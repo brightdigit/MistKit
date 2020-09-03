@@ -10,6 +10,24 @@ import Foundation
 //import FluentPostgresDriver
 //import HeartwitchKit
 //import Vapor
+struct Environment {
+  
+}
+struct HTTPResponseStatus {
+  
+}
+struct Abort {
+  
+}
+struct User {
+  
+}
+struct Request{
+  
+}
+struct EventLoopFuture<T> {
+  
+}
 
 struct DeviceControllerResponse<T> {
   
