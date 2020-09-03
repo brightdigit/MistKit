@@ -1,0 +1,4 @@
+--indent 2
+--header strip
+--commas inline
+--exclude .build, DerivedData

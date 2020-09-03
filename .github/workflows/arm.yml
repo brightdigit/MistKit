@@ -1,0 +1,74 @@
+name: arm
+
+on: [push]
+
+jobs:
+  build:
+    env:
+      PACKAGE_NAME: _PACKAGE_NAME
+      SWIFT_VER: 5.2.4
+
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+
+    strategy:
+      matrix:
+        architecture:  [aarch64]
+        distribution: [ubuntu16.04,ubuntu18.04,ubuntu20.04]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build with Swift on arm
+      uses: uraimo/run-on-arch-action@master
+      env:
+         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      with:
+        architecture: ${{ matrix.architecture }}
+        distribution: ${{ matrix.distribution }}
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+          apt update
+          apt install -y curl lsb-release sudo clang
+          RELEASE_DOT=$(lsb_release -sr)
+          RELEASE_NUM=${RELEASE_DOT//[-._]/}
+          RELEASE_NAME=$(lsb_release -sc)
+          if [[ $RELEASE_DOT == "20.04" ]]; then
+            sudo apt-get -y install \
+                    binutils \
+                    git \
+                    gnupg2 \
+                    libc6-dev \
+                    libcurl4 \
+                    libedit2 \
+                    libgcc-9-dev \
+                    libpython2.7 \
+                    libsqlite3-0 \
+                    libstdc++-9-dev \
+                    libxml2 \
+                    libz3-dev \
+                    pkg-config \
+                    tzdata \
+                    zlib1g-dev
+            elif [[ $RELEASE_DOT == "16.04" ]]; then
+              apt-get -y install \
+                binutils \
+                git \
+                libc6-dev \
+                libcurl3 \
+                libedit2 \
+                libgcc-5-dev \
+                libpython2.7 \
+                libsqlite3-0 \
+                libstdc++-5-dev \
+                libxml2 \
+                pkg-config \
+                tzdata \
+                zlib1g-dev
+            fi
+          dpkg-reconfigure --frontend noninteractive tzdata
+          curl -s https://packagecloud.io/install/repositories/swift-arm/release/script.deb.sh | sudo bash
+          apt-get install -y swift5
+          swift build
+          swift test --enable-test-discovery --enable-code-coverage
+          llvm-cov export -format="lcov" .build/aarch64-unknown-linux-gnu/debug/${{ env.PACKAGE_NAME }}PackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
+          bash <(curl https://codecov.io/bash) -F github -F ${RELEASE_NAME} -F aarch64 -n ${{ github.sha }}

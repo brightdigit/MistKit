@@ -1,0 +1,42 @@
+name: ubuntu
+
+on: [push]
+
+jobs:
+  build:
+    env:
+      PACKAGE_NAME: MistKit
+      SWIFT_VER: 5.2.4
+
+    runs-on: ${{ matrix.runs-on }}
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+
+    strategy:
+      matrix:
+        runs-on:  [ubuntu-18.04,ubuntu-20.04]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set Ubuntu Release DOT
+      run: echo "::set-env name=RELEASE_DOT::$(lsb_release -sr)"
+    - name: Set Ubuntu Release NUM
+      run: echo "::set-env name=RELEASE_NUM::${RELEASE_DOT//[-._]/}"
+    - name: Set Ubuntu Codename
+      run: echo "::set-env name=RELEASE_NAME::$(lsb_release -sc)"
+    - name: Download Swift
+      run: curl -O https://swift.org/builds/swift-${SWIFT_VER}-release/ubuntu${RELEASE_NUM}/swift-${SWIFT_VER}-RELEASE/swift-${SWIFT_VER}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz
+    - name: Extract Swift
+      run: tar xzf swift-${SWIFT_VER}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz
+    - name: Add Path
+      run: echo "::add-path::$GITHUB_WORKSPACE/swift-${SWIFT_VER}-RELEASE-ubuntu${RELEASE_DOT}/usr/bin"
+    - name: Build
+      run: swift build
+    - name: Run tests
+      run: swift test --enable-test-discovery --enable-code-coverage
+    - name: Verify Valid Swift Package
+      run: curl -s https://raw.githubusercontent.com/daveverwer/SwiftPMLibrary/master/script.sh | bash -s -- mine
+    - name: Prepare Code Coverage
+      run: llvm-cov export -format="lcov" .build/x86_64-unknown-linux-gnu/debug/${{ env.PACKAGE_NAME }}PackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
+    - name: Upload to CodeCov.io
+      run: bash <(curl https://codecov.io/bash) -F github -F ${RELEASE_NAME} -n ${{ github.sha }}
+      env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
