@@ -11,7 +11,7 @@ import SwiftUI
 struct MistKitDemoApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+          ContentView().environmentObject(MistObject())
         }
     }
 }

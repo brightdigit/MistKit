@@ -11,10 +11,10 @@ import CloudKit
 enum Errors : Error {
   case empty
 }
-struct TodoItem {
-  let id : UUID
-  let text : String
-  let completedDate : Date?
+struct TodoItem : Identifiable {
+  public let id : UUID
+  public let text : String
+  public let completedDate : Date?
   
   init(record: CKRecord) throws {
     guard let id = UUID(uuidString: record.recordID.recordName) else {
@@ -45,16 +45,37 @@ class MistObject: ObservableObject {
       } else {
         result = .failure(Errors.empty)
       }
-      self.items = result
+      DispatchQueue.main.async {
+        self.items = result
+      }      
     }
   }
 }
 
 struct ContentView: View {
-    var body: some View {
-        Text("Hello, world!")
-            .padding()
+  @EnvironmentObject var data : MistObject
+  
+  var error : Error? {
+    switch self.data.items {
+    case .failure(let error): return error
+    default: return nil
     }
+  }
+  var isBusy : Bool {
+    self.data.items == nil
+  }
+  var items : [TodoItem] {
+    self.data.items.flatMap{ try? $0.get() } ?? [TodoItem]()
+  }
+  var body: some View {
+    ZStack{
+      self.error.map{ Text($0.localizedDescription) }
+      Text("Loading").opacity(self.isBusy ? 1.0 : 0.0)
+      List( self.items ) { (item) in
+        Text(item.text)
+      }
+    }
+  }
 }
 
 struct ContentView_Previews: PreviewProvider {
