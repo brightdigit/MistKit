@@ -36,6 +36,14 @@ struct DeviceRegistrationRequest {
   
 }
 
+struct HTTPStatus {
+  
+}
+
+struct HTTPHeaders {
+  
+}
+
 struct DeviceController {
   let jsonDecoder = JSONDecoder()
   let ckEncoder: CloudKitTokenEncoder
@@ -44,9 +52,9 @@ struct DeviceController {
     ckEncoder = encoder
   }
 
-  func fetch(_ request: Request) throws -> EventLoopFuture<DeviceControllerResponse<[DeviceResponseItem]>> {
-    let user = try request.auth.require(User.self)
-    let userID = try user.requireID()
+  func fetch(_ request: Request) { //throws -> EventLoopFuture<DeviceControllerResponse<[DeviceResponseItem]>> {
+    //let user = try request.auth.require(User.self)
+    //let userID = try user.requireID()
     let token = user.$appleUsers.query(on: request.db).first().map { appleUser in
       appleUser.map {
         self.ckEncoder.encode($0.webAuthenticationToken)
