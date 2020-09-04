@@ -13,7 +13,7 @@ enum Errors : Error {
 }
 struct TodoItem : Identifiable {
   public let id : UUID
-  public let text : String
+  public let title : String
   public let completedDate : Date?
   
   init(record: CKRecord) throws {
@@ -21,21 +21,25 @@ struct TodoItem : Identifiable {
       throw NSError()
     }
     
-    guard let text =  record["text"] as? String else {
+    guard let title =  record["title"] as? String else {
       throw NSError()
     }
     
     self.id = id
-    self.text = text
+    self.title = title
     self.completedDate = record["completedDate"] as? Date
   }
 }
 
 class MistObject: ObservableObject {
   @Published var items : Result<[TodoItem], Error>?
+  let database : CKDatabase
+  let container : CKContainer
   init () {
-    let container = CKContainer.default()
+    let container = CKContainer(identifier: "iCloud.com.brightdigit.MistDemo")
     let database = container.privateCloudDatabase
+    self.container = container
+    self.database = database
     database.perform(.init(recordType: "TodoItem", predicate: .init(value: true)), inZoneWith: nil) { (records, error) in
       let result : Result<[TodoItem], Error>
       if let error = error {
@@ -68,12 +72,14 @@ struct ContentView: View {
     self.data.items.flatMap{ try? $0.get() } ?? [TodoItem]()
   }
   var body: some View {
+    NavigationView{
     ZStack{
       self.error.map{ Text($0.localizedDescription) }
       Text("Loading").opacity(self.isBusy ? 1.0 : 0.0)
       List( self.items ) { (item) in
-        Text(item.text)
+        Text(item.title)
       }
+    }.navigationTitle("Todo Items")
     }
   }
 }
