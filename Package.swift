@@ -10,10 +10,15 @@ let package = Package(
         .library(
             name: "MistKit",
             targets: ["MistKit"]),
+      .library(
+          name: "MistKitAuth",
+          targets: ["MistKitAuth"]),
+      .executable(name: "mist", targets: ["mist"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
+      .package(url: "https://github.com/apple/swift-nio.git", from: "2.20.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -21,6 +26,11 @@ let package = Package(
         .target(
             name: "MistKit",
             dependencies: []),
+      .target(name: "MistKitAuth",
+              dependencies: [
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio")]),
+      .target(name: "mist", dependencies: ["MistKit","MistKitAuth"]),
         .testTarget(
             name: "MistKitTests",
             dependencies: ["MistKit"]),
