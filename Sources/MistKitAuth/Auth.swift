@@ -267,7 +267,12 @@ private final class HTTPHandler: ChannelInboundHandler {
       return { self.handleMultipleWrites(context: $0, request: $1, strings: (1...10).map { "\($0)" }, delay: .milliseconds(100)) }
     case "/dynamic/client-ip":
       return { context, req in self.handleJustWrite(context: context, request: req, string: "\(context.remoteAddress.debugDescription)") }
+    case "":
+      let keyValuePairs = reqHead.uri.split(separator: "?").last?.split(separator: "&").map{$0.split(separator: "=")}
+      print(keyValuePairs)
+        return { context, req in self.handleJustWrite(context: context, request: req, string: "\(context.remoteAddress.debugDescription)") }
     default:
+
       return { context, req in self.handleJustWrite(context: context, request: req, statusCode: .notFound, string: "not found") }
     }
   }
@@ -417,7 +422,8 @@ private final class HTTPHandler: ChannelInboundHandler {
       
       self.keepAlive = request.isKeepAlive
       self.state.requestReceived()
-      
+      let keyValuePairs = request.uri.split(separator: "?").last?.split(separator: "&").map{$0.split(separator: "=")}
+      print(keyValuePairs)
       var responseHead = httpResponseHead(request: request, status: HTTPResponseStatus.ok)
       self.buffer.clear()
       self.buffer.writeString(self.defaultResponse)
