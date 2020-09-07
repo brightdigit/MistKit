@@ -1,13 +1,18 @@
 import Foundation
 import MistKit
-import MistKitAuth
+//import MistKitAuth
 
-let token = "29__54__ASY54BFa%2Fuzc8N2wZ5dqQq%2FWTxLNfB2gKcqdkoYk8rlObgzRLA75yEUaMmRaD%2F8p%2BMmm5RI6CkHw9agx%2BeKgSU8z91AUnFeZZ9hWp5n8UzAqkCge3MoPnlDu%2F50FRZNQPs21RxkyteI2yg1cVyyemv8Wf1AUO16CpUxZtPr4oN6iiGFd1V1UYATugzYiZODdrGnHp3tB7iYTObM9tF0VKDpMs1ccymI1milAwsEU2BC8MPy%2FFRtZ%2FnMUTCRAZkIQARxgzToppmdYeislSe%2BuQRyJFIHxo%2BEeyhB%2FOdvbQYOOotucXv5aRGLtyPGiGLJ4qRtguQA47X2YlLnbdUyWklQFl6OvI0Jr5iSPJAZIM2TwnQ%2BzRemIr2QaMBoULWjsofwL%2BQTFGvhMmAhjVTVR%2Fx28AePfMO1l8xuczI6VONDmpC4%3D__eyJYLUFQUExFLVdFQkFVVEgtUENTLUNsb3Vka2l0IjoiUVhCd2JEb3hPZ0VpWHNmM09aSFhLUjl5YXpEOFh1NXZkU1EzaCs5WmkwcGpBSnRVeUhjNHJ0aGwxdW9hMVFDMTFzMW4rWC9NRXNwUHBJaWpTNGp1NmpFM0t0UWtrM0VVIiwiWC1BUFBMRS1XRUJBVVRILVBDUy1TaGFyaW5nIjoiUVhCd2JEb3hPZ0hiODFSQXpVbnpkWXhBSEVrWlRhYmtrd1owOGhUNXVXK3NBTEJidlBEcS8yWlhLS3UrdmxtVTJ4VGp0Q1ZnVGd1dGMzZGZVUE1DZFJEMmtUNmtZb3BiIn0%3D"
+let token = "29__54__ASGcOFYJkVPHI6y8s83vtYVOR1typ4MSCUy0kZycATM4uthl1yAZJT7pQbcCdWGwaflTHuvieI8oG9ALTmWbk8AtC2o3Bd0XhaLZAdApXQKJwtysgq6DrVvsLhZEUTYPzSVDbmRwq9%2FdqTPnOtNV4SD9UJvYGgTyw%2FHXLeQJ22L%2F%2BqjB8qRCpJqXOvUHxeGxUjOslu3mQiLCsO3s%2FBVjQOE%2B9j0kh15xyHJNLXv0pa3Abyz3fn6F1oaZU3bfQ0q6HnG1VdBPp%2Fk0Rcv8eUPO1W6BHkvMjSltC3tITBs2T1bdhZloKoOJhYe9B2%2Fqgo2W%2FlO5ODt0QDU8AewbyGm27lvxJD0hJ066zX1NIAaNFm9vHLud0QpZStmcWuCAMayPBc7XNHWjpTO2qW0oEVAWMRuf%2ByuHJCRb0HXrwKq3AyrfrV4%3D__eyJYLUFQUExFLVdFQkFVVEgtUENTLUNsb3Vka2l0IjoiUVhCd2JEb3hPZ0hCcTY4a2V5OVdVNTVXbVZUcjBzVjhPNWFVNk5FRXVXZDRnOFZ0MlYya09hclFSOHRFU1J0YzFTbi9PbHcrY3VYNk5KbUtNTE92SCtjZ3pXYW8zNG9CIiwiWC1BUFBMRS1XRUJBVVRILVBDUy1TaGFyaW5nIjoiUVhCd2JEb3hPZ0d2UWhPRU1vQklTdnNjR1NqQjVhZUhlSHNiNkh4am5WVFlRSHhYMFgrZGt1eW10dHdmaHFRTHpVa2dSbEZkUEJOMnB5b0FJS3lGclAxbTVvSTgyeDRGIn0%3D"
+
 let apiKey = "c2b958e56ab5a41aa25d673f479bbac1379f1247d83199ccd94e38bb6ae715e2"
 let container = "iCloud.com.brightdigit.MistDemo"
 
 enum MKError : Error {
   case noDataFromStatus(Int)
+  case invalidReponse(Any)
+  case empty
+  case invalidURL(URL)
+  case invalidURLQuery([URLQueryItem])
 }
 enum MKEnvironment : String {
   case production
@@ -31,16 +36,27 @@ protocol MKWebTokenProvider {
   
 }
 struct MKDatabaseConnection {
+  public static let baseURL = URL(string: "https://api.apple-cloudkit.com/database")!
   let container : String
   let environment : MKEnvironment
   let version : MKAPIVersion
+  let apiToken : String
   
   public init ( container : String,
+                apiToken : String,
  environment : MKEnvironment,
  version : MKAPIVersion = .v1) {
     self.container = container
     self.environment = environment
     self.version = version
+    self.apiToken = apiToken
+  }
+}
+
+extension MKDatabaseConnection {
+  var url : URL {
+    //return URL(string: "https://api.apple-cloudkit.com/database/1/\(container)/\(environment)")
+    return Self.baseURL.appendingPathComponent(version.rawValue).appendingPathComponent(container).appendingPathComponent(environment.rawValue)
   }
 }
 
@@ -94,33 +110,124 @@ extension MKRequest {
   }
 }
 
+
 protocol MKHttpResponse {
   var body : Data? { get }
   var status : Int { get }
 }
-
+struct MKURLResponse : MKHttpResponse {
+  let body: Data?
+  let response : HTTPURLResponse
+  
+  var status: Int {
+    return response.statusCode
+  }
+}
 protocol MKHttpRequest {
   func execute(_ callback: @escaping ((Result<MKHttpResponse, Error>) -> Void))
 }
 
 protocol MKHttpClient {
   associatedtype RequestType : MKHttpRequest
-  func request (withURL url: URL, relativePath: [String], data: Data?) -> RequestType
+  func request (withURL url: URL, data: Data?) -> RequestType
 }
+
+struct MKURLRequest : MKHttpRequest {
+  let urlRequest : URLRequest
+  let urlSession: URLSession
+  func execute(_ callback: @escaping ((Result<MKHttpResponse, Error>) -> Void)) {
+    urlSession.dataTask(with: urlRequest) { (data, response, error) in
+      let result : Result<MKHttpResponse, Error>
+      if let error = error {
+        result = .failure(error)
+      } else if let response = response as? HTTPURLResponse {
+        result = .success(MKURLResponse(body: data, response: response))
+      } else if let response = response {
+        result = .failure(MKError.invalidReponse(response))
+      } else {
+        result = .failure(MKError.empty)
+      }
+      callback(result)
+    }.resume()
+  }
+  
+  
+}
+struct MKURLSessionClient : MKHttpClient {
+  let session : URLSession
+  func request(withURL url: URL, data: Data?) -> MKURLRequest {
+    var urlRequest = URLRequest(url: url)
+    urlRequest.httpBody = data
+    return MKURLRequest(urlRequest: urlRequest, urlSession: self.session)
+  }
+  
+  typealias RequestType = MKURLRequest
+  
+  
+}
+
+struct MKURLBuilderFactory {
+  func builder (forConnection connection: MKDatabaseConnection, withWebAuthToken webAuthenticationToken: String?) -> MKURLBuilder {
+    return MKURLBuilder(tokenEncoder: CharacterMapEncoder(), connection: connection, webAuthenticationToken: webAuthenticationToken)
+  }
+}
+struct MKURLBuilder {
+  let tokenEncoder : CloudKitTokenEncoder?
+  let connection : MKDatabaseConnection
+  let webAuthenticationToken : String?
+  
+  func url(withPathComponents pathComponents: [String]) throws -> URL {
+    var url = connection.url
+    for path in pathComponents {
+      url.appendPathComponent(path)
+    }
+    guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+      throw MKError.invalidURL(url)
+    }
+    components.queryItems = self.queryItems
+    
+    guard let result = components.url else {
+      throw MKError.invalidURLQuery(self.queryItems)
+    }
+    print(result)
+    return result
+  }
+}
+
+extension MKURLBuilder {
+  var queryItems : [URLQueryItem] {
+    var parameters = [URLQueryItem(name: "ckAPIToken", value: self.connection.apiToken)]
+    if let webAuthenticationToken = self.webAuthenticationToken, let tokenEncoder = self.tokenEncoder {
+      parameters.append(URLQueryItem(name: "ckSession", value: tokenEncoder.encode( webAuthenticationToken)))
+    }
+    return parameters
+  }
+  
+}
+
+
+
 struct MKDatabase<HttpClient : MKHttpClient> {
-  let baseURL : URL
+  let urlBuilder : MKURLBuilder
   let encoder : MKEncoder = JSONEncoder()
   let decoder : MKDecoder = JSONDecoder()
   let client : HttpClient
+  
+  public init (connection: MKDatabaseConnection, factory: MKURLBuilderFactory, client: HttpClient, authenticationToken: String? = nil) {
+    self.urlBuilder = MKURLBuilder(tokenEncoder: CharacterMapEncoder(), connection: connection, webAuthenticationToken: authenticationToken)
+    self.client = client
+  }
   func perform<RequestType : MKRequest, ResponseType>(request: RequestType, _ callback: @escaping ((Result<ResponseType, Error>) -> Void) ) where RequestType.Response == ResponseType {
 
+    let url = try! self.urlBuilder.url(withPathComponents: request.relativePath)
     let data = try! self.encoder.optionalData(from: request.data)
-    let httpRequest = client.request(withURL: self.baseURL, relativePath: request.relativePath, data: data)
+    let httpRequest = client.request(withURL: url, data: data)
     httpRequest.execute { (result) in
       let newResult = result.flatMap { (response) -> Result<Data, Error> in
         guard let data = response.body else {
           return .failure(MKError.noDataFromStatus(response.status))
         }
+        debugPrint(String(data: data, encoding: .utf8))
         return .success(data)
       }.flatMap { (data) in
         return Result{
@@ -132,9 +239,65 @@ struct MKDatabase<HttpClient : MKHttpClient> {
   }
 }
 
-let channel = try startServer(htdocs: "", allowHalfClosure: true, bindTarget: .ip(host: "127.0.0.1", port: 7000))
+struct UserIdentityLookupInfo : Codable {
+  public let emailAddress : String
+  public let phoneNumber : String
+  public let userRecordName : String
+}
 
-let urlString = URL(string: "https://api.apple-cloudkit.com/database/1/\(container)/\(environment)/\(database)/users/current?ckAPIToken=\(apiKey)")!
+struct UserIdentityNameComponents : Codable {
+  public let namePrefix : String
+  public let givenName : String
+  public let familyName : String
+  public let nickname : String
+  public let nameSuffix : String
+  public let middleName : String
+  public let phoneticRepresentation : String
+}
 
-print(urlString)
-try channel.closeFuture.wait()
+struct UserIdentity : Codable {
+  let lookupInfo : UserIdentityLookupInfo
+  let userRecordName : UUID
+  let nameComponents : UserIdentityNameComponents
+}
+
+struct UserIdentityResponse : MKDecodable {
+  let users : [UserIdentity]
+}
+struct GetCurrentUserIdentityRequest : MKRequest {
+  let data: MKEmptyGet = .value
+  
+  let database: MKDatabaseType = .public
+  
+  let subpath: [String] = ["users","caller"]
+  
+  typealias Response = UserIdentityResponse
+  
+  typealias Data = MKEmptyGet
+  
+  
+}
+
+let dbConnection = MKDatabaseConnection(container: container, apiToken: apiKey, environment: .development)
+
+let client = MKURLSessionClient(session: .shared)
+let db = MKDatabase(connection: dbConnection, factory: MKURLBuilderFactory(), client: client, authenticationToken: token)
+let getUser = GetCurrentUserIdentityRequest()
+var userResult : Result<UserIdentityResponse, Error>?
+db.perform(request: getUser) { (result) in
+  userResult = result
+}
+
+while true {
+  RunLoop.main.run(until: .distantPast)
+  if let result = userResult {
+    dump(result)
+    break
+  }
+}
+//let channel = try startServer(htdocs: "", allowHalfClosure: true, bindTarget: .ip(host: "127.0.0.1", port: 7000))
+//
+//let urlString = URL(string: "https://api.apple-cloudkit.com/database/1/\(container)/\(environment)/\(database)/users/current?ckAPIToken=\(apiKey)")!
+//
+//print(urlString)
+//try channel.closeFuture.wait()
