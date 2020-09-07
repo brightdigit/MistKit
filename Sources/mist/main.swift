@@ -134,6 +134,33 @@ protocol MKHttpClient {
   func request (withURL url: URL, data: Data?) -> RequestType
 }
 
+struct FetchRecordQuery : MKEncodable {
+  
+}
+
+struct FetchRecordQueryResponse : MKDecodable {
+  
+}
+
+struct FetchedRecord : Codable {
+  
+}
+struct FetchRecordQueryRequest : MKRequest {
+  let data: FetchRecordQuery
+  
+  let database: MKDatabaseType
+  
+  let subpath = ["records","query"]
+
+  
+  
+  typealias Response = FetchRecordQueryResponse
+  
+  typealias Data = FetchRecordQuery
+  
+  
+}
+
 struct MKURLRequest : MKHttpRequest {
   let urlRequest : URLRequest
   let urlSession: URLSession
