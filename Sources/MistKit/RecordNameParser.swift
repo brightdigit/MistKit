@@ -13,6 +13,9 @@ public struct RecordNameParser {
     "([0-9A-F]{\(length)})"
   }
 
+  public init () {
+    
+  }
   static let regexStrInner = componentSizes.map(regexComponent(forLength:)).joined(separator: "")
   static let regexString = "^_\(regexStrInner)$"
   // swiftlint:disable:next force_try

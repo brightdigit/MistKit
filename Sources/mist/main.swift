@@ -2,7 +2,8 @@ import Foundation
 import MistKit
 //import MistKitAuth
 
-let token = "29__54__ASGcOFYJkVPHI6y8s83vtYVOR1typ4MSCUy0kZycATM4uthl1yAZJT7pQbcCdWGwaflTHuvieI8oG9ALTmWbk8AtC2o3Bd0XhaLZAdApXQKJwtysgq6DrVvsLhZEUTYPzSVDbmRwq9%2FdqTPnOtNV4SD9UJvYGgTyw%2FHXLeQJ22L%2F%2BqjB8qRCpJqXOvUHxeGxUjOslu3mQiLCsO3s%2FBVjQOE%2B9j0kh15xyHJNLXv0pa3Abyz3fn6F1oaZU3bfQ0q6HnG1VdBPp%2Fk0Rcv8eUPO1W6BHkvMjSltC3tITBs2T1bdhZloKoOJhYe9B2%2Fqgo2W%2FlO5ODt0QDU8AewbyGm27lvxJD0hJ066zX1NIAaNFm9vHLud0QpZStmcWuCAMayPBc7XNHWjpTO2qW0oEVAWMRuf%2ByuHJCRb0HXrwKq3AyrfrV4%3D__eyJYLUFQUExFLVdFQkFVVEgtUENTLUNsb3Vka2l0IjoiUVhCd2JEb3hPZ0hCcTY4a2V5OVdVNTVXbVZUcjBzVjhPNWFVNk5FRXVXZDRnOFZ0MlYya09hclFSOHRFU1J0YzFTbi9PbHcrY3VYNk5KbUtNTE92SCtjZ3pXYW8zNG9CIiwiWC1BUFBMRS1XRUJBVVRILVBDUy1TaGFyaW5nIjoiUVhCd2JEb3hPZ0d2UWhPRU1vQklTdnNjR1NqQjVhZUhlSHNiNkh4am5WVFlRSHhYMFgrZGt1eW10dHdmaHFRTHpVa2dSbEZkUEJOMnB5b0FJS3lGclAxbTVvSTgyeDRGIn0%3D"
+
+let token = "29__54__ASGcOFYJkVPHI6y8s83vtYVOR1typ4MSCUy0kZycATM4uthl1yAZJT7pQbcCdWGwaflTHuvieI8oG9ALTmWbk8AtC2o3Bd0XhaLZAdApXQKJwtysgq6DrVvsLhZEUTYPzSVDbmRwq9/dqTPnOtNV4SD9UJvYGgTyw/HXLeQJ22L/+qjB8qRCpJqXOvUHxeGxUjOslu3mQiLCsO3s/BVjQOE+9j0kh15xyHJNLXv0pa3Abyz3fn6F1oaZU3bfQ0q6HnG1VdBPp/k0Rcv8eUPO1W6BHkvMjSltC3tITBs2T1bdhZloKoOJhYe9B2/qgo2W/lO5ODt0QDU8AewbyGm27lvxJD0hJ066zX1NIAaNFm9vHLud0QpZStmcWuCAMayPBc7XNHWjpTO2qW0oEVAWMRuf+yuHJCRb0HXrwKq3AyrfrV4=__eyJYLUFQUExFLVdFQkFVVEgtUENTLUNsb3Vka2l0IjoiUVhCd2JEb3hPZ0hCcTY4a2V5OVdVNTVXbVZUcjBzVjhPNWFVNk5FRXVXZDRnOFZ0MlYya09hclFSOHRFU1J0YzFTbi9PbHcrY3VYNk5KbUtNTE92SCtjZ3pXYW8zNG9CIiwiWC1BUFBMRS1XRUJBVVRILVBDUy1TaGFyaW5nIjoiUVhCd2JEb3hPZ0d2UWhPRU1vQklTdnNjR1NqQjVhZUhlSHNiNkh4am5WVFlRSHhYMFgrZGt1eW10dHdmaHFRTHpVa2dSbEZkUEJOMnB5b0FJS3lGclAxbTVvSTgyeDRGIn0="
 
 let apiKey = "c2b958e56ab5a41aa25d673f479bbac1379f1247d83199ccd94e38bb6ae715e2"
 let container = "iCloud.com.brightdigit.MistDemo"
@@ -12,7 +13,8 @@ enum MKError : Error {
   case invalidReponse(Any)
   case empty
   case invalidURL(URL)
-  case invalidURLQuery([URLQueryItem])
+  case invalidURLQuery(String)
+  case invalidRecordName(String)
 }
 enum MKEnvironment : String {
   case production
@@ -181,13 +183,17 @@ struct MKURLBuilder {
     for path in pathComponents {
       url.appendPathComponent(path)
     }
-    guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-      throw MKError.invalidURL(url)
-    }
-    components.queryItems = self.queryItems
-    
-    guard let result = components.url else {
-      throw MKError.invalidURLQuery(self.queryItems)
+    let query = self.queryItems.map {
+      [$0.key, $0.value].joined(separator: "=")
+    }.joined(separator: "&")
+    //[url.absoluteString
+//    guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+//      throw MKError.invalidURL(url)
+//    }
+//    components.queryItems = self.queryItems
+//
+    guard let result = URL(string: [url.absoluteString, query].joined(separator: "?"))else {
+      throw MKError.invalidURLQuery(query)
     }
     print(result)
     return result
@@ -195,10 +201,10 @@ struct MKURLBuilder {
 }
 
 extension MKURLBuilder {
-  var queryItems : [URLQueryItem] {
-    var parameters = [URLQueryItem(name: "ckAPIToken", value: self.connection.apiToken)]
+  var queryItems : [String : String] {
+    var parameters = ["ckAPIToken" : self.connection.apiToken]
     if let webAuthenticationToken = self.webAuthenticationToken, let tokenEncoder = self.tokenEncoder {
-      parameters.append(URLQueryItem(name: "ckSession", value: tokenEncoder.encode( webAuthenticationToken)))
+      parameters["ckWebAuthToken"] = tokenEncoder.encode(webAuthenticationToken)
     }
     return parameters
   }
@@ -255,14 +261,28 @@ struct UserIdentityNameComponents : Codable {
   public let phoneticRepresentation : String
 }
 
-struct UserIdentity : Codable {
-  let lookupInfo : UserIdentityLookupInfo
-  let userRecordName : UUID
-  let nameComponents : UserIdentityNameComponents
+//struct UserIdentity : Codable {
+//  let lookupInfo : UserIdentityLookupInfo?
+//  let userRecordName : UUID
+//  let nameComponents : UserIdentityNameComponents?
+//}
+
+struct RecordName : Decodable {
+  public let uuid : UUID
+  init(from decoder: Decoder) throws {
+    let uuidString = try decoder.singleValueContainer().decode(String.self)
+    guard let uuid = RecordNameParser.uuid(fromRecordName: uuidString) else {
+      throw MKError.invalidRecordName(uuidString)
+    }
+    self.uuid = uuid
+  }
+  
 }
 
 struct UserIdentityResponse : MKDecodable {
-  let users : [UserIdentity]
+  let lookupInfo : UserIdentityLookupInfo?
+  let userRecordName : RecordName
+  let nameComponents : UserIdentityNameComponents?
 }
 struct GetCurrentUserIdentityRequest : MKRequest {
   let data: MKEmptyGet = .value
