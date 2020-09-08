@@ -13,8 +13,8 @@ jobs:
 
     strategy:
       matrix:
-        architecture:  [aarch64]
-        distribution: [ubuntu16.04,ubuntu18.04,ubuntu20.04]
+        arch:  [aarch64]
+        distro: [ubuntu16.04,ubuntu18.04,ubuntu20.04]
     steps:
     - uses: actions/checkout@v2
     - name: Build with Swift on arm
@@ -22,8 +22,8 @@ jobs:
       env:
          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
-        architecture: ${{ matrix.architecture }}
-        distribution: ${{ matrix.distribution }}
+        arch: ${{ matrix.arch }}
+        distro: ${{ matrix.distro }}
         run: |
           export DEBIAN_FRONTEND=noninteractive
           ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime

@@ -13,11 +13,13 @@ jobs:
       dist: focal
       arch: arm64
     - os: osx
-      osx_image: xcode11.3
-    - os: osx
       osx_image: xcode11.4
     - os: osx
       osx_image: xcode11.5
+    - os: osx
+      osx_image: xcode11.6
+    - os: osx
+      osx_image: xcode12
 env:
   global:
   - FRAMEWORK_NAME=MistKit
