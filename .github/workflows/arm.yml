@@ -18,12 +18,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build with Swift on arm
-      uses: uraimo/run-on-arch-action@master
+      uses: uraimo/run-on-arch-action@v2.0.1
       env:
          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
         arch: ${{ matrix.arch }}
         distro: ${{ matrix.distro }}
+        githubToken: ${{ github.token }}
         run: |
           export DEBIAN_FRONTEND=noninteractive
           ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime

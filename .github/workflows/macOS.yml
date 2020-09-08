@@ -37,7 +37,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - name: Build Documentation
       if: ${{ matrix.xcode == '/Applications/Xcode_12_beta.app' }}
-      run: swift run sourcedocs generate build -c --spm-module OrchardNestKit
+      run: swift run sourcedocs generate build -c --spm-module MistKit
     - name: Commit files
       if: ${{ matrix.xcode == '/Applications/Xcode_12_beta.app' }}
       run: |
