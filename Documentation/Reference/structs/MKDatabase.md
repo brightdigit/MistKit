@@ -16,5 +16,8 @@ public init(connection: MKDatabaseConnection, factory _: MKURLBuilderFactory, cl
 ### `perform(request:_:)`
 
 ```swift
-public func perform<RequestType: MKRequest, ResponseType>(request: RequestType, _ callback: @escaping ((Result<ResponseType, Error>) -> Void)) where RequestType.Response == ResponseType
+public func perform<RequestType: MKRequest, ResponseType>(
+  request: RequestType,
+  _ callback: @escaping ((Result<ResponseType, Error>) -> Void)
+) where RequestType.Response == ResponseType
 ```

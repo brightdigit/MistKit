@@ -11,9 +11,19 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
     self.client = client
   }
 
-  public func perform<RequestType: MKRequest, ResponseType>(request: RequestType, _ callback: @escaping ((Result<ResponseType, Error>) -> Void)) where RequestType.Response == ResponseType {
-    let url = try! urlBuilder.url(withPathComponents: request.relativePath)
-    let data = try! encoder.optionalData(from: request.data)
+  public func perform<RequestType: MKRequest, ResponseType>(
+    request: RequestType,
+    _ callback: @escaping ((Result<ResponseType, Error>) -> Void)
+  ) where RequestType.Response == ResponseType {
+    let url: URL
+    let data: Data?
+    do {
+      url = try urlBuilder.url(withPathComponents: request.relativePath)
+      data = try encoder.optionalData(from: request.data)
+    } catch {
+      callback(.failure(error))
+      return
+    }
     let httpRequest = client.request(withURL: url, data: data)
     httpRequest.execute { result in
 
