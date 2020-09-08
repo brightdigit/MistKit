@@ -1,10 +1,3 @@
-//
-// Array.swift
-// Copyright © 2020 Bright Digit, LLC.
-// All Rights Reserved.
-// Created by Leo G Dion.
-//
-
 import Foundation
 
 public extension Array where Element == UInt8 {

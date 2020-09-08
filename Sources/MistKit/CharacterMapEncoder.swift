@@ -1,11 +1,4 @@
-//
-// CharacterMapEncoder.swift
-// Copyright © 2020 Bright Digit, LLC.
-// All Rights Reserved.
-// Created by Leo G Dion.
-//
-
-public struct CharacterMapEncoder: CloudKitTokenEncoder {
+public struct CharacterMapEncoder: MKTokenEncoder {
   public static let defaultCharacterMap = ["+": "%2B", "/": "%2F", "=": "%3D"]
   let characterMap: [String: String]
 

@@ -1,4 +1,5 @@
 --indent 2
 --header strip
 --commas inline
+--disable wrapMultilineStatementBraces
 --exclude .build, DerivedData

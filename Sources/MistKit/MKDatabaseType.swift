@@ -1,6 +1,4 @@
-
-
-public enum MKDatabaseType : String {
+public enum MKDatabaseType: String {
   case `private`
   case `public`
   case shared

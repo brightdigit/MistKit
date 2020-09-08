@@ -1,6 +1,6 @@
 import Foundation
 
-public enum MKError : Error {
+public enum MKError: Error {
   case noDataFromStatus(Int)
   case invalidReponse(Any)
   case empty

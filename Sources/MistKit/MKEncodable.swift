@@ -1,5 +1,1 @@
-
-
-public protocol MKEncodable : Encodable {
-  
-}
+public protocol MKEncodable: Encodable {}

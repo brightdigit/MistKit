@@ -1,10 +1,3 @@
-//
-// RecordNameParser.swift
-// Copyright © 2020 Bright Digit, LLC.
-// All Rights Reserved.
-// Created by Leo G Dion.
-//
-
 import Foundation
 
 public struct RecordNameParser {
@@ -13,9 +6,8 @@ public struct RecordNameParser {
     "([0-9A-F]{\(length)})"
   }
 
-  public init () {
-    
-  }
+  public init() {}
+
   static let regexStrInner = componentSizes.map(regexComponent(forLength:)).joined(separator: "")
   static let regexString = "^_\(regexStrInner)$"
   // swiftlint:disable:next force_try

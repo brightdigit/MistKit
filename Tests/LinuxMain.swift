@@ -3,5 +3,6 @@ import XCTest
 import MistKitTests
 
 var tests = [XCTestCaseEntry]()
-tests += MistKitTests.allTests()
+tests += MistKitTests.__allTests()
+
 XCTMain(tests)
