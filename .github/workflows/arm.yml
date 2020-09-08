@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         arch:  [aarch64]
-        distro: [ubuntu16.04,ubuntu18.04,ubuntu20.04]
+        distro: [ubuntu18.04,ubuntu20.04]
     steps:
     - uses: actions/checkout@v2
     - name: Build with Swift on arm
@@ -50,21 +50,6 @@ jobs:
                     pkg-config \
                     tzdata \
                     zlib1g-dev
-            elif [[ $RELEASE_DOT == "16.04" ]]; then
-              apt-get -y install \
-                binutils \
-                git \
-                libc6-dev \
-                libcurl3 \
-                libedit2 \
-                libgcc-5-dev \
-                libpython2.7 \
-                libsqlite3-0 \
-                libstdc++-5-dev \
-                libxml2 \
-                pkg-config \
-                tzdata \
-                zlib1g-dev
             else
               apt-get -y install \
                 binutils \
