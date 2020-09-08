@@ -50,7 +50,7 @@ jobs:
                     pkg-config \
                     tzdata \
                     zlib1g-dev
-            elif [[ $RELEASE_DOT == "16.04" ]]; then
+            else
               apt-get -y install \
                 binutils \
                 git \
