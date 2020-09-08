@@ -1,5 +1,9 @@
 import Foundation
 
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
+
 public struct MKURLRequest: MKHttpRequest {
   public let urlRequest: URLRequest
   public let urlSession: URLSession

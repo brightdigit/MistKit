@@ -6,8 +6,10 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
   let decoder: MKDecoder = JSONDecoder()
   let client: HttpClient
 
-  public init(connection: MKDatabaseConnection, factory _: MKURLBuilderFactory, client: HttpClient, authenticationToken: String? = nil) {
-    urlBuilder = MKURLBuilder(tokenEncoder: CharacterMapEncoder(), connection: connection, webAuthenticationToken: authenticationToken)
+  public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, authenticationToken: String? = nil) {
+    let factory = factory ?? MKURLBuilderFactory()
+    urlBuilder = factory.builder(forConnection: connection, withWebAuthToken: authenticationToken)
+//      MKURLBuilder(tokenEncoder: CharacterMapEncoder(), connection: connection, webAuthenticationToken: authenticationToken)
     self.client = client
   }
 
@@ -29,7 +31,7 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
 
       let newResult = result.flatMap { (response) -> Result<Data, Error> in
         if let webAuthenticationToken = response.webAuthenticationToken {
-          urlBuilder.webAuthenticationToken = webAuthenticationToken
+          self.urlBuilder.webAuthenticationToken = webAuthenticationToken
         }
         guard let data = response.body else {
           return .failure(MKError.noDataFromStatus(response.status))

@@ -1,5 +1,9 @@
 import Foundation
 
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
+
 struct MKURLResponse: MKHttpResponse {
   let body: Data?
   let response: HTTPURLResponse

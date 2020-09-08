@@ -1,4 +1,9 @@
 import Foundation
+
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
+
 public struct MKURLSessionClient: MKHttpClient {
   public init(session: URLSession) {
     self.session = session
