@@ -8,24 +8,11 @@ let token = "29__54__ARHdpCmg06ZOVWu1BK9TnE0QIkAGdUiw7rxmJWLxb/LeZN05YtNcrtCH+KX
 let apiKey = "c2b958e56ab5a41aa25d673f479bbac1379f1247d83199ccd94e38bb6ae715e2"
 let container = "iCloud.com.brightdigit.MistDemo"
 
-enum MKError : Error {
-  case noDataFromStatus(Int)
-  case invalidReponse(Any)
-  case empty
-  case invalidURL(URL)
-  case invalidURLQuery(String)
-  case invalidRecordName(String)
-}
 enum MKEnvironment : String {
   case production
   case development
 }
 
-enum MKDatabaseType : String {
-  case `private`
-  case `public`
-  case shared
-}
 
 enum MKAPIVersion : String {
     case v1 = "1"
@@ -34,9 +21,6 @@ enum MKAPIVersion : String {
 let environment = MKEnvironment.development
 let database = MKDatabaseType.private
 
-protocol MKWebTokenProvider {
-  
-}
 struct MKDatabaseConnection {
   public static let baseURL = URL(string: "https://api.apple-cloudkit.com/database")!
   let container : String
@@ -65,10 +49,6 @@ extension MKDatabaseConnection {
 protocol MKEncoder {
   func data<EncodableType : MKEncodable>(from object: EncodableType) throws -> Data
 }
-struct MKEmptyGet : MKEncodable {
-  private init () {}
-  public static let value = MKEmptyGet()
-}
 extension MKEncoder {
   func optionalData<EncodableType : MKEncodable>(from object: EncodableType) throws -> Data? {
     guard !(object is MKEmptyGet) else {
@@ -92,19 +72,6 @@ extension JSONEncoder : MKEncoder {
   }
 }
 
-protocol MKRequest {
-  var data : Data { get }
-  var database : MKDatabaseType { get }
-  var subpath : [String] { get }
-  associatedtype Response : MKDecodable
-  associatedtype Data : MKEncodable
-}
-
-extension MKRequest {
-  var relativePath : [String] {
-    ([self.database.rawValue] + subpath)
-  }
-}
 
 
 protocol MKHttpResponse {
@@ -130,21 +97,6 @@ protocol MKHttpClient {
 
 
 
-struct FetchRecordQueryRequest : MKRequest {
-  let data: FetchRecordQuery
-  
-  let database: MKDatabaseType
-  
-  let subpath = ["records","query"]
-
-  
-  
-  typealias Response = FetchRecordQueryResponse
-  
-  typealias Data = FetchRecordQuery
-  
-  
-}
 
 struct MKURLRequest : MKHttpRequest {
   let urlRequest : URLRequest
@@ -260,21 +212,7 @@ struct MKDatabase<HttpClient : MKHttpClient> {
   }
 }
 
-struct UserIdentityLookupInfo : Codable {
-  public let emailAddress : String
-  public let phoneNumber : String
-  public let userRecordName : String
-}
 
-struct UserIdentityNameComponents : Codable {
-  public let namePrefix : String
-  public let givenName : String
-  public let familyName : String
-  public let nickname : String
-  public let nameSuffix : String
-  public let middleName : String
-  public let phoneticRepresentation : String
-}
 
 //struct UserIdentity : Codable {
 //  let lookupInfo : UserIdentityLookupInfo?
@@ -282,55 +220,26 @@ struct UserIdentityNameComponents : Codable {
 //  let nameComponents : UserIdentityNameComponents?
 //}
 
-struct RecordName : Decodable {
-  public let uuid : UUID
-  init(from decoder: Decoder) throws {
-    let uuidString = try decoder.singleValueContainer().decode(String.self)
-    guard let uuid = RecordNameParser.uuid(fromRecordName: uuidString) else {
-      throw MKError.invalidRecordName(uuidString)
-    }
-    self.uuid = uuid
-  }
-  
-}
 
-struct UserIdentityResponse : MKDecodable {
-  let lookupInfo : UserIdentityLookupInfo?
-  let userRecordName : RecordName
-  let nameComponents : UserIdentityNameComponents?
-}
-struct GetCurrentUserIdentityRequest : MKRequest {
-  let data: MKEmptyGet = .value
-  
-  let database: MKDatabaseType = .public
-  
-  let subpath: [String] = ["users","caller"]
-  
-  typealias Response = UserIdentityResponse
-  
-  typealias Data = MKEmptyGet
-  
-  
-}
 
 let dbConnection = MKDatabaseConnection(container: container, apiToken: apiKey, environment: .development)
 
 let client = MKURLSessionClient(session: .shared)
 let db = MKDatabase(connection: dbConnection, factory: MKURLBuilderFactory(), client: client, authenticationToken: token)
 let getUser = GetCurrentUserIdentityRequest()
-//var userResult : Result<UserIdentityResponse, Error>?
+var userResult : Result<UserIdentityResponse, Error>?
 var recordsResult : Result<FetchRecordQueryResponse, Error>?
-//db.perform(request: getUser) { (result) in
-//  userResult = result
-//}
-let getTodoitems = FetchRecordQueryRequest(data: FetchRecordQuery(query: .init(recordType: "TodoItem")), database: .private)
+db.perform(request: getUser) { (result) in
+  userResult = result
+}
+let getTodoitems = FetchRecordQueryRequest(database: .private, query: FetchRecordQuery(query: .init(recordType: "TodoItem")))
 db.perform(request: getTodoitems) { (result) in
   recordsResult = result
 }
 while true {
   RunLoop.main.run(until: .distantPast)
-  if let todoitems = recordsResult {
-    //dump(result)
+  if let todoitems = recordsResult, let result = userResult  {
+    dump(result)
     dump(todoitems)
     break
   }

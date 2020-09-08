@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(*, renamed: "UserIdentityResponse")
 public struct CloudKitUserFetchResponse: Codable {
   public let userRecordName: UUID
 

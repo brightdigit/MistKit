@@ -1,19 +1,20 @@
-//
-// CloudKitQueryRequest.swift
-// Copyright © 2020 Bright Digit, LLC.
-// All Rights Reserved.
-// Created by Leo G Dion.
-//
 
-import Foundation
 
-public struct FetchRecordQuery: MKEncodable {
-  public let query: CloudKitQuery
-  public let desiredKeys: [String]?
-  public let numbersAsStrings: Bool = true
+public struct FetchRecordQueryRequest : MKRequest {
+  public let database: MKDatabaseType
+  public let data: FetchRecordQuery
 
-  public init(query: CloudKitQuery, desiredKeys: [String]? = nil) {
-    self.query = query
-    self.desiredKeys = desiredKeys
+  
+  public let subpath = ["records","query"]
+
+  
+  
+  public typealias Response = FetchRecordQueryResponse
+  
+  public typealias Data = FetchRecordQuery
+  
+  public init (database: MKDatabaseType, query: FetchRecordQuery) {
+    self.database = database
+    self.data = query
   }
 }
