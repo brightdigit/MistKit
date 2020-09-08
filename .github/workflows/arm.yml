@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build with Swift on arm
-      uses: elijahr/run-on-arch-action@fix-args
+      uses: uraimo/run-on-arch-action@v2.0.2
       env:
          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
