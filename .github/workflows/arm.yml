@@ -28,7 +28,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
           apt update
-          apt install -y curl lsb-release sudo clang
+          apt install -y curl lsb-release sudo clang git
           RELEASE_DOT=$(lsb_release -sr)
           RELEASE_NUM=${RELEASE_DOT//[-._]/}
           RELEASE_NAME=$(lsb_release -sc)
