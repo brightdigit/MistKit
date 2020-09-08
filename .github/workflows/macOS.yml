@@ -1,28 +1,32 @@
 name: macOS
 
-on: [push]
+on:
+  push:
+    branches:
+      - '*'
 
 jobs:
   build:
     env:
       PACKAGE_NAME: MistKit
-      XCODE_PATH: /Applications/Xcode_11.5.app
 
     runs-on: macos-latest
     if: "!contains(github.event.head_commit.message, 'ci skip')"
 
+    strategy:
+      matrix:
+        xcode: ["/Applications/Xcode_11.6.app","/Applications/Xcode_11.7_beta.app","/Applications/Xcode_12_beta.app"]
+
     steps:
     - uses: actions/checkout@v2
     - name: Set Xcode Name
-      run: echo "::set-env name=XCODE_NAME::$(basename -- ${{ env.XCODE_PATH }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)"
+      run: echo "::set-env name=XCODE_NAME::$(basename -- ${{ matrix.xcode }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)"
     - name: Setup Xcode
-      run: sudo xcode-select -s ${{ env.XCODE_PATH }}/Contents/Developer
-    - name: Prepare Build
-      run: brew bundle
+      run: sudo xcode-select -s ${{ matrix.xcode }}/Contents/Developer
     - name: Build
       run: swift build
     - name: Lint
-      run: swiftformat --lint . && swiftlint
+      run: swift run swiftformat --lint . && swift run swiftlint
     - name: Run tests
       run: swift test -v --enable-code-coverage
     - name: Prepare Code Coverage
@@ -32,12 +36,10 @@ jobs:
       env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - name: Build Documentation
-      run: sourcedocs generate --spm-module ${{ env.PACKAGE_NAME }}
-    - name: Verify Valid Swift Package
-      run: curl -s https://raw.githubusercontent.com/daveverwer/SwiftPMLibrary/master/script.sh | bash -s -- mine
-    - name: CocoaPods Action
-      run: pod lib lint
+      if: ${{ matrix.xcode == '/Applications/Xcode_12_beta.app' }}
+      run: swift run sourcedocs generate build -c --spm-module MistKit
     - name: Commit files
+      if: ${{ matrix.xcode == '/Applications/Xcode_12_beta.app' }}
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"

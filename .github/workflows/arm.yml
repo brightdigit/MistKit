@@ -5,7 +5,7 @@ on: [push]
 jobs:
   build:
     env:
-      PACKAGE_NAME: _PACKAGE_NAME
+      PACKAGE_NAME: MistKit
       SWIFT_VER: 5.2.4
 
     runs-on: ubuntu-latest
@@ -13,22 +13,23 @@ jobs:
 
     strategy:
       matrix:
-        architecture:  [aarch64]
-        distribution: [ubuntu16.04,ubuntu18.04,ubuntu20.04]
+        arch:  [aarch64]
+        distro: [ubuntu18.04,ubuntu20.04]
     steps:
     - uses: actions/checkout@v2
     - name: Build with Swift on arm
-      uses: uraimo/run-on-arch-action@master
+      uses: uraimo/run-on-arch-action@v2.0.2
       env:
          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
-        architecture: ${{ matrix.architecture }}
-        distribution: ${{ matrix.distribution }}
+        arch: ${{ matrix.arch }}
+        distro: ${{ matrix.distro }}
+        githubToken: ${{ github.token }}
         run: |
           export DEBIAN_FRONTEND=noninteractive
           ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
           apt update
-          apt install -y curl lsb-release sudo clang
+          apt install -y curl lsb-release sudo clang git
           RELEASE_DOT=$(lsb_release -sr)
           RELEASE_NUM=${RELEASE_DOT//[-._]/}
           RELEASE_NAME=$(lsb_release -sc)
@@ -49,12 +50,12 @@ jobs:
                     pkg-config \
                     tzdata \
                     zlib1g-dev
-            elif [[ $RELEASE_DOT == "16.04" ]]; then
+            else
               apt-get -y install \
                 binutils \
                 git \
                 libc6-dev \
-                libcurl3 \
+                libcurl4 \
                 libedit2 \
                 libgcc-5-dev \
                 libpython2.7 \
@@ -67,7 +68,7 @@ jobs:
             fi
           dpkg-reconfigure --frontend noninteractive tzdata
           curl -s https://packagecloud.io/install/repositories/swift-arm/release/script.deb.sh | sudo bash
-          apt-get install -y swift5
+          apt-get install -y swift-lang
           swift build
           swift test --enable-test-discovery --enable-code-coverage
           llvm-cov export -format="lcov" .build/aarch64-unknown-linux-gnu/debug/${{ env.PACKAGE_NAME }}PackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov

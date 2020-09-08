@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $TRAVIS_OS_NAME = 'osx' ]]; then
-  swiftformat --lint . && swiftlint
+  swift run swiftformat --lint . && swift run swiftlint
 elif [[ $TRAVIS_OS_NAME = 'linux' ]]; then
   # What to do in Ubunutu
   RELEASE_DOT=$(lsb_release -sr)
@@ -25,13 +25,12 @@ else
   bash <(curl https://codecov.io/bash) -F travis -F $RELEASE_NAME -F $ARCH -n $TRAVIS_JOB_NUMBER-$TRAVIS_OS_NAME
 fi
 
-curl -s https://raw.githubusercontent.com/daveverwer/SwiftPMLibrary/master/script.sh | bash -s -- mine
+# curl -s https://raw.githubusercontent.com/daveverwer/SwiftPMLibrary/master/script.sh | bash -s -- mine
 
-if [[ $TRAVIS_OS_NAME = 'osx' ]]; then
-  pod lib lint
-  swift package generate-xcodeproj
-  pod install --silent --project-directory=Example
-  xcodebuild -quiet -workspace Example/Example.xcworkspace -scheme "iOS_Example"  ONLY_ACTIVE_ARCH=NO  CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  CODE_SIGNING_ALLOWED=NO
-  xcodebuild -quiet -workspace Example/Example.xcworkspace -scheme "tvOS_Example"  ONLY_ACTIVE_ARCH=NO   CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  CODE_SIGNING_ALLOWED=NO
-  xcodebuild -quiet -workspace Example/Example.xcworkspace -scheme "macOS_Example"  ONLY_ACTIVE_ARCH=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  CODE_SIGNING_ALLOWED=NO
-fi
+# if [[ $TRAVIS_OS_NAME = 'osx' ]]; then
+#   pod lib lint
+#   swift package generate-xcodeproj
+#   xcodebuild -quiet -workspace Example/Example.xcworkspace -scheme "iOS_Example"  ONLY_ACTIVE_ARCH=NO  CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  CODE_SIGNING_ALLOWED=NO
+#   xcodebuild -quiet -workspace Example/Example.xcworkspace -scheme "tvOS_Example"  ONLY_ACTIVE_ARCH=NO   CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  CODE_SIGNING_ALLOWED=NO
+#   xcodebuild -quiet -workspace Example/Example.xcworkspace -scheme "macOS_Example"  ONLY_ACTIVE_ARCH=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO  CODE_SIGNING_ALLOWED=NO
+# fi

@@ -32,8 +32,8 @@ jobs:
       run: swift build
     - name: Run tests
       run: swift test --enable-test-discovery --enable-code-coverage
-    - name: Verify Valid Swift Package
-      run: curl -s https://raw.githubusercontent.com/daveverwer/SwiftPMLibrary/master/script.sh | bash -s -- mine
+    #- name: Verify Valid Swift Package
+    #  run: curl -s https://raw.githubusercontent.com/daveverwer/SwiftPMLibrary/master/script.sh | bash -s -- mine
     - name: Prepare Code Coverage
       run: llvm-cov export -format="lcov" .build/x86_64-unknown-linux-gnu/debug/${{ env.PACKAGE_NAME }}PackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
     - name: Upload to CodeCov.io
