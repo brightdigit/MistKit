@@ -7,6 +7,6 @@
 
 import Foundation
 
-public struct CloudKitQueryResponse: Codable {
+public struct FetchRecordQueryResponse: MKDecodable {
   public let records: [CloudKitResponseRecord]
 }

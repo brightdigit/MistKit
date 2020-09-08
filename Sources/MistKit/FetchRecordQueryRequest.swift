@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct CloudKitQueryRequest: Codable {
+public struct FetchRecordQuery: MKEncodable {
   public let query: CloudKitQuery
   public let desiredKeys: [String]?
   public let numbersAsStrings: Bool = true

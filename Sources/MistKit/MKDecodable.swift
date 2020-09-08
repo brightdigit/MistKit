@@ -1,0 +1,4 @@
+
+public protocol MKDecodable : Decodable {
+  
+}

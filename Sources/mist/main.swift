@@ -3,7 +3,7 @@ import MistKit
 //import MistKitAuth
 
 
-let token = "29__54__ASGcOFYJkVPHI6y8s83vtYVOR1typ4MSCUy0kZycATM4uthl1yAZJT7pQbcCdWGwaflTHuvieI8oG9ALTmWbk8AtC2o3Bd0XhaLZAdApXQKJwtysgq6DrVvsLhZEUTYPzSVDbmRwq9/dqTPnOtNV4SD9UJvYGgTyw/HXLeQJ22L/+qjB8qRCpJqXOvUHxeGxUjOslu3mQiLCsO3s/BVjQOE+9j0kh15xyHJNLXv0pa3Abyz3fn6F1oaZU3bfQ0q6HnG1VdBPp/k0Rcv8eUPO1W6BHkvMjSltC3tITBs2T1bdhZloKoOJhYe9B2/qgo2W/lO5ODt0QDU8AewbyGm27lvxJD0hJ066zX1NIAaNFm9vHLud0QpZStmcWuCAMayPBc7XNHWjpTO2qW0oEVAWMRuf+yuHJCRb0HXrwKq3AyrfrV4=__eyJYLUFQUExFLVdFQkFVVEgtUENTLUNsb3Vka2l0IjoiUVhCd2JEb3hPZ0hCcTY4a2V5OVdVNTVXbVZUcjBzVjhPNWFVNk5FRXVXZDRnOFZ0MlYya09hclFSOHRFU1J0YzFTbi9PbHcrY3VYNk5KbUtNTE92SCtjZ3pXYW8zNG9CIiwiWC1BUFBMRS1XRUJBVVRILVBDUy1TaGFyaW5nIjoiUVhCd2JEb3hPZ0d2UWhPRU1vQklTdnNjR1NqQjVhZUhlSHNiNkh4am5WVFlRSHhYMFgrZGt1eW10dHdmaHFRTHpVa2dSbEZkUEJOMnB5b0FJS3lGclAxbTVvSTgyeDRGIn0="
+let token = "29__54__ARHdpCmg06ZOVWu1BK9TnE0QIkAGdUiw7rxmJWLxb/LeZN05YtNcrtCH+KX77oHecH69twhPmGnePFniCp4og6QSqgp9aM+mL/3vP7PQp8Qy7IKdaoTns0TXZDHP+zXdCLX8ka/jD5UMTSmwbZjaDNzwgTBE8Re2X4MlmuL9SciBTzW0MLEaV5A551Z9/zI9VCjriDvRdUtj8lXBHQDgkqcypl24Pu/EC90vad3GAEk93oO9Zdk1VooWv5DWmsAVZBOX3n1wP5AIP2PID81CZmjEIiuzKoBnFf5z4eaIfLETXNBwBklR7IxxGy4Kuphz0M339Yfgvnvaln9DWBrh92v6/4ZrhXK0YhB6xMycJTfawVzHVlixK8+qcRJvAUTpQvNQEFSE8+cisf3CQ7MdcbB1h2TbzdvBkwoewi8O5UUfpJg=__eyJYLUFQUExFLVdFQkFVVEgtUENTLUNsb3Vka2l0IjoiUVhCd2JEb3hPZ0VSRHE4MG1XRUJ6aVIxMk5CckZVaGhtZnV4UXZjNHAvUEtocEpHV0pIMlpaUHd2NExPN2k5QlZVclBnMFlUanlBQ0htbndkWE1yMnF4YTF1V1FMNVE0IiwiWC1BUFBMRS1XRUJBVVRILVBDUy1TaGFyaW5nIjoiUVhCd2JEb3hPZ0hHSUxuMDFjeU9vQXhjTXZ4L3BoTVpuc1JGTjlmbFgxTkNhK2hDQVFKVFFCQ1JBbVY1akNJbVRDT3FFbHR2MG5BSFd0OXhJRG14WUZObHRqZXBqcVFQIn0="
 
 let apiKey = "c2b958e56ab5a41aa25d673f479bbac1379f1247d83199ccd94e38bb6ae715e2"
 let container = "iCloud.com.brightdigit.MistDemo"
@@ -62,9 +62,6 @@ extension MKDatabaseConnection {
   }
 }
 
-protocol MKEncodable : Encodable {
-  
-}
 protocol MKEncoder {
   func data<EncodableType : MKEncodable>(from object: EncodableType) throws -> Data
 }
@@ -83,9 +80,6 @@ extension MKEncoder {
 }
 protocol MKDecoder {
   func decode<DecoableType : MKDecodable>(_ type: DecoableType.Type, from data: Data) throws -> DecoableType
-}
-protocol MKDecodable : Decodable {
-  
 }
 
 extension JSONDecoder : MKDecoder {
@@ -134,17 +128,8 @@ protocol MKHttpClient {
   func request (withURL url: URL, data: Data?) -> RequestType
 }
 
-struct FetchRecordQuery : MKEncodable {
-  
-}
 
-struct FetchRecordQueryResponse : MKDecodable {
-  
-}
 
-struct FetchedRecord : Codable {
-  
-}
 struct FetchRecordQueryRequest : MKRequest {
   let data: FetchRecordQuery
   
@@ -186,7 +171,13 @@ struct MKURLSessionClient : MKHttpClient {
   let session : URLSession
   func request(withURL url: URL, data: Data?) -> MKURLRequest {
     var urlRequest = URLRequest(url: url)
-    urlRequest.httpBody = data
+    if let data = data {
+      debugPrint(String(data: data, encoding: .utf8))
+      urlRequest.httpBody = data
+      urlRequest.httpMethod = "POST"
+      urlRequest.allHTTPHeaderFields = [ "Content-Type": "application/json" ]
+
+    }
     return MKURLRequest(urlRequest: urlRequest, urlSession: self.session)
   }
   
@@ -213,12 +204,6 @@ struct MKURLBuilder {
     let query = self.queryItems.map {
       [$0.key, $0.value].joined(separator: "=")
     }.joined(separator: "&")
-    //[url.absoluteString
-//    guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-//      throw MKError.invalidURL(url)
-//    }
-//    components.queryItems = self.queryItems
-//
     guard let result = URL(string: [url.absoluteString, query].joined(separator: "?"))else {
       throw MKError.invalidURLQuery(query)
     }
@@ -232,6 +217,8 @@ extension MKURLBuilder {
     var parameters = ["ckAPIToken" : self.connection.apiToken]
     if let webAuthenticationToken = self.webAuthenticationToken, let tokenEncoder = self.tokenEncoder {
       parameters["ckWebAuthToken"] = tokenEncoder.encode(webAuthenticationToken)
+      parameters["ckSession"] = tokenEncoder.encode(webAuthenticationToken)
+      
     }
     return parameters
   }
@@ -255,6 +242,7 @@ struct MKDatabase<HttpClient : MKHttpClient> {
     let url = try! self.urlBuilder.url(withPathComponents: request.relativePath)
     let data = try! self.encoder.optionalData(from: request.data)
     let httpRequest = client.request(withURL: url, data: data)
+    dump(httpRequest)
     httpRequest.execute { (result) in
       let newResult = result.flatMap { (response) -> Result<Data, Error> in
         guard let data = response.body else {
@@ -330,15 +318,20 @@ let dbConnection = MKDatabaseConnection(container: container, apiToken: apiKey, 
 let client = MKURLSessionClient(session: .shared)
 let db = MKDatabase(connection: dbConnection, factory: MKURLBuilderFactory(), client: client, authenticationToken: token)
 let getUser = GetCurrentUserIdentityRequest()
-var userResult : Result<UserIdentityResponse, Error>?
-db.perform(request: getUser) { (result) in
-  userResult = result
+//var userResult : Result<UserIdentityResponse, Error>?
+var recordsResult : Result<FetchRecordQueryResponse, Error>?
+//db.perform(request: getUser) { (result) in
+//  userResult = result
+//}
+let getTodoitems = FetchRecordQueryRequest(data: FetchRecordQuery(query: .init(recordType: "TodoItem")), database: .private)
+db.perform(request: getTodoitems) { (result) in
+  recordsResult = result
 }
-
 while true {
   RunLoop.main.run(until: .distantPast)
-  if let result = userResult {
-    dump(result)
+  if let todoitems = recordsResult {
+    //dump(result)
+    dump(todoitems)
     break
   }
 }

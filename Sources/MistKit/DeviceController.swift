@@ -70,7 +70,7 @@ struct DeviceController {
     //let environemntType = request.application.environment.isRelease ? "production" : "development"
     let containerName = "iCloud.com.brightdigit.Heartwitch"
     // user.appleUser
-    let queryRequest = CloudKitQueryRequest(query: CloudKitQuery(recordType: "Device"), desiredKeys: nil)
+    let queryRequest = FetchRecordQuery(query: CloudKitQuery(recordType: "Device"), desiredKeys: nil)
 
 //    let url = token.map { (token) -> String in
 //      var url = "https://api.apple-cloudkit.com/database/1/" + containerName + "/" + environemntType + "/private/records/query?ckAPIToken=" + apiToken
