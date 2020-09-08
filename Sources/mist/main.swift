@@ -3,7 +3,7 @@ import MistKit
 //import MistKitAuth
 
 
-let token = "29__54__ARHdpCmg06ZOVWu1BK9TnE0QIkAGdUiw7rxmJWLxb/LeZN05YtNcrtCH+KX77oHecH69twhPmGnePFniCp4og6QSqgp9aM+mL/3vP7PQp8Qy7IKdaoTns0TXZDHP+zXdCLX8ka/jD5UMTSmwbZjaDNzwgTBE8Re2X4MlmuL9SciBTzW0MLEaV5A551Z9/zI9VCjriDvRdUtj8lXBHQDgkqcypl24Pu/EC90vad3GAEk93oO9Zdk1VooWv5DWmsAVZBOX3n1wP5AIP2PID81CZmjEIiuzKoBnFf5z4eaIfLETXNBwBklR7IxxGy4Kuphz0M339Yfgvnvaln9DWBrh92v6/4ZrhXK0YhB6xMycJTfawVzHVlixK8+qcRJvAUTpQvNQEFSE8+cisf3CQ7MdcbB1h2TbzdvBkwoewi8O5UUfpJg=__eyJYLUFQUExFLVdFQkFVVEgtUENTLUNsb3Vka2l0IjoiUVhCd2JEb3hPZ0VSRHE4MG1XRUJ6aVIxMk5CckZVaGhtZnV4UXZjNHAvUEtocEpHV0pIMlpaUHd2NExPN2k5QlZVclBnMFlUanlBQ0htbndkWE1yMnF4YTF1V1FMNVE0IiwiWC1BUFBMRS1XRUJBVVRILVBDUy1TaGFyaW5nIjoiUVhCd2JEb3hPZ0hHSUxuMDFjeU9vQXhjTXZ4L3BoTVpuc1JGTjlmbFgxTkNhK2hDQVFKVFFCQ1JBbVY1akNJbVRDT3FFbHR2MG5BSFd0OXhJRG14WUZObHRqZXBqcVFQIn0="
+let token = "29__54__AeRKh0by2d2DvN5Oz8PF4VAdx4UMoP1ZsmDwjCTRzmbgiyGp3xygO+MRZ9jjNuW/npq8rPnAjs/MHuGmTVfrbOy8Gzw00qK8CDiK9WbiX6wBoYEniyo75po5iC4fMq0sXoysth54wzokiQMsXDhqpotXUVJMlQVsuyImtZJOMLpgKLc+nr94e1VRBlrmuWdRtUN85Cch0RHij4xgorQkXOOQOmcujTsX88+61il9ugVahsVi19dKPhfE9B0lMZ7QByTk5IR3ZMEqeZVz7+nmitWJMn5/h82n8WIP2fx0FlXZ+gvwEt1AVRh314QG7VxAmCZipO0RrQx3mKxbUEX+QP2elNo4kY/F1rinLFbL04NXp+nKM0BDln8xN8D7SVrrwW1JiCqcJTAK2wh5gWpq3kbUV5Ti0nE8UzSX3X31tjoTtxk=__eyJYLUFQUExFLVdFQkFVVEgtUENTLUNsb3Vka2l0IjoiUVhCd2JEb3hPZ0dMK090eHFMeXlKSVJDeTdJai94aHBIN3puRStDS0g3WkMyVDNQWkorOGRvS2UrT24xdU9zMk94NUU0SjduSXJocDdrQXprZHNrQU9LYUVveWJVK0NFIiwiWC1BUFBMRS1XRUJBVVRILVBDUy1TaGFyaW5nIjoiUVhCd2JEb3hPZ0dYam54OVZHMEZxNkFWUndzRnViZCtpZ3RzUmJiMUtXOEs4bEhpWXE1UnRiZVZtczNkeW1CRzNac2xaYnZRM1V4b3grRjNyYlNmUkl2dUhqb2kvenBKIn0="
 
 let apiKey = "c2b958e56ab5a41aa25d673f479bbac1379f1247d83199ccd94e38bb6ae715e2"
 let container = "iCloud.com.brightdigit.MistDemo"
@@ -212,7 +212,20 @@ struct MKDatabase<HttpClient : MKHttpClient> {
   }
 }
 
-
+extension MKDatabase {
+  func query<RecordType : MKQueryRecord>(_ query: FetchRecordQueryRequest<MKQuery<RecordType>>, _ callback: @escaping ((Result<[RecordType], Error>) -> Void) ) {
+    self.perform(request: query) { (result) in
+      let newResult = result.flatMap { (response) -> Result<[RecordType], Error> in
+        Result{
+        try response.records.map(
+          RecordType.init(record:)
+        )
+        }
+      }
+      callback(newResult)
+    }
+  }
+}
 
 //struct UserIdentity : Codable {
 //  let lookupInfo : UserIdentityLookupInfo?
@@ -228,12 +241,12 @@ let client = MKURLSessionClient(session: .shared)
 let db = MKDatabase(connection: dbConnection, factory: MKURLBuilderFactory(), client: client, authenticationToken: token)
 let getUser = GetCurrentUserIdentityRequest()
 var userResult : Result<UserIdentityResponse, Error>?
-var recordsResult : Result<FetchRecordQueryResponse, Error>?
+var recordsResult : Result<[TodoListItem], Error>?
 db.perform(request: getUser) { (result) in
   userResult = result
 }
-let getTodoitems = FetchRecordQueryRequest(database: .private, query: FetchRecordQuery(query: .init(recordType: "TodoItem")))
-db.perform(request: getTodoitems) { (result) in
+let getTodoitems = FetchRecordQueryRequest(database: .private, query: FetchRecordQuery(query: MKAnyQuery(recordType: "TodoItem")))
+db.query(FetchRecordQueryRequest(database: .private, query: FetchRecordQuery(query: MKQuery(recordType: TodoListItem.self)))) { (result) in
   recordsResult = result
 }
 while true {

@@ -1,8 +1,8 @@
 
 
-public struct FetchRecordQueryRequest : MKRequest {
+public struct FetchRecordQueryRequest<QueryType: MKQueryProtocol> : MKRequest {
   public let database: MKDatabaseType
-  public let data: FetchRecordQuery
+  public let data: FetchRecordQuery<QueryType>
 
   
   public let subpath = ["records","query"]
@@ -13,7 +13,7 @@ public struct FetchRecordQueryRequest : MKRequest {
   
   public typealias Data = FetchRecordQuery
   
-  public init (database: MKDatabaseType, query: FetchRecordQuery) {
+  public init (database: MKDatabaseType, query: FetchRecordQuery<QueryType>) {
     self.database = database
     self.data = query
   }
