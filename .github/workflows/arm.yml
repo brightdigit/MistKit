@@ -5,7 +5,7 @@ on: [push]
 jobs:
   build:
     env:
-      PACKAGE_NAME: _PACKAGE_NAME
+      PACKAGE_NAME: MistKit
       SWIFT_VER: 5.2.4
 
     runs-on: ubuntu-latest

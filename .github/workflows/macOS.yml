@@ -17,8 +17,6 @@ jobs:
       run: echo "::set-env name=XCODE_NAME::$(basename -- ${{ env.XCODE_PATH }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)"
     - name: Setup Xcode
       run: sudo xcode-select -s ${{ env.XCODE_PATH }}/Contents/Developer
-    - name: Prepare Build
-      run: brew bundle
     - name: Build
       run: swift build
     - name: Lint
