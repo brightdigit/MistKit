@@ -7,13 +7,14 @@
 
 import Foundation
 
-public struct FetchRecordQuery: MKEncodable {
-  public let query: CloudKitQuery
+
+public struct FetchRecordQuery<QueryType : MKQueryProtocol>: MKEncodable {
+  public let query: QueryType
   public let desiredKeys: [String]?
   public let numbersAsStrings: Bool = true
 
-  public init(query: CloudKitQuery, desiredKeys: [String]? = nil) {
+  public init(query: QueryType) {
     self.query = query
-    self.desiredKeys = desiredKeys
+    self.desiredKeys = query.desiredKeys
   }
 }
