@@ -71,7 +71,3 @@ jobs:
           apt-get install -y swift-lang
           swift build
           swift test --enable-test-discovery --enable-code-coverage
-          #ls -R .build
-          #which  llvm-cov
-          #llvm-cov export -format="lcov" .build/aarch64-unknown-linux-gnu/debug/${{ env.PACKAGE_NAME }}PackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
-          #bash <(curl https://codecov.io/bash) -F github -F ${RELEASE_NAME} -F aarch64 -n ${{ github.sha }}
