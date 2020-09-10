@@ -11,6 +11,6 @@ extension MKDatabase
 ```swift
 public func query<RecordType: MKQueryRecord>(
   _ query: FetchRecordQueryRequest<MKQuery<RecordType>>,
-  _ callback: @escaping ((Result<[RecordType], Error>) -> Void)
+  _ callback: @escaping ((MKResult<[RecordType], Error>) -> Void)
 )
 ```

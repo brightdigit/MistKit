@@ -3,7 +3,7 @@
 # `MKErrorResponse`
 
 ```swift
-public struct MKErrorResponse: Codable
+public struct MKErrorResponse: MKDecodable
 ```
 
 ## Properties
