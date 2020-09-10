@@ -1,9 +1,9 @@
 name: arm
 
 on:
-  push:
-    branches-ignore: 
-      - '*'
+  push:    
+    branches:    
+      - main
 
 jobs:
   build:
