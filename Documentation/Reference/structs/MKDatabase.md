@@ -25,6 +25,6 @@ public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = ni
 public func perform<RequestType: MKRequest, ResponseType>(
   request: RequestType,
   returnFailedAuthentication: Bool = false,
-  _ callback: @escaping ((MKResult<ResponseType, Error>) -> Void)
+  _ callback: @escaping ((Result<ResponseType, Error>) -> Void)
 ) where RequestType.Response == ResponseType
 ```

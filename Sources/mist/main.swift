@@ -26,8 +26,6 @@ func query(_ callback: @escaping ((Result<[TodoListItem], Error>) -> Void)) {
       recordsResult = .success(result)
     case let .failure(error):
       recordsResult = .failure(error)
-    case let .authenticationRequired(redirect):
-      recordsResult = .failure(MKAuthenticationError(redirect: redirect))
     }
     callback(recordsResult)
   }

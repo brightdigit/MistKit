@@ -1,11 +1,11 @@
 import Foundation
-
-@available(*, deprecated)
-public enum MKResult<Success, Failure: Error> {
-  case success(Success)
-  case authenticationRequired(MKAuthenticationRedirect)
-  case failure(Failure)
-}
+//
+// @available(*, deprecated)
+// public enum MKResult<Success, Failure: Error> {
+//  case success(Success)
+//  case authenticationRequired(MKAuthenticationRedirect)
+//  case failure(Failure)
+// }
 
 public struct MKDatabase<HttpClient: MKHttpClient> {
   let urlBuilder: MKURLBuilder
@@ -20,14 +20,13 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
   public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManager? = nil) {
     let factory = factory ?? MKURLBuilderFactory()
     urlBuilder = factory.builder(forConnection: connection, withTokenManager: tokenManager)
-//      MKURLBuilder(tokenEncoder: CharacterMapEncoder(), connection: connection, webAuthenticationToken: authenticationToken)
     self.client = client
   }
 
   public func perform<RequestType: MKRequest, ResponseType>(
     request: RequestType,
     returnFailedAuthentication: Bool = false,
-    _ callback: @escaping ((MKResult<ResponseType, Error>) -> Void)
+    _ callback: @escaping ((Result<ResponseType, Error>) -> Void)
   ) where RequestType.Response == ResponseType {
     let url: URL
     let data: Data?
@@ -50,7 +49,7 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
         }
         return .success(data)
       }
-      let newResult: MKResult<ResponseType, Error>
+      let newResult: Result<ResponseType, Error>
       switch dataResult {
       case let .success(data):
         do {
@@ -67,7 +66,7 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
               }
               return
             } else {
-              newResult = .authenticationRequired(auth)
+              newResult = .failure(MKError.authenticationRequired(auth))
             }
           } catch {
             newResult = .failure(error)
@@ -76,11 +75,6 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
       case let .failure(error):
         newResult = .failure(error)
       }
-//      .flatMap { data in
-//        Result {
-//
-//        }
-//      }
       callback(newResult)
     }
   }
