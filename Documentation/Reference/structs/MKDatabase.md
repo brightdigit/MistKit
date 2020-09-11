@@ -6,14 +6,13 @@
 public struct MKDatabase<HttpClient: MKHttpClient>
 ```
 
-## Properties
-### `webAuthenticationToken`
+## Methods
+### `setWebAuthenticationToken(_:)`
 
 ```swift
-public var webAuthenticationToken: String?
+public nonmutating func setWebAuthenticationToken(_ newValue: String)
 ```
 
-## Methods
 ### `init(connection:factory:client:authenticationToken:)`
 
 ```swift

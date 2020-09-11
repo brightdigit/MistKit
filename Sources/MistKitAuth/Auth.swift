@@ -3,6 +3,49 @@ import Foundation
 import NIO
 import NIOHTTP1
 
+public class MKAuthenticationListener {
+  var channel: Channel?
+  var webAuthenticationToken: String?
+  public init() {}
+
+  public func begin(_ callback: @escaping ((Result<String, Error>) -> Void)) {
+    do {
+      channel = try startServer(
+        htdocs: "",
+        allowHalfClosure: true,
+        bindTarget: .ip(host: "127.0.0.1", port: 7000)
+      ) { _, token in
+        self.webAuthenticationToken = token
+
+        if let channel = self.channel {
+          // DispatchQueue.global().async {
+
+          channel.close()
+        }
+
+        // .whenComplete { (result) in
+        let actual: Result<String, Error>
+        if let token = self.webAuthenticationToken {
+          actual = .success(token)
+
+        } else {
+          actual = .failure(NSError())
+        }
+
+        // }
+
+        // }
+        callback(actual)
+        // }
+        // }
+      }
+
+    } catch {
+      callback(.failure(error))
+    }
+  }
+}
+
 extension String {
   func chopPrefix(_ prefix: String) -> String? {
     if unicodeScalars.starts(with: prefix.unicodeScalars) {
@@ -87,10 +130,14 @@ private final class HTTPHandler: ChannelInboundHandler {
   private var handlerFuture: EventLoopFuture<Void>?
   private let fileIO: NonBlockingFileIO
   private let defaultResponse = "Hello World\r\n"
+  private let channel: Channel
+  private let onToken: (String) -> Void
 
-  public init(fileIO: NonBlockingFileIO, htdocsPath: String) {
+  public init(fileIO: NonBlockingFileIO, htdocsPath: String, channel: Channel, _ onToken: @escaping (String) -> Void) {
     self.htdocsPath = htdocsPath
     self.fileIO = fileIO
+    self.channel = channel
+    self.onToken = onToken
   }
 
   func handleInfo(context: ChannelHandlerContext, request: HTTPServerRequestPart) {
@@ -418,7 +465,13 @@ private final class HTTPHandler: ChannelInboundHandler {
       keepAlive = request.isKeepAlive
       state.requestReceived()
       let keyValuePairs = request.uri.split(separator: "?").last?.split(separator: "&").map { $0.split(separator: "=") }
-      print(keyValuePairs)
+      let webAuthenticationTokenFound = keyValuePairs?.first(where: {
+        $0.first == "ckWebAuthToken"
+      })?.last
+
+      if let webAuthenticationToken = webAuthenticationTokenFound {
+        onToken(String(webAuthenticationToken))
+      }
       var responseHead = httpResponseHead(request: request, status: HTTPResponseStatus.ok)
       buffer.clear()
       buffer.writeString(defaultResponse)
@@ -509,14 +562,17 @@ public enum BindTo {
 //    bindTarget = BindTo.ip(host: defaultHost, port: defaultPort)
 // }
 
-public func startServer(htdocs: String, allowHalfClosure: Bool, bindTarget: BindTo) throws -> Channel {
+public func startServer(htdocs: String, allowHalfClosure: Bool, bindTarget: BindTo, _ callback: @escaping (EventLoop, String) -> Void) throws -> Channel {
   let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+
   let threadPool = NIOThreadPool(numberOfThreads: 6)
   threadPool.start()
 
   func childChannelInitializer(channel: Channel) -> EventLoopFuture<Void> {
     return channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
-      channel.pipeline.addHandler(HTTPHandler(fileIO: fileIO, htdocsPath: htdocs))
+      channel.pipeline.addHandler(HTTPHandler(fileIO: fileIO, htdocsPath: htdocs, channel: channel) {
+        callback(group.next(), $0)
+      })
     }
   }
 
@@ -568,9 +624,19 @@ public func startServer(htdocs: String, allowHalfClosure: Bool, bindTarget: Bind
     localAddress = "\(channelLocalAddress)"
   }
   print("Server started and listening on \(localAddress), htdocs path \(htdocs)")
+
   channel.closeFuture.whenComplete { _ in
-    try! group.syncShutdownGracefully()
-    try! threadPool.syncShutdownGracefully()
+//    let actual : Result<String, Error> = result.flatMap { _ in
+//      guard let token = webAuthenticationToken else {
+//        return .failure(NSError())
+//      }
+//      return .success(token)
+//    }
+    group.shutdownGracefully(queue: .global()) { _ in
+
+      threadPool.shutdownGracefully(queue: .global()) { _ in
+      }
+    }
   }
   return channel
 }

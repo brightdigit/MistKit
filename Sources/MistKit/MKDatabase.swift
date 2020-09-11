@@ -16,13 +16,8 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
   let decoder: MKDecoder = JSONDecoder()
   let client: HttpClient
 
-  public var webAuthenticationToken: String? {
-    get {
-      return urlBuilder.webAuthenticationToken
-    }
-    set {
-      urlBuilder.webAuthenticationToken = newValue
-    }
+  public nonmutating func setWebAuthenticationToken(_ newValue: String) {
+    urlBuilder.webAuthenticationToken = newValue
   }
 
   public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, authenticationToken: String? = nil) {
