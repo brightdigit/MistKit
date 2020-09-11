@@ -10,7 +10,10 @@ extension MKDatabase {
 }
 
 extension MKResult {
-  func tryFlatmap<RecordType: MKQueryRecord>(recordsTo _: RecordType.Type) -> MKResult<[RecordType], Error> where Success == FetchRecordQueryResponse {
+  func tryFlatmap<RecordType: MKQueryRecord>(
+    recordsTo _: RecordType.Type
+  ) -> MKResult<[RecordType], Error>
+    where Success == FetchRecordQueryResponse {
     let records: [RecordType]
     let success: FetchRecordQueryResponse
     switch self {
