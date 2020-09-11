@@ -7,6 +7,12 @@ public enum MKError: Error
 ```
 
 ## Cases
+### `authenticationRequired(_:)`
+
+```swift
+case authenticationRequired(MKAuthenticationRedirect)
+```
+
 ### `noDataFromStatus(_:)`
 
 ```swift

@@ -3,15 +3,21 @@ extension MKDatabase {
     _ query: FetchRecordQueryRequest<MKQuery<RecordType>>,
     _ callback: @escaping ((Result<[RecordType], Error>) -> Void)
   ) {
-    perform(request: query) { result in
-      let newResult = result.flatMap { (response) -> Result<[RecordType], Error> in
-        Result {
-          try response.records.map(
-            RecordType.init(record:)
-          )
-        }
+    perform(request: query) {
+      callback($0.tryFlatmap(recordsTo: RecordType.self))
+    }
+  }
+}
+
+extension Result {
+  func tryFlatmap<RecordType: MKQueryRecord>(
+    recordsTo _: RecordType.Type
+  ) -> Result<[RecordType], Failure>
+    where Success == FetchRecordQueryResponse, Failure == Error {
+    return flatMap { response in
+      Result<[RecordType], Failure> {
+        try response.records.map(RecordType.init(record:))
       }
-      callback(newResult)
     }
   }
 }

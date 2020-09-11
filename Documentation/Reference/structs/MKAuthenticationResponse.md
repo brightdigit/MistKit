@@ -1,9 +1,9 @@
 **STRUCT**
 
-# `MKErrorResponse`
+# `MKAuthenticationResponse`
 
 ```swift
-public struct MKErrorResponse: Codable
+public struct MKAuthenticationResponse: MKDecodable
 ```
 
 ## Properties

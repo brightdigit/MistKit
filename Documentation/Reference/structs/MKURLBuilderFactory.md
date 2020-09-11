@@ -13,8 +13,8 @@ public struct MKURLBuilderFactory
 public init()
 ```
 
-### `builder(forConnection:withWebAuthToken:)`
+### `builder(forConnection:withTokenManager:)`
 
 ```swift
-public func builder(forConnection connection: MKDatabaseConnection, withWebAuthToken webAuthenticationToken: String?) -> MKURLBuilder
+public func builder(forConnection connection: MKDatabaseConnection, withTokenManager tokenManager: MKTokenManager?) -> MKURLBuilder
 ```

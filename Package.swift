@@ -12,8 +12,8 @@ let package = Package(
       targets: ["MistKit"]
     ),
     .library(
-      name: "MistKitAuth",
-      targets: ["MistKitAuth"]
+      name: "MistKitNIOHTTP1Token",
+      targets: ["MistKitNIOHTTP1Token"]
     ),
     .executable(name: "mist", targets: ["mist"])
   ],
@@ -32,12 +32,13 @@ let package = Package(
       name: "MistKit",
       dependencies: []
     ),
-    .target(name: "MistKitAuth",
+    .target(name: "MistKitNIOHTTP1Token",
             dependencies: [
+              "MistKit",
               .product(name: "NIO", package: "swift-nio"),
               .product(name: "NIOHTTP1", package: "swift-nio")
             ]),
-    .target(name: "mist", dependencies: ["MistKit", "MistKitAuth"]),
+    .target(name: "mist", dependencies: ["MistKit", "MistKitNIOHTTP1Token"]),
     .testTarget(
       name: "MistKitTests",
       dependencies: ["MistKit"]
