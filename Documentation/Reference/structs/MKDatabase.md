@@ -13,17 +13,18 @@ public struct MKDatabase<HttpClient: MKHttpClient>
 public nonmutating func setWebAuthenticationToken(_ newValue: String)
 ```
 
-### `init(connection:factory:client:authenticationToken:)`
+### `init(connection:factory:client:tokenManager:)`
 
 ```swift
-public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, authenticationToken: String? = nil)
+public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManager? = nil)
 ```
 
-### `perform(request:_:)`
+### `perform(request:returnFailedAuthentication:_:)`
 
 ```swift
 public func perform<RequestType: MKRequest, ResponseType>(
   request: RequestType,
+  returnFailedAuthentication: Bool = false,
   _ callback: @escaping ((MKResult<ResponseType, Error>) -> Void)
 ) where RequestType.Response == ResponseType
 ```

@@ -1,9 +1,6 @@
 import Foundation
 
-public protocol MKAuthRedirect {
-  var url: URL { get }
-}
-
+@available(*, deprecated)
 public enum MKResult<Success, Failure: Error> {
   case success(Success)
   case authenticationRequired(MKAuthRedirect)
@@ -17,18 +14,19 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
   let client: HttpClient
 
   public nonmutating func setWebAuthenticationToken(_ newValue: String) {
-    urlBuilder.webAuthenticationToken = newValue
+    urlBuilder.tokenManager?.webAuthenticationToken = newValue
   }
 
-  public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, authenticationToken: String? = nil) {
+  public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManager? = nil) {
     let factory = factory ?? MKURLBuilderFactory()
-    urlBuilder = factory.builder(forConnection: connection, withWebAuthToken: authenticationToken)
+    urlBuilder = factory.builder(forConnection: connection, withTokenManager: tokenManager)
 //      MKURLBuilder(tokenEncoder: CharacterMapEncoder(), connection: connection, webAuthenticationToken: authenticationToken)
     self.client = client
   }
 
   public func perform<RequestType: MKRequest, ResponseType>(
     request: RequestType,
+    returnFailedAuthentication: Bool = false,
     _ callback: @escaping ((MKResult<ResponseType, Error>) -> Void)
   ) where RequestType.Response == ResponseType {
     let url: URL
@@ -45,7 +43,7 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
 
       let dataResult = result.flatMap { (response) -> Result<Data, Error> in
         if let webAuthenticationToken = response.webAuthenticationToken {
-          self.urlBuilder.webAuthenticationToken = webAuthenticationToken
+          self.urlBuilder.tokenManager?.webAuthenticationToken = webAuthenticationToken
         }
         guard let data = response.body else {
           return .failure(MKError.noDataFromStatus(response.status))
@@ -62,7 +60,15 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
         } catch {
           do {
             let auth = try self.decoder.decode(MKErrorResponse.self, from: data)
-            newResult = .authenticationRequired(auth)
+
+            if let tokenManager = self.urlBuilder.tokenManager, !returnFailedAuthentication {
+              tokenManager.request(auth) { _ in
+                self.perform(request: request, returnFailedAuthentication: true, callback)
+              }
+              return
+            } else {
+              newResult = .authenticationRequired(auth)
+            }
           } catch {
             newResult = .failure(error)
           }

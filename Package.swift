@@ -34,6 +34,7 @@ let package = Package(
     ),
     .target(name: "MistKitAuth",
             dependencies: [
+              "MistKit",
               .product(name: "NIO", package: "swift-nio"),
               .product(name: "NIOHTTP1", package: "swift-nio")
             ]),

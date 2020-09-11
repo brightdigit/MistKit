@@ -1,14 +1,18 @@
 // swiftlint:disable all
 import Foundation
+import MistKit
 import NIO
 import NIOHTTP1
 
-public class MKAuthenticationListener {
+public class MKHttpServerTokenManager: MKTokenManager {
   var channel: Channel?
-  var webAuthenticationToken: String?
+  public var webAuthenticationToken: String?
   public init() {}
 
-  public func begin(_ callback: @escaping ((Result<String, Error>) -> Void)) {
+  public func request(_ request: MKErrorResponse?, _ callback: @escaping ((Result<String, Error>) -> Void)) {
+    if let url = request?.redirectURL {
+      print(url)
+    }
     do {
       channel = try startServer(
         htdocs: "",
@@ -16,12 +20,6 @@ public class MKAuthenticationListener {
         bindTarget: .ip(host: "127.0.0.1", port: 7000)
       ) { _, token in
         self.webAuthenticationToken = token
-
-        if let channel = self.channel {
-          // DispatchQueue.global().async {
-
-          channel.close()
-        }
 
         // .whenComplete { (result) in
         let actual: Result<String, Error>
@@ -38,6 +36,12 @@ public class MKAuthenticationListener {
         callback(actual)
         // }
         // }
+
+        if let channel = self.channel {
+          // DispatchQueue.global().async {
+
+          channel.close()
+        }
       }
 
     } catch {
@@ -117,7 +121,7 @@ private final class HTTPHandler: ChannelInboundHandler {
     }
   }
 
-  private var buffer: ByteBuffer!
+  private var buffer: ByteBuffer?
   private var keepAlive = false
   private var state = State.idle
   private let htdocsPath: String
@@ -174,16 +178,16 @@ private final class HTTPHandler: ChannelInboundHandler {
         onToken(String(webAuthenticationToken))
       }
       var responseHead = httpResponseHead(request: request, status: HTTPResponseStatus.ok)
-      buffer.clear()
-      buffer.writeString(defaultResponse)
-      responseHead.headers.add(name: "content-length", value: "\(buffer!.readableBytes)")
+      buffer?.clear()
+      buffer?.writeString(defaultResponse)
+      // responseHead.headers.add(name: "content-length", value: "\(buffer?.readableBytes)")
       let response = HTTPServerResponsePart.head(responseHead)
       context.write(wrapOutboundOut(response), promise: nil)
     case .body:
       break
     case .end:
       state.requestComplete()
-      let content = HTTPServerResponsePart.body(.byteBuffer(buffer!.slice()))
+      let content = HTTPServerResponsePart.body(.byteBuffer(buffer?.slice() ?? ByteBuffer()))
       context.write(wrapOutboundOut(content), promise: nil)
       completeResponse(context, trailers: nil, promise: nil)
     }
