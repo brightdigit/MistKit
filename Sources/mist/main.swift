@@ -44,12 +44,3 @@ while true {
     break
   }
 }
-
-// let channel = try startServer(
-// htdocs: "",
-// allowHalfClosure: true,
-// bindTarget: .ip(host: "127.0.0.1", port: 7000))
-//
-//
-// print(urlString)
-// try channel.closeFuture.wait()

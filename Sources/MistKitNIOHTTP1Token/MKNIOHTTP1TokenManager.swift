@@ -12,7 +12,7 @@ public class MKNIOHTTP1TokenManager: MKTokenManager {
       print(url)
     }
     do {
-      channel = try startServer(
+      channel = try HTTPHandler.startServer(
         htdocs: "",
         allowHalfClosure: true,
         bindTarget: .ipAddress(host: "127.0.0.1", port: 7000)
