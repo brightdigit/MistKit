@@ -1,8 +1,8 @@
 name: arm
 
 on:
-  push:    
-    branches:    
+  push:
+    branches: 
       - main
 
 jobs:
