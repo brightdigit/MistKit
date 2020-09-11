@@ -1,9 +1,9 @@
 **PROTOCOL**
 
-# `MKAuthRedirect`
+# `MKAuthenticationRedirect`
 
 ```swift
-public protocol MKAuthRedirect
+public protocol MKAuthenticationRedirect
 ```
 
 ## Properties

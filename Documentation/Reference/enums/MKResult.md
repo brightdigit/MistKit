@@ -16,7 +16,7 @@ case success(Success)
 ### `authenticationRequired(_:)`
 
 ```swift
-case authenticationRequired(MKAuthRedirect)
+case authenticationRequired(MKAuthenticationRedirect)
 ```
 
 ### `failure(_:)`

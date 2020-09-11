@@ -17,5 +17,5 @@ var webAuthenticationToken: String?
 ### `request(_:_:)`
 
 ```swift
-func request(_ request: MKErrorResponse?, _ callback: @escaping (Result<String, Error>) -> Void)
+func request(_ request: MKAuthenticationResponse?, _ callback: @escaping (Result<String, Error>) -> Void)
 ```

@@ -4,6 +4,6 @@ import Foundation
   import FoundationNetworking
 #endif
 
-public protocol MKAuthRedirect {
+public protocol MKAuthenticationRedirect {
   var url: URL { get }
 }

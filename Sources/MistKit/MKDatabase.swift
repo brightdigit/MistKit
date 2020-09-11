@@ -3,7 +3,7 @@ import Foundation
 @available(*, deprecated)
 public enum MKResult<Success, Failure: Error> {
   case success(Success)
-  case authenticationRequired(MKAuthRedirect)
+  case authenticationRequired(MKAuthenticationRedirect)
   case failure(Failure)
 }
 
@@ -59,7 +59,7 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
           break
         } catch {
           do {
-            let auth = try self.decoder.decode(MKErrorResponse.self, from: data)
+            let auth = try self.decoder.decode(MKAuthenticationResponse.self, from: data)
 
             if let tokenManager = self.urlBuilder.tokenManager, !returnFailedAuthentication {
               tokenManager.request(auth) { _ in

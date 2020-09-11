@@ -4,12 +4,16 @@ import MistKit
 import NIO
 import NIOHTTP1
 
-public class MKHttpServerTokenManager: MKTokenManager {
+enum MKNIOHTTP1Error: Error {
+  case noToken
+}
+
+public class MKNIOHTTP1TokenManager: MKTokenManager {
   var channel: Channel?
   public var webAuthenticationToken: String?
   public init() {}
 
-  public func request(_ request: MKErrorResponse?, _ callback: @escaping ((Result<String, Error>) -> Void)) {
+  public func request(_ request: MKAuthenticationResponse?, _ callback: @escaping ((Result<String, Error>) -> Void)) {
     if let url = request?.redirectURL {
       print(url)
     }
@@ -27,7 +31,7 @@ public class MKHttpServerTokenManager: MKTokenManager {
           actual = .success(token)
 
         } else {
-          actual = .failure(NSError())
+          actual = .failure(MKNIOHTTP1Error.noToken)
         }
 
         // }
@@ -50,26 +54,6 @@ public class MKHttpServerTokenManager: MKTokenManager {
   }
 }
 
-//
-// extension String {
-//  func chopPrefix(_ prefix: String) -> String? {
-//    if unicodeScalars.starts(with: prefix.unicodeScalars) {
-//      return String(self[index(startIndex, offsetBy: prefix.count)...])
-//    } else {
-//      return nil
-//    }
-//  }
-//
-//  func containsDotDot() -> Bool {
-//    for idx in indices {
-//      if self[idx] == ".", idx < index(before: endIndex), self[index(after: idx)] == "." {
-//        return true
-//      }
-//    }
-//    return false
-//  }
-// }
-//
 private func httpResponseHead(request: HTTPRequestHead, status: HTTPResponseStatus, headers: HTTPHeaders = HTTPHeaders()) -> HTTPResponseHead {
   var head = HTTPResponseHead(version: request.version, status: status, headers: headers)
   let connectionHeaders: [String] = head.headers[canonicalForm: "connection"].map { $0.lowercased() }

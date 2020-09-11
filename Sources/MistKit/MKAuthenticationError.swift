@@ -1,7 +1,7 @@
 public struct MKAuthenticationError: Error {
-  public init(redirect: MKAuthRedirect) {
+  public init(redirect: MKAuthenticationRedirect) {
     self.redirect = redirect
   }
 
-  let redirect: MKAuthRedirect
+  let redirect: MKAuthenticationRedirect
 }

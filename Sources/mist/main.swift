@@ -1,6 +1,6 @@
 import Foundation
 import MistKit
-import MistKitAuth
+import MistKitNIOHTTP1Token
 
 let apiKey = "c2b958e56ab5a41aa25d673f479bbac1379f1247d83199ccd94e38bb6ae715e2"
 let container = "iCloud.com.brightdigit.MistDemo"
@@ -13,7 +13,7 @@ let database = MKDatabase(
   connection: dbConnection,
   factory: MKURLBuilderFactory(),
   client: client,
-  tokenManager: MKHttpServerTokenManager()
+  tokenManager: MKNIOHTTP1TokenManager()
 )
 
 var todoResult: Result<[TodoListItem], Error>?

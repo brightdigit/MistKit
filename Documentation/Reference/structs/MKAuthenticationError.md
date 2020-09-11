@@ -10,5 +10,5 @@ public struct MKAuthenticationError: Error
 ### `init(redirect:)`
 
 ```swift
-public init(redirect: MKAuthRedirect)
+public init(redirect: MKAuthenticationRedirect)
 ```
