@@ -190,7 +190,6 @@ public final class HTTPHandler: ChannelInboundHandler {
       }
       localAddress = "\(channelLocalAddress)"
     }
-    print("Server started and listening on \(localAddress), htdocs path \(htdocs)")
 
     channel.closeFuture.whenComplete { _ in
       //    let actual : Result<String, Error> = result.flatMap { _ in
