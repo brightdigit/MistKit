@@ -2,9 +2,9 @@ import Foundation
 import MistKit
 import NIO
 
-public class MKNIOHTTP1TokenManager: MKTokenManager {
+public class MKNIOHTTP1TokenClient: MKTokenClient {
   var channel: Channel?
-  public var webAuthenticationToken: String?
+  // public var webAuthenticationToken: String?
   public init() {}
 
   public func request(_ request: MKAuthenticationResponse?, _ callback: @escaping ((Result<String, Error>) -> Void)) {
@@ -17,16 +17,16 @@ public class MKNIOHTTP1TokenManager: MKTokenManager {
         allowHalfClosure: true,
         bindTarget: .ipAddress(host: "127.0.0.1", port: 7000)
       ) { _, token in
-        self.webAuthenticationToken = token
+        // self.webAuthenticationToken = token
 
         // .whenComplete { (result) in
         let actual: Result<String, Error>
-        if let token = self.webAuthenticationToken {
-          actual = .success(token)
+//        if let token = token {
+        actual = .success(token)
 
-        } else {
-          actual = .failure(MKNIOHTTP1Error.noToken)
-        }
+//        } else {
+//          actual = .failure(MKNIOHTTP1Error.noToken)
+//        }
 
         // }
 

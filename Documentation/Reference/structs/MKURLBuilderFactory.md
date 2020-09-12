@@ -16,5 +16,5 @@ public init()
 ### `builder(forConnection:withTokenManager:)`
 
 ```swift
-public func builder(forConnection connection: MKDatabaseConnection, withTokenManager tokenManager: MKTokenManager?) -> MKURLBuilder
+public func builder(forConnection connection: MKDatabaseConnection, withTokenManager tokenManager: MKTokenManagerProtocol?) -> MKURLBuilder
 ```

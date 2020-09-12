@@ -1,11 +1,4 @@
 import Foundation
-//
-// @available(*, deprecated)
-// public enum MKResult<Success, Failure: Error> {
-//  case success(Success)
-//  case authenticationRequired(MKAuthenticationRedirect)
-//  case failure(Failure)
-// }
 
 public struct MKDatabase<HttpClient: MKHttpClient> {
   let urlBuilder: MKURLBuilder
@@ -13,11 +6,7 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
   let decoder: MKDecoder = JSONDecoder()
   let client: HttpClient
 
-  public nonmutating func setWebAuthenticationToken(_ newValue: String) {
-    urlBuilder.tokenManager?.webAuthenticationToken = newValue
-  }
-
-  public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManager? = nil) {
+  public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManagerProtocol? = nil) {
     let factory = factory ?? MKURLBuilderFactory()
     urlBuilder = factory.builder(forConnection: connection, withTokenManager: tokenManager)
     self.client = client

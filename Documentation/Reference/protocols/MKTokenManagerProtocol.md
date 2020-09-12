@@ -1,9 +1,9 @@
 **PROTOCOL**
 
-# `MKTokenManager`
+# `MKTokenManagerProtocol`
 
 ```swift
-public protocol MKTokenManager: AnyObject
+public protocol MKTokenManagerProtocol: AnyObject
 ```
 
 ## Properties
