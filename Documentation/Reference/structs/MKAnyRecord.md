@@ -19,6 +19,12 @@ public let recordType: String
 public let recordName: UUID
 ```
 
+### `recordChangeTag`
+
+```swift
+public let recordChangeTag: String
+```
+
 ### `fields`
 
 ```swift

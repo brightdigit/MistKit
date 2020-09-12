@@ -3,6 +3,7 @@ import Foundation
 public struct MKAnyRecord: Codable {
   public let recordType: String
   public let recordName: UUID
+  public let recordChangeTag: String
   public let fields: [String: MKField]
 }
 

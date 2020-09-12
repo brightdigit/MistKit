@@ -13,6 +13,12 @@ public protocol MKQueryRecord
 var recordName: UUID
 ```
 
+### `recordChangeTag`
+
+```swift
+var recordChangeTag: String
+```
+
 ## Methods
 ### `init(record:)`
 
