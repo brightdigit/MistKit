@@ -50,9 +50,11 @@ let package = Package(
             dependencies: [
               "MistKit", .product(name: "Vapor", package: "vapor")
             ]),
-    .target(name: "mistdemoc", dependencies: ["MistKit", "MistKitNIOHTTP1Token",
+    .target(name: "mistdemoc", dependencies: ["MistKit", "MistKitNIOHTTP1Token", "MistKitDemo",
                                               .product(name: "ArgumentParser", package: "swift-argument-parser")]),
-    .target(name: "mistdemod", dependencies: ["MistKit", "MistKitVapor", .product(name: "Vapor", package: "vapor")]),
+    .target(name: "mistdemod", dependencies: ["MistKit", "MistKitVapor", "MistKitDemo", .product(name: "Vapor", package: "vapor")]),
+    .target(name: "MistKitDemo",
+            dependencies: ["MistKit"]),
     .testTarget(
       name: "MistKitTests",
       dependencies: ["MistKit"]

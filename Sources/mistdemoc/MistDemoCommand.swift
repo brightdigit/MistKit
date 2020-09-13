@@ -1,6 +1,7 @@
 import ArgumentParser
 import Foundation
 import MistKit
+import MistKitDemo
 import MistKitNIOHTTP1Token
 
 extension Result where Success == Void, Failure == Error {
@@ -85,7 +86,7 @@ struct MistDemoCommand: ParsableCommand {
       let dbConnection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
 
       let client = MKURLSessionClient(session: .shared)
-      let manager = try MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
+      let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
       if let token = options.token {
         manager.webAuthenticationToken = token
       }

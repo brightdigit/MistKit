@@ -6,6 +6,13 @@ public struct MKAnyRecord: Codable {
   public let recordChangeTag: String?
   public let fields: [String: MKValue]
 
+  internal init(recordType: String, recordName: UUID) {
+    self.recordType = recordType
+    self.recordName = recordName
+    recordChangeTag = nil
+    fields = [String: MKValue]()
+  }
+
   public init<RecordType: MKQueryRecord>(record: RecordType) {
     recordType = RecordType.recordType
     recordName = record.recordName
