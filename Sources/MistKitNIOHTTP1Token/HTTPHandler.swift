@@ -168,8 +168,6 @@ public final class HTTPHandler: ChannelInboundHandler {
     //    try! threadPool.syncShutdownGracefully()
     //  }
 
-    print("htdocs = \(htdocs)")
-
     let channel = try { () -> Channel in
       switch bindTarget {
       case let .ipAddress(host, port):

@@ -65,9 +65,9 @@ struct MistDemoCommand: ParsableCommand {
       let query = ModifyRecordQuery(operations: [operation])
 
       let request = ModifyRecordQueryRequest(database: .private, query: query)
-      database.perform(request: request) { result in
+      database.perform(operations: request) { result in
         do {
-          try dump(result.get())
+          try print(result.get().information)
         } catch {
           completed(error)
           return
@@ -98,7 +98,7 @@ struct MistDemoCommand: ParsableCommand {
       let getTodosQuery = FetchRecordQueryRequest(database: .private, query: FetchRecordQuery(query: MKQuery(recordType: TodoListItem.self)))
       database.query(getTodosQuery) { result in
         do {
-          try print(result.get())
+          try print(result.get().information)
         } catch {
           completed(error)
           return

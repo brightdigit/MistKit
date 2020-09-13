@@ -25,3 +25,28 @@ public struct TodoListItem: MKQueryRecord {
   public let title: String
   public let recordChangeTag: String?
 }
+
+extension Array where Element : MKQueryRecord {
+  var information: String {
+    let header = "\(self.count) results"
+    let items = [header] + self.map{ $0.information }
+    let minlength = items.map{ $0.components(separatedBy: .newlines).map{ $0.count }.max() }.compactMap{ $0 }.max() ?? 0
+    let separator = String(repeating: "=", count: minlength + 3)
+    return items.joined(separator: "\n\(separator)\n")
+  }
+}
+
+extension MKQueryRecord {
+  var information : String {
+    let fieldString = fields.map{
+      return "  \($0.key): \($0.value)"
+    }.joined(separator: "\n")
+    
+    return """
+      recordName: \(self.recordName?.uuidString ?? "")
+      recordChangeTag: \(self.recordChangeTag ?? "")
+      fields:
+      \(fieldString)
+      """
+  }
+}
