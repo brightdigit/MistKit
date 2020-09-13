@@ -13,20 +13,21 @@ public struct ModifyRecordQuery: MKEncodable
 public let operations: [ModifyOperation]
 ```
 
-### `atomic`
-
-```swift
-public let atomic = true
-```
-
 ### `desiredKeys`
 
 ```swift
-public let desiredKeys: [String]?
+public let desiredKeys: [String]? = nil
 ```
 
 ### `numbersAsStrings`
 
 ```swift
 public let numbersAsStrings: Bool = true
+```
+
+## Methods
+### `init(operations:)`
+
+```swift
+public init(operations: [ModifyOperation])
 ```

@@ -18,3 +18,9 @@ case missingKey(String)
 ```swift
 case invalidData(String)
 ```
+
+### `invalidKey(_:)`
+
+```swift
+case invalidKey(String)
+```

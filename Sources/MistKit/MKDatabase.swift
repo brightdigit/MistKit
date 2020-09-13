@@ -22,6 +22,9 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
     do {
       url = try urlBuilder.url(withPathComponents: request.relativePath)
       data = try encoder.optionalData(from: request.data)
+      if let dumpData = data {
+        print(String(data: dumpData, encoding: .utf8)!)
+      }
     } catch {
       callback(.failure(error))
       return
@@ -36,6 +39,7 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
         guard let data = response.body else {
           return .failure(MKError.noDataFromStatus(response.status))
         }
+        print(String(data: data, encoding: .utf8)!)
         return .success(data)
       }
       let newResult: Result<ResponseType, Error>

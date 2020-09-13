@@ -14,7 +14,7 @@ extension Result {
 }
 
 protocol ParsableAsyncCommand: ParsableCommand {
-  func runAsync(_ completed: (Error?) -> Void)
+  func runAsync(_ completed: @escaping (Error?) -> Void)
 }
 
 extension ParsableAsyncCommand {
@@ -35,21 +35,20 @@ extension ParsableAsyncCommand {
 }
 
 struct MistDemoCommand: ParsableCommand {
-  static var configuration = CommandConfiguration(commandName: "mistdemoc", subcommands: [ListCommand.self], defaultSubcommand: ListCommand.self)
+  static var configuration = CommandConfiguration(commandName: "mistdemoc", subcommands: [ListCommand.self, NewCommand.self], defaultSubcommand: ListCommand.self)
 
   struct NewCommand: ParsableAsyncCommand {
-    static var configuration = CommandConfiguration(commandName: "list")
+    static var configuration = CommandConfiguration(commandName: "new")
     @OptionGroup var options: MistDemoArguments
 
     @Argument
     var title: String
 
-    func runAsync(_: (Error?) -> Void) {
+    func runAsync(_ completed: @escaping (Error?) -> Void) {
       let dbConnection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
 
       let client = MKURLSessionClient(session: .shared)
-      let mistdemoURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".mistdemo")
-      let manager = try MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
+      let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
       if let token = options.token {
         manager.webAuthenticationToken = token
       }
@@ -59,25 +58,33 @@ struct MistDemoCommand: ParsableCommand {
         client: client,
         tokenManager: manager
       )
+      let item = TodoListItem(title: title)
 
-      var todoResult: Result<[TodoListItem], Error>?
+      let operation = ModifyOperation(operationType: .create, record: MKAnyRecord(record: item), desiredKeys: TodoListItem.desiredKeys)
 
-      let getTodosQuery = FetchRecordQueryRequest(database: .private, query: FetchRecordQuery(query: MKQuery(recordType: TodoListItem.self)))
-      database.query(getTodosQuery) { result in
-        todoResult = result
+      let query = ModifyRecordQuery(operations: [operation])
+
+      let request = ModifyRecordQueryRequest(database: .private, query: query)
+      database.perform(request: request) { result in
+        do {
+          try dump(result.get())
+        } catch {
+          completed(error)
+          return
+        }
+        completed(nil)
       }
     }
   }
 
-  struct ListCommand: ParsableCommand {
+  struct ListCommand: ParsableAsyncCommand {
     static var configuration = CommandConfiguration(commandName: "list")
     @OptionGroup var options: MistDemoArguments
 
-    func run() throws {
+    func runAsync(_ completed: @escaping (Error?) -> Void) {
       let dbConnection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
 
       let client = MKURLSessionClient(session: .shared)
-      let mistdemoURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".mistdemo")
       let manager = try MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
       if let token = options.token {
         manager.webAuthenticationToken = token
@@ -88,20 +95,15 @@ struct MistDemoCommand: ParsableCommand {
         client: client,
         tokenManager: manager
       )
-
-      var todoResult: Result<[TodoListItem], Error>?
-
       let getTodosQuery = FetchRecordQueryRequest(database: .private, query: FetchRecordQuery(query: MKQuery(recordType: TodoListItem.self)))
       database.query(getTodosQuery) { result in
-        todoResult = result
-      }
-
-      while true {
-        RunLoop.main.run(until: .distantPast)
-        if let todoitems = todoResult {
-          dump(todoitems)
+        do {
+          try print(result.get())
+        } catch {
+          completed(error)
           return
         }
+        completed(nil)
       }
     }
   }
