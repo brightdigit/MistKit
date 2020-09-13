@@ -3,8 +3,8 @@ import Foundation
 import MistKit
 import MistKitNIOHTTP1Token
 
-extension Result {
-  init(_ error: Error?) where Success == Void, Failure == Error {
+extension Result where Success == Void, Failure == Error {
+  init(_ error: Error?) {
     if let error = error {
       self = .failure(error)
     } else {
