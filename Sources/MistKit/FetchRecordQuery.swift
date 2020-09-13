@@ -28,10 +28,10 @@ public enum ModifyOperationType: String, Encodable {
   case forceDelete
 }
 
-public struct ModifyOperation: Encodable {
-  public init(operationType: ModifyOperationType, record: MKAnyRecord, desiredKeys: [String]? = nil) {
+public struct ModifyOperation<RecordType: MKQueryRecord>: Encodable {
+  public init(operationType: ModifyOperationType, record: RecordType, desiredKeys: [String]? = nil) {
     self.operationType = operationType
-    self.record = record
+    self.record = MKAnyRecord(record: record)
     self.desiredKeys = desiredKeys
   }
 
@@ -41,12 +41,12 @@ public struct ModifyOperation: Encodable {
   public let desiredKeys: [String]?
 }
 
-public struct ModifyRecordQuery: MKEncodable {
-  public init(operations: [ModifyOperation]) {
+public struct ModifyRecordQuery<RecordType: MKQueryRecord>: MKEncodable {
+  public init(operations: [ModifyOperation<RecordType>]) {
     self.operations = operations
   }
 
-  public let operations: [ModifyOperation]
+  public let operations: [ModifyOperation<RecordType>]
   // public let atomic = true
   public let desiredKeys: [String]? = nil
   public let numbersAsStrings: Bool = true

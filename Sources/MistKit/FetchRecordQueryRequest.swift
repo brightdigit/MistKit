@@ -14,17 +14,17 @@ public struct FetchRecordQueryRequest<QueryType: MKQueryProtocol>: MKRequest {
   }
 }
 
-public struct ModifyRecordQueryRequest: MKRequest {
+public struct ModifyRecordQueryRequest<RecordType: MKQueryRecord>: MKRequest {
   public let database: MKDatabaseType
-  public let data: ModifyRecordQuery
+  public let data: ModifyRecordQuery<RecordType>
 
   public let subpath = ["records", "modify"]
 
   public typealias Response = FetchRecordQueryResponse
 
-  public typealias Data = ModifyRecordQuery
+  public typealias Data = ModifyRecordQuery<RecordType>
 
-  public init(database: MKDatabaseType, query: ModifyRecordQuery) {
+  public init(database: MKDatabaseType, query: ModifyRecordQuery<RecordType>) {
     self.database = database
     data = query
   }

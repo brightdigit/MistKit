@@ -3,5 +3,5 @@
 # `ModifyRecordQueryRequest.Data`
 
 ```swift
-public typealias Data = ModifyRecordQuery
+public typealias Data = ModifyRecordQuery<RecordType>
 ```

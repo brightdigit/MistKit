@@ -7,6 +7,15 @@ extension MKDatabase {
       callback($0.tryFlatmap(recordsTo: RecordType.self))
     }
   }
+
+  public func perform<RecordType: MKQueryRecord>(
+    operations: ModifyRecordQueryRequest<RecordType>,
+    _ callback: @escaping ((Result<[RecordType], Error>) -> Void)
+  ) {
+    perform(request: operations) {
+      callback($0.tryFlatmap(recordsTo: RecordType.self))
+    }
+  }
 }
 
 extension Result {

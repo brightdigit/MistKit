@@ -14,3 +14,12 @@ public func query<RecordType: MKQueryRecord>(
   _ callback: @escaping ((Result<[RecordType], Error>) -> Void)
 )
 ```
+
+### `perform(operations:_:)`
+
+```swift
+public func perform<RecordType: MKQueryRecord>(
+  operations: ModifyRecordQueryRequest<RecordType>,
+  _ callback: @escaping ((Result<[RecordType], Error>) -> Void)
+)
+```

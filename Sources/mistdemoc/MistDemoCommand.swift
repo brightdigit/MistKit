@@ -60,7 +60,7 @@ struct MistDemoCommand: ParsableCommand {
       )
       let item = TodoListItem(title: title)
 
-      let operation = ModifyOperation(operationType: .create, record: MKAnyRecord(record: item), desiredKeys: TodoListItem.desiredKeys)
+      let operation = ModifyOperation(operationType: .create, record: item)
 
       let query = ModifyRecordQuery(operations: [operation])
 

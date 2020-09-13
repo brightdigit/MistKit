@@ -3,7 +3,7 @@
 # `ModifyOperation`
 
 ```swift
-public struct ModifyOperation: Encodable
+public struct ModifyOperation<RecordType: MKQueryRecord>: Encodable
 ```
 
 ## Properties
@@ -29,5 +29,5 @@ public let desiredKeys: [String]?
 ### `init(operationType:record:desiredKeys:)`
 
 ```swift
-public init(operationType: ModifyOperationType, record: MKAnyRecord, desiredKeys: [String]? = nil)
+public init(operationType: ModifyOperationType, record: RecordType, desiredKeys: [String]? = nil)
 ```

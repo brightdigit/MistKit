@@ -3,7 +3,7 @@
 # `ModifyRecordQueryRequest`
 
 ```swift
-public struct ModifyRecordQueryRequest: MKRequest
+public struct ModifyRecordQueryRequest<RecordType: MKQueryRecord>: MKRequest
 ```
 
 ## Properties
@@ -16,7 +16,7 @@ public let database: MKDatabaseType
 ### `data`
 
 ```swift
-public let data: ModifyRecordQuery
+public let data: ModifyRecordQuery<RecordType>
 ```
 
 ### `subpath`
@@ -29,5 +29,5 @@ public let subpath = ["records", "modify"]
 ### `init(database:query:)`
 
 ```swift
-public init(database: MKDatabaseType, query: ModifyRecordQuery)
+public init(database: MKDatabaseType, query: ModifyRecordQuery<RecordType>)
 ```

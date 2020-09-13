@@ -3,14 +3,14 @@
 # `ModifyRecordQuery`
 
 ```swift
-public struct ModifyRecordQuery: MKEncodable
+public struct ModifyRecordQuery<RecordType: MKQueryRecord>: MKEncodable
 ```
 
 ## Properties
 ### `operations`
 
 ```swift
-public let operations: [ModifyOperation]
+public let operations: [ModifyOperation<RecordType>]
 ```
 
 ### `desiredKeys`
@@ -29,5 +29,5 @@ public let numbersAsStrings: Bool = true
 ### `init(operations:)`
 
 ```swift
-public init(operations: [ModifyOperation])
+public init(operations: [ModifyOperation<RecordType>])
 ```
