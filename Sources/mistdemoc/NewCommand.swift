@@ -12,19 +12,12 @@ extension MistDemoCommand {
     var title: String
 
     func runAsync(_ completed: @escaping (Error?) -> Void) {
-      let dbConnection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
-
-      let client = MKURLSessionClient(session: .shared)
+      // setup how to manager your user's web authentication token
       let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
-      if let token = options.token {
-        manager.webAuthenticationToken = token
-      }
-      let database = MKDatabase(
-        connection: dbConnection,
-        factory: MKURLBuilderFactory(),
-        client: client,
-        tokenManager: manager
-      )
+
+      // setup your database manager
+      let database = MKDatabase(options: options, tokenManager: manager)
+
       let item = TodoListItem(title: title)
 
       let operation = ModifyOperation(operationType: .create, record: item)

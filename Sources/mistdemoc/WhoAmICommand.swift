@@ -9,21 +9,13 @@ extension MistDemoCommand {
     @OptionGroup var options: MistDemoArguments
 
     func runAsync(_ completed: @escaping (Error?) -> Void) {
-      let dbConnection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
-
-      let client = MKURLSessionClient(session: .shared)
+      // setup how to manager your user's web authentication token
       let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
-      if let token = options.token {
-        manager.webAuthenticationToken = token
-      }
-      let database = MKDatabase(
-        connection: dbConnection,
-        factory: MKURLBuilderFactory(),
-        client: client,
-        tokenManager: manager
-      )
-      let getTodosQuery = FetchRecordQueryRequest(database: .private, query: FetchRecordQuery(query: MKQuery(recordType: TodoListItem.self)))
-      database.query(getTodosQuery) { result in
+
+      // setup your database manager
+      let database = MKDatabase(options: options, tokenManager: manager)
+
+      database.perform(request: GetCurrentUserIdentityRequest()) { result in
         do {
           try print(result.get().information)
         } catch {
@@ -33,5 +25,22 @@ extension MistDemoCommand {
         completed(nil)
       }
     }
+  }
+}
+
+extension UserIdentityResponse {
+  var information: String {
+    return """
+    userRecordName: \(userRecordName.uuid)
+      emailAddress: \(lookupInfo?.emailAddress ?? "(empty)")
+      phoneNumber: \(lookupInfo?.phoneNumber ?? "(empty)")
+      namePrefix: \(nameComponents?.namePrefix ?? "(empty)")
+      givenName: \(nameComponents?.givenName ?? "(empty)")
+      familyName: \(nameComponents?.familyName ?? "(empty)")
+      nickname: \(nameComponents?.nickname ?? "(empty)")
+      nameSuffix: \(nameComponents?.nameSuffix ?? "(empty)")
+      middleName: \(nameComponents?.middleName ?? "(empty)")
+      phoneticRepresentation: \(nameComponents?.phoneticRepresentation ?? "(empty)")
+    """
   }
 }

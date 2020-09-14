@@ -5,5 +5,5 @@ import MistKitDemo
 import MistKitNIOHTTP1Token
 
 struct MistDemoCommand: ParsableCommand {
-  static var configuration = CommandConfiguration(commandName: "mistdemoc", subcommands: [ListCommand.self, NewCommand.self, FindCommand.self, DeleteCommand.self, RenameCommand.self], defaultSubcommand: ListCommand.self)
+  static var configuration = CommandConfiguration(commandName: "mistdemoc", subcommands: [ListCommand.self, NewCommand.self, FindCommand.self, DeleteCommand.self, RenameCommand.self, WhoAmICommand.self], defaultSubcommand: ListCommand.self)
 }

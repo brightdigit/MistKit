@@ -12,16 +12,11 @@ extension MistDemoCommand {
     var record: Bool = false
 
     func runAsync(_ completed: @escaping (Error?) -> Void) {
-      let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
-
       // setup how to manager your user's web authentication token
       let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
 
       // setup your database manager
-      let database = MKDatabase(
-        connection: connection,
-        tokenManager: manager
-      )
+      let database = MKDatabase(options: options, tokenManager: manager)
 
       if record {
         // create your request to CloudKit

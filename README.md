@@ -188,6 +188,13 @@ _Coming Soon_
 
 ## Fetching Current User Identity (users/caller)
 
+```swift
+let request = GetCurrentUserIdentityRequest()
+database.perform(request: request) { (result) in
+  try? print(result.get().userRecordName)
+}
+```
+
 _Coming Soon_
 
 ## Modifying Records (records/modify)

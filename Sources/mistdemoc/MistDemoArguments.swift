@@ -14,3 +14,20 @@ struct MistDemoArguments: ParsableArguments {
   @Option()
   var token: String?
 }
+
+extension MKDatabase where HttpClient == MKURLSessionClient {
+  init(options: MistDemoArguments, tokenManager: MKTokenManagerProtocol) {
+    // setup your connection to CloudKit
+    let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+
+    // use the webAuthenticationToken is passed
+    if let token = options.token {
+      tokenManager.webAuthenticationToken = token
+    }
+
+    self.init(
+      connection: connection,
+      tokenManager: tokenManager
+    )
+  }
+}
