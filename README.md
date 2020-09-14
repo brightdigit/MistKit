@@ -171,19 +171,19 @@ _Coming Soon_
 - [ ] Location Field Types
 - [ ] List Field Types
 
-# 0.6.0
+## 0.6.0
 
 - [ ] Name Component Types
 - [ ] Discovering User Identities (POST users/discover)
 - [ ] Discovering All User Identities (GET users/discover)
 
-# 0.8.0
+## 0.8.0
 
 - [ ] Uploading Assets (assets/upload)
 - [ ] Referencing Existing Assets (assets/rereference)
 - [ ] Fetching Records Using a Query (records/query) w/ basic filtering
 
-# 0.9.0
+## 0.9.0
 
 - [ ] Fetching Contacts (users/lookup/contacts)
 - [ ] Fetching Users by Email (users/lookup/email)
