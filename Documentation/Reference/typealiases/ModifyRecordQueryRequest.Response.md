@@ -3,5 +3,5 @@
 # `ModifyRecordQueryRequest.Response`
 
 ```swift
-public typealias Response = FetchRecordQueryResponse
+public typealias Response = ModifiedRecordQueryResponse
 ```

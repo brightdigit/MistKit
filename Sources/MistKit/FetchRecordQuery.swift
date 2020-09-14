@@ -11,6 +11,22 @@ public struct FetchRecordQuery<QueryType: MKQueryProtocol>: MKEncodable {
   }
 }
 
+public struct LookupRecord: MKEncodable {
+  public let recordName: UUID
+  public let desiredKeys: [String]? = nil
+}
+
+public struct LookupRecordQuery<RecordType: MKQueryRecord>: MKEncodable {
+  public let records: [LookupRecord]
+  public let desiredKeys: [String]?
+  public let numbersAsStrings: Bool = true
+
+  public init(_: RecordType.Type, recordNames: [UUID]) {
+    records = recordNames.map(LookupRecord.init(recordName:))
+    desiredKeys = RecordType.desiredKeys
+  }
+}
+
 public enum ModifyOperationType: String, Encodable {
   // Create a new record. This operation fails if a record with the same record name already exists.
   case create

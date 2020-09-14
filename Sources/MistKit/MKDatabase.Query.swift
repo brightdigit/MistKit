@@ -1,3 +1,9 @@
+import Foundation
+public struct ModifiedRecordQueryResult<RecordType: MKQueryRecord> {
+  public let deleted: [UUID]
+  public let updated: [RecordType]
+}
+
 extension MKDatabase {
   public func query<RecordType: MKQueryRecord>(
     _ query: FetchRecordQueryRequest<MKQuery<RecordType>>,
@@ -10,9 +16,35 @@ extension MKDatabase {
 
   public func perform<RecordType: MKQueryRecord>(
     operations: ModifyRecordQueryRequest<RecordType>,
+    _ callback: @escaping ((Result<ModifiedRecordQueryResult<RecordType>, Error>) -> Void)
+  ) {
+    perform(request: operations) { response in
+      response.map { response in
+        var updated = [RecordType]()
+        var deleted = [UUID]()
+        for record in response.records {
+          switch record {
+          case let .deleted(recordName):
+            deleted.append(recordName)
+          case let .updated(record):
+            do {
+              try updated.append(RecordType(record: record))
+            } catch {
+              callback(.failure(error))
+              return
+            }
+          }
+        }
+        callback(.success(.init(deleted: deleted, updated: updated)))
+      }
+    }
+  }
+
+  public func lookup<RecordType: MKQueryRecord>(
+    _ lookup: LookupRecordQueryRequest<RecordType>,
     _ callback: @escaping ((Result<[RecordType], Error>) -> Void)
   ) {
-    perform(request: operations) {
+    perform(request: lookup) {
       callback($0.tryFlatmap(recordsTo: RecordType.self))
     }
   }
