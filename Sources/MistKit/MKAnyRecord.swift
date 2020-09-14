@@ -2,36 +2,50 @@ import Foundation
 
 public struct MKAnyRecord: Codable {
   public let recordType: String
-  public let recordName: UUID
-  public let fields: [String: MKField]
+  public let recordName: UUID?
+  public let recordChangeTag: String?
+  public let fields: [String: MKValue]
+
+  internal init(recordType: String, recordName: UUID) {
+    self.recordType = recordType
+    self.recordName = recordName
+    recordChangeTag = nil
+    fields = [String: MKValue]()
+  }
+
+  public init<RecordType: MKQueryRecord>(record: RecordType) {
+    recordType = RecordType.recordType
+    recordName = record.recordName
+    recordChangeTag = record.recordChangeTag
+    fields = record.fields
+  }
 }
 
 public extension MKAnyRecord {
-  func uuid(fromKey key: String) throws -> UUID {
-    let value = try string(fromKey: key)
-
-    guard let uuid = Data(base64Encoded: value).flatMap(UUID.init(data:)) else {
-      throw MKDecodingError.invalidData(value)
+  func data(fromKey key: String) throws -> Data {
+    switch fields[key] {
+    case let .data(value):
+      return value
+    default:
+      throw MKDecodingError.invalidKey(key)
     }
-
-    return uuid
   }
 
   func string(fromKey key: String) throws -> String {
-    guard let field = fields[key] else {
-      throw MKDecodingError.missingKey(key)
+    switch fields[key] {
+    case let .string(value):
+      return value
+    default:
+      throw MKDecodingError.invalidKey(key)
     }
-
-    return field.value
   }
 
-  func integer(fromKey key: String) throws -> Int {
-    let value = try string(fromKey: key)
-
-    guard let integer = Int(value) else {
-      throw MKDecodingError.invalidData(value)
+  func integer(fromKey key: String) throws -> Int64 {
+    switch fields[key] {
+    case let .integer(value):
+      return value
+    default:
+      throw MKDecodingError.invalidKey(key)
     }
-
-    return integer
   }
 }

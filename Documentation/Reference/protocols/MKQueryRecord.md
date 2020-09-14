@@ -10,7 +10,19 @@ public protocol MKQueryRecord
 ### `recordName`
 
 ```swift
-var recordName: UUID
+var recordName: UUID?
+```
+
+### `recordChangeTag`
+
+```swift
+var recordChangeTag: String?
+```
+
+### `fields`
+
+```swift
+var fields: [String: MKValue]
 ```
 
 ## Methods

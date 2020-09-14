@@ -7,14 +7,8 @@ public enum MKDecodingError: Error
 ```
 
 ## Cases
-### `missingKey(_:)`
+### `invalidKey(_:)`
 
 ```swift
-case missingKey(String)
-```
-
-### `invalidData(_:)`
-
-```swift
-case invalidData(String)
+case invalidKey(String)
 ```

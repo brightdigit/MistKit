@@ -7,16 +7,10 @@ public struct MKDatabase<HttpClient: MKHttpClient>
 ```
 
 ## Methods
-### `setWebAuthenticationToken(_:)`
-
-```swift
-public nonmutating func setWebAuthenticationToken(_ newValue: String)
-```
-
 ### `init(connection:factory:client:tokenManager:)`
 
 ```swift
-public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManager? = nil)
+public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManagerProtocol? = nil)
 ```
 
 ### `perform(request:returnFailedAuthentication:_:)`

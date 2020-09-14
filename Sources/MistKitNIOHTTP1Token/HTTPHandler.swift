@@ -168,8 +168,6 @@ public final class HTTPHandler: ChannelInboundHandler {
     //    try! threadPool.syncShutdownGracefully()
     //  }
 
-    print("htdocs = \(htdocs)")
-
     let channel = try { () -> Channel in
       switch bindTarget {
       case let .ipAddress(host, port):
@@ -190,7 +188,6 @@ public final class HTTPHandler: ChannelInboundHandler {
       }
       localAddress = "\(channelLocalAddress)"
     }
-    print("Server started and listening on \(localAddress), htdocs path \(htdocs)")
 
     channel.closeFuture.whenComplete { _ in
       //    let actual : Result<String, Error> = result.flatMap { _ in

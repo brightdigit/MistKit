@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
   name: "MistKit",
+  platforms: [.macOS(.v10_15)],
   products: [
     // Products define the executables and libraries a package produces, and make them visible to other packages.
     .library(
@@ -15,12 +16,19 @@ let package = Package(
       name: "MistKitNIOHTTP1Token",
       targets: ["MistKitNIOHTTP1Token"]
     ),
-    .executable(name: "mist", targets: ["mist"])
+    .library(
+      name: "MistKitVapor",
+      targets: ["MistKitVapor"]
+    ),
+    .executable(name: "mistdemoc", targets: ["mistdemoc"]),
+    .executable(name: "mistdemod", targets: ["mistdemod"])
   ],
   dependencies: [
     // Dependencies declare other packages that this package depends on.
     // .package(url: /* package url */, from: "1.0.0"),
     .package(url: "https://github.com/apple/swift-nio.git", from: "2.20.0"),
+    .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
+    .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
     // dev
     .package(url: "https://github.com/shibapm/Komondor", from: "1.0.5"),
     .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1")
@@ -38,7 +46,15 @@ let package = Package(
               .product(name: "NIO", package: "swift-nio"),
               .product(name: "NIOHTTP1", package: "swift-nio")
             ]),
-    .target(name: "mist", dependencies: ["MistKit", "MistKitNIOHTTP1Token"]),
+    .target(name: "MistKitVapor",
+            dependencies: [
+              "MistKit", .product(name: "Vapor", package: "vapor")
+            ]),
+    .target(name: "mistdemoc", dependencies: ["MistKit", "MistKitNIOHTTP1Token", "MistKitDemo",
+                                              .product(name: "ArgumentParser", package: "swift-argument-parser")]),
+    .target(name: "mistdemod", dependencies: ["MistKit", "MistKitVapor", "MistKitDemo", .product(name: "Vapor", package: "vapor")]),
+    .target(name: "MistKitDemo",
+            dependencies: ["MistKit"]),
     .testTarget(
       name: "MistKitTests",
       dependencies: ["MistKit"]

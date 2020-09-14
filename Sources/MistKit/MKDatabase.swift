@@ -1,11 +1,4 @@
 import Foundation
-//
-// @available(*, deprecated)
-// public enum MKResult<Success, Failure: Error> {
-//  case success(Success)
-//  case authenticationRequired(MKAuthenticationRedirect)
-//  case failure(Failure)
-// }
 
 public struct MKDatabase<HttpClient: MKHttpClient> {
   let urlBuilder: MKURLBuilder
@@ -13,11 +6,7 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
   let decoder: MKDecoder = JSONDecoder()
   let client: HttpClient
 
-  public nonmutating func setWebAuthenticationToken(_ newValue: String) {
-    urlBuilder.tokenManager?.webAuthenticationToken = newValue
-  }
-
-  public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManager? = nil) {
+  public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManagerProtocol? = nil) {
     let factory = factory ?? MKURLBuilderFactory()
     urlBuilder = factory.builder(forConnection: connection, withTokenManager: tokenManager)
     self.client = client
@@ -33,6 +22,11 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
     do {
       url = try urlBuilder.url(withPathComponents: request.relativePath)
       data = try encoder.optionalData(from: request.data)
+      #if DEBUG
+        if let dumpData = data {
+          print(String(data: dumpData, encoding: .utf8)!)
+        }
+      #endif
     } catch {
       callback(.failure(error))
       return
@@ -47,6 +41,9 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
         guard let data = response.body else {
           return .failure(MKError.noDataFromStatus(response.status))
         }
+        #if DEBUG
+          print(String(data: data, encoding: .utf8)!)
+        #endif
         return .success(data)
       }
       let newResult: Result<ResponseType, Error>

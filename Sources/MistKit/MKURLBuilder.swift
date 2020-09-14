@@ -1,7 +1,7 @@
 import Foundation
 
 public class MKURLBuilder {
-  public init(tokenEncoder: MKTokenEncoder?, connection: MKDatabaseConnection, tokenManager: MKTokenManager? = nil) {
+  public init(tokenEncoder: MKTokenEncoder?, connection: MKDatabaseConnection, tokenManager: MKTokenManagerProtocol? = nil) {
     self.tokenEncoder = tokenEncoder
     self.connection = connection
     self.tokenManager = tokenManager
@@ -9,7 +9,7 @@ public class MKURLBuilder {
 
   public let tokenEncoder: MKTokenEncoder?
   public let connection: MKDatabaseConnection
-  public let tokenManager: MKTokenManager?
+  public let tokenManager: MKTokenManagerProtocol?
 
   public func url(withPathComponents pathComponents: [String]) throws -> URL {
     var url = connection.url

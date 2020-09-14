@@ -6,10 +6,10 @@ public extension MKAnyRecord
 ```
 
 ## Methods
-### `uuid(fromKey:)`
+### `data(fromKey:)`
 
 ```swift
-func uuid(fromKey key: String) throws -> UUID
+func data(fromKey key: String) throws -> Data
 ```
 
 ### `string(fromKey:)`
@@ -21,5 +21,5 @@ func string(fromKey key: String) throws -> String
 ### `integer(fromKey:)`
 
 ```swift
-func integer(fromKey key: String) throws -> Int
+func integer(fromKey key: String) throws -> Int64
 ```
