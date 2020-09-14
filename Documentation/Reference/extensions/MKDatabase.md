@@ -36,5 +36,5 @@ public func lookup<RecordType: MKQueryRecord>(
 ### `init(connection:factory:tokenManager:session:)`
 
 ```swift
-init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, tokenManager: MKTokenManagerProtocol? = nil, session: URLSession? = nil) where HttpClient == MKURLSessionClient
+init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, tokenManager: MKTokenManagerProtocol? = nil, session: URLSession? = nil)
 ```
