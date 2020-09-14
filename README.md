@@ -30,6 +30,7 @@ Access CloudKit outside of the CloudKit framework via Web Services. Why?
 * Building a Command Line Application
 * Required for Server-Side Integration (via Vapor)
 * Access via AWS Lambda 
+* Migrating Data from/to CloudKit
 
 ... and more
 
@@ -79,6 +80,8 @@ Here's what's currently implemented with this library:
 
 # Requirements 
 
+_Coming Soon_
+
 # Installation
 
 ```swift    
@@ -104,48 +107,115 @@ let package = Package(
 
 ## Composing Web Service Requests
 
-## Modifying Records (records/modify)
+_Coming Soon_
+
+### Setting Up Authenticated Requests
+
+_Coming Soon_
 
 ## Fetching Records Using a Query (records/query)
 
+### Setting Up Queries
+
+_Coming Soon_
+
+### Strong-Typed Queries
+
+_Coming Soon_
+
+### Filters 
+
+_Coming Soon_
+
 ## Fetching Records by Record Name (records/lookup)
 
-## Fetching Current User (users/current)
+_Coming Soon_
+
+## Fetching Current User Identity (users/caller)
+
+_Coming Soon_
+
+## Modifying Records (records/modify)
+
+### Creating Records
+
+### Deleting Records
+
+### Updating Records
+
+## Further Code Documentation
 
 [Documentation Here](/docs/README.md)
 
 # Roadmap
 
+<!-- https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html#//apple_ref/doc/uid/TP40015240-CH41-SW1 -->
+
+## 0.1.0
+
+- [x] Composing Web Service Requests
+- [x] Modifying Records (records/modify)
+- [x] Fetching Records Using a Query (records/query)
+- [x] Fetching Records by Record Name (records/lookup)
+- [x] Fetching Current User Identity (users/caller)
+
+## 0.2.0 
+
 - [ ] Vapor Token Client
 - [ ] Vapor URL Client
 - [ ] Swift NIO URL Client
 
+## 0.4.0 
+
+- [ ] Date Field Types
+- [ ] Location Field Types
+- [ ] List Field Types
+
+# 0.6.0
+
+- [ ] Name Component Types
+- [ ] Discovering User Identities (POST users/discover)
+- [ ] Discovering All User Identities (GET users/discover)
+
+# 0.8.0
+
+- [ ] Uploading Assets (assets/upload)
+- [ ] Referencing Existing Assets (assets/rereference)
+- [ ] Fetching Records Using a Query (records/query) w/ basic filtering
+
+# 0.9.0
+
+- [ ] Fetching Contacts (users/lookup/contacts)
+- [ ] Fetching Users by Email (users/lookup/email)
+- [ ] Fetching Users by Record Name (users/lookup/id)
+
+## v1.0.0
+
+- [ ] Reference Field Types
+- [ ] Error Codes
+- [ ] Handle Data Size Limits
+
+## v1.x.x+
+
 - [ ] Fetching Record Changes (records/changes)
 - [ ] Fetching Record Information (records/resolve)
 - [ ] Accepting Share Records (records/accept)
-- [ ] Uploading Assets (assets/upload)
-- [ ] Referencing Existing Assets (assets/rereference)
 - [ ] Fetching Zones (zones/list)
 - [ ] Fetching Zones by Identifier (zones/lookup)
 - [ ] Modifying Zones (zones/modify)
 - [ ] Fetching Database Changes (changes/database)
 - [ ] Fetching Record Zone Changes (changes/zone)
 - [ ] Fetching Zone Changes (zones/changes)
-- [ ] Fetching Current User Identity (users/caller)
-- [ ] Discovering User Identities (POST users/discover)
-- [ ] Discovering All User Identities (GET users/discover)
-- [ ] Fetching Contacts (users/lookup/contacts)
-- [ ] Fetching Users by Email (users/lookup/email)
-- [ ] Fetching Users by Record Name (users/lookup/id)
 - [ ] Fetching Subscriptions (subscriptions/list)
 - [ ] Fetching Subscriptions by Identifier (subscriptions/lookup)
 - [ ] Modifying Subscriptions (subscriptions/modify)
 - [ ] Creating APNs Tokens (tokens/create)
 - [ ] Registering Tokens (tokens/register)
-- [ ] Types and Dictionaries
-- [ ] Error Codes
-- [ ] Data Size Limits
+
+## Not Planned
+
+- [ ] Fetching Current User (users/current) _deprecated_
 
 # License 
 
-This code is distributed under the MIT license. See the LICENSE file for more info.
+This code is distributed under the MIT license. See the [LICENSE](LICENSE.md) file for more info.
