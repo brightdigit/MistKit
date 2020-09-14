@@ -25,6 +25,7 @@ extension MistDemoCommand {
       let query = ModifyRecordQuery(operations: [operation])
 
       let request = ModifyRecordQueryRequest(database: .private, query: query)
+
       database.perform(operations: request) { result in
         do {
           try print(result.get().updated.information)

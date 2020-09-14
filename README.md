@@ -112,6 +112,18 @@ _Coming Soon_
 ```swift
 let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
 
+// setup your database manager
+let database = MKDatabase(
+  connection: connection,
+  tokenManager: manager
+)
+```
+
+### Setting Up Authenticated Requests
+
+```swift
+let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+
 // setup how to manager your user's web authentication token
 let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
 
@@ -121,8 +133,6 @@ let database = MKDatabase(
   tokenManager: manager
 )
 ```
-
-### Setting Up Authenticated Requests
 
 _Coming Soon_
 
@@ -184,6 +194,18 @@ _Coming Soon_
 
 ## Fetching Records by Record Name (records/lookup)
 
+```swift
+let recordNames : [UUID] = [...]
+
+let query = LookupRecordQuery(TodoListItem.self, recordNames: recordNames)
+
+let request = LookupRecordQueryRequest(database: .private, query: query)
+
+database.lookup(request) { result in
+  try? print(result.get().count)
+}
+```
+
 _Coming Soon_
 
 ## Fetching Current User Identity (users/caller)
@@ -201,9 +223,98 @@ _Coming Soon_
 
 ### Creating Records
 
+```swift
+let item = TodoListItem(title: title)
+
+let operation = ModifyOperation(operationType: .create, record: item)
+
+let query = ModifyRecordQuery(operations: [operation])
+
+let request = ModifyRecordQueryRequest(database: .private, query: query)
+
+database.perform(operations: request) { result in
+  do {
+    try print(result.get().updated.information)
+  } catch {
+    completed(error)
+    return
+  }
+  completed(nil)
+}
+```
+
 ### Deleting Records
 
+```swift
+let query = LookupRecordQuery(TodoListItem.self, recordNames: recordNames)
+
+let request = LookupRecordQueryRequest(database: .private, query: query)
+
+database.lookup(request) { result in
+  let items: [TodoListItem]
+  
+  do {
+    items = try result.get()
+  } catch {
+    completed(error)
+    return
+  }
+  
+  let operations = items.map {
+    ModifyOperation(operationType: .delete, record: $0)
+  }
+
+  let query = ModifyRecordQuery(operations: operations)
+
+  let request = ModifyRecordQueryRequest(database: .private, query: query)
+  
+  database.perform(operations: request) { result in
+    do {
+      try print("Deleted \(result.get().deleted.count) items.")
+    } catch {
+      completed(error)
+      return
+    }
+    completed(nil)
+  }
+}
+```
+
 ### Updating Records
+
+```swift
+let query = LookupRecordQuery(TodoListItem.self, recordNames: [recordName])
+
+let request = LookupRecordQueryRequest(database: .private, query: query)
+
+database.lookup(request) { result in
+  let items: [TodoListItem]
+  do {
+    items = try result.get()
+
+  } catch {
+    completed(error)
+    return
+  }
+  let operations = items.map { (item) -> ModifyOperation<TodoListItem> in
+    item.title = self.newTitle
+    return ModifyOperation(operationType: .update, record: item)
+  }
+
+  let query = ModifyRecordQuery(operations: operations)
+
+  let request = ModifyRecordQueryRequest(database: .private, query: query)
+  database.perform(operations: request) { result in
+    do {
+      try print("Updated \(result.get().updated.count) items.")
+    } catch {
+      completed(error)
+      return
+    }
+    completed(nil)
+  }
+}
+```
 
 ## Further Code Documentation
 

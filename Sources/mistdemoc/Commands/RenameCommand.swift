@@ -23,7 +23,9 @@ extension MistDemoCommand {
       let database = MKDatabase(options: options, tokenManager: manager)
 
       let query = LookupRecordQuery(TodoListItem.self, recordNames: [recordName])
+
       let request = LookupRecordQueryRequest(database: .private, query: query)
+
       database.lookup(request) { result in
         let items: [TodoListItem]
         do {
