@@ -22,7 +22,6 @@ extension MistDemoCommand {
       }
       let database = MKDatabase(
         connection: dbConnection,
-        factory: MKURLBuilderFactory(),
         client: client,
         tokenManager: manager
       )
