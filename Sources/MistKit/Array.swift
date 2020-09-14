@@ -7,11 +7,12 @@ public extension Array where Element == UInt8 {
   }
 }
 
-public extension Array {
-  var only: Element? {
-    guard count == 1 else {
-      return nil
-    }
-    return first
-  }
-}
+//
+// public extension Array {
+//  var only: Element? {
+//    guard count == 1 else {
+//      return nil
+//    }
+//    return first
+//  }
+// }

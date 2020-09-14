@@ -19,7 +19,8 @@ extension MKDatabase {
     _ callback: @escaping ((Result<ModifiedRecordQueryResult<RecordType>, Error>) -> Void)
   ) {
     perform(request: operations) { response in
-      response.map { response in
+      let result: Result<ModifiedRecordQueryResult<RecordType>, Error>
+      result = response.flatMap { response in
         var updated = [RecordType]()
         var deleted = [UUID]()
         for record in response.records {
@@ -30,13 +31,13 @@ extension MKDatabase {
             do {
               try updated.append(RecordType(record: record))
             } catch {
-              callback(.failure(error))
-              return
+              return .failure(error)
             }
           }
         }
-        callback(.success(.init(deleted: deleted, updated: updated)))
+        return .success(.init(deleted: deleted, updated: updated))
       }
+      callback(result)
     }
   }
 
