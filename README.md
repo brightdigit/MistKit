@@ -4,6 +4,8 @@
 </p>
 <h1 align="center"> MistKit </h1>
 
+Swift package for accessing CloudKit for server-side or command-line Swift development.
+
 [![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
 [![Twitter](https://img.shields.io/badge/twitter-@brightdigit-blue.svg?style=flat)](http://twitter.com/brightdigit)
 ![GitHub](https://img.shields.io/github/license/brightdigit/MistKit)
@@ -21,7 +23,7 @@
 
 [![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
 
----
+# Introduction
 
 Access CloudKit outside of the CloudKit framework via Web Services. Why?
 
@@ -31,45 +33,93 @@ Access CloudKit outside of the CloudKit framework via Web Services. Why?
 
 ... and more
 
-```
+```swift
+// Example for pulling a todo list from CloudKit
 import MistKit
+import MistKitNIOHTTP1Token
 
-let token = "***"
-
-let apiKey = "***"
-let container = "iCloud.com.brightdigit.MistDemo"
-
-let dbConnection = MKDatabaseConnection(
-  container: container, 
-  apiToken: apiKey, 
+// setup your connection to CloudKit
+let connection = MKDatabaseConnection(
+  container: "iCloud.com.brightdigit.MistDemo", 
+  apiToken: "****", 
   environment: .development
 )
 
-let client = MKURLSessionClient(session: .shared)
+// setup how to manager your user's web authentication token 
+let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
+
+// setup your database manager
 let database = MKDatabase(
-  connection: dbConnection,
-  factory: MKURLBuilderFactory(),
-  client: client,
-  authenticationToken: token
+  connection: connection,
+  tokenManager: manager
 )
 
-var recordsResult: Result<[TodoListItem], Error>?
-let getTodosQuery = FetchRecordQueryRequest(
-  database: .private,
-  query: FetchRecordQuery(query: MKQuery(recordType: TodoListItem.self))
-)
+// create your request to CloudKit
+let query = MKQuery(recordType: TodoListItem.self)
 
-database.query(getTodosQuery) { result in
+let request = FetchRecordQueryRequest(
+  database: .private, 
+  query: FetchRecordQuery(query: query))
+
+// handle the result
+database.query(request) { result in
   dump(result)
 }
 ```
 
 # Features 
 
+Here's what's currently implemented with this library:
+
 - [x] Composing Web Service Requests
-- [ ] Modifying Records (records/modify)
+- [x] Modifying Records (records/modify)
 - [x] Fetching Records Using a Query (records/query)
-- [ ] Fetching Records by Record Name (records/lookup)
+- [x] Fetching Records by Record Name (records/lookup)
+- [x] Fetching Current User (users/current)
+
+# Requirements 
+
+# Installation
+
+```swift    
+let package = Package(
+  ...
+  dependencies: [
+      // Dependencies declare other packages that this package depends on.
+      // .package(url: /* package url */, from: "1.0.0"),
+    .package(url: "https://github.com/brightdigit/MistKit", .branch("main")
+  ],
+  targets: [
+      // Targets are the basic building blocks of a package. A target can define a module or a test suite.
+      // Targets can depend on other targets in this package, and on products in packages this package depends on.
+      .target(
+          name: "YourTarget",
+          dependencies: ["MistKit","MistKitNIOHTTP1Token", ...]),
+      ...
+  ]
+)
+```
+
+# Usage 
+
+## Composing Web Service Requests
+
+## Modifying Records (records/modify)
+
+## Fetching Records Using a Query (records/query)
+
+## Fetching Records by Record Name (records/lookup)
+
+## Fetching Current User (users/current)
+
+[Documentation Here](/docs/README.md)
+
+# Roadmap
+
+- [ ] Vapor Token Client
+- [ ] Vapor URL Client
+- [ ] Swift NIO URL Client
+
 - [ ] Fetching Record Changes (records/changes)
 - [ ] Fetching Record Information (records/resolve)
 - [ ] Accepting Share Records (records/accept)
@@ -84,7 +134,6 @@ database.query(getTodosQuery) { result in
 - [ ] Fetching Current User Identity (users/caller)
 - [ ] Discovering User Identities (POST users/discover)
 - [ ] Discovering All User Identities (GET users/discover)
-- [x] Fetching Current User (users/current)
 - [ ] Fetching Contacts (users/lookup/contacts)
 - [ ] Fetching Users by Email (users/lookup/email)
 - [ ] Fetching Users by Record Name (users/lookup/id)
@@ -97,6 +146,6 @@ database.query(getTodosQuery) { result in
 - [ ] Error Codes
 - [ ] Data Size Limits
 
-# Requirements 
+# License 
 
-[Documentation Here](/docs/README.md)
+This code is distributed under the MIT license. See the LICENSE file for more info.
