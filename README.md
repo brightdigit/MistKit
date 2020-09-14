@@ -212,6 +212,8 @@ _Coming Soon_
 - [ ] Creating APNs Tokens (tokens/create)
 - [ ] Registering Tokens (tokens/register)
 
+<!-- Explain Demo Application -->
+
 ## Not Planned
 
 - [ ] Fetching Current User (users/current) _deprecated_
