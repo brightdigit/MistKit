@@ -76,3 +76,11 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
     }
   }
 }
+
+public extension MKDatabase {
+  init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, tokenManager: MKTokenManagerProtocol? = nil, session: URLSession? = nil) where HttpClient == MKURLSessionClient {
+    let factory = factory ?? MKURLBuilderFactory()
+    urlBuilder = factory.builder(forConnection: connection, withTokenManager: tokenManager)
+    client = MKURLSessionClient(session: session ?? URLSession.shared)
+  }
+}

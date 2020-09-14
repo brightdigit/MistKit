@@ -8,29 +8,60 @@ extension MistDemoCommand {
     static var configuration = CommandConfiguration(commandName: "list")
     @OptionGroup var options: MistDemoArguments
 
-    func runAsync(_ completed: @escaping (Error?) -> Void) {
-      let dbConnection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+    @Flag
+    var record: Bool = false
 
-      let client = MKURLSessionClient(session: .shared)
+    func runAsync(_ completed: @escaping (Error?) -> Void) {
+      let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+
+      // setup how to manager your user's web authentication token
       let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
-      if let token = options.token {
-        manager.webAuthenticationToken = token
-      }
+
+      // setup your database manager
       let database = MKDatabase(
-        connection: dbConnection,
-        factory: MKURLBuilderFactory(),
-        client: client,
+        connection: connection,
         tokenManager: manager
       )
-      let getTodosQuery = FetchRecordQueryRequest(database: .private, query: FetchRecordQuery(query: MKQuery(recordType: TodoListItem.self)))
-      database.query(getTodosQuery) { result in
-        do {
-          try print(result.get().information)
-        } catch {
-          completed(error)
-          return
+
+      if record {
+        // create your request to CloudKit
+        let query = MKAnyQuery(recordType: TodoListItem.recordType)
+
+        let request = FetchRecordQueryRequest(
+          database: .private,
+          query: FetchRecordQuery(query: query)
+        )
+
+        // handle the result
+        database.perform(request: request) { result in
+          do {
+            try print(result.get().records.information)
+          } catch {
+            completed(error)
+            return
+          }
+          completed(nil)
         }
-        completed(nil)
+
+      } else {
+        // create your request to CloudKit
+        let query = MKQuery(recordType: TodoListItem.self)
+
+        let request = FetchRecordQueryRequest(
+          database: .private,
+          query: FetchRecordQuery(query: query)
+        )
+
+        // handle the result
+        database.query(request) { result in
+          do {
+            try print(result.get().information)
+          } catch {
+            completed(error)
+            return
+          }
+          completed(nil)
+        }
       }
     }
   }
