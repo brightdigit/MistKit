@@ -20,7 +20,7 @@ workflows:
             swift run swiftformat --lint . && swift run swiftlint
             swift build
             swift test  --enable-code-coverage
-            
+
             xcrun llvm-cov export -format="lcov"
             .build/debug/${PACKAGE_NAME}PackageTests.xctest/Contents/MacOS/${PACKAGE_NAME}PackageTests
             -instr-profile .build/debug/codecov/default.profdata > info.lcov
