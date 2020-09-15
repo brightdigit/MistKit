@@ -13,15 +13,22 @@ workflows:
         - content: >-
             #!/usr/bin/env bash
             # fail if any commands fails
+            
             set -e
+            
             # debug log
+            
             set -x
 
             swift run swiftformat --lint . && swift run swiftlint
+            
             swift build
+            
             swift test  --enable-code-coverage
+            
 
             xcrun llvm-cov export -format="lcov" .build/debug/${{ env.PACKAGE_NAME }}PackageTests.xctest/Contents/MacOS/${{ env.PACKAGE_NAME }}PackageTests -instr-profile .build/debug/codecov/default.profdata > info.lcov
+            
             bash <(curl https://codecov.io/bash) -F bitrise -F macOS -n $BITRISE_BUILD_NUMBER
 trigger_map:
 - push_branch: '*'
