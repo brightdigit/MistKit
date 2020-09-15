@@ -461,4 +461,4 @@ database.lookup(request) { result in
 
 # License 
 
-This code is distributed under the MIT license. See the [LICENSE](LICENSE.md) file for more info.
+This code is distributed under the MIT license. See the [LICENSE](LICENSE) file for more info.
