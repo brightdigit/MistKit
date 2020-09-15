@@ -49,9 +49,6 @@ jobs:
           name: Run tests
           command: swift test --enable-test-discovery --enable-code-coverage
       - run:
-          name: Verify Valid Swift Package
-          command: curl -s https://raw.githubusercontent.com/daveverwer/SwiftPMLibrary/master/script.sh | bash -s -- mine
-      - run:
           name: Prepare Code Coverage
           command: llvm-cov export -format="lcov" .build/x86_64-unknown-linux-gnu/debug/${PACKAGE_NAME}PackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
       - codecov/upload:
