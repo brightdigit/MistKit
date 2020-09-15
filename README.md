@@ -27,10 +27,10 @@ Swift package for accessing CloudKit for server-side or command-line Swift devel
 
 Access CloudKit outside of the CloudKit framework via Web Services. Why?
 
-* Building a Command Line Application
-* Required for Server-Side Integration (via Vapor)
-* Access via AWS Lambda 
-* Migrating Data from/to CloudKit
+* Building a **Command Line Application**
+* Required for **Server-Side Integration (via Vapor)**
+* Access via **AWS Lambda**
+* **Migrating Data from/to CloudKit**
 
 ... and more
 
@@ -78,26 +78,22 @@ Here's what's currently implemented with this library:
 - [x] Fetching Records by Record Name (records/lookup)
 - [x] Fetching Current User (users/current)
 
-# Requirements 
-
-_Coming Soon_
-
 # Installation
+
+Swift Package Manager is Apple's decentralized dependency manager to integrate libraries to your Swift projects. It is now fully integrated with Xcode 11
+
+To integrate into your project using SPM, specify it in your Package.swift file:
 
 ```swift    
 let package = Package(
   ...
   dependencies: [
-      // Dependencies declare other packages that this package depends on.
-      // .package(url: /* package url */, from: "1.0.0"),
     .package(url: "https://github.com/brightdigit/MistKit", .branch("main")
   ],
   targets: [
-      // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-      // Targets can depend on other targets in this package, and on products in packages this package depends on.
       .target(
           name: "YourTarget",
-          dependencies: ["MistKit","MistKitNIOHTTP1Token", ...]),
+          dependencies: ["MistKit", ...]),
       ...
   ]
 )
@@ -107,10 +103,19 @@ let package = Package(
 
 ## Composing Web Service Requests
 
-_Coming Soon_
+MistKit requires a connection be setup with the:
+
+* `container` name in the format of `iCloud.com.*.*` such as `iCloud.com.brightdigit.MistDemo`
+* `apiToken` which can be [created through the CloudKit Dashboard](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW1)
+* `environment` which can be either `development` or `production`
+
+Here's an example of how to setup an `MKDatabase`:
 
 ```swift
-let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+let connection = MKDatabaseConnection(
+  container: options.container, 
+  apiToken: options.apiKey, 
+  environment: options.environment)
 
 // setup your database manager
 let database = MKDatabase(
@@ -118,14 +123,45 @@ let database = MKDatabase(
   tokenManager: manager
 )
 ```
+
+Before getting into make an actual request, you should probably know how to make authenticated request for `private` or `shared` databases.
 
 ### Setting Up Authenticated Requests
 
+In order to have access to `private` or `shared` databases, the Cloud Web Services API require a web authentication token. In order for the MistKit to obtain this, an http server is setup to listen to the callback from CloudKit.
+
+Therefore when you setup your API token, make sure to setup a url for the Sign-In Callback:
+
+![CloudKit Dashboard](Assets/CloudKitDB-APIToken.png)
+
+Once that's setup, you can setup a `MKTokenManager`.
+
+![CloudKit Dashboard Callback](Assets/CloudKitDB-APIToken-Callback.png)
+
+#### Managing Web Authentication Tokens
+
+`MKTokenManager` requires two components:
+
+* `MKTokenStorage` stores the token for later
+  * `MKFileStorage` stores the token as a simple text file
+  * `MKUserDefaultsStorage` stores the token using `UserDefaults`
+* `MKTokenClient` sets up an http server for listening for the web authentication token
+  * `MKNIOHTTP1TokenClient` sets up an http server using SwiftNIO
+
 ```swift
-let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+let connection = MKDatabaseConnection(
+  container: options.container, 
+  apiToken: options.apiKey, 
+  environment: options.environment
+ )
 
 // setup how to manager your user's web authentication token
-let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
+let manager = MKTokenManager(
+  // store the token in UserDefaults
+  storage: MKUserDefaultsStorage(), 
+  // setup an http server at localhost for port 7000
+  client: MKNIOHTTP1TokenClient(bindTo: .ipAddress(host: "127.0.0.1", port: 7000))
+)
 
 // setup your database manager
 let database = MKDatabase(
@@ -134,7 +170,37 @@ let database = MKDatabase(
 )
 ```
 
-_Coming Soon_
+##### Using `MKNIOHTTP1TokenClient`
+
+To use `MKNIOHTTP1TokenClient`, add `MistKitNIOHTTP1Token` to your package dependency:
+
+```swift
+let package = Package(
+  ...
+  dependencies: [
+    .package(url: "https://github.com/brightdigit/MistKit", .branch("main")
+  ],
+  targets: [
+      .target(
+          name: "YourTarget",
+          dependencies: ["MistKit", "MistKitNIOHTTP1Token", ...]),
+      ...
+  ]
+)
+```
+
+When a request fails due to authentication failure, `MKNIOHTTP1TokenClient` will start an http server to begin listening to web authentication token. By default, `MKNIOHTTP1TokenClient` will simply print the url but you can override the `onRequestURL`:
+
+```swift
+public class MKNIOHTTP1TokenClient: MKTokenClient {
+  
+  public init(bindTo: BindTo, onRedirectURL : ((URL) -> Void)? = nil) {
+    self.bindTo = bindTo
+    self.onRedirectURL = onRedirectURL ?? {print($0)}
+  }
+  ...
+}
+```
 
 ## Fetching Records Using a Query (records/query)
 
@@ -318,7 +384,7 @@ database.lookup(request) { result in
 
 ## Further Code Documentation
 
-[Documentation Here](/docs/README.md)
+[Documentation Here](/Documentation/Reference/README.md)
 
 # Roadmap
 
@@ -335,6 +401,7 @@ database.lookup(request) { result in
 ## 0.2.0 
 
 - [ ] Vapor Token Client
+- [ ] Vapor Token Storage
 - [ ] Vapor URL Client
 - [ ] Swift NIO URL Client
 
@@ -349,6 +416,7 @@ database.lookup(request) { result in
 - [ ] Name Component Types
 - [ ] Discovering User Identities (POST users/discover)
 - [ ] Discovering All User Identities (GET users/discover)
+- [ ] Support `postMessage` for Authentication Requests
 
 ## 0.8.0
 
