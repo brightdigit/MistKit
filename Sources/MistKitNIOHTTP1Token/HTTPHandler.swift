@@ -179,23 +179,7 @@ public final class HTTPHandler: ChannelInboundHandler {
       }
     }()
 
-    let localAddress: String
-    if case .stdio = bindTarget {
-      localAddress = "STDIO"
-    } else {
-      guard let channelLocalAddress = channel.localAddress else {
-        fatalError("Address was unable to bind. Please check that the socket was not closed or that the address family was understood.")
-      }
-      localAddress = "\(channelLocalAddress)"
-    }
-
     channel.closeFuture.whenComplete { _ in
-      //    let actual : Result<String, Error> = result.flatMap { _ in
-      //      guard let token = webAuthenticationToken else {
-      //        return .failure(NSError())
-      //      }
-      //      return .success(token)
-      //    }
       group.shutdownGracefully(queue: .global()) { _ in
 
         threadPool.shutdownGracefully(queue: .global()) { _ in

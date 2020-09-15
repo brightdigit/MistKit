@@ -10,41 +10,41 @@ public struct UserIdentityNameComponents: Codable
 ### `namePrefix`
 
 ```swift
-public let namePrefix: String
+public let namePrefix: String?
 ```
 
 ### `givenName`
 
 ```swift
-public let givenName: String
+public let givenName: String?
 ```
 
 ### `familyName`
 
 ```swift
-public let familyName: String
+public let familyName: String?
 ```
 
 ### `nickname`
 
 ```swift
-public let nickname: String
+public let nickname: String?
 ```
 
 ### `nameSuffix`
 
 ```swift
-public let nameSuffix: String
+public let nameSuffix: String?
 ```
 
 ### `middleName`
 
 ```swift
-public let middleName: String
+public let middleName: String?
 ```
 
 ### `phoneticRepresentation`
 
 ```swift
-public let phoneticRepresentation: String
+public let phoneticRepresentation: String?
 ```

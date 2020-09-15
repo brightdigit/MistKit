@@ -27,7 +27,7 @@ public class MKNIOHTTP1TokenClient: MKTokenClient {
         callback(actual)
 
         if let channel = self.channel {
-          channel.close()
+          _ = channel.close()
         }
       }
 

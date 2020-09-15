@@ -14,6 +14,9 @@ Swift package for accessing CloudKit for server-side or command-line Swift devel
 [![macOS](https://github.com/brightdigit/MistKit/workflows/macOS/badge.svg)](https://github.com/brightdigit/MistKit/actions?query=workflow%3AmacOS)
 [![ubuntu](https://github.com/brightdigit/MistKit/workflows/ubuntu/badge.svg)](https://github.com/brightdigit/MistKit/actions?query=workflow%3Aubuntu)
 [![Travis (.com)](https://img.shields.io/travis/com/brightdigit/MistKit?logo=travis)](https://travis-ci.com/brightdigit/MistKit)
+[![Bitrise](https://img.shields.io/bitrise/b2595eab70c25d1b?token=rHUhEUFkU2RUL-KGmrKX1Q)](https://app.bitrise.io/app/b2595eab70c25d1b)
+[![CircleCI](https://img.shields.io/circleci/build/github/brightdigit/MistKit?token=45c9ff6a86f9ac6c1ec8c85c3bc02f4d8859aa6b)](https://app.circleci.com/pipelines/github/brightdigit/MistKit)
+
 [![Codecov](https://img.shields.io/codecov/c/github/brightdigit/MistKit)](https://codecov.io/gh/brightdigit/MistKit)
 [![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/brightdigit/MistKit)](https://www.codefactor.io/repository/github/brightdigit/MistKit)
 [![codebeat badge](https://codebeat.co/badges/c47b7e58-867c-410b-80c5-57e10140ba0f)](https://codebeat.co/projects/github-com-brightdigit-mistkit-main)
@@ -22,6 +25,8 @@ Swift package for accessing CloudKit for server-side or command-line Swift devel
 [![Code Climate issues](https://img.shields.io/codeclimate/issues/brightdigit/MistKit)](https://codeclimate.com/github/brightdigit/MistKit)
 
 [![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
+
+![Demonstration of MistKit via Command-Line App `mistdemoc`](Assets/MistKitDemo.gif)
 
 # Introduction
 
