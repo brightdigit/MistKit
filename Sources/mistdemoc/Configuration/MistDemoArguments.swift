@@ -20,7 +20,7 @@ extension MKDatabase where HttpClient == MKURLSessionClient {
     // setup your connection to CloudKit
     let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
 
-    // use the webAuthenticationToken is passed
+    // use the webAuthenticationToken which is passed
     if let token = options.token {
       tokenManager.webAuthenticationToken = token
     }

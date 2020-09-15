@@ -4,7 +4,7 @@
 </p>
 <h1 align="center"> MistKit </h1>
 
-Swift package for accessing CloudKit for server-side or command-line Swift development.
+Package for accessing CloudKit for server-side or command-line Swift development.
 
 [![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
 [![Twitter](https://img.shields.io/badge/twitter-@brightdigit-blue.svg?style=flat)](http://twitter.com/brightdigit)
@@ -29,7 +29,7 @@ Swift package for accessing CloudKit for server-side or command-line Swift devel
 
 # Introduction
 
-Access CloudKit outside of the CloudKit framework via Web Services. Why?
+Access CloudKit outside of the CloudKit framework via [Web Services](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html#//apple_ref/doc/uid/TP40015240-CH41-SW1). Why?
 
 * Building a **Command Line Application**
 * Required for **Server-Side Integration (via Vapor)**
@@ -37,6 +37,14 @@ Access CloudKit outside of the CloudKit framework via Web Services. Why?
 * **Migrating Data from/to CloudKit**
 
 ... and more
+
+### Demo Example
+
+#### CloudKit Dashboard Schema
+
+![Sample Schema for Todo List](Assets/CloudKitDB-Demo-Schema.jpg)
+
+#### Sample Code using **MistKit**
 
 ```swift
 // Example for pulling a todo list from CloudKit
@@ -80,13 +88,13 @@ Here's what's currently implemented with this library:
 - [x] Modifying Records (records/modify)
 - [x] Fetching Records Using a Query (records/query)
 - [x] Fetching Records by Record Name (records/lookup)
-- [x] Fetching Current User (users/current)
+- [x] Fetching Current User Identity (users/caller)
 
 # Installation
 
-Swift Package Manager is Apple's decentralized dependency manager to integrate libraries to your Swift projects. It is now fully integrated with Xcode 11
+Swift Package Manager is Apple's decentralized dependency manager to integrate libraries to your Swift projects. It is now fully integrated with Xcode 11.
 
-To integrate into your project using SPM, specify it in your Package.swift file:
+To integrate **MistKit** into your project using SPM, specify it in your Package.swift file:
 
 ```swift    
 let package = Package(
@@ -107,7 +115,7 @@ let package = Package(
 
 ## Composing Web Service Requests
 
-MistKit requires a connection be setup with the:
+**MistKit** requires a connection be setup with the following properties:
 
 * `container` name in the format of `iCloud.com.*.*` such as `iCloud.com.brightdigit.MistDemo`
 * `apiToken` which can be [created through the CloudKit Dashboard](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW1)
@@ -174,6 +182,25 @@ let database = MKDatabase(
 )
 ```
 
+If you already have access to the `webAuthenticationToken`, you can set the token in the `MKTokenManager` at any point in your application:
+
+```swift
+// setup how to manager your user's web authentication token
+let manager = MKTokenManager(
+  // store the token in UserDefaults
+  storage: MKUserDefaultsStorage(), 
+  // setup an http server at localhost for port 7000
+  client: MKNIOHTTP1TokenClient(bindTo: .ipAddress(host: "127.0.0.1", port: 7000))
+
+// use the webAuthenticationToken which is passed
+if let token = options.token {
+  manager.webAuthenticationToken = token
+}
+...
+```
+
+A great example of this is if you are already, logged in an iPhone app using CloudKit and wish to [save the webAuthenticationToken from `CKFetchWebAuthTokenOperation` into a database using server-side swift](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation).
+
 ##### Using `MKNIOHTTP1TokenClient`
 
 To use `MKNIOHTTP1TokenClient`, add `MistKitNIOHTTP1Token` to your package dependency:
@@ -208,11 +235,18 @@ public class MKNIOHTTP1TokenClient: MKTokenClient {
 
 ## Fetching Records Using a Query (records/query)
 
+There are two ways to fetch records:
+
+* using an `MKAnyQuery` to fetch `MKAnyRecord` items
+* using a custom type which implements `MKQueryRecord`
+
 ### Setting Up Queries
+
+To fetch as `MKAnyRecord`, simply create `MKAnyQuery` with the matching `recordType` (i.e. schema name). 
 
 ```swift
 // create your request to CloudKit
-let query = MKAnyQuery(recordType: TodoListItem.recordType)
+let query = MKAnyQuery(recordType: "TodoListItem")
 
 let request = FetchRecordQueryRequest(
   database: .private,
@@ -231,7 +265,18 @@ database.perform(request: request) { result in
 }
 ```
 
-_Coming Soon_
+This will give you `MKAnyRecord` items which contain a `fields` property with your values:
+
+```swift
+public struct MKAnyRecord: Codable {
+  public let recordType: String
+  public let recordName: UUID?
+  public let recordChangeTag: String?
+  public let fields: [String: MKValue]
+  ...
+```
+
+The `MKValue` type is an enum which contains the type and value of the field.
 
 ### Strong-Typed Queries
 
@@ -267,6 +312,8 @@ public class TodoListItem: MKQueryRecord {
 }
 ```
 
+Now you can create an `MKQuery` using your custom type.
+
 ```swift
 // create your request to CloudKit
 let query = MKQuery(recordType: TodoListItem.self)
@@ -288,7 +335,7 @@ database.query(request) { result in
 }
 ```
 
-_Coming Soon_
+Rather than using `MKDatabase.perform(request:)`, use `MKDatabase.query(_ query:)` and `MKDatabase` will decode the value to your custom type.
 
 ### Filters 
 
@@ -347,6 +394,8 @@ database.perform(operations: request) { result in
 
 ### Deleting Records
 
+In order to delete and update records, you are required to already have the object fetched from CloudKit. Therefore you'll need to run a `LookupRecordQueryRequest` or `FetchRecordQueryRequest` to get access to the record. Once you have access to the records, simply create a delete operation with your record:
+
 ```swift
 let query = LookupRecordQuery(TodoListItem.self, recordNames: recordNames)
 
@@ -362,8 +411,8 @@ database.lookup(request) { result in
     return
   }
   
-  let operations = items.map {
-    ModifyOperation(operationType: .delete, record: $0)
+  let operations = items.map { (item) in
+    ModifyOperation(operationType: .delete, record: item)
   }
 
   let query = ModifyRecordQuery(operations: operations)
@@ -383,6 +432,8 @@ database.lookup(request) { result in
 ```
 
 ### Updating Records
+
+Similarly with updating records, you are required to already have the object fetched from CloudKit. Again, run a `LookupRecordQueryRequest` or `FetchRecordQueryRequest` to get access to the record. Once you have access to the records, simply create a update operation with your record:
 
 ```swift
 let query = LookupRecordQuery(TodoListItem.self, recordNames: [recordName])
