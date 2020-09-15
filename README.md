@@ -4,7 +4,7 @@
 </p>
 <h1 align="center"> MistKit </h1>
 
-Package for accessing CloudKit for server-side or command-line Swift development.
+Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
 
 [![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
 [![Twitter](https://img.shields.io/badge/twitter-@brightdigit-blue.svg?style=flat)](http://twitter.com/brightdigit)
