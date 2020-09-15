@@ -29,14 +29,17 @@ Package for accessing CloudKit for server-side or command-line Swift development
 
 # Introduction
 
-Access CloudKit outside of the CloudKit framework via [Web Services](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html#//apple_ref/doc/uid/TP40015240-CH41-SW1). Why?
+Rather than the CloudKit framework this Swift package uses [CloudKit Web Services.](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html#//apple_ref/doc/uid/TP40015240-CH41-SW1). Why?
 
 * Building a **Command Line Application**
+* Use on **Linux** (or any other non-Apple OS)
 * Required for **Server-Side Integration (via Vapor)**
 * Access via **AWS Lambda**
 * **Migrating Data from/to CloudKit**
 
 ... and more
+
+In my case, I was using this for **the Vapor back-end for my Apple Watch app [Heartwitch](https://heartwitch.app)**. Here's some example code showing how to setup and use **MistKit** with CloudKit container.
 
 ### Demo Example
 
