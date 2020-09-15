@@ -231,6 +231,38 @@ _Coming Soon_
 
 ### Strong-Typed Queries
 
+In order to use a custom type for requests, you need to implement `MKQueryRecord`. Here's an example of a todo item which contains a title property:
+
+```swift
+public class TodoListItem: MKQueryRecord {
+  // required property and methods for MKQueryRecord
+  public static var recordType: String = "TodoItem"
+  public static var desiredKeys: [String]? = ["title"]
+
+  public let recordName: UUID?
+  public let recordChangeTag: String?
+  
+  public required init(record: MKAnyRecord) throws {
+    recordName = record.recordName
+    recordChangeTag = record.recordChangeTag
+    title = try record.string(fromKey: "title")
+  }
+  
+  public var fields: [String: MKValue] {
+    return ["title": .string(title)]
+  }
+  
+  // custom fields and methods to `TodoListItem`
+  public var title: String
+  
+  public init(title: String) {
+    self.title = title
+    recordName = nil
+    recordChangeTag = nil
+  }
+}
+```
+
 ```swift
 // create your request to CloudKit
 let query = MKQuery(recordType: TodoListItem.self)
@@ -382,6 +414,10 @@ database.lookup(request) { result in
 }
 ```
 
+## Examples
+
+For now checkout [the `mistdemoc` Swift package executable here](https://github.com/brightdigit/MistKit/tree/main/Sources/mistdemoc) on how to do basic CRUD methods in CloudKit via MistKit.
+
 ## Further Code Documentation
 
 [Documentation Here](/Documentation/Reference/README.md)
@@ -410,6 +446,7 @@ database.lookup(request) { result in
 - [ ] Date Field Types
 - [ ] Location Field Types
 - [ ] List Field Types
+- [ ] System Field Integration
 
 ## 0.6.0
 
