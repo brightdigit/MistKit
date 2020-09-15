@@ -15,7 +15,7 @@ parameters:
 orbs:
   codecov: codecov/codecov@1.0.5
 jobs:
-  build-xenial:  
+  build-xenial:
     machine:
       image: ubuntu-1604:201903-01
     environment:
@@ -64,7 +64,7 @@ jobs:
       PACKAGE_NAME: << pipeline.parameters.package-name >>
     steps:
       - checkout
-      - run: 
+      - run:
           name: Build
           command: swift build
       - run:
