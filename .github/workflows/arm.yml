@@ -3,7 +3,7 @@ name: arm
 on:
   push:
     branches:
-      - main
+      - feature/arm-support
 
 jobs:
   build:
