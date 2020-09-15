@@ -1,6 +1,6 @@
 ---
 format_version: '8'
-default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
 project_type: other
 app:
   envs:
@@ -10,17 +10,21 @@ workflows:
     steps:
     - script@1:
         inputs:
-        - content: |-
+        - content: >-
             #!/usr/bin/env bash
             # fail if any commands fails
             set -e
             # debug log
             set -x
 
-            brew bundle
-            swiftformat --lint . && swiftlint
-
+            swift run swiftformat --lint . && swift run swiftlint
             swift build
             swift test  --enable-code-coverage
-            xcrun llvm-cov export -format="lcov" .build/debug/${PACKAGE_NAME}PackageTests.xctest/Contents/MacOS/${PACKAGE_NAME}PackageTests -instr-profile .build/debug/codecov/default.profdata > info.lcov
+            
+            xcrun llvm-cov export -format="lcov"
+            .build/debug/${PACKAGE_NAME}PackageTests.xctest/Contents/MacOS/${PACKAGE_NAME}PackageTests
+            -instr-profile .build/debug/codecov/default.profdata > info.lcov
             bash <(curl https://codecov.io/bash) -F bitrise -F macOS -n $BITRISE_BUILD_NUMBER
+trigger_map:
+- push_branch: '*'
+  workflow: ci
