@@ -5,6 +5,13 @@
 public extension MKAnyRecord
 ```
 
+## Properties
+### `information`
+
+```swift
+var information: String
+```
+
 ## Methods
 ### `data(fromKey:)`
 

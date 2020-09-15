@@ -16,22 +16,16 @@ extension MistDemoCommand {
     var newTitle: String
 
     func runAsync(_ completed: @escaping (Error?) -> Void) {
-      let dbConnection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+      // setup how to manager your user's web authentication token
+      let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding))
 
-      let client = MKURLSessionClient(session: .shared)
-      let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
-      if let token = options.token {
-        manager.webAuthenticationToken = token
-      }
-      let database = MKDatabase(
-        connection: dbConnection,
-        factory: MKURLBuilderFactory(),
-        client: client,
-        tokenManager: manager
-      )
+      // setup your database manager
+      let database = MKDatabase(options: options, tokenManager: manager)
 
       let query = LookupRecordQuery(TodoListItem.self, recordNames: [recordName])
+
       let request = LookupRecordQueryRequest(database: .private, query: query)
+
       database.lookup(request) { result in
         let items: [TodoListItem]
         do {
