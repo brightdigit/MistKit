@@ -17,6 +17,10 @@ let package = Package(
       targets: ["MistKitNIOHTTP1Token"]
     ),
     .library(
+      name: "MistKitSwifter",
+      targets: ["MistKitSwifter"]
+    ),
+    .library(
       name: "MistKitVapor",
       targets: ["MistKitVapor"]
     ),
@@ -29,6 +33,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-nio.git", from: "2.20.0"),
     .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
+    .package(url: "https://github.com/brightdigit/swifter.git", .branch( "stable")),
     // dev
     .package(url: "https://github.com/shibapm/Komondor", from: "1.0.5"),
     .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1")
@@ -45,6 +50,11 @@ let package = Package(
               "MistKit",
               .product(name: "NIO", package: "swift-nio"),
               .product(name: "NIOHTTP1", package: "swift-nio")
+            ]),
+    .target(name: "MistKitSwifter",
+            dependencies: [
+              "MistKit", 
+              .product(name: "Swifter", package: "swifter"),
             ]),
     .target(name: "MistKitVapor",
             dependencies: [
