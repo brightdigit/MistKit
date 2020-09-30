@@ -1,4 +1,5 @@
 import ArgumentParser
+import CoreFoundation
 import Foundation
 
 protocol ParsableAsyncCommand: ParsableCommand {
