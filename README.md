@@ -105,8 +105,25 @@ let request = FetchRecordQueryRequest(
 database.query(request) { result in
   dump(result)
 }
+
+// wait for query here...
 ```
 
+To wait for the CloudKit query to complete synchronously, you can use [CFRunLoop](https://developer.apple.com/documentation/corefoundation/cfrunloop-rht):
+
+```swift
+...
+// handle the result
+database.query(request) { result in
+  dump(result)
+
+  // nessecary if you need run this synchronously
+  CFRunLoopStop(CFRunLoopGetMain())
+}
+
+// nessecary if you need run this synchronously
+CFRunLoopRun()
+```
 # Features 
 
 Here's what's currently implemented with this library:
