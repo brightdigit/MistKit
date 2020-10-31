@@ -4,8 +4,8 @@ public struct ModifiedRecordQueryResult<RecordType: MKQueryRecord> {
   public let updated: [RecordType]
 }
 
-extension MKDatabase {
-  public func query<RecordType: MKQueryRecord>(
+public extension MKDatabase {
+  func query<RecordType: MKQueryRecord>(
     _ query: FetchRecordQueryRequest<MKQuery<RecordType>>,
     _ callback: @escaping ((Result<[RecordType], Error>) -> Void)
   ) {
@@ -14,7 +14,7 @@ extension MKDatabase {
     }
   }
 
-  public func perform<RecordType: MKQueryRecord>(
+  func perform<RecordType: MKQueryRecord>(
     operations: ModifyRecordQueryRequest<RecordType>,
     _ callback: @escaping ((Result<ModifiedRecordQueryResult<RecordType>, Error>) -> Void)
   ) {
@@ -41,7 +41,7 @@ extension MKDatabase {
     }
   }
 
-  public func lookup<RecordType: MKQueryRecord>(
+  func lookup<RecordType: MKQueryRecord>(
     _ lookup: LookupRecordQueryRequest<RecordType>,
     _ callback: @escaping ((Result<[RecordType], Error>) -> Void)
   ) {
