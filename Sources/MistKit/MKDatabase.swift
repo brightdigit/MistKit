@@ -6,7 +6,10 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
   let decoder: MKDecoder = JSONDecoder()
   let client: HttpClient
 
-  public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManagerProtocol? = nil) {
+  public init(connection: MKDatabaseConnection,
+              factory: MKURLBuilderFactory? = nil,
+              client: HttpClient,
+              tokenManager: MKTokenManagerProtocol? = nil) {
     let factory = factory ?? MKURLBuilderFactory()
     urlBuilder = factory.builder(forConnection: connection, withTokenManager: tokenManager)
     self.client = client
@@ -82,7 +85,10 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
 #endif
 
 public extension MKDatabase where HttpClient == MKURLSessionClient {
-  init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, tokenManager: MKTokenManagerProtocol? = nil, session: URLSession? = nil) {
+  init(connection: MKDatabaseConnection,
+       factory: MKURLBuilderFactory? = nil,
+       tokenManager: MKTokenManagerProtocol? = nil,
+       session: URLSession? = nil) {
     let factory = factory ?? MKURLBuilderFactory()
     urlBuilder = factory.builder(forConnection: connection, withTokenManager: tokenManager)
     client = MKURLSessionClient(session: session ?? URLSession.shared)

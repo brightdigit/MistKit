@@ -27,6 +27,30 @@ Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
 
 ![Demonstration of MistKit via Command-Line App `mistdemoc`](Assets/MistKitDemo.gif)
 
+
+# Table of Contents
+
+   * [**Introduction**](#introduction)
+   * [**Features**](#features)
+   * [**Installation**](#installation)
+   * [**Usage**](#usage)
+      * [Composing Web Service Requests](#composing-web-service-requests)
+      * [Fetching Records Using a Query (records/query)](#fetching-records-using-a-query-recordsquery)
+      * [Fetching Records by Record Name (records/lookup)](#fetching-records-by-record-name-recordslookup)
+      * [Fetching Current User Identity (users/caller)](#fetching-current-user-identity-userscaller)
+      * [Modifying Records (records/modify)](#modifying-records-recordsmodify)
+      * [Examples](#examples)
+      * [Further Code Documentation](#further-code-documentation)
+   * [**Roadmap**](#roadmap)
+      * [~~0.1.0~~](#010)
+      * [**0.2.0**](#020)
+      * [0.4.0](#040)
+      * [0.6.0](#060)
+      * [0.8.0](#080)
+      * [0.9.0](#090)
+      * [v1.0.0](#v100)
+   * [**License**](#license)
+
 # Introduction
 
 Rather than the CloudKit framework this Swift package uses [CloudKit Web Services.](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html#//apple_ref/doc/uid/TP40015240-CH41-SW1). Why?
@@ -81,8 +105,25 @@ let request = FetchRecordQueryRequest(
 database.query(request) { result in
   dump(result)
 }
+
+// wait for query here...
 ```
 
+To wait for the CloudKit query to complete synchronously, you can use [CFRunLoop](https://developer.apple.com/documentation/corefoundation/cfrunloop-rht):
+
+```swift
+...
+// handle the result
+database.query(request) { result in
+  dump(result)
+
+  // nessecary if you need run this synchronously
+  CFRunLoopStop(CFRunLoopGetMain())
+}
+
+// nessecary if you need run this synchronously
+CFRunLoopRun()
+```
 # Features 
 
 Here's what's currently implemented with this library:

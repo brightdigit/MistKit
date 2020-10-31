@@ -1,4 +1,5 @@
 import ArgumentParser
+import CoreFoundation
 import Foundation
 
 protocol ParsableAsyncCommand: ParsableCommand {
@@ -7,17 +8,15 @@ protocol ParsableAsyncCommand: ParsableCommand {
 
 extension ParsableAsyncCommand {
   func run() throws {
-    var result: Result<Void, Error>?
+    var result: Result<Void, Error>!
 
     runAsync { error in
       result = Result(error)
+      CFRunLoopStop(CFRunLoopGetMain())
     }
 
-    while true {
-      RunLoop.main.run(until: .distantPast)
-      if let result = result {
-        return try result.get()
-      }
-    }
+    CFRunLoopRun()
+
+    return try result.get()
   }
 }

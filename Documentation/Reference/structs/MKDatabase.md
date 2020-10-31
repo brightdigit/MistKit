@@ -10,7 +10,10 @@ public struct MKDatabase<HttpClient: MKHttpClient>
 ### `init(connection:factory:client:tokenManager:)`
 
 ```swift
-public init(connection: MKDatabaseConnection, factory: MKURLBuilderFactory? = nil, client: HttpClient, tokenManager: MKTokenManagerProtocol? = nil)
+public init(connection: MKDatabaseConnection,
+            factory: MKURLBuilderFactory? = nil,
+            client: HttpClient,
+            tokenManager: MKTokenManagerProtocol? = nil)
 ```
 
 ### `perform(request:returnFailedAuthentication:_:)`
