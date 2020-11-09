@@ -30,8 +30,10 @@ let package = Package(
     .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
     // dev
-    .package(url: "https://github.com/shibapm/Komondor", from: "1.0.5"),
-    .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1")
+    .package(url: "https://github.com/shibapm/Komondor", from: "1.0.6"),
+    .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"),
+    .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.47.0"),
+    .package(url: "https://github.com/realm/SwiftLint", from: "0.41.0")
   ],
   targets: [
     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
