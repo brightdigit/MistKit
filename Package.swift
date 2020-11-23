@@ -34,9 +34,12 @@ let package = Package(
     .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
     .package(url: "https://github.com/brightdigit/Swifter.git", .branch("stable")),
+    .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
     // dev
     .package(url: "https://github.com/shibapm/Komondor", from: "1.0.5"),
-    .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1")
+    .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"),
+    .package(url: "https://github.com/brightdigit/SwiftFormat", from: "0.47.0"),
+    .package(url: "https://github.com/realm/SwiftLint", from: "0.41.0")
   ],
   targets: [
     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -62,7 +65,9 @@ let package = Package(
             ]),
     .target(name: "mistdemoc", dependencies: ["MistKit", "MistKitNIOHTTP1Token", "MistKitDemo",
                                               .product(name: "ArgumentParser", package: "swift-argument-parser")]),
-    .target(name: "mistdemod", dependencies: ["MistKit", "MistKitVapor", "MistKitDemo", .product(name: "Vapor", package: "vapor")]),
+    .target(name: "mistdemod", dependencies: ["MistKit", "MistKitVapor", "MistKitDemo",
+                                              .product(name: "Vapor", package: "vapor"),
+                                              .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver")]),
     .target(name: "MistKitDemo",
             dependencies: ["MistKit"]),
     .testTarget(
@@ -82,8 +87,7 @@ let package = Package(
         "swift test --enable-code-coverage --enable-test-discovery --generate-linuxmain",
         "swift run swiftformat .",
         "swift run swiftlint autocorrect",
-        "swift run sourcedocs generate build --spm-module MistKit -c -r",
-        // "swift run swiftpmls mine",
+        "swift run sourcedocs generate build -cra",
         "git add .",
         "swift run swiftformat --lint .",
         "swift run swiftlint"
