@@ -22,8 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set Xcode Name
-      #run: echo "::set-env name=XCODE_NAME::$(basename -- ${{ matrix.xcode }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)"
-      run: echo "name=XCODE_NAME::$(basename -- ${{ matrix.xcode }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)" >> $GITHUB_ENV
+      run: echo "XCODE_NAME=$(basename -- ${{ matrix.xcode }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)" >> $GITHUB_ENV
     - name: Setup Xcode
       run: sudo xcode-select -s ${{ matrix.xcode }}/Contents/Developer
     - name: Build
