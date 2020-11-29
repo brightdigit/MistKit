@@ -17,12 +17,12 @@ jobs:
 
     strategy:
       matrix:
-        xcode: ["/Applications/Xcode_11.5.app","/Applications/Xcode_11.6.app","/Applications/Xcode_11.7.app","/Applications/Xcode_12.app"]
+        xcode: ["/Applications/Xcode_11.5.app","/Applications/Xcode_11.6.app","/Applications/Xcode_11.7.app","/Applications/Xcode_12.app","/Applications/Xcode_12.1.app","/Applications/Xcode_12.2.app","/Applications/Xcode_12.3.app"]
 
     steps:
     - uses: actions/checkout@v2
     - name: Set Xcode Name
-      run: echo "::set-env name=XCODE_NAME::$(basename -- ${{ matrix.xcode }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)"
+      run: echo "XCODE_NAME=$(basename -- ${{ matrix.xcode }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)" >> $GITHUB_ENV
     - name: Setup Xcode
       run: sudo xcode-select -s ${{ matrix.xcode }}/Contents/Developer
     - name: Build
