@@ -36,9 +36,9 @@ let package = Package(
     .package(url: "https://github.com/brightdigit/Swifter.git", .branch("stable")),
     .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
     // dev
-    .package(url: "https://github.com/shibapm/Komondor", from: "1.0.5"),
+    .package(url: "https://github.com/shibapm/Komondor", from: "1.0.6"),
     .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"),
-    .package(url: "https://github.com/brightdigit/SwiftFormat", from: "0.47.0"),
+    .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.47.0"),
     .package(url: "https://github.com/realm/SwiftLint", from: "0.41.0")
   ],
   targets: [
