@@ -27,7 +27,7 @@ jobs:
     - name: Extract Swift
       run: tar xzf swift-${SWIFT_VER}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz
     - name: Add Path
-      run: echo "::add-path::$GITHUB_WORKSPACE/swift-${SWIFT_VER}-RELEASE-ubuntu${RELEASE_DOT}/usr/bin"
+      run: echo "$GITHUB_WORKSPACE/swift-${SWIFT_VER}-RELEASE-ubuntu${RELEASE_DOT}/usr/bin" >> $GITHUB_PATH
     - name: Build
       run: swift build
     - name: Run tests
