@@ -12,10 +12,10 @@ public class TodoListItem: MKQueryRecord {
     title = try record.string(fromKey: "title")
   }
 
-  public init(title: String) {
+  public init(title: String, recordName: UUID? = nil, recordChangeTag: String? = nil) {
     self.title = title
-    recordName = nil
-    recordChangeTag = nil
+    self.recordName = recordName
+    self.recordChangeTag = recordChangeTag
   }
 
   public static var recordType: String = "TodoItem"

@@ -18,16 +18,24 @@ extension Request {
 }
 
 extension MKDatabase where HttpClient == MKVaporClient {
-  init(options: MistDemoConfiguration, tokenManager: MKTokenManagerProtocol?, client: Client) {
-    // setup your connection to CloudKit
+  init(request: Request) {
+    let storage: MKTokenStorage
+    if let user = request.auth.get(User.self) {
+      storage = MKVaporModelStorage(model: user)
+    } else {
+      storage = request.cloudKitAPI
+    }
+    let manager = MKTokenManager(storage: storage, client: nil)
+
+    let options = MistDemoDefaultConfiguration(apiKey: request.application.cloudKitAPIKey)
     let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
 
     // use the webAuthenticationToken which is passed
     if let token = options.token {
-      tokenManager?.webAuthenticationToken = token
+      manager.webAuthenticationToken = token
     }
 
-    self.init(connection: connection, factory: nil, client: MKVaporClient(client: client), tokenManager: tokenManager)
+    self.init(connection: connection, factory: nil, client: MKVaporClient(client: request.client), tokenManager: manager)
   }
 }
 

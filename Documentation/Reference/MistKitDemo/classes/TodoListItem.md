@@ -38,8 +38,8 @@ public let recordChangeTag: String?
 public required init(record: MKAnyRecord) throws
 ```
 
-### `init(title:)`
+### `init(title:recordName:recordChangeTag:)`
 
 ```swift
-public init(title: String)
+public init(title: String, recordName: UUID? = nil, recordChangeTag: String? = nil)
 ```

@@ -3,6 +3,7 @@
 ## Protocols
 
 -   [MKAuthenticationRedirect](protocols/MKAuthenticationRedirect.md)
+-   [MKContentRecord](protocols/MKContentRecord.md)
 -   [MKDecodable](protocols/MKDecodable.md)
 -   [MKEncodable](protocols/MKEncodable.md)
 -   [MKHttpClient](protocols/MKHttpClient.md)
@@ -36,6 +37,7 @@
 -   [MKURLBuilderFactory](structs/MKURLBuilderFactory.md)
 -   [MKURLRequest](structs/MKURLRequest.md)
 -   [MKURLSessionClient](structs/MKURLSessionClient.md)
+-   [ModifiedRecordQueryContent](structs/ModifiedRecordQueryContent.md)
 -   [ModifiedRecordQueryResponse](structs/ModifiedRecordQueryResponse.md)
 -   [ModifiedRecordQueryResult](structs/ModifiedRecordQueryResult.md)
 -   [ModifyOperation](structs/ModifyOperation.md)

@@ -1,7 +1,7 @@
 import MistKitDemo
 import Vapor
 
-struct TodoItemModel: Content {
+public struct TodoItemModel: Content {
   let id: UUID?
   let title: String
   init(item: TodoListItem) {

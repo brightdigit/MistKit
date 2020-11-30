@@ -3,20 +3,18 @@ import MistKitDemo
 import MistKitVapor
 import Vapor
 
+extension TodoListItem: MKContentRecord {
+  public static func content(fromRecord record: TodoListItem) -> TodoItemModel {
+    return TodoItemModel(item: record)
+  }
+
+  public typealias ContentType = TodoItemModel
+}
+
 struct ItemsController: RouteCollection {
   func list(_ request: Request) -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> {
-    // setup how to manager your user's web authentication token
-
-    let storage: MKTokenStorage
-    if let user = request.auth.get(User.self) {
-      storage = MKVaporModelStorage(model: user)
-    } else {
-      storage = request.cloudKitAPI
-    }
-    let manager = MKTokenManager(storage: storage, client: nil)
-
     // setup your database manager
-    let database = MKDatabase(options: MistDemoDefaultConfiguration(apiKey: request.application.cloudKitAPIKey), tokenManager: manager, client: request.client)
+    let database = MKDatabase(request: request)
 
     // create your request to CloudKit
     let query = MKQuery(recordType: TodoListItem.self)
@@ -26,30 +24,13 @@ struct ItemsController: RouteCollection {
       query: FetchRecordQuery(query: query)
     )
 
-    let promise = request.eventLoop.makePromise(of: MKServerResponse<[TodoItemModel]>.self)
-    // handle the result
-    database.query(cloudKitRequest) { result in
-      let serverResult = result.map { $0.map(TodoItemModel.init) }
-      let actual = Result { try MKServerResponse(fromResult: serverResult) }
-
-      promise.completeWith(actual)
-    }
-    return promise.futureResult
+    return database.query(cloudKitRequest, on: request.eventLoop)
   }
 
-  func create(_ request: Request) throws -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> {
-    let storage: MKTokenStorage
-
+  func create(_ request: Request) throws -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
     let title = try request.parameters.require("title")
-    if let user = request.auth.get(User.self) {
-      storage = MKVaporModelStorage(model: user)
-    } else {
-      storage = request.cloudKitAPI
-    }
-    let manager = MKTokenManager(storage: storage, client: nil)
 
-    // setup your database manager
-    let database = MKDatabase(options: MistDemoDefaultConfiguration(apiKey: request.application.cloudKitAPIKey), tokenManager: manager, client: request.client)
+    let database = MKDatabase(request: request)
 
     let item = TodoListItem(title: title)
 
@@ -59,14 +40,7 @@ struct ItemsController: RouteCollection {
 
     let cloudKitRequest = ModifyRecordQueryRequest(database: .private, query: query)
 
-    let promise = request.eventLoop.makePromise(of: MKServerResponse<[TodoItemModel]>.self)
-    // handle the result
-    database.perform(operations: cloudKitRequest) { result in
-      let serverResult = result.map { $0.updated.map(TodoItemModel.init) }
-      let actual = Result { try MKServerResponse(fromResult: serverResult) }
-      promise.completeWith(actual)
-    }
-    return promise.futureResult
+    return database.perform(operations: cloudKitRequest, on: request.eventLoop)
   }
 
   func boot(routes: RoutesBuilder) throws {
