@@ -1,5 +1,13 @@
 # Reference Documentation
 
+## Protocols
+
+-   [MistDemoConfiguration](protocols/MistDemoConfiguration.md)
+
+## Structs
+
+-   [MistDemoDefaultConfiguration](structs/MistDemoDefaultConfiguration.md)
+
 ## Classes
 
 -   [TodoListItem](classes/TodoListItem.md)
