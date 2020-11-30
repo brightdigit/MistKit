@@ -4,6 +4,12 @@
 
 -   [MKModelStorable](protocols/MKModelStorable.md)
 
+## Structs
+
+-   [MKVaporClient](structs/MKVaporClient.md)
+-   [MKVaporClientRequest](structs/MKVaporClientRequest.md)
+-   [MKVaporClientResponse](structs/MKVaporClientResponse.md)
+
 ## Classes
 
 -   [MKVaporModelStorage](classes/MKVaporModelStorage.md)

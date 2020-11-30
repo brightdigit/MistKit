@@ -16,7 +16,7 @@ struct ItemsController: RouteCollection {
     let manager = MKTokenManager(storage: storage, client: nil)
 
     // setup your database manager
-    let database = MKDatabase(options: MistDemoDefaultConfiguration(apiKey: request.application.cloudKitAPIKey), tokenManager: manager)
+    let database = MKDatabase(options: MistDemoDefaultConfiguration(apiKey: request.application.cloudKitAPIKey), tokenManager: manager, client: request.client)
 
     // create your request to CloudKit
     let query = MKQuery(recordType: TodoListItem.self)
@@ -49,7 +49,7 @@ struct ItemsController: RouteCollection {
     let manager = MKTokenManager(storage: storage, client: nil)
 
     // setup your database manager
-    let database = MKDatabase(options: MistDemoDefaultConfiguration(apiKey: request.application.cloudKitAPIKey), tokenManager: manager)
+    let database = MKDatabase(options: MistDemoDefaultConfiguration(apiKey: request.application.cloudKitAPIKey), tokenManager: manager, client: request.client)
 
     let item = TodoListItem(title: title)
 
@@ -71,6 +71,6 @@ struct ItemsController: RouteCollection {
 
   func boot(routes: RoutesBuilder) throws {
     routes.get(["items"], use: list)
-    routes.get(["items", ":title"], use: create)
+    routes.post(["items", ":title"], use: create)
   }
 }

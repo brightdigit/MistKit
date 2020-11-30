@@ -17,21 +17,17 @@ extension Request {
   }
 }
 
-extension MKDatabase where HttpClient == MKURLSessionClient {
-  @available(*, deprecated)
-  init(options: MistDemoConfiguration, tokenManager: MKTokenManagerProtocol) {
+extension MKDatabase where HttpClient == MKVaporClient {
+  init(options: MistDemoConfiguration, tokenManager: MKTokenManagerProtocol?, client: Client) {
     // setup your connection to CloudKit
     let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
 
     // use the webAuthenticationToken which is passed
     if let token = options.token {
-      tokenManager.webAuthenticationToken = token
+      tokenManager?.webAuthenticationToken = token
     }
 
-    self.init(
-      connection: connection,
-      tokenManager: tokenManager
-    )
+    self.init(connection: connection, factory: nil, client: MKVaporClient(client: client), tokenManager: tokenManager)
   }
 }
 
