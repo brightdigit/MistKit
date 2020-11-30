@@ -62,7 +62,9 @@ let package = Package(
             ]),
     .target(name: "MistKitVapor",
             dependencies: [
-              "MistKit", .product(name: "Vapor", package: "vapor")
+              "MistKit",
+              .product(name: "Vapor", package: "vapor"),
+              .product(name: "Fluent", package: "fluent")
             ]),
     .target(name: "mistdemoc", dependencies: ["MistKit", "MistKitNIOHTTP1Token", "MistKitDemo",
                                               .product(name: "ArgumentParser", package: "swift-argument-parser")]),
