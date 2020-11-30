@@ -34,6 +34,7 @@ let package = Package(
     .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
     .package(url: "https://github.com/brightdigit/Swifter.git", .branch("stable")),
+    .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
     .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
     // dev
     .package(url: "https://github.com/shibapm/Komondor", from: "1.0.6"),
@@ -67,6 +68,7 @@ let package = Package(
                                               .product(name: "ArgumentParser", package: "swift-argument-parser")]),
     .target(name: "mistdemod", dependencies: ["MistKit", "MistKitVapor", "MistKitDemo",
                                               .product(name: "Vapor", package: "vapor"),
+                                              .product(name: "Fluent", package: "fluent"),
                                               .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver")]),
     .target(name: "MistKitDemo",
             dependencies: ["MistKit"]),

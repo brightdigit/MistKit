@@ -1,8 +1,80 @@
+import Fluent
+import FluentSQLiteDriver
 import MistKit
+import MistKitDemo
 import MistKitVapor
 import Vapor
 
-import MistKitDemo
+final class User: Model, Content {
+  static let schema = "users"
+
+  @ID(key: .id)
+  var id: UUID?
+
+  @Field(key: "name")
+  var name: String
+
+  @Field(key: "hash")
+  var passwordHash: String
+
+  @Field(key: "cloudKitToken")
+  var cloudKitToken: String?
+
+  init() {}
+
+  init(id: UUID? = nil, name: String, passwordHash: String) {
+    self.id = id
+    self.name = name
+    self.passwordHash = passwordHash
+    cloudKitToken = nil
+  }
+}
+
+extension User {
+  struct Create: Content {
+    var name: String
+    var password: String
+  }
+}
+
+public protocol MKModelStorable: Model {
+  static var tokenKey: KeyPath<Self, Field<String?>> { get }
+}
+
+extension User: MKModelStorable {
+  static var tokenKey: KeyPath<User, Field<String?>> = \User.$cloudKitToken
+}
+
+extension User: ModelAuthenticatable {
+  static let usernameKey = \User.$name
+  static let passwordHashKey = \User.$passwordHash
+
+  func verify(password: String) throws -> Bool {
+    try Bcrypt.verify(password, created: passwordHash)
+  }
+}
+
+// let passwordProtected = app.grouped(User.authenticator())
+// passwordProtected.post("login") { req -> User in
+//    try req.auth.require(User.self)
+// }
+
+public class MKVaporModelStorage<ModelType: MKModelStorable>: MKTokenStorage {
+  public let model: ModelType
+
+  public init(model: ModelType) {
+    self.model = model
+  }
+
+  public var webAuthenticationToken: String? {
+    get {
+      return model[keyPath: ModelType.tokenKey].wrappedValue
+    }
+    set {
+      model[keyPath: ModelType.tokenKey].wrappedValue = newValue
+    }
+  }
+}
 
 public class MKVaporSessionStorage: MKTokenStorage {
   let session: Session
@@ -76,18 +148,51 @@ struct TodoItemModel: Content {
   }
 }
 
-let tokenClient = MKVaporTokenClient()
-app.middleware.use(app.sessions.middleware)
-app.get("token") { (request) -> HTTPStatus in
-
-  print(request)
-  guard let token: String = request.query["ckWebAuthToken"] else {
-    return .notFound
+struct CreateUser: Migration {
+  func prepare(on database: Database) -> EventLoopFuture<Void> {
+    database.schema(User.schema)
+      .id()
+      .field("name", .string, .required)
+      .field("hash", .string, .required)
+      .field("cloudKitToken", .string)
+      .create()
   }
-  request.cloudKitAPI.webAuthenticationToken = token
-  // request.session.data["cloudKitToken"] = token
-  return .accepted
-  // https://localhost:8080/token?ckWebAuthToken=29__54__AYNnAxzqtf%2FkYdAk62NvEr%2BFjRQovNuI7YofL7OIuEdVnqSIElu8eHckOLKQMjxTm8MudlGy8itmpIbGGNee8y4Hx8pZ8MCGKb4ebMHXiDwcQslvfhodl7mdl8eUmAjXuxCTRuX2AVH6lwUDA9k9S1zDm%2FW1xH7c6HqAllbrgrnSy73%2B9F5Mj6QN30kuTAHfDwiBnVoS9yovFTGFVSSBLc85mqBp9lxzeOOXuMGHHjr6Eg8wPbHW8Sz5nbymBtF7wHEqyJK5Pr3to0xRoUggj7UGDiqLn0q0M1gp1OKpcNES2FaTGuUKqjS72sYfbQumNTXg2DrVLMKTsoQUcpHCCueStseYzEmkwZi4WVomCgriKQxHXB9dWZ0X9UNOHEZdf6W%2FCKERNHL9Svx4yho0bWcEpcmaKs13PV8ONf4vfbM4WNg%3D__eyJYLUFQUExFLVdFQkFVVEgtUENTLUNsb3Vka2l0IjoiUVhCd2JEb3hPZ0hwTmIvSzduc0JEcDBEV2Q0RlZ2dmhkYUZEdGtTTHpuYmN2bkNxRUNyWmJhNllFWTdEanhpbC9hQ0FRRUxKL01jQ0o3Z29tNmlEa2lLTjBJV0Y5Q2h6IiwiWC1BUFBMRS1XRUJBVVRILVBDUy1TaGFyaW5nIjoiUVhCd2JEb3hPZ0dDNGxKTkpPUXAremloSUdvRzRoQndoTXlvY2lSOENDOXMvMjVEbzhNUDY1Z3E4ZnF3UEdVWmdUQmE0bGR4Qm44Ukw5ZHRNNU11bU1CVm9KTXhDK2FaIn0%3D&ckSession=29__54__AYNnAxzqtf%2FkYdAk62NvEr%2BFjRQovNuI7YofL7OIuEdVnqSIElu8eHckOLKQMjxTm8MudlGy8itmpIbGGNee8y4Hx8pZ8MCGKb4ebMHXiDwcQslvfhodl7mdl8eUmAjXuxCTRuX2AVH6lwUDA9k9S1zDm%2FW1xH7c6HqAllbrgrnSy73%2B9F5Mj6QN30kuTAHfDwiBnVoS9yovFTGFVSSBLc85mqBp9lxzeOOXuMGHHjr6Eg8wPbHW8Sz5nbymBtF7wHEqyJK5Pr3to0xRoUggj7UGDiqLn0q0M1gp1OKpcNES2FaTGuUKqjS72sYfbQumNTXg2DrVLMKTsoQUcpHCCueStseYzEmkwZi4WVomCgriKQxHXB9dWZ0X9UNOHEZdf6W%2FCKERNHL9Svx4yho0bWcEpcmaKs13PV8ONf4vfbM4WNg%3D__eyJYLUFQUExFLVdFQkFVVEgtUENTLUNsb3Vka2l0IjoiUVhCd2JEb3hPZ0hwTmIvSzduc0JEcDBEV2Q0RlZ2dmhkYUZEdGtTTHpuYmN2bkNxRUNyWmJhNllFWTdEanhpbC9hQ0FRRUxKL01jQ0o3Z29tNmlEa2lLTjBJV0Y5Q2h6IiwiWC1BUFBMRS1XRUJBVVRILVBDUy1TaGFyaW5nIjoiUVhCd2JEb3hPZ0dDNGxKTkpPUXAremloSUdvRzRoQndoTXlvY2lSOENDOXMvMjVEbzhNUDY1Z3E4ZnF3UEdVWmdUQmE0bGR4Qm44Ukw5ZHRNNU11bU1CVm9KTXhDK2FaIn0%3D
+
+  func revert(on database: Database) -> EventLoopFuture<Void> {
+    database.schema(User.schema).delete()
+  }
+}
+
+let tokenClient = MKVaporTokenClient()
+app.databases.use(.sqlite(.memory), as: .sqlite)
+app.middleware.use(app.sessions.middleware)
+app.migrations.add(CreateUser())
+try app.autoMigrate().wait()
+
+let passwordProtected = app.grouped(User.authenticator())
+passwordProtected.get("token") { (request) -> EventLoopFuture<HTTPStatus> in
+
+  guard let token: String = request.query["ckWebAuthToken"] else {
+    return request.eventLoop.makeSucceededFuture(.notFound)
+  }
+
+  guard let user = request.auth.get(User.self) else {
+    request.cloudKitAPI.webAuthenticationToken = token
+    return request.eventLoop.makeSucceededFuture(.accepted)
+  }
+
+  user.cloudKitToken = token
+  return user.save(on: request.db).transform(to: .accepted)
+}
+
+app.post("users") { req -> EventLoopFuture<User> in
+  let create = try req.content.decode(User.Create.self)
+  let user = try User(
+    name: create.name,
+    passwordHash: Bcrypt.hash(create.password)
+  )
+  return user.save(on: req.db)
+    .map { user }
 }
 
 public enum MKServerResponse<Success>: Codable where Success: Codable {
@@ -136,9 +241,16 @@ public enum MKServerResponse<Success>: Codable where Success: Codable {
 
 extension MKServerResponse: Content {}
 
-app.get("list") { req -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> in
+passwordProtected.get("list") { req -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> in
   // setup how to manager your user's web authentication token
-  let manager = MKTokenManager(storage: req.cloudKitAPI, client: tokenClient)
+
+  let storage: MKTokenStorage
+  if let user = req.auth.get(User.self) {
+    storage = MKVaporModelStorage(model: user)
+  } else {
+    storage = req.cloudKitAPI
+  }
+  let manager = MKTokenManager(storage: storage, client: tokenClient)
 
   // setup your database manager
   let database = MKDatabase(options: MistDemoArguments(), tokenManager: manager)
@@ -158,15 +270,55 @@ app.get("list") { req -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> in
     let actual = Result { try MKServerResponse(fromResult: serverResult) }
 
     promise.completeWith(actual)
-//    do {
-//      try print(result.get().information)
-//    } catch {
-//      //completed(error)
-//      return
-//    }
+    //    do {
+    //      try print(result.get().information)
+    //    } catch {
+    //      //completed(error)
+    //      return
+    //    }
     // completed(nil)
   }
   return promise.futureResult
 }
+
+// app.get("list") { req -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> in
+//  // setup how to manager your user's web authentication token
+//
+//  let storage : MKTokenStorage
+//  if let user = req.auth.get(User.self) {
+//    storage = MKVaporModelStorage(model: user)
+//  } else {
+//    storage = req.cloudKitAPI
+//  }
+//  let manager = MKTokenManager(storage: storage, client: tokenClient)
+//
+//  // setup your database manager
+//  let database = MKDatabase(options: MistDemoArguments(), tokenManager: manager)
+//
+//  // create your request to CloudKit
+//  let query = MKQuery(recordType: TodoListItem.self)
+//
+//  let request = FetchRecordQueryRequest(
+//    database: .private,
+//    query: FetchRecordQuery(query: query)
+//  )
+//
+//  let promise = req.eventLoop.makePromise(of: MKServerResponse<[TodoItemModel]>.self)
+//  // handle the result
+//  database.query(request) { result in
+//    let serverResult = result.map { $0.map(TodoItemModel.init) }
+//    let actual = Result { try MKServerResponse(fromResult: serverResult) }
+//
+//    promise.completeWith(actual)
+//    //    do {
+//    //      try print(result.get().information)
+//    //    } catch {
+//    //      //completed(error)
+//    //      return
+//    //    }
+//    // completed(nil)
+//  }
+//  return promise.futureResult
+// }
 
 try app.run()

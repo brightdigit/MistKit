@@ -1,7 +1,12 @@
 # Reference Documentation
 
+## Protocols
+
+-   [MKModelStorable](protocols/MKModelStorable.md)
+
 ## Classes
 
+-   [MKVaporModelStorage](classes/MKVaporModelStorage.md)
 -   [MKVaporSessionStorage](classes/MKVaporSessionStorage.md)
 
 ## Enums
