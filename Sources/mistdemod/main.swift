@@ -56,9 +56,11 @@ struct MistDemoArguments {
   var token: String?
 }
 
+struct MKVaporTokenClientError: Error {}
+
 class MKVaporTokenClient: MKTokenClient {
   func request(_: MKAuthenticationResponse?, _ callback: @escaping (Result<String, Error>) -> Void) {
-    callback(.failure(NSError()))
+    callback(.failure(MKVaporTokenClientError()))
   }
 }
 
