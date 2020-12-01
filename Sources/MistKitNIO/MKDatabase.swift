@@ -46,7 +46,8 @@ public extension EventLoopFuture {
   func content<RecordType: MKContentRecord, ContentType>()
     -> EventLoopFuture<MKServerResponse<[ContentType]>>
     where Value == [RecordType], RecordType.ContentType == ContentType {
-    return mapEach(RecordType.content(fromRecord:)).mistKitResponse()
+    // return mapEach(RecordType.content(fromRecord:)).mistKitResponse()
+    return map { $0.map(RecordType.content(fromRecord:)) }.mistKitResponse()
   }
 
   func content<RecordType: MKContentRecord, ContentType>()
