@@ -18,7 +18,12 @@ func query<RecordType: MKContentRecord, EncodedType>(
 ### `perform(operations:on:)`
 
 ```swift
-func perform<RecordType: MKContentRecord, EncodedType>(operations: ModifyRecordQueryRequest<RecordType>, on eventLoop: EventLoop) -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>> where RecordType.ContentType == EncodedType
+func perform<RecordType: MKContentRecord, EncodedType>(
+  operations: ModifyRecordQueryRequest<RecordType>,
+  on eventLoop: EventLoop
+)
+  -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>>
+  where RecordType.ContentType == EncodedType
 ```
 
 ### `lookup(_:on:)`
