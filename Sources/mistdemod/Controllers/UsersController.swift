@@ -1,3 +1,5 @@
+import MistKit
+import MistKitVapor
 import Vapor
 
 struct UsersController: RouteCollection {
@@ -10,7 +12,16 @@ struct UsersController: RouteCollection {
     return user.save(on: request.db).transform(to: HTTPStatus.created)
   }
 
+  // whoami
+
+  func get(_ request: Request) throws -> EventLoopFuture<MKServerResponse<UserIdentityResponse>> {
+    let database = MKDatabase(request: request)
+    return database.perform(request: GetCurrentUserIdentityRequest(), on: request.eventLoop).mistKitResponse()
+  }
+
   func boot(routes: RoutesBuilder) throws {
-    routes.post("users", use: create)
+    let users = routes.grouped("users")
+    users.grouped(User.authenticator()).get([], use: get)
+    users.post([], use: create)
   }
 }

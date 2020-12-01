@@ -49,3 +49,9 @@ public func encode(to encoder: Encoder) throws
 ```swift
 public init(fromResult result: Result<Success, Error>) throws
 ```
+
+### `init(attemptRecoveryFrom:)`
+
+```swift
+public init(attemptRecoveryFrom error: Error) throws
+```

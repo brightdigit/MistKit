@@ -42,8 +42,36 @@ public enum MKServerResponse<Success>: Codable where Success: Codable {
     }
   }
 
+  public init(attemptRecoveryFrom error: Error) throws {
+    guard let mkError = error as? MKError else {
+      throw error
+    }
+
+    guard case let MKError.authenticationRequired(redirect) = mkError else {
+      throw error
+    }
+
+    self = .failure(redirect.url)
+  }
+
   case failure(URL)
   case success(Success)
 }
 
 extension MKServerResponse: Content {}
+
+public extension EventLoopFuture {
+  func content<RecordType: MKContentRecord, ContentType>() -> EventLoopFuture<MKServerResponse<[ContentType]>> where Value == [RecordType], RecordType.ContentType == ContentType {
+    return mapEach(RecordType.content(fromRecord:)).mistKitResponse()
+  }
+
+  func content<RecordType: MKContentRecord, ContentType>() -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<ContentType>>> where Value == ModifiedRecordQueryResult<RecordType>, RecordType.ContentType == ContentType {
+    return map(ModifiedRecordQueryContent.init).mistKitResponse()
+  }
+
+  func mistKitResponse() -> EventLoopFuture<MKServerResponse<Value>> where Value: Decodable {
+    map(MKServerResponse.success).flatMapErrorThrowing(MKServerResponse.init(attemptRecoveryFrom:))
+  }
+}
+
+extension UserIdentityResponse: Content {}

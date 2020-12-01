@@ -3,7 +3,7 @@
 # `RecordName`
 
 ```swift
-public struct RecordName: Decodable
+public struct RecordName: Codable
 ```
 
 ## Properties

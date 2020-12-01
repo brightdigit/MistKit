@@ -1,6 +1,6 @@
 import Foundation
 
-public struct RecordName: Decodable {
+public struct RecordName: Codable {
   public let uuid: UUID
   public init(from decoder: Decoder) throws {
     let uuidString = try decoder.singleValueContainer().decode(String.self)

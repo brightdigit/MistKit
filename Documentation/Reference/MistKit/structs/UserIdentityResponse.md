@@ -3,7 +3,7 @@
 # `UserIdentityResponse`
 
 ```swift
-public struct UserIdentityResponse: MKDecodable
+public struct UserIdentityResponse: MKDecodable, Codable
 ```
 
 ## Properties
