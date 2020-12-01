@@ -17,12 +17,12 @@ let package = Package(
       targets: ["MistKitNIO"]
     ),
     .library(
-      name: "MistKitSwifter",
-      targets: ["MistKitSwifter"]
-    ),
-    .library(
       name: "MistKitVapor",
       targets: ["MistKitVapor"]
+    ),
+    .library(
+      name: "MistKitSwifter",
+      targets: ["MistKitSwifter"]
     ),
     .executable(name: "mistdemoc", targets: ["mistdemoc"]),
     .executable(name: "mistdemod", targets: ["mistdemod"])

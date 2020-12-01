@@ -148,7 +148,7 @@ To integrate **MistKit** into your project using SPM, specify it in your Package
 let package = Package(
   ...
   dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit", .branch("main")
+    .package(url: "https://github.com/brightdigit/MistKit", from: "0.2.0")
   ],
   targets: [
       .target(
@@ -157,6 +157,18 @@ let package = Package(
       ...
   ]
 )
+```
+
+There are also products for SwiftNIO as well as Vapor if you are building server-side implmentation:
+
+```swift      
+      .target(
+          name: "YourTarget",
+          dependencies: ["MistKit", 
+            .product(name: "MistKitNIO", package: "MistKit"),  // if you are building a server-side application
+            .product(name: "MistKitVapor", package: "MistKit") // if you are building a Vapor application
+            ...]
+      ),
 ```
 
 # Usage 
@@ -200,13 +212,18 @@ Once that's setup, you can setup a `MKTokenManager`.
 
 #### Managing Web Authentication Tokens
 
-`MKTokenManager` requires two components:
-
-* `MKTokenStorage` stores the token for later
+`MKTokenManager` requires a `MKTokenStorage` for storing the token for later.
+There are a few implementations you can use:
   * `MKFileStorage` stores the token as a simple text file
   * `MKUserDefaultsStorage` stores the token using `UserDefaults`
-* `MKTokenClient` sets up an http server for listening for the web authentication token
+  * `MKVaporModelStorage` stores the token in a database `Model` object via `Fluent`
+  * `MKVaporSessionStorage` stores the token the Vapor `Session` data
+
+Optionally **MistKit** can setup a web server for you if needed to listen to web authentication via a `MKTokenClient`:
+There are a few implementations you can use:
   * `MKNIOHTTP1TokenClient` sets up an http server using SwiftNIO
+
+Here's an example of how you `MKDatabase`:
 
 ```swift
 let connection = MKDatabaseConnection(
@@ -230,7 +247,7 @@ let database = MKDatabase(
 )
 ```
 
-If you already have access to the `webAuthenticationToken`, you can set the token in the `MKTokenManager` at any point in your application:
+If you already have access to the `webAuthenticationToken`, you can always set the token in the `MKTokenManager` at any point in your application:
 
 ```swift
 // setup how to manager your user's web authentication token
@@ -247,11 +264,80 @@ if let token = options.token {
 ...
 ```
 
-A great example of this is if you are already, logged in an iPhone app using CloudKit and wish to [save the webAuthenticationToken from `CKFetchWebAuthTokenOperation` into a database using server-side swift](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation).
+##### Managing Tokens in Vapor
+
+In the `mistdemod` demo Vapor application, there's an example of how to create an `MKDatabase` based on the request using both `MKVaporModelStorage` and `MKVaporSessionStorage`:
+
+```swift
+extension MKDatabase where HttpClient == MKVaporClient {
+  init(request: Request) {
+    let storage: MKTokenStorage
+    if let user = request.auth.get(User.self) {
+      storage = MKVaporModelStorage(model: user)
+    } else {
+      storage = MKVaporSessionStorage(session: request.session)
+    }
+    let manager = MKTokenManager(storage: storage, client: nil)
+
+    let options = MistDemoDefaultConfiguration(apiKey: request.application.cloudKitAPIKey)
+    let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+
+    // use the webAuthenticationToken which is passed
+    if let token = options.token {
+      manager.webAuthenticationToken = token
+    }
+
+    self.init(connection: connection, factory: nil, client: MKVaporClient(client: request.client), tokenManager: manager)
+  }
+}
+```
+
+In this case, for the `User` model needs to implement `MKModelStorable`.
+
+```swift
+final class User: Model, Content {
+  ...
+
+  @Field(key: "cloudKitToken")
+  var cloudKitToken: String?
+}
+
+extension User: MKModelStorable {
+  static var tokenKey: KeyPath<User, Field<String?>> = \User.$cloudKitToken
+}
+```
+
+The `MKModelStorable` protocol ensures that the `Model` contains the properties needed for storing the web authentication token.
+
+While the command line tool needs a `MKTokenClient` to listen for the callback from CloudKit, with a server-side application you can just add a API call. Here's an example which listens for the `ckWebAuthToken` and saves it to the `User`:
+
+```swift
+struct CloudKitController: RouteCollection {
+  func token(_ request: Request) -> EventLoopFuture<HTTPStatus> {
+    guard let token: String = request.query["ckWebAuthToken"] else {
+      return request.eventLoop.makeSucceededFuture(.notFound)
+    }
+
+    guard let user = request.auth.get(User.self) else {
+      request.cloudKitAPI.webAuthenticationToken = token
+      return request.eventLoop.makeSucceededFuture(.accepted)
+    }
+
+    user.cloudKitToken = token
+    return user.save(on: request.db).transform(to: .accepted)
+  }
+
+  func boot(routes: RoutesBuilder) throws {
+    routes.get(["token"], use: token)
+  }
+}
+```
+
+If you have an app which already uses Apple's existing CloudKit API, you can also [save the webAuthenticationToken to your database with a `CKFetchWebAuthTokenOperation`](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation).
 
 ##### Using `MKNIOHTTP1TokenClient`
 
-To use `MKNIOHTTP1TokenClient`, add `MistKitNIOHTTP1Token` to your package dependency:
+If you are not building a server-side application, you can use `MKNIOHTTP1TokenClient`, by adding `MistKitNIO` to your package dependency:
 
 ```swift
 let package = Package(
@@ -516,6 +602,20 @@ database.lookup(request) { result in
   }
 }
 ```
+
+### Using SwiftNIO
+
+If you are building a server-side application and already using SwiftNIO 
+
+* TODO *
+
+#### Using EventLoops
+
+* TODO *
+
+#### Choosing an Http Client
+
+* TODO *
 
 ## Examples
 
