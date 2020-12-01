@@ -49,7 +49,8 @@ jobs:
                     libz3-dev \
                     pkg-config \
                     tzdata \
-                    zlib1g-dev
+                    zlib1g-dev \
+                    libsqlite3-dev
             else
               apt-get -y install \
                 binutils \
@@ -64,7 +65,8 @@ jobs:
                 libxml2 \
                 pkg-config \
                 tzdata \
-                zlib1g-dev
+                zlib1g-dev \
+                libsqlite3-dev
             fi
           dpkg-reconfigure --frontend noninteractive tzdata
           curl -s https://packagecloud.io/install/repositories/swift-arm/release/script.deb.sh | sudo bash
