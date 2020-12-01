@@ -11,7 +11,12 @@ public extension MKDatabase {
     return promise.futureResult
   }
 
-  func perform<RecordType: MKContentRecord, EncodedType>(operations: ModifyRecordQueryRequest<RecordType>, on eventLoop: EventLoop) -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>> where RecordType.ContentType == EncodedType {
+  func perform<RecordType: MKContentRecord, EncodedType>(
+    operations: ModifyRecordQueryRequest<RecordType>,
+    on eventLoop: EventLoop
+  )
+    -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>>
+    where RecordType.ContentType == EncodedType {
     let promise = eventLoop.makePromise(of: ModifiedRecordQueryResult<RecordType>.self)
     perform(operations: operations, promise.completeWith)
     return promise.futureResult
@@ -38,11 +43,15 @@ public extension MKDatabase {
 }
 
 public extension EventLoopFuture {
-  func content<RecordType: MKContentRecord, ContentType>() -> EventLoopFuture<MKServerResponse<[ContentType]>> where Value == [RecordType], RecordType.ContentType == ContentType {
+  func content<RecordType: MKContentRecord, ContentType>()
+    -> EventLoopFuture<MKServerResponse<[ContentType]>>
+    where Value == [RecordType], RecordType.ContentType == ContentType {
     return mapEach(RecordType.content(fromRecord:)).mistKitResponse()
   }
 
-  func content<RecordType: MKContentRecord, ContentType>() -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<ContentType>>> where Value == ModifiedRecordQueryResult<RecordType>, RecordType.ContentType == ContentType {
+  func content<RecordType: MKContentRecord, ContentType>()
+    -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<ContentType>>>
+    where Value == ModifiedRecordQueryResult<RecordType>, RecordType.ContentType == ContentType {
     return map(ModifiedRecordQueryContent.init).mistKitResponse()
   }
 }
