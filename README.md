@@ -43,6 +43,9 @@ Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
       * [Fetching Records by Record Name (records/lookup)](#fetching-records-by-record-name-recordslookup)
       * [Fetching Current User Identity (users/caller)](#fetching-current-user-identity-userscaller)
       * [Modifying Records (records/modify)](#modifying-records-recordsmodify)
+      * [Using SwiftNIO](#using-swiftnio)
+         * [Using EventLoops](#using-eventloops)
+         * [Choosing an HTTP Client](#choosing-an-http-client)
       * [Examples](#examples)
       * [Further Code Documentation](#further-code-documentation)
    * [**Roadmap**](#roadmap)
@@ -603,17 +606,17 @@ database.lookup(request) { result in
 }
 ```
 
-### Using SwiftNIO
+## Using SwiftNIO
 
 If you are building a server-side application and already using SwiftNIO 
 
 * TODO *
 
-#### Using EventLoops
+### Using EventLoops
 
 * TODO *
 
-#### Choosing an Http Client
+### Choosing an Http Client
 
 * TODO *
 
