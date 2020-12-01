@@ -15,11 +15,6 @@
 -   [MKVaporModelStorage](classes/MKVaporModelStorage.md)
 -   [MKVaporSessionStorage](classes/MKVaporSessionStorage.md)
 
-## Enums
-
--   [MKServerResponse](enums/MKServerResponse.md)
--   [MKServerResponse.CodingKeys](enums/MKServerResponse.CodingKeys.md)
-
 ## Extensions
 
 -   [EventLoopFuture](extensions/EventLoopFuture.md)

@@ -65,6 +65,8 @@
 -   [MKError](enums/MKError.md)
 -   [MKErrorCode](enums/MKErrorCode.md)
 -   [MKFieldType](enums/MKFieldType.md)
+-   [MKServerResponse](enums/MKServerResponse.md)
+-   [MKServerResponse.CodingKeys](enums/MKServerResponse.CodingKeys.md)
 -   [MKValue](enums/MKValue.md)
 -   [ModifiedRecord](enums/ModifiedRecord.md)
 -   [ModifyOperationType](enums/ModifyOperationType.md)

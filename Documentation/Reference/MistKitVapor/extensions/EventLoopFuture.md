@@ -21,5 +21,5 @@ func content<RecordType: MKContentRecord, ContentType>() -> EventLoopFuture<MKSe
 ### `mistKitResponse()`
 
 ```swift
-func mistKitResponse() -> EventLoopFuture<MKServerResponse<Value>> where Value: Decodable
+func mistKitResponse() -> EventLoopFuture<MKServerResponse<Value>>
 ```

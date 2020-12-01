@@ -9,20 +9,12 @@ public extension MKDatabase {
     let promise = eventLoop.makePromise(of: [RecordType].self)
     self.query(query, promise.completeWith)
     return promise.futureResult
-//    let next = promise.futureResult.mapEach(RecordType.content(fromRecord:))
-//    return next.flatMapAlways { result in
-//      eventLoop.future(result: Result(catching: { try MKServerResponse(fromResult: result) }))
-//    }
   }
 
   func perform<RecordType: MKContentRecord, EncodedType>(operations: ModifyRecordQueryRequest<RecordType>, on eventLoop: EventLoop) -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>> where RecordType.ContentType == EncodedType {
     let promise = eventLoop.makePromise(of: ModifiedRecordQueryResult<RecordType>.self)
     perform(operations: operations, promise.completeWith)
     return promise.futureResult
-//    let next = promise.futureResult.map(ModifiedRecordQueryContent.init(from:))
-//    return next.flatMapAlways { (result) -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<EncodedType>>> in
-//      eventLoop.future(result: Result(catching: { try MKServerResponse(fromResult: result) }))
-//    }
   }
 
   func lookup<RecordType: MKContentRecord, EncodedType>(
@@ -32,10 +24,6 @@ public extension MKDatabase {
     let promise = eventLoop.makePromise(of: [RecordType].self)
     self.lookup(lookup, promise.completeWith)
     return promise.futureResult
-//    let next = promise.futureResult.mapEach(RecordType.content(fromRecord:))
-//    return next.flatMapAlways { result in
-//      eventLoop.future(result: Result(catching: { try MKServerResponse(fromResult: result) }))
-//    }
   }
 
   func perform<RequestType: MKRequest, ResponseType>(
@@ -46,5 +34,21 @@ public extension MKDatabase {
     let promise = eventLoop.makePromise(of: ResponseType.self)
     perform(request: request, returnFailedAuthentication: returnFailedAuthentication, promise.completeWith)
     return promise.futureResult
+  }
+}
+
+public extension EventLoopFuture {
+  func content<RecordType: MKContentRecord, ContentType>() -> EventLoopFuture<MKServerResponse<[ContentType]>> where Value == [RecordType], RecordType.ContentType == ContentType {
+    return mapEach(RecordType.content(fromRecord:)).mistKitResponse()
+  }
+
+  func content<RecordType: MKContentRecord, ContentType>() -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<ContentType>>> where Value == ModifiedRecordQueryResult<RecordType>, RecordType.ContentType == ContentType {
+    return map(ModifiedRecordQueryContent.init).mistKitResponse()
+  }
+}
+
+public extension EventLoopFuture where Value: Codable {
+  func mistKitResponse() -> EventLoopFuture<MKServerResponse<Value>> {
+    map(MKServerResponse.success).flatMapErrorThrowing(MKServerResponse.init(attemptRecoveryFrom:))
   }
 }

@@ -24,6 +24,10 @@ let package = Package(
       name: "MistKitVapor",
       targets: ["MistKitVapor"]
     ),
+    .library(
+      name: "MistKitNIOClient",
+      targets: ["MistKitNIOClient"]
+    ),
     .executable(name: "mistdemoc", targets: ["mistdemoc"]),
     .executable(name: "mistdemod", targets: ["mistdemod"])
   ],
@@ -36,6 +40,7 @@ let package = Package(
     .package(url: "https://github.com/brightdigit/Swifter.git", .branch("stable")),
     .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
     .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
+    .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
     // dev
     .package(url: "https://github.com/shibapm/Komondor", from: "1.0.6"),
     .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"),
@@ -65,6 +70,12 @@ let package = Package(
               "MistKit",
               .product(name: "Vapor", package: "vapor"),
               .product(name: "Fluent", package: "fluent")
+            ]),
+
+    .target(name: "MistKitNIOClient",
+            dependencies: [
+              "MistKit",
+              .product(name: "AsyncHTTPClient", package: "async-http-client")
             ]),
     .target(name: "mistdemoc", dependencies: ["MistKit", "MistKitNIOHTTP1Token", "MistKitDemo",
                                               .product(name: "ArgumentParser", package: "swift-argument-parser")]),
