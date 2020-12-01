@@ -17,12 +17,16 @@ jobs:
 
     strategy:
       matrix:
-        xcode: ["/Applications/Xcode_11.5.app","/Applications/Xcode_11.6.app","/Applications/Xcode_11.7.app","/Applications/Xcode_12.app"]
+        runs-on:  [macos-10.15,macos-11.0]
+        xcode: ["/Applications/Xcode_11.7.app","/Applications/Xcode_12.2.app","/Applications/Xcode_12.3.app"]
+        include:
+          - os: macos-10.15
+            xcode: "/Applications/Xcode_11.5.app"
 
     steps:
     - uses: actions/checkout@v2
     - name: Set Xcode Name
-      run: echo "::set-env name=XCODE_NAME::$(basename -- ${{ matrix.xcode }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)"
+      run: echo "XCODE_NAME=$(basename -- ${{ matrix.xcode }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)" >> $GITHUB_ENV
     - name: Setup Xcode
       run: sudo xcode-select -s ${{ matrix.xcode }}/Contents/Developer
     - name: Build
@@ -34,15 +38,13 @@ jobs:
     - name: Prepare Code Coverage
       run: xcrun llvm-cov export -format="lcov" .build/debug/${{ env.PACKAGE_NAME }}PackageTests.xctest/Contents/MacOS/${{ env.PACKAGE_NAME }}PackageTests -instr-profile .build/debug/codecov/default.profdata > info.lcov
     - name: Upload to CodeCov.io
-      run: bash <(curl https://codecov.io/bash) -F github -F macOS -n ${{ github.sha }}
+      run: bash <(curl https://codecov.io/bash) -F github -F macOS -F ${{ matrix.runs-on }} -n ${{ github.sha }}
       env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - name: Build Documentation
-      if: ${{ matrix.xcode == '/Applications/Xcode_12_beta.app' }}
-      run: swift run sourcedocs generate build -cra
-    - name: Commit files
-      if: ${{ matrix.xcode == '/Applications/Xcode_12_beta.app' }}
+      if: ${{ matrix.xcode == '/Applications/Xcode_12.3.app' }}
       run: |
+        swift run sourcedocs generate build -cra
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git status
