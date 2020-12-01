@@ -29,8 +29,6 @@ public class MKFileStorage: MKTokenStorage {
       try? fileHandle.seek(toOffset: 0)
       let data = fileHandle.readDataToEndOfFile()
       return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
-      // return try? String(contentsOf: url)
-      // self.userDefaults.string(forKey: "webAuthenticationToken")
     }
     set {
       guard let data = newValue?.data(using: .utf8) else {
@@ -38,8 +36,6 @@ public class MKFileStorage: MKTokenStorage {
       }
       fileHandle.write(data)
       fileHandle.truncateFile(atOffset: UInt64(data.count))
-      // webAuthenticationToken?.write(to: url, atomically: true, encoding: .utf8)
-      // self.userDefaults.set(newValue, forKey: "webAuthenticationToken")
     }
   }
 

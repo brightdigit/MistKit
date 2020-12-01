@@ -17,8 +17,16 @@ let package = Package(
       targets: ["MistKitNIOHTTP1Token"]
     ),
     .library(
+      name: "MistKitSwifter",
+      targets: ["MistKitSwifter"]
+    ),
+    .library(
       name: "MistKitVapor",
       targets: ["MistKitVapor"]
+    ),
+    .library(
+      name: "MistKitNIOClient",
+      targets: ["MistKitNIOClient"]
     ),
     .executable(name: "mistdemoc", targets: ["mistdemoc"]),
     .executable(name: "mistdemod", targets: ["mistdemod"])
@@ -29,6 +37,10 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-nio.git", from: "2.20.0"),
     .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
+    .package(url: "https://github.com/brightdigit/Swifter.git", .branch("stable")),
+    .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
+    .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
+    .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
     // dev
     .package(url: "https://github.com/shibapm/Komondor", from: "1.0.6"),
     .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"),
@@ -48,13 +60,29 @@ let package = Package(
               .product(name: "NIO", package: "swift-nio"),
               .product(name: "NIOHTTP1", package: "swift-nio")
             ]),
+    .target(name: "MistKitSwifter",
+            dependencies: [
+              "MistKit",
+              .product(name: "Swifter", package: "Swifter")
+            ]),
     .target(name: "MistKitVapor",
             dependencies: [
-              "MistKit", .product(name: "Vapor", package: "vapor")
+              "MistKit",
+              .product(name: "Vapor", package: "vapor"),
+              .product(name: "Fluent", package: "fluent")
+            ]),
+
+    .target(name: "MistKitNIOClient",
+            dependencies: [
+              "MistKit",
+              .product(name: "AsyncHTTPClient", package: "async-http-client")
             ]),
     .target(name: "mistdemoc", dependencies: ["MistKit", "MistKitNIOHTTP1Token", "MistKitDemo",
                                               .product(name: "ArgumentParser", package: "swift-argument-parser")]),
-    .target(name: "mistdemod", dependencies: ["MistKit", "MistKitVapor", "MistKitDemo", .product(name: "Vapor", package: "vapor")]),
+    .target(name: "mistdemod", dependencies: ["MistKit", "MistKitVapor", "MistKitDemo",
+                                              .product(name: "Vapor", package: "vapor"),
+                                              .product(name: "Fluent", package: "fluent"),
+                                              .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver")]),
     .target(name: "MistKitDemo",
             dependencies: ["MistKit"]),
     .testTarget(
@@ -74,8 +102,7 @@ let package = Package(
         "swift test --enable-code-coverage --enable-test-discovery --generate-linuxmain",
         "swift run swiftformat .",
         "swift run swiftlint autocorrect",
-        "swift run sourcedocs generate build --spm-module MistKit -c -r",
-        // "swift run swiftpmls mine",
+        "swift run sourcedocs generate build -cra",
         "git add .",
         "swift run swiftformat --lint .",
         "swift run swiftlint"
