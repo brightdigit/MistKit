@@ -23,7 +23,7 @@ jobs:
     - name: Set Ubuntu Codename
       run: echo "RELEASE_NAME=$(lsb_release -sc)"  >> $GITHUB_ENV
     - name: Download Swift
-      run: curl -O https://swift.org/builds/swift-${{ martix.SWIFT_VER }}-release/ubuntu${RELEASE_NUM}/swift-${{ martix.SWIFT_VER }}-RELEASE/swift-${{ martix.SWIFT_VER }}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz
+      run: curl -O "https://swift.org/builds/swift-${{ martix.SWIFT_VER }}-release/ubuntu${RELEASE_NUM}/swift-${{ martix.SWIFT_VER }}-RELEASE/swift-${{ martix.SWIFT_VER }}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz"
     - name: Extract Swift
       run: tar xzf "swift-${{ martix.SWIFT_VER }}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz"
     - name: Add Path
