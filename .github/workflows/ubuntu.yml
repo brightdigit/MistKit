@@ -25,7 +25,7 @@ jobs:
     - name: Download Swift
       run: curl -O https://swift.org/builds/swift-${{ martix.SWIFT_VER }}-release/ubuntu${RELEASE_NUM}/swift-${{ martix.SWIFT_VER }}-RELEASE/swift-${{ martix.SWIFT_VER }}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz
     - name: Extract Swift
-      run: tar xzf swift-${{ martix.SWIFT_VER }}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz
+      run: tar xzf "swift-${{ martix.SWIFT_VER }}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz"
     - name: Add Path
       run: echo "$GITHUB_WORKSPACE/swift-${{ martix.SWIFT_VER }}-RELEASE-ubuntu${RELEASE_DOT}/usr/bin" >> $GITHUB_PATH
     - name: Build
