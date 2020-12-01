@@ -22,10 +22,10 @@ jobs:
         include:
           - os: macos-10.15
             xcode: "/Applications/Xcode_11.5.app"
-          - os: macos-10.15
-            xcode: "/Applications/Xcode_11.6.app"
-          - os: macos-10.15
-            xcode: "/Applications/Xcode_12.app"
+#           - os: macos-10.15
+#             xcode: "/Applications/Xcode_11.6.app"
+#           - os: macos-10.15
+#             xcode: "/Applications/Xcode_12.app"
 
     steps:
     - uses: actions/checkout@v2
