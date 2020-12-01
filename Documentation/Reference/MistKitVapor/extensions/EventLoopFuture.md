@@ -9,13 +9,17 @@ public extension EventLoopFuture
 ### `content()`
 
 ```swift
-func content<RecordType: MKContentRecord, ContentType>() -> EventLoopFuture<MKServerResponse<[ContentType]>> where Value == [RecordType], RecordType.ContentType == ContentType
+func content<RecordType: MKContentRecord, ContentType>()
+  -> EventLoopFuture<MKServerResponse<[ContentType]>>
+  where Value == [RecordType], RecordType.ContentType == ContentType
 ```
 
 ### `content()`
 
 ```swift
-func content<RecordType: MKContentRecord, ContentType>() -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<ContentType>>> where Value == ModifiedRecordQueryResult<RecordType>, RecordType.ContentType == ContentType
+func content<RecordType: MKContentRecord, ContentType>()
+  -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<ContentType>>>
+  where Value == ModifiedRecordQueryResult<RecordType>, RecordType.ContentType == ContentType
 ```
 
 ### `mistKitResponse()`
