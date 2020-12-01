@@ -47,8 +47,8 @@ Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
       * [Further Code Documentation](#further-code-documentation)
    * [**Roadmap**](#roadmap)
       * [~~0.1.0~~](#010)
-      * [**0.2.0**](#020)
-      * [0.4.0](#040)
+      * [~~0.2.0~~](#020)
+      * [**0.4.0**](#040)
       * [0.6.0](#060)
       * [0.8.0](#080)
       * [0.9.0](#090)
@@ -519,7 +519,9 @@ database.lookup(request) { result in
 
 ## Examples
 
-For now checkout [the `mistdemoc` Swift package executable here](https://github.com/brightdigit/MistKit/tree/main/Sources/mistdemoc) on how to do basic CRUD methods in CloudKit via MistKit.
+There are two examples on how to do basic CRUD methods in CloudKit via MistKit: 
+* As a command line tool using Swift Argument Parser checkout [the `mistdemoc` Swift package executable here](https://github.com/brightdigit/MistKit/tree/main/Sources/mistdemoc)
+* And a server-side Vapor application [`mistdemod` here](https://github.com/brightdigit/MistKit/tree/main/Sources/mistdemoc)
 
 ## Further Code Documentation
 
@@ -539,10 +541,10 @@ For now checkout [the `mistdemoc` Swift package executable here](https://github.
 
 ## 0.2.0 
 
-- [ ] Vapor Token Client
-- [ ] Vapor Token Storage
-- [ ] Vapor URL Client
-- [ ] Swift NIO URL Client
+- [x] Vapor Token Client
+- [x] Vapor Token Storage
+- [x] Vapor URL Client
+- [x] Swift NIO URL Client
 
 ## 0.4.0 
 
