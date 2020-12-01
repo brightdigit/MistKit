@@ -21,7 +21,11 @@ jobs:
         xcode: ["/Applications/Xcode_11.7.app","/Applications/Xcode_12.2.app","/Applications/Xcode_12.3.app"]
         include:
           - os: macos-10.15
-            xcode: ["/Applications/Xcode_11.5.app","/Applications/Xcode_11.6.app","/Applications/Xcode_12.app","/Applications/Xcode_12.1.app"]
+            xcode: "/Applications/Xcode_11.5.app"
+          - os: macos-10.15
+            xcode: "/Applications/Xcode_11.6.app"
+          - os: macos-10.15
+            xcode: "/Applications/Xcode_12.app"
 
     steps:
     - uses: actions/checkout@v2
