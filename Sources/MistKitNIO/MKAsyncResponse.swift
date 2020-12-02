@@ -3,6 +3,8 @@ import Foundation
 import MistKit
 
 public struct MKAsyncResponse: MKHttpResponse {
+  public let response: HTTPClient.Response
+  
   public var body: Data? {
     return response.body.map { Data(buffer: $0) }
   }
@@ -14,6 +16,4 @@ public struct MKAsyncResponse: MKHttpResponse {
   public var webAuthenticationToken: String? {
     return response.headers["X-Apple-CloudKit-Web-Auth-Token"].first
   }
-
-  let response: HTTPClient.Response
 }
