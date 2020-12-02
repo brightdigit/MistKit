@@ -6,6 +6,7 @@ on:
       - '*'
       - 'feature/*'
       - 'release/*'
+    tag: '*'
 
 jobs:
   build:
