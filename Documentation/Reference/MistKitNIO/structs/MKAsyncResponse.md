@@ -7,6 +7,12 @@ public struct MKAsyncResponse: MKHttpResponse
 ```
 
 ## Properties
+### `response`
+
+```swift
+public let response: HTTPClient.Response
+```
+
 ### `body`
 
 ```swift
