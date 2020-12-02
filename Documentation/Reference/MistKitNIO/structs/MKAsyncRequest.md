@@ -6,6 +6,25 @@
 public struct MKAsyncRequest: MKHttpRequest
 ```
 
+## Properties
+### `client`
+
+```swift
+public let client: HTTPClient
+```
+
+### `url`
+
+```swift
+public let url: URL
+```
+
+### `data`
+
+```swift
+public let data: Data?
+```
+
 ## Methods
 ### `execute(_:)`
 
