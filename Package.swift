@@ -37,12 +37,12 @@ let package = Package(
     .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
     .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
     .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
-//    // dev
-//    .package(url: "https://github.com/shibapm/Komondor", from: "1.0.6"), // dev
-//    .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"), // dev
-//    .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.47.0"), // dev
-//    .package(url: "https://github.com/realm/SwiftLint", from: "0.41.0"), // dev
-//    .package(url: "https://github.com/brightdigit/Rocket", .branch("feature/yams-4.0.0")) // dev
+    // dev
+    .package(url: "https://github.com/shibapm/Komondor", from: "1.0.6"), // dev
+    .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"), // dev
+    .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.47.0"), // dev
+    .package(url: "https://github.com/realm/SwiftLint", from: "0.41.0"), // dev
+    .package(url: "https://github.com/brightdigit/Rocket", .branch("feature/yams-4.0.0")) // dev
   ],
   targets: [
     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
