@@ -1,5 +1,5 @@
 import MistKit
-import MistKitVapor
+import MistKitNIO
 import Vapor
 
 struct UsersController: RouteCollection {

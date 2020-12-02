@@ -9,30 +9,29 @@ public extension MKDatabase
 ### `query(_:on:)`
 
 ```swift
-func query<RecordType: MKContentRecord, EncodedType>(
+func query<RecordType>(
   _ query: FetchRecordQueryRequest<MKQuery<RecordType>>,
   on eventLoop: EventLoop
-) -> EventLoopFuture<[RecordType]> where RecordType.ContentType == EncodedType
+) -> EventLoopFuture<[RecordType]>
 ```
 
 ### `perform(operations:on:)`
 
 ```swift
-func perform<RecordType: MKContentRecord, EncodedType>(
+func perform<RecordType>(
   operations: ModifyRecordQueryRequest<RecordType>,
   on eventLoop: EventLoop
 )
   -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>>
-  where RecordType.ContentType == EncodedType
 ```
 
 ### `lookup(_:on:)`
 
 ```swift
-func lookup<RecordType: MKContentRecord, EncodedType>(
+func lookup<RecordType>(
   _ lookup: LookupRecordQueryRequest<RecordType>,
   on eventLoop: EventLoop
-) -> EventLoopFuture<[RecordType]> where RecordType.ContentType == EncodedType
+) -> EventLoopFuture<[RecordType]>
 ```
 
 ### `perform(request:returnFailedAuthentication:on:)`

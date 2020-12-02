@@ -13,20 +13,16 @@ let package = Package(
       targets: ["MistKit"]
     ),
     .library(
-      name: "MistKitNIOHTTP1Token",
-      targets: ["MistKitNIOHTTP1Token"]
-    ),
-    .library(
-      name: "MistKitSwifter",
-      targets: ["MistKitSwifter"]
+      name: "MistKitNIO",
+      targets: ["MistKitNIO"]
     ),
     .library(
       name: "MistKitVapor",
       targets: ["MistKitVapor"]
     ),
     .library(
-      name: "MistKitNIOClient",
-      targets: ["MistKitNIOClient"]
+      name: "MistKitSwifter",
+      targets: ["MistKitSwifter"]
     ),
     .executable(name: "mistdemoc", targets: ["mistdemoc"]),
     .executable(name: "mistdemod", targets: ["mistdemod"])
@@ -42,11 +38,11 @@ let package = Package(
     .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
     .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
     // dev
-    .package(url: "https://github.com/shibapm/Komondor", from: "1.0.6"),
-    .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"),
-    .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.47.0"),
-    .package(url: "https://github.com/realm/SwiftLint", from: "0.41.0"),
-    .package(url: "https://github.com/brightdigit/Rocket", .branch("feature/yams-4.0.0"))
+    .package(url: "https://github.com/shibapm/Komondor", from: "1.0.6"), // dev
+    .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"), // dev
+    .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.47.0"), // dev
+    .package(url: "https://github.com/realm/SwiftLint", from: "0.41.0"), // dev
+    .package(url: "https://github.com/brightdigit/Rocket", .branch("feature/yams-4.0.0")) // dev
   ],
   targets: [
     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -55,11 +51,12 @@ let package = Package(
       name: "MistKit",
       dependencies: []
     ),
-    .target(name: "MistKitNIOHTTP1Token",
+    .target(name: "MistKitNIO",
             dependencies: [
               "MistKit",
               .product(name: "NIO", package: "swift-nio"),
-              .product(name: "NIOHTTP1", package: "swift-nio")
+              .product(name: "NIOHTTP1", package: "swift-nio"),
+              .product(name: "AsyncHTTPClient", package: "async-http-client")
             ]),
     .target(name: "MistKitSwifter",
             dependencies: [
@@ -69,16 +66,11 @@ let package = Package(
     .target(name: "MistKitVapor",
             dependencies: [
               "MistKit",
+              "MistKitNIO",
               .product(name: "Vapor", package: "vapor"),
               .product(name: "Fluent", package: "fluent")
             ]),
-
-    .target(name: "MistKitNIOClient",
-            dependencies: [
-              "MistKit",
-              .product(name: "AsyncHTTPClient", package: "async-http-client")
-            ]),
-    .target(name: "mistdemoc", dependencies: ["MistKit", "MistKitNIOHTTP1Token", "MistKitDemo",
+    .target(name: "mistdemoc", dependencies: ["MistKit", "MistKitNIO", "MistKitDemo",
                                               .product(name: "ArgumentParser", package: "swift-argument-parser")]),
     .target(name: "mistdemod", dependencies: ["MistKit", "MistKitVapor", "MistKitDemo",
                                               .product(name: "Vapor", package: "vapor"),

@@ -43,12 +43,15 @@ Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
       * [Fetching Records by Record Name (records/lookup)](#fetching-records-by-record-name-recordslookup)
       * [Fetching Current User Identity (users/caller)](#fetching-current-user-identity-userscaller)
       * [Modifying Records (records/modify)](#modifying-records-recordsmodify)
+      * [Using SwiftNIO](#using-swiftnio)
+         * [Using EventLoops](#using-eventloops)
+         * [Choosing an HTTP Client](#choosing-an-http-client)
       * [Examples](#examples)
       * [Further Code Documentation](#further-code-documentation)
    * [**Roadmap**](#roadmap)
       * [~~0.1.0~~](#010)
-      * [**0.2.0**](#020)
-      * [0.4.0](#040)
+      * [~~0.2.0~~](#020)
+      * [**0.4.0**](#040)
       * [0.6.0](#060)
       * [0.8.0](#080)
       * [0.9.0](#090)
@@ -148,7 +151,7 @@ To integrate **MistKit** into your project using SPM, specify it in your Package
 let package = Package(
   ...
   dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit", .branch("main")
+    .package(url: "https://github.com/brightdigit/MistKit", from: "0.2.0")
   ],
   targets: [
       .target(
@@ -157,6 +160,18 @@ let package = Package(
       ...
   ]
 )
+```
+
+There are also products for SwiftNIO as well as Vapor if you are building server-side implmentation:
+
+```swift      
+      .target(
+          name: "YourTarget",
+          dependencies: ["MistKit", 
+            .product(name: "MistKitNIO", package: "MistKit"),  // if you are building a server-side application
+            .product(name: "MistKitVapor", package: "MistKit") // if you are building a Vapor application
+            ...]
+      ),
 ```
 
 # Usage 
@@ -200,13 +215,18 @@ Once that's setup, you can setup a `MKTokenManager`.
 
 #### Managing Web Authentication Tokens
 
-`MKTokenManager` requires two components:
-
-* `MKTokenStorage` stores the token for later
+`MKTokenManager` requires a `MKTokenStorage` for storing the token for later.
+There are a few implementations you can use:
   * `MKFileStorage` stores the token as a simple text file
   * `MKUserDefaultsStorage` stores the token using `UserDefaults`
-* `MKTokenClient` sets up an http server for listening for the web authentication token
+  * `MKVaporModelStorage` stores the token in a database `Model` object via `Fluent`
+  * `MKVaporSessionStorage` stores the token the Vapor `Session` data
+
+Optionally **MistKit** can setup a web server for you if needed to listen to web authentication via a `MKTokenClient`:
+There are a few implementations you can use:
   * `MKNIOHTTP1TokenClient` sets up an http server using SwiftNIO
+
+Here's an example of how you `MKDatabase`:
 
 ```swift
 let connection = MKDatabaseConnection(
@@ -230,7 +250,7 @@ let database = MKDatabase(
 )
 ```
 
-If you already have access to the `webAuthenticationToken`, you can set the token in the `MKTokenManager` at any point in your application:
+If you already have access to the `webAuthenticationToken`, you can always set the token in the `MKTokenManager` at any point in your application:
 
 ```swift
 // setup how to manager your user's web authentication token
@@ -247,11 +267,80 @@ if let token = options.token {
 ...
 ```
 
-A great example of this is if you are already, logged in an iPhone app using CloudKit and wish to [save the webAuthenticationToken from `CKFetchWebAuthTokenOperation` into a database using server-side swift](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation).
+##### Managing Tokens in Vapor
+
+In the `mistdemod` demo Vapor application, there's an example of how to create an `MKDatabase` based on the request using both `MKVaporModelStorage` and `MKVaporSessionStorage`:
+
+```swift
+extension MKDatabase where HttpClient == MKVaporClient {
+  init(request: Request) {
+    let storage: MKTokenStorage
+    if let user = request.auth.get(User.self) {
+      storage = MKVaporModelStorage(model: user)
+    } else {
+      storage = MKVaporSessionStorage(session: request.session)
+    }
+    let manager = MKTokenManager(storage: storage, client: nil)
+
+    let options = MistDemoDefaultConfiguration(apiKey: request.application.cloudKitAPIKey)
+    let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+
+    // use the webAuthenticationToken which is passed
+    if let token = options.token {
+      manager.webAuthenticationToken = token
+    }
+
+    self.init(connection: connection, factory: nil, client: MKVaporClient(client: request.client), tokenManager: manager)
+  }
+}
+```
+
+In this case, for the `User` model needs to implement `MKModelStorable`.
+
+```swift
+final class User: Model, Content {
+  ...
+
+  @Field(key: "cloudKitToken")
+  var cloudKitToken: String?
+}
+
+extension User: MKModelStorable {
+  static var tokenKey: KeyPath<User, Field<String?>> = \User.$cloudKitToken
+}
+```
+
+The `MKModelStorable` protocol ensures that the `Model` contains the properties needed for storing the web authentication token.
+
+While the command line tool needs a `MKTokenClient` to listen for the callback from CloudKit, with a server-side application you can just add a API call. Here's an example which listens for the `ckWebAuthToken` and saves it to the `User`:
+
+```swift
+struct CloudKitController: RouteCollection {
+  func token(_ request: Request) -> EventLoopFuture<HTTPStatus> {
+    guard let token: String = request.query["ckWebAuthToken"] else {
+      return request.eventLoop.makeSucceededFuture(.notFound)
+    }
+
+    guard let user = request.auth.get(User.self) else {
+      request.cloudKitAPI.webAuthenticationToken = token
+      return request.eventLoop.makeSucceededFuture(.accepted)
+    }
+
+    user.cloudKitToken = token
+    return user.save(on: request.db).transform(to: .accepted)
+  }
+
+  func boot(routes: RoutesBuilder) throws {
+    routes.get(["token"], use: token)
+  }
+}
+```
+
+If you have an app which already uses Apple's existing CloudKit API, you can also [save the webAuthenticationToken to your database with a `CKFetchWebAuthTokenOperation`](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation).
 
 ##### Using `MKNIOHTTP1TokenClient`
 
-To use `MKNIOHTTP1TokenClient`, add `MistKitNIOHTTP1Token` to your package dependency:
+If you are not building a server-side application, you can use `MKNIOHTTP1TokenClient`, by adding `MistKitNIO` to your package dependency:
 
 ```swift
 let package = Package(
@@ -517,9 +606,93 @@ database.lookup(request) { result in
 }
 ```
 
+## Using SwiftNIO
+
+If you are building a server-side application and already using [SwiftNIO](https://github.com/apple/swift-nio), you might want to take advantage of some helpers which will work already existing patterns and APIs available. Primarily **[EventLoops](https://apple.github.io/swift-nio/docs/current/NIO/Protocols/EventLoop.html)** from [SwiftNIO](https://github.com/apple/swift-nio) and the respective **HTTP clients** from [SwiftNIO](https://github.com/apple/swift-nio) and [Vapor](https://vapor.codes/).
+
+### Using EventLoops
+
+If you are building a server-side application in [SwiftNIO](https://github.com/apple/swift-nio) (or [Vapor](https://vapor.codes/)), you are likely using [EventLoops](https://apple.github.io/swift-nio/docs/current/NIO/Protocols/EventLoop.html) and [EventLoopFuture](https://apple.github.io/swift-nio/docs/current/NIO/Classes/EventLoopFuture.html) for asyncronous programming. EventLoopFutures are essentially the Future/Promise implementation of [SwiftNIO](https://github.com/apple/swift-nio). Luckily there are helper methods in MistKit which provide [EventLoopFutures](https://apple.github.io/swift-nio/docs/current/NIO/Classes/EventLoopFuture.html) similar to the way they implmented in [SwiftNIO](https://github.com/apple/swift-nio). These implementations augment the already existing callback:
+
+
+```swift
+public extension MKDatabase {
+  func query<RecordType>(
+    _ query: FetchRecordQueryRequest<MKQuery<RecordType>>,
+    on eventLoop: EventLoop
+  ) -> EventLoopFuture<[RecordType]>
+
+  func perform<RecordType>(
+    operations: ModifyRecordQueryRequest<RecordType>,
+    on eventLoop: EventLoop
+  ) -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>>
+  
+  func lookup<RecordType>(
+    _ lookup: LookupRecordQueryRequest<RecordType>,
+    on eventLoop: EventLoop
+  ) -> EventLoopFuture<[RecordType]>
+
+  func perform<RequestType: MKRequest, ResponseType>(
+    request: RequestType,
+    on eventLoop: EventLoop
+  ) -> EventLoopFuture<ResponseType> -> EventLoopFuture<ResponseType>
+    where RequestType.Response == ResponseType
+}
+```
+
+Also if you are using the results as `Content` for a [Vapor](https://vapor.codes/) HTTP response, **MistKit** provides a `MKServerResponse` enum type which distinguishes between an authentication failure (with the redirect URL) and an actual success. 
+
+```swift
+public enum MKServerResponse<Success>: Codable where Success: Codable {
+  public init(attemptRecoveryFrom error: Error) throws
+
+  case failure(URL)
+  case success(Success)
+}
+```
+
+Besides [EventLoopFuture](https://apple.github.io/swift-nio/docs/current/NIO/Classes/EventLoopFuture.html), you can also use a different HTTP client for calling CloudKit Web Services.  
+
+### Choosing an HTTP Client
+
+By default, MistKit uses `URLSession` for making HTTP calls to the CloudKit Web Service via the `MKURLSessionClient`:
+
+```swift
+public struct MKURLSessionClient: MKHttpClient {
+  public init(session: URLSession) {
+    self.session = session
+  }
+
+  public func request(withURL url: URL, data: Data?) -> MKURLRequest
+}
+```
+
+However if you are using [SwiftNIO](https://github.com/apple/swift-nio) or [Vapor](https://vapor.codes/), it makes more sense the use their HTTP clients for making those calls:
+* For **SwiftNIO**, there's **`MKAsyncClient`** which uses an `HTTPClient` provided by the `AsyncHTTPClient` library
+* For **Vapor**, there's **`MKVaporClient`** which uses an `Client` provided by the `Vapor` library
+
+In the mistdemod example, you can see how to use a Vapor `Request` to create an `MKDatabase` with the `client` property of the `Request`:
+
+```swift
+extension MKDatabase where HttpClient == MKVaporClient {
+  init(request: Request) {
+    let manager: MKTokenManager    
+    let connection : MKDatabaseConnection
+    self.init(
+      connection: connection, 
+      factory: nil, 
+      client: MKVaporClient(client: request.client), 
+      tokenManager: manager
+    )
+  }
+}
+```
+
 ## Examples
 
-For now checkout [the `mistdemoc` Swift package executable here](https://github.com/brightdigit/MistKit/tree/main/Sources/mistdemoc) on how to do basic CRUD methods in CloudKit via MistKit.
+There are two examples on how to do basic CRUD methods in CloudKit via MistKit: 
+* As a command line tool using Swift Argument Parser checkout [the `mistdemoc` Swift package executable here](https://github.com/brightdigit/MistKit/tree/main/Sources/mistdemoc)
+* And a server-side Vapor application [`mistdemod` here](https://github.com/brightdigit/MistKit/tree/main/Sources/mistdemoc)
 
 ## Further Code Documentation
 
@@ -539,10 +712,10 @@ For now checkout [the `mistdemoc` Swift package executable here](https://github.
 
 ## 0.2.0 
 
-- [ ] Vapor Token Client
-- [ ] Vapor Token Storage
-- [ ] Vapor URL Client
-- [ ] Swift NIO URL Client
+- [x] Vapor Token Client
+- [x] Vapor Token Storage
+- [x] Vapor URL Client
+- [x] Swift NIO URL Client
 
 ## 0.4.0 
 

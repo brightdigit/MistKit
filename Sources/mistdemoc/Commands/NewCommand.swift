@@ -2,7 +2,8 @@ import ArgumentParser
 import Foundation
 import MistKit
 import MistKitDemo
-import MistKitNIOHTTP1Token
+import MistKitNIO
+
 extension MistDemoCommand {
   struct NewCommand: ParsableAsyncCommand {
     static var configuration = CommandConfiguration(commandName: "new")

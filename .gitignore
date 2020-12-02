@@ -166,3 +166,4 @@ Pods
 *.lcov
 Brewfile.lock.json
 Package.resolved
+gh-md-toc

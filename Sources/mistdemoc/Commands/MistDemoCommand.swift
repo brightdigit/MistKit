@@ -2,7 +2,7 @@ import ArgumentParser
 import Foundation
 import MistKit
 import MistKitDemo
-import MistKitNIOHTTP1Token
+import MistKitNIO
 
 struct MistDemoCommand: ParsableCommand {
   static var configuration = CommandConfiguration(

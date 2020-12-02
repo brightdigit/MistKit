@@ -2,30 +2,29 @@ import MistKit
 import NIO
 
 public extension MKDatabase {
-  func query<RecordType: MKContentRecord, EncodedType>(
+  func query<RecordType>(
     _ query: FetchRecordQueryRequest<MKQuery<RecordType>>,
     on eventLoop: EventLoop
-  ) -> EventLoopFuture<[RecordType]> where RecordType.ContentType == EncodedType {
+  ) -> EventLoopFuture<[RecordType]> {
     let promise = eventLoop.makePromise(of: [RecordType].self)
     self.query(query, promise.completeWith)
     return promise.futureResult
   }
 
-  func perform<RecordType: MKContentRecord, EncodedType>(
+  func perform<RecordType>(
     operations: ModifyRecordQueryRequest<RecordType>,
     on eventLoop: EventLoop
   )
-    -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>>
-    where RecordType.ContentType == EncodedType {
+    -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>> {
     let promise = eventLoop.makePromise(of: ModifiedRecordQueryResult<RecordType>.self)
     perform(operations: operations, promise.completeWith)
     return promise.futureResult
   }
 
-  func lookup<RecordType: MKContentRecord, EncodedType>(
+  func lookup<RecordType>(
     _ lookup: LookupRecordQueryRequest<RecordType>,
     on eventLoop: EventLoop
-  ) -> EventLoopFuture<[RecordType]> where RecordType.ContentType == EncodedType {
+  ) -> EventLoopFuture<[RecordType]> {
     let promise = eventLoop.makePromise(of: [RecordType].self)
     self.lookup(lookup, promise.completeWith)
     return promise.futureResult
@@ -46,7 +45,8 @@ public extension EventLoopFuture {
   func content<RecordType: MKContentRecord, ContentType>()
     -> EventLoopFuture<MKServerResponse<[ContentType]>>
     where Value == [RecordType], RecordType.ContentType == ContentType {
-    return mapEach(RecordType.content(fromRecord:)).mistKitResponse()
+    // return mapEach(RecordType.content(fromRecord:)).mistKitResponse()
+    return map { $0.map(RecordType.content(fromRecord:)) }.mistKitResponse()
   }
 
   func content<RecordType: MKContentRecord, ContentType>()
