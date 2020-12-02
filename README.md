@@ -608,11 +608,11 @@ database.lookup(request) { result in
 
 ## Using SwiftNIO
 
-If you are building a server-side application and already using SwiftNIO, you might want to take advantage of some helpers which will work already existing patterns and APIs available. Primarily **EventLoops** from SwiftNIO and the respective **HTTP clients** from SwiftNIO and Vapor.
+If you are building a server-side application and already using [SwiftNIO](https://github.com/apple/swift-nio), you might want to take advantage of some helpers which will work already existing patterns and APIs available. Primarily **[EventLoops](https://apple.github.io/swift-nio/docs/current/NIO/Protocols/EventLoop.html)** from [SwiftNIO](https://github.com/apple/swift-nio) and the respective **HTTP clients** from [SwiftNIO](https://github.com/apple/swift-nio) and [Vapor](https://vapor.codes/).
 
 ### Using EventLoops
 
-If you are building a server-side application in SwiftNIO (or Vapor), you are likely using EventLoops and EventLoopFuture for asyncronous programming. EventLoopFutures are essentially the Future/Promise implementation of SwiftNIO. Luckily there are helper methods in MistKit which provide EventLoopFutures similar to the way they implmented in SwiftNIO. These implementations augment the already existing callback:
+If you are building a server-side application in [SwiftNIO](https://github.com/apple/swift-nio) (or [Vapor](https://vapor.codes/)), you are likely using [EventLoops](https://apple.github.io/swift-nio/docs/current/NIO/Protocols/EventLoop.html) and [EventLoopFuture](https://apple.github.io/swift-nio/docs/current/NIO/Classes/EventLoopFuture.html) for asyncronous programming. EventLoopFutures are essentially the Future/Promise implementation of [SwiftNIO](https://github.com/apple/swift-nio). Luckily there are helper methods in MistKit which provide [EventLoopFutures](https://apple.github.io/swift-nio/docs/current/NIO/Classes/EventLoopFuture.html) similar to the way they implmented in [SwiftNIO](https://github.com/apple/swift-nio). These implementations augment the already existing callback:
 
 
 ```swift
@@ -635,11 +635,12 @@ public extension MKDatabase {
   func perform<RequestType: MKRequest, ResponseType>(
     request: RequestType,
     on eventLoop: EventLoop
-  ) -> EventLoopFuture<ResponseType> -> EventLoopFuture<ResponseType> where RequestType.Response == ResponseType
+  ) -> EventLoopFuture<ResponseType> -> EventLoopFuture<ResponseType>
+    where RequestType.Response == ResponseType
 }
 ```
 
-Also if you are using the results as `Content` for a Vapor HTTP response, **MistKit** provides a `MKServerResponse` enum type which distinguishes between an authentication failure (with the redirect URL) and an actual success. 
+Also if you are using the results as `Content` for a [Vapor](https://vapor.codes/) HTTP response, **MistKit** provides a `MKServerResponse` enum type which distinguishes between an authentication failure (with the redirect URL) and an actual success. 
 
 ```swift
 public enum MKServerResponse<Success>: Codable where Success: Codable {
@@ -650,7 +651,7 @@ public enum MKServerResponse<Success>: Codable where Success: Codable {
 }
 ```
 
-Besides EventLoopFuture, you can also use a different HTTP client for calling CloudKit Web Services.  
+Besides [EventLoopFuture](https://apple.github.io/swift-nio/docs/current/NIO/Classes/EventLoopFuture.html), you can also use a different HTTP client for calling CloudKit Web Services.  
 
 ### Choosing an HTTP Client
 
@@ -666,9 +667,9 @@ public struct MKURLSessionClient: MKHttpClient {
 }
 ```
 
-However if you are using SwiftNIO or Vapor, it makes more sense the use their HTTP clients for making those calls:
-* For SwiftNIO, there's `MKAsyncClient` which uses an `HTTPClient` provided by the `AsyncHTTPClient` library
-* For Vapor, there's `MKVaporClient` which uses an Client provided by the `Vapor` library
+However if you are using [SwiftNIO](https://github.com/apple/swift-nio) or [Vapor](https://vapor.codes/), it makes more sense the use their HTTP clients for making those calls:
+* For **SwiftNIO**, there's **`MKAsyncClient`** which uses an `HTTPClient` provided by the `AsyncHTTPClient` library
+* For **Vapor**, there's **`MKVaporClient`** which uses an `Client` provided by the `Vapor` library
 
 In the mistdemod example, you can see how to use a Vapor `Request` to create an `MKDatabase` with the `client` property of the `Request`:
 
