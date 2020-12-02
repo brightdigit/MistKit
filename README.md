@@ -608,17 +608,84 @@ database.lookup(request) { result in
 
 ## Using SwiftNIO
 
-If you are building a server-side application and already using SwiftNIO 
-
-* TODO *
+If you are building a server-side application and already using SwiftNIO, you might want to take advantage of some helpers which will work already existing patterns and APIs available. Primarily **EventLoops** from SwiftNIO and the respective **HTTP clients** from SwiftNIO and Vapor.
 
 ### Using EventLoops
 
-* TODO *
+If you are building a server-side application in SwiftNIO (or Vapor), you are likely using EventLoops and EventLoopFuture for asyncronous programming. EventLoopFutures are essentially the Future/Promise implementation of SwiftNIO. Luckily there are helper methods in MistKit which provide EventLoopFutures similar to the way they implmented in SwiftNIO. These implementations augment the already existing callback:
 
-### Choosing an Http Client
 
-* TODO *
+```swift
+public extension MKDatabase {
+  func query<RecordType>(
+    _ query: FetchRecordQueryRequest<MKQuery<RecordType>>,
+    on eventLoop: EventLoop
+  ) -> EventLoopFuture<[RecordType]>
+
+  func perform<RecordType>(
+    operations: ModifyRecordQueryRequest<RecordType>,
+    on eventLoop: EventLoop
+  ) -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>>
+  
+  func lookup<RecordType>(
+    _ lookup: LookupRecordQueryRequest<RecordType>,
+    on eventLoop: EventLoop
+  ) -> EventLoopFuture<[RecordType]>
+
+  func perform<RequestType: MKRequest, ResponseType>(
+    request: RequestType,
+    on eventLoop: EventLoop
+  ) -> EventLoopFuture<ResponseType> -> EventLoopFuture<ResponseType> where RequestType.Response == ResponseType
+}
+```
+
+Also if you are using the results as `Content` for a Vapor HTTP response, **MistKit** provides a `MKServerResponse` enum type which distinguishes between an authentication failure (with the redirect URL) and an actual success. 
+
+```swift
+public enum MKServerResponse<Success>: Codable where Success: Codable {
+  public init(attemptRecoveryFrom error: Error) throws
+
+  case failure(URL)
+  case success(Success)
+}
+```
+
+Besides EventLoopFuture, you can also use a different HTTP client for calling CloudKit Web Services.  
+
+### Choosing an HTTP Client
+
+By default, MistKit uses `URLSession` for making HTTP calls to the CloudKit Web Service via the `MKURLSessionClient`:
+
+```swift
+public struct MKURLSessionClient: MKHttpClient {
+  public init(session: URLSession) {
+    self.session = session
+  }
+
+  public func request(withURL url: URL, data: Data?) -> MKURLRequest
+}
+```
+
+However if you are using SwiftNIO or Vapor, it makes more sense the use their HTTP clients for making those calls:
+* For SwiftNIO, there's `MKAsyncClient` which uses an `HTTPClient` provided by the `AsyncHTTPClient` library
+* For Vapor, there's `MKVaporClient` which uses an Client provided by the `Vapor` library
+
+In the mistdemod example, you can see how to use a Vapor `Request` to create an `MKDatabase` with the `client` property of the `Request`:
+
+```swift
+extension MKDatabase where HttpClient == MKVaporClient {
+  init(request: Request) {
+    let manager: MKTokenManager    
+    let connection : MKDatabaseConnection
+    self.init(
+      connection: connection, 
+      factory: nil, 
+      client: MKVaporClient(client: request.client), 
+      tokenManager: manager
+    )
+  }
+}
+```
 
 ## Examples
 
