@@ -7,11 +7,12 @@ public struct MKDatabase<HttpClient: MKHttpClient>
 ```
 
 ## Methods
-### `init(connection:factory:client:tokenManager:)`
+### `init(connection:factory:requestConfigFactory:client:tokenManager:)`
 
 ```swift
 public init(connection: MKDatabaseConnection,
             factory: MKURLBuilderFactory? = nil,
+            requestConfigFactory _: RequestConfigurationFactoryProtocol? = nil,
             client: HttpClient,
             tokenManager: MKTokenManagerProtocol? = nil)
 ```

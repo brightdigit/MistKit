@@ -16,6 +16,7 @@
 -   [MKTokenEncoder](protocols/MKTokenEncoder.md)
 -   [MKTokenManagerProtocol](protocols/MKTokenManagerProtocol.md)
 -   [MKTokenStorage](protocols/MKTokenStorage.md)
+-   [RequestConfigurationFactoryProtocol](protocols/RequestConfigurationFactoryProtocol.md)
 
 ## Structs
 
@@ -45,6 +46,8 @@
 -   [ModifyRecordQueryRequest](structs/ModifyRecordQueryRequest.md)
 -   [RecordName](structs/RecordName.md)
 -   [RecordNameParser](structs/RecordNameParser.md)
+-   [RequestConfiguration](structs/RequestConfiguration.md)
+-   [RequestConfigurationFactory](structs/RequestConfigurationFactory.md)
 -   [UserIdentityLookupInfo](structs/UserIdentityLookupInfo.md)
 -   [UserIdentityNameComponents](structs/UserIdentityNameComponents.md)
 -   [UserIdentityResponse](structs/UserIdentityResponse.md)
@@ -77,6 +80,7 @@
 -   [MKAnyRecord](extensions/MKAnyRecord.md)
 -   [MKAuthenticationResponse](extensions/MKAuthenticationResponse.md)
 -   [MKDatabase](extensions/MKDatabase.md)
+-   [MKHttpClient](extensions/MKHttpClient.md)
 -   [MKRequest](extensions/MKRequest.md)
 -   [UUID](extensions/UUID.md)
 
