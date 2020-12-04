@@ -8,6 +8,6 @@ public protocol MKHttpClient {
 
 public extension MKHttpClient {
   func request(fromConfiguration configuration: RequestConfiguration) -> RequestType {
-    return request(withURL: configuration.url, data: configuration.data)
+    request(withURL: configuration.url, data: configuration.data)
   }
 }

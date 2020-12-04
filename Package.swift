@@ -1,5 +1,9 @@
 // swift-tools-version:5.2
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+// swiftlint:disable explicit_top_level_acl
+// swiftlint:disable prefixed_toplevel_constant
+// swiftlint:disable line_length
+// swiftlint:disable explicit_acl
 
 import PackageDescription
 
@@ -7,7 +11,6 @@ let package = Package(
   name: "MistKit",
   platforms: [.macOS(.v10_15)],
   products: [
-    // Products define the executables and libraries a package produces, and make them visible to other packages.
     .library(
       name: "MistKit",
       targets: ["MistKit"]
@@ -70,12 +73,17 @@ let package = Package(
               .product(name: "Vapor", package: "vapor"),
               .product(name: "Fluent", package: "fluent")
             ]),
-    .target(name: "mistdemoc", dependencies: ["MistKit", "MistKitNIO", "MistKitDemo",
-                                              .product(name: "ArgumentParser", package: "swift-argument-parser")]),
-    .target(name: "mistdemod", dependencies: ["MistKit", "MistKitVapor", "MistKitDemo",
-                                              .product(name: "Vapor", package: "vapor"),
-                                              .product(name: "Fluent", package: "fluent"),
-                                              .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver")]),
+    .target(name: "mistdemoc", dependencies: [
+      "MistKit",
+      "MistKitNIO", "MistKitDemo",
+      .product(name: "ArgumentParser", package: "swift-argument-parser")
+    ]),
+    .target(name: "mistdemod", dependencies: [
+      "MistKit", "MistKitVapor", "MistKitDemo",
+      .product(name: "Vapor", package: "vapor"),
+      .product(name: "Fluent", package: "fluent"),
+      .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver")
+    ]),
     .target(name: "MistKitDemo",
             dependencies: ["MistKit"]),
     .testTarget(

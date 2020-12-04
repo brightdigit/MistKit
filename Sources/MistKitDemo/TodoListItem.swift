@@ -3,7 +3,7 @@ import MistKit
 
 public class TodoListItem: MKQueryRecord {
   public var fields: [String: MKValue] {
-    return ["title": .string(title)]
+    ["title": .string(title)]
   }
 
   public required init(record: MKAnyRecord) throws {

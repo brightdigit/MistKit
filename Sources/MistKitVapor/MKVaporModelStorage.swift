@@ -9,7 +9,7 @@ public class MKVaporModelStorage<ModelType: MKModelStorable>: MKTokenStorage {
 
   public var webAuthenticationToken: String? {
     get {
-      return model[keyPath: ModelType.tokenKey].wrappedValue
+      model[keyPath: ModelType.tokenKey].wrappedValue
     }
     set {
       model[keyPath: ModelType.tokenKey].wrappedValue = newValue

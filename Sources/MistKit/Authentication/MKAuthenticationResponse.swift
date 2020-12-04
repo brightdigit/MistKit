@@ -9,6 +9,6 @@ public struct MKAuthenticationResponse: MKDecodable {
 
 extension MKAuthenticationResponse: MKAuthenticationRedirect {
   public var url: URL {
-    return redirectURL
+    redirectURL
   }
 }

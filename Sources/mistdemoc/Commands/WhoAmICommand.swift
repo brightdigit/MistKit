@@ -31,7 +31,7 @@ extension MistDemoCommand {
 
 extension UserIdentityResponse {
   var information: String {
-    return """
+    """
     userRecordName: \(userRecordName.uuid)
       emailAddress: \(lookupInfo?.emailAddress ?? "(empty)")
       phoneNumber: \(lookupInfo?.phoneNumber ?? "(empty)")

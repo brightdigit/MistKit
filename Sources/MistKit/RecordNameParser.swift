@@ -8,7 +8,7 @@ public struct RecordNameParser {
 
   public init() {}
 
-  static let regexStrInner = componentSizes.map(regexComponent(forLength:)).joined(separator: "")
+  static let regexStrInner = componentSizes.map(regexComponent(forLength:)).joined()
   static let regexString = "^_\(regexStrInner)$"
   // swiftlint:disable:next force_try
   static let regex = try! NSRegularExpression(pattern: regexString, options: .caseInsensitive)
@@ -18,7 +18,7 @@ public struct RecordNameParser {
     }
     let match = regex.firstMatch(in: recordName, options: NSRegularExpression.MatchingOptions(), range: .init(location: 0, length: recordName.count))
 
-    let uuidStringComponents = componentSizes.enumerated().compactMap { (index, _) -> Substring? in
+    let uuidStringComponents = componentSizes.enumerated().compactMap { index, _ -> Substring? in
       let nsRange = match?.range(at: index + 1)
       return nsRange.flatMap {
         Range($0, in: recordName)
@@ -29,7 +29,6 @@ public struct RecordNameParser {
 
     if uuidStringComponents.count == componentSizes.count {
       return UUID(uuidString: uuidStringComponents.joined(separator: "-"))
-
     } else {
       return nil
     }

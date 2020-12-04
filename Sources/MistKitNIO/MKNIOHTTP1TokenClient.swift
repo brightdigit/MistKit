@@ -30,7 +30,6 @@ public class MKNIOHTTP1TokenClient: MKTokenClient {
           _ = channel.close()
         }
       }
-
     } catch {
       callback(.failure(error))
     }

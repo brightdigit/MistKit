@@ -9,7 +9,7 @@ struct MKURLResponse: MKHttpResponse {
   let response: HTTPURLResponse
 
   var status: Int {
-    return response.statusCode
+    response.statusCode
   }
 
   var webAuthenticationToken: String? {

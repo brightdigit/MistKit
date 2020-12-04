@@ -26,6 +26,7 @@ public extension MKAnyRecord {
     switch fields[key] {
     case let .data(value):
       return value
+
     default:
       throw MKDecodingError.invalidKey(key)
     }
@@ -35,6 +36,7 @@ public extension MKAnyRecord {
     switch fields[key] {
     case let .string(value):
       return value
+
     default:
       throw MKDecodingError.invalidKey(key)
     }
@@ -44,6 +46,7 @@ public extension MKAnyRecord {
     switch fields[key] {
     case let .integer(value):
       return value
+
     default:
       throw MKDecodingError.invalidKey(key)
     }

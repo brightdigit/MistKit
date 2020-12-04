@@ -30,12 +30,11 @@ extension MistDemoCommand {
         let items: [TodoListItem]
         do {
           items = try result.get()
-
         } catch {
           completed(error)
           return
         }
-        let operations = items.map { (item) -> ModifyOperation<TodoListItem> in
+        let operations = items.map { item -> ModifyOperation<TodoListItem> in
           item.title = self.newTitle
           return ModifyOperation(operationType: .update, record: item)
         }

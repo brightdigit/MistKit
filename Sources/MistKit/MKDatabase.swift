@@ -12,7 +12,10 @@ public protocol RequestConfigurationFactoryProtocol {
 public struct RequestConfigurationFactory: RequestConfigurationFactoryProtocol {
   let encoder: MKEncoder = JSONEncoder()
 
-  public func configuration<RequestType>(from request: RequestType, withURLBuilder urlBuilder: MKURLBuilder) throws -> RequestConfiguration where RequestType: MKRequest {
+  public func configuration<RequestType>(
+    from request: RequestType,
+    withURLBuilder urlBuilder: MKURLBuilder
+  ) throws -> RequestConfiguration where RequestType: MKRequest {
     let url: URL = try urlBuilder.url(withPathComponents: request.relativePath)
     let data: Data? = try encoder.optionalData(from: request.data)
     return RequestConfiguration(url: url, data: data)
@@ -36,9 +39,8 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
     self.client = client
   }
 
-  private func onResult<RequestType: MKRequest, ResponseType>(_ result: Result<MKHttpResponse, Error>, fromRequest request: RequestType, returnFailedAuthentication: Bool = false,
-                                                              _ callback: @escaping ((Result<ResponseType, Error>) -> Void)) where RequestType.Response == ResponseType {
-    let dataResult = result.flatMap { (response) -> Result<Data, Error> in
+  private func data(fromResult result: Result<MKHttpResponse, Error>) -> Result<Data, Error> {
+    result.flatMap { response -> Result<Data, Error> in
       if let webAuthenticationToken = response.webAuthenticationToken {
         self.urlBuilder.tokenManager?.webAuthenticationToken = webAuthenticationToken
       }
@@ -47,6 +49,14 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
       }
       return .success(data)
     }
+  }
+
+  private func onResult<RequestType: MKRequest, ResponseType>(_ result: Result<MKHttpResponse, Error>,
+                                                              fromRequest request: RequestType,
+                                                              returnFailedAuthentication: Bool = false,
+                                                              _ callback: @escaping ((Result<ResponseType, Error>) -> Void))
+    where RequestType.Response == ResponseType {
+    let dataResult = data(fromResult: result)
     let newResult: Result<ResponseType, Error>
     switch dataResult {
     case let .success(data):
@@ -70,6 +80,7 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
           newResult = .failure(error)
         }
       }
+
     case let .failure(error):
       newResult = .failure(error)
     }

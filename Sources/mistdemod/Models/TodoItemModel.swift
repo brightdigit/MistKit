@@ -13,7 +13,7 @@ public struct TodoItemModel: Content {
 
 extension TodoListItem: MKContentRecord {
   public static func content(fromRecord record: TodoListItem) -> TodoItemModel {
-    return TodoItemModel(item: record)
+    TodoItemModel(item: record)
   }
 
   public typealias ContentType = TodoItemModel

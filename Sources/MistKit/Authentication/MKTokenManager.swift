@@ -9,7 +9,7 @@ public class MKTokenManager: MKTokenManagerProtocol {
 
   public var webAuthenticationToken: String? {
     get {
-      return storage.webAuthenticationToken
+      storage.webAuthenticationToken
     }
     set {
       storage.webAuthenticationToken = newValue

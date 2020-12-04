@@ -55,8 +55,10 @@ struct ContentView: View {
 
   var error: Error? {
     switch data.items {
-    case let .failure(error): return error
-    default: return nil
+    case let .failure(error):
+      return error
+    default:
+      return nil
     }
   }
 

@@ -7,7 +7,7 @@ public class MKVaporSessionStorage: MKTokenStorage {
 
   public var webAuthenticationToken: String? {
     get {
-      return session.data[name]
+      session.data[name]
     }
     set {
       session.data[name] = newValue

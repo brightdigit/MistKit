@@ -93,8 +93,10 @@ public final class HTTPHandler: ChannelInboundHandler {
       // responseHead.headers.add(name: "content-length", value: "\(buffer?.readableBytes)")
       let response = HTTPServerResponsePart.head(responseHead)
       context.write(wrapOutboundOut(response), promise: nil)
+
     case .body:
       break
+
     case .end:
       state.requestComplete()
       let content = HTTPServerResponsePart.body(.byteBuffer(buffer?.slice() ?? ByteBuffer()))
@@ -113,9 +115,11 @@ public final class HTTPHandler: ChannelInboundHandler {
       case (true, 1, 0):
         // HTTP/1.0 and the request has 'Connection: keep-alive', we should mirror that
         head.headers.add(name: "Connection", value: "keep-alive")
+
       case (false, 1, let minor) where minor >= 1:
         // HTTP/1.1 (or treated as such) and the request has 'Connection: close', we should mirror that
         head.headers.add(name: "Connection", value: "close")
+
       default:
         // we should match the default or are dealing with some HTTP that we don't support, let's leave as is
         ()
@@ -136,7 +140,7 @@ public final class HTTPHandler: ChannelInboundHandler {
     threadPool.start()
 
     func childChannelInitializer(channel: Channel) -> EventLoopFuture<Void> {
-      return channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
+      channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
         channel.pipeline.addHandler(HTTPHandler(fileIO: fileIO, htdocsPath: htdocs, channel: channel) {
           callback(group.next(), $0)
         })
@@ -172,8 +176,10 @@ public final class HTTPHandler: ChannelInboundHandler {
       switch bindTarget {
       case let .ipAddress(host, port):
         return try socketBootstrap.bind(host: host, port: port).wait()
+
       case let .unixDomainSocket(path):
         return try socketBootstrap.bind(unixDomainSocketPath: path).wait()
+
       case .stdio:
         return try pipeBootstrap.withPipes(inputDescriptor: STDIN_FILENO, outputDescriptor: STDOUT_FILENO).wait()
       }
@@ -181,7 +187,6 @@ public final class HTTPHandler: ChannelInboundHandler {
 
     channel.closeFuture.whenComplete { _ in
       group.shutdownGracefully(queue: .global()) { _ in
-
         threadPool.shutdownGracefully(queue: .global()) { _ in
         }
       }

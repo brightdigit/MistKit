@@ -38,7 +38,6 @@ extension MistDemoCommand {
           }
           completed(nil)
         }
-
       } else {
         // create your request to CloudKit
         let query = MKQuery(recordType: TodoListItem.self)

@@ -2,4 +2,5 @@
 --header strip
 --commas inline
 --disable wrapMultilineStatementBraces
+--extensionacl on-extension
 --exclude .build, DerivedData

@@ -22,6 +22,7 @@ public enum MKServerResponse<Success>: Codable where Success: Codable {
     switch self {
     case let .failure(url):
       try container.encode(url, forKey: .redirectURL)
+
     case let .success(data):
       try container.encode(data, forKey: .result)
     }
@@ -30,6 +31,7 @@ public enum MKServerResponse<Success>: Codable where Success: Codable {
   public init(fromResult result: Result<Success, Error>) throws {
     switch result {
     case let .success(value): self = .success(value)
+
     case let .failure(mkError as MKError):
       if case let MKError.authenticationRequired(redirect) = mkError {
         self = .failure(redirect.url)

@@ -9,12 +9,14 @@ public enum MKValue: Codable {
     switch fieldType {
     case .string:
       self = try .string(container.decode(String.self, forKey: .value))
+
     case .bytes:
       let base64Encoded = try container.decode(String.self, forKey: .value)
       guard let data = Data(base64Encoded: base64Encoded) else {
         throw DecodingError.dataCorruptedError(forKey: .value, in: container, debugDescription: "Invalid Base64 String.")
       }
       self = .data(data)
+
     case .integer:
       do {
         let integer = try container.decode(Int64.self, forKey: .value)
@@ -43,9 +45,11 @@ public enum MKValue: Codable {
     case let .string(string):
       try container.encode(string, forKey: .value)
       try container.encode(MKFieldType.string, forKey: .type)
+
     case let .integer(integer):
       try container.encode(integer, forKey: .value)
       try container.encode(MKFieldType.integer, forKey: .type)
+
     case let .data(data):
       try container.encode(data.base64EncodedData(), forKey: .value)
       try container.encode(MKFieldType.bytes, forKey: .type)

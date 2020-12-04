@@ -52,7 +52,7 @@ public extension EventLoopFuture {
   func content<RecordType: MKContentRecord, ContentType>()
     -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<ContentType>>>
     where Value == ModifiedRecordQueryResult<RecordType>, RecordType.ContentType == ContentType {
-    return map(ModifiedRecordQueryContent.init).mistKitResponse()
+    map(ModifiedRecordQueryContent.init).mistKitResponse()
   }
 }
 
