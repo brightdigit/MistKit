@@ -3,9 +3,6 @@
 swift_versions=('5.3' '5.2')
 ubuntu_versions=('bionic' 'xenial' 'focal')
 
-#docker build -t brightdigit/mistkit-sql .
-#docker push brightdigit/mistkit-sql
-
 for swift_version in ${swift_versions[@]}
 do
     for ubuntu_version in ${ubuntu_versions[@]}
