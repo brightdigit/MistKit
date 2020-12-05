@@ -2,6 +2,20 @@ version: 1
 builder:
   configs:
   - platform: linux
+    swift_version: '5.2'
+    image: brightdigit/mistkit-sql:5.2-xenial
+  - platform: linux
+    swift_version: '5.2'
+    image: brightdigit/mistkit-sql:5.2-bionic 
+  - platform: linux
+    swift_version: '5.2'
+    image: brightdigit/mistkit-sql:5.2-focal
+  - platform: linux
     swift_version: '5.3'
-    image: leogdion/mistkit-swift
-    
+    image: brightdigit/mistkit-sql:5.3-xenial
+  - platform: linux
+    swift_version: '5.3'
+    image: brightdigit/mistkit-sql:5.3-bionic
+  - platform: linux
+    swift_version: '5.3'
+    image: brightdigit/mistkit-sql:5.3-focal
