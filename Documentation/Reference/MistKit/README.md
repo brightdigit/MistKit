@@ -17,6 +17,7 @@
 -   [MKTokenManagerProtocol](protocols/MKTokenManagerProtocol.md)
 -   [MKTokenStorage](protocols/MKTokenStorage.md)
 -   [RequestConfigurationFactoryProtocol](protocols/RequestConfigurationFactoryProtocol.md)
+-   [ResultTransformerProtocol](protocols/ResultTransformerProtocol.md)
 
 ## Structs
 

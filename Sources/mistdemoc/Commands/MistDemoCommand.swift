@@ -17,5 +17,5 @@ struct MistDemoCommand: ParsableCommand {
     ], defaultSubcommand: ListCommand.self
   )
 
-  static let defaultBinding: BindTo = .ipAddress(host: "127.0.0.1", port: 7000)
+  static let defaultBinding: BindTo = .ipAddress(host: "127.0.0.1", port: 7_000)
 }

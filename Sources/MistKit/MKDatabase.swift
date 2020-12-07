@@ -22,6 +22,10 @@ public struct RequestConfigurationFactory: RequestConfigurationFactoryProtocol {
   }
 }
 
+public protocol ResultTransformerProtocol {
+  func data(fromResult result: Result<MKHttpResponse, Error>, setWebAuthenticationToken: (String) -> Void) -> Result<Data, Error>
+}
+
 public struct MKDatabase<HttpClient: MKHttpClient> {
   let urlBuilder: MKURLBuilder
   let requestConfigFactory: RequestConfigurationFactoryProtocol
@@ -39,10 +43,10 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
     self.client = client
   }
 
-  private func data(fromResult result: Result<MKHttpResponse, Error>) -> Result<Data, Error> {
+  private static func data(fromResult result: Result<MKHttpResponse, Error>, setWebAuthenticationToken: (String) -> Void) -> Result<Data, Error> {
     result.flatMap { response -> Result<Data, Error> in
       if let webAuthenticationToken = response.webAuthenticationToken {
-        self.urlBuilder.tokenManager?.webAuthenticationToken = webAuthenticationToken
+        setWebAuthenticationToken(webAuthenticationToken)
       }
       guard let data = response.body else {
         return .failure(MKError.noDataFromStatus(response.status))
@@ -51,12 +55,16 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
     }
   }
 
-  private func onResult<RequestType: MKRequest, ResponseType>(_ result: Result<MKHttpResponse, Error>,
-                                                              fromRequest request: RequestType,
-                                                              returnFailedAuthentication: Bool = false,
-                                                              _ callback: @escaping ((Result<ResponseType, Error>) -> Void))
+  private static func onResult<RequestType: MKRequest, ResponseType>(
+    _ result: Result<MKHttpResponse, Error>,
+    fromRequest request: RequestType,
+    decoder: MKDecoder,
+    onFailedAuthentication: MKDatabase?,
+    setWebAuthenticationToken: (String) -> Void,
+    _ callback: @escaping ((Result<ResponseType, Error>) -> Void)
+  )
     where RequestType.Response == ResponseType {
-    let dataResult = data(fromResult: result)
+    let dataResult = Self.data(fromResult: result, setWebAuthenticationToken: setWebAuthenticationToken)
     let newResult: Result<ResponseType, Error>
     switch dataResult {
     case let .success(data):
@@ -68,9 +76,9 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
         do {
           let auth = try decoder.decode(MKAuthenticationResponse.self, from: data)
 
-          if let tokenManager = urlBuilder.tokenManager, !returnFailedAuthentication {
+          if let onFailedAuthentication = onFailedAuthentication, let tokenManager = onFailedAuthentication.urlBuilder.tokenManager {
             tokenManager.request(auth) { _ in
-              self.perform(request: request, returnFailedAuthentication: true, callback)
+              onFailedAuthentication.perform(request: request, returnFailedAuthentication: true, callback)
             }
             return
           } else {
@@ -89,7 +97,7 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
 
   public func perform<RequestType: MKRequest, ResponseType>(
     request: RequestType,
-    returnFailedAuthentication: Bool = false,
+    returnFailedAuthentication _: Bool = false,
     _ callback: @escaping ((Result<ResponseType, Error>) -> Void)
   ) where RequestType.Response == ResponseType {
     let requestConfig: RequestConfiguration
@@ -101,10 +109,12 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
     }
     let httpRequest = client.request(fromConfiguration: requestConfig)
     httpRequest.execute { result in
-      self.onResult(
+      Self.onResult(
         result,
         fromRequest: request,
-        returnFailedAuthentication: returnFailedAuthentication,
+        decoder: self.decoder,
+        onFailedAuthentication: nil,
+        setWebAuthenticationToken: { self.urlBuilder.tokenManager?.webAuthenticationToken = $0 },
         callback
       )
     }

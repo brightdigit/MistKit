@@ -22,7 +22,7 @@ public init(connection: MKDatabaseConnection,
 ```swift
 public func perform<RequestType: MKRequest, ResponseType>(
   request: RequestType,
-  returnFailedAuthentication: Bool = false,
+  returnFailedAuthentication _: Bool = false,
   _ callback: @escaping ((Result<ResponseType, Error>) -> Void)
 ) where RequestType.Response == ResponseType
 ```
