@@ -44,7 +44,7 @@ jobs:
       env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - name: Build Documentation
-      if: ${{ matrix.xcode == '/Applications/Xcode_12.3.app' && !startsWith(github.ref, 'refs/tags/') }}
+      if: ${{ matrix.os == 'macos-11.0' && matrix.xcode == '/Applications/Xcode_12.3.app' && !startsWith(github.ref, 'refs/tags/') }}
       run: |
         swift run sourcedocs generate build -cra
         git config --local user.email "action@github.com"
