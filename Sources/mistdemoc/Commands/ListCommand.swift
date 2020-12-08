@@ -12,6 +12,7 @@ extension MistDemoCommand {
     @Flag
     var record: Bool = false
 
+    // swiftlint:disable:next function_body_length
     func runAsync(_ completed: @escaping (Error?) -> Void) {
       // setup how to manager your user's web authentication token
       let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding))

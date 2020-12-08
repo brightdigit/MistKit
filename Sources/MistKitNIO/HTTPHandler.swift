@@ -67,6 +67,7 @@ public final class HTTPHandler: ChannelInboundHandler {
     context.writeAndFlush(wrapOutboundOut(.end(trailers)), promise: promise)
   }
 
+  // swiftlint:disable:next function_body_length
   public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
     let reqPart = unwrapInboundIn(data)
     if let handler = self.handler {
@@ -128,6 +129,7 @@ public final class HTTPHandler: ChannelInboundHandler {
     return head
   }
 
+  // swiftlint:disable:next function_body_length
   public static func startServer(
     htdocs: String,
     allowHalfClosure: Bool,

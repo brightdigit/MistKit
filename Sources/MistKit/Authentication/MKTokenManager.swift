@@ -16,7 +16,7 @@ public class MKTokenManager: MKTokenManagerProtocol {
     }
   }
 
-  public func request(_ request: MKAuthenticationResponse, _ callback: @escaping (Result<String, Error>) -> Void) {
+  public func request(_ request: MKAuthenticationRedirect, _ callback: @escaping (Result<String, Error>) -> Void) {
     guard let client = self.client else {
       callback(.failure(MKError.authenticationRequired(request)))
       return
