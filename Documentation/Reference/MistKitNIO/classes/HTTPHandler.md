@@ -10,7 +10,12 @@ public final class HTTPHandler: ChannelInboundHandler
 ### `init(fileIO:htdocsPath:channel:_:)`
 
 ```swift
-public init(fileIO: NonBlockingFileIO, htdocsPath: String, channel: Channel, _ onToken: @escaping (String) -> Void)
+public init(
+  fileIO: NonBlockingFileIO,
+  htdocsPath: String,
+  channel: Channel,
+  _ onToken: @escaping (String) -> Void
+)
 ```
 
 ### `channelRead(context:data:)`

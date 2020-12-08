@@ -57,7 +57,11 @@ public extension Array where Element == MKAnyRecord {
   var information: String {
     let header = "\(count) results"
     let items = [header] + map { $0.information }
-    let minlength = items.map { $0.components(separatedBy: .newlines).map { $0.count }.max() }.compactMap { $0 }.max() ?? 0
+    let minlength = items.map {
+      $0.components(separatedBy: .newlines)
+        .map { $0.count }
+        .max()
+    }.compactMap { $0 }.max() ?? 0
     let separator = String(repeating: "=", count: minlength + 3)
     return items.joined(separator: "\n\(separator)\n")
   }

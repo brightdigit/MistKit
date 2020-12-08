@@ -14,9 +14,13 @@ public struct UsersController: RouteCollection {
 
   // whoami
 
-  public func get(_ request: Request) throws -> EventLoopFuture<MKServerResponse<UserIdentityResponse>> {
+  public func get(_ request: Request)
+    throws -> EventLoopFuture<MKServerResponse<UserIdentityResponse>> {
     let database = MKDatabase(request: request)
-    return database.perform(request: GetCurrentUserIdentityRequest(), on: request.eventLoop).mistKitResponse()
+    return database.perform(
+      request: GetCurrentUserIdentityRequest(),
+      on: request.eventLoop
+    ).mistKitResponse()
   }
 
   public func boot(routes: RoutesBuilder) throws {

@@ -32,9 +32,9 @@ public init(dataTransformer: ResultTransformerProtocol? = nil, decoder: MKDecode
 public func response<RequestType, ResponseType>(
   fromResult dataResult: Result<Data, Error>,
   ofRequest _: RequestType,
-
   shouldFailAuth _: Bool
-) -> Result<ResponseType, Error> where RequestType: MKRequest, ResponseType == RequestType.Response
+) -> Result<ResponseType, Error>
+  where RequestType: MKRequest, ResponseType == RequestType.Response
 ```
 
 ### `database(_:request:completedWith:shouldFailAuth:_:)`

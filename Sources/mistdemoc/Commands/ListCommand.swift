@@ -17,7 +17,10 @@ public extension MistDemoCommand {
     // swiftlint:disable:next function_body_length
     public func runAsync(_ completed: @escaping (Error?) -> Void) {
       // setup how to manager your user's web authentication token
-      let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding))
+      let manager = MKTokenManager(
+        storage: MKUserDefaultsStorage(),
+        client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding)
+      )
 
       // setup your database manager
       let database = MKDatabase(options: options, tokenManager: manager)

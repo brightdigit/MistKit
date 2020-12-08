@@ -41,5 +41,9 @@ public required init(record: MKAnyRecord) throws
 ### `init(title:recordName:recordChangeTag:)`
 
 ```swift
-public init(title: String, recordName: UUID? = nil, recordChangeTag: String? = nil)
+public init(
+  title: String,
+  recordName: UUID? = nil,
+  recordChangeTag: String? = nil
+)
 ```

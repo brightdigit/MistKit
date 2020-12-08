@@ -12,9 +12,9 @@ public struct ResultSink: ResultSinkProtocol {
   public func response<RequestType, ResponseType>(
     fromResult dataResult: Result<Data, Error>,
     ofRequest _: RequestType,
-
     shouldFailAuth _: Bool
-  ) -> Result<ResponseType, Error> where RequestType: MKRequest, ResponseType == RequestType.Response {
+  ) -> Result<ResponseType, Error>
+    where RequestType: MKRequest, ResponseType == RequestType.Response {
     let newResult: Result<ResponseType, Error>
     switch dataResult {
     case let .success(data):
@@ -24,7 +24,10 @@ public struct ResultSink: ResultSinkProtocol {
         break
       } catch {
         do {
-          let auth = try decoder.decode(MKAuthenticationResponse.self, from: data)
+          let auth = try decoder.decode(
+            MKAuthenticationResponse.self,
+            from: data
+          )
 
           newResult = .failure(MKError.authenticationRequired(auth))
         } catch {
@@ -59,10 +62,15 @@ public struct ResultSink: ResultSinkProtocol {
       shouldFailAuth: shouldFailAuth
     )
 
-    if !shouldFailAuth, let tokenManager = database.urlBuilder.tokenManager, let redirect = newResult.authResponse {
-      // database.perform(request: request, returnFailedAuthentication: shouldFailAuth, callback)
+    if !shouldFailAuth,
+       let tokenManager = database.urlBuilder.tokenManager,
+       let redirect = newResult.authResponse {
       tokenManager.request(redirect) { _ in
-        database.perform(request: request, returnFailedAuthentication: true, callback)
+        database.perform(
+          request: request,
+          returnFailedAuthentication: true,
+          callback
+        )
       }
       return
     }

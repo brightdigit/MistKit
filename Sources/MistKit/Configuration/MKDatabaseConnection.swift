@@ -1,7 +1,9 @@
 import Foundation
 
 public struct MKDatabaseConnection {
-  public static let baseURL = URL(string: "https://api.apple-cloudkit.com/database")!
+  public static let baseURL = URL(
+    string: "https://api.apple-cloudkit.com/database"
+  )!
   public let container: String
   public let environment: MKEnvironment
   public let version: MKAPIVersion

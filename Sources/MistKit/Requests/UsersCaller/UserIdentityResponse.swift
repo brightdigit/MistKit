@@ -1,5 +1,9 @@
 public struct UserIdentityResponse: MKDecodable, Codable {
-  public init(lookupInfo: UserIdentityLookupInfo?, userRecordName: RecordName, nameComponents: UserIdentityNameComponents?) {
+  public init(
+    lookupInfo: UserIdentityLookupInfo?,
+    userRecordName: RecordName,
+    nameComponents: UserIdentityNameComponents?
+  ) {
     self.lookupInfo = lookupInfo
     self.userRecordName = userRecordName
     self.nameComponents = nameComponents

@@ -16,7 +16,8 @@ public func create(_ request: Request) throws -> EventLoopFuture<HTTPStatus>
 ### `get(_:)`
 
 ```swift
-public func get(_ request: Request) throws -> EventLoopFuture<MKServerResponse<UserIdentityResponse>>
+public func get(_ request: Request)
+  throws -> EventLoopFuture<MKServerResponse<UserIdentityResponse>>
 ```
 
 ### `boot(routes:)`

@@ -1,7 +1,11 @@
 import Foundation
 
 public class MKURLBuilder {
-  public init(tokenEncoder: MKTokenEncoder?, connection: MKDatabaseConnection, tokenManager: MKTokenManagerProtocol? = nil) {
+  public init(
+    tokenEncoder: MKTokenEncoder?,
+    connection: MKDatabaseConnection,
+    tokenManager: MKTokenManagerProtocol? = nil
+  ) {
     self.tokenEncoder = tokenEncoder
     self.connection = connection
     self.tokenManager = tokenManager
@@ -29,7 +33,8 @@ public class MKURLBuilder {
 public extension MKURLBuilder {
   var queryItems: [String: String] {
     var parameters = ["ckAPIToken": connection.apiToken]
-    if let webAuthenticationToken = tokenManager?.webAuthenticationToken, let tokenEncoder = self.tokenEncoder {
+    if let webAuthenticationToken = tokenManager?.webAuthenticationToken,
+       let tokenEncoder = self.tokenEncoder {
       parameters["ckWebAuthToken"] = tokenEncoder.encode(webAuthenticationToken)
       parameters["ckSession"] = tokenEncoder.encode(webAuthenticationToken)
     }

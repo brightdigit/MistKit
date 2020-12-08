@@ -17,7 +17,11 @@ public enum ModifiedRecord: Decodable {
     let recordNameString = try container.decode(String.self, forKey: .recordName)
 
     guard let recordName = UUID(uuidString: recordNameString) else {
-      throw DecodingError.dataCorruptedError(forKey: .recordName, in: container, debugDescription: "Invalid Record Name")
+      throw DecodingError.dataCorruptedError(
+        forKey: .recordName,
+        in: container,
+        debugDescription: "Invalid Record Name"
+      )
     }
 
     self = .deleted(recordName)

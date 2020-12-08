@@ -23,5 +23,7 @@ public let updated: [EncodedType]
 ### `init(from:)`
 
 ```swift
-public init<RecordType: MKContentRecord>(from result: ModifiedRecordQueryResult<RecordType>) where RecordType.ContentType == EncodedType
+public init<RecordType: MKContentRecord>(
+  from result: ModifiedRecordQueryResult<RecordType>
+) where RecordType.ContentType == EncodedType
 ```

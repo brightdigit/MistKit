@@ -35,5 +35,8 @@ public init(bindTo: BindTo, onRedirectURL: ((URL) -> Void)? = nil)
 ### `request(_:_:)`
 
 ```swift
-public func request(_ request: MKAuthenticationRedirect?, _ callback: @escaping ((Result<String, Error>) -> Void))
+public func request(
+  _ request: MKAuthenticationRedirect?,
+  _ callback: @escaping ((Result<String, Error>) -> Void)
+)
 ```

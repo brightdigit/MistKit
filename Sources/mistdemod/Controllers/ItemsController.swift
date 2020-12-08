@@ -4,7 +4,8 @@ import MistKitVapor
 import Vapor
 
 public struct ItemsController: RouteCollection {
-  public func list(_ request: Request) -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> {
+  public func list(_ request: Request)
+    -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> {
     // setup your database manager
     let database = MKDatabase(request: request)
 
@@ -19,7 +20,8 @@ public struct ItemsController: RouteCollection {
     return database.query(cloudKitRequest, on: request.eventLoop).content()
   }
 
-  public func create(_ request: Request) throws -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
+  public func create(_ request: Request) throws
+    -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
     let title = try request.parameters.require("title")
 
     let database = MKDatabase(request: request)
@@ -36,7 +38,8 @@ public struct ItemsController: RouteCollection {
   }
 
   // delete
-  public func delete(_ request: Request) throws -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
+  public func delete(_ request: Request) throws
+    -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
     let id: UUID = try request.parameters.require("id")
 
     let database = MKDatabase(request: request)
@@ -50,12 +53,15 @@ public struct ItemsController: RouteCollection {
     }
     .map(ModifyRecordQuery.init)
     .flatMap { query in
-      database.perform(operations: ModifyRecordQueryRequest(database: .private, query: query), on: request.eventLoop)
+      database.perform(
+        operations: ModifyRecordQueryRequest(database: .private, query: query),
+        on: request.eventLoop
+      )
     }.content()
   }
 
-  // find
-  public func find(_ request: Request) throws -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> {
+  public func find(_ request: Request) throws
+    -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> {
     let id: UUID = try request.parameters.require("id")
 
     let database = MKDatabase(request: request)
@@ -67,8 +73,8 @@ public struct ItemsController: RouteCollection {
     return database.lookup(cloudKitRequest, on: request.eventLoop).content()
   }
 
-  // rename
-  public func rename(_ request: Request) throws -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
+  public func rename(_ request: Request) throws
+    -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
     let id: UUID = try request.parameters.require("id")
     let title = try request.parameters.require("title")
 
@@ -84,7 +90,10 @@ public struct ItemsController: RouteCollection {
     }
     .map(ModifyRecordQuery<TodoListItem>.init)
     .flatMap { query in
-      database.perform(operations: ModifyRecordQueryRequest(database: .private, query: query), on: request.eventLoop)
+      database.perform(
+        operations: ModifyRecordQueryRequest(database: .private, query: query),
+        on: request.eventLoop
+      )
     }.content()
   }
 

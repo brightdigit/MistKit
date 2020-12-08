@@ -5,12 +5,12 @@ file_length:
   - 200
   - 550
 function_body_length: 
-  - 10
-  - 20
+  - 15
+  - 25
 function_parameter_count: 8
 line_length: 
   - 80
-  - 150
+  - 100
 identifier_name:
   excluded: # excluded via string array
     - id
@@ -68,7 +68,6 @@ opt_in_rules:
   - last_where
   - legacy_multiple
   - legacy_random
-  - let_var_whitespace
   - literal_expression_end_indentation
   - lower_acl_than_parent
   - missing_docs

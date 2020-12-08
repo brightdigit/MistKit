@@ -36,7 +36,11 @@ public extension MKDatabase {
     on eventLoop: EventLoop
   ) -> EventLoopFuture<ResponseType> where RequestType.Response == ResponseType {
     let promise = eventLoop.makePromise(of: ResponseType.self)
-    perform(request: request, returnFailedAuthentication: returnFailedAuthentication, promise.completeWith)
+    perform(
+      request: request,
+      returnFailedAuthentication: returnFailedAuthentication,
+      promise.completeWith
+    )
     return promise.futureResult
   }
 }

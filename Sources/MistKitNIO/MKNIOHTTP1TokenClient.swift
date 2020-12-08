@@ -12,7 +12,10 @@ public class MKNIOHTTP1TokenClient: MKTokenClient {
     self.onRedirectURL = onRedirectURL ?? { print($0) }
   }
 
-  public func request(_ request: MKAuthenticationRedirect?, _ callback: @escaping ((Result<String, Error>) -> Void)) {
+  public func request(
+    _ request: MKAuthenticationRedirect?,
+    _ callback: @escaping ((Result<String, Error>) -> Void)
+  ) {
     if let url = request?.url {
       onRedirectURL(url)
     }

@@ -29,7 +29,11 @@ public let tokenManager: MKTokenManagerProtocol?
 ### `init(tokenEncoder:connection:tokenManager:)`
 
 ```swift
-public init(tokenEncoder: MKTokenEncoder?, connection: MKDatabaseConnection, tokenManager: MKTokenManagerProtocol? = nil)
+public init(
+  tokenEncoder: MKTokenEncoder?,
+  connection: MKDatabaseConnection,
+  tokenManager: MKTokenManagerProtocol? = nil
+)
 ```
 
 ### `url(withPathComponents:)`

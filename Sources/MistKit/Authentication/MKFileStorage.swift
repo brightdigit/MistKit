@@ -15,7 +15,11 @@ public class MKFileStorage: MKTokenStorage {
         throw error
       }
 
-      FileManager.default.createFile(atPath: url.path, contents: nil, attributes: nil)
+      FileManager.default.createFile(
+        atPath: url.path,
+        contents: nil,
+        attributes: nil
+      )
       fileHandle = try FileHandle(forUpdating: url)
     }
     self.fileHandle = fileHandle
@@ -28,7 +32,9 @@ public class MKFileStorage: MKTokenStorage {
       }
       try? fileHandle.seek(toOffset: 0)
       let data = fileHandle.readDataToEndOfFile()
-      return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+      return String(data: data, encoding: .utf8)?
+        .trimmingCharacters(in: .whitespacesAndNewlines)
+        .nilIfEmpty
     }
     set {
       guard let data = newValue?.data(using: .utf8) else {

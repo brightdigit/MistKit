@@ -10,7 +10,10 @@ public struct CharacterMapEncoder: MKTokenEncoder {
     var encodedString = token
 
     for (find, replace) in characterMap {
-      encodedString = encodedString.replacingOccurrences(of: find, with: replace)
+      encodedString = encodedString.replacingOccurrences(
+        of: find,
+        with: replace
+      )
     }
 
     return encodedString

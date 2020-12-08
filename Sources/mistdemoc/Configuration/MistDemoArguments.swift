@@ -21,7 +21,11 @@ public struct MistDemoArguments: MistDemoConfiguration, ParsableArguments {
 public extension MKDatabase where HttpClient == MKURLSessionClient {
   init(options: MistDemoArguments, tokenManager: MKTokenManagerProtocol) {
     // setup your connection to CloudKit
-    let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+    let connection = MKDatabaseConnection(
+      container: options.container,
+      apiToken: options.apiKey,
+      environment: options.environment
+    )
 
     // use the webAuthenticationToken which is passed
     if let token = options.token {

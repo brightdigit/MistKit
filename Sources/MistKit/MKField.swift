@@ -1,6 +1,7 @@
 import Foundation
 
 public enum MKValue: Codable {
+  // swiftlint:disable:next function_body_length
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: MKValue.CodingKeys.self)
 
@@ -13,7 +14,11 @@ public enum MKValue: Codable {
     case .bytes:
       let base64Encoded = try container.decode(String.self, forKey: .value)
       guard let data = Data(base64Encoded: base64Encoded) else {
-        throw DecodingError.dataCorruptedError(forKey: .value, in: container, debugDescription: "Invalid Base64 String.")
+        throw DecodingError.dataCorruptedError(
+          forKey: .value,
+          in: container,
+          debugDescription: "Invalid Base64 String."
+        )
       }
       self = .data(data)
 

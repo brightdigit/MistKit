@@ -10,5 +10,8 @@ public protocol MKTokenClient: AnyObject
 ### `request(_:_:)`
 
 ```swift
-func request(_ request: MKAuthenticationRedirect?, _ callback: @escaping (Result<String, Error>) -> Void)
+func request(
+  _ request: MKAuthenticationRedirect?,
+  _ callback: @escaping (Result<String, Error>) -> Void
+)
 ```

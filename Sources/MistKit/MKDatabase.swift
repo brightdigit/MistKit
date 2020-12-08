@@ -26,14 +26,23 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
   ) where RequestType.Response == ResponseType {
     let requestConfig: RequestConfiguration
     do {
-      requestConfig = try requestConfigFactory.configuration(from: request, withURLBuilder: urlBuilder)
+      requestConfig = try requestConfigFactory.configuration(
+        from: request,
+        withURLBuilder: urlBuilder
+      )
     } catch {
       callback(.failure(error))
       return
     }
     let httpRequest = client.request(fromConfiguration: requestConfig)
     httpRequest.execute { result in
-      self.resultSink.database(self, request: request, completedWith: result, shouldFailAuth: returnFailedAuthentication, callback)
+      self.resultSink.database(
+        self,
+        request: request,
+        completedWith: result,
+        shouldFailAuth: returnFailedAuthentication,
+        callback
+      )
     }
   }
 }

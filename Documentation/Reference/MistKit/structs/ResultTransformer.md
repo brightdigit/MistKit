@@ -10,5 +10,8 @@ public struct ResultTransformer: ResultTransformerProtocol
 ### `data(fromResult:setWebAuthenticationToken:)`
 
 ```swift
-public func data(fromResult result: Result<MKHttpResponse, Error>, setWebAuthenticationToken: (String) -> Void) -> Result<Data, Error>
+public func data(
+  fromResult result: Result<MKHttpResponse, Error>,
+  setWebAuthenticationToken: (String) -> Void
+) -> Result<Data, Error>
 ```

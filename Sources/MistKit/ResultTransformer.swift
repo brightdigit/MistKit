@@ -1,7 +1,10 @@
 import Foundation
 
 public struct ResultTransformer: ResultTransformerProtocol {
-  public func data(fromResult result: Result<MKHttpResponse, Error>, setWebAuthenticationToken: (String) -> Void) -> Result<Data, Error> {
+  public func data(
+    fromResult result: Result<MKHttpResponse, Error>,
+    setWebAuthenticationToken: (String) -> Void
+  ) -> Result<Data, Error> {
     result.flatMap { response -> Result<Data, Error> in
       if let webAuthenticationToken = response.webAuthenticationToken {
         setWebAuthenticationToken(webAuthenticationToken)

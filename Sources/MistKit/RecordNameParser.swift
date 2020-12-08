@@ -11,12 +11,19 @@ public struct RecordNameParser {
   public static let regexStrInner = componentSizes.map(regexComponent(forLength:)).joined()
   public static let regexString = "^_\(regexStrInner)$"
   // swiftlint:disable:next force_try
-  public static let regex = try! NSRegularExpression(pattern: regexString, options: .caseInsensitive)
+  public static let regex = try! NSRegularExpression(
+    pattern: regexString,
+    options: .caseInsensitive
+  )
   public static func uuid(fromRecordName recordName: String) -> UUID? {
     if let uuid = UUID(uuidString: recordName) {
       return uuid
     }
-    let match = regex.firstMatch(in: recordName, options: NSRegularExpression.MatchingOptions(), range: .init(location: 0, length: recordName.count))
+    let match = regex.firstMatch(
+      in: recordName,
+      options: NSRegularExpression.MatchingOptions(),
+      range: .init(location: 0, length: recordName.count)
+    )
 
     let uuidStringComponents = componentSizes.enumerated().compactMap { index, _ -> Substring? in
       let nsRange = match?.range(at: index + 1)

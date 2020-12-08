@@ -35,5 +35,8 @@ public init(storage: MKTokenStorage, client: MKTokenClient?)
 ### `request(_:_:)`
 
 ```swift
-public func request(_ request: MKAuthenticationRedirect, _ callback: @escaping (Result<String, Error>) -> Void)
+public func request(
+  _ request: MKAuthenticationRedirect,
+  _ callback: @escaping (Result<String, Error>) -> Void
+)
 ```

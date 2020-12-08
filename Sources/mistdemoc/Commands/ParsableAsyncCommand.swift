@@ -8,6 +8,7 @@ public protocol ParsableAsyncCommand: ParsableCommand {
 
 public extension ParsableAsyncCommand {
   func run() throws {
+    // swiftlint:disable:next implicitly_unwrapped_optional
     var result: Result<Void, Error>!
 
     runAsync { error in

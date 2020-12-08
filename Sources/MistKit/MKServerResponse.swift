@@ -13,7 +13,12 @@ public enum MKServerResponse<Success>: Codable where Success: Codable {
     } else if container.contains(.redirectURL) {
       self = try .failure(container.decode(URL.self, forKey: .redirectURL))
     } else {
-      throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: container.codingPath, debugDescription: "No Valid Keys"))
+      throw DecodingError.dataCorrupted(
+        DecodingError.Context(
+          codingPath: container.codingPath,
+          debugDescription: "No Valid Keys"
+        )
+      )
     }
   }
 

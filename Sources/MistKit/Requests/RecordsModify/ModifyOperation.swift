@@ -1,5 +1,9 @@
 public struct ModifyOperation<RecordType: MKQueryRecord>: Encodable {
-  public init(operationType: ModifyOperationType, record: RecordType, desiredKeys: [String]? = nil) {
+  public init(
+    operationType: ModifyOperationType,
+    record: RecordType,
+    desiredKeys: [String]? = nil
+  ) {
     self.operationType = operationType
     self.record = MKAnyRecord(record: record)
     self.desiredKeys = desiredKeys

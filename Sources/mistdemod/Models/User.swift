@@ -35,7 +35,7 @@ public extension User {
 }
 
 extension User: MKModelStorable {
-  public static var tokenKey: KeyPath<User, Field<String?>> = \User.$cloudKitToken
+  public static var tokenKey = \User.$cloudKitToken
 }
 
 extension User: ModelAuthenticatable {
