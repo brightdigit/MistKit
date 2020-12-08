@@ -29,7 +29,8 @@ public struct RecordNameParser {
       let nsRange = match?.range(at: index + 1)
       return nsRange.flatMap {
         Range($0, in: recordName)
-      }.map {
+      }
+      .map {
         recordName[$0]
       }
     }

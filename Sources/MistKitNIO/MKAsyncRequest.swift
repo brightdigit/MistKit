@@ -29,7 +29,8 @@ public struct MKAsyncRequest: MKHttpRequest {
 
     client.execute(
       request: request
-    ).map(MKAsyncResponse.init)
-      .whenComplete(callback)
+    )
+    .map(MKAsyncResponse.init)
+    .whenComplete(callback)
   }
 }

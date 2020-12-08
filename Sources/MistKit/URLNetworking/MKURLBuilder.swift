@@ -22,7 +22,8 @@ public class MKURLBuilder {
     }
     let query = queryItems.map {
       [$0.key, $0.value].joined(separator: "=")
-    }.joined(separator: "&")
+    }
+    .joined(separator: "&")
     guard let result = URL(string: [url.absoluteString, query].joined(separator: "?")) else {
       throw MKError.invalidURLQuery(query)
     }

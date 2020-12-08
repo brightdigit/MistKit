@@ -1,3 +1,3 @@
-enum MKNIOHTTP1Error: Error {
+public enum MKNIOHTTP1Error: Error {
   case noToken
 }

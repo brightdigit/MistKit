@@ -14,6 +14,7 @@
 ## Enums
 
 -   [BindTo](enums/BindTo.md)
+-   [MKNIOHTTP1Error](enums/MKNIOHTTP1Error.md)
 
 ## Extensions
 

@@ -7,6 +7,12 @@ struct ListCommand: ParsableAsyncCommand
 ```
 
 ## Properties
+### `options`
+
+```swift
+@OptionGroup public var options: MistDemoArguments
+```
+
 ### `record`
 
 ```swift

@@ -1,6 +1,11 @@
 import Foundation
 
 public enum MKValue: Codable {
+  public enum CodingKeys: String, CodingKey {
+    case value
+    case type
+  }
+
   // swiftlint:disable:next function_body_length
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: MKValue.CodingKeys.self)
@@ -34,11 +39,6 @@ public enum MKValue: Codable {
         self = .integer(integer)
       }
     }
-  }
-
-  enum CodingKeys: String, CodingKey {
-    case value
-    case type
   }
 
   case string(String)

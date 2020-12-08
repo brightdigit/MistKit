@@ -7,10 +7,16 @@ struct NewCommand: ParsableAsyncCommand
 ```
 
 ## Properties
+### `options`
+
+```swift
+@OptionGroup public var options: MistDemoArguments
+```
+
 ### `title`
 
 ```swift
-public var title: String
+@Argument public var title: String
 ```
 
 ## Methods

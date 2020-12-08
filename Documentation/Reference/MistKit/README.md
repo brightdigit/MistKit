@@ -69,16 +69,20 @@
 ## Enums
 
 -   [MKAPIVersion](enums/MKAPIVersion.md)
+-   [MKAnyQuery.CodingKeys](enums/MKAnyQuery.CodingKeys.md)
 -   [MKDatabaseType](enums/MKDatabaseType.md)
 -   [MKDecodingError](enums/MKDecodingError.md)
 -   [MKEnvironment](enums/MKEnvironment.md)
 -   [MKError](enums/MKError.md)
 -   [MKErrorCode](enums/MKErrorCode.md)
 -   [MKFieldType](enums/MKFieldType.md)
+-   [MKQuery.CodingKeys](enums/MKQuery.CodingKeys.md)
 -   [MKServerResponse](enums/MKServerResponse.md)
 -   [MKServerResponse.CodingKeys](enums/MKServerResponse.CodingKeys.md)
 -   [MKValue](enums/MKValue.md)
+-   [MKValue.CodingKeys](enums/MKValue.CodingKeys.md)
 -   [ModifiedRecord](enums/ModifiedRecord.md)
+-   [ModifiedRecord.CodingKeys](enums/ModifiedRecord.CodingKeys.md)
 -   [ModifyOperationType](enums/ModifyOperationType.md)
 
 ## Extensions

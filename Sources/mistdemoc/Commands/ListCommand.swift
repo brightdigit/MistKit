@@ -7,7 +7,7 @@ import MistKitNIO
 public extension MistDemoCommand {
   struct ListCommand: ParsableAsyncCommand {
     public static var configuration = CommandConfiguration(commandName: "list")
-    @OptionGroup var options: MistDemoArguments
+    @OptionGroup public var options: MistDemoArguments
 
     @Flag
     public var record: Bool = false

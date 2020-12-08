@@ -7,7 +7,7 @@ import MistKitNIO
 public extension MistDemoCommand {
   struct FindCommand: ParsableAsyncCommand {
     public static var configuration = CommandConfiguration(commandName: "find")
-    @OptionGroup var options: MistDemoArguments
+    @OptionGroup public var options: MistDemoArguments
 
     @Argument
     public var recordNames: [UUID] = []

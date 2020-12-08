@@ -7,7 +7,7 @@ import MistKitNIO
 public extension MistDemoCommand {
   struct RenameCommand: ParsableAsyncCommand {
     public static var configuration = CommandConfiguration(commandName: "rename")
-    @OptionGroup var options: MistDemoArguments
+    @OptionGroup public var options: MistDemoArguments
 
     @Argument
     public var recordName: UUID

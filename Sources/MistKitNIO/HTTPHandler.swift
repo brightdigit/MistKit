@@ -205,7 +205,8 @@ public final class HTTPHandler: ChannelInboundHandler {
         return try pipeBootstrap.withPipes(
           inputDescriptor: STDIN_FILENO,
           outputDescriptor: STDOUT_FILENO
-        ).wait()
+        )
+        .wait()
       }
     }()
 

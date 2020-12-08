@@ -7,7 +7,7 @@ import MistKitNIO
 public extension MistDemoCommand {
   struct DeleteCommand: ParsableAsyncCommand {
     public static var configuration = CommandConfiguration(commandName: "delete")
-    @OptionGroup var options: MistDemoArguments
+    @OptionGroup public var options: MistDemoArguments
 
     @Argument
     public var recordNames: [UUID] = []

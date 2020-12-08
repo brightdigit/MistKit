@@ -2,7 +2,7 @@ public struct MKAnyQuery: MKQueryProtocol {
   public let recordType: String
   public let desiredKeys: [String]?
 
-  enum CodingKeys: String, CodingKey {
+  public enum CodingKeys: String, CodingKey {
     case recordType
   }
 

@@ -7,6 +7,12 @@ struct RenameCommand: ParsableAsyncCommand
 ```
 
 ## Properties
+### `options`
+
+```swift
+@OptionGroup public var options: MistDemoArguments
+```
+
 ### `recordName`
 
 ```swift

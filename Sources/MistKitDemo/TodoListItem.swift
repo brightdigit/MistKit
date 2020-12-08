@@ -48,7 +48,8 @@ public extension MKQueryRecord {
   var information: String {
     let fieldString = fields.map {
       "  \($0.key): \($0.value)"
-    }.joined(separator: "\n")
+    }
+    .joined(separator: "\n")
 
     return """
     recordName: \(recordName?.uuidString ?? "")

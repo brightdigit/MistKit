@@ -20,7 +20,8 @@ public struct UsersController: RouteCollection {
     return database.perform(
       request: GetCurrentUserIdentityRequest(),
       on: request.eventLoop
-    ).mistKitResponse()
+    )
+    .mistKitResponse()
   }
 
   public func boot(routes: RoutesBuilder) throws {

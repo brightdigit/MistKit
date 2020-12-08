@@ -57,7 +57,8 @@ public struct ItemsController: RouteCollection {
         operations: ModifyRecordQueryRequest(database: .private, query: query),
         on: request.eventLoop
       )
-    }.content()
+    }
+    .content()
   }
 
   public func find(_ request: Request) throws
@@ -94,7 +95,8 @@ public struct ItemsController: RouteCollection {
         operations: ModifyRecordQueryRequest(database: .private, query: query),
         on: request.eventLoop
       )
-    }.content()
+    }
+    .content()
   }
 
   public func boot(routes: RoutesBuilder) throws {

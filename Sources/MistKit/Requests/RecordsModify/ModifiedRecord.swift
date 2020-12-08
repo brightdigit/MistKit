@@ -1,7 +1,7 @@
 import Foundation
 
 public enum ModifiedRecord: Decodable {
-  enum CodingKeys: String, CodingKey {
+  public enum CodingKeys: String, CodingKey {
     case deleted
     case recordName
   }
