@@ -32,13 +32,13 @@ public let resultSink: ResultSinkProtocol
 ```
 
 ## Methods
-### `init(connection:factory:requestConfigFactory:client:resultSink:tokenManager:)`
+### `init(connection:client:factory:requestConfigFactory:resultSink:tokenManager:)`
 
 ```swift
 public init(connection: MKDatabaseConnection,
+            client: HttpClient,
             factory: MKURLBuilderFactory? = nil,
             requestConfigFactory: RequestConfigurationFactoryProtocol? = nil,
-            client: HttpClient,
             resultSink: ResultSinkProtocol? = nil,
             tokenManager: MKTokenManagerProtocol? = nil)
 ```

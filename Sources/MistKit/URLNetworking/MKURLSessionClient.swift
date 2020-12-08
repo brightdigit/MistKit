@@ -5,11 +5,14 @@ import Foundation
 #endif
 
 public struct MKURLSessionClient: MKHttpClient {
+  public typealias RequestType = MKURLRequest
+
+  public let session: URLSession
+
   public init(session: URLSession) {
     self.session = session
   }
 
-  public let session: URLSession
   public func request(withURL url: URL, data: Data?) -> MKURLRequest {
     var urlRequest = URLRequest(url: url)
     if let data = data {
@@ -19,6 +22,4 @@ public struct MKURLSessionClient: MKHttpClient {
     }
     return MKURLRequest(urlRequest: urlRequest, urlSession: session)
   }
-
-  public typealias RequestType = MKURLRequest
 }

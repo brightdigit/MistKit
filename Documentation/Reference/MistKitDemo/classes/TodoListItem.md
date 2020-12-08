@@ -7,12 +7,6 @@ public class TodoListItem: MKQueryRecord
 ```
 
 ## Properties
-### `fields`
-
-```swift
-public var fields: [String: MKValue]
-```
-
 ### `recordName`
 
 ```swift
@@ -29,6 +23,12 @@ public var title: String
 
 ```swift
 public let recordChangeTag: String?
+```
+
+### `fields`
+
+```swift
+public var fields: [String: MKValue]
 ```
 
 ## Methods

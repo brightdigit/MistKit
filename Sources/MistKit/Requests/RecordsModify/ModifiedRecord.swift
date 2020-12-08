@@ -1,6 +1,9 @@
 import Foundation
 
 public enum ModifiedRecord: Decodable {
+  case deleted(UUID)
+  case updated(MKAnyRecord)
+
   public enum CodingKeys: String, CodingKey {
     case deleted
     case recordName
@@ -26,7 +29,4 @@ public enum ModifiedRecord: Decodable {
 
     self = .deleted(recordName)
   }
-
-  case deleted(UUID)
-  case updated(MKAnyRecord)
 }

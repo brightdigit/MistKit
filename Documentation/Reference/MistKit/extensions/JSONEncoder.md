@@ -9,5 +9,7 @@ extension JSONEncoder: MKEncoder
 ### `data(from:)`
 
 ```swift
-public func data<EncodableType: MKEncodable>(from object: EncodableType) throws -> Data
+public func data<EncodableType: MKEncodable>(
+  from object: EncodableType
+) throws -> Data
 ```

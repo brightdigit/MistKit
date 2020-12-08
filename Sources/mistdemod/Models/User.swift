@@ -19,6 +19,7 @@ public final class User: Model, Content {
 
   public init() {}
 
+  // swiftlint:disable:next function_default_parameter_at_end
   public init(id: UUID? = nil, name: String, passwordHash: String) {
     self.id = id
     self.name = name

@@ -48,17 +48,18 @@ public struct ItemsController: RouteCollection {
 
     let cloudKitRequest = LookupRecordQueryRequest(database: .private, query: query)
 
-    return database.lookup(cloudKitRequest, on: request.eventLoop).mapEach {
-      ModifyOperation(operationType: .delete, record: $0)
-    }
-    .map(ModifyRecordQuery.init)
-    .flatMap { query in
-      database.perform(
-        operations: ModifyRecordQueryRequest(database: .private, query: query),
-        on: request.eventLoop
-      )
-    }
-    .content()
+    return database.lookup(cloudKitRequest, on: request.eventLoop)
+      .mapEach {
+        ModifyOperation(operationType: .delete, record: $0)
+      }
+      .map(ModifyRecordQuery.init)
+      .flatMap { query in
+        database.perform(
+          operations: ModifyRecordQueryRequest(database: .private, query: query),
+          on: request.eventLoop
+        )
+      }
+      .content()
   }
 
   public func find(_ request: Request) throws
@@ -85,18 +86,19 @@ public struct ItemsController: RouteCollection {
 
     let cloudKitRequest = LookupRecordQueryRequest(database: .private, query: query)
 
-    return database.lookup(cloudKitRequest, on: request.eventLoop).mapEach { item in
-      item.title = title
-      return ModifyOperation(operationType: .update, record: item)
-    }
-    .map(ModifyRecordQuery<TodoListItem>.init)
-    .flatMap { query in
-      database.perform(
-        operations: ModifyRecordQueryRequest(database: .private, query: query),
-        on: request.eventLoop
-      )
-    }
-    .content()
+    return database.lookup(cloudKitRequest, on: request.eventLoop)
+      .mapEach { item in
+        item.title = title
+        return ModifyOperation(operationType: .update, record: item)
+      }
+      .map(ModifyRecordQuery<TodoListItem>.init)
+      .flatMap { query in
+        database.perform(
+          operations: ModifyRecordQueryRequest(database: .private, query: query),
+          on: request.eventLoop
+        )
+      }
+      .content()
   }
 
   public func boot(routes: RoutesBuilder) throws {

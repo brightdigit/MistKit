@@ -1,4 +1,7 @@
 public struct UserIdentityResponse: MKDecodable, Codable {
+  public let lookupInfo: UserIdentityLookupInfo?
+  public let userRecordName: RecordName
+  public let nameComponents: UserIdentityNameComponents?
   public init(
     lookupInfo: UserIdentityLookupInfo?,
     userRecordName: RecordName,
@@ -8,8 +11,4 @@ public struct UserIdentityResponse: MKDecodable, Codable {
     self.userRecordName = userRecordName
     self.nameComponents = nameComponents
   }
-
-  public let lookupInfo: UserIdentityLookupInfo?
-  public let userRecordName: RecordName
-  public let nameComponents: UserIdentityNameComponents?
 }

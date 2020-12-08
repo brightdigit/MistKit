@@ -12,9 +12,9 @@ public struct TodoItemModel: Content {
 }
 
 extension TodoListItem: MKContentRecord {
+  public typealias ContentType = TodoItemModel
+
   public static func content(fromRecord record: TodoListItem) -> TodoItemModel {
     TodoItemModel(item: record)
   }
-
-  public typealias ContentType = TodoItemModel
 }

@@ -2,6 +2,13 @@ import Foundation
 import MistKit
 
 public class TodoListItem: MKQueryRecord {
+  public static let recordType: String = "TodoItem"
+  public static let desiredKeys: [String] = ["title"]
+
+  public let recordName: UUID?
+  public var title: String
+  public let recordChangeTag: String?
+
   public var fields: [String: MKValue] {
     ["title": .string(title)]
   }
@@ -21,13 +28,6 @@ public class TodoListItem: MKQueryRecord {
     self.recordName = recordName
     self.recordChangeTag = recordChangeTag
   }
-
-  public static var recordType: String = "TodoItem"
-  public static var desiredKeys: [String]? = ["title"]
-
-  public let recordName: UUID?
-  public var title: String
-  public let recordChangeTag: String?
 }
 
 public extension Array where Element: MKQueryRecord {
@@ -38,7 +38,9 @@ public extension Array where Element: MKQueryRecord {
       $0.components(separatedBy: .newlines)
         .map { $0.count }
         .max()
-    }.compactMap { $0 }.max() ?? 0
+    }
+    .compactMap { $0 }
+    .max() ?? 0
     let separator = String(repeating: "=", count: minlength + 3)
     return items.joined(separator: "\n\(separator)\n")
   }

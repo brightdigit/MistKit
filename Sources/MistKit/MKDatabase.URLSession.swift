@@ -12,7 +12,10 @@ public extension MKDatabase where HttpClient == MKURLSessionClient {
        session: URLSession? = nil,
        resultSink: ResultSinkProtocol? = nil) {
     let factory = factory ?? MKURLBuilderFactory()
-    urlBuilder = factory.builder(forConnection: connection, withTokenManager: tokenManager)
+    urlBuilder = factory.builder(
+      forConnection: connection,
+      withTokenManager: tokenManager
+    )
     client = MKURLSessionClient(session: session ?? URLSession.shared)
     requestConfigFactory = RequestConfigurationFactory()
     self.resultSink = resultSink ?? ResultSink()

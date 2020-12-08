@@ -1,9 +1,4 @@
 public class MKTokenManager: MKTokenManagerProtocol {
-  public init(storage: MKTokenStorage, client: MKTokenClient?) {
-    self.storage = storage
-    self.client = client
-  }
-
   public let storage: MKTokenStorage
   public let client: MKTokenClient?
 
@@ -14,6 +9,11 @@ public class MKTokenManager: MKTokenManagerProtocol {
     set {
       storage.webAuthenticationToken = newValue
     }
+  }
+
+  public init(storage: MKTokenStorage, client: MKTokenClient?) {
+    self.storage = storage
+    self.client = client
   }
 
   public func request(

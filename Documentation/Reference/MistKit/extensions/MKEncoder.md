@@ -9,5 +9,7 @@ public extension MKEncoder
 ### `optionalData(from:)`
 
 ```swift
-func optionalData<EncodableType: MKEncodable>(from object: EncodableType) throws -> Data?
+func optionalData<EncodableType: MKEncodable>(
+  from object: EncodableType
+) throws -> Data?
 ```

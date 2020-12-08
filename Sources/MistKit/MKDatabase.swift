@@ -7,13 +7,16 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
   public let resultSink: ResultSinkProtocol
 
   public init(connection: MKDatabaseConnection,
+              client: HttpClient,
               factory: MKURLBuilderFactory? = nil,
               requestConfigFactory: RequestConfigurationFactoryProtocol? = nil,
-              client: HttpClient,
               resultSink: ResultSinkProtocol? = nil,
               tokenManager: MKTokenManagerProtocol? = nil) {
     let factory = factory ?? MKURLBuilderFactory()
-    urlBuilder = factory.builder(forConnection: connection, withTokenManager: tokenManager)
+    urlBuilder = factory.builder(
+      forConnection: connection,
+      withTokenManager: tokenManager
+    )
     self.requestConfigFactory = requestConfigFactory ?? RequestConfigurationFactory()
     self.client = client
     self.resultSink = resultSink ?? ResultSink()

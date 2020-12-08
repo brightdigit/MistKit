@@ -1,13 +1,16 @@
 import Foundation
 
 public struct ResultSink: ResultSinkProtocol {
-  public init(dataTransformer: ResultTransformerProtocol? = nil, decoder: MKDecoder? = nil) {
+  public let dataTransformer: ResultTransformerProtocol
+  public let decoder: MKDecoder
+
+  public init(
+    dataTransformer: ResultTransformerProtocol? = nil,
+    decoder: MKDecoder? = nil
+  ) {
     self.dataTransformer = dataTransformer ?? ResultTransformer()
     self.decoder = decoder ?? JSONDecoder()
   }
-
-  public let dataTransformer: ResultTransformerProtocol
-  public let decoder: MKDecoder
 
   public func response<RequestType, ResponseType>(
     fromResult dataResult: Result<Data, Error>,

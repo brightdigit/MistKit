@@ -19,7 +19,8 @@ func content<RecordType: MKContentRecord, ContentType>()
 ```swift
 func content<RecordType: MKContentRecord, ContentType>()
   -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<ContentType>>>
-  where Value == ModifiedRecordQueryResult<RecordType>, RecordType.ContentType == ContentType
+  where Value == ModifiedRecordQueryResult<RecordType>,
+  RecordType.ContentType == ContentType
 ```
 
 ### `mistKitResponse()`

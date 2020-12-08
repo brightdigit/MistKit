@@ -1,6 +1,10 @@
 import Foundation
 
 public enum MKValue: Codable {
+  case string(String)
+  case integer(Int64)
+  case data(Data)
+
   public enum CodingKeys: String, CodingKey {
     case value
     case type
@@ -41,9 +45,6 @@ public enum MKValue: Codable {
     }
   }
 
-  case string(String)
-  case integer(Int64)
-  case data(Data)
   public func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: MKValue.CodingKeys.self)
     switch self {

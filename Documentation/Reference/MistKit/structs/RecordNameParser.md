@@ -13,12 +13,6 @@ public struct RecordNameParser
 public static func regexComponent(forLength length: Int) -> String
 ```
 
-### `init()`
-
-```swift
-public init()
-```
-
 ### `uuid(fromRecordName:)`
 
 ```swift

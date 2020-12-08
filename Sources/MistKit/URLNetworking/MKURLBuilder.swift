@@ -1,6 +1,10 @@
 import Foundation
 
 public class MKURLBuilder {
+  public let tokenEncoder: MKTokenEncoder?
+  public let connection: MKDatabaseConnection
+  public let tokenManager: MKTokenManagerProtocol?
+
   public init(
     tokenEncoder: MKTokenEncoder?,
     connection: MKDatabaseConnection,
@@ -11,10 +15,6 @@ public class MKURLBuilder {
     self.tokenManager = tokenManager
   }
 
-  public let tokenEncoder: MKTokenEncoder?
-  public let connection: MKDatabaseConnection
-  public let tokenManager: MKTokenManagerProtocol?
-
   public func url(withPathComponents pathComponents: [String]) throws -> URL {
     var url = connection.url
     for path in pathComponents {
@@ -24,7 +24,10 @@ public class MKURLBuilder {
       [$0.key, $0.value].joined(separator: "=")
     }
     .joined(separator: "&")
-    guard let result = URL(string: [url.absoluteString, query].joined(separator: "?")) else {
+    guard let result = URL(
+      string: [url.absoluteString, query]
+        .joined(separator: "?")
+    ) else {
       throw MKError.invalidURLQuery(query)
     }
     return result

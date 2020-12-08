@@ -1,26 +1,3 @@
-cyclomatic_complexity: 
-  - 6
-  - 9
-file_length: 
-  - 200
-  - 550
-function_body_length: 
-  - 15
-  - 25
-function_parameter_count: 8
-line_length: 
-  - 80
-  - 100
-identifier_name:
-  excluded: # excluded via string array
-    - id
-excluded:
-  - Tests/*/XCTestManifests.swift
-  - DerivedData
-  - .build
-  - Tests/LinuxMain.swift
-indentation_width: 
-  indentation_width: 2
 opt_in_rules:
   - anyobject_protocol
   - array_init
@@ -37,7 +14,6 @@ opt_in_rules:
   - convenience_type
   - discouraged_object_literal
   - discouraged_optional_boolean
-  - discouraged_optional_collection
   - empty_collection_literal
   - empty_count
   - empty_string
@@ -45,7 +21,6 @@ opt_in_rules:
   - enum_case_associated_values_count
   - expiring_todo
   - explicit_acl
-  - explicit_enum_raw_value
   - explicit_init
   - explicit_self
   - explicit_top_level_acl
@@ -90,7 +65,6 @@ opt_in_rules:
   - pattern_matching_keywords
   - prefer_self_type_over_type_of_self
   - prefer_zero_over_explicit_init
-  - prefixed_toplevel_constant
   - private_action
   - private_outlet
   - prohibited_interface_builder
@@ -126,3 +100,26 @@ opt_in_rules:
   - vertical_whitespace_opening_braces
   - xct_specific_matcher
   - yoda_condition
+cyclomatic_complexity: 
+  - 6
+  - 9
+file_length: 
+  - 200
+  - 550
+function_body_length: 
+  - 15
+  - 25
+function_parameter_count: 8
+line_length: 
+  - 90
+  - 90
+identifier_name:
+  excluded: 
+    - id
+excluded:
+  - Tests/*/XCTestManifests.swift
+  - DerivedData
+  - .build
+  - Tests/LinuxMain.swift
+indentation_width: 
+  indentation_width: 2

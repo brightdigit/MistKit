@@ -1,9 +1,10 @@
 public protocol MKRequest {
+  associatedtype Response: MKDecodable
+  associatedtype Data: MKEncodable
+
   var data: Data { get }
   var database: MKDatabaseType { get }
   var subpath: [String] { get }
-  associatedtype Response: MKDecodable
-  associatedtype Data: MKEncodable
 }
 
 public extension MKRequest {

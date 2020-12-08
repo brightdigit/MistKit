@@ -1,3 +1,5 @@
+// swiftlint:disable all
+
 import NIO
 import NIOHTTP1
 

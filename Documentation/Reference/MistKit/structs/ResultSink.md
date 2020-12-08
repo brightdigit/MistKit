@@ -23,7 +23,10 @@ public let decoder: MKDecoder
 ### `init(dataTransformer:decoder:)`
 
 ```swift
-public init(dataTransformer: ResultTransformerProtocol? = nil, decoder: MKDecoder? = nil)
+public init(
+  dataTransformer: ResultTransformerProtocol? = nil,
+  decoder: MKDecoder? = nil
+)
 ```
 
 ### `response(fromResult:ofRequest:shouldFailAuth:)`

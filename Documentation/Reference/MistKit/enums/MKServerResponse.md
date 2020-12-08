@@ -20,6 +20,18 @@ case success(Success)
 ```
 
 ## Methods
+### `init(attemptRecoveryFrom:)`
+
+```swift
+public init(attemptRecoveryFrom error: Error) throws
+```
+
+### `init(fromResult:)`
+
+```swift
+public init(fromResult result: Result<Success, Error>) throws
+```
+
 ### `init(from:)`
 
 ```swift
@@ -43,15 +55,3 @@ public func encode(to encoder: Encoder) throws
 | Name | Description |
 | ---- | ----------- |
 | encoder | The encoder to write data to. |
-
-### `init(fromResult:)`
-
-```swift
-public init(fromResult result: Result<Success, Error>) throws
-```
-
-### `init(attemptRecoveryFrom:)`
-
-```swift
-public init(attemptRecoveryFrom error: Error) throws
-```

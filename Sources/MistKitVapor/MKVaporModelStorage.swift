@@ -3,10 +3,6 @@ import MistKit
 public class MKVaporModelStorage<ModelType: MKModelStorable>: MKTokenStorage {
   public let model: ModelType
 
-  public init(model: ModelType) {
-    self.model = model
-  }
-
   public var webAuthenticationToken: String? {
     get {
       model[keyPath: ModelType.tokenKey].wrappedValue
@@ -14,5 +10,9 @@ public class MKVaporModelStorage<ModelType: MKModelStorable>: MKTokenStorage {
     set {
       model[keyPath: ModelType.tokenKey].wrappedValue = newValue
     }
+  }
+
+  public init(model: ModelType) {
+    self.model = model
   }
 }

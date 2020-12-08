@@ -29,7 +29,6 @@ public extension MKDatabase where HttpClient == MKVaporClient {
 
     self.init(
       connection: connection,
-      factory: nil,
       client: MKVaporClient(client: request.client),
       tokenManager: manager
     )

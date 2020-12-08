@@ -7,6 +7,7 @@ import MistKitNIO
 public extension MistDemoCommand {
   struct WhoAmICommand: ParsableAsyncCommand {
     public static var configuration = CommandConfiguration(commandName: "whoami")
+
     @OptionGroup public private(set) var options: MistDemoArguments
 
     public func runAsync(_ completed: @escaping (Error?) -> Void) {

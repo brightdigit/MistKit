@@ -1,9 +1,41 @@
 import Foundation
 
 public enum MKServerResponse<Success>: Codable where Success: Codable {
+  case failure(URL)
+  case success(Success)
+
   public enum CodingKeys: String, CodingKey {
     case redirectURL
     case result
+  }
+
+  public init(attemptRecoveryFrom error: Error) throws {
+    guard let mkError = error as? MKError else {
+      throw error
+    }
+
+    guard case let MKError.authenticationRequired(redirect) = mkError else {
+      throw error
+    }
+
+    self = .failure(redirect.url)
+  }
+
+  public init(fromResult result: Result<Success, Error>) throws {
+    switch result {
+    case let .success(value):
+      self = .success(value)
+
+    case let .failure(mkError as MKError):
+      if case let MKError.authenticationRequired(redirect) = mkError {
+        self = .failure(redirect.url)
+      } else {
+        throw mkError
+      }
+
+    case let .failure(error):
+      throw error
+    }
   }
 
   public init(from decoder: Decoder) throws {
@@ -32,33 +64,4 @@ public enum MKServerResponse<Success>: Codable where Success: Codable {
       try container.encode(data, forKey: .result)
     }
   }
-
-  public init(fromResult result: Result<Success, Error>) throws {
-    switch result {
-    case let .success(value): self = .success(value)
-
-    case let .failure(mkError as MKError):
-      if case let MKError.authenticationRequired(redirect) = mkError {
-        self = .failure(redirect.url)
-      } else {
-        throw mkError
-      }
-    case let .failure(error): throw error
-    }
-  }
-
-  public init(attemptRecoveryFrom error: Error) throws {
-    guard let mkError = error as? MKError else {
-      throw error
-    }
-
-    guard case let MKError.authenticationRequired(redirect) = mkError else {
-      throw error
-    }
-
-    self = .failure(redirect.url)
-  }
-
-  case failure(URL)
-  case success(Success)
 }
