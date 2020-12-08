@@ -4,12 +4,12 @@ import MistKit
 import MistKitDemo
 import MistKitNIO
 
-extension MistDemoCommand {
+public extension MistDemoCommand {
   struct WhoAmICommand: ParsableAsyncCommand {
-    static var configuration = CommandConfiguration(commandName: "whoami")
-    @OptionGroup var options: MistDemoArguments
+    public static var configuration = CommandConfiguration(commandName: "whoami")
+    @OptionGroup public private(set) var options: MistDemoArguments
 
-    func runAsync(_ completed: @escaping (Error?) -> Void) {
+    public func runAsync(_ completed: @escaping (Error?) -> Void) {
       // setup how to manager your user's web authentication token
       let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding))
 
@@ -26,10 +26,12 @@ extension MistDemoCommand {
         completed(nil)
       }
     }
+
+    public init() {}
   }
 }
 
-extension UserIdentityResponse {
+public extension UserIdentityResponse {
   var information: String {
     """
     userRecordName: \(userRecordName.uuid)

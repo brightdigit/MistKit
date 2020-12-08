@@ -24,3 +24,9 @@ public var status: Int
 ```swift
 public var webAuthenticationToken: String?
 ```
+
+### `response`
+
+```swift
+public let response: ClientResponse
+```

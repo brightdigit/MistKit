@@ -1,7 +1,7 @@
 import Foundation
 
 public struct RequestConfigurationFactory: RequestConfigurationFactoryProtocol {
-  let encoder: MKEncoder = JSONEncoder()
+  public let encoder: MKEncoder = JSONEncoder()
 
   public func configuration<RequestType>(
     from request: RequestType,

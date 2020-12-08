@@ -6,6 +6,13 @@
 public struct RequestConfigurationFactory: RequestConfigurationFactoryProtocol
 ```
 
+## Properties
+### `encoder`
+
+```swift
+public let encoder: MKEncoder = JSONEncoder()
+```
+
 ## Methods
 ### `configuration(from:withURLBuilder:)`
 

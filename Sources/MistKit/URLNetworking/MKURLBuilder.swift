@@ -26,7 +26,7 @@ public class MKURLBuilder {
   }
 }
 
-extension MKURLBuilder {
+public extension MKURLBuilder {
   var queryItems: [String: String] {
     var parameters = ["ckAPIToken": connection.apiToken]
     if let webAuthenticationToken = tokenManager?.webAuthenticationToken, let tokenEncoder = self.tokenEncoder {

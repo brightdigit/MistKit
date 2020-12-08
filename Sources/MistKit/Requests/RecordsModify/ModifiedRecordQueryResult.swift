@@ -52,7 +52,7 @@ public extension MKDatabase {
   }
 }
 
-extension Result {
+public extension Result {
   func tryFlatmap<RecordType: MKQueryRecord>(
     recordsTo _: RecordType.Type
   ) -> Result<[RecordType], Failure>

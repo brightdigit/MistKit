@@ -1,13 +1,10 @@
 import MistKit
 
 public protocol MistDemoConfiguration {
-  //  @Option()
   var apiKey: String { get }
-  //
-  //  @Option()
+
   var container: String { get }
-  //
-  //  @Option()
+
   var environment: MKEnvironment { get }
 
   var token: String? { get }

@@ -7,6 +7,12 @@ public class MKFileStorage: MKTokenStorage
 ```
 
 ## Properties
+### `fileHandle`
+
+```swift
+public let fileHandle: FileHandle
+```
+
 ### `webAuthenticationToken`
 
 ```swift

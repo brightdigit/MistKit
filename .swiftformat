@@ -3,4 +3,5 @@
 --commas inline
 --disable wrapMultilineStatementBraces
 --extensionacl on-extension
+--decimalgrouping 3,4
 --exclude .build, DerivedData

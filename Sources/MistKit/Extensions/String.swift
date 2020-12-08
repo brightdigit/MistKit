@@ -1,4 +1,4 @@
-extension String {
+public extension String {
   var nilIfEmpty: String? {
     isEmpty ? self : nil
   }

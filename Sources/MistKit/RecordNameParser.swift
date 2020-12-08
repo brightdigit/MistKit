@@ -1,17 +1,17 @@
 import Foundation
 
 public struct RecordNameParser {
-  static let componentSizes = [8, 4, 4, 4, 12]
-  static func regexComponent(forLength length: Int) -> String {
+  public static let componentSizes = [8, 4, 4, 4, 12]
+  public static func regexComponent(forLength length: Int) -> String {
     "([0-9A-F]{\(length)})"
   }
 
   public init() {}
 
-  static let regexStrInner = componentSizes.map(regexComponent(forLength:)).joined()
-  static let regexString = "^_\(regexStrInner)$"
+  public static let regexStrInner = componentSizes.map(regexComponent(forLength:)).joined()
+  public static let regexString = "^_\(regexStrInner)$"
   // swiftlint:disable:next force_try
-  static let regex = try! NSRegularExpression(pattern: regexString, options: .caseInsensitive)
+  public static let regex = try! NSRegularExpression(pattern: regexString, options: .caseInsensitive)
   public static func uuid(fromRecordName recordName: String) -> UUID? {
     if let uuid = UUID(uuidString: recordName) {
       return uuid

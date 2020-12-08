@@ -1,7 +1,7 @@
 import FluentSQLiteDriver
 import Vapor
 
-let app = try Application(.detect())
+public let app = try Application(.detect())
 defer { app.shutdown() }
 app.databases.use(.sqlite(.memory), as: .sqlite)
 app.middleware.use(app.sessions.middleware)

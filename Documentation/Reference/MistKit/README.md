@@ -5,7 +5,9 @@
 -   [MKAuthenticationRedirect](protocols/MKAuthenticationRedirect.md)
 -   [MKContentRecord](protocols/MKContentRecord.md)
 -   [MKDecodable](protocols/MKDecodable.md)
+-   [MKDecoder](protocols/MKDecoder.md)
 -   [MKEncodable](protocols/MKEncodable.md)
+-   [MKEncoder](protocols/MKEncoder.md)
 -   [MKHttpClient](protocols/MKHttpClient.md)
 -   [MKHttpRequest](protocols/MKHttpRequest.md)
 -   [MKHttpResponse](protocols/MKHttpResponse.md)
@@ -17,6 +19,7 @@
 -   [MKTokenManagerProtocol](protocols/MKTokenManagerProtocol.md)
 -   [MKTokenStorage](protocols/MKTokenStorage.md)
 -   [RequestConfigurationFactoryProtocol](protocols/RequestConfigurationFactoryProtocol.md)
+-   [ResultSinkProtocol](protocols/ResultSinkProtocol.md)
 -   [ResultTransformerProtocol](protocols/ResultTransformerProtocol.md)
 
 ## Structs
@@ -38,6 +41,7 @@
 -   [MKQuery](structs/MKQuery.md)
 -   [MKURLBuilderFactory](structs/MKURLBuilderFactory.md)
 -   [MKURLRequest](structs/MKURLRequest.md)
+-   [MKURLResponse](structs/MKURLResponse.md)
 -   [MKURLSessionClient](structs/MKURLSessionClient.md)
 -   [ModifiedRecordQueryContent](structs/ModifiedRecordQueryContent.md)
 -   [ModifiedRecordQueryResponse](structs/ModifiedRecordQueryResponse.md)
@@ -49,6 +53,8 @@
 -   [RecordNameParser](structs/RecordNameParser.md)
 -   [RequestConfiguration](structs/RequestConfiguration.md)
 -   [RequestConfigurationFactory](structs/RequestConfigurationFactory.md)
+-   [ResultSink](structs/ResultSink.md)
+-   [ResultTransformer](structs/ResultTransformer.md)
 -   [UserIdentityLookupInfo](structs/UserIdentityLookupInfo.md)
 -   [UserIdentityNameComponents](structs/UserIdentityNameComponents.md)
 -   [UserIdentityResponse](structs/UserIdentityResponse.md)
@@ -78,11 +84,17 @@
 ## Extensions
 
 -   [Array](extensions/Array.md)
+-   [JSONEncoder](extensions/JSONEncoder.md)
 -   [MKAnyRecord](extensions/MKAnyRecord.md)
 -   [MKAuthenticationResponse](extensions/MKAuthenticationResponse.md)
 -   [MKDatabase](extensions/MKDatabase.md)
+-   [MKDatabaseConnection](extensions/MKDatabaseConnection.md)
+-   [MKEncoder](extensions/MKEncoder.md)
 -   [MKHttpClient](extensions/MKHttpClient.md)
 -   [MKRequest](extensions/MKRequest.md)
+-   [MKURLBuilder](extensions/MKURLBuilder.md)
+-   [Result](extensions/Result.md)
+-   [String](extensions/String.md)
 -   [UUID](extensions/UUID.md)
 
 ## Typealiases

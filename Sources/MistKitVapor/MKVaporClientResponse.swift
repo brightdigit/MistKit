@@ -14,5 +14,5 @@ public struct MKVaporClientResponse: MKHttpResponse {
     response.headers["X-Apple-CloudKit-Web-Auth-Token"].first
   }
 
-  let response: ClientResponse
+  public let response: ClientResponse
 }

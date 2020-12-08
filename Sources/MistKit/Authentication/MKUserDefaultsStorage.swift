@@ -1,7 +1,7 @@
 import Foundation
 
 public class MKUserDefaultsStorage: MKTokenStorage {
-  let userDefaults: UserDefaults
+  public let userDefaults: UserDefaults
 
   public init(userDefaults: UserDefaults? = nil) {
     self.userDefaults = userDefaults ?? .standard

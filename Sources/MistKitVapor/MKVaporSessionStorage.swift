@@ -2,8 +2,8 @@ import MistKit
 import Vapor
 
 public class MKVaporSessionStorage: MKTokenStorage {
-  let session: Session
-  let name: String
+  public let session: Session
+  public let name: String
 
   public var webAuthenticationToken: String? {
     get {

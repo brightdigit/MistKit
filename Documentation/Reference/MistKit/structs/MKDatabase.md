@@ -6,14 +6,40 @@
 public struct MKDatabase<HttpClient: MKHttpClient>
 ```
 
+## Properties
+### `urlBuilder`
+
+```swift
+public let urlBuilder: MKURLBuilder
+```
+
+### `requestConfigFactory`
+
+```swift
+public let requestConfigFactory: RequestConfigurationFactoryProtocol
+```
+
+### `client`
+
+```swift
+public let client: HttpClient
+```
+
+### `resultSink`
+
+```swift
+public let resultSink: ResultSinkProtocol
+```
+
 ## Methods
-### `init(connection:factory:requestConfigFactory:client:tokenManager:)`
+### `init(connection:factory:requestConfigFactory:client:resultSink:tokenManager:)`
 
 ```swift
 public init(connection: MKDatabaseConnection,
             factory: MKURLBuilderFactory? = nil,
-            requestConfigFactory _: RequestConfigurationFactoryProtocol? = nil,
+            requestConfigFactory: RequestConfigurationFactoryProtocol? = nil,
             client: HttpClient,
+            resultSink: ResultSinkProtocol? = nil,
             tokenManager: MKTokenManagerProtocol? = nil)
 ```
 
@@ -22,7 +48,7 @@ public init(connection: MKDatabaseConnection,
 ```swift
 public func perform<RequestType: MKRequest, ResponseType>(
   request: RequestType,
-  returnFailedAuthentication _: Bool = false,
+  returnFailedAuthentication: Bool = false,
   _ callback: @escaping ((Result<ResponseType, Error>) -> Void)
 ) where RequestType.Response == ResponseType
 ```

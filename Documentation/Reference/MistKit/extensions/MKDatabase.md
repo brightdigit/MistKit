@@ -6,14 +6,15 @@ public extension MKDatabase where HttpClient == MKURLSessionClient
 ```
 
 ## Methods
-### `init(connection:factory:requestConfigFactory:tokenManager:session:)`
+### `init(connection:factory:requestConfigFactory:tokenManager:session:resultSink:)`
 
 ```swift
 init(connection: MKDatabaseConnection,
      factory: MKURLBuilderFactory? = nil,
      requestConfigFactory _: RequestConfigurationFactoryProtocol? = nil,
      tokenManager: MKTokenManagerProtocol? = nil,
-     session: URLSession? = nil)
+     session: URLSession? = nil,
+     resultSink: ResultSinkProtocol? = nil)
 ```
 
 ### `query(_:_:)`

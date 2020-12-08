@@ -4,15 +4,17 @@ import MistKit
 import MistKitDemo
 import MistKitNIO
 
-extension MistDemoCommand {
+public extension MistDemoCommand {
   struct NewCommand: ParsableAsyncCommand {
-    static var configuration = CommandConfiguration(commandName: "new")
+    public static var configuration = CommandConfiguration(commandName: "new")
     @OptionGroup var options: MistDemoArguments
 
     @Argument
-    var title: String
+    public var title: String
 
-    func runAsync(_ completed: @escaping (Error?) -> Void) {
+    public init() {}
+
+    public func runAsync(_ completed: @escaping (Error?) -> Void) {
       // setup how to manager your user's web authentication token
       let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding))
 

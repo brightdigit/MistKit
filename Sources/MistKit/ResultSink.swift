@@ -6,8 +6,8 @@ public struct ResultSink: ResultSinkProtocol {
     self.decoder = decoder ?? JSONDecoder()
   }
 
-  let dataTransformer: ResultTransformerProtocol
-  let decoder: MKDecoder
+  public let dataTransformer: ResultTransformerProtocol
+  public let decoder: MKDecoder
 
   public func response<RequestType, ResponseType>(
     fromResult dataResult: Result<Data, Error>,
@@ -71,7 +71,7 @@ public struct ResultSink: ResultSinkProtocol {
   }
 }
 
-extension Result {
+public extension Result {
   var authResponse: MKAuthenticationRedirect? {
     guard case let .failure(error) = self else {
       return nil

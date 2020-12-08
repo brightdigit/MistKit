@@ -1,7 +1,7 @@
 import Foundation
 
 public class MKFileStorage: MKTokenStorage {
-  let fileHandle: FileHandle
+  public let fileHandle: FileHandle
 
   public init(url: URL) throws {
     let fileHandle: FileHandle

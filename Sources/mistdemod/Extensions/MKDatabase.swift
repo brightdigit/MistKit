@@ -3,7 +3,7 @@ import MistKitDemo
 import MistKitVapor
 import Vapor
 
-extension MKDatabase where HttpClient == MKVaporClient {
+public extension MKDatabase where HttpClient == MKVaporClient {
   init(request: Request) {
     let storage: MKTokenStorage
     if let user = request.auth.get(User.self) {

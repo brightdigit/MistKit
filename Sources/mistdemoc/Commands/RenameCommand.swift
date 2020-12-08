@@ -4,19 +4,21 @@ import MistKit
 import MistKitDemo
 import MistKitNIO
 
-extension MistDemoCommand {
+public extension MistDemoCommand {
   struct RenameCommand: ParsableAsyncCommand {
-    static var configuration = CommandConfiguration(commandName: "rename")
+    public static var configuration = CommandConfiguration(commandName: "rename")
     @OptionGroup var options: MistDemoArguments
 
     @Argument
-    var recordName: UUID
+    public var recordName: UUID
 
     @Argument
-    var newTitle: String
+    public var newTitle: String
+
+    public init() {}
 
     // swiftlint:disable:next function_body_length
-    func runAsync(_ completed: @escaping (Error?) -> Void) {
+    public func runAsync(_ completed: @escaping (Error?) -> Void) {
       // setup how to manager your user's web authentication token
       let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding))
 

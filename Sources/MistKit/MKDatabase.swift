@@ -1,10 +1,10 @@
 import Foundation
 
 public struct MKDatabase<HttpClient: MKHttpClient> {
-  let urlBuilder: MKURLBuilder
-  let requestConfigFactory: RequestConfigurationFactoryProtocol
-  let client: HttpClient
-  let resultSink: ResultSinkProtocol
+  public let urlBuilder: MKURLBuilder
+  public let requestConfigFactory: RequestConfigurationFactoryProtocol
+  public let client: HttpClient
+  public let resultSink: ResultSinkProtocol
 
   public init(connection: MKDatabaseConnection,
               factory: MKURLBuilderFactory? = nil,

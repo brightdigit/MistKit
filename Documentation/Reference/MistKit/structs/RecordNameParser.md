@@ -7,6 +7,12 @@ public struct RecordNameParser
 ```
 
 ## Methods
+### `regexComponent(forLength:)`
+
+```swift
+public static func regexComponent(forLength length: Int) -> String
+```
+
 ### `init()`
 
 ```swift

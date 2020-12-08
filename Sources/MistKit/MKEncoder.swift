@@ -1,9 +1,9 @@
 import Foundation
-protocol MKEncoder {
+public protocol MKEncoder {
   func data<EncodableType: MKEncodable>(from object: EncodableType) throws -> Data
 }
 
-extension MKEncoder {
+public extension MKEncoder {
   func optionalData<EncodableType: MKEncodable>(from object: EncodableType) throws -> Data? {
     guard !(object is MKEmptyGet) else {
       return nil

@@ -3,8 +3,8 @@ import MistKitDemo
 import MistKitVapor
 import Vapor
 
-struct ItemsController: RouteCollection {
-  func list(_ request: Request) -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> {
+public struct ItemsController: RouteCollection {
+  public func list(_ request: Request) -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> {
     // setup your database manager
     let database = MKDatabase(request: request)
 
@@ -19,7 +19,7 @@ struct ItemsController: RouteCollection {
     return database.query(cloudKitRequest, on: request.eventLoop).content()
   }
 
-  func create(_ request: Request) throws -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
+  public func create(_ request: Request) throws -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
     let title = try request.parameters.require("title")
 
     let database = MKDatabase(request: request)
@@ -36,7 +36,7 @@ struct ItemsController: RouteCollection {
   }
 
   // delete
-  func delete(_ request: Request) throws -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
+  public func delete(_ request: Request) throws -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
     let id: UUID = try request.parameters.require("id")
 
     let database = MKDatabase(request: request)
@@ -55,7 +55,7 @@ struct ItemsController: RouteCollection {
   }
 
   // find
-  func find(_ request: Request) throws -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> {
+  public func find(_ request: Request) throws -> EventLoopFuture<MKServerResponse<[TodoItemModel]>> {
     let id: UUID = try request.parameters.require("id")
 
     let database = MKDatabase(request: request)
@@ -68,7 +68,7 @@ struct ItemsController: RouteCollection {
   }
 
   // rename
-  func rename(_ request: Request) throws -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
+  public func rename(_ request: Request) throws -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<TodoItemModel>>> {
     let id: UUID = try request.parameters.require("id")
     let title = try request.parameters.require("title")
 
@@ -88,7 +88,7 @@ struct ItemsController: RouteCollection {
     }.content()
   }
 
-  func boot(routes: RoutesBuilder) throws {
+  public func boot(routes: RoutesBuilder) throws {
     let items = routes.grouped("items")
     items.get([], use: list)
     items.post([":title"], use: create)
