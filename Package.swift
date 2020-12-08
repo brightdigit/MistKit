@@ -46,7 +46,8 @@ let package = Package(
     .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"), // dev
     .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.47.0"), // dev
     .package(url: "https://github.com/realm/SwiftLint", from: "0.41.0"), // dev
-    .package(url: "https://github.com/brightdigit/Rocket", .branch("feature/yams-4.0.0")) // dev
+    .package(url: "https://github.com/brightdigit/Rocket", .branch("feature/yams-4.0.0")), // dev
+    .package(url: "https://github.com/mattpolzin/swift-test-codecov", .branch("master")), // dev
   ],
   targets: [
     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -99,7 +100,10 @@ let package = Package(
 
   let config = PackageConfiguration([
     "komondor": [
-      "pre-push": "swift test --enable-code-coverage --enable-test-discovery",
+      "pre-push": [
+        "swift test --enable-code-coverage --enable-test-discovery",
+        "swift run swift-test-codecov .build/debug/codecov/MistKit.json -v 1"
+       ],
       "pre-commit": [
         "swift test --enable-code-coverage --enable-test-discovery --generate-linuxmain",
         "swift run swiftformat .",
