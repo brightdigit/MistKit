@@ -3,7 +3,7 @@ public struct MKURLBuilderFactory {
   public func builder(
     forConnection connection: MKDatabaseConnection,
     withTokenManager tokenManager: MKTokenManagerProtocol?
-  ) -> MKURLBuilder {
+  ) -> MKURLBuilderProtocol {
     MKURLBuilder(
       tokenEncoder: CharacterMapEncoder(),
       connection: connection,

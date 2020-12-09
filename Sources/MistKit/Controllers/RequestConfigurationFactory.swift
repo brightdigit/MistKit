@@ -5,7 +5,7 @@ public struct RequestConfigurationFactory: RequestConfigurationFactoryProtocol {
 
   public func configuration<RequestType>(
     from request: RequestType,
-    withURLBuilder urlBuilder: MKURLBuilder
+    withURLBuilder urlBuilder: MKURLBuilderProtocol
   ) throws -> RequestConfiguration where RequestType: MKRequest {
     let url: URL = try urlBuilder.url(withPathComponents: request.relativePath)
     let data: Data? = try encoder.optionalData(from: request.data)

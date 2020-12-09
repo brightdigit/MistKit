@@ -1,7 +1,7 @@
 import Foundation
 
 public struct MKDatabase<HttpClient: MKHttpClient> {
-  public let urlBuilder: MKURLBuilder
+  public let urlBuilder: MKURLBuilderProtocol
   public let requestConfigFactory: RequestConfigurationFactoryProtocol
   public let client: HttpClient
   public let resultSink: ResultSinkProtocol

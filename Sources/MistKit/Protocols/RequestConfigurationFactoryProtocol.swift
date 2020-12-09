@@ -1,6 +1,6 @@
 public protocol RequestConfigurationFactoryProtocol {
   func configuration<RequestType: MKRequest>(
     from request: RequestType,
-    withURLBuilder urlBuilder: MKURLBuilder
+    withURLBuilder urlBuilder: MKURLBuilderProtocol
   ) throws -> RequestConfiguration
 }

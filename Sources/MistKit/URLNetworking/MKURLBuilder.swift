@@ -1,6 +1,6 @@
 import Foundation
 
-public class MKURLBuilder {
+public class MKURLBuilder : MKURLBuilderProtocol {
   public let tokenEncoder: MKTokenEncoder?
   public let connection: MKDatabaseConnection
   public let tokenManager: MKTokenManagerProtocol?
