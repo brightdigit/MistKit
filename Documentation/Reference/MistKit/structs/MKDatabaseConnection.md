@@ -7,6 +7,12 @@ public struct MKDatabaseConnection
 ```
 
 ## Properties
+### `baseURL`
+
+```swift
+public let baseURL: URL
+```
+
 ### `container`
 
 ```swift
@@ -32,11 +38,12 @@ public let apiToken: String
 ```
 
 ## Methods
-### `init(container:apiToken:environment:version:)`
+### `init(container:apiToken:environment:baseURL:version:)`
 
 ```swift
 public init(container: String,
             apiToken: String,
             environment: MKEnvironment,
+            baseURL: URL = Self.baseURL,
             version: MKAPIVersion = .v1)
 ```

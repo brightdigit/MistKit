@@ -32,6 +32,14 @@ class MockTokenClient: MKTokenClient {
   }
 }
 
+public extension URL {
+  static func random() -> URL {
+    FileManager.default.temporaryDirectory.appendingPathComponent(
+      UUID().uuidString
+    )
+  }
+}
+
 final class MKTokenManagerTests: XCTestCase {
   func testWebAuthenticationToken() {
     let storage = MockTokenStorage()
@@ -41,9 +49,7 @@ final class MKTokenManagerTests: XCTestCase {
   }
 
   func testRequest() {
-    let url = FileManager.default.temporaryDirectory.appendingPathComponent(
-      UUID().uuidString
-    )
+    let url = URL.random()
     let storage = MockTokenStorage()
     let redirect = MockAuthRedirect(url: url)
     let exp = expectation(description: "")
