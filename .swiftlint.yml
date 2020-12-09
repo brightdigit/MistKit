@@ -52,7 +52,6 @@ opt_in_rules:
   - multiline_function_chains
   - multiline_literal_brackets
   - multiline_parameters
-  - multiline_parameters_brackets
   - nimble_operator
   - nslocalizedstring_key
   - nslocalizedstring_require_bundle
@@ -72,7 +71,6 @@ opt_in_rules:
   - quick_discouraged_call
   - quick_discouraged_focused_test
   - quick_discouraged_pending_test
-  - raw_value_for_camel_cased_codable_enum
   - reduce_into
   - redundant_nil_coalescing
   - redundant_type_annotation
