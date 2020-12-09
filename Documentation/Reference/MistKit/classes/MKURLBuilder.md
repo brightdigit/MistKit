@@ -3,7 +3,7 @@
 # `MKURLBuilder`
 
 ```swift
-public class MKURLBuilder
+public class MKURLBuilder: MKURLBuilderProtocol
 ```
 
 ## Properties

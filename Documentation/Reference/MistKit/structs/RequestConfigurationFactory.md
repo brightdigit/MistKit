@@ -19,6 +19,6 @@ public let encoder: MKEncoder = JSONEncoder()
 ```swift
 public func configuration<RequestType>(
   from request: RequestType,
-  withURLBuilder urlBuilder: MKURLBuilder
+  withURLBuilder urlBuilder: MKURLBuilderProtocol
 ) throws -> RequestConfiguration where RequestType: MKRequest
 ```

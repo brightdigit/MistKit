@@ -19,5 +19,5 @@ public init()
 public func builder(
   forConnection connection: MKDatabaseConnection,
   withTokenManager tokenManager: MKTokenManagerProtocol?
-) -> MKURLBuilder
+) -> MKURLBuilderProtocol
 ```

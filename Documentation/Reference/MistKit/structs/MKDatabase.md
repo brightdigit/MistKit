@@ -10,7 +10,7 @@ public struct MKDatabase<HttpClient: MKHttpClient>
 ### `urlBuilder`
 
 ```swift
-public let urlBuilder: MKURLBuilder
+public let urlBuilder: MKURLBuilderProtocol
 ```
 
 ### `requestConfigFactory`

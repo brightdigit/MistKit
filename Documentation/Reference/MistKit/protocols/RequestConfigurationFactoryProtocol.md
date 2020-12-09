@@ -12,6 +12,6 @@ public protocol RequestConfigurationFactoryProtocol
 ```swift
 func configuration<RequestType: MKRequest>(
   from request: RequestType,
-  withURLBuilder urlBuilder: MKURLBuilder
+  withURLBuilder urlBuilder: MKURLBuilderProtocol
 ) throws -> RequestConfiguration
 ```
