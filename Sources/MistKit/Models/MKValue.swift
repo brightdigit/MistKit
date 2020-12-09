@@ -1,6 +1,6 @@
 import Foundation
 
-public enum MKValue: Codable {
+public enum MKValue: Codable, Equatable {
   case string(String)
   case integer(Int64)
   case data(Data)

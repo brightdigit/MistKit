@@ -3,7 +3,7 @@
 # `MKValue`
 
 ```swift
-public enum MKValue: Codable
+public enum MKValue: Codable, Equatable
 ```
 
 ## Cases

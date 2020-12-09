@@ -98,11 +98,13 @@ let package = Package(
 #if canImport(PackageConfig)
   import PackageConfig
 
+  let requiredCoverage: Int = 30
+
   let config = PackageConfiguration([
     "komondor": [
       "pre-push": [
         "swift test --enable-code-coverage --enable-test-discovery",
-        "swift run swift-test-codecov .build/debug/codecov/MistKit.json -v 10"
+        "swift run swift-test-codecov .build/debug/codecov/MistKit.json -v \(requiredCoverage)"
       ],
       "pre-commit": [
         "swift test --enable-code-coverage --enable-test-discovery --generate-linuxmain",
