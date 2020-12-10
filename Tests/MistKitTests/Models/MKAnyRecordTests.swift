@@ -95,7 +95,7 @@ final class MKAnyRecordTests: XCTestCase {
 
   fileprivate func valueTest(
     _ method: (MKAnyRecord) -> (String) throws -> Any,
-    _ key: String
+    _ key: String = UUID().uuidString
   ) {
     var failedKey: String?
     do {
@@ -113,32 +113,69 @@ final class MKAnyRecordTests: XCTestCase {
     XCTAssertEqual(record.recordName, expectedRecordName)
     XCTAssertEqual(record.recordChangeTag, expectedTag)
     XCTAssertEqual(record.fields, expectedFields)
-
-    do {
-      XCTAssertEqual(try record.integer(fromKey: expectedIntField), expectedIntValue)
-      XCTAssertEqual(try record.string(fromKey: expectedStrField), expectedStrValue)
-      XCTAssertEqual(try record.data(fromKey: expectedDataField), expectedDataValue)
-      XCTAssertEqual(try record.date(fromKey: expectedDateField), expectedDateValue)
-      XCTAssertEqual(try record.double(fromKey: expectedDoubleField), expectedDoubleValue)
-      XCTAssertEqual(try record.asset(fromKey: expectedAssetField), expectedAssetValue)
-      XCTAssertEqual(
-        try record.location(fromKey: expectedLocationField),
-        expectedLocationValue
-      )
-    } catch {
-      XCTFail(error.localizedDescription)
-    }
   }
 
-  func testData() {
-    valueTest(MKAnyRecord.data, expectedIntField)
+  func testValues() {
+    XCTAssertEqual(try record.integer(fromKey: expectedIntField), expectedIntValue)
+    XCTAssertEqual(try record.string(fromKey: expectedStrField), expectedStrValue)
+    XCTAssertEqual(try record.data(fromKey: expectedDataField), expectedDataValue)
+    XCTAssertEqual(try record.date(fromKey: expectedDateField), expectedDateValue)
+    XCTAssertEqual(try record.double(fromKey: expectedDoubleField), expectedDoubleValue)
+    XCTAssertEqual(try record.asset(fromKey: expectedAssetField), expectedAssetValue)
+    XCTAssertEqual(
+      try record.location(fromKey: expectedLocationField),
+      expectedLocationValue
+    )
   }
 
-  func testString() {
-    valueTest(MKAnyRecord.string, expectedDataField)
+  func testValuesIfExists() {
+    XCTAssertEqual(
+      try record.integerIfExists(fromKey: expectedIntField),
+      expectedIntValue
+    )
+    XCTAssertEqual(
+      try record.stringIfExists(fromKey: expectedStrField),
+      expectedStrValue
+    )
+    XCTAssertEqual(
+      try record.dataIfExists(fromKey: expectedDataField),
+      expectedDataValue
+    )
+    XCTAssertEqual(
+      try record.dateIfExists(fromKey: expectedDateField),
+      expectedDateValue
+    )
+    XCTAssertEqual(
+      try record.doubleIfExists(fromKey: expectedDoubleField),
+      expectedDoubleValue
+    )
+    XCTAssertEqual(
+      try record.assetIfExists(fromKey: expectedAssetField),
+      expectedAssetValue
+    )
+    XCTAssertEqual(
+      try record.locationIfExists(fromKey: expectedLocationField),
+      expectedLocationValue
+    )
   }
 
-  func testIntegerFailure() {
-    valueTest(MKAnyRecord.integer, expectedStrField)
+  func testNilIfExists() {
+    XCTAssertNil(try record.integerIfExists(fromKey: UUID().uuidString))
+    XCTAssertNil(try record.stringIfExists(fromKey: UUID().uuidString))
+    XCTAssertNil(try record.dataIfExists(fromKey: UUID().uuidString))
+    XCTAssertNil(try record.dateIfExists(fromKey: UUID().uuidString))
+    XCTAssertNil(try record.doubleIfExists(fromKey: UUID().uuidString))
+    XCTAssertNil(try record.assetIfExists(fromKey: UUID().uuidString))
+    XCTAssertNil(try record.locationIfExists(fromKey: UUID().uuidString))
+  }
+
+  func testMissingFields() {
+    valueTest(MKAnyRecord.integer, UUID().uuidString)
+    valueTest(MKAnyRecord.string, UUID().uuidString)
+    valueTest(MKAnyRecord.data, UUID().uuidString)
+    valueTest(MKAnyRecord.date, UUID().uuidString)
+    valueTest(MKAnyRecord.double, UUID().uuidString)
+    valueTest(MKAnyRecord.asset, UUID().uuidString)
+    valueTest(MKAnyRecord.location, UUID().uuidString)
   }
 }
