@@ -13,14 +13,11 @@ public struct MKURLSessionClient: MKHttpClient {
     self.session = session
   }
 
-  public func request(withURL url: URL, data: Data?) -> MKURLRequest {
-    var urlRequest = URLRequest(url: url)
-    if let data = data {
-      #if DEBUG
-        if let text = String(data: data, encoding: .utf8) {
-          debugPrint(text)
-        }
-      #endif
+  public func request(
+    fromConfiguration configuration: RequestConfiguration
+  ) -> MKURLRequest {
+    var urlRequest = URLRequest(url: configuration.url)
+    if let data = configuration.data {
       urlRequest.httpBody = data
       urlRequest.httpMethod = "POST"
       urlRequest.allHTTPHeaderFields = ["Content-Type": "application/json"]

@@ -99,7 +99,6 @@
 -   [MKDatabase](extensions/MKDatabase.md)
 -   [MKDatabaseConnection](extensions/MKDatabaseConnection.md)
 -   [MKEncoder](extensions/MKEncoder.md)
--   [MKHttpClient](extensions/MKHttpClient.md)
 -   [MKRequest](extensions/MKRequest.md)
 -   [MKURLBuilder](extensions/MKURLBuilder.md)
 -   [Result](extensions/Result.md)

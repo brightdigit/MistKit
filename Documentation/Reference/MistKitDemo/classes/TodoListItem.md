@@ -13,6 +13,12 @@ public class TodoListItem: MKQueryRecord
 public let recordName: UUID?
 ```
 
+### `recordChangeTag`
+
+```swift
+public let recordChangeTag: String?
+```
+
 ### `title`
 
 ```swift
@@ -41,12 +47,6 @@ public var value: Double?
 
 ```swift
 public var location: MKLocation?
-```
-
-### `recordChangeTag`
-
-```swift
-public let recordChangeTag: String?
 ```
 
 ### `fields`

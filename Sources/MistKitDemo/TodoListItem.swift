@@ -8,18 +8,31 @@ public class TodoListItem: MKQueryRecord {
   ]
 
   public let recordName: UUID?
+  public let recordChangeTag: String?
+
   public var title: String
   public var completedAt: Date?
   public var image: MKAsset?
   public var value: Double?
   public var location: MKLocation?
-  public let recordChangeTag: String?
 
   public var fields: [String: MKValue] {
     var fields: [String: MKValue] = ["title": .string(title)]
     if let completedAt = self.completedAt {
       fields["completedAt"] = .date(completedAt)
     }
+    if let image = self.image {
+      fields["image"] = .asset(image)
+    }
+
+    if let value = self.value {
+      fields["value"] = .double(value)
+    }
+
+    if let location = self.location {
+      fields["location"] = .location(location)
+    }
+
     return fields
   }
 
