@@ -65,33 +65,45 @@ final class MKAnyRecordTests: XCTestCase {
     )
   }
 
+  fileprivate func valueTest(
+    _ method: (MKAnyRecord) -> (String) throws -> Any,
+    _ key: String
+  ) {
+    var failedKey: String?
+    do {
+      _ = try method(record)(key)
+    } catch let MKDecodingError.invalidKey(caughtKey) {
+      failedKey = caughtKey
+    } catch {
+      XCTFail(error.localizedDescription)
+    }
+
+    XCTAssertEqual(key, failedKey)
+  }
+
   func testInit() {
     XCTAssertEqual(record.recordName, expectedRecordName)
     XCTAssertEqual(record.recordChangeTag, expectedTag)
     XCTAssertEqual(record.fields, expectedFields)
 
     do {
-      try XCTAssertEqual(record.integer(fromKey: expectedIntField), expectedIntValue)
-      try XCTAssertEqual(record.string(fromKey: expectedStrField), expectedStrValue)
-      try XCTAssertEqual(record.data(fromKey: expectedDataField), expectedDataValue)
+      XCTAssertEqual(try record.integer(fromKey: expectedIntField), expectedIntValue)
+      XCTAssertEqual(try record.string(fromKey: expectedStrField), expectedStrValue)
+      XCTAssertEqual(try record.data(fromKey: expectedDataField), expectedDataValue)
     } catch {
       XCTFail(error.localizedDescription)
     }
   }
 
-  func expectFailure(_ closure: @escaping () throws -> Void) {
-    var error: Error?
-
-    XCTAssertThrowsError(closure) {
-      error = $0
-    }
-
-    XCTAssertNotNil(error)
+  func testData() {
+    valueTest(MKAnyRecord.data, expectedIntField)
   }
 
-  func testData() {}
+  func testString() {
+    valueTest(MKAnyRecord.string, expectedDataField)
+  }
 
-  func testString() {}
-
-  func testInteger() {}
+  func testIntegerFailure() {
+    valueTest(MKAnyRecord.integer, expectedStrField)
+  }
 }

@@ -19,6 +19,12 @@ public let recordName: UUID?
 public var title: String
 ```
 
+### `completedAt`
+
+```swift
+public var completedAt: Date?
+```
+
 ### `recordChangeTag`
 
 ```swift

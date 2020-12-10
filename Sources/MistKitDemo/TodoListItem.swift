@@ -3,20 +3,26 @@ import MistKit
 
 public class TodoListItem: MKQueryRecord {
   public static let recordType: String = "TodoItem"
-  public static let desiredKeys: [String] = ["title"]
+  public static let desiredKeys: [String] = ["title", "completedAt"]
 
   public let recordName: UUID?
   public var title: String
+  public var completedAt: Date?
   public let recordChangeTag: String?
 
   public var fields: [String: MKValue] {
-    ["title": .string(title)]
+    var fields: [String: MKValue] = ["title": .string(title)]
+    if let completedAt = self.completedAt {
+      fields["completedAt"] = .date(completedAt)
+    }
+    return fields
   }
 
   public required init(record: MKAnyRecord) throws {
     recordName = record.recordName
     recordChangeTag = record.recordChangeTag
     title = try record.string(fromKey: "title")
+    completedAt = try record.dateIfExists(fromKey: "completedAt")
   }
 
   public init(

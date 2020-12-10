@@ -27,7 +27,7 @@
     static let __allTests__MKAnyRecordTests = [
       ("testData", testData),
       ("testInit", testInit),
-      ("testInteger", testInteger),
+      ("testIntegerFailure", testIntegerFailure),
       ("testString", testString)
     ]
   }

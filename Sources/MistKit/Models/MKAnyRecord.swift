@@ -51,6 +51,19 @@ public extension MKAnyRecord {
       throw MKDecodingError.invalidKey(key)
     }
   }
+
+  func dateIfExists(fromKey key: String) throws -> Date? {
+    switch fields[key] {
+    case let .date(value):
+      return value
+
+    case .none:
+      return nil
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
 }
 
 public extension Array where Element == MKAnyRecord {

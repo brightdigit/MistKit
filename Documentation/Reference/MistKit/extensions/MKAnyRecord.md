@@ -30,3 +30,9 @@ func string(fromKey key: String) throws -> String
 ```swift
 func integer(fromKey key: String) throws -> Int64
 ```
+
+### `dateIfExists(fromKey:)`
+
+```swift
+func dateIfExists(fromKey key: String) throws -> Date?
+```

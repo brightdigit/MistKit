@@ -4,13 +4,17 @@ public enum MKValue: Codable, Equatable {
   case string(String)
   case integer(Int64)
   case data(Data)
+  case date(Date)
+  case double(Double)
+  case location(MKLocation)
+  case asset(MKAsset)
 
   public enum CodingKeys: String, CodingKey {
     case value
     case type
   }
 
-  // swiftlint:disable:next function_body_length
+  // swiftlint:disable:next function_body_length cyclomatic_complexity
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: MKValue.CodingKeys.self)
 
@@ -32,16 +36,53 @@ public enum MKValue: Codable, Equatable {
       self = .data(data)
 
     case .integer:
+
+      let integer: Int64
       do {
-        let integer = try container.decode(Int64.self, forKey: .value)
-        self = .integer(integer)
+        integer = try container.decode(Int64.self, forKey: .value)
       } catch {
         let string = try container.decode(String.self, forKey: .value)
-        guard let integer = Int64(string) else {
+        guard let intstr = Int64(string) else {
           throw error
         }
-        self = .integer(integer)
+        integer = intstr
       }
+      self = .integer(integer)
+
+    case .timestamp:
+      let integer: Int64
+      do {
+        integer = try container.decode(Int64.self, forKey: .value)
+      } catch {
+        let string = try container.decode(String.self, forKey: .value)
+        guard let intstr = Int64(string) else {
+          throw error
+        }
+        integer = intstr
+      }
+      let millisecondsSince = TimeInterval(integer)
+      self = .date(Date(timeIntervalSince1970: millisecondsSince / 1_000.0))
+
+    case .double:
+      let double: Double
+      do {
+        double = try container.decode(Double.self, forKey: .value)
+      } catch {
+        let string = try container.decode(String.self, forKey: .value)
+        guard let strdbl = Double(string) else {
+          throw error
+        }
+        double = strdbl
+      }
+      self = .double(double)
+
+    case .location:
+      let location = try container.decode(MKLocation.self, forKey: .value)
+      self = .location(location)
+
+    case .asset:
+      let asset = try container.decode(MKAsset.self, forKey: .value)
+      self = .asset(asset)
     }
   }
 
@@ -59,6 +100,22 @@ public enum MKValue: Codable, Equatable {
     case let .data(data):
       try container.encode(data.base64EncodedData(), forKey: .value)
       try container.encode(MKFieldType.bytes, forKey: .type)
+
+    case let .date(date):
+      try container.encode(Int64(date.timeIntervalSince1970 * 1_000.0), forKey: .value)
+      try container.encode(MKFieldType.timestamp, forKey: .type)
+
+    case let .double(double):
+      try container.encode(double, forKey: .value)
+      try container.encode(MKFieldType.double, forKey: .type)
+
+    case let .location(location):
+      try container.encode(location, forKey: .value)
+      try container.encode(MKFieldType.location, forKey: .type)
+
+    case let .asset(asset):
+      try container.encode(asset, forKey: .value)
+      try container.encode(MKFieldType.asset, forKey: .type)
     }
   }
 }
