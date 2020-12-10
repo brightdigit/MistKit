@@ -25,6 +25,24 @@ public var title: String
 public var completedAt: Date?
 ```
 
+### `image`
+
+```swift
+public var image: MKAsset?
+```
+
+### `value`
+
+```swift
+public var value: Double?
+```
+
+### `location`
+
+```swift
+public var location: MKLocation?
+```
+
 ### `recordChangeTag`
 
 ```swift

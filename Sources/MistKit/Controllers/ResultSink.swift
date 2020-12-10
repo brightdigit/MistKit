@@ -30,7 +30,8 @@ public struct ResultSink: ResultSinkProtocol {
         let value = try decoder.decode(RequestType.Response.self, from: data)
         newResult = .success(value)
         break
-      } catch {
+        // swiftlint:disable:next untyped_error_in_catch
+      } catch let valueError {
         do {
           let auth = try decoder.decode(
             MKAuthenticationResponse.self,
@@ -39,7 +40,7 @@ public struct ResultSink: ResultSinkProtocol {
 
           newResult = .failure(MKError.authenticationRequired(auth))
         } catch {
-          newResult = .failure(error)
+          newResult = .failure(valueError)
         }
       }
 

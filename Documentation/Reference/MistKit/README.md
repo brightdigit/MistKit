@@ -36,6 +36,7 @@
 -   [MKAnyQuery](structs/MKAnyQuery.md)
 -   [MKAnyRecord](structs/MKAnyRecord.md)
 -   [MKAsset](structs/MKAsset.md)
+-   [MKAsset.URLBase](structs/MKAsset.URLBase.md)
 -   [MKAuthenticationResponse](structs/MKAuthenticationResponse.md)
 -   [MKDatabase](structs/MKDatabase.md)
 -   [MKDatabaseConnection](structs/MKDatabaseConnection.md)

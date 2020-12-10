@@ -52,9 +52,127 @@ public extension MKAnyRecord {
     }
   }
 
+  func date(fromKey key: String) throws -> Date {
+    switch fields[key] {
+    case let .date(value):
+      return value
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
+
+  func double(fromKey key: String) throws -> Double {
+    switch fields[key] {
+    case let .double(value):
+      return value
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
+
+  func location(fromKey key: String) throws -> MKLocation {
+    switch fields[key] {
+    case let .location(value):
+      return value
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
+
+  func asset(fromKey key: String) throws -> MKAsset {
+    switch fields[key] {
+    case let .asset(value):
+      return value
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
+
+  func dataIfExists(fromKey key: String) throws -> Data? {
+    switch fields[key] {
+    case let .data(value):
+      return value
+
+    case .none:
+      return nil
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
+
+  func stringIfExists(fromKey key: String) throws -> String? {
+    switch fields[key] {
+    case let .string(value):
+      return value
+
+    case .none:
+      return nil
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
+
+  func integerIfExists(fromKey key: String) throws -> Int64? {
+    switch fields[key] {
+    case let .integer(value):
+      return value
+
+    case .none:
+      return nil
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
+
   func dateIfExists(fromKey key: String) throws -> Date? {
     switch fields[key] {
     case let .date(value):
+      return value
+
+    case .none:
+      return nil
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
+
+  func doubleIfExists(fromKey key: String) throws -> Double? {
+    switch fields[key] {
+    case let .double(value):
+      return value
+
+    case .none:
+      return nil
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
+
+  func locationIfExists(fromKey key: String) throws -> MKLocation? {
+    switch fields[key] {
+    case let .location(value):
+      return value
+
+    case .none:
+      return nil
+
+    default:
+      throw MKDecodingError.invalidKey(key)
+    }
+  }
+
+  func assetIfExists(fromKey key: String) throws -> MKAsset? {
+    switch fields[key] {
+    case let .asset(value):
       return value
 
     case .none:
