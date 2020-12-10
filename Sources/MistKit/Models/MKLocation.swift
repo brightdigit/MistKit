@@ -14,6 +14,24 @@ public struct MKLocationCoordinate2D: Equatable {
 }
 
 public struct MKLocation: Codable, Equatable {
+  internal init(
+    coordinate: MKLocationCoordinate2D,
+    altitude: MKLocationDistance? = nil,
+    horizontalAccuracy: MKLocationAccuracy? = nil,
+    verticalAccuracy: MKLocationAccuracy? = nil,
+    speed: MKLocationSpeed? = nil,
+    course: MKLocationDirection? = nil,
+    timestamp: Date? = nil
+  ) {
+    self.coordinate = coordinate
+    self.altitude = altitude
+    self.horizontalAccuracy = horizontalAccuracy
+    self.verticalAccuracy = verticalAccuracy
+    self.speed = speed
+    self.course = course
+    self.timestamp = timestamp
+  }
+
   /// The geographical coordinate information.
   var coordinate: MKLocationCoordinate2D
 

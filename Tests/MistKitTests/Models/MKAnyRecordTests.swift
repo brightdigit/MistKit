@@ -42,9 +42,33 @@ final class MKAnyRecordTests: XCTestCase {
   let expectedStrField = UUID().uuidString
   let expectedDataField = UUID().uuidString
 
+  let expectedDateField = UUID().uuidString
+  let expectedDoubleField = UUID().uuidString
+  let expectedAssetField = UUID().uuidString
+  let expectedLocationField = UUID().uuidString
+
   let expectedIntValue = Int64.random(in: 0 ... Int64.max)
   let expectedStrValue = UUID().uuidString
   let expectedDataValue = Data.random()
+
+  let expectedDateValue: Date = .init(
+    timeIntervalSince1970: .random(in: 0 ... TimeInterval.greatestFiniteMagnitude)
+  )
+  let expectedDoubleValue: Double = .random(in: 0 ... .greatestFiniteMagnitude)
+  let expectedAssetValue = MKAsset(
+    fileChecksum: .random(),
+    size: .random(in: 0 ... Int64.max),
+    wrappingKey: Data.random(),
+    referenceChecksum: .random(),
+    downloadURL: MKAsset.URLBase(baseURL: URL.random()),
+    receipt: .random()
+  )
+  let expectedLocationValue = MKLocation(
+    coordinate: MKLocationCoordinate2D(
+      latitude: .random(in: 0 ... MKLocationDegrees.greatestFiniteMagnitude),
+      longitude: .random(in: 0 ... MKLocationDegrees.greatestFiniteMagnitude)
+    )
+  )
 
   var expectedFields: [String: MKValue]!
   var record: MKAnyRecord!
@@ -53,7 +77,11 @@ final class MKAnyRecordTests: XCTestCase {
     expectedFields = [
       expectedIntField: .integer(expectedIntValue),
       expectedStrField: .string(expectedStrValue),
-      expectedDataField: .data(expectedDataValue)
+      expectedDataField: .data(expectedDataValue),
+      expectedDateField: .date(expectedDateValue),
+      expectedDoubleField: .double(expectedDoubleValue),
+      expectedAssetField: .asset(expectedAssetValue),
+      expectedLocationField: .location(expectedLocationValue)
     ]
 
     record = MKAnyRecord(
@@ -90,6 +118,13 @@ final class MKAnyRecordTests: XCTestCase {
       XCTAssertEqual(try record.integer(fromKey: expectedIntField), expectedIntValue)
       XCTAssertEqual(try record.string(fromKey: expectedStrField), expectedStrValue)
       XCTAssertEqual(try record.data(fromKey: expectedDataField), expectedDataValue)
+      XCTAssertEqual(try record.date(fromKey: expectedDateField), expectedDateValue)
+      XCTAssertEqual(try record.double(fromKey: expectedDoubleField), expectedDoubleValue)
+      XCTAssertEqual(try record.asset(fromKey: expectedAssetField), expectedAssetValue)
+      XCTAssertEqual(
+        try record.location(fromKey: expectedLocationField),
+        expectedLocationValue
+      )
     } catch {
       XCTFail(error.localizedDescription)
     }

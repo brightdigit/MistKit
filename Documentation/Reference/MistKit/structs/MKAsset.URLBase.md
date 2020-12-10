@@ -7,6 +7,12 @@ public struct URLBase: Codable, Equatable
 ```
 
 ## Methods
+### `init(baseURL:)`
+
+```swift
+public init(baseURL: URL)
+```
+
 ### `init(from:)`
 
 ```swift

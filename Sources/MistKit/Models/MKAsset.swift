@@ -2,6 +2,10 @@ import Foundation
 
 public struct MKAsset: Codable, Equatable {
   public struct URLBase: Codable, Equatable {
+    public init(baseURL: URL) {
+      self.baseURL = baseURL
+    }
+
     let baseURL: URL
 
     func url(withFileName fileName: String) -> URL {
