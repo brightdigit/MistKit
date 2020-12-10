@@ -2,12 +2,13 @@ import ArgumentParser
 import CoreFoundation
 import Foundation
 
-protocol ParsableAsyncCommand: ParsableCommand {
+public protocol ParsableAsyncCommand: ParsableCommand {
   func runAsync(_ completed: @escaping (Error?) -> Void)
 }
 
-extension ParsableAsyncCommand {
+public extension ParsableAsyncCommand {
   func run() throws {
+    // swiftlint:disable:next implicitly_unwrapped_optional
     var result: Result<Void, Error>!
 
     runAsync { error in

@@ -1,11 +1,14 @@
 public struct UserIdentityResponse: MKDecodable, Codable {
-  public init(lookupInfo: UserIdentityLookupInfo?, userRecordName: RecordName, nameComponents: UserIdentityNameComponents?) {
+  public let lookupInfo: UserIdentityLookupInfo?
+  public let userRecordName: RecordName
+  public let nameComponents: UserIdentityNameComponents?
+  public init(
+    lookupInfo: UserIdentityLookupInfo?,
+    userRecordName: RecordName,
+    nameComponents: UserIdentityNameComponents?
+  ) {
     self.lookupInfo = lookupInfo
     self.userRecordName = userRecordName
     self.nameComponents = nameComponents
   }
-
-  public let lookupInfo: UserIdentityLookupInfo?
-  public let userRecordName: RecordName
-  public let nameComponents: UserIdentityNameComponents?
 }

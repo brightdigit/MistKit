@@ -9,7 +9,9 @@ public struct MKAsyncClient: MKHttpClient {
     self.client = client
   }
 
-  public func request(withURL url: URL, data: Data?) -> MKAsyncRequest {
-    return MKAsyncRequest(client: client, url: url, data: data)
+  public func request(
+    fromConfiguration configuration: RequestConfiguration
+  ) -> MKAsyncRequest {
+    MKAsyncRequest(client: client, url: configuration.url, data: configuration.data)
   }
 }

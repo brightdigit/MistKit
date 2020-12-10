@@ -6,13 +6,40 @@
 public struct MKDatabase<HttpClient: MKHttpClient>
 ```
 
+## Properties
+### `urlBuilder`
+
+```swift
+public let urlBuilder: MKURLBuilderProtocol
+```
+
+### `requestConfigFactory`
+
+```swift
+public let requestConfigFactory: RequestConfigurationFactoryProtocol
+```
+
+### `client`
+
+```swift
+public let client: HttpClient
+```
+
+### `resultSink`
+
+```swift
+public let resultSink: ResultSinkProtocol
+```
+
 ## Methods
-### `init(connection:factory:client:tokenManager:)`
+### `init(connection:client:factory:requestConfigFactory:resultSink:tokenManager:)`
 
 ```swift
 public init(connection: MKDatabaseConnection,
-            factory: MKURLBuilderFactory? = nil,
             client: HttpClient,
+            factory: MKURLBuilderFactory? = nil,
+            requestConfigFactory: RequestConfigurationFactoryProtocol? = nil,
+            resultSink: ResultSinkProtocol? = nil,
             tokenManager: MKTokenManagerProtocol? = nil)
 ```
 

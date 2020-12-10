@@ -8,10 +8,12 @@ public struct MKVaporClient: MKHttpClient {
     self.client = client
   }
 
-  public func request(withURL url: URL, data: Data?) -> MKVaporClientRequest {
+  public func request(
+    fromConfiguration configuration: RequestConfiguration
+  ) -> MKVaporClientRequest {
     var clientRequest = ClientRequest()
-    clientRequest.url = URI(string: url.absoluteString)
-    if let data = data {
+    clientRequest.url = URI(string: configuration.url.absoluteString)
+    if let data = configuration.data {
       clientRequest.body = ByteBuffer(data: data)
       clientRequest.method = .POST
       clientRequest.headers.add(name: .contentType, value: "application/json")

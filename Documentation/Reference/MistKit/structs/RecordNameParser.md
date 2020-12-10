@@ -7,10 +7,10 @@ public struct RecordNameParser
 ```
 
 ## Methods
-### `init()`
+### `regexComponent(forLength:)`
 
 ```swift
-public init()
+public static func regexComponent(forLength length: Int) -> String
 ```
 
 ### `uuid(fromRecordName:)`

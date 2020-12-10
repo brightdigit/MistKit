@@ -2,8 +2,8 @@ import MistKit
 import MistKitVapor
 import Vapor
 
-extension Request {
+public extension Request {
   var cloudKitAPI: MKTokenStorage {
-    return MKVaporSessionStorage(session: session)
+    MKVaporSessionStorage(session: session)
   }
 }

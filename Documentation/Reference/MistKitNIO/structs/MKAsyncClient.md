@@ -20,8 +20,10 @@ public let client: HTTPClient
 public init(client: HTTPClient)
 ```
 
-### `request(withURL:data:)`
+### `request(fromConfiguration:)`
 
 ```swift
-public func request(withURL url: URL, data: Data?) -> MKAsyncRequest
+public func request(
+  fromConfiguration configuration: RequestConfiguration
+) -> MKAsyncRequest
 ```

@@ -7,8 +7,8 @@ public protocol MKHttpClient
 ```
 
 ## Methods
-### `request(withURL:data:)`
+### `request(fromConfiguration:)`
 
 ```swift
-func request(withURL url: URL, data: Data?) -> RequestType
+func request(fromConfiguration configuration: RequestConfiguration) -> RequestType
 ```

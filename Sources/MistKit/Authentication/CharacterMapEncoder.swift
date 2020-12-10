@@ -1,6 +1,6 @@
 public struct CharacterMapEncoder: MKTokenEncoder {
   public static let defaultCharacterMap = ["+": "%2B", "/": "%2F", "=": "%3D"]
-  let characterMap: [String: String]
+  public let characterMap: [String: String]
 
   public init(characterMap: [String: String] = defaultCharacterMap) {
     self.characterMap = characterMap
@@ -10,7 +10,10 @@ public struct CharacterMapEncoder: MKTokenEncoder {
     var encodedString = token
 
     for (find, replace) in characterMap {
-      encodedString = encodedString.replacingOccurrences(of: find, with: replace)
+      encodedString = encodedString.replacingOccurrences(
+        of: find,
+        with: replace
+      )
     }
 
     return encodedString
