@@ -7,6 +7,18 @@ public class MKVaporSessionStorage: MKTokenStorage
 ```
 
 ## Properties
+### `session`
+
+```swift
+public let session: Session
+```
+
+### `name`
+
+```swift
+public let name: String
+```
+
 ### `webAuthenticationToken`
 
 ```swift

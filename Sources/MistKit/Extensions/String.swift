@@ -1,5 +1,5 @@
-extension String {
+public extension String {
   var nilIfEmpty: String? {
-    return count > 0 ? self : nil
+    isEmpty ? self : nil
   }
 }

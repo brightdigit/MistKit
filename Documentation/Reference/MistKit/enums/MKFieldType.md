@@ -24,3 +24,27 @@ case bytes = "BYTES"
 ```swift
 case integer = "INT64"
 ```
+
+### `timestamp`
+
+```swift
+case timestamp = "TIMESTAMP"
+```
+
+### `double`
+
+```swift
+case double = "DOUBLE"
+```
+
+### `location`
+
+```swift
+case location = "LOCATION"
+```
+
+### `asset`
+
+```swift
+case asset = "ASSETID"
+```

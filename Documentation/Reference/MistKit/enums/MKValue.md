@@ -3,7 +3,7 @@
 # `MKValue`
 
 ```swift
-public enum MKValue: Codable
+public enum MKValue: Codable, Equatable
 ```
 
 ## Cases
@@ -23,6 +23,30 @@ case integer(Int64)
 
 ```swift
 case data(Data)
+```
+
+### `date(_:)`
+
+```swift
+case date(Date)
+```
+
+### `double(_:)`
+
+```swift
+case double(Double)
+```
+
+### `location(_:)`
+
+```swift
+case location(MKLocation)
+```
+
+### `asset(_:)`
+
+```swift
+case asset(MKAsset)
 ```
 
 ## Methods

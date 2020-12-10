@@ -3,18 +3,18 @@ import MistKitDemo
 import Vapor
 
 public struct TodoItemModel: Content {
-  let id: UUID?
-  let title: String
-  init(item: TodoListItem) {
+  public let id: UUID?
+  public let title: String
+  public init(item: TodoListItem) {
     title = item.title
     id = item.recordName
   }
 }
 
 extension TodoListItem: MKContentRecord {
-  public static func content(fromRecord record: TodoListItem) -> TodoItemModel {
-    return TodoItemModel(item: record)
-  }
-
   public typealias ContentType = TodoItemModel
+
+  public static func content(fromRecord record: TodoListItem) -> TodoItemModel {
+    TodoItemModel(item: record)
+  }
 }

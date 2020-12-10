@@ -1,7 +1,12 @@
+// swiftlint:disable:this file_name
 import Foundation
 
-extension MKDatabaseConnection {
+public extension MKDatabaseConnection {
   var url: URL {
-    return Self.baseURL.appendingPathComponent(version.rawValue).appendingPathComponent(container).appendingPathComponent(environment.rawValue)
+    baseURL.appendingPathComponent(
+      version.rawValue
+    )
+    .appendingPathComponent(container)
+    .appendingPathComponent(environment.rawValue)
   }
 }

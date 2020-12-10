@@ -7,6 +7,12 @@ public class MKUserDefaultsStorage: MKTokenStorage
 ```
 
 ## Properties
+### `userDefaults`
+
+```swift
+public let userDefaults: UserDefaults
+```
+
 ### `webAuthenticationToken`
 
 ```swift

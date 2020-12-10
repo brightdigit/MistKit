@@ -2,24 +2,25 @@ import Fluent
 import MistKitVapor
 import Vapor
 
-final class User: Model, Content {
-  static let schema = "users"
+public final class User: Model, Content {
+  public static let schema = "users"
 
   @ID(key: .id)
-  var id: UUID?
+  public var id: UUID?
 
   @Field(key: "name")
-  var name: String
+  public var name: String
 
   @Field(key: "hash")
-  var passwordHash: String
+  public var passwordHash: String
 
   @Field(key: "cloudKitToken")
-  var cloudKitToken: String?
+  public var cloudKitToken: String?
 
-  init() {}
+  public init() {}
 
-  init(id: UUID? = nil, name: String, passwordHash: String) {
+  // swiftlint:disable:next function_default_parameter_at_end
+  public init(id: UUID? = nil, name: String, passwordHash: String) {
     self.id = id
     self.name = name
     self.passwordHash = passwordHash
@@ -27,22 +28,22 @@ final class User: Model, Content {
   }
 }
 
-extension User {
+public extension User {
   struct Create: Content {
-    var name: String
-    var password: String
+    public var name: String
+    public var password: String
   }
 }
 
 extension User: MKModelStorable {
-  static var tokenKey: KeyPath<User, Field<String?>> = \User.$cloudKitToken
+  public static var tokenKey = \User.$cloudKitToken
 }
 
 extension User: ModelAuthenticatable {
-  static let usernameKey = \User.$name
-  static let passwordHashKey = \User.$passwordHash
+  public static let usernameKey = \User.$name
+  public static let passwordHashKey = \User.$passwordHash
 
-  func verify(password: String) throws -> Bool {
+  public func verify(password: String) throws -> Bool {
     try Bcrypt.verify(password, created: passwordHash)
   }
 }

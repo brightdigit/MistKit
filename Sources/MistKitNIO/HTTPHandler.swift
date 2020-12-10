@@ -1,3 +1,5 @@
+// swiftlint:disable all
+
 import NIO
 import NIOHTTP1
 
@@ -48,14 +50,23 @@ public final class HTTPHandler: ChannelInboundHandler {
   private let channel: Channel
   private let onToken: (String) -> Void
 
-  public init(fileIO: NonBlockingFileIO, htdocsPath: String, channel: Channel, _ onToken: @escaping (String) -> Void) {
+  public init(
+    fileIO: NonBlockingFileIO,
+    htdocsPath: String,
+    channel: Channel,
+    _ onToken: @escaping (String) -> Void
+  ) {
     self.htdocsPath = htdocsPath
     self.fileIO = fileIO
     self.channel = channel
     self.onToken = onToken
   }
 
-  private func completeResponse(_ context: ChannelHandlerContext, trailers: HTTPHeaders?, promise: EventLoopPromise<Void>?) {
+  private func completeResponse(
+    _ context: ChannelHandlerContext,
+    trailers: HTTPHeaders?,
+    promise: EventLoopPromise<Void>?
+  ) {
     state.responseComplete()
 
     let promise = keepAlive ? promise : (promise ?? context.eventLoop.makePromise())
@@ -67,6 +78,7 @@ public final class HTTPHandler: ChannelInboundHandler {
     context.writeAndFlush(wrapOutboundOut(.end(trailers)), promise: promise)
   }
 
+  // swiftlint:disable:next function_body_length
   public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
     let reqPart = unwrapInboundIn(data)
     if let handler = self.handler {
@@ -79,7 +91,11 @@ public final class HTTPHandler: ChannelInboundHandler {
 
       keepAlive = request.isKeepAlive
       state.requestReceived()
-      let keyValuePairs = request.uri.split(separator: "?").last?.split(separator: "&").map { $0.split(separator: "=") }
+      let keyValuePairs = request.uri
+        .split(separator: "?")
+        .last?
+        .split(separator: "&")
+        .map { $0.split(separator: "=") }
       let webAuthenticationTokenFound = keyValuePairs?.first(where: {
         $0.first == "ckWebAuthToken"
       })?.last
@@ -93,8 +109,10 @@ public final class HTTPHandler: ChannelInboundHandler {
       // responseHead.headers.add(name: "content-length", value: "\(buffer?.readableBytes)")
       let response = HTTPServerResponsePart.head(responseHead)
       context.write(wrapOutboundOut(response), promise: nil)
+
     case .body:
       break
+
     case .end:
       state.requestComplete()
       let content = HTTPServerResponsePart.body(.byteBuffer(buffer?.slice() ?? ByteBuffer()))
@@ -103,9 +121,14 @@ public final class HTTPHandler: ChannelInboundHandler {
     }
   }
 
-  private func httpResponseHead(request: HTTPRequestHead, status: HTTPResponseStatus, headers: HTTPHeaders = HTTPHeaders()) -> HTTPResponseHead {
+  private func httpResponseHead(
+    request: HTTPRequestHead,
+    status: HTTPResponseStatus,
+    headers: HTTPHeaders = HTTPHeaders()
+  ) -> HTTPResponseHead {
     var head = HTTPResponseHead(version: request.version, status: status, headers: headers)
-    let connectionHeaders: [String] = head.headers[canonicalForm: "connection"].map { $0.lowercased() }
+    let connectionHeaders: [String] = head.headers[canonicalForm: "connection"]
+      .map { $0.lowercased() }
 
     if !connectionHeaders.contains("keep-alive"), !connectionHeaders.contains("close") {
       // the user hasn't pre-set either 'keep-alive' or 'close', so we might need to add headers
@@ -113,17 +136,20 @@ public final class HTTPHandler: ChannelInboundHandler {
       case (true, 1, 0):
         // HTTP/1.0 and the request has 'Connection: keep-alive', we should mirror that
         head.headers.add(name: "Connection", value: "keep-alive")
+
       case (false, 1, let minor) where minor >= 1:
-        // HTTP/1.1 (or treated as such) and the request has 'Connection: close', we should mirror that
+        // HTTP/1.1 (or treated as such) and the request has 'Connection: close',
+        // we should mirror that
         head.headers.add(name: "Connection", value: "close")
+
       default:
-        // we should match the default or are dealing with some HTTP that we don't support, let's leave as is
         ()
       }
     }
     return head
   }
 
+  // swiftlint:disable:next function_body_length
   public static func startServer(
     htdocs: String,
     allowHalfClosure: Bool,
@@ -136,10 +162,11 @@ public final class HTTPHandler: ChannelInboundHandler {
     threadPool.start()
 
     func childChannelInitializer(channel: Channel) -> EventLoopFuture<Void> {
-      return channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
-        channel.pipeline.addHandler(HTTPHandler(fileIO: fileIO, htdocsPath: htdocs, channel: channel) {
-          callback(group.next(), $0)
-        })
+      channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
+        channel.pipeline.addHandler(
+          HTTPHandler(fileIO: fileIO, htdocsPath: htdocs, channel: channel) {
+            callback(group.next(), $0)
+          })
       }
     }
 
@@ -172,16 +199,21 @@ public final class HTTPHandler: ChannelInboundHandler {
       switch bindTarget {
       case let .ipAddress(host, port):
         return try socketBootstrap.bind(host: host, port: port).wait()
+
       case let .unixDomainSocket(path):
         return try socketBootstrap.bind(unixDomainSocketPath: path).wait()
+
       case .stdio:
-        return try pipeBootstrap.withPipes(inputDescriptor: STDIN_FILENO, outputDescriptor: STDOUT_FILENO).wait()
+        return try pipeBootstrap.withPipes(
+          inputDescriptor: STDIN_FILENO,
+          outputDescriptor: STDOUT_FILENO
+        )
+        .wait()
       }
     }()
 
     channel.closeFuture.whenComplete { _ in
       group.shutdownGracefully(queue: .global()) { _ in
-
         threadPool.shutdownGracefully(queue: .global()) { _ in
         }
       }

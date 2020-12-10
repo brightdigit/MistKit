@@ -29,5 +29,9 @@ public let nameComponents: UserIdentityNameComponents?
 ### `init(lookupInfo:userRecordName:nameComponents:)`
 
 ```swift
-public init(lookupInfo: UserIdentityLookupInfo?, userRecordName: RecordName, nameComponents: UserIdentityNameComponents?)
+public init(
+  lookupInfo: UserIdentityLookupInfo?,
+  userRecordName: RecordName,
+  nameComponents: UserIdentityNameComponents?
+)
 ```

@@ -7,16 +7,16 @@ public class TodoListItem: MKQueryRecord
 ```
 
 ## Properties
-### `fields`
-
-```swift
-public var fields: [String: MKValue]
-```
-
 ### `recordName`
 
 ```swift
 public let recordName: UUID?
+```
+
+### `recordChangeTag`
+
+```swift
+public let recordChangeTag: String?
 ```
 
 ### `title`
@@ -25,10 +25,34 @@ public let recordName: UUID?
 public var title: String
 ```
 
-### `recordChangeTag`
+### `completedAt`
 
 ```swift
-public let recordChangeTag: String?
+public var completedAt: Date?
+```
+
+### `image`
+
+```swift
+public var image: MKAsset?
+```
+
+### `value`
+
+```swift
+public var value: Double?
+```
+
+### `location`
+
+```swift
+public var location: MKLocation?
+```
+
+### `fields`
+
+```swift
+public var fields: [String: MKValue]
 ```
 
 ## Methods
@@ -41,5 +65,9 @@ public required init(record: MKAnyRecord) throws
 ### `init(title:recordName:recordChangeTag:)`
 
 ```swift
-public init(title: String, recordName: UUID? = nil, recordChangeTag: String? = nil)
+public init(
+  title: String,
+  recordName: UUID? = nil,
+  recordChangeTag: String? = nil
+)
 ```

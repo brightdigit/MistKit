@@ -11,3 +11,10 @@ public extension UUID
 ```swift
 var data: NSData
 ```
+
+## Methods
+### `init(data:)`
+
+```swift
+init(data: Data)
+```

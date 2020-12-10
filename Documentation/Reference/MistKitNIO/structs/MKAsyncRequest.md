@@ -29,5 +29,7 @@ public let data: Data?
 ### `execute(_:)`
 
 ```swift
-public func execute(_ callback: @escaping ((Result<MKHttpResponse, Error>) -> Void))
+public func execute(
+  _ callback: @escaping ((Result<MKHttpResponse, Error>) -> Void)
+)
 ```

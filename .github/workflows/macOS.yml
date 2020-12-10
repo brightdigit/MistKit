@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         runs-on:  [macos-10.15,macos-11.0]
-        xcode: ["/Applications/Xcode_11.7.app","/Applications/Xcode_12.2.app","/Applications/Xcode_12.3.app"]
+        xcode: ["/Applications/Xcode_11.7.app","/Applications/Xcode_12.app","/Applications/Xcode_12.1.app","/Applications/Xcode_12.2.app","/Applications/Xcode_12.3.app"]
         include:
           - os: macos-10.15
             xcode: "/Applications/Xcode_11.5.app"
@@ -44,7 +44,7 @@ jobs:
       env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - name: Build Documentation
-      if: ${{ matrix.xcode == '/Applications/Xcode_12.3.app' && !startsWith(github.ref, 'refs/tags/') }}
+      if: ${{ matrix.os == 'macos-11.0' && matrix.xcode == '/Applications/Xcode_12.3.app' && !startsWith(github.ref, 'refs/tags/') }}
       run: |
         swift run sourcedocs generate build -cra
         git config --local user.email "action@github.com"

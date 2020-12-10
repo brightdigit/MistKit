@@ -6,6 +6,19 @@
 public struct MKVaporClientRequest: MKHttpRequest
 ```
 
+## Properties
+### `client`
+
+```swift
+public let client: Client
+```
+
+### `request`
+
+```swift
+public let request: ClientRequest
+```
+
 ## Methods
 ### `execute(_:)`
 

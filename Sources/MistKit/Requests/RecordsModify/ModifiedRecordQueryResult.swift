@@ -27,6 +27,7 @@ public extension MKDatabase {
           switch record {
           case let .deleted(recordName):
             deleted.append(recordName)
+
           case let .updated(record):
             do {
               try updated.append(RecordType(record: record))
@@ -51,12 +52,12 @@ public extension MKDatabase {
   }
 }
 
-extension Result {
+public extension Result {
   func tryFlatmap<RecordType: MKQueryRecord>(
     recordsTo _: RecordType.Type
   ) -> Result<[RecordType], Failure>
     where Success == FetchRecordQueryResponse, Failure == Error {
-    return flatMap { response in
+    flatMap { response in
       Result<[RecordType], Failure> {
         try response.records.map(RecordType.init(record:))
       }

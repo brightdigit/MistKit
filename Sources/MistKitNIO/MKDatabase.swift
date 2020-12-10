@@ -30,13 +30,18 @@ public extension MKDatabase {
     return promise.futureResult
   }
 
+  // swiftlint:disable:next function_default_parameter_at_end
   func perform<RequestType: MKRequest, ResponseType>(
     request: RequestType,
     returnFailedAuthentication: Bool = false,
     on eventLoop: EventLoop
   ) -> EventLoopFuture<ResponseType> where RequestType.Response == ResponseType {
     let promise = eventLoop.makePromise(of: ResponseType.self)
-    perform(request: request, returnFailedAuthentication: returnFailedAuthentication, promise.completeWith)
+    perform(
+      request: request,
+      returnFailedAuthentication: returnFailedAuthentication,
+      promise.completeWith
+    )
     return promise.futureResult
   }
 }
@@ -51,13 +56,15 @@ public extension EventLoopFuture {
 
   func content<RecordType: MKContentRecord, ContentType>()
     -> EventLoopFuture<MKServerResponse<ModifiedRecordQueryContent<ContentType>>>
-    where Value == ModifiedRecordQueryResult<RecordType>, RecordType.ContentType == ContentType {
-    return map(ModifiedRecordQueryContent.init).mistKitResponse()
+    where Value == ModifiedRecordQueryResult<RecordType>,
+    RecordType.ContentType == ContentType {
+    map(ModifiedRecordQueryContent.init).mistKitResponse()
   }
 }
 
 public extension EventLoopFuture where Value: Codable {
   func mistKitResponse() -> EventLoopFuture<MKServerResponse<Value>> {
-    map(MKServerResponse.success).flatMapErrorThrowing(MKServerResponse.init(attemptRecoveryFrom:))
+    map(MKServerResponse.success)
+      .flatMapErrorThrowing(MKServerResponse.init(attemptRecoveryFrom:))
   }
 }
