@@ -104,7 +104,7 @@
   }
 
   public func __allTests() -> [XCTestCaseEntry] {
-    [
+    return [
       testCase(CharacterMapEncoderTests.__allTests__CharacterMapEncoderTests),
       testCase(FetchRecordQueryTests.__allTests__FetchRecordQueryTests),
       testCase(MKAnyRecordTests.__allTests__MKAnyRecordTests),
