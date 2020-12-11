@@ -98,27 +98,27 @@ opt_in_rules:
   - vertical_whitespace_opening_braces
   - xct_specific_matcher
   - yoda_condition
-cyclomatic_complexity: 
+cyclomatic_complexity:
   - 6
   - 9
-file_length: 
+file_length:
   - 200
   - 550
-function_body_length: 
+function_body_length:
   - 15
   - 25
 function_parameter_count: 8
-line_length: 
+line_length:
   - 90
   - 90
 identifier_name:
-  excluded: 
+  excluded:
     - id
 excluded:
   - Tests/*/XCTestManifests.swift
   - DerivedData
   - .build
   - Tests/LinuxMain.swift
-indentation_width: 
+indentation_width:
   indentation_width: 2
 indentation: 2
