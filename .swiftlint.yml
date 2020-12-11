@@ -121,3 +121,4 @@ excluded:
   - Tests/LinuxMain.swift
 indentation_width: 
   indentation_width: 2
+indentation: 2
