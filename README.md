@@ -719,8 +719,8 @@ There are two examples on how to do basic CRUD methods in CloudKit via MistKit:
 
 ## 0.4.0 
 
-- [ ] Date Field Types
-- [ ] Location Field Types
+- [X] Date Field Types
+- [X] Location Field Types
 - [ ] List Field Types
 - [ ] System Field Integration
 
