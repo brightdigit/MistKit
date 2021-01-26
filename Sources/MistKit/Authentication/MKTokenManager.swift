@@ -1,4 +1,4 @@
-public class MKTokenManager: MKTokenManagerProtocol {
+public class MKTokenManager: MKWritableTokenManagerProtocol {
   public let storage: MKTokenStorage
   public let client: MKTokenClient?
 

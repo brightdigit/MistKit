@@ -59,11 +59,17 @@ public struct ResultSink: ResultSinkProtocol {
   ) where RequestType: MKRequest,
     ResponseType == RequestType.Response,
     HttpClientType: MKHttpClient {
+    let setWebAuthenticationToken : ((String) -> Void)?
+    
+    if let writable = database.urlBuilder.tokenManager as? MKWritableTokenManagerProtocol {
+      setWebAuthenticationToken = { writable.webAuthenticationToken = $0 }
+    } else {
+      setWebAuthenticationToken = nil
+    }
+    
     let dataResult = dataTransformer.data(
       fromResult: result,
-      setWebAuthenticationToken: {
-        database.urlBuilder.tokenManager?.webAuthenticationToken = $0
-      }
+      setWebAuthenticationToken: setWebAuthenticationToken
     )
     let newResult = response(
       fromResult: dataResult,

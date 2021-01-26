@@ -35,27 +35,27 @@ extension Data {
 }
 
 final class MKAnyRecordTests: XCTestCase {
-  let expectedRecordName = UUID()
-  let expectedTag = UUID().uuidString
+  private let expectedRecordName = UUID()
+  private let expectedTag = UUID().uuidString
 
-  let expectedIntField = UUID().uuidString
-  let expectedStrField = UUID().uuidString
-  let expectedDataField = UUID().uuidString
+  private let expectedIntField = UUID().uuidString
+  private let expectedStrField = UUID().uuidString
+  private let expectedDataField = UUID().uuidString
 
-  let expectedDateField = UUID().uuidString
-  let expectedDoubleField = UUID().uuidString
-  let expectedAssetField = UUID().uuidString
-  let expectedLocationField = UUID().uuidString
+  private let expectedDateField = UUID().uuidString
+  private let expectedDoubleField = UUID().uuidString
+  private let expectedAssetField = UUID().uuidString
+  private let expectedLocationField = UUID().uuidString
 
-  let expectedIntValue = Int64.random(in: 0 ... Int64.max)
-  let expectedStrValue = UUID().uuidString
-  let expectedDataValue = Data.random()
+  private let expectedIntValue = Int64.random(in: 0 ... Int64.max)
+  private let expectedStrValue = UUID().uuidString
+  private let expectedDataValue = Data.random()
 
-  let expectedDateValue: Date = .init(
+  private let expectedDateValue: Date = .init(
     timeIntervalSince1970: .random(in: 0 ... TimeInterval.greatestFiniteMagnitude)
   )
-  let expectedDoubleValue: Double = .random(in: 0 ... .greatestFiniteMagnitude)
-  let expectedAssetValue = MKAsset(
+  private let expectedDoubleValue: Double = .random(in: 0 ... .greatestFiniteMagnitude)
+  private let expectedAssetValue = MKAsset(
     fileChecksum: .random(),
     size: .random(in: 0 ... Int64.max),
     wrappingKey: Data.random(),
@@ -63,15 +63,15 @@ final class MKAnyRecordTests: XCTestCase {
     downloadURL: MKAsset.URLBase(baseURL: URL.random()),
     receipt: .random()
   )
-  let expectedLocationValue = MKLocation(
+  private let expectedLocationValue = MKLocation(
     coordinate: MKLocationCoordinate2D(
       latitude: .random(in: 0 ... MKLocationDegrees.greatestFiniteMagnitude),
       longitude: .random(in: 0 ... MKLocationDegrees.greatestFiniteMagnitude)
     )
   )
 
-  var expectedFields: [String: MKValue]!
-  var record: MKAnyRecord!
+  private var expectedFields: [String: MKValue]!
+  private var record: MKAnyRecord!
 
   override func setUp() {
     expectedFields = [

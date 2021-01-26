@@ -19,7 +19,7 @@ public struct MistDemoArguments: MistDemoConfiguration, ParsableArguments {
 }
 
 public extension MKDatabase where HttpClient == MKURLSessionClient {
-  init(options: MistDemoArguments, tokenManager: MKTokenManagerProtocol) {
+  init(options: MistDemoArguments, tokenManager: MKWritableTokenManagerProtocol) {
     // setup your connection to CloudKit
     let connection = MKDatabaseConnection(
       container: options.container,
