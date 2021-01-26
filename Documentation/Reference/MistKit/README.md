@@ -19,6 +19,7 @@
 -   [MKTokenManagerProtocol](protocols/MKTokenManagerProtocol.md)
 -   [MKTokenStorage](protocols/MKTokenStorage.md)
 -   [MKURLBuilderProtocol](protocols/MKURLBuilderProtocol.md)
+-   [MKWritableTokenManagerProtocol](protocols/MKWritableTokenManagerProtocol.md)
 -   [RequestConfigurationFactoryProtocol](protocols/RequestConfigurationFactoryProtocol.md)
 -   [ResultSinkProtocol](protocols/ResultSinkProtocol.md)
 -   [ResultTransformerProtocol](protocols/ResultTransformerProtocol.md)

@@ -9,5 +9,5 @@ public extension MKDatabase where HttpClient == MKURLSessionClient
 ### `init(options:tokenManager:)`
 
 ```swift
-init(options: MistDemoArguments, tokenManager: MKTokenManagerProtocol)
+init(options: MistDemoArguments, tokenManager: MKWritableTokenManagerProtocol)
 ```

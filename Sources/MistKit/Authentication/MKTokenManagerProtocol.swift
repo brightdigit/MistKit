@@ -1,7 +1,5 @@
 import Foundation
 
-
-
 public protocol MKTokenManagerProtocol: AnyObject {
   var webAuthenticationToken: String? { get }
 
@@ -11,7 +9,6 @@ public protocol MKTokenManagerProtocol: AnyObject {
   )
 }
 
-public protocol MKWritableTokenManagerProtocol : MKTokenManagerProtocol {
+public protocol MKWritableTokenManagerProtocol: MKTokenManagerProtocol {
   var webAuthenticationToken: String? { get set }
-  
 }

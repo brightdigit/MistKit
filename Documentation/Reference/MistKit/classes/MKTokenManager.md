@@ -3,7 +3,7 @@
 # `MKTokenManager`
 
 ```swift
-public class MKTokenManager: MKTokenManagerProtocol
+public class MKTokenManager: MKWritableTokenManagerProtocol
 ```
 
 ## Properties
