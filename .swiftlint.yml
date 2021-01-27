@@ -82,7 +82,6 @@ opt_in_rules:
   - strict_fileprivate
   - strong_iboutlet
   - switch_case_on_newline
-  - test_case_accessibility
   - toggle_bool
   - trailing_closure
   - type_contents_order
@@ -116,6 +115,7 @@ identifier_name:
     - id
 excluded:
   - Tests/*/XCTestManifests.swift
+  - Tests/MistKitTests/XCTestManifests.swift
   - DerivedData
   - .build
   - Tests/LinuxMain.swift

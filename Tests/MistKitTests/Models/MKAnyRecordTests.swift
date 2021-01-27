@@ -25,7 +25,7 @@ class MockRecord: MKQueryRecord {
   }
 }
 
-extension Data {
+public extension Data {
   static func random(withCount count: Int = 32) -> Data {
     let bytes = (1 ... count).map { _ in
       UInt8.random(in: 0 ... UInt8.max)
@@ -73,7 +73,7 @@ final class MKAnyRecordTests: XCTestCase {
   private var expectedFields: [String: MKValue]!
   private var record: MKAnyRecord!
 
-  override func setUp() {
+  override public func setUp() {
     expectedFields = [
       expectedIntField: .integer(expectedIntValue),
       expectedStrField: .string(expectedStrValue),
@@ -93,7 +93,7 @@ final class MKAnyRecordTests: XCTestCase {
     )
   }
 
-  fileprivate func valueTest(
+  public func valueTest(
     _ method: (MKAnyRecord) -> (String) throws -> Any,
     _ key: String = UUID().uuidString
   ) {
@@ -109,13 +109,13 @@ final class MKAnyRecordTests: XCTestCase {
     XCTAssertEqual(key, failedKey)
   }
 
-  func testInit() {
+  public func testInit() {
     XCTAssertEqual(record.recordName, expectedRecordName)
     XCTAssertEqual(record.recordChangeTag, expectedTag)
     XCTAssertEqual(record.fields, expectedFields)
   }
 
-  func testValues() {
+  public func testValues() {
     XCTAssertEqual(try record.integer(fromKey: expectedIntField), expectedIntValue)
     XCTAssertEqual(try record.string(fromKey: expectedStrField), expectedStrValue)
     XCTAssertEqual(try record.data(fromKey: expectedDataField), expectedDataValue)
@@ -128,7 +128,7 @@ final class MKAnyRecordTests: XCTestCase {
     )
   }
 
-  func testValuesIfExists() {
+  public func testValuesIfExists() {
     XCTAssertEqual(
       try record.integerIfExists(fromKey: expectedIntField),
       expectedIntValue
@@ -159,7 +159,7 @@ final class MKAnyRecordTests: XCTestCase {
     )
   }
 
-  func testNilIfExists() {
+  public func testNilIfExists() {
     XCTAssertNil(try record.integerIfExists(fromKey: UUID().uuidString))
     XCTAssertNil(try record.stringIfExists(fromKey: UUID().uuidString))
     XCTAssertNil(try record.dataIfExists(fromKey: UUID().uuidString))
@@ -169,7 +169,7 @@ final class MKAnyRecordTests: XCTestCase {
     XCTAssertNil(try record.locationIfExists(fromKey: UUID().uuidString))
   }
 
-  func testMissingFields() {
+  public func testMissingFields() {
     valueTest(MKAnyRecord.integer, UUID().uuidString)
     valueTest(MKAnyRecord.string, UUID().uuidString)
     valueTest(MKAnyRecord.data, UUID().uuidString)

@@ -10,7 +10,7 @@ struct MockAuthenticationRedirect: MKAuthenticationRedirect {
 }
 
 final class MKServerResponseTests: XCTestCase {
-  func testInitAttemptRecoveryFromURL() {
+  public func testInitAttemptRecoveryFromURL() {
     let expected = URL.random()
     let error: Error = MKError.authenticationRequired(
       MockAuthenticationRedirect(url: expected)
@@ -23,7 +23,7 @@ final class MKServerResponseTests: XCTestCase {
     XCTAssertEqual(expected, actual)
   }
 
-  func testInitAttemptRecoveryFromFailure() {
+  public func testInitAttemptRecoveryFromFailure() {
     let expected = UUID()
     let error = MockError(value: expected)
     do {
@@ -38,7 +38,7 @@ final class MKServerResponseTests: XCTestCase {
     XCTFail()
   }
 
-  func testInitFromResultSuccess() {
+  public func testInitFromResultSuccess() {
     let expected = UUID()
     let result: Result<UUID, Error> = .success(expected)
     let serverResponse = try? MKServerResponse(fromResult: result)
@@ -49,7 +49,7 @@ final class MKServerResponseTests: XCTestCase {
     XCTAssertEqual(expected, actual)
   }
 
-  func testInitFromResultURL() {
+  public func testInitFromResultURL() {
     let expected = URL.random()
     let result: Result<UUID, Error> =
       .failure(MKError.authenticationRequired(MockAuthenticationRedirect(url: expected)))
@@ -61,7 +61,7 @@ final class MKServerResponseTests: XCTestCase {
     XCTAssertEqual(expected, actual)
   }
 
-  func testInitFromResultFailure() {
+  public func testInitFromResultFailure() {
     let expected = UUID()
     let result: Result<UUID, Error> = .failure(MockError(value: expected))
     do {

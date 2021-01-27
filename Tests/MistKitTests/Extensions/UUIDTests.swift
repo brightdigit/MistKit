@@ -1,7 +1,7 @@
 @testable import MistKit
 import XCTest
 final class UUIDTests: XCTestCase {
-  func testArray() {
+  public func testArray() {
     let count = 40
     let uuidByteSize = 16
     let expectedDatas = (1 ... count).map { _ in
