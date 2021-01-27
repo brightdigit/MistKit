@@ -1,5 +1,3 @@
-
-
 public class MKStaticTokenManager: MKTokenManagerProtocol {
   public let token: String?
   public let client: MKTokenClient?

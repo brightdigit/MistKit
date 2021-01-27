@@ -68,6 +68,7 @@
 ## Classes
 
 -   [MKFileStorage](classes/MKFileStorage.md)
+-   [MKStaticTokenManager](classes/MKStaticTokenManager.md)
 -   [MKTokenManager](classes/MKTokenManager.md)
 -   [MKURLBuilder](classes/MKURLBuilder.md)
 -   [MKUserDefaultsStorage](classes/MKUserDefaultsStorage.md)
