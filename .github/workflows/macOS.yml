@@ -23,7 +23,6 @@ jobs:
         include:
           - os: macos-10.15
             xcode: "/Applications/Xcode_11.5.app"
-        include:
           - os: macos-11.0
             xcode: "/Applications/Xcode_12.4.app"
 
