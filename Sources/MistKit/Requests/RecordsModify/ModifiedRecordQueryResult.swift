@@ -14,14 +14,16 @@ public extension MKDatabase {
     }
   }
 
-  fileprivate func resultFrom<RecordType: MKQueryRecord>(response: ModifyRecordQueryRequest<RecordType>.Response) -> Result<ModifiedRecordQueryResult<RecordType>, Error> {
+  private func resultFrom<RecordType: MKQueryRecord>(
+    response: ModifyRecordQueryRequest<RecordType>.Response
+  ) -> Result<ModifiedRecordQueryResult<RecordType>, Error> {
     var updated = [RecordType]()
     var deleted = [UUID]()
     for record in response.records {
       switch record {
       case let .deleted(recordName):
         deleted.append(recordName)
-        
+
       case let .updated(record):
         do {
           try updated.append(RecordType(record: record))
@@ -32,7 +34,7 @@ public extension MKDatabase {
     }
     return .success(.init(deleted: deleted, updated: updated))
   }
-  
+
   func perform<RecordType: MKQueryRecord>(
     operations: ModifyRecordQueryRequest<RecordType>,
     _ callback: @escaping ((Result<ModifiedRecordQueryResult<RecordType>, Error>) -> Void)
