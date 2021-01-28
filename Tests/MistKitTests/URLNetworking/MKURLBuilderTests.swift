@@ -7,7 +7,6 @@ final class MKURLBuilderTests: XCTestCase {
     let connection = MKDatabaseConnection(container: container, apiToken: apiToken, environment: .development)
     let builder = MKURLBuilder(tokenEncoder: nil, connection: connection)
     let parameters = builder.queryItems
-    XCTAssertEqual(parameters["ckAPIToken"],apiToken)
-    
+    XCTAssertEqual(parameters["ckAPIToken"], apiToken)
   }
 }
