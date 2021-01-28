@@ -1,15 +1,15 @@
 @testable import MistKit
 import XCTest
 final class MKStaticTokenManagerTests: XCTestCase {
-  func testNoClientWithTokenString () {
+  func testNoClientWithTokenString() {
     let token = String.random(ofLength: 32)
     let manager = MKStaticTokenManager(token: token, client: nil)
-    XCTAssertEqual( manager.webAuthenticationToken, token)
+    XCTAssertEqual(manager.webAuthenticationToken, token)
     let url = URL.random()
     let testExp = expectation(description: "test")
     manager.request(MockAuthRedirect(url: url)) { result in
       switch result {
-      case .failure(let error):
+      case let .failure(error):
         guard let mkError = error as? MKError else {
           XCTFail()
           break
@@ -30,7 +30,7 @@ final class MKStaticTokenManagerTests: XCTestCase {
     }
   }
 
-  func testWClientWithTokenString () {
+  func testWClientWithTokenString() {
     let requestExp = expectation(description: "request")
     let clientExp = expectation(description: "client")
     let token = String.random(ofLength: 32)
@@ -42,7 +42,7 @@ final class MKStaticTokenManagerTests: XCTestCase {
       clientExp.fulfill()
     }
     let manager = MKStaticTokenManager(token: token, client: client)
-    XCTAssertEqual( manager.webAuthenticationToken, token)
+    XCTAssertEqual(manager.webAuthenticationToken, token)
     manager.request(MockAuthRedirect(url: url)) { result in
       guard case let .success(actualToken) = result else {
         XCTFail()
