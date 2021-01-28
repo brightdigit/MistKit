@@ -36,6 +36,6 @@ jobs:
     - name: Prepare Code Coverage
       run: llvm-cov export -format="lcov" .build/x86_64-unknown-linux-gnu/debug/${{ env.PACKAGE_NAME }}PackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
     - name: Upload to CodeCov.io
-      run: bash <(curl https://codecov.io/bash) -F github -F ${RELEASE_NAME} -F ${SWIFT_VER} -n ${{ github.sha }}
+      run: bash <(curl https://codecov.io/bash) -F github -F ${RELEASE_NAME} -F ${SWIFT_VER}
       env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

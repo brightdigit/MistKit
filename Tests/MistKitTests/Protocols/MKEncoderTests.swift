@@ -2,7 +2,7 @@
 import XCTest
 
 struct MockEncoder: MKEncoder {
-  func data<EncodableType>(
+  public func data<EncodableType>(
     from _: EncodableType
   ) throws -> Data where EncodableType: MKEncodable {
     throw MKError.empty
@@ -10,7 +10,7 @@ struct MockEncoder: MKEncoder {
 }
 
 final class MKEncoderTests: XCTestCase {
-  func testOptionalData() {
+  public func testOptionalData() {
     let encoder = MockEncoder()
     let actual: Data?
     do {

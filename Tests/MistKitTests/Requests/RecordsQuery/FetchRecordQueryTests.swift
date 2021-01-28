@@ -7,7 +7,7 @@ public struct MockQuery: MKQueryProtocol {
 }
 
 final class FetchRecordQueryTests: XCTestCase {
-  func testInit() {
+  public func testInit() {
     let recordType = UUID().uuidString
     let desiredKeys = (0 ... 3).map { _ in UUID().uuidString }
     let query = FetchRecordQuery(

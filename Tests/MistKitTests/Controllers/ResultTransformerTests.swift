@@ -8,7 +8,7 @@ struct MockHttpResponse: MKHttpResponse {
 }
 
 final class ResultTransformerTests: XCTestCase {
-  func testData() {
+  public func testData() {
     let exp = expectation(description: "Web Auth")
     let transformer = ResultTransformer()
     let expectedWAT = String.random(ofLength: 32)
@@ -36,7 +36,7 @@ final class ResultTransformerTests: XCTestCase {
     }
   }
 
-  func testNoData() {
+  public func testNoData() {
     let exp = expectation(description: "Web Auth")
     let transformer = ResultTransformer()
     let expectedWAT = String.random(ofLength: 32)

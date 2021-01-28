@@ -11,12 +11,12 @@ public extension String {
 }
 
 final class CharacterMapEncoderTests: XCTestCase {
-  func testDefaultInit() {
+  public func testDefaultInit() {
     let encoder = CharacterMapEncoder()
     XCTAssertEqual(encoder.characterMap, ["+": "%2B", "/": "%2F", "=": "%3D"])
   }
 
-  fileprivate func encodingTest() {
+  public func encodingTest() {
     var map = [String: String]()
     var token = ""
     var expected = ""
@@ -40,7 +40,7 @@ final class CharacterMapEncoderTests: XCTestCase {
     XCTAssertEqual(actual, expected)
   }
 
-  func testEncode() {
+  public func testEncode() {
     for _ in 0 ..< 100 {
       encodingTest()
     }
