@@ -33,7 +33,7 @@ jobs:
     - name: Setup Xcode
       run: sudo xcode-select -s ${{ matrix.xcode }}/Contents/Developer
     - name: Build
-      run: swift build
+      run: swift build -v
     - name: Lint
       if: startsWith(github.ref, 'refs/tags/') != true
       run: swift run swiftformat --lint . && swift run swiftlint
