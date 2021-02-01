@@ -30,7 +30,7 @@ public struct MockRequest: MKRequest {
 }
 
 final class RequestConfigurationFactoryTests: XCTestCase {
-  func testConfiguration() {
+  public func testConfiguration() {
     let factory = RequestConfigurationFactory()
     let value = UUID()
     let url = FileManager.default.temporaryDirectory.appendingPathComponent(

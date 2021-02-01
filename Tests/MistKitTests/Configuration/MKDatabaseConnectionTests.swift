@@ -1,7 +1,7 @@
 @testable import MistKit
 import XCTest
 final class MKDatabaseConnectionTests: XCTestCase {
-  func testDefaultInit() {
+  public func testDefaultInit() {
     let container = UUID().uuidString
     let apiToken = UUID().uuidString
     let environment = MKEnvironment.development
@@ -14,7 +14,7 @@ final class MKDatabaseConnectionTests: XCTestCase {
     XCTAssertEqual(connection.version, .v1)
   }
 
-  func testURL() {
+  public func testURL() {
     let container = UUID().uuidString
     let apiToken = UUID().uuidString
     let baseURL = URL.random()

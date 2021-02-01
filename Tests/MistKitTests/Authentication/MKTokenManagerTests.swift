@@ -24,7 +24,7 @@ class MockTokenClient: MKTokenClient {
   }
 
   let onRequest: (MKAuthenticationRedirect?, (Result<String, Error>) -> Void) -> Void
-  func request(
+  public func request(
     _ request: MKAuthenticationRedirect?,
     _ callback: @escaping (Result<String, Error>) -> Void
   ) {
@@ -41,14 +41,14 @@ public extension URL {
 }
 
 final class MKTokenManagerTests: XCTestCase {
-  func testWebAuthenticationToken() {
+  public func testWebAuthenticationToken() {
     let storage = MockTokenStorage()
     let manager = MKTokenManager(storage: storage, client: nil)
     manager.webAuthenticationToken = UUID().uuidString
     XCTAssertEqual(manager.webAuthenticationToken, storage.webAuthenticationToken)
   }
 
-  func testRequest() {
+  public func testRequest() {
     let url = URL.random()
     let storage = MockTokenStorage()
     let redirect = MockAuthRedirect(url: url)

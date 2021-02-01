@@ -37,7 +37,6 @@ public struct MKDatabase<HttpClient: MKHttpClient> {
       callback(.failure(error))
       return
     }
-    debugPrint(requestConfig.url)
     let httpRequest = client.request(fromConfiguration: requestConfig)
     httpRequest.execute { result in
       self.resultSink.database(

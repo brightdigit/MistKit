@@ -1,18 +1,13 @@
-public class MKTokenManager: MKWritableTokenManagerProtocol {
-  public let storage: MKTokenStorage
+public class MKStaticTokenManager: MKTokenManagerProtocol {
+  public let token: String?
   public let client: MKTokenClient?
 
   public var webAuthenticationToken: String? {
-    get {
-      storage.webAuthenticationToken
-    }
-    set {
-      storage.webAuthenticationToken = newValue
-    }
+    token
   }
 
-  public init(storage: MKTokenStorage, client: MKTokenClient?) {
-    self.storage = storage
+  public init(token: String?, client: MKTokenClient?) {
+    self.token = token
     self.client = client
   }
 
@@ -24,10 +19,8 @@ public class MKTokenManager: MKWritableTokenManagerProtocol {
       callback(.failure(MKError.authenticationRequired(request)))
       return
     }
+
     client.request(request) {
-      if let token = try? $0.get() {
-        self.webAuthenticationToken = token
-      }
       callback($0)
     }
   }

@@ -12,6 +12,6 @@ public struct ResultTransformer: ResultTransformerProtocol
 ```swift
 public func data(
   fromResult result: Result<MKHttpResponse, Error>,
-  setWebAuthenticationToken: (String) -> Void
+  setWebAuthenticationToken: ((String) -> Void)?
 ) -> Result<Data, Error>
 ```

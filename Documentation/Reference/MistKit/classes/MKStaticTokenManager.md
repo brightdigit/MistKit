@@ -1,16 +1,16 @@
 **CLASS**
 
-# `MKTokenManager`
+# `MKStaticTokenManager`
 
 ```swift
-public class MKTokenManager: MKWritableTokenManagerProtocol
+public class MKStaticTokenManager: MKTokenManagerProtocol
 ```
 
 ## Properties
-### `storage`
+### `token`
 
 ```swift
-public let storage: MKTokenStorage
+public let token: String?
 ```
 
 ### `client`
@@ -26,10 +26,10 @@ public var webAuthenticationToken: String?
 ```
 
 ## Methods
-### `init(storage:client:)`
+### `init(token:client:)`
 
 ```swift
-public init(storage: MKTokenStorage, client: MKTokenClient?)
+public init(token: String?, client: MKTokenClient?)
 ```
 
 ### `request(_:_:)`
