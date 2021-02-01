@@ -39,6 +39,8 @@ Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
    * [**Installation**](#installation)
    * [**Usage**](#usage)
       * [Composing Web Service Requests](#composing-web-service-requests)
+        * [Setting Up Authenticated Requests](#setting-up-authenticated-requests)
+        * [CloudKit and Vapor](#cloudkit-and-vapor)
       * [Fetching Records Using a Query (records/query)](#fetching-records-using-a-query-recordsquery)
       * [Fetching Records by Record Name (records/lookup)](#fetching-records-by-record-name-recordslookup)
       * [Fetching Current User Identity (users/caller)](#fetching-current-user-identity-userscaller)
@@ -250,24 +252,99 @@ let database = MKDatabase(
 )
 ```
 
-If you already have access to the `webAuthenticationToken`, you can always set the token in the `MKTokenManager` at any point in your application:
+##### Using `MKNIOHTTP1TokenClient`
+
+If you are not building a server-side application, you can use `MKNIOHTTP1TokenClient`, by adding `MistKitNIO` to your package dependency:
 
 ```swift
-// setup how to manager your user's web authentication token
-let manager = MKTokenManager(
-  // store the token in UserDefaults
-  storage: MKUserDefaultsStorage(), 
-  // setup an http server at localhost for port 7000
-  client: MKNIOHTTP1TokenClient(bindTo: .ipAddress(host: "127.0.0.1", port: 7000))
-
-// use the webAuthenticationToken which is passed
-if let token = options.token {
-  manager.webAuthenticationToken = token
-}
-...
+let package = Package(
+  ...
+  dependencies: [
+    .package(url: "https://github.com/brightdigit/MistKit", .branch("main")
+  ],
+  targets: [
+      .target(
+          name: "YourTarget",
+          dependencies: ["MistKit", "MistKitNIOHTTP1Token", ...]),
+      ...
+  ]
+)
 ```
 
-##### Managing Tokens in Vapor
+When a request fails due to authentication failure, `MKNIOHTTP1TokenClient` will start an http server to begin listening to web authentication token. By default, `MKNIOHTTP1TokenClient` will simply print the url but you can override the `onRequestURL`:
+
+```swift
+public class MKNIOHTTP1TokenClient: MKTokenClient {
+  
+  public init(bindTo: BindTo, onRedirectURL : ((URL) -> Void)? = nil) {
+    self.bindTo = bindTo
+    self.onRedirectURL = onRedirectURL ?? {print($0)}
+  }
+  ...
+}
+```
+
+### CloudKit and Vapor
+
+#### Static Web Authentication Tokens
+
+If you may already have a `webAuthenticationToken`, you can use `MKStaticTokenManager`. This is a read-only implementation of `MKTokenManagerProtocol` which takes a read-only `String?` for the `webAuthenticationToken`.
+
+Here's some sample code I use in my Vapor app **[Heartwitch](https://heartwitch.app)** for pulling the `webAuthenticationToken` from my database and using that token when I create a `MKDatabase` instance.
+
+```swift
+import MistKit
+import MistKitVapor
+
+extension Application {
+  ...
+  var cloudKitConnection: MKDatabaseConnection {
+    MKDatabaseConnection(
+      container: configuration.cloudkitContainer,
+      apiToken: configuration.cloudkitAPIKey,
+      environment: environment.cloudKitEnvironment
+    )
+  }
+
+  func cloudKitDatabase(using client: Client, withWebAuthenticationToken webAuthenticationToken: String? = nil) -> MKDatabase<MKVaporClient> {
+    MKDatabase(
+      connection: cloudKitConnection,
+      client: MKVaporClient(client: client),
+      tokenManager: MKStaticTokenManager(token: webAuthenticationToken, client: nil)
+    )
+  }
+}
+
+struct DeviceController {
+
+  func fetch(_ request: Request) throws -> EventLoopFuture<MKServerResponse<[DeviceResponseItem]>> {
+    let user = try request.auth.require(User.self)
+    let userID = try user.requireID()
+    let token = user.$appleUsers.query(on: request.db).field(\.$webAuthenticationToken).first().map { $0?.webAuthenticationToken }
+
+    let cloudKitDatabase: EventLoopFuture<MKDatabase> = token.map {
+      request.application.cloudKitDatabase(using: request.client, withWebAuthenticationToken: $0)
+    }
+    
+    let cloudKitRequest = FetchRecordQueryRequest(
+      database: .private,
+      query: FetchRecordQuery(query: query)
+    )
+    
+    let newEntries = cloudKitDatabase.flatMap {
+      let cloudKitResult = cloudKitDatabase.query(cloudKitRequest, on: request.eventLoop)
+    }
+
+    return newEntries.mistKitResponse()
+  }
+  
+  ...
+}
+```
+
+Besides static strings, you can store your tokens in the session or in your database.
+
+#### Storing Web Authentication Tokens in Databases and Sessions
 
 In the `mistdemod` demo Vapor application, there's an example of how to create an `MKDatabase` based on the request using both `MKVaporModelStorage` and `MKVaporSessionStorage`:
 
@@ -337,38 +414,6 @@ struct CloudKitController: RouteCollection {
 ```
 
 If you have an app which already uses Apple's existing CloudKit API, you can also [save the webAuthenticationToken to your database with a `CKFetchWebAuthTokenOperation`](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation).
-
-##### Using `MKNIOHTTP1TokenClient`
-
-If you are not building a server-side application, you can use `MKNIOHTTP1TokenClient`, by adding `MistKitNIO` to your package dependency:
-
-```swift
-let package = Package(
-  ...
-  dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit", .branch("main")
-  ],
-  targets: [
-      .target(
-          name: "YourTarget",
-          dependencies: ["MistKit", "MistKitNIOHTTP1Token", ...]),
-      ...
-  ]
-)
-```
-
-When a request fails due to authentication failure, `MKNIOHTTP1TokenClient` will start an http server to begin listening to web authentication token. By default, `MKNIOHTTP1TokenClient` will simply print the url but you can override the `onRequestURL`:
-
-```swift
-public class MKNIOHTTP1TokenClient: MKTokenClient {
-  
-  public init(bindTo: BindTo, onRedirectURL : ((URL) -> Void)? = nil) {
-    self.bindTo = bindTo
-    self.onRedirectURL = onRedirectURL ?? {print($0)}
-  }
-  ...
-}
-```
 
 ## Fetching Records Using a Query (records/query)
 
