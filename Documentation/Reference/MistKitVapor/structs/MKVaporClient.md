@@ -20,8 +20,10 @@ public let client: Client
 public init(client: Client)
 ```
 
-### `request(withURL:data:)`
+### `request(fromConfiguration:)`
 
 ```swift
-public func request(withURL url: URL, data: Data?) -> MKVaporClientRequest
+public func request(
+  fromConfiguration configuration: RequestConfiguration
+) -> MKVaporClientRequest
 ```

@@ -2,15 +2,20 @@ import ArgumentParser
 import Foundation
 import MistKit
 import MistKitDemo
-import MistKitNIOHTTP1Token
-extension MistDemoCommand {
-  struct WhoAmICommand: ParsableAsyncCommand {
-    static var configuration = CommandConfiguration(commandName: "whoami")
-    @OptionGroup var options: MistDemoArguments
+import MistKitNIO
 
-    func runAsync(_ completed: @escaping (Error?) -> Void) {
+public extension MistDemoCommand {
+  struct WhoAmICommand: ParsableAsyncCommand {
+    public static var configuration = CommandConfiguration(commandName: "whoami")
+
+    @OptionGroup public private(set) var options: MistDemoArguments
+
+    public func runAsync(_ completed: @escaping (Error?) -> Void) {
       // setup how to manager your user's web authentication token
-      let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding))
+      let manager = MKTokenManager(
+        storage: MKUserDefaultsStorage(),
+        client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding)
+      )
 
       // setup your database manager
       let database = MKDatabase(options: options, tokenManager: manager)
@@ -25,12 +30,14 @@ extension MistDemoCommand {
         completed(nil)
       }
     }
+
+    public init() {}
   }
 }
 
-extension UserIdentityResponse {
+public extension UserIdentityResponse {
   var information: String {
-    return """
+    """
     userRecordName: \(userRecordName.uuid)
       emailAddress: \(lookupInfo?.emailAddress ?? "(empty)")
       phoneNumber: \(lookupInfo?.phoneNumber ?? "(empty)")
@@ -40,7 +47,9 @@ extension UserIdentityResponse {
       nickname: \(nameComponents?.nickname ?? "(empty)")
       nameSuffix: \(nameComponents?.nameSuffix ?? "(empty)")
       middleName: \(nameComponents?.middleName ?? "(empty)")
-      phoneticRepresentation: \(nameComponents?.phoneticRepresentation ?? "(empty)")
+      phoneticRepresentation: \(
+        nameComponents?.phoneticRepresentation ?? "(empty)"
+      )
     """
   }
 }

@@ -20,6 +20,7 @@ public struct MKURLRequest: MKHttpRequest {
         result = .failure(MKError.empty)
       }
       callback(result)
-    }.resume()
+    }
+    .resume()
   }
 }

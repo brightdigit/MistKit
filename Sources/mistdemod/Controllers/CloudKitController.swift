@@ -1,7 +1,7 @@
 import Vapor
 
-struct CloudKitController: RouteCollection {
-  func token(_ request: Request) -> EventLoopFuture<HTTPStatus> {
+public struct CloudKitController: RouteCollection {
+  public func token(_ request: Request) -> EventLoopFuture<HTTPStatus> {
     guard let token: String = request.query["ckWebAuthToken"] else {
       return request.eventLoop.makeSucceededFuture(.notFound)
     }
@@ -15,7 +15,7 @@ struct CloudKitController: RouteCollection {
     return user.save(on: request.db).transform(to: .accepted)
   }
 
-  func boot(routes: RoutesBuilder) throws {
+  public func boot(routes: RoutesBuilder) throws {
     routes.get(["token"], use: token)
   }
 }

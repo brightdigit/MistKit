@@ -2,27 +2,36 @@ import ArgumentParser
 import Foundation
 import MistKit
 import MistKitDemo
-import MistKitNIOHTTP1Token
+import MistKitNIO
 
-extension MistDemoCommand {
+public extension MistDemoCommand {
   struct RenameCommand: ParsableAsyncCommand {
-    static var configuration = CommandConfiguration(commandName: "rename")
-    @OptionGroup var options: MistDemoArguments
+    public static var configuration = CommandConfiguration(commandName: "rename")
+    @OptionGroup public var options: MistDemoArguments
 
     @Argument
-    var recordName: UUID
+    public var recordName: UUID
 
     @Argument
-    var newTitle: String
+    public var newTitle: String
 
-    func runAsync(_ completed: @escaping (Error?) -> Void) {
+    public init() {}
+
+    // swiftlint:disable:next function_body_length
+    public func runAsync(_ completed: @escaping (Error?) -> Void) {
       // setup how to manager your user's web authentication token
-      let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding))
+      let manager = MKTokenManager(
+        storage: MKUserDefaultsStorage(),
+        client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding)
+      )
 
       // setup your database manager
       let database = MKDatabase(options: options, tokenManager: manager)
 
-      let query = LookupRecordQuery(TodoListItem.self, recordNames: [recordName])
+      let query = LookupRecordQuery(
+        TodoListItem.self,
+        recordNames: [recordName]
+      )
 
       let request = LookupRecordQueryRequest(database: .private, query: query)
 
@@ -30,12 +39,11 @@ extension MistDemoCommand {
         let items: [TodoListItem]
         do {
           items = try result.get()
-
         } catch {
           completed(error)
           return
         }
-        let operations = items.map { (item) -> ModifyOperation<TodoListItem> in
+        let operations = items.map { item -> ModifyOperation<TodoListItem> in
           item.title = self.newTitle
           return ModifyOperation(operationType: .update, record: item)
         }

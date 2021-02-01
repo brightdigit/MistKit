@@ -2,18 +2,25 @@ import ArgumentParser
 import Foundation
 import MistKit
 import MistKitDemo
-import MistKitNIOHTTP1Token
-extension MistDemoCommand {
+import MistKitNIO
+
+public extension MistDemoCommand {
   struct ListCommand: ParsableAsyncCommand {
-    static var configuration = CommandConfiguration(commandName: "list")
-    @OptionGroup var options: MistDemoArguments
+    public static var configuration = CommandConfiguration(commandName: "list")
+    @OptionGroup public var options: MistDemoArguments
 
     @Flag
-    var record: Bool = false
+    public var record: Bool = false
 
-    func runAsync(_ completed: @escaping (Error?) -> Void) {
+    public init() {}
+
+    // swiftlint:disable:next function_body_length
+    public func runAsync(_ completed: @escaping (Error?) -> Void) {
       // setup how to manager your user's web authentication token
-      let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding))
+      let manager = MKTokenManager(
+        storage: MKUserDefaultsStorage(),
+        client: MKNIOHTTP1TokenClient(bindTo: MistDemoCommand.defaultBinding)
+      )
 
       // setup your database manager
       let database = MKDatabase(options: options, tokenManager: manager)
@@ -37,7 +44,6 @@ extension MistDemoCommand {
           }
           completed(nil)
         }
-
       } else {
         // create your request to CloudKit
         let query = MKQuery(recordType: TodoListItem.self)

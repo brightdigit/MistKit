@@ -20,8 +20,10 @@ public let session: URLSession
 public init(session: URLSession)
 ```
 
-### `request(withURL:data:)`
+### `request(fromConfiguration:)`
 
 ```swift
-public func request(withURL url: URL, data: Data?) -> MKURLRequest
+public func request(
+  fromConfiguration configuration: RequestConfiguration
+) -> MKURLRequest
 ```

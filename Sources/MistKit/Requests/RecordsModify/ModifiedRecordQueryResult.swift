@@ -14,30 +14,33 @@ public extension MKDatabase {
     }
   }
 
+  private func resultFrom<RecordType: MKQueryRecord>(
+    response: ModifyRecordQueryRequest<RecordType>.Response
+  ) -> Result<ModifiedRecordQueryResult<RecordType>, Error> {
+    var updated = [RecordType]()
+    var deleted = [UUID]()
+    for record in response.records {
+      switch record {
+      case let .deleted(recordName):
+        deleted.append(recordName)
+
+      case let .updated(record):
+        do {
+          try updated.append(RecordType(record: record))
+        } catch {
+          return .failure(error)
+        }
+      }
+    }
+    return .success(.init(deleted: deleted, updated: updated))
+  }
+
   func perform<RecordType: MKQueryRecord>(
     operations: ModifyRecordQueryRequest<RecordType>,
     _ callback: @escaping ((Result<ModifiedRecordQueryResult<RecordType>, Error>) -> Void)
   ) {
     perform(request: operations) { response in
-      let result: Result<ModifiedRecordQueryResult<RecordType>, Error>
-      result = response.flatMap { response in
-        var updated = [RecordType]()
-        var deleted = [UUID]()
-        for record in response.records {
-          switch record {
-          case let .deleted(recordName):
-            deleted.append(recordName)
-          case let .updated(record):
-            do {
-              try updated.append(RecordType(record: record))
-            } catch {
-              return .failure(error)
-            }
-          }
-        }
-        return .success(.init(deleted: deleted, updated: updated))
-      }
-      callback(result)
+      callback(response.flatMap(self.resultFrom(response:)))
     }
   }
 
@@ -51,12 +54,12 @@ public extension MKDatabase {
   }
 }
 
-extension Result {
+public extension Result {
   func tryFlatmap<RecordType: MKQueryRecord>(
     recordsTo _: RecordType.Type
   ) -> Result<[RecordType], Failure>
     where Success == FetchRecordQueryResponse, Failure == Error {
-    return flatMap { response in
+    flatMap { response in
       Result<[RecordType], Failure> {
         try response.records.map(RecordType.init(record:))
       }

@@ -2,11 +2,24 @@
 
 ## Structs
 
+-   [CloudKitController](structs/CloudKitController.md)
+-   [CreateUser](structs/CreateUser.md)
+-   [ItemsController](structs/ItemsController.md)
 -   [TodoItemModel](structs/TodoItemModel.md)
+-   [User.Create](structs/User.Create.md)
+-   [UsersController](structs/UsersController.md)
+
+## Classes
+
+-   [User](classes/User.md)
 
 ## Extensions
 
+-   [Application](extensions/Application.md)
+-   [MKDatabase](extensions/MKDatabase.md)
+-   [Request](extensions/Request.md)
 -   [TodoListItem](extensions/TodoListItem.md)
+-   [User](extensions/User.md)
 
 ## Typealiases
 

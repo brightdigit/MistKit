@@ -3,7 +3,7 @@
 # `MKTokenManager`
 
 ```swift
-public class MKTokenManager: MKTokenManagerProtocol
+public class MKTokenManager: MKWritableTokenManagerProtocol
 ```
 
 ## Properties
@@ -35,5 +35,8 @@ public init(storage: MKTokenStorage, client: MKTokenClient?)
 ### `request(_:_:)`
 
 ```swift
-public func request(_ request: MKAuthenticationResponse, _ callback: @escaping (Result<String, Error>) -> Void)
+public func request(
+  _ request: MKAuthenticationRedirect,
+  _ callback: @escaping (Result<String, Error>) -> Void
+)
 ```

@@ -6,6 +6,13 @@
 public struct CharacterMapEncoder: MKTokenEncoder
 ```
 
+## Properties
+### `characterMap`
+
+```swift
+public let characterMap: [String: String]
+```
+
 ## Methods
 ### `init(characterMap:)`
 

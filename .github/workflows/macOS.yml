@@ -6,6 +6,7 @@ on:
       - '*'
       - 'feature/*'
       - 'release/*'
+    tags: '*'
 
 jobs:
   build:
@@ -18,10 +19,12 @@ jobs:
     strategy:
       matrix:
         runs-on:  [macos-10.15,macos-11.0]
-        xcode: ["/Applications/Xcode_11.7.app","/Applications/Xcode_12.2.app","/Applications/Xcode_12.3.app"]
+        xcode: ["/Applications/Xcode_11.7.app","/Applications/Xcode_12.app","/Applications/Xcode_12.1.app","/Applications/Xcode_12.2.app","/Applications/Xcode_12.3.app"]
         include:
           - os: macos-10.15
             xcode: "/Applications/Xcode_11.5.app"
+          - os: macos-11.0
+            xcode: "/Applications/Xcode_12.4.app"
 
     steps:
     - uses: actions/checkout@v2
@@ -30,19 +33,20 @@ jobs:
     - name: Setup Xcode
       run: sudo xcode-select -s ${{ matrix.xcode }}/Contents/Developer
     - name: Build
-      run: swift build
+      run: swift build -v
     - name: Lint
+      if: startsWith(github.ref, 'refs/tags/') != true
       run: swift run swiftformat --lint . && swift run swiftlint
     - name: Run tests
       run: swift test -v --enable-code-coverage
     - name: Prepare Code Coverage
       run: xcrun llvm-cov export -format="lcov" .build/debug/${{ env.PACKAGE_NAME }}PackageTests.xctest/Contents/MacOS/${{ env.PACKAGE_NAME }}PackageTests -instr-profile .build/debug/codecov/default.profdata > info.lcov
     - name: Upload to CodeCov.io
-      run: bash <(curl https://codecov.io/bash) -F github -F macOS -F ${{ matrix.runs-on }} -n ${{ github.sha }}
+      run: bash <(curl https://codecov.io/bash) -F github -F macOS -F ${{ matrix.runs-on }}
       env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - name: Build Documentation
-      if: ${{ matrix.xcode == '/Applications/Xcode_12.3.app' }}
+      if: ${{ matrix.os == 'macos-11.0' && matrix.xcode == '/Applications/Xcode_12.4.app' && !startsWith(github.ref, 'refs/tags/') }}
       run: |
         swift run sourcedocs generate build -cra
         git config --local user.email "action@github.com"

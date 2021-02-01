@@ -2,7 +2,7 @@
 
 # `Array`
 ```swift
-public extension Array where Element == MKAnyRecord
+public extension Array where Element == UInt8
 ```
 
 ## Properties
@@ -10,4 +10,11 @@ public extension Array where Element == MKAnyRecord
 
 ```swift
 var information: String
+```
+
+## Methods
+### `init(uuid:)`
+
+```swift
+init(uuid: UUID)
 ```
