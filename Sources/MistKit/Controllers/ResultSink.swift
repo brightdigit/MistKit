@@ -22,11 +22,6 @@ public struct ResultSink: ResultSinkProtocol {
     switch dataResult {
     case let .success(data):
       do {
-        #if DEBUG
-          if let text = String(data: data, encoding: .utf8) {
-            debugPrint(text)
-          }
-        #endif
         let value = try decoder.decode(RequestType.Response.self, from: data)
         newResult = .success(value)
         break
