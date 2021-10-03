@@ -93,7 +93,7 @@ let package = Package(
     "komondor": [
       "pre-push": [
         "swift test --enable-code-coverage --enable-test-discovery",
-        "swift run swift-test-codecov .build/debug/codecov/MistKit.json -v \(requiredCoverage)"
+        "swift run swift-test-codecov .build/debug/codecov/MistKit.json --minimum \(requiredCoverage)"
       ],
       "pre-commit": [
         "swift test --enable-code-coverage --enable-test-discovery --generate-linuxmain",
