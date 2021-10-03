@@ -13,7 +13,7 @@ public struct ResultSink: ResultSinkProtocol {
   }
 
   public func response<RequestType, ResponseType>(
-    fromResult _: Result<Data, Error>,
+    fromResult dataResult: Result<Data, Error>,
     ofRequest _: RequestType,
     shouldFailAuth _: Bool
   ) -> Result<ResponseType, Error>
