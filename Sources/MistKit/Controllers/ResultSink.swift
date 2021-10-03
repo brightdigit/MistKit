@@ -18,31 +18,20 @@ public struct ResultSink: ResultSinkProtocol {
     shouldFailAuth _: Bool
   ) -> Result<ResponseType, Error>
     where RequestType: MKRequest, ResponseType == RequestType.Response {
-    let newResult: Result<ResponseType, Error>
-    switch dataResult {
-    case let .success(data):
-      do {
-        let value = try decoder.decode(RequestType.Response.self, from: data)
-        newResult = .success(value)
-        break
-        // swiftlint:disable:next untyped_error_in_catch
-      } catch let valueError {
+    dataResult.flatMap { data in
+      Result {
         do {
+          return try decoder.decode(RequestType.Response.self, from: data)
+        } catch {
           let auth = try decoder.decode(
             MKAuthenticationResponse.self,
             from: data
           )
 
-          newResult = .failure(MKError.authenticationRequired(auth))
-        } catch {
-          newResult = .failure(valueError)
+          throw MKError.authenticationRequired(auth)
         }
       }
-
-    case let .failure(error):
-      newResult = .failure(error)
     }
-    return newResult
   }
 
   public func database<RequestType, ResponseType, HttpClientType>(
