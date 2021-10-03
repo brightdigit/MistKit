@@ -34,15 +34,14 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
     .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
     .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
-    .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
-    .package(url: "https://github.com/apple/swift-nio-http2.git", from: "1.16.1"),
+    .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.6.0"),
     // dev
-    .package(url: "https://github.com/shibapm/Komondor", from: "1.0.6"), // dev
+    .package(url: "https://github.com/shibapm/Komondor", from: "1.1.1"), // dev
     .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"), // dev
     .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.47.0"), // dev
-    .package(url: "https://github.com/realm/SwiftLint", from: "0.41.0"), // dev
-    .package(url: "https://github.com/shibapm/Rocket", .branch("master")), // dev
-    .package(url: "https://github.com/mattpolzin/swift-test-codecov", .branch("master")) // dev
+    .package(url: "https://github.com/realm/SwiftLint", from: "0.43.0"), // dev
+    .package(url: "https://github.com/shibapm/Rocket", from: "1.2.0"), // dev
+    .package(url: "https://github.com/brightdigit/swift-test-codecov", from: "1.0.0") // dev
   ],
   targets: [
     // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -100,7 +99,7 @@ let package = Package(
         "swift test --enable-code-coverage --enable-test-discovery --generate-linuxmain",
         "swift run swiftformat .",
         "swift run swiftlint autocorrect",
-        "swift run sourcedocs generate build -cra",
+//        "swift run sourcedocs generate build -cra",
         "git add .",
         "swift run swiftformat --lint .",
         "swift run swiftlint"
