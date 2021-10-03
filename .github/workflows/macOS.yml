@@ -52,5 +52,5 @@ jobs:
       env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - name: Build sourcedocs Documentation
-        if: ${{ matrix.os == 'macos-11' && matrix.xcode == '/Applications/Xcode_12.5.app' && !startsWith(github.ref, 'refs/tags/') }}
-        run: "swift run sourcedocs generate build -cra\ngit config --local user.email \"action@github.com\"\ngit config --local user.name \"GitHub Action\"\ngit status\ngit add Documentation\ngit diff-index --quiet HEAD || git commit -m \"[github action] Update Docs\"\ngit push    \n"
+      if: ${{ matrix.os == 'macos-11' && matrix.xcode == '/Applications/Xcode_13.0.app' && !startsWith(github.ref, 'refs/tags/') }}
+      run: "swift run sourcedocs generate build -cra\ngit config --local user.email \"action@github.com\"\ngit config --local user.name \"GitHub Action\"\ngit status\ngit add Documentation\ngit diff-index --quiet HEAD || git commit -m \"[github action] Update Docs\"\ngit push    \n"
