@@ -9,6 +9,6 @@ public protocol MKRequest {
 
 public extension MKRequest {
   var relativePath: [String] {
-    ([database.rawValue] + subpath)
+    [database.rawValue] + subpath
   }
 }

@@ -1,6 +1,7 @@
 import AsyncHTTPClient
 import Foundation
 import MistKit
+import NIOFoundationCompat
 
 public struct MKAsyncResponse: MKHttpResponse {
   public let response: HTTPClient.Response

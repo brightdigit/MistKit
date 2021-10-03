@@ -13,18 +13,24 @@ jobs:
     env:
       PACKAGE_NAME: MistKit
 
-    runs-on: macos-latest
+    runs-on: ${{ matrix.runs-on }}
     if: "!contains(github.event.head_commit.message, 'ci skip')"
 
     strategy:
       matrix:
-        runs-on:  [macos-10.15,macos-11.0]
-        xcode: ["/Applications/Xcode_11.7.app","/Applications/Xcode_12.app","/Applications/Xcode_12.1.app","/Applications/Xcode_12.2.app","/Applications/Xcode_12.3.app"]
+        runs-on: [macos-11, macos-10.15]
+        xcode: ["/Applications/Xcode_12.4.app", "/Applications/Xcode_11.7.app"]
         include:
-          - os: macos-10.15
+          - runs-on: macos-10.15
+            xcode: "/Applications/Xcode_11.6.app"
+          - runs-on: macos-10.15
             xcode: "/Applications/Xcode_11.5.app"
-          - os: macos-11.0
-            xcode: "/Applications/Xcode_12.4.app"
+          - runs-on: macos-10.15
+            xcode: "/Applications/Xcode_11.4.1.app"
+          - runs-on: macos-11
+            xcode: "/Applications/Xcode_13.0.app"
+          - runs-on: macos-11
+            xcode: "/Applications/Xcode_12.5.1.app"
 
     steps:
     - uses: actions/checkout@v2
@@ -45,13 +51,6 @@ jobs:
       run: bash <(curl https://codecov.io/bash) -F github -F macOS -F ${{ matrix.runs-on }}
       env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-    - name: Build Documentation
-      if: ${{ matrix.os == 'macos-11.0' && matrix.xcode == '/Applications/Xcode_12.4.app' && !startsWith(github.ref, 'refs/tags/') }}
-      run: |
-        swift run sourcedocs generate build -cra
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git status
-        git add Documentation
-        git diff-index --quiet HEAD || git commit -m "[github action] Update Docs"
-        git push
+    - name: Build sourcedocs Documentation
+      if: ${{ matrix.os == 'macos-11' && matrix.xcode == '/Applications/Xcode_13.0.app' && !startsWith(github.ref, 'refs/tags/') }}
+      run: "swift run sourcedocs generate build -cra\ngit config --local user.email \"action@github.com\"\ngit config --local user.name \"GitHub Action\"\ngit status\ngit add Documentation\ngit diff-index --quiet HEAD || git commit -m \"[github action] Update Docs\"\ngit push    \n"
