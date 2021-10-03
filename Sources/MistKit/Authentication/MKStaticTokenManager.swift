@@ -15,7 +15,7 @@ public class MKStaticTokenManager: MKTokenManagerProtocol {
     _ request: MKAuthenticationRedirect,
     _ callback: @escaping (Result<String, Error>) -> Void
   ) {
-    guard let client = self.client else {
+    guard let client = client else {
       callback(.failure(MKError.authenticationRequired(request)))
       return
     }

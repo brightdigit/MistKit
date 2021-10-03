@@ -18,18 +18,18 @@ public class TodoListItem: MKQueryRecord {
 
   public var fields: [String: MKValue] {
     var fields: [String: MKValue] = ["title": .string(title)]
-    if let completedAt = self.completedAt {
+    if let completedAt = completedAt {
       fields["completedAt"] = .date(completedAt)
     }
-    if let image = self.image {
+    if let image = image {
       fields["image"] = .asset(image)
     }
 
-    if let value = self.value {
+    if let value = value {
       fields["value"] = .double(value)
     }
 
-    if let location = self.location {
+    if let location = location {
       fields["location"] = .location(location)
     }
 

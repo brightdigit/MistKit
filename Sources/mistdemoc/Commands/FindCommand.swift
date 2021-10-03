@@ -13,7 +13,7 @@ public extension MistDemoCommand {
     public var recordNames: [UUID] = []
 
     @Flag
-    public var record: Bool = false
+    public var record = false
 
     public init() {}
 

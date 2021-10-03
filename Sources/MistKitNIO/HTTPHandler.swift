@@ -81,7 +81,7 @@ public final class HTTPHandler: ChannelInboundHandler {
   // swiftlint:disable:next function_body_length
   public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
     let reqPart = unwrapInboundIn(data)
-    if let handler = self.handler {
+    if let handler = handler {
       handler(context, reqPart)
       return
     }

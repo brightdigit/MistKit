@@ -10,7 +10,7 @@ public extension MistDemoCommand {
     @OptionGroup public var options: MistDemoArguments
 
     @Flag
-    public var record: Bool = false
+    public var record = false
 
     public init() {}
 
