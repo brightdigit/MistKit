@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version: 5.8
 
 // swiftlint:disable explicit_top_level_acl
 // swiftlint:disable prefixed_toplevel_constant
@@ -6,6 +6,16 @@
 // swiftlint:disable explicit_acl
 
 import PackageDescription
+
+let swiftSettings: [SwiftSetting] = [
+   .enableUpcomingFeature("BareSlashRegexLiterals"),
+   .enableUpcomingFeature("ConciseMagicFile"),
+   .enableUpcomingFeature("ExistentialAny"),
+   .enableUpcomingFeature("ForwardTrailingClosures"),
+   .enableUpcomingFeature("ImplicitOpenExistentials"),
+   .enableUpcomingFeature("StrictConcurrency"),
+   .unsafeFlags(["-warn-concurrency", "-enable-actor-data-race-checks"]),
+]
 
 let package = Package(
   name: "MistKit",
@@ -42,7 +52,8 @@ let package = Package(
     // Targets can depend on other targets in this package, and on products in packages this package depends on.
     .target(
       name: "MistKit",
-      dependencies: []
+      dependencies: [],
+       swiftSettings: swiftSettings
     ),
     .target(name: "MistKitNIO",
             dependencies: [
@@ -50,30 +61,36 @@ let package = Package(
               .product(name: "NIO", package: "swift-nio"),
               .product(name: "NIOHTTP1", package: "swift-nio"),
               .product(name: "AsyncHTTPClient", package: "async-http-client")
-            ]),
+            ],
+             swiftSettings: swiftSettings),
     .target(name: "MistKitVapor",
             dependencies: [
               "MistKit",
               "MistKitNIO",
               .product(name: "Vapor", package: "vapor"),
               .product(name: "Fluent", package: "fluent")
-            ]),
+            ],
+             swiftSettings: swiftSettings),
     .target(name: "mistdemoc", dependencies: [
       "MistKit",
       "MistKitNIO", "MistKitDemo",
       .product(name: "ArgumentParser", package: "swift-argument-parser")
-    ]),
+    ],
+     swiftSettings: swiftSettings),
     .target(name: "mistdemod", dependencies: [
       "MistKit", "MistKitVapor", "MistKitDemo",
       .product(name: "Vapor", package: "vapor"),
       .product(name: "Fluent", package: "fluent"),
       .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver")
-    ]),
+    ],
+     swiftSettings: swiftSettings),
     .target(name: "MistKitDemo",
-            dependencies: ["MistKit"]),
+            dependencies: ["MistKit"],
+             swiftSettings: swiftSettings),
     .testTarget(
       name: "MistKitTests",
-      dependencies: ["MistKit"]
+      dependencies: ["MistKit"],
+       swiftSettings: swiftSettings
     )
   ]
 )

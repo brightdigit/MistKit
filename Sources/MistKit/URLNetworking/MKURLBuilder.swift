@@ -1,14 +1,14 @@
 import Foundation
 
 public class MKURLBuilder: MKURLBuilderProtocol {
-  public let tokenEncoder: MKTokenEncoder?
+  public let tokenEncoder: (any MKTokenEncoder)?
   public let connection: MKDatabaseConnection
-  public let tokenManager: MKTokenManagerProtocol?
+  public let tokenManager: (any MKTokenManagerProtocol)?
 
   public init(
-    tokenEncoder: MKTokenEncoder?,
+    tokenEncoder: (any MKTokenEncoder)?,
     connection: MKDatabaseConnection,
-    tokenManager: MKTokenManagerProtocol? = nil
+    tokenManager: (any MKTokenManagerProtocol)? = nil
   ) {
     self.tokenEncoder = tokenEncoder
     self.connection = connection

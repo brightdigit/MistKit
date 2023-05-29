@@ -1,6 +1,6 @@
 public class MKTokenManager: MKWritableTokenManagerProtocol {
-  public let storage: MKTokenStorage
-  public let client: MKTokenClient?
+  public let storage: any MKTokenStorage
+  public let client: (any MKTokenClient)?
 
   public var webAuthenticationToken: String? {
     get {
@@ -11,13 +11,13 @@ public class MKTokenManager: MKWritableTokenManagerProtocol {
     }
   }
 
-  public init(storage: MKTokenStorage, client: MKTokenClient?) {
+  public init(storage: any MKTokenStorage, client: (any MKTokenClient)?) {
     self.storage = storage
     self.client = client
   }
 
   public func request(
-    _ request: MKAuthenticationRedirect,
+    _ request: any MKAuthenticationRedirect,
     _ callback: @escaping (Result<String, Error>) -> Void
   ) {
     guard let client = self.client else {

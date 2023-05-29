@@ -13,7 +13,7 @@ public class MKNIOHTTP1TokenClient: MKTokenClient {
   }
 
   public func request(
-    _ request: MKAuthenticationRedirect?,
+    _ request: (any MKAuthenticationRedirect)?,
     _ callback: @escaping ((Result<String, Error>) -> Void)
   ) {
     if let url = request?.url {

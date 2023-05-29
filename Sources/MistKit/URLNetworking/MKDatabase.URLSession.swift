@@ -9,10 +9,10 @@ import Foundation
 public extension MKDatabase where HttpClient == MKURLSessionClient {
   init(connection: MKDatabaseConnection,
        factory: MKURLBuilderFactory? = nil,
-       requestConfigFactory _: RequestConfigurationFactoryProtocol? = nil,
-       tokenManager: MKTokenManagerProtocol? = nil,
+       requestConfigFactory _: (any RequestConfigurationFactoryProtocol)? = nil,
+       tokenManager: (any MKTokenManagerProtocol)? = nil,
        session: URLSession? = nil,
-       resultSink: ResultSinkProtocol? = nil) {
+       resultSink: (any ResultSinkProtocol)? = nil) {
     let factory = factory ?? MKURLBuilderFactory()
     urlBuilder = factory.builder(
       forConnection: connection,

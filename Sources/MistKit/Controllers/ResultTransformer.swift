@@ -2,7 +2,7 @@ import Foundation
 
 public struct ResultTransformer: ResultTransformerProtocol {
   public func data(
-    fromResult result: Result<MKHttpResponse, Error>,
+    fromResult result: Result<any MKHttpResponse, Error>,
     setWebAuthenticationToken: ((String) -> Void)?
   ) -> Result<Data, Error> {
     result.flatMap { response -> Result<Data, Error> in

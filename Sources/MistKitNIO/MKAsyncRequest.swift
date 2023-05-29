@@ -8,7 +8,7 @@ public struct MKAsyncRequest: MKHttpRequest {
   public let data: Data?
 
   public func execute(
-    _ callback: @escaping ((Result<MKHttpResponse, Error>) -> Void)
+    _ callback: @escaping ((Result<any MKHttpResponse, Error>) -> Void)
   ) {
     var request: HTTPClient.Request
 

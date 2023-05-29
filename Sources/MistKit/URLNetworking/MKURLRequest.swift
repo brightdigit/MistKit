@@ -7,9 +7,9 @@ import Foundation
 public struct MKURLRequest: MKHttpRequest {
   public let urlRequest: URLRequest
   public let urlSession: URLSession
-  public func execute(_ callback: @escaping ((Result<MKHttpResponse, Error>) -> Void)) {
+  public func execute(_ callback: @escaping ((Result<any MKHttpResponse, Error>) -> Void)) {
     urlSession.dataTask(with: urlRequest) { data, response, error in
-      let result: Result<MKHttpResponse, Error>
+      let result: Result<any MKHttpResponse, Error>
       if let error = error {
         result = .failure(error)
       } else if let response = response as? HTTPURLResponse {

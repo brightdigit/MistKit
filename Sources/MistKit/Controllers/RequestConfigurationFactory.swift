@@ -1,11 +1,11 @@
 import Foundation
 
 public struct RequestConfigurationFactory: RequestConfigurationFactoryProtocol {
-  public let encoder: MKEncoder = JSONEncoder()
+  public let encoder: any MKEncoder = JSONEncoder()
 
   public func configuration<RequestType>(
     from request: RequestType,
-    withURLBuilder urlBuilder: MKURLBuilderProtocol
+    withURLBuilder urlBuilder: any MKURLBuilderProtocol
   ) throws -> RequestConfiguration where RequestType: MKRequest {
     let url: URL = try urlBuilder.url(withPathComponents: request.relativePath)
     let data: Data? = try encoder.optionalData(from: request.data)

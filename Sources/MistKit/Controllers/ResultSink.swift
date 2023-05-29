@@ -1,12 +1,12 @@
 import Foundation
 
 public struct ResultSink: ResultSinkProtocol {
-  public let dataTransformer: ResultTransformerProtocol
-  public let decoder: MKDecoder
+  public let dataTransformer: any ResultTransformerProtocol
+  public let decoder: any MKDecoder
 
   public init(
-    dataTransformer: ResultTransformerProtocol? = nil,
-    decoder: MKDecoder? = nil
+    dataTransformer: (any ResultTransformerProtocol)? = nil,
+    decoder: (any MKDecoder)? = nil
   ) {
     self.dataTransformer = dataTransformer ?? ResultTransformer()
     self.decoder = decoder ?? JSONDecoder()
@@ -48,7 +48,7 @@ public struct ResultSink: ResultSinkProtocol {
   public func database<RequestType, ResponseType, HttpClientType>(
     _ database: MKDatabase<HttpClientType>,
     request: RequestType,
-    completedWith result: Result<MKHttpResponse, Error>,
+    completedWith result: Result<any MKHttpResponse, Error>,
     shouldFailAuth: Bool,
     _ callback: @escaping ((Result<ResponseType, Error>) -> Void)
   ) where RequestType: MKRequest,
@@ -57,7 +57,7 @@ public struct ResultSink: ResultSinkProtocol {
     let setWebAuthenticationToken: ((String) -> Void)?
 
     if let writable =
-      database.urlBuilder.tokenManager as? MKWritableTokenManagerProtocol {
+      database.urlBuilder.tokenManager as? any MKWritableTokenManagerProtocol {
       setWebAuthenticationToken = { writable.webAuthenticationToken = $0 }
     } else {
       setWebAuthenticationToken = nil
@@ -91,7 +91,7 @@ public struct ResultSink: ResultSinkProtocol {
 }
 
 public extension Result {
-  var authResponse: MKAuthenticationRedirect? {
+  var authResponse: (any MKAuthenticationRedirect)? {
     guard case let .failure(error) = self else {
       return nil
     }

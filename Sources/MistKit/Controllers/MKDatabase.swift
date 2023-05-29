@@ -1,17 +1,17 @@
 import Foundation
 
 public struct MKDatabase<HttpClient: MKHttpClient> {
-  public let urlBuilder: MKURLBuilderProtocol
-  public let requestConfigFactory: RequestConfigurationFactoryProtocol
+  public let urlBuilder: any MKURLBuilderProtocol
+  public let requestConfigFactory: any RequestConfigurationFactoryProtocol
   public let client: HttpClient
-  public let resultSink: ResultSinkProtocol
+  public let resultSink: any ResultSinkProtocol
 
   public init(connection: MKDatabaseConnection,
               client: HttpClient,
               factory: MKURLBuilderFactory? = nil,
-              requestConfigFactory: RequestConfigurationFactoryProtocol? = nil,
-              resultSink: ResultSinkProtocol? = nil,
-              tokenManager: MKTokenManagerProtocol? = nil) {
+              requestConfigFactory: (any RequestConfigurationFactoryProtocol)? = nil,
+              resultSink: (any ResultSinkProtocol)? = nil,
+              tokenManager: (any MKTokenManagerProtocol)? = nil) {
     let factory = factory ?? MKURLBuilderFactory()
     urlBuilder = factory.builder(
       forConnection: connection,

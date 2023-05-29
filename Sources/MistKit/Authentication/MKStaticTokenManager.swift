@@ -1,18 +1,18 @@
 public class MKStaticTokenManager: MKTokenManagerProtocol {
   public let token: String?
-  public let client: MKTokenClient?
+  public let client: (any MKTokenClient)?
 
   public var webAuthenticationToken: String? {
     token
   }
 
-  public init(token: String?, client: MKTokenClient?) {
+  public init(token: String?, client: (any MKTokenClient)?) {
     self.token = token
     self.client = client
   }
 
   public func request(
-    _ request: MKAuthenticationRedirect,
+    _ request: any MKAuthenticationRedirect,
     _ callback: @escaping (Result<String, Error>) -> Void
   ) {
     guard let client = self.client else {
