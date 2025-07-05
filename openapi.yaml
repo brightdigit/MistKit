@@ -1,0 +1,958 @@
+openapi: 3.0.3
+info:
+  title: Apple CloudKit Web Services API
+  description: |
+    CloudKit web services provides an HTTP interface to fetch, create, update, and delete records, zones, and subscriptions.
+    You also have access to discoverable users and contacts.
+    
+    ## Authentication
+    There are two authentication methods:
+    1. API Token Authentication - Use query parameters: `?ckAPIToken=[API token]&ckWebAuthToken=[Web Auth Token]`
+    2. Server-to-Server Key Authentication - Pass the key ID as `X-Apple-CloudKit-Request-KeyID` header
+    
+    ## Base URL Structure
+    `https://api.apple-cloudkit.com/database/{version}/{container}/{environment}/{database}/{operation}`
+    
+    Where:
+    - version: Protocol version (currently "1")
+    - container: Unique identifier for the app's container (begins with "iCloud.")
+    - environment: "development" or "production"
+    - database: "public", "private", or "shared"
+  version: 1.0.0
+  contact:
+    name: Apple Developer Support
+    url: https://developer.apple.com/support/
+servers:
+  - url: https://api.apple-cloudkit.com
+    description: CloudKit Web Services API
+
+security:
+  - ApiTokenAuth: []
+  - ServerToServerAuth: []
+
+paths:
+  /database/{version}/{container}/{environment}/{database}/records/query:
+    post:
+      summary: Query Records
+      description: Fetch records using a query with filters and sorting options
+      tags:
+        - Records
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                zoneID:
+                  $ref: '#/components/schemas/ZoneID'
+                resultsLimit:
+                  type: integer
+                  description: Maximum number of records to return
+                query:
+                  type: object
+                  properties:
+                    recordType:
+                      type: string
+                      description: The record type to query
+                    filterBy:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Filter'
+                    sortBy:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Sort'
+                desiredKeys:
+                  type: array
+                  items:
+                    type: string
+                  description: List of field names to return
+                continuationMarker:
+                  type: string
+                  description: Marker for pagination
+      responses:
+        '200':
+          description: Successful query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/records/modify:
+    post:
+      summary: Modify Records
+      description: Create, update, or delete records (supports bulk operations)
+      tags:
+        - Records
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operations:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RecordOperation'
+                atomic:
+                  type: boolean
+                  description: If true, all operations must succeed or all fail
+      responses:
+        '200':
+          description: Records modified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModifyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/records/lookup:
+    post:
+      summary: Lookup Records
+      description: Fetch specific records by their IDs
+      tags:
+        - Records
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                records:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      recordName:
+                        type: string
+                      desiredKeys:
+                        type: array
+                        items:
+                          type: string
+      responses:
+        '200':
+          description: Records retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LookupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/records/changes:
+    post:
+      summary: Fetch Record Changes
+      description: Get all record changes relative to a sync token
+      tags:
+        - Records
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                zoneID:
+                  $ref: '#/components/schemas/ZoneID'
+                syncToken:
+                  type: string
+                  description: Token from previous sync operation
+                resultsLimit:
+                  type: integer
+      responses:
+        '200':
+          description: Changes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/zones/list:
+    get:
+      summary: List All Zones
+      description: Fetch all zones in the database
+      tags:
+        - Zones
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      responses:
+        '200':
+          description: Zones retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZonesListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/zones/lookup:
+    post:
+      summary: Lookup Zones
+      description: Fetch specific zones by their IDs
+      tags:
+        - Zones
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                zones:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ZoneID'
+      responses:
+        '200':
+          description: Zones retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZonesLookupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/zones/modify:
+    post:
+      summary: Modify Zones
+      description: Create or delete zones (only supported in private database)
+      tags:
+        - Zones
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operations:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ZoneOperation'
+      responses:
+        '200':
+          description: Zones modified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZonesModifyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/zones/changes:
+    post:
+      summary: Fetch Zone Changes
+      description: Get all changed zones relative to a meta-sync token
+      tags:
+        - Zones
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                syncToken:
+                  type: string
+                  description: Meta-sync token from previous operation
+      responses:
+        '200':
+          description: Zone changes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneChangesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/subscriptions/list:
+    get:
+      summary: List All Subscriptions
+      description: Fetch all subscriptions in the database
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      responses:
+        '200':
+          description: Subscriptions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionsListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/subscriptions/lookup:
+    post:
+      summary: Lookup Subscriptions
+      description: Fetch specific subscriptions by their IDs
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscriptions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      subscriptionID:
+                        type: string
+      responses:
+        '200':
+          description: Subscriptions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionsLookupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/subscriptions/modify:
+    post:
+      summary: Modify Subscriptions
+      description: Create, update, or delete subscriptions
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operations:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SubscriptionOperation'
+      responses:
+        '200':
+          description: Subscriptions modified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionsModifyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/public/users/current:
+    get:
+      summary: Get Current User
+      description: Fetch the current authenticated user's information
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/public/users/discover:
+    post:
+      summary: Discover User Identities
+      description: Discover all user identities based on email addresses or user record names
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      emailAddress:
+                        type: string
+                      userRecordName:
+                        type: string
+      responses:
+        '200':
+          description: User identities discovered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/public/users/lookup/contacts:
+    post:
+      summary: Lookup Contacts (Deprecated)
+      description: Fetch contacts (This endpoint is deprecated)
+      deprecated: true
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contacts:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '200':
+          description: Contacts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/assets/upload:
+    post:
+      summary: Upload Assets
+      description: Upload binary assets to CloudKit
+      tags:
+        - Assets
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Asset uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetUploadResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/tokens/create:
+    post:
+      summary: Create APNs Token
+      description: Create an Apple Push Notification service (APNs) token
+      tags:
+        - Tokens
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                apnsEnvironment:
+                  type: string
+                  enum: [development, production]
+      responses:
+        '200':
+          description: Token created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/tokens/register:
+    post:
+      summary: Register Token
+      description: Register a token for push notifications
+      tags:
+        - Tokens
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                apnsToken:
+                  type: string
+                  description: The APNs token to register
+      responses:
+        '200':
+          description: Token registered successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    ApiTokenAuth:
+      type: apiKey
+      in: query
+      name: ckAPIToken
+      description: API token created using CloudKit Dashboard
+    ServerToServerAuth:
+      type: apiKey
+      in: header
+      name: X-Apple-CloudKit-Request-KeyID
+      description: Key ID for server-to-server authentication
+
+  parameters:
+    version:
+      name: version
+      in: path
+      required: true
+      schema:
+        type: string
+        default: "1"
+        description: Protocol version
+    container:
+      name: container
+      in: path
+      required: true
+      schema:
+        type: string
+        description: Container ID (begins with "iCloud.")
+    environment:
+      name: environment
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [development, production]
+        description: Container environment
+    database:
+      name: database
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [public, private, shared]
+        description: Database scope
+
+  schemas:
+    ZoneID:
+      type: object
+      properties:
+        zoneName:
+          type: string
+        ownerName:
+          type: string
+
+    Filter:
+      type: object
+      properties:
+        comparator:
+          type: string
+          enum: [EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_OR_EQUALS, GREATER_THAN, GREATER_THAN_OR_EQUALS, NEAR, CONTAINS_ALL_TOKENS, IN, NOT_IN, CONTAINS_ANY_TOKENS, LIST_CONTAINS, NOT_LIST_CONTAINS, BEGINS_WITH, NOT_BEGINS_WITH, LIST_MEMBER_BEGINS_WITH, NOT_LIST_MEMBER_BEGINS_WITH]
+        fieldName:
+          type: string
+        fieldValue:
+          type: object
+          properties:
+            value:
+              oneOf:
+                - type: string
+                - type: number
+                - type: boolean
+                - type: array
+            type:
+              type: string
+
+    Sort:
+      type: object
+      properties:
+        fieldName:
+          type: string
+        ascending:
+          type: boolean
+
+    RecordOperation:
+      type: object
+      properties:
+        operationType:
+          type: string
+          enum: [create, update, forceUpdate, replace, forceReplace, delete, forceDelete]
+        record:
+          $ref: '#/components/schemas/Record'
+
+    Record:
+      type: object
+      properties:
+        recordName:
+          type: string
+        recordType:
+          type: string
+        recordChangeTag:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              value:
+                oneOf:
+                  - type: string
+                  - type: number
+                  - type: boolean
+                  - type: array
+                  - type: object
+              type:
+                type: string
+
+    ZoneOperation:
+      type: object
+      properties:
+        operationType:
+          type: string
+          enum: [create, delete]
+        zone:
+          type: object
+          properties:
+            zoneID:
+              $ref: '#/components/schemas/ZoneID'
+
+    SubscriptionOperation:
+      type: object
+      properties:
+        operationType:
+          type: string
+          enum: [create, update, delete]
+        subscription:
+          $ref: '#/components/schemas/Subscription'
+
+    Subscription:
+      type: object
+      properties:
+        subscriptionID:
+          type: string
+        subscriptionType:
+          type: string
+          enum: [query, zone]
+        query:
+          type: object
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        firesOn:
+          type: array
+          items:
+            type: string
+            enum: [create, update, delete]
+
+    QueryResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/Record'
+        continuationMarker:
+          type: string
+
+    ModifyResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/Record'
+
+    LookupResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/Record'
+
+    ChangesResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/Record'
+        syncToken:
+          type: string
+        moreComing:
+          type: boolean
+
+    ZonesListResponse:
+      type: object
+      properties:
+        zones:
+          type: array
+          items:
+            type: object
+            properties:
+              zoneID:
+                $ref: '#/components/schemas/ZoneID'
+
+    ZonesLookupResponse:
+      type: object
+      properties:
+        zones:
+          type: array
+          items:
+            type: object
+            properties:
+              zoneID:
+                $ref: '#/components/schemas/ZoneID'
+
+    ZonesModifyResponse:
+      type: object
+      properties:
+        zones:
+          type: array
+          items:
+            type: object
+            properties:
+              zoneID:
+                $ref: '#/components/schemas/ZoneID'
+
+    ZoneChangesResponse:
+      type: object
+      properties:
+        zones:
+          type: array
+          items:
+            type: object
+            properties:
+              zoneID:
+                $ref: '#/components/schemas/ZoneID'
+        syncToken:
+          type: string
+
+    SubscriptionsListResponse:
+      type: object
+      properties:
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+
+    SubscriptionsLookupResponse:
+      type: object
+      properties:
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+
+    SubscriptionsModifyResponse:
+      type: object
+      properties:
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+
+    UserResponse:
+      type: object
+      properties:
+        userRecordName:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        emailAddress:
+          type: string
+
+    DiscoverResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            type: object
+            properties:
+              userRecordName:
+                type: string
+              firstName:
+                type: string
+              lastName:
+                type: string
+              emailAddress:
+                type: string
+
+    ContactsResponse:
+      type: object
+      properties:
+        contacts:
+          type: array
+          items:
+            type: object
+
+    AssetUploadResponse:
+      type: object
+      properties:
+        tokens:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+              recordName:
+                type: string
+              fieldName:
+                type: string
+
+    TokenResponse:
+      type: object
+      properties:
+        apnsToken:
+          type: string
+        webcAuthToken:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+        serverErrorCode:
+          type: string
+        reason:
+          type: string
+        redirectURL:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
