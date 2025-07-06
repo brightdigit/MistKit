@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MistKit CloudKit Authentication Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f7;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+        }
+        h1 {
+            color: #1d1d1f;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #6e6e73;
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+        #signin-button {
+            display: inline-block;
+            background-color: #007aff;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+        }
+        #signin-button:hover {
+            background-color: #0051d5;
+        }
+        #signin-button:disabled {
+            background-color: #86868b;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .status.success {
+            background-color: #d1f5d3;
+            color: #1d5e20;
+        }
+        .status.error {
+            background-color: #fdd;
+            color: #c00;
+        }
+        .user-info {
+            margin-top: 20px;
+            text-align: left;
+            background-color: #f5f5f7;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        .user-info h3 {
+            margin-top: 0;
+            color: #1d1d1f;
+            font-size: 18px;
+        }
+        .user-info pre {
+            background-color: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+            margin: 8px 0;
+        }
+        .loading {
+            display: none;
+            color: #86868b;
+            margin-top: 20px;
+        }
+        .token-display {
+            margin-top: 20px;
+            padding: 16px;
+            background-color: #f0f9ff;
+            border: 1px solid #0369a1;
+            border-radius: 8px;
+        }
+        .token-display h3 {
+            margin-top: 0;
+            color: #0369a1;
+            font-size: 18px;
+        }
+        .token-value {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            background-color: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 8px 0;
+            user-select: all;
+        }
+        .copy-button {
+            background-color: #0369a1;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .copy-button:hover {
+            background-color: #0c4a6e;
+        }
+    </style>
+    <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>MistKit CloudKit Example</h1>
+        <p>Sign in with your Apple ID to test CloudKit Web Services authentication and API access.</p>
+        
+        <button id="signin-button">Sign In with Apple ID</button>
+        
+        <div id="loading" class="loading">Authenticating...</div>
+        <div id="status"></div>
+        <div id="user-info"></div>
+    </div>
+
+    <script>
+        // Configure CloudKit
+        CloudKit.configure({
+            containers: [{
+                containerIdentifier: 'iCloud.com.example.mistkit',
+                apiTokenAuth: {
+                    apiToken: 'YOUR_API_TOKEN',
+                    persist: true
+                },
+                environment: 'development'
+            }]
+        });
+
+        const container = CloudKit.getDefaultContainer();
+        const statusDiv = document.getElementById('status');
+        const userInfoDiv = document.getElementById('user-info');
+        const signinButton = document.getElementById('signin-button');
+        const loadingDiv = document.getElementById('loading');
+
+        function showStatus(message, isError = false) {
+            statusDiv.className = 'status ' + (isError ? 'error' : 'success');
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+
+        function showLoading(show) {
+            loadingDiv.style.display = show ? 'block' : 'none';
+            signinButton.disabled = show;
+        }
+
+        async function signIn() {
+            try {
+                showLoading(true);
+                statusDiv.style.display = 'none';
+                userInfoDiv.innerHTML = '';
+
+                // Sign in to CloudKit
+                const userIdentity = await container.whenUserSignsIn();
+                
+                if (userIdentity) {
+                    showStatus('Successfully signed in!');
+                    
+                    // Get session token
+                    const sessionToken = container.sessionToken;
+                    
+                    // Send token to our server
+                    const response = await fetch('/api/authenticate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            sessionToken: sessionToken,
+                            userRecordName: userIdentity.userRecordName
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        displayUserInfo(data);
+                    } else {
+                        throw new Error('Server authentication failed');
+                    }
+                }
+            } catch (error) {
+                showStatus('Authentication failed: ' + error.message, true);
+                console.error('Sign in error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayUserInfo(data) {
+            let html = '';
+            
+            // Display session token prominently
+            const sessionToken = container.sessionToken;
+            if (sessionToken) {
+                html += `
+                    <div class="token-display">
+                        <h3>Session Token (Web Auth Token)</h3>
+                        <p>Use this token for command-line CloudKit API access:</p>
+                        <div class="token-value" id="token-value">${sessionToken}</div>
+                        <button class="copy-button" onclick="copyToken()">Copy Token</button>
+                    </div>
+                `;
+            }
+            
+            html += `<div class="user-info"><h3>CloudKit Data</h3>`;
+            
+            // Display user info if available
+            if (data.cloudKitData.user) {
+                html += `
+                    <h4>User Profile</h4>
+                    <p><strong>Record Name:</strong> ${data.cloudKitData.user.userRecordName}</p>
+                    ${data.cloudKitData.user.firstName ? `<p><strong>First Name:</strong> ${data.cloudKitData.user.firstName}</p>` : ''}
+                    ${data.cloudKitData.user.lastName ? `<p><strong>Last Name:</strong> ${data.cloudKitData.user.lastName}</p>` : ''}
+                    ${data.cloudKitData.user.emailAddress ? `<p><strong>Email:</strong> ${data.cloudKitData.user.emailAddress}</p>` : ''}
+                `;
+            }
+            
+            // Display zones
+            if (data.cloudKitData.zones && data.cloudKitData.zones.length > 0) {
+                html += `<h4>Available Zones</h4><ul>`;
+                data.cloudKitData.zones.forEach(zone => {
+                    html += `<li><strong>${zone.zoneName}</strong>`;
+                    if (zone.capabilities && zone.capabilities.length > 0) {
+                        html += ` - Capabilities: ${zone.capabilities.join(', ')}`;
+                    }
+                    html += `</li>`;
+                });
+                html += `</ul>`;
+            }
+            
+            // Display any errors
+            if (data.cloudKitData.error) {
+                html += `<p style="color: #c00;"><strong>Error:</strong> ${data.cloudKitData.error}</p>`;
+                html += `<p><em>Note: Make sure to configure your CloudKit container and API token correctly.</em></p>`;
+            }
+            
+            html += `
+                <h4>Raw Response</h4>
+                <pre>${JSON.stringify(data.cloudKitData, null, 2)}</pre>
+            </div>`;
+            
+            userInfoDiv.innerHTML = html;
+        }
+        
+        function copyToken() {
+            const tokenValue = document.getElementById('token-value').textContent;
+            navigator.clipboard.writeText(tokenValue).then(() => {
+                const button = document.querySelector('.copy-button');
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        // Set up button click handler
+        signinButton.addEventListener('click', signIn);
+
+        // Check if user is already signed in
+        container.whenUserSignsIn().then(userIdentity => {
+            if (userIdentity) {
+                showStatus('Already signed in. Click button to refresh data.');
+            }
+        });
+    </script>
+</body>
+</html>
