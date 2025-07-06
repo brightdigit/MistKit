@@ -13,9 +13,6 @@ DerivedData/
 *.xcworkspace
 xcuserdata/
 
-# Generated OpenAPI code
-Sources/MistKit/Generated/
-
 # IDE
 .vscode/
 .idea/
