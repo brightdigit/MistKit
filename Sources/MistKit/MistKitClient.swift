@@ -1,11 +1,13 @@
 import Foundation
 import OpenAPIRuntime
 import OpenAPIURLSession
+import HTTPTypes
+import HTTPTypes
 
 /// A client for interacting with CloudKit Web Services
 public struct MistKitClient {
     /// The underlying OpenAPI client
-    private let client: Client
+    public let client: Client
     
     /// The CloudKit container configuration
     public let configuration: MistKitConfiguration
@@ -30,7 +32,7 @@ public struct MistKitClient {
 // MARK: - Configuration
 
 /// Configuration for MistKit client
-public struct MistKitConfiguration {
+public struct MistKitConfiguration : Sendable {
     /// The CloudKit container identifier (e.g., "iCloud.com.example.app")
     public let container: String
     
@@ -72,13 +74,13 @@ public struct MistKitConfiguration {
 // MARK: - Enums
 
 /// CloudKit environment types
-public enum Environment: String {
+public enum Environment: String, Sendable {
     case development
     case production
 }
 
 /// CloudKit database types
-public enum Database: String {
+public enum Database: String, Sendable  {
     case `public`
     case `private`
     case shared
@@ -89,6 +91,7 @@ public enum Database: String {
 /// Authentication middleware for CloudKit requests
 struct AuthenticationMiddleware: ClientMiddleware {
     let configuration: MistKitConfiguration
+    private let tokenEncoder = CharacterMapEncoder()
     
     func intercept(
         _ request: HTTPRequest,
@@ -99,18 +102,42 @@ struct AuthenticationMiddleware: ClientMiddleware {
     ) async throws -> (HTTPResponse, HTTPBody?) {
         var modifiedRequest = request
         
-        // Add authentication query parameters
-        var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
-        var queryItems = urlComponents.queryItems ?? []
+        // Get the current path without query parameters
+        let requestPath = request.path ?? ""
+        let pathComponents = requestPath.split(separator: "?", maxSplits: 1)
+        let cleanPath = String(pathComponents.first ?? "")
         
+        // Create URL components from the clean path
+        var urlComponents = URLComponents()
+        urlComponents.path = cleanPath
+        
+        // Parse existing query items if any
+        if pathComponents.count > 1 {
+            let existingQuery = String(pathComponents[1])
+            if let existingComponents = URLComponents(string: "?" + existingQuery) {
+                urlComponents.queryItems = existingComponents.queryItems ?? []
+            }
+        }
+        
+        // Add authentication parameters
+        var queryItems = urlComponents.queryItems ?? []
         queryItems.append(URLQueryItem(name: "ckAPIToken", value: configuration.apiToken))
         if let webAuthToken = configuration.webAuthToken {
-            queryItems.append(URLQueryItem(name: "ckWebAuthToken", value: webAuthToken))
+            // Encode the web authentication token using CharacterMapEncoder
+            let encodedWebAuthToken = tokenEncoder.encode(webAuthToken)
+            queryItems.append(URLQueryItem(name: "ckWebAuthToken", value: encodedWebAuthToken))
         }
         
         urlComponents.queryItems = queryItems
         
-        return try await next(modifiedRequest, body, urlComponents.url!)
+        // Build the new path with query parameters
+        if let query = urlComponents.query {
+            modifiedRequest.path = cleanPath + "?" + query
+        } else {
+            modifiedRequest.path = cleanPath
+        }
+      
+        return try await next(modifiedRequest, body, baseURL)
     }
 }
 
@@ -124,13 +151,36 @@ struct LoggingMiddleware: ClientMiddleware {
         next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
     ) async throws -> (HTTPResponse, HTTPBody?) {
         #if DEBUG
-        print("🌐 CloudKit Request: \(request.method.rawValue) \(baseURL.absoluteString)")
+        let fullPath = baseURL.absoluteString + (request.path ?? "")
+        print("🌐 CloudKit Request: \(request.method.rawValue) \(fullPath)")
+        print("   Base URL: \(baseURL.absoluteString)")
+        print("   Path: \(request.path ?? "none")")
+        print("   Headers: \(request.headerFields)")
+        
+        // Log query parameters for debugging authentication
+        if let path = request.path, let url = URL(string: path, relativeTo: baseURL) {
+            if let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
+                if let queryItems = components.queryItems {
+                    print("   Query Parameters:")
+                    for item in queryItems {
+                        if item.name == "ckWebAuthToken" {
+                            print("     \(item.name): \(item.value?.prefix(20) ?? "nil")... (encoded)")
+                        } else {
+                            print("     \(item.name): \(item.value ?? "nil")")
+                        }
+                    }
+                }
+            }
+        }
         #endif
         
         let (response, responseBody) = try await next(request, body, baseURL)
         
         #if DEBUG
         print("✅ CloudKit Response: \(response.status.code)")
+        if response.status.code == 421 {
+            print("⚠️  421 Misdirected Request - The server cannot produce a response for this request")
+        }
         #endif
         
         return (response, responseBody)

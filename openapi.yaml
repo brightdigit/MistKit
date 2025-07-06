@@ -35,6 +35,7 @@ paths:
     post:
       summary: Query Records
       description: Fetch records using a query with filters and sorting options
+      operationId: queryRecords
       tags:
         - Records
       parameters:
@@ -87,11 +88,30 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/records/modify:
     post:
       summary: Modify Records
       description: Create, update, or delete records (supports bulk operations)
+      operationId: modifyRecords
       tags:
         - Records
       parameters:
@@ -124,11 +144,30 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/records/lookup:
     post:
       summary: Lookup Records
       description: Fetch specific records by their IDs
+      operationId: lookupRecords
       tags:
         - Records
       parameters:
@@ -165,11 +204,30 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/records/changes:
     post:
       summary: Fetch Record Changes
       description: Get all record changes relative to a sync token
+      operationId: fetchRecordChanges
       tags:
         - Records
       parameters:
@@ -202,11 +260,30 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/zones/list:
     get:
       summary: List All Zones
       description: Fetch all zones in the database
+      operationId: listZones
       tags:
         - Zones
       parameters:
@@ -225,11 +302,30 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/zones/lookup:
     post:
       summary: Lookup Zones
       description: Fetch specific zones by their IDs
+      operationId: lookupZones
       tags:
         - Zones
       parameters:
@@ -264,6 +360,7 @@ paths:
     post:
       summary: Modify Zones
       description: Create or delete zones (only supported in private database)
+      operationId: modifyZones
       tags:
         - Zones
       parameters:
@@ -298,6 +395,7 @@ paths:
     post:
       summary: Fetch Zone Changes
       description: Get all changed zones relative to a meta-sync token
+      operationId: fetchZoneChanges
       tags:
         - Zones
       parameters:
@@ -331,6 +429,7 @@ paths:
     get:
       summary: List All Subscriptions
       description: Fetch all subscriptions in the database
+      operationId: listSubscriptions
       tags:
         - Subscriptions
       parameters:
@@ -354,6 +453,7 @@ paths:
     post:
       summary: Lookup Subscriptions
       description: Fetch specific subscriptions by their IDs
+      operationId: lookupSubscriptions
       tags:
         - Subscriptions
       parameters:
@@ -391,6 +491,7 @@ paths:
     post:
       summary: Modify Subscriptions
       description: Create, update, or delete subscriptions
+      operationId: modifySubscriptions
       tags:
         - Subscriptions
       parameters:
@@ -421,16 +522,18 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /database/{version}/{container}/{environment}/public/users/current:
+  /database/{version}/{container}/{environment}/{database}/users/current:
     get:
       summary: Get Current User
       description: Fetch the current authenticated user's information
+      operationId: getCurrentUser
       tags:
         - Users
       parameters:
         - $ref: '#/components/parameters/version'
         - $ref: '#/components/parameters/container'
         - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
       responses:
         '200':
           description: User information retrieved successfully
@@ -438,19 +541,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
-  /database/{version}/{container}/{environment}/public/users/discover:
+  /database/{version}/{container}/{environment}/{database}/users/discover:
     post:
       summary: Discover User Identities
       description: Discover all user identities based on email addresses or user record names
+      operationId: discoverUserIdentities
       tags:
         - Users
       parameters:
         - $ref: '#/components/parameters/version'
         - $ref: '#/components/parameters/container'
         - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
       requestBody:
         required: true
         content:
@@ -479,17 +604,19 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /database/{version}/{container}/{environment}/public/users/lookup/contacts:
+  /database/{version}/{container}/{environment}/{database}/users/lookup/contacts:
     post:
       summary: Lookup Contacts (Deprecated)
       description: Fetch contacts (This endpoint is deprecated)
       deprecated: true
+      operationId: lookupContacts
       tags:
         - Users
       parameters:
         - $ref: '#/components/parameters/version'
         - $ref: '#/components/parameters/container'
         - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
       requestBody:
         required: true
         content:
@@ -517,6 +644,7 @@ paths:
     post:
       summary: Upload Assets
       description: Upload binary assets to CloudKit
+      operationId: uploadAssets
       tags:
         - Assets
       parameters:
@@ -550,6 +678,7 @@ paths:
     post:
       summary: Create APNs Token
       description: Create an Apple Push Notification service (APNs) token
+      operationId: createToken
       tags:
         - Tokens
       parameters:
@@ -583,6 +712,7 @@ paths:
     post:
       summary: Register Token
       description: Register a token for push notifications
+      operationId: registerToken
       tags:
         - Tokens
       parameters:
@@ -672,16 +802,7 @@ components:
         fieldName:
           type: string
         fieldValue:
-          type: object
-          properties:
-            value:
-              oneOf:
-                - type: string
-                - type: number
-                - type: boolean
-                - type: array
-            type:
-              type: string
+          $ref: '#/components/schemas/FieldValue'
 
     Sort:
       type: object
@@ -705,24 +826,156 @@ components:
       properties:
         recordName:
           type: string
+          description: The unique identifier for the record
         recordType:
           type: string
+          description: The record type (schema name)
         recordChangeTag:
           type: string
+          description: Change tag for optimistic concurrency control
         fields:
           type: object
+          description: Record fields with their values and types
           additionalProperties:
-            type: object
-            properties:
-              value:
-                oneOf:
-                  - type: string
-                  - type: number
-                  - type: boolean
-                  - type: array
-                  - type: object
-              type:
-                type: string
+            $ref: '#/components/schemas/FieldValue'
+
+    FieldValue:
+      type: object
+      description: A CloudKit field value with its type information
+      properties:
+        value:
+          oneOf:
+            - $ref: '#/components/schemas/StringValue'
+            - $ref: '#/components/schemas/Int64Value'
+            - $ref: '#/components/schemas/DoubleValue'
+            - $ref: '#/components/schemas/BooleanValue'
+            - $ref: '#/components/schemas/BytesValue'
+            - $ref: '#/components/schemas/DateValue'
+            - $ref: '#/components/schemas/LocationValue'
+            - $ref: '#/components/schemas/ReferenceValue'
+            - $ref: '#/components/schemas/AssetValue'
+            - $ref: '#/components/schemas/ListValue'
+        type:
+          type: string
+          enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, ASSETID, LOCATION, TIMESTAMP, LIST]
+          description: The CloudKit field type
+
+    StringValue:
+      type: string
+      description: A text string value
+
+    Int64Value:
+      type: integer
+      format: int64
+      description: A 64-bit integer value
+
+    DoubleValue:
+      type: number
+      format: double
+      description: A double-precision floating point value
+
+    BooleanValue:
+      type: boolean
+      description: A true or false value
+
+    BytesValue:
+      type: string
+      description: Base64-encoded string representing binary data
+
+    DateValue:
+      type: number
+      format: double
+      description: Number representing milliseconds since epoch (January 1, 1970)
+
+    LocationValue:
+      type: object
+      description: Location dictionary as defined in CloudKit Web Services
+      properties:
+        latitude:
+          type: number
+          format: double
+          description: Latitude in degrees
+        longitude:
+          type: number
+          format: double
+          description: Longitude in degrees
+        horizontalAccuracy:
+          type: number
+          format: double
+          description: Horizontal accuracy in meters
+        verticalAccuracy:
+          type: number
+          format: double
+          description: Vertical accuracy in meters
+        altitude:
+          type: number
+          format: double
+          description: Altitude in meters
+        speed:
+          type: number
+          format: double
+          description: Speed in meters per second
+        course:
+          type: number
+          format: double
+          description: Course in degrees
+        timestamp:
+          type: number
+          format: double
+          description: Timestamp in milliseconds since epoch
+
+    ReferenceValue:
+      type: object
+      description: Reference dictionary as defined in CloudKit Web Services
+      properties:
+        recordName:
+          type: string
+          description: The record name being referenced
+        action:
+          type: string
+          enum: [DELETE_SELF]
+          description: Action to perform on the referenced record
+
+    AssetValue:
+      type: object
+      description: Asset dictionary as defined in CloudKit Web Services
+      properties:
+        fileChecksum:
+          type: string
+          description: Checksum of the asset file
+        size:
+          type: integer
+          format: int64
+          description: Size of the asset in bytes
+        referenceChecksum:
+          type: string
+          description: Checksum of the asset reference
+        wrappingKey:
+          type: string
+          description: Wrapping key for the asset
+        receipt:
+          type: string
+          description: Receipt for the asset
+        downloadURL:
+          type: string
+          format: uri
+          description: URL for downloading the asset
+
+    ListValue:
+      type: array
+      description: Array containing any of the above field types
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/StringValue'
+          - $ref: '#/components/schemas/Int64Value'
+          - $ref: '#/components/schemas/DoubleValue'
+          - $ref: '#/components/schemas/BooleanValue'
+          - $ref: '#/components/schemas/BytesValue'
+          - $ref: '#/components/schemas/DateValue'
+          - $ref: '#/components/schemas/LocationValue'
+          - $ref: '#/components/schemas/ReferenceValue'
+          - $ref: '#/components/schemas/AssetValue'
+          - $ref: '#/components/schemas/ListValue'
 
     ZoneOperation:
       type: object
@@ -933,11 +1186,44 @@ components:
 
     ErrorResponse:
       type: object
+      description: |
+        Error response object. For a full list of error codes and meanings, see:
+        https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1
+        
+        Common error codes include:
+        - AUTHENTICATION_FAILED: The request could not be authenticated.
+        - ACCESS_DENIED: The user does not have permission to access the resource.
+        - INVALID_ARGUMENTS: The request contained invalid parameters.
+        - LIMIT_EXCEEDED: A request or resource limit was exceeded.
+        - NOT_FOUND: The requested resource does not exist.
+        - SERVICE_UNAVAILABLE: The service is temporarily unavailable.
+        - ZONE_NOT_FOUND: The specified zone does not exist.
+        - RECORD_NOT_FOUND: The specified record does not exist.
+        - PARTIAL_FAILURE: Some, but not all, operations succeeded.
+        
+        See the documentation for a complete list and details.
       properties:
         uuid:
           type: string
         serverErrorCode:
           type: string
+          enum:
+            - ACCESS_DENIED
+            - ATOMIC_ERROR
+            - AUTHENTICATION_FAILED
+            - AUTHENTICATION_REQUIRED
+            - BAD_REQUEST
+            - CONFLICT
+            - EXISTS
+            - INTERNAL_ERROR
+            - NOT_FOUND
+            - QUOTA_EXCEEDED
+            - THROTTLED
+            - TRY_AGAIN_LATER
+            - VALIDATING_REFERENCE_ERROR
+            - ZONE_NOT_FOUND
+          description: |
+            Server error code. See https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1 for complete details.
         reason:
           type: string
         redirectURL:
@@ -945,13 +1231,67 @@ components:
 
   responses:
     BadRequest:
-      description: Bad request
+      description: Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
     Unauthorized:
-      description: Unauthorized
+      description: Unauthorized (401) - AUTHENTICATION_FAILED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden (403) - ACCESS_DENIED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict (409) - CONFLICT, EXISTS
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    PreconditionFailed:
+      description: Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RequestEntityTooLarge:
+      description: Request entity too large (413) - QUOTA_EXCEEDED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TooManyRequests:
+      description: Too many requests (429) - THROTTLED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnprocessableEntity:
+      description: Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Internal server error (500) - INTERNAL_ERROR
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Service unavailable (503) - TRY_AGAIN_LATER
       content:
         application/json:
           schema:
