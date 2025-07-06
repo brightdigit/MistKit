@@ -682,6 +682,7 @@ components:
                 - type: array
             type:
               type: string
+              enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, LOCATION, TIMESTAMP, LIST]
 
     Sort:
       type: object
@@ -723,6 +724,7 @@ components:
                   - type: object
               type:
                 type: string
+                enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, LOCATION, TIMESTAMP, LIST]
 
     ZoneOperation:
       type: object

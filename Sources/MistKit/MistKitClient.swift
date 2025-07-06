@@ -1,6 +1,8 @@
 import Foundation
 import OpenAPIRuntime
 import OpenAPIURLSession
+import HTTPTypes
+import HTTPTypes
 
 /// A client for interacting with CloudKit Web Services
 public struct MistKitClient {
@@ -30,7 +32,7 @@ public struct MistKitClient {
 // MARK: - Configuration
 
 /// Configuration for MistKit client
-public struct MistKitConfiguration {
+public struct MistKitConfiguration : Sendable {
     /// The CloudKit container identifier (e.g., "iCloud.com.example.app")
     public let container: String
     
@@ -72,13 +74,13 @@ public struct MistKitConfiguration {
 // MARK: - Enums
 
 /// CloudKit environment types
-public enum Environment: String {
+public enum Environment: String, Sendable {
     case development
     case production
 }
 
 /// CloudKit database types
-public enum Database: String {
+public enum Database: String, Sendable  {
     case `public`
     case `private`
     case shared
@@ -97,7 +99,7 @@ struct AuthenticationMiddleware: ClientMiddleware {
         operationID: String,
         next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
     ) async throws -> (HTTPResponse, HTTPBody?) {
-        var modifiedRequest = request
+      let modifiedRequest = request
         
         // Add authentication query parameters
         var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
