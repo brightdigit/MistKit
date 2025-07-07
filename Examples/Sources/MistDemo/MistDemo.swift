@@ -16,10 +16,10 @@ struct MistDemo: AsyncParsableCommand {
     )
     
     @Option(name: .shortAndLong, help: "CloudKit container identifier")
-    var containerIdentifier: String = "iCloud.com.example.mistkit"
+    var containerIdentifier: String = "iCloud.com.brightdigit.MistDemo"
     
     @Option(name: .shortAndLong, help: "CloudKit API token")
-    var apiToken: String = "YOUR_API_TOKEN"
+    var apiToken: String = "296c503003846ef692cb5b56c4a63cc1d27fb952eebe259d73e692759286dfa6"
     
     @Option(name: .long, help: "Host to bind the server to")
     var host: String = "127.0.0.1"
@@ -67,24 +67,35 @@ struct MistDemo: AsyncParsableCommand {
         let router = Router(context: BasicRequestContext.self)
         router.middlewares.add(LogRequestsMiddleware(.info))
         
-        // Serve static files
+        // Serve static files - try multiple potential paths
+        let possiblePaths = [
+            Bundle.main.resourcePath ?? "",
+            Bundle.main.bundlePath + "/Contents/Resources",
+            "./Sources/MistDemo/Resources",
+            "./Examples/Sources/MistDemo/Resources",
+            URL(fileURLWithPath: #file).deletingLastPathComponent().appendingPathComponent("Resources").path
+        ]
+        
+        var resourcesPath = "./Sources/MistDemo/Resources" // default fallback
+        for path in possiblePaths {
+            if !path.isEmpty && FileManager.default.fileExists(atPath: path + "/index.html") {
+                resourcesPath = path
+                break
+            }
+        }
+        
+        print("📁 Serving static files from: \(resourcesPath)")
         router.middlewares.add(
             FileMiddleware(
-                Bundle.module.bundleURL.appendingPathComponent("Resources").path,
+                resourcesPath,
                 searchForIndexHtml: true
             )
-        )
-        
-        // Initialize CloudKit service
-        var cloudKitService = try CloudKitService(
-            containerIdentifier: containerIdentifier,
-            apiToken: apiToken
         )
         
         // API routes  
         let api = router.group("api")
         // Authentication endpoint
-        api.post("authenticate") { [cloudKitService] request, context -> Response in
+        api.post("authenticate") { request, context -> Response in
                 struct AuthRequest: Decodable {
                     let sessionToken: String
                     let userRecordName: String
@@ -116,8 +127,11 @@ struct MistDemo: AsyncParsableCommand {
                 
                 // Try to fetch user data and zones
                 do {
-                    var service = cloudKitService
-                    try service.setWebAuthToken(webAuthToken)
+                    let service = try CloudKitService(
+                        containerIdentifier: containerIdentifier,
+                        apiToken: apiToken,
+                        webAuthToken: webAuthToken
+                    )
                     userData = try await service.fetchCurrentUser()
                     zones = try await service.listZones()
                 } catch {
@@ -192,11 +206,11 @@ struct MistDemo: AsyncParsableCommand {
         print(String(repeating: "-", count: 50))
         
         // Initialize CloudKit service
-        var cloudKitService = try CloudKitService(
+        let cloudKitService = try CloudKitService(
             containerIdentifier: containerIdentifier,
-            apiToken: apiToken
+            apiToken: apiToken,
+            webAuthToken: webAuthToken
         )
-        try cloudKitService.setWebAuthToken(webAuthToken)
         
         // Fetch current user
         print("\n👤 Fetching current user...")

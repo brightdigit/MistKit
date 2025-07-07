@@ -35,6 +35,7 @@ paths:
     post:
       summary: Query Records
       description: Fetch records using a query with filters and sorting options
+      operationId: queryRecords
       tags:
         - Records
       parameters:
@@ -92,6 +93,7 @@ paths:
     post:
       summary: Modify Records
       description: Create, update, or delete records (supports bulk operations)
+      operationId: modifyRecords
       tags:
         - Records
       parameters:
@@ -129,6 +131,7 @@ paths:
     post:
       summary: Lookup Records
       description: Fetch specific records by their IDs
+      operationId: lookupRecords
       tags:
         - Records
       parameters:
@@ -170,6 +173,7 @@ paths:
     post:
       summary: Fetch Record Changes
       description: Get all record changes relative to a sync token
+      operationId: fetchRecordChanges
       tags:
         - Records
       parameters:
@@ -207,6 +211,7 @@ paths:
     get:
       summary: List All Zones
       description: Fetch all zones in the database
+      operationId: listZones
       tags:
         - Zones
       parameters:
@@ -230,6 +235,7 @@ paths:
     post:
       summary: Lookup Zones
       description: Fetch specific zones by their IDs
+      operationId: lookupZones
       tags:
         - Zones
       parameters:
@@ -264,6 +270,7 @@ paths:
     post:
       summary: Modify Zones
       description: Create or delete zones (only supported in private database)
+      operationId: modifyZones
       tags:
         - Zones
       parameters:
@@ -298,6 +305,7 @@ paths:
     post:
       summary: Fetch Zone Changes
       description: Get all changed zones relative to a meta-sync token
+      operationId: fetchZoneChanges
       tags:
         - Zones
       parameters:
@@ -331,6 +339,7 @@ paths:
     get:
       summary: List All Subscriptions
       description: Fetch all subscriptions in the database
+      operationId: listSubscriptions
       tags:
         - Subscriptions
       parameters:
@@ -354,6 +363,7 @@ paths:
     post:
       summary: Lookup Subscriptions
       description: Fetch specific subscriptions by their IDs
+      operationId: lookupSubscriptions
       tags:
         - Subscriptions
       parameters:
@@ -391,6 +401,7 @@ paths:
     post:
       summary: Modify Subscriptions
       description: Create, update, or delete subscriptions
+      operationId: modifySubscriptions
       tags:
         - Subscriptions
       parameters:
@@ -425,6 +436,7 @@ paths:
     get:
       summary: Get Current User
       description: Fetch the current authenticated user's information
+      operationId: getCurrentUser
       tags:
         - Users
       parameters:
@@ -445,6 +457,7 @@ paths:
     post:
       summary: Discover User Identities
       description: Discover all user identities based on email addresses or user record names
+      operationId: discoverUserIdentities
       tags:
         - Users
       parameters:
@@ -484,6 +497,7 @@ paths:
       summary: Lookup Contacts (Deprecated)
       description: Fetch contacts (This endpoint is deprecated)
       deprecated: true
+      operationId: lookupContacts
       tags:
         - Users
       parameters:
@@ -517,6 +531,7 @@ paths:
     post:
       summary: Upload Assets
       description: Upload binary assets to CloudKit
+      operationId: uploadAssets
       tags:
         - Assets
       parameters:
@@ -550,6 +565,7 @@ paths:
     post:
       summary: Create APNs Token
       description: Create an Apple Push Notification service (APNs) token
+      operationId: createToken
       tags:
         - Tokens
       parameters:
@@ -583,6 +599,7 @@ paths:
     post:
       summary: Register Token
       description: Register a token for push notifications
+      operationId: registerToken
       tags:
         - Tokens
       parameters:

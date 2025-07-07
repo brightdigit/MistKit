@@ -8,23 +8,21 @@ struct CloudKitService {
     let apiToken: String
     let environment: String = "development"
     
-    private var mistKitClient: MistKitClient?
+    private let mistKitClient: MistKitClient
     private var client: Client {
-        return mistKitClient!.client
+        return mistKitClient.client
     }
     
-    init(containerIdentifier: String, apiToken: String) throws {
+    init(containerIdentifier: String, apiToken: String, webAuthToken: String) throws {
         self.containerIdentifier = containerIdentifier
         self.apiToken = apiToken
-    }
-    
-    mutating func setWebAuthToken(_ token: String) throws {
+        
         let config = MistKitConfiguration(
             container: containerIdentifier,
             environment: .development,
             database: .private,
             apiToken: apiToken,
-            webAuthToken: token
+            webAuthToken: webAuthToken
         )
         self.mistKitClient = try MistKitClient(configuration: config)
     }
@@ -32,7 +30,7 @@ struct CloudKitService {
     /// Fetch current user information
     func fetchCurrentUser() async throws -> UserInfo {
         // Create the request to get current user
-        let response = try await client.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current(
+        let response = try await client.getCurrentUser(
             .init(
                 path: .init(
                     version: "1",
@@ -57,7 +55,7 @@ struct CloudKitService {
     
     /// List zones in the user's private database
     func listZones() async throws -> [ZoneInfo] {
-        let response = try await client.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list(
+        let response = try await client.listZones(
             .init(
                 path: .init(
                     version: "1",
@@ -92,7 +90,7 @@ struct CloudKitService {
     
     /// Query records from the default zone
     func queryRecords(recordType: String, limit: Int = 10) async throws -> [RecordInfo] {
-        let response = try await client.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query(
+        let response = try await client.queryRecords(
             .init(
                 path: .init(
                     version: "1",

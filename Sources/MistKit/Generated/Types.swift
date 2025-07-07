@@ -16,121 +16,121 @@ public protocol APIProtocol: Sendable {
     /// Fetch records using a query with filters and sorting options
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/query`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)`.
+    func queryRecords(_ input: Operations.queryRecords.Input) async throws -> Operations.queryRecords.Output
     /// Modify Records
     ///
     /// Create, update, or delete records (supports bulk operations)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)`.
+    func modifyRecords(_ input: Operations.modifyRecords.Input) async throws -> Operations.modifyRecords.Output
     /// Lookup Records
     ///
     /// Fetch specific records by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)`.
+    func lookupRecords(_ input: Operations.lookupRecords.Input) async throws -> Operations.lookupRecords.Output
     /// Fetch Record Changes
     ///
     /// Get all record changes relative to a sync token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/changes`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)`.
+    func fetchRecordChanges(_ input: Operations.fetchRecordChanges.Input) async throws -> Operations.fetchRecordChanges.Output
     /// List All Zones
     ///
     /// Fetch all zones in the database
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/zones/list`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get`.
-    func get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list(_ input: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Input) async throws -> Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)`.
+    func listZones(_ input: Operations.listZones.Input) async throws -> Operations.listZones.Output
     /// Lookup Zones
     ///
     /// Fetch specific zones by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)`.
+    func lookupZones(_ input: Operations.lookupZones.Input) async throws -> Operations.lookupZones.Output
     /// Modify Zones
     ///
     /// Create or delete zones (only supported in private database)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)`.
+    func modifyZones(_ input: Operations.modifyZones.Input) async throws -> Operations.modifyZones.Output
     /// Fetch Zone Changes
     ///
     /// Get all changed zones relative to a meta-sync token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/changes`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)`.
+    func fetchZoneChanges(_ input: Operations.fetchZoneChanges.Input) async throws -> Operations.fetchZoneChanges.Output
     /// List All Subscriptions
     ///
     /// Fetch all subscriptions in the database
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/subscriptions/list`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get`.
-    func get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list(_ input: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Input) async throws -> Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)`.
+    func listSubscriptions(_ input: Operations.listSubscriptions.Input) async throws -> Operations.listSubscriptions.Output
     /// Lookup Subscriptions
     ///
     /// Fetch specific subscriptions by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/subscriptions/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)`.
+    func lookupSubscriptions(_ input: Operations.lookupSubscriptions.Input) async throws -> Operations.lookupSubscriptions.Output
     /// Modify Subscriptions
     ///
     /// Create, update, or delete subscriptions
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/subscriptions/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)`.
+    func modifySubscriptions(_ input: Operations.modifySubscriptions.Input) async throws -> Operations.modifySubscriptions.Output
     /// Get Current User
     ///
     /// Fetch the current authenticated user's information
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/public/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get`.
-    func get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current(_ input: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Input) async throws -> Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)`.
+    func getCurrentUser(_ input: Operations.getCurrentUser.Input) async throws -> Operations.getCurrentUser.Output
     /// Discover User Identities
     ///
     /// Discover all user identities based on email addresses or user record names
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/discover`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)`.
+    func discoverUserIdentities(_ input: Operations.discoverUserIdentities.Input) async throws -> Operations.discoverUserIdentities.Output
     /// Lookup Contacts (Deprecated)
     ///
     /// Fetch contacts (This endpoint is deprecated)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/lookup/contacts`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)`.
     @available(*, deprecated)
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Output
+    func lookupContacts(_ input: Operations.lookupContacts.Input) async throws -> Operations.lookupContacts.Output
     /// Upload Assets
     ///
     /// Upload binary assets to CloudKit
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/upload`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)`.
+    func uploadAssets(_ input: Operations.uploadAssets.Input) async throws -> Operations.uploadAssets.Output
     /// Create APNs Token
     ///
     /// Create an Apple Push Notification service (APNs) token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)`.
+    func createToken(_ input: Operations.createToken.Input) async throws -> Operations.createToken.Output
     /// Register Token
     ///
     /// Register a token for push notifications
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post`.
-    func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Output
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)`.
+    func registerToken(_ input: Operations.registerToken.Input) async throws -> Operations.registerToken.Output
 }
 
 /// Convenience overloads for operation inputs.
@@ -140,13 +140,13 @@ extension APIProtocol {
     /// Fetch records using a query with filters and sorting options
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/query`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)`.
+    public func queryRecords(
+        path: Operations.queryRecords.Input.Path,
+        headers: Operations.queryRecords.Input.Headers = .init(),
+        body: Operations.queryRecords.Input.Body
+    ) async throws -> Operations.queryRecords.Output {
+        try await queryRecords(Operations.queryRecords.Input(
             path: path,
             headers: headers,
             body: body
@@ -157,13 +157,13 @@ extension APIProtocol {
     /// Create, update, or delete records (supports bulk operations)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)`.
+    public func modifyRecords(
+        path: Operations.modifyRecords.Input.Path,
+        headers: Operations.modifyRecords.Input.Headers = .init(),
+        body: Operations.modifyRecords.Input.Body
+    ) async throws -> Operations.modifyRecords.Output {
+        try await modifyRecords(Operations.modifyRecords.Input(
             path: path,
             headers: headers,
             body: body
@@ -174,13 +174,13 @@ extension APIProtocol {
     /// Fetch specific records by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)`.
+    public func lookupRecords(
+        path: Operations.lookupRecords.Input.Path,
+        headers: Operations.lookupRecords.Input.Headers = .init(),
+        body: Operations.lookupRecords.Input.Body
+    ) async throws -> Operations.lookupRecords.Output {
+        try await lookupRecords(Operations.lookupRecords.Input(
             path: path,
             headers: headers,
             body: body
@@ -191,13 +191,13 @@ extension APIProtocol {
     /// Get all record changes relative to a sync token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/changes`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)`.
+    public func fetchRecordChanges(
+        path: Operations.fetchRecordChanges.Input.Path,
+        headers: Operations.fetchRecordChanges.Input.Headers = .init(),
+        body: Operations.fetchRecordChanges.Input.Body
+    ) async throws -> Operations.fetchRecordChanges.Output {
+        try await fetchRecordChanges(Operations.fetchRecordChanges.Input(
             path: path,
             headers: headers,
             body: body
@@ -208,12 +208,12 @@ extension APIProtocol {
     /// Fetch all zones in the database
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/zones/list`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get`.
-    public func get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list(
-        path: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Input.Path,
-        headers: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Input.Headers = .init()
-    ) async throws -> Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Output {
-        try await get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list(Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)`.
+    public func listZones(
+        path: Operations.listZones.Input.Path,
+        headers: Operations.listZones.Input.Headers = .init()
+    ) async throws -> Operations.listZones.Output {
+        try await listZones(Operations.listZones.Input(
             path: path,
             headers: headers
         ))
@@ -223,13 +223,13 @@ extension APIProtocol {
     /// Fetch specific zones by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)`.
+    public func lookupZones(
+        path: Operations.lookupZones.Input.Path,
+        headers: Operations.lookupZones.Input.Headers = .init(),
+        body: Operations.lookupZones.Input.Body
+    ) async throws -> Operations.lookupZones.Output {
+        try await lookupZones(Operations.lookupZones.Input(
             path: path,
             headers: headers,
             body: body
@@ -240,13 +240,13 @@ extension APIProtocol {
     /// Create or delete zones (only supported in private database)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)`.
+    public func modifyZones(
+        path: Operations.modifyZones.Input.Path,
+        headers: Operations.modifyZones.Input.Headers = .init(),
+        body: Operations.modifyZones.Input.Body
+    ) async throws -> Operations.modifyZones.Output {
+        try await modifyZones(Operations.modifyZones.Input(
             path: path,
             headers: headers,
             body: body
@@ -257,13 +257,13 @@ extension APIProtocol {
     /// Get all changed zones relative to a meta-sync token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/changes`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)`.
+    public func fetchZoneChanges(
+        path: Operations.fetchZoneChanges.Input.Path,
+        headers: Operations.fetchZoneChanges.Input.Headers = .init(),
+        body: Operations.fetchZoneChanges.Input.Body
+    ) async throws -> Operations.fetchZoneChanges.Output {
+        try await fetchZoneChanges(Operations.fetchZoneChanges.Input(
             path: path,
             headers: headers,
             body: body
@@ -274,12 +274,12 @@ extension APIProtocol {
     /// Fetch all subscriptions in the database
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/subscriptions/list`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get`.
-    public func get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list(
-        path: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Input.Path,
-        headers: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Input.Headers = .init()
-    ) async throws -> Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Output {
-        try await get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list(Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)`.
+    public func listSubscriptions(
+        path: Operations.listSubscriptions.Input.Path,
+        headers: Operations.listSubscriptions.Input.Headers = .init()
+    ) async throws -> Operations.listSubscriptions.Output {
+        try await listSubscriptions(Operations.listSubscriptions.Input(
             path: path,
             headers: headers
         ))
@@ -289,13 +289,13 @@ extension APIProtocol {
     /// Fetch specific subscriptions by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/subscriptions/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)`.
+    public func lookupSubscriptions(
+        path: Operations.lookupSubscriptions.Input.Path,
+        headers: Operations.lookupSubscriptions.Input.Headers = .init(),
+        body: Operations.lookupSubscriptions.Input.Body
+    ) async throws -> Operations.lookupSubscriptions.Output {
+        try await lookupSubscriptions(Operations.lookupSubscriptions.Input(
             path: path,
             headers: headers,
             body: body
@@ -306,13 +306,13 @@ extension APIProtocol {
     /// Create, update, or delete subscriptions
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/subscriptions/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)`.
+    public func modifySubscriptions(
+        path: Operations.modifySubscriptions.Input.Path,
+        headers: Operations.modifySubscriptions.Input.Headers = .init(),
+        body: Operations.modifySubscriptions.Input.Body
+    ) async throws -> Operations.modifySubscriptions.Output {
+        try await modifySubscriptions(Operations.modifySubscriptions.Input(
             path: path,
             headers: headers,
             body: body
@@ -323,12 +323,12 @@ extension APIProtocol {
     /// Fetch the current authenticated user's information
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/public/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get`.
-    public func get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current(
-        path: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Input.Path,
-        headers: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Input.Headers = .init()
-    ) async throws -> Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Output {
-        try await get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current(Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)`.
+    public func getCurrentUser(
+        path: Operations.getCurrentUser.Input.Path,
+        headers: Operations.getCurrentUser.Input.Headers = .init()
+    ) async throws -> Operations.getCurrentUser.Output {
+        try await getCurrentUser(Operations.getCurrentUser.Input(
             path: path,
             headers: headers
         ))
@@ -338,13 +338,13 @@ extension APIProtocol {
     /// Discover all user identities based on email addresses or user record names
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/discover`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)`.
+    public func discoverUserIdentities(
+        path: Operations.discoverUserIdentities.Input.Path,
+        headers: Operations.discoverUserIdentities.Input.Headers = .init(),
+        body: Operations.discoverUserIdentities.Input.Body
+    ) async throws -> Operations.discoverUserIdentities.Output {
+        try await discoverUserIdentities(Operations.discoverUserIdentities.Input(
             path: path,
             headers: headers,
             body: body
@@ -355,14 +355,14 @@ extension APIProtocol {
     /// Fetch contacts (This endpoint is deprecated)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/lookup/contacts`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)`.
     @available(*, deprecated)
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input(
+    public func lookupContacts(
+        path: Operations.lookupContacts.Input.Path,
+        headers: Operations.lookupContacts.Input.Headers = .init(),
+        body: Operations.lookupContacts.Input.Body
+    ) async throws -> Operations.lookupContacts.Output {
+        try await lookupContacts(Operations.lookupContacts.Input(
             path: path,
             headers: headers,
             body: body
@@ -373,13 +373,13 @@ extension APIProtocol {
     /// Upload binary assets to CloudKit
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/upload`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)`.
+    public func uploadAssets(
+        path: Operations.uploadAssets.Input.Path,
+        headers: Operations.uploadAssets.Input.Headers = .init(),
+        body: Operations.uploadAssets.Input.Body
+    ) async throws -> Operations.uploadAssets.Output {
+        try await uploadAssets(Operations.uploadAssets.Input(
             path: path,
             headers: headers,
             body: body
@@ -390,13 +390,13 @@ extension APIProtocol {
     /// Create an Apple Push Notification service (APNs) token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)`.
+    public func createToken(
+        path: Operations.createToken.Input.Path,
+        headers: Operations.createToken.Input.Headers = .init(),
+        body: Operations.createToken.Input.Body
+    ) async throws -> Operations.createToken.Output {
+        try await createToken(Operations.createToken.Input(
             path: path,
             headers: headers,
             body: body
@@ -407,13 +407,13 @@ extension APIProtocol {
     /// Register a token for push notifications
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register(
-        path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input.Path,
-        headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input.Headers = .init(),
-        body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input.Body
-    ) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Output {
-        try await post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input(
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)`.
+    public func registerToken(
+        path: Operations.registerToken.Input.Path,
+        headers: Operations.registerToken.Input.Headers = .init(),
+        body: Operations.registerToken.Input.Body
+    ) async throws -> Operations.registerToken.Output {
+        try await registerToken(Operations.registerToken.Input(
             path: path,
             headers: headers,
             body: body
@@ -1512,9 +1512,9 @@ public enum Operations {
     /// Fetch records using a query with filters and sorting options
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/query`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/records/query"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)`.
+    public enum queryRecords {
+        public static let id: Swift.String = "queryRecords"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -1560,19 +1560,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Path
+            public var path: Operations.queryRecords.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.queryRecords.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.queryRecords.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Headers
+            public var headers: Operations.queryRecords.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json`.
@@ -1615,7 +1615,7 @@ public enum Operations {
                         }
                     }
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/query`.
-                    public var query: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Body.jsonPayload.queryPayload?
+                    public var query: Operations.queryRecords.Input.Body.jsonPayload.queryPayload?
                     /// List of field names to return
                     ///
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/desiredKeys`.
@@ -1635,7 +1635,7 @@ public enum Operations {
                     public init(
                         zoneID: Components.Schemas.ZoneID? = nil,
                         resultsLimit: Swift.Int? = nil,
-                        query: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Body.jsonPayload.queryPayload? = nil,
+                        query: Operations.queryRecords.Input.Body.jsonPayload.queryPayload? = nil,
                         desiredKeys: [Swift.String]? = nil,
                         continuationMarker: Swift.String? = nil
                     ) {
@@ -1654,9 +1654,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Body.jsonPayload)
+                case json(Operations.queryRecords.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Body
+            public var body: Operations.queryRecords.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -1664,9 +1664,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input.Body
+                path: Operations.queryRecords.Input.Path,
+                headers: Operations.queryRecords.Input.Headers = .init(),
+                body: Operations.queryRecords.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -1693,26 +1693,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Output.Ok.Body
+                public var body: Operations.queryRecords.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Output.Ok.Body) {
+                public init(body: Operations.queryRecords.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Successful query
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Output.Ok)
+            case ok(Operations.queryRecords.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Output.Ok {
+            public var ok: Operations.queryRecords.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -1727,7 +1727,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -1750,7 +1750,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -1807,9 +1807,9 @@ public enum Operations {
     /// Create, update, or delete records (supports bulk operations)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/records/modify"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)`.
+    public enum modifyRecords {
+        public static let id: Swift.String = "modifyRecords"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/modify/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -1855,19 +1855,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input.Path
+            public var path: Operations.modifyRecords.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/modify/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.modifyRecords.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.modifyRecords.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input.Headers
+            public var headers: Operations.modifyRecords.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/modify/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/modify/POST/requestBody/json`.
@@ -1896,9 +1896,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/modify/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input.Body.jsonPayload)
+                case json(Operations.modifyRecords.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input.Body
+            public var body: Operations.modifyRecords.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -1906,9 +1906,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input.Body
+                path: Operations.modifyRecords.Input.Path,
+                headers: Operations.modifyRecords.Input.Headers = .init(),
+                body: Operations.modifyRecords.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -1935,26 +1935,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Output.Ok.Body
+                public var body: Operations.modifyRecords.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Output.Ok.Body) {
+                public init(body: Operations.modifyRecords.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Records modified successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Output.Ok)
+            case ok(Operations.modifyRecords.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Output.Ok {
+            public var ok: Operations.modifyRecords.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -1969,7 +1969,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -1992,7 +1992,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -2049,9 +2049,9 @@ public enum Operations {
     /// Fetch specific records by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/records/lookup"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)`.
+    public enum lookupRecords {
+        public static let id: Swift.String = "lookupRecords"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -2097,19 +2097,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Path
+            public var path: Operations.lookupRecords.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupRecords.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupRecords.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Headers
+            public var headers: Operations.lookupRecords.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/requestBody/json`.
@@ -2138,14 +2138,14 @@ public enum Operations {
                         }
                     }
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/requestBody/json/records`.
-                    public typealias recordsPayload = [Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Body.jsonPayload.recordsPayloadPayload]
+                    public typealias recordsPayload = [Operations.lookupRecords.Input.Body.jsonPayload.recordsPayloadPayload]
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/requestBody/json/records`.
-                    public var records: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Body.jsonPayload.recordsPayload?
+                    public var records: Operations.lookupRecords.Input.Body.jsonPayload.recordsPayload?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - records:
-                    public init(records: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Body.jsonPayload.recordsPayload? = nil) {
+                    public init(records: Operations.lookupRecords.Input.Body.jsonPayload.recordsPayload? = nil) {
                         self.records = records
                     }
                     public enum CodingKeys: String, CodingKey {
@@ -2153,9 +2153,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/lookup/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Body.jsonPayload)
+                case json(Operations.lookupRecords.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Body
+            public var body: Operations.lookupRecords.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -2163,9 +2163,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input.Body
+                path: Operations.lookupRecords.Input.Path,
+                headers: Operations.lookupRecords.Input.Headers = .init(),
+                body: Operations.lookupRecords.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -2192,26 +2192,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Output.Ok.Body
+                public var body: Operations.lookupRecords.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Output.Ok.Body) {
+                public init(body: Operations.lookupRecords.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Records retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Output.Ok)
+            case ok(Operations.lookupRecords.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Output.Ok {
+            public var ok: Operations.lookupRecords.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -2226,7 +2226,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -2249,7 +2249,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -2306,9 +2306,9 @@ public enum Operations {
     /// Get all record changes relative to a sync token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/changes`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/records/changes"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)`.
+    public enum fetchRecordChanges {
+        public static let id: Swift.String = "fetchRecordChanges"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/changes/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -2354,19 +2354,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input.Path
+            public var path: Operations.fetchRecordChanges.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/changes/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.fetchRecordChanges.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.fetchRecordChanges.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input.Headers
+            public var headers: Operations.fetchRecordChanges.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/changes/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/changes/POST/requestBody/json`.
@@ -2401,9 +2401,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/changes/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input.Body.jsonPayload)
+                case json(Operations.fetchRecordChanges.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input.Body
+            public var body: Operations.fetchRecordChanges.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -2411,9 +2411,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input.Body
+                path: Operations.fetchRecordChanges.Input.Path,
+                headers: Operations.fetchRecordChanges.Input.Headers = .init(),
+                body: Operations.fetchRecordChanges.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -2440,26 +2440,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Output.Ok.Body
+                public var body: Operations.fetchRecordChanges.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Output.Ok.Body) {
+                public init(body: Operations.fetchRecordChanges.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Changes retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Output.Ok)
+            case ok(Operations.fetchRecordChanges.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Output.Ok {
+            public var ok: Operations.fetchRecordChanges.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -2474,7 +2474,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -2497,7 +2497,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -2554,9 +2554,9 @@ public enum Operations {
     /// Fetch all zones in the database
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/zones/list`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get`.
-    public enum get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list {
-        public static let id: Swift.String = "get/database/{version}/{container}/{environment}/{database}/zones/list"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)`.
+    public enum listZones {
+        public static let id: Swift.String = "listZones"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/list/GET/path`.
             public struct Path: Sendable, Hashable {
@@ -2602,27 +2602,27 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Input.Path
+            public var path: Operations.listZones.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/list/GET/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.listZones.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.listZones.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Input.Headers
+            public var headers: Operations.listZones.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
             public init(
-                path: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Input.Path,
-                headers: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Input.Headers = .init()
+                path: Operations.listZones.Input.Path,
+                headers: Operations.listZones.Input.Headers = .init()
             ) {
                 self.path = path
                 self.headers = headers
@@ -2648,26 +2648,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Output.Ok.Body
+                public var body: Operations.listZones.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Output.Ok.Body) {
+                public init(body: Operations.listZones.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Zones retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Output.Ok)
+            case ok(Operations.listZones.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Output.Ok {
+            public var ok: Operations.listZones.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -2682,7 +2682,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -2705,7 +2705,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -2762,9 +2762,9 @@ public enum Operations {
     /// Fetch specific zones by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/zones/lookup"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)`.
+    public enum lookupZones {
+        public static let id: Swift.String = "lookupZones"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/lookup/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -2810,19 +2810,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input.Path
+            public var path: Operations.lookupZones.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/lookup/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupZones.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupZones.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input.Headers
+            public var headers: Operations.lookupZones.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/lookup/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/lookup/POST/requestBody/json`.
@@ -2841,9 +2841,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/lookup/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input.Body.jsonPayload)
+                case json(Operations.lookupZones.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input.Body
+            public var body: Operations.lookupZones.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -2851,9 +2851,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input.Body
+                path: Operations.lookupZones.Input.Path,
+                headers: Operations.lookupZones.Input.Headers = .init(),
+                body: Operations.lookupZones.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -2880,26 +2880,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Output.Ok.Body
+                public var body: Operations.lookupZones.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Output.Ok.Body) {
+                public init(body: Operations.lookupZones.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Zones retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Output.Ok)
+            case ok(Operations.lookupZones.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Output.Ok {
+            public var ok: Operations.lookupZones.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -2914,7 +2914,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -2937,7 +2937,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -2994,9 +2994,9 @@ public enum Operations {
     /// Create or delete zones (only supported in private database)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/zones/modify"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)`.
+    public enum modifyZones {
+        public static let id: Swift.String = "modifyZones"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/modify/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -3042,19 +3042,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input.Path
+            public var path: Operations.modifyZones.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/modify/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.modifyZones.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.modifyZones.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input.Headers
+            public var headers: Operations.modifyZones.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/modify/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/modify/POST/requestBody/json`.
@@ -3073,9 +3073,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/modify/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input.Body.jsonPayload)
+                case json(Operations.modifyZones.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input.Body
+            public var body: Operations.modifyZones.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -3083,9 +3083,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input.Body
+                path: Operations.modifyZones.Input.Path,
+                headers: Operations.modifyZones.Input.Headers = .init(),
+                body: Operations.modifyZones.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -3112,26 +3112,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Output.Ok.Body
+                public var body: Operations.modifyZones.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Output.Ok.Body) {
+                public init(body: Operations.modifyZones.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Zones modified successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Output.Ok)
+            case ok(Operations.modifyZones.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Output.Ok {
+            public var ok: Operations.modifyZones.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3146,7 +3146,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -3169,7 +3169,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -3226,9 +3226,9 @@ public enum Operations {
     /// Get all changed zones relative to a meta-sync token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/changes`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/zones/changes"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)`.
+    public enum fetchZoneChanges {
+        public static let id: Swift.String = "fetchZoneChanges"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -3274,19 +3274,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input.Path
+            public var path: Operations.fetchZoneChanges.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.fetchZoneChanges.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.fetchZoneChanges.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input.Headers
+            public var headers: Operations.fetchZoneChanges.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/json`.
@@ -3307,9 +3307,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input.Body.jsonPayload)
+                case json(Operations.fetchZoneChanges.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input.Body
+            public var body: Operations.fetchZoneChanges.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -3317,9 +3317,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input.Body
+                path: Operations.fetchZoneChanges.Input.Path,
+                headers: Operations.fetchZoneChanges.Input.Headers = .init(),
+                body: Operations.fetchZoneChanges.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -3346,26 +3346,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Output.Ok.Body
+                public var body: Operations.fetchZoneChanges.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Output.Ok.Body) {
+                public init(body: Operations.fetchZoneChanges.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Zone changes retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Output.Ok)
+            case ok(Operations.fetchZoneChanges.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Output.Ok {
+            public var ok: Operations.fetchZoneChanges.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3380,7 +3380,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -3403,7 +3403,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -3460,9 +3460,9 @@ public enum Operations {
     /// Fetch all subscriptions in the database
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/subscriptions/list`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get`.
-    public enum get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list {
-        public static let id: Swift.String = "get/database/{version}/{container}/{environment}/{database}/subscriptions/list"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)`.
+    public enum listSubscriptions {
+        public static let id: Swift.String = "listSubscriptions"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/list/GET/path`.
             public struct Path: Sendable, Hashable {
@@ -3508,27 +3508,27 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Input.Path
+            public var path: Operations.listSubscriptions.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/list/GET/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.listSubscriptions.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.listSubscriptions.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Input.Headers
+            public var headers: Operations.listSubscriptions.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
             public init(
-                path: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Input.Path,
-                headers: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Input.Headers = .init()
+                path: Operations.listSubscriptions.Input.Path,
+                headers: Operations.listSubscriptions.Input.Headers = .init()
             ) {
                 self.path = path
                 self.headers = headers
@@ -3554,26 +3554,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Output.Ok.Body
+                public var body: Operations.listSubscriptions.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Output.Ok.Body) {
+                public init(body: Operations.listSubscriptions.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Subscriptions retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Output.Ok)
+            case ok(Operations.listSubscriptions.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Output.Ok {
+            public var ok: Operations.listSubscriptions.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3588,7 +3588,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -3611,7 +3611,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -3668,9 +3668,9 @@ public enum Operations {
     /// Fetch specific subscriptions by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/subscriptions/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/subscriptions/lookup"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)`.
+    public enum lookupSubscriptions {
+        public static let id: Swift.String = "lookupSubscriptions"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/lookup/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -3716,19 +3716,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Path
+            public var path: Operations.lookupSubscriptions.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/lookup/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupSubscriptions.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupSubscriptions.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Headers
+            public var headers: Operations.lookupSubscriptions.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/lookup/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/lookup/POST/requestBody/json`.
@@ -3749,14 +3749,14 @@ public enum Operations {
                         }
                     }
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/lookup/POST/requestBody/json/subscriptions`.
-                    public typealias subscriptionsPayload = [Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Body.jsonPayload.subscriptionsPayloadPayload]
+                    public typealias subscriptionsPayload = [Operations.lookupSubscriptions.Input.Body.jsonPayload.subscriptionsPayloadPayload]
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/lookup/POST/requestBody/json/subscriptions`.
-                    public var subscriptions: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Body.jsonPayload.subscriptionsPayload?
+                    public var subscriptions: Operations.lookupSubscriptions.Input.Body.jsonPayload.subscriptionsPayload?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - subscriptions:
-                    public init(subscriptions: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Body.jsonPayload.subscriptionsPayload? = nil) {
+                    public init(subscriptions: Operations.lookupSubscriptions.Input.Body.jsonPayload.subscriptionsPayload? = nil) {
                         self.subscriptions = subscriptions
                     }
                     public enum CodingKeys: String, CodingKey {
@@ -3764,9 +3764,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/lookup/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Body.jsonPayload)
+                case json(Operations.lookupSubscriptions.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Body
+            public var body: Operations.lookupSubscriptions.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -3774,9 +3774,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input.Body
+                path: Operations.lookupSubscriptions.Input.Path,
+                headers: Operations.lookupSubscriptions.Input.Headers = .init(),
+                body: Operations.lookupSubscriptions.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -3803,26 +3803,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Output.Ok.Body
+                public var body: Operations.lookupSubscriptions.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Output.Ok.Body) {
+                public init(body: Operations.lookupSubscriptions.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Subscriptions retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Output.Ok)
+            case ok(Operations.lookupSubscriptions.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Output.Ok {
+            public var ok: Operations.lookupSubscriptions.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3837,7 +3837,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -3860,7 +3860,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -3917,9 +3917,9 @@ public enum Operations {
     /// Create, update, or delete subscriptions
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/subscriptions/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/subscriptions/modify"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)`.
+    public enum modifySubscriptions {
+        public static let id: Swift.String = "modifySubscriptions"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/modify/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -3965,19 +3965,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input.Path
+            public var path: Operations.modifySubscriptions.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/modify/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.modifySubscriptions.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.modifySubscriptions.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input.Headers
+            public var headers: Operations.modifySubscriptions.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/modify/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/modify/POST/requestBody/json`.
@@ -3996,9 +3996,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/subscriptions/modify/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input.Body.jsonPayload)
+                case json(Operations.modifySubscriptions.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input.Body
+            public var body: Operations.modifySubscriptions.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -4006,9 +4006,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input.Body
+                path: Operations.modifySubscriptions.Input.Path,
+                headers: Operations.modifySubscriptions.Input.Headers = .init(),
+                body: Operations.modifySubscriptions.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -4035,26 +4035,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Output.Ok.Body
+                public var body: Operations.modifySubscriptions.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Output.Ok.Body) {
+                public init(body: Operations.modifySubscriptions.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Subscriptions modified successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Output.Ok)
+            case ok(Operations.modifySubscriptions.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Output.Ok {
+            public var ok: Operations.modifySubscriptions.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4069,7 +4069,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -4092,7 +4092,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -4149,9 +4149,9 @@ public enum Operations {
     /// Fetch the current authenticated user's information
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/public/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get`.
-    public enum get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current {
-        public static let id: Swift.String = "get/database/{version}/{container}/{environment}/public/users/current"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)`.
+    public enum getCurrentUser {
+        public static let id: Swift.String = "getCurrentUser"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/current/GET/path`.
             public struct Path: Sendable, Hashable {
@@ -4184,27 +4184,27 @@ public enum Operations {
                     self.environment = environment
                 }
             }
-            public var path: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Input.Path
+            public var path: Operations.getCurrentUser.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/current/GET/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getCurrentUser.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getCurrentUser.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Input.Headers
+            public var headers: Operations.getCurrentUser.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
             public init(
-                path: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Input.Path,
-                headers: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Input.Headers = .init()
+                path: Operations.getCurrentUser.Input.Path,
+                headers: Operations.getCurrentUser.Input.Headers = .init()
             ) {
                 self.path = path
                 self.headers = headers
@@ -4230,26 +4230,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Output.Ok.Body
+                public var body: Operations.getCurrentUser.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Output.Ok.Body) {
+                public init(body: Operations.getCurrentUser.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// User information retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Output.Ok)
+            case ok(Operations.getCurrentUser.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Output.Ok {
+            public var ok: Operations.getCurrentUser.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4264,7 +4264,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -4321,9 +4321,9 @@ public enum Operations {
     /// Discover all user identities based on email addresses or user record names
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/discover`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/public/users/discover"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)`.
+    public enum discoverUserIdentities {
+        public static let id: Swift.String = "discoverUserIdentities"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -4356,19 +4356,19 @@ public enum Operations {
                     self.environment = environment
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Path
+            public var path: Operations.discoverUserIdentities.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.discoverUserIdentities.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.discoverUserIdentities.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Headers
+            public var headers: Operations.discoverUserIdentities.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/json`.
@@ -4397,14 +4397,14 @@ public enum Operations {
                         }
                     }
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/json/users`.
-                    public typealias usersPayload = [Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Body.jsonPayload.usersPayloadPayload]
+                    public typealias usersPayload = [Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayloadPayload]
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/json/users`.
-                    public var users: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Body.jsonPayload.usersPayload?
+                    public var users: Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayload?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - users:
-                    public init(users: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Body.jsonPayload.usersPayload? = nil) {
+                    public init(users: Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayload? = nil) {
                         self.users = users
                     }
                     public enum CodingKeys: String, CodingKey {
@@ -4412,9 +4412,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Body.jsonPayload)
+                case json(Operations.discoverUserIdentities.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Body
+            public var body: Operations.discoverUserIdentities.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -4422,9 +4422,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input.Body
+                path: Operations.discoverUserIdentities.Input.Path,
+                headers: Operations.discoverUserIdentities.Input.Headers = .init(),
+                body: Operations.discoverUserIdentities.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -4451,26 +4451,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Output.Ok.Body
+                public var body: Operations.discoverUserIdentities.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Output.Ok.Body) {
+                public init(body: Operations.discoverUserIdentities.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// User identities discovered successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Output.Ok)
+            case ok(Operations.discoverUserIdentities.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Output.Ok {
+            public var ok: Operations.discoverUserIdentities.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4485,7 +4485,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -4508,7 +4508,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -4565,9 +4565,9 @@ public enum Operations {
     /// Fetch contacts (This endpoint is deprecated)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/lookup/contacts`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/public/users/lookup/contacts"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)`.
+    public enum lookupContacts {
+        public static let id: Swift.String = "lookupContacts"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -4600,19 +4600,19 @@ public enum Operations {
                     self.environment = environment
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input.Path
+            public var path: Operations.lookupContacts.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupContacts.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupContacts.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input.Headers
+            public var headers: Operations.lookupContacts.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/requestBody/json`.
@@ -4631,9 +4631,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input.Body.jsonPayload)
+                case json(Operations.lookupContacts.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input.Body
+            public var body: Operations.lookupContacts.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -4641,9 +4641,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input.Body
+                path: Operations.lookupContacts.Input.Path,
+                headers: Operations.lookupContacts.Input.Headers = .init(),
+                body: Operations.lookupContacts.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -4670,26 +4670,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Output.Ok.Body
+                public var body: Operations.lookupContacts.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Output.Ok.Body) {
+                public init(body: Operations.lookupContacts.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Contacts retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Output.Ok)
+            case ok(Operations.lookupContacts.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Output.Ok {
+            public var ok: Operations.lookupContacts.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4704,7 +4704,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -4727,7 +4727,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -4784,9 +4784,9 @@ public enum Operations {
     /// Upload binary assets to CloudKit
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/upload`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/assets/upload"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)`.
+    public enum uploadAssets {
+        public static let id: Swift.String = "uploadAssets"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -4832,19 +4832,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Path
+            public var path: Operations.uploadAssets.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.uploadAssets.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.uploadAssets.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Headers
+            public var headers: Operations.uploadAssets.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/multipartForm`.
@@ -4860,13 +4860,13 @@ public enum Operations {
                             self.body = body
                         }
                     }
-                    case file(OpenAPIRuntime.MultipartPart<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Body.multipartFormPayload.filePayload>)
+                    case file(OpenAPIRuntime.MultipartPart<Operations.uploadAssets.Input.Body.multipartFormPayload.filePayload>)
                     case undocumented(OpenAPIRuntime.MultipartRawPart)
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/content/multipart\/form-data`.
-                case multipartForm(OpenAPIRuntime.MultipartBody<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Body.multipartFormPayload>)
+                case multipartForm(OpenAPIRuntime.MultipartBody<Operations.uploadAssets.Input.Body.multipartFormPayload>)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Body
+            public var body: Operations.uploadAssets.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -4874,9 +4874,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input.Body
+                path: Operations.uploadAssets.Input.Path,
+                headers: Operations.uploadAssets.Input.Headers = .init(),
+                body: Operations.uploadAssets.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -4903,26 +4903,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Output.Ok.Body
+                public var body: Operations.uploadAssets.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Output.Ok.Body) {
+                public init(body: Operations.uploadAssets.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Asset uploaded successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Output.Ok)
+            case ok(Operations.uploadAssets.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Output.Ok {
+            public var ok: Operations.uploadAssets.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4937,7 +4937,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -4960,7 +4960,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -5017,9 +5017,9 @@ public enum Operations {
     /// Create an Apple Push Notification service (APNs) token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/tokens/create"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)`.
+    public enum createToken {
+        public static let id: Swift.String = "createToken"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -5065,19 +5065,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Path
+            public var path: Operations.createToken.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.createToken.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.createToken.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Headers
+            public var headers: Operations.createToken.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/requestBody/json`.
@@ -5088,12 +5088,12 @@ public enum Operations {
                         case production = "production"
                     }
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/requestBody/json/apnsEnvironment`.
-                    public var apnsEnvironment: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Body.jsonPayload.apnsEnvironmentPayload?
+                    public var apnsEnvironment: Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - apnsEnvironment:
-                    public init(apnsEnvironment: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Body.jsonPayload.apnsEnvironmentPayload? = nil) {
+                    public init(apnsEnvironment: Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload? = nil) {
                         self.apnsEnvironment = apnsEnvironment
                     }
                     public enum CodingKeys: String, CodingKey {
@@ -5101,9 +5101,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Body.jsonPayload)
+                case json(Operations.createToken.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Body
+            public var body: Operations.createToken.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -5111,9 +5111,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input.Body
+                path: Operations.createToken.Input.Path,
+                headers: Operations.createToken.Input.Headers = .init(),
+                body: Operations.createToken.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -5140,26 +5140,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Output.Ok.Body
+                public var body: Operations.createToken.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Output.Ok.Body) {
+                public init(body: Operations.createToken.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// Token created successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Output.Ok)
+            case ok(Operations.createToken.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Output.Ok {
+            public var ok: Operations.createToken.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -5174,7 +5174,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -5197,7 +5197,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -5254,9 +5254,9 @@ public enum Operations {
     /// Register a token for push notifications
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post`.
-    public enum post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register {
-        public static let id: Swift.String = "post/database/{version}/{container}/{environment}/{database}/tokens/register"
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)`.
+    public enum registerToken {
+        public static let id: Swift.String = "registerToken"
         public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/path`.
             public struct Path: Sendable, Hashable {
@@ -5302,19 +5302,19 @@ public enum Operations {
                     self.database = database
                 }
             }
-            public var path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input.Path
+            public var path: Operations.registerToken.Input.Path
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.registerToken.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.registerToken.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input.Headers
+            public var headers: Operations.registerToken.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/requestBody/json`.
@@ -5335,9 +5335,9 @@ public enum Operations {
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/requestBody/content/application\/json`.
-                case json(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input.Body.jsonPayload)
+                case json(Operations.registerToken.Input.Body.jsonPayload)
             }
-            public var body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input.Body
+            public var body: Operations.registerToken.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
@@ -5345,9 +5345,9 @@ public enum Operations {
             ///   - headers:
             ///   - body:
             public init(
-                path: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input.Path,
-                headers: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input.Headers = .init(),
-                body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input.Body
+                path: Operations.registerToken.Input.Path,
+                headers: Operations.registerToken.Input.Headers = .init(),
+                body: Operations.registerToken.Input.Body
             ) {
                 self.path = path
                 self.headers = headers
@@ -5361,13 +5361,13 @@ public enum Operations {
             }
             /// Token registered successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Output.Ok)
+            case ok(Operations.registerToken.Output.Ok)
             /// Token registered successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             public static var ok: Self {
@@ -5377,7 +5377,7 @@ public enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Output.Ok {
+            public var ok: Operations.registerToken.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -5392,7 +5392,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -5415,7 +5415,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)

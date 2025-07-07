@@ -59,11 +59,11 @@ public struct Client: APIProtocol {
     /// Fetch records using a query with filters and sorting options
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/query`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)`.
+    public func queryRecords(_ input: Operations.queryRecords.Input) async throws -> Operations.queryRecords.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.id,
+            forOperation: Operations.queryRecords.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/records/query",
@@ -98,7 +98,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query.Output.Ok.Body
+                    let body: Operations.queryRecords.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -179,11 +179,11 @@ public struct Client: APIProtocol {
     /// Create, update, or delete records (supports bulk operations)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)`.
+    public func modifyRecords(_ input: Operations.modifyRecords.Input) async throws -> Operations.modifyRecords.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.id,
+            forOperation: Operations.modifyRecords.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/records/modify",
@@ -218,7 +218,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_modify.Output.Ok.Body
+                    let body: Operations.modifyRecords.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -299,11 +299,11 @@ public struct Client: APIProtocol {
     /// Fetch specific records by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)`.
+    public func lookupRecords(_ input: Operations.lookupRecords.Input) async throws -> Operations.lookupRecords.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.id,
+            forOperation: Operations.lookupRecords.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/records/lookup",
@@ -338,7 +338,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_lookup.Output.Ok.Body
+                    let body: Operations.lookupRecords.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -419,11 +419,11 @@ public struct Client: APIProtocol {
     /// Get all record changes relative to a sync token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/changes`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)`.
+    public func fetchRecordChanges(_ input: Operations.fetchRecordChanges.Input) async throws -> Operations.fetchRecordChanges.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.id,
+            forOperation: Operations.fetchRecordChanges.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/records/changes",
@@ -458,7 +458,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_changes.Output.Ok.Body
+                    let body: Operations.fetchRecordChanges.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -539,11 +539,11 @@ public struct Client: APIProtocol {
     /// Fetch all zones in the database
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/zones/list`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get`.
-    public func get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list(_ input: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Input) async throws -> Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)`.
+    public func listZones(_ input: Operations.listZones.Input) async throws -> Operations.listZones.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.id,
+            forOperation: Operations.listZones.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/zones/list",
@@ -569,7 +569,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list.Output.Ok.Body
+                    let body: Operations.listZones.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -650,11 +650,11 @@ public struct Client: APIProtocol {
     /// Fetch specific zones by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)`.
+    public func lookupZones(_ input: Operations.lookupZones.Input) async throws -> Operations.lookupZones.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.id,
+            forOperation: Operations.lookupZones.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/zones/lookup",
@@ -689,7 +689,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_lookup.Output.Ok.Body
+                    let body: Operations.lookupZones.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -770,11 +770,11 @@ public struct Client: APIProtocol {
     /// Create or delete zones (only supported in private database)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)`.
+    public func modifyZones(_ input: Operations.modifyZones.Input) async throws -> Operations.modifyZones.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.id,
+            forOperation: Operations.modifyZones.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/zones/modify",
@@ -809,7 +809,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_modify.Output.Ok.Body
+                    let body: Operations.modifyZones.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -890,11 +890,11 @@ public struct Client: APIProtocol {
     /// Get all changed zones relative to a meta-sync token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/zones/changes`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)`.
+    public func fetchZoneChanges(_ input: Operations.fetchZoneChanges.Input) async throws -> Operations.fetchZoneChanges.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.id,
+            forOperation: Operations.fetchZoneChanges.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/zones/changes",
@@ -929,7 +929,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_changes.Output.Ok.Body
+                    let body: Operations.fetchZoneChanges.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1010,11 +1010,11 @@ public struct Client: APIProtocol {
     /// Fetch all subscriptions in the database
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/subscriptions/list`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get`.
-    public func get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list(_ input: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Input) async throws -> Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)`.
+    public func listSubscriptions(_ input: Operations.listSubscriptions.Input) async throws -> Operations.listSubscriptions.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.id,
+            forOperation: Operations.listSubscriptions.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/subscriptions/list",
@@ -1040,7 +1040,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_list.Output.Ok.Body
+                    let body: Operations.listSubscriptions.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1121,11 +1121,11 @@ public struct Client: APIProtocol {
     /// Fetch specific subscriptions by their IDs
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/subscriptions/lookup`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)`.
+    public func lookupSubscriptions(_ input: Operations.lookupSubscriptions.Input) async throws -> Operations.lookupSubscriptions.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.id,
+            forOperation: Operations.lookupSubscriptions.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/subscriptions/lookup",
@@ -1160,7 +1160,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_lookup.Output.Ok.Body
+                    let body: Operations.lookupSubscriptions.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1241,11 +1241,11 @@ public struct Client: APIProtocol {
     /// Create, update, or delete subscriptions
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/subscriptions/modify`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)`.
+    public func modifySubscriptions(_ input: Operations.modifySubscriptions.Input) async throws -> Operations.modifySubscriptions.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.id,
+            forOperation: Operations.modifySubscriptions.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/subscriptions/modify",
@@ -1280,7 +1280,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_subscriptions_sol_modify.Output.Ok.Body
+                    let body: Operations.modifySubscriptions.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1361,11 +1361,11 @@ public struct Client: APIProtocol {
     /// Fetch the current authenticated user's information
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/public/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get`.
-    public func get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current(_ input: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Input) async throws -> Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)`.
+    public func getCurrentUser(_ input: Operations.getCurrentUser.Input) async throws -> Operations.getCurrentUser.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.id,
+            forOperation: Operations.getCurrentUser.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/public/users/current",
@@ -1390,7 +1390,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current.Output.Ok.Body
+                    let body: Operations.getCurrentUser.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1449,11 +1449,11 @@ public struct Client: APIProtocol {
     /// Discover all user identities based on email addresses or user record names
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/discover`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)`.
+    public func discoverUserIdentities(_ input: Operations.discoverUserIdentities.Input) async throws -> Operations.discoverUserIdentities.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.id,
+            forOperation: Operations.discoverUserIdentities.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/public/users/discover",
@@ -1487,7 +1487,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_discover.Output.Ok.Body
+                    let body: Operations.discoverUserIdentities.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1568,12 +1568,12 @@ public struct Client: APIProtocol {
     /// Fetch contacts (This endpoint is deprecated)
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/lookup/contacts`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)`.
     @available(*, deprecated)
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Output {
+    public func lookupContacts(_ input: Operations.lookupContacts.Input) async throws -> Operations.lookupContacts.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.id,
+            forOperation: Operations.lookupContacts.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/public/users/lookup/contacts",
@@ -1607,7 +1607,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_lookup_sol_contacts.Output.Ok.Body
+                    let body: Operations.lookupContacts.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1688,11 +1688,11 @@ public struct Client: APIProtocol {
     /// Upload binary assets to CloudKit
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/upload`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)`.
+    public func uploadAssets(_ input: Operations.uploadAssets.Input) async throws -> Operations.uploadAssets.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.id,
+            forOperation: Operations.uploadAssets.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/assets/upload",
@@ -1754,7 +1754,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_assets_sol_upload.Output.Ok.Body
+                    let body: Operations.uploadAssets.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1835,11 +1835,11 @@ public struct Client: APIProtocol {
     /// Create an Apple Push Notification service (APNs) token
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)`.
+    public func createToken(_ input: Operations.createToken.Input) async throws -> Operations.createToken.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.id,
+            forOperation: Operations.createToken.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/tokens/create",
@@ -1874,7 +1874,7 @@ public struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_create.Output.Ok.Body
+                    let body: Operations.createToken.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1955,11 +1955,11 @@ public struct Client: APIProtocol {
     /// Register a token for push notifications
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post`.
-    public func post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register(_ input: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Input) async throws -> Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.Output {
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)`.
+    public func registerToken(_ input: Operations.registerToken.Input) async throws -> Operations.registerToken.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_tokens_sol_register.id,
+            forOperation: Operations.registerToken.id,
             serializer: { input in
                 let path = try converter.renderedPath(
                     template: "/database/{}/{}/{}/{}/tokens/register",

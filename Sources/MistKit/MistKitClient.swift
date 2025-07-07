@@ -99,11 +99,23 @@ struct AuthenticationMiddleware: ClientMiddleware {
         operationID: String,
         next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
     ) async throws -> (HTTPResponse, HTTPBody?) {
-      let modifiedRequest = request
+        var modifiedRequest = request
         
-        // Add authentication query parameters
-        var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)!
+        // Get the current path
+        let requestPath = request.path ?? ""
+        let fullURLString = baseURL.absoluteString + (requestPath.hasPrefix("/") ? String(requestPath.dropFirst()) : requestPath)
+        
+        // Parse and add authentication query parameters
+        var urlComponents = URLComponents(string: fullURLString)!
         var queryItems = urlComponents.queryItems ?? []
+        
+        // Parse existing query items from the request if any
+        if let queryString = request.path?.split(separator: "?").last {
+            let existingQuery = String(queryString)
+            if let existingComponents = URLComponents(string: "?" + existingQuery) {
+                queryItems.append(contentsOf: existingComponents.queryItems ?? [])
+            }
+        }
         
         queryItems.append(URLQueryItem(name: "ckAPIToken", value: configuration.apiToken))
         if let webAuthToken = configuration.webAuthToken {
@@ -112,7 +124,13 @@ struct AuthenticationMiddleware: ClientMiddleware {
         
         urlComponents.queryItems = queryItems
         
-        return try await next(modifiedRequest, body, urlComponents.url!)
+        // Update the request path with query parameters
+        if let updatedURL = urlComponents.url {
+            let newPath = updatedURL.absoluteString.replacingOccurrences(of: baseURL.absoluteString, with: "/")
+            modifiedRequest.path = newPath
+        }
+        
+        return try await next(modifiedRequest, body, baseURL)
     }
 }
 
@@ -126,7 +144,8 @@ struct LoggingMiddleware: ClientMiddleware {
         next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
     ) async throws -> (HTTPResponse, HTTPBody?) {
         #if DEBUG
-        print("🌐 CloudKit Request: \(request.method.rawValue) \(baseURL.absoluteString)")
+        let fullPath = baseURL.absoluteString + (request.path ?? "")
+        print("🌐 CloudKit Request: \(request.method.rawValue) \(fullPath)")
         #endif
         
         let (response, responseBody) = try await next(request, body, baseURL)
