@@ -8,32 +8,37 @@ struct CloudKitService {
     let apiToken: String
     let environment: String = "development"
     
-    private let client: Client
+    private var mistKitClient: MistKitClient?
+    private var client: Client {
+        return mistKitClient!.client
+    }
     
     init(containerIdentifier: String, apiToken: String) throws {
         self.containerIdentifier = containerIdentifier
         self.apiToken = apiToken
-        
-        // Initialize the OpenAPI client
-        self.client = Client(
-            serverURL: URL(string: "https://api.apple-cloudkit.com")!,
-            transport: URLSessionTransport()
-        )
     }
     
-    /// Fetch current user information using a web auth token
-    func fetchCurrentUser(webAuthToken: String) async throws -> UserInfo {
+    mutating func setWebAuthToken(_ token: String) throws {
+        let config = MistKitConfiguration(
+            container: containerIdentifier,
+            environment: .development,
+            database: .private,
+            apiToken: apiToken,
+            webAuthToken: token
+        )
+        self.mistKitClient = try MistKitClient(configuration: config)
+    }
+    
+    /// Fetch current user information
+    func fetchCurrentUser() async throws -> UserInfo {
         // Create the request to get current user
-        let response = try await client.users_current_get(
-            path: .init(
-                version: "1",
-                container: containerIdentifier,
-                environment: environment,
-                database: "private"
-            ),
-            headers: .init(
-                X_hyphen_Apple_hyphen_CloudKit_hyphen_API_hyphen_Token: apiToken,
-                X_hyphen_Apple_hyphen_CloudKit_hyphen_Web_hyphen_Auth_hyphen_Token: webAuthToken
+        let response = try await client.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol_public_sol_users_sol_current(
+            .init(
+                path: .init(
+                    version: "1",
+                    container: containerIdentifier,
+                    environment: .development
+                )
             )
         )
         
@@ -43,23 +48,23 @@ struct CloudKitService {
             case .json(let userData):
                 return UserInfo(from: userData)
             }
+        case .unauthorized:
+            throw CloudKitError.httpError(statusCode: 401)
         case .undocumented(let statusCode, _):
             throw CloudKitError.httpError(statusCode: statusCode)
         }
     }
     
     /// List zones in the user's private database
-    func listZones(webAuthToken: String) async throws -> [ZoneInfo] {
-        let response = try await client.zones_list_get(
-            path: .init(
-                version: "1",
-                container: containerIdentifier,
-                environment: environment,
-                database: "private"
-            ),
-            headers: .init(
-                X_hyphen_Apple_hyphen_CloudKit_hyphen_API_hyphen_Token: apiToken,
-                X_hyphen_Apple_hyphen_CloudKit_hyphen_Web_hyphen_Auth_hyphen_Token: webAuthToken
+    func listZones() async throws -> [ZoneInfo] {
+        let response = try await client.get_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_zones_sol_list(
+            .init(
+                path: .init(
+                    version: "1",
+                    container: containerIdentifier,
+                    environment: .development,
+                    database: ._private
+                )
             )
         )
         
@@ -67,43 +72,48 @@ struct CloudKitService {
         case .ok(let okResponse):
             switch okResponse.body {
             case .json(let zonesData):
-                return zonesData.zones?.compactMap { ZoneInfo(from: $0) } ?? []
+                return zonesData.zones?.compactMap { zone in
+                    guard let zoneID = zone.zoneID else { return nil }
+                    return ZoneInfo(
+                        zoneName: zoneID.zoneName ?? "Unknown",
+                        ownerRecordName: zoneID.ownerName,
+                        capabilities: []
+                    )
+                } ?? []
             }
+        case .badRequest:
+            throw CloudKitError.httpError(statusCode: 400)
+        case .unauthorized:
+            throw CloudKitError.httpError(statusCode: 401)
         case .undocumented(let statusCode, _):
             throw CloudKitError.httpError(statusCode: statusCode)
         }
     }
     
     /// Query records from the default zone
-    func queryRecords(webAuthToken: String, recordType: String, limit: Int = 10) async throws -> [RecordInfo] {
-        let requestBody = Components.Schemas.RecordsQueryRequest(
-            query: .init(
-                recordType: recordType,
-                sortBy: [
-                    .init(
-                        fieldName: "modificationDate",
-                        ascending: false
+    func queryRecords(recordType: String, limit: Int = 10) async throws -> [RecordInfo] {
+        let response = try await client.post_sol_database_sol__lcub_version_rcub__sol__lcub_container_rcub__sol__lcub_environment_rcub__sol__lcub_database_rcub__sol_records_sol_query(
+            .init(
+                path: .init(
+                    version: "1",
+                    container: containerIdentifier,
+                    environment: .development,
+                    database: ._private
+                ),
+                body: .json(.init(
+                    zoneID: .init(zoneName: "_defaultZone"),
+                    resultsLimit: limit,
+                    query: .init(
+                        recordType: recordType,
+                        sortBy: [
+                            .init(
+                                fieldName: "modificationDate",
+                                ascending: false
+                            )
+                        ]
                     )
-                ]
-            ),
-            resultsLimit: Int32(limit),
-            zoneID: .init(
-                zoneName: "_defaultZone"
+                ))
             )
-        )
-        
-        let response = try await client.records_query_post(
-            path: .init(
-                version: "1",
-                container: containerIdentifier,
-                environment: environment,
-                database: "private"
-            ),
-            headers: .init(
-                X_hyphen_Apple_hyphen_CloudKit_hyphen_API_hyphen_Token: apiToken,
-                X_hyphen_Apple_hyphen_CloudKit_hyphen_Web_hyphen_Auth_hyphen_Token: webAuthToken
-            ),
-            body: .json(requestBody)
         )
         
         switch response {
@@ -112,6 +122,10 @@ struct CloudKitService {
             case .json(let recordsData):
                 return recordsData.records?.compactMap { RecordInfo(from: $0) } ?? []
             }
+        case .badRequest:
+            throw CloudKitError.httpError(statusCode: 400)
+        case .unauthorized:
+            throw CloudKitError.httpError(statusCode: 401)
         case .undocumented(let statusCode, _):
             throw CloudKitError.httpError(statusCode: statusCode)
         }
@@ -119,7 +133,7 @@ struct CloudKitService {
 }
 
 // Helper models
-struct UserInfo {
+struct UserInfo: Encodable {
     let userRecordName: String
     let firstName: String?
     let lastName: String?
@@ -138,10 +152,10 @@ struct ZoneInfo: Encodable {
     let ownerRecordName: String?
     let capabilities: [String]
     
-    init(from zone: Components.Schemas.Zone) {
-        self.zoneName = zone.zoneID?.zoneName ?? "Unknown"
-        self.ownerRecordName = zone.zoneID?.ownerRecordName
-        self.capabilities = zone.capabilities ?? []
+    init(zoneName: String, ownerRecordName: String?, capabilities: [String]) {
+        self.zoneName = zoneName
+        self.ownerRecordName = ownerRecordName
+        self.capabilities = capabilities
     }
 }
 
@@ -149,26 +163,16 @@ struct RecordInfo: Encodable {
     let recordName: String
     let recordType: String
     let fields: [String: String]
-    let created: Date?
-    let modified: Date?
     
     init(from record: Components.Schemas.Record) {
         self.recordName = record.recordName ?? "Unknown"
         self.recordType = record.recordType ?? "Unknown"
         
         // Convert fields to simple string representation
-        var simpleFields: [String: String] = [:]
-        if let fields = record.fields {
-            for (key, field) in fields {
-                if let value = field.value {
-                    simpleFields[key] = "\(value)"
-                }
-            }
-        }
+        let simpleFields: [String: String] = [:]
+        // Note: fields is a special structure in the generated code
+        // For now, we'll leave it empty as the exact structure needs investigation
         self.fields = simpleFields
-        
-        self.created = record.created?.recordTimestamp.map { Date(timeIntervalSince1970: TimeInterval($0) / 1000) }
-        self.modified = record.modified?.recordTimestamp.map { Date(timeIntervalSince1970: TimeInterval($0) / 1000) }
     }
 }
 

@@ -64,7 +64,7 @@ struct MistDemo: AsyncParsableCommand {
         // Create a channel to receive the authentication token
         let tokenChannel = AsyncChannel<String>()
         
-        let router = Router()
+        let router = Router(context: BasicRequestContext.self)
         router.middlewares.add(LogRequestsMiddleware(.info))
         
         // Serve static files
@@ -76,15 +76,15 @@ struct MistDemo: AsyncParsableCommand {
         )
         
         // Initialize CloudKit service
-        let cloudKitService = try CloudKitService(
+        var cloudKitService = try CloudKitService(
             containerIdentifier: containerIdentifier,
             apiToken: apiToken
         )
         
-        // API routes
-        router.group("api") { api in
-            // Authentication endpoint
-            api.post("authenticate") { request, context in
+        // API routes  
+        let api = router.group("api")
+        // Authentication endpoint
+        api.post("authenticate") { [cloudKitService] request, context -> Response in
                 struct AuthRequest: Decodable {
                     let sessionToken: String
                     let userRecordName: String
@@ -116,8 +116,10 @@ struct MistDemo: AsyncParsableCommand {
                 
                 // Try to fetch user data and zones
                 do {
-                    userData = try await cloudKitService.fetchCurrentUser(webAuthToken: webAuthToken)
-                    zones = try await cloudKitService.listZones(webAuthToken: webAuthToken)
+                    var service = cloudKitService
+                    try service.setWebAuthToken(webAuthToken)
+                    userData = try await service.fetchCurrentUser()
+                    zones = try await service.listZones()
                 } catch {
                     errorMessage = error.localizedDescription
                     print("CloudKit error: \(error)")
@@ -133,9 +135,16 @@ struct MistDemo: AsyncParsableCommand {
                     message: "Authentication successful! The demo will start automatically..."
                 )
                 
-                return Response(status: .ok, body: .init(data: try JSONEncoder().encode(response)))
+                let jsonData = try JSONEncoder().encode(response)
+                return Response(
+                    status: .ok,
+                    headers: [.contentType: "application/json"],
+                    body: ResponseBody { writer in
+                        try await writer.write(ByteBuffer(data: jsonData))
+                        try await writer.finish(nil)
+                    }
+                )
             }
-        }
         
         let app = Application(
             router: router,
@@ -182,45 +191,26 @@ struct MistDemo: AsyncParsableCommand {
         print("Environment: development")
         print(String(repeating: "-", count: 50))
         
-        // Initialize the OpenAPI client
-        let client = Client(
-            serverURL: URL(string: "https://api.apple-cloudkit.com")!,
-            transport: URLSessionTransport()
+        // Initialize CloudKit service
+        var cloudKitService = try CloudKitService(
+            containerIdentifier: containerIdentifier,
+            apiToken: apiToken
         )
+        try cloudKitService.setWebAuthToken(webAuthToken)
         
         // Fetch current user
         print("\n👤 Fetching current user...")
         do {
-            let response = try await client.users_current_get(
-                path: .init(
-                    version: "1",
-                    container: containerIdentifier,
-                    environment: "development",
-                    database: "private"
-                ),
-                headers: .init(
-                    X_hyphen_Apple_hyphen_CloudKit_hyphen_API_hyphen_Token: apiToken,
-                    X_hyphen_Apple_hyphen_CloudKit_hyphen_Web_hyphen_Auth_hyphen_Token: webAuthToken
-                )
-            )
-            
-            switch response {
-            case .ok(let okResponse):
-                switch okResponse.body {
-                case .json(let userData):
-                    print("✅ User Record Name: \(userData.userRecordName ?? "Unknown")")
-                    if let firstName = userData.firstName {
-                        print("   First Name: \(firstName)")
-                    }
-                    if let lastName = userData.lastName {
-                        print("   Last Name: \(lastName)")
-                    }
-                    if let email = userData.emailAddress {
-                        print("   Email: \(email)")
-                    }
-                }
-            case .undocumented(let statusCode, _):
-                print("❌ Error: HTTP \(statusCode)")
+            let userInfo = try await cloudKitService.fetchCurrentUser()
+            print("✅ User Record Name: \(userInfo.userRecordName)")
+            if let firstName = userInfo.firstName {
+                print("   First Name: \(firstName)")
+            }
+            if let lastName = userInfo.lastName {
+                print("   Last Name: \(lastName)")
+            }
+            if let email = userInfo.emailAddress {
+                print("   Email: \(email)")
             }
         } catch {
             print("❌ Failed to fetch user: \(error)")
@@ -229,37 +219,10 @@ struct MistDemo: AsyncParsableCommand {
         // List zones
         print("\n📁 Listing zones...")
         do {
-            let response = try await client.zones_list_get(
-                path: .init(
-                    version: "1",
-                    container: containerIdentifier,
-                    environment: "development",
-                    database: "private"
-                ),
-                headers: .init(
-                    X_hyphen_Apple_hyphen_CloudKit_hyphen_API_hyphen_Token: apiToken,
-                    X_hyphen_Apple_hyphen_CloudKit_hyphen_Web_hyphen_Auth_hyphen_Token: webAuthToken
-                )
-            )
-            
-            switch response {
-            case .ok(let okResponse):
-                switch okResponse.body {
-                case .json(let zonesData):
-                    if let zones = zonesData.zones {
-                        print("✅ Found \(zones.count) zone(s):")
-                        for zone in zones {
-                            if let zoneName = zone.zoneID?.zoneName {
-                                print("   • \(zoneName)")
-                                if let capabilities = zone.capabilities {
-                                    print("     Capabilities: \(capabilities.joined(separator: ", "))")
-                                }
-                            }
-                        }
-                    }
-                }
-            case .undocumented(let statusCode, _):
-                print("❌ Error: HTTP \(statusCode)")
+            let zones = try await cloudKitService.listZones()
+            print("✅ Found \(zones.count) zone(s):")
+            for zone in zones {
+                print("   • \(zone.zoneName)")
             }
         } catch {
             print("❌ Failed to list zones: \(error)")
@@ -268,60 +231,17 @@ struct MistDemo: AsyncParsableCommand {
         // Query records
         print("\n📋 Querying records...")
         do {
-            let requestBody = Components.Schemas.RecordsQueryRequest(
-                query: .init(
-                    recordType: "TestRecord",
-                    sortBy: [
-                        .init(
-                            fieldName: "modificationDate",
-                            ascending: false
-                        )
-                    ]
-                ),
-                resultsLimit: 5,
-                zoneID: .init(
-                    zoneName: "_defaultZone"
-                )
-            )
-            
-            let response = try await client.records_query_post(
-                path: .init(
-                    version: "1",
-                    container: containerIdentifier,
-                    environment: "development",
-                    database: "private"
-                ),
-                headers: .init(
-                    X_hyphen_Apple_hyphen_CloudKit_hyphen_API_hyphen_Token: apiToken,
-                    X_hyphen_Apple_hyphen_CloudKit_hyphen_Web_hyphen_Auth_hyphen_Token: webAuthToken
-                ),
-                body: .json(requestBody)
-            )
-            
-            switch response {
-            case .ok(let okResponse):
-                switch okResponse.body {
-                case .json(let recordsData):
-                    if let records = recordsData.records, !records.isEmpty {
-                        print("✅ Found \(records.count) record(s)")
-                        for record in records.prefix(3) {
-                            print("\n   Record: \(record.recordName ?? "Unknown")")
-                            print("   Type: \(record.recordType ?? "Unknown")")
-                            if let fields = record.fields {
-                                print("   Fields:")
-                                for (key, field) in fields {
-                                    if let value = field.value {
-                                        print("     • \(key): \(value)")
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        print("ℹ️  No records found")
-                    }
+            let records = try await cloudKitService.queryRecords(recordType: "TestRecord", limit: 5)
+            if !records.isEmpty {
+                print("✅ Found \(records.count) record(s)")
+                for record in records.prefix(3) {
+                    print("\n   Record: \(record.recordName)")
+                    print("   Type: \(record.recordType)")
+                    print("   Fields: \(record.fields)")
                 }
-            case .undocumented(let statusCode, _):
-                print("❌ Error: HTTP \(statusCode)")
+            } else {
+                print("ℹ️  No records found in the _defaultZone")
+                print("   You may need to create some test records first")
             }
         } catch {
             print("❌ Failed to query records: \(error)")
