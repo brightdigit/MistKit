@@ -101,22 +101,25 @@ struct AuthenticationMiddleware: ClientMiddleware {
     ) async throws -> (HTTPResponse, HTTPBody?) {
         var modifiedRequest = request
         
-        // Get the current path
+        // Get the current path without query parameters
         let requestPath = request.path ?? ""
-        let fullURLString = baseURL.absoluteString + (requestPath.hasPrefix("/") ? String(requestPath.dropFirst()) : requestPath)
+        let pathComponents = requestPath.split(separator: "?", maxSplits: 1)
+        let cleanPath = String(pathComponents.first ?? "")
         
-        // Parse and add authentication query parameters
-        var urlComponents = URLComponents(string: fullURLString)!
-        var queryItems = urlComponents.queryItems ?? []
+        // Create URL components from the clean path
+        var urlComponents = URLComponents()
+        urlComponents.path = cleanPath
         
-        // Parse existing query items from the request if any
-        if let queryString = request.path?.split(separator: "?").last {
-            let existingQuery = String(queryString)
+        // Parse existing query items if any
+        if pathComponents.count > 1 {
+            let existingQuery = String(pathComponents[1])
             if let existingComponents = URLComponents(string: "?" + existingQuery) {
-                queryItems.append(contentsOf: existingComponents.queryItems ?? [])
+                urlComponents.queryItems = existingComponents.queryItems ?? []
             }
         }
         
+        // Add authentication parameters
+        var queryItems = urlComponents.queryItems ?? []
         queryItems.append(URLQueryItem(name: "ckAPIToken", value: configuration.apiToken))
         if let webAuthToken = configuration.webAuthToken {
             queryItems.append(URLQueryItem(name: "ckWebAuthToken", value: webAuthToken))
@@ -124,12 +127,13 @@ struct AuthenticationMiddleware: ClientMiddleware {
         
         urlComponents.queryItems = queryItems
         
-        // Update the request path with query parameters
-        if let updatedURL = urlComponents.url {
-            let newPath = updatedURL.absoluteString.replacingOccurrences(of: baseURL.absoluteString, with: "/")
-            modifiedRequest.path = newPath
+        // Build the new path with query parameters
+        if let query = urlComponents.query {
+            modifiedRequest.path = cleanPath + "?" + query
+        } else {
+            modifiedRequest.path = cleanPath
         }
-        
+      
         return try await next(modifiedRequest, body, baseURL)
     }
 }
@@ -146,12 +150,18 @@ struct LoggingMiddleware: ClientMiddleware {
         #if DEBUG
         let fullPath = baseURL.absoluteString + (request.path ?? "")
         print("🌐 CloudKit Request: \(request.method.rawValue) \(fullPath)")
+        print("   Base URL: \(baseURL.absoluteString)")
+        print("   Path: \(request.path ?? "none")")
+        print("   Headers: \(request.headerFields)")
         #endif
         
         let (response, responseBody) = try await next(request, body, baseURL)
         
         #if DEBUG
         print("✅ CloudKit Response: \(response.status.code)")
+        if response.status.code == 421 {
+            print("⚠️  421 Misdirected Request - The server cannot produce a response for this request")
+        }
         #endif
         
         return (response, responseBody)
