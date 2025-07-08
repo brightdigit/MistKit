@@ -35,7 +35,8 @@ struct CloudKitService {
                 path: .init(
                     version: "1",
                     container: containerIdentifier,
-                    environment: .development
+                    environment: .development,
+                    database: ._private
                 )
             )
         )
@@ -46,10 +47,45 @@ struct CloudKitService {
             case .json(let userData):
                 return UserInfo(from: userData)
             }
-        case .unauthorized:
-            throw CloudKitError.httpError(statusCode: 401)
-        case .undocumented(let statusCode, _):
-            throw CloudKitError.httpError(statusCode: statusCode)
+        case .unauthorized(let unauthorizedResponse):
+            // Try to extract error details from the response body
+            if case .json(let errorResponse) = unauthorizedResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 401,
+                    serverErrorCode: errorResponse.serverErrorCode,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 401)
+            }
+        case .undocumented(let statusCode, let undocumentedResponse):
+            // Try to decode the response body as an error response
+            if let responseBody = undocumentedResponse.body {
+                let errorData: Data
+                do {
+                    errorData = try await Data(collecting: responseBody, upTo: 1024 * 1024) // 1MB limit
+                } catch {
+                    throw CloudKitError.httpError(statusCode: statusCode)
+                }
+                
+                do {
+                    let errorResponse = try JSONDecoder().decode(Components.Schemas.ErrorResponse.self, from: errorData)
+                    throw CloudKitError.httpErrorWithDetails(
+                        statusCode: statusCode,
+                        serverErrorCode: errorResponse.serverErrorCode,
+                        reason: errorResponse.reason
+                    )
+                } catch {
+                    // If we can't decode as ErrorResponse, try to get raw text
+                    if let errorText = String(data: errorData, encoding: .utf8) {
+                        throw CloudKitError.httpErrorWithRawResponse(statusCode: statusCode, rawResponse: errorText)
+                    } else {
+                        throw CloudKitError.httpError(statusCode: statusCode)
+                    }
+                }
+            } else {
+                throw CloudKitError.httpError(statusCode: statusCode)
+            }
         }
     }
     
@@ -79,12 +115,52 @@ struct CloudKitService {
                     )
                 } ?? []
             }
-        case .badRequest:
-            throw CloudKitError.httpError(statusCode: 400)
-        case .unauthorized:
-            throw CloudKitError.httpError(statusCode: 401)
-        case .undocumented(let statusCode, _):
-            throw CloudKitError.httpError(statusCode: statusCode)
+        case .badRequest(let badRequestResponse):
+            if case .json(let errorResponse) = badRequestResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 400,
+                    serverErrorCode: errorResponse.serverErrorCode,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 400)
+            }
+        case .unauthorized(let unauthorizedResponse):
+            if case .json(let errorResponse) = unauthorizedResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 401,
+                    serverErrorCode: errorResponse.serverErrorCode,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 401)
+            }
+        case .undocumented(let statusCode, let undocumentedResponse):
+            if let responseBody = undocumentedResponse.body {
+                let errorData: Data
+                do {
+                    errorData = try await Data(collecting: responseBody, upTo: 1024 * 1024)
+                } catch {
+                    throw CloudKitError.httpError(statusCode: statusCode)
+                }
+                
+                do {
+                    let errorResponse = try JSONDecoder().decode(Components.Schemas.ErrorResponse.self, from: errorData)
+                    throw CloudKitError.httpErrorWithDetails(
+                        statusCode: statusCode,
+                        serverErrorCode: errorResponse.serverErrorCode,
+                        reason: errorResponse.reason
+                    )
+                } catch {
+                    if let errorText = String(data: errorData, encoding: .utf8) {
+                        throw CloudKitError.httpErrorWithRawResponse(statusCode: statusCode, rawResponse: errorText)
+                    } else {
+                        throw CloudKitError.httpError(statusCode: statusCode)
+                    }
+                }
+            } else {
+                throw CloudKitError.httpError(statusCode: statusCode)
+            }
         }
     }
     
@@ -120,12 +196,52 @@ struct CloudKitService {
             case .json(let recordsData):
                 return recordsData.records?.compactMap { RecordInfo(from: $0) } ?? []
             }
-        case .badRequest:
-            throw CloudKitError.httpError(statusCode: 400)
-        case .unauthorized:
-            throw CloudKitError.httpError(statusCode: 401)
-        case .undocumented(let statusCode, _):
-            throw CloudKitError.httpError(statusCode: statusCode)
+        case .badRequest(let badRequestResponse):
+            if case .json(let errorResponse) = badRequestResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 400,
+                    serverErrorCode: errorResponse.serverErrorCode,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 400)
+            }
+        case .unauthorized(let unauthorizedResponse):
+            if case .json(let errorResponse) = unauthorizedResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 401,
+                    serverErrorCode: errorResponse.serverErrorCode,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 401)
+            }
+        case .undocumented(let statusCode, let undocumentedResponse):
+            if let responseBody = undocumentedResponse.body {
+                let errorData: Data
+                do {
+                    errorData = try await Data(collecting: responseBody, upTo: 1024 * 1024)
+                } catch {
+                    throw CloudKitError.httpError(statusCode: statusCode)
+                }
+                
+                do {
+                    let errorResponse = try JSONDecoder().decode(Components.Schemas.ErrorResponse.self, from: errorData)
+                    throw CloudKitError.httpErrorWithDetails(
+                        statusCode: statusCode,
+                        serverErrorCode: errorResponse.serverErrorCode,
+                        reason: errorResponse.reason
+                    )
+                } catch {
+                    if let errorText = String(data: errorData, encoding: .utf8) {
+                        throw CloudKitError.httpErrorWithRawResponse(statusCode: statusCode, rawResponse: errorText)
+                    } else {
+                        throw CloudKitError.httpError(statusCode: statusCode)
+                    }
+                }
+            } else {
+                throw CloudKitError.httpError(statusCode: statusCode)
+            }
         }
     }
 }
@@ -176,12 +292,25 @@ struct RecordInfo: Encodable {
 
 enum CloudKitError: LocalizedError {
     case httpError(statusCode: Int)
+    case httpErrorWithDetails(statusCode: Int, serverErrorCode: String?, reason: String?)
+    case httpErrorWithRawResponse(statusCode: Int, rawResponse: String)
     case invalidResponse
     
     var errorDescription: String? {
         switch self {
         case .httpError(let statusCode):
             return "CloudKit API error: HTTP \(statusCode)"
+        case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason):
+            var message = "CloudKit API error: HTTP \(statusCode)"
+            if let serverErrorCode = serverErrorCode {
+                message += "\nServer Error Code: \(serverErrorCode)"
+            }
+            if let reason = reason {
+                message += "\nReason: \(reason)"
+            }
+            return message
+        case .httpErrorWithRawResponse(let statusCode, let rawResponse):
+            return "CloudKit API error: HTTP \(statusCode)\nRaw Response: \(rawResponse)"
         case .invalidResponse:
             return "Invalid response from CloudKit"
         }

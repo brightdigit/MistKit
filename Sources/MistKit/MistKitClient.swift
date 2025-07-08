@@ -91,6 +91,7 @@ public enum Database: String, Sendable  {
 /// Authentication middleware for CloudKit requests
 struct AuthenticationMiddleware: ClientMiddleware {
     let configuration: MistKitConfiguration
+    private let tokenEncoder = CharacterMapEncoder()
     
     func intercept(
         _ request: HTTPRequest,
@@ -122,7 +123,9 @@ struct AuthenticationMiddleware: ClientMiddleware {
         var queryItems = urlComponents.queryItems ?? []
         queryItems.append(URLQueryItem(name: "ckAPIToken", value: configuration.apiToken))
         if let webAuthToken = configuration.webAuthToken {
-            queryItems.append(URLQueryItem(name: "ckWebAuthToken", value: webAuthToken))
+            // Encode the web authentication token using CharacterMapEncoder
+            let encodedWebAuthToken = tokenEncoder.encode(webAuthToken)
+            queryItems.append(URLQueryItem(name: "ckWebAuthToken", value: encodedWebAuthToken))
         }
         
         urlComponents.queryItems = queryItems
@@ -153,6 +156,22 @@ struct LoggingMiddleware: ClientMiddleware {
         print("   Base URL: \(baseURL.absoluteString)")
         print("   Path: \(request.path ?? "none")")
         print("   Headers: \(request.headerFields)")
+        
+        // Log query parameters for debugging authentication
+        if let path = request.path, let url = URL(string: path, relativeTo: baseURL) {
+            if let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
+                if let queryItems = components.queryItems {
+                    print("   Query Parameters:")
+                    for item in queryItems {
+                        if item.name == "ckWebAuthToken" {
+                            print("     \(item.name): \(item.value?.prefix(20) ?? "nil")... (encoded)")
+                        } else {
+                            print("     \(item.name): \(item.value ?? "nil")")
+                        }
+                    }
+                }
+            }
+        }
         #endif
         
         let (response, responseBody) = try await next(request, body, baseURL)

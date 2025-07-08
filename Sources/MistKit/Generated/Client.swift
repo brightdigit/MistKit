@@ -1360,19 +1360,20 @@ public struct Client: APIProtocol {
     ///
     /// Fetch the current authenticated user's information
     ///
-    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/public/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)`.
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/current`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)`.
     public func getCurrentUser(_ input: Operations.getCurrentUser.Input) async throws -> Operations.getCurrentUser.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getCurrentUser.id,
             serializer: { input in
                 let path = try converter.renderedPath(
-                    template: "/database/{}/{}/{}/public/users/current",
+                    template: "/database/{}/{}/{}/{}/users/current",
                     parameters: [
                         input.path.version,
                         input.path.container,
-                        input.path.environment
+                        input.path.environment,
+                        input.path.database
                     ]
                 )
                 var request: HTTPTypes.HTTPRequest = .init(
@@ -1448,19 +1449,20 @@ public struct Client: APIProtocol {
     ///
     /// Discover all user identities based on email addresses or user record names
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/discover`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/discover`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)`.
     public func discoverUserIdentities(_ input: Operations.discoverUserIdentities.Input) async throws -> Operations.discoverUserIdentities.Output {
         try await client.send(
             input: input,
             forOperation: Operations.discoverUserIdentities.id,
             serializer: { input in
                 let path = try converter.renderedPath(
-                    template: "/database/{}/{}/{}/public/users/discover",
+                    template: "/database/{}/{}/{}/{}/users/discover",
                     parameters: [
                         input.path.version,
                         input.path.container,
-                        input.path.environment
+                        input.path.environment,
+                        input.path.database
                     ]
                 )
                 var request: HTTPTypes.HTTPRequest = .init(
@@ -1567,8 +1569,8 @@ public struct Client: APIProtocol {
     ///
     /// Fetch contacts (This endpoint is deprecated)
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/lookup/contacts`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/contacts`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)`.
     @available(*, deprecated)
     public func lookupContacts(_ input: Operations.lookupContacts.Input) async throws -> Operations.lookupContacts.Output {
         try await client.send(
@@ -1576,11 +1578,12 @@ public struct Client: APIProtocol {
             forOperation: Operations.lookupContacts.id,
             serializer: { input in
                 let path = try converter.renderedPath(
-                    template: "/database/{}/{}/{}/public/users/lookup/contacts",
+                    template: "/database/{}/{}/{}/{}/users/lookup/contacts",
                     parameters: [
                         input.path.version,
                         input.path.container,
-                        input.path.environment
+                        input.path.environment,
+                        input.path.database
                     ]
                 )
                 var request: HTTPTypes.HTTPRequest = .init(

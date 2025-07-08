@@ -92,22 +92,22 @@ public protocol APIProtocol: Sendable {
     ///
     /// Fetch the current authenticated user's information
     ///
-    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/public/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)`.
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/current`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)`.
     func getCurrentUser(_ input: Operations.getCurrentUser.Input) async throws -> Operations.getCurrentUser.Output
     /// Discover User Identities
     ///
     /// Discover all user identities based on email addresses or user record names
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/discover`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/discover`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)`.
     func discoverUserIdentities(_ input: Operations.discoverUserIdentities.Input) async throws -> Operations.discoverUserIdentities.Output
     /// Lookup Contacts (Deprecated)
     ///
     /// Fetch contacts (This endpoint is deprecated)
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/lookup/contacts`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/contacts`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)`.
     @available(*, deprecated)
     func lookupContacts(_ input: Operations.lookupContacts.Input) async throws -> Operations.lookupContacts.Output
     /// Upload Assets
@@ -322,8 +322,8 @@ extension APIProtocol {
     ///
     /// Fetch the current authenticated user's information
     ///
-    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/public/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)`.
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/current`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)`.
     public func getCurrentUser(
         path: Operations.getCurrentUser.Input.Path,
         headers: Operations.getCurrentUser.Input.Headers = .init()
@@ -337,8 +337,8 @@ extension APIProtocol {
     ///
     /// Discover all user identities based on email addresses or user record names
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/discover`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/discover`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)`.
     public func discoverUserIdentities(
         path: Operations.discoverUserIdentities.Input.Path,
         headers: Operations.discoverUserIdentities.Input.Headers = .init(),
@@ -354,8 +354,8 @@ extension APIProtocol {
     ///
     /// Fetch contacts (This endpoint is deprecated)
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/lookup/contacts`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/contacts`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)`.
     @available(*, deprecated)
     public func lookupContacts(
         path: Operations.lookupContacts.Input.Path,
@@ -4148,16 +4148,16 @@ public enum Operations {
     ///
     /// Fetch the current authenticated user's information
     ///
-    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/public/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)`.
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/current`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)`.
     public enum getCurrentUser {
         public static let id: Swift.String = "getCurrentUser"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/current/GET/path`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/path`.
             public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/current/GET/path/version`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/path/version`.
                 public var version: Components.Parameters.version
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/current/GET/path/container`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/path/container`.
                 public var container: Components.Parameters.container
                 /// Container environment
                 ///
@@ -4166,26 +4166,39 @@ public enum Operations {
                     case development = "development"
                     case production = "production"
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/current/GET/path/environment`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/path/environment`.
                 public var environment: Components.Parameters.environment
+                /// Database scope
+                ///
+                /// - Remark: Generated from `#/components/parameters/database`.
+                @frozen public enum database: String, Codable, Hashable, Sendable, CaseIterable {
+                    case _public = "public"
+                    case _private = "private"
+                    case shared = "shared"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/path/database`.
+                public var database: Components.Parameters.database
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - version:
                 ///   - container:
                 ///   - environment:
+                ///   - database:
                 public init(
                     version: Components.Parameters.version,
                     container: Components.Parameters.container,
-                    environment: Components.Parameters.environment
+                    environment: Components.Parameters.environment,
+                    database: Components.Parameters.database
                 ) {
                     self.version = version
                     self.container = container
                     self.environment = environment
+                    self.database = database
                 }
             }
             public var path: Operations.getCurrentUser.Input.Path
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/current/GET/header`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/header`.
             public struct Headers: Sendable, Hashable {
                 public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getCurrentUser.AcceptableContentType>]
                 /// Creates a new `Headers`.
@@ -4212,9 +4225,9 @@ public enum Operations {
         }
         @frozen public enum Output: Sendable, Hashable {
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/current/GET/responses/200/content`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/current/GET/responses/200/content/application\/json`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/responses/200/content/application\/json`.
                     case json(Components.Schemas.UserResponse)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
@@ -4241,7 +4254,7 @@ public enum Operations {
             }
             /// User information retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.getCurrentUser.Output.Ok)
@@ -4264,7 +4277,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/current/get(getCurrentUser)/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -4320,16 +4333,16 @@ public enum Operations {
     ///
     /// Discover all user identities based on email addresses or user record names
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/discover`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/discover`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)`.
     public enum discoverUserIdentities {
         public static let id: Swift.String = "discoverUserIdentities"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/path`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/path`.
             public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/path/version`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/path/version`.
                 public var version: Components.Parameters.version
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/path/container`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/path/container`.
                 public var container: Components.Parameters.container
                 /// Container environment
                 ///
@@ -4338,26 +4351,39 @@ public enum Operations {
                     case development = "development"
                     case production = "production"
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/path/environment`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/path/environment`.
                 public var environment: Components.Parameters.environment
+                /// Database scope
+                ///
+                /// - Remark: Generated from `#/components/parameters/database`.
+                @frozen public enum database: String, Codable, Hashable, Sendable, CaseIterable {
+                    case _public = "public"
+                    case _private = "private"
+                    case shared = "shared"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/path/database`.
+                public var database: Components.Parameters.database
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - version:
                 ///   - container:
                 ///   - environment:
+                ///   - database:
                 public init(
                     version: Components.Parameters.version,
                     container: Components.Parameters.container,
-                    environment: Components.Parameters.environment
+                    environment: Components.Parameters.environment,
+                    database: Components.Parameters.database
                 ) {
                     self.version = version
                     self.container = container
                     self.environment = environment
+                    self.database = database
                 }
             }
             public var path: Operations.discoverUserIdentities.Input.Path
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/header`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/header`.
             public struct Headers: Sendable, Hashable {
                 public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.discoverUserIdentities.AcceptableContentType>]
                 /// Creates a new `Headers`.
@@ -4369,15 +4395,15 @@ public enum Operations {
                 }
             }
             public var headers: Operations.discoverUserIdentities.Input.Headers
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/json`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/json/usersPayload`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/usersPayload`.
                     public struct usersPayloadPayload: Codable, Hashable, Sendable {
-                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/json/usersPayload/emailAddress`.
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/usersPayload/emailAddress`.
                         public var emailAddress: Swift.String?
-                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/json/usersPayload/userRecordName`.
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/usersPayload/userRecordName`.
                         public var userRecordName: Swift.String?
                         /// Creates a new `usersPayloadPayload`.
                         ///
@@ -4396,9 +4422,9 @@ public enum Operations {
                             case userRecordName
                         }
                     }
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/json/users`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/users`.
                     public typealias usersPayload = [Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayloadPayload]
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/json/users`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/users`.
                     public var users: Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayload?
                     /// Creates a new `jsonPayload`.
                     ///
@@ -4411,7 +4437,7 @@ public enum Operations {
                         case users
                     }
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/requestBody/content/application\/json`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/content/application\/json`.
                 case json(Operations.discoverUserIdentities.Input.Body.jsonPayload)
             }
             public var body: Operations.discoverUserIdentities.Input.Body
@@ -4433,9 +4459,9 @@ public enum Operations {
         }
         @frozen public enum Output: Sendable, Hashable {
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/responses/200/content`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/discover/POST/responses/200/content/application\/json`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/responses/200/content/application\/json`.
                     case json(Components.Schemas.DiscoverResponse)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
@@ -4462,7 +4488,7 @@ public enum Operations {
             }
             /// User identities discovered successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.discoverUserIdentities.Output.Ok)
@@ -4485,7 +4511,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -4508,7 +4534,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/discover/post(discoverUserIdentities)/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -4564,16 +4590,16 @@ public enum Operations {
     ///
     /// Fetch contacts (This endpoint is deprecated)
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/public/users/lookup/contacts`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/contacts`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)`.
     public enum lookupContacts {
         public static let id: Swift.String = "lookupContacts"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/path`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/path`.
             public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/path/version`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/path/version`.
                 public var version: Components.Parameters.version
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/path/container`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/path/container`.
                 public var container: Components.Parameters.container
                 /// Container environment
                 ///
@@ -4582,26 +4608,39 @@ public enum Operations {
                     case development = "development"
                     case production = "production"
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/path/environment`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/path/environment`.
                 public var environment: Components.Parameters.environment
+                /// Database scope
+                ///
+                /// - Remark: Generated from `#/components/parameters/database`.
+                @frozen public enum database: String, Codable, Hashable, Sendable, CaseIterable {
+                    case _public = "public"
+                    case _private = "private"
+                    case shared = "shared"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/path/database`.
+                public var database: Components.Parameters.database
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - version:
                 ///   - container:
                 ///   - environment:
+                ///   - database:
                 public init(
                     version: Components.Parameters.version,
                     container: Components.Parameters.container,
-                    environment: Components.Parameters.environment
+                    environment: Components.Parameters.environment,
+                    database: Components.Parameters.database
                 ) {
                     self.version = version
                     self.container = container
                     self.environment = environment
+                    self.database = database
                 }
             }
             public var path: Operations.lookupContacts.Input.Path
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/header`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/header`.
             public struct Headers: Sendable, Hashable {
                 public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupContacts.AcceptableContentType>]
                 /// Creates a new `Headers`.
@@ -4613,11 +4652,11 @@ public enum Operations {
                 }
             }
             public var headers: Operations.lookupContacts.Input.Headers
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/requestBody`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/requestBody/json`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/requestBody/json/contacts`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/requestBody/json/contacts`.
                     public var contacts: [OpenAPIRuntime.OpenAPIObjectContainer]?
                     /// Creates a new `jsonPayload`.
                     ///
@@ -4630,7 +4669,7 @@ public enum Operations {
                         case contacts
                     }
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/requestBody/content/application\/json`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/requestBody/content/application\/json`.
                 case json(Operations.lookupContacts.Input.Body.jsonPayload)
             }
             public var body: Operations.lookupContacts.Input.Body
@@ -4652,9 +4691,9 @@ public enum Operations {
         }
         @frozen public enum Output: Sendable, Hashable {
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/responses/200/content`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/public/users/lookup/contacts/POST/responses/200/content/application\/json`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/contacts/POST/responses/200/content/application\/json`.
                     case json(Components.Schemas.ContactsResponse)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
@@ -4681,7 +4720,7 @@ public enum Operations {
             }
             /// Contacts retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.lookupContacts.Output.Ok)
@@ -4704,7 +4743,7 @@ public enum Operations {
             }
             /// Bad request
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -4727,7 +4766,7 @@ public enum Operations {
             }
             /// Unauthorized
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/public/users/lookup/contacts/post(lookupContacts)/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)

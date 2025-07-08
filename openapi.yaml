@@ -432,7 +432,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /database/{version}/{container}/{environment}/public/users/current:
+  /database/{version}/{container}/{environment}/{database}/users/current:
     get:
       summary: Get Current User
       description: Fetch the current authenticated user's information
@@ -443,6 +443,7 @@ paths:
         - $ref: '#/components/parameters/version'
         - $ref: '#/components/parameters/container'
         - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
       responses:
         '200':
           description: User information retrieved successfully
@@ -453,7 +454,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /database/{version}/{container}/{environment}/public/users/discover:
+  /database/{version}/{container}/{environment}/{database}/users/discover:
     post:
       summary: Discover User Identities
       description: Discover all user identities based on email addresses or user record names
@@ -464,6 +465,7 @@ paths:
         - $ref: '#/components/parameters/version'
         - $ref: '#/components/parameters/container'
         - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
       requestBody:
         required: true
         content:
@@ -492,7 +494,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /database/{version}/{container}/{environment}/public/users/lookup/contacts:
+  /database/{version}/{container}/{environment}/{database}/users/lookup/contacts:
     post:
       summary: Lookup Contacts (Deprecated)
       description: Fetch contacts (This endpoint is deprecated)
@@ -504,6 +506,7 @@ paths:
         - $ref: '#/components/parameters/version'
         - $ref: '#/components/parameters/container'
         - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
       requestBody:
         required: true
         content:
