@@ -245,7 +245,7 @@ struct MistDemo: AsyncParsableCommand {
         // Query records
         print("\n📋 Querying records...")
         do {
-            let records = try await cloudKitService.queryRecords(recordType: "TestRecord", limit: 5)
+            let records = try await cloudKitService.queryRecords(recordType: "TodoItem", limit: 5)
             if !records.isEmpty {
                 print("✅ Found \(records.count) record(s)")
                 for record in records.prefix(3) {

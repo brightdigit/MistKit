@@ -1378,12 +1378,52 @@ public enum Components {
                 case webcAuthToken
             }
         }
+        /// Error response object. For a full list of error codes and meanings, see:
+        /// https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1
+        ///
+        /// Common error codes include:
+        /// - AUTHENTICATION_FAILED: The request could not be authenticated.
+        /// - ACCESS_DENIED: The user does not have permission to access the resource.
+        /// - INVALID_ARGUMENTS: The request contained invalid parameters.
+        /// - LIMIT_EXCEEDED: A request or resource limit was exceeded.
+        /// - NOT_FOUND: The requested resource does not exist.
+        /// - SERVICE_UNAVAILABLE: The service is temporarily unavailable.
+        /// - ZONE_NOT_FOUND: The specified zone does not exist.
+        /// - RECORD_NOT_FOUND: The specified record does not exist.
+        /// - PARTIAL_FAILURE: Some, but not all, operations succeeded.
+        ///
+        /// See the documentation for a complete list and details.
+        ///
+        ///
         /// - Remark: Generated from `#/components/schemas/ErrorResponse`.
         public struct ErrorResponse: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ErrorResponse/uuid`.
             public var uuid: Swift.String?
+            /// Server error code. See https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1 for complete details.
+            ///
+            ///
             /// - Remark: Generated from `#/components/schemas/ErrorResponse/serverErrorCode`.
-            public var serverErrorCode: Swift.String?
+            @frozen public enum serverErrorCodePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case ACCESS_DENIED = "ACCESS_DENIED"
+                case ATOMIC_ERROR = "ATOMIC_ERROR"
+                case AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
+                case AUTHENTICATION_REQUIRED = "AUTHENTICATION_REQUIRED"
+                case BAD_REQUEST = "BAD_REQUEST"
+                case CONFLICT = "CONFLICT"
+                case EXISTS = "EXISTS"
+                case INTERNAL_ERROR = "INTERNAL_ERROR"
+                case NOT_FOUND = "NOT_FOUND"
+                case QUOTA_EXCEEDED = "QUOTA_EXCEEDED"
+                case THROTTLED = "THROTTLED"
+                case TRY_AGAIN_LATER = "TRY_AGAIN_LATER"
+                case VALIDATING_REFERENCE_ERROR = "VALIDATING_REFERENCE_ERROR"
+                case ZONE_NOT_FOUND = "ZONE_NOT_FOUND"
+            }
+            /// Server error code. See https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1 for complete details.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ErrorResponse/serverErrorCode`.
+            public var serverErrorCode: Components.Schemas.ErrorResponse.serverErrorCodePayload?
             /// - Remark: Generated from `#/components/schemas/ErrorResponse/reason`.
             public var reason: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ErrorResponse/redirectURL`.
@@ -1392,12 +1432,12 @@ public enum Components {
             ///
             /// - Parameters:
             ///   - uuid:
-            ///   - serverErrorCode:
+            ///   - serverErrorCode: Server error code. See https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1 for complete details.
             ///   - reason:
             ///   - redirectURL:
             public init(
                 uuid: Swift.String? = nil,
-                serverErrorCode: Swift.String? = nil,
+                serverErrorCode: Components.Schemas.ErrorResponse.serverErrorCodePayload? = nil,
                 reason: Swift.String? = nil,
                 redirectURL: Swift.String? = nil
             ) {
@@ -1497,6 +1537,258 @@ public enum Components {
             /// - Parameters:
             ///   - body: Received HTTP response body
             public init(body: Components.Responses.Unauthorized.Body) {
+                self.body = body
+            }
+        }
+        public struct Forbidden: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/Forbidden/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/Forbidden/content/application\/json`.
+                case json(Components.Schemas.ErrorResponse)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Schemas.ErrorResponse {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.Forbidden.Body
+            /// Creates a new `Forbidden`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.Forbidden.Body) {
+                self.body = body
+            }
+        }
+        public struct NotFound: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/NotFound/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/NotFound/content/application\/json`.
+                case json(Components.Schemas.ErrorResponse)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Schemas.ErrorResponse {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.NotFound.Body
+            /// Creates a new `NotFound`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.NotFound.Body) {
+                self.body = body
+            }
+        }
+        public struct Conflict: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/Conflict/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/Conflict/content/application\/json`.
+                case json(Components.Schemas.ErrorResponse)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Schemas.ErrorResponse {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.Conflict.Body
+            /// Creates a new `Conflict`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.Conflict.Body) {
+                self.body = body
+            }
+        }
+        public struct PreconditionFailed: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/PreconditionFailed/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/PreconditionFailed/content/application\/json`.
+                case json(Components.Schemas.ErrorResponse)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Schemas.ErrorResponse {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.PreconditionFailed.Body
+            /// Creates a new `PreconditionFailed`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.PreconditionFailed.Body) {
+                self.body = body
+            }
+        }
+        public struct RequestEntityTooLarge: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/RequestEntityTooLarge/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/RequestEntityTooLarge/content/application\/json`.
+                case json(Components.Schemas.ErrorResponse)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Schemas.ErrorResponse {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.RequestEntityTooLarge.Body
+            /// Creates a new `RequestEntityTooLarge`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.RequestEntityTooLarge.Body) {
+                self.body = body
+            }
+        }
+        public struct TooManyRequests: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/TooManyRequests/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/TooManyRequests/content/application\/json`.
+                case json(Components.Schemas.ErrorResponse)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Schemas.ErrorResponse {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.TooManyRequests.Body
+            /// Creates a new `TooManyRequests`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.TooManyRequests.Body) {
+                self.body = body
+            }
+        }
+        public struct UnprocessableEntity: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/UnprocessableEntity/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/UnprocessableEntity/content/application\/json`.
+                case json(Components.Schemas.ErrorResponse)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Schemas.ErrorResponse {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.UnprocessableEntity.Body
+            /// Creates a new `UnprocessableEntity`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.UnprocessableEntity.Body) {
+                self.body = body
+            }
+        }
+        public struct InternalServerError: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/InternalServerError/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/InternalServerError/content/application\/json`.
+                case json(Components.Schemas.ErrorResponse)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Schemas.ErrorResponse {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.InternalServerError.Body
+            /// Creates a new `InternalServerError`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.InternalServerError.Body) {
+                self.body = body
+            }
+        }
+        public struct ServiceUnavailable: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/ServiceUnavailable/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/ServiceUnavailable/content/application\/json`.
+                case json(Components.Schemas.ErrorResponse)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Schemas.ErrorResponse {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.ServiceUnavailable.Body
+            /// Creates a new `ServiceUnavailable`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.ServiceUnavailable.Body) {
                 self.body = body
             }
         }
@@ -1725,7 +2017,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/400`.
             ///
@@ -1748,7 +2040,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/401`.
             ///
@@ -1766,6 +2058,213 @@ public enum Operations {
                     default:
                         try throwUnexpectedResponseStatus(
                             expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden (403) - ACCESS_DENIED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Forbidden)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Forbidden {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Conflict (409) - CONFLICT, EXISTS
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Conflict)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Conflict {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/412`.
+            ///
+            /// HTTP response code: `412 preconditionFailed`.
+            case preconditionFailed(Components.Responses.PreconditionFailed)
+            /// The associated value of the enum case if `self` is `.preconditionFailed`.
+            ///
+            /// - Throws: An error if `self` is not `.preconditionFailed`.
+            /// - SeeAlso: `.preconditionFailed`.
+            public var preconditionFailed: Components.Responses.PreconditionFailed {
+                get throws {
+                    switch self {
+                    case let .preconditionFailed(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "preconditionFailed",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Request entity too large (413) - QUOTA_EXCEEDED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            /// The associated value of the enum case if `self` is `.contentTooLarge`.
+            ///
+            /// - Throws: An error if `self` is not `.contentTooLarge`.
+            /// - SeeAlso: `.contentTooLarge`.
+            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+                get throws {
+                    switch self {
+                    case let .contentTooLarge(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "contentTooLarge",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too many requests (429) - THROTTLED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.TooManyRequests)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.TooManyRequests {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/421`.
+            ///
+            /// HTTP response code: `421 misdirectedRequest`.
+            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            /// The associated value of the enum case if `self` is `.misdirectedRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.misdirectedRequest`.
+            /// - SeeAlso: `.misdirectedRequest`.
+            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+                get throws {
+                    switch self {
+                    case let .misdirectedRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "misdirectedRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal server error (500) - INTERNAL_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.InternalServerError)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.InternalServerError {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Service unavailable (503) - TRY_AGAIN_LATER
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
                             response: self
                         )
                     }
@@ -1967,7 +2466,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/400`.
             ///
@@ -1990,7 +2489,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/401`.
             ///
@@ -2008,6 +2507,213 @@ public enum Operations {
                     default:
                         try throwUnexpectedResponseStatus(
                             expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden (403) - ACCESS_DENIED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Forbidden)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Forbidden {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Conflict (409) - CONFLICT, EXISTS
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Conflict)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Conflict {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/412`.
+            ///
+            /// HTTP response code: `412 preconditionFailed`.
+            case preconditionFailed(Components.Responses.PreconditionFailed)
+            /// The associated value of the enum case if `self` is `.preconditionFailed`.
+            ///
+            /// - Throws: An error if `self` is not `.preconditionFailed`.
+            /// - SeeAlso: `.preconditionFailed`.
+            public var preconditionFailed: Components.Responses.PreconditionFailed {
+                get throws {
+                    switch self {
+                    case let .preconditionFailed(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "preconditionFailed",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Request entity too large (413) - QUOTA_EXCEEDED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            /// The associated value of the enum case if `self` is `.contentTooLarge`.
+            ///
+            /// - Throws: An error if `self` is not `.contentTooLarge`.
+            /// - SeeAlso: `.contentTooLarge`.
+            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+                get throws {
+                    switch self {
+                    case let .contentTooLarge(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "contentTooLarge",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too many requests (429) - THROTTLED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.TooManyRequests)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.TooManyRequests {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/421`.
+            ///
+            /// HTTP response code: `421 misdirectedRequest`.
+            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            /// The associated value of the enum case if `self` is `.misdirectedRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.misdirectedRequest`.
+            /// - SeeAlso: `.misdirectedRequest`.
+            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+                get throws {
+                    switch self {
+                    case let .misdirectedRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "misdirectedRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal server error (500) - INTERNAL_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.InternalServerError)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.InternalServerError {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Service unavailable (503) - TRY_AGAIN_LATER
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
                             response: self
                         )
                     }
@@ -2224,7 +2930,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/400`.
             ///
@@ -2247,7 +2953,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/401`.
             ///
@@ -2265,6 +2971,213 @@ public enum Operations {
                     default:
                         try throwUnexpectedResponseStatus(
                             expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden (403) - ACCESS_DENIED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Forbidden)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Forbidden {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Conflict (409) - CONFLICT, EXISTS
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Conflict)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Conflict {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/412`.
+            ///
+            /// HTTP response code: `412 preconditionFailed`.
+            case preconditionFailed(Components.Responses.PreconditionFailed)
+            /// The associated value of the enum case if `self` is `.preconditionFailed`.
+            ///
+            /// - Throws: An error if `self` is not `.preconditionFailed`.
+            /// - SeeAlso: `.preconditionFailed`.
+            public var preconditionFailed: Components.Responses.PreconditionFailed {
+                get throws {
+                    switch self {
+                    case let .preconditionFailed(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "preconditionFailed",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Request entity too large (413) - QUOTA_EXCEEDED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            /// The associated value of the enum case if `self` is `.contentTooLarge`.
+            ///
+            /// - Throws: An error if `self` is not `.contentTooLarge`.
+            /// - SeeAlso: `.contentTooLarge`.
+            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+                get throws {
+                    switch self {
+                    case let .contentTooLarge(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "contentTooLarge",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too many requests (429) - THROTTLED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.TooManyRequests)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.TooManyRequests {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/421`.
+            ///
+            /// HTTP response code: `421 misdirectedRequest`.
+            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            /// The associated value of the enum case if `self` is `.misdirectedRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.misdirectedRequest`.
+            /// - SeeAlso: `.misdirectedRequest`.
+            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+                get throws {
+                    switch self {
+                    case let .misdirectedRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "misdirectedRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal server error (500) - INTERNAL_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.InternalServerError)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.InternalServerError {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Service unavailable (503) - TRY_AGAIN_LATER
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
                             response: self
                         )
                     }
@@ -2472,7 +3385,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/400`.
             ///
@@ -2495,7 +3408,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/401`.
             ///
@@ -2513,6 +3426,213 @@ public enum Operations {
                     default:
                         try throwUnexpectedResponseStatus(
                             expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden (403) - ACCESS_DENIED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Forbidden)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Forbidden {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Conflict (409) - CONFLICT, EXISTS
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Conflict)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Conflict {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/412`.
+            ///
+            /// HTTP response code: `412 preconditionFailed`.
+            case preconditionFailed(Components.Responses.PreconditionFailed)
+            /// The associated value of the enum case if `self` is `.preconditionFailed`.
+            ///
+            /// - Throws: An error if `self` is not `.preconditionFailed`.
+            /// - SeeAlso: `.preconditionFailed`.
+            public var preconditionFailed: Components.Responses.PreconditionFailed {
+                get throws {
+                    switch self {
+                    case let .preconditionFailed(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "preconditionFailed",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Request entity too large (413) - QUOTA_EXCEEDED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            /// The associated value of the enum case if `self` is `.contentTooLarge`.
+            ///
+            /// - Throws: An error if `self` is not `.contentTooLarge`.
+            /// - SeeAlso: `.contentTooLarge`.
+            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+                get throws {
+                    switch self {
+                    case let .contentTooLarge(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "contentTooLarge",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too many requests (429) - THROTTLED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.TooManyRequests)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.TooManyRequests {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/421`.
+            ///
+            /// HTTP response code: `421 misdirectedRequest`.
+            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            /// The associated value of the enum case if `self` is `.misdirectedRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.misdirectedRequest`.
+            /// - SeeAlso: `.misdirectedRequest`.
+            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+                get throws {
+                    switch self {
+                    case let .misdirectedRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "misdirectedRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal server error (500) - INTERNAL_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.InternalServerError)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.InternalServerError {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Service unavailable (503) - TRY_AGAIN_LATER
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
                             response: self
                         )
                     }
@@ -2680,7 +3800,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/400`.
             ///
@@ -2703,7 +3823,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/401`.
             ///
@@ -2721,6 +3841,213 @@ public enum Operations {
                     default:
                         try throwUnexpectedResponseStatus(
                             expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden (403) - ACCESS_DENIED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Forbidden)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Forbidden {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Conflict (409) - CONFLICT, EXISTS
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Conflict)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Conflict {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/412`.
+            ///
+            /// HTTP response code: `412 preconditionFailed`.
+            case preconditionFailed(Components.Responses.PreconditionFailed)
+            /// The associated value of the enum case if `self` is `.preconditionFailed`.
+            ///
+            /// - Throws: An error if `self` is not `.preconditionFailed`.
+            /// - SeeAlso: `.preconditionFailed`.
+            public var preconditionFailed: Components.Responses.PreconditionFailed {
+                get throws {
+                    switch self {
+                    case let .preconditionFailed(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "preconditionFailed",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Request entity too large (413) - QUOTA_EXCEEDED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            /// The associated value of the enum case if `self` is `.contentTooLarge`.
+            ///
+            /// - Throws: An error if `self` is not `.contentTooLarge`.
+            /// - SeeAlso: `.contentTooLarge`.
+            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+                get throws {
+                    switch self {
+                    case let .contentTooLarge(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "contentTooLarge",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too many requests (429) - THROTTLED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.TooManyRequests)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.TooManyRequests {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/421`.
+            ///
+            /// HTTP response code: `421 misdirectedRequest`.
+            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            /// The associated value of the enum case if `self` is `.misdirectedRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.misdirectedRequest`.
+            /// - SeeAlso: `.misdirectedRequest`.
+            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+                get throws {
+                    switch self {
+                    case let .misdirectedRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "misdirectedRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal server error (500) - INTERNAL_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.InternalServerError)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.InternalServerError {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Service unavailable (503) - TRY_AGAIN_LATER
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
                             response: self
                         )
                     }
@@ -2912,7 +4239,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)/responses/400`.
             ///
@@ -2935,7 +4262,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)/responses/401`.
             ///
@@ -3144,7 +4471,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)/responses/400`.
             ///
@@ -3167,7 +4494,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)/responses/401`.
             ///
@@ -3378,7 +4705,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)/responses/400`.
             ///
@@ -3401,7 +4728,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)/responses/401`.
             ///
@@ -3586,7 +4913,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)/responses/400`.
             ///
@@ -3609,7 +4936,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)/responses/401`.
             ///
@@ -3835,7 +5162,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)/responses/400`.
             ///
@@ -3858,7 +5185,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)/responses/401`.
             ///
@@ -4067,7 +5394,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)/responses/400`.
             ///
@@ -4090,7 +5417,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)/responses/401`.
             ///
@@ -4275,7 +5602,30 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.BadRequest)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/401`.
             ///
@@ -4293,6 +5643,213 @@ public enum Operations {
                     default:
                         try throwUnexpectedResponseStatus(
                             expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden (403) - ACCESS_DENIED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Forbidden)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Forbidden {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Conflict (409) - CONFLICT, EXISTS
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Conflict)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Conflict {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/412`.
+            ///
+            /// HTTP response code: `412 preconditionFailed`.
+            case preconditionFailed(Components.Responses.PreconditionFailed)
+            /// The associated value of the enum case if `self` is `.preconditionFailed`.
+            ///
+            /// - Throws: An error if `self` is not `.preconditionFailed`.
+            /// - SeeAlso: `.preconditionFailed`.
+            public var preconditionFailed: Components.Responses.PreconditionFailed {
+                get throws {
+                    switch self {
+                    case let .preconditionFailed(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "preconditionFailed",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Request entity too large (413) - QUOTA_EXCEEDED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            /// The associated value of the enum case if `self` is `.contentTooLarge`.
+            ///
+            /// - Throws: An error if `self` is not `.contentTooLarge`.
+            /// - SeeAlso: `.contentTooLarge`.
+            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+                get throws {
+                    switch self {
+                    case let .contentTooLarge(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "contentTooLarge",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too many requests (429) - THROTTLED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.TooManyRequests)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.TooManyRequests {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/421`.
+            ///
+            /// HTTP response code: `421 misdirectedRequest`.
+            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            /// The associated value of the enum case if `self` is `.misdirectedRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.misdirectedRequest`.
+            /// - SeeAlso: `.misdirectedRequest`.
+            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+                get throws {
+                    switch self {
+                    case let .misdirectedRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "misdirectedRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal server error (500) - INTERNAL_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.InternalServerError)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.InternalServerError {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Service unavailable (503) - TRY_AGAIN_LATER
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
                             response: self
                         )
                     }
@@ -4509,7 +6066,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)/responses/400`.
             ///
@@ -4532,7 +6089,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)/responses/401`.
             ///
@@ -4741,7 +6298,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)/responses/400`.
             ///
@@ -4764,7 +6321,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)/responses/401`.
             ///
@@ -4974,7 +6531,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)/responses/400`.
             ///
@@ -4997,7 +6554,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)/responses/401`.
             ///
@@ -5211,7 +6768,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)/responses/400`.
             ///
@@ -5234,7 +6791,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)/responses/401`.
             ///
@@ -5429,7 +6986,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/400`.
             ///
@@ -5452,7 +7009,7 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/401`.
             ///

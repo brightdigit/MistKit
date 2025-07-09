@@ -47,16 +47,116 @@ struct CloudKitService {
             case .json(let userData):
                 return UserInfo(from: userData)
             }
+        case .badRequest(let badRequestResponse):
+            if case .json(let errorResponse) = badRequestResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 400,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 400)
+            }
         case .unauthorized(let unauthorizedResponse):
             // Try to extract error details from the response body
             if case .json(let errorResponse) = unauthorizedResponse.body {
                 throw CloudKitError.httpErrorWithDetails(
                     statusCode: 401,
-                    serverErrorCode: errorResponse.serverErrorCode,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
                     reason: errorResponse.reason
                 )
             } else {
                 throw CloudKitError.httpError(statusCode: 401)
+            }
+        case .forbidden(let forbiddenResponse):
+            if case .json(let errorResponse) = forbiddenResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 403,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 403)
+            }
+        case .notFound(let notFoundResponse):
+            if case .json(let errorResponse) = notFoundResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 404,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 404)
+            }
+        case .conflict(let conflictResponse):
+            if case .json(let errorResponse) = conflictResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 409,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 409)
+            }
+        case .preconditionFailed(let preconditionFailedResponse):
+            if case .json(let errorResponse) = preconditionFailedResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 412,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 412)
+            }
+        case .contentTooLarge(let contentTooLargeResponse):
+            if case .json(let errorResponse) = contentTooLargeResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 413,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 413)
+            }
+        case .tooManyRequests(let tooManyRequestsResponse):
+            if case .json(let errorResponse) = tooManyRequestsResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 429,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 429)
+            }
+        case .misdirectedRequest(let misdirectedRequestResponse):
+            if case .json(let errorResponse) = misdirectedRequestResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 421,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 421)
+            }
+        case .internalServerError(let internalServerErrorResponse):
+            if case .json(let errorResponse) = internalServerErrorResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 500,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 500)
+            }
+        case .serviceUnavailable(let serviceUnavailableResponse):
+            if case .json(let errorResponse) = serviceUnavailableResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 503,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 503)
             }
         case .undocumented(let statusCode, let undocumentedResponse):
             // Try to decode the response body as an error response
@@ -72,7 +172,7 @@ struct CloudKitService {
                     let errorResponse = try JSONDecoder().decode(Components.Schemas.ErrorResponse.self, from: errorData)
                     throw CloudKitError.httpErrorWithDetails(
                         statusCode: statusCode,
-                        serverErrorCode: errorResponse.serverErrorCode,
+                        serverErrorCode: errorResponse.serverErrorCode?.rawValue,
                         reason: errorResponse.reason
                     )
                 } catch {
@@ -119,7 +219,7 @@ struct CloudKitService {
             if case .json(let errorResponse) = badRequestResponse.body {
                 throw CloudKitError.httpErrorWithDetails(
                     statusCode: 400,
-                    serverErrorCode: errorResponse.serverErrorCode,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
                     reason: errorResponse.reason
                 )
             } else {
@@ -129,11 +229,101 @@ struct CloudKitService {
             if case .json(let errorResponse) = unauthorizedResponse.body {
                 throw CloudKitError.httpErrorWithDetails(
                     statusCode: 401,
-                    serverErrorCode: errorResponse.serverErrorCode,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
                     reason: errorResponse.reason
                 )
             } else {
                 throw CloudKitError.httpError(statusCode: 401)
+            }
+        case .forbidden(let forbiddenResponse):
+            if case .json(let errorResponse) = forbiddenResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 403,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 403)
+            }
+        case .notFound(let notFoundResponse):
+            if case .json(let errorResponse) = notFoundResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 404,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 404)
+            }
+        case .conflict(let conflictResponse):
+            if case .json(let errorResponse) = conflictResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 409,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 409)
+            }
+        case .preconditionFailed(let preconditionFailedResponse):
+            if case .json(let errorResponse) = preconditionFailedResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 412,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 412)
+            }
+        case .contentTooLarge(let contentTooLargeResponse):
+            if case .json(let errorResponse) = contentTooLargeResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 413,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 413)
+            }
+        case .tooManyRequests(let tooManyRequestsResponse):
+            if case .json(let errorResponse) = tooManyRequestsResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 429,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 429)
+            }
+        case .misdirectedRequest(let misdirectedRequestResponse):
+            if case .json(let errorResponse) = misdirectedRequestResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 421,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 421)
+            }
+        case .internalServerError(let internalServerErrorResponse):
+            if case .json(let errorResponse) = internalServerErrorResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 500,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 500)
+            }
+        case .serviceUnavailable(let serviceUnavailableResponse):
+            if case .json(let errorResponse) = serviceUnavailableResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 503,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 503)
             }
         case .undocumented(let statusCode, let undocumentedResponse):
             if let responseBody = undocumentedResponse.body {
@@ -148,7 +338,7 @@ struct CloudKitService {
                     let errorResponse = try JSONDecoder().decode(Components.Schemas.ErrorResponse.self, from: errorData)
                     throw CloudKitError.httpErrorWithDetails(
                         statusCode: statusCode,
-                        serverErrorCode: errorResponse.serverErrorCode,
+                        serverErrorCode: errorResponse.serverErrorCode?.rawValue,
                         reason: errorResponse.reason
                     )
                 } catch {
@@ -200,7 +390,7 @@ struct CloudKitService {
             if case .json(let errorResponse) = badRequestResponse.body {
                 throw CloudKitError.httpErrorWithDetails(
                     statusCode: 400,
-                    serverErrorCode: errorResponse.serverErrorCode,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
                     reason: errorResponse.reason
                 )
             } else {
@@ -210,11 +400,101 @@ struct CloudKitService {
             if case .json(let errorResponse) = unauthorizedResponse.body {
                 throw CloudKitError.httpErrorWithDetails(
                     statusCode: 401,
-                    serverErrorCode: errorResponse.serverErrorCode,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
                     reason: errorResponse.reason
                 )
             } else {
                 throw CloudKitError.httpError(statusCode: 401)
+            }
+        case .forbidden(let forbiddenResponse):
+            if case .json(let errorResponse) = forbiddenResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 403,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 403)
+            }
+        case .notFound(let notFoundResponse):
+            if case .json(let errorResponse) = notFoundResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 404,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 404)
+            }
+        case .conflict(let conflictResponse):
+            if case .json(let errorResponse) = conflictResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 409,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 409)
+            }
+        case .preconditionFailed(let preconditionFailedResponse):
+            if case .json(let errorResponse) = preconditionFailedResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 412,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 412)
+            }
+        case .contentTooLarge(let contentTooLargeResponse):
+            if case .json(let errorResponse) = contentTooLargeResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 413,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 413)
+            }
+        case .tooManyRequests(let tooManyRequestsResponse):
+            if case .json(let errorResponse) = tooManyRequestsResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 429,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 429)
+            }
+        case .misdirectedRequest(let misdirectedRequestResponse):
+            if case .json(let errorResponse) = misdirectedRequestResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 421,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 421)
+            }
+        case .internalServerError(let internalServerErrorResponse):
+            if case .json(let errorResponse) = internalServerErrorResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 500,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 500)
+            }
+        case .serviceUnavailable(let serviceUnavailableResponse):
+            if case .json(let errorResponse) = serviceUnavailableResponse.body {
+                throw CloudKitError.httpErrorWithDetails(
+                    statusCode: 503,
+                    serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+                    reason: errorResponse.reason
+                )
+            } else {
+                throw CloudKitError.httpError(statusCode: 503)
             }
         case .undocumented(let statusCode, let undocumentedResponse):
             if let responseBody = undocumentedResponse.body {
@@ -229,7 +509,7 @@ struct CloudKitService {
                     let errorResponse = try JSONDecoder().decode(Components.Schemas.ErrorResponse.self, from: errorData)
                     throw CloudKitError.httpErrorWithDetails(
                         statusCode: statusCode,
-                        serverErrorCode: errorResponse.serverErrorCode,
+                        serverErrorCode: errorResponse.serverErrorCode?.rawValue,
                         reason: errorResponse.reason
                     )
                 } catch {

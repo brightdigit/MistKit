@@ -88,6 +88,24 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/records/modify:
     post:
@@ -126,6 +144,24 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/records/lookup:
     post:
@@ -168,6 +204,24 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/records/changes:
     post:
@@ -206,6 +260,24 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/zones/list:
     get:
@@ -230,6 +302,24 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/zones/lookup:
     post:
@@ -451,8 +541,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/RequestEntityTooLarge'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '421':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /database/{version}/{container}/{environment}/{database}/users/discover:
     post:
@@ -955,11 +1065,44 @@ components:
 
     ErrorResponse:
       type: object
+      description: |
+        Error response object. For a full list of error codes and meanings, see:
+        https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1
+        
+        Common error codes include:
+        - AUTHENTICATION_FAILED: The request could not be authenticated.
+        - ACCESS_DENIED: The user does not have permission to access the resource.
+        - INVALID_ARGUMENTS: The request contained invalid parameters.
+        - LIMIT_EXCEEDED: A request or resource limit was exceeded.
+        - NOT_FOUND: The requested resource does not exist.
+        - SERVICE_UNAVAILABLE: The service is temporarily unavailable.
+        - ZONE_NOT_FOUND: The specified zone does not exist.
+        - RECORD_NOT_FOUND: The specified record does not exist.
+        - PARTIAL_FAILURE: Some, but not all, operations succeeded.
+        
+        See the documentation for a complete list and details.
       properties:
         uuid:
           type: string
         serverErrorCode:
           type: string
+          enum:
+            - ACCESS_DENIED
+            - ATOMIC_ERROR
+            - AUTHENTICATION_FAILED
+            - AUTHENTICATION_REQUIRED
+            - BAD_REQUEST
+            - CONFLICT
+            - EXISTS
+            - INTERNAL_ERROR
+            - NOT_FOUND
+            - QUOTA_EXCEEDED
+            - THROTTLED
+            - TRY_AGAIN_LATER
+            - VALIDATING_REFERENCE_ERROR
+            - ZONE_NOT_FOUND
+          description: |
+            Server error code. See https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/ErrorCodes.html#//apple_ref/doc/uid/TP40015240-CH4-SW1 for complete details.
         reason:
           type: string
         redirectURL:
@@ -967,13 +1110,67 @@ components:
 
   responses:
     BadRequest:
-      description: Bad request
+      description: Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
     Unauthorized:
-      description: Unauthorized
+      description: Unauthorized (401) - AUTHENTICATION_FAILED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden (403) - ACCESS_DENIED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict (409) - CONFLICT, EXISTS
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    PreconditionFailed:
+      description: Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RequestEntityTooLarge:
+      description: Request entity too large (413) - QUOTA_EXCEEDED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TooManyRequests:
+      description: Too many requests (429) - THROTTLED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnprocessableEntity:
+      description: Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Internal server error (500) - INTERNAL_ERROR
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Service unavailable (503) - TRY_AGAIN_LATER
       content:
         application/json:
           schema:
