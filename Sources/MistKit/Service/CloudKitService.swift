@@ -1,9 +1,8 @@
 import Foundation
-import MistKit
 import OpenAPIRuntime
 import OpenAPIURLSession
 
-struct CloudKitService {
+public struct CloudKitService {
     let containerIdentifier: String
     let apiToken: String
     let environment: String = "development"
@@ -13,7 +12,7 @@ struct CloudKitService {
         return mistKitClient.client
     }
     
-    init(containerIdentifier: String, apiToken: String, webAuthToken: String) throws {
+   public init(containerIdentifier: String, apiToken: String, webAuthToken: String) throws {
         self.containerIdentifier = containerIdentifier
         self.apiToken = apiToken
         
@@ -28,7 +27,7 @@ struct CloudKitService {
     }
     
     /// Fetch current user information
-    func fetchCurrentUser() async throws -> UserInfo {
+   public func fetchCurrentUser() async throws -> UserInfo {
         // Create the request to get current user
         let response = try await client.getCurrentUser(
             .init(
@@ -190,7 +189,7 @@ struct CloudKitService {
     }
     
     /// List zones in the user's private database
-    func listZones() async throws -> [ZoneInfo] {
+  public func listZones() async throws -> [ZoneInfo] {
         let response = try await client.listZones(
             .init(
                 path: .init(
@@ -355,7 +354,7 @@ struct CloudKitService {
     }
     
     /// Query records from the default zone
-    func queryRecords(recordType: String, limit: Int = 10) async throws -> [RecordInfo] {
+  public func queryRecords(recordType: String, limit: Int = 10) async throws -> [RecordInfo] {
         let response = try await client.queryRecords(
             .init(
                 path: .init(
@@ -526,73 +525,3 @@ struct CloudKitService {
     }
 }
 
-// Helper models
-struct UserInfo: Encodable {
-    let userRecordName: String
-    let firstName: String?
-    let lastName: String?
-    let emailAddress: String?
-    
-    init(from cloudKitUser: Components.Schemas.UserResponse) {
-        self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
-        self.firstName = cloudKitUser.firstName
-        self.lastName = cloudKitUser.lastName
-        self.emailAddress = cloudKitUser.emailAddress
-    }
-}
-
-struct ZoneInfo: Encodable {
-    let zoneName: String
-    let ownerRecordName: String?
-    let capabilities: [String]
-    
-    init(zoneName: String, ownerRecordName: String?, capabilities: [String]) {
-        self.zoneName = zoneName
-        self.ownerRecordName = ownerRecordName
-        self.capabilities = capabilities
-    }
-}
-
-struct RecordInfo: Encodable {
-    let recordName: String
-    let recordType: String
-    let fields: [String: String]
-    
-    init(from record: Components.Schemas.Record) {
-        self.recordName = record.recordName ?? "Unknown"
-        self.recordType = record.recordType ?? "Unknown"
-        
-        // Convert fields to simple string representation
-        let simpleFields: [String: String] = [:]
-        // Note: fields is a special structure in the generated code
-        // For now, we'll leave it empty as the exact structure needs investigation
-        self.fields = simpleFields
-    }
-}
-
-enum CloudKitError: LocalizedError {
-    case httpError(statusCode: Int)
-    case httpErrorWithDetails(statusCode: Int, serverErrorCode: String?, reason: String?)
-    case httpErrorWithRawResponse(statusCode: Int, rawResponse: String)
-    case invalidResponse
-    
-    var errorDescription: String? {
-        switch self {
-        case .httpError(let statusCode):
-            return "CloudKit API error: HTTP \(statusCode)"
-        case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason):
-            var message = "CloudKit API error: HTTP \(statusCode)"
-            if let serverErrorCode = serverErrorCode {
-                message += "\nServer Error Code: \(serverErrorCode)"
-            }
-            if let reason = reason {
-                message += "\nReason: \(reason)"
-            }
-            return message
-        case .httpErrorWithRawResponse(let statusCode, let rawResponse):
-            return "CloudKit API error: HTTP \(statusCode)\nRaw Response: \(rawResponse)"
-        case .invalidResponse:
-            return "Invalid response from CloudKit"
-        }
-    }
-}
