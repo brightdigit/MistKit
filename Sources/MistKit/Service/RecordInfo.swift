@@ -13,7 +13,7 @@ public struct RecordInfo: Encodable {
   public let recordType: String
   public let fields: [String: String]
     
-  public init(from record: Components.Schemas.Record) {
+  internal init(from record: Components.Schemas.Record) {
         self.recordName = record.recordName ?? "Unknown"
         self.recordType = record.recordType ?? "Unknown"
         

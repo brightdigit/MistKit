@@ -7,7 +7,7 @@ import HTTPTypes
 /// A client for interacting with CloudKit Web Services
 public struct MistKitClient {
     /// The underlying OpenAPI client
-    public let client: Client
+  internal let client: Client
     
     /// The CloudKit container configuration
     public let configuration: MistKitConfiguration

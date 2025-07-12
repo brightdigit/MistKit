@@ -13,7 +13,7 @@ public struct UserInfo: Encodable {
   public  let lastName: String?
   public  let emailAddress: String?
     
-  public  init(from cloudKitUser: Components.Schemas.UserResponse) {
+  internal  init(from cloudKitUser: Components.Schemas.UserResponse) {
         self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
         self.firstName = cloudKitUser.firstName
         self.lastName = cloudKitUser.lastName
