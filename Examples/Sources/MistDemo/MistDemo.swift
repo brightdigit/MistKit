@@ -251,7 +251,7 @@ struct MistDemo: AsyncParsableCommand {
                 for record in records.prefix(3) {
                     print("\n   Record: \(record.recordName)")
                     print("   Type: \(record.recordType)")
-                    print("   Fields: \(record.fields)")
+                    print("   Fields: \(formatFields(record.fields))")
                 }
             } else {
                 print("ℹ️  No records found in the _defaultZone")
@@ -268,6 +268,50 @@ struct MistDemo: AsyncParsableCommand {
         // Print usage tip
         print("\n💡 Tip: You can skip authentication next time by running:")
         print("   mistdemo --skip-auth --web-auth-token \"\(webAuthToken)\"")
+    }
+    
+    /// Format CKValue fields for display
+    private func formatFields(_ fields: [String: CKValue]) -> String {
+        if fields.isEmpty {
+            return "{}"
+        }
+        
+        let formattedFields = fields.map { (key, value) in
+            let valueString = formatCKValue(value)
+            return "\(key): \(valueString)"
+        }.joined(separator: ", ")
+        
+        return "{\(formattedFields)}"
+    }
+    
+    /// Format a single CKValue for display
+    private func formatCKValue(_ value: CKValue) -> String {
+        switch value {
+        case .string(let string):
+            return "\"\(string)\""
+        case .int64(let int):
+            return "\(int)"
+        case .double(let double):
+            return "\(double)"
+        case .boolean(let bool):
+            return "\(bool)"
+        case .bytes(let bytes):
+            return "bytes(\(bytes.prefix(20)))"
+        case .date(let date):
+            let formatter = DateFormatter()
+            formatter.dateStyle = .short
+            formatter.timeStyle = .short
+            return "date(\(formatter.string(from: date)))"
+        case .location(let location):
+            return "location(\(location.latitude), \(location.longitude))"
+        case .reference(let reference):
+            return "reference(\(reference.recordName))"
+        case .asset(let asset):
+            return "asset(\(asset.downloadURL ?? "no URL"))"
+        case .list(let values):
+            let formattedValues = values.map { formatCKValue($0) }.joined(separator: ", ")
+            return "[\(formattedValues)]"
+        }
     }
     
     func openBrowser(url: String) {
