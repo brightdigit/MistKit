@@ -497,97 +497,7 @@ internal enum Components {
             /// - Remark: Generated from `#/components/schemas/Filter/fieldName`.
             internal var fieldName: Swift.String?
             /// - Remark: Generated from `#/components/schemas/Filter/fieldValue`.
-            internal struct fieldValuePayload: Codable, Hashable, Sendable {
-                /// - Remark: Generated from `#/components/schemas/Filter/fieldValue/value`.
-                internal enum valuePayload: Codable, Hashable, Sendable {
-                    /// - Remark: Generated from `#/components/schemas/Filter/fieldValue/value/case1`.
-                    case case1(Swift.String)
-                    /// - Remark: Generated from `#/components/schemas/Filter/fieldValue/value/case2`.
-                    case case2(Swift.Double)
-                    /// - Remark: Generated from `#/components/schemas/Filter/fieldValue/value/case3`.
-                    case case3(Swift.Bool)
-                    /// - Remark: Generated from `#/components/schemas/Filter/fieldValue/value/case4`.
-                    case case4(OpenAPIRuntime.OpenAPIArrayContainer)
-                    internal init(from decoder: any Decoder) throws {
-                        var errors: [any Error] = []
-                        do {
-                            self = .case1(try decoder.decodeFromSingleValueContainer())
-                            return
-                        } catch {
-                            errors.append(error)
-                        }
-                        do {
-                            self = .case2(try decoder.decodeFromSingleValueContainer())
-                            return
-                        } catch {
-                            errors.append(error)
-                        }
-                        do {
-                            self = .case3(try decoder.decodeFromSingleValueContainer())
-                            return
-                        } catch {
-                            errors.append(error)
-                        }
-                        do {
-                            self = .case4(try decoder.decodeFromSingleValueContainer())
-                            return
-                        } catch {
-                            errors.append(error)
-                        }
-                        throw Swift.DecodingError.failedToDecodeOneOfSchema(
-                            type: Self.self,
-                            codingPath: decoder.codingPath,
-                            errors: errors
-                        )
-                    }
-                    internal func encode(to encoder: any Encoder) throws {
-                        switch self {
-                        case let .case1(value):
-                            try encoder.encodeToSingleValueContainer(value)
-                        case let .case2(value):
-                            try encoder.encodeToSingleValueContainer(value)
-                        case let .case3(value):
-                            try encoder.encodeToSingleValueContainer(value)
-                        case let .case4(value):
-                            try encoder.encodeToSingleValueContainer(value)
-                        }
-                    }
-                }
-                /// - Remark: Generated from `#/components/schemas/Filter/fieldValue/value`.
-                internal var value: Components.Schemas.Filter.fieldValuePayload.valuePayload?
-                /// - Remark: Generated from `#/components/schemas/Filter/fieldValue/type`.
-                internal enum _typePayload: String, Codable, Hashable, Sendable, CaseIterable {
-                    case STRING = "STRING"
-                    case INT64 = "INT64"
-                    case DOUBLE = "DOUBLE"
-                    case BYTES = "BYTES"
-                    case REFERENCE = "REFERENCE"
-                    case ASSET = "ASSET"
-                    case LOCATION = "LOCATION"
-                    case TIMESTAMP = "TIMESTAMP"
-                    case LIST = "LIST"
-                }
-                /// - Remark: Generated from `#/components/schemas/Filter/fieldValue/type`.
-                internal var _type: Components.Schemas.Filter.fieldValuePayload._typePayload?
-                /// Creates a new `fieldValuePayload`.
-                ///
-                /// - Parameters:
-                ///   - value:
-                ///   - _type:
-                internal init(
-                    value: Components.Schemas.Filter.fieldValuePayload.valuePayload? = nil,
-                    _type: Components.Schemas.Filter.fieldValuePayload._typePayload? = nil
-                ) {
-                    self.value = value
-                    self._type = _type
-                }
-                internal enum CodingKeys: String, CodingKey {
-                    case value
-                    case _type = "type"
-                }
-            }
-            /// - Remark: Generated from `#/components/schemas/Filter/fieldValue`.
-            internal var fieldValue: Components.Schemas.Filter.fieldValuePayload?
+            internal var fieldValue: Components.Schemas.FieldValue?
             /// Creates a new `Filter`.
             ///
             /// - Parameters:
@@ -597,7 +507,7 @@ internal enum Components {
             internal init(
                 comparator: Components.Schemas.Filter.comparatorPayload? = nil,
                 fieldName: Swift.String? = nil,
-                fieldValue: Components.Schemas.Filter.fieldValuePayload? = nil
+                fieldValue: Components.Schemas.FieldValue? = nil
             ) {
                 self.comparator = comparator
                 self.fieldName = fieldName
@@ -667,121 +577,29 @@ internal enum Components {
         }
         /// - Remark: Generated from `#/components/schemas/Record`.
         internal struct Record: Codable, Hashable, Sendable {
+            /// The unique identifier for the record
+            ///
             /// - Remark: Generated from `#/components/schemas/Record/recordName`.
             internal var recordName: Swift.String?
+            /// The record type (schema name)
+            ///
             /// - Remark: Generated from `#/components/schemas/Record/recordType`.
             internal var recordType: Swift.String?
+            /// Change tag for optimistic concurrency control
+            ///
             /// - Remark: Generated from `#/components/schemas/Record/recordChangeTag`.
             internal var recordChangeTag: Swift.String?
+            /// Record fields with their values and types
+            ///
             /// - Remark: Generated from `#/components/schemas/Record/fields`.
             internal struct fieldsPayload: Codable, Hashable, Sendable {
-                /// - Remark: Generated from `#/components/schemas/Record/fields/additionalProperties`.
-                internal struct additionalPropertiesPayload: Codable, Hashable, Sendable {
-                    /// - Remark: Generated from `#/components/schemas/Record/fields/additionalProperties/value`.
-                    internal enum valuePayload: Codable, Hashable, Sendable {
-                        /// - Remark: Generated from `#/components/schemas/Record/fields/additionalProperties/value/case1`.
-                        case case1(Swift.String)
-                        /// - Remark: Generated from `#/components/schemas/Record/fields/additionalProperties/value/case2`.
-                        case case2(Swift.Double)
-                        /// - Remark: Generated from `#/components/schemas/Record/fields/additionalProperties/value/case3`.
-                        case case3(Swift.Bool)
-                        /// - Remark: Generated from `#/components/schemas/Record/fields/additionalProperties/value/case4`.
-                        case case4(OpenAPIRuntime.OpenAPIArrayContainer)
-                        /// - Remark: Generated from `#/components/schemas/Record/fields/additionalProperties/value/case5`.
-                        case case5(OpenAPIRuntime.OpenAPIObjectContainer)
-                        internal init(from decoder: any Decoder) throws {
-                            var errors: [any Error] = []
-                            do {
-                                self = .case1(try decoder.decodeFromSingleValueContainer())
-                                return
-                            } catch {
-                                errors.append(error)
-                            }
-                            do {
-                                self = .case2(try decoder.decodeFromSingleValueContainer())
-                                return
-                            } catch {
-                                errors.append(error)
-                            }
-                            do {
-                                self = .case3(try decoder.decodeFromSingleValueContainer())
-                                return
-                            } catch {
-                                errors.append(error)
-                            }
-                            do {
-                                self = .case4(try decoder.decodeFromSingleValueContainer())
-                                return
-                            } catch {
-                                errors.append(error)
-                            }
-                            do {
-                                self = .case5(try .init(from: decoder))
-                                return
-                            } catch {
-                                errors.append(error)
-                            }
-                            throw Swift.DecodingError.failedToDecodeOneOfSchema(
-                                type: Self.self,
-                                codingPath: decoder.codingPath,
-                                errors: errors
-                            )
-                        }
-                        internal func encode(to encoder: any Encoder) throws {
-                            switch self {
-                            case let .case1(value):
-                                try encoder.encodeToSingleValueContainer(value)
-                            case let .case2(value):
-                                try encoder.encodeToSingleValueContainer(value)
-                            case let .case3(value):
-                                try encoder.encodeToSingleValueContainer(value)
-                            case let .case4(value):
-                                try encoder.encodeToSingleValueContainer(value)
-                            case let .case5(value):
-                                try value.encode(to: encoder)
-                            }
-                        }
-                    }
-                    /// - Remark: Generated from `#/components/schemas/Record/fields/additionalProperties/value`.
-                    internal var value: Components.Schemas.Record.fieldsPayload.additionalPropertiesPayload.valuePayload?
-                    /// - Remark: Generated from `#/components/schemas/Record/fields/additionalProperties/type`.
-                    internal enum _typePayload: String, Codable, Hashable, Sendable, CaseIterable {
-                        case STRING = "STRING"
-                        case INT64 = "INT64"
-                        case DOUBLE = "DOUBLE"
-                        case BYTES = "BYTES"
-                        case REFERENCE = "REFERENCE"
-                        case ASSET = "ASSET"
-                        case LOCATION = "LOCATION"
-                        case TIMESTAMP = "TIMESTAMP"
-                        case LIST = "LIST"
-                    }
-                    /// - Remark: Generated from `#/components/schemas/Record/fields/additionalProperties/type`.
-                    internal var _type: Components.Schemas.Record.fieldsPayload.additionalPropertiesPayload._typePayload?
-                    /// Creates a new `additionalPropertiesPayload`.
-                    ///
-                    /// - Parameters:
-                    ///   - value:
-                    ///   - _type:
-                    internal init(
-                        value: Components.Schemas.Record.fieldsPayload.additionalPropertiesPayload.valuePayload? = nil,
-                        _type: Components.Schemas.Record.fieldsPayload.additionalPropertiesPayload._typePayload? = nil
-                    ) {
-                        self.value = value
-                        self._type = _type
-                    }
-                    internal enum CodingKeys: String, CodingKey {
-                        case value
-                        case _type = "type"
-                    }
-                }
                 /// A container of undocumented properties.
-                internal var additionalProperties: [String: Components.Schemas.Record.fieldsPayload.additionalPropertiesPayload]
+                internal var additionalProperties: [String: Components.Schemas.FieldValue]
                 /// Creates a new `fieldsPayload`.
                 ///
                 /// - Parameters:
                 ///   - additionalProperties: A container of undocumented properties.
-                internal init(additionalProperties: [String: Components.Schemas.Record.fieldsPayload.additionalPropertiesPayload] = .init()) {
+                internal init(additionalProperties: [String: Components.Schemas.FieldValue] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
                 internal init(from decoder: any Decoder) throws {
@@ -791,15 +609,17 @@ internal enum Components {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
+            /// Record fields with their values and types
+            ///
             /// - Remark: Generated from `#/components/schemas/Record/fields`.
             internal var fields: Components.Schemas.Record.fieldsPayload?
             /// Creates a new `Record`.
             ///
             /// - Parameters:
-            ///   - recordName:
-            ///   - recordType:
-            ///   - recordChangeTag:
-            ///   - fields:
+            ///   - recordName: The unique identifier for the record
+            ///   - recordType: The record type (schema name)
+            ///   - recordChangeTag: Change tag for optimistic concurrency control
+            ///   - fields: Record fields with their values and types
             internal init(
                 recordName: Swift.String? = nil,
                 recordType: Swift.String? = nil,
@@ -818,6 +638,478 @@ internal enum Components {
                 case fields
             }
         }
+        /// A CloudKit field value with its type information
+        ///
+        /// - Remark: Generated from `#/components/schemas/FieldValue`.
+        internal struct FieldValue: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FieldValue/value`.
+            internal enum valuePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FieldValue/value/case1`.
+                case StringValue(Components.Schemas.StringValue)
+                /// - Remark: Generated from `#/components/schemas/FieldValue/value/case2`.
+                case Int64Value(Components.Schemas.Int64Value)
+                /// - Remark: Generated from `#/components/schemas/FieldValue/value/case3`.
+                case DoubleValue(Components.Schemas.DoubleValue)
+                /// - Remark: Generated from `#/components/schemas/FieldValue/value/case4`.
+                case BooleanValue(Components.Schemas.BooleanValue)
+                /// - Remark: Generated from `#/components/schemas/FieldValue/value/case5`.
+                case BytesValue(Components.Schemas.BytesValue)
+                /// - Remark: Generated from `#/components/schemas/FieldValue/value/case6`.
+                case DateValue(Components.Schemas.DateValue)
+                /// - Remark: Generated from `#/components/schemas/FieldValue/value/case7`.
+                case LocationValue(Components.Schemas.LocationValue)
+                /// - Remark: Generated from `#/components/schemas/FieldValue/value/case8`.
+                case ReferenceValue(Components.Schemas.ReferenceValue)
+                /// - Remark: Generated from `#/components/schemas/FieldValue/value/case9`.
+                case AssetValue(Components.Schemas.AssetValue)
+                /// - Remark: Generated from `#/components/schemas/FieldValue/value/case10`.
+                case ListValue(Components.Schemas.ListValue)
+                internal init(from decoder: any Decoder) throws {
+                    var errors: [any Error] = []
+                    do {
+                        self = .StringValue(try decoder.decodeFromSingleValueContainer())
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .Int64Value(try decoder.decodeFromSingleValueContainer())
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .DoubleValue(try decoder.decodeFromSingleValueContainer())
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .BooleanValue(try decoder.decodeFromSingleValueContainer())
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .BytesValue(try decoder.decodeFromSingleValueContainer())
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .DateValue(try decoder.decodeFromSingleValueContainer())
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .LocationValue(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .ReferenceValue(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .AssetValue(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .ListValue(try decoder.decodeFromSingleValueContainer())
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    throw Swift.DecodingError.failedToDecodeOneOfSchema(
+                        type: Self.self,
+                        codingPath: decoder.codingPath,
+                        errors: errors
+                    )
+                }
+                internal func encode(to encoder: any Encoder) throws {
+                    switch self {
+                    case let .StringValue(value):
+                        try encoder.encodeToSingleValueContainer(value)
+                    case let .Int64Value(value):
+                        try encoder.encodeToSingleValueContainer(value)
+                    case let .DoubleValue(value):
+                        try encoder.encodeToSingleValueContainer(value)
+                    case let .BooleanValue(value):
+                        try encoder.encodeToSingleValueContainer(value)
+                    case let .BytesValue(value):
+                        try encoder.encodeToSingleValueContainer(value)
+                    case let .DateValue(value):
+                        try encoder.encodeToSingleValueContainer(value)
+                    case let .LocationValue(value):
+                        try value.encode(to: encoder)
+                    case let .ReferenceValue(value):
+                        try value.encode(to: encoder)
+                    case let .AssetValue(value):
+                        try value.encode(to: encoder)
+                    case let .ListValue(value):
+                        try encoder.encodeToSingleValueContainer(value)
+                    }
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FieldValue/value`.
+            internal var value: Components.Schemas.FieldValue.valuePayload?
+            /// The CloudKit field type
+            ///
+            /// - Remark: Generated from `#/components/schemas/FieldValue/type`.
+            internal enum _typePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case STRING = "STRING"
+                case INT64 = "INT64"
+                case DOUBLE = "DOUBLE"
+                case BYTES = "BYTES"
+                case REFERENCE = "REFERENCE"
+                case ASSET = "ASSET"
+                case LOCATION = "LOCATION"
+                case TIMESTAMP = "TIMESTAMP"
+                case LIST = "LIST"
+            }
+            /// The CloudKit field type
+            ///
+            /// - Remark: Generated from `#/components/schemas/FieldValue/type`.
+            internal var _type: Components.Schemas.FieldValue._typePayload?
+            /// Creates a new `FieldValue`.
+            ///
+            /// - Parameters:
+            ///   - value:
+            ///   - _type: The CloudKit field type
+            internal init(
+                value: Components.Schemas.FieldValue.valuePayload? = nil,
+                _type: Components.Schemas.FieldValue._typePayload? = nil
+            ) {
+                self.value = value
+                self._type = _type
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case value
+                case _type = "type"
+            }
+        }
+        /// A text string value
+        ///
+        /// - Remark: Generated from `#/components/schemas/StringValue`.
+        internal typealias StringValue = Swift.String
+        /// A 64-bit integer value
+        ///
+        /// - Remark: Generated from `#/components/schemas/Int64Value`.
+        internal typealias Int64Value = Swift.Int64
+        /// A double-precision floating point value
+        ///
+        /// - Remark: Generated from `#/components/schemas/DoubleValue`.
+        internal typealias DoubleValue = Swift.Double
+        /// A true or false value
+        ///
+        /// - Remark: Generated from `#/components/schemas/BooleanValue`.
+        internal typealias BooleanValue = Swift.Bool
+        /// Base64-encoded string representing binary data
+        ///
+        /// - Remark: Generated from `#/components/schemas/BytesValue`.
+        internal typealias BytesValue = Swift.String
+        /// Number representing milliseconds since epoch (January 1, 1970)
+        ///
+        /// - Remark: Generated from `#/components/schemas/DateValue`.
+        internal typealias DateValue = Swift.Double
+        /// Location dictionary as defined in CloudKit Web Services
+        ///
+        /// - Remark: Generated from `#/components/schemas/LocationValue`.
+        internal struct LocationValue: Codable, Hashable, Sendable {
+            /// Latitude in degrees
+            ///
+            /// - Remark: Generated from `#/components/schemas/LocationValue/latitude`.
+            internal var latitude: Swift.Double?
+            /// Longitude in degrees
+            ///
+            /// - Remark: Generated from `#/components/schemas/LocationValue/longitude`.
+            internal var longitude: Swift.Double?
+            /// Horizontal accuracy in meters
+            ///
+            /// - Remark: Generated from `#/components/schemas/LocationValue/horizontalAccuracy`.
+            internal var horizontalAccuracy: Swift.Double?
+            /// Vertical accuracy in meters
+            ///
+            /// - Remark: Generated from `#/components/schemas/LocationValue/verticalAccuracy`.
+            internal var verticalAccuracy: Swift.Double?
+            /// Altitude in meters
+            ///
+            /// - Remark: Generated from `#/components/schemas/LocationValue/altitude`.
+            internal var altitude: Swift.Double?
+            /// Speed in meters per second
+            ///
+            /// - Remark: Generated from `#/components/schemas/LocationValue/speed`.
+            internal var speed: Swift.Double?
+            /// Course in degrees
+            ///
+            /// - Remark: Generated from `#/components/schemas/LocationValue/course`.
+            internal var course: Swift.Double?
+            /// Timestamp in milliseconds since epoch
+            ///
+            /// - Remark: Generated from `#/components/schemas/LocationValue/timestamp`.
+            internal var timestamp: Swift.Double?
+            /// Creates a new `LocationValue`.
+            ///
+            /// - Parameters:
+            ///   - latitude: Latitude in degrees
+            ///   - longitude: Longitude in degrees
+            ///   - horizontalAccuracy: Horizontal accuracy in meters
+            ///   - verticalAccuracy: Vertical accuracy in meters
+            ///   - altitude: Altitude in meters
+            ///   - speed: Speed in meters per second
+            ///   - course: Course in degrees
+            ///   - timestamp: Timestamp in milliseconds since epoch
+            internal init(
+                latitude: Swift.Double? = nil,
+                longitude: Swift.Double? = nil,
+                horizontalAccuracy: Swift.Double? = nil,
+                verticalAccuracy: Swift.Double? = nil,
+                altitude: Swift.Double? = nil,
+                speed: Swift.Double? = nil,
+                course: Swift.Double? = nil,
+                timestamp: Swift.Double? = nil
+            ) {
+                self.latitude = latitude
+                self.longitude = longitude
+                self.horizontalAccuracy = horizontalAccuracy
+                self.verticalAccuracy = verticalAccuracy
+                self.altitude = altitude
+                self.speed = speed
+                self.course = course
+                self.timestamp = timestamp
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case latitude
+                case longitude
+                case horizontalAccuracy
+                case verticalAccuracy
+                case altitude
+                case speed
+                case course
+                case timestamp
+            }
+        }
+        /// Reference dictionary as defined in CloudKit Web Services
+        ///
+        /// - Remark: Generated from `#/components/schemas/ReferenceValue`.
+        internal struct ReferenceValue: Codable, Hashable, Sendable {
+            /// The record name being referenced
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReferenceValue/recordName`.
+            internal var recordName: Swift.String?
+            /// Action to perform on the referenced record
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReferenceValue/action`.
+            internal enum actionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case DELETE_SELF = "DELETE_SELF"
+            }
+            /// Action to perform on the referenced record
+            ///
+            /// - Remark: Generated from `#/components/schemas/ReferenceValue/action`.
+            internal var action: Components.Schemas.ReferenceValue.actionPayload?
+            /// Creates a new `ReferenceValue`.
+            ///
+            /// - Parameters:
+            ///   - recordName: The record name being referenced
+            ///   - action: Action to perform on the referenced record
+            internal init(
+                recordName: Swift.String? = nil,
+                action: Components.Schemas.ReferenceValue.actionPayload? = nil
+            ) {
+                self.recordName = recordName
+                self.action = action
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case recordName
+                case action
+            }
+        }
+        /// Asset dictionary as defined in CloudKit Web Services
+        ///
+        /// - Remark: Generated from `#/components/schemas/AssetValue`.
+        internal struct AssetValue: Codable, Hashable, Sendable {
+            /// Checksum of the asset file
+            ///
+            /// - Remark: Generated from `#/components/schemas/AssetValue/fileChecksum`.
+            internal var fileChecksum: Swift.String?
+            /// Size of the asset in bytes
+            ///
+            /// - Remark: Generated from `#/components/schemas/AssetValue/size`.
+            internal var size: Swift.Int64?
+            /// Checksum of the asset reference
+            ///
+            /// - Remark: Generated from `#/components/schemas/AssetValue/referenceChecksum`.
+            internal var referenceChecksum: Swift.String?
+            /// Wrapping key for the asset
+            ///
+            /// - Remark: Generated from `#/components/schemas/AssetValue/wrappingKey`.
+            internal var wrappingKey: Swift.String?
+            /// Receipt for the asset
+            ///
+            /// - Remark: Generated from `#/components/schemas/AssetValue/receipt`.
+            internal var receipt: Swift.String?
+            /// URL for downloading the asset
+            ///
+            /// - Remark: Generated from `#/components/schemas/AssetValue/downloadURL`.
+            internal var downloadURL: Swift.String?
+            /// Creates a new `AssetValue`.
+            ///
+            /// - Parameters:
+            ///   - fileChecksum: Checksum of the asset file
+            ///   - size: Size of the asset in bytes
+            ///   - referenceChecksum: Checksum of the asset reference
+            ///   - wrappingKey: Wrapping key for the asset
+            ///   - receipt: Receipt for the asset
+            ///   - downloadURL: URL for downloading the asset
+            internal init(
+                fileChecksum: Swift.String? = nil,
+                size: Swift.Int64? = nil,
+                referenceChecksum: Swift.String? = nil,
+                wrappingKey: Swift.String? = nil,
+                receipt: Swift.String? = nil,
+                downloadURL: Swift.String? = nil
+            ) {
+                self.fileChecksum = fileChecksum
+                self.size = size
+                self.referenceChecksum = referenceChecksum
+                self.wrappingKey = wrappingKey
+                self.receipt = receipt
+                self.downloadURL = downloadURL
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case fileChecksum
+                case size
+                case referenceChecksum
+                case wrappingKey
+                case receipt
+                case downloadURL
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ListValue`.
+        internal indirect enum ListValuePayload: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ListValue/case1`.
+            case StringValue(Components.Schemas.StringValue)
+            /// - Remark: Generated from `#/components/schemas/ListValue/case2`.
+            case Int64Value(Components.Schemas.Int64Value)
+            /// - Remark: Generated from `#/components/schemas/ListValue/case3`.
+            case DoubleValue(Components.Schemas.DoubleValue)
+            /// - Remark: Generated from `#/components/schemas/ListValue/case4`.
+            case BooleanValue(Components.Schemas.BooleanValue)
+            /// - Remark: Generated from `#/components/schemas/ListValue/case5`.
+            case BytesValue(Components.Schemas.BytesValue)
+            /// - Remark: Generated from `#/components/schemas/ListValue/case6`.
+            case DateValue(Components.Schemas.DateValue)
+            /// - Remark: Generated from `#/components/schemas/ListValue/case7`.
+            case LocationValue(Components.Schemas.LocationValue)
+            /// - Remark: Generated from `#/components/schemas/ListValue/case8`.
+            case ReferenceValue(Components.Schemas.ReferenceValue)
+            /// - Remark: Generated from `#/components/schemas/ListValue/case9`.
+            case AssetValue(Components.Schemas.AssetValue)
+            /// - Remark: Generated from `#/components/schemas/ListValue/case10`.
+            case ListValue(Components.Schemas.ListValue)
+            internal init(from decoder: any Decoder) throws {
+                var errors: [any Error] = []
+                do {
+                    self = .StringValue(try decoder.decodeFromSingleValueContainer())
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .Int64Value(try decoder.decodeFromSingleValueContainer())
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .DoubleValue(try decoder.decodeFromSingleValueContainer())
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .BooleanValue(try decoder.decodeFromSingleValueContainer())
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .BytesValue(try decoder.decodeFromSingleValueContainer())
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .DateValue(try decoder.decodeFromSingleValueContainer())
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .LocationValue(try .init(from: decoder))
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .ReferenceValue(try .init(from: decoder))
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .AssetValue(try .init(from: decoder))
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                do {
+                    self = .ListValue(try decoder.decodeFromSingleValueContainer())
+                    return
+                } catch {
+                    errors.append(error)
+                }
+                throw Swift.DecodingError.failedToDecodeOneOfSchema(
+                    type: Self.self,
+                    codingPath: decoder.codingPath,
+                    errors: errors
+                )
+            }
+            internal func encode(to encoder: any Encoder) throws {
+                switch self {
+                case let .StringValue(value):
+                    try encoder.encodeToSingleValueContainer(value)
+                case let .Int64Value(value):
+                    try encoder.encodeToSingleValueContainer(value)
+                case let .DoubleValue(value):
+                    try encoder.encodeToSingleValueContainer(value)
+                case let .BooleanValue(value):
+                    try encoder.encodeToSingleValueContainer(value)
+                case let .BytesValue(value):
+                    try encoder.encodeToSingleValueContainer(value)
+                case let .DateValue(value):
+                    try encoder.encodeToSingleValueContainer(value)
+                case let .LocationValue(value):
+                    try value.encode(to: encoder)
+                case let .ReferenceValue(value):
+                    try value.encode(to: encoder)
+                case let .AssetValue(value):
+                    try value.encode(to: encoder)
+                case let .ListValue(value):
+                    try encoder.encodeToSingleValueContainer(value)
+                }
+            }
+        }
+        /// Array containing any of the above field types
+        ///
+        /// - Remark: Generated from `#/components/schemas/ListValue`.
+        internal typealias ListValue = [Components.Schemas.ListValuePayload]
         /// - Remark: Generated from `#/components/schemas/ZoneOperation`.
         internal struct ZoneOperation: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ZoneOperation/operationType`.
