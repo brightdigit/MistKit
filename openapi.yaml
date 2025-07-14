@@ -802,17 +802,7 @@ components:
         fieldName:
           type: string
         fieldValue:
-          type: object
-          properties:
-            value:
-              oneOf:
-                - type: string
-                - type: number
-                - type: boolean
-                - type: array
-            type:
-              type: string
-              enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, LOCATION, TIMESTAMP, LIST]
+          $ref: '#/components/schemas/FieldValue'
 
     Sort:
       type: object
@@ -836,25 +826,156 @@ components:
       properties:
         recordName:
           type: string
+          description: The unique identifier for the record
         recordType:
           type: string
+          description: The record type (schema name)
         recordChangeTag:
           type: string
+          description: Change tag for optimistic concurrency control
         fields:
           type: object
+          description: Record fields with their values and types
           additionalProperties:
-            type: object
-            properties:
-              value:
-                oneOf:
-                  - type: string
-                  - type: number
-                  - type: boolean
-                  - type: array
-                  - type: object
-              type:
-                type: string
-                enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, LOCATION, TIMESTAMP, LIST]
+            $ref: '#/components/schemas/FieldValue'
+
+    FieldValue:
+      type: object
+      description: A CloudKit field value with its type information
+      properties:
+        value:
+          oneOf:
+            - $ref: '#/components/schemas/StringValue'
+            - $ref: '#/components/schemas/Int64Value'
+            - $ref: '#/components/schemas/DoubleValue'
+            - $ref: '#/components/schemas/BooleanValue'
+            - $ref: '#/components/schemas/BytesValue'
+            - $ref: '#/components/schemas/DateValue'
+            - $ref: '#/components/schemas/LocationValue'
+            - $ref: '#/components/schemas/ReferenceValue'
+            - $ref: '#/components/schemas/AssetValue'
+            - $ref: '#/components/schemas/ListValue'
+        type:
+          type: string
+          enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, LOCATION, TIMESTAMP, LIST]
+          description: The CloudKit field type
+
+    StringValue:
+      type: string
+      description: A text string value
+
+    Int64Value:
+      type: integer
+      format: int64
+      description: A 64-bit integer value
+
+    DoubleValue:
+      type: number
+      format: double
+      description: A double-precision floating point value
+
+    BooleanValue:
+      type: boolean
+      description: A true or false value
+
+    BytesValue:
+      type: string
+      description: Base64-encoded string representing binary data
+
+    DateValue:
+      type: number
+      format: double
+      description: Number representing milliseconds since epoch (January 1, 1970)
+
+    LocationValue:
+      type: object
+      description: Location dictionary as defined in CloudKit Web Services
+      properties:
+        latitude:
+          type: number
+          format: double
+          description: Latitude in degrees
+        longitude:
+          type: number
+          format: double
+          description: Longitude in degrees
+        horizontalAccuracy:
+          type: number
+          format: double
+          description: Horizontal accuracy in meters
+        verticalAccuracy:
+          type: number
+          format: double
+          description: Vertical accuracy in meters
+        altitude:
+          type: number
+          format: double
+          description: Altitude in meters
+        speed:
+          type: number
+          format: double
+          description: Speed in meters per second
+        course:
+          type: number
+          format: double
+          description: Course in degrees
+        timestamp:
+          type: number
+          format: double
+          description: Timestamp in milliseconds since epoch
+
+    ReferenceValue:
+      type: object
+      description: Reference dictionary as defined in CloudKit Web Services
+      properties:
+        recordName:
+          type: string
+          description: The record name being referenced
+        action:
+          type: string
+          enum: [DELETE_SELF]
+          description: Action to perform on the referenced record
+
+    AssetValue:
+      type: object
+      description: Asset dictionary as defined in CloudKit Web Services
+      properties:
+        fileChecksum:
+          type: string
+          description: Checksum of the asset file
+        size:
+          type: integer
+          format: int64
+          description: Size of the asset in bytes
+        referenceChecksum:
+          type: string
+          description: Checksum of the asset reference
+        wrappingKey:
+          type: string
+          description: Wrapping key for the asset
+        receipt:
+          type: string
+          description: Receipt for the asset
+        downloadURL:
+          type: string
+          format: uri
+          description: URL for downloading the asset
+
+    ListValue:
+      type: array
+      description: Array containing any of the above field types
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/StringValue'
+          - $ref: '#/components/schemas/Int64Value'
+          - $ref: '#/components/schemas/DoubleValue'
+          - $ref: '#/components/schemas/BooleanValue'
+          - $ref: '#/components/schemas/BytesValue'
+          - $ref: '#/components/schemas/DateValue'
+          - $ref: '#/components/schemas/LocationValue'
+          - $ref: '#/components/schemas/ReferenceValue'
+          - $ref: '#/components/schemas/AssetValue'
+          - $ref: '#/components/schemas/ListValue'
 
     ZoneOperation:
       type: object

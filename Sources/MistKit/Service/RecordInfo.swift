@@ -184,15 +184,17 @@ public struct RecordInfo: Encodable {
     }
     
     /// Convert a CloudKit field value to CKValue
-    private static func convertToCKValue(_ fieldData: Components.Schemas.Record.fieldsPayload.additionalPropertiesPayload) -> CKValue? {
+    private static func convertToCKValue(_ fieldData: Components.Schemas.FieldValue) -> CKValue? {
         guard let value = fieldData.value else {
             return nil
         }
         
         switch value {
-        case .case1(let stringValue):
+        case .StringValue(let stringValue):
             return .string(stringValue)
-        case .case2(let doubleValue):
+        case .Int64Value(let intValue):
+            return .int64(intValue)
+        case .DoubleValue(let doubleValue):
             // Check the type to determine if it's a date or double
             if let fieldType = fieldData._type {
                 switch fieldType {
@@ -200,24 +202,116 @@ public struct RecordInfo: Encodable {
                     // Convert milliseconds to Date
                     let date = Date(timeIntervalSince1970: doubleValue / 1000)
                     return .date(date)
-                case .INT64:
-                    return .int64(Int64(doubleValue))
                 default:
                     return .double(doubleValue)
                 }
             } else {
                 return .double(doubleValue)
             }
-        case .case3(let boolValue):
+        case .BooleanValue(let boolValue):
             return .boolean(boolValue)
-        case .case4(_):
-            // TODO: Implement proper array conversion when OpenAPI container structure is understood
-            // For now, return nil to skip arrays
-            return nil
-        case .case5(_):
-            // TODO: Implement proper object conversion when OpenAPI container structure is understood
-            // For now, return nil to skip objects
-            return nil
+        case .BytesValue(let bytesValue):
+            return .bytes(bytesValue)
+        case .DateValue(let dateValue):
+            // Convert milliseconds to Date
+            let date = Date(timeIntervalSince1970: dateValue / 1000)
+            return .date(date)
+        case .LocationValue(let locationValue):
+            let location = CKValue.Location(
+                latitude: locationValue.latitude ?? 0.0,
+                longitude: locationValue.longitude ?? 0.0,
+                horizontalAccuracy: locationValue.horizontalAccuracy,
+                verticalAccuracy: locationValue.verticalAccuracy,
+                altitude: locationValue.altitude,
+                speed: locationValue.speed,
+                course: locationValue.course,
+                timestamp: locationValue.timestamp.map { Date(timeIntervalSince1970: $0 / 1000) }
+            )
+            return .location(location)
+        case .ReferenceValue(let referenceValue):
+            let reference = CKValue.Reference(
+                recordName: referenceValue.recordName ?? "",
+                action: referenceValue.action?.rawValue
+            )
+            return .reference(reference)
+        case .AssetValue(let assetValue):
+            let asset = CKValue.Asset(
+                fileChecksum: assetValue.fileChecksum,
+                size: assetValue.size,
+                referenceChecksum: assetValue.referenceChecksum,
+                wrappingKey: assetValue.wrappingKey,
+                receipt: assetValue.receipt,
+                downloadURL: assetValue.downloadURL
+            )
+            return .asset(asset)
+        case .ListValue(let listValue):
+            // Convert list items to CKValue array
+            let convertedList = listValue.compactMap { listItem in
+                // Handle the recursive list structure properly
+                switch listItem {
+                case .StringValue(let stringValue):
+                    return CKValue.string(stringValue)
+                case .Int64Value(let intValue):
+                    return CKValue.int64(intValue)
+                case .DoubleValue(let doubleValue):
+                    return CKValue.double(doubleValue)
+                case .BooleanValue(let boolValue):
+                    return CKValue.boolean(boolValue)
+                case .BytesValue(let bytesValue):
+                    return CKValue.bytes(bytesValue)
+                case .DateValue(let dateValue):
+                    let date = Date(timeIntervalSince1970: dateValue / 1000)
+                    return CKValue.date(date)
+                case .LocationValue(let locationValue):
+                    let location = CKValue.Location(
+                        latitude: locationValue.latitude ?? 0.0,
+                        longitude: locationValue.longitude ?? 0.0,
+                        horizontalAccuracy: locationValue.horizontalAccuracy,
+                        verticalAccuracy: locationValue.verticalAccuracy,
+                        altitude: locationValue.altitude,
+                        speed: locationValue.speed,
+                        course: locationValue.course,
+                        timestamp: locationValue.timestamp.map { Date(timeIntervalSince1970: $0 / 1000) }
+                    )
+                    return CKValue.location(location)
+                case .ReferenceValue(let refValue):
+                    let reference = CKValue.Reference(
+                        recordName: refValue.recordName ?? "",
+                        action: refValue.action?.rawValue
+                    )
+                    return CKValue.reference(reference)
+                case .AssetValue(let assetValue):
+                    let asset = CKValue.Asset(
+                        fileChecksum: assetValue.fileChecksum,
+                        size: assetValue.size,
+                        referenceChecksum: assetValue.referenceChecksum,
+                        wrappingKey: assetValue.wrappingKey,
+                        receipt: assetValue.receipt,
+                        downloadURL: assetValue.downloadURL
+                    )
+                    return CKValue.asset(asset)
+                case .ListValue(let nestedList):
+                    // Recursively convert nested lists
+                    let nestedConvertedList = nestedList.compactMap { nestedItem in
+                        // For simplicity, we'll handle basic types in nested lists
+                        switch nestedItem {
+                        case .StringValue(let stringValue):
+                            return CKValue.string(stringValue)
+                        case .Int64Value(let intValue):
+                            return CKValue.int64(intValue)
+                        case .DoubleValue(let doubleValue):
+                            return CKValue.double(doubleValue)
+                        case .BooleanValue(let boolValue):
+                            return CKValue.boolean(boolValue)
+                        default:
+                            // For complex nested types, return nil for now
+                            return nil
+                        }
+                    }
+                    return CKValue.list(nestedConvertedList)
+                }
+            }
+            return .list(convertedList)
         }
     }
 }
