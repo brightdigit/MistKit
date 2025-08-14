@@ -1,0 +1,24 @@
+{
+  "name": "mistkit",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts" : {
+    "claude" : "claude",
+    "task-master" : "task-master"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brightdigit/MistKit.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brightdigit/MistKit/issues"
+  },
+  "homepage": "https://github.com/brightdigit/MistKit#readme",
+  "description": "",
+  "dependencies": {
+    "@anthropic-ai/claude-code": "^1.0.81",
+    "task-master-ai": "^0.24.0"
+  }
+}

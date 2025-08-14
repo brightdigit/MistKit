@@ -1,21 +1,5 @@
-# macOS
-.DS_Store
-
-# Swift Package Manager
-.build/
-.swiftpm/
-Package.resolved
-DerivedData/
-.index-build/
-
-# Xcode
-*.xcodeproj
-*.xcworkspace
-xcuserdata/
-
-# IDE
-.vscode/
-.idea/
+# Created by https://www.toptal.com/developers/gitignore/api/node
+# Edit at https://www.toptal.com/developers/gitignore?templates=node
 
 ### Node ###
 # Logs

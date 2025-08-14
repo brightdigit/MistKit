@@ -1,0 +1,1938 @@
+╭───────────────────────────────────────────────────╮
+│ ✻ Welcome to Claude Code!                         │
+│                                                   │
+│   /help for help, /status for your current setup  │
+│                                                   │
+│   cwd: /Users/leo/Documents/Projects/MistKit      │
+╰───────────────────────────────────────────────────╯
+
+> init
+
+⏺ I'm ready to help you with MistKit development! This is a Swift package for CloudKit Web Services with
+  OpenAPI-driven architecture. What would you like to work on?
+
+> Let's create a PRD for this
+
+⏺ I'll help you create a Product Requirements Document (PRD) for MistKit. Let me first research the current state
+  of the project to understand what we're building.
+
+⏺ Read(openapi.yaml)
+  ⎿  Read 1298 lines (ctrl+r to expand)
+
+⏺ Read(Package.swift)
+  ⎿  Read 43 lines (ctrl+r to expand)
+
+⏺ List(~/Documents/Projects/MistKit)
+  ⎿  Listed 61 paths (ctrl+r to expand)
+
+⏺ Read(Sources/MistKit/MistKitClient.swift)
+  ⎿  Read 43 lines (ctrl+r to expand)
+
+⏺ Read(Examples/README.md)
+  ⎿  Read 106 lines (ctrl+r to expand)
+
+⏺ Search(pattern: "README")
+  ⎿  Found 244 files (ctrl+r to expand)
+
+⏺ Based on my research of the MistKit project, I can now create a comprehensive Product Requirements Document
+  (PRD). Let me present my plan:
+                                                                                                                  
+⏺ User approved Claude's plan:
+  ⎿  PRD Creation Plan for MistKit
+
+     Overview
+
+     Create a comprehensive Product Requirements Document (PRD) for MistKit - a Swift Package for Server-Side and 
+     Command-Line Access to CloudKit Web Services.
+
+     PRD Structure
+
+     1. Executive Summary
+       - Product vision and mission
+       - Key value proposition
+       - Target audience
+     2. Product Overview
+       - Current state analysis
+       - Problem statement
+       - Solution approach
+     3. Market & User Analysis
+       - Target developers and use cases
+       - Competitive landscape
+       - Market opportunity
+     4. Features & Requirements
+       - Core functionality (based on OpenAPI spec)
+       - Platform support and technical requirements
+       - Authentication mechanisms
+       - API coverage
+     5. Technical Architecture
+       - Modern Swift features integration
+       - OpenAPI-driven development approach
+       - Performance and security considerations
+     6. User Experience
+       - Developer experience priorities
+       - Example applications and demos
+       - Documentation and learning curve
+     7. Success Metrics
+       - Adoption metrics
+       - Technical performance indicators
+       - Developer satisfaction measures
+     8. Timeline & Milestones
+       - Development phases
+       - Release strategy
+       - Future roadmap
+
+     Implementation
+
+     - Create a well-structured PRD document in Markdown format
+     - Include all CloudKit Web Services capabilities from the OpenAPI spec
+     - Reference existing demo and examples
+     - Align with the modern Swift architecture described in CLAUDE.md
+     - Focus on cross-platform server-side Swift applications
+
+⏺ Update Todos
+  ⎿  ☐ Create comprehensive PRD document for MistKit                              
+     ☐ Structure PRD with executive summary, product overview, and market analysis
+     ☐ Detail features and requirements based on OpenAPI specification
+     ☐ Include technical architecture and modern Swift features
+     ☐ Add user experience section with developer-focused content
+     ☐ Define success metrics and timeline
+
+⏺ Write(PRD.md)
+  ⎿  User rejected write to PRD.md
+         1 +  # Product Requirements Document: MistKit
+         2 +  
+         3 +  ## Executive Summary
+         4 +  
+         5 +  ### Product Vision
+         6 +  MistKit is a modern, cross-platform Swift package that provides seamless server-side and command-line 
+           + access to Apple's CloudKit Web Services. It empowers Swift developers to build robust, 
+     cloud-integrated
+           +  applications beyond Apple's ecosystem while maintaining the familiar CloudKit data model.
+         7 +  
+         8 +  ### Mission Statement
+         9 +  To democratize CloudKit access for server-side Swift applications, enabling developers to build 
+           + cross-platform solutions that leverage Apple's cloud infrastructure without being limited to Apple 
+           + platforms.
+        10 +  
+        11 +  ### Key Value Proposition
+        12 +  - **Cross-Platform CloudKit**: Access CloudKit from Linux servers, command-line tools, and non-Apple 
+           + platforms
+        13 +  - **Modern Swift Architecture**: Built with async/await, actors, and latest Swift concurrency 
+     features
+        14 +  - **Type-Safe API**: OpenAPI-driven development ensures compile-time safety and comprehensive API 
+           + coverage
+        15 +  - **Production Ready**: Designed for server-side applications with proper authentication, error 
+           + handling, and performance optimization
+        16 +  
+        17 +  ### Target Audience
+        18 +  - **Server-Side Swift Developers**: Building web applications, APIs, and microservices
+        19 +  - **DevOps Engineers**: Creating automation tools and deployment scripts
+        20 +  - **Cross-Platform Developers**: Building applications that need CloudKit data synchronization across 
+           + non-Apple platforms
+        21 +  - **Enterprise Developers**: Integrating CloudKit into existing server infrastructure
+        22 +  
+        23 +  ## Product Overview
+        24 +  
+        25 +  ### Current State Analysis
+        26 +  MistKit represents a complete rewrite leveraging modern Swift capabilities, built on the `claude` 
+           + branch. The project includes:
+        27 +  - Complete OpenAPI 3.0.3 specification for CloudKit Web Services
+        28 +  - Swift Package Manager integration with OpenAPI code generation
+        29 +  - Comprehensive authentication middleware
+        30 +  - Working demo application with web-based authentication
+        31 +  - Cross-platform support (macOS, Linux, server environments)
+        32 +  
+        33 +  ### Problem Statement
+        34 +  Existing CloudKit access is limited to Apple platforms through the CloudKit framework. Developers 
+           + building server-side applications, Linux services, or cross-platform tools cannot directly access 
+           + CloudKit data, forcing them to:
+        35 +  - Build complex proxy services on Apple platforms
+        36 +  - Use alternative cloud solutions, losing CloudKit's integration benefits
+        37 +  - Maintain separate data synchronization logic
+        38 +  - Accept platform limitations for their architecture choices
+        39 +  
+        40 +  ### Solution Approach
+        41 +  MistKit solves this by providing a native Swift package that:
+        42 +  1. **Direct API Access**: Communicates directly with CloudKit Web Services REST API
+        43 +  2. **OpenAPI-Driven**: Automatically generates type-safe client code from Apple's official 
+           + specification
+        44 +  3. **Authentication Handling**: Supports both API Token and Server-to-Server authentication methods
+        45 +  4. **Modern Swift Design**: Leverages async/await, structured concurrency, and protocol-oriented 
+           + architecture
+        46 +  5. **Cross-Platform Ready**: Works on any platform supporting Swift, including Linux servers
+        47 +  
+        48 +  ## Market & User Analysis
+        49 +  
+        50 +  ### Primary Use Cases
+        51 +  
+        52 +  #### Server-Side Web Applications
+        53 +  - **Hummingbird/Vapor Applications**: Web backends that need CloudKit data access
+        54 +  - **API Services**: REST/GraphQL APIs serving CloudKit data to multiple client types
+        55 +  - **Real-time Services**: WebSocket servers providing live CloudKit data updates
+        56 +  
+        57 +  #### DevOps & Automation
+        58 +  - **CI/CD Pipelines**: Automated testing and deployment tools accessing CloudKit
+        59 +  - **Data Migration Tools**: Scripts for bulk data operations and synchronization
+        60 +  - **Monitoring Services**: Server applications tracking CloudKit usage and performance
+        61 +  
+        62 +  #### Cross-Platform Applications
+        63 +  - **Desktop Applications**: Native apps on non-Apple platforms needing CloudKit integration
+        64 +  - **IoT Devices**: Embedded systems and edge computing devices
+        65 +  - **Command-Line Tools**: Developer utilities and administrative interfaces
+        66 +  
+        67 +  ### Competitive Landscape
+        68 +  - **CloudKit Framework**: Apple's native solution (Apple platforms only)
+        69 +  - **Custom REST Implementations**: Manual HTTP client implementations (high maintenance)
+        70 +  - **Third-Party Services**: Alternative cloud providers (no CloudKit integration)
+        71 +  - **Proxy Solutions**: Apple platform intermediaries (added complexity and latency)
+        72 +  
+        73 +  ### Market Opportunity
+        74 +  - Growing server-side Swift adoption in enterprise environments
+        75 +  - Increasing demand for cross-platform Apple ecosystem integration
+        76 +  - Developer productivity gains from type-safe, generated APIs
+        77 +  - Cost savings from direct CloudKit access versus proxy architectures
+        78 +  
+        79 +  ## Features & Requirements
+        80 +  
+        81 +  ### Core CloudKit Operations
+        82 +  
+        83 +  #### Record Management
+        84 +  - **Query Records**: Advanced filtering, sorting, and pagination support
+        85 +  - **Modify Records**: Create, update, delete operations with optimistic concurrency
+        86 +  - **Lookup Records**: Efficient batch retrieval by record identifiers
+        87 +  - **Record Changes**: Incremental sync with change tokens
+        88 +  
+        89 +  #### Zone Management
+        90 +  - **List Zones**: Enumerate all zones in public, private, or shared databases
+        91 +  - **Lookup Zones**: Retrieve specific zone information
+        92 +  - **Modify Zones**: Create and delete custom zones (private database only)
+        93 +  - **Zone Changes**: Track zone-level modifications for sync operations
+        94 +  
+        95 +  #### Subscription Management
+        96 +  - **List Subscriptions**: View all active push notification subscriptions
+        97 +  - **Lookup Subscriptions**: Retrieve specific subscription details
+        98 +  - **Modify Subscriptions**: Create, update, and delete query or zone subscriptions
+        99 +  
+       100 +  #### User Management
+       101 +  - **Current User**: Retrieve authenticated user information
+       102 +  - **Discover Users**: Find users by email addresses or record names
+       103 +  - **Contact Lookup**: Legacy contact discovery support
+       104 +  
+       105 +  #### Asset Management
+       106 +  - **Upload Assets**: Binary file upload with proper CloudKit asset handling
+       107 +  - **Asset References**: Manage file attachments in record fields
+       108 +  
+       109 +  #### Token Management
+       110 +  - **APNs Tokens**: Create and register push notification tokens
+       111 +  - **Authentication**: Handle both API token and server-to-server authentication
+       112 +  
+       113 +  ### Platform Support
+       114 +  
+       115 +  #### Minimum Requirements
+       116 +  - **Swift 5.9+**: Modern Swift language features and concurrency support
+       117 +  - **Platform Versions**:
+       118 +    - macOS 10.15+ (Catalina)
+       119 +    - iOS 13.0+
+       120 +    - tvOS 13.0+
+       121 +    - watchOS 6.0+
+       122 +    - visionOS 1.0+
+       123 +    - Linux (Ubuntu 18.04+, Amazon Linux 2+)
+       124 +  
+       125 +  #### Dependencies
+       126 +  - **Swift OpenAPI Generator**: Automatic client code generation
+       127 +  - **Swift OpenAPI Runtime**: HTTP transport and middleware support
+       128 +  - **URLSession Transport**: Cross-platform HTTP client implementation
+       129 +  
+       130 +  ### Authentication & Security
+       131 +  
+       132 +  #### Supported Authentication Methods
+       133 +  1. **API Token Authentication**
+       134 +     - CloudKit Dashboard-generated API tokens
+       135 +     - Query parameter-based authentication
+       136 +     - Suitable for development and testing
+       137 +  
+       138 +  2. **Server-to-Server Authentication**
+       139 +     - Private key-based authentication
+       140 +     - Header-based key ID transmission
+       141 +     - Production-ready security model
+       142 +  
+       143 +  #### Security Features
+       144 +  - **TLS/HTTPS Only**: All communications encrypted in transit
+       145 +  - **Token Management**: Secure storage and rotation handling
+       146 +  - **Error Context**: Detailed security error reporting without exposure
+       147 +  - **Rate Limiting**: Built-in respect for CloudKit API limits
+       148 +  
+       149 +  ### Performance & Scalability
+       150 +  
+       151 +  #### Concurrency Support
+       152 +  - **Async/Await**: All network operations use modern Swift concurrency
+       153 +  - **Structured Concurrency**: TaskGroup support for parallel operations
+       154 +  - **Actor Integration**: Thread-safe state management for concurrent access
+       155 +  
+       156 +  #### Optimization Features
+       157 +  - **Connection Pooling**: Efficient HTTP connection reuse
+       158 +  - **Request Batching**: Bulk operations for improved throughput
+       159 +  - **Pagination Support**: AsyncSequence for large result sets
+       160 +  - **Caching Strategy**: Optional response caching with invalidation
+       161 +  
+       162 +  ## Technical Architecture
+       163 +  
+       164 +  ### Modern Swift Features
+       165 +  
+       166 +  #### Concurrency Model
+       167 +  ```swift
+       168 +  // Async/await for all network operations
+       169 +  let records = try await client.queryRecords(
+       170 +      database: .private,
+       171 +      query: .init(recordType: "Article")
+       172 +  )
+       173 +  
+       174 +  // Structured concurrency for parallel operations
+       175 +  async let users = client.getCurrentUser()
+       176 +  async let zones = client.listZones(database: .private)
+       177 +  let (userInfo, zoneList) = try await (users, zones)
+       178 +  ```
+       179 +  
+       180 +  #### Protocol-Oriented Design
+       181 +  - **TokenManager Protocol**: Pluggable authentication strategies
+       182 +  - **NetworkClient Protocol**: Testable HTTP transport abstraction
+       183 +  - **CloudKitService Protocol**: Mockable service layer for testing
+       184 +  
+       185 +  #### Type Safety
+       186 +  - **Generated Models**: Compile-time validation of CloudKit field types
+       187 +  - **Enum-Driven APIs**: Strongly typed database scopes, environments, and operations
+       188 +  - **Result Builders**: Fluent query construction with compile-time validation
+       189 +  
+       190 +  #### Error Handling
+       191 +  ```swift
+       192 +  enum CloudKitError: LocalizedError {
+       193 +      case authenticationFailed(reason: String)
+       194 +      case recordNotFound(recordName: String)
+       195 +      case quotaExceeded(limit: Int)
+       196 +      case networkError(underlying: Error)
+       197 +  }
+       198 +  ```
+       199 +  
+       200 +  ### OpenAPI-Driven Development
+       201 +  
+       202 +  #### Code Generation Pipeline
+       203 +  1. **Official Specification**: Apple's CloudKit Web Services OpenAPI 3.0.3 spec
+       204 +  2. **Swift OpenAPI Generator**: Automatic client and model generation
+       205 +  3. **Type-Safe APIs**: Compile-time validation of requests and responses
+       206 +  4. **Documentation**: Auto-generated API documentation from specification
+       207 +  
+       208 +  #### Architecture Benefits
+       209 +  - **Always Current**: Automatic updates when CloudKit API evolves
+       210 +  - **Comprehensive Coverage**: Every CloudKit operation included
+       211 +  - **Type Safety**: Compile-time validation prevents runtime errors
+       212 +  - **Documentation**: Self-documenting APIs with inline help
+       213 +  
+       214 +  ### Package Structure
+       215 +  ```
+       216 +  MistKit/
+       217 +  ├── Sources/
+       218 +  │   └── MistKit/
+       219 +  │       ├── Generated/              # Auto-generated OpenAPI code
+       220 +  │       │   ├── Client.swift
+       221 +  │       │   └── Types.swift
+       222 +  │       ├── Authentication/         # Authentication middleware
+       223 +  │       │   ├── TokenManager.swift
+       224 +  │       │   └── ServerToServerAuth.swift
+       225 +  │       ├── Service/               # High-level service layer
+       226 +  │       │   ├── CloudKitService.swift
+       227 +  │       │   ├── RecordService.swift
+       228 +  │       │   └── ZoneService.swift
+       229 +  │       ├── Models/                # Swift-native CloudKit types
+       230 +  │       │   ├── Record.swift
+       231 +  │       │   ├── Zone.swift
+       232 +  │       │   └── FieldValue.swift
+       233 +  │       └── MistKitClient.swift    # Main public interface
+       234 +  ├── Tests/
+       235 +  │   └── MistKitTests/
+       236 +  ├── Examples/
+       237 +  │   └── MistDemo/                  # Comprehensive demo application
+       238 +  └── Scripts/
+       239 +      └── generate-openapi.sh        # Code generation automation
+       240 +  ```
+       241 +  
+       242 +  ## User Experience
+       243 +  
+       244 +  ### Developer Experience Priorities
+       245 +  
+       246 +  #### Ease of Integration
+       247 +  ```swift
+       248 +  // Simple client initialization
+       249 +  let config = MistKitConfiguration(
+       250 +      containerIdentifier: "iCloud.com.example.app",
+       251 +      environment: .development,
+       252 +      authentication: .apiToken(
+       253 +          apiToken: "your-api-token",
+       254 +          webAuthToken: "session-token"
+       255 +      )
+       256 +  )
+       257 +  let client = try MistKitClient(configuration: config)
+       258 +  ```
+       259 +  
+       260 +  #### Familiar CloudKit Patterns
+       261 +  ```swift
+       262 +  // CloudKit-style record operations
+       263 +  let record = CloudKitRecord(
+       264 +      recordType: "Article",
+       265 +      fields: [
+       266 +          "title": .string("Hello World"),
+       267 +          "publishDate": .date(Date()),
+       268 +          "tags": .stringList(["swift", "cloudkit"])
+       269 +      ]
+       270 +  )
+       271 +  
+       272 +  let savedRecord = try await client.saveRecord(record, to: .private)
+       273 +  ```
+       274 +  
+       275 +  #### Comprehensive Error Handling
+       276 +  ```swift
+       277 +  do {
+       278 +      let records = try await client.queryRecords(query)
+       279 +  } catch CloudKitError.authenticationFailed(let reason) {
+       280 +      // Handle authentication issues
+       281 +  } catch CloudKitError.quotaExceeded(let limit) {
+       282 +      // Handle rate limiting
+       283 +  } catch {
+       284 +      // Handle other errors
+       285 +  }
+       286 +  ```
+       287 +  
+       288 +  ### Documentation Strategy
+       289 +  
+       290 +  #### Multi-Level Documentation
+       291 +  1. **Quick Start Guide**: Basic setup and common operations
+       292 +  2. **API Reference**: Complete generated documentation
+       293 +  3. **Cookbook**: Real-world usage patterns and recipes
+       294 +  4. **Migration Guide**: Moving from CloudKit framework to MistKit
+       295 +  
+       296 +  #### Example Applications
+       297 +  1. **MistDemo**: Web-based authentication and basic operations
+       298 +  2. **Server Example**: Hummingbird web application with CloudKit integration
+       299 +  3. **CLI Tool**: Command-line utility for CloudKit administration
+       300 +  4. **Sync Service**: Background service for data synchronization
+       301 +  
+       302 +  ### Learning Curve Considerations
+       303 +  
+       304 +  #### For CloudKit Developers
+       305 +  - **Familiar Concepts**: Same data model and operation patterns
+       306 +  - **Modern Swift**: Upgrade to async/await and structured concurrency
+       307 +  - **Cross-Platform**: Understanding server-side deployment differences
+       308 +  
+       309 +  #### For Server-Side Swift Developers
+       310 +  - **CloudKit Concepts**: Records, zones, and Apple's data model
+       311 +  - **Authentication**: Apple ID and CloudKit-specific auth flows
+       312 +  - **Apple Ecosystem**: Integration patterns and best practices
+       313 +  
+       314 +  ## Success Metrics
+       315 +  
+       316 +  ### Adoption Metrics
+       317 +  - **Package Downloads**: Swift Package Manager installation counts
+       318 +  - **GitHub Activity**: Stars, forks, and community contributions
+       319 +  - **Integration Usage**: Projects incorporating MistKit in production
+       320 +  - **Platform Distribution**: Usage across macOS, Linux, and other platforms
+       321 +  
+       322 +  ### Technical Performance Indicators
+       323 +  - **API Coverage**: Percentage of CloudKit Web Services operations supported
+       324 +  - **Error Rates**: Authentication and network operation success rates
+       325 +  - **Response Times**: Latency measurements for common operations
+       326 +  - **Throughput**: Requests per second handling capabilities
+       327 +  
+       328 +  ### Developer Satisfaction Measures
+       329 +  - **Documentation Quality**: Feedback on guides and API reference
+       330 +  - **Issue Resolution**: Time to resolve bugs and feature requests
+       331 +  - **Community Growth**: Active contributors and maintainers
+       332 +  - **Enterprise Adoption**: Use in production server-side applications
+       333 +  
+       334 +  ### Quality Assurance Targets
+       335 +  - **Test Coverage**: >90% code coverage for core functionality
+       336 +  - **Platform Compatibility**: Successful builds on all supported platforms
+       337 +  - **CI/CD Success**: Automated testing and release pipeline reliability
+       338 +  - **Security Audit**: Regular security reviews and vulnerability assessments
+       339 +  
+       340 +  ## Timeline & Milestones
+       341 +  
+       342 +  ### Phase 1: Foundation (Current)
+       343 +  **Status**: In Progress on `claude` branch
+       344 +  - ✅ OpenAPI specification integration
+       345 +  - ✅ Basic client architecture
+       346 +  - ✅ Authentication middleware
+       347 +  - ✅ Demo application
+       348 +  - 🔄 Complete API coverage
+       349 +  - 🔄 Comprehensive testing
+       350 +  
+       351 +  ### Phase 2: Stabilization (Next 2-3 months)
+       352 +  - **API Completeness**: Full CloudKit Web Services operation support
+       353 +  - **Testing Suite**: Comprehensive unit and integration tests
+       354 +  - **Documentation**: Complete API reference and guides
+       355 +  - **Performance**: Optimization and benchmarking
+       356 +  - **Platform Testing**: Validation across all supported platforms
+       357 +  
+       358 +  ### Phase 3: Production Ready (3-6 months)
+       359 +  - **Security Audit**: Professional security review
+       360 +  - **Performance Tuning**: Production-grade optimizations
+       361 +  - **Error Handling**: Comprehensive error scenarios and recovery
+       362 +  - **Examples**: Real-world application examples
+       363 +  - **1.0 Release**: Stable API with semantic versioning commitment
+       364 +  
+       365 +  ### Phase 4: Ecosystem Growth (6+ months)
+       366 +  - **Community**: Active open-source community development
+       367 +  - **Integrations**: Framework-specific integrations (Vapor, Hummingbird)
+       368 +  - **Tooling**: Developer productivity tools and extensions
+       369 +  - **Enterprise**: Enterprise support and service offerings
+       370 +  - **Advanced Features**: Additional CloudKit capabilities and optimizations
+       371 +  
+       372 +  ### Future Roadmap Considerations
+       373 +  - **CloudKit Sharing**: Support for shared database operations
+       374 +  - **Push Notifications**: Enhanced subscription and notification handling
+       375 +  - **Batch Operations**: Advanced bulk operation optimizations
+       376 +  - **Offline Support**: Local caching and sync strategies
+       377 +  - **Analytics**: Usage analytics and performance monitoring
+       378 +  
+       379 +  ## Conclusion
+       380 +  
+       381 +  MistKit represents a significant advancement in CloudKit accessibility, bringing Apple's cloud 
+           + infrastructure to the broader Swift ecosystem. By combining modern Swift language features with 
+           + comprehensive CloudKit Web Services access, it enables developers to build robust, cross-platform 
+           + applications while maintaining the familiar CloudKit development experience.
+       382 +  
+       383 +  The project's OpenAPI-driven architecture ensures long-term maintainability and feature completeness, 
+           + while its focus on developer experience and production readiness makes it suitable for both 
+           + experimental projects and enterprise deployments.
+       384 +  
+       385 +  Success will be measured through widespread adoption in the server-side Swift community, robust 
+           + performance in production environments, and continued alignment with Apple's CloudKit evolution.
+       386   \ No newline at end of file
+
+> What is Optimization Features?
+
+⏺ Based on the PRD content I was creating, "Optimization Features" refers to performance and efficiency
+  improvements built into MistKit. Here are the specific optimization features I outlined:
+
+  Performance & Scalability Optimization Features
+
+  Connection Pooling
+
+  - Efficient HTTP connection reuse: Maintains persistent connections to CloudKit servers instead of creating new
+  ones for each request
+  - Reduces latency: Eliminates connection establishment overhead for subsequent requests
+  - Better resource usage: Minimizes socket and memory usage on both client and server
+
+  Request Batching
+
+  - Bulk operations: Combine multiple individual operations into single API calls
+  - Improved throughput: Process multiple records, zones, or subscriptions in one request
+  - Reduced API calls: Fewer round trips to CloudKit servers means better performance and lower rate limit usage
+
+  Pagination Support
+
+  - AsyncSequence implementation: Handle large result sets efficiently without loading everything into memory
+  - Streaming results: Process records as they arrive rather than waiting for complete responses
+  - Memory efficiency: Avoid memory spikes when dealing with thousands of records
+
+  Caching Strategy
+
+  - Optional response caching: Cache CloudKit responses to reduce redundant API calls
+  - Cache invalidation: Smart cache expiration based on data freshness requirements
+  - Configurable policies: Different caching strategies for different data types (user info vs. dynamic records)
+
+  These optimizations are designed to make MistKit production-ready for server-side applications that need to
+  handle high throughput and maintain good performance characteristics.
+
+> I'd prefer an abstration layer above the client provided by the openapi generator.
+
+⏺ That's an excellent architectural decision! An abstraction layer above the OpenAPI-generated client would provide
+   several benefits:
+
+  Benefits of an Abstraction Layer
+
+  Developer Experience
+
+  - Simplified API: Hide OpenAPI complexity behind intuitive Swift interfaces
+  - CloudKit-native feel: Make it feel like using the familiar CloudKit framework
+  - Type safety: Convert OpenAPI types to more Swift-friendly models
+  - Error handling: Transform low-level HTTP errors into meaningful CloudKit errors
+
+  Future-proofing
+
+  - API stability: Shield users from OpenAPI generator changes
+  - Custom optimizations: Add performance features without modifying generated code
+  - Testing: Easier to mock and test the abstraction layer
+
+  Proposed Architecture
+
+  User Application
+         ↓
+  MistKit Public API (Abstraction Layer)
+         ↓
+  Generated OpenAPI Client
+         ↓
+  CloudKit Web Services
+
+  Example Structure
+
+  // Public abstraction layer
+  public protocol CloudKitServiceProtocol {
+      func queryRecords<T: CloudKitRecord>(_ query: RecordQuery<T>) async throws -> [T]
+      func saveRecord<T: CloudKitRecord>(_ record: T) async throws -> T
+      func deleteRecord(recordName: String, recordType: String) async throws
+  }
+
+  // Internal implementation using generated client
+  internal class CloudKitService: CloudKitServiceProtocol {
+      private let generatedClient: Client
+
+      func queryRecords<T: CloudKitRecord>(_ query: RecordQuery<T>) async throws -> [T] {
+          // Convert high-level query to OpenAPI request
+          // Call generated client
+          // Transform response to Swift-friendly types
+      }
+  }
+
+  Would you like me to update the PRD to reflect this architectural approach with the abstraction layer as a key
+  design principle?
+
+> yes
+
+⏺ Update Todos
+  ⎿  ☒ Structure PRD with executive summary, product overview, and market analysis
+     ☒ Detail features and requirements based on OpenAPI specification
+     ☒ Add user experience section with developer-focused content
+     ☒ Define success metrics and timeline
+     ☐ Update PRD to include abstraction layer architecture above OpenAPI client
+     ☐ Revise technical architecture section to emphasize abstraction layer design
+
+⏺ Write(PRD.md)
+  ⎿  User rejected write to PRD.md
+         1 +  # Product Requirements Document: MistKit
+         2 +  
+         3 +  ## Executive Summary
+         4 +  
+         5 +  ### Product Vision
+         6 +  MistKit is a modern, cross-platform Swift package that provides seamless server-side and command-line 
+           + access to Apple's CloudKit Web Services. It empowers Swift developers to build robust, 
+     cloud-integrated
+           +  applications beyond Apple's ecosystem while maintaining the familiar CloudKit data model through an 
+           + intuitive abstraction layer.
+         7 +  
+         8 +  ### Mission Statement
+         9 +  To democratize CloudKit access for server-side Swift applications, enabling developers to build 
+           + cross-platform solutions that leverage Apple's cloud infrastructure without being limited to Apple 
+           + platforms, while providing a developer-friendly API that feels native to Swift and CloudKit.
+        10 +  
+        11 +  ### Key Value Proposition
+        12 +  - **Cross-Platform CloudKit**: Access CloudKit from Linux servers, command-line tools, and non-Apple 
+           + platforms
+        13 +  - **Native Swift Experience**: High-level abstraction layer that feels like using CloudKit framework
+        14 +  - **Type-Safe API**: OpenAPI-driven foundation with Swift-friendly interfaces
+        15 +  - **Production Ready**: Designed for server-side applications with proper authentication, error 
+           + handling, and performance optimization
+        16 +  
+        17 +  ### Target Audience
+        18 +  - **Server-Side Swift Developers**: Building web applications, APIs, and microservices
+        19 +  - **DevOps Engineers**: Creating automation tools and deployment scripts
+        20 +  - **Cross-Platform Developers**: Building applications that need CloudKit data synchronization across 
+           + non-Apple platforms
+        21 +  - **Enterprise Developers**: Integrating CloudKit into existing server infrastructure
+        22 +  
+        23 +  ## Product Overview
+        24 +  
+        25 +  ### Current State Analysis
+        26 +  MistKit represents a complete rewrite leveraging modern Swift capabilities, built on the `claude` 
+           + branch. The project includes:
+        27 +  - Complete OpenAPI 3.0.3 specification for CloudKit Web Services
+        28 +  - Swift Package Manager integration with OpenAPI code generation
+        29 +  - High-level abstraction layer above generated OpenAPI client
+        30 +  - Comprehensive authentication middleware
+        31 +  - Working demo application with web-based authentication
+        32 +  - Cross-platform support (macOS, Linux, server environments)
+        33 +  
+        34 +  ### Problem Statement
+        35 +  Existing CloudKit access is limited to Apple platforms through the CloudKit framework. Developers 
+           + building server-side applications, Linux services, or cross-platform tools cannot directly access 
+           + CloudKit data, forcing them to:
+        36 +  - Build complex proxy services on Apple platforms
+        37 +  - Use alternative cloud solutions, losing CloudKit's integration benefits
+        38 +  - Maintain separate data synchronization logic
+        39 +  - Accept platform limitations for their architecture choices
+        40 +  - Work with low-level HTTP APIs instead of familiar CloudKit patterns
+        41 +  
+        42 +  ### Solution Approach
+        43 +  MistKit solves this by providing a native Swift package that:
+        44 +  1. **Abstraction Layer**: High-level Swift API that mirrors CloudKit framework patterns
+        45 +  2. **OpenAPI Foundation**: Automatically generated, type-safe client code from Apple's official 
+           + specification
+        46 +  3. **Authentication Handling**: Supports both API Token and Server-to-Server authentication methods
+        47 +  4. **Modern Swift Design**: Leverages async/await, structured concurrency, and protocol-oriented 
+           + architecture
+        48 +  5. **Cross-Platform Ready**: Works on any platform supporting Swift, including Linux servers
+        49 +  
+        50 +  ## Market & User Analysis
+        51 +  
+        52 +  ### Primary Use Cases
+        53 +  
+        54 +  #### Server-Side Web Applications
+        55 +  - **Hummingbird/Vapor Applications**: Web backends that need CloudKit data access
+        56 +  - **API Services**: REST/GraphQL APIs serving CloudKit data to multiple client types
+        57 +  - **Real-time Services**: WebSocket servers providing live CloudKit data updates
+        58 +  
+        59 +  #### DevOps & Automation
+        60 +  - **CI/CD Pipelines**: Automated testing and deployment tools accessing CloudKit
+        61 +  - **Data Migration Tools**: Scripts for bulk data operations and synchronization
+        62 +  - **Monitoring Services**: Server applications tracking CloudKit usage and performance
+        63 +  
+        64 +  #### Cross-Platform Applications
+        65 +  - **Desktop Applications**: Native apps on non-Apple platforms needing CloudKit integration
+        66 +  - **IoT Devices**: Embedded systems and edge computing devices
+        67 +  - **Command-Line Tools**: Developer utilities and administrative interfaces
+        68 +  
+        69 +  ### Competitive Landscape
+        70 +  - **CloudKit Framework**: Apple's native solution (Apple platforms only)
+        71 +  - **Custom REST Implementations**: Manual HTTP client implementations (high maintenance)
+        72 +  - **Third-Party Services**: Alternative cloud providers (no CloudKit integration)
+        73 +  - **Proxy Solutions**: Apple platform intermediaries (added complexity and latency)
+        74 +  
+        75 +  ### Market Opportunity
+        76 +  - Growing server-side Swift adoption in enterprise environments
+        77 +  - Increasing demand for cross-platform Apple ecosystem integration
+        78 +  - Developer productivity gains from type-safe, generated APIs
+        79 +  - Cost savings from direct CloudKit access versus proxy architectures
+        80 +  
+        81 +  ## Features & Requirements
+        82 +  
+        83 +  ### Core CloudKit Operations
+        84 +  
+        85 +  #### Record Management
+        86 +  - **Query Records**: Advanced filtering, sorting, and pagination support
+        87 +  - **Modify Records**: Create, update, delete operations with optimistic concurrency
+        88 +  - **Lookup Records**: Efficient batch retrieval by record identifiers
+        89 +  - **Record Changes**: Incremental sync with change tokens
+        90 +  
+        91 +  #### Zone Management
+        92 +  - **List Zones**: Enumerate all zones in public, private, or shared databases
+        93 +  - **Lookup Zones**: Retrieve specific zone information
+        94 +  - **Modify Zones**: Create and delete custom zones (private database only)
+        95 +  - **Zone Changes**: Track zone-level modifications for sync operations
+        96 +  
+        97 +  #### Subscription Management
+        98 +  - **List Subscriptions**: View all active push notification subscriptions
+        99 +  - **Lookup Subscriptions**: Retrieve specific subscription details
+       100 +  - **Modify Subscriptions**: Create, update, and delete query or zone subscriptions
+       101 +  
+       102 +  #### User Management
+       103 +  - **Current User**: Retrieve authenticated user information
+       104 +  - **Discover Users**: Find users by email addresses or record names
+       105 +  - **Contact Lookup**: Legacy contact discovery support
+       106 +  
+       107 +  #### Asset Management
+       108 +  - **Upload Assets**: Binary file upload with proper CloudKit asset handling
+       109 +  - **Asset References**: Manage file attachments in record fields
+       110 +  
+       111 +  #### Token Management
+       112 +  - **APNs Tokens**: Create and register push notification tokens
+       113 +  - **Authentication**: Handle both API token and server-to-server authentication
+       114 +  
+       115 +  ### Platform Support
+       116 +  
+       117 +  #### Minimum Requirements
+       118 +  - **Swift 5.9+**: Modern Swift language features and concurrency support
+       119 +  - **Platform Versions**:
+       120 +    - macOS 10.15+ (Catalina)
+       121 +    - iOS 13.0+
+       122 +    - tvOS 13.0+
+       123 +    - watchOS 6.0+
+       124 +    - visionOS 1.0+
+       125 +    - Linux (Ubuntu 18.04+, Amazon Linux 2+)
+       126 +  
+       127 +  #### Dependencies
+       128 +  - **Swift OpenAPI Generator**: Automatic client code generation
+       129 +  - **Swift OpenAPI Runtime**: HTTP transport and middleware support
+       130 +  - **URLSession Transport**: Cross-platform HTTP client implementation
+       131 +  
+       132 +  ### Authentication & Security
+       133 +  
+       134 +  #### Supported Authentication Methods
+       135 +  1. **API Token Authentication**
+       136 +     - CloudKit Dashboard-generated API tokens
+       137 +     - Query parameter-based authentication
+       138 +     - Suitable for development and testing
+       139 +  
+       140 +  2. **Server-to-Server Authentication**
+       141 +     - Private key-based authentication
+       142 +     - Header-based key ID transmission
+       143 +     - Production-ready security model
+       144 +  
+       145 +  #### Security Features
+       146 +  - **TLS/HTTPS Only**: All communications encrypted in transit
+       147 +  - **Token Management**: Secure storage and rotation handling
+       148 +  - **Error Context**: Detailed security error reporting without exposure
+       149 +  - **Rate Limiting**: Built-in respect for CloudKit API limits
+       150 +  
+       151 +  ### Performance & Scalability
+       152 +  
+       153 +  #### Concurrency Support
+       154 +  - **Async/Await**: All network operations use modern Swift concurrency
+       155 +  - **Structured Concurrency**: TaskGroup support for parallel operations
+       156 +  - **Actor Integration**: Thread-safe state management for concurrent access
+       157 +  
+       158 +  #### Optimization Features
+       159 +  - **Connection Pooling**: Efficient HTTP connection reuse through abstraction layer
+       160 +  - **Request Batching**: Bulk operations orchestrated by high-level API
+       161 +  - **Intelligent Caching**: Abstraction layer manages response caching with invalidation
+       162 +  - **Pagination Streaming**: AsyncSequence implementation for large result sets
+       163 +  - **Query Optimization**: High-level query builder with performance hints
+       164 +  
+       165 +  ## Technical Architecture
+       166 +  
+       167 +  ### Layered Architecture Design
+       168 +  
+       169 +  ```
+       170 +  ┌─────────────────────────────────────┐
+       171 +  │        User Application             │
+       172 +  └─────────────────┬───────────────────┘
+       173 +                    │
+       174 +  ┌─────────────────▼───────────────────┐
+       175 +  │     MistKit Public API              │
+       176 +  │   (High-Level Abstraction Layer)    │
+       177 +  │                                     │
+       178 +  │  • CloudKitService Protocol        │
+       179 +  │  • Swift-Native Models             │
+       180 +  │  • Query Builders                  │
+       181 +  │  • Error Handling                  │
+       182 +  │  • Caching & Optimization          │
+       183 +  └─────────────────┬───────────────────┘
+       184 +                    │
+       185 +  ┌─────────────────▼───────────────────┐
+       186 +  │   Generated OpenAPI Client          │
+       187 +  │                                     │
+       188 +  │  • Type-Safe HTTP Client           │
+       189 +  │  • Request/Response Models          │
+       190 +  │  • Serialization/Deserialization   │
+       191 +  │  • Basic Error Handling            │
+       192 +  └─────────────────┬───────────────────┘
+       193 +                    │
+       194 +  ┌─────────────────▼───────────────────┐
+       195 +  │    CloudKit Web Services            │
+       196 +  │   (Apple's REST API)                │
+       197 +  └─────────────────────────────────────┘
+       198 +  ```
+       199 +  
+       200 +  ### Abstraction Layer Benefits
+       201 +  
+       202 +  #### Developer Experience
+       203 +  - **Familiar API**: CloudKit-style interfaces that Swift developers know
+       204 +  - **Type Safety**: Convert OpenAPI types to Swift-idiomatic models
+       205 +  - **Error Handling**: Transform HTTP errors into meaningful CloudKit errors
+       206 +  - **Async Patterns**: Native async/await support throughout
+       207 +  
+       208 +  #### Flexibility & Maintenance
+       209 +  - **API Stability**: Shield users from OpenAPI generator changes
+       210 +  - **Custom Optimizations**: Add performance features without modifying generated code
+       211 +  - **Testing**: Easier to mock and test the abstraction layer
+       212 +  - **Future-Proofing**: Evolve the API without breaking existing code
+       213 +  
+       214 +  ### Modern Swift Features
+       215 +  
+       216 +  #### High-Level API Design
+       217 +  ```swift
+       218 +  // CloudKit-style record operations through abstraction layer
+       219 +  public protocol CloudKitServiceProtocol {
+       220 +      func queryRecords<T: CloudKitRecord>(
+       221 +          _ query: RecordQuery<T>
+       222 +      ) async throws -> QueryResult<T>
+       223 +      
+       224 +      func saveRecord<T: CloudKitRecord>(
+       225 +          _ record: T, 
+       226 +          to database: Database
+       227 +      ) async throws -> T
+       228 +      
+       229 +      func deleteRecord(
+       230 +          recordName: String, 
+       231 +          recordType: String, 
+       232 +          from database: Database
+       233 +      ) async throws
+       234 +  }
+       235 +  
+       236 +  // Swift-native models
+       237 +  public struct CloudKitRecord: Codable {
+       238 +      public let recordName: String?
+       239 +      public let recordType: String
+       240 +      public let recordChangeTag: String?
+       241 +      public let fields: [String: FieldValue]
+       242 +  }
+       243 +  
+       244 +  // Query builder pattern
+       245 +  public struct RecordQuery<T: CloudKitRecord> {
+       246 +      public static func filter(
+       247 +          _ field: String, 
+       248 +          _ comparator: Comparator, 
+       249 +          _ value: FieldValue
+       250 +      ) -> RecordQuery<T>
+       251 +      
+       252 +      public func sorted(by field: String, ascending: Bool = true) -> RecordQuery<T>
+       253 +      public func limit(_ count: Int) -> RecordQuery<T>
+       254 +  }
+       255 +  ```
+       256 +  
+       257 +  #### Protocol-Oriented Design
+       258 +  - **CloudKitServiceProtocol**: Main service interface for dependency injection
+       259 +  - **TokenManagerProtocol**: Pluggable authentication strategies
+       260 +  - **CacheProviderProtocol**: Configurable caching implementations
+       261 +  - **NetworkTransportProtocol**: Testable HTTP transport abstraction
+       262 +  
+       263 +  #### Error Handling Strategy
+       264 +  ```swift
+       265 +  public enum CloudKitError: LocalizedError {
+       266 +      case authenticationFailed(reason: String)
+       267 +      case recordNotFound(recordName: String)
+       268 +      case quotaExceeded(limit: Int)
+       269 +      case networkError(underlying: Error)
+       270 +      case invalidQuery(description: String)
+       271 +      case serverError(code: String, message: String)
+       272 +      
+       273 +      public var errorDescription: String? {
+       274 +          switch self {
+       275 +          case .authenticationFailed(let reason):
+       276 +              return "Authentication failed: \(reason)"
+       277 +          case .recordNotFound(let recordName):
+       278 +              return "Record '\(recordName)' not found"
+       279 +          // ... additional cases
+       280 +          }
+       281 +      }
+       282 +  }
+       283 +  ```
+       284 +  
+       285 +  ### Implementation Architecture
+       286 +  
+       287 +  #### Package Structure
+       288 +  ```
+       289 +  MistKit/
+       290 +  ├── Sources/
+       291 +  │   └── MistKit/
+       292 +  │       ├── Public/                    # High-level abstraction layer
+       293 +  │       │   ├── CloudKitService.swift
+       294 +  │       │   ├── Models/
+       295 +  │       │   │   ├── CloudKitRecord.swift
+       296 +  │       │   │   ├── FieldValue.swift
+       297 +  │       │   │   └── RecordQuery.swift
+       298 +  │       │   ├── Protocols/
+       299 +  │       │   │   ├── CloudKitServiceProtocol.swift
+       300 +  │       │   │   └── CacheProviderProtocol.swift
+       301 +  │       │   └── QueryBuilder/
+       302 +  │       │       ├── RecordQueryBuilder.swift
+       303 +  │       │       └── FilterBuilder.swift
+       304 +  │       ├── Internal/                  # Implementation details
+       305 +  │       │   ├── ServiceImplementation/
+       306 +  │       │   │   ├── RecordService.swift
+       307 +  │       │   │   ├── ZoneService.swift
+       308 +  │       │   │   └── SubscriptionService.swift
+       309 +  │       │   ├── Mapping/              # OpenAPI ↔ Public API translation
+       310 +  │       │   │   ├── RecordMapper.swift
+       311 +  │       │   │   ├── ErrorMapper.swift
+       312 +  │       │   │   └── QueryMapper.swift
+       313 +  │       │   ├── Caching/
+       314 +  │       │   │   ├── DefaultCacheProvider.swift
+       315 +  │       │   │   └── CacheKey.swift
+       316 +  │       │   └── Optimization/
+       317 +  │       │       ├── RequestBatcher.swift
+       318 +  │       │       └── ConnectionPool.swift
+       319 +  │       ├── Generated/                 # OpenAPI generated code
+       320 +  │       │   ├── Client.swift
+       321 +  │       │   └── Types.swift
+       322 +  │       ├── Authentication/
+       323 +  │       │   ├── TokenManager.swift
+       324 +  │       │   └── ServerToServerAuth.swift
+       325 +  │       └── MistKitClient.swift       # Main entry point
+       326 +  ├── Tests/
+       327 +  ├── Examples/
+       328 +  └── Scripts/
+       329 +  ```
+       330 +  
+       331 +  #### Data Flow Architecture
+       332 +  1. **User Code** → High-level abstraction API (CloudKitService)
+       333 +  2. **Abstraction Layer** → Maps to OpenAPI models and calls generated client
+       334 +  3. **Generated Client** → Makes HTTP requests to CloudKit Web Services
+       335 +  4. **Response Processing** → Maps OpenAPI responses back to Swift-native models
+       336 +  5. **Result Delivery** → Returns results through abstraction layer to user code
+       337 +  
+       338 +  ### OpenAPI Integration Strategy
+       339 +  
+       340 +  #### Code Generation Pipeline
+       341 +  1. **Official Specification**: Apple's CloudKit Web Services OpenAPI 3.0.3 spec
+       342 +  2. **Swift OpenAPI Generator**: Automatic client and model generation
+       343 +  3. **Internal Mapping Layer**: Convert between OpenAPI and public models
+       344 +  4. **Public API Exposure**: Only expose abstraction layer to users
+       345 +  
+       346 +  #### Benefits of This Approach
+       347 +  - **Type Safety**: OpenAPI ensures API correctness while abstraction provides usability
+       348 +  - **Maintainability**: Generated code handles HTTP details, abstraction handles developer experience
+       349 +  - **Testability**: Mock the abstraction layer for unit tests, use generated client for integration 
+           + tests
+       350 +  - **Evolution**: OpenAPI updates don't break user code thanks to stable abstraction layer
+       351 +  
+       352 +  ## User Experience
+       353 +  
+       354 +  ### Developer Experience Priorities
+       355 +  
+       356 +  #### Simple Client Initialization
+       357 +  ```swift
+       358 +  // Straightforward setup with sensible defaults
+       359 +  let config = MistKitConfiguration(
+       360 +      containerIdentifier: "iCloud.com.example.app",
+       361 +      environment: .development,
+       362 +      authentication: .apiToken(
+       363 +          apiToken: "your-api-token",
+       364 +          webAuthToken: "session-token"
+       365 +      )
+       366 +  )
+       367 +  let client = try MistKitClient(configuration: config)
+       368 +  ```
+       369 +  
+       370 +  #### CloudKit-Style Operations
+       371 +  ```swift
+       372 +  // Familiar patterns for CloudKit developers
+       373 +  let article = CloudKitRecord(
+       374 +      recordType: "Article",
+       375 +      fields: [
+       376 +          "title": .string("Hello World"),
+       377 +          "publishDate": .date(Date()),
+       378 +          "tags": .stringList(["swift", "cloudkit"]),
+       379 +          "author": .reference("user123")
+       380 +      ]
+       381 +  )
+       382 +  
+       383 +  // Save to private database
+       384 +  let savedArticle = try await client.saveRecord(article, to: .private)
+       385 +  
+       386 +  // Query with familiar filtering
+       387 +  let query = RecordQuery<Article>
+       388 +      .filter("publishDate", .greaterThan, .date(lastWeek))
+       389 +      .sorted(by: "publishDate", ascending: false)
+       390 +      .limit(50)
+       391 +  
+       392 +  let articles = try await client.queryRecords(query, from: .public)
+       393 +  ```
+       394 +  
+       395 +  #### Advanced Query Building
+       396 +  ```swift
+       397 +  // Fluent, type-safe query construction
+       398 +  let complexQuery = RecordQuery<BlogPost>
+       399 +      .filter("category", .equals, .string("Swift"))
+       400 +      .filter("publishDate", .greaterThan, .date(lastMonth))
+       401 +      .filter("tags", .containsAllTokens, .stringList(["server-side", "cloudkit"]))
+       402 +      .sorted(by: "publishDate", ascending: false)
+       403 +      .sorted(by: "title", ascending: true)
+       404 +      .limit(100)
+       405 +  
+       406 +  // Async sequence for large result sets
+       407 +  for try await batch in client.queryRecords(complexQuery, from: .public).batched(by: 20) {
+       408 +      await processBatch(batch)
+       409 +  }
+       410 +  ```
+       411 +  
+       412 +  #### Comprehensive Error Handling
+       413 +  ```swift
+       414 +  do {
+       415 +      let records = try await client.queryRecords(query, from: .private)
+       416 +      // Process records
+       417 +  } catch CloudKitError.authenticationFailed(let reason) {
+       418 +      // Handle authentication issues
+       419 +      logger.error("Auth failed: \(reason)")
+       420 +  } catch CloudKitError.quotaExceeded(let limit) {
+       421 +      // Handle rate limiting with backoff
+       422 +      await backoffStrategy.wait()
+       423 +  } catch CloudKitError.recordNotFound(let recordName) {
+       424 +      // Handle missing records gracefully
+       425 +      logger.info("Record \(recordName) not found, creating new one")
+       426 +  } catch {
+       427 +      // Handle unexpected errors
+       428 +      logger.error("Unexpected error: \(error)")
+       429 +  }
+       430 +  ```
+       431 +  
+       432 +  ### Documentation Strategy
+       433 +  
+       434 +  #### Multi-Level Documentation
+       435 +  1. **Quick Start Guide**: Basic setup and common operations
+       436 +  2. **Migration Guide**: Moving from CloudKit framework to MistKit
+       437 +  3. **API Reference**: Complete documentation for abstraction layer
+       438 +  4. **Architecture Guide**: Understanding the layered design
+       439 +  5. **Cookbook**: Real-world usage patterns and recipes
+       440 +  6. **Performance Guide**: Optimization techniques and best practices
+       441 +  
+       442 +  #### Example Applications
+       443 +  1. **MistDemo**: Web-based authentication and basic operations
+       444 +  2. **Server Example**: Hummingbird web application with CloudKit integration
+       445 +  3. **CLI Tool**: Command-line utility for CloudKit administration
+       446 +  4. **Sync Service**: Background service for data synchronization
+       447 +  5. **Migration Tool**: Example bulk data migration utility
+       448 +  
+       449 +  ### Learning Curve Considerations
+       450 +  
+       451 +  #### For CloudKit Developers
+       452 +  - **Familiar Concepts**: Same data model and operation patterns through abstraction layer
+       453 +  - **Modern Swift**: Natural upgrade to async/await and structured concurrency
+       454 +  - **Cross-Platform**: Understanding server-side deployment differences
+       455 +  - **New Patterns**: Query builders and streaming result processing
+       456 +  
+       457 +  #### For Server-Side Swift Developers
+       458 +  - **CloudKit Concepts**: Records, zones, and Apple's data model
+       459 +  - **Authentication**: Apple ID and CloudKit-specific auth flows
+       460 +  - **Apple Ecosystem**: Integration patterns and best practices
+       461 +  - **Abstraction Benefits**: How the layered architecture improves development
+       462 +  
+       463 +  ## Success Metrics
+       464 +  
+       465 +  ### Adoption Metrics
+       466 +  - **Package Downloads**: Swift Package Manager installation counts
+       467 +  - **GitHub Activity**: Stars, forks, and community contributions
+       468 +  - **Integration Usage**: Projects incorporating MistKit in production
+       469 +  - **Platform Distribution**: Usage across macOS, Linux, and other platforms
+       470 +  - **API Usage Patterns**: Which abstraction layer features are most used
+       471 +  
+       472 +  ### Technical Performance Indicators
+       473 +  - **API Coverage**: Percentage of CloudKit Web Services operations supported
+       474 +  - **Abstraction Overhead**: Performance impact of the abstraction layer
+       475 +  - **Error Rates**: Authentication and network operation success rates
+       476 +  - **Response Times**: Latency measurements for common operations through abstraction
+       477 +  - **Cache Effectiveness**: Hit rates and performance improvements from caching
+       478 +  
+       479 +  ### Developer Satisfaction Measures
+       480 +  - **Documentation Quality**: Feedback on guides and API reference
+       481 +  - **Issue Resolution**: Time to resolve bugs and feature requests
+       482 +  - **Community Growth**: Active contributors and maintainers
+       483 +  - **Enterprise Adoption**: Use in production server-side applications
+       484 +  - **API Usability**: Feedback on abstraction layer design and ergonomics
+       485 +  
+       486 +  ### Quality Assurance Targets
+       487 +  - **Test Coverage**: >90% code coverage for abstraction layer and core functionality
+       488 +  - **Platform Compatibility**: Successful builds on all supported platforms
+       489 +  - **CI/CD Success**: Automated testing and release pipeline reliability
+       490 +  - **Security Audit**: Regular security reviews and vulnerability assessments
+       491 +  - **Performance Benchmarks**: Consistent performance across abstraction and generated layers
+       492 +  
+       493 +  ## Timeline & Milestones
+       494 +  
+       495 +  ### Phase 1: Foundation (Current)
+       496 +  **Status**: In Progress on `claude` branch
+       497 +  - ✅ OpenAPI specification integration
+       498 +  - ✅ Generated client architecture
+       499 +  - ✅ Basic abstraction layer design
+       500 +  - ✅ Authentication middleware
+       501 +  - ✅ Demo application
+       502 +  - 🔄 Complete abstraction layer implementation
+       503 +  - 🔄 Comprehensive testing of both layers
+       504 +  
+       505 +  ### Phase 2: Abstraction Layer Completion (Next 2-3 months)
+       506 +  - **High-Level API**: Complete CloudKit-style abstraction layer
+       507 +  - **Query Builder**: Fluent, type-safe query construction
+       508 +  - **Error Mapping**: Comprehensive error translation from OpenAPI to CloudKit errors
+       509 +  - **Caching Layer**: Intelligent caching with configurable providers
+       510 +  - **Performance Optimization**: Request batching and connection pooling
+       511 +  - **Testing**: Unit tests for abstraction layer, integration tests with generated client
+       512 +  
+       513 +  ### Phase 3: Production Ready (3-6 months)
+       514 +  - **API Stabilization**: Stable public API with semantic versioning
+       515 +  - **Performance Tuning**: Production-grade optimizations in abstraction layer
+       516 +  - **Security Audit**: Professional security review of both layers
+       517 +  - **Documentation**: Complete guides, API reference, and examples
+       518 +  - **1.0 Release**: Production-ready release with stable abstraction API
+       519 +  
+       520 +  ### Phase 4: Ecosystem Growth (6+ months)
+       521 +  - **Community**: Active open-source community development
+       522 +  - **Framework Integrations**: Vapor and Hummingbird-specific convenience APIs
+       523 +  - **Advanced Features**: Additional abstraction layer capabilities
+       524 +  - **Tooling**: Developer productivity tools and extensions
+       525 +  - **Enterprise Support**: Enterprise features and service offerings
+       526 +  
+       527 +  ### Future Roadmap Considerations
+       528 +  - **Extended Abstractions**: Higher-level patterns like repositories and data access objects
+       529 +  - **CloudKit Sharing**: Enhanced support for shared database operations
+       530 +  - **Real-time Features**: Subscription management and push notification abstractions
+       531 +  - **Migration Tools**: Utilities for migrating between CloudKit and other data stores
+       532 +  - **GraphQL Layer**: Optional GraphQL interface over the abstraction layer
+       533 +  
+       534 +  ## Conclusion
+       535 +  
+       536 +  MistKit's layered architecture represents a significant advancement in CloudKit accessibility, 
+           + bringing Apple's cloud infrastructure to the broader Swift ecosystem while maintaining excellent 
+           + developer experience. The combination of OpenAPI-generated foundation with a thoughtfully designed 
+           + abstraction layer ensures both correctness and usability.
+       537 +  
+       538 +  The abstraction layer serves as the primary interface for developers, providing CloudKit-familiar 
+           + patterns while hiding the complexity of HTTP-level operations. This approach enables rapid development 
+           + with familiar APIs while maintaining the flexibility to evolve and optimize the underlying 
+           + implementation.
+       539 +  
+       540 +  Success will be measured through widespread adoption in the server-side Swift community, robust 
+           + performance in production environments, positive developer feedback on the abstraction layer design, 
+           + and continued alignment with Apple's CloudKit evolution. The layered architecture ensures that MistKit 
+           + can grow and adapt while maintaining a stable, developer-friendly public API.
+       541   \ No newline at end of file
+
+> As far as Records they should reflect some sort of key value pairs with the value being strong type (perhaps 
+  enum?) for what data could be stored there.
+
+⏺ Absolutely! That's a great point about strongly typing the record field values. CloudKit has specific field
+  types, and the abstraction layer should reflect those with a clean enum-based approach.
+
+  Here's how that could look:
+
+  public struct CloudKitRecord {
+      public let recordName: String?
+      public let recordType: String
+      public let recordChangeTag: String?
+      public let fields: [String: FieldValue]
+  }
+
+  public enum FieldValue: Codable, Equatable {
+      case string(String)
+      case int64(Int64)
+      case double(Double)
+      case boolean(Bool)
+      case bytes(Data)
+      case date(Date)
+      case location(CLLocation)
+      case reference(RecordReference)
+      case asset(Asset)
+      case stringList([String])
+      case int64List([Int64])
+      case doubleList([Double])
+      case dateList([Date])
+      case locationList([CLLocation])
+      case referenceList([RecordReference])
+      case assetList([Asset])
+  }
+
+  // Usage example:
+  let article = CloudKitRecord(
+      recordType: "Article",
+      fields: [
+          "title": .string("Hello World"),
+          "publishedAt": .date(Date()),
+          "viewCount": .int64(1250),
+          "featured": .boolean(true),
+          "tags": .stringList(["swift", "cloudkit"]),
+          "author": .reference(RecordReference(recordName: "user123")),
+          "coverImage": .asset(Asset(fileURL: imageURL))
+      ]
+  )
+
+  This approach provides:
+  - Type Safety: Compile-time validation of field types
+  - CloudKit Compatibility: Direct mapping to CloudKit's supported field types
+  - Intuitive API: Clear, self-documenting field value creation
+  - Easy Conversion: Simple mapping to/from OpenAPI generated types
+
+  Should I update the PRD to emphasize this strongly-typed field value approach in the abstraction layer design?
+
+> yes
+
+⏺ Update Todos
+  ⎿  ☒ Update PRD to include abstraction layer architecture above OpenAPI client               
+     ☒ Structure PRD with executive summary, product overview, and market analysis
+     ☒ Detail features and requirements based on OpenAPI specification
+     ☒ Add user experience section with developer-focused content
+     ☒ Define success metrics and timeline
+     ☐ Revise technical architecture section to emphasize strongly-typed FieldValue enum design
+
+⏺ Read(PRD.md)
+  ⎿  Error reading file
+  ⎿  Interrupted by user
+
+> We need to add it the planned PRD. I don't think we've created the file yet
+
+✻ Thinking…
+
+  The user is correct - we never actually created the PRD file. The previous attempt to write the file was 
+  rejected/interrupted, so the file doesn't exist yet. I need to create the PRD file now, incorporating the 
+  abstraction layer architecture and the strongly-typed FieldValue enum design that we discussed.
+
+⏺ You're absolutely right! Let me create the PRD file now with the abstraction layer architecture and the
+  strongly-typed FieldValue enum design:
+
+⏺ Write(PRD.md)
+  ⎿  User rejected write to PRD.md
+         1 +  # Product Requirements Document: MistKit
+         2 +  
+         3 +  ## Executive Summary
+         4 +  
+         5 +  ### Product Vision
+         6 +  MistKit is a modern, cross-platform Swift package that provides seamless server-side and command-line 
+           + access to Apple's CloudKit Web Services. It empowers Swift developers to build robust, 
+     cloud-integrated
+           +  applications beyond Apple's ecosystem while maintaining the familiar CloudKit data model through an 
+           + intuitive abstraction layer.
+         7 +  
+         8 +  ### Mission Statement
+         9 +  To democratize CloudKit access for server-side Swift applications, enabling developers to build 
+           + cross-platform solutions that leverage Apple's cloud infrastructure without being limited to Apple 
+           + platforms, while providing a developer-friendly API that feels native to Swift and CloudKit.
+        10 +  
+        11 +  ### Key Value Proposition
+        12 +  - **Cross-Platform CloudKit**: Access CloudKit from Linux servers, command-line tools, and non-Apple 
+           + platforms
+        13 +  - **Native Swift Experience**: High-level abstraction layer that feels like using CloudKit framework
+        14 +  - **Type-Safe API**: Strongly-typed field values with OpenAPI-driven foundation
+        15 +  - **Production Ready**: Designed for server-side applications with proper authentication, error 
+           + handling, and performance optimization
+        16 +  
+        17 +  ### Target Audience
+        18 +  - **Server-Side Swift Developers**: Building web applications, APIs, and microservices
+        19 +  - **DevOps Engineers**: Creating automation tools and deployment scripts
+        20 +  - **Cross-Platform Developers**: Building applications that need CloudKit data synchronization across 
+           + non-Apple platforms
+        21 +  - **Enterprise Developers**: Integrating CloudKit into existing server infrastructure
+        22 +  
+        23 +  ## Technical Architecture
+        24 +  
+        25 +  ### Layered Architecture Design
+        26 +  
+        27 +  ```
+        28 +  ┌─────────────────────────────────────┐
+        29 +  │        User Application             │
+        30 +  └─────────────────┬───────────────────┘
+        31 +                    │
+        32 +  ┌─────────────────▼───────────────────┐
+        33 +  │     MistKit Public API              │
+        34 +  │   (High-Level Abstraction Layer)    │
+        35 +  │                                     │
+        36 +  │  • CloudKitService Protocol        │
+        37 +  │  • Strongly-Typed Records          │
+        38 +  │  • FieldValue Enum                 │
+        39 +  │  • Query Builders                  │
+        40 +  │  • Error Handling                  │
+        41 +  │  • Caching & Optimization          │
+        42 +  └─────────────────┬───────────────────┘
+        43 +                    │
+        44 +  ┌─────────────────▼───────────────────┐
+        45 +  │   Generated OpenAPI Client          │
+        46 +  │                                     │
+        47 +  │  • Type-Safe HTTP Client           │
+        48 +  │  • Request/Response Models          │
+        49 +  │  • Serialization/Deserialization   │
+        50 +  │  • Basic Error Handling            │
+        51 +  └─────────────────┬───────────────────┘
+        52 +                    │
+        53 +  ┌─────────────────▼───────────────────┐
+        54 +  │    CloudKit Web Services            │
+        55 +  │   (Apple's REST API)                │
+        56 +  └─────────────────────────────────────┘
+        57 +  ```
+        58 +  
+        59 +  ### Strongly-Typed Record Design
+        60 +  
+        61 +  #### Core Record Structure
+        62 +  ```swift
+        63 +  public struct CloudKitRecord: Codable, Sendable {
+        64 +      public let recordName: String?
+        65 +      public let recordType: String
+        66 +      public let recordChangeTag: String?
+        67 +      public let fields: [String: FieldValue]
+        68 +      
+        69 +      public init(
+        70 +          recordName: String? = nil,
+        71 +          recordType: String,
+        72 +          recordChangeTag: String? = nil,
+        73 +          fields: [String: FieldValue] = [:]
+        74 +      )
+        75 +  }
+        76 +  ```
+        77 +  
+        78 +  #### Strongly-Typed Field Values
+        79 +  ```swift
+        80 +  public enum FieldValue: Codable, Equatable, Sendable {
+        81 +      // Primitive types
+        82 +      case string(String)
+        83 +      case int64(Int64)
+        84 +      case double(Double)
+        85 +      case boolean(Bool)
+        86 +      case bytes(Data)
+        87 +      case date(Date)
+        88 +      
+        89 +      // CloudKit-specific types
+        90 +      case location(CLLocation)
+        91 +      case reference(RecordReference)
+        92 +      case asset(Asset)
+        93 +      
+        94 +      // List types
+        95 +      case stringList([String])
+        96 +      case int64List([Int64])
+        97 +      case doubleList([Double])
+        98 +      case dateList([Date])
+        99 +      case locationList([CLLocation])
+       100 +      case referenceList([RecordReference])
+       101 +      case assetList([Asset])
+       102 +      
+       103 +      // Convenience accessors
+       104 +      public var stringValue: String? {
+       105 +          if case .string(let value) = self { return value }
+       106 +          return nil
+       107 +      }
+       108 +      
+       109 +      public var int64Value: Int64? {
+       110 +          if case .int64(let value) = self { return value }
+       111 +          return nil
+       112 +      }
+       113 +      
+       114 +      // ... additional accessors for other types
+       115 +  }
+       116 +  ```
+       117 +  
+       118 +  #### Supporting Types
+       119 +  ```swift
+       120 +  public struct RecordReference: Codable, Equatable, Sendable {
+       121 +      public let recordName: String
+       122 +      public let action: ReferenceAction?
+       123 +      
+       124 +      public enum ReferenceAction: String, Codable {
+       125 +          case deleteSelf = "DELETE_SELF"
+       126 +      }
+       127 +  }
+       128 +  
+       129 +  public struct Asset: Codable, Equatable, Sendable {
+       130 +      public let fileChecksum: String?
+       131 +      public let size: Int64?
+       132 +      public let referenceChecksum: String?
+       133 +      public let downloadURL: URL?
+       134 +      
+       135 +      // Convenience initializer for uploads
+       136 +      public init(fileURL: URL) throws {
+       137 +          // Implementation for creating asset from local file
+       138 +      }
+       139 +  }
+       140 +  
+       141 +  public struct CLLocation: Codable, Equatable, Sendable {
+       142 +      public let latitude: Double
+       143 +      public let longitude: Double
+       144 +      public let horizontalAccuracy: Double?
+       145 +      public let verticalAccuracy: Double?
+       146 +      public let altitude: Double?
+       147 +      public let speed: Double?
+       148 +      public let course: Double?
+       149 +      public let timestamp: Date?
+       150 +  }
+       151 +  ```
+       152 +  
+       153 +  ### High-Level API Design
+       154 +  
+       155 +  #### Service Protocol
+       156 +  ```swift
+       157 +  public protocol CloudKitServiceProtocol: Sendable {
+       158 +      func queryRecords<T: CloudKitRecord>(
+       159 +          _ query: RecordQuery<T>,
+       160 +          from database: Database
+       161 +      ) async throws -> QueryResult<T>
+       162 +      
+       163 +      func saveRecord(
+       164 +          _ record: CloudKitRecord, 
+       165 +          to database: Database
+       166 +      ) async throws -> CloudKitRecord
+       167 +      
+       168 +      func saveRecords(
+       169 +          _ records: [CloudKitRecord],
+       170 +          to database: Database,
+       171 +          atomic: Bool
+       172 +      ) async throws -> [CloudKitRecord]
+       173 +      
+       174 +      func deleteRecord(
+       175 +          recordName: String, 
+       176 +          recordType: String, 
+       177 +          from database: Database
+       178 +      ) async throws
+       179 +      
+       180 +      func lookupRecord(
+       181 +          recordName: String,
+       182 +          desiredKeys: [String]?
+       183 +      ) async throws -> CloudKitRecord?
+       184 +  }
+       185 +  ```
+       186 +  
+       187 +  #### Type-Safe Usage Examples
+       188 +  ```swift
+       189 +  // Creating records with strongly-typed fields
+       190 +  let article = CloudKitRecord(
+       191 +      recordType: "Article",
+       192 +      fields: [
+       193 +          "title": .string("Building Server-Side Swift Apps"),
+       194 +          "publishedAt": .date(Date()),
+       195 +          "viewCount": .int64(1250),
+       196 +          "featured": .boolean(true),
+       197 +          "rating": .double(4.8),
+       198 +          "tags": .stringList(["swift", "server-side", "cloudkit"]),
+       199 +          "author": .reference(RecordReference(recordName: "user123")),
+       200 +          "coverImage": .asset(try Asset(fileURL: imageURL)),
+       201 +          "coordinates": .location(CLLocation(
+       202 +              latitude: 37.7749,
+       203 +              longitude: -122.4194
+       204 +          ))
+       205 +      ]
+       206 +  )
+       207 +  
+       208 +  // Type-safe field access
+       209 +  if let title = article.fields["title"]?.stringValue {
+       210 +      print("Article title: \(title)")
+       211 +  }
+       212 +  
+       213 +  if let publishedAt = article.fields["publishedAt"]?.dateValue {
+       214 +      print("Published: \(publishedAt)")
+       215 +  }
+       216 +  
+       217 +  if let tags = article.fields["tags"]?.stringListValue {
+       218 +      print("Tags: \(tags.joined(separator: ", "))")
+       219 +  }
+       220 +  ```
+       221 +  
+       222 +  ### Query Builder with Type Safety
+       223 +  
+       224 +  #### Query Construction
+       225 +  ```swift
+       226 +  public struct RecordQuery<T: CloudKitRecord> {
+       227 +      public static func `where`(
+       228 +          _ field: String, 
+       229 +          _ comparator: Comparator, 
+       230 +          _ value: FieldValue
+       231 +      ) -> RecordQuery<T>
+       232 +      
+       233 +      public func and(
+       234 +          _ field: String, 
+       235 +          _ comparator: Comparator, 
+       236 +          _ value: FieldValue
+       237 +      ) -> RecordQuery<T>
+       238 +      
+       239 +      public func sorted(by field: String, ascending: Bool = true) -> RecordQuery<T>
+       240 +      public func limit(_ count: Int) -> RecordQuery<T>
+       241 +      public func desiredKeys(_ keys: [String]) -> RecordQuery<T>
+       242 +  }
+       243 +  
+       244 +  public enum Comparator {
+       245 +      case equals
+       246 +      case notEquals
+       247 +      case lessThan
+       248 +      case lessThanOrEquals
+       249 +      case greaterThan
+       250 +      case greaterThanOrEquals
+       251 +      case near
+       252 +      case containsAllTokens
+       253 +      case `in`
+       254 +      case notIn
+       255 +      case containsAnyTokens
+       256 +      case listContains
+       257 +      case notListContains
+       258 +      case beginsWith
+       259 +      case notBeginsWith
+       260 +  }
+       261 +  ```
+       262 +  
+       263 +  #### Query Usage Examples
+       264 +  ```swift
+       265 +  // Type-safe query building
+       266 +  let recentArticles = RecordQuery<Article>
+       267 +      .where("publishedAt", .greaterThan, .date(lastWeek))
+       268 +      .and("featured", .equals, .boolean(true))
+       269 +      .and("tags", .containsAllTokens, .stringList(["swift", "tutorial"]))
+       270 +      .sorted(by: "publishedAt", ascending: false)
+       271 +      .limit(50)
+       272 +      .desiredKeys(["title", "publishedAt", "author", "viewCount"])
+       273 +  
+       274 +  let articles = try await client.queryRecords(recentArticles, from: .public)
+       275 +  
+       276 +  // Location-based queries
+       277 +  let nearbyEvents = RecordQuery<Event>
+       278 +      .where("location", .near, .location(userLocation))
+       279 +      .and("eventDate", .greaterThan, .date(Date()))
+       280 +      .sorted(by: "eventDate", ascending: true)
+       281 +      .limit(20)
+       282 +  ```
+       283 +  
+       284 +  ### Abstraction Layer Benefits
+       285 +  
+       286 +  #### Type Safety & Developer Experience
+       287 +  - **Compile-Time Validation**: Field types validated at compile time
+       288 +  - **Auto-completion**: Rich IDE support for field values and types
+       289 +  - **CloudKit Familiarity**: API patterns match CloudKit framework conventions
+       290 +  - **Error Prevention**: Impossible to assign wrong types to fields
+       291 +  
+       292 +  #### Performance & Optimization
+       293 +  - **Efficient Serialization**: Direct mapping between Swift types and CloudKit field formats
+       294 +  - **Request Batching**: Abstraction layer orchestrates bulk operations
+       295 +  - **Intelligent Caching**: Type-aware caching with proper invalidation
+       296 +  - **Connection Pooling**: Managed HTTP connection reuse
+       297 +  
+       298 +  #### Flexibility & Maintenance
+       299 +  - **API Stability**: Changes to OpenAPI don't affect user code
+       300 +  - **Custom Optimizations**: Performance improvements transparent to users
+       301 +  - **Testing**: Easy to mock with protocol-based design
+       302 +  - **Evolution**: Can add features without breaking existing code
+       303 +  
+       304 +  ### Implementation Architecture
+       305 +  
+       306 +  #### Package Structure
+       307 +  ```
+       308 +  MistKit/
+       309 +  ├── Sources/
+       310 +  │   └── MistKit/
+       311 +  │       ├── Public/                    # High-level abstraction layer
+       312 +  │       │   ├── CloudKitService.swift
+       313 +  │       │   ├── Models/
+       314 +  │       │   │   ├── CloudKitRecord.swift
+       315 +  │       │   │   ├── FieldValue.swift
+       316 +  │       │   │   ├── RecordReference.swift
+       317 +  │       │   │   ├── Asset.swift
+       318 +  │       │   │   └── CLLocation.swift
+       319 +  │       │   ├── Protocols/
+       320 +  │       │   │   ├── CloudKitServiceProtocol.swift
+       321 +  │       │   │   └── CacheProviderProtocol.swift
+       322 +  │       │   └── QueryBuilder/
+       323 +  │       │       ├── RecordQuery.swift
+       324 +  │       │       ├── Comparator.swift
+       325 +  │       │       └── QueryResult.swift
+       326 +  │       ├── Internal/                  # Implementation details
+       327 +  │       │   ├── ServiceImplementation/
+       328 +  │       │   │   ├── RecordService.swift
+       329 +  │       │   │   ├── ZoneService.swift
+       330 +  │       │   │   └── SubscriptionService.swift
+       331 +  │       │   ├── Mapping/              # OpenAPI ↔ Public API translation
+       332 +  │       │   │   ├── RecordMapper.swift
+       333 +  │       │   │   ├── FieldValueMapper.swift
+       334 +  │       │   │   ├── ErrorMapper.swift
+       335 +  │       │   │   └── QueryMapper.swift
+       336 +  │       │   ├── Caching/
+       337 +  │       │   │   ├── DefaultCacheProvider.swift
+       338 +  │       │   │   └── CacheKey.swift
+       339 +  │       │   └── Optimization/
+       340 +  │       │       ├── RequestBatcher.swift
+       341 +  │       │       └── ConnectionPool.swift
+       342 +  │       ├── Generated/                 # OpenAPI generated code
+       343 +  │       │   ├── Client.swift
+       344 +  │       │   └── Types.swift
+       345 +  │       ├── Authentication/
+       346 +  │       │   ├── TokenManager.swift
+       347 +  │       │   └── ServerToServerAuth.swift
+       348 +  │       └── MistKitClient.swift       # Main entry point
+       349 +  ├── Tests/
+       350 +  ├── Examples/
+       351 +  └── Scripts/
+       352 +  ```
+       353 +  
+       354 +  ## Features & Requirements
+       355 +  
+       356 +  ### Core CloudKit Operations
+       357 +  
+       358 +  #### Record Management
+       359 +  - **Query Records**: Advanced filtering, sorting, and pagination with strongly-typed field values
+       360 +  - **Modify Records**: Create, update, delete operations with type-safe field handling
+       361 +  - **Lookup Records**: Efficient batch retrieval with field type preservation
+       362 +  - **Record Changes**: Incremental sync with strongly-typed change detection
+       363 +  
+       364 +  #### Field Type Support
+       365 +  - **Primitive Types**: String, Int64, Double, Boolean, Bytes, Date
+       366 +  - **CloudKit Types**: Location, Reference, Asset with proper Swift representations
+       367 +  - **List Types**: Arrays of all supported primitive and CloudKit types
+       368 +  - **Type Conversion**: Automatic conversion between Swift types and CloudKit field formats
+       369 +  
+       370 +  #### Query Capabilities
+       371 +  - **Type-Safe Filtering**: Strongly-typed field comparisons and operations
+       372 +  - **Complex Queries**: Multiple filter conditions with proper type validation
+       373 +  - **Location Queries**: Geospatial searches with CLLocation integration
+       374 +  - **List Operations**: Queries on list fields with contains/member operations
+       375 +  
+       376 +  ### Platform Support
+       377 +  
+       378 +  #### Minimum Requirements
+       379 +  - **Swift 5.9+**: Modern Swift language features and concurrency support
+       380 +  - **Platform Versions**:
+       381 +    - macOS 10.15+ (Catalina)
+       382 +    - iOS 13.0+
+       383 +    - tvOS 13.0+
+       384 +    - watchOS 6.0+
+       385 +    - visionOS 1.0+
+       386 +    - Linux (Ubuntu 18.04+, Amazon Linux 2+)
+       387 +  
+       388 +  #### Dependencies
+       389 +  - **Swift OpenAPI Generator**: Automatic client code generation
+       390 +  - **Swift OpenAPI Runtime**: HTTP transport and middleware support
+       391 +  - **URLSession Transport**: Cross-platform HTTP client implementation
+       392 +  
+       393 +  ## User Experience
+       394 +  
+       395 +  ### Developer Experience Priorities
+       396 +  
+       397 +  #### Intuitive Record Creation
+       398 +  ```swift
+       399 +  // Natural, type-safe field assignment
+       400 +  let blogPost = CloudKitRecord(
+       401 +      recordType: "BlogPost",
+       402 +      fields: [
+       403 +          "title": .string("Getting Started with MistKit"),
+       404 +          "content": .string("CloudKit for everyone..."),
+       405 +          "publishedAt": .date(Date()),
+       406 +          "wordCount": .int64(1200),
+       407 +          "published": .boolean(true),
+       408 +          "rating": .double(4.7),
+       409 +          "tags": .stringList(["swift", "cloudkit", "tutorial"]),
+       410 +          "author": .reference(RecordReference(recordName: "author123")),
+       411 +          "featuredImage": .asset(try Asset(fileURL: imageURL)),
+       412 +          "lastEditLocation": .location(CLLocation(
+       413 +              latitude: 37.7749, 
+       414 +              longitude: -122.4194
+       415 +          ))
+       416 +      ]
+       417 +  )
+       418 +  ```
+       419 +  
+       420 +  #### Type-Safe Field Access
+       421 +  ```swift
+       422 +  // Safe, expressive field access
+       423 +  func displayBlogPost(_ record: CloudKitRecord) {
+       424 +      guard let title = record.fields["title"]?.stringValue else { return }
+       425 +      
+       426 +      let publishedAt = record.fields["publishedAt"]?.dateValue ?? Date()
+       427 +      let wordCount = record.fields["wordCount"]?.int64Value ?? 0
+       428 +      let isPublished = record.fields["published"]?.booleanValue ?? false
+       429 +      let tags = record.fields["tags"]?.stringListValue ?? []
+       430 +      
+       431 +      print("\(title) - \(wordCount) words")
+       432 +      print("Published: \(publishedAt)")
+       433 +      print("Tags: \(tags.joined(separator: ", "))")
+       434 +  }
+       435 +  ```
+       436 +  
+       437 +  #### Fluent Query Construction
+       438 +  ```swift
+       439 +  // Expressive, type-safe queries
+       440 +  let featuredTutorials = RecordQuery<Tutorial>
+       441 +      .where("category", .equals, .string("Swift"))
+       442 +      .and("featured", .equals, .boolean(true))
+       443 +      .and("publishedAt", .greaterThan, .date(lastMonth))
+       444 +      .and("tags", .containsAllTokens, .stringList(["beginner", "ios"]))
+       445 +      .sorted(by: "publishedAt", ascending: false)
+       446 +      .sorted(by: "rating", ascending: false)
+       447 +      .limit(25)
+       448 +      .desiredKeys(["title", "author", "publishedAt", "rating"])
+       449 +  
+       450 +  for try await tutorial in client.queryRecords(featuredTutorials, from: .public) {
+       451 +      print(tutorial.fields["title"]?.stringValue ?? "Untitled")
+       452 +  }
+       453 +  ```
+       454 +  
+       455 +  ### Error Handling Strategy
+       456 +  ```swift
+       457 +  public enum CloudKitError: LocalizedError {
+       458 +      case authenticationFailed(reason: String)
+       459 +      case recordNotFound(recordName: String)
+       460 +      case quotaExceeded(limit: Int)
+       461 +      case fieldTypeMismatch(field: String, expected: String, actual: String)
+       462 +      case invalidQuery(description: String)
+       463 +      case networkError(underlying: Error)
+       464 +      case serverError(code: String, message: String)
+       465 +      
+       466 +      public var errorDescription: String? {
+       467 +          switch self {
+       468 +          case .fieldTypeMismatch(let field, let expected, let actual):
+       469 +              return "Field '\(field)' type mismatch: expected \(expected), got \(actual)"
+       470 +          case .invalidQuery(let description):
+       471 +              return "Invalid query: \(description)"
+       472 +          // ... other cases
+       473 +          }
+       474 +      }
+       475 +  }
+       476 +  ```
+       477 +  
+       478 +  ## Success Metrics
+       479 +  
+       480 +  ### Technical Performance Indicators
+       481 +  - **Type Safety**: Zero runtime type errors in field value operations
+       482 +  - **API Coverage**: 100% of CloudKit Web Services operations with strongly-typed interfaces
+       483 +  - **Serialization Performance**: Efficient conversion between Swift types and CloudKit formats
+       484 +  - **Memory Usage**: Minimal overhead from abstraction layer type handling
+       485 +  - **Developer Productivity**: Reduced development time through type safety and auto-completion
+       486 +  
+       487 +  ### Developer Satisfaction Measures
+       488 +  - **Type Safety Appreciation**: Feedback on compile-time error prevention
+       489 +  - **API Intuitiveness**: Ease of learning for CloudKit and server-side Swift developers
+       490 +  - **Documentation Quality**: Clarity of type system and field value documentation
+       491 +  - **Migration Experience**: Smoothness of transition from manual CloudKit HTTP clients
+       492 +  
+       493 +  ## Timeline & Milestones
+       494 +  
+       495 +  ### Phase 1: Strongly-Typed Foundation (Current)
+       496 +  - ✅ OpenAPI specification integration
+       497 +  - 🔄 FieldValue enum with all CloudKit types
+       498 +  - 🔄 CloudKitRecord with strongly-typed fields
+       499 +  - 🔄 Type-safe serialization/deserialization
+       500 +  - 🔄 Basic query builder with type validation
+       501 +  
+       502 +  ### Phase 2: Complete Type System (Next 2-3 months)
+       503 +  - **Full Field Type Support**: All CloudKit field types with proper Swift representations
+       504 +  - **Advanced Query Builder**: Complete type-safe query construction
+       505 +  - **Error Type Mapping**: Comprehensive error handling with field type context
+       506 +  - **Performance Optimization**: Efficient type conversion and validation
+       507 +  - **Testing**: Comprehensive tests for type safety and conversion accuracy
+       508 +  
+       509 +  ### Phase 3: Production Ready (3-6 months)
+       510 +  - **API Stabilization**: Stable public API with semantic versioning
+       511 +  - **Performance Benchmarks**: Type system performance validation
+       512 +  - **Security Audit**: Review of type safety and serialization security
+       513 +  - **Documentation**: Complete guides for strongly-typed CloudKit development
+       514 +  - **1.0 Release**: Production-ready release with stable type system
+       515 +  
+       516 +  ## Conclusion
+       517 +  
+       518 +  MistKit's strongly-typed abstraction layer represents a significant advancement in CloudKit 
+           + accessibility and developer experience. By providing compile-time type safety for CloudKit field 
+     values
+           +  while maintaining the familiar CloudKit development patterns, MistKit enables developers to build 
+           + robust, cross-platform applications with confidence.
+       519 +  
+       520 +  The FieldValue enum system ensures that field type errors are caught at compile time rather than 
+           + runtime, dramatically improving development productivity and application reliability. Combined with 
+     the
+           +  layered architecture and modern Swift features, MistKit provides an optimal balance of type safety, 
+           + performance, and ease of use for server-side Swift applications accessing CloudKit Web Services.
+       521   \ No newline at end of file
+
+> Do we have anything about a cli to directly interface with a cloudkit database specificly for testing the 
+  robustness of MistKit's API?
+
+⏺ Looking at the PRD content I was working on, I mentioned CLI tools in a few places but didn't specifically detail
+   a testing-focused CLI for MistKit's API robustness. Let me check what's currently in the project:
+
+⏺ Search(pattern: "CLI|cli|command.line", output_mode: "content")
+  ⎿  Found 0 lines 
+
+⏺ Read(Examples/Sources/MistDemo/MistDemo.swift)
+  ⎿  Read 50 lines (ctrl+r to expand)
+
+⏺ Based on what I can see, there's currently a demo CLI application (MistDemo) that focuses on authentication and
+  basic CloudKit operations, but it's not specifically designed as a comprehensive testing tool for MistKit's API
+  robustness.
+
+  The PRD should definitely include a dedicated CLI testing tool. This would be valuable for:
+
+  Proposed CLI Testing Tool: mistkit-test
+
+  Purpose
+
+  - API Robustness Testing: Comprehensive testing of all MistKit operations
+  - Performance Benchmarking: Load testing and latency measurements
+  - Integration Validation: End-to-end testing with real CloudKit services
+  - Developer Tooling: Easy way to validate CloudKit setup and credentials
+
+  Key Features
+
+  # Test all record operations
+  mistkit-test records --container "iCloud.com.example.app" --api-token "..." --environment development
+
+  # Stress test with concurrent operations
+  mistkit-test stress --operations 1000 --concurrency 50 --duration 60s
+
+  # Validate field type handling
+  mistkit-test field-types --test-all-types
+
+  # Test query performance with large datasets
+  mistkit-test query-performance --record-count 10000 --query-variations 20
+
+  # Test authentication methods
+  mistkit-test auth --server-to-server --key-file private.p8 --key-id ABC123
+
+  CLI Commands Structure
+
+  - records - Test CRUD operations, batching, atomic transactions
+  - zones - Test zone management operations
+  - subscriptions - Test push notification setup
+  - assets - Test file upload/download operations
+  - stress - Load testing with configurable parameters
+  - field-types - Validate strongly-typed FieldValue enum handling
+  - auth - Test different authentication methods
+  - benchmark - Performance comparisons against direct HTTP calls
+
+  Should I add this CLI testing tool as a key component in the PRD? It would be an excellent way to validate
+  MistKit's robustness and provide developers with confidence in the abstraction layer's reliability.
+
+> It should support public and private databases
+
+⏺ Absolutely! The CLI testing tool should definitely support both public and private databases, as they have
+  different capabilities and access patterns. Here's how that should be structured:
+
+  Enhanced CLI Testing Tool: mistkit-test
+
+  Database-Specific Testing
+
+  # Test public database operations
+  mistkit-test records --database public --container "iCloud.com.example.app" --api-token "..."
+
+  # Test private database operations (requires authentication)
+  mistkit-test records --database private --container "iCloud.com.example.app" --api-token "..." --web-auth-token
+  "..."
+
+  # Test both databases in sequence
+  mistkit-test records --database all --container "iCloud.com.example.app" --api-token "..." --web-auth-token "..."
+
+  # Database-specific stress testing
+  mistkit-test stress --database private --operations 1000 --concurrency 50
+
+  Database-Aware Operations
+
+  Public Database Testing
+
+  # Public database: read-only record operations
+  mistkit-test query --database public --record-type "Article" --limit 100
+
+  # Public database: test discovery operations
+  mistkit-test users discover --database public --emails "user@example.com"
+
+  Private Database Testing
+
+  # Private database: full CRUD operations
+  mistkit-test records crud --database private --record-type "UserData"
+
+  # Private database: zone management (only supported in private)
+  mistkit-test zones --database private --create-test-zones 5
+
+  # Private database: subscription management
+  mistkit-test subscriptions --database private --test-push-notifications
+
+  Cross-Database Operations
+
+  # Test data consistency across databases
+  mistkit-test consistency --source-database private --target-database public --record-type "SharedContent"
+
+  # Performance comparison between databases
+  mistkit-test benchmark --databases public,private --operations query,lookup
+
+  Validation Features
+
+  - Database Capability Validation: Ensure operations are only attempted on supported databases
+  - Authentication Requirements: Verify proper auth tokens for private database access
+  - Permission Testing: Test read/write permissions in each database scope
+  - Data Isolation: Ensure private data doesn't leak into public database tests
+
+  This approach would thoroughly test MistKit's handling of CloudKit's database scoping while providing developers
+  with confidence that the abstraction layer properly respects CloudKit's access controls and capabilities.
+
+  Should I incorporate this database-aware CLI testing tool into the PRD as a key validation and developer
+  experience component?
+
+> Call the command `mist` or `mistk` based on what it doesn't conflict with
+
+⏺ Bash(which mist)
+  ⎿  Error: mist not found
+
+⏺ Bash(which mistk)
+  ⎿  Error: mistk not found
+
+⏺ Bash(command -v mist)
+  ⎿  Error: Error
+  ⎿  Claude usage limit reached. Your limit will reset at 6pm (America/Detroit).
+
+      • /upgrade to increase your usage limit.
+
+> Can you create the PRD file?
+  ⎿  Claude usage limit reached. Your limit will reset at 6pm (America/Detroit).
+
+      • /upgrade to increase your usage limit.
+
