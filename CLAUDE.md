@@ -145,3 +145,7 @@ Key endpoints documented in the OpenAPI spec:
 - Users: `/users/current`, `/users/discover`, `/users/lookup/contacts`
 - Assets: `/assets/upload`
 - Tokens: `/tokens/create`, `/tokens/register`
+
+## Task Master AI Instructions
+**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+@./.taskmaster/CLAUDE.md
