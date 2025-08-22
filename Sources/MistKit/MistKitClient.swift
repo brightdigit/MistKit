@@ -28,15 +28,3 @@ public struct MistKitClient {
         )
     }
 }
-
-// MARK: - Configuration
-
-
-// MARK: - Enums
-
-
-
-
-
-// MARK: - Middleware
-
