@@ -17,7 +17,7 @@
             "description": "Perform a complete rename refactoring of CKValue enum to FieldValue across all files, updating all references, imports, and type annotations",
             "dependencies": [],
             "details": "Use Xcode's refactoring tools or search-and-replace to rename CKValue to FieldValue in RecordInfo.swift and any other files that reference it. Update all type annotations, function parameters, return types, and variable declarations. Ensure the rename is consistent in comments and documentation. Verify that all existing tests still compile and pass after the rename.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -915,7 +915,7 @@
     ],
     "metadata": {
       "created": "2025-08-15T00:05:03.986Z",
-      "updated": "2025-08-15T00:05:03.986Z",
+      "updated": "2025-08-22T16:39:31.562Z",
       "description": "Tasks for master context"
     }
   }

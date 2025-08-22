@@ -8,7 +8,7 @@
 import Foundation
 
 /// Represents a CloudKit field value as defined in the CloudKit Web Services API
-public enum CKValue: Codable, Equatable {
+public enum FieldValue: Codable, Equatable {
     case string(String)
     case int64(Int64)
     case double(Double)
@@ -18,7 +18,7 @@ public enum CKValue: Codable, Equatable {
     case location(Location)
     case reference(Reference)
     case asset(Asset)
-    case list([CKValue])
+    case list([FieldValue])
     
     /// Location dictionary as defined in CloudKit Web Services
     public struct Location: Codable, Equatable {
@@ -135,7 +135,7 @@ public enum CKValue: Codable, Equatable {
             self = .boolean(value)
             return
         }
-        if let value = try? container.decode([CKValue].self) {
+        if let value = try? container.decode([FieldValue].self) {
             self = .list(value)
             return
         }
@@ -156,25 +156,25 @@ public enum CKValue: Codable, Equatable {
             self = .date(Date(timeIntervalSince1970: value / 1000))
             return
         }
-        throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unable to decode CKValue")
+        throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unable to decode FieldValue")
     }
 }
 
 public struct RecordInfo: Encodable {
     public let recordName: String
     public let recordType: String
-    public let fields: [String: CKValue]
+    public let fields: [String: FieldValue]
     
     internal init(from record: Components.Schemas.Record) {
         self.recordName = record.recordName ?? "Unknown"
         self.recordType = record.recordType ?? "Unknown"
         
-        // Convert fields to CKValue representation
-        var convertedFields: [String: CKValue] = [:]
+        // Convert fields to FieldValue representation
+        var convertedFields: [String: FieldValue] = [:]
         
         if let fieldsPayload = record.fields {
             for (fieldName, fieldData) in fieldsPayload.additionalProperties {
-                if let fieldValue = Self.convertToCKValue(fieldData) {
+                if let fieldValue = Self.convertToFieldValue(fieldData) {
                     convertedFields[fieldName] = fieldValue
                 }
             }
@@ -183,8 +183,8 @@ public struct RecordInfo: Encodable {
         self.fields = convertedFields
     }
     
-    /// Convert a CloudKit field value to CKValue
-    private static func convertToCKValue(_ fieldData: Components.Schemas.FieldValue) -> CKValue? {
+    /// Convert a CloudKit field value to FieldValue
+    private static func convertToFieldValue(_ fieldData: Components.Schemas.FieldValue) -> FieldValue? {
         guard let value = fieldData.value else {
             return nil
         }
@@ -217,7 +217,7 @@ public struct RecordInfo: Encodable {
             let date = Date(timeIntervalSince1970: dateValue / 1000)
             return .date(date)
         case .LocationValue(let locationValue):
-            let location = CKValue.Location(
+            let location = FieldValue.Location(
                 latitude: locationValue.latitude ?? 0.0,
                 longitude: locationValue.longitude ?? 0.0,
                 horizontalAccuracy: locationValue.horizontalAccuracy,
@@ -229,13 +229,13 @@ public struct RecordInfo: Encodable {
             )
             return .location(location)
         case .ReferenceValue(let referenceValue):
-            let reference = CKValue.Reference(
+            let reference = FieldValue.Reference(
                 recordName: referenceValue.recordName ?? "",
                 action: referenceValue.action?.rawValue
             )
             return .reference(reference)
         case .AssetValue(let assetValue):
-            let asset = CKValue.Asset(
+            let asset = FieldValue.Asset(
                 fileChecksum: assetValue.fileChecksum,
                 size: assetValue.size,
                 referenceChecksum: assetValue.referenceChecksum,
@@ -245,25 +245,25 @@ public struct RecordInfo: Encodable {
             )
             return .asset(asset)
         case .ListValue(let listValue):
-            // Convert list items to CKValue array
+            // Convert list items to FieldValue array
             let convertedList = listValue.compactMap { listItem in
                 // Handle the recursive list structure properly
                 switch listItem {
                 case .StringValue(let stringValue):
-                    return CKValue.string(stringValue)
+                    return FieldValue.string(stringValue)
                 case .Int64Value(let intValue):
-                    return CKValue.int64(intValue)
+                    return FieldValue.int64(intValue)
                 case .DoubleValue(let doubleValue):
-                    return CKValue.double(doubleValue)
+                    return FieldValue.double(doubleValue)
                 case .BooleanValue(let boolValue):
-                    return CKValue.boolean(boolValue)
+                    return FieldValue.boolean(boolValue)
                 case .BytesValue(let bytesValue):
-                    return CKValue.bytes(bytesValue)
+                    return FieldValue.bytes(bytesValue)
                 case .DateValue(let dateValue):
                     let date = Date(timeIntervalSince1970: dateValue / 1000)
-                    return CKValue.date(date)
+                    return FieldValue.date(date)
                 case .LocationValue(let locationValue):
-                    let location = CKValue.Location(
+                    let location = FieldValue.Location(
                         latitude: locationValue.latitude ?? 0.0,
                         longitude: locationValue.longitude ?? 0.0,
                         horizontalAccuracy: locationValue.horizontalAccuracy,
@@ -273,15 +273,15 @@ public struct RecordInfo: Encodable {
                         course: locationValue.course,
                         timestamp: locationValue.timestamp.map { Date(timeIntervalSince1970: $0 / 1000) }
                     )
-                    return CKValue.location(location)
+                    return FieldValue.location(location)
                 case .ReferenceValue(let refValue):
-                    let reference = CKValue.Reference(
+                    let reference = FieldValue.Reference(
                         recordName: refValue.recordName ?? "",
                         action: refValue.action?.rawValue
                     )
-                    return CKValue.reference(reference)
+                    return FieldValue.reference(reference)
                 case .AssetValue(let assetValue):
-                    let asset = CKValue.Asset(
+                    let asset = FieldValue.Asset(
                         fileChecksum: assetValue.fileChecksum,
                         size: assetValue.size,
                         referenceChecksum: assetValue.referenceChecksum,
@@ -289,26 +289,26 @@ public struct RecordInfo: Encodable {
                         receipt: assetValue.receipt,
                         downloadURL: assetValue.downloadURL
                     )
-                    return CKValue.asset(asset)
+                    return FieldValue.asset(asset)
                 case .ListValue(let nestedList):
                     // Recursively convert nested lists
                     let nestedConvertedList = nestedList.compactMap { nestedItem in
                         // For simplicity, we'll handle basic types in nested lists
                         switch nestedItem {
                         case .StringValue(let stringValue):
-                            return CKValue.string(stringValue)
+                            return FieldValue.string(stringValue)
                         case .Int64Value(let intValue):
-                            return CKValue.int64(intValue)
+                            return FieldValue.int64(intValue)
                         case .DoubleValue(let doubleValue):
-                            return CKValue.double(doubleValue)
+                            return FieldValue.double(doubleValue)
                         case .BooleanValue(let boolValue):
-                            return CKValue.boolean(boolValue)
+                            return FieldValue.boolean(boolValue)
                         default:
                             // For complex nested types, return nil for now
                             return nil
                         }
                     }
-                    return CKValue.list(nestedConvertedList)
+                    return FieldValue.list(nestedConvertedList)
                 }
             }
             return .list(convertedList)

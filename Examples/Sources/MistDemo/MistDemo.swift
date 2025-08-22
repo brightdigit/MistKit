@@ -270,22 +270,22 @@ struct MistDemo: AsyncParsableCommand {
         print("   mistdemo --skip-auth --web-auth-token \"\(webAuthToken)\"")
     }
     
-    /// Format CKValue fields for display
-    private func formatFields(_ fields: [String: CKValue]) -> String {
+    /// Format FieldValue fields for display
+    private func formatFields(_ fields: [String: FieldValue]) -> String {
         if fields.isEmpty {
             return "{}"
         }
         
         let formattedFields = fields.map { (key, value) in
-            let valueString = formatCKValue(value)
+            let valueString = formatFieldValue(value)
             return "\(key): \(valueString)"
         }.joined(separator: ", ")
         
         return "{\(formattedFields)}"
     }
     
-    /// Format a single CKValue for display
-    private func formatCKValue(_ value: CKValue) -> String {
+    /// Format a single FieldValue for display
+    private func formatFieldValue(_ value: FieldValue) -> String {
         switch value {
         case .string(let string):
             return "\"\(string)\""
@@ -309,7 +309,7 @@ struct MistDemo: AsyncParsableCommand {
         case .asset(let asset):
             return "asset(\(asset.downloadURL ?? "no URL"))"
         case .list(let values):
-            let formattedValues = values.map { formatCKValue($0) }.joined(separator: ", ")
+            let formattedValues = values.map { formatFieldValue($0) }.joined(separator: ", ")
             return "[\(formattedValues)]"
         }
     }

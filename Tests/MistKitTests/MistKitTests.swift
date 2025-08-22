@@ -35,70 +35,70 @@ final class MistKitTests: XCTestCase {
         XCTAssertEqual(Database.shared.rawValue, "shared")
     }
     
-    // MARK: - CKValue Tests
+    // MARK: - FieldValue Tests
     
-    func testCKValueString() {
-        let value = CKValue.string("test")
+    func testFieldValueString() {
+        let value = FieldValue.string("test")
         XCTAssertEqual(value, .string("test"))
     }
     
-    func testCKValueInt64() {
-        let value = CKValue.int64(123)
+    func testFieldValueInt64() {
+        let value = FieldValue.int64(123)
         XCTAssertEqual(value, .int64(123))
     }
     
-    func testCKValueDouble() {
-        let value = CKValue.double(3.14)
+    func testFieldValueDouble() {
+        let value = FieldValue.double(3.14)
         XCTAssertEqual(value, .double(3.14))
     }
     
-    func testCKValueBoolean() {
-        let value = CKValue.boolean(true)
+    func testFieldValueBoolean() {
+        let value = FieldValue.boolean(true)
         XCTAssertEqual(value, .boolean(true))
     }
     
-    func testCKValueDate() {
+    func testFieldValueDate() {
         let date = Date()
-        let value = CKValue.date(date)
+        let value = FieldValue.date(date)
         XCTAssertEqual(value, .date(date))
     }
     
-    func testCKValueLocation() {
-        let location = CKValue.Location(
+    func testFieldValueLocation() {
+        let location = FieldValue.Location(
             latitude: 37.7749,
             longitude: -122.4194,
             horizontalAccuracy: 10.0
         )
-        let value = CKValue.location(location)
+        let value = FieldValue.location(location)
         XCTAssertEqual(value, .location(location))
     }
     
-    func testCKValueReference() {
-        let reference = CKValue.Reference(recordName: "test-record")
-        let value = CKValue.reference(reference)
+    func testFieldValueReference() {
+        let reference = FieldValue.Reference(recordName: "test-record")
+        let value = FieldValue.reference(reference)
         XCTAssertEqual(value, .reference(reference))
     }
     
-    func testCKValueAsset() {
-        let asset = CKValue.Asset(
+    func testFieldValueAsset() {
+        let asset = FieldValue.Asset(
             fileChecksum: "abc123",
             size: 1024,
             downloadURL: "https://example.com/file"
         )
-        let value = CKValue.asset(asset)
+        let value = FieldValue.asset(asset)
         XCTAssertEqual(value, .asset(asset))
     }
     
-    func testCKValueList() {
-        let list = [CKValue.string("item1"), CKValue.int64(42)]
-        let value = CKValue.list(list)
+    func testFieldValueList() {
+        let list = [FieldValue.string("item1"), FieldValue.int64(42)]
+        let value = FieldValue.list(list)
         XCTAssertEqual(value, .list(list))
     }
     
-    func testCKValueEncodable() throws {
-        let value = CKValue.string("test")
+    func testFieldValueEncodable() throws {
+        let value = FieldValue.string("test")
         let data = try JSONEncoder().encode(value)
-        let decoded = try JSONDecoder().decode(CKValue.self, from: data)
+        let decoded = try JSONDecoder().decode(FieldValue.self, from: data)
         XCTAssertEqual(value, decoded)
     }
     
@@ -111,12 +111,12 @@ final class MistKitTests: XCTestCase {
             recordType: "TestType",
             fields: Components.Schemas.Record.fieldsPayload(
                 additionalProperties: [
-                    "name": Components.Schemas.Record.fieldsPayload.additionalPropertiesPayload(
-                        value: .case1("Test Name"),
+                    "name": Components.Schemas.FieldValue(
+                        value: .StringValue("Test Name"),
                         _type: .STRING
                     ),
-                    "count": Components.Schemas.Record.fieldsPayload.additionalPropertiesPayload(
-                        value: .case2(42.0),
+                    "count": Components.Schemas.FieldValue(
+                        value: .Int64Value(42),
                         _type: .INT64
                     )
                 ]
