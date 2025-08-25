@@ -369,10 +369,10 @@ public struct CloudKitService {
                     query: .init(
                         recordType: recordType,
                         sortBy: [
-                            .init(
-                                fieldName: "modificationDate",
-                                ascending: false
-                            )
+//                            .init(
+//                                fieldName: "modificationDate",
+//                                ascending: false
+//                            )
                         ]
                     )
                 ))
