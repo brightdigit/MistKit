@@ -56,13 +56,15 @@ struct MistDemo: AsyncParsableCommand {
         print("3. Authenticate with your Apple ID")
         print("4. The demo will run automatically after authentication")
         print(String(repeating: "-", count: 60))
-        print("\n⚠️  Before authenticating, update these in the web page:")
+        print("\n⚠️  IMPORTANT: Update these values in index.html before authenticating:")
         print("   • containerIdentifier: '\(containerIdentifier)'")
-        print("   • apiToken: 'YOUR_API_TOKEN'")
+        print("   • apiToken: 'YOUR_VALID_API_TOKEN' (get from CloudKit Console)")
+        print("   • Ensure container exists and API token is valid")
         print(String(repeating: "=", count: 60) + "\n")
         
-        // Create a channel to receive the authentication token
+        // Create channels for communication
         let tokenChannel = AsyncChannel<String>()
+        let responseCompleteChannel = AsyncChannel<Void>()
         
         let router = Router(context: BasicRequestContext.self)
         router.middlewares.add(LogRequestsMiddleware(.info))
@@ -150,6 +152,14 @@ struct MistDemo: AsyncParsableCommand {
                 )
                 
                 let jsonData = try JSONEncoder().encode(response)
+                
+                // Notify that the response is about to be sent
+                Task {
+                    // Give a small delay to ensure response is fully sent
+                    try await Task.sleep(nanoseconds: 200_000_000) // 200ms
+                    await responseCompleteChannel.send(())
+                }
+                
                 return Response(
                     status: .ok,
                     headers: [.contentType: "application/json"],
@@ -184,6 +194,11 @@ struct MistDemo: AsyncParsableCommand {
         let token = await tokenChannel.receive()
         
         print("\n✅ Authentication successful! Received session token.")
+        print("⏳ Waiting for response to complete...")
+        
+        // Wait for the response to be fully sent to the web page
+        await responseCompleteChannel.receive()
+        
         print("🔄 Shutting down server...")
         
         // Shutdown the server
