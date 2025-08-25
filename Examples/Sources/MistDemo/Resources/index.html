@@ -216,6 +216,36 @@
                 return; // Exit early, don't do the other detection attempts
             }
             
+            // Check localStorage for persisted CloudKit session data
+            try {
+                console.log('Checking localStorage for CloudKit session...');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.includes('cloudkit') || key && key.includes('ck')) {
+                        const value = localStorage.getItem(key);
+                        console.log(`LocalStorage ${key}:`, value);
+                        
+                        // Try to parse the value and look for session tokens
+                        try {
+                            const parsed = JSON.parse(value);
+                            if (parsed && (parsed.ckSession || parsed.ckWebAuthToken || parsed.webAuthToken)) {
+                                const token = parsed.ckSession || parsed.ckWebAuthToken || parsed.webAuthToken;
+                                console.log('Found token in localStorage:', token);
+                                webAuthToken = token;
+                                authenticationInProgress = true;
+                                await handleAuthenticationWithToken(userIdentity, token);
+                                return;
+                            }
+                        } catch (parseError) {
+                            // Value might not be JSON, that's fine
+                        }
+                    }
+                }
+                console.log('No CloudKit session found in localStorage');
+            } catch (localStorageError) {
+                console.log('Error checking localStorage:', localStorageError);
+            }
+            
             // Always try to get fresh token for each authentication
             // (don't rely on cached webAuthToken from previous runs)
             showStatus('Retrieving authentication token...');
@@ -250,6 +280,7 @@
                             container.session?.authToken,
                             container._session?.webAuthToken,
                             container._auth?.webAuthToken,
+                            container._auth?._ckSession,  // This is where it actually is!
                             container._ckSession
                         ];
                         
@@ -445,13 +476,33 @@
                     throw new Error('CloudKit.js failed to load');
                 }
                 
+                // Debug: Check authentication state before setUpAuth
+                console.log('Container auth state before setup:', container._auth);
+                
                 // Set up authentication and check if user is already signed in
                 const userIdentity = await container.setUpAuth();
+                
+                // Debug: Check authentication state after setUpAuth
+                console.log('Container auth state after setup:', container._auth);
+                console.log('User identity from setUpAuth:', userIdentity);
+                
+                // Check if we have the session token directly from the auth object
+                const sessionToken = container._auth?._ckSession;
+                console.log('Session token from auth:', sessionToken);
                 
                 if (userIdentity) {
                     // User is already signed in
                     showStatus('Already signed in. Processing authentication...');
-                    await handleAuthentication(userIdentity);
+                    
+                    // If we have the session token, use it directly
+                    if (sessionToken && !authenticationInProgress) {
+                        console.log('Using session token from container._auth._ckSession');
+                        webAuthToken = sessionToken;
+                        authenticationInProgress = true;
+                        await handleAuthenticationWithToken(userIdentity, sessionToken);
+                    } else {
+                        await handleAuthentication(userIdentity);
+                    }
                 } else {
                     // User is not signed in, wait for sign-in
                     showStatus('Please click "Sign In with Apple ID" to authenticate.');
