@@ -107,6 +107,19 @@
         .copy-button:hover {
             background-color: #0c4a6e;
         }
+        .signout-button {
+            background-color: #ff3b30;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .signout-button:hover {
+            background-color: #d70015;
+        }
     </style>
     <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js" onerror="console.log('Failed to load CloudKit.js')"></script>
 </head>
@@ -116,6 +129,7 @@
         <p>Sign in with your Apple ID to test CloudKit Web Services authentication and API access.</p>
         
         <div id="signin-button"></div>
+        <button id="signout-button" class="signout-button" style="display: none;">Sign Out</button>
         
         <div id="loading" class="loading">Authenticating...</div>
         <div id="status"></div>
@@ -151,6 +165,7 @@
         const statusDiv = document.getElementById('status');
         const userInfoDiv = document.getElementById('user-info');
         const signinButton = document.getElementById('signin-button');
+        const signoutButton = document.getElementById('signout-button');
         const loadingDiv = document.getElementById('loading');
 
         // Store the web auth token when received
@@ -244,6 +259,30 @@
                 console.log('No CloudKit session found in localStorage');
             } catch (localStorageError) {
                 console.log('Error checking localStorage:', localStorageError);
+            }
+            
+            // Check cookies for CloudKit session data
+            try {
+                console.log('Checking cookies for CloudKit session...');
+                const cookies = document.cookie.split(';');
+                for (const cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name && (name.includes('cloudkit') || name.includes('ck') || name.includes('iCloud'))) {
+                        console.log(`Cookie ${name}:`, value?.substring(0, 100) + '...');
+                        
+                        // The CloudKit cookie appears to be the token directly
+                        if (value && value.startsWith('158__54__')) {
+                            console.log('Found CloudKit token in cookie:', name);
+                            webAuthToken = decodeURIComponent(value);
+                            authenticationInProgress = true;
+                            await handleAuthenticationWithToken(userIdentity, webAuthToken);
+                            return;
+                        }
+                    }
+                }
+                console.log('No CloudKit session found in cookies');
+            } catch (cookieError) {
+                console.log('Error checking cookies:', cookieError);
             }
             
             // Always try to get fresh token for each authentication
@@ -365,6 +404,9 @@
                 if (userIdentity && token) {
                     showStatus('Successfully authenticated with web token!');
                     
+                    // Show sign out button
+                    signoutButton.style.display = 'inline-block';
+                    
                     console.log('User Identity:', userIdentity);
                     console.log('Web Auth Token:', token);
                     
@@ -466,6 +508,42 @@
             });
         }
 
+        // Sign out functionality
+        async function signOutUser() {
+            try {
+                console.log('Signing out user...');
+                await container.signOut();
+                
+                // Clear application state
+                webAuthToken = null;
+                currentUserIdentity = null;
+                authenticationInProgress = false;
+                
+                // Update UI
+                showStatus('Signed out successfully.');
+                userInfoDiv.innerHTML = '';
+                signoutButton.style.display = 'none';
+                
+                // Clear any CloudKit cookies
+                const cookies = document.cookie.split(';');
+                for (const cookie of cookies) {
+                    const [name] = cookie.trim().split('=');
+                    if (name && (name.includes('cloudkit') || name.includes('ck') || name.includes('iCloud'))) {
+                        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                        console.log('Cleared cookie:', name);
+                    }
+                }
+                
+                console.log('Sign out complete');
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showStatus('Sign out failed: ' + error.message, true);
+            }
+        }
+
+        // Add sign out button event listener
+        signoutButton.addEventListener('click', signOutUser);
+
         // Initialize CloudKit authentication
         async function initializeCloudKit() {
             try {
@@ -518,6 +596,7 @@
                     console.log('User signed out');
                     showStatus('Signed out successfully.');
                     userInfoDiv.innerHTML = '';
+                    signoutButton.style.display = 'none';
                     //signinButton.textContent = 'Sign In with Apple ID';
                 });
 
