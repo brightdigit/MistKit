@@ -1,3 +1,10 @@
+//
+//  CloudKitService.swift
+//  MistKit
+//
+//  Created by Leo Dion on 7/9/25.
+//
+
 import Foundation
 import OpenAPIRuntime
 import OpenAPIURLSession
@@ -28,7 +35,6 @@ public struct CloudKitService {
     
     /// Fetch current user information
    public func fetchCurrentUser() async throws -> UserInfo {
-        // Create the request to get current user
         let response = try await client.getCurrentUser(
             .init(
                 path: .init(
@@ -57,7 +63,6 @@ public struct CloudKitService {
                 throw CloudKitError.httpError(statusCode: 400)
             }
         case .unauthorized(let unauthorizedResponse):
-            // Try to extract error details from the response body
             if case .json(let errorResponse) = unauthorizedResponse.body {
                 throw CloudKitError.httpErrorWithDetails(
                     statusCode: 401,
@@ -158,11 +163,10 @@ public struct CloudKitService {
                 throw CloudKitError.httpError(statusCode: 503)
             }
         case .undocumented(let statusCode, let undocumentedResponse):
-            // Try to decode the response body as an error response
             if let responseBody = undocumentedResponse.body {
                 let errorData: Data
                 do {
-                    errorData = try await Data(collecting: responseBody, upTo: 1024 * 1024) // 1MB limit
+                    errorData = try await Data(collecting: responseBody, upTo: 1024 * 1024)
                 } catch {
                     throw CloudKitError.httpError(statusCode: statusCode)
                 }
@@ -175,7 +179,6 @@ public struct CloudKitService {
                         reason: errorResponse.reason
                     )
                 } catch {
-                    // If we can't decode as ErrorResponse, try to get raw text
                     if let errorText = String(data: errorData, encoding: .utf8) {
                         throw CloudKitError.httpErrorWithRawResponse(statusCode: statusCode, rawResponse: errorText)
                     } else {
@@ -322,7 +325,7 @@ public struct CloudKitService {
                     reason: errorResponse.reason
                 )
             } else {
-                throw CloudKitError.httpError(statusCode: 503)
+                throw CloudKitError.httpError(statusCode: 500)
             }
         case .undocumented(let statusCode, let undocumentedResponse):
             if let responseBody = undocumentedResponse.body {

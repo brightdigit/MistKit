@@ -98,23 +98,6 @@ struct MistDemo: AsyncParsableCommand {
         let api = router.group("api")
         // Authentication endpoint
         api.post("authenticate") { request, context -> Response in
-                struct AuthRequest: Decodable {
-                    let sessionToken: String
-                    let userRecordName: String
-                }
-                
-                struct AuthResponse: Encodable {
-                    let userRecordName: String
-                    let cloudKitData: CloudKitData
-                    let message: String
-                    
-                    struct CloudKitData: Encodable {
-                        let user: UserInfo?
-                        let zones: [ZoneInfo]
-                        let error: String?
-                    }
-                }
-                
                 let authRequest = try await request.decode(as: AuthRequest.self, context: context)
                 
                 // Send token to the channel
@@ -186,7 +169,7 @@ struct MistDemo: AsyncParsableCommand {
         Task {
             try await Task.sleep(nanoseconds: 1_000_000_000) // Wait 1 second
             print("🌐 Opening browser...")
-            openBrowser(url: "http://\(host):\(port)")
+            BrowserOpener.openBrowser(url: "http://\(host):\(port)")
         }
         
         // Wait for authentication token
@@ -266,7 +249,7 @@ struct MistDemo: AsyncParsableCommand {
                 for record in records.prefix(3) {
                     print("\n   Record: \(record.recordName)")
                     print("   Type: \(record.recordType)")
-                    print("   Fields: \(formatFields(record.fields))")
+                    print("   Fields: \(FieldValueFormatter.formatFields(record.fields))")
                 }
             } else {
                 print("ℹ️  No records found in the _defaultZone")
@@ -283,88 +266,5 @@ struct MistDemo: AsyncParsableCommand {
         // Print usage tip
         print("\n💡 Tip: You can skip authentication next time by running:")
         print("   mistdemo --skip-auth --web-auth-token \"\(webAuthToken)\"")
-    }
-    
-    /// Format FieldValue fields for display
-    private func formatFields(_ fields: [String: FieldValue]) -> String {
-        if fields.isEmpty {
-            return "{}"
-        }
-        
-        let formattedFields = fields.map { (key, value) in
-            let valueString = formatFieldValue(value)
-            return "\(key): \(valueString)"
-        }.joined(separator: ", ")
-        
-        return "{\(formattedFields)}"
-    }
-    
-    /// Format a single FieldValue for display
-    private func formatFieldValue(_ value: FieldValue) -> String {
-        switch value {
-        case .string(let string):
-            return "\"\(string)\""
-        case .int64(let int):
-            return "\(int)"
-        case .double(let double):
-            return "\(double)"
-        case .boolean(let bool):
-            return "\(bool)"
-        case .bytes(let bytes):
-            return "bytes(\(bytes.prefix(20)))"
-        case .date(let date):
-            let formatter = DateFormatter()
-            formatter.dateStyle = .short
-            formatter.timeStyle = .short
-            return "date(\(formatter.string(from: date)))"
-        case .location(let location):
-            return "location(\(location.latitude), \(location.longitude))"
-        case .reference(let reference):
-            return "reference(\(reference.recordName))"
-        case .asset(let asset):
-            return "asset(\(asset.downloadURL ?? "no URL"))"
-        case .list(let values):
-            let formattedValues = values.map { formatFieldValue($0) }.joined(separator: ", ")
-            return "[\(formattedValues)]"
-        }
-    }
-    
-    func openBrowser(url: String) {
-        #if canImport(AppKit)
-        if let url = URL(string: url) {
-            NSWorkspace.shared.open(url)
-        }
-        #elseif os(Linux)
-        let process = Process()
-        process.launchPath = "/usr/bin/env"
-        process.arguments = ["xdg-open", url]
-        try? process.run()
-        #endif
-    }
-}
-
-// AsyncChannel for communication between server and main thread
-actor AsyncChannel<T> {
-    private var value: T?
-    private var continuation: CheckedContinuation<T, Never>?
-    
-    func send(_ newValue: T) {
-        if let continuation = continuation {
-            continuation.resume(returning: newValue)
-            self.continuation = nil
-        } else {
-            value = newValue
-        }
-    }
-    
-    func receive() async -> T {
-        if let value = value {
-            self.value = nil
-            return value
-        }
-        
-        return await withCheckedContinuation { continuation in
-            self.continuation = continuation
-        }
     }
 }
