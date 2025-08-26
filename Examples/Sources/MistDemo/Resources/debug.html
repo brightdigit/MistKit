@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudKit Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>CloudKit Configuration Debug</h1>
+    
+    <div id="status"></div>
+    
+    <button onclick="testCloudKitConfig()">Test CloudKit Configuration</button>
+    <button onclick="testDirectAPI()">Test Direct API Call</button>
+    <button onclick="clearLog()">Clear Log</button>
+    
+    <div id="log"></div>
+    
+    <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js"></script>
+    <script>
+        const logDiv = document.getElementById('log');
+        const statusDiv = document.getElementById('status');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logDiv.appendChild(logEntry);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function clearLog() {
+            logDiv.innerHTML = '';
+        }
+        
+        function updateStatus(message, type = 'info') {
+            statusDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+        
+        async function testCloudKitConfig() {
+            try {
+                log('Testing CloudKit configuration...');
+                
+                // Test 1: Basic CloudKit availability
+                if (typeof CloudKit === 'undefined') {
+                    throw new Error('CloudKit library not loaded');
+                }
+                log('✓ CloudKit library loaded successfully', 'success');
+                
+                // Test 2: Configuration
+                const config = {
+                    containers: [{
+                        containerIdentifier: 'iCloud.com.brightdigit.MistDemo',
+                        apiTokenAuth: {
+                            apiToken: '296c503003846ef692cb5b56c4a63cc1d27fb952eebe259d73e692759286dfa6',
+                            persist: true,
+                            signInButton: {
+                                id: 'signin-button',
+                                theme: 'black'
+                            }
+                        },
+                        environment: 'development'
+                    }]
+                };
+                
+                log('Configuration object:', 'info');
+                log(JSON.stringify(config, null, 2), 'info');
+                
+                // Test 3: Apply configuration
+                CloudKit.configure(config);
+                log('✓ CloudKit configuration applied', 'success');
+                
+                // Test 4: Get container
+                const container = CloudKit.getDefaultContainer();
+                log('✓ Container retrieved', 'success');
+                log(`Container ID: ${container.containerIdentifier}`, 'info');
+                log(`Environment: ${container.environment}`, 'info');
+                
+                // Test 5: Check if user is authenticated
+                try {
+                    const userIdentity = await container.setUpAuth();
+                    if (userIdentity) {
+                        log('✓ User already authenticated', 'success');
+                        log(`User Record Name: ${userIdentity.userRecordName}`, 'info');
+                    } else {
+                        log('ℹ User not authenticated - this is normal for first visit', 'info');
+                    }
+                } catch (authError) {
+                    log(`⚠ Authentication check failed: ${authError.message}`, 'error');
+                }
+                
+                updateStatus('CloudKit configuration test completed successfully', 'success');
+                
+            } catch (error) {
+                log(`✗ Configuration test failed: ${error.message}`, 'error');
+                log(`Error details: ${error.stack || 'No stack trace'}`, 'error');
+                updateStatus(`Configuration test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testDirectAPI() {
+            try {
+                log('Testing direct CloudKit API call...');
+                
+                const apiUrl = 'https://api.apple-cloudkit.com/database/1/iCloud.com.brightdigit.MistDemo/development/private/records/query';
+                const params = new URLSearchParams({
+                    ckAPIToken: '296c503003846ef692cb5b56c4a63cc1d27fb952eebe259d73e692759286dfa6'
+                });
+                
+                const fullUrl = `${apiUrl}?${params.toString()}`;
+                log(`API URL: ${fullUrl}`, 'info');
+                
+                const response = await fetch(fullUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: {
+                            recordType: 'CKRecord'
+                        }
+                    })
+                });
+                
+                log(`Response status: ${response.status}`, 'info');
+                log(`Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`, 'info');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✓ Direct API call successful', 'success');
+                    log(`Response data: ${JSON.stringify(data, null, 2)}`, 'info');
+                } else {
+                    const errorText = await response.text();
+                    log(`✗ Direct API call failed: ${response.status}`, 'error');
+                    log(`Error response: ${errorText}`, 'error');
+                    
+                    if (response.status === 421) {
+                        log('⚠ 421 error detected - this usually indicates:', 'error');
+                        log('  - Container identifier mismatch', 'error');
+                        log('  - Invalid API token', 'error');
+                        log('  - Environment mismatch', 'error');
+                        log('  - Container not properly configured in CloudKit Dashboard', 'error');
+                    }
+                }
+                
+                updateStatus('Direct API test completed', response.ok ? 'success' : 'error');
+                
+            } catch (error) {
+                log(`✗ Direct API test failed: ${error.message}`, 'error');
+                updateStatus(`Direct API test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-run configuration test on page load
+        window.addEventListener('load', () => {
+            log('Page loaded, running configuration test...', 'info');
+            setTimeout(testCloudKitConfig, 1000);
+        });
+    </script>
+</body>
+</html>

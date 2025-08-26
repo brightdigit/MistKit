@@ -857,7 +857,7 @@ components:
             - $ref: '#/components/schemas/ListValue'
         type:
           type: string
-          enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, LOCATION, TIMESTAMP, LIST]
+          enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, ASSETID, LOCATION, TIMESTAMP, LIST]
           description: The CloudKit field type
 
     StringValue:

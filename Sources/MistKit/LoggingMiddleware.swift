@@ -50,8 +50,33 @@ struct LoggingMiddleware: ClientMiddleware {
         if response.status.code == 421 {
             print("⚠️  421 Misdirected Request - The server cannot produce a response for this request")
         }
+        
+        // Log response body for debugging without consuming the original stream
+        let finalResponseBody: HTTPBody?
+        if let responseBody = responseBody {
+            do {
+                // Buffer the response data
+                let bodyData = try await Data(collecting: responseBody, upTo: 1024 * 1024) // 1MB limit
+                
+                // Log the data
+                if let jsonString = String(data: bodyData, encoding: .utf8) {
+                    print("📄 Response Body:")
+                    print(jsonString)
+                } else {
+                    print("📄 Response Body: <non-UTF8 data, \(bodyData.count) bytes>")
+                }
+                
+                // Create a new HTTPBody from the buffered data for the parser
+                finalResponseBody = HTTPBody(bodyData)
+            } catch {
+                print("📄 Response Body: <failed to read: \(error)>")
+                finalResponseBody = responseBody // fallback to original if buffering fails
+            }
+        } else {
+            finalResponseBody = responseBody
+        }
         #endif
         
-        return (response, responseBody)
+        return (response, finalResponseBody)
     }
 }

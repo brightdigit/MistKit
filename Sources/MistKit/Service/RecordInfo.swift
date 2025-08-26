@@ -185,9 +185,17 @@ public struct RecordInfo: Encodable {
     
     /// Convert a CloudKit field value to FieldValue
     private static func convertToFieldValue(_ fieldData: Components.Schemas.FieldValue) -> FieldValue? {
-        guard let value = fieldData.value else {
-            return nil
+        let value = fieldData.value
+        
+        #if DEBUG
+        if let fieldType = fieldData._type {
+            print("🔍 Converting field with type: \(fieldType)")
+            if fieldType == .ASSETID || fieldType == .ASSET {
+                print("📁 Asset field detected, value type: \(value)")
+            }
         }
+        #endif
+        
         
         switch value {
         case .StringValue(let stringValue):
@@ -313,5 +321,11 @@ public struct RecordInfo: Encodable {
             }
             return .list(convertedList)
         }
+        
+        #if DEBUG
+        print("⚠️  Unhandled field value type: \(value) with fieldType: \(fieldData._type?.rawValue ?? "nil")")
+        #endif
+        return nil
     }
+    
 }

@@ -2,3 +2,6 @@ generate:
   - types
   - client
 accessModifier: internal
+typeOverrides:
+  schemas:
+    FieldValue: CustomFieldValue
