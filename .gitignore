@@ -4,7 +4,6 @@
 # Swift Package Manager
 .build/
 .swiftpm/
-Package.resolved
 DerivedData/
 .index-build/
 
