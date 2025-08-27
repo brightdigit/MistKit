@@ -20,22 +20,22 @@ echo "LintMode: $LINT_MODE"
 
 # More portable way to get script directory
 if [ -z "$SRCROOT" ]; then
-    SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
-    PACKAGE_DIR="${SCRIPT_DIR}/.."
+	SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+	PACKAGE_DIR="${SCRIPT_DIR}/.."
 else
-    PACKAGE_DIR="${SRCROOT}"     
+	PACKAGE_DIR="${SRCROOT}"     
 fi
 
 # Detect OS and set paths accordingly
 if [ "$(uname)" = "Darwin" ]; then
-    DEFAULT_MINT_PATH="/opt/homebrew/bin/mint"
+	DEFAULT_MINT_PATH="/opt/homebrew/bin/mint"
 elif [ "$(uname)" = "Linux" ] && [ -n "$GITHUB_ACTIONS" ]; then
-    DEFAULT_MINT_PATH="$GITHUB_WORKSPACE/Mint/.mint/bin/mint"
+	DEFAULT_MINT_PATH="$GITHUB_WORKSPACE/Mint/.mint/bin/mint"
 elif [ "$(uname)" = "Linux" ]; then
-    DEFAULT_MINT_PATH="/usr/local/bin/mint"
+	DEFAULT_MINT_PATH="/usr/local/bin/mint"
 else
-    echo "Unsupported operating system"
-    exit 1
+	echo "Unsupported operating system"
+	exit 1
 fi
 
 # Use environment MINT_CMD if set, otherwise use default path
@@ -66,17 +66,17 @@ if [ -z "$CI" ]; then
 fi
 
 if [ -z "$FORMAT_ONLY" ]; then
-    run_command $MINT_RUN swift-format lint --configuration .swift-format --recursive --parallel $SWIFTFORMAT_OPTIONS Sources Tests || exit 1
-    run_command $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS || exit 1
+	run_command $MINT_RUN swift-format lint --configuration .swift-format --recursive --parallel $SWIFTFORMAT_OPTIONS Sources Tests || exit 1
+	run_command $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS || exit 1
 fi
 
-$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "MistKit"
+$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "SyntaxKit"
 
 run_command $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS
 run_command $MINT_RUN swift-format lint --recursive --parallel $SWIFTFORMAT_OPTIONS Sources Tests
 
 if [ -z "$CI" ]; then
-    run_command $MINT_RUN periphery scan $PERIPHERY_OPTIONS --disable-update-check
+	run_command $MINT_RUN periphery scan $PERIPHERY_OPTIONS --disable-update-check
 fi
 
 popd
