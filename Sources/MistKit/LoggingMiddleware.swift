@@ -41,63 +41,93 @@ internal struct LoggingMiddleware: ClientMiddleware {
     next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
   ) async throws -> (HTTPResponse, HTTPBody?) {
     #if DEBUG
+      logRequest(request, baseURL: baseURL)
+    #endif
+
+    let (response, responseBody) = try await next(request, body, baseURL)
+
+    #if DEBUG
+      let finalResponseBody = await logResponse(response, body: responseBody)
+      return (response, finalResponseBody)
+    #else
+      return (response, responseBody)
+    #endif
+  }
+
+  #if DEBUG
+    /// Log outgoing request details
+    private func logRequest(_ request: HTTPRequest, baseURL: URL) {
       let fullPath = baseURL.absoluteString + (request.path ?? "")
       print("🌐 CloudKit Request: \(request.method.rawValue) \(fullPath)")
       print("   Base URL: \(baseURL.absoluteString)")
       print("   Path: \(request.path ?? "none")")
       print("   Headers: \(request.headerFields)")
 
-      // Log query parameters for debugging authentication
-      if let path = request.path, let url = URL(string: path, relativeTo: baseURL) {
-        if let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
-          if let queryItems = components.queryItems {
-            print("   Query Parameters:")
-            for item in queryItems {
-              if item.name == "ckWebAuthToken" {
-                print("     \(item.name): \(item.value?.prefix(20) ?? "nil")... (encoded)")
-              } else {
-                print("     \(item.name): \(item.value ?? "nil")")
-              }
-            }
-          }
-        }
+      logQueryParameters(for: request, baseURL: baseURL)
+    }
+
+    /// Log query parameters from request
+    private func logQueryParameters(for request: HTTPRequest, baseURL: URL) {
+      guard let path = request.path,
+        let url = URL(string: path, relativeTo: baseURL),
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+        let queryItems = components.queryItems
+      else {
+        return
       }
-    #endif
 
-    let (response, responseBody) = try await next(request, body, baseURL)
+      print("   Query Parameters:")
+      for item in queryItems {
+        let value = formatQueryValue(for: item)
+        print("     \(item.name): \(value)")
+      }
+    }
 
-    #if DEBUG
+    /// Format query parameter value for logging
+    private func formatQueryValue(for item: URLQueryItem) -> String {
+      guard let value = item.value else { return "nil" }
+
+      if item.name == "ckWebAuthToken" {
+        return "\(value.prefix(20))... (encoded)"
+      }
+      return value
+    }
+
+    /// Log incoming response details
+    private func logResponse(_ response: HTTPResponse, body: HTTPBody?) async -> HTTPBody? {
       print("✅ CloudKit Response: \(response.status.code)")
+
       if response.status.code == 421 {
         print("⚠️  421 Misdirected Request - The server cannot produce a response for this request")
       }
 
-      // Log response body for debugging without consuming the original stream
-      let finalResponseBody: HTTPBody?
-      if let responseBody = responseBody {
-        do {
-          // Buffer the response data
-          let bodyData = try await Data(collecting: responseBody, upTo: 1_024 * 1_024)  // 1MB limit
+      return await logResponseBody(body)
+    }
 
-          // Log the data
-          if let jsonString = String(data: bodyData, encoding: .utf8) {
-            print("📄 Response Body:")
-            print(jsonString)
-          } else {
-            print("📄 Response Body: <non-UTF8 data, \(bodyData.count) bytes>")
-          }
-
-          // Create a new HTTPBody from the buffered data for the parser
-          finalResponseBody = HTTPBody(bodyData)
-        } catch {
-          print("📄 Response Body: <failed to read: \(error)>")
-          finalResponseBody = responseBody  // fallback to original if buffering fails
-        }
-      } else {
-        finalResponseBody = responseBody
+    /// Log response body content
+    private func logResponseBody(_ responseBody: HTTPBody?) async -> HTTPBody? {
+      guard let responseBody = responseBody else {
+        return nil
       }
-    #endif
 
-    return (response, finalResponseBody)
-  }
+      do {
+        let bodyData = try await Data(collecting: responseBody, upTo: 1_024 * 1_024)
+        logBodyData(bodyData)
+        return HTTPBody(bodyData)
+      } catch {
+        print("📄 Response Body: <failed to read: \(error)>")
+        return responseBody
+      }
+    }
+
+    /// Log the actual body data content
+    private func logBodyData(_ bodyData: Data) {
+      if let jsonString = String(data: bodyData, encoding: .utf8) {
+        print("📄 Response Body:")
+        print(jsonString)
+      } else {
+        print("📄 Response Body: <non-UTF8 data, \(bodyData.count) bytes>")
+      }
+    }
+  #endif
 }

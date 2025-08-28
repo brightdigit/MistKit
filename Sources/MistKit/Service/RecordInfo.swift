@@ -76,123 +76,21 @@ public struct RecordInfo: Encodable {
     case .int64Value(let intValue):
       return .int64(intValue)
     case .doubleValue(let doubleValue):
-      // Check the type to determine if it's a date or double
-      if let fieldType = fieldData.type {
-        switch fieldType {
-        case .timestamp:
-          // Convert milliseconds to Date
-          let date = Date(timeIntervalSince1970: doubleValue / 1_000)
-          return .date(date)
-        default:
-          return .double(doubleValue)
-        }
-      } else {
-        return .double(doubleValue)
-      }
+      return convertDoubleFieldValue(doubleValue, fieldType: fieldData.type)
     case .booleanValue(let boolValue):
       return .boolean(boolValue)
     case .bytesValue(let bytesValue):
       return .bytes(bytesValue)
     case .dateValue(let dateValue):
-      // Convert milliseconds to Date
-      let date = Date(timeIntervalSince1970: dateValue / 1_000)
-      return .date(date)
+      return convertDateFieldValue(dateValue)
     case .locationValue(let locationValue):
-      let location = FieldValue.Location(
-        latitude: locationValue.latitude ?? 0.0,
-        longitude: locationValue.longitude ?? 0.0,
-        horizontalAccuracy: locationValue.horizontalAccuracy,
-        verticalAccuracy: locationValue.verticalAccuracy,
-        altitude: locationValue.altitude,
-        speed: locationValue.speed,
-        course: locationValue.course,
-        timestamp: locationValue.timestamp.map { Date(timeIntervalSince1970: $0 / 1_000) }
-      )
-      return .location(location)
+      return convertLocationFieldValue(locationValue)
     case .referenceValue(let referenceValue):
-      let reference = FieldValue.Reference(
-        recordName: referenceValue.recordName ?? "",
-        action: referenceValue.action?.rawValue
-      )
-      return .reference(reference)
+      return convertReferenceFieldValue(referenceValue)
     case .assetValue(let assetValue):
-      let asset = FieldValue.Asset(
-        fileChecksum: assetValue.fileChecksum,
-        size: assetValue.size,
-        referenceChecksum: assetValue.referenceChecksum,
-        wrappingKey: assetValue.wrappingKey,
-        receipt: assetValue.receipt,
-        downloadURL: assetValue.downloadURL
-      )
-      return .asset(asset)
+      return convertAssetFieldValue(assetValue)
     case .listValue(let listValue):
-      // Convert list items to FieldValue array
-      let convertedList = listValue.compactMap { listItem in
-        // Handle the recursive list structure properly
-        switch listItem {
-        case .stringValue(let stringValue):
-          return FieldValue.string(stringValue)
-        case .int64Value(let intValue):
-          return FieldValue.int64(intValue)
-        case .doubleValue(let doubleValue):
-          return FieldValue.double(doubleValue)
-        case .booleanValue(let boolValue):
-          return FieldValue.boolean(boolValue)
-        case .bytesValue(let bytesValue):
-          return FieldValue.bytes(bytesValue)
-        case .dateValue(let dateValue):
-          let date = Date(timeIntervalSince1970: dateValue / 1_000)
-          return FieldValue.date(date)
-        case .locationValue(let locationValue):
-          let location = FieldValue.Location(
-            latitude: locationValue.latitude ?? 0.0,
-            longitude: locationValue.longitude ?? 0.0,
-            horizontalAccuracy: locationValue.horizontalAccuracy,
-            verticalAccuracy: locationValue.verticalAccuracy,
-            altitude: locationValue.altitude,
-            speed: locationValue.speed,
-            course: locationValue.course,
-            timestamp: locationValue.timestamp.map { Date(timeIntervalSince1970: $0 / 1_000) }
-          )
-          return FieldValue.location(location)
-        case .referenceValue(let refValue):
-          let reference = FieldValue.Reference(
-            recordName: refValue.recordName ?? "",
-            action: refValue.action?.rawValue
-          )
-          return FieldValue.reference(reference)
-        case .assetValue(let assetValue):
-          let asset = FieldValue.Asset(
-            fileChecksum: assetValue.fileChecksum,
-            size: assetValue.size,
-            referenceChecksum: assetValue.referenceChecksum,
-            wrappingKey: assetValue.wrappingKey,
-            receipt: assetValue.receipt,
-            downloadURL: assetValue.downloadURL
-          )
-          return FieldValue.asset(asset)
-        case .listValue(let nestedList):
-          // Recursively convert nested lists
-          let nestedConvertedList = nestedList.compactMap { nestedItem in
-            // For simplicity, we'll handle basic types in nested lists
-            switch nestedItem {
-            case .stringValue(let stringValue):
-              return FieldValue.string(stringValue)
-            case .int64Value(let intValue):
-              return FieldValue.int64(intValue)
-            case .doubleValue(let doubleValue):
-              return FieldValue.double(doubleValue)
-            case .booleanValue(let boolValue):
-              return FieldValue.boolean(boolValue)
-            default:
-              // For complex nested types, return nil for now
-              return nil
-            }
-          }
-          return FieldValue.list(nestedConvertedList)
-        }
-      }
-      return .list(convertedList)
+      return convertListFieldValue(listValue)
     }
 
     #if DEBUG
@@ -203,22 +101,129 @@ public struct RecordInfo: Encodable {
     return nil
   }
 
-  /// Convert double value, handling timestamp conversion
-  private static func convertDoubleValue(
+  /// Convert double field value, handling timestamp conversion
+  private static func convertDoubleFieldValue(
     _ doubleValue: Double, fieldType: CustomFieldValue.FieldTypePayload?
   ) -> FieldValue {
-    // Check the type to determine if it's a date or double
-    if let fieldType = fieldType {
-      switch fieldType {
-      case .timestamp:
-        // Convert milliseconds to Date
-        let date = Date(timeIntervalSince1970: doubleValue / 1_000)
-        return .date(date)
-      default:
-        return .double(doubleValue)
-      }
-    } else {
+    if let fieldType = fieldType, fieldType == .timestamp {
+      let date = Date(timeIntervalSince1970: doubleValue / 1_000)
+      return .date(date)
+    }
+    return .double(doubleValue)
+  }
+
+  /// Convert date field value
+  private static func convertDateFieldValue(_ dateValue: Double) -> FieldValue {
+    let date = Date(timeIntervalSince1970: dateValue / 1_000)
+    return .date(date)
+  }
+
+  /// Convert location field value
+  private static func convertLocationFieldValue(
+    _ locationValue: Components.Schemas.LocationValue
+  ) -> FieldValue {
+    let location = FieldValue.Location(
+      latitude: locationValue.latitude ?? 0.0,
+      longitude: locationValue.longitude ?? 0.0,
+      horizontalAccuracy: locationValue.horizontalAccuracy,
+      verticalAccuracy: locationValue.verticalAccuracy,
+      altitude: locationValue.altitude,
+      speed: locationValue.speed,
+      course: locationValue.course,
+      timestamp: locationValue.timestamp.map { Date(timeIntervalSince1970: $0 / 1_000) }
+    )
+    return .location(location)
+  }
+
+  /// Convert reference field value
+  private static func convertReferenceFieldValue(
+    _ referenceValue: Components.Schemas.ReferenceValue
+  ) -> FieldValue {
+    let reference = FieldValue.Reference(
+      recordName: referenceValue.recordName ?? "",
+      action: referenceValue.action?.rawValue
+    )
+    return .reference(reference)
+  }
+
+  /// Convert asset field value
+  private static func convertAssetFieldValue(
+    _ assetValue: Components.Schemas.AssetValue
+  ) -> FieldValue {
+    let asset = FieldValue.Asset(
+      fileChecksum: assetValue.fileChecksum,
+      size: assetValue.size,
+      referenceChecksum: assetValue.referenceChecksum,
+      wrappingKey: assetValue.wrappingKey,
+      receipt: assetValue.receipt,
+      downloadURL: assetValue.downloadURL
+    )
+    return .asset(asset)
+  }
+
+  /// Convert list field value
+  private static func convertListFieldValue(
+    _ listValue: [CustomFieldValue.CustomFieldValuePayload]
+  ) -> FieldValue {
+    let convertedList = listValue.compactMap { listItem in
+      convertListItem(listItem)
+    }
+    return .list(convertedList)
+  }
+
+  /// Convert individual list item
+  private static func convertListItem(_ listItem: CustomFieldValue.CustomFieldValuePayload)
+    -> FieldValue?
+  {
+    switch listItem {
+    case .stringValue(let stringValue):
+      return .string(stringValue)
+    case .int64Value(let intValue):
+      return .int64(intValue)
+    case .doubleValue(let doubleValue):
       return .double(doubleValue)
+    case .booleanValue(let boolValue):
+      return .boolean(boolValue)
+    case .bytesValue(let bytesValue):
+      return .bytes(bytesValue)
+    case .dateValue(let dateValue):
+      return convertDateFieldValue(dateValue)
+    case .locationValue(let locationValue):
+      return convertLocationFieldValue(locationValue)
+    case .referenceValue(let referenceValue):
+      return convertReferenceFieldValue(referenceValue)
+    case .assetValue(let assetValue):
+      return convertAssetFieldValue(assetValue)
+    case .listValue(let nestedList):
+      return convertNestedListValue(nestedList)
+    }
+  }
+
+  /// Convert nested list value (simplified for basic types)
+  private static func convertNestedListValue(
+    _ nestedList: [CustomFieldValue.CustomFieldValuePayload]
+  ) -> FieldValue {
+    let nestedConvertedList = nestedList.compactMap { nestedItem in
+      convertBasicListItem(nestedItem)
+    }
+    return .list(nestedConvertedList)
+  }
+
+  /// Convert basic list item types only
+  private static func convertBasicListItem(_ nestedItem: CustomFieldValue.CustomFieldValuePayload)
+    -> FieldValue?
+  {
+    switch nestedItem {
+    case .stringValue(let stringValue):
+      return .string(stringValue)
+    case .int64Value(let intValue):
+      return .int64(intValue)
+    case .doubleValue(let doubleValue):
+      return .double(doubleValue)
+    case .booleanValue(let boolValue):
+      return .boolean(boolValue)
+    default:
+      return nil
     }
   }
 }
