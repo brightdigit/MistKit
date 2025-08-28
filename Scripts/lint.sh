@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -e  # Exit on any error
+# Remove set -e to allow script to continue running
+# set -e  # Exit on any error
 
 ERRORS=0
 
@@ -66,17 +67,23 @@ if [ -z "$CI" ]; then
 fi
 
 if [ -z "$FORMAT_ONLY" ]; then
-	run_command $MINT_RUN swift-format lint --configuration .swift-format --recursive --parallel $SWIFTFORMAT_OPTIONS Sources Tests || exit 1
-	run_command $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS || exit 1
+	run_command $MINT_RUN swift-format lint --configuration .swift-format --recursive --parallel $SWIFTFORMAT_OPTIONS Sources Tests
+	run_command $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS
 fi
 
-$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "SyntaxKit"
-
-run_command $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS
-run_command $MINT_RUN swift-format lint --recursive --parallel $SWIFTFORMAT_OPTIONS Sources Tests
+$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "MistKit"
 
 if [ -z "$CI" ]; then
 	run_command $MINT_RUN periphery scan $PERIPHERY_OPTIONS --disable-update-check
 fi
 
 popd
+
+# Exit with error code if any errors occurred
+if [ $ERRORS -gt 0 ]; then
+	echo "Linting completed with $ERRORS error(s)"
+	exit 1
+else
+	echo "Linting completed successfully"
+	exit 0
+fi
