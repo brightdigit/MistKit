@@ -31,8 +31,9 @@ import Foundation
 import OpenAPIRuntime
 
 /// Handles CloudKit API error responses
-struct CloudKitErrorHandler {
-  func handleBadRequest(_ response: Components.Responses.BadRequest) async throws -> Never {
+internal struct CloudKitErrorHandler {
+  internal func handleBadRequest(_ response: Components.Responses.BadRequest) async throws -> Never
+  {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
         statusCode: 400,
@@ -44,7 +45,9 @@ struct CloudKitErrorHandler {
     }
   }
 
-  func handleUnauthorized(_ response: Components.Responses.Unauthorized) async throws -> Never {
+  internal func handleUnauthorized(_ response: Components.Responses.Unauthorized) async throws
+    -> Never
+  {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
         statusCode: 401,
@@ -56,7 +59,7 @@ struct CloudKitErrorHandler {
     }
   }
 
-  func handleForbidden(_ response: Components.Responses.Forbidden) async throws -> Never {
+  internal func handleForbidden(_ response: Components.Responses.Forbidden) async throws -> Never {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
         statusCode: 403,
@@ -68,7 +71,7 @@ struct CloudKitErrorHandler {
     }
   }
 
-  func handleNotFound(_ response: Components.Responses.NotFound) async throws -> Never {
+  internal func handleNotFound(_ response: Components.Responses.NotFound) async throws -> Never {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
         statusCode: 404,
@@ -80,7 +83,7 @@ struct CloudKitErrorHandler {
     }
   }
 
-  func handleConflict(_ response: Components.Responses.Conflict) async throws -> Never {
+  internal func handleConflict(_ response: Components.Responses.Conflict) async throws -> Never {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
         statusCode: 409,
@@ -92,7 +95,7 @@ struct CloudKitErrorHandler {
     }
   }
 
-  func handlePreconditionFailed(_ response: Components.Responses.PreconditionFailed)
+  internal func handlePreconditionFailed(_ response: Components.Responses.PreconditionFailed)
     async throws -> Never
   {
     if case .json(let errorResponse) = response.body {
@@ -106,7 +109,7 @@ struct CloudKitErrorHandler {
     }
   }
 
-  func handleContentTooLarge(_ response: Components.Responses.RequestEntityTooLarge)
+  internal func handleContentTooLarge(_ response: Components.Responses.RequestEntityTooLarge)
     async throws -> Never
   {
     if case .json(let errorResponse) = response.body {
@@ -120,7 +123,8 @@ struct CloudKitErrorHandler {
     }
   }
 
-  func handleTooManyRequests(_ response: Components.Responses.TooManyRequests) async throws -> Never
+  internal func handleTooManyRequests(_ response: Components.Responses.TooManyRequests) async throws
+    -> Never
   {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
@@ -133,7 +137,7 @@ struct CloudKitErrorHandler {
     }
   }
 
-  func handleMisdirectedRequest(_ response: Components.Responses.UnprocessableEntity)
+  internal func handleMisdirectedRequest(_ response: Components.Responses.UnprocessableEntity)
     async throws -> Never
   {
     if case .json(let errorResponse) = response.body {
@@ -147,7 +151,7 @@ struct CloudKitErrorHandler {
     }
   }
 
-  func handleInternalServerError(_ response: Components.Responses.InternalServerError)
+  internal func handleInternalServerError(_ response: Components.Responses.InternalServerError)
     async throws -> Never
   {
     if case .json(let errorResponse) = response.body {
@@ -161,7 +165,7 @@ struct CloudKitErrorHandler {
     }
   }
 
-  func handleServiceUnavailable(_ response: Components.Responses.ServiceUnavailable)
+  internal func handleServiceUnavailable(_ response: Components.Responses.ServiceUnavailable)
     async throws -> Never
   {
     if case .json(let errorResponse) = response.body {

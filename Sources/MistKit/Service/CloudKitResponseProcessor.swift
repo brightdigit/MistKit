@@ -31,22 +31,42 @@ import Foundation
 import OpenAPIRuntime
 
 /// Processes CloudKit API responses and handles errors
-struct CloudKitResponseProcessor {
+internal struct CloudKitResponseProcessor {
   private let errorHandler = CloudKitErrorHandler()
 
   /// Process getCurrentUser response
   /// - Parameter response: The response to process
   /// - Returns: The extracted user data
   /// - Throws: CloudKitError for various error conditions
-  func processGetCurrentUserResponse(_ response: Operations.getCurrentUser.Output)
+  internal func processGetCurrentUserResponse(_ response: Operations.getCurrentUser.Output)
     async throws -> Components.Schemas.UserResponse
   {
     switch response {
     case .ok(let okResponse):
-      switch okResponse.body {
-      case .json(let userData):
-        return userData
-      }
+      return try extractUserData(from: okResponse)
+    default:
+      try await handleGetCurrentUserErrors(response)
+    }
+
+    throw CloudKitError.invalidResponse
+  }
+
+  /// Extract user data from OK response
+  private func extractUserData(
+    from response: Operations.getCurrentUser.Output.Ok
+  ) throws -> Components.Schemas.UserResponse {
+    switch response.body {
+    case .json(let userData):
+      return userData
+    }
+  }
+
+  /// Handle error cases for getCurrentUser
+  private func handleGetCurrentUserErrors(_ response: Operations.getCurrentUser.Output) async throws
+  {
+    switch response {
+    case .ok:
+      return  // This case is handled in the main function
     case .badRequest(let badRequestResponse):
       try await errorHandler.handleBadRequest(badRequestResponse)
     case .unauthorized(let unauthorizedResponse):
@@ -72,15 +92,13 @@ struct CloudKitResponseProcessor {
     case .undocumented(let statusCode, _):
       throw CloudKitError.httpError(statusCode: statusCode)
     }
-
-    throw CloudKitError.invalidResponse
   }
 
   /// Process listZones response
   /// - Parameter response: The response to process
   /// - Returns: The extracted zones data
   /// - Throws: CloudKitError for various error conditions
-  func processListZonesResponse(_ response: Operations.listZones.Output) async throws
+  internal func processListZonesResponse(_ response: Operations.listZones.Output) async throws
     -> Components.Schemas.ZonesListResponse
   {
     switch response {
@@ -100,7 +118,7 @@ struct CloudKitResponseProcessor {
   /// - Parameter response: The response to process
   /// - Returns: The extracted records data
   /// - Throws: CloudKitError for various error conditions
-  func processQueryRecordsResponse(_ response: Operations.queryRecords.Output)
+  internal func processQueryRecordsResponse(_ response: Operations.queryRecords.Output)
     async throws -> Components.Schemas.QueryResponse
   {
     switch response {

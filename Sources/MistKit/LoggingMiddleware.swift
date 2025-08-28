@@ -85,7 +85,9 @@ internal struct LoggingMiddleware: ClientMiddleware {
 
     /// Format query parameter value for logging
     private func formatQueryValue(for item: URLQueryItem) -> String {
-      guard let value = item.value else { return "nil" }
+      guard let value = item.value else {
+        return "nil"
+      }
 
       if item.name == "ckWebAuthToken" {
         return "\(value.prefix(20))... (encoded)"

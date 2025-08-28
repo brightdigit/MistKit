@@ -59,24 +59,29 @@ public struct RecordInfo: Encodable {
   /// Convert a CloudKit field value to FieldValue
   private static func convertToFieldValue(_ fieldData: Components.Schemas.FieldValue) -> FieldValue?
   {
-    let value = fieldData.value
+    logFieldTypeConversion(fieldData)
 
-    #if DEBUG
-      if let fieldType = fieldData.type {
-        print("🔍 Converting field with type: \(fieldType)")
-        if fieldType == .assetid || fieldType == .asset {
-          print("📁 Asset field detected, value type: \(value)")
-        }
-      }
-    #endif
+    let convertedValue = convertFieldValueByType(fieldData.value, fieldType: fieldData.type)
 
+    if convertedValue == nil {
+      logUnhandledFieldValue(fieldData)
+    }
+
+    return convertedValue
+  }
+
+  /// Convert field value based on its type
+  private static func convertFieldValueByType(
+    _ value: CustomFieldValue.CustomFieldValuePayload,
+    fieldType: CustomFieldValue.FieldTypePayload?
+  ) -> FieldValue? {
     switch value {
     case .stringValue(let stringValue):
       return .string(stringValue)
     case .int64Value(let intValue):
       return .int64(intValue)
     case .doubleValue(let doubleValue):
-      return convertDoubleFieldValue(doubleValue, fieldType: fieldData.type)
+      return convertDoubleFieldValue(doubleValue, fieldType: fieldType)
     case .booleanValue(let boolValue):
       return .boolean(boolValue)
     case .bytesValue(let bytesValue):
@@ -92,13 +97,27 @@ public struct RecordInfo: Encodable {
     case .listValue(let listValue):
       return convertListFieldValue(listValue)
     }
+  }
 
+  /// Log field type conversion for debugging
+  private static func logFieldTypeConversion(_ fieldData: Components.Schemas.FieldValue) {
+    #if DEBUG
+      if let fieldType = fieldData.type {
+        print("🔍 Converting field with type: \(fieldType)")
+        if fieldType == .assetid || fieldType == .asset {
+          print("📁 Asset field detected, value type: \(fieldData.value)")
+        }
+      }
+    #endif
+  }
+
+  /// Log unhandled field value for debugging
+  private static func logUnhandledFieldValue(_ fieldData: Components.Schemas.FieldValue) {
     #if DEBUG
       print(
-        "⚠️  Unhandled field value type: \(value) with fieldType: \(fieldData.type?.rawValue ?? "nil")"
+        "⚠️  Unhandled field value type: \(fieldData.value) with fieldType: \(fieldData.type?.rawValue ?? "nil")"
       )
     #endif
-    return nil
   }
 
   /// Convert double field value, handling timestamp conversion

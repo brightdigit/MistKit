@@ -1,5 +1,5 @@
 //
-//  CustomFieldValue+CustomFieldValuePayload.swift
+//  CustomFieldValuePayload+Extensions.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -34,31 +34,60 @@ extension CustomFieldValue.CustomFieldValuePayload {
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
 
-    // Try to decode different types in order
-    if let value = try? container.decode(String.self) {
-      self = .stringValue(value)
-    } else if let value = try? container.decode(Int64.self) {
-      self = .int64Value(value)
-    } else if let value = try? container.decode(Double.self) {
-      self = .doubleValue(value)
-    } else if let value = try? container.decode(Bool.self) {
-      self = .booleanValue(value)
-    } else if let value = try? container.decode(Components.Schemas.AssetValue.self) {
-      self = .assetValue(value)
-    } else if let value = try? container.decode(Components.Schemas.LocationValue.self) {
-      self = .locationValue(value)
-    } else if let value = try? container.decode(Components.Schemas.ReferenceValue.self) {
-      self = .referenceValue(value)
-    } else if let value = try? container.decode([CustomFieldValue.CustomFieldValuePayload].self) {
-      self = .listValue(value)
-    } else {
-      throw DecodingError.dataCorrupted(
-        DecodingError.Context(
-          codingPath: decoder.codingPath,
-          debugDescription: "Could not decode FieldValuePayload"
-        )
-      )
+    if let value = try Self.decodeBasicPayloadTypes(from: container) {
+      self = value
+      return
     }
+
+    if let value = try Self.decodeComplexPayloadTypes(from: container) {
+      self = value
+      return
+    }
+
+    throw DecodingError.dataCorrupted(
+      DecodingError.Context(
+        codingPath: decoder.codingPath,
+        debugDescription: "Could not decode FieldValuePayload"
+      )
+    )
+  }
+
+  /// Decode basic payload types (string, int64, double, boolean)
+  private static func decodeBasicPayloadTypes(
+    from container: SingleValueDecodingContainer
+  ) throws -> CustomFieldValue.CustomFieldValuePayload? {
+    if let value = try? container.decode(String.self) {
+      return .stringValue(value)
+    }
+    if let value = try? container.decode(Int64.self) {
+      return .int64Value(value)
+    }
+    if let value = try? container.decode(Double.self) {
+      return .doubleValue(value)
+    }
+    if let value = try? container.decode(Bool.self) {
+      return .booleanValue(value)
+    }
+    return nil
+  }
+
+  /// Decode complex payload types (asset, location, reference, list)
+  private static func decodeComplexPayloadTypes(
+    from container: SingleValueDecodingContainer
+  ) throws -> CustomFieldValue.CustomFieldValuePayload? {
+    if let value = try? container.decode(Components.Schemas.AssetValue.self) {
+      return .assetValue(value)
+    }
+    if let value = try? container.decode(Components.Schemas.LocationValue.self) {
+      return .locationValue(value)
+    }
+    if let value = try? container.decode(Components.Schemas.ReferenceValue.self) {
+      return .referenceValue(value)
+    }
+    if let value = try? container.decode([CustomFieldValue.CustomFieldValuePayload].self) {
+      return .listValue(value)
+    }
+    return nil
   }
 
   /// Encode to encoder
@@ -66,17 +95,13 @@ extension CustomFieldValue.CustomFieldValuePayload {
     var container = encoder.singleValueContainer()
 
     switch self {
-    case .stringValue(let value):
+    case .stringValue(let value), .bytesValue(let value):
       try container.encode(value)
     case .int64Value(let value):
       try container.encode(value)
-    case .doubleValue(let value):
+    case .doubleValue(let value), .dateValue(let value):
       try container.encode(value)
     case .booleanValue(let value):
-      try container.encode(value)
-    case .bytesValue(let value):
-      try container.encode(value)
-    case .dateValue(let value):
       try container.encode(value)
     case .locationValue(let value):
       try container.encode(value)

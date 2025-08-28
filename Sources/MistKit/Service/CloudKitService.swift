@@ -82,7 +82,9 @@ public struct CloudKitService {
     let zonesData: Components.Schemas.ZonesListResponse =
       try await responseProcessor.processListZonesResponse(response)
     return zonesData.zones?.compactMap { zone in
-      guard let zoneID = zone.zoneID else { return nil }
+      guard let zoneID = zone.zoneID else {
+        return nil
+      }
       return ZoneInfo(
         zoneName: zoneID.zoneName ?? "Unknown",
         ownerRecordName: zoneID.ownerName,
@@ -109,7 +111,8 @@ public struct CloudKitService {
                 //                            )
               ]
             )
-          ))
+          )
+        )
       )
     )
 

@@ -134,63 +134,77 @@ public enum FieldValue: Codable, Equatable {
   /// Initialize field value from decoder
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
-    // Try to decode in order of most specific to least specific
-    if let value = try? container.decode(String.self) {
-      self = .string(value)
+
+    if let value = try Self.decodeBasicTypes(from: container) {
+      self = value
       return
     }
-    if let value = try? container.decode(Int64.self) {
-      self = .int64(value)
+
+    if let value = try Self.decodeComplexTypes(from: container) {
+      self = value
       return
     }
-    if let value = try? container.decode(Double.self) {
-      self = .double(value)
-      return
-    }
-    if let value = try? container.decode(Bool.self) {
-      self = .boolean(value)
-      return
-    }
-    if let value = try? container.decode([FieldValue].self) {
-      self = .list(value)
-      return
-    }
-    if let value = try? container.decode(Location.self) {
-      self = .location(value)
-      return
-    }
-    if let value = try? container.decode(Reference.self) {
-      self = .reference(value)
-      return
-    }
-    if let value = try? container.decode(Asset.self) {
-      self = .asset(value)
-      return
-    }
-    // Try to decode as date (milliseconds since epoch)
-    if let value = try? container.decode(Double.self) {
-      self = .date(Date(timeIntervalSince1970: value / 1_000))
-      return
-    }
+
     throw DecodingError.dataCorruptedError(
       in: container,
       debugDescription: "Unable to decode FieldValue"
     )
   }
 
+  /// Decode basic field value types (string, int64, double, boolean)
+  private static func decodeBasicTypes(from container: SingleValueDecodingContainer) throws
+    -> FieldValue?
+  {
+    if let value = try? container.decode(String.self) {
+      return .string(value)
+    }
+    if let value = try? container.decode(Int64.self) {
+      return .int64(value)
+    }
+    if let value = try? container.decode(Double.self) {
+      return .double(value)
+    }
+    if let value = try? container.decode(Bool.self) {
+      return .boolean(value)
+    }
+    return nil
+  }
+
+  /// Decode complex field value types (list, location, reference, asset, date)
+  private static func decodeComplexTypes(from container: SingleValueDecodingContainer) throws
+    -> FieldValue?
+  {
+    if let value = try? container.decode([FieldValue].self) {
+      return .list(value)
+    }
+    if let value = try? container.decode(Location.self) {
+      return .location(value)
+    }
+    if let value = try? container.decode(Reference.self) {
+      return .reference(value)
+    }
+    if let value = try? container.decode(Asset.self) {
+      return .asset(value)
+    }
+    // Try to decode as date (milliseconds since epoch)
+    if let value = try? container.decode(Double.self) {
+      return .date(Date(timeIntervalSince1970: value / 1_000))
+    }
+    return nil
+  }
+
   /// Encode field value to encoder
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
+
     switch self {
-    case .string(let value):
+    case .string(let value), .bytes(let value):
       try container.encode(value)
     case .int64(let value):
       try container.encode(value)
     case .double(let value):
       try container.encode(value)
     case .boolean(let value):
-      try container.encode(value)
-    case .bytes(let value):
       try container.encode(value)
     case .date(let value):
       try container.encode(value.timeIntervalSince1970 * 1_000)
