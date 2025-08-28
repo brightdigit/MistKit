@@ -60,7 +60,8 @@ internal struct CloudKitResponseProcessor {
       return userData
     }
   }
-
+  
+  // swiftlint:disable cyclomatic_complexity
   /// Handle error cases for getCurrentUser
   private func handleGetCurrentUserErrors(_ response: Operations.getCurrentUser.Output) async throws
   {
@@ -93,6 +94,7 @@ internal struct CloudKitResponseProcessor {
       throw CloudKitError.httpError(statusCode: statusCode)
     }
   }
+  // swiftlint:enable cyclomatic_complexity
 
   /// Process listZones response
   /// - Parameter response: The response to process

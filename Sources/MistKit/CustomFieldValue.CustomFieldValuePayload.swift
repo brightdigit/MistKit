@@ -1,5 +1,5 @@
 //
-//  CustomFieldValuePayload+Extensions.swift
+//  CustomFieldValue.CustomFieldValuePayload.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
