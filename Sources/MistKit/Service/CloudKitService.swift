@@ -9,6 +9,7 @@ import Foundation
 import OpenAPIRuntime
 import OpenAPIURLSession
 
+/// Service for interacting with CloudKit Web Services
 public struct CloudKitService {
   let containerIdentifier: String
   let apiToken: String
@@ -19,6 +20,7 @@ public struct CloudKitService {
     mistKitClient.client
   }
 
+  /// Initialize CloudKit service
   public init(containerIdentifier: String, apiToken: String, webAuthToken: String) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken

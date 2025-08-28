@@ -7,9 +7,13 @@
 
 import Foundation
 
+/// Record information from CloudKit
 public struct RecordInfo: Encodable {
+  /// The record name
   public let recordName: String
+  /// The record type
   public let recordType: String
+  /// The record fields
   public let fields: [String: FieldValue]
 
   internal init(from record: Components.Schemas.Record) {
@@ -36,24 +40,24 @@ public struct RecordInfo: Encodable {
     let value = fieldData.value
 
     #if DEBUG
-      if let fieldType = fieldData._type {
+      if let fieldType = fieldData.type {
         print("🔍 Converting field with type: \(fieldType)")
-        if fieldType == .ASSETID || fieldType == .ASSET {
+        if fieldType == .assetid || fieldType == .asset {
           print("📁 Asset field detected, value type: \(value)")
         }
       }
     #endif
 
     switch value {
-    case .StringValue(let stringValue):
+    case .stringValue(let stringValue):
       return .string(stringValue)
-    case .Int64Value(let intValue):
+    case .int64Value(let intValue):
       return .int64(intValue)
-    case .DoubleValue(let doubleValue):
+    case .doubleValue(let doubleValue):
       // Check the type to determine if it's a date or double
-      if let fieldType = fieldData._type {
+      if let fieldType = fieldData.type {
         switch fieldType {
-        case .TIMESTAMP:
+        case .timestamp:
           // Convert milliseconds to Date
           let date = Date(timeIntervalSince1970: doubleValue / 1_000)
           return .date(date)
@@ -63,15 +67,15 @@ public struct RecordInfo: Encodable {
       } else {
         return .double(doubleValue)
       }
-    case .BooleanValue(let boolValue):
+    case .booleanValue(let boolValue):
       return .boolean(boolValue)
-    case .BytesValue(let bytesValue):
+    case .bytesValue(let bytesValue):
       return .bytes(bytesValue)
-    case .DateValue(let dateValue):
+    case .dateValue(let dateValue):
       // Convert milliseconds to Date
       let date = Date(timeIntervalSince1970: dateValue / 1_000)
       return .date(date)
-    case .LocationValue(let locationValue):
+    case .locationValue(let locationValue):
       let location = FieldValue.Location(
         latitude: locationValue.latitude ?? 0.0,
         longitude: locationValue.longitude ?? 0.0,
@@ -83,13 +87,13 @@ public struct RecordInfo: Encodable {
         timestamp: locationValue.timestamp.map { Date(timeIntervalSince1970: $0 / 1_000) }
       )
       return .location(location)
-    case .ReferenceValue(let referenceValue):
+    case .referenceValue(let referenceValue):
       let reference = FieldValue.Reference(
         recordName: referenceValue.recordName ?? "",
         action: referenceValue.action?.rawValue
       )
       return .reference(reference)
-    case .AssetValue(let assetValue):
+    case .assetValue(let assetValue):
       let asset = FieldValue.Asset(
         fileChecksum: assetValue.fileChecksum,
         size: assetValue.size,
@@ -99,25 +103,25 @@ public struct RecordInfo: Encodable {
         downloadURL: assetValue.downloadURL
       )
       return .asset(asset)
-    case .ListValue(let listValue):
+    case .listValue(let listValue):
       // Convert list items to FieldValue array
       let convertedList = listValue.compactMap { listItem in
         // Handle the recursive list structure properly
         switch listItem {
-        case .StringValue(let stringValue):
+        case .stringValue(let stringValue):
           return FieldValue.string(stringValue)
-        case .Int64Value(let intValue):
+        case .int64Value(let intValue):
           return FieldValue.int64(intValue)
-        case .DoubleValue(let doubleValue):
+        case .doubleValue(let doubleValue):
           return FieldValue.double(doubleValue)
-        case .BooleanValue(let boolValue):
+        case .booleanValue(let boolValue):
           return FieldValue.boolean(boolValue)
-        case .BytesValue(let bytesValue):
+        case .bytesValue(let bytesValue):
           return FieldValue.bytes(bytesValue)
-        case .DateValue(let dateValue):
+        case .dateValue(let dateValue):
           let date = Date(timeIntervalSince1970: dateValue / 1_000)
           return FieldValue.date(date)
-        case .LocationValue(let locationValue):
+        case .locationValue(let locationValue):
           let location = FieldValue.Location(
             latitude: locationValue.latitude ?? 0.0,
             longitude: locationValue.longitude ?? 0.0,
@@ -129,13 +133,13 @@ public struct RecordInfo: Encodable {
             timestamp: locationValue.timestamp.map { Date(timeIntervalSince1970: $0 / 1_000) }
           )
           return FieldValue.location(location)
-        case .ReferenceValue(let refValue):
+        case .referenceValue(let refValue):
           let reference = FieldValue.Reference(
             recordName: refValue.recordName ?? "",
             action: refValue.action?.rawValue
           )
           return FieldValue.reference(reference)
-        case .AssetValue(let assetValue):
+        case .assetValue(let assetValue):
           let asset = FieldValue.Asset(
             fileChecksum: assetValue.fileChecksum,
             size: assetValue.size,
@@ -145,18 +149,18 @@ public struct RecordInfo: Encodable {
             downloadURL: assetValue.downloadURL
           )
           return FieldValue.asset(asset)
-        case .ListValue(let nestedList):
+        case .listValue(let nestedList):
           // Recursively convert nested lists
           let nestedConvertedList = nestedList.compactMap { nestedItem in
             // For simplicity, we'll handle basic types in nested lists
             switch nestedItem {
-            case .StringValue(let stringValue):
+            case .stringValue(let stringValue):
               return FieldValue.string(stringValue)
-            case .Int64Value(let intValue):
+            case .int64Value(let intValue):
               return FieldValue.int64(intValue)
-            case .DoubleValue(let doubleValue):
+            case .doubleValue(let doubleValue):
               return FieldValue.double(doubleValue)
-            case .BooleanValue(let boolValue):
+            case .booleanValue(let boolValue):
               return FieldValue.boolean(boolValue)
             default:
               // For complex nested types, return nil for now
@@ -171,7 +175,7 @@ public struct RecordInfo: Encodable {
 
     #if DEBUG
       print(
-        "⚠️  Unhandled field value type: \(value) with fieldType: \(fieldData._type?.rawValue ?? "nil")"
+        "⚠️  Unhandled field value type: \(value) with fieldType: \(fieldData.type?.rawValue ?? "nil")"
       )
     #endif
     return nil

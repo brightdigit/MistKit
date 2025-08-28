@@ -2,15 +2,15 @@ import Foundation
 
 /// A token encoder that replaces specific characters with URL-encoded equivalents
 public struct CharacterMapEncoder: Sendable {
-  /// Character mapping for encoding tokens
-  private let characterMap: [Character: String]
-
   /// Default character map for CloudKit web authentication tokens
   public static let defaultCharacterMap: [Character: String] = [
     "+": "%2B",
     "/": "%2F",
     "=": "%3D",
   ]
+
+  /// Character mapping for encoding tokens
+  private let characterMap: [Character: String]
 
   /// Initialize with a custom character map
   /// - Parameter characterMap: The character mapping to use for encoding

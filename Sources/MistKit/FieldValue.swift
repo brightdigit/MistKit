@@ -22,15 +22,24 @@ public enum FieldValue: Codable, Equatable {
 
   /// Location dictionary as defined in CloudKit Web Services
   public struct Location: Codable, Equatable {
+    /// The latitude coordinate
     public let latitude: Double
+    /// The longitude coordinate
     public let longitude: Double
+    /// The horizontal accuracy in meters
     public let horizontalAccuracy: Double?
+    /// The vertical accuracy in meters
     public let verticalAccuracy: Double?
+    /// The altitude in meters
     public let altitude: Double?
+    /// The speed in meters per second
     public let speed: Double?
+    /// The course in degrees
     public let course: Double?
+    /// The timestamp when location was recorded
     public let timestamp: Date?
 
+    /// Initialize a location value
     public init(
       latitude: Double,
       longitude: Double,
@@ -54,9 +63,12 @@ public enum FieldValue: Codable, Equatable {
 
   /// Reference dictionary as defined in CloudKit Web Services
   public struct Reference: Codable, Equatable {
+    /// The record name being referenced
     public let recordName: String
-    public let action: String?  // "DELETE_SELF" or nil
+    /// The action to take ("DELETE_SELF" or nil)
+    public let action: String?
 
+    /// Initialize a reference value
     public init(recordName: String, action: String? = nil) {
       self.recordName = recordName
       self.action = action
@@ -65,13 +77,20 @@ public enum FieldValue: Codable, Equatable {
 
   /// Asset dictionary as defined in CloudKit Web Services
   public struct Asset: Codable, Equatable {
+    /// The file checksum
     public let fileChecksum: String?
+    /// The file size in bytes
     public let size: Int64?
+    /// The reference checksum
     public let referenceChecksum: String?
+    /// The wrapping key for encryption
     public let wrappingKey: String?
+    /// The upload receipt
     public let receipt: String?
+    /// The download URL
     public let downloadURL: String?
 
+    /// Initialize an asset value
     public init(
       fileChecksum: String? = nil,
       size: Int64? = nil,
@@ -90,32 +109,7 @@ public enum FieldValue: Codable, Equatable {
   }
 
   // MARK: - Codable
-  public func encode(to encoder: Encoder) throws {
-    var container = encoder.singleValueContainer()
-    switch self {
-    case .string(let value):
-      try container.encode(value)
-    case .int64(let value):
-      try container.encode(value)
-    case .double(let value):
-      try container.encode(value)
-    case .boolean(let value):
-      try container.encode(value)
-    case .bytes(let value):
-      try container.encode(value)
-    case .date(let value):
-      try container.encode(value.timeIntervalSince1970 * 1_000)
-    case .location(let value):
-      try container.encode(value)
-    case .reference(let value):
-      try container.encode(value)
-    case .asset(let value):
-      try container.encode(value)
-    case .list(let values):
-      try container.encode(values)
-    }
-  }
-
+  /// Initialize field value from decoder
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
     // Try to decode in order of most specific to least specific
@@ -157,6 +151,35 @@ public enum FieldValue: Codable, Equatable {
       return
     }
     throw DecodingError.dataCorruptedError(
-      in: container, debugDescription: "Unable to decode FieldValue")
+      in: container,
+      debugDescription: "Unable to decode FieldValue"
+    )
+  }
+
+  /// Encode field value to encoder
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    switch self {
+    case .string(let value):
+      try container.encode(value)
+    case .int64(let value):
+      try container.encode(value)
+    case .double(let value):
+      try container.encode(value)
+    case .boolean(let value):
+      try container.encode(value)
+    case .bytes(let value):
+      try container.encode(value)
+    case .date(let value):
+      try container.encode(value.timeIntervalSince1970 * 1_000)
+    case .location(let value):
+      try container.encode(value)
+    case .reference(let value):
+      try container.encode(value)
+    case .asset(let value):
+      try container.encode(value)
+    case .list(let values):
+      try container.encode(values)
+    }
   }
 }

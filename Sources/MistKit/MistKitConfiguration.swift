@@ -29,9 +29,13 @@ public struct MistKitConfiguration: Sendable {
 
   /// Computed server URL based on configuration
   public var serverURL: URL {
-    URL(string: "https://api.apple-cloudkit.com")!
+    guard let url = URL(string: "https://api.apple-cloudkit.com") else {
+      fatalError("Invalid CloudKit API URL")
+    }
+    return url
   }
 
+  /// Initialize MistKit configuration
   public init(
     container: String,
     environment: Environment,

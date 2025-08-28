@@ -10,136 +10,151 @@ import OpenAPIRuntime
 
 /// Custom implementation of FieldValue with proper ASSETID handling
 internal struct CustomFieldValue: Codable, Hashable, Sendable {
-  let value: CustomFieldValuePayload
-  let _type: FieldTypePayload?
-
+  /// Field type payload for CloudKit fields
   public enum FieldTypePayload: String, Codable, Hashable, Sendable, CaseIterable {
-    case STRING = "STRING"
-    case INT64 = "INT64"
-    case DOUBLE = "DOUBLE"
-    case BYTES = "BYTES"
-    case REFERENCE = "REFERENCE"
-    case ASSET = "ASSET"
-    case ASSETID = "ASSETID"
-    case LOCATION = "LOCATION"
-    case TIMESTAMP = "TIMESTAMP"
-    case LIST = "LIST"
+    case string = "STRING"
+    case int64 = "INT64"
+    case double = "DOUBLE"
+    case bytes = "BYTES"
+    case reference = "REFERENCE"
+    case asset = "ASSET"
+    case assetid = "ASSETID"
+    case location = "LOCATION"
+    case timestamp = "TIMESTAMP"
+    case list = "LIST"
   }
 
+  /// Custom field value payload supporting various CloudKit types
   public enum CustomFieldValuePayload: Codable, Hashable, Sendable {
-    case StringValue(String)
-    case Int64Value(Int64)
-    case DoubleValue(Double)
-    case BooleanValue(Bool)
-    case BytesValue(String)
-    case DateValue(Double)
-    case LocationValue(Components.Schemas.LocationValue)
-    case ReferenceValue(Components.Schemas.ReferenceValue)
-    case AssetValue(Components.Schemas.AssetValue)
-    case ListValue([CustomFieldValuePayload])
+    case stringValue(String)
+    case int64Value(Int64)
+    case doubleValue(Double)
+    case booleanValue(Bool)
+    case bytesValue(String)
+    case dateValue(Double)
+    case locationValue(Components.Schemas.LocationValue)
+    case referenceValue(Components.Schemas.ReferenceValue)
+    case assetValue(Components.Schemas.AssetValue)
+    case listValue([CustomFieldValuePayload])
   }
 
-  enum CodingKeys: String, CodingKey {
+  internal enum CodingKeys: String, CodingKey {
     case value
-    case _type = "type"
+    case type
   }
 
-  // Convenience initializers for creating instances
-  init(value: CustomFieldValuePayload, type: FieldTypePayload) {
+  /// The field value payload
+  internal let value: CustomFieldValuePayload
+  /// The field type
+  internal let type: FieldTypePayload?
+
+  /// Convenience initializers for creating instances
+  internal init(value: CustomFieldValuePayload, type: FieldTypePayload) {
     self.value = value
-    self._type = type
+    self.type = type
   }
 
-  init(stringValue: String) {
-    self.value = .StringValue(stringValue)
-    self._type = .STRING
+  /// Initialize with string value
+  internal init(stringValue: String) {
+    self.value = .stringValue(stringValue)
+    self.type = .string
   }
 
-  init(int64Value: Int64) {
-    self.value = .Int64Value(int64Value)
-    self._type = .INT64
+  /// Initialize with int64 value
+  internal init(int64Value: Int64) {
+    self.value = .int64Value(int64Value)
+    self.type = .int64
   }
 
-  init(doubleValue: Double) {
-    self.value = .DoubleValue(doubleValue)
-    self._type = .DOUBLE
+  /// Initialize with double value
+  internal init(doubleValue: Double) {
+    self.value = .doubleValue(doubleValue)
+    self.type = .double
   }
 
-  init(booleanValue: Bool) {
-    self.value = .BooleanValue(booleanValue)
-    self._type = .BYTES  // Boolean values are stored as bytes in CloudKit
+  /// Initialize with boolean value
+  internal init(booleanValue: Bool) {
+    self.value = .booleanValue(booleanValue)
+    self.type = .bytes  // Boolean values are stored as bytes in CloudKit
   }
 
-  init(dateValue: Double) {
-    self.value = .DateValue(dateValue)
-    self._type = .TIMESTAMP
+  /// Initialize with date value
+  internal init(dateValue: Double) {
+    self.value = .dateValue(dateValue)
+    self.type = .timestamp
   }
 
-  init(locationValue: Components.Schemas.LocationValue) {
-    self.value = .LocationValue(locationValue)
-    self._type = .LOCATION
+  /// Initialize with location value
+  internal init(locationValue: Components.Schemas.LocationValue) {
+    self.value = .locationValue(locationValue)
+    self.type = .location
   }
 
-  init(referenceValue: Components.Schemas.ReferenceValue) {
-    self.value = .ReferenceValue(referenceValue)
-    self._type = .REFERENCE
+  /// Initialize with reference value
+  internal init(referenceValue: Components.Schemas.ReferenceValue) {
+    self.value = .referenceValue(referenceValue)
+    self.type = .reference
   }
 
-  init(assetValue: Components.Schemas.AssetValue) {
-    self.value = .AssetValue(assetValue)
-    self._type = .ASSET
+  /// Initialize with asset value
+  internal init(assetValue: Components.Schemas.AssetValue) {
+    self.value = .assetValue(assetValue)
+    self.type = .asset
   }
 
-  init(listValue: [CustomFieldValuePayload]) {
-    self.value = .ListValue(listValue)
-    self._type = .LIST
+  /// Initialize with list value
+  internal init(listValue: [CustomFieldValuePayload]) {
+    self.value = .listValue(listValue)
+    self.type = .list
   }
 
-  init(from decoder: Decoder) throws {
+  internal init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let _type = try container.decodeIfPresent(FieldTypePayload.self, forKey: ._type)
-    self._type = _type
+    let fieldType = try container.decodeIfPresent(FieldTypePayload.self, forKey: .type)
+    self.type = fieldType
 
     // Decode value based on the field type
-    if let fieldType = _type {
+    if let fieldType = fieldType {
       switch fieldType {
-      case .STRING:
+      case .string:
         let stringValue = try container.decode(String.self, forKey: .value)
-        self.value = .StringValue(stringValue)
+        self.value = .stringValue(stringValue)
 
-      case .INT64:
+      case .int64:
         let intValue = try container.decode(Int64.self, forKey: .value)
-        self.value = .Int64Value(intValue)
+        self.value = .int64Value(intValue)
 
-      case .DOUBLE:
+      case .double:
         let doubleValue = try container.decode(Double.self, forKey: .value)
-        self.value = .DoubleValue(doubleValue)
+        self.value = .doubleValue(doubleValue)
 
-      case .BYTES:
+      case .bytes:
         let bytesValue = try container.decode(String.self, forKey: .value)
-        self.value = .BytesValue(bytesValue)
+        self.value = .bytesValue(bytesValue)
 
-      case .REFERENCE:
+      case .reference:
         let refValue = try container.decode(Components.Schemas.ReferenceValue.self, forKey: .value)
-        self.value = .ReferenceValue(refValue)
+        self.value = .referenceValue(refValue)
 
-      case .ASSET, .ASSETID:
+      case .asset, .assetid:
         // Both ASSET and ASSETID decode as AssetValue
         let assetValue = try container.decode(Components.Schemas.AssetValue.self, forKey: .value)
-        self.value = .AssetValue(assetValue)
+        self.value = .assetValue(assetValue)
 
-      case .LOCATION:
+      case .location:
         let locationValue = try container.decode(
-          Components.Schemas.LocationValue.self, forKey: .value)
-        self.value = .LocationValue(locationValue)
+          Components.Schemas.LocationValue.self,
+          forKey: .value
+        )
+        self.value = .locationValue(locationValue)
 
-      case .TIMESTAMP:
+      case .timestamp:
         let dateValue = try container.decode(Double.self, forKey: .value)
-        self.value = .DateValue(dateValue)
+        self.value = .dateValue(dateValue)
 
-      case .LIST:
+      case .list:
         let listValue = try container.decode([CustomFieldValuePayload].self, forKey: .value)
-        self.value = .ListValue(listValue)
+        self.value = .listValue(listValue)
       }
     } else {
       // Fallback decoding without type information
@@ -148,30 +163,30 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
     }
   }
 
-  func encode(to encoder: Encoder) throws {
+  internal func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encodeIfPresent(_type, forKey: ._type)
+    try container.encodeIfPresent(type, forKey: .type)
 
     switch value {
-    case .StringValue(let stringValue):
+    case .stringValue(let stringValue):
       try container.encode(stringValue, forKey: .value)
-    case .Int64Value(let intValue):
+    case .int64Value(let intValue):
       try container.encode(intValue, forKey: .value)
-    case .DoubleValue(let doubleValue):
+    case .doubleValue(let doubleValue):
       try container.encode(doubleValue, forKey: .value)
-    case .BooleanValue(let boolValue):
+    case .booleanValue(let boolValue):
       try container.encode(boolValue, forKey: .value)
-    case .BytesValue(let bytesValue):
+    case .bytesValue(let bytesValue):
       try container.encode(bytesValue, forKey: .value)
-    case .DateValue(let dateValue):
+    case .dateValue(let dateValue):
       try container.encode(dateValue, forKey: .value)
-    case .LocationValue(let locationValue):
+    case .locationValue(let locationValue):
       try container.encode(locationValue, forKey: .value)
-    case .ReferenceValue(let refValue):
+    case .referenceValue(let refValue):
       try container.encode(refValue, forKey: .value)
-    case .AssetValue(let assetValue):
+    case .assetValue(let assetValue):
       try container.encode(assetValue, forKey: .value)
-    case .ListValue(let listValue):
+    case .listValue(let listValue):
       try container.encode(listValue, forKey: .value)
     }
   }

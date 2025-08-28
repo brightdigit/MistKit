@@ -8,26 +8,27 @@
 import Foundation
 
 extension CustomFieldValue.CustomFieldValuePayload {
+  /// Initialize from decoder
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
 
     // Try to decode different types in order
     if let value = try? container.decode(String.self) {
-      self = .StringValue(value)
+      self = .stringValue(value)
     } else if let value = try? container.decode(Int64.self) {
-      self = .Int64Value(value)
+      self = .int64Value(value)
     } else if let value = try? container.decode(Double.self) {
-      self = .DoubleValue(value)
+      self = .doubleValue(value)
     } else if let value = try? container.decode(Bool.self) {
-      self = .BooleanValue(value)
+      self = .booleanValue(value)
     } else if let value = try? container.decode(Components.Schemas.AssetValue.self) {
-      self = .AssetValue(value)
+      self = .assetValue(value)
     } else if let value = try? container.decode(Components.Schemas.LocationValue.self) {
-      self = .LocationValue(value)
+      self = .locationValue(value)
     } else if let value = try? container.decode(Components.Schemas.ReferenceValue.self) {
-      self = .ReferenceValue(value)
+      self = .referenceValue(value)
     } else if let value = try? container.decode([CustomFieldValue.CustomFieldValuePayload].self) {
-      self = .ListValue(value)
+      self = .listValue(value)
     } else {
       throw DecodingError.dataCorrupted(
         DecodingError.Context(
@@ -38,29 +39,30 @@ extension CustomFieldValue.CustomFieldValuePayload {
     }
   }
 
+  /// Encode to encoder
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
 
     switch self {
-    case .StringValue(let value):
+    case .stringValue(let value):
       try container.encode(value)
-    case .Int64Value(let value):
+    case .int64Value(let value):
       try container.encode(value)
-    case .DoubleValue(let value):
+    case .doubleValue(let value):
       try container.encode(value)
-    case .BooleanValue(let value):
+    case .booleanValue(let value):
       try container.encode(value)
-    case .BytesValue(let value):
+    case .bytesValue(let value):
       try container.encode(value)
-    case .DateValue(let value):
+    case .dateValue(let value):
       try container.encode(value)
-    case .LocationValue(let value):
+    case .locationValue(let value):
       try container.encode(value)
-    case .ReferenceValue(let value):
+    case .referenceValue(let value):
       try container.encode(value)
-    case .AssetValue(let value):
+    case .assetValue(let value):
       try container.encode(value)
-    case .ListValue(let value):
+    case .listValue(let value):
       try container.encode(value)
     }
   }

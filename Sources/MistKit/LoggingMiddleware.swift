@@ -10,8 +10,8 @@ import HTTPTypes
 import OpenAPIRuntime
 
 /// Logging middleware for debugging
-struct LoggingMiddleware: ClientMiddleware {
-  func intercept(
+internal struct LoggingMiddleware: ClientMiddleware {
+  internal func intercept(
     _ request: HTTPRequest,
     body: HTTPBody?,
     baseURL: URL,

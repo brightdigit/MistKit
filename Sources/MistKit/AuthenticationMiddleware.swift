@@ -10,11 +10,11 @@ import HTTPTypes
 import OpenAPIRuntime
 
 /// Authentication middleware for CloudKit requests
-struct AuthenticationMiddleware: ClientMiddleware {
-  let configuration: MistKitConfiguration
+internal struct AuthenticationMiddleware: ClientMiddleware {
+  internal let configuration: MistKitConfiguration
   private let tokenEncoder = CharacterMapEncoder()
 
-  func intercept(
+  internal func intercept(
     _ request: HTTPRequest,
     body: HTTPBody?,
     baseURL: URL,

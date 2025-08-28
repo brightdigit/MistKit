@@ -12,7 +12,9 @@ public struct MistKitClient {
   public let configuration: MistKitConfiguration
 
   /// Initialize a new MistKit client
-  /// - Parameter configuration: The CloudKit configuration including container, environment, and authentication
+  /// - Parameter configuration: The CloudKit configuration including container,
+  ///   environment, and authentication
+  /// - Throws: ClientError if initialization fails
   public init(configuration: MistKitConfiguration) throws {
     self.configuration = configuration
 
