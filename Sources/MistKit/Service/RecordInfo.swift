@@ -202,4 +202,23 @@ public struct RecordInfo: Encodable {
     #endif
     return nil
   }
+
+  /// Convert double value, handling timestamp conversion
+  private static func convertDoubleValue(
+    _ doubleValue: Double, fieldType: CustomFieldValue.FieldTypePayload?
+  ) -> FieldValue {
+    // Check the type to determine if it's a date or double
+    if let fieldType = fieldType {
+      switch fieldType {
+      case .timestamp:
+        // Convert milliseconds to Date
+        let date = Date(timeIntervalSince1970: doubleValue / 1_000)
+        return .date(date)
+      default:
+        return .double(doubleValue)
+      }
+    } else {
+      return .double(doubleValue)
+    }
+  }
 }

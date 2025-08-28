@@ -2,8 +2,8 @@ import XCTest
 
 @testable import MistKit
 
-final class MistKitTests: XCTestCase {
-  func testConfigurationInitialization() {
+public final class MistKitTests: XCTestCase {
+  public func testConfigurationInitialization() {
     // Given
     let container = "iCloud.com.example.app"
     let apiToken = "test-token"
@@ -25,12 +25,12 @@ final class MistKitTests: XCTestCase {
     XCTAssertEqual(configuration.serverURL.absoluteString, "https://api.apple-cloudkit.com")
   }
 
-  func testEnvironmentRawValues() {
+  public func testEnvironmentRawValues() {
     XCTAssertEqual(Environment.development.rawValue, "development")
     XCTAssertEqual(Environment.production.rawValue, "production")
   }
 
-  func testDatabaseRawValues() {
+  public func testDatabaseRawValues() {
     XCTAssertEqual(Database.public.rawValue, "public")
     XCTAssertEqual(Database.private.rawValue, "private")
     XCTAssertEqual(Database.shared.rawValue, "shared")
@@ -38,33 +38,33 @@ final class MistKitTests: XCTestCase {
 
   // MARK: - FieldValue Tests
 
-  func testFieldValueString() {
+  public func testFieldValueString() {
     let value = FieldValue.string("test")
     XCTAssertEqual(value, .string("test"))
   }
 
-  func testFieldValueInt64() {
+  public func testFieldValueInt64() {
     let value = FieldValue.int64(123)
     XCTAssertEqual(value, .int64(123))
   }
 
-  func testFieldValueDouble() {
+  public func testFieldValueDouble() {
     let value = FieldValue.double(3.14)
     XCTAssertEqual(value, .double(3.14))
   }
 
-  func testFieldValueBoolean() {
+  public func testFieldValueBoolean() {
     let value = FieldValue.boolean(true)
     XCTAssertEqual(value, .boolean(true))
   }
 
-  func testFieldValueDate() {
+  public func testFieldValueDate() {
     let date = Date()
     let value = FieldValue.date(date)
     XCTAssertEqual(value, .date(date))
   }
 
-  func testFieldValueLocation() {
+  public func testFieldValueLocation() {
     let location = FieldValue.Location(
       latitude: 37.7749,
       longitude: -122.4194,
@@ -74,13 +74,13 @@ final class MistKitTests: XCTestCase {
     XCTAssertEqual(value, .location(location))
   }
 
-  func testFieldValueReference() {
+  public func testFieldValueReference() {
     let reference = FieldValue.Reference(recordName: "test-record")
     let value = FieldValue.reference(reference)
     XCTAssertEqual(value, .reference(reference))
   }
 
-  func testFieldValueAsset() {
+  public func testFieldValueAsset() {
     let asset = FieldValue.Asset(
       fileChecksum: "abc123",
       size: 1_024,
@@ -90,13 +90,13 @@ final class MistKitTests: XCTestCase {
     XCTAssertEqual(value, .asset(asset))
   }
 
-  func testFieldValueList() {
+  public func testFieldValueList() {
     let list = [FieldValue.string("item1"), FieldValue.int64(42)]
     let value = FieldValue.list(list)
     XCTAssertEqual(value, .list(list))
   }
 
-  func testFieldValueEncodable() throws {
+  public func testFieldValueEncodable() throws {
     let value = FieldValue.string("test")
     let data = try JSONEncoder().encode(value)
     let decoded = try JSONDecoder().decode(FieldValue.self, from: data)
@@ -105,7 +105,7 @@ final class MistKitTests: XCTestCase {
 
   // MARK: - RecordInfo Tests
 
-  func testRecordInfoInitialization() {
+  public func testRecordInfoInitialization() {
     // Create a mock record with fields
     let mockRecord = Components.Schemas.Record(
       recordName: "test-record",
@@ -137,7 +137,7 @@ final class MistKitTests: XCTestCase {
     }
   }
 
-  func testRecordInfoWithUnknownRecord() {
+  public func testRecordInfoWithUnknownRecord() {
     let mockRecord = Components.Schemas.Record()
     let recordInfo = RecordInfo(from: mockRecord)
 

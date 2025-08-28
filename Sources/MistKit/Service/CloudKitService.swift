@@ -33,9 +33,9 @@ import OpenAPIURLSession
 
 /// Service for interacting with CloudKit Web Services
 public struct CloudKitService {
-  let containerIdentifier: String
-  let apiToken: String
-  let environment: String = "development"
+  public let containerIdentifier: String
+  public let apiToken: String
+  public let environment: String = "development"
 
   private let mistKitClient: MistKitClient
   private var client: Client {
