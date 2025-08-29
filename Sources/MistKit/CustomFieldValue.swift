@@ -66,25 +66,28 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
   }
 
   private static let fieldTypeDecoders:
-    [FieldTypePayload: @Sendable (KeyedDecodingContainer<CodingKeys>) throws -> CustomFieldValuePayload] = [
-      .string: { .stringValue(try $0.decode(String.self, forKey: .value)) },
-      .int64: { .int64Value(try $0.decode(Int64.self, forKey: .value)) },
-      .double: { .doubleValue(try $0.decode(Double.self, forKey: .value)) },
-      .bytes: { .bytesValue(try $0.decode(String.self, forKey: .value)) },
-      .reference: {
-        .referenceValue(try $0.decode(Components.Schemas.ReferenceValue.self, forKey: .value))
-      },
-      .asset: { .assetValue(try $0.decode(Components.Schemas.AssetValue.self, forKey: .value)) },
-      .assetid: { .assetValue(try $0.decode(Components.Schemas.AssetValue.self, forKey: .value)) },
-      .location: {
-        .locationValue(try $0.decode(Components.Schemas.LocationValue.self, forKey: .value))
-      },
-      .timestamp: { .dateValue(try $0.decode(Double.self, forKey: .value)) },
-      .list: { .listValue(try $0.decode([CustomFieldValuePayload].self, forKey: .value)) },
-    ]
+    [FieldTypePayload: @Sendable (KeyedDecodingContainer<CodingKeys>) throws ->
+      CustomFieldValuePayload] = [
+        .string: { .stringValue(try $0.decode(String.self, forKey: .value)) },
+        .int64: { .int64Value(try $0.decode(Int64.self, forKey: .value)) },
+        .double: { .doubleValue(try $0.decode(Double.self, forKey: .value)) },
+        .bytes: { .bytesValue(try $0.decode(String.self, forKey: .value)) },
+        .reference: {
+          .referenceValue(try $0.decode(Components.Schemas.ReferenceValue.self, forKey: .value))
+        },
+        .asset: { .assetValue(try $0.decode(Components.Schemas.AssetValue.self, forKey: .value)) },
+        .assetid: {
+          .assetValue(try $0.decode(Components.Schemas.AssetValue.self, forKey: .value))
+        },
+        .location: {
+          .locationValue(try $0.decode(Components.Schemas.LocationValue.self, forKey: .value))
+        },
+        .timestamp: { .dateValue(try $0.decode(Double.self, forKey: .value)) },
+        .list: { .listValue(try $0.decode([CustomFieldValuePayload].self, forKey: .value)) },
+      ]
 
   private static let defaultDecoder:
-  @Sendable (KeyedDecodingContainer<CodingKeys>) throws -> CustomFieldValuePayload = {
+    @Sendable (KeyedDecodingContainer<CodingKeys>) throws -> CustomFieldValuePayload = {
       .stringValue(try $0.decode(String.self, forKey: .value))
     }
 

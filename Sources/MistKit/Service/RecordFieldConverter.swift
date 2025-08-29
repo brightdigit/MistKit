@@ -32,7 +32,9 @@ import Foundation
 /// Utilities for converting CloudKit field values to FieldValue types
 internal enum RecordFieldConverter {
   /// Convert a CloudKit field value to FieldValue
-  internal static func convertToFieldValue(_ fieldData: Components.Schemas.FieldValue) -> FieldValue? {
+  internal static func convertToFieldValue(_ fieldData: Components.Schemas.FieldValue)
+    -> FieldValue?
+  {
     convertFieldValueByType(fieldData.value, fieldType: fieldData.type)
   }
 
