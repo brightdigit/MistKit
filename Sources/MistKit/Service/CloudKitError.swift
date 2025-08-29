@@ -1,5 +1,5 @@
 //
-//  CharacterMapEncoder.swift
+//  CloudKitError.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -29,34 +29,29 @@
 
 public import Foundation
 
-/// A token encoder that replaces specific characters with URL-encoded equivalents
-public struct CharacterMapEncoder: Sendable {
-  /// Default character map for CloudKit web authentication tokens
-  public static let defaultCharacterMap: [Character: String] = [
-    "+": "%2B",
-    "/": "%2F",
-    "=": "%3D",
-  ]
+internal enum CloudKitError: LocalizedError {
+  case httpError(statusCode: Int)
+  case httpErrorWithDetails(statusCode: Int, serverErrorCode: String?, reason: String?)
+  case httpErrorWithRawResponse(statusCode: Int, rawResponse: String)
+  case invalidResponse
 
-  /// Character mapping for encoding tokens
-  private let characterMap: [Character: String]
-
-  /// Initialize with a custom character map
-  /// - Parameter characterMap: The character mapping to use for encoding
-  public init(characterMap: [Character: String] = defaultCharacterMap) {
-    self.characterMap = characterMap
-  }
-
-  /// Encode a token by replacing characters according to the character map
-  /// - Parameter token: The token to encode
-  /// - Returns: The encoded token with characters replaced
-  public func encode(_ token: String) -> String {
-    var encodedToken = token
-
-    for (character, replacement) in characterMap {
-      encodedToken = encodedToken.replacingOccurrences(of: String(character), with: replacement)
+  internal var errorDescription: String? {
+    switch self {
+    case .httpError(let statusCode):
+      return "CloudKit API error: HTTP \(statusCode)"
+    case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason):
+      var message = "CloudKit API error: HTTP \(statusCode)"
+      if let serverErrorCode = serverErrorCode {
+        message += "\nServer Error Code: \(serverErrorCode)"
+      }
+      if let reason = reason {
+        message += "\nReason: \(reason)"
+      }
+      return message
+    case .httpErrorWithRawResponse(let statusCode, let rawResponse):
+      return "CloudKit API error: HTTP \(statusCode)\nRaw Response: \(rawResponse)"
+    case .invalidResponse:
+      return "Invalid response from CloudKit"
     }
-
-    return encodedToken
   }
 }

@@ -1,188 +1,60 @@
-import Foundation
+//
+//  MistKitClient.swift
+//  PackageDSLKit
+//
+//  Created by Leo Dion.
+//  Copyright © 2025 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the “Software”), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+public import Foundation
+import HTTPTypes
 import OpenAPIRuntime
 import OpenAPIURLSession
-import HTTPTypes
-import HTTPTypes
 
 /// A client for interacting with CloudKit Web Services
 public struct MistKitClient {
-    /// The underlying OpenAPI client
-    public let client: Client
-    
-    /// The CloudKit container configuration
-    public let configuration: MistKitConfiguration
-    
-    /// Initialize a new MistKit client
-    /// - Parameter configuration: The CloudKit configuration including container, environment, and authentication
-    public init(configuration: MistKitConfiguration) throws {
-        self.configuration = configuration
-        
-        // Create the OpenAPI client with custom server URL and middleware
-        self.client = Client(
-            serverURL: configuration.serverURL,
-            transport: URLSessionTransport(),
-            middlewares: [
-                AuthenticationMiddleware(configuration: configuration),
-                LoggingMiddleware()
-            ]
-        )
-    }
-}
+  /// The underlying OpenAPI client
+  internal let client: Client
 
-// MARK: - Configuration
+  /// The CloudKit container configuration
+  public let configuration: MistKitConfiguration
 
-/// Configuration for MistKit client
-public struct MistKitConfiguration : Sendable {
-    /// The CloudKit container identifier (e.g., "iCloud.com.example.app")
-    public let container: String
-    
-    /// The CloudKit environment
-    public let environment: Environment
-    
-    /// The CloudKit database type
-    public let database: Database
-    
-    /// API Token for authentication
-    public let apiToken: String
-    
-    /// Optional Web Auth Token for user authentication
-    public let webAuthToken: String?
-    
-    /// Protocol version (currently "1")
-    public let version: String = "1"
-    
-    /// Computed server URL based on configuration
-    public var serverURL: URL {
-        URL(string: "https://api.apple-cloudkit.com")!
-    }
-    
-    public init(
-        container: String,
-        environment: Environment,
-        database: Database = .private,
-        apiToken: String,
-        webAuthToken: String? = nil
-    ) {
-        self.container = container
-        self.environment = environment
-        self.database = database
-        self.apiToken = apiToken
-        self.webAuthToken = webAuthToken
-    }
-}
+  /// Initialize a new MistKit client
+  /// - Parameter configuration: The CloudKit configuration including container,
+  ///   environment, and authentication
+  /// - Throws: ClientError if initialization fails
+  public init(configuration: MistKitConfiguration) throws {
+    self.configuration = configuration
 
-// MARK: - Enums
-
-/// CloudKit environment types
-public enum Environment: String, Sendable {
-    case development
-    case production
-}
-
-/// CloudKit database types
-public enum Database: String, Sendable  {
-    case `public`
-    case `private`
-    case shared
-}
-
-// MARK: - Middleware
-
-/// Authentication middleware for CloudKit requests
-struct AuthenticationMiddleware: ClientMiddleware {
-    let configuration: MistKitConfiguration
-    private let tokenEncoder = CharacterMapEncoder()
-    
-    func intercept(
-        _ request: HTTPRequest,
-        body: HTTPBody?,
-        baseURL: URL,
-        operationID: String,
-        next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
-    ) async throws -> (HTTPResponse, HTTPBody?) {
-        var modifiedRequest = request
-        
-        // Get the current path without query parameters
-        let requestPath = request.path ?? ""
-        let pathComponents = requestPath.split(separator: "?", maxSplits: 1)
-        let cleanPath = String(pathComponents.first ?? "")
-        
-        // Create URL components from the clean path
-        var urlComponents = URLComponents()
-        urlComponents.path = cleanPath
-        
-        // Parse existing query items if any
-        if pathComponents.count > 1 {
-            let existingQuery = String(pathComponents[1])
-            if let existingComponents = URLComponents(string: "?" + existingQuery) {
-                urlComponents.queryItems = existingComponents.queryItems ?? []
-            }
-        }
-        
-        // Add authentication parameters
-        var queryItems = urlComponents.queryItems ?? []
-        queryItems.append(URLQueryItem(name: "ckAPIToken", value: configuration.apiToken))
-        if let webAuthToken = configuration.webAuthToken {
-            // Encode the web authentication token using CharacterMapEncoder
-            let encodedWebAuthToken = tokenEncoder.encode(webAuthToken)
-            queryItems.append(URLQueryItem(name: "ckWebAuthToken", value: encodedWebAuthToken))
-        }
-        
-        urlComponents.queryItems = queryItems
-        
-        // Build the new path with query parameters
-        if let query = urlComponents.query {
-            modifiedRequest.path = cleanPath + "?" + query
-        } else {
-            modifiedRequest.path = cleanPath
-        }
-      
-        return try await next(modifiedRequest, body, baseURL)
-    }
-}
-
-/// Logging middleware for debugging
-struct LoggingMiddleware: ClientMiddleware {
-    func intercept(
-        _ request: HTTPRequest,
-        body: HTTPBody?,
-        baseURL: URL,
-        operationID: String,
-        next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
-    ) async throws -> (HTTPResponse, HTTPBody?) {
-        #if DEBUG
-        let fullPath = baseURL.absoluteString + (request.path ?? "")
-        print("🌐 CloudKit Request: \(request.method.rawValue) \(fullPath)")
-        print("   Base URL: \(baseURL.absoluteString)")
-        print("   Path: \(request.path ?? "none")")
-        print("   Headers: \(request.headerFields)")
-        
-        // Log query parameters for debugging authentication
-        if let path = request.path, let url = URL(string: path, relativeTo: baseURL) {
-            if let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
-                if let queryItems = components.queryItems {
-                    print("   Query Parameters:")
-                    for item in queryItems {
-                        if item.name == "ckWebAuthToken" {
-                            print("     \(item.name): \(item.value?.prefix(20) ?? "nil")... (encoded)")
-                        } else {
-                            print("     \(item.name): \(item.value ?? "nil")")
-                        }
-                    }
-                }
-            }
-        }
-        #endif
-        
-        let (response, responseBody) = try await next(request, body, baseURL)
-        
-        #if DEBUG
-        print("✅ CloudKit Response: \(response.status.code)")
-        if response.status.code == 421 {
-            print("⚠️  421 Misdirected Request - The server cannot produce a response for this request")
-        }
-        #endif
-        
-        return (response, responseBody)
-    }
+    // Create the OpenAPI client with custom server URL and middleware
+    self.client = Client(
+      serverURL: configuration.serverURL,
+      transport: URLSessionTransport(),
+      middlewares: [
+        AuthenticationMiddleware(configuration: configuration),
+        LoggingMiddleware(),
+      ]
+    )
+  }
 }
