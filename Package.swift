@@ -1,6 +1,8 @@
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
+// swiftlint:disable explicit_acl explicit_top_level_acl
+
 import PackageDescription
 
 let package = Package(
@@ -21,8 +23,7 @@ let package = Package(
     ),
   ],
   dependencies: [
-    // Swift OpenAPI Generator and Runtime
-    .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),
+    // Swift OpenAPI Runtime dependencies
     .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
     .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
   ],
@@ -42,3 +43,4 @@ let package = Package(
     ),
   ]
 )
+// swiftlint:enable explicit_acl explicit_top_level_acl

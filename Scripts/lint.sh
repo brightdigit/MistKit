@@ -73,34 +73,7 @@ fi
 
 $PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "PackageDSLKit"
 
-# Add ignore directives to generated files
-echo "Adding ignore directives to generated files..."
-GENERATED_DIR="$PACKAGE_DIR/Sources/MistKit/Generated"
-if [ -d "$GENERATED_DIR" ]; then
-	for file in "$GENERATED_DIR"/*.swift; do
-		if [ -f "$file" ]; then
-			echo "Processing $file..."
-			# Check if file already has the ignore directives
-			if ! grep -q "// periphery:ignore:all" "$file"; then
-				# Create a temporary file with the ignore directives
-				cat > "${file}.tmp" << 'EOF'
-// periphery:ignore:all
-// swift-format-ignore-file
-
-EOF
-				# Append the original file content
-				cat "$file" >> "${file}.tmp"
-				# Replace the original file
-				mv "${file}.tmp" "$file"
-				echo "Added ignore directives to $file"
-			else
-				echo "Ignore directives already present in $file"
-			fi
-		fi
-	done
-else
-	echo "Generated directory not found: $GENERATED_DIR"
-fi
+# Generated files now automatically include ignore directives via OpenAPI generator configuration
 
 if [ -z "$CI" ]; then
 	run_command $MINT_RUN periphery scan $PERIPHERY_OPTIONS --disable-update-check

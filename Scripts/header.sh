@@ -66,6 +66,12 @@ header_template="//
 
 # Loop through each Swift file in the specified directory and subdirectories
 find "$directory" -type f -name "*.swift" | while read -r file; do
+  # Skip files in the Generated directory
+  if [[ "$file" == *"/Generated/"* ]]; then
+    echo "Skipping $file (generated file)"
+    continue
+  fi
+  
   # Check if the first line is the swift-format-ignore indicator
   first_line=$(head -n 1 "$file")
   if [[ "$first_line" == "// swift-format-ignore-file" ]]; then
