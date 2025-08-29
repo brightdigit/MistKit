@@ -173,20 +173,3 @@ jobs:
           swift run mint install yonaskolb/mint
       - name: Lint
         run: ./Scripts/lint.sh
-        
-  swift-source-compat-suite:
-    name: Test Swift 6.x For Source Compatibility Suite
-    runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
-    strategy:
-      matrix:
-        container:
-          - swift:6.0
-          - swift:6.1
-          - swiftlang/swift:nightly-6.1-noble
-          - swiftlang/swift:nightly-6.2-noble
-    container: ${{ matrix.container }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run Swift 6.x tests
-        run: swift build --disable-sandbox --verbose --configuration release -Xswiftc -swift-version -Xswiftc 6
