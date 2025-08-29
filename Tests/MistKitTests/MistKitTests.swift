@@ -1,4 +1,4 @@
-import XCTest
+public import XCTest
 
 @testable import MistKit
 

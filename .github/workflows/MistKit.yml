@@ -14,9 +14,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: "noble"
-            swift-version: "5.9"
-            container: "swift:5.9-noble"
           - os: "jammy"
             swift-version: "5.9"
             container: "swift:5.9-jammy"
