@@ -65,7 +65,13 @@ jobs:
         include:
           # SPM Build Matrix
           - runs-on: macos-15
+            xcode: "/Applications/Xcode_26.0.app" 
+          - runs-on: macos-15
             xcode: "/Applications/Xcode_16.4.app"
+          - runs-on: macos-15
+            xcode: "/Applications/Xcode_16.3.app"
+          - runs-on: macos-15
+            xcode: "/Applications/Xcode_16.2.app"
 
           # macOS Build Matrix
           - type: macos
@@ -75,9 +81,24 @@ jobs:
           # iOS Build Matrix
           - type: ios
             runs-on: macos-15
-            xcode: "/Applications/Xcode_16.4.app"
+            xcode: "/Applications/Xcode_26.0.app"
             deviceName: "iPhone 16 Pro"
+            osVersion: "26.0"
+          - type: ios
+            runs-on: macos-15
+            xcode: "/Applications/Xcode_16.4.app"
+            deviceName: "iPhone 16"
             osVersion: "18.5"
+          - type: ios
+            runs-on: macos-15
+            xcode: "/Applications/Xcode_16.3.app"
+            deviceName: "iPhone 16"
+            osVersion: "18.4"
+          - type: ios
+            runs-on: macos-15
+            xcode: "/Applications/Xcode_16.2.app"
+            deviceName: "iPhone 16"
+            osVersion: "18.3" 
   
           # watchOS Build Matrix
           - type: watchos
