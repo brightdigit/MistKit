@@ -9,12 +9,47 @@ jobs:
   build-ubuntu:
     name: Build on Ubuntu
     runs-on: ubuntu-latest
-    container: swiftlang/swift:nightly-${{ matrix.swift-version }}-${{ matrix.os }}
+    container: ${{ matrix.container }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       matrix:
-        os: ["noble", "jammy"]
-        swift-version: ["6.1", "6.2"]
+        include:
+          - os: "noble"
+            swift-version: "5.9"
+            container: "swift:5.9-noble"
+          - os: "jammy"
+            swift-version: "5.9"
+            container: "swift:5.9-jammy"
+          - os: "noble"
+            swift-version: "5.10"
+            container: "swift:5.10-noble"
+          - os: "jammy"
+            swift-version: "5.10"
+            container: "swift:5.10-jammy"
+          - os: "noble"
+            swift-version: "6.0"
+            container: "swift:6.0-noble"
+          - os: "jammy"
+            swift-version: "6.0"
+            container: "swift:6.0-jammy"
+          - os: "noble"
+            swift-version: "6.1"
+            container: "swift:6.1-noble"
+          - os: "jammy"
+            swift-version: "6.1"
+            container: "swift:6.1-jammy"
+          - os: "noble"
+            swift-version: "6.1-nightly"
+            container: "swiftlang/swift:nightly-6.1-noble"
+          - os: "jammy"
+            swift-version: "6.1-nightly"
+            container: "swiftlang/swift:nightly-6.1-jammy"
+          - os: "noble"
+            swift-version: "6.2-nightly"
+            container: "swiftlang/swift:nightly-6.2-noble"
+          - os: "jammy"
+            swift-version: "6.2-nightly"
+            container: "swiftlang/swift:nightly-6.2-jammy"
     steps:
       - uses: actions/checkout@v4
       - uses: brightdigit/swift-build@v1.1.1
