@@ -131,3 +131,4 @@ disabled_rules:
     - trailing_comma
     - opening_brace
     - optional_data_string_conversion
+    - pattern_matching_keywords

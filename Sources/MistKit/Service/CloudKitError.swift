@@ -39,7 +39,7 @@ internal enum CloudKitError: LocalizedError {
     switch self {
     case .httpError(let statusCode):
       return "CloudKit API error: HTTP \(statusCode)"
-    case let .httpErrorWithDetails(statusCode, serverErrorCode, reason):
+    case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason):
       var message = "CloudKit API error: HTTP \(statusCode)"
       if let serverErrorCode = serverErrorCode {
         message += "\nServer Error Code: \(serverErrorCode)"
@@ -48,7 +48,7 @@ internal enum CloudKitError: LocalizedError {
         message += "\nReason: \(reason)"
       }
       return message
-    case let .httpErrorWithRawResponse(statusCode, rawResponse):
+    case .httpErrorWithRawResponse(let statusCode, let rawResponse):
       return "CloudKit API error: HTTP \(statusCode)\nRaw Response: \(rawResponse)"
     case .invalidResponse:
       return "Invalid response from CloudKit"

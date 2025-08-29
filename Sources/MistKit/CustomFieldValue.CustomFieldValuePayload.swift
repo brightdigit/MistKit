@@ -96,17 +96,31 @@ extension CustomFieldValue.CustomFieldValuePayload {
     try encodeValue(to: &container)
   }
 
-  /// Encode the payload value to the container
+  // swiftlint:disable:next cyclomatic_complexity
   private func encodeValue(to container: inout SingleValueEncodingContainer) throws {
     switch self {
-    case .stringValue(let val), .bytesValue(let val): try container.encode(val)
-    case .int64Value(let val): try container.encode(val)
-    case .doubleValue(let val), .dateValue(let val): try container.encode(val)
-    case .booleanValue(let val): try container.encode(val)
-    case .locationValue(let val): try container.encode(val)
-    case .referenceValue(let val): try container.encode(val)
-    case .assetValue(let val): try container.encode(val)
-    case .listValue(let val): try container.encode(val)
+    case .stringValue(let val), .bytesValue(let val):
+      try container.encode(val)
+    case .int64Value(let val):
+      try container.encode(val)
+    case .booleanValue(let val):
+      try container.encode(val)
+    case .doubleValue(let val), .dateValue(let val):
+      try encodeNumericValue(val, to: &container)
+    case .locationValue(let val):
+      try container.encode(val)
+    case .referenceValue(let val):
+      try container.encode(val)
+    case .assetValue(let val):
+      try container.encode(val)
+    case .listValue(let val):
+      try container.encode(val)
     }
+  }
+
+  private func encodeNumericValue<T: Encodable>(
+    _ value: T, to container: inout SingleValueEncodingContainer
+  ) throws {
+    try container.encode(value)
   }
 }

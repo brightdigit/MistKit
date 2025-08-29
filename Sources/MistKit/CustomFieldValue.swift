@@ -183,21 +183,30 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
     return try CustomFieldValuePayload(from: valueContainer)
   }
 
+  // swiftlint:disable:next cyclomatic_complexity
   private static func encodeValue(
     _ value: CustomFieldValuePayload,
     to container: inout KeyedEncodingContainer<CodingKeys>
   ) throws {
     switch value {
-    case .stringValue(let val): try container.encode(val, forKey: .value)
-    case .int64Value(let val): try container.encode(val, forKey: .value)
-    case .doubleValue(let val): try container.encode(val, forKey: .value)
-    case .booleanValue(let val): try container.encode(val, forKey: .value)
-    case .bytesValue(let val): try container.encode(val, forKey: .value)
-    case .dateValue(let val): try container.encode(val, forKey: .value)
-    case .locationValue(let val): try container.encode(val, forKey: .value)
-    case .referenceValue(let val): try container.encode(val, forKey: .value)
-    case .assetValue(let val): try container.encode(val, forKey: .value)
-    case .listValue(let val): try container.encode(val, forKey: .value)
+    case .stringValue(let val), .bytesValue(let val):
+      try container.encode(val, forKey: .value)
+    case .int64Value(let val):
+      try container.encode(val, forKey: .value)
+    case .doubleValue(let val):
+      try container.encode(val, forKey: .value)
+    case .booleanValue(let val):
+      try container.encode(val, forKey: .value)
+    case .dateValue(let val):
+      try container.encode(val, forKey: .value)
+    case .locationValue(let val):
+      try container.encode(val, forKey: .value)
+    case .referenceValue(let val):
+      try container.encode(val, forKey: .value)
+    case .assetValue(let val):
+      try container.encode(val, forKey: .value)
+    case .listValue(let val):
+      try container.encode(val, forKey: .value)
     }
   }
 

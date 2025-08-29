@@ -199,18 +199,27 @@ public enum FieldValue: Codable, Equatable {
     try encodeValue(to: &container)
   }
 
-  /// Encode the field value to the container
+  // swiftlint:disable:next cyclomatic_complexity
   private func encodeValue(to container: inout SingleValueEncodingContainer) throws {
     switch self {
-    case .string(let val), .bytes(let val): try container.encode(val)
-    case .int64(let val): try container.encode(val)
-    case .double(let val): try container.encode(val)
-    case .boolean(let val): try container.encode(val)
-    case .date(let val): try container.encode(val.timeIntervalSince1970 * 1_000)
-    case .location(let val): try container.encode(val)
-    case .reference(let val): try container.encode(val)
-    case .asset(let val): try container.encode(val)
-    case .list(let val): try container.encode(val)
+    case .string(let val), .bytes(let val):
+      try container.encode(val)
+    case .int64(let val):
+      try container.encode(val)
+    case .double(let val):
+      try container.encode(val)
+    case .boolean(let val):
+      try container.encode(val)
+    case .date(let val):
+      try container.encode(val.timeIntervalSince1970 * 1_000)
+    case .location(let val):
+      try container.encode(val)
+    case .reference(let val):
+      try container.encode(val)
+    case .asset(let val):
+      try container.encode(val)
+    case .list(let val):
+      try container.encode(val)
     }
   }
 }

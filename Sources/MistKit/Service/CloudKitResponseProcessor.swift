@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 import OpenAPIRuntime
 
 /// Processes CloudKit API responses and handles errors
@@ -140,7 +140,7 @@ internal struct CloudKitResponseProcessor {
 // MARK: - Error Handling
 extension CloudKitResponseProcessor {
   /// Process standard error responses common across endpoints
-  private func processStandardErrorResponse<T>(_ response: T) async throws {
+  private func processStandardErrorResponse<T>(_: T) async throws {
     // For now, throw a generic error - specific error handling should be implemented
     // per endpoint as needed to avoid the complexity of reflection-based error handling
     throw CloudKitError.invalidResponse
