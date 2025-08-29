@@ -60,7 +60,7 @@ internal struct CloudKitResponseProcessor {
       return userData
     }
   }
-  
+
   // swiftlint:disable cyclomatic_complexity
   /// Handle error cases for getCurrentUser
   private func handleGetCurrentUserErrors(_ response: Operations.getCurrentUser.Output) async throws

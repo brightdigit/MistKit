@@ -93,24 +93,20 @@ extension CustomFieldValue.CustomFieldValuePayload {
   /// Encode to encoder
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
+    try encodeValue(to: &container)
+  }
 
+  /// Encode the payload value to the container
+  private func encodeValue(to container: inout SingleValueEncodingContainer) throws {
     switch self {
-    case .stringValue(let value), .bytesValue(let value):
-      try container.encode(value)
-    case .int64Value(let value):
-      try container.encode(value)
-    case .doubleValue(let value), .dateValue(let value):
-      try container.encode(value)
-    case .booleanValue(let value):
-      try container.encode(value)
-    case .locationValue(let value):
-      try container.encode(value)
-    case .referenceValue(let value):
-      try container.encode(value)
-    case .assetValue(let value):
-      try container.encode(value)
-    case .listValue(let value):
-      try container.encode(value)
+    case .stringValue(let val), .bytesValue(let val): try container.encode(val)
+    case .int64Value(let val): try container.encode(val)
+    case .doubleValue(let val), .dateValue(let val): try container.encode(val)
+    case .booleanValue(let val): try container.encode(val)
+    case .locationValue(let val): try container.encode(val)
+    case .referenceValue(let val): try container.encode(val)
+    case .assetValue(let val): try container.encode(val)
+    case .listValue(let val): try container.encode(val)
     }
   }
 }

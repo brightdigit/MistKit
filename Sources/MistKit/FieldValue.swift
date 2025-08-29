@@ -196,26 +196,21 @@ public enum FieldValue: Codable, Equatable {
   /// Encode field value to encoder
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
+    try encodeValue(to: &container)
+  }
 
+  /// Encode the field value to the container
+  private func encodeValue(to container: inout SingleValueEncodingContainer) throws {
     switch self {
-    case .string(let value), .bytes(let value):
-      try container.encode(value)
-    case .int64(let value):
-      try container.encode(value)
-    case .double(let value):
-      try container.encode(value)
-    case .boolean(let value):
-      try container.encode(value)
-    case .date(let value):
-      try container.encode(value.timeIntervalSince1970 * 1_000)
-    case .location(let value):
-      try container.encode(value)
-    case .reference(let value):
-      try container.encode(value)
-    case .asset(let value):
-      try container.encode(value)
-    case .list(let values):
-      try container.encode(values)
+    case .string(let val), .bytes(let val): try container.encode(val)
+    case .int64(let val): try container.encode(val)
+    case .double(let val): try container.encode(val)
+    case .boolean(let val): try container.encode(val)
+    case .date(let val): try container.encode(val.timeIntervalSince1970 * 1_000)
+    case .location(let val): try container.encode(val)
+    case .reference(let val): try container.encode(val)
+    case .asset(let val): try container.encode(val)
+    case .list(let val): try container.encode(val)
     }
   }
 }

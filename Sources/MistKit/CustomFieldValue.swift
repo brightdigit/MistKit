@@ -135,81 +135,67 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
     let fieldType = try container.decodeIfPresent(FieldTypePayload.self, forKey: .type)
     self.type = fieldType
 
-    // Decode value based on the field type
     if let fieldType = fieldType {
-      switch fieldType {
-      case .string:
-        let stringValue = try container.decode(String.self, forKey: .value)
-        self.value = .stringValue(stringValue)
-
-      case .int64:
-        let intValue = try container.decode(Int64.self, forKey: .value)
-        self.value = .int64Value(intValue)
-
-      case .double:
-        let doubleValue = try container.decode(Double.self, forKey: .value)
-        self.value = .doubleValue(doubleValue)
-
-      case .bytes:
-        let bytesValue = try container.decode(String.self, forKey: .value)
-        self.value = .bytesValue(bytesValue)
-
-      case .reference:
-        let refValue = try container.decode(Components.Schemas.ReferenceValue.self, forKey: .value)
-        self.value = .referenceValue(refValue)
-
-      case .asset, .assetid:
-        // Both ASSET and ASSETID decode as AssetValue
-        let assetValue = try container.decode(Components.Schemas.AssetValue.self, forKey: .value)
-        self.value = .assetValue(assetValue)
-
-      case .location:
-        let locationValue = try container.decode(
-          Components.Schemas.LocationValue.self,
-          forKey: .value
-        )
-        self.value = .locationValue(locationValue)
-
-      case .timestamp:
-        let dateValue = try container.decode(Double.self, forKey: .value)
-        self.value = .dateValue(dateValue)
-
-      case .list:
-        let listValue = try container.decode([CustomFieldValuePayload].self, forKey: .value)
-        self.value = .listValue(listValue)
-      }
+      self.value = try Self.decodeTypedValue(from: container, type: fieldType)
     } else {
-      // Fallback decoding without type information
-      let valueContainer = try container.superDecoder(forKey: .value)
-      self.value = try CustomFieldValuePayload(from: valueContainer)
+      self.value = try Self.decodeFallbackValue(from: container)
     }
+  }
+
+  private static func decodeTypedValue(
+    from container: KeyedDecodingContainer<CodingKeys>,
+    type fieldType: FieldTypePayload
+  ) throws -> CustomFieldValuePayload {
+    let decoder = fieldTypeDecoders[fieldType] ?? fieldTypeDecoders[.string]!
+    return try decoder(container)
+  }
+
+  private static let fieldTypeDecoders:
+    [FieldTypePayload: (KeyedDecodingContainer<CodingKeys>) throws -> CustomFieldValuePayload] = [
+      .string: { .stringValue(try $0.decode(String.self, forKey: .value)) },
+      .int64: { .int64Value(try $0.decode(Int64.self, forKey: .value)) },
+      .double: { .doubleValue(try $0.decode(Double.self, forKey: .value)) },
+      .bytes: { .bytesValue(try $0.decode(String.self, forKey: .value)) },
+      .reference: {
+        .referenceValue(try $0.decode(Components.Schemas.ReferenceValue.self, forKey: .value))
+      },
+      .asset: { .assetValue(try $0.decode(Components.Schemas.AssetValue.self, forKey: .value)) },
+      .assetid: { .assetValue(try $0.decode(Components.Schemas.AssetValue.self, forKey: .value)) },
+      .location: {
+        .locationValue(try $0.decode(Components.Schemas.LocationValue.self, forKey: .value))
+      },
+      .timestamp: { .dateValue(try $0.decode(Double.self, forKey: .value)) },
+      .list: { .listValue(try $0.decode([CustomFieldValuePayload].self, forKey: .value)) },
+    ]
+
+  private static func decodeFallbackValue(
+    from container: KeyedDecodingContainer<CodingKeys>
+  ) throws -> CustomFieldValuePayload {
+    let valueContainer = try container.superDecoder(forKey: .value)
+    return try CustomFieldValuePayload(from: valueContainer)
   }
 
   internal func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encodeIfPresent(type, forKey: .type)
+    try Self.encodeValue(value, to: &container)
+  }
 
+  private static func encodeValue(
+    _ value: CustomFieldValuePayload,
+    to container: inout KeyedEncodingContainer<CodingKeys>
+  ) throws {
     switch value {
-    case .stringValue(let stringValue):
-      try container.encode(stringValue, forKey: .value)
-    case .int64Value(let intValue):
-      try container.encode(intValue, forKey: .value)
-    case .doubleValue(let doubleValue):
-      try container.encode(doubleValue, forKey: .value)
-    case .booleanValue(let boolValue):
-      try container.encode(boolValue, forKey: .value)
-    case .bytesValue(let bytesValue):
-      try container.encode(bytesValue, forKey: .value)
-    case .dateValue(let dateValue):
-      try container.encode(dateValue, forKey: .value)
-    case .locationValue(let locationValue):
-      try container.encode(locationValue, forKey: .value)
-    case .referenceValue(let refValue):
-      try container.encode(refValue, forKey: .value)
-    case .assetValue(let assetValue):
-      try container.encode(assetValue, forKey: .value)
-    case .listValue(let listValue):
-      try container.encode(listValue, forKey: .value)
+    case .stringValue(let val): try container.encode(val, forKey: .value)
+    case .int64Value(let val): try container.encode(val, forKey: .value)
+    case .doubleValue(let val): try container.encode(val, forKey: .value)
+    case .booleanValue(let val): try container.encode(val, forKey: .value)
+    case .bytesValue(let val): try container.encode(val, forKey: .value)
+    case .dateValue(let val): try container.encode(val, forKey: .value)
+    case .locationValue(let val): try container.encode(val, forKey: .value)
+    case .referenceValue(let val): try container.encode(val, forKey: .value)
+    case .assetValue(let val): try container.encode(val, forKey: .value)
+    case .listValue(let val): try container.encode(val, forKey: .value)
     }
   }
 }
