@@ -84,21 +84,26 @@ jobs:
             xcode: "/Applications/Xcode_26.0.app"
             deviceName: "iPhone 16 Pro"
             osVersion: "26.0"
+            download-platform: true
+            
           - type: ios
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.4.app"
             deviceName: "iPhone 16"
             osVersion: "18.5"
+            
           - type: ios
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.3.app"
             deviceName: "iPhone 16"
             osVersion: "18.4"
+            
           - type: ios
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "iPhone 16"
             osVersion: "18.2" 
+            download-platform: true
   
           # watchOS Build Matrix
           - type: watchos
@@ -132,6 +137,7 @@ jobs:
           xcode: ${{ matrix.xcode }}
           deviceName: ${{ matrix.deviceName }}
           osVersion: ${{ matrix.osVersion }}
+          download-platform: ${{ martix.download-platform }}
           
       # Common Coverage Steps
       - name: Process Coverage
