@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
 /// Represents a CloudKit field value as defined in the CloudKit Web Services API
 public enum FieldValue: Codable, Equatable {
