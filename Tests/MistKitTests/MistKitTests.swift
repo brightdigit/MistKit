@@ -2,7 +2,9 @@ public import XCTest
 
 @testable import MistKit
 
+/// Test suite for MistKit framework functionality
 public final class MistKitTests: XCTestCase {
+  /// Tests MistKitConfiguration initialization with required parameters
   public func testConfigurationInitialization() {
     // Given
     let container = "iCloud.com.example.app"
@@ -25,11 +27,13 @@ public final class MistKitTests: XCTestCase {
     XCTAssertEqual(configuration.serverURL.absoluteString, "https://api.apple-cloudkit.com")
   }
 
+  /// Tests Environment enum raw values
   public func testEnvironmentRawValues() {
     XCTAssertEqual(Environment.development.rawValue, "development")
     XCTAssertEqual(Environment.production.rawValue, "production")
   }
 
+  /// Tests Database enum raw values
   public func testDatabaseRawValues() {
     XCTAssertEqual(Database.public.rawValue, "public")
     XCTAssertEqual(Database.private.rawValue, "private")
@@ -38,32 +42,38 @@ public final class MistKitTests: XCTestCase {
 
   // MARK: - FieldValue Tests
 
+  /// Tests FieldValue string type creation and equality
   public func testFieldValueString() {
     let value = FieldValue.string("test")
     XCTAssertEqual(value, .string("test"))
   }
 
+  /// Tests FieldValue int64 type creation and equality
   public func testFieldValueInt64() {
     let value = FieldValue.int64(123)
     XCTAssertEqual(value, .int64(123))
   }
 
+  /// Tests FieldValue double type creation and equality
   public func testFieldValueDouble() {
     let value = FieldValue.double(3.14)
     XCTAssertEqual(value, .double(3.14))
   }
 
+  /// Tests FieldValue boolean type creation and equality
   public func testFieldValueBoolean() {
     let value = FieldValue.boolean(true)
     XCTAssertEqual(value, .boolean(true))
   }
 
+  /// Tests FieldValue date type creation and equality
   public func testFieldValueDate() {
     let date = Date()
     let value = FieldValue.date(date)
     XCTAssertEqual(value, .date(date))
   }
 
+  /// Tests FieldValue location type creation and equality
   public func testFieldValueLocation() {
     let location = FieldValue.Location(
       latitude: 37.7749,
@@ -74,12 +84,14 @@ public final class MistKitTests: XCTestCase {
     XCTAssertEqual(value, .location(location))
   }
 
+  /// Tests FieldValue reference type creation and equality
   public func testFieldValueReference() {
     let reference = FieldValue.Reference(recordName: "test-record")
     let value = FieldValue.reference(reference)
     XCTAssertEqual(value, .reference(reference))
   }
 
+  /// Tests FieldValue asset type creation and equality
   public func testFieldValueAsset() {
     let asset = FieldValue.Asset(
       fileChecksum: "abc123",
@@ -90,12 +102,14 @@ public final class MistKitTests: XCTestCase {
     XCTAssertEqual(value, .asset(asset))
   }
 
+  /// Tests FieldValue list type creation and equality
   public func testFieldValueList() {
     let list = [FieldValue.string("item1"), FieldValue.int64(42)]
     let value = FieldValue.list(list)
     XCTAssertEqual(value, .list(list))
   }
 
+  /// Tests FieldValue JSON encoding and decoding
   public func testFieldValueEncodable() throws {
     let value = FieldValue.string("test")
     let data = try JSONEncoder().encode(value)
@@ -105,6 +119,7 @@ public final class MistKitTests: XCTestCase {
 
   // MARK: - RecordInfo Tests
 
+  /// Tests RecordInfo initialization from Components.Schemas.Record
   public func testRecordInfoInitialization() {
     // Create a mock record with fields
     let mockRecord = Components.Schemas.Record(
@@ -137,6 +152,7 @@ public final class MistKitTests: XCTestCase {
     }
   }
 
+  /// Tests RecordInfo initialization with empty record data
   public func testRecordInfoWithUnknownRecord() {
     let mockRecord = Components.Schemas.Record()
     let recordInfo = RecordInfo(from: mockRecord)

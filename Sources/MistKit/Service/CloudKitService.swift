@@ -27,14 +27,17 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
 import OpenAPIRuntime
 import OpenAPIURLSession
 
 /// Service for interacting with CloudKit Web Services
 public struct CloudKitService {
+  /// The CloudKit container identifier
   public let containerIdentifier: String
+  /// The API token for authentication
   public let apiToken: String
+  /// The CloudKit environment (development or production)
   public let environment: String = "development"
 
   private let mistKitClient: MistKitClient
