@@ -1,5 +1,5 @@
 //
-//  CharacterMapEncoder.swift
+//  MistKitConfiguration.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -29,34 +29,46 @@
 
 public import Foundation
 
-/// A token encoder that replaces specific characters with URL-encoded equivalents
-public struct CharacterMapEncoder: Sendable {
-  /// Default character map for CloudKit web authentication tokens
-  public static let defaultCharacterMap: [Character: String] = [
-    "+": "%2B",
-    "/": "%2F",
-    "=": "%3D",
-  ]
+/// Configuration for MistKit client
+public struct MistKitConfiguration: Sendable {
+  /// The CloudKit container identifier (e.g., "iCloud.com.example.app")
+  public let container: String
 
-  /// Character mapping for encoding tokens
-  private let characterMap: [Character: String]
+  /// The CloudKit environment
+  public let environment: Environment
 
-  /// Initialize with a custom character map
-  /// - Parameter characterMap: The character mapping to use for encoding
-  public init(characterMap: [Character: String] = defaultCharacterMap) {
-    self.characterMap = characterMap
+  /// The CloudKit database type
+  public let database: Database
+
+  /// API Token for authentication
+  public let apiToken: String
+
+  /// Optional Web Auth Token for user authentication
+  public let webAuthToken: String?
+
+  /// Protocol version (currently "1")
+  public let version: String = "1"
+
+  /// Computed server URL based on configuration
+  public var serverURL: URL {
+    guard let url = URL(string: "https://api.apple-cloudkit.com") else {
+      fatalError("Invalid CloudKit API URL")
+    }
+    return url
   }
 
-  /// Encode a token by replacing characters according to the character map
-  /// - Parameter token: The token to encode
-  /// - Returns: The encoded token with characters replaced
-  public func encode(_ token: String) -> String {
-    var encodedToken = token
-
-    for (character, replacement) in characterMap {
-      encodedToken = encodedToken.replacingOccurrences(of: String(character), with: replacement)
-    }
-
-    return encodedToken
+  /// Initialize MistKit configuration
+  public init(
+    container: String,
+    environment: Environment,
+    database: Database = .private,
+    apiToken: String,
+    webAuthToken: String? = nil
+  ) {
+    self.container = container
+    self.environment = environment
+    self.database = database
+    self.apiToken = apiToken
+    self.webAuthToken = webAuthToken
   }
 }

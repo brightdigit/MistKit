@@ -15,7 +15,7 @@
             background-color: #f5f5f7;
         }
         .container {
-            text-align: center;
+            {# text-align: center; #}
             background: white;
             padding: 40px;
             border-radius: 12px;
@@ -33,26 +33,7 @@
             line-height: 1.5;
             margin-bottom: 30px;
         }
-        #signin-button {
-            display: inline-block;
-            background-color: #007aff;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.2s;
-        }
-        #signin-button:hover {
-            background-color: #0051d5;
-        }
-        #signin-button:disabled {
-            background-color: #86868b;
-            cursor: not-allowed;
-        }
+
         .status {
             margin-top: 20px;
             padding: 12px;
@@ -126,15 +107,29 @@
         .copy-button:hover {
             background-color: #0c4a6e;
         }
+        .signout-button {
+            background-color: #ff3b30;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .signout-button:hover {
+            background-color: #d70015;
+        }
     </style>
-    <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js"></script>
+    <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js" onerror="console.log('Failed to load CloudKit.js')"></script>
 </head>
 <body>
     <div class="container">
         <h1>MistKit CloudKit Example</h1>
         <p>Sign in with your Apple ID to test CloudKit Web Services authentication and API access.</p>
         
-        <button id="signin-button">Sign In with Apple ID</button>
+        <div id="signin-button"></div>
+        <button id="signout-button" class="signout-button" style="display: none;">Sign Out</button>
         
         <div id="loading" class="loading">Authenticating...</div>
         <div id="status"></div>
@@ -143,25 +138,34 @@
 
     <script>
         // Configure CloudKit
-        CloudKit.configure({
-            containers: [{
-                containerIdentifier: 'iCloud.com.brightdigit.MistDemo',
-                apiTokenAuth: {
-                    apiToken: '296c503003846ef692cb5b56c4a63cc1d27fb952eebe259d73e692759286dfa6',
-                    persist: true,
-                    signInButton: {
-                        id: 'signin-button',
-                        theme: 'black'
-                    }
-                },
-                environment: 'development'
-            }]
-        });
+        // ⚠️ IMPORTANT: Replace these values with your own:
+        // 1. Get your container identifier from CloudKit Console
+        // 2. Generate a valid API token from CloudKit Console > API Access
+        try {
+            CloudKit.configure({
+                containers: [{
+                    containerIdentifier: 'iCloud.com.brightdigit.MistDemo', // ← Replace with your container ID
+                    apiTokenAuth: {
+                        apiToken: '296c503003846ef692cb5b56c4a63cc1d27fb952eebe259d73e692759286dfa6', // ← Replace with your API token
+                        persist: true,
+                        signInButton: {
+                            id: 'signin-button',
+                            theme: 'black'
+                        }
+                    },
+                    environment: 'development'
+                }]
+            });
+            console.log('CloudKit configured successfully');
+        } catch (error) {
+            console.error('CloudKit configuration error:', error);
+        }
 
         const container = CloudKit.getDefaultContainer();
         const statusDiv = document.getElementById('status');
         const userInfoDiv = document.getElementById('user-info');
         const signinButton = document.getElementById('signin-button');
+        const signoutButton = document.getElementById('signout-button');
         const loadingDiv = document.getElementById('loading');
 
         // Store the web auth token when received
@@ -169,6 +173,9 @@
         let currentUserIdentity = null;
         let tokenPromiseResolve = null;
         let tokenPromiseReject = null;
+
+        // Track if authentication is already in progress
+        let authenticationInProgress = false;
 
         // Listen for web auth token from CloudKit
         window.addEventListener('message', function(event) {
@@ -185,9 +192,18 @@
                     tokenPromiseReject = null;
                 }
                 
-                // If we have user identity and token, proceed with authentication
-                if (currentUserIdentity && webAuthToken) {
+                // Debug the condition check
+                console.log('PostMessage check - currentUserIdentity:', currentUserIdentity);
+                console.log('PostMessage check - webAuthToken exists:', !!webAuthToken);
+                console.log('PostMessage check - authenticationInProgress:', authenticationInProgress);
+                
+                // If we have user identity and token, and auth not already in progress
+                if (currentUserIdentity && webAuthToken && !authenticationInProgress) {
+                    console.log('All conditions met, starting authentication...');
+                    authenticationInProgress = true;
                     handleAuthenticationWithToken(currentUserIdentity, webAuthToken);
+                } else {
+                    console.log('Conditions not met, waiting...');
                 }
             }
         });
@@ -200,23 +216,81 @@
 
         function showLoading(show) {
             loadingDiv.style.display = show ? 'block' : 'none';
-            signinButton.disabled = show;
+            //signinButton.disabled = show;
         }
 
         async function handleAuthentication(userIdentity) {
             console.log('User signed in:', userIdentity);
             currentUserIdentity = userIdentity;
             
-            if (webAuthToken) {
-                // We already have the token, proceed immediately
+            // Check if we already have a token from postMessage
+            if (webAuthToken && !authenticationInProgress) {
+                console.log('Token already available from postMessage, starting authentication...');
+                authenticationInProgress = true;
                 await handleAuthenticationWithToken(userIdentity, webAuthToken);
-            } else {
-                // For already authenticated users, we need to trigger a CloudKit operation
-                // to get the web auth token via postMessage
-                showStatus('Retrieving authentication token...');
-                showLoading(true);
-                
-                try {
+                return; // Exit early, don't do the other detection attempts
+            }
+            
+            // Check localStorage for persisted CloudKit session data
+            try {
+                console.log('Checking localStorage for CloudKit session...');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.includes('cloudkit') || key && key.includes('ck')) {
+                        const value = localStorage.getItem(key);
+                        console.log(`LocalStorage ${key}:`, value);
+                        
+                        // Try to parse the value and look for session tokens
+                        try {
+                            const parsed = JSON.parse(value);
+                            if (parsed && (parsed.ckSession || parsed.ckWebAuthToken || parsed.webAuthToken)) {
+                                const token = parsed.ckSession || parsed.ckWebAuthToken || parsed.webAuthToken;
+                                console.log('Found token in localStorage:', token);
+                                webAuthToken = token;
+                                authenticationInProgress = true;
+                                await handleAuthenticationWithToken(userIdentity, token);
+                                return;
+                            }
+                        } catch (parseError) {
+                            // Value might not be JSON, that's fine
+                        }
+                    }
+                }
+                console.log('No CloudKit session found in localStorage');
+            } catch (localStorageError) {
+                console.log('Error checking localStorage:', localStorageError);
+            }
+            
+            // Check cookies for CloudKit session data
+            try {
+                console.log('Checking cookies for CloudKit session...');
+                const cookies = document.cookie.split(';');
+                for (const cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name && (name.includes('cloudkit') || name.includes('ck') || name.includes('iCloud'))) {
+                        console.log(`Cookie ${name}:`, value?.substring(0, 100) + '...');
+                        
+                        // The CloudKit cookie appears to be the token directly
+                        if (value && value.startsWith('158__54__')) {
+                            console.log('Found CloudKit token in cookie:', name);
+                            webAuthToken = decodeURIComponent(value);
+                            authenticationInProgress = true;
+                            await handleAuthenticationWithToken(userIdentity, webAuthToken);
+                            return;
+                        }
+                    }
+                }
+                console.log('No CloudKit session found in cookies');
+            } catch (cookieError) {
+                console.log('Error checking cookies:', cookieError);
+            }
+            
+            // Always try to get fresh token for each authentication
+            // (don't rely on cached webAuthToken from previous runs)
+            showStatus('Retrieving authentication token...');
+            showLoading(true);
+            
+            try {
                     // Create a promise that will be resolved when the token is received
                     const tokenPromise = new Promise((resolve, reject) => {
                         tokenPromiseResolve = resolve;
@@ -234,45 +308,58 @@
                     
                     // Try multiple approaches to trigger the web auth token
                     
-                    // Approach 1: Try to access the session directly
+                    // Approach 1: Try to access the session and internal auth state
                     try {
                         console.log('Attempting to access CloudKit session...');
-                        // Check if we can access the session through the container
-                        if (container.session && container.session.webAuthToken) {
-                            webAuthToken = container.session.webAuthToken;
-                            console.log('Web Auth Token found in container session:', webAuthToken);
-                            await handleAuthenticationWithToken(userIdentity, webAuthToken);
-                            return;
+                        
+                        // Check various potential locations for the web auth token
+                        const possibleTokenLocations = [
+                            container.session?.webAuthToken,
+                            container.session?.ckWebAuthToken, 
+                            container.session?.authToken,
+                            container._session?.webAuthToken,
+                            container._auth?.webAuthToken,
+                            container._auth?._ckSession,  // This is where it actually is!
+                            container._ckSession
+                        ];
+                        
+                        for (let i = 0; i < possibleTokenLocations.length; i++) {
+                            const token = possibleTokenLocations[i];
+                            if (token) {
+                                console.log(`Web Auth Token found at location ${i}:`, token);
+                                webAuthToken = token;
+                                await handleAuthenticationWithToken(userIdentity, webAuthToken);
+                                return;
+                            }
                         }
                         
-                        // Try to access other potential session properties
-                        console.log('Container session object:', container.session);
-                        if (container.session) {
-                            console.log('Session keys:', Object.keys(container.session));
-                        }
+                        console.log('Container object keys:', Object.keys(container));
+                        console.log('Container session:', container.session);
                     } catch (sessionError) {
                         console.log('Could not access session directly:', sessionError);
                     }
                     
-                    // Approach 2: Try to trigger a user info request
+                    // Approach 2: Try to get current user identity (this might trigger token)
                     try {
-                        console.log('Attempting to fetch user info...');
-                        await container.fetchUserInfo();
+                        console.log('Attempting to get current user...');
+                        const currentUser = await container.getCurrentUserIdentity();
+                        console.log('Current user identity:', currentUser);
                     } catch (userInfoError) {
-                        console.log('User info fetch failed:', userInfoError);
+                        console.log('Current user fetch failed:', userInfoError);
                     }
                     
-                    // Approach 3: Try database query with different record type
+                    // Approach 3: Try database query with a valid record type
                     try {
                         console.log('Attempting database query...');
                         const database = container.getDatabaseWithDatabaseScope(CloudKit.DatabaseScope.PRIVATE);
                         
                         // Try to perform a simple query - this should trigger the auth token
                         await database.performQuery({
-                            recordType: 'CKRecord'
+                            recordType: 'Users' // Use a more standard record type
                         });
                     } catch (queryError) {
-                        console.log('Database query failed:', queryError);
+                        console.log('Database query failed (expected):', queryError);
+                        // This is expected to fail, but might trigger the token
                     }
                     
                     // Approach 4: Try to force a fresh authentication by signing out and back in
@@ -305,17 +392,20 @@
                     showStatus('Failed to retrieve authentication token. Please try signing out and back in.', true);
                     showLoading(false);
                 }
-            }
         }
 
         async function handleAuthenticationWithToken(userIdentity, token) {
             try {
+                console.log('Starting authentication with token...');
                 showLoading(true);
                 statusDiv.style.display = 'none';
                 userInfoDiv.innerHTML = '';
 
                 if (userIdentity && token) {
                     showStatus('Successfully authenticated with web token!');
+                    
+                    // Show sign out button
+                    signoutButton.style.display = 'inline-block';
                     
                     console.log('User Identity:', userIdentity);
                     console.log('Web Auth Token:', token);
@@ -347,6 +437,7 @@
                 console.error('Authentication error:', error);
             } finally {
                 showLoading(false);
+                authenticationInProgress = false; // Reset the flag
             }
         }
 
@@ -417,16 +508,79 @@
             });
         }
 
+        // Sign out functionality
+        async function signOutUser() {
+            try {
+                console.log('Signing out user...');
+                await container.signOut();
+                
+                // Clear application state
+                webAuthToken = null;
+                currentUserIdentity = null;
+                authenticationInProgress = false;
+                
+                // Update UI
+                showStatus('Signed out successfully.');
+                userInfoDiv.innerHTML = '';
+                signoutButton.style.display = 'none';
+                
+                // Clear any CloudKit cookies
+                const cookies = document.cookie.split(';');
+                for (const cookie of cookies) {
+                    const [name] = cookie.trim().split('=');
+                    if (name && (name.includes('cloudkit') || name.includes('ck') || name.includes('iCloud'))) {
+                        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                        console.log('Cleared cookie:', name);
+                    }
+                }
+                
+                console.log('Sign out complete');
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showStatus('Sign out failed: ' + error.message, true);
+            }
+        }
+
+        // Add sign out button event listener
+        signoutButton.addEventListener('click', signOutUser);
+
         // Initialize CloudKit authentication
         async function initializeCloudKit() {
             try {
+                console.log('Initializing CloudKit with container:', 'iCloud.com.brightdigit.MistDemo');
+                
+                // Check if CloudKit is properly loaded
+                if (typeof CloudKit === 'undefined') {
+                    throw new Error('CloudKit.js failed to load');
+                }
+                
+                // Debug: Check authentication state before setUpAuth
+                console.log('Container auth state before setup:', container._auth);
+                
                 // Set up authentication and check if user is already signed in
                 const userIdentity = await container.setUpAuth();
+                
+                // Debug: Check authentication state after setUpAuth
+                console.log('Container auth state after setup:', container._auth);
+                console.log('User identity from setUpAuth:', userIdentity);
+                
+                // Check if we have the session token directly from the auth object
+                const sessionToken = container._auth?._ckSession;
+                console.log('Session token from auth:', sessionToken);
                 
                 if (userIdentity) {
                     // User is already signed in
                     showStatus('Already signed in. Processing authentication...');
-                    await handleAuthentication(userIdentity);
+                    
+                    // If we have the session token, use it directly
+                    if (sessionToken && !authenticationInProgress) {
+                        console.log('Using session token from container._auth._ckSession');
+                        webAuthToken = sessionToken;
+                        authenticationInProgress = true;
+                        await handleAuthenticationWithToken(userIdentity, sessionToken);
+                    } else {
+                        await handleAuthentication(userIdentity);
+                    }
                 } else {
                     // User is not signed in, wait for sign-in
                     showStatus('Please click "Sign In with Apple ID" to authenticate.');
@@ -442,14 +596,24 @@
                     console.log('User signed out');
                     showStatus('Signed out successfully.');
                     userInfoDiv.innerHTML = '';
-                    signinButton.textContent = 'Sign In with Apple ID';
+                    signoutButton.style.display = 'none';
+                    //signinButton.textContent = 'Sign In with Apple ID';
                 });
 
             } catch (error) {
                 console.error('CloudKit setup error:', error);
-                showStatus('CloudKit setup failed: ' + error.message, true);
+                if (error.message && error.message.includes('421')) {
+                    showStatus('CloudKit container setup issue. Check CloudKit Console for: 1) Container exists 2) Development environment enabled 3) Web services configured', true);
+                } else {
+                    showStatus('CloudKit setup failed: ' + error.message, true);
+                }
             }
         }
+
+        // Add error handling for CloudKit
+        window.addEventListener('error', function(event) {
+            console.log('Global error:', event.error, event.filename, event.lineno);
+        });
 
         // Initialize CloudKit when page loads
         initializeCloudKit();
