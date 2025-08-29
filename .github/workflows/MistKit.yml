@@ -9,35 +9,19 @@ jobs:
   build-ubuntu:
     name: Build on Ubuntu
     runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
+    container: ${{ matrix.swift.nightly && format('swiftlang/swift:nightly-{0}-{1}', matrix.swift.version, matrix.os) || format('swift:{0}-{1}', matrix.swift.version, matrix.os) }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       matrix:
-        include:
-          - os: "noble"
-            swift-version: "6.0"
-            container: "swift:6.0-noble"
-          - os: "jammy"
-            swift-version: "6.0"
-            container: "swift:6.0-jammy"
-          - os: "noble"
-            swift-version: "6.1"
-            container: "swift:6.1-noble"
-          - os: "jammy"
-            swift-version: "6.1"
-            container: "swift:6.1-jammy"
-          - os: "noble"
-            swift-version: "6.1-nightly"
-            container: "swiftlang/swift:nightly-6.1-noble"
-          - os: "jammy"
-            swift-version: "6.1-nightly"
-            container: "swiftlang/swift:nightly-6.1-jammy"
-          - os: "noble"
-            swift-version: "6.2-nightly"
-            container: "swiftlang/swift:nightly-6.2-noble"
-          - os: "jammy"
-            swift-version: "6.2-nightly"
-            container: "swiftlang/swift:nightly-6.2-jammy"
+        os: [noble, jammy]
+        swift:
+          - version: "6.0"
+          - version: "6.1"
+          - version: "6.1"
+            nightly: true
+          - version: "6.2"
+            nightly: true
+    
     steps:
       - uses: actions/checkout@v4
       - uses: brightdigit/swift-build@v1.1.1
@@ -49,7 +33,7 @@ jobs:
         uses: codecov/codecov-action@v4       
         with:
           fail_ci_if_error: true
-          flags: swift-${{ matrix.swift-version }},ubuntu
+          flags: swift-${{ matrix.swift.version }}-${{ matrix.os }}${{ matrix.swift.nightly && 'nightly' || '' }}
           verbose: true        
           token: ${{ secrets.CODECOV_TOKEN }}  
           files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}    
@@ -137,7 +121,7 @@ jobs:
           xcode: ${{ matrix.xcode }}
           deviceName: ${{ matrix.deviceName }}
           osVersion: ${{ matrix.osVersion }}
-          download-platform: ${{ martix.download-platform }}
+          download-platform: ${{ matrix.download-platform }}
           
       # Common Coverage Steps
       - name: Process Coverage
