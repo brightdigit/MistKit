@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
 extension CustomFieldValue.CustomFieldValuePayload {
   /// Initialize from decoder

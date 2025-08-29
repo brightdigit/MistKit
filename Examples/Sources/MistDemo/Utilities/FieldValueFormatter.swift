@@ -5,7 +5,7 @@
 //  Created by Leo Dion on 7/9/25.
 //
 
-import Foundation
+public import Foundation
 import MistKit
 
 /// Utility for formatting FieldValue objects for display

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
 internal enum CloudKitError: LocalizedError {
   case httpError(statusCode: Int)

@@ -15,12 +15,6 @@ jobs:
       matrix:
         include:
           - os: "noble"
-            swift-version: "5.10"
-            container: "swift:5.10-noble"
-          - os: "jammy"
-            swift-version: "5.10"
-            container: "swift:5.10-jammy"
-          - os: "noble"
             swift-version: "6.0"
             container: "swift:6.0-noble"
           - os: "jammy"

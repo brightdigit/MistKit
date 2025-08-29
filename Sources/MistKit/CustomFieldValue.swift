@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 import OpenAPIRuntime
 
 /// Custom implementation of FieldValue with proper ASSETID handling

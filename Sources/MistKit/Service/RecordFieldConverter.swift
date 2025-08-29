@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
 /// Utilities for converting CloudKit field values to FieldValue types
 internal enum RecordFieldConverter {
