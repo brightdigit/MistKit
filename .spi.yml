@@ -1,9 +1,5 @@
 version: 1
 builder:
   configs:
-  - platform: linux
-    swift_version: '5.2'
-    image: brightdigit/mistkit-sql:5.2-focal
-  - platform: linux
-    swift_version: '5.3'
-    image: brightdigit/mistkit-sql:5.3-focal
+    - documentation_targets: [PackageDSLKit]    
+      swift_version: 6.0    

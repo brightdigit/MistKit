@@ -1,7 +1,5 @@
 opt_in_rules:
-  - anyobject_protocol
   - array_init
-  - attributes
   - closure_body_length
   - closure_end_indentation
   - closure_spacing
@@ -22,18 +20,16 @@ opt_in_rules:
   - expiring_todo
   - explicit_acl
   - explicit_init
-  - explicit_self
   - explicit_top_level_acl
-  - fallthrough
+  # - fallthrough
   - fatal_error_message
-  - file_header
   - file_name
   - file_name_no_space
   - file_types_order
   - first_where
   - flatmap_over_map_reduce
   - force_unwrapping
-  - function_default_parameter_at_end
+#  - function_default_parameter_at_end
   - ibinspectable_in_extension
   - identical_operands
   - implicit_return
@@ -79,45 +75,60 @@ opt_in_rules:
   - sorted_first_last
   - sorted_imports
   - static_operator
-  - strict_fileprivate
   - strong_iboutlet
-  - switch_case_on_newline
   - toggle_bool
-  - trailing_closure
+#  - trailing_closure
   - type_contents_order
   - unavailable_function
   - unneeded_parentheses_in_closure_argument
   - unowned_variable_capture
   - untyped_error_in_catch
-  - unused_declaration
-  - unused_import
   - vertical_parameter_alignment_on_call
-  - vertical_whitespace_between_cases
   - vertical_whitespace_closing_braces
   - vertical_whitespace_opening_braces
   - xct_specific_matcher
   - yoda_condition
+analyzer_rules:
+  - unused_import  
+  - unused_declaration
 cyclomatic_complexity:
   - 6
-  - 9
+  - 12
 file_length:
-  - 200
-  - 550
+  warning: 225
+  error: 300
 function_body_length:
-  - 15
-  - 25
+  - 50
+  - 76
 function_parameter_count: 8
 line_length:
-  - 90
-  - 90
+  - 108
+  - 200
+closure_body_length:
+  - 50
+  - 60
 identifier_name:
   excluded:
     - id
+    - no
 excluded:
-  - Tests/*/XCTestManifests.swift
-  - Tests/MistKitTests/XCTestManifests.swift
   - DerivedData
   - .build
-  - Tests/LinuxMain.swift
+  - Mint
+  - Examples
+  - Sources/MistKit/Generated
 indentation_width:
   indentation_width: 2
+file_name:
+    severity: error
+fatal_error_message:
+    severity: error
+disabled_rules:
+    - nesting
+    - implicit_getter
+    - switch_case_alignment
+    - closure_parameter_position
+    - trailing_comma
+    - opening_brace
+    - optional_data_string_conversion
+    - pattern_matching_keywords

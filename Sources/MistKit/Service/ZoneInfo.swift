@@ -1,5 +1,5 @@
 //
-//  CharacterMapEncoder.swift
+//  ZoneInfo.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,36 +27,19 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+/// Zone information from CloudKit
+public struct ZoneInfo: Encodable {
+  /// The zone name
+  public let zoneName: String
+  /// The owner record name
+  public let ownerRecordName: String?
+  /// The zone capabilities
+  public let capabilities: [String]
 
-/// A token encoder that replaces specific characters with URL-encoded equivalents
-public struct CharacterMapEncoder: Sendable {
-  /// Default character map for CloudKit web authentication tokens
-  public static let defaultCharacterMap: [Character: String] = [
-    "+": "%2B",
-    "/": "%2F",
-    "=": "%3D",
-  ]
-
-  /// Character mapping for encoding tokens
-  private let characterMap: [Character: String]
-
-  /// Initialize with a custom character map
-  /// - Parameter characterMap: The character mapping to use for encoding
-  public init(characterMap: [Character: String] = defaultCharacterMap) {
-    self.characterMap = characterMap
-  }
-
-  /// Encode a token by replacing characters according to the character map
-  /// - Parameter token: The token to encode
-  /// - Returns: The encoded token with characters replaced
-  public func encode(_ token: String) -> String {
-    var encodedToken = token
-
-    for (character, replacement) in characterMap {
-      encodedToken = encodedToken.replacingOccurrences(of: String(character), with: replacement)
-    }
-
-    return encodedToken
+  /// Initialize zone information
+  public init(zoneName: String, ownerRecordName: String?, capabilities: [String]) {
+    self.zoneName = zoneName
+    self.ownerRecordName = ownerRecordName
+    self.capabilities = capabilities
   }
 }
