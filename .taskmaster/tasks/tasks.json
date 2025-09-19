@@ -319,7 +319,7 @@
             "description": "Create the TokenManager protocol and supporting types for authentication management",
             "dependencies": [],
             "details": "Define a TokenManager protocol in Sources/MistKit/Authentication/TokenManager.swift with async methods for token validation, refresh, and retrieval. Create an AuthenticationMethod enum with cases for apiToken(String), webAuthToken(apiToken: String, webToken: String), and serverToServer(keyID: String, privateKey: Data). Create a TokenCredentials struct that encapsulates all authentication-related data. Ensure all types conform to Sendable for concurrent access safety.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test the protocol conformance with mock implementations. Test that all types are properly Sendable. Verify enum case creation and pattern matching works correctly."
           },
           {
@@ -330,7 +330,7 @@
               "5.1"
             ],
             "details": "Create APITokenManager and WebAuthTokenManager classes conforming to TokenManager protocol in Sources/MistKit/Authentication/. APITokenManager handles simple API token storage and validation. WebAuthTokenManager manages both API and web auth tokens, using the existing CharacterMapEncoder for web token encoding. Implement token validation logic checking for expiry if applicable. Add token refresh stub methods that can be extended later. Store tokens securely in memory with actor isolation for thread safety.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test token storage and retrieval. Verify CharacterMapEncoder is properly used for web tokens. Test concurrent access patterns with async/await. Mock token validation scenarios including expired tokens."
           },
           {
@@ -341,7 +341,7 @@
               "5.1"
             ],
             "details": "Create ServerToServerAuthManager in Sources/MistKit/Authentication/ServerToServerAuthManager.swift. Import CryptoKit for P-256 ECDSA operations. Implement private key loading from Data or PEM format. Create request signing method that generates ISO8601 timestamp, constructs the signature payload ([Current Date]:[Request Body]:[Web Service URL]), signs with P-256 private key, and returns base64-encoded signature. Implement header construction for X-Apple-CloudKit-Request-KeyID, X-Apple-CloudKit-Request-ISO8601Date, and X-Apple-CloudKit-Request-SignatureV1. Add key rotation support with multiple key storage.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test ECDSA signature generation with known test vectors. Verify ISO8601 date formatting matches CloudKit requirements. Test header construction with various request types. Mock key rotation scenarios. Test PEM key parsing and validation."
           },
           {
@@ -354,7 +354,7 @@
               "5.3"
             ],
             "details": "Refactor AuthenticationMiddleware to accept a TokenManager instance instead of MistKitConfiguration directly. Add authentication method detection based on configuration. For API/Web auth, maintain existing query parameter approach. For server-to-server, add request headers instead of query parameters. Implement async request signing for server-to-server auth before sending. Create factory method in MistKitConfiguration to instantiate appropriate TokenManager based on provided credentials. Ensure backward compatibility with existing API token authentication.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test middleware with each authentication method independently. Verify query parameters for API/Web auth and headers for server-to-server. Test request interception and modification. Verify backward compatibility with existing code."
           },
           {
@@ -367,7 +367,7 @@
               "5.4"
             ],
             "details": "Add token refresh logic to WebAuthTokenManager using CloudKit's token refresh endpoints if available. Implement key rotation scheduler in ServerToServerAuthManager with configurable rotation intervals. Create TokenRefreshPolicy enum with options like onExpiry, periodic(TimeInterval), and manual. Add retry logic with exponential backoff for failed authentication attempts. Implement token/key storage interface for persistence (in-memory default, with protocol for custom storage). Add notification system for token refresh events using AsyncStream.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Test automatic token refresh triggers. Verify key rotation at specified intervals. Test retry logic with various failure scenarios. Mock token expiry and refresh flows. Test AsyncStream notifications for refresh events."
           }
         ]
@@ -915,7 +915,7 @@
     ],
     "metadata": {
       "created": "2025-08-15T00:05:03.986Z",
-      "updated": "2025-08-26T17:38:51.416Z",
+      "updated": "2025-09-17T18:14:15.189Z",
       "description": "Tasks for master context"
     }
   }

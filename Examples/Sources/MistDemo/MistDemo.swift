@@ -4,6 +4,7 @@ import OpenAPIRuntime
 import OpenAPIURLSession
 import Hummingbird
 import ArgumentParser
+import Crypto
 #if canImport(AppKit)
 import AppKit
 #endif
@@ -29,12 +30,49 @@ struct MistDemo: AsyncParsableCommand {
     
     @Flag(name: .long, help: "Skip authentication and use provided web auth token")
     var skipAuth: Bool = false
-    
+
     @Option(name: .long, help: "Web auth token (use with --skip-auth)")
     var webAuthToken: String?
+
+    @Flag(name: .long, help: "Test all authentication methods")
+    var testAllAuth: Bool = false
+
+    @Flag(name: .long, help: "Test API-only authentication")
+    var testApiOnly: Bool = false
+
+    @Flag(name: .long, help: "Test AdaptiveTokenManager transitions")
+    var testAdaptive: Bool = false
+
+    @Flag(name: .long, help: "Test server-to-server authentication")
+    var testServerToServer: Bool = false
+
+    @Flag(name: .long, help: "Test signature generation")
+    var testSignature: Bool = false
+
+    @Option(name: .long, help: "Server-to-server key ID")
+    var keyID: String?
+
+    @Option(name: .long, help: "Server-to-server private key (PEM format)")
+    var privateKey: String?
+
+    @Option(name: .long, help: "Path to private key file")
+    var privateKeyFile: String?
+
+    @Option(name: .long, help: "CloudKit environment (development or production)")
+    var environment: String = "development"
     
     func run() async throws {
-        if skipAuth, let token = webAuthToken {
+        if testAllAuth {
+            try await testAllAuthenticationMethods()
+        } else if testApiOnly {
+            try await testAPIOnlyAuthentication()
+        } else if testAdaptive {
+            try await testAdaptiveTokenManager()
+        } else if testServerToServer {
+            try await testServerToServerAuthentication()
+        } else if testSignature {
+            testSignatureGeneration()
+        } else if skipAuth, let token = webAuthToken {
             // Run demo directly with provided token
             try await runCloudKitDemo(webAuthToken: token)
         } else {
@@ -266,5 +304,380 @@ struct MistDemo: AsyncParsableCommand {
         // Print usage tip
         print("\n💡 Tip: You can skip authentication next time by running:")
         print("   mistdemo --skip-auth --web-auth-token \"\(webAuthToken)\"")
+    }
+
+    /// Test all authentication methods
+    func testAllAuthenticationMethods() async throws {
+        print("\n" + String(repeating: "=", count: 70))
+        print("🧪 MistKit Authentication Methods Test Suite")
+        print(String(repeating: "=", count: 70))
+        print("Container: \(containerIdentifier)")
+        print("API Token: \(apiToken)")
+        print(String(repeating: "=", count: 70))
+
+        // Test 1: API-only Authentication
+        print("\n🔐 Test 1: API-only Authentication (Public Database)")
+        print(String(repeating: "-", count: 50))
+        do {
+            let apiTokenManager = APITokenManager(apiToken: apiToken)
+            let service = try CloudKitService(
+                containerIdentifier: containerIdentifier,
+                tokenManager: apiTokenManager,
+                environment: .development,
+                database: .public
+            )
+
+            // Validate credentials
+            print("📋 Validating API token credentials...")
+            let isValid = try await apiTokenManager.validateCredentials()
+            print("✅ API Token validation: \(isValid ? "PASSED" : "FAILED")")
+
+            // List zones (public database)
+            print("📁 Listing public zones...")
+            let zones = try await service.listZones()
+            print("✅ Found \(zones.count) public zone(s)")
+
+        } catch {
+            print("❌ API-only authentication test failed: \(error)")
+        }
+
+        // Test 2: Web Authentication (requires manual token)
+        print("\n🌐 Test 2: Web Authentication (Private Database)")
+        print(String(repeating: "-", count: 50))
+        if let webToken = webAuthToken {
+            do {
+                let webTokenManager = WebAuthTokenManager(apiToken: apiToken, webAuthToken: webToken)
+                let service = try CloudKitService(
+                    containerIdentifier: containerIdentifier,
+                    tokenManager: webTokenManager,
+                    environment: .development,
+                    database: .private
+                )
+
+                // Validate credentials
+                print("📋 Validating web auth credentials...")
+                let isValid = try await webTokenManager.validateCredentials()
+                print("✅ Web Auth validation: \(isValid ? "PASSED" : "FAILED")")
+
+                // Fetch current user
+                print("👤 Fetching current user...")
+                let userInfo = try await service.fetchCurrentUser()
+                print("✅ User: \(userInfo.userRecordName)")
+
+                // List zones
+                print("📁 Listing private zones...")
+                let zones = try await service.listZones()
+                print("✅ Found \(zones.count) private zone(s)")
+
+            } catch {
+                print("❌ Web authentication test failed: \(error)")
+            }
+        } else {
+            print("⚠️  Skipped: No web auth token provided")
+            print("   Use --web-auth-token <token> to test web authentication")
+        }
+
+        // Test 3: AdaptiveTokenManager
+        print("\n🔄 Test 3: AdaptiveTokenManager Transitions")
+        print(String(repeating: "-", count: 50))
+        await testAdaptiveTokenManagerInternal()
+
+        // Test 4: Server-to-Server Authentication (basic test only)
+        print("\n🔐 Test 4: Server-to-Server Authentication (Test Keys)")
+        print(String(repeating: "-", count: 50))
+        if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+            await testServerToServerBasic()
+        } else {
+            print("⚠️  Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+")
+            print("   Use API-only or Web authentication on older platforms")
+        }
+
+        print("\n" + String(repeating: "=", count: 70))
+        print("✅ Authentication test suite completed!")
+        print(String(repeating: "=", count: 70))
+    }
+
+    /// Test API-only authentication
+    func testAPIOnlyAuthentication() async throws {
+        print("\n" + String(repeating: "=", count: 60))
+        print("🔐 API-only Authentication Test")
+        print(String(repeating: "=", count: 60))
+        print("Container: \(containerIdentifier)")
+        print("Database: public (API-only limitation)")
+        print(String(repeating: "-", count: 60))
+
+        do {
+            // Use API-only service initializer with environment
+            let cloudKitEnvironment: MistKit.Environment = environment == "production" ? .production : .development
+            let tokenManager = APITokenManager(apiToken: apiToken)
+            let service = try CloudKitService(
+                containerIdentifier: containerIdentifier, 
+                tokenManager: tokenManager,
+                environment: cloudKitEnvironment,
+                database: .public
+            )
+
+            print("\n📋 Testing API-only authentication...")
+            print("✅ CloudKitService initialized with API-only authentication")
+
+            // List zones in public database
+            print("\n📁 Listing zones in public database...")
+            let zones = try await service.listZones()
+            print("✅ Found \(zones.count) zone(s):")
+            for zone in zones {
+                print("   • \(zone.zoneName)")
+            }
+
+            // Query records from public database
+            print("\n📋 Querying records from public database...")
+            let records = try await service.queryRecords(recordType: "TodoItem", limit: 5)
+            print("✅ Found \(records.count) record(s) in public database")
+            for record in records.prefix(3) {
+                print("   Record: \(record.recordName)")
+            }
+
+        } catch {
+            print("❌ API-only authentication test failed: \(error)")
+        }
+
+        print("\n" + String(repeating: "=", count: 60))
+        print("✅ API-only authentication test completed!")
+        print(String(repeating: "=", count: 60))
+    }
+
+    /// Test AdaptiveTokenManager
+    func testAdaptiveTokenManager() async throws {
+        print("\n" + String(repeating: "=", count: 60))
+        print("🔄 AdaptiveTokenManager Transition Test")
+        print(String(repeating: "=", count: 60))
+        await testAdaptiveTokenManagerInternal()
+        print(String(repeating: "=", count: 60))
+        print("✅ AdaptiveTokenManager test completed!")
+        print(String(repeating: "=", count: 60))
+    }
+
+    /// Internal AdaptiveTokenManager test implementation
+    func testAdaptiveTokenManagerInternal() async {
+        do {
+            print("📋 Creating AdaptiveTokenManager with API token...")
+            let adaptiveManager = AdaptiveTokenManager(apiToken: apiToken)
+
+            // Test initial state
+            print("🔍 Testing initial API-only state...")
+            let initialCredentials = try await adaptiveManager.getCurrentCredentials()
+            if case .apiToken(let token) = initialCredentials?.method {
+                print("✅ Initial state: API-only authentication (\(String(token.prefix(8)))...)")
+            }
+
+            let hasCredentials = await adaptiveManager.hasCredentials
+            print("✅ Has credentials: \(hasCredentials)")
+
+            let supportsRefresh = adaptiveManager.supportsRefresh
+            print("✅ Supports refresh: \(supportsRefresh)")
+
+            // Test validation
+            print("🔍 Testing credential validation...")
+            let isValid = try await adaptiveManager.validateCredentials()
+            print("✅ Credential validation: \(isValid ? "PASSED" : "FAILED")")
+
+            // Test transition to web auth (if web token available)
+            if let webToken = webAuthToken {
+                print("🔄 Testing upgrade to web authentication...")
+                let upgradedCredentials = try await adaptiveManager.upgradeToWebAuthentication(webAuthToken: webToken)
+                if case .webAuthToken(let api, let web) = upgradedCredentials.method {
+                    print("✅ Upgraded to web auth (API: \(String(api.prefix(8)))..., Web: \(String(web.prefix(8)))...)")
+                }
+
+                // Test validation after upgrade
+                let validAfterUpgrade = try await adaptiveManager.validateCredentials()
+                print("✅ Validation after upgrade: \(validAfterUpgrade ? "PASSED" : "FAILED")")
+
+                // Test downgrade back to API-only
+                print("🔄 Testing downgrade to API-only...")
+                let downgradedCredentials = try await adaptiveManager.downgradeToAPIOnly()
+                if case .apiToken(let token) = downgradedCredentials.method {
+                    print("✅ Downgraded to API-only (\(String(token.prefix(8)))...)")
+                }
+
+                print("✅ AdaptiveTokenManager transitions completed successfully!")
+            } else {
+                print("⚠️  Transition test skipped: No web auth token provided")
+                print("   Use --web-auth-token <token> to test full transition functionality")
+            }
+
+        } catch {
+            print("❌ AdaptiveTokenManager test failed: \(error)")
+        }
+    }
+
+    /// Test server-to-server authentication
+    func testServerToServerAuthentication() async throws {
+        print("\n" + String(repeating: "=", count: 60))
+        print("🔐 Server-to-Server Authentication Test")
+        print(String(repeating: "=", count: 60))
+        print("Container: \(containerIdentifier)")
+        print("Database: public (server-to-server only supports public database)")
+        print("ℹ️  Note: Server-to-server keys must be registered in CloudKit Dashboard")
+        print("ℹ️  See: https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html")
+        print(String(repeating: "-", count: 60))
+
+        // Get the private key
+        let privateKeyPEM: String
+        var keyIdentifier: String = ""
+
+        if let keyFile = privateKeyFile {
+            // Read from file
+            print("📁 Reading private key from file: \(keyFile)")
+            do {
+                privateKeyPEM = try String(contentsOfFile: keyFile, encoding: .utf8)
+                print("✅ Private key loaded from file")
+            } catch {
+                print("❌ Failed to read private key file: \(error)")
+                print("💡 Make sure the file exists and is readable")
+                return
+            }
+        } else if let key = privateKey {
+            // Use provided key
+            privateKeyPEM = key
+            print("🔑 Using provided private key")
+        } else {
+            // Generate a test key
+            print("🔧 No private key provided, generating test key...")
+            if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+                let testKeys = generateTestKeys()
+                privateKeyPEM = testKeys.privateKeyPEM
+                keyIdentifier = testKeys.keyID
+                print("✅ Generated test key ID: \(keyIdentifier)")
+                print("⚠️  Note: This is a test key and won't work with real CloudKit")
+            } else {
+                print("❌ Key generation requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+")
+                print("💡 Provide a key manually using --private-key-file or --private-key")
+                return
+            }
+        }
+
+        // Use provided key ID or default test ID
+        if let providedKeyID = keyID {
+            keyIdentifier = providedKeyID
+            print("🔑 Using provided key ID: \(keyIdentifier)")
+        } else if keyID == nil && privateKey == nil && privateKeyFile == nil {
+            // keyIdentifier already set from test key generation
+        } else {
+            print("❌ Key ID is required when providing a private key")
+            print("💡 Use --key-id 'your_key_id' to specify the key ID")
+            return
+        }
+
+        do {
+            if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+                // Create server-to-server manager
+                print("\n📋 Creating ServerToServerAuthManager...")
+                let serverManager = try ServerToServerAuthManager(
+                    keyID: keyIdentifier,
+                    pemString: privateKeyPEM
+                )
+
+                print("🔍 Testing server-to-server credentials...")
+                let isValid = try await serverManager.validateCredentials()
+                print("✅ Credential validation: \(isValid ? "PASSED" : "FAILED")")
+
+                // Test with CloudKit service
+                print("\n🌐 Testing CloudKit integration...")
+                let cloudKitEnvironment: MistKit.Environment = environment == "production" ? .production : .development
+                let service = try CloudKitService(
+                    containerIdentifier: containerIdentifier,
+                    tokenManager: serverManager,
+                    environment: cloudKitEnvironment,
+                    database: .public  // Server-to-server only supports public database
+                )
+
+                print("✅ CloudKitService initialized with server-to-server authentication (public database only)")
+
+                // Try listing zones first (GET request with no body)
+//                print("\n📁 Testing zone listing with server-to-server authentication...")
+//                let zones = try await service.listZones()
+//                print("✅ Found \(zones.count) zone(s):")
+//                for zone in zones.prefix(3) {
+//                    print("   • Zone: \(zone.zoneName)")
+//                }
+
+                // Query public records
+                print("\n📋 Querying public records with server-to-server authentication...")
+                let records = try await service.queryRecords(recordType: "TodoItem", limit: 5)
+                print("✅ Found \(records.count) public record(s):")
+                for record in records.prefix(3) {
+                    print("   • Record: \(record.recordName)")
+                }
+//
+//                // Try to fetch current user (should work with server-to-server)
+//                print("\n👤 Testing user operations...")
+//                let userInfo = try await service.fetchCurrentUser()
+//                print("✅ Server identity: \(userInfo.userRecordName)")
+            } else {
+                print("❌ Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+")
+                print("💡 On older platforms, use API-only or Web authentication instead")
+            }
+
+        } catch {
+            print("❌ Server-to-server authentication test failed: \(error)")
+
+            // Provide helpful setup guidance based on Apple's documentation
+            print("💡 Server-to-server setup checklist (per Apple docs):")
+            print("   1. Create server-to-server certificate with OpenSSL")
+            print("   2. Extract public key from certificate")
+            print("   3. Register public key in CloudKit Dashboard")
+            print("   4. Obtain key ID from CloudKit Dashboard")
+            print("   5. Ensure container has server-to-server access enabled")
+            print("   6. Verify key is enabled and not expired")
+            print("   7. Only public database access is supported")
+            print("📖 Full setup guide:")
+            print("   https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html")
+        }
+
+        print("\n" + String(repeating: "=", count: 60))
+        print("✅ Server-to-server authentication test completed!")
+        print(String(repeating: "=", count: 60))
+
+        if keyID == nil && privateKey == nil && privateKeyFile == nil {
+            print("\n💡 To test with real CloudKit server-to-server authentication:")
+            print("   1. Generate a key pair in Apple Developer Console")
+            print("   2. Run: mistdemo --test-server-to-server \\")
+            print("             --key-id 'your_key_id' \\")
+            print("             --private-key-file 'path/to/private_key.pem'")
+        }
+    }
+
+    /// Basic server-to-server test for comprehensive suite
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    private func testServerToServerBasic() async {
+        do {
+            print("📋 Testing server-to-server authentication basics...")
+            let testKeys = generateTestKeys()
+            let serverManager = try ServerToServerAuthManager(
+                keyID: testKeys.keyID,
+                pemString: testKeys.privateKeyPEM
+            )
+
+            let isValid = try await serverManager.validateCredentials()
+            print("✅ Server-to-server validation: \(isValid ? "PASSED" : "FAILED")")
+            print("✅ Key generation and authentication setup working")
+        } catch {
+            print("❌ Server-to-server basic test failed: \(error)")
+        }
+    }
+
+    /// Generate test keys for server-to-server authentication testing
+    /// Available on macOS 11.0+, iOS 14.0+, tvOS 14.0+, watchOS 7.0+, and Linux
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    private func generateTestKeys() -> (keyID: String, privateKeyPEM: String) {
+        // Generate a new P-256 private key
+        let privateKey = P256.Signing.PrivateKey()
+
+        // Generate a test key ID (8-character random string)
+        let keyID = String((0..<8).compactMap { _ in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".randomElement() })
+
+        // Convert to PEM format
+        let privateKeyPEM = privateKey.pemRepresentation
+        return (keyID: keyID, privateKeyPEM: privateKeyPEM)
     }
 }

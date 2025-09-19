@@ -38,7 +38,9 @@ public struct CloudKitService {
   /// The API token for authentication
   public let apiToken: String
   /// The CloudKit environment (development or production)
-  public let environment: String = "development"
+  public let environment: Environment
+  /// The CloudKit database (public, private, or shared)
+  public let database: Database
 
   private let mistKitClient: MistKitClient
   private let responseProcessor = CloudKitResponseProcessor()
@@ -46,10 +48,12 @@ public struct CloudKitService {
     mistKitClient.client
   }
 
-  /// Initialize CloudKit service
+  /// Initialize CloudKit service with web authentication
   public init(containerIdentifier: String, apiToken: String, webAuthToken: String) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
+    self.environment = .development
+    self.database = .private
 
     let config = MistKitConfiguration(
       container: containerIdentifier,
@@ -59,6 +63,37 @@ public struct CloudKitService {
       webAuthToken: webAuthToken
     )
     self.mistKitClient = try MistKitClient(configuration: config)
+  }
+
+  /// Initialize CloudKit service with API-only authentication
+  public init(containerIdentifier: String, apiToken: String) throws {
+    self.containerIdentifier = containerIdentifier
+    self.apiToken = apiToken
+    self.environment = .development
+    self.database = .public  // API-only supports public database
+
+    let config = MistKitConfiguration(
+      container: containerIdentifier,
+      environment: .development,
+      database: .public,  // API-only supports public database
+      apiToken: apiToken
+    )
+    self.mistKitClient = try MistKitClient(configuration: config)
+  }
+
+  /// Initialize CloudKit service with a custom TokenManager
+  public init(containerIdentifier: String, tokenManager: any TokenManager, environment: Environment = .development, database: Database = .private) throws {
+    self.containerIdentifier = containerIdentifier
+    self.apiToken = "" // Not used when providing TokenManager directly
+    self.environment = environment
+    self.database = database
+
+    self.mistKitClient = try MistKitClient(
+      container: containerIdentifier,
+      environment: environment,
+      database: database,
+      tokenManager: tokenManager
+    )
   }
 
   /// Fetch current user information
@@ -137,8 +172,8 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: .development,
-      database: ._private
+      environment: environment.toComponentsEnvironment(),
+      database: database.toComponentsDatabase()
     )
   }
 
@@ -151,8 +186,8 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: .development,
-      database: ._private
+      environment: environment.toComponentsEnvironment(),
+      database: database.toComponentsDatabase()
     )
   }
 
@@ -165,8 +200,8 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: .development,
-      database: ._private
+      environment: environment.toComponentsEnvironment(),
+      database: database.toComponentsDatabase()
     )
   }
 

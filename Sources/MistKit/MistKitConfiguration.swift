@@ -71,4 +71,113 @@ public struct MistKitConfiguration: Sendable {
     self.apiToken = apiToken
     self.webAuthToken = webAuthToken
   }
+
+  /// Creates an appropriate TokenManager based on the configuration
+  /// - Returns: A TokenManager instance matching the authentication method
+  public func createTokenManager() -> any TokenManager {
+    if let webAuthToken = webAuthToken {
+      return WebAuthTokenManager(apiToken: apiToken, webAuthToken: webAuthToken)
+    } else {
+      return APITokenManager(apiToken: apiToken)
+    }
+  }
+}
+
+// MARK: - Convenience Initializers
+
+extension MistKitConfiguration {
+  /// Initialize configuration with API token only (container-level access)
+  /// - Parameters:
+  ///   - container: The CloudKit container identifier
+  ///   - environment: The CloudKit environment
+  ///   - database: The database type (default: .private)
+  ///   - apiToken: The API token
+  public static func apiToken(
+    container: String,
+    environment: Environment,
+    database: Database = .private,
+    apiToken: String
+  ) -> MistKitConfiguration {
+    MistKitConfiguration(
+      container: container,
+      environment: environment,
+      database: database,
+      apiToken: apiToken,
+      webAuthToken: nil
+    )
+  }
+
+  /// Initialize configuration with web authentication (user-specific access)
+  /// - Parameters:
+  ///   - container: The CloudKit container identifier
+  ///   - environment: The CloudKit environment
+  ///   - database: The database type (default: .private)
+  ///   - apiToken: The API token
+  ///   - webAuthToken: The web authentication token
+  public static func webAuth(
+    container: String,
+    environment: Environment,
+    database: Database = .private,
+    apiToken: String,
+    webAuthToken: String
+  ) -> MistKitConfiguration {
+    MistKitConfiguration(
+      container: container,
+      environment: environment,
+      database: database,
+      apiToken: apiToken,
+      webAuthToken: webAuthToken
+    )
+  }
+
+  /// Initialize configuration for server-to-server authentication (public database only)
+  /// Server-to-server authentication in CloudKit Web Services only supports the public database
+  /// - Parameters:
+  ///   - container: The CloudKit container identifier
+  ///   - environment: The CloudKit environment
+  /// - Note: Database is automatically set to .public as server-to-server authentication
+  ///         only supports the public database in CloudKit Web Services
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  public static func serverToServer(
+    container: String,
+    environment: Environment
+  ) -> MistKitConfiguration {
+    MistKitConfiguration(
+      container: container,
+      environment: environment,
+      database: .public, // Server-to-server only supports public database
+      apiToken: "", // Not used with server-to-server auth
+      webAuthToken: nil
+    )
+  }
+}
+
+// MARK: - Component Type Conversions
+
+/// Extension to convert Environment enum to Components type
+extension Environment {
+  /// Convert to the generated Components.Parameters.environment type
+  internal func toComponentsEnvironment() -> Components.Parameters.environment {
+    switch self {
+    case .development:
+      return .development
+    case .production:
+      return .production
+    }
+  }
+}
+
+/// Extension to convert Database enum to Components type
+extension Database {
+  /// Convert to the generated Components.Parameters.database type
+  internal func toComponentsDatabase() -> Components.Parameters.database {
+    switch self {
+    case .public:
+      return ._public
+    case .private:
+      return ._private
+    case .shared:
+      return .shared
+    }
+  }
 }
