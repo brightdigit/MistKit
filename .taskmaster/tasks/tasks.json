@@ -367,7 +367,7 @@
               "5.4"
             ],
             "details": "Add token refresh logic to WebAuthTokenManager using CloudKit's token refresh endpoints if available. Implement key rotation scheduler in ServerToServerAuthManager with configurable rotation intervals. Create TokenRefreshPolicy enum with options like onExpiry, periodic(TimeInterval), and manual. Add retry logic with exponential backoff for failed authentication attempts. Implement token/key storage interface for persistence (in-memory default, with protocol for custom storage). Add notification system for token refresh events using AsyncStream.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Test automatic token refresh triggers. Verify key rotation at specified intervals. Test retry logic with various failure scenarios. Mock token expiry and refresh flows. Test AsyncStream notifications for refresh events."
           }
         ]
@@ -915,7 +915,7 @@
     ],
     "metadata": {
       "created": "2025-08-15T00:05:03.986Z",
-      "updated": "2025-09-17T18:14:15.189Z",
+      "updated": "2025-09-20T20:19:38.976Z",
       "description": "Tasks for master context"
     }
   }

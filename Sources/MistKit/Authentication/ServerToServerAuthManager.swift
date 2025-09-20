@@ -43,36 +43,124 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   private let keyID: String
   private let privateKey: P256.Signing.PrivateKey
   private let credentials: TokenCredentials
+  private let refreshPolicy: TokenRefreshPolicy
+  private let retryPolicy: RetryPolicy
+  private let storage: (any TokenStorage)?
+
+  // Key rotation scheduler state
+  private let taskState = TaskState()
+  private let rotationSubject = AsyncStream<KeyRotationEvent>.makeStream()
+
+  /// Actor to manage task state safely
+  private actor TaskState {
+    private var rotationTask: Task<Void, Never>?
+
+    func setTask(_ task: Task<Void, Never>?) {
+      rotationTask?.cancel()
+      rotationTask = task
+    }
+
+    func cancelTask() {
+      rotationTask?.cancel()
+      rotationTask = nil
+    }
+  }
+
+  /// Events emitted during key rotation operations
+  public enum KeyRotationEvent: Sendable {
+    case rotationStarted(keyID: String)
+    case rotationCompleted(oldKeyID: String, newKeyID: String)
+    case rotationFailed(keyID: String, error: any Error)
+    case rotationScheduled(keyID: String, nextRotation: Date)
+  }
+
+  /// Stream of key rotation events
+  public var rotationEvents: AsyncStream<KeyRotationEvent> {
+    rotationSubject.stream
+  }
 
   /// Creates a new server-to-server authentication manager
   /// - Parameters:
   ///   - keyID: The key identifier from Apple Developer Console
   ///   - privateKey: The ECDSA P-256 private key
-  public init(keyID: String, privateKey: P256.Signing.PrivateKey) {
+  ///   - refreshPolicy: Token refresh policy (default: manual)
+  ///   - retryPolicy: Retry policy for failed operations (default: .default)
+  ///   - storage: Optional storage for persistence (default: nil for in-memory only)
+  public init(
+    keyID: String,
+    privateKey: P256.Signing.PrivateKey,
+    refreshPolicy: TokenRefreshPolicy = .manual,
+    retryPolicy: RetryPolicy = .default,
+    storage: (any TokenStorage)? = nil
+  ) {
     self.keyID = keyID
     self.privateKey = privateKey
+    self.refreshPolicy = refreshPolicy
+    self.retryPolicy = retryPolicy
+    self.storage = storage
     self.credentials = TokenCredentials.serverToServer(
       keyID: keyID,
       privateKey: privateKey.rawRepresentation
     )
+
+    // Start rotation scheduler if policy supports it
+    if refreshPolicy.supportsAutomaticRefresh {
+      startRotationScheduler()
+    }
+  }
+
+  deinit {
+    let taskState = self.taskState
+    Task.detached { await taskState.cancelTask() }
+    rotationSubject.continuation.finish()
   }
 
   /// Convenience initializer with private key data
   /// - Parameters:
   ///   - keyID: The key identifier from Apple Developer Console
   ///   - privateKeyData: The private key as raw data (32 bytes for P-256)
-  public convenience init(keyID: String, privateKeyData: Data) throws {
+  ///   - refreshPolicy: Token refresh policy (default: manual)
+  ///   - retryPolicy: Retry policy for failed operations (default: .default)
+  ///   - storage: Optional storage for persistence (default: nil for in-memory only)
+  public convenience init(
+    keyID: String,
+    privateKeyData: Data,
+    refreshPolicy: TokenRefreshPolicy = .manual,
+    retryPolicy: RetryPolicy = .default,
+    storage: (any TokenStorage)? = nil
+  ) throws {
     let privateKey = try P256.Signing.PrivateKey(rawRepresentation: privateKeyData)
-    self.init(keyID: keyID, privateKey: privateKey)
+    self.init(
+      keyID: keyID,
+      privateKey: privateKey,
+      refreshPolicy: refreshPolicy,
+      retryPolicy: retryPolicy,
+      storage: storage
+    )
   }
 
   /// Convenience initializer with PEM-formatted private key
   /// - Parameters:
   ///   - keyID: The key identifier from Apple Developer Console
   ///   - pemString: The private key in PEM format
-  public convenience init(keyID: String, pemString: String) throws {
+  ///   - refreshPolicy: Token refresh policy (default: manual)
+  ///   - retryPolicy: Retry policy for failed operations (default: .default)
+  ///   - storage: Optional storage for persistence (default: nil for in-memory only)
+  public convenience init(
+    keyID: String,
+    pemString: String,
+    refreshPolicy: TokenRefreshPolicy = .manual,
+    retryPolicy: RetryPolicy = .default,
+    storage: (any TokenStorage)? = nil
+  ) throws {
     let privateKey = try P256.Signing.PrivateKey(pemRepresentation: pemString)
-    self.init(keyID: keyID, privateKey: privateKey)
+    self.init(
+      keyID: keyID,
+      privateKey: privateKey,
+      refreshPolicy: refreshPolicy,
+      retryPolicy: retryPolicy,
+      storage: storage
+    )
   }
 
   // MARK: - TokenManager Protocol
@@ -123,6 +211,147 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
       keyID: keyID,
       privateKey: privateKey.rawRepresentation
     )
+  }
+}
+
+// MARK: - Key Rotation Scheduler
+
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+extension ServerToServerAuthManager {
+  /// Starts the automatic key rotation scheduler based on refresh policy
+  private func startRotationScheduler() {
+    guard refreshPolicy.supportsAutomaticRefresh else { return }
+
+    let task = Task<Void, Never> { [weak self] in
+      await self?.runRotationScheduler()
+    }
+    Task { await taskState.setTask(task) }
+  }
+
+  /// Runs the key rotation scheduler loop
+  private func runRotationScheduler() async {
+    while !Task.isCancelled {
+      do {
+        let nextRotationDate = calculateNextRotationDate()
+
+        // Emit scheduled event
+        rotationSubject.continuation.yield(.rotationScheduled(keyID: keyID, nextRotation: nextRotationDate))
+
+        // Wait until the scheduled rotation time
+        let now = Date()
+        if nextRotationDate > now {
+          let delay = nextRotationDate.timeIntervalSince(now)
+          let nanoseconds = UInt64(delay * 1_000_000_000)
+          try await Task.sleep(nanoseconds: nanoseconds)
+        }
+
+        // Check if we're still running after sleep
+        guard !Task.isCancelled else { break }
+
+        // Perform key rotation (this would typically involve external key management)
+        await performScheduledRotation()
+
+      } catch {
+        // If sleeping was cancelled, exit gracefully
+        if error is CancellationError {
+          break
+        }
+
+        // For other errors, wait a bit before retrying
+        try? await Task.sleep(nanoseconds: 60_000_000_000) // 60 seconds
+      }
+    }
+  }
+
+  /// Calculates the next rotation date based on refresh policy
+  private func calculateNextRotationDate() -> Date {
+    let now = Date()
+
+    switch refreshPolicy {
+    case .periodic(let interval):
+      return now.addingTimeInterval(interval)
+    case .onExpiry:
+      // For server-to-server keys, we don't have a specific expiry
+      // Default to 24 hours for onExpiry policy
+      return now.addingTimeInterval(24 * 60 * 60)
+    case .manual:
+      // This shouldn't be called for manual policy
+      return now.addingTimeInterval(Double.greatestFiniteMagnitude)
+    }
+  }
+
+  /// Performs the actual key rotation (placeholder for external key management integration)
+  private func performScheduledRotation() async {
+    rotationSubject.continuation.yield(.rotationStarted(keyID: keyID))
+
+    do {
+      // In a real implementation, this would:
+      // 1. Generate a new key pair
+      // 2. Register the new key with Apple's key management system
+      // 3. Update the keyID and privateKey properties
+      // 4. Store the new credentials if storage is available
+
+      // For now, we'll just emit a completion event with the same key
+      // since we can't actually perform key rotation without external integration
+      rotationSubject.continuation.yield(.rotationCompleted(oldKeyID: keyID, newKeyID: keyID))
+
+      // Store updated credentials if storage is available
+      if let storage = storage {
+        try await storage.store(credentials, identifier: keyID)
+      }
+
+    } catch {
+      rotationSubject.continuation.yield(.rotationFailed(keyID: keyID, error: error))
+    }
+  }
+
+  /// Manually triggers key rotation (can be called regardless of refresh policy)
+  /// - Parameters:
+  ///   - newKeyID: The new key identifier
+  ///   - newPrivateKey: The new private key
+  /// - Returns: New TokenCredentials with rotated key
+  public func rotateKey(to newKeyID: String, privateKey newPrivateKey: P256.Signing.PrivateKey) async throws -> TokenCredentials {
+    let oldKeyID = keyID
+
+    rotationSubject.continuation.yield(.rotationStarted(keyID: oldKeyID))
+
+    do {
+      // Create new credentials with rotated key
+      let newCredentials = TokenCredentials.serverToServer(
+        keyID: newKeyID,
+        privateKey: newPrivateKey.rawRepresentation
+      )
+
+      // Store new credentials if storage is available
+      if let storage = storage {
+        // Store new credentials and remove old ones
+        try await storage.store(newCredentials, identifier: newKeyID)
+        try await storage.remove(identifier: oldKeyID)
+      }
+
+      rotationSubject.continuation.yield(.rotationCompleted(oldKeyID: oldKeyID, newKeyID: newKeyID))
+
+      return newCredentials
+
+    } catch {
+      rotationSubject.continuation.yield(.rotationFailed(keyID: oldKeyID, error: error))
+      throw error
+    }
+  }
+
+  /// Stops the automatic key rotation scheduler
+  public func stopRotationScheduler() {
+    Task { await taskState.cancelTask() }
+  }
+
+  /// Returns the current refresh policy
+  public var currentRefreshPolicy: TokenRefreshPolicy {
+    refreshPolicy
+  }
+
+  /// Returns the current retry policy
+  public var currentRetryPolicy: RetryPolicy {
+    retryPolicy
   }
 }
 

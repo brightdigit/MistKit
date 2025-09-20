@@ -89,6 +89,143 @@ public protocol TokenManager: Sendable {
   var hasCredentials: Bool { get async }
 }
 
+// MARK: - Token Refresh Policy
+
+/// Defines when and how tokens should be refreshed
+public enum TokenRefreshPolicy: Sendable, Equatable {
+  /// Refresh tokens only when they expire
+  case onExpiry
+
+  /// Refresh tokens at regular intervals
+  case periodic(TimeInterval)
+
+  /// Manual refresh only - no automatic refresh
+  case manual
+
+  /// Returns true if this policy supports automatic refresh
+  public var supportsAutomaticRefresh: Bool {
+    switch self {
+    case .onExpiry, .periodic:
+      return true
+    case .manual:
+      return false
+    }
+  }
+
+  /// Returns the refresh interval if applicable
+  public var refreshInterval: TimeInterval? {
+    switch self {
+    case .onExpiry, .manual:
+      return nil
+    case .periodic(let interval):
+      return interval
+    }
+  }
+}
+
+// MARK: - Token Storage Protocol
+
+/// Protocol for persisting and retrieving authentication tokens/keys
+public protocol TokenStorage: Sendable {
+  /// Stores token credentials with an optional identifier
+  /// - Parameters:
+  ///   - credentials: The credentials to store
+  ///   - identifier: Optional identifier for multiple credential storage
+  /// - Throws: TokenStorageError if storage fails
+  func store(_ credentials: TokenCredentials, identifier: String?) async throws
+
+  /// Retrieves stored token credentials
+  /// - Parameter identifier: Optional identifier for specific credentials
+  /// - Returns: Stored credentials or nil if not found
+  /// - Throws: TokenStorageError if retrieval fails
+  func retrieve(identifier: String?) async throws -> TokenCredentials?
+
+  /// Removes stored credentials
+  /// - Parameter identifier: Optional identifier for specific credentials
+  /// - Throws: TokenStorageError if removal fails
+  func remove(identifier: String?) async throws
+
+  /// Lists all stored credential identifiers
+  /// - Returns: Array of stored identifiers
+  func listIdentifiers() async throws -> [String]
+}
+
+// MARK: - Token Storage Errors
+
+/// Errors that can occur during token storage operations
+public enum TokenStorageError: Error, LocalizedError, Sendable {
+  /// Storage operation failed
+  case storageFailed(reason: String)
+
+  /// Credentials not found
+  case notFound(identifier: String?)
+
+  /// Access denied to storage
+  case accessDenied
+
+  /// Storage corrupted or invalid format
+  case corruptedStorage
+
+  public var errorDescription: String? {
+    switch self {
+    case .storageFailed(let reason):
+      return "Token storage failed: \(reason)"
+    case .notFound(let identifier):
+      if let identifier = identifier {
+        return "Credentials not found for identifier: \(identifier)"
+      } else {
+        return "No credentials found"
+      }
+    case .accessDenied:
+      return "Access denied to token storage"
+    case .corruptedStorage:
+      return "Token storage is corrupted or in invalid format"
+    }
+  }
+}
+
+// MARK: - Retry Policy
+
+/// Configuration for retry behavior during authentication operations
+public struct RetryPolicy: Sendable, Equatable {
+  /// Maximum number of retry attempts
+  public let maxAttempts: Int
+
+  /// Base delay between retries (will be multiplied by attempt number for exponential backoff)
+  public let baseDelay: TimeInterval
+
+  /// Maximum delay between retries (caps exponential backoff)
+  public let maxDelay: TimeInterval
+
+  /// Creates a new retry policy
+  /// - Parameters:
+  ///   - maxAttempts: Maximum number of retry attempts (default: 3)
+  ///   - baseDelay: Base delay in seconds (default: 1.0)
+  ///   - maxDelay: Maximum delay in seconds (default: 60.0)
+  public init(maxAttempts: Int = 3, baseDelay: TimeInterval = 1.0, maxDelay: TimeInterval = 60.0) {
+    self.maxAttempts = maxAttempts
+    self.baseDelay = baseDelay
+    self.maxDelay = maxDelay
+  }
+
+  /// Calculates delay for a specific attempt using exponential backoff
+  /// - Parameter attempt: The attempt number (1-based)
+  /// - Returns: Delay in seconds for this attempt
+  public func delay(for attempt: Int) -> TimeInterval {
+    let exponentialDelay = baseDelay * pow(2.0, Double(attempt - 1))
+    return min(exponentialDelay, maxDelay)
+  }
+
+  /// Default retry policy for authentication operations
+  public static let `default` = RetryPolicy()
+
+  /// No retry policy (single attempt only)
+  public static let none = RetryPolicy(maxAttempts: 1)
+
+  /// Aggressive retry policy for critical operations
+  public static let aggressive = RetryPolicy(maxAttempts: 5, baseDelay: 0.5, maxDelay: 30.0)
+}
+
 // MARK: - Token Manager Errors
 
 /// Errors that can occur during token management operations
