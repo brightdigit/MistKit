@@ -26,6 +26,7 @@ let package = Package(
     // Swift OpenAPI Runtime dependencies
     .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.8.0"),
     .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
+    .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -35,6 +36,7 @@ let package = Package(
       dependencies: [
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
         .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+        .product(name: "Crypto", package: "swift-crypto"),
       ]
     ),
     .testTarget(
