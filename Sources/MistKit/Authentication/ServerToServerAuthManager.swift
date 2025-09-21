@@ -41,7 +41,7 @@ public import Crypto
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public final class ServerToServerAuthManager: TokenManager, Sendable {
   private let keyID: String
-  private let privateKey: P256.Signing.PrivateKey
+  private let privateKey: @Sendable () throws -> P256.Signing.PrivateKey
   private let credentials: TokenCredentials
   private let refreshPolicy: TokenRefreshPolicy
   private let retryPolicy: RetryPolicy
@@ -88,13 +88,14 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public init(
     keyID: String,
-    privateKey: P256.Signing.PrivateKey,
+    privateKeyCallback: @autoclosure  @escaping @Sendable () throws -> P256.Signing.PrivateKey,
     refreshPolicy: TokenRefreshPolicy = .manual,
     retryPolicy: RetryPolicy = .default,
     storage: (any TokenStorage)? = nil
-  ) {
+  ) throws {
+    let privateKey = try privateKeyCallback()
     self.keyID = keyID
-    self.privateKey = privateKey
+    self.privateKey = privateKeyCallback
     self.refreshPolicy = refreshPolicy
     self.retryPolicy = retryPolicy
     self.storage = storage
@@ -129,10 +130,9 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     retryPolicy: RetryPolicy = .default,
     storage: (any TokenStorage)? = nil
   ) throws {
-    let privateKey = try P256.Signing.PrivateKey(rawRepresentation: privateKeyData)
-    self.init(
+    try self.init(
       keyID: keyID,
-      privateKey: privateKey,
+      privateKeyCallback: try P256.Signing.PrivateKey(rawRepresentation: privateKeyData),
       refreshPolicy: refreshPolicy,
       retryPolicy: retryPolicy,
       storage: storage
@@ -153,10 +153,9 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     retryPolicy: RetryPolicy = .default,
     storage: (any TokenStorage)? = nil
   ) throws {
-    let privateKey = try P256.Signing.PrivateKey(pemRepresentation: pemString)
-    self.init(
+    try self.init(
       keyID: keyID,
-      privateKey: privateKey,
+      privateKeyCallback: try P256.Signing.PrivateKey(pemRepresentation: pemString),
       refreshPolicy: refreshPolicy,
       retryPolicy: retryPolicy,
       storage: storage
@@ -188,7 +187,7 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     // Try to create a test signature to validate the private key
     do {
       let testData = "test".data(using: .utf8)!
-      _ = try privateKey.signature(for: testData)
+      _ = try privateKey().signature(for: testData)
     } catch {
       throw TokenManagerError.invalidCredentials(
         reason: "Private key is invalid or corrupted: \(error.localizedDescription)"
@@ -207,9 +206,9 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   public func refreshCredentials() async throws -> TokenCredentials? {
     // For server-to-server auth, "refresh" means we regenerate credentials
     // with the same key (useful for updating metadata or timestamps)
-    return TokenCredentials.serverToServer(
+    return try TokenCredentials.serverToServer(
       keyID: keyID,
-      privateKey: privateKey.rawRepresentation
+      privateKey: privateKey().rawRepresentation
     )
   }
 }
@@ -400,7 +399,7 @@ extension ServerToServerAuthManager {
     }
 
     // Create ECDSA signature
-    let signature = try privateKey.signature(for: payloadData)
+    let signature = try privateKey().signature(for: payloadData)
     let signatureBase64 = signature.derRepresentation.base64EncodedString()
 
     return RequestSignature(
@@ -417,15 +416,17 @@ extension ServerToServerAuthManager {
 
   /// Returns the public key for verification purposes
   public var publicKey: P256.Signing.PublicKey {
-    privateKey.publicKey
+    get throws {
+      try privateKey().publicKey
+    }
   }
 
   /// Creates credentials with additional metadata
   /// - Parameter metadata: Additional metadata to include
   /// - Returns: TokenCredentials with metadata
-  public func credentialsWithMetadata(_ metadata: [String: String]) -> TokenCredentials {
-    TokenCredentials(
-      method: .serverToServer(keyID: keyID, privateKey: privateKey.rawRepresentation),
+  public func credentialsWithMetadata(_ metadata: [String: String]) throws -> TokenCredentials {
+    try TokenCredentials(
+      method: .serverToServer(keyID: keyID, privateKey: privateKey().rawRepresentation),
       metadata: metadata
     )
   }
