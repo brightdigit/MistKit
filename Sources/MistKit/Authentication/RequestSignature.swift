@@ -1,5 +1,5 @@
 //
-//  UserInfo.swift
+//  RequestSignature.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// User information from CloudKit
-public struct UserInfo: Encodable {
-  /// The user's record name
-  public let userRecordName: String
-  /// The user's first name
-  public let firstName: String?
-  /// The user's last name
-  public let lastName: String?
-  /// The user's email address
-  public let emailAddress: String?
+public import Foundation
 
-  internal init(from cloudKitUser: Components.Schemas.UserResponse) {
-    self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
-    self.firstName = cloudKitUser.firstName
-    self.lastName = cloudKitUser.lastName
-    self.emailAddress = cloudKitUser.emailAddress
+/// CloudKit Web Services request signature components
+public struct RequestSignature: Sendable {
+  /// The key identifier for X-Apple-CloudKit-Request-KeyID header
+  public let keyID: String
+
+  /// The ISO8601 date string for X-Apple-CloudKit-Request-ISO8601Date header
+  public let date: String
+
+  /// The base64-encoded signature for X-Apple-CloudKit-Request-SignatureV1 header
+  public let signature: String
+
+  /// Creates CloudKit request headers from this signature
+  public var headers: [String: String] {
+    [
+      "X-Apple-CloudKit-Request-KeyID": keyID,
+      "X-Apple-CloudKit-Request-ISO8601Date": date,
+      "X-Apple-CloudKit-Request-SignatureV1": signature,
+    ]
   }
 }

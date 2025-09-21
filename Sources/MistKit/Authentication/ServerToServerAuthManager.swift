@@ -1,6 +1,6 @@
 //
 //  ServerToServerAuthManager.swift
-//  MistKit
+//  PackageDSLKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -40,19 +40,19 @@ public import Foundation
 /// Available on macOS 11.0+, iOS 14.0+, tvOS 14.0+, watchOS 7.0+, and Linux
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public final class ServerToServerAuthManager: TokenManager, Sendable {
-  private let keyID: String
-  private let privateKey: @Sendable () throws -> P256.Signing.PrivateKey
-  private let credentials: TokenCredentials
-  private let refreshPolicy: TokenRefreshPolicy
-  private let retryPolicy: RetryPolicy
-  private let storage: (any TokenStorage)?
+  internal let keyID: String
+  internal let privateKey: @Sendable () throws -> P256.Signing.PrivateKey
+  internal let credentials: TokenCredentials
+  internal let refreshPolicy: TokenRefreshPolicy
+  internal let retryPolicy: RetryPolicy
+  internal let storage: (any TokenStorage)?
 
   // Key rotation scheduler state
-  private let taskState = TaskState()
-  private let rotationSubject = AsyncStream<KeyRotationEvent>.makeStream()
+  internal let taskState = TaskState()
+  internal let rotationSubject = AsyncStream<KeyRotationEvent>.makeStream()
 
   /// Actor to manage task state safely
-  private actor TaskState {
+  internal actor TaskState {
     private var rotationTask: Task<Void, Never>?
 
     func setTask(_ task: Task<Void, Never>?) {
@@ -210,277 +210,5 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
       keyID: keyID,
       privateKey: privateKey().rawRepresentation
     )
-  }
-}
-
-// MARK: - Key Rotation Scheduler
-
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension ServerToServerAuthManager {
-  /// Starts the automatic key rotation scheduler based on refresh policy
-  private func startRotationScheduler() {
-    guard refreshPolicy.supportsAutomaticRefresh else { return }
-
-    let task = Task<Void, Never> { [weak self] in
-      await self?.runRotationScheduler()
-    }
-    Task { await taskState.setTask(task) }
-  }
-
-  /// Runs the key rotation scheduler loop
-  private func runRotationScheduler() async {
-    while !Task.isCancelled {
-      do {
-        let nextRotationDate = calculateNextRotationDate()
-
-        // Emit scheduled event
-        rotationSubject.continuation.yield(
-          .rotationScheduled(keyID: keyID, nextRotation: nextRotationDate))
-
-        // Wait until the scheduled rotation time
-        let now = Date()
-        if nextRotationDate > now {
-          let delay = nextRotationDate.timeIntervalSince(now)
-          let nanoseconds = UInt64(delay * 1_000_000_000)
-          try await Task.sleep(nanoseconds: nanoseconds)
-        }
-
-        // Check if we're still running after sleep
-        guard !Task.isCancelled else { break }
-
-        // Perform key rotation (this would typically involve external key management)
-        await performScheduledRotation()
-      } catch {
-        // If sleeping was cancelled, exit gracefully
-        if error is CancellationError {
-          break
-        }
-
-        // For other errors, wait a bit before retrying
-        try? await Task.sleep(nanoseconds: 60_000_000_000)  // 60 seconds
-      }
-    }
-  }
-
-  /// Calculates the next rotation date based on refresh policy
-  private func calculateNextRotationDate() -> Date {
-    let now = Date()
-
-    switch refreshPolicy {
-    case .periodic(let interval):
-      return now.addingTimeInterval(interval)
-    case .onExpiry:
-      // For server-to-server keys, we don't have a specific expiry
-      // Default to 24 hours for onExpiry policy
-      return now.addingTimeInterval(24 * 60 * 60)
-    case .manual:
-      // This shouldn't be called for manual policy
-      return now.addingTimeInterval(Double.greatestFiniteMagnitude)
-    }
-  }
-
-  /// Performs the actual key rotation (placeholder for external key management integration)
-  private func performScheduledRotation() async {
-    rotationSubject.continuation.yield(.rotationStarted(keyID: keyID))
-
-    do {
-      // In a real implementation, this would:
-      // 1. Generate a new key pair
-      // 2. Register the new key with Apple's key management system
-      // 3. Update the keyID and privateKey properties
-      // 4. Store the new credentials if storage is available
-
-      // For now, we'll just emit a completion event with the same key
-      // since we can't actually perform key rotation without external integration
-      rotationSubject.continuation.yield(.rotationCompleted(oldKeyID: keyID, newKeyID: keyID))
-
-      // Store updated credentials if storage is available
-      if let storage = storage {
-        try await storage.store(credentials, identifier: keyID)
-      }
-    } catch {
-      rotationSubject.continuation.yield(.rotationFailed(keyID: keyID, error: error))
-    }
-  }
-
-  /// Manually triggers key rotation (can be called regardless of refresh policy)
-  /// - Parameters:
-  ///   - newKeyID: The new key identifier
-  ///   - newPrivateKey: The new private key
-  /// - Returns: New TokenCredentials with rotated key
-  public func rotateKey(to newKeyID: String, privateKey newPrivateKey: P256.Signing.PrivateKey)
-    async throws -> TokenCredentials
-  {
-    let oldKeyID = keyID
-
-    rotationSubject.continuation.yield(.rotationStarted(keyID: oldKeyID))
-
-    do {
-      // Create new credentials with rotated key
-      let newCredentials = TokenCredentials.serverToServer(
-        keyID: newKeyID,
-        privateKey: newPrivateKey.rawRepresentation
-      )
-
-      // Store new credentials if storage is available
-      if let storage = storage {
-        // Store new credentials and remove old ones
-        try await storage.store(newCredentials, identifier: newKeyID)
-        try await storage.remove(identifier: oldKeyID)
-      }
-
-      rotationSubject.continuation.yield(.rotationCompleted(oldKeyID: oldKeyID, newKeyID: newKeyID))
-
-      return newCredentials
-    } catch {
-      rotationSubject.continuation.yield(.rotationFailed(keyID: oldKeyID, error: error))
-      throw error
-    }
-  }
-
-  /// Stops the automatic key rotation scheduler
-  public func stopRotationScheduler() {
-    Task { await taskState.cancelTask() }
-  }
-
-  /// Returns the current refresh policy
-  public var currentRefreshPolicy: TokenRefreshPolicy {
-    refreshPolicy
-  }
-
-  /// Returns the current retry policy
-  public var currentRetryPolicy: RetryPolicy {
-    retryPolicy
-  }
-}
-
-// MARK: - Request Signing Methods
-
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension ServerToServerAuthManager {
-  /// Signs a CloudKit Web Services request
-  /// - Parameters:
-  ///   - requestBody: The HTTP request body (for POST requests)
-  ///   - webServiceURL: The full CloudKit Web Services URL
-  ///   - date: The request date (defaults to current date)
-  /// - Returns: Signature components for CloudKit headers
-  public func signRequest(
-    requestBody: Data?,
-    webServiceURL: String,
-    date: Date = Date()
-  ) throws -> RequestSignature {
-    // Create the signature payload according to Apple's CloudKit specification:
-    // [Current Date]:[Base64 Body Hash]:[Web Service URL Subpath]
-    // Apple requires ISO8601 format without milliseconds (e.g., 2016-01-25T22:15:43Z)
-    let formatter = ISO8601DateFormatter()
-    formatter.formatOptions = [.withInternetDateTime, .withTimeZone]
-    let iso8601Date = formatter.string(from: date)
-
-    // Calculate SHA-256 hash of request body, then base64 encode (per Apple docs)
-    let bodyHash: String
-    if let requestBody = requestBody {
-      let hash = SHA256.hash(data: requestBody)
-      bodyHash = Data(hash).base64EncodedString()
-    } else {
-      bodyHash = ""
-    }
-
-    let signaturePayload = "\(iso8601Date):\(bodyHash):\(webServiceURL)"
-
-    // Debug output for troubleshooting
-    print("🔍 Debug - Signature Payload:")
-    print("   Date: \(iso8601Date)")
-    print("   Body Hash: \(bodyHash)")
-    print("   Web Service URL: \(webServiceURL)")
-    print("   Full Payload: \(signaturePayload)")
-
-    guard let payloadData = signaturePayload.data(using: .utf8) else {
-      throw TokenManagerError.internalError(reason: "Failed to encode signature payload")
-    }
-
-    // Create ECDSA signature
-    let signature = try privateKey().signature(for: payloadData)
-    let signatureBase64 = signature.derRepresentation.base64EncodedString()
-
-    return RequestSignature(
-      keyID: keyID,
-      date: iso8601Date,
-      signature: signatureBase64
-    )
-  }
-
-  /// The key identifier
-  public var keyIdentifier: String {
-    keyID
-  }
-
-  /// Returns the public key for verification purposes
-  public var publicKey: P256.Signing.PublicKey {
-    get throws {
-      try privateKey().publicKey
-    }
-  }
-
-  /// Creates credentials with additional metadata
-  /// - Parameter metadata: Additional metadata to include
-  /// - Returns: TokenCredentials with metadata
-  public func credentialsWithMetadata(_ metadata: [String: String]) throws -> TokenCredentials {
-    try TokenCredentials(
-      method: .serverToServer(keyID: keyID, privateKey: privateKey().rawRepresentation),
-      metadata: metadata
-    )
-  }
-
-  /// Creates new credentials with rotated key (for key rotation)
-  /// - Parameter newPrivateKey: The new private key
-  /// - Returns: New TokenCredentials with updated key
-  /// - Note: This creates new credentials but doesn't update the manager's internal key
-  public func credentialsWithRotatedKey(to newPrivateKey: P256.Signing.PrivateKey)
-    -> TokenCredentials
-  {
-    // Note: This would typically require updating the keyID as well in a real rotation
-    TokenCredentials.serverToServer(
-      keyID: keyID,
-      privateKey: newPrivateKey.rawRepresentation
-    )
-  }
-
-  /// Creates a MistKitConfiguration for server-to-server authentication
-  /// This automatically configures the public database as required for server-to-server auth
-  /// - Parameters:
-  ///   - container: The CloudKit container identifier
-  ///   - environment: The CloudKit environment
-  /// - Returns: A properly configured MistKitConfiguration for server-to-server use
-  public static func configuration(
-    container: String,
-    environment: Environment
-  ) -> MistKitConfiguration {
-    MistKitConfiguration.serverToServer(
-      container: container,
-      environment: environment
-    )
-  }
-}
-
-// MARK: - Request Signature Type
-
-/// CloudKit Web Services request signature components
-public struct RequestSignature: Sendable {
-  /// The key identifier for X-Apple-CloudKit-Request-KeyID header
-  public let keyID: String
-
-  /// The ISO8601 date string for X-Apple-CloudKit-Request-ISO8601Date header
-  public let date: String
-
-  /// The base64-encoded signature for X-Apple-CloudKit-Request-SignatureV1 header
-  public let signature: String
-
-  /// Creates CloudKit request headers from this signature
-  public var headers: [String: String] {
-    [
-      "X-Apple-CloudKit-Request-KeyID": keyID,
-      "X-Apple-CloudKit-Request-ISO8601Date": date,
-      "X-Apple-CloudKit-Request-SignatureV1": signature,
-    ]
   }
 }

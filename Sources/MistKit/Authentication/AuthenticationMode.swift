@@ -1,5 +1,5 @@
 //
-//  UserInfo.swift
+//  AuthenticationMode.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,33 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// User information from CloudKit
-public struct UserInfo: Encodable {
-  /// The user's record name
-  public let userRecordName: String
-  /// The user's first name
-  public let firstName: String?
-  /// The user's last name
-  public let lastName: String?
-  /// The user's email address
-  public let emailAddress: String?
+public import Foundation
 
-  internal init(from cloudKitUser: Components.Schemas.UserResponse) {
-    self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
-    self.firstName = cloudKitUser.firstName
-    self.lastName = cloudKitUser.lastName
-    self.emailAddress = cloudKitUser.emailAddress
+/// Represents the current authentication mode
+public enum AuthenticationMode: Sendable, Equatable {
+  /// API token only - container-level access
+  case apiOnly
+
+  /// API + Web token - user-specific access
+  case webAuthenticated
+
+  /// Human-readable description
+  public var description: String {
+    switch self {
+    case .apiOnly:
+      return "API Token Only (Container Access)"
+    case .webAuthenticated:
+      return "Web Authenticated (User Access)"
+    }
+  }
+
+  /// Returns true if this mode supports user operations
+  public var supportsUserOperations: Bool {
+    switch self {
+    case .apiOnly:
+      return false
+    case .webAuthenticated:
+      return true
+    }
   }
 }

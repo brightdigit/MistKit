@@ -1,0 +1,128 @@
+//
+//  AdaptiveTokenManager+Transitions.swift
+//  PackageDSLKit
+//
+//  Created by Leo Dion.
+//  Copyright © 2025 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the “Software”), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+public import Foundation
+
+// MARK: - Transition Methods
+
+extension AdaptiveTokenManager {
+  /// Current authentication mode
+  public var authenticationMode: AuthenticationMode {
+    webAuthToken != nil ? .webAuthenticated : .apiOnly
+  }
+
+  /// Upgrades to web authentication by adding a web auth token
+  /// - Parameter webAuthToken: The web authentication token from CloudKit JS
+  /// - Returns: New credentials with web authentication
+  /// - Throws: TokenManagerError if the web token is invalid
+  public func upgradeToWebAuthentication(webAuthToken: String) async throws -> TokenCredentials {
+    guard !webAuthToken.isEmpty else {
+      throw TokenManagerError.invalidCredentials(reason: "Web auth token cannot be empty")
+    }
+
+    guard webAuthToken.count >= 10 else {
+      throw TokenManagerError.invalidCredentials(reason: "Web auth token too short")
+    }
+
+    let oldMode = authenticationMode
+    self.webAuthToken = webAuthToken
+    let newMode = authenticationMode
+
+    // Emit mode change event
+    refreshSubject.continuation.yield(.modeChanged(from: oldMode, to: newMode))
+
+    // Start refresh scheduler if policy supports it and we're now in web auth mode
+    if newMode == .webAuthenticated && refreshPolicy.supportsAutomaticRefresh {
+      startRefreshScheduler()
+    }
+
+    // Store credentials if storage is available
+    if let storage = storage {
+      let credentials = try await getCurrentCredentials()!
+      try await storage.store(credentials, identifier: apiToken)
+    }
+
+    return try await getCurrentCredentials()!
+  }
+
+  /// Downgrades to API-only authentication (removes web auth token)
+  /// - Returns: New credentials with API-only authentication
+  public func downgradeToAPIOnly() async throws -> TokenCredentials {
+    let oldMode = authenticationMode
+    self.webAuthToken = nil
+    let newMode = authenticationMode
+
+    // Emit mode change event
+    refreshSubject.continuation.yield(.modeChanged(from: oldMode, to: newMode))
+
+    // Stop refresh scheduler since we're no longer in web auth mode
+    stopRefreshScheduler()
+
+    return try await getCurrentCredentials()!
+  }
+
+  /// Updates the web auth token (for token refresh scenarios)
+  /// - Parameter newWebAuthToken: The new web authentication token
+  /// - Returns: Updated credentials
+  /// - Throws: TokenManagerError if not in web auth mode or token is invalid
+  public func updateWebAuthToken(_ newWebAuthToken: String) async throws -> TokenCredentials {
+    guard webAuthToken != nil else {
+      throw TokenManagerError.invalidCredentials(
+        reason: "Cannot update web auth token when not in web authentication mode"
+      )
+    }
+
+    return try await upgradeToWebAuthentication(webAuthToken: newWebAuthToken)
+  }
+
+  /// Returns true if currently supports user-specific operations
+  public var supportsUserOperations: Bool {
+    webAuthToken != nil
+  }
+
+  /// Returns the current API token
+  public var currentAPIToken: String {
+    apiToken
+  }
+
+  /// Returns the current web auth token (if any)
+  public var currentWebAuthToken: String? {
+    webAuthToken
+  }
+
+  /// Returns the current refresh policy
+  public var currentRefreshPolicy: TokenRefreshPolicy {
+    refreshPolicy
+  }
+
+  /// Returns the current retry policy
+  public var currentRetryPolicy: RetryPolicy {
+    retryPolicy
+  }
+}

@@ -1,5 +1,5 @@
 //
-//  UserInfo.swift
+//  TokenRefreshPolicy.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,36 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// User information from CloudKit
-public struct UserInfo: Encodable {
-  /// The user's record name
-  public let userRecordName: String
-  /// The user's first name
-  public let firstName: String?
-  /// The user's last name
-  public let lastName: String?
-  /// The user's email address
-  public let emailAddress: String?
+public import Foundation
 
-  internal init(from cloudKitUser: Components.Schemas.UserResponse) {
-    self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
-    self.firstName = cloudKitUser.firstName
-    self.lastName = cloudKitUser.lastName
-    self.emailAddress = cloudKitUser.emailAddress
+/// Defines when and how tokens should be refreshed
+public enum TokenRefreshPolicy: Sendable, Equatable {
+  /// Refresh tokens only when they expire
+  case onExpiry
+
+  /// Refresh tokens at regular intervals
+  case periodic(TimeInterval)
+
+  /// Manual refresh only - no automatic refresh
+  case manual
+
+  /// Returns true if this policy supports automatic refresh
+  public var supportsAutomaticRefresh: Bool {
+    switch self {
+    case .onExpiry, .periodic:
+      return true
+    case .manual:
+      return false
+    }
+  }
+
+  /// Returns the refresh interval if applicable
+  public var refreshInterval: TimeInterval? {
+    switch self {
+    case .onExpiry, .manual:
+      return nil
+    case .periodic(let interval):
+      return interval
+    }
   }
 }
