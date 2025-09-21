@@ -16,7 +16,8 @@
       "WebFetch(domain:github.com)",
       "Bash(Scripts/generate-openapi.sh:*)",
       "Bash(./Scripts/lint.sh:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(gh pr view:*)"
     ],
     "deny": []
   },

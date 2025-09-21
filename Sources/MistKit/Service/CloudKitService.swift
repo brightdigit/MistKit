@@ -1,6 +1,6 @@
 //
 //  CloudKitService.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -82,9 +82,12 @@ public struct CloudKitService {
   }
 
   /// Initialize CloudKit service with a custom TokenManager
-  public init(containerIdentifier: String, tokenManager: any TokenManager, environment: Environment = .development, database: Database = .private) throws {
+  public init(
+    containerIdentifier: String, tokenManager: any TokenManager,
+    environment: Environment = .development, database: Database = .private
+  ) throws {
     self.containerIdentifier = containerIdentifier
-    self.apiToken = "" // Not used when providing TokenManager directly
+    self.apiToken = ""  // Not used when providing TokenManager directly
     self.environment = environment
     self.database = database
 

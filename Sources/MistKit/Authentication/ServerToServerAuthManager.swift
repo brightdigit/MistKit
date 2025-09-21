@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -27,12 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
 public import Crypto
+public import Foundation
 
 // Forward declaration for MistKitConfiguration
 #if canImport(MistKit)
-// Configuration will be available when imported as part of MistKit
+  // Configuration will be available when imported as part of MistKit
 #endif
 
 /// Token manager for server-to-server authentication using ECDSA P-256 signing
@@ -88,7 +88,7 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public init(
     keyID: String,
-    privateKeyCallback: @autoclosure  @escaping @Sendable () throws -> P256.Signing.PrivateKey,
+    privateKeyCallback: @autoclosure @escaping @Sendable () throws -> P256.Signing.PrivateKey,
     refreshPolicy: TokenRefreshPolicy = .manual,
     retryPolicy: RetryPolicy = .default,
     storage: (any TokenStorage)? = nil
@@ -164,11 +164,11 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
 
   // MARK: - TokenManager Protocol
 
-  public let supportsRefresh = true // Server keys can be rotated
+  public let supportsRefresh = true  // Server keys can be rotated
 
   public var hasCredentials: Bool {
     get async {
-      return !keyID.isEmpty
+      !keyID.isEmpty
     }
   }
 
@@ -206,7 +206,7 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   public func refreshCredentials() async throws -> TokenCredentials? {
     // For server-to-server auth, "refresh" means we regenerate credentials
     // with the same key (useful for updating metadata or timestamps)
-    return try TokenCredentials.serverToServer(
+    try TokenCredentials.serverToServer(
       keyID: keyID,
       privateKey: privateKey().rawRepresentation
     )
@@ -234,7 +234,8 @@ extension ServerToServerAuthManager {
         let nextRotationDate = calculateNextRotationDate()
 
         // Emit scheduled event
-        rotationSubject.continuation.yield(.rotationScheduled(keyID: keyID, nextRotation: nextRotationDate))
+        rotationSubject.continuation.yield(
+          .rotationScheduled(keyID: keyID, nextRotation: nextRotationDate))
 
         // Wait until the scheduled rotation time
         let now = Date()
@@ -249,7 +250,6 @@ extension ServerToServerAuthManager {
 
         // Perform key rotation (this would typically involve external key management)
         await performScheduledRotation()
-
       } catch {
         // If sleeping was cancelled, exit gracefully
         if error is CancellationError {
@@ -257,7 +257,7 @@ extension ServerToServerAuthManager {
         }
 
         // For other errors, wait a bit before retrying
-        try? await Task.sleep(nanoseconds: 60_000_000_000) // 60 seconds
+        try? await Task.sleep(nanoseconds: 60_000_000_000)  // 60 seconds
       }
     }
   }
@@ -298,7 +298,6 @@ extension ServerToServerAuthManager {
       if let storage = storage {
         try await storage.store(credentials, identifier: keyID)
       }
-
     } catch {
       rotationSubject.continuation.yield(.rotationFailed(keyID: keyID, error: error))
     }
@@ -309,7 +308,9 @@ extension ServerToServerAuthManager {
   ///   - newKeyID: The new key identifier
   ///   - newPrivateKey: The new private key
   /// - Returns: New TokenCredentials with rotated key
-  public func rotateKey(to newKeyID: String, privateKey newPrivateKey: P256.Signing.PrivateKey) async throws -> TokenCredentials {
+  public func rotateKey(to newKeyID: String, privateKey newPrivateKey: P256.Signing.PrivateKey)
+    async throws -> TokenCredentials
+  {
     let oldKeyID = keyID
 
     rotationSubject.continuation.yield(.rotationStarted(keyID: oldKeyID))
@@ -331,7 +332,6 @@ extension ServerToServerAuthManager {
       rotationSubject.continuation.yield(.rotationCompleted(oldKeyID: oldKeyID, newKeyID: newKeyID))
 
       return newCredentials
-
     } catch {
       rotationSubject.continuation.yield(.rotationFailed(keyID: oldKeyID, error: error))
       throw error
@@ -386,7 +386,7 @@ extension ServerToServerAuthManager {
     }
 
     let signaturePayload = "\(iso8601Date):\(bodyHash):\(webServiceURL)"
-    
+
     // Debug output for troubleshooting
     print("🔍 Debug - Signature Payload:")
     print("   Date: \(iso8601Date)")
@@ -435,9 +435,11 @@ extension ServerToServerAuthManager {
   /// - Parameter newPrivateKey: The new private key
   /// - Returns: New TokenCredentials with updated key
   /// - Note: This creates new credentials but doesn't update the manager's internal key
-  public func credentialsWithRotatedKey(to newPrivateKey: P256.Signing.PrivateKey) -> TokenCredentials {
+  public func credentialsWithRotatedKey(to newPrivateKey: P256.Signing.PrivateKey)
+    -> TokenCredentials
+  {
     // Note: This would typically require updating the keyID as well in a real rotation
-    return TokenCredentials.serverToServer(
+    TokenCredentials.serverToServer(
       keyID: keyID,
       privateKey: newPrivateKey.rawRepresentation
     )
@@ -453,7 +455,7 @@ extension ServerToServerAuthManager {
     container: String,
     environment: Environment
   ) -> MistKitConfiguration {
-    return MistKitConfiguration.serverToServer(
+    MistKitConfiguration.serverToServer(
       container: container,
       environment: environment
     )
@@ -478,7 +480,7 @@ public struct RequestSignature: Sendable {
     [
       "X-Apple-CloudKit-Request-KeyID": keyID,
       "X-Apple-CloudKit-Request-ISO8601Date": date,
-      "X-Apple-CloudKit-Request-SignatureV1": signature
+      "X-Apple-CloudKit-Request-SignatureV1": signature,
     ]
   }
 }

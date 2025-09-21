@@ -1,6 +1,6 @@
 //
 //  MistKitConfiguration.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -145,8 +145,8 @@ extension MistKitConfiguration {
     MistKitConfiguration(
       container: container,
       environment: environment,
-      database: .public, // Server-to-server only supports public database
-      apiToken: "", // Not used with server-to-server auth
+      database: .public,  // Server-to-server only supports public database
+      apiToken: "",  // Not used with server-to-server auth
       webAuthToken: nil
     )
   }

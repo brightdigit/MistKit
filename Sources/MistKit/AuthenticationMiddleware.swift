@@ -1,6 +1,6 @@
 //
 //  AuthenticationMiddleware.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import Crypto
 public import Foundation
 import HTTPTypes
 import OpenAPIRuntime
-import Crypto
 
 /// Authentication middleware for CloudKit requests using TokenManager
 internal struct AuthenticationMiddleware: ClientMiddleware {
@@ -50,7 +50,6 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
     operationID: String,
     next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
   ) async throws -> (HTTPResponse, HTTPBody?) {
-
     // Get credentials from token manager
     guard let credentials = try await tokenManager.getCurrentCredentials() else {
       throw TokenManagerError.invalidCredentials(reason: "No credentials available")
@@ -91,7 +90,7 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
       queryItems.append(URLQueryItem(name: "ckWebAuthToken", value: encodedWebAuthToken))
       urlComponents.queryItems = queryItems
 
-    case .serverToServer(_, _):
+    case .serverToServer:
       // Server-to-server authentication uses ECDSA P-256 signature in headers
       // Available on macOS 11.0+, iOS 14.0+, tvOS 14.0+, watchOS 7.0+, and Linux
       if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
@@ -109,7 +108,7 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
           } else {
             requestBodyData = nil
           }
-          
+
           // According to Apple's documentation, the signature should use the Web Service URL Subpath
           // which is /database/1/[container]/[environment]/[operation-specific subpath]
           // NOT the full URL with https://api.apple-cloudkit.com
@@ -122,8 +121,10 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
 
           // Add CloudKit headers
           modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-KeyID")!] = signature.keyID
-          modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-ISO8601Date")!] = signature.date
-          modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-SignatureV1")!] = signature.signature
+          modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-ISO8601Date")!] =
+            signature.date
+          modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-SignatureV1")!] =
+            signature.signature
         } else {
           throw TokenManagerError.internalError(
             reason: "Server-to-server credentials require ServerToServerAuthManager"
@@ -131,7 +132,8 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
         }
       } else {
         throw TokenManagerError.internalError(
-          reason: "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
+          reason:
+            "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
         )
       }
     }
@@ -145,6 +147,4 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
 
     return try await next(modifiedRequest, body, baseURL)
   }
-
 }
-

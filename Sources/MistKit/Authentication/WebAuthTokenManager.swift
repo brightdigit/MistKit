@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -117,7 +117,7 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
 
   public var hasCredentials: Bool {
     get async {
-      return !apiToken.isEmpty && !webAuthToken.isEmpty
+      !apiToken.isEmpty && !webAuthToken.isEmpty
     }
   }
 
@@ -191,7 +191,8 @@ extension WebAuthTokenManager {
         let nextRefreshDate = calculateNextRefreshDate()
 
         // Emit scheduled event
-        refreshSubject.continuation.yield(.refreshScheduled(apiToken: apiToken, nextRefresh: nextRefreshDate))
+        refreshSubject.continuation.yield(
+          .refreshScheduled(apiToken: apiToken, nextRefresh: nextRefreshDate))
 
         // Wait until the scheduled refresh time
         let now = Date()
@@ -206,7 +207,6 @@ extension WebAuthTokenManager {
 
         // Perform token refresh
         await performScheduledRefresh()
-
       } catch {
         // If sleeping was cancelled, exit gracefully
         if error is CancellationError {
@@ -214,7 +214,7 @@ extension WebAuthTokenManager {
         }
 
         // For other errors, wait a bit before retrying
-        try? await Task.sleep(nanoseconds: 60_000_000_000) // 60 seconds
+        try? await Task.sleep(nanoseconds: 60_000_000_000)  // 60 seconds
       }
     }
   }
@@ -270,10 +270,10 @@ extension WebAuthTokenManager {
           try await storage.store(refreshedCredentials, identifier: apiToken)
         }
 
-        refreshSubject.continuation.yield(.refreshCompleted(apiToken: apiToken, newWebToken: webAuthToken))
+        refreshSubject.continuation.yield(
+          .refreshCompleted(apiToken: apiToken, newWebToken: webAuthToken))
 
         return refreshedCredentials
-
       } catch {
         lastError = error
 
@@ -288,7 +288,9 @@ extension WebAuthTokenManager {
     }
 
     // If we get here, all attempts failed
-    let finalError = lastError ?? TokenManagerError.internalError(reason: "Refresh failed after all retry attempts")
+    let finalError =
+      lastError
+      ?? TokenManagerError.internalError(reason: "Refresh failed after all retry attempts")
     refreshSubject.continuation.yield(.refreshFailed(apiToken: apiToken, error: finalError))
     throw finalError
   }
@@ -311,10 +313,10 @@ extension WebAuthTokenManager {
         try await storage.store(newCredentials, identifier: apiToken)
       }
 
-      refreshSubject.continuation.yield(.refreshCompleted(apiToken: apiToken, newWebToken: newWebAuthToken))
+      refreshSubject.continuation.yield(
+        .refreshCompleted(apiToken: apiToken, newWebToken: newWebAuthToken))
 
       return newCredentials
-
     } catch {
       refreshSubject.continuation.yield(.refreshFailed(apiToken: apiToken, error: error))
       throw error
@@ -386,7 +388,7 @@ extension WebAuthTokenManager {
   /// - Returns: New TokenCredentials with updated web token
   /// - Note: This creates new credentials but doesn't update the manager's internal token
   public func credentialsWithUpdatedWebAuthToken(_ newWebAuthToken: String) -> TokenCredentials {
-    return TokenCredentials.webAuthToken(
+    TokenCredentials.webAuthToken(
       apiToken: apiToken,
       webToken: newWebAuthToken
     )

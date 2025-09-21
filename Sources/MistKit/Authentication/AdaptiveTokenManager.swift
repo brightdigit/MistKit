@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -85,12 +85,12 @@ public actor AdaptiveTokenManager: TokenManager {
 
   nonisolated public var supportsRefresh: Bool {
     // Support refresh only in web authentication mode with appropriate policy
-    return refreshPolicy.supportsAutomaticRefresh
+    refreshPolicy.supportsAutomaticRefresh
   }
 
   public var hasCredentials: Bool {
     get async {
-      return !apiToken.isEmpty
+      !apiToken.isEmpty
     }
   }
 
@@ -250,7 +250,9 @@ extension AdaptiveTokenManager {
 extension AdaptiveTokenManager {
   /// Starts the automatic token refresh scheduler (only in web auth mode)
   private func startRefreshScheduler() {
-    guard authenticationMode == .webAuthenticated && refreshPolicy.supportsAutomaticRefresh else { return }
+    guard authenticationMode == .webAuthenticated && refreshPolicy.supportsAutomaticRefresh else {
+      return
+    }
 
     refreshTask = Task { [weak self] in
       await self?.runRefreshScheduler()
@@ -264,7 +266,8 @@ extension AdaptiveTokenManager {
         let nextRefreshDate = calculateNextRefreshDate()
 
         // Emit scheduled event
-        refreshSubject.continuation.yield(.refreshScheduled(apiToken: apiToken, nextRefresh: nextRefreshDate))
+        refreshSubject.continuation.yield(
+          .refreshScheduled(apiToken: apiToken, nextRefresh: nextRefreshDate))
 
         // Wait until the scheduled refresh time
         let now = Date()
@@ -279,7 +282,6 @@ extension AdaptiveTokenManager {
 
         // Perform token refresh
         await performScheduledRefresh()
-
       } catch {
         // If sleeping was cancelled, exit gracefully
         if error is CancellationError {
@@ -287,7 +289,7 @@ extension AdaptiveTokenManager {
         }
 
         // For other errors, wait a bit before retrying
-        try? await Task.sleep(nanoseconds: 60_000_000_000) // 60 seconds
+        try? await Task.sleep(nanoseconds: 60_000_000_000)  // 60 seconds
       }
     }
   }
@@ -328,7 +330,8 @@ extension AdaptiveTokenManager {
         // In a real implementation, this would make a request to CloudKit's token refresh endpoint
         // For now, we'll simulate a refresh by creating new credentials with existing tokens
         guard let currentWebToken = webAuthToken else {
-          throw TokenManagerError.invalidCredentials(reason: "No web auth token available for refresh")
+          throw TokenManagerError.invalidCredentials(
+            reason: "No web auth token available for refresh")
         }
 
         let refreshedCredentials = TokenCredentials.webAuthToken(
@@ -341,10 +344,10 @@ extension AdaptiveTokenManager {
           try await storage.store(refreshedCredentials, identifier: apiToken)
         }
 
-        refreshSubject.continuation.yield(.refreshCompleted(apiToken: apiToken, newWebToken: currentWebToken))
+        refreshSubject.continuation.yield(
+          .refreshCompleted(apiToken: apiToken, newWebToken: currentWebToken))
 
         return refreshedCredentials
-
       } catch {
         lastError = error
 
@@ -359,7 +362,9 @@ extension AdaptiveTokenManager {
     }
 
     // If we get here, all attempts failed
-    let finalError = lastError ?? TokenManagerError.internalError(reason: "Refresh failed after all retry attempts")
+    let finalError =
+      lastError
+      ?? TokenManagerError.internalError(reason: "Refresh failed after all retry attempts")
     refreshSubject.continuation.yield(.refreshFailed(apiToken: apiToken, error: finalError))
     throw finalError
   }
@@ -383,10 +388,10 @@ extension AdaptiveTokenManager {
         try await storage.store(newCredentials, identifier: apiToken)
       }
 
-      refreshSubject.continuation.yield(.refreshCompleted(apiToken: apiToken, newWebToken: newWebAuthToken))
+      refreshSubject.continuation.yield(
+        .refreshCompleted(apiToken: apiToken, newWebToken: newWebAuthToken))
 
       return newCredentials
-
     } catch {
       refreshSubject.continuation.yield(.refreshFailed(apiToken: apiToken, error: error))
       throw error

@@ -1,9 +1,9 @@
 public import XCTest
+
 @testable import MistKit
 
 /// Test suite for TokenManager protocol and related types
 public final class TokenManagerTests: XCTestCase {
-
   // MARK: - AuthenticationMethod Tests
 
   /// Tests AuthenticationMethod enum case creation and equality
@@ -213,7 +213,7 @@ public final class TokenManagerTests: XCTestCase {
 
     XCTAssertEqual(credentials1, credentials2)
     XCTAssertNotEqual(credentials1, credentials3)
-    XCTAssertNotEqual(credentials1, credentials4) // Different metadata
+    XCTAssertNotEqual(credentials1, credentials4)  // Different metadata
   }
 
   // MARK: - TokenManagerError Tests
@@ -312,14 +312,14 @@ internal final class MockTokenManager: TokenManager {
   }
 
   func validateCredentials() async throws -> Bool {
-    return true
+    true
   }
 
   func getCurrentCredentials() async throws -> TokenCredentials? {
-    return TokenCredentials.apiToken("mock-token")
+    TokenCredentials.apiToken("mock-token")
   }
 
   func refreshCredentials() async throws -> TokenCredentials? {
-    return TokenCredentials.apiToken("refreshed-mock-token")
+    TokenCredentials.apiToken("refreshed-mock-token")
   }
 }

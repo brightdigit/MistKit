@@ -1,6 +1,6 @@
 //
 //  MistKitClient.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -33,7 +33,7 @@ import OpenAPIRuntime
 import OpenAPIURLSession
 
 #if canImport(Crypto)
-import Crypto
+  import Crypto
 #endif
 
 /// A client for interacting with CloudKit Web Services
@@ -74,7 +74,8 @@ public struct MistKitClient {
     self.configuration = configuration
 
     // Validate server-to-server authentication restrictions
-    try Self.validateServerToServerConfiguration(configuration: configuration, tokenManager: tokenManager)
+    try Self.validateServerToServerConfiguration(
+      configuration: configuration, tokenManager: tokenManager)
 
     // Create the OpenAPI client with custom server URL and middleware
     self.client = Client(
@@ -104,7 +105,7 @@ public struct MistKitClient {
       container: container,
       environment: environment,
       database: database,
-      apiToken: "" // Not used with custom TokenManager
+      apiToken: ""  // Not used with custom TokenManager
     )
 
     try self.init(configuration: configuration, tokenManager: tokenManager)
@@ -123,16 +124,17 @@ public struct MistKitClient {
   ) throws {
     // Check if this is a server-to-server token manager (only available on newer platforms)
     #if canImport(Crypto)
-    if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
-      if tokenManager is ServerToServerAuthManager {
-        // Server-to-server authentication only supports the public database
-        guard configuration.database == .public else {
-          throw TokenManagerError.invalidCredentials(
-            reason: "Server-to-server authentication only supports the public database. Current database: \(configuration.database). Use MistKitConfiguration.serverToServer() for proper configuration."
-          )
+      if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+        if tokenManager is ServerToServerAuthManager {
+          // Server-to-server authentication only supports the public database
+          guard configuration.database == .public else {
+            throw TokenManagerError.invalidCredentials(
+              reason:
+                "Server-to-server authentication only supports the public database. Current database: \(configuration.database). Use MistKitConfiguration.serverToServer() for proper configuration."
+            )
+          }
         }
       }
-    }
     #endif
   }
 }

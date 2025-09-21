@@ -71,7 +71,7 @@ if [ -z "$FORMAT_ONLY" ]; then
 	run_command $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS
 fi
 
-$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "PackageDSLKit"
+$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "MistKit"
 
 # Generated files now automatically include ignore directives via OpenAPI generator configuration
 
