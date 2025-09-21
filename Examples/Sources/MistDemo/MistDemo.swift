@@ -19,8 +19,8 @@ struct MistDemo: AsyncParsableCommand {
     @Option(name: .shortAndLong, help: "CloudKit container identifier")
     var containerIdentifier: String = "iCloud.com.brightdigit.MistDemo"
     
-    @Option(name: .shortAndLong, help: "CloudKit API token")
-    var apiToken: String = "296c503003846ef692cb5b56c4a63cc1d27fb952eebe259d73e692759286dfa6"
+    @Option(name: .shortAndLong, help: "CloudKit API token (or set CLOUDKIT_API_TOKEN environment variable)")
+    var apiToken: String = ""
     
     @Option(name: .long, help: "Host to bind the server to")
     var host: String = "127.0.0.1"
@@ -62,6 +62,26 @@ struct MistDemo: AsyncParsableCommand {
     var environment: String = "development"
     
     func run() async throws {
+        // Get API token from environment variable if not provided
+        let resolvedApiToken = apiToken.isEmpty ? 
+            EnvironmentConfig.getOptional(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" : 
+            apiToken
+        
+        guard !resolvedApiToken.isEmpty else {
+            print("❌ Error: CloudKit API token is required")
+            print("   Provide it via --api-token or set CLOUDKIT_API_TOKEN environment variable")
+            print("   Get your API token from: https://icloud.developer.apple.com/dashboard/")
+            print("\n💡 Environment variables available:")
+            let maskedEnv = EnvironmentConfig.CloudKit.getMaskedEnvironment()
+            for (key, value) in maskedEnv.sorted(by: { $0.key < $1.key }) {
+                print("   \(key): \(value)")
+            }
+            return
+        }
+        
+        // Update the apiToken property with the resolved value
+        apiToken = resolvedApiToken
+        
         if testAllAuth {
             try await testAllAuthenticationMethods()
         } else if testApiOnly {
@@ -87,6 +107,7 @@ struct MistDemo: AsyncParsableCommand {
         print(String(repeating: "=", count: 60))
         print("\n📍 Server URL: http://\(host):\(port)")
         print("📱 Container: \(containerIdentifier)")
+        print("🔑 API Token: \(apiToken.maskedAPIToken)")
         print("\n" + String(repeating: "-", count: 60))
         print("📋 Instructions:")
         print("1. Opening browser to: http://\(host):\(port)")
@@ -312,7 +333,7 @@ struct MistDemo: AsyncParsableCommand {
         print("🧪 MistKit Authentication Methods Test Suite")
         print(String(repeating: "=", count: 70))
         print("Container: \(containerIdentifier)")
-        print("API Token: \(apiToken)")
+        print("API Token: \(apiToken.maskedAPIToken)")
         print(String(repeating: "=", count: 70))
 
         // Test 1: API-only Authentication

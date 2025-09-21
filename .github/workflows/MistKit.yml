@@ -170,6 +170,7 @@ jobs:
     env:
       MINT_PATH: .mint/lib
       MINT_LINK_PATH: .mint/bin
+      LINT_MODE: STRICT
     steps:
       - uses: actions/checkout@v4    
       - name: Cache mint
@@ -191,4 +192,6 @@ jobs:
           cd Mint
           swift run mint install yonaskolb/mint
       - name: Lint
-        run: ./Scripts/lint.sh
+        run: |
+          set -e
+          ./Scripts/lint.sh

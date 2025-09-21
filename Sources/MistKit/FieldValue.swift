@@ -1,6 +1,6 @@
 //
 //  FieldValue.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -132,7 +132,7 @@ public enum FieldValue: Codable, Equatable {
 
   // MARK: - Codable
   /// Initialize field value from decoder
-  public init(from decoder: Decoder) throws {
+  public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
 
     if let value = try Self.decodeBasicTypes(from: container) {
@@ -152,7 +152,7 @@ public enum FieldValue: Codable, Equatable {
   }
 
   /// Decode basic field value types (string, int64, double, boolean)
-  private static func decodeBasicTypes(from container: SingleValueDecodingContainer) throws
+  private static func decodeBasicTypes(from container: any SingleValueDecodingContainer) throws
     -> FieldValue?
   {
     if let value = try? container.decode(String.self) {
@@ -171,7 +171,7 @@ public enum FieldValue: Codable, Equatable {
   }
 
   /// Decode complex field value types (list, location, reference, asset, date)
-  private static func decodeComplexTypes(from container: SingleValueDecodingContainer) throws
+  private static func decodeComplexTypes(from container: any SingleValueDecodingContainer) throws
     -> FieldValue?
   {
     if let value = try? container.decode([FieldValue].self) {
@@ -194,13 +194,13 @@ public enum FieldValue: Codable, Equatable {
   }
 
   /// Encode field value to encoder
-  public func encode(to encoder: Encoder) throws {
+  public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     try encodeValue(to: &container)
   }
 
   // swiftlint:disable:next cyclomatic_complexity
-  private func encodeValue(to container: inout SingleValueEncodingContainer) throws {
+  private func encodeValue(to container: inout any SingleValueEncodingContainer) throws {
     switch self {
     case .string(let val), .bytes(let val):
       try container.encode(val)

@@ -1,6 +1,6 @@
 //
 //  WebAuthTokenManager.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.

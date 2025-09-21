@@ -1,6 +1,6 @@
 //
 //  CustomFieldValue.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -156,7 +156,7 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
     self.type = .list
   }
 
-  internal init(from decoder: Decoder) throws {
+  internal init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let fieldType = try container.decodeIfPresent(FieldTypePayload.self, forKey: .type)
     self.type = fieldType
@@ -210,7 +210,7 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
     }
   }
 
-  internal func encode(to encoder: Encoder) throws {
+  internal func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encodeIfPresent(type, forKey: .type)
     try Self.encodeValue(value, to: &container)

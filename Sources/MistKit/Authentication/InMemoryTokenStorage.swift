@@ -1,6 +1,6 @@
 //
 //  InMemoryTokenStorage.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -37,28 +37,95 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
   /// Thread-safe storage using actor
   private actor Storage {
     private var credentials: [String: TokenCredentials] = [:]
+    private var expirationTimes: [String: Date] = [:]
 
-    func store(_ tokenCredentials: TokenCredentials, identifier: String?) {
+    func store(
+      _ tokenCredentials: TokenCredentials, identifier: String?, expirationTime: Date? = nil
+    ) {
       let key = identifier ?? "default"
       credentials[key] = tokenCredentials
+      expirationTimes[key] = expirationTime
     }
 
     func retrieve(identifier: String?) -> TokenCredentials? {
       let key = identifier ?? "default"
+
+      // Check if token has expired
+      if let expirationTime = expirationTimes[key], expirationTime < Date() {
+        // Token has expired, remove it
+        credentials.removeValue(forKey: key)
+        expirationTimes.removeValue(forKey: key)
+        return nil
+      }
+
       return credentials[key]
     }
 
     func remove(identifier: String?) {
       let key = identifier ?? "default"
       credentials.removeValue(forKey: key)
+      expirationTimes.removeValue(forKey: key)
     }
 
     func listIdentifiers() -> [String] {
-      Array(credentials.keys)
+      // Filter out expired tokens
+      let now = Date()
+      let validKeys = credentials.keys.filter { key in
+        guard let expirationTime = expirationTimes[key] else { return true }
+        return expirationTime >= now
+      }
+      return Array(validKeys)
     }
 
     func clear() {
+      // Securely clear sensitive data before removing
+      for (_, credentials) in credentials {
+        var mutableCredentials = credentials
+        clearCredentials(&mutableCredentials)
+      }
+
       credentials.removeAll()
+      expirationTimes.removeAll()
+    }
+
+    func cleanupExpiredTokens() {
+      let now = Date()
+      let expiredKeys = expirationTimes.compactMap { key, expirationTime in
+        expirationTime < now ? key : nil
+      }
+
+      for key in expiredKeys {
+        // Securely clear sensitive data before removing
+        if var credentials = credentials[key] {
+          clearCredentials(&credentials)
+        }
+        credentials.removeValue(forKey: key)
+        expirationTimes.removeValue(forKey: key)
+      }
+    }
+
+    /// Securely clears sensitive data from credentials
+    private func clearCredentials(_ credentials: inout TokenCredentials) {
+      // Clear sensitive data based on authentication method
+      switch credentials.method {
+      case .apiToken(let token):
+        var mutableToken = token
+        SecureMemory.clear(&mutableToken)
+      case .webAuthToken(let apiToken, let webToken):
+        var mutableApiToken = apiToken
+        var mutableWebToken = webToken
+        SecureMemory.clear(&mutableApiToken)
+        SecureMemory.clear(&mutableWebToken)
+      case .serverToServer(let keyID, let privateKey):
+        var mutableKeyID = keyID
+        var mutablePrivateKey = privateKey
+        SecureMemory.clear(&mutableKeyID)
+        SecureMemory.clear(&mutablePrivateKey)
+      }
+
+      // Clear metadata
+      var mutableMetadata = credentials.metadata
+      SecureMemory.clear(&mutableMetadata)
     }
   }
 
@@ -69,6 +136,17 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
 
   public func store(_ credentials: TokenCredentials, identifier: String?) async throws {
     await storage.store(credentials, identifier: identifier)
+  }
+
+  /// Stores credentials with expiration time
+  /// - Parameters:
+  ///   - credentials: The credentials to store
+  ///   - identifier: Optional identifier for the credentials
+  ///   - expirationTime: When the credentials expire
+  public func store(_ credentials: TokenCredentials, identifier: String?, expirationTime: Date?)
+    async throws
+  {
+    await storage.store(credentials, identifier: identifier, expirationTime: expirationTime)
   }
 
   public func retrieve(identifier: String?) async throws -> TokenCredentials? {
@@ -88,6 +166,11 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
     await storage.clear()
   }
 
+  /// Cleans up expired tokens from storage
+  public func cleanupExpiredTokens() async {
+    await storage.cleanupExpiredTokens()
+  }
+
   /// Returns the number of stored credentials
   public var count: Int {
     get async {
@@ -102,59 +185,5 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
       let identifiers = await storage.listIdentifiers()
       return identifiers.isEmpty
     }
-  }
-}
-
-// MARK: - Convenience Methods
-
-extension InMemoryTokenStorage {
-  /// Stores credentials with automatic identifier based on authentication method
-  /// - Parameter credentials: The credentials to store
-  public func store(_ credentials: TokenCredentials) async throws {
-    let identifier: String
-
-    switch credentials.method {
-    case .apiToken(let token):
-      identifier = "api-\(token.prefix(8))"
-    case .webAuthToken(let apiToken, _):
-      identifier = "web-\(apiToken.prefix(8))"
-    case .serverToServer(let keyID, _):
-      identifier = "s2s-\(keyID)"
-    }
-
-    try await store(credentials, identifier: identifier)
-  }
-
-  /// Retrieves credentials by authentication method type
-  /// - Parameter methodType: The authentication method type to search for
-  /// - Returns: First matching credentials or nil if not found
-  public func retrieve(byMethodType methodType: String) async throws -> TokenCredentials? {
-    let identifiers = try await listIdentifiers()
-
-    for identifier in identifiers {
-      if let credentials = try await retrieve(identifier: identifier),
-        credentials.methodType == methodType
-      {
-        return credentials
-      }
-    }
-
-    return nil
-  }
-
-  /// Lists all credentials grouped by method type
-  /// - Returns: Dictionary mapping method types to arrays of credentials
-  public func credentialsByMethodType() async throws -> [String: [TokenCredentials]] {
-    var result: [String: [TokenCredentials]] = [:]
-    let identifiers = try await listIdentifiers()
-
-    for identifier in identifiers {
-      if let credentials = try await retrieve(identifier: identifier) {
-        let methodType = credentials.methodType
-        result[methodType, default: []].append(credentials)
-      }
-    }
-
-    return result
   }
 }
