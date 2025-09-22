@@ -1,6 +1,6 @@
 //
 //  WebAuthTokenManager+Refresh.swift
-//  MistKit
+//  PackageDSLKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -116,12 +116,9 @@ extension WebAuthTokenManager {
         // 2. Parse the new web auth token from the response
         // 3. Update internal state with the new token
 
-        // For now, we'll simulate a refresh by creating new credentials
-        // with the existing tokens (since we can't actually refresh without external API)
-        let refreshedCredentials = TokenCredentials.webAuthToken(
-          apiToken: apiToken,
-          webToken: webAuthToken
-        )
+        // For now, we'll simulate a refresh by reusing existing credentials to avoid allocations
+        // (since we can't actually refresh without external API)
+        let refreshedCredentials = credentials
 
         // Store refreshed credentials if storage is available
         if let storage = storage {

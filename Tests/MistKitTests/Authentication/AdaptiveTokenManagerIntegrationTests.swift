@@ -2,8 +2,8 @@ import XCTest
 
 @testable import MistKit
 
-public final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
-  public func testAdaptiveTokenManagerTransitions() async throws {
+internal final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
+  func testAdaptiveTokenManagerTransitions() async throws {
     // Create adaptive manager starting with API-only authentication
     let apiToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let adaptiveManager = AdaptiveTokenManager(apiToken: apiToken)
@@ -57,7 +57,7 @@ public final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
     XCTAssertTrue(isValid)
   }
 
-  public func testAdaptiveTokenManagerProperties() async throws {
+  func testAdaptiveTokenManagerProperties() async throws {
     let apiToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let adaptiveManager = AdaptiveTokenManager(apiToken: apiToken)
 
@@ -80,7 +80,7 @@ public final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
     }
   }
 
-  public func testAdaptiveTokenManagerWithInvalidToken() async throws {
+  func testAdaptiveTokenManagerWithInvalidToken() async throws {
     let invalidApiToken = "invalid_token"
     let adaptiveManager = AdaptiveTokenManager(apiToken: invalidApiToken)
 

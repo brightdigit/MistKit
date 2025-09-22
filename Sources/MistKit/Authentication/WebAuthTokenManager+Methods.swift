@@ -1,6 +1,6 @@
 //
 //  WebAuthTokenManager+Methods.swift
-//  MistKit
+//  PackageDSLKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -50,12 +50,8 @@ extension WebAuthTokenManager {
   /// Returns true if both tokens appear to be in valid format
   public var areTokensValidFormat: Bool {
     // Check API token format
-    let apiTokenPattern = "^[a-fA-F0-9]{64}$"
-    guard let regex = try? NSRegularExpression(pattern: apiTokenPattern) else {
-      return false
-    }
-    let range = NSRange(location: 0, length: apiToken.count)
-    let apiTokenMatches = regex.matches(in: apiToken, range: range)
+    let regex = NSRegularExpression.apiTokenRegex
+    let apiTokenMatches = regex.matches(in: apiToken)
 
     // Check web auth token has reasonable length
     let webTokenValid = webAuthToken.count >= 10

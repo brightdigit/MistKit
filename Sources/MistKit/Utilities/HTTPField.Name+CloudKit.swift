@@ -1,5 +1,5 @@
 //
-//  UserInfo.swift
+//  HTTPField.Name+CloudKit.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,28 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// User information from CloudKit
-public struct UserInfo: Encodable {
-  /// The user's record name
-  public let userRecordName: String
-  /// The user's first name
-  public let firstName: String?
-  /// The user's last name
-  public let lastName: String?
-  /// The user's email address
-  public let emailAddress: String?
+import HTTPTypes
 
-  internal init(from cloudKitUser: Components.Schemas.UserResponse) {
-    self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
-    self.firstName = cloudKitUser.firstName
-    self.lastName = cloudKitUser.lastName
-    self.emailAddress = cloudKitUser.emailAddress
-  }
+// swiftlint:disable force_unwrapping
+// swift-format-ignore: NeverForceUnwrap
+/// Extension providing static properties for CloudKit-specific HTTP header field names
+extension HTTPField.Name {
+  /// CloudKit request key ID header field name
+  /// Used for server-to-server authentication to identify the key used for signing
+  internal static let cloudKitRequestKeyID = HTTPField.Name(
+    "X-Apple-CloudKit-Request-KeyID"
+  )!
+
+  /// CloudKit request ISO8601 date header field name
+  /// Used for server-to-server authentication to provide the timestamp for the request
+  internal static let cloudKitRequestISO8601Date = HTTPField.Name(
+    "X-Apple-CloudKit-Request-ISO8601Date"
+  )!
+
+  /// CloudKit request signature V1 header field name
+  /// Used for server-to-server authentication to provide the ECDSA P-256 signature
+  internal static let cloudKitRequestSignatureV1 = HTTPField.Name(
+    "X-Apple-CloudKit-Request-SignatureV1"
+  )!
 }
+// swiftlint:enable force_unwrapping

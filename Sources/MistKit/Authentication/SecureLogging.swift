@@ -1,6 +1,6 @@
 //
 //  SecureLogging.swift
-//  MistKit
+//  PackageDSLKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -131,29 +131,26 @@ public enum SecureLogging {
   public static func safeLogMessage(_ message: String) -> String {
     var safeMessage = message
 
-    // Common patterns for sensitive data
-    let patterns = [
+    // Use static regex patterns for better performance
+    let patterns: [(NSRegularExpression, String)] = [
       // API tokens (64 character hex strings)
-      ("[a-fA-F0-9]{64}", "API_TOKEN_REDACTED"),
+      (NSRegularExpression.maskApiTokenRegex, "API_TOKEN_REDACTED"),
       // Web auth tokens (base64-like strings)
-      ("[A-Za-z0-9+/]{20,}={0,2}", "WEB_AUTH_TOKEN_REDACTED"),
+      (NSRegularExpression.maskWebAuthTokenRegex, "WEB_AUTH_TOKEN_REDACTED"),
       // Key IDs (alphanumeric strings)
-      ("[A-Za-z0-9]{8,}", "KEY_ID_REDACTED"),
+      (NSRegularExpression.maskKeyIdRegex, "KEY_ID_REDACTED"),
       // Generic tokens
-      ("token[=:][\\s]*[A-Za-z0-9+/=]+", "token=***REDACTED***"),
-      ("key[=:][\\s]*[A-Za-z0-9+/=]+", "key=***REDACTED***"),
-      ("secret[=:][\\s]*[A-Za-z0-9+/=]+", "secret=***REDACTED***"),
+      (NSRegularExpression.maskGenericTokenRegex, "token=***REDACTED***"),
+      (NSRegularExpression.maskGenericKeyRegex, "key=***REDACTED***"),
+      (NSRegularExpression.maskGenericSecretRegex, "secret=***REDACTED***"),
     ]
 
-    for (pattern, replacement) in patterns {
-      if let regex = try? NSRegularExpression(pattern: pattern) {
-        let range = NSRange(location: 0, length: safeMessage.count)
-        safeMessage = regex.stringByReplacingMatches(
-          in: safeMessage,
-          range: range,
-          withTemplate: replacement
-        )
-      }
+    for (regex, replacement) in patterns {
+      safeMessage = regex.stringByReplacingMatches(
+        in: safeMessage,
+        range: NSRange(location: 0, length: safeMessage.count),
+        withTemplate: replacement
+      )
     }
 
     return safeMessage

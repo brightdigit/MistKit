@@ -1,6 +1,6 @@
 //
 //  RecordInfo.swift
-//  MistKit
+//  PackageDSLKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.

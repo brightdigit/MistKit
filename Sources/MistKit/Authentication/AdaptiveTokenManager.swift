@@ -1,6 +1,6 @@
 //
 //  AdaptiveTokenManager.swift
-//  MistKit
+//  PackageDSLKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -100,10 +100,8 @@ public actor AdaptiveTokenManager: TokenManager {
       throw TokenManagerError.invalidCredentials(reason: "API token is empty")
     }
 
-    let tokenPattern = "^[a-fA-F0-9]{64}$"
-    let regex = try NSRegularExpression(pattern: tokenPattern)
-    let range = NSRange(location: 0, length: apiToken.count)
-    let matches = regex.matches(in: apiToken, range: range)
+    let regex = NSRegularExpression.apiTokenRegex
+    let matches = regex.matches(in: apiToken)
 
     guard !matches.isEmpty else {
       throw TokenManagerError.invalidCredentials(

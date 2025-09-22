@@ -17,7 +17,8 @@
       "Bash(Scripts/generate-openapi.sh:*)",
       "Bash(./Scripts/lint.sh:*)",
       "Bash(mv:*)",
-      "Bash(gh pr view:*)"
+      "Bash(gh pr view:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   },

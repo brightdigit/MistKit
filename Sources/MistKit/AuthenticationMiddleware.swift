@@ -1,6 +1,6 @@
 //
 //  AuthenticationMiddleware.swift
-//  MistKit
+//  PackageDSLKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -28,7 +28,7 @@
 //
 
 import Crypto
-public import Foundation
+import Foundation
 import HTTPTypes
 import OpenAPIRuntime
 
@@ -143,10 +143,9 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
     )
 
     var modifiedRequest = request
-    modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-KeyID")] = signature.keyID
-    modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-ISO8601Date")] = signature.date
-    modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-SignatureV1")] =
-      signature.signature
+    modifiedRequest.headerFields[.cloudKitRequestKeyID] = signature.keyID
+    modifiedRequest.headerFields[.cloudKitRequestISO8601Date] = signature.date
+    modifiedRequest.headerFields[.cloudKitRequestSignatureV1] = signature.signature
 
     return modifiedRequest
   }

@@ -1,6 +1,6 @@
 //
 //  WebAuthTokenManager.swift
-//  MistKit
+//  PackageDSLKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -133,10 +133,8 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     }
 
     // Basic API token format validation
-    let apiTokenPattern = "^[a-fA-F0-9]{64}$"
-    let regex = try NSRegularExpression(pattern: apiTokenPattern)
-    let range = NSRange(location: 0, length: apiToken.count)
-    let matches = regex.matches(in: apiToken, range: range)
+    let regex = NSRegularExpression.apiTokenRegex
+    let matches = regex.matches(in: apiToken)
 
     guard !matches.isEmpty else {
       throw TokenManagerError.invalidCredentials(

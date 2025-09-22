@@ -1,6 +1,6 @@
 //
 //  AdaptiveTokenManager+Refresh.swift
-//  MistKit
+//  PackageDSLKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -112,16 +112,17 @@ extension AdaptiveTokenManager {
         refreshSubject.continuation.yield(.refreshStarted(apiToken: apiToken))
 
         // In a real implementation, this would make a request to CloudKit's token refresh endpoint
-        // For now, we'll simulate a refresh by creating new credentials with existing tokens
+        // For now, we'll simulate a refresh by reusing existing credentials to avoid allocations
         guard let currentWebToken = webAuthToken else {
           throw TokenManagerError.invalidCredentials(
             reason: "No web auth token available for refresh")
         }
 
-        let refreshedCredentials = TokenCredentials.webAuthToken(
-          apiToken: apiToken,
-          webToken: currentWebToken
-        )
+        // Performance optimization: reuse existing credentials if tokens haven't changed
+        let refreshedCredentials = try await getCurrentCredentials()
+        guard let refreshedCredentials = refreshedCredentials else {
+          throw TokenManagerError.invalidCredentials(reason: "Failed to get current credentials")
+        }
 
         // Store refreshed credentials if storage is available
         if let storage = storage {

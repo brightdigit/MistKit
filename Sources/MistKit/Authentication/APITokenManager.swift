@@ -1,6 +1,6 @@
 //
 //  APITokenManager.swift
-//  MistKit
+//  PackageDSLKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -58,10 +58,8 @@ public final class APITokenManager: TokenManager, Sendable {
     }
 
     // Basic format validation - CloudKit API tokens are typically 64 character hex strings
-    let tokenPattern = "^[a-fA-F0-9]{64}$"
-    let regex = try NSRegularExpression(pattern: tokenPattern)
-    let range = NSRange(location: 0, length: apiToken.count)
-    let matches = regex.matches(in: apiToken, range: range)
+    let regex = NSRegularExpression.apiTokenRegex
+    let matches = regex.matches(in: apiToken)
 
     guard !matches.isEmpty else {
       throw TokenManagerError.invalidCredentials(
@@ -93,12 +91,8 @@ extension APITokenManager {
 
   /// Returns true if the token appears to be in valid format
   public var isValidFormat: Bool {
-    let tokenPattern = "^[a-fA-F0-9]{64}$"
-    guard let regex = try? NSRegularExpression(pattern: tokenPattern) else {
-      return false
-    }
-    let range = NSRange(location: 0, length: apiToken.count)
-    let matches = regex.matches(in: apiToken, range: range)
+    let regex = NSRegularExpression.apiTokenRegex
+    let matches = regex.matches(in: apiToken)
     return !matches.isEmpty
   }
 
