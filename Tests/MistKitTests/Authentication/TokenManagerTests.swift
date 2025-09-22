@@ -1,19 +1,21 @@
-public import XCTest
+import Testing
 
 @testable import MistKit
+import Foundation
 
 /// Test suite for TokenManager protocol and related types
-public final class TokenManagerTests: XCTestCase {
+struct TokenManagerTests {
   // MARK: - AuthenticationMethod Tests
 
   /// Tests AuthenticationMethod enum case creation and equality
-  public func testAuthenticationMethodCases() {
+  @Test
+  func authenticationMethodCases() {
     // Test API token case
     let apiToken = AuthenticationMethod.apiToken("test-token-123")
     if case .apiToken(let token) = apiToken {
-      XCTAssertEqual(token, "test-token-123")
+      #expect(token == "test-token-123")
     } else {
-      XCTFail("Expected apiToken case")
+      Issue.record("Expected apiToken case")
     }
 
     // Test web auth token case
@@ -22,15 +24,15 @@ public final class TokenManagerTests: XCTestCase {
       webToken: "web-456"
     )
     if case .webAuthToken(let api, let web) = webAuth {
-      XCTAssertEqual(api, "api-123")
-      XCTAssertEqual(web, "web-456")
+      #expect(api == "api-123")
+      #expect(web == "web-456")
     } else {
-      XCTFail("Expected webAuthToken case")
+      Issue.record("Expected webAuthToken case")
     }
 
     // Test server-to-server case
     guard let keyData = "test-key".data(using: .utf8) else {
-      XCTFail("Failed to create test key data")
+      Issue.record("Failed to create test key data")
       return
     }
     let serverAuth = AuthenticationMethod.serverToServer(
@@ -38,15 +40,16 @@ public final class TokenManagerTests: XCTestCase {
       privateKey: keyData
     )
     if case .serverToServer(let keyID, let privateKey) = serverAuth {
-      XCTAssertEqual(keyID, "key-789")
-      XCTAssertEqual(privateKey, keyData)
+      #expect(keyID == "key-789")
+      #expect(privateKey == keyData)
     } else {
-      XCTFail("Expected serverToServer case")
+      Issue.record("Expected serverToServer case")
     }
   }
 
   /// Tests AuthenticationMethod computed properties
-  public func testAuthenticationMethodProperties() {
+  @Test
+  func authenticationMethodProperties() {
     let apiToken = AuthenticationMethod.apiToken("api-123")
     let webAuth = AuthenticationMethod.webAuthToken(
       apiToken: "api-456",
@@ -58,39 +61,40 @@ public final class TokenManagerTests: XCTestCase {
     )
 
     // Test apiToken property
-    XCTAssertEqual(apiToken.apiToken, "api-123")
-    XCTAssertEqual(webAuth.apiToken, "api-456")
-    XCTAssertEqual(serverAuth.apiToken, "")
+    #expect(apiToken.apiToken == "api-123")
+    #expect(webAuth.apiToken == "api-456")
+    #expect(serverAuth.apiToken == "")
 
     // Test webAuthToken property
-    XCTAssertNil(apiToken.webAuthToken)
-    XCTAssertEqual(webAuth.webAuthToken, "web-789")
-    XCTAssertNil(serverAuth.webAuthToken)
+    #expect(apiToken.webAuthToken == nil)
+    #expect(webAuth.webAuthToken == "web-789")
+    #expect(serverAuth.webAuthToken == nil)
 
     // Test serverKeyID property
-    XCTAssertNil(apiToken.serverKeyID)
-    XCTAssertNil(webAuth.serverKeyID)
-    XCTAssertEqual(serverAuth.serverKeyID, "key-abc")
+    #expect(apiToken.serverKeyID == nil)
+    #expect(webAuth.serverKeyID == nil)
+    #expect(serverAuth.serverKeyID == "key-abc")
 
     // Test privateKeyData property
-    XCTAssertNil(apiToken.privateKeyData)
-    XCTAssertNil(webAuth.privateKeyData)
-    XCTAssertNotNil(serverAuth.privateKeyData)
+    #expect(apiToken.privateKeyData == nil)
+    #expect(webAuth.privateKeyData == nil)
+    #expect(serverAuth.privateKeyData != nil)
 
     // Test methodType property
-    XCTAssertEqual(apiToken.methodType, "api-token")
-    XCTAssertEqual(webAuth.methodType, "web-auth-token")
-    XCTAssertEqual(serverAuth.methodType, "server-to-server")
+    #expect(apiToken.methodType == "api-token")
+    #expect(webAuth.methodType == "web-auth-token")
+    #expect(serverAuth.methodType == "server-to-server")
   }
 
   /// Tests AuthenticationMethod Equatable conformance
-  public func testAuthenticationMethodEquality() {
+  @Test
+  func authenticationMethodEquality() {
     let apiToken1 = AuthenticationMethod.apiToken("same-token")
     let apiToken2 = AuthenticationMethod.apiToken("same-token")
     let apiToken3 = AuthenticationMethod.apiToken("different-token")
 
-    XCTAssertEqual(apiToken1, apiToken2)
-    XCTAssertNotEqual(apiToken1, apiToken3)
+    #expect(apiToken1 == apiToken2)
+    #expect(apiToken1 != apiToken3)
 
     let webAuth1 = AuthenticationMethod.webAuthToken(
       apiToken: "api",
@@ -105,11 +109,11 @@ public final class TokenManagerTests: XCTestCase {
       webToken: "different"
     )
 
-    XCTAssertEqual(webAuth1, webAuth2)
-    XCTAssertNotEqual(webAuth1, webAuth3)
+    #expect(webAuth1 == webAuth2)
+    #expect(webAuth1 != webAuth3)
 
     guard let keyData = "test".data(using: .utf8) else {
-      XCTFail("Failed to create test data")
+      Issue.record("Failed to create test data")
       return
     }
     let serverAuth1 = AuthenticationMethod.serverToServer(
@@ -125,33 +129,35 @@ public final class TokenManagerTests: XCTestCase {
       privateKey: keyData
     )
 
-    XCTAssertEqual(serverAuth1, serverAuth2)
-    XCTAssertNotEqual(serverAuth1, serverAuth3)
+    #expect(serverAuth1 == serverAuth2)
+    #expect(serverAuth1 != serverAuth3)
   }
 
   // MARK: - TokenCredentials Tests
 
   /// Tests TokenCredentials initialization and properties
-  public func testTokenCredentialsInitialization() {
+  @Test
+  func tokenCredentialsInitialization() {
     let method = AuthenticationMethod.apiToken("test-token")
     let metadata = ["created": "2025-01-01", "environment": "test"]
 
     let credentials = TokenCredentials(method: method, metadata: metadata)
 
-    XCTAssertEqual(credentials.method, method)
-    XCTAssertEqual(credentials.metadata.count, 2)
-    XCTAssertEqual(credentials.metadata["created"], "2025-01-01")
-    XCTAssertEqual(credentials.metadata["environment"], "test")
+    #expect(credentials.method == method)
+    #expect(credentials.metadata.count == 2)
+    #expect(credentials.metadata["created"] == "2025-01-01")
+    #expect(credentials.metadata["environment"] == "test")
   }
 
   /// Tests TokenCredentials convenience initializers
-  public func testTokenCredentialsConvenienceInitializers() {
+  @Test
+  func tokenCredentialsConvenienceInitializers() {
     // Test apiToken convenience initializer
     let apiCredentials = TokenCredentials.apiToken("api-token-123")
     if case .apiToken(let token) = apiCredentials.method {
-      XCTAssertEqual(token, "api-token-123")
+      #expect(token == "api-token-123")
     } else {
-      XCTFail("Expected apiToken method")
+      Issue.record("Expected apiToken method")
     }
 
     // Test webAuthToken convenience initializer
@@ -160,15 +166,15 @@ public final class TokenManagerTests: XCTestCase {
       webToken: "web-789"
     )
     if case .webAuthToken(let api, let web) = webCredentials.method {
-      XCTAssertEqual(api, "api-456")
-      XCTAssertEqual(web, "web-789")
+      #expect(api == "api-456")
+      #expect(web == "web-789")
     } else {
-      XCTFail("Expected webAuthToken method")
+      Issue.record("Expected webAuthToken method")
     }
 
     // Test serverToServer convenience initializer
     guard let keyData = "private-key".data(using: .utf8) else {
-      XCTFail("Failed to create private key data")
+      Issue.record("Failed to create private key data")
       return
     }
     let serverCredentials = TokenCredentials.serverToServer(
@@ -176,15 +182,16 @@ public final class TokenManagerTests: XCTestCase {
       privateKey: keyData
     )
     if case .serverToServer(let keyID, let privateKey) = serverCredentials.method {
-      XCTAssertEqual(keyID, "server-key-id")
-      XCTAssertEqual(privateKey, keyData)
+      #expect(keyID == "server-key-id")
+      #expect(privateKey == keyData)
     } else {
-      XCTFail("Expected serverToServer method")
+      Issue.record("Expected serverToServer method")
     }
   }
 
   /// Tests TokenCredentials computed properties
-  public func testTokenCredentialsProperties() {
+  @Test
+  func tokenCredentialsProperties() {
     let apiCredentials = TokenCredentials.apiToken("test")
     let webCredentials = TokenCredentials.webAuthToken(
       apiToken: "api",
@@ -196,18 +203,19 @@ public final class TokenManagerTests: XCTestCase {
     )
 
     // Test supportsUserOperations
-    XCTAssertFalse(apiCredentials.supportsUserOperations)
-    XCTAssertTrue(webCredentials.supportsUserOperations)
-    XCTAssertTrue(serverCredentials.supportsUserOperations)
+    #expect(apiCredentials.supportsUserOperations == false)
+    #expect(webCredentials.supportsUserOperations == true)
+    #expect(serverCredentials.supportsUserOperations == true)
 
     // Test methodType
-    XCTAssertEqual(apiCredentials.methodType, "api-token")
-    XCTAssertEqual(webCredentials.methodType, "web-auth-token")
-    XCTAssertEqual(serverCredentials.methodType, "server-to-server")
+    #expect(apiCredentials.methodType == "api-token")
+    #expect(webCredentials.methodType == "web-auth-token")
+    #expect(serverCredentials.methodType == "server-to-server")
   }
 
   /// Tests TokenCredentials Equatable conformance
-  public func testTokenCredentialsEquality() {
+  @Test
+  func tokenCredentialsEquality() {
     let method1 = AuthenticationMethod.apiToken("same-token")
     let method2 = AuthenticationMethod.apiToken("same-token")
     let method3 = AuthenticationMethod.apiToken("different-token")
@@ -220,15 +228,16 @@ public final class TokenManagerTests: XCTestCase {
       metadata: ["test": "value"]
     )
 
-    XCTAssertEqual(credentials1, credentials2)
-    XCTAssertNotEqual(credentials1, credentials3)
-    XCTAssertNotEqual(credentials1, credentials4)  // Different metadata
+    #expect(credentials1 == credentials2)
+    #expect(credentials1 != credentials3)
+    #expect(credentials1 != credentials4)  // Different metadata
   }
 
   // MARK: - TokenManagerError Tests
 
   /// Tests TokenManagerError cases and localized descriptions
-  public func testTokenManagerError() {
+  @Test
+  func tokenManagerError() {
     let invalidError = TokenManagerError.invalidCredentials(reason: "Bad format")
     let authError = TokenManagerError.authenticationFailed(underlying: nil)
     let expiredError = TokenManagerError.tokenExpired
@@ -238,41 +247,43 @@ public final class TokenManagerTests: XCTestCase {
     let internalError = TokenManagerError.internalError(reason: "System failure")
 
     // Test error descriptions
-    XCTAssertTrue(invalidError.localizedDescription.contains("Invalid credentials"))
-    XCTAssertTrue(invalidError.localizedDescription.contains("Bad format"))
+    #expect(invalidError.localizedDescription.contains("Invalid credentials"))
+    #expect(invalidError.localizedDescription.contains("Bad format"))
 
-    XCTAssertTrue(authError.localizedDescription.contains("Authentication failed"))
+    #expect(authError.localizedDescription.contains("Authentication failed"))
 
-    XCTAssertTrue(expiredError.localizedDescription.contains("expired"))
+    #expect(expiredError.localizedDescription.contains("expired"))
 
-    XCTAssertTrue(networkError.localizedDescription.contains("Network error"))
+    #expect(networkError.localizedDescription.contains("Network error"))
 
-    XCTAssertTrue(internalError.localizedDescription.contains("Internal"))
-    XCTAssertTrue(internalError.localizedDescription.contains("System failure"))
+    #expect(internalError.localizedDescription.contains("Internal"))
+    #expect(internalError.localizedDescription.contains("System failure"))
   }
 
   // MARK: - TokenManager Protocol Tests
 
   /// Tests TokenManager protocol conformance with mock implementation
-  public func testTokenManagerProtocolConformance() async throws {
+  @Test
+  func tokenManagerProtocolConformance() async throws {
     let mockManager = MockTokenManager()
 
     // Test protocol methods can be called
     let isValid = try await mockManager.validateCredentials()
-    XCTAssertTrue(isValid)
+    #expect(isValid == true)
 
     let credentials = try await mockManager.getCurrentCredentials()
-    XCTAssertNotNil(credentials)
+    #expect(credentials != nil)
 
     // Test computed properties
     let hasCredentials = await mockManager.hasCredentials
-    XCTAssertTrue(hasCredentials)
+    #expect(hasCredentials == true)
   }
 
   // MARK: - Sendable Compliance Tests
 
   /// Tests that all types are Sendable and can be used across async boundaries
-  public func testSendableCompliance() async {
+  @Test
+  func sendableCompliance() async {
     let method = AuthenticationMethod.apiToken("test")
     let credentials = TokenCredentials(method: method)
     let error = TokenManagerError.tokenExpired
@@ -283,9 +294,9 @@ public final class TokenManagerTests: XCTestCase {
     async let task3 = Self.processError(error)
 
     let results = await (task1, task2, task3)
-    XCTAssertEqual(results.0, "api-token")
-    XCTAssertEqual(results.1, "api-token")
-    XCTAssertFalse(results.2.isEmpty)
+    #expect(results.0 == "api-token")
+    #expect(results.1 == "api-token")
+    #expect(results.2.isEmpty == false)
   }
 
   // MARK: - Helper Methods
@@ -306,7 +317,7 @@ public final class TokenManagerTests: XCTestCase {
 // MARK: - Mock TokenManager Implementation
 
 /// Mock implementation of TokenManager for testing protocol conformance
-internal final class MockTokenManager: TokenManager {
+final class MockTokenManager: TokenManager {
   var hasCredentials: Bool {
     get async { true }
   }
