@@ -107,6 +107,7 @@ public struct MistKitClient {
     // Check if this is a server-to-server token manager
     var keyID: String? = nil
     var privateKeyData: Data? = nil
+    var apiToken: String = ""
     
     if let serverManager = tokenManager as? ServerToServerAuthManager {
       // Extract keyID and privateKeyData from ServerToServerAuthManager
@@ -117,13 +118,16 @@ public struct MistKitClient {
         // If we can't get the private key, we'll use empty API token
         // This will be handled by the precondition check
       }
+    } else if let apiManager = tokenManager as? APITokenManager {
+      // Extract API token from APITokenManager
+      apiToken = apiManager.token
     }
     
     let configuration = MistKitConfiguration(
       container: container,
       environment: environment,
       database: database,
-      apiToken: "",  // Not used with custom TokenManager
+      apiToken: apiToken,  // Use extracted API token if available
       webAuthToken: nil,
       keyID: keyID,
       privateKeyData: privateKeyData,

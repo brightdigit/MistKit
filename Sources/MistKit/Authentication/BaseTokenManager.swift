@@ -78,7 +78,7 @@ internal final class BaseTokenManager: TokenManager, @unchecked Sendable {
   /// Validates API token format using regex
   /// - Parameter apiToken: The API token to validate
   /// - Throws: TokenManagerError if validation fails
-  internal func validateAPITokenFormat(_ apiToken: String) throws {
+  internal static func validateAPITokenFormat(_ apiToken: String) throws {
     guard !apiToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(reason: "API token is empty")
     }
@@ -96,7 +96,7 @@ internal final class BaseTokenManager: TokenManager, @unchecked Sendable {
   /// Validates web auth token format
   /// - Parameter webToken: The web auth token to validate
   /// - Throws: TokenManagerError if validation fails
-  internal func validateWebAuthTokenFormat(_ webToken: String) throws {
+  internal static func validateWebAuthTokenFormat(_ webToken: String) throws {
     guard !webToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(reason: "Web auth token is empty")
     }
@@ -111,7 +111,7 @@ internal final class BaseTokenManager: TokenManager, @unchecked Sendable {
   /// Validates key ID format
   /// - Parameter keyID: The key ID to validate
   /// - Throws: TokenManagerError if validation fails
-  internal func validateKeyIDFormat(_ keyID: String) throws {
+  internal static func validateKeyIDFormat(_ keyID: String) throws {
     guard !keyID.isEmpty else {
       throw TokenManagerError.invalidCredentials(reason: "Key ID is empty")
     }

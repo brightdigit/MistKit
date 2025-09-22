@@ -37,6 +37,9 @@ extension NSRegularExpression {
   /// CloudKit web auth token pattern
   private static let webAuthTokenPattern = "^[A-Za-z0-9+/=_]{100,}$"
 
+  /// CloudKit key ID pattern (64-character hex string)
+  private static let keyIDPattern = "^[a-fA-F0-9]{64}$"
+
   // MARK: - Secure Logging Patterns
   /// API tokens (64 character hex strings) for masking
   private static let maskApiTokenPattern = "[a-fA-F0-9]{64}"
@@ -64,6 +67,11 @@ extension NSRegularExpression {
   /// Compiled regex for web auth token validation
   public static let webAuthTokenRegex: NSRegularExpression = {
     try! NSRegularExpression(pattern: webAuthTokenPattern)
+  }()
+
+  /// Compiled regex for key ID validation
+  public static let keyIDRegex: NSRegularExpression = {
+    try! NSRegularExpression(pattern: keyIDPattern)
   }()
 
   // MARK: - Secure Logging Regexes
