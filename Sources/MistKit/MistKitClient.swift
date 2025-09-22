@@ -1,6 +1,6 @@
 //
 //  MistKitClient.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -27,11 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import Crypto
 import Foundation
 import HTTPTypes
 public import OpenAPIRuntime
 import OpenAPIURLSession
-import Crypto
 
 /// A client for interacting with CloudKit Web Services
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -72,14 +72,16 @@ public struct MistKitClient {
   ///   - tokenManager: Custom token manager for authentication
   ///   - transport: Custom transport for network requests
   /// - Throws: ClientError if initialization fails
-  public init(configuration: MistKitConfiguration, tokenManager: any TokenManager, transport: any ClientTransport) throws {
+  public init(
+    configuration: MistKitConfiguration, tokenManager: any TokenManager,
+    transport: any ClientTransport
+  ) throws {
     self.configuration = configuration
 
     // Validate server-to-server authentication restrictions
     try Self.validateServerToServerConfiguration(
       configuration: configuration, tokenManager: tokenManager
     )
-
 
     // Create the OpenAPI client with custom server URL and middleware
     self.client = Client(
@@ -108,10 +110,10 @@ public struct MistKitClient {
     transport: any ClientTransport
   ) throws {
     // Check if this is a server-to-server token manager
-    var keyID: String? = nil
-    var privateKeyData: Data? = nil
+    var keyID: String?
+    var privateKeyData: Data?
     var apiToken: String = ""
-    
+
     if let serverManager = tokenManager as? ServerToServerAuthManager {
       // Extract keyID and privateKeyData from ServerToServerAuthManager
       keyID = serverManager.keyIdentifier
@@ -125,7 +127,7 @@ public struct MistKitClient {
       // Extract API token from APITokenManager
       apiToken = apiManager.token
     }
-    
+
     let configuration = MistKitConfiguration(
       container: container,
       environment: environment,
@@ -158,7 +160,8 @@ public struct MistKitClient {
   ///   - tokenManager: Custom token manager for authentication
   /// - Throws: ClientError if initialization fails
   public init(configuration: MistKitConfiguration, tokenManager: any TokenManager) throws {
-    try self.init(configuration: configuration, tokenManager: tokenManager, transport: URLSessionTransport())
+    try self.init(
+      configuration: configuration, tokenManager: tokenManager, transport: URLSessionTransport())
   }
 
   /// Initialize a new MistKit client with a custom TokenManager and individual parameters using default URLSessionTransport

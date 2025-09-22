@@ -1,6 +1,6 @@
 //
 //  AdaptiveTokenManager+Transitions.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -117,6 +117,4 @@ extension AdaptiveTokenManager {
   public var currentWebAuthToken: String? {
     webAuthToken
   }
-
-
 }

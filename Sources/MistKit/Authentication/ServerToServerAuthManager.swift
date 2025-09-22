@@ -1,6 +1,6 @@
 //
 //  ServerToServerAuthManager.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -28,8 +28,9 @@
 //
 
 public import Crypto
+
 #if canImport(Foundation)
-public import Foundation
+  public import Foundation
 #endif
 
 // Forward declaration for MistKitConfiguration
@@ -46,7 +47,6 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   internal let privateKey: @Sendable () throws -> P256.Signing.PrivateKey
   internal let credentials: TokenCredentials
   internal let storage: (any TokenStorage)?
-
 
   /// Creates a new server-to-server authentication manager
   /// - Parameters:
@@ -104,7 +104,8 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
       )
     } catch {
       // Provide more specific error handling for PEM parsing failures
-      if error.localizedDescription.contains("PEM") || error.localizedDescription.contains("format") {
+      if error.localizedDescription.contains("PEM") || error.localizedDescription.contains("format")
+      {
         throw TokenManagerError.invalidCredentials(
           reason: "Invalid PEM format for private key: \(error.localizedDescription)"
         )
@@ -117,7 +118,6 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   }
 
   // MARK: - TokenManager Protocol
-
 
   public var hasCredentials: Bool {
     get async {
@@ -157,5 +157,4 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     _ = try await validateCredentials()
     return credentials
   }
-
 }

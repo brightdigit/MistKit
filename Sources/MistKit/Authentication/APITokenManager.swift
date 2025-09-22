@@ -1,6 +1,6 @@
 //
 //  APITokenManager.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -28,7 +28,7 @@
 //
 
 #if canImport(Foundation)
-import Foundation
+  import Foundation
 #endif
 
 /// Token manager for simple API token authentication
@@ -51,7 +51,6 @@ public final class APITokenManager: TokenManager, Sendable {
 
   // MARK: - TokenManager Protocol
 
-
   public var hasCredentials: Bool {
     get async {
       !apiToken.isEmpty
@@ -68,7 +67,6 @@ public final class APITokenManager: TokenManager, Sendable {
     _ = try await validateCredentials()
     return credentials
   }
-
 }
 
 // MARK: - Additional API Token Methods

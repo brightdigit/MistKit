@@ -1,6 +1,6 @@
 //
 //  AdaptiveTokenManager.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -28,7 +28,7 @@
 //
 
 #if canImport(Foundation)
-import Foundation
+  import Foundation
 #endif
 
 /// Adaptive token manager that can transition between API-only and Web authentication
@@ -54,7 +54,6 @@ public actor AdaptiveTokenManager: TokenManager {
   }
 
   // MARK: - TokenManager Protocol
-
 
   public var hasCredentials: Bool {
     get async {
@@ -83,6 +82,4 @@ public actor AdaptiveTokenManager: TokenManager {
       return TokenCredentials.apiToken(apiToken)
     }
   }
-  
-
 }

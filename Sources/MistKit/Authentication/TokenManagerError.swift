@@ -1,6 +1,6 @@
 //
 //  TokenManagerError.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -28,7 +28,7 @@
 //
 
 #if canImport(Foundation)
-public import Foundation
+  public import Foundation
 #endif
 
 /// Errors that can occur during token management operations
@@ -38,7 +38,6 @@ public enum TokenManagerError: Error, LocalizedError, Sendable {
 
   /// Authentication failed with external service
   case authenticationFailed(underlying: (any Error)?)
-
 
   /// Token has expired and cannot be used
   case tokenExpired

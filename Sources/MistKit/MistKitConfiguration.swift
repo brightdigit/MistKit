@@ -1,6 +1,6 @@
 //
 //  MistKitConfiguration.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -28,7 +28,7 @@
 //
 
 #if canImport(Foundation)
-public import Foundation
+  public import Foundation
 #endif
 
 /// Configuration for MistKit client
@@ -86,9 +86,12 @@ public struct MistKitConfiguration: Sendable {
     precondition(!container.isEmpty, "Container identifier cannot be empty")
     // Allow empty API token only if we have server-to-server authentication parameters
     if apiToken.isEmpty {
-      precondition(keyID != nil && privateKeyData != nil, "API token cannot be empty unless using server-to-server authentication (keyID and privateKeyData must be provided)")
+      precondition(
+        keyID != nil && privateKeyData != nil,
+        "API token cannot be empty unless using server-to-server authentication (keyID and privateKeyData must be provided)"
+      )
     }
-    
+
     self.container = container
     self.environment = environment
     self.database = database

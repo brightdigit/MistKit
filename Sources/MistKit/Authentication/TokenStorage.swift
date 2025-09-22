@@ -1,6 +1,6 @@
 //
 //  TokenStorage.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -28,7 +28,7 @@
 //
 
 #if canImport(Foundation)
-public import Foundation
+  public import Foundation
 #endif
 
 /// Protocol for persisting and retrieving authentication tokens/keys

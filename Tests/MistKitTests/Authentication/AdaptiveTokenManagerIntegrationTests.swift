@@ -64,7 +64,6 @@ internal final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
     // Test initial properties
     let hasCredentials = await adaptiveManager.hasCredentials
     XCTAssertTrue(hasCredentials)
-
   }
 
   func testAdaptiveTokenManagerWithInvalidToken() async throws {
@@ -77,7 +76,7 @@ internal final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
       XCTFail("Should have thrown invalidCredentials error")
     } catch let error as TokenManagerError {
       if case .invalidCredentials(let reason) = error {
-        XCTAssertEqual(reason, "API token format is invalid")
+        XCTAssertEqual(reason, "API token format is invalid (expected 64-character hex string)")
       } else {
         XCTFail("Expected invalidCredentials error, got: \(error)")
       }

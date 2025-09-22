@@ -243,7 +243,6 @@ public final class TokenManagerTests: XCTestCase {
 
     XCTAssertTrue(authError.localizedDescription.contains("Authentication failed"))
 
-
     XCTAssertTrue(expiredError.localizedDescription.contains("expired"))
 
     XCTAssertTrue(networkError.localizedDescription.contains("Network error"))
@@ -264,7 +263,6 @@ public final class TokenManagerTests: XCTestCase {
 
     let credentials = try await mockManager.getCurrentCredentials()
     XCTAssertNotNil(credentials)
-
 
     // Test computed properties
     let hasCredentials = await mockManager.hasCredentials
@@ -309,7 +307,6 @@ public final class TokenManagerTests: XCTestCase {
 
 /// Mock implementation of TokenManager for testing protocol conformance
 internal final class MockTokenManager: TokenManager {
-
   var hasCredentials: Bool {
     get async { true }
   }
@@ -321,5 +318,4 @@ internal final class MockTokenManager: TokenManager {
   func getCurrentCredentials() async throws -> TokenCredentials? {
     TokenCredentials.apiToken("mock-token")
   }
-
 }

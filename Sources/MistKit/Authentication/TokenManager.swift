@@ -1,6 +1,6 @@
 //
 //  TokenManager.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -28,7 +28,7 @@
 //
 
 #if canImport(Foundation)
-import Foundation
+  import Foundation
 #endif
 
 /// Protocol for managing authentication tokens and credentials for CloudKit Web Services

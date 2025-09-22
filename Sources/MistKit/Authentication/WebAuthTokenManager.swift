@@ -1,6 +1,6 @@
 //
 //  WebAuthTokenManager.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -28,7 +28,7 @@
 //
 
 #if canImport(Foundation)
-import Foundation
+  import Foundation
 #endif
 
 /// Token manager for web authentication with API token + web auth token
@@ -39,7 +39,6 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
   internal let tokenEncoder = CharacterMapEncoder()
   internal let credentials: TokenCredentials
   internal let storage: (any TokenStorage)?
-
 
   /// Creates a new web authentication token manager
   /// - Parameters:
@@ -68,7 +67,6 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
 
   // MARK: - TokenManager Protocol
 
-
   public var hasCredentials: Bool {
     get async {
       !apiToken.isEmpty && !webAuthToken.isEmpty
@@ -80,27 +78,27 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     guard !apiToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(reason: "API token is empty")
     }
-    
+
     let regex = NSRegularExpression.apiTokenRegex
     let matches = regex.matches(in: apiToken)
-    
+
     guard !matches.isEmpty else {
       throw TokenManagerError.invalidCredentials(
         reason: "API token format is invalid (expected 64-character hex string)"
       )
     }
-    
+
     // Validate web auth token
     guard !webAuthToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(reason: "Web auth token is empty")
     }
-    
+
     guard webAuthToken.count >= 10 else {
       throw TokenManagerError.invalidCredentials(
         reason: "Web auth token appears to be too short"
       )
     }
-    
+
     return true
   }
 
@@ -109,5 +107,4 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     _ = try await validateCredentials()
     return credentials
   }
-
 }

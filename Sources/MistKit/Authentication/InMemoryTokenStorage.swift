@@ -1,6 +1,6 @@
 //
 //  InMemoryTokenStorage.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -93,7 +93,6 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
         expirationTimes.removeValue(forKey: key)
       }
     }
-
   }
 
   /// Creates a new in-memory token storage
