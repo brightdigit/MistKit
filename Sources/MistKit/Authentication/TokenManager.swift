@@ -41,13 +41,6 @@ public protocol TokenManager: Sendable {
   /// - Throws: TokenManagerError if retrieval fails
   func getCurrentCredentials() async throws -> TokenCredentials?
 
-  /// Refreshes the authentication credentials if supported
-  /// - Returns: New TokenCredentials if refresh was successful
-  /// - Throws: TokenManagerError if refresh fails or is not supported
-  func refreshCredentials() async throws -> TokenCredentials?
-
-  /// Checks if the token manager supports credential refresh
-  var supportsRefresh: Bool { get }
 
   /// Checks if credentials are currently available
   var hasCredentials: Bool { get async }

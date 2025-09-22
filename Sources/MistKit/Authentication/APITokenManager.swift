@@ -44,7 +44,6 @@ public final class APITokenManager: TokenManager, Sendable {
 
   // MARK: - TokenManager Protocol
 
-  public let supportsRefresh = false
 
   public var hasCredentials: Bool {
     get async {
@@ -76,9 +75,6 @@ public final class APITokenManager: TokenManager, Sendable {
     return credentials
   }
 
-  public func refreshCredentials() async throws -> TokenCredentials? {
-    throw TokenManagerError.refreshNotSupported
-  }
 }
 
 // MARK: - Additional API Token Methods

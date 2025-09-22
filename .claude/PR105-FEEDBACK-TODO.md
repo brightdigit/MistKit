@@ -28,14 +28,12 @@
 - [x] **Precompile and cache regex patterns to improve performance** *[CodeRabbit: performance]* ✅ RegexCache utility with thread-safe caching
 - [x] **Minimize unnecessary allocations in token refresh** *[CodeRabbit: performance review]* ✅ Reuse existing credentials when tokens unchanged
 - [x] **Use more efficient data retrieval methods** *[CodeRabbit: performance review]* ✅ String.fullNSRange extension reduces NSRange allocations
-- [ ] **Use snapshot APIs for more efficient operations** *[CodeRabbit: performance]*
 - [x] **Review and optimize network request patterns** *[CodeRabbit: performance review]* ✅ Cached regex patterns reduce compilation overhead
 
 ## 🔧 ARCHITECTURE IMPROVEMENTS
 
 ### Reliability Issues
 - [ ] **Add atomic state transitions in AdaptiveTokenManager to prevent race conditions** *[Claude Code Review: reliability]*
-- [ ] **Enhance retry logic with jitter for exponential backoff** *[Claude Code Review: reliability]*
 - [ ] **Fix potential resource leak in ServerToServerAuthManager deinit (Task.detached usage)** *[Claude Code Review: reliability]*
 
 ### General Architecture

@@ -36,84 +36,35 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
   internal let webAuthToken: String
   internal let tokenEncoder = CharacterMapEncoder()
   internal let credentials: TokenCredentials
-  internal let refreshPolicy: TokenRefreshPolicy
-  internal let retryPolicy: RetryPolicy
   internal let storage: (any TokenStorage)?
 
-  // Token refresh state
-  internal let taskState = TaskState()
-  internal let refreshSubject = AsyncStream<TokenRefreshEvent>.makeStream()
-
-  /// Actor to manage task state safely
-  internal actor TaskState {
-    private var refreshTask: Task<Void, Never>?
-
-    func setTask(_ task: Task<Void, Never>?) {
-      refreshTask?.cancel()
-      refreshTask = task
-    }
-
-    func cancelTask() {
-      refreshTask?.cancel()
-      refreshTask = nil
-    }
-  }
-
-  /// Events emitted during token refresh operations
-  public enum TokenRefreshEvent: Sendable {
-    case refreshStarted(apiToken: String)
-    case refreshCompleted(apiToken: String, newWebToken: String)
-    case refreshFailed(apiToken: String, error: any Error)
-    case refreshScheduled(apiToken: String, nextRefresh: Date)
-  }
-
-  /// Stream of token refresh events
-  public var refreshEvents: AsyncStream<TokenRefreshEvent> {
-    refreshSubject.stream
-  }
 
   /// Creates a new web authentication token manager
   /// - Parameters:
   ///   - apiToken: The CloudKit API token from Apple Developer Console
   ///   - webAuthToken: The web authentication token from CloudKit JS authentication
-  ///   - refreshPolicy: Token refresh policy (default: manual)
-  ///   - retryPolicy: Retry policy for failed operations (default: .default)
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public init(
     apiToken: String,
     webAuthToken: String,
-    refreshPolicy: TokenRefreshPolicy = .manual,
-    retryPolicy: RetryPolicy = .default,
     storage: (any TokenStorage)? = nil
   ) {
     self.apiToken = apiToken
     self.webAuthToken = webAuthToken
-    self.refreshPolicy = refreshPolicy
-    self.retryPolicy = retryPolicy
     self.storage = storage
     self.credentials = TokenCredentials.webAuthToken(
       apiToken: apiToken,
       webToken: webAuthToken
     )
 
-    // Start refresh scheduler if policy supports it
-    if refreshPolicy.supportsAutomaticRefresh {
-      startRefreshScheduler()
-    }
   }
 
   deinit {
-    let taskState = self.taskState
-    Task.detached { await taskState.cancelTask() }
-    refreshSubject.continuation.finish()
+    // Clean up any resources
   }
 
   // MARK: - TokenManager Protocol
 
-  public var supportsRefresh: Bool {
-    // Support refresh if we have a refresh policy that supports it
-    refreshPolicy.supportsAutomaticRefresh
-  }
 
   public var hasCredentials: Bool {
     get async {
@@ -159,12 +110,4 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     return credentials
   }
 
-  public func refreshCredentials() async throws -> TokenCredentials? {
-    guard supportsRefresh else {
-      throw TokenManagerError.refreshNotSupported
-    }
-
-    // Perform refresh with retry logic
-    return try await performRefreshWithRetry()
-  }
 }

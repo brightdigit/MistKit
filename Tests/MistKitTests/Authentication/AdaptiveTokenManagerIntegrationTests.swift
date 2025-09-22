@@ -62,22 +62,9 @@ internal final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
     let adaptiveManager = AdaptiveTokenManager(apiToken: apiToken)
 
     // Test initial properties
-    let supportsRefresh = adaptiveManager.supportsRefresh
-    XCTAssertFalse(supportsRefresh)
     let hasCredentials = await adaptiveManager.hasCredentials
     XCTAssertTrue(hasCredentials)
 
-    // Test that refresh throws appropriate error
-    do {
-      _ = try await adaptiveManager.refreshCredentials()
-      XCTFail("Should have thrown refreshNotSupported error")
-    } catch let error as TokenManagerError {
-      if case .refreshNotSupported = error {
-        // Success - correct error type
-      } else {
-        XCTFail("Expected refreshNotSupported error, got: \(error)")
-      }
-    }
   }
 
   func testAdaptiveTokenManagerWithInvalidToken() async throws {

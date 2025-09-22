@@ -31,62 +31,32 @@ public import Foundation
 
 /// Adaptive token manager that can transition between API-only and Web authentication
 /// Starts with API token and can be upgraded to include web authentication
-/// Supports refresh policies and storage when upgraded to web authentication
+/// Supports storage when upgraded to web authentication
 public actor AdaptiveTokenManager: TokenManager {
   internal let apiToken: String
   internal var webAuthToken: String?
-  internal let refreshPolicy: TokenRefreshPolicy
-  internal let retryPolicy: RetryPolicy
   internal let storage: (any TokenStorage)?
 
-  // Refresh state (only used in web authentication mode)
-  internal var refreshTask: Task<Void, Never>?
-  internal let refreshSubject = AsyncStream<TokenRefreshEvent>.makeStream()
-
-  /// Events emitted during token refresh operations
-  public enum TokenRefreshEvent: Sendable {
-    case refreshStarted(apiToken: String)
-    case refreshCompleted(apiToken: String, newWebToken: String)
-    case refreshFailed(apiToken: String, error: any Error)
-    case refreshScheduled(apiToken: String, nextRefresh: Date)
-    case modeChanged(from: AuthenticationMode, toMode: AuthenticationMode)
-  }
-
-  /// Stream of token refresh events
-  nonisolated public var refreshEvents: AsyncStream<TokenRefreshEvent> {
-    refreshSubject.stream
-  }
 
   /// Creates an adaptive token manager starting with API token only
   /// - Parameters:
   ///   - apiToken: The CloudKit API token
-  ///   - refreshPolicy: Token refresh policy (default: manual)
-  ///   - retryPolicy: Retry policy for failed operations (default: .default)
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public init(
     apiToken: String,
-    refreshPolicy: TokenRefreshPolicy = .manual,
-    retryPolicy: RetryPolicy = .default,
     storage: (any TokenStorage)? = nil
   ) {
     self.apiToken = apiToken
     self.webAuthToken = nil
-    self.refreshPolicy = refreshPolicy
-    self.retryPolicy = retryPolicy
     self.storage = storage
   }
 
   deinit {
-    refreshTask?.cancel()
-    refreshSubject.continuation.finish()
+    // Clean up any resources
   }
 
   // MARK: - TokenManager Protocol
 
-  nonisolated public var supportsRefresh: Bool {
-    // Support refresh only in web authentication mode with appropriate policy
-    refreshPolicy.supportsAutomaticRefresh
-  }
 
   public var hasCredentials: Bool {
     get async {
@@ -131,16 +101,4 @@ public actor AdaptiveTokenManager: TokenManager {
     }
   }
 
-  public func refreshCredentials() async throws -> TokenCredentials? {
-    guard webAuthToken != nil else {
-      throw TokenManagerError.refreshNotSupported
-    }
-
-    guard supportsRefresh else {
-      throw TokenManagerError.refreshNotSupported
-    }
-
-    // Perform refresh with retry logic (similar to WebAuthTokenManager)
-    return try await performRefreshWithRetry()
-  }
 }

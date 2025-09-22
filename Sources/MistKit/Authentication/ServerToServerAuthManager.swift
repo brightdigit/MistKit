@@ -43,98 +43,47 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   internal let keyID: String
   internal let privateKey: @Sendable () throws -> P256.Signing.PrivateKey
   internal let credentials: TokenCredentials
-  internal let refreshPolicy: TokenRefreshPolicy
-  internal let retryPolicy: RetryPolicy
   internal let storage: (any TokenStorage)?
 
-  // Key rotation scheduler state
-  internal let taskState = TaskState()
-  internal let rotationSubject = AsyncStream<KeyRotationEvent>.makeStream()
-
-  /// Actor to manage task state safely
-  internal actor TaskState {
-    private var rotationTask: Task<Void, Never>?
-
-    func setTask(_ task: Task<Void, Never>?) {
-      rotationTask?.cancel()
-      rotationTask = task
-    }
-
-    func cancelTask() {
-      rotationTask?.cancel()
-      rotationTask = nil
-    }
-  }
-
-  /// Events emitted during key rotation operations
-  public enum KeyRotationEvent: Sendable {
-    case rotationStarted(keyID: String)
-    case rotationCompleted(oldKeyID: String, newKeyID: String)
-    case rotationFailed(keyID: String, error: any Error)
-    case rotationScheduled(keyID: String, nextRotation: Date)
-  }
-
-  /// Stream of key rotation events
-  public var rotationEvents: AsyncStream<KeyRotationEvent> {
-    rotationSubject.stream
-  }
 
   /// Creates a new server-to-server authentication manager
   /// - Parameters:
   ///   - keyID: The key identifier from Apple Developer Console
   ///   - privateKey: The ECDSA P-256 private key
-  ///   - refreshPolicy: Token refresh policy (default: manual)
-  ///   - retryPolicy: Retry policy for failed operations (default: .default)
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public init(
     keyID: String,
     privateKeyCallback: @autoclosure @escaping @Sendable () throws -> P256.Signing.PrivateKey,
-    refreshPolicy: TokenRefreshPolicy = .manual,
-    retryPolicy: RetryPolicy = .default,
     storage: (any TokenStorage)? = nil
   ) throws {
     let privateKey = try privateKeyCallback()
     self.keyID = keyID
     self.privateKey = privateKeyCallback
-    self.refreshPolicy = refreshPolicy
-    self.retryPolicy = retryPolicy
     self.storage = storage
     self.credentials = TokenCredentials.serverToServer(
       keyID: keyID,
       privateKey: privateKey.rawRepresentation
     )
 
-    // Start rotation scheduler if policy supports it
-    if refreshPolicy.supportsAutomaticRefresh {
-      startRotationScheduler()
-    }
   }
 
   deinit {
-    let taskState = self.taskState
-    Task.detached { await taskState.cancelTask() }
-    rotationSubject.continuation.finish()
+    // Clean up any resources
   }
 
   /// Convenience initializer with private key data
   /// - Parameters:
   ///   - keyID: The key identifier from Apple Developer Console
   ///   - privateKeyData: The private key as raw data (32 bytes for P-256)
-  ///   - refreshPolicy: Token refresh policy (default: manual)
-  ///   - retryPolicy: Retry policy for failed operations (default: .default)
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public convenience init(
     keyID: String,
     privateKeyData: Data,
-    refreshPolicy: TokenRefreshPolicy = .manual,
-    retryPolicy: RetryPolicy = .default,
     storage: (any TokenStorage)? = nil
   ) throws {
     try self.init(
       keyID: keyID,
       privateKeyCallback: try P256.Signing.PrivateKey(rawRepresentation: privateKeyData),
-      refreshPolicy: refreshPolicy,
-      retryPolicy: retryPolicy,
       storage: storage
     )
   }
@@ -143,28 +92,21 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   /// - Parameters:
   ///   - keyID: The key identifier from Apple Developer Console
   ///   - pemString: The private key in PEM format
-  ///   - refreshPolicy: Token refresh policy (default: manual)
-  ///   - retryPolicy: Retry policy for failed operations (default: .default)
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public convenience init(
     keyID: String,
     pemString: String,
-    refreshPolicy: TokenRefreshPolicy = .manual,
-    retryPolicy: RetryPolicy = .default,
     storage: (any TokenStorage)? = nil
   ) throws {
     try self.init(
       keyID: keyID,
       privateKeyCallback: try P256.Signing.PrivateKey(pemRepresentation: pemString),
-      refreshPolicy: refreshPolicy,
-      retryPolicy: retryPolicy,
       storage: storage
     )
   }
 
   // MARK: - TokenManager Protocol
 
-  public let supportsRefresh = true  // Server keys can be rotated
 
   public var hasCredentials: Bool {
     get async {
@@ -205,12 +147,4 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     return credentials
   }
 
-  public func refreshCredentials() async throws -> TokenCredentials? {
-    // For server-to-server auth, "refresh" means we regenerate credentials
-    // with the same key (useful for updating metadata or timestamps)
-    try TokenCredentials.serverToServer(
-      keyID: keyID,
-      privateKey: privateKey().rawRepresentation
-    )
-  }
 }

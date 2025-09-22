@@ -231,7 +231,6 @@ public final class TokenManagerTests: XCTestCase {
   public func testTokenManagerError() {
     let invalidError = TokenManagerError.invalidCredentials(reason: "Bad format")
     let authError = TokenManagerError.authenticationFailed(underlying: nil)
-    let refreshError = TokenManagerError.refreshNotSupported
     let expiredError = TokenManagerError.tokenExpired
     let networkError = TokenManagerError.networkError(
       underlying: NSError(domain: "test", code: 123, userInfo: nil)
@@ -244,7 +243,6 @@ public final class TokenManagerTests: XCTestCase {
 
     XCTAssertTrue(authError.localizedDescription.contains("Authentication failed"))
 
-    XCTAssertTrue(refreshError.localizedDescription.contains("not supported"))
 
     XCTAssertTrue(expiredError.localizedDescription.contains("expired"))
 
@@ -267,11 +265,8 @@ public final class TokenManagerTests: XCTestCase {
     let credentials = try await mockManager.getCurrentCredentials()
     XCTAssertNotNil(credentials)
 
-    let refreshedCredentials = try await mockManager.refreshCredentials()
-    XCTAssertNotNil(refreshedCredentials)
 
     // Test computed properties
-    XCTAssertTrue(mockManager.supportsRefresh)
     let hasCredentials = await mockManager.hasCredentials
     XCTAssertTrue(hasCredentials)
   }
@@ -314,7 +309,6 @@ public final class TokenManagerTests: XCTestCase {
 
 /// Mock implementation of TokenManager for testing protocol conformance
 internal final class MockTokenManager: TokenManager {
-  let supportsRefresh = true
 
   var hasCredentials: Bool {
     get async { true }
@@ -328,7 +322,4 @@ internal final class MockTokenManager: TokenManager {
     TokenCredentials.apiToken("mock-token")
   }
 
-  func refreshCredentials() async throws -> TokenCredentials? {
-    TokenCredentials.apiToken("refreshed-mock-token")
-  }
 }

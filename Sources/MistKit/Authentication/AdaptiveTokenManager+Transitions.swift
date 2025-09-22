@@ -50,17 +50,9 @@ extension AdaptiveTokenManager {
       throw TokenManagerError.invalidCredentials(reason: "Web auth token too short")
     }
 
-    let oldMode = authenticationMode
     self.webAuthToken = webAuthToken
-    let newMode = authenticationMode
 
-    // Emit mode change event
-    refreshSubject.continuation.yield(.modeChanged(from: oldMode, toMode: newMode))
-
-    // Start refresh scheduler if policy supports it and we're now in web auth mode
-    if newMode == .webAuthenticated && refreshPolicy.supportsAutomaticRefresh {
-      startRefreshScheduler()
-    }
+    // Mode changed to web authentication
 
     // Store credentials if storage is available
     if let storage = storage {
@@ -79,15 +71,9 @@ extension AdaptiveTokenManager {
   /// Downgrades to API-only authentication (removes web auth token)
   /// - Returns: New credentials with API-only authentication
   public func downgradeToAPIOnly() async throws -> TokenCredentials {
-    let oldMode = authenticationMode
     self.webAuthToken = nil
-    let newMode = authenticationMode
 
-    // Emit mode change event
-    refreshSubject.continuation.yield(.modeChanged(from: oldMode, toMode: newMode))
-
-    // Stop refresh scheduler since we're no longer in web auth mode
-    stopRefreshScheduler()
+    // Mode changed to API-only
 
     guard let finalCredentials = try await getCurrentCredentials() else {
       throw TokenManagerError.internalError(reason: "Failed to get credentials after downgrade")
@@ -124,13 +110,5 @@ extension AdaptiveTokenManager {
     webAuthToken
   }
 
-  /// Returns the current refresh policy
-  public var currentRefreshPolicy: TokenRefreshPolicy {
-    refreshPolicy
-  }
 
-  /// Returns the current retry policy
-  public var currentRetryPolicy: RetryPolicy {
-    retryPolicy
-  }
 }

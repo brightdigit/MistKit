@@ -37,8 +37,6 @@ public enum TokenManagerError: Error, LocalizedError, Sendable {
   /// Authentication failed with external service
   case authenticationFailed(underlying: (any Error)?)
 
-  /// Token refresh is not supported by this manager
-  case refreshNotSupported
 
   /// Token has expired and cannot be used
   case tokenExpired
@@ -55,8 +53,6 @@ public enum TokenManagerError: Error, LocalizedError, Sendable {
       return "Invalid credentials: \(reason)"
     case .authenticationFailed(let error):
       return "Authentication failed: \(error?.localizedDescription ?? "Unknown error")"
-    case .refreshNotSupported:
-      return "Token refresh is not supported by this authentication method"
     case .tokenExpired:
       return "Authentication token has expired"
     case .networkError(let error):
