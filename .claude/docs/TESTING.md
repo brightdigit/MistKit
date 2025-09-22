@@ -171,7 +171,7 @@ Database: public (API-only limitation)
 📁 Listing zones in public database...
 🌐 CloudKit Request: GET https://api.apple-cloudkit.com/database/...
    Query Parameters:
-     ckAPIToken: 296c503003846ef692cb5b56c4a63cc1d27fb952eebe259d73e692759286dfa6
+     ckAPIToken: CK_API_TOKEN_REDACTED_296c50300384...
 ✅ Found 0 zone(s)
 
 📋 Querying records from public database...
@@ -203,7 +203,7 @@ Database: public (API-only limitation)
 🧪 MistKit Authentication Methods Test Suite
 ======================================================================
 Container: iCloud.com.brightdigit.MistDemo
-API Token: 296c503003846ef692cb5b56c4a63cc1d27fb952eebe259d73e692759286dfa6
+API Token: CK_API_TOKEN_REDACTED_296c50300384...
 ======================================================================
 
 🔐 Test 1: API-only Authentication (Public Database)

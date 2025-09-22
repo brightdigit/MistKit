@@ -8,7 +8,7 @@ This document describes the environment variables used by MistKit for secure con
 - **Description**: CloudKit API Token for authentication
 - **Format**: 64-character hexadecimal string
 - **Source**: [Apple Developer Console](https://icloud.developer.apple.com/dashboard/)
-- **Example**: `296c503003846ef692cb5b56c4a63cc1d27fb952eebe259d73e692759286dfa6`
+- **Example**: `CK_API_TOKEN_REDACTED_EXAMPLE_296c50300384...`
 
 ## Optional Variables
 
