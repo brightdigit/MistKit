@@ -45,9 +45,4 @@ public protocol TokenManager: Sendable {
 
   /// Checks if credentials are currently available
   var hasCredentials: Bool { get async }
-  
-  /// Refreshes the token if needed (optional implementation)
-  /// - Returns: Updated TokenCredentials or nil if no refresh needed
-  /// - Throws: TokenManagerError if refresh fails
-  func refreshTokenIfNeeded() async throws -> TokenCredentials?
 }

@@ -68,12 +68,6 @@ public final class APITokenManager: TokenManager, Sendable {
     _ = try await validateCredentials()
     return credentials
   }
-  
-  public func refreshTokenIfNeeded() async throws -> TokenCredentials? {
-    // API tokens don't typically need refresh, but validate anyway
-    _ = try await validateCredentials()
-    return nil
-  }
 
 }
 

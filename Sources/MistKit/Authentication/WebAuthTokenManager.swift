@@ -109,12 +109,5 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     _ = try await validateCredentials()
     return credentials
   }
-  
-  public func refreshTokenIfNeeded() async throws -> TokenCredentials? {
-    // Web auth tokens typically don't need refresh as they're long-lived
-    // But we should validate them to ensure they're still valid
-    _ = try await validateCredentials()
-    return nil
-  }
 
 }

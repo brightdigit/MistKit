@@ -84,14 +84,5 @@ public actor AdaptiveTokenManager: TokenManager {
     }
   }
   
-  public func refreshTokenIfNeeded() async throws -> TokenCredentials? {
-    // For adaptive token manager, check if we need to refresh web auth token
-    // API tokens typically don't need refresh
-    _ = try await validateCredentials()
-    
-    // If we have a web auth token, we might need to refresh it
-    // For now, just return nil as web auth tokens are typically long-lived
-    return nil
-  }
 
 }

@@ -27,9 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Crypto)
 public import Crypto
-#endif
 #if canImport(Foundation)
 public import Foundation
 #endif
@@ -98,11 +96,24 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     pemString: String,
     storage: (any TokenStorage)? = nil
   ) throws {
-    try self.init(
-      keyID: keyID,
-      privateKeyCallback: try P256.Signing.PrivateKey(pemRepresentation: pemString),
-      storage: storage
-    )
+    do {
+      try self.init(
+        keyID: keyID,
+        privateKeyCallback: try P256.Signing.PrivateKey(pemRepresentation: pemString),
+        storage: storage
+      )
+    } catch {
+      // Provide more specific error handling for PEM parsing failures
+      if error.localizedDescription.contains("PEM") || error.localizedDescription.contains("format") {
+        throw TokenManagerError.invalidCredentials(
+          reason: "Invalid PEM format for private key: \(error.localizedDescription)"
+        )
+      } else {
+        throw TokenManagerError.invalidCredentials(
+          reason: "Failed to parse private key from PEM string: \(error.localizedDescription)"
+        )
+      }
+    }
   }
 
   // MARK: - TokenManager Protocol
@@ -145,13 +156,6 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     // Validate first
     _ = try await validateCredentials()
     return credentials
-  }
-  
-  public func refreshTokenIfNeeded() async throws -> TokenCredentials? {
-    // Server-to-server authentication doesn't typically need token refresh
-    // The private key is used to sign requests directly
-    _ = try await validateCredentials()
-    return nil
   }
 
 }

@@ -27,14 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
 import HTTPTypes
-import OpenAPIRuntime
+public import OpenAPIRuntime
 import OpenAPIURLSession
-
-#if canImport(Crypto)
-  import Crypto
-#endif
+import Crypto
 
 /// A client for interacting with CloudKit Web Services
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -46,11 +43,13 @@ public struct MistKitClient {
   public let configuration: MistKitConfiguration
 
   /// Initialize a new MistKit client
-  /// - Parameter configuration: The CloudKit configuration including container,
-  ///   environment, and authentication
+  /// - Parameters:
+  ///   - configuration: The CloudKit configuration including container,
+  ///     environment, and authentication
+  ///   - transport: Custom transport for network requests
   /// - Throws: ClientError if initialization fails
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  public init(configuration: MistKitConfiguration) throws {
+  public init(configuration: MistKitConfiguration, transport: any ClientTransport) throws {
     self.configuration = configuration
 
     // Create appropriate TokenManager from configuration
@@ -59,7 +58,7 @@ public struct MistKitClient {
     // Create the OpenAPI client with custom server URL and middleware
     self.client = Client(
       serverURL: configuration.serverURL,
-      transport: URLSessionTransport(),
+      transport: transport,
       middlewares: [
         AuthenticationMiddleware(tokenManager: tokenManager),
         LoggingMiddleware(),
@@ -71,8 +70,9 @@ public struct MistKitClient {
   /// - Parameters:
   ///   - configuration: The CloudKit configuration
   ///   - tokenManager: Custom token manager for authentication
+  ///   - transport: Custom transport for network requests
   /// - Throws: ClientError if initialization fails
-  public init(configuration: MistKitConfiguration, tokenManager: any TokenManager) throws {
+  public init(configuration: MistKitConfiguration, tokenManager: any TokenManager, transport: any ClientTransport) throws {
     self.configuration = configuration
 
     // Validate server-to-server authentication restrictions
@@ -80,10 +80,11 @@ public struct MistKitClient {
       configuration: configuration, tokenManager: tokenManager
     )
 
+
     // Create the OpenAPI client with custom server URL and middleware
     self.client = Client(
       serverURL: configuration.serverURL,
-      transport: URLSessionTransport(),
+      transport: transport,
       middlewares: [
         AuthenticationMiddleware(tokenManager: tokenManager),
         LoggingMiddleware(),
@@ -97,12 +98,14 @@ public struct MistKitClient {
   ///   - environment: CloudKit environment (development/production)
   ///   - database: CloudKit database (public/private/shared)
   ///   - tokenManager: Custom token manager for authentication
+  ///   - transport: Custom transport for network requests
   /// - Throws: ClientError if initialization fails
   public init(
     container: String,
     environment: Environment,
     database: Database,
-    tokenManager: any TokenManager
+    tokenManager: any TokenManager,
+    transport: any ClientTransport
   ) throws {
     // Check if this is a server-to-server token manager
     var keyID: String? = nil
@@ -135,7 +138,49 @@ public struct MistKitClient {
       dependencyContainer: nil
     )
 
-    try self.init(configuration: configuration, tokenManager: tokenManager)
+    try self.init(configuration: configuration, tokenManager: tokenManager, transport: transport)
+  }
+
+  // MARK: - Convenience Initializers
+
+  /// Initialize a new MistKit client with default URLSessionTransport
+  /// - Parameter configuration: The CloudKit configuration including container,
+  ///   environment, and authentication
+  /// - Throws: ClientError if initialization fails
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  public init(configuration: MistKitConfiguration) throws {
+    try self.init(configuration: configuration, transport: URLSessionTransport())
+  }
+
+  /// Initialize a new MistKit client with a custom TokenManager and default URLSessionTransport
+  /// - Parameters:
+  ///   - configuration: The CloudKit configuration
+  ///   - tokenManager: Custom token manager for authentication
+  /// - Throws: ClientError if initialization fails
+  public init(configuration: MistKitConfiguration, tokenManager: any TokenManager) throws {
+    try self.init(configuration: configuration, tokenManager: tokenManager, transport: URLSessionTransport())
+  }
+
+  /// Initialize a new MistKit client with a custom TokenManager and individual parameters using default URLSessionTransport
+  /// - Parameters:
+  ///   - container: CloudKit container identifier
+  ///   - environment: CloudKit environment (development/production)
+  ///   - database: CloudKit database (public/private/shared)
+  ///   - tokenManager: Custom token manager for authentication
+  /// - Throws: ClientError if initialization fails
+  public init(
+    container: String,
+    environment: Environment,
+    database: Database,
+    tokenManager: any TokenManager
+  ) throws {
+    try self.init(
+      container: container,
+      environment: environment,
+      database: database,
+      tokenManager: tokenManager,
+      transport: URLSessionTransport()
+    )
   }
 
   // MARK: - Server-to-Server Validation
@@ -149,21 +194,17 @@ public struct MistKitClient {
     configuration: MistKitConfiguration,
     tokenManager: any TokenManager
   ) throws {
-    // Check if this is a server-to-server token manager (only available on newer platforms)
-    #if canImport(Crypto)
-      if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
-        if tokenManager is ServerToServerAuthManager {
-          // Server-to-server authentication only supports the public database
-          guard configuration.database == .public else {
-            throw TokenManagerError.invalidCredentials(
-              reason: """
-                Server-to-server authentication only supports the public database. Current database: \(configuration.database). \
-                Use MistKitConfiguration.serverToServer() for proper configuration.
-                """
-            )
-          }
-        }
+    // Check if this is a server-to-server token manager
+    if tokenManager is ServerToServerAuthManager {
+      // Server-to-server authentication only supports the public database
+      guard configuration.database == .public else {
+        throw TokenManagerError.invalidCredentials(
+          reason: """
+            Server-to-server authentication only supports the public database. Current database: \(configuration.database). \
+            Use MistKitConfiguration.serverToServer() for proper configuration.
+            """
+        )
       }
-    #endif
+    }
   }
 }

@@ -181,15 +181,11 @@ public struct EnhancedMistKitConfiguration: Sendable {
     
     // Default creation logic
     if let keyID = keyID, let privateKeyData = privateKeyData {
-      #if canImport(Crypto)
       return try ServerToServerAuthManager(
         keyID: keyID,
         privateKeyData: privateKeyData,
         storage: storage
       )
-      #else
-      throw TokenManagerError.internalError(reason: "Crypto framework not available for server-to-server auth")
-      #endif
     } else if let webAuthToken = webAuthToken {
       return WebAuthTokenManager(
         apiToken: apiToken,

@@ -59,7 +59,15 @@ extension AdaptiveTokenManager {
       guard let credentials = try await getCurrentCredentials() else {
         throw TokenManagerError.internalError(reason: "Failed to get credentials after upgrade")
       }
-      try await storage.store(credentials, identifier: apiToken)
+      do {
+        try await storage.store(credentials, identifier: apiToken)
+      } catch {
+        // Don't fail silently - log the storage error but continue with the upgrade
+        // This ensures the authentication upgrade succeeds even if storage fails
+        print("Warning: Failed to store credentials after upgrade: \(error.localizedDescription)")
+        // Could also throw here if storage failure should be fatal:
+        // throw TokenManagerError.internalError(reason: "Failed to store credentials: \(error.localizedDescription)")
+      }
     }
 
     guard let finalCredentials = try await getCurrentCredentials() else {

@@ -106,7 +106,6 @@ public struct MistKitConfiguration: Sendable {
   public func createTokenManager() -> any TokenManager {
     // Default creation logic
     if let keyID = keyID, let privateKeyData = privateKeyData {
-      #if canImport(Crypto)
       do {
         return try ServerToServerAuthManager(
           keyID: keyID,
@@ -116,9 +115,6 @@ public struct MistKitConfiguration: Sendable {
       } catch {
         fatalError("Failed to create ServerToServerAuthManager: \(error)")
       }
-      #else
-      fatalError("Crypto framework not available for server-to-server auth")
-      #endif
     } else if let webAuthToken = webAuthToken {
       return WebAuthTokenManager(
         apiToken: apiToken,

@@ -56,10 +56,6 @@ internal final class BaseTokenManager: TokenManager, @unchecked Sendable {
     return try await createCredentials()
   }
   
-  public func refreshTokenIfNeeded() async throws -> TokenCredentials? {
-    // Base implementation - override in subclasses
-    nil
-  }
   
   // MARK: - Internal Methods to Override
   
