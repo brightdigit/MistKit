@@ -1,4 +1,4 @@
-public import Foundation
+import Foundation
 import MistKit
 import OpenAPIRuntime
 import OpenAPIURLSession
@@ -79,29 +79,29 @@ struct MistDemo: AsyncParsableCommand {
             return
         }
         
-        // Update the apiToken property with the resolved value
-        apiToken = resolvedApiToken
+        // Use the resolved API token for all operations
+        let effectiveApiToken = resolvedApiToken
         
         if testAllAuth {
-            try await testAllAuthenticationMethods()
+            try await testAllAuthenticationMethods(apiToken: effectiveApiToken)
         } else if testApiOnly {
-            try await testAPIOnlyAuthentication()
+            try await testAPIOnlyAuthentication(apiToken: effectiveApiToken)
         } else if testAdaptive {
-            try await testAdaptiveTokenManager()
+            try await testAdaptiveTokenManager(apiToken: effectiveApiToken)
         } else if testServerToServer {
-            try await testServerToServerAuthentication()
+            try await testServerToServerAuthentication(apiToken: effectiveApiToken)
         } else if testSignature {
             testSignatureGeneration()
         } else if skipAuth, let token = webAuthToken {
             // Run demo directly with provided token
-            try await runCloudKitDemo(webAuthToken: token)
+            try await runCloudKitDemo(webAuthToken: token, apiToken: effectiveApiToken)
         } else {
             // Start server and wait for authentication
-            try await startAuthenticationServer()
+            try await startAuthenticationServer(apiToken: effectiveApiToken)
         }
     }
     
-    func startAuthenticationServer() async throws {
+    func startAuthenticationServer(apiToken: String) async throws {
         print("\n" + String(repeating: "=", count: 60))
         print("🚀 MistKit CloudKit Authentication Server")
         print(String(repeating: "=", count: 60))
@@ -251,10 +251,10 @@ struct MistDemo: AsyncParsableCommand {
         
         // Run the demo with the token
         print("\n📱 Starting CloudKit demo...\n")
-        try await runCloudKitDemo(webAuthToken: token)
+        try await runCloudKitDemo(webAuthToken: token, apiToken: apiToken)
     }
     
-    func runCloudKitDemo(webAuthToken: String) async throws {
+    func runCloudKitDemo(webAuthToken: String, apiToken: String) async throws {
         print(String(repeating: "=", count: 50))
         print("🌩️  MistKit CloudKit Demo")
         print(String(repeating: "=", count: 50))
@@ -328,7 +328,7 @@ struct MistDemo: AsyncParsableCommand {
     }
 
     /// Test all authentication methods
-    func testAllAuthenticationMethods() async throws {
+    func testAllAuthenticationMethods(apiToken: String) async throws {
         print("\n" + String(repeating: "=", count: 70))
         print("🧪 MistKit Authentication Methods Test Suite")
         print(String(repeating: "=", count: 70))
@@ -401,7 +401,7 @@ struct MistDemo: AsyncParsableCommand {
         // Test 3: AdaptiveTokenManager
         print("\n🔄 Test 3: AdaptiveTokenManager Transitions")
         print(String(repeating: "-", count: 50))
-        await testAdaptiveTokenManagerInternal()
+        await testAdaptiveTokenManagerInternal(apiToken: apiToken)
 
         // Test 4: Server-to-Server Authentication (basic test only)
         print("\n🔐 Test 4: Server-to-Server Authentication (Test Keys)")
@@ -419,7 +419,7 @@ struct MistDemo: AsyncParsableCommand {
     }
 
     /// Test API-only authentication
-    func testAPIOnlyAuthentication() async throws {
+    func testAPIOnlyAuthentication(apiToken: String) async throws {
         print("\n" + String(repeating: "=", count: 60))
         print("🔐 API-only Authentication Test")
         print(String(repeating: "=", count: 60))
@@ -467,18 +467,18 @@ struct MistDemo: AsyncParsableCommand {
     }
 
     /// Test AdaptiveTokenManager
-    func testAdaptiveTokenManager() async throws {
+    func testAdaptiveTokenManager(apiToken: String) async throws {
         print("\n" + String(repeating: "=", count: 60))
         print("🔄 AdaptiveTokenManager Transition Test")
         print(String(repeating: "=", count: 60))
-        await testAdaptiveTokenManagerInternal()
+        await testAdaptiveTokenManagerInternal(apiToken: apiToken)
         print(String(repeating: "=", count: 60))
         print("✅ AdaptiveTokenManager test completed!")
         print(String(repeating: "=", count: 60))
     }
 
     /// Internal AdaptiveTokenManager test implementation
-    func testAdaptiveTokenManagerInternal() async {
+    func testAdaptiveTokenManagerInternal(apiToken: String) async {
         do {
             print("📋 Creating AdaptiveTokenManager with API token...")
             let adaptiveManager = AdaptiveTokenManager(apiToken: apiToken)
@@ -493,8 +493,6 @@ struct MistDemo: AsyncParsableCommand {
             let hasCredentials = await adaptiveManager.hasCredentials
             print("✅ Has credentials: \(hasCredentials)")
 
-            let supportsRefresh = adaptiveManager.supportsRefresh
-            print("✅ Supports refresh: \(supportsRefresh)")
 
             // Test validation
             print("🔍 Testing credential validation...")
@@ -532,7 +530,7 @@ struct MistDemo: AsyncParsableCommand {
     }
 
     /// Test server-to-server authentication
-    func testServerToServerAuthentication() async throws {
+    func testServerToServerAuthentication(apiToken: String) async throws {
         print("\n" + String(repeating: "=", count: 60))
         print("🔐 Server-to-Server Authentication Test")
         print(String(repeating: "=", count: 60))
