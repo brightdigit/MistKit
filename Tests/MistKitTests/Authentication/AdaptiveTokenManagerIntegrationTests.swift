@@ -2,8 +2,8 @@ import XCTest
 
 @testable import MistKit
 
-final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
-  func testAdaptiveTokenManagerTransitions() async throws {
+public final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
+  public func testAdaptiveTokenManagerTransitions() async throws {
     // Create adaptive manager starting with API-only authentication
     let apiToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let adaptiveManager = AdaptiveTokenManager(apiToken: apiToken)
@@ -19,7 +19,8 @@ final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
     // Test upgrade to web authentication
     let webToken = "user123_web_auth_token"
     let upgradedCredentials = try await adaptiveManager.upgradeToWebAuthentication(
-      webAuthToken: webToken)
+      webAuthToken: webToken
+    )
     if case .webAuthToken(let api, let web) = upgradedCredentials.method {
       XCTAssertEqual(api, apiToken)
       XCTAssertEqual(web, webToken)
@@ -56,7 +57,7 @@ final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
     XCTAssertTrue(isValid)
   }
 
-  func testAdaptiveTokenManagerProperties() async throws {
+  public func testAdaptiveTokenManagerProperties() async throws {
     let apiToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let adaptiveManager = AdaptiveTokenManager(apiToken: apiToken)
 
@@ -79,7 +80,7 @@ final class AdaptiveTokenManagerIntegrationTests: XCTestCase {
     }
   }
 
-  func testAdaptiveTokenManagerWithInvalidToken() async throws {
+  public func testAdaptiveTokenManagerWithInvalidToken() async throws {
     let invalidApiToken = "invalid_token"
     let adaptiveManager = AdaptiveTokenManager(apiToken: invalidApiToken)
 

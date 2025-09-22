@@ -56,13 +56,32 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
     }
 
     var modifiedRequest = request
+    var urlComponents = parseRequestPath(request.path ?? "")
 
-    // Get the current path without query parameters
-    let requestPath = request.path ?? ""
+    // Apply authentication based on method type
+    switch credentials.method {
+    case .apiToken(let apiToken):
+      addAPITokenAuthentication(apiToken: apiToken, to: &urlComponents)
+
+    case .webAuthToken(let apiToken, let webToken):
+      addWebAuthTokenAuthentication(apiToken: apiToken, webToken: webToken, to: &urlComponents)
+
+    case .serverToServer:
+      modifiedRequest = try await addServerToServerAuthentication(to: modifiedRequest, body: body)
+    }
+
+    // Build the new path with query parameters (for API and Web auth)
+    updateRequestPath(&modifiedRequest, with: urlComponents)
+
+    return try await next(modifiedRequest, body, baseURL)
+  }
+
+  // MARK: - Private Helper Methods
+
+  private func parseRequestPath(_ requestPath: String) -> URLComponents {
     let pathComponents = requestPath.split(separator: "?", maxSplits: 1)
     let cleanPath = String(pathComponents.first ?? "")
 
-    // Create URL components from the clean path
     var urlComponents = URLComponents()
     urlComponents.path = cleanPath
 
@@ -74,77 +93,80 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
       }
     }
 
-    // Apply authentication based on method type
-    switch credentials.method {
-    case .apiToken(let apiToken):
-      // Add API token as query parameter
-      var queryItems = urlComponents.queryItems ?? []
-      queryItems.append(URLQueryItem(name: "ckAPIToken", value: apiToken))
-      urlComponents.queryItems = queryItems
+    return urlComponents
+  }
 
-    case .webAuthToken(let apiToken, let webToken):
-      // Add both API token and encoded web auth token as query parameters
-      var queryItems = urlComponents.queryItems ?? []
-      queryItems.append(URLQueryItem(name: "ckAPIToken", value: apiToken))
-      let encodedWebAuthToken = tokenEncoder.encode(webToken)
-      queryItems.append(URLQueryItem(name: "ckWebAuthToken", value: encodedWebAuthToken))
-      urlComponents.queryItems = queryItems
+  private func addAPITokenAuthentication(apiToken: String, to urlComponents: inout URLComponents) {
+    var queryItems = urlComponents.queryItems ?? []
+    queryItems.append(URLQueryItem(name: "ckAPIToken", value: apiToken))
+    urlComponents.queryItems = queryItems
+  }
 
-    case .serverToServer:
-      // Server-to-server authentication uses ECDSA P-256 signature in headers
-      // Available on macOS 11.0+, iOS 14.0+, tvOS 14.0+, watchOS 7.0+, and Linux
-      if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
-        // For server-to-server auth, we expect the tokenManager to be a ServerToServerAuthManager
-        // The actual signing should be handled by the ServerToServerAuthManager, not here
-        if let serverAuthManager = tokenManager as? ServerToServerAuthManager {
-          // Extract body data for signing
-          let requestBodyData: Data?
-          if let body = body {
-            do {
-              requestBodyData = try await Data(collecting: body, upTo: 1_024 * 1_024)
-            } catch {
-              requestBodyData = nil
-            }
-          } else {
-            requestBodyData = nil
-          }
+  private func addWebAuthTokenAuthentication(
+    apiToken: String,
+    webToken: String,
+    to urlComponents: inout URLComponents
+  ) {
+    var queryItems = urlComponents.queryItems ?? []
+    queryItems.append(URLQueryItem(name: "ckAPIToken", value: apiToken))
+    let encodedWebAuthToken = tokenEncoder.encode(webToken)
+    queryItems.append(URLQueryItem(name: "ckWebAuthToken", value: encodedWebAuthToken))
+    urlComponents.queryItems = queryItems
+  }
 
-          // According to Apple's documentation, the signature should use the Web Service URL Subpath
-          // which is /database/1/[container]/[environment]/[operation-specific subpath]
-          // NOT the full URL with https://api.apple-cloudkit.com
-          let webServiceSubpath = modifiedRequest.path ?? ""
-
-          let signature = try serverAuthManager.signRequest(
-            requestBody: requestBodyData,
-            webServiceURL: webServiceSubpath
-          )
-
-          // Add CloudKit headers
-          modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-KeyID")!] = signature.keyID
-          modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-ISO8601Date")!] =
-            signature.date
-          modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-SignatureV1")!] =
-            signature.signature
-        } else {
-          throw TokenManagerError.internalError(
-            reason: "Server-to-server credentials require ServerToServerAuthManager"
-          )
-        }
-      } else {
-        throw TokenManagerError.internalError(
-          reason:
-            "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
-        )
-      }
+  private func addServerToServerAuthentication(
+    to request: HTTPRequest,
+    body: HTTPBody?
+  ) async throws -> HTTPRequest {
+    // Server-to-server authentication uses ECDSA P-256 signature in headers
+    // Available on macOS 11.0+, iOS 14.0+, tvOS 14.0+, watchOS 7.0+, and Linux
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      throw TokenManagerError.internalError(
+        reason:
+          "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
+      )
     }
 
-    // Build the new path with query parameters (for API and Web auth)
+    guard let serverAuthManager = tokenManager as? ServerToServerAuthManager else {
+      throw TokenManagerError.internalError(
+        reason: "Server-to-server credentials require ServerToServerAuthManager"
+      )
+    }
+
+    // Extract body data for signing
+    let requestBodyData = try await extractRequestBodyData(from: body)
+    let webServiceSubpath = request.path ?? ""
+
+    let signature = try serverAuthManager.signRequest(
+      requestBody: requestBodyData,
+      webServiceURL: webServiceSubpath
+    )
+
+    var modifiedRequest = request
+    modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-KeyID")] = signature.keyID
+    modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-ISO8601Date")] = signature.date
+    modifiedRequest.headerFields[.init("X-Apple-CloudKit-Request-SignatureV1")] =
+      signature.signature
+
+    return modifiedRequest
+  }
+
+  private func extractRequestBodyData(from body: HTTPBody?) async throws -> Data? {
+    guard let body = body else { return nil }
+
+    do {
+      return try await Data(collecting: body, upTo: 1_024 * 1_024)
+    } catch {
+      return nil
+    }
+  }
+
+  private func updateRequestPath(_ request: inout HTTPRequest, with urlComponents: URLComponents) {
+    let cleanPath = urlComponents.path
     if let query = urlComponents.query {
-      modifiedRequest.path = cleanPath + "?" + query
+      request.path = cleanPath + "?" + query
     } else {
-      modifiedRequest.path = cleanPath
+      request.path = cleanPath
     }
-
-    return try await next(modifiedRequest, body, baseURL)
   }
 }

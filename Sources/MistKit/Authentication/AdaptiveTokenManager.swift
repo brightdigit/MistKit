@@ -49,7 +49,7 @@ public actor AdaptiveTokenManager: TokenManager {
     case refreshCompleted(apiToken: String, newWebToken: String)
     case refreshFailed(apiToken: String, error: any Error)
     case refreshScheduled(apiToken: String, nextRefresh: Date)
-    case modeChanged(from: AuthenticationMode, to: AuthenticationMode)
+    case modeChanged(from: AuthenticationMode, toMode: AuthenticationMode)
   }
 
   /// Stream of token refresh events

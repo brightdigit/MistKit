@@ -75,7 +75,8 @@ public struct MistKitClient {
 
     // Validate server-to-server authentication restrictions
     try Self.validateServerToServerConfiguration(
-      configuration: configuration, tokenManager: tokenManager)
+      configuration: configuration, tokenManager: tokenManager
+    )
 
     // Create the OpenAPI client with custom server URL and middleware
     self.client = Client(
@@ -129,8 +130,10 @@ public struct MistKitClient {
           // Server-to-server authentication only supports the public database
           guard configuration.database == .public else {
             throw TokenManagerError.invalidCredentials(
-              reason:
-                "Server-to-server authentication only supports the public database. Current database: \(configuration.database). Use MistKitConfiguration.serverToServer() for proper configuration."
+              reason: """
+                Server-to-server authentication only supports the public database. Current database: \(configuration.database). \
+                Use MistKitConfiguration.serverToServer() for proper configuration.
+                """
             )
           }
         }

@@ -29,7 +29,10 @@ public final class TokenManagerTests: XCTestCase {
     }
 
     // Test server-to-server case
-    let keyData = "test-key".data(using: .utf8)!
+    guard let keyData = "test-key".data(using: .utf8) else {
+      XCTFail("Failed to create test key data")
+      return
+    }
     let serverAuth = AuthenticationMethod.serverToServer(
       keyID: "key-789",
       privateKey: keyData
@@ -105,7 +108,10 @@ public final class TokenManagerTests: XCTestCase {
     XCTAssertEqual(webAuth1, webAuth2)
     XCTAssertNotEqual(webAuth1, webAuth3)
 
-    let keyData = "test".data(using: .utf8)!
+    guard let keyData = "test".data(using: .utf8) else {
+      XCTFail("Failed to create test data")
+      return
+    }
     let serverAuth1 = AuthenticationMethod.serverToServer(
       keyID: "key1",
       privateKey: keyData
@@ -161,7 +167,10 @@ public final class TokenManagerTests: XCTestCase {
     }
 
     // Test serverToServer convenience initializer
-    let keyData = "private-key".data(using: .utf8)!
+    guard let keyData = "private-key".data(using: .utf8) else {
+      XCTFail("Failed to create private key data")
+      return
+    }
     let serverCredentials = TokenCredentials.serverToServer(
       keyID: "server-key-id",
       privateKey: keyData

@@ -55,7 +55,7 @@ extension AdaptiveTokenManager {
     let newMode = authenticationMode
 
     // Emit mode change event
-    refreshSubject.continuation.yield(.modeChanged(from: oldMode, to: newMode))
+    refreshSubject.continuation.yield(.modeChanged(from: oldMode, toMode: newMode))
 
     // Start refresh scheduler if policy supports it and we're now in web auth mode
     if newMode == .webAuthenticated && refreshPolicy.supportsAutomaticRefresh {
@@ -64,11 +64,16 @@ extension AdaptiveTokenManager {
 
     // Store credentials if storage is available
     if let storage = storage {
-      let credentials = try await getCurrentCredentials()!
+      guard let credentials = try await getCurrentCredentials() else {
+        throw TokenManagerError.internalError(reason: "Failed to get credentials after upgrade")
+      }
       try await storage.store(credentials, identifier: apiToken)
     }
 
-    return try await getCurrentCredentials()!
+    guard let finalCredentials = try await getCurrentCredentials() else {
+      throw TokenManagerError.internalError(reason: "Failed to get credentials after upgrade")
+    }
+    return finalCredentials
   }
 
   /// Downgrades to API-only authentication (removes web auth token)
@@ -79,12 +84,15 @@ extension AdaptiveTokenManager {
     let newMode = authenticationMode
 
     // Emit mode change event
-    refreshSubject.continuation.yield(.modeChanged(from: oldMode, to: newMode))
+    refreshSubject.continuation.yield(.modeChanged(from: oldMode, toMode: newMode))
 
     // Stop refresh scheduler since we're no longer in web auth mode
     stopRefreshScheduler()
 
-    return try await getCurrentCredentials()!
+    guard let finalCredentials = try await getCurrentCredentials() else {
+      throw TokenManagerError.internalError(reason: "Failed to get credentials after downgrade")
+    }
+    return finalCredentials
   }
 
   /// Updates the web auth token (for token refresh scenarios)

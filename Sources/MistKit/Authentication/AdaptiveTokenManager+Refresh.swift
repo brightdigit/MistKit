@@ -165,7 +165,9 @@ extension AdaptiveTokenManager {
       webAuthToken = newWebAuthToken
 
       // Create new credentials with refreshed web token
-      let newCredentials = try await getCurrentCredentials()!
+      guard let newCredentials = try await getCurrentCredentials() else {
+        throw TokenManagerError.internalError(reason: "Failed to get credentials after refresh")
+      }
 
       // Store new credentials if storage is available
       if let storage = storage {
