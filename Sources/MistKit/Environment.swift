@@ -27,6 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(Foundation)
+import Foundation
+#endif
+
 /// CloudKit environment types
 public enum Environment: String, Sendable {
   case development

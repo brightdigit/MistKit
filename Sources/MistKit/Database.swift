@@ -27,6 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(Foundation)
+import Foundation
+#endif
+
 /// CloudKit database types
 public enum Database: String, Sendable {
   case `public`

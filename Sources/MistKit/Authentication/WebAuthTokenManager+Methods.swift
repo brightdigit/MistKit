@@ -49,14 +49,13 @@ extension WebAuthTokenManager {
 
   /// Returns true if both tokens appear to be in valid format
   public var areTokensValidFormat: Bool {
-    // Check API token format
-    let regex = NSRegularExpression.apiTokenRegex
-    let apiTokenMatches = regex.matches(in: apiToken)
-
-    // Check web auth token has reasonable length
-    let webTokenValid = webAuthToken.count >= 10
-
-    return !apiTokenMatches.isEmpty && webTokenValid
+    do {
+      try TokenValidation.validateAPITokenFormat(apiToken)
+      try TokenValidation.validateWebAuthTokenFormat(webAuthToken)
+      return true
+    } catch {
+      return false
+    }
   }
 
   /// Creates credentials with additional metadata

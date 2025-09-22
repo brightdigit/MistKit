@@ -37,6 +37,7 @@ import OpenAPIURLSession
 #endif
 
 /// A client for interacting with CloudKit Web Services
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct MistKitClient {
   /// The underlying OpenAPI client
   internal let client: Client
@@ -48,6 +49,7 @@ public struct MistKitClient {
   /// - Parameter configuration: The CloudKit configuration including container,
   ///   environment, and authentication
   /// - Throws: ClientError if initialization fails
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public init(configuration: MistKitConfiguration) throws {
     self.configuration = configuration
 
@@ -102,11 +104,31 @@ public struct MistKitClient {
     database: Database,
     tokenManager: any TokenManager
   ) throws {
+    // Check if this is a server-to-server token manager
+    var keyID: String? = nil
+    var privateKeyData: Data? = nil
+    
+    if let serverManager = tokenManager as? ServerToServerAuthManager {
+      // Extract keyID and privateKeyData from ServerToServerAuthManager
+      keyID = serverManager.keyIdentifier
+      do {
+        privateKeyData = try serverManager.privateKey().rawRepresentation
+      } catch {
+        // If we can't get the private key, we'll use empty API token
+        // This will be handled by the precondition check
+      }
+    }
+    
     let configuration = MistKitConfiguration(
       container: container,
       environment: environment,
       database: database,
-      apiToken: ""  // Not used with custom TokenManager
+      apiToken: "",  // Not used with custom TokenManager
+      webAuthToken: nil,
+      keyID: keyID,
+      privateKeyData: privateKeyData,
+      storage: nil,
+      dependencyContainer: nil
     )
 
     try self.init(configuration: configuration, tokenManager: tokenManager)

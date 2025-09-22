@@ -27,7 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+#if canImport(Foundation)
+import Foundation
+#endif
 
 /// Adaptive token manager that can transition between API-only and Web authentication
 /// Starts with API token and can be upgraded to include web authentication
@@ -37,7 +39,6 @@ public actor AdaptiveTokenManager: TokenManager {
   internal var webAuthToken: String?
   internal let storage: (any TokenStorage)?
 
-
   /// Creates an adaptive token manager starting with API token only
   /// - Parameters:
   ///   - apiToken: The CloudKit API token
@@ -46,13 +47,10 @@ public actor AdaptiveTokenManager: TokenManager {
     apiToken: String,
     storage: (any TokenStorage)? = nil
   ) {
+    precondition(!apiToken.isEmpty, "API token cannot be empty")
     self.apiToken = apiToken
     self.webAuthToken = nil
     self.storage = storage
-  }
-
-  deinit {
-    // Clean up any resources
   }
 
   // MARK: - TokenManager Protocol
@@ -65,27 +63,12 @@ public actor AdaptiveTokenManager: TokenManager {
   }
 
   public func validateCredentials() async throws -> Bool {
-    // Validate API token
-    guard !apiToken.isEmpty else {
-      throw TokenManagerError.invalidCredentials(reason: "API token is empty")
-    }
-
-    let regex = NSRegularExpression.apiTokenRegex
-    let matches = regex.matches(in: apiToken)
-
-    guard !matches.isEmpty else {
-      throw TokenManagerError.invalidCredentials(
-        reason: "API token format is invalid"
-      )
-    }
+    // Validate API token using common validation
+    try TokenValidation.validateAPITokenFormat(apiToken)
 
     // Validate web token if present
     if let webToken = webAuthToken {
-      guard webToken.count >= 10 else {
-        throw TokenManagerError.invalidCredentials(
-          reason: "Web auth token appears to be too short"
-        )
-      }
+      try TokenValidation.validateWebAuthTokenFormat(webToken)
     }
 
     return true
@@ -99,6 +82,16 @@ public actor AdaptiveTokenManager: TokenManager {
     } else {
       return TokenCredentials.apiToken(apiToken)
     }
+  }
+  
+  public func refreshTokenIfNeeded() async throws -> TokenCredentials? {
+    // For adaptive token manager, check if we need to refresh web auth token
+    // API tokens typically don't need refresh
+    _ = try await validateCredentials()
+    
+    // If we have a web auth token, we might need to refresh it
+    // For now, just return nil as web auth tokens are typically long-lived
+    return nil
   }
 
 }

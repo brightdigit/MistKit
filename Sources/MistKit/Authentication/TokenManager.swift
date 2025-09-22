@@ -27,7 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+#if canImport(Foundation)
+import Foundation
+#endif
 
 /// Protocol for managing authentication tokens and credentials for CloudKit Web Services
 public protocol TokenManager: Sendable {
@@ -41,7 +43,11 @@ public protocol TokenManager: Sendable {
   /// - Throws: TokenManagerError if retrieval fails
   func getCurrentCredentials() async throws -> TokenCredentials?
 
-
   /// Checks if credentials are currently available
   var hasCredentials: Bool { get async }
+  
+  /// Refreshes the token if needed (optional implementation)
+  /// - Returns: Updated TokenCredentials or nil if no refresh needed
+  /// - Throws: TokenManagerError if refresh fails
+  func refreshTokenIfNeeded() async throws -> TokenCredentials?
 }

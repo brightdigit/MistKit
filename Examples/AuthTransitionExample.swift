@@ -34,7 +34,7 @@ struct AuthTransitionExample {
     /// Demonstrates authentication using a PEM file
     static func demonstratePEMFileAuth() async {
         print("📁 Example 1: PEM File Authentication")
-        print("-" * 40)
+        print(String(repeating: "-", count: 40))
 
         // Example paths - update these with your actual values
         let keyID = "your-key-id-here"
@@ -92,7 +92,7 @@ struct AuthTransitionExample {
     /// Demonstrates authentication using generated test keys
     static func demonstrateGeneratedKeyAuth() async {
         print("🔑 Example 2: Generated Key Authentication")
-        print("-" * 40)
+        print(String(repeating: "-", count: 40))
 
         do {
             // Generate test keys
@@ -142,13 +142,5 @@ func checkPlatformSupport() {
     } else {
         print("❌ Platform does not support server-to-server authentication")
         print("   Requires: macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+")
-    }
-}
-
-// String multiplication operator for convenience
-infix operator *: MultiplicationPrecedence
-extension String {
-    static func *(left: String, right: Int) -> String {
-        return String(repeating: left, count: right)
     }
 }

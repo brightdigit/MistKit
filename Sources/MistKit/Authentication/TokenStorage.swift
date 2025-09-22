@@ -27,7 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(Foundation)
 public import Foundation
+#endif
 
 /// Protocol for persisting and retrieving authentication tokens/keys
 public protocol TokenStorage: Sendable {

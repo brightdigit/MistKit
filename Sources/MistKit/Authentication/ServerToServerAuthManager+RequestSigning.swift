@@ -127,13 +127,15 @@ extension ServerToServerAuthManager {
   ///   - container: The CloudKit container identifier
   ///   - environment: The CloudKit environment
   /// - Returns: A properly configured MistKitConfiguration for server-to-server use
-  public static func configuration(
+  public func configuration(
     container: String,
     environment: Environment
-  ) -> MistKitConfiguration {
+  ) throws -> MistKitConfiguration {
     MistKitConfiguration.serverToServer(
       container: container,
-      environment: environment
+      environment: environment,
+      keyID: keyID,
+      privateKeyData: try privateKey().rawRepresentation
     )
   }
 }

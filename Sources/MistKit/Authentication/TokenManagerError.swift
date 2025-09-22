@@ -27,7 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(Foundation)
 public import Foundation
+#endif
 
 /// Errors that can occur during token management operations
 public enum TokenManagerError: Error, LocalizedError, Sendable {

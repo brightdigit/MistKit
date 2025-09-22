@@ -27,8 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(Crypto)
 public import Crypto
+#endif
+#if canImport(Foundation)
 public import Foundation
+#endif
 
 // Forward declaration for MistKitConfiguration
 #if canImport(MistKit)
@@ -56,6 +60,7 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     privateKeyCallback: @autoclosure @escaping @Sendable () throws -> P256.Signing.PrivateKey,
     storage: (any TokenStorage)? = nil
   ) throws {
+    precondition(!keyID.isEmpty, "Key ID cannot be empty")
     let privateKey = try privateKeyCallback()
     self.keyID = keyID
     self.privateKey = privateKeyCallback
@@ -64,11 +69,6 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
       keyID: keyID,
       privateKey: privateKey.rawRepresentation
     )
-
-  }
-
-  deinit {
-    // Clean up any resources
   }
 
   /// Convenience initializer with private key data
@@ -145,6 +145,13 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     // Validate first
     _ = try await validateCredentials()
     return credentials
+  }
+  
+  public func refreshTokenIfNeeded() async throws -> TokenCredentials? {
+    // Server-to-server authentication doesn't typically need token refresh
+    // The private key is used to sign requests directly
+    _ = try await validateCredentials()
+    return nil
   }
 
 }

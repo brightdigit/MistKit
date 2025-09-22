@@ -27,7 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(Foundation)
 public import Foundation
+#endif
 
 /// Configuration for MistKit client
 public struct MistKitConfiguration: Sendable {
@@ -46,6 +48,18 @@ public struct MistKitConfiguration: Sendable {
   /// Optional Web Auth Token for user authentication
   public let webAuthToken: String?
 
+  /// Optional Key ID for server-to-server authentication
+  public let keyID: String?
+
+  /// Optional private key data for server-to-server authentication
+  public let privateKeyData: Data?
+
+  /// Optional token storage for persistence
+  public let storage: (any TokenStorage)?
+
+  /// Optional dependency container for advanced configuration
+  public let dependencyContainer: (any DependencyContainer)?
+
   /// Protocol version (currently "1")
   public let version: String = "1"
 
@@ -63,22 +77,56 @@ public struct MistKitConfiguration: Sendable {
     environment: Environment,
     database: Database = .private,
     apiToken: String,
-    webAuthToken: String? = nil
+    webAuthToken: String? = nil,
+    keyID: String? = nil,
+    privateKeyData: Data? = nil,
+    storage: (any TokenStorage)? = nil,
+    dependencyContainer: (any DependencyContainer)? = nil
   ) {
+    precondition(!container.isEmpty, "Container identifier cannot be empty")
+    // Allow empty API token only if we have server-to-server authentication parameters
+    if apiToken.isEmpty {
+      precondition(keyID != nil && privateKeyData != nil, "API token cannot be empty unless using server-to-server authentication (keyID and privateKeyData must be provided)")
+    }
+    
     self.container = container
     self.environment = environment
     self.database = database
     self.apiToken = apiToken
     self.webAuthToken = webAuthToken
+    self.keyID = keyID
+    self.privateKeyData = privateKeyData
+    self.storage = storage
+    self.dependencyContainer = dependencyContainer
   }
 
   /// Creates an appropriate TokenManager based on the configuration
   /// - Returns: A TokenManager instance matching the authentication method
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public func createTokenManager() -> any TokenManager {
-    if let webAuthToken = webAuthToken {
-      return WebAuthTokenManager(apiToken: apiToken, webAuthToken: webAuthToken)
+    // Default creation logic
+    if let keyID = keyID, let privateKeyData = privateKeyData {
+      #if canImport(Crypto)
+      do {
+        return try ServerToServerAuthManager(
+          keyID: keyID,
+          privateKeyData: privateKeyData,
+          storage: storage
+        )
+      } catch {
+        fatalError("Failed to create ServerToServerAuthManager: \(error)")
+      }
+      #else
+      fatalError("Crypto framework not available for server-to-server auth")
+      #endif
+    } else if let webAuthToken = webAuthToken {
+      return WebAuthTokenManager(
+        apiToken: apiToken,
+        webAuthToken: webAuthToken,
+        storage: storage
+      )
     } else {
-      return APITokenManager(apiToken: apiToken)
+      return APITokenManager(apiToken: apiToken, storage: storage)
     }
   }
 }
@@ -92,18 +140,24 @@ extension MistKitConfiguration {
   ///   - environment: The CloudKit environment
   ///   - database: The database type (default: .private)
   ///   - apiToken: The API token
+  ///   - storage: Optional token storage for persistence
   public static func apiToken(
     container: String,
     environment: Environment,
     database: Database = .private,
-    apiToken: String
+    apiToken: String,
+    storage: (any TokenStorage)? = nil
   ) -> MistKitConfiguration {
     MistKitConfiguration(
       container: container,
       environment: environment,
       database: database,
       apiToken: apiToken,
-      webAuthToken: nil
+      webAuthToken: nil,
+      keyID: nil,
+      privateKeyData: nil,
+      storage: storage,
+      dependencyContainer: nil
     )
   }
 
@@ -114,19 +168,25 @@ extension MistKitConfiguration {
   ///   - database: The database type (default: .private)
   ///   - apiToken: The API token
   ///   - webAuthToken: The web authentication token
+  ///   - storage: Optional token storage for persistence
   public static func webAuth(
     container: String,
     environment: Environment,
     database: Database = .private,
     apiToken: String,
-    webAuthToken: String
+    webAuthToken: String,
+    storage: (any TokenStorage)? = nil
   ) -> MistKitConfiguration {
     MistKitConfiguration(
       container: container,
       environment: environment,
       database: database,
       apiToken: apiToken,
-      webAuthToken: webAuthToken
+      webAuthToken: webAuthToken,
+      keyID: nil,
+      privateKeyData: nil,
+      storage: storage,
+      dependencyContainer: nil
     )
   }
 
@@ -135,19 +195,29 @@ extension MistKitConfiguration {
   /// - Parameters:
   ///   - container: The CloudKit container identifier
   ///   - environment: The CloudKit environment
+  ///   - keyID: The key identifier from Apple Developer Console
+  ///   - privateKeyData: The private key as raw data (32 bytes for P-256)
+  ///   - storage: Optional token storage for persistence
   /// - Note: Database is automatically set to .public as server-to-server authentication
   ///         only supports the public database in CloudKit Web Services
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public static func serverToServer(
     container: String,
-    environment: Environment
+    environment: Environment,
+    keyID: String,
+    privateKeyData: Data,
+    storage: (any TokenStorage)? = nil
   ) -> MistKitConfiguration {
     MistKitConfiguration(
       container: container,
       environment: environment,
       database: .public,  // Server-to-server only supports public database
       apiToken: "",  // Not used with server-to-server auth
-      webAuthToken: nil
+      webAuthToken: nil,
+      keyID: keyID,
+      privateKeyData: privateKeyData,
+      storage: storage,
+      dependencyContainer: nil
     )
   }
 }

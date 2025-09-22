@@ -27,18 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+#if canImport(Foundation)
+import Foundation
+#endif
 
 /// Token manager for simple API token authentication
 /// Provides container-level access to CloudKit Web Services
 public final class APITokenManager: TokenManager, Sendable {
   private let apiToken: String
   private let credentials: TokenCredentials
+  private let storage: (any TokenStorage)?
 
   /// Creates a new API token manager
-  /// - Parameter apiToken: The CloudKit API token from Apple Developer Console
-  public init(apiToken: String) {
+  /// - Parameters:
+  ///   - apiToken: The CloudKit API token from Apple Developer Console
+  ///   - storage: Optional storage for persistence (default: nil for in-memory only)
+  public init(apiToken: String, storage: (any TokenStorage)? = nil) {
+    precondition(!apiToken.isEmpty, "API token cannot be empty")
     self.apiToken = apiToken
+    self.storage = storage
     self.credentials = TokenCredentials.apiToken(apiToken)
   }
 
@@ -52,20 +59,7 @@ public final class APITokenManager: TokenManager, Sendable {
   }
 
   public func validateCredentials() async throws -> Bool {
-    guard !apiToken.isEmpty else {
-      throw TokenManagerError.invalidCredentials(reason: "API token is empty")
-    }
-
-    // Basic format validation - CloudKit API tokens are typically 64 character hex strings
-    let regex = NSRegularExpression.apiTokenRegex
-    let matches = regex.matches(in: apiToken)
-
-    guard !matches.isEmpty else {
-      throw TokenManagerError.invalidCredentials(
-        reason: "API token format is invalid (expected 64-character hex string)"
-      )
-    }
-
+    try TokenValidation.validateAPITokenFormat(apiToken)
     return true
   }
 
@@ -73,6 +67,12 @@ public final class APITokenManager: TokenManager, Sendable {
     // Validate first
     _ = try await validateCredentials()
     return credentials
+  }
+  
+  public func refreshTokenIfNeeded() async throws -> TokenCredentials? {
+    // API tokens don't typically need refresh, but validate anyway
+    _ = try await validateCredentials()
+    return nil
   }
 
 }
@@ -87,9 +87,12 @@ extension APITokenManager {
 
   /// Returns true if the token appears to be in valid format
   public var isValidFormat: Bool {
-    let regex = NSRegularExpression.apiTokenRegex
-    let matches = regex.matches(in: apiToken)
-    return !matches.isEmpty
+    do {
+      try TokenValidation.validateAPITokenFormat(apiToken)
+      return true
+    } catch {
+      return false
+    }
   }
 
   /// Creates credentials with additional metadata

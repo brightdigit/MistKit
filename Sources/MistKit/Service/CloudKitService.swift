@@ -32,6 +32,7 @@ import OpenAPIRuntime
 import OpenAPIURLSession
 
 /// Service for interacting with CloudKit Web Services
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct CloudKitService {
   /// The CloudKit container identifier
   public let containerIdentifier: String
@@ -49,6 +50,7 @@ public struct CloudKitService {
   }
 
   /// Initialize CloudKit service with web authentication
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public init(containerIdentifier: String, apiToken: String, webAuthToken: String) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
@@ -60,12 +62,17 @@ public struct CloudKitService {
       environment: .development,
       database: .private,
       apiToken: apiToken,
-      webAuthToken: webAuthToken
+      webAuthToken: webAuthToken,
+      keyID: nil,
+      privateKeyData: nil,
+      storage: nil,
+      dependencyContainer: nil
     )
     self.mistKitClient = try MistKitClient(configuration: config)
   }
 
   /// Initialize CloudKit service with API-only authentication
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public init(containerIdentifier: String, apiToken: String) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
@@ -76,12 +83,18 @@ public struct CloudKitService {
       container: containerIdentifier,
       environment: .development,
       database: .public,  // API-only supports public database
-      apiToken: apiToken
+      apiToken: apiToken,
+      webAuthToken: nil,
+      keyID: nil,
+      privateKeyData: nil,
+      storage: nil,
+      dependencyContainer: nil
     )
     self.mistKitClient = try MistKitClient(configuration: config)
   }
 
   /// Initialize CloudKit service with a custom TokenManager
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public init(
     containerIdentifier: String, tokenManager: any TokenManager,
     environment: Environment = .development, database: Database = .private
@@ -165,6 +178,7 @@ public struct CloudKitService {
 
 // MARK: - Private Helper Methods
 
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
   /// Create a standard path for getCurrentUser requests
   /// - Parameter containerIdentifier: The container identifier

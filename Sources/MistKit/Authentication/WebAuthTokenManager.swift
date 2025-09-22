@@ -27,7 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+#if canImport(Foundation)
+import Foundation
+#endif
 
 /// Token manager for web authentication with API token + web auth token
 /// Provides user-specific access to CloudKit Web Services
@@ -49,6 +51,8 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     webAuthToken: String,
     storage: (any TokenStorage)? = nil
   ) {
+    precondition(!apiToken.isEmpty, "API token cannot be empty")
+    precondition(!webAuthToken.isEmpty, "Web auth token cannot be empty")
     self.apiToken = apiToken
     self.webAuthToken = webAuthToken
     self.storage = storage
@@ -56,7 +60,6 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
       apiToken: apiToken,
       webToken: webAuthToken
     )
-
   }
 
   deinit {
@@ -77,30 +80,27 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     guard !apiToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(reason: "API token is empty")
     }
-
-    // Validate web auth token
-    guard !webAuthToken.isEmpty else {
-      throw TokenManagerError.invalidCredentials(reason: "Web auth token is empty")
-    }
-
-    // Basic API token format validation
+    
     let regex = NSRegularExpression.apiTokenRegex
     let matches = regex.matches(in: apiToken)
-
+    
     guard !matches.isEmpty else {
       throw TokenManagerError.invalidCredentials(
         reason: "API token format is invalid (expected 64-character hex string)"
       )
     }
-
-    // Web auth tokens are typically base64-encoded and longer
-    // Just check it's not empty and has reasonable length
+    
+    // Validate web auth token
+    guard !webAuthToken.isEmpty else {
+      throw TokenManagerError.invalidCredentials(reason: "Web auth token is empty")
+    }
+    
     guard webAuthToken.count >= 10 else {
       throw TokenManagerError.invalidCredentials(
         reason: "Web auth token appears to be too short"
       )
     }
-
+    
     return true
   }
 
@@ -108,6 +108,13 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     // Validate first
     _ = try await validateCredentials()
     return credentials
+  }
+  
+  public func refreshTokenIfNeeded() async throws -> TokenCredentials? {
+    // Web auth tokens typically don't need refresh as they're long-lived
+    // But we should validate them to ensure they're still valid
+    _ = try await validateCredentials()
+    return nil
   }
 
 }
