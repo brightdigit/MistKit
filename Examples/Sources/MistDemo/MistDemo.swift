@@ -455,6 +455,8 @@ struct MistDemo: AsyncParsableCommand {
             print("✅ Found \(records.count) record(s) in public database")
             for record in records.prefix(3) {
                 print("   Record: \(record.recordName)")
+                print("     Type: \(record.recordType)")
+                print("     Fields: \(FieldValueFormatter.formatFields(record.fields))")
             }
 
         } catch {
@@ -626,6 +628,8 @@ struct MistDemo: AsyncParsableCommand {
                 print("✅ Found \(records.count) public record(s):")
                 for record in records.prefix(3) {
                     print("   • Record: \(record.recordName)")
+                    print("     Type: \(record.recordType)")
+                    print("     Fields: \(FieldValueFormatter.formatFields(record.fields))")
                 }
 //
 //                // Try to fetch current user (should work with server-to-server)
