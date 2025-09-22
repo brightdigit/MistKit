@@ -112,6 +112,17 @@ internal final class BaseTokenManager: TokenManager, @unchecked Sendable {
   /// - Parameter keyID: The key ID to validate
   /// - Throws: TokenManagerError if validation fails
   internal func validateKeyIDFormat(_ keyID: String) throws {
-    try TokenValidation.validateKeyIDFormat(keyID)
+    guard !keyID.isEmpty else {
+      throw TokenManagerError.invalidCredentials(reason: "Key ID is empty")
+    }
+    
+    let regex = NSRegularExpression.keyIDRegex
+    let matches = regex.matches(in: keyID)
+    
+    guard !matches.isEmpty else {
+      throw TokenManagerError.invalidCredentials(
+        reason: "Key ID format is invalid (expected 64-character hex string)"
+      )
+    }
   }
 }
