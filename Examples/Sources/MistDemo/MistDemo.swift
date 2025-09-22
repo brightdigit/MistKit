@@ -206,7 +206,7 @@ struct MistDemo: AsyncParsableCommand {
                     status: .ok,
                     headers: [.contentType: "application/json"],
                     body: ResponseBody { writer in
-                        try await writer.write(ByteBuffer(data: jsonData))
+                        try await writer.write(ByteBuffer(bytes: jsonData))
                         try await writer.finish(nil)
                     }
                 )

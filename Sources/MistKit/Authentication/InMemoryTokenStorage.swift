@@ -78,12 +78,6 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
     }
 
     func clear() {
-      // Securely clear sensitive data before removing
-      for (_, credentials) in credentials {
-        var mutableCredentials = credentials
-        clearCredentials(&mutableCredentials)
-      }
-
       credentials.removeAll()
       expirationTimes.removeAll()
     }
@@ -95,38 +89,11 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
       }
 
       for key in expiredKeys {
-        // Securely clear sensitive data before removing
-        if var credentials = credentials[key] {
-          clearCredentials(&credentials)
-        }
         credentials.removeValue(forKey: key)
         expirationTimes.removeValue(forKey: key)
       }
     }
 
-    /// Securely clears sensitive data from credentials
-    private func clearCredentials(_ credentials: inout TokenCredentials) {
-      // Clear sensitive data based on authentication method
-      switch credentials.method {
-      case .apiToken(let token):
-        var mutableToken = token
-        SecureMemory.clear(&mutableToken)
-      case .webAuthToken(let apiToken, let webToken):
-        var mutableApiToken = apiToken
-        var mutableWebToken = webToken
-        SecureMemory.clear(&mutableApiToken)
-        SecureMemory.clear(&mutableWebToken)
-      case .serverToServer(let keyID, let privateKey):
-        var mutableKeyID = keyID
-        var mutablePrivateKey = privateKey
-        SecureMemory.clear(&mutableKeyID)
-        SecureMemory.clear(&mutablePrivateKey)
-      }
-
-      // Clear metadata
-      var mutableMetadata = credentials.metadata
-      SecureMemory.clear(&mutableMetadata)
-    }
   }
 
   /// Creates a new in-memory token storage
