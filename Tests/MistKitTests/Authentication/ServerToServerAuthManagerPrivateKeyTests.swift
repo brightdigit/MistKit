@@ -1,0 +1,127 @@
+import Crypto
+import Foundation
+import Testing
+
+@testable import MistKit
+
+@Suite("Server-to-Server Auth Manager Private Key Validation")
+public enum ServerToServerAuthManagerPrivateKeyTests {}
+
+extension ServerToServerAuthManagerPrivateKeyTests {
+  /// Private key validation tests for ServerToServerAuthManager
+  @Suite("Private Key Tests")
+  public struct PrivateKeyTests {
+    // MARK: - Private Key Validation Tests
+
+    /// Tests that private key can be used for signing
+    @Test("Private key signing validation")
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    public func privateKeySigningValidation() async throws {
+      let keyID = "test-key-id-12345678"
+      let privateKey = try Self.generateTestPrivateKey()
+      let manager = try ServerToServerAuthManager(
+        keyID: keyID,
+        privateKeyCallback: privateKey
+      )
+
+      // Validate credentials (this internally tests signing)
+      let isValid = try await manager.validateCredentials()
+      #expect(isValid == true)
+    }
+
+    /// Tests that different private keys produce different signatures
+    @Test("Different private keys produce different signatures")
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    public func differentPrivateKeysProduceDifferentSignatures() async throws {
+      let keyID = "test-key-id-12345678"
+      let privateKey1 = try Self.generateTestPrivateKey()
+      let privateKey2 = try Self.generateTestPrivateKey()
+
+      let manager1 = try ServerToServerAuthManager(
+        keyID: keyID,
+        privateKeyCallback: privateKey1
+      )
+
+      let manager2 = try ServerToServerAuthManager(
+        keyID: keyID,
+        privateKeyCallback: privateKey2
+      )
+
+      // Both should be valid
+      let isValid1 = try await manager1.validateCredentials()
+      let isValid2 = try await manager2.validateCredentials()
+      #expect(isValid1 == true)
+      #expect(isValid2 == true)
+
+      // But they should have different private keys
+      let credentials1 = try await manager1.getCurrentCredentials()
+      let credentials2 = try await manager2.getCurrentCredentials()
+
+      #expect(credentials1 != nil)
+      #expect(credentials2 != nil)
+
+      if let cred1 = credentials1, let cred2 = credentials2 {
+        if case .serverToServer(let keyID1, let privateKeyData1) = cred1.method,
+          case .serverToServer(let keyID2, let privateKeyData2) = cred2.method
+        {
+          #expect(keyID1 == keyID2)  // Same key ID
+          #expect(privateKeyData1 != privateKeyData2)  // Different private keys
+        } else {
+          Issue.record("Expected serverToServer method")
+        }
+      }
+    }
+
+    // MARK: - Sendable Compliance Tests
+
+    /// Tests that ServerToServerAuthManager can be used across async boundaries
+    @Test("ServerToServerAuthManager sendable compliance")
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    public func serverToServerAuthManagerSendableCompliance() async throws {
+      let keyID = "test-key-id-12345678"
+      let privateKey = try Self.generateTestPrivateKey()
+      let manager = try ServerToServerAuthManager(
+        keyID: keyID,
+        privateKeyCallback: privateKey
+      )
+
+      // Test concurrent access patterns
+      async let task1 = Self.validateManager(manager)
+      async let task2 = Self.getCredentialsFromManager(manager)
+      async let task3 = Self.checkHasCredentials(manager)
+
+      let results = await (task1, task2, task3)
+      #expect(results.0 == true)
+      #expect(results.1 != nil)
+      #expect(results.2 == true)
+    }
+
+    // MARK: - Helper Methods
+
+    private static func generateTestPrivateKey() -> P256.Signing.PrivateKey {
+      P256.Signing.PrivateKey()
+    }
+
+    private static func validateManager(_ manager: ServerToServerAuthManager) async -> Bool {
+      do {
+        return try await manager.validateCredentials()
+      } catch {
+        return false
+      }
+    }
+
+    private static func getCredentialsFromManager(_ manager: ServerToServerAuthManager) async
+      -> TokenCredentials?
+    {
+      do {
+        return try await manager.getCurrentCredentials()
+      } catch {
+        return nil
+      }
+    }
+
+    private static func checkHasCredentials(_ manager: ServerToServerAuthManager) async -> Bool {
+      await manager.hasCredentials
+    }
+  }
+}

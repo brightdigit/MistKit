@@ -66,8 +66,8 @@
 ## 📈 TEST COVERAGE IMPROVEMENTS
 
 ### Test Framework Migration
-- [ ] **Migrate from XCTest to Swift Testing** *[User Request]*
-- [ ] **Split large test files into more focused test classes** *[Claude Code Review]*
+- [x] **Migrate from XCTest to Swift Testing** *[User Request]*
+- [x] **Split large test files into more focused test classes** *[Claude Code Review]*
 
 ### Test Coverage by File (Current patch coverage: 15.24%)
 - [ ] **APITokenManager.swift** - Add unit tests (0% coverage) *[CodeRabbit: test coverage]*

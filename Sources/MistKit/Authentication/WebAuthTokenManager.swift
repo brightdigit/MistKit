@@ -50,8 +50,6 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     webAuthToken: String,
     storage: (any TokenStorage)? = nil
   ) {
-    precondition(!apiToken.isEmpty, "API token cannot be empty")
-    precondition(!webAuthToken.isEmpty, "Web auth token cannot be empty")
     self.apiToken = apiToken
     self.webAuthToken = webAuthToken
     self.storage = storage
@@ -69,7 +67,24 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
 
   public var hasCredentials: Bool {
     get async {
-      !apiToken.isEmpty && !webAuthToken.isEmpty
+      // Check if tokens are non-empty and have valid format
+      guard !apiToken.isEmpty && !webAuthToken.isEmpty else {
+        return false
+      }
+
+      // Check API token format (64-character hex string)
+      let regex = NSRegularExpression.apiTokenRegex
+      let matches = regex.matches(in: apiToken)
+      guard !matches.isEmpty else {
+        return false
+      }
+
+      // Check web auth token length (at least 10 characters)
+      guard webAuthToken.count >= 10 else {
+        return false
+      }
+
+      return true
     }
   }
 

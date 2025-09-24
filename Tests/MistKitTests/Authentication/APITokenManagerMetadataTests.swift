@@ -1,0 +1,94 @@
+import Foundation
+import Testing
+
+@testable import MistKit
+
+@Suite("API Token Manager Metadata")
+public enum APITokenManagerMetadataTests {}
+
+extension APITokenManagerMetadataTests {
+  /// Metadata and sendable compliance tests for APITokenManager
+  @Suite("Metadata Tests")
+  public struct MetadataTests {
+    // MARK: - Metadata Tests
+
+    /// Tests credentialsWithMetadata method
+    @Test("credentialsWithMetadata method")
+    public func credentialsWithMetadata() {
+      let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      let manager = APITokenManager(apiToken: validToken)
+
+      let metadata = ["created": "2025-01-01", "environment": "test"]
+      let credentials = manager.credentialsWithMetadata(metadata)
+
+      if case .apiToken(let token) = credentials.method {
+        #expect(token == validToken)
+      } else {
+        Issue.record("Expected .apiToken method")
+      }
+
+      #expect(credentials.metadata["created"] == "2025-01-01")
+      #expect(credentials.metadata["environment"] == "test")
+    }
+
+    /// Tests credentialsWithMetadata with empty metadata
+    @Test("credentialsWithMetadata with empty metadata")
+    public func credentialsWithEmptyMetadata() {
+      let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      let manager = APITokenManager(apiToken: validToken)
+
+      let credentials = manager.credentialsWithMetadata([:])
+
+      if case .apiToken(let token) = credentials.method {
+        #expect(token == validToken)
+      } else {
+        Issue.record("Expected .apiToken method")
+      }
+
+      #expect(credentials.metadata.isEmpty)
+    }
+
+    // MARK: - Sendable Compliance Tests
+
+    /// Tests that APITokenManager can be used across async boundaries
+    @Test("APITokenManager sendable compliance")
+    public func sendableCompliance() async {
+      let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      let manager = APITokenManager(apiToken: validToken)
+
+      // Test concurrent access patterns
+      async let task1 = Self.validateManager(manager)
+      async let task2 = Self.getCredentialsFromManager(manager)
+      async let task3 = Self.checkHasCredentials(manager)
+
+      let results = await (task1, task2, task3)
+      #expect(results.0 == true)
+      #expect(results.1 != nil)
+      #expect(results.2 == true)
+    }
+
+    // MARK: - Helper Methods
+
+    private static func validateManager(_ manager: APITokenManager) async -> Bool {
+      do {
+        return try await manager.validateCredentials()
+      } catch {
+        return false
+      }
+    }
+
+    private static func getCredentialsFromManager(_ manager: APITokenManager) async
+      -> TokenCredentials?
+    {
+      do {
+        return try await manager.getCurrentCredentials()
+      } catch {
+        return nil
+      }
+    }
+
+    private static func checkHasCredentials(_ manager: APITokenManager) async -> Bool {
+      await manager.hasCredentials
+    }
+  }
+}

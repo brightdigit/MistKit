@@ -27,12 +27,23 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Foundation)
-  import Foundation
-#endif
+import Foundation
 
 /// CloudKit environment types
 public enum Environment: String, Sendable {
   case development
   case production
+}
+
+/// Extension to convert Environment enum to Components type
+extension Environment {
+  /// Convert to the generated Components.Parameters.environment type
+  internal func toComponentsEnvironment() -> Components.Parameters.environment {
+    switch self {
+    case .development:
+      return .development
+    case .production:
+      return .production
+    }
+  }
 }

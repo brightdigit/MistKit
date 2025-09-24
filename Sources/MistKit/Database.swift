@@ -37,3 +37,18 @@ public enum Database: String, Sendable {
   case `private`
   case shared
 }
+
+/// Extension to convert Database enum to Components type
+extension Database {
+  /// Convert to the generated Components.Parameters.database type
+  internal func toComponentsDatabase() -> Components.Parameters.database {
+    switch self {
+    case .public:
+      return ._public
+    case .private:
+      return ._private
+    case .shared:
+      return .shared
+    }
+  }
+}

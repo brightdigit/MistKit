@@ -1,0 +1,59 @@
+//
+//  MockTokenManagerWithRefresh.swift
+//  MistKit
+//
+//  Created by Leo Dion on 9/24/25.
+//
+
+import Foundation
+import HTTPTypes
+import OpenAPIRuntime
+import Testing
+
+@testable import MistKit
+
+/// Mock TokenManager that simulates token refresh
+final class MockTokenManagerWithRefresh: TokenManager {
+  private let counter = Counter()
+
+  private actor Counter {
+    private var count = 0
+
+    func increment() -> Int {
+      count += 1
+      return count
+    }
+
+    func getCount() -> Int {
+      count
+    }
+  }
+
+  var hasCredentials: Bool {
+    get async { true }
+  }
+
+  var refreshCallCount: Int {
+    get async { await counter.getCount() }
+  }
+
+  func validateCredentials() async throws -> Bool {
+    let count = await counter.increment()
+    // Simulate refresh on first call
+    if count == 1 {
+      // Simulate refresh delay
+      try await Task.sleep(nanoseconds: 100_000_000)  // 0.1 seconds
+    }
+    return true
+  }
+
+  func getCurrentCredentials() async throws -> TokenCredentials? {
+    let count = await counter.increment()
+    // Simulate refresh on first call
+    if count == 1 {
+      // Simulate refresh delay
+      try await Task.sleep(nanoseconds: 100_000_000)  // 0.1 seconds
+    }
+    return TokenCredentials.apiToken("refreshed-token")
+  }
+}

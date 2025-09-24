@@ -68,13 +68,8 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
     }
 
     func listIdentifiers() -> [String] {
-      // Filter out expired tokens
-      let now = Date()
-      let validKeys = credentials.keys.filter { key in
-        guard let expirationTime = expirationTimes[key] else { return true }
-        return expirationTime >= now
-      }
-      return Array(validKeys)
+      // Return all stored identifiers, including expired ones
+      Array(credentials.keys)
     }
 
     func clear() {
@@ -101,7 +96,7 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
   // MARK: - TokenStorage Protocol
 
   public func store(_ credentials: TokenCredentials, identifier: String?) async throws {
-    await storage.store(credentials, identifier: identifier)
+    await storage.store(credentials, identifier: identifier, expirationTime: nil)
   }
 
   /// Stores credentials with expiration time
