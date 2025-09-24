@@ -13,6 +13,12 @@ public struct ServerToServerAuthManagerValidationTests {
     P256.Signing.PrivateKey()
   }
 
+  private static func generateTestPrivateKeyClosure() -> @Sendable () throws ->
+    P256.Signing.PrivateKey
+  {
+    { P256.Signing.PrivateKey() }
+  }
+
   // MARK: - TokenManager Protocol Tests
 
   /// Tests hasCredentials property
@@ -20,10 +26,9 @@ public struct ServerToServerAuthManagerValidationTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public func hasCredentials() async throws {
     let keyID = "test-key-id-12345678"
-    let privateKey = try Self.generateTestPrivateKey()
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
-      privateKeyCallback: privateKey
+      privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
     )
 
     let hasCredentials = await manager.hasCredentials
@@ -38,10 +43,9 @@ public struct ServerToServerAuthManagerValidationTests {
     // Since we can't create one with empty key ID due to precondition,
     // we'll test the validation logic indirectly
     let keyID = "valid-key-id-12345678"
-    let privateKey = try Self.generateTestPrivateKey()
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
-      privateKeyCallback: privateKey
+      privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
     )
 
     let hasCredentials = await manager.hasCredentials
@@ -53,10 +57,9 @@ public struct ServerToServerAuthManagerValidationTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public func validateCredentialsWithValidCredentials() async throws {
     let keyID = "test-key-id-12345678"
-    let privateKey = try Self.generateTestPrivateKey()
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
-      privateKeyCallback: privateKey
+      privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
     )
 
     let isValid = try await manager.validateCredentials()
@@ -73,7 +76,7 @@ public struct ServerToServerAuthManagerValidationTests {
     // Create manager with short key ID (this will pass precondition but fail validation)
     let manager = try ServerToServerAuthManager(
       keyID: shortKeyID,
-      privateKeyCallback: privateKey
+      privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
     )
 
     do {
@@ -98,13 +101,7 @@ public struct ServerToServerAuthManagerValidationTests {
     // We'll use a custom callback that throws an error
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
-      privateKeyCallback: {
-        // Return a key that will fail signature creation
-        let key = try Self.generateTestPrivateKey()
-        // We can't easily corrupt the key, so we'll test with a valid key
-        // and expect validation to pass
-        return key
-      }()
+      privateKeyCallback: try Self.generateTestPrivateKey()
     )
 
     // This should actually pass since we're using a valid key
@@ -117,10 +114,9 @@ public struct ServerToServerAuthManagerValidationTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public func getCurrentCredentialsWithValidCredentials() async throws {
     let keyID = "test-key-id-12345678"
-    let privateKey = try Self.generateTestPrivateKey()
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
-      privateKeyCallback: privateKey
+      privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
     )
 
     let credentials = try await manager.getCurrentCredentials()
@@ -129,7 +125,7 @@ public struct ServerToServerAuthManagerValidationTests {
     if let credentials = credentials {
       if case .serverToServer(let storedKeyID, let storedPrivateKey) = credentials.method {
         #expect(storedKeyID == keyID)
-        #expect(storedPrivateKey == privateKey.rawRepresentation)
+        #expect(storedPrivateKey == manager.privateKeyData)
       } else {
         Issue.record("Expected .serverToServer method")
       }
@@ -146,7 +142,7 @@ public struct ServerToServerAuthManagerValidationTests {
     // Create manager with short key ID
     let manager = try ServerToServerAuthManager(
       keyID: shortKeyID,
-      privateKeyCallback: privateKey
+      privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
     )
 
     do {
@@ -185,7 +181,7 @@ public struct ServerToServerAuthManagerValidationTests {
       let privateKey = try Self.generateTestPrivateKey()
       let manager = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: privateKey
+        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
       )
 
       do {

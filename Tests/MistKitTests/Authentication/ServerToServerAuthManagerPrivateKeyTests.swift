@@ -18,10 +18,9 @@ extension ServerToServerAuthManagerPrivateKeyTests {
     @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     public func privateKeySigningValidation() async throws {
       let keyID = "test-key-id-12345678"
-      let privateKey = try Self.generateTestPrivateKey()
       let manager = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: privateKey
+        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
       )
 
       // Validate credentials (this internally tests signing)
@@ -34,17 +33,15 @@ extension ServerToServerAuthManagerPrivateKeyTests {
     @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     public func differentPrivateKeysProduceDifferentSignatures() async throws {
       let keyID = "test-key-id-12345678"
-      let privateKey1 = try Self.generateTestPrivateKey()
-      let privateKey2 = try Self.generateTestPrivateKey()
 
       let manager1 = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: privateKey1
+        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
       )
 
       let manager2 = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: privateKey2
+        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
       )
 
       // Both should be valid
@@ -79,10 +76,9 @@ extension ServerToServerAuthManagerPrivateKeyTests {
     @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     public func serverToServerAuthManagerSendableCompliance() async throws {
       let keyID = "test-key-id-12345678"
-      let privateKey = try Self.generateTestPrivateKey()
       let manager = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: privateKey
+        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
       )
 
       // Test concurrent access patterns
@@ -98,8 +94,14 @@ extension ServerToServerAuthManagerPrivateKeyTests {
 
     // MARK: - Helper Methods
 
-    private static func generateTestPrivateKey() -> P256.Signing.PrivateKey {
+    private static func generateTestPrivateKey() throws -> P256.Signing.PrivateKey {
       P256.Signing.PrivateKey()
+    }
+
+    private static func generateTestPrivateKeyClosure() -> @Sendable () throws ->
+      P256.Signing.PrivateKey
+    {
+      { P256.Signing.PrivateKey() }
     }
 
     private static func validateManager(_ manager: ServerToServerAuthManager) async -> Bool {

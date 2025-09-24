@@ -117,12 +117,7 @@ public struct MistKitClient {
     if let serverManager = tokenManager as? ServerToServerAuthManager {
       // Extract keyID and privateKeyData from ServerToServerAuthManager
       keyID = serverManager.keyIdentifier
-      do {
-        privateKeyData = try serverManager.privateKey().rawRepresentation
-      } catch {
-        // If we can't get the private key, we'll use empty API token
-        // This will be handled by the precondition check
-      }
+      privateKeyData = serverManager.privateKeyData
     } else if let apiManager = tokenManager as? APITokenManager {
       // Extract API token from APITokenManager
       apiToken = apiManager.token

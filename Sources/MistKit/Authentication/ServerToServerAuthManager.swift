@@ -44,14 +44,14 @@ public import Crypto
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public final class ServerToServerAuthManager: TokenManager, Sendable {
   internal let keyID: String
-  internal let privateKey: @Sendable () throws -> P256.Signing.PrivateKey
+  internal let privateKeyData: Data
   internal let credentials: TokenCredentials
   internal let storage: (any TokenStorage)?
 
   /// Creates a new server-to-server authentication manager
   /// - Parameters:
   ///   - keyID: The key identifier from Apple Developer Console
-  ///   - privateKey: The ECDSA P-256 private key
+  ///   - privateKeyCallback: A closure that returns the ECDSA P-256 private key
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public init(
     keyID: String,
@@ -61,7 +61,7 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     precondition(!keyID.isEmpty, "Key ID cannot be empty")
     let privateKey = try privateKeyCallback()
     self.keyID = keyID
-    self.privateKey = privateKeyCallback
+    self.privateKeyData = privateKey.rawRepresentation
     self.storage = storage
     self.credentials = TokenCredentials.serverToServer(
       keyID: keyID,
@@ -117,6 +117,14 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     }
   }
 
+  // MARK: - Private Key Access
+
+  /// Creates a P256.Signing.PrivateKey from the stored private key data
+  /// This method is thread-safe as it creates a new instance each time
+  internal func createPrivateKey() throws -> P256.Signing.PrivateKey {
+    try P256.Signing.PrivateKey(rawRepresentation: privateKeyData)
+  }
+
   // MARK: - TokenManager Protocol
 
   public var hasCredentials: Bool {
@@ -142,7 +150,8 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
       guard let testData = "test".data(using: .utf8) else {
         throw TokenManagerError.internalError(reason: "Failed to create test data")
       }
-      _ = try privateKey().signature(for: testData)
+      let privateKey = try createPrivateKey()
+      _ = try privateKey.signature(for: testData)
     } catch {
       throw TokenManagerError.invalidCredentials(
         reason: "Private key is invalid or corrupted: \(error.localizedDescription)"

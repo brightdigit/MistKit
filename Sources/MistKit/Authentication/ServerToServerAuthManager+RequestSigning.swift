@@ -75,7 +75,8 @@ extension ServerToServerAuthManager {
     }
 
     // Create ECDSA signature
-    let signature = try privateKey().signature(for: payloadData)
+    let privateKey = try createPrivateKey()
+    let signature = try privateKey.signature(for: payloadData)
     let signatureBase64 = signature.derRepresentation.base64EncodedString()
 
     return RequestSignature(
@@ -93,7 +94,7 @@ extension ServerToServerAuthManager {
   /// Returns the public key for verification purposes
   public var publicKey: P256.Signing.PublicKey {
     get throws {
-      try privateKey().publicKey
+      try createPrivateKey().publicKey
     }
   }
 
@@ -102,7 +103,7 @@ extension ServerToServerAuthManager {
   /// - Returns: TokenCredentials with metadata
   public func credentialsWithMetadata(_ metadata: [String: String]) throws -> TokenCredentials {
     try TokenCredentials(
-      method: .serverToServer(keyID: keyID, privateKey: privateKey().rawRepresentation),
+      method: .serverToServer(keyID: keyID, privateKey: createPrivateKey().rawRepresentation),
       metadata: metadata
     )
   }
@@ -135,7 +136,7 @@ extension ServerToServerAuthManager {
       container: container,
       environment: environment,
       keyID: keyID,
-      privateKeyData: try privateKey().rawRepresentation
+      privateKeyData: privateKeyData
     )
   }
 }

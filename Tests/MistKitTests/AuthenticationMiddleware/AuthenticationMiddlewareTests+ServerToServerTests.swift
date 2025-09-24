@@ -29,11 +29,9 @@ extension AuthenticationMiddlewareTests {
     @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     public func interceptWithServerToServerAuthentication() async throws {
       let keyID = "test-key-id-12345678"
-      let privateKey = P256.Signing.PrivateKey()
-
       let tokenManager = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: privateKey
+        privateKeyCallback: P256.Signing.PrivateKey()
       )
       let middleware = AuthenticationMiddleware(tokenManager: tokenManager)
 
@@ -75,11 +73,9 @@ extension AuthenticationMiddlewareTests {
     @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     public func interceptWithServerToServerAuthenticationAndExistingHeaders() async throws {
       let keyID = "test-key-id-12345678"
-      let privateKey = P256.Signing.PrivateKey()
-
       let tokenManager = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: privateKey
+        privateKeyCallback: P256.Signing.PrivateKey()
       )
       let middleware = AuthenticationMiddleware(tokenManager: tokenManager)
 
@@ -127,11 +123,10 @@ extension AuthenticationMiddlewareTests {
     @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     public func interceptPOSTWithServerToServerAuthentication() async throws {
       let keyID = "test-key-id-12345678"
-      let privateKey = P256.Signing.PrivateKey()
 
       let tokenManager = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: privateKey
+        privateKeyCallback: P256.Signing.PrivateKey()
       )
       let middleware = AuthenticationMiddleware(tokenManager: tokenManager)
 

@@ -13,6 +13,12 @@ public struct ServerToServerAuthManagerInitializationTests {
     P256.Signing.PrivateKey()
   }
 
+  private static func generateTestPrivateKeyClosure() -> @Sendable () throws ->
+    P256.Signing.PrivateKey
+  {
+    { P256.Signing.PrivateKey() }
+  }
+
   private static func generateTestPrivateKeyData() throws -> Data {
     let privateKey = try generateTestPrivateKey()
     return privateKey.rawRepresentation
@@ -30,11 +36,10 @@ public struct ServerToServerAuthManagerInitializationTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public func initializationWithPrivateKeyCallback() async throws {
     let keyID = "test-key-id-12345678"
-    let privateKey = try Self.generateTestPrivateKey()
 
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
-      privateKeyCallback: privateKey
+      privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
     )
 
     // Verify manager properties
@@ -47,7 +52,7 @@ public struct ServerToServerAuthManagerInitializationTests {
     if let credentials = credentials {
       if case .serverToServer(let storedKeyID, let storedPrivateKey) = credentials.method {
         #expect(storedKeyID == keyID)
-        #expect(storedPrivateKey == privateKey.rawRepresentation)
+        #expect(storedPrivateKey == manager.privateKeyData)
       } else {
         Issue.record("Expected .serverToServer method")
       }
@@ -116,12 +121,11 @@ public struct ServerToServerAuthManagerInitializationTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public func initializationWithStorage() async throws {
     let keyID = "test-key-id-12345678"
-    let privateKey = try Self.generateTestPrivateKey()
     let storage = InMemoryTokenStorage()
 
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
-      privateKeyCallback: privateKey,
+      privateKeyCallback: try Self.generateTestPrivateKeyClosure()(),
       storage: storage
     )
 
@@ -136,11 +140,10 @@ public struct ServerToServerAuthManagerInitializationTests {
     // This should crash due to precondition - we can't easily test this with Swift Testing
     // Instead, we'll test that a valid key ID works
     let validKeyID = "test-key-id-12345678"
-    let privateKey = try Self.generateTestPrivateKey()
 
     let manager = try ServerToServerAuthManager(
       keyID: validKeyID,
-      privateKeyCallback: privateKey
+      privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
     )
     #expect(manager.keyID == validKeyID)
   }
