@@ -24,6 +24,7 @@ public struct ServerToServerAuthManagerInitializationTests {
     return privateKey.rawRepresentation
   }
 
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   private static func generateTestPEMString() throws -> String {
     let privateKey = try generateTestPrivateKey()
     return privateKey.pemRepresentation
@@ -32,9 +33,12 @@ public struct ServerToServerAuthManagerInitializationTests {
   // MARK: - Initialization Tests
 
   /// Tests ServerToServerAuthManager initialization with private key callback
-  @Test("Initialization with private key callback")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("Initialization with private key callback", .enabled(if: Platform.isCryptoAvailable))
   public func initializationWithPrivateKeyCallback() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let keyID = "test-key-id-12345678"
 
     let manager = try ServerToServerAuthManager(
@@ -60,9 +64,12 @@ public struct ServerToServerAuthManagerInitializationTests {
   }
 
   /// Tests ServerToServerAuthManager initialization with private key data
-  @Test("Initialization with private key data")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("Initialization with private key data", .enabled(if: Platform.isCryptoAvailable))
   public func initializationWithPrivateKeyData() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let keyID = "test-key-id-12345678"
     let privateKeyData = try Self.generateTestPrivateKeyData()
 
@@ -89,9 +96,12 @@ public struct ServerToServerAuthManagerInitializationTests {
   }
 
   /// Tests ServerToServerAuthManager initialization with PEM string
-  @Test("Initialization with PEM string")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("Initialization with PEM string", .enabled(if: Platform.isCryptoAvailable))
   public func initializationWithPEMString() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let keyID = "test-key-id-12345678"
     let pemString = try Self.generateTestPEMString()
 
@@ -117,9 +127,12 @@ public struct ServerToServerAuthManagerInitializationTests {
   }
 
   /// Tests ServerToServerAuthManager initialization with storage
-  @Test("Initialization with storage")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("Initialization with storage", .enabled(if: Platform.isCryptoAvailable))
   public func initializationWithStorage() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let keyID = "test-key-id-12345678"
     let storage = InMemoryTokenStorage()
 
@@ -134,9 +147,12 @@ public struct ServerToServerAuthManagerInitializationTests {
   }
 
   /// Tests ServerToServerAuthManager initialization with empty key ID (should crash)
-  @Test("Initialization with empty key ID")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("Initialization with empty key ID", .enabled(if: Platform.isCryptoAvailable))
   public func initializationWithEmptyKeyID() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     // This should crash due to precondition - we can't easily test this with Swift Testing
     // Instead, we'll test that a valid key ID works
     let validKeyID = "test-key-id-12345678"
@@ -149,9 +165,12 @@ public struct ServerToServerAuthManagerInitializationTests {
   }
 
   /// Tests ServerToServerAuthManager initialization with invalid private key data
-  @Test("Initialization with invalid private key data")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("Initialization with invalid private key data", .enabled(if: Platform.isCryptoAvailable))
   public func initializationWithInvalidPrivateKeyData() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let keyID = "test-key-id-12345678"
     let invalidKeyData = Data([0, 1, 2, 3, 4, 5])  // Invalid key data
 
@@ -165,9 +184,13 @@ public struct ServerToServerAuthManagerInitializationTests {
   }
 
   /// Tests ServerToServerAuthManager initialization with invalid PEM string
-  @Test("Initialization with invalid PEM string")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("Initialization with invalid PEM string", .enabled(if: Platform.isCryptoAvailable))
   public func initializationWithInvalidPEMString() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
+
     let keyID = "test-key-id-12345678"
     let invalidPEM = "-----BEGIN INVALID KEY-----\ninvalid content\n-----END INVALID KEY-----"
 
@@ -189,9 +212,12 @@ public struct ServerToServerAuthManagerInitializationTests {
   }
 
   /// Tests ServerToServerAuthManager initialization with malformed PEM string
-  @Test("Initialization with malformed PEM string")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("Initialization with malformed PEM string", .enabled(if: Platform.isCryptoAvailable))
   public func initializationWithMalformedPEMString() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let keyID = "test-key-id-12345678"
     let malformedPEM = "not a valid PEM string"
 

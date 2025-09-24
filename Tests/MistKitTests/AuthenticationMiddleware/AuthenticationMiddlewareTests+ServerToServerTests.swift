@@ -25,9 +25,14 @@ extension AuthenticationMiddlewareTests {
     // MARK: - Server-to-Server Authentication Tests
 
     /// Tests intercept with server-to-server authentication
-    @Test("Intercept request with server-to-server authentication")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    @Test(
+      "Intercept request with server-to-server authentication",
+      .enabled(if: Platform.isCryptoAvailable))
     public func interceptWithServerToServerAuthentication() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("ServerToServerAuthManager is not available on this operating system.")
+        return
+      }
       let keyID = "test-key-id-12345678"
       let tokenManager = try ServerToServerAuthManager(
         keyID: keyID,
@@ -69,9 +74,14 @@ extension AuthenticationMiddlewareTests {
     }
 
     /// Tests intercept with server-to-server authentication and existing headers
-    @Test("Intercept request with server-to-server authentication and existing headers")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    @Test(
+      "Intercept request with server-to-server authentication and existing headers",
+      .enabled(if: Platform.isCryptoAvailable))
     public func interceptWithServerToServerAuthenticationAndExistingHeaders() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("ServerToServerAuthManager is not available on this operating system.")
+        return
+      }
       let keyID = "test-key-id-12345678"
       let tokenManager = try ServerToServerAuthManager(
         keyID: keyID,
@@ -119,9 +129,14 @@ extension AuthenticationMiddlewareTests {
     }
 
     /// Tests intercept with server-to-server authentication for POST request
-    @Test("Intercept POST request with server-to-server authentication")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    @Test(
+      "Intercept POST request with server-to-server authentication",
+      .enabled(if: Platform.isCryptoAvailable))
     public func interceptPOSTWithServerToServerAuthentication() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("ServerToServerAuthManager is not available on this operating system.")
+        return
+      }
       let keyID = "test-key-id-12345678"
 
       let tokenManager = try ServerToServerAuthManager(

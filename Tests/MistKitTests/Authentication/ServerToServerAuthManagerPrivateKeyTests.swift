@@ -14,9 +14,12 @@ extension ServerToServerAuthManagerPrivateKeyTests {
     // MARK: - Private Key Validation Tests
 
     /// Tests that private key can be used for signing
-    @Test("Private key signing validation")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    @Test("Private key signing validation", .enabled(if: Platform.isCryptoAvailable))
     public func privateKeySigningValidation() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("ServerToServerAuthManager is not available on this operating system.")
+        return
+      }
       let keyID = "test-key-id-12345678"
       let manager = try ServerToServerAuthManager(
         keyID: keyID,
@@ -29,9 +32,14 @@ extension ServerToServerAuthManagerPrivateKeyTests {
     }
 
     /// Tests that different private keys produce different signatures
-    @Test("Different private keys produce different signatures")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    @Test(
+      "Different private keys produce different signatures",
+      .enabled(if: Platform.isCryptoAvailable))
     public func differentPrivateKeysProduceDifferentSignatures() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("ServerToServerAuthManager is not available on this operating system.")
+        return
+      }
       let keyID = "test-key-id-12345678"
 
       let manager1 = try ServerToServerAuthManager(
@@ -72,9 +80,12 @@ extension ServerToServerAuthManagerPrivateKeyTests {
     // MARK: - Sendable Compliance Tests
 
     /// Tests that ServerToServerAuthManager can be used across async boundaries
-    @Test("ServerToServerAuthManager sendable compliance")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    @Test("ServerToServerAuthManager sendable compliance", .enabled(if: Platform.isCryptoAvailable))
     public func serverToServerAuthManagerSendableCompliance() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("ServerToServerAuthManager is not available on this operating system.")
+        return
+      }
       let keyID = "test-key-id-12345678"
       let manager = try ServerToServerAuthManager(
         keyID: keyID,
@@ -93,7 +104,7 @@ extension ServerToServerAuthManagerPrivateKeyTests {
     }
 
     // MARK: - Helper Methods
-
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     private static func generateTestPrivateKey() throws -> P256.Signing.PrivateKey {
       P256.Signing.PrivateKey()
     }
@@ -104,6 +115,7 @@ extension ServerToServerAuthManagerPrivateKeyTests {
       { P256.Signing.PrivateKey() }
     }
 
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     private static func validateManager(_ manager: ServerToServerAuthManager) async -> Bool {
       do {
         return try await manager.validateCredentials()
@@ -112,6 +124,7 @@ extension ServerToServerAuthManagerPrivateKeyTests {
       }
     }
 
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     private static func getCredentialsFromManager(_ manager: ServerToServerAuthManager) async
       -> TokenCredentials?
     {
@@ -122,6 +135,7 @@ extension ServerToServerAuthManagerPrivateKeyTests {
       }
     }
 
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     private static func checkHasCredentials(_ manager: ServerToServerAuthManager) async -> Bool {
       await manager.hasCredentials
     }

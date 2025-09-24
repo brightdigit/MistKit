@@ -22,9 +22,12 @@ public struct ServerToServerAuthManagerValidationTests {
   // MARK: - TokenManager Protocol Tests
 
   /// Tests hasCredentials property
-  @Test("hasCredentials")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("hasCredentials", .enabled(if: Platform.isCryptoAvailable))
   public func hasCredentials() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let keyID = "test-key-id-12345678"
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
@@ -36,9 +39,12 @@ public struct ServerToServerAuthManagerValidationTests {
   }
 
   /// Tests hasCredentials property with empty key ID
-  @Test("hasCredentials with empty key ID")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("hasCredentials with empty key ID", .enabled(if: Platform.isCryptoAvailable))
   public func hasCredentialsWithEmptyKeyID() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     // Create a manager with empty key ID by using a private initializer
     // Since we can't create one with empty key ID due to precondition,
     // we'll test the validation logic indirectly
@@ -53,9 +59,12 @@ public struct ServerToServerAuthManagerValidationTests {
   }
 
   /// Tests validateCredentials with valid credentials
-  @Test("validateCredentials with valid credentials")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("validateCredentials with valid credentials", .enabled(if: Platform.isCryptoAvailable))
   public func validateCredentialsWithValidCredentials() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let keyID = "test-key-id-12345678"
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
@@ -67,9 +76,12 @@ public struct ServerToServerAuthManagerValidationTests {
   }
 
   /// Tests validateCredentials with short key ID
-  @Test("validateCredentials with short key ID")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("validateCredentials with short key ID", .enabled(if: Platform.isCryptoAvailable))
   public func validateCredentialsWithShortKeyID() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let shortKeyID = "short"
     let privateKey = try Self.generateTestPrivateKey()
 
@@ -92,9 +104,12 @@ public struct ServerToServerAuthManagerValidationTests {
   }
 
   /// Tests validateCredentials with corrupted private key
-  @Test("validateCredentials with corrupted private key")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("validateCredentials with corrupted private key", .enabled(if: Platform.isCryptoAvailable))
   public func validateCredentialsWithCorruptedPrivateKey() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let keyID = "test-key-id-12345678"
 
     // Create a manager with a private key that will fail signature creation
@@ -110,9 +125,12 @@ public struct ServerToServerAuthManagerValidationTests {
   }
 
   /// Tests getCurrentCredentials with valid credentials
-  @Test("getCurrentCredentials with valid credentials")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("getCurrentCredentials with valid credentials", .enabled(if: Platform.isCryptoAvailable))
   public func getCurrentCredentialsWithValidCredentials() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let keyID = "test-key-id-12345678"
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
@@ -133,9 +151,12 @@ public struct ServerToServerAuthManagerValidationTests {
   }
 
   /// Tests getCurrentCredentials with invalid credentials
-  @Test("getCurrentCredentials with invalid credentials")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("getCurrentCredentials with invalid credentials", .enabled(if: Platform.isCryptoAvailable))
   public func getCurrentCredentialsWithInvalidCredentials() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let shortKeyID = "short"
     let privateKey = try Self.generateTestPrivateKey()
 
@@ -160,9 +181,12 @@ public struct ServerToServerAuthManagerValidationTests {
   // MARK: - Key ID Validation Tests
 
   /// Tests various key ID formats
-  @Test("Key ID validation")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @Test("Key ID validation", .enabled(if: Platform.isCryptoAvailable))
   public func keyIDValidation() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("ServerToServerAuthManager is not available on this operating system.")
+      return
+    }
     let testCases = [
       ("valid-key-id-12345678", true),
       ("another-valid-key-12345678", true),
