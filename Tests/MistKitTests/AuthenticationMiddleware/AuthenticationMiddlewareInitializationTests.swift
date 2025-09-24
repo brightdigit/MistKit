@@ -70,16 +70,25 @@ extension AuthenticationMiddlewareInitializationTests {
       )
 
       // Test concurrent access patterns with separate closures
-      async let task1 = Self.interceptWithMiddleware(middleware, originalRequest) {
-        _, _, _ in
+      async let task1 = middleware.interceptWithMiddleware(
+        request: originalRequest,
+        baseURL: Self.testURL,
+        operationID: Self.testOperationID
+      ) { _, _, _ in
         (HTTPResponse(status: .ok), nil)
       }
-      async let task2 = Self.interceptWithMiddleware(middleware, originalRequest) {
-        _, _, _ in
+      async let task2 = middleware.interceptWithMiddleware(
+        request: originalRequest,
+        baseURL: Self.testURL,
+        operationID: Self.testOperationID
+      ) { _, _, _ in
         (HTTPResponse(status: .ok), nil)
       }
-      async let task3 = Self.interceptWithMiddleware(middleware, originalRequest) {
-        _, _, _ in
+      async let task3 = middleware.interceptWithMiddleware(
+        request: originalRequest,
+        baseURL: Self.testURL,
+        operationID: Self.testOperationID
+      ) { _, _, _ in
         (HTTPResponse(status: .ok), nil)
       }
 
@@ -87,27 +96,6 @@ extension AuthenticationMiddlewareInitializationTests {
       #expect(results.0 == true)
       #expect(results.1 == true)
       #expect(results.2 == true)
-    }
-
-    // MARK: - Helper Methods
-
-    private static func interceptWithMiddleware(
-      _ middleware: AuthenticationMiddleware,
-      _ request: HTTPRequest,
-      _ next: @escaping (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
-    ) async -> Bool {
-      do {
-        _ = try await middleware.intercept(
-          request,
-          body: nil as HTTPBody?,
-          baseURL: Self.testURL,
-          operationID: Self.testOperationID,
-          next: next
-        )
-        return true
-      } catch {
-        return false
-      }
     }
   }
 }

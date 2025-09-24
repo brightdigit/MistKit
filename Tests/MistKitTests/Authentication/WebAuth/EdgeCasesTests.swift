@@ -24,11 +24,11 @@ extension WebAuthTokenManagerTests {
       )
 
       // Test concurrent access patterns
-      async let task1 = Self.validateManager(manager)
-      async let task2 = Self.getCredentialsFromManager(manager)
-      async let task3 = Self.checkHasCredentials(manager)
-      async let task4 = Self.validateManager(manager)
-      async let task5 = Self.getCredentialsFromManager(manager)
+      async let task1 = manager.validateManager()
+      async let task2 = manager.getCredentialsFromManager()
+      async let task3 = manager.checkHasCredentials()
+      async let task4 = manager.validateManager()
+      async let task5 = manager.getCredentialsFromManager()
 
       let results = await (task1, task2, task3, task4, task5)
       #expect(results.0 == true)
@@ -48,13 +48,13 @@ extension WebAuthTokenManagerTests {
 
       // Make rapid successive calls
       for _ in 0..<100 {
-        let hasCredentials = await manager.hasCredentials
+        let hasCredentials = await manager.checkHasCredentials()
         #expect(hasCredentials == true)
 
-        let isValid = try await manager.validateCredentials()
+        let isValid = await manager.validateManager()
         #expect(isValid == true)
 
-        let credentials = try await manager.getCurrentCredentials()
+        let credentials = await manager.getCredentialsFromManager()
         #expect(credentials != nil)
       }
     }
@@ -73,10 +73,10 @@ extension WebAuthTokenManagerTests {
         )
         weakManager = manager
 
-        let hasCredentials = await manager.hasCredentials
+        let hasCredentials = await manager.checkHasCredentials()
         #expect(hasCredentials == true)
 
-        let isValid = try await manager.validateCredentials()
+        let isValid = await manager.validateManager()
         #expect(isValid == true)
       }
 
@@ -95,17 +95,17 @@ extension WebAuthTokenManagerTests {
       )
 
       // Store credentials
-      let credentials = try await manager.getCurrentCredentials()
+      let credentials = await manager.getCredentialsFromManager()
       #expect(credentials != nil)
 
       // Clear storage
       await storage.clear()
 
       // Manager should still work with its own tokens
-      let hasCredentials = await manager.hasCredentials
+      let hasCredentials = await manager.checkHasCredentials()
       #expect(hasCredentials == true)
 
-      let isValid = try await manager.validateCredentials()
+      let isValid = await manager.validateManager()
       #expect(isValid == true)
     }
 
@@ -149,30 +149,6 @@ extension WebAuthTokenManagerTests {
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }
-    }
-
-    // MARK: - Helper Methods
-
-    private static func validateManager(_ manager: WebAuthTokenManager) async -> Bool {
-      do {
-        return try await manager.validateCredentials()
-      } catch {
-        return false
-      }
-    }
-
-    private static func getCredentialsFromManager(_ manager: WebAuthTokenManager) async
-      -> TokenCredentials?
-    {
-      do {
-        return try await manager.getCurrentCredentials()
-      } catch {
-        return nil
-      }
-    }
-
-    private static func checkHasCredentials(_ manager: WebAuthTokenManager) async -> Bool {
-      await manager.hasCredentials
     }
   }
 }

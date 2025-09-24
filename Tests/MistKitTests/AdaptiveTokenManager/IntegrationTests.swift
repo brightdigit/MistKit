@@ -106,38 +106,14 @@ extension AdaptiveTokenManagerTests {
       )
 
       // Test concurrent access patterns
-      async let task1 = Self.validateManager(tokenManager)
-      async let task2 = Self.getCredentialsFromManager(tokenManager)
-      async let task3 = Self.checkHasCredentials(tokenManager)
+      async let task1 = tokenManager.validateManager()
+      async let task2 = tokenManager.getCredentialsFromManager()
+      async let task3 = tokenManager.checkHasCredentials()
 
       let results = await (task1, task2, task3)
       #expect(results.0 == true)
       #expect(results.1 != nil)
       #expect(results.2 == true)
-    }
-
-    // MARK: - Helper Methods
-
-    private static func validateManager(_ manager: AdaptiveTokenManager) async -> Bool {
-      do {
-        return try await manager.validateCredentials()
-      } catch {
-        return false
-      }
-    }
-
-    private static func getCredentialsFromManager(_ manager: AdaptiveTokenManager) async
-      -> TokenCredentials?
-    {
-      do {
-        return try await manager.getCurrentCredentials()
-      } catch {
-        return nil
-      }
-    }
-
-    private static func checkHasCredentials(_ manager: AdaptiveTokenManager) async -> Bool {
-      await manager.hasCredentials
     }
   }
 }

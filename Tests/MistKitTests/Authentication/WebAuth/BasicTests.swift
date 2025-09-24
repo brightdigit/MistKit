@@ -104,38 +104,14 @@ extension WebAuthTokenManagerTests {
       )
 
       // Test concurrent access patterns
-      async let task1 = Self.validateManager(manager)
-      async let task2 = Self.getCredentialsFromManager(manager)
-      async let task3 = Self.checkHasCredentials(manager)
+      async let task1 = manager.validateManager()
+      async let task2 = manager.getCredentialsFromManager()
+      async let task3 = manager.checkHasCredentials()
 
       let results = await (task1, task2, task3)
       #expect(results.0 == true)
       #expect(results.1 != nil)
       #expect(results.2 == true)
-    }
-
-    // MARK: - Helper Methods
-
-    private static func validateManager(_ manager: WebAuthTokenManager) async -> Bool {
-      do {
-        return try await manager.validateCredentials()
-      } catch {
-        return false
-      }
-    }
-
-    private static func getCredentialsFromManager(_ manager: WebAuthTokenManager) async
-      -> TokenCredentials?
-    {
-      do {
-        return try await manager.getCurrentCredentials()
-      } catch {
-        return nil
-      }
-    }
-
-    private static func checkHasCredentials(_ manager: WebAuthTokenManager) async -> Bool {
-      await manager.hasCredentials
     }
   }
 }

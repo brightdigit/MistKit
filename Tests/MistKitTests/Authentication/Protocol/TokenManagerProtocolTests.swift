@@ -35,28 +35,14 @@ public struct TokenManagerProtocolTests {
     let error = TokenManagerError.tokenExpired
 
     // Test concurrent access patterns
-    async let task1 = Self.processCredentials(credentials)
-    async let task2 = Self.processMethod(method)
-    async let task3 = Self.processError(error)
+    async let task1 = credentials.processCredentials()
+    async let task2 = method.processMethod()
+    async let task3 = error.processError()
 
     let results = await (task1, task2, task3)
     #expect(results.0 == "api-token")
     #expect(results.1 == "api-token")
     #expect(results.2.isEmpty == false)
-  }
-
-  // MARK: - Helper Methods
-
-  private static func processCredentials(_ credentials: TokenCredentials) async -> String {
-    credentials.methodType
-  }
-
-  private static func processMethod(_ method: AuthenticationMethod) async -> String {
-    method.methodType
-  }
-
-  private static func processError(_ error: TokenManagerError) async -> String {
-    error.localizedDescription
   }
 }
 

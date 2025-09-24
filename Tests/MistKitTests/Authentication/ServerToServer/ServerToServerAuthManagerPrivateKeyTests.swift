@@ -93,9 +93,9 @@ extension ServerToServerAuthManagerPrivateKeyTests {
       )
 
       // Test concurrent access patterns
-      async let task1 = Self.validateManager(manager)
-      async let task2 = Self.getCredentialsFromManager(manager)
-      async let task3 = Self.checkHasCredentials(manager)
+      async let task1 = manager.validateManager()
+      async let task2 = manager.getCredentialsFromManager()
+      async let task3 = manager.checkHasCredentials()
 
       let results = await (task1, task2, task3)
       #expect(results.0 == true)
@@ -113,31 +113,6 @@ extension ServerToServerAuthManagerPrivateKeyTests {
       P256.Signing.PrivateKey
     {
       { P256.Signing.PrivateKey() }
-    }
-
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    private static func validateManager(_ manager: ServerToServerAuthManager) async -> Bool {
-      do {
-        return try await manager.validateCredentials()
-      } catch {
-        return false
-      }
-    }
-
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    private static func getCredentialsFromManager(_ manager: ServerToServerAuthManager) async
-      -> TokenCredentials?
-    {
-      do {
-        return try await manager.getCurrentCredentials()
-      } catch {
-        return nil
-      }
-    }
-
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    private static func checkHasCredentials(_ manager: ServerToServerAuthManager) async -> Bool {
-      await manager.hasCredentials
     }
   }
 }

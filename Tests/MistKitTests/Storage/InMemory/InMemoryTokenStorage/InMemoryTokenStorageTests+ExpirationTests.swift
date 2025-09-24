@@ -203,23 +203,14 @@ extension InMemoryTokenStorageTests {
       try await storage.store(credentials, identifier: "concurrent", expirationTime: expirationTime)
 
       // Test concurrent retrieval of non-expired token
-      async let task1 = Self.getCredentials(storage, "concurrent")
-      async let task2 = Self.getCredentials(storage, "concurrent")
-      async let task3 = Self.getCredentials(storage, "concurrent")
+      async let task1 = storage.getCredentials(identifier: "concurrent")
+      async let task2 = storage.getCredentials(identifier: "concurrent")
+      async let task3 = storage.getCredentials(identifier: "concurrent")
 
       let results = await (task1, task2, task3)
       #expect(results.0 != nil)
       #expect(results.1 != nil)
       #expect(results.2 != nil)
-    }
-
-    // MARK: - Helper Methods
-
-    private static func getCredentials(
-      _ storage: InMemoryTokenStorage,
-      _ identifier: String
-    ) async -> TokenCredentials? {
-      try? await storage.retrieve(identifier: identifier)
     }
   }
 }

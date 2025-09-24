@@ -77,29 +77,5 @@ extension WebAuthTokenManagerTests {
         }
       }
     }
-
-    // MARK: - Helper Methods
-
-    private static func validateManager(_ manager: WebAuthTokenManager) async -> Bool {
-      do {
-        return try await manager.validateCredentials()
-      } catch {
-        return false
-      }
-    }
-
-    private static func getCredentialsFromManager(_ manager: WebAuthTokenManager) async
-      -> TokenCredentials?
-    {
-      do {
-        return try await manager.getCurrentCredentials()
-      } catch {
-        return nil
-      }
-    }
-
-    private static func checkHasCredentials(_ manager: WebAuthTokenManager) async -> Bool {
-      await manager.hasCredentials
-    }
   }
 }

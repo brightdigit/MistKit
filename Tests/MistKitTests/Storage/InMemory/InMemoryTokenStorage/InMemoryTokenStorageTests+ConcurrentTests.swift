@@ -23,9 +23,9 @@ extension InMemoryTokenStorageTests {
       let credentials3 = TokenCredentials.apiToken("token3")
 
       // Test concurrent storage operations
-      async let task1 = Self.storeCredentials(storage, credentials1)
-      async let task2 = Self.storeCredentials(storage, credentials2)
-      async let task3 = Self.storeCredentials(storage, credentials3)
+      async let task1 = storage.storeCredentials(credentials1)
+      async let task2 = storage.storeCredentials(credentials2)
+      async let task3 = storage.storeCredentials(credentials3)
 
       let results = await (task1, task2, task3)
       #expect(results.0 == true)
@@ -46,9 +46,9 @@ extension InMemoryTokenStorageTests {
       try await storage.store(credentials, identifier: nil)
 
       // Test concurrent retrieval operations
-      async let task1 = Self.getCredentials(storage)
-      async let task2 = Self.getCredentials(storage)
-      async let task3 = Self.getCredentials(storage)
+      async let task1 = storage.getCredentials()
+      async let task2 = storage.getCredentials()
+      async let task3 = storage.getCredentials()
 
       let results = await (task1, task2, task3)
       #expect(results.0 != nil)
@@ -69,47 +69,14 @@ extension InMemoryTokenStorageTests {
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
       // Test concurrent access patterns
-      async let task1 = Self.storeAndRetrieve(storage, credentials)
-      async let task2 = Self.storeAndRetrieve(storage, credentials)
-      async let task3 = Self.storeAndRetrieve(storage, credentials)
+      async let task1 = storage.storeAndRetrieve(credentials)
+      async let task2 = storage.storeAndRetrieve(credentials)
+      async let task3 = storage.storeAndRetrieve(credentials)
 
       let results = await (task1, task2, task3)
       #expect(results.0 == true)
       #expect(results.1 == true)
       #expect(results.2 == true)
-    }
-
-    // MARK: - Helper Methods
-
-    private static func storeCredentials(
-      _ storage: InMemoryTokenStorage,
-      _ credentials: TokenCredentials
-    ) async -> Bool {
-      do {
-        try await storage.store(credentials, identifier: nil)
-        return true
-      } catch {
-        return false
-      }
-    }
-
-    private static func getCredentials(
-      _ storage: InMemoryTokenStorage
-    ) async -> TokenCredentials? {
-      try? await storage.retrieve(identifier: nil)
-    }
-
-    private static func storeAndRetrieve(
-      _ storage: InMemoryTokenStorage,
-      _ credentials: TokenCredentials
-    ) async -> Bool {
-      do {
-        try await storage.store(credentials, identifier: nil)
-        let retrieved = try await storage.retrieve(identifier: nil)
-        return retrieved != nil
-      } catch {
-        return false
-      }
     }
   }
 }

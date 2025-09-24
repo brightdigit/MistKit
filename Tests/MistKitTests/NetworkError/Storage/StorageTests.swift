@@ -94,9 +94,9 @@ extension NetworkErrorTests {
 
       // Test concurrent storage operations
       try await withThrowingTaskGroup(of: Void.self) { group in
-        group.addTask { try await Self.storeToken(storage, key: "concurrent-1", token: "token-1") }
-        group.addTask { try await Self.storeToken(storage, key: "concurrent-2", token: "token-2") }
-        group.addTask { try await Self.storeToken(storage, key: "concurrent-3", token: "token-3") }
+        group.addTask { try await storage.storeToken(key: "concurrent-1", token: "token-1") }
+        group.addTask { try await storage.storeToken(key: "concurrent-2", token: "token-2") }
+        group.addTask { try await storage.storeToken(key: "concurrent-3", token: "token-3") }
 
         for try await _ in group {}
       }
@@ -129,15 +129,6 @@ extension NetworkErrorTests {
       // but we can test the storage mechanism works
       let finalRetrieval = try await storage.retrieve(identifier: "expiring-key")
       #expect(finalRetrieval != nil)
-    }
-
-    // MARK: - Helper Methods
-
-    private static func storeToken(_ storage: InMemoryTokenStorage, key: String, token: String)
-      async throws
-    {
-      let credentials = TokenCredentials.apiToken(token)
-      try await storage.store(credentials, identifier: key)
     }
   }
 }

@@ -29,9 +29,9 @@ extension InMemoryTokenStorageTests {
       try await storage.store(credentials3, identifier: "concurrent3")
 
       // Test concurrent removal
-      async let task1 = Self.removeToken(storage, "concurrent1")
-      async let task2 = Self.removeToken(storage, "concurrent2")
-      async let task3 = Self.removeToken(storage, "concurrent3")
+      async let task1 = storage.removeToken(identifier: "concurrent1")
+      async let task2 = storage.removeToken(identifier: "concurrent2")
+      async let task3 = storage.removeToken(identifier: "concurrent3")
 
       let results = await (task1, task2, task3)
       #expect(results.0 == true)
@@ -54,9 +54,9 @@ extension InMemoryTokenStorageTests {
       try await storage.store(credentials, identifier: "concurrent-test")
 
       // Test concurrent removal and retrieval
-      async let task1 = Self.removeToken(storage, "concurrent-test")
-      async let task2 = Self.getToken(storage, "concurrent-test")
-      async let task3 = Self.removeToken(storage, "concurrent-test")
+      async let task1 = storage.removeToken(identifier: "concurrent-test")
+      async let task2 = storage.getToken(identifier: "concurrent-test")
+      async let task3 = storage.removeToken(identifier: "concurrent-test")
 
       let results = await (task1, task2, task3)
       // At least removal should succeed
@@ -107,27 +107,6 @@ extension InMemoryTokenStorageTests {
 
       let countFinal = await storage.count
       #expect(countFinal == 0)
-    }
-
-    // MARK: - Helper Methods
-
-    private static func removeToken(
-      _ storage: InMemoryTokenStorage,
-      _ identifier: String
-    ) async -> Bool {
-      do {
-        try await storage.remove(identifier: identifier)
-        return true
-      } catch {
-        return false
-      }
-    }
-
-    private static func getToken(
-      _ storage: InMemoryTokenStorage,
-      _ identifier: String
-    ) async -> TokenCredentials? {
-      try? await storage.retrieve(identifier: identifier)
     }
   }
 }
