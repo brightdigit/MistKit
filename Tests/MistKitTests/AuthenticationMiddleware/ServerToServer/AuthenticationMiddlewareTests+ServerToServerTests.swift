@@ -11,7 +11,7 @@ enum AuthenticationMiddlewareTests {
 extension AuthenticationMiddlewareTests {
   /// Server-to-server authentication tests for AuthenticationMiddleware
   @Suite("Server-to-Server Tests")
-  public struct ServerToServerTests {
+  struct ServerToServerTests {
     // MARK: - Test Data Setup
 
     private static let testURL: URL = {
@@ -28,7 +28,7 @@ extension AuthenticationMiddlewareTests {
     @Test(
       "Intercept request with server-to-server authentication",
       .enabled(if: Platform.isCryptoAvailable))
-    public func interceptWithServerToServerAuthentication() async throws {
+    func interceptWithServerToServerAuthentication() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -77,7 +77,7 @@ extension AuthenticationMiddlewareTests {
     @Test(
       "Intercept request with server-to-server authentication and existing headers",
       .enabled(if: Platform.isCryptoAvailable))
-    public func interceptWithServerToServerAuthenticationAndExistingHeaders() async throws {
+    func interceptWithServerToServerAuthenticationAndExistingHeaders() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -132,7 +132,7 @@ extension AuthenticationMiddlewareTests {
     @Test(
       "Intercept POST request with server-to-server authentication",
       .enabled(if: Platform.isCryptoAvailable))
-    public func interceptPOSTWithServerToServerAuthentication() async throws {
+    func interceptPOSTWithServerToServerAuthentication() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return

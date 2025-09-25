@@ -4,12 +4,12 @@ import Testing
 @testable import MistKit
 
 @Suite("Web Auth Token Manager")
-public enum WebAuthTokenManagerTests {}
+enum WebAuthTokenManagerTests {}
 
 extension WebAuthTokenManagerTests {
   /// Basic functionality tests for WebAuthTokenManager
   @Suite("Basic Tests")
-  public struct BasicTests {
+  struct BasicTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -22,7 +22,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager initialization with valid tokens
     @Test("WebAuthTokenManager initialization with valid tokens")
-    public func initializationWithValidTokens() {
+    func initializationWithValidTokens() {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -34,7 +34,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager initialization with storage
     @Test("WebAuthTokenManager initialization with storage")
-    public func initializationWithStorage() {
+    func initializationWithStorage() {
       let storage = InMemoryTokenStorage()
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
@@ -50,7 +50,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests hasCredentials property with valid tokens
     @Test("hasCredentials property with valid tokens")
-    public func hasCredentialsWithValidTokens() async {
+    func hasCredentialsWithValidTokens() async {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -62,7 +62,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validateCredentials with valid tokens
     @Test("validateCredentials with valid tokens")
-    public func validateCredentialsWithValidTokens() async throws {
+    func validateCredentialsWithValidTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -74,7 +74,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests getCurrentCredentials with valid tokens
     @Test("getCurrentCredentials with valid tokens")
-    public func getCurrentCredentialsWithValidTokens() async throws {
+    func getCurrentCredentialsWithValidTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -97,7 +97,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests that WebAuthTokenManager can be used across async boundaries
     @Test("WebAuthTokenManager sendable compliance")
-    public func sendableCompliance() async throws {
+    func sendableCompliance() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken

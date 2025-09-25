@@ -6,7 +6,7 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Token format validation tests for WebAuthTokenManager
   @Suite("Validation Format Tests")
-  public struct ValidationFormatTests {
+  struct ValidationFormatTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -21,7 +21,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with valid API token format
     @Test("Validation with valid API token format")
-    public func validationWithValidAPITokenFormat() async throws {
+    func validationWithValidAPITokenFormat() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -33,7 +33,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with invalid API token format
     @Test("Validation with invalid API token format")
-    public func validationWithInvalidAPITokenFormat() async throws {
+    func validationWithInvalidAPITokenFormat() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.invalidAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -53,7 +53,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with short web auth token
     @Test("Validation with short web auth token")
-    public func validationWithShortWebAuthToken() async throws {
+    func validationWithShortWebAuthToken() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.shortWebAuthToken
@@ -73,7 +73,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with empty API token
     @Test("Validation with empty API token")
-    public func validationWithEmptyAPIToken() async throws {
+    func validationWithEmptyAPIToken() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.emptyAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -93,7 +93,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with empty web auth token
     @Test("Validation with empty web auth token")
-    public func validationWithEmptyWebAuthToken() async throws {
+    func validationWithEmptyWebAuthToken() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.emptyWebAuthToken

@@ -5,12 +5,12 @@ import Testing
 
 @Suite("API Token Manager")
 /// Test suite for APITokenManager functionality
-public struct APITokenManagerTests {
+struct APITokenManagerTests {
   // MARK: - Initialization Tests
 
   /// Tests APITokenManager initialization with valid API token
   @Test("APITokenManager initialization with valid API token")
-  public func initializationWithValidToken() {
+  func initializationWithValidToken() {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let manager = APITokenManager(apiToken: validToken)
 
@@ -20,7 +20,7 @@ public struct APITokenManagerTests {
 
   /// Tests APITokenManager initialization with invalid API token format
   @Test("APITokenManager initialization with invalid API token format")
-  public func initializationWithInvalidToken() {
+  func initializationWithInvalidToken() {
     let invalidToken = "invalid_token_format"
     let manager = APITokenManager(apiToken: invalidToken)
 
@@ -30,7 +30,7 @@ public struct APITokenManagerTests {
 
   /// Tests APITokenManager initialization with empty token (should crash)
   @Test("APITokenManager initialization with empty token")
-  public func initializationWithEmptyToken() {
+  func initializationWithEmptyToken() {
     _ = ""
 
     // This should crash due to precondition - we can't easily test this with Swift Testing
@@ -42,7 +42,7 @@ public struct APITokenManagerTests {
 
   /// Tests APITokenManager initialization with storage parameter
   @Test("APITokenManager initialization with storage parameter")
-  public func initializationWithStorage() {
+  func initializationWithStorage() {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let storage = InMemoryTokenStorage()
     let manager = APITokenManager(apiToken: validToken, storage: storage)
@@ -55,7 +55,7 @@ public struct APITokenManagerTests {
 
   /// Tests hasCredentials property
   @Test("hasCredentials property")
-  public func hasCredentials() async {
+  func hasCredentials() async {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let manager = APITokenManager(apiToken: validToken)
 
@@ -65,7 +65,7 @@ public struct APITokenManagerTests {
 
   /// Tests validateCredentials with valid token
   @Test("validateCredentials with valid token")
-  public func validateCredentialsWithValidToken() async throws {
+  func validateCredentialsWithValidToken() async throws {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let manager = APITokenManager(apiToken: validToken)
 
@@ -75,7 +75,7 @@ public struct APITokenManagerTests {
 
   /// Tests validateCredentials with invalid token
   @Test("validateCredentials with invalid token")
-  public func validateCredentialsWithInvalidToken() async throws {
+  func validateCredentialsWithInvalidToken() async throws {
     let invalidToken = "invalid_token_format"
     let manager = APITokenManager(apiToken: invalidToken)
 
@@ -93,7 +93,7 @@ public struct APITokenManagerTests {
 
   /// Tests validateCredentials with token that's too short
   @Test("validateCredentials with token that's too short")
-  public func validateCredentialsWithShortToken() async throws {
+  func validateCredentialsWithShortToken() async throws {
     let shortToken = "abc123"
     let manager = APITokenManager(apiToken: shortToken)
 
@@ -111,7 +111,7 @@ public struct APITokenManagerTests {
 
   /// Tests validateCredentials with token that's too long
   @Test("validateCredentials with token that's too long")
-  public func validateCredentialsWithLongToken() async throws {
+  func validateCredentialsWithLongToken() async throws {
     let longToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd12345"
     let manager = APITokenManager(apiToken: longToken)
 
@@ -129,7 +129,7 @@ public struct APITokenManagerTests {
 
   /// Tests validateCredentials with non-hex characters
   @Test("validateCredentials with non-hex characters")
-  public func validateCredentialsWithNonHexToken() async throws {
+  func validateCredentialsWithNonHexToken() async throws {
     let nonHexToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd12gh"
     let manager = APITokenManager(apiToken: nonHexToken)
 
@@ -147,7 +147,7 @@ public struct APITokenManagerTests {
 
   /// Tests getCurrentCredentials with valid token
   @Test("getCurrentCredentials with valid token")
-  public func getCurrentCredentialsWithValidToken() async throws {
+  func getCurrentCredentialsWithValidToken() async throws {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let manager = APITokenManager(apiToken: validToken)
 
@@ -165,7 +165,7 @@ public struct APITokenManagerTests {
 
   /// Tests getCurrentCredentials with invalid token
   @Test("getCurrentCredentials with invalid token")
-  public func getCurrentCredentialsWithInvalidToken() async throws {
+  func getCurrentCredentialsWithInvalidToken() async throws {
     let invalidToken = "invalid_token_format"
     let manager = APITokenManager(apiToken: invalidToken)
 
@@ -185,7 +185,7 @@ public struct APITokenManagerTests {
 
   /// Tests isValidFormat property with valid token
   @Test("isValidFormat property with valid token")
-  public func isValidFormatWithValidToken() {
+  func isValidFormatWithValidToken() {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let manager = APITokenManager(apiToken: validToken)
 
@@ -194,7 +194,7 @@ public struct APITokenManagerTests {
 
   /// Tests isValidFormat property with invalid token
   @Test("isValidFormat property with invalid token")
-  public func isValidFormatWithInvalidToken() {
+  func isValidFormatWithInvalidToken() {
     let invalidToken = "invalid_token_format"
     let manager = APITokenManager(apiToken: invalidToken)
 

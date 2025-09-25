@@ -9,7 +9,7 @@ import Testing
 extension AuthenticationMiddlewareTests {
   /// Error handling tests for AuthenticationMiddleware
   @Suite("Error Tests")
-  public struct ErrorTests {
+  struct ErrorTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -26,7 +26,7 @@ extension AuthenticationMiddlewareTests {
 
     /// Tests intercept with invalid token manager
     @Test("Intercept request with invalid token manager")
-    public func interceptWithInvalidTokenManager() async throws {
+    func interceptWithInvalidTokenManager() async throws {
       let mockTokenManager = MockTokenManagerWithoutCredentials()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -62,7 +62,7 @@ extension AuthenticationMiddlewareTests {
 
     /// Tests intercept with token manager that throws authentication error
     @Test("Intercept request with token manager that throws authentication error")
-    public func interceptWithTokenManagerAuthenticationError() async throws {
+    func interceptWithTokenManagerAuthenticationError() async throws {
       let mockTokenManager = MockTokenManagerWithAuthenticationError()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -98,7 +98,7 @@ extension AuthenticationMiddlewareTests {
 
     /// Tests intercept with token manager that throws network error
     @Test("Intercept request with token manager that throws network error")
-    public func interceptWithTokenManagerNetworkError() async throws {
+    func interceptWithTokenManagerNetworkError() async throws {
       let mockTokenManager = MockTokenManagerWithNetworkError()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -134,7 +134,7 @@ extension AuthenticationMiddlewareTests {
 
     /// Tests that errors from next middleware are properly propagated
     @Test("Error propagation from next middleware")
-    public func errorPropagationFromNextMiddleware() async throws {
+    func errorPropagationFromNextMiddleware() async throws {
       let tokenManager = APITokenManager(apiToken: Self.validAPIToken)
       let middleware = AuthenticationMiddleware(tokenManager: tokenManager)
 

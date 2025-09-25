@@ -5,17 +5,17 @@ import Testing
 @testable import MistKit
 
 @Suite("Server-to-Server Auth Manager Private Key Validation")
-public enum ServerToServerAuthManagerPrivateKeyTests {}
+enum ServerToServerAuthManagerPrivateKeyTests {}
 
 extension ServerToServerAuthManagerPrivateKeyTests {
   /// Private key validation tests for ServerToServerAuthManager
   @Suite("Private Key Tests")
-  public struct PrivateKeyTests {
+  struct PrivateKeyTests {
     // MARK: - Private Key Validation Tests
 
     /// Tests that private key can be used for signing
     @Test("Private key signing validation", .enabled(if: Platform.isCryptoAvailable))
-    public func privateKeySigningValidation() async throws {
+    func privateKeySigningValidation() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -35,7 +35,7 @@ extension ServerToServerAuthManagerPrivateKeyTests {
     @Test(
       "Different private keys produce different signatures",
       .enabled(if: Platform.isCryptoAvailable))
-    public func differentPrivateKeysProduceDifferentSignatures() async throws {
+    func differentPrivateKeysProduceDifferentSignatures() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -81,7 +81,7 @@ extension ServerToServerAuthManagerPrivateKeyTests {
 
     /// Tests that ServerToServerAuthManager can be used across async boundaries
     @Test("ServerToServerAuthManager sendable compliance", .enabled(if: Platform.isCryptoAvailable))
-    public func serverToServerAuthManagerSendableCompliance() async throws {
+    func serverToServerAuthManagerSendableCompliance() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return

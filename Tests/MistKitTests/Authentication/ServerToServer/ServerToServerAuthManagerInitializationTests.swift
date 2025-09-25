@@ -6,7 +6,7 @@ import Testing
 
 @Suite("Server-to-Server Auth Manager Initialization")
 /// Test suite for ServerToServerAuthManager initialization functionality
-public struct ServerToServerAuthManagerInitializationTests {
+struct ServerToServerAuthManagerInitializationTests {
   // MARK: - Test Data Setup
 
   private static func generateTestPrivateKey() throws -> P256.Signing.PrivateKey {
@@ -34,7 +34,7 @@ public struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with private key callback
   @Test("Initialization with private key callback", .enabled(if: Platform.isCryptoAvailable))
-  public func initializationWithPrivateKeyCallback() async throws {
+  func initializationWithPrivateKeyCallback() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -65,7 +65,7 @@ public struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with private key data
   @Test("Initialization with private key data", .enabled(if: Platform.isCryptoAvailable))
-  public func initializationWithPrivateKeyData() async throws {
+  func initializationWithPrivateKeyData() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -97,7 +97,7 @@ public struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with PEM string
   @Test("Initialization with PEM string", .enabled(if: Platform.isCryptoAvailable))
-  public func initializationWithPEMString() async throws {
+  func initializationWithPEMString() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -128,7 +128,7 @@ public struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with storage
   @Test("Initialization with storage", .enabled(if: Platform.isCryptoAvailable))
-  public func initializationWithStorage() async throws {
+  func initializationWithStorage() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -148,7 +148,7 @@ public struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with empty key ID (should crash)
   @Test("Initialization with empty key ID", .enabled(if: Platform.isCryptoAvailable))
-  public func initializationWithEmptyKeyID() async throws {
+  func initializationWithEmptyKeyID() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -166,7 +166,7 @@ public struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with invalid private key data
   @Test("Initialization with invalid private key data", .enabled(if: Platform.isCryptoAvailable))
-  public func initializationWithInvalidPrivateKeyData() async throws {
+  func initializationWithInvalidPrivateKeyData() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -185,7 +185,7 @@ public struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with invalid PEM string
   @Test("Initialization with invalid PEM string", .enabled(if: Platform.isCryptoAvailable))
-  public func initializationWithInvalidPEMString() async throws {
+  func initializationWithInvalidPEMString() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -213,7 +213,7 @@ public struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with malformed PEM string
   @Test("Initialization with malformed PEM string", .enabled(if: Platform.isCryptoAvailable))
-  public func initializationWithMalformedPEMString() async throws {
+  func initializationWithMalformedPEMString() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return

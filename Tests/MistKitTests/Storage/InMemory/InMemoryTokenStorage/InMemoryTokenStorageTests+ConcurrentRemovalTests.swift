@@ -6,7 +6,7 @@ import Testing
 extension InMemoryTokenStorageTests {
   /// Concurrent removal tests for InMemoryTokenStorage
   @Suite("Concurrent Removal Tests")
-  public struct ConcurrentRemovalTests {
+  struct ConcurrentRemovalTests {
     // MARK: - Test Data Setup
 
     private static let testAPIToken =
@@ -16,7 +16,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests concurrent token removal
     @Test("Concurrent token removal")
-    public func concurrentTokenRemoval() async throws {
+    func concurrentTokenRemoval() async throws {
       let storage = InMemoryTokenStorage()
 
       let credentials1 = TokenCredentials.apiToken("token1")
@@ -47,7 +47,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests concurrent removal and retrieval
     @Test("Concurrent removal and retrieval")
-    public func concurrentRemovalAndRetrieval() async throws {
+    func concurrentRemovalAndRetrieval() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -71,7 +71,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests storage state after removal
     @Test("Storage state after removal")
-    public func storageStateAfterRemoval() async throws {
+    func storageStateAfterRemoval() async throws {
       let storage = InMemoryTokenStorage()
 
       let credentials1 = TokenCredentials.apiToken("token1")

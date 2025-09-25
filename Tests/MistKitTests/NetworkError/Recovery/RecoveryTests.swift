@@ -7,12 +7,12 @@ import Testing
 @testable import MistKit
 
 @Suite("Network Error")
-public enum NetworkErrorTests {}
+enum NetworkErrorTests {}
 
 extension NetworkErrorTests {
   /// Network error recovery and retry mechanism tests
   @Suite("Recovery Tests")
-  public struct RecoveryTests {
+  struct RecoveryTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =

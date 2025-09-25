@@ -8,12 +8,12 @@ import Testing
 
 @Suite("Authentication Middleware Initialization")
 /// Initialization tests for AuthenticationMiddleware
-public enum AuthenticationMiddlewareInitializationTests {}
+enum AuthenticationMiddlewareInitializationTests {}
 
 extension AuthenticationMiddlewareInitializationTests {
   /// Basic functionality tests for AuthenticationMiddleware
   @Suite("Basic Tests")
-  public struct BasicTests {
+  struct BasicTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -31,7 +31,7 @@ extension AuthenticationMiddlewareInitializationTests {
 
     /// Tests AuthenticationMiddleware initialization with APITokenManager
     @Test("Authentication Middleware initialization with API token manager")
-    public func initializationWithAPITokenManager() {
+    func initializationWithAPITokenManager() {
       let tokenManager = APITokenManager(apiToken: Self.validAPIToken)
       let middleware = AuthenticationMiddleware(tokenManager: tokenManager)
 
@@ -42,7 +42,7 @@ extension AuthenticationMiddlewareInitializationTests {
 
     /// Tests AuthenticationMiddleware initialization with WebAuthTokenManager
     @Test("Authentication Middleware initialization with web auth token manager")
-    public func initializationWithWebAuthTokenManager() {
+    func initializationWithWebAuthTokenManager() {
       let tokenManager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -58,7 +58,7 @@ extension AuthenticationMiddlewareInitializationTests {
 
     /// Tests that AuthenticationMiddleware can be used across async boundaries
     @Test("Authentication Middleware sendable compliance")
-    public func sendableCompliance() async throws {
+    func sendableCompliance() async throws {
       let tokenManager = APITokenManager(apiToken: Self.validAPIToken)
       let middleware = AuthenticationMiddleware(tokenManager: tokenManager)
 

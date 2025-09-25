@@ -5,10 +5,10 @@ import Testing
 
 @Suite("MistKit Configuration")
 /// Tests for MistKitConfiguration functionality
-public struct MistKitConfigurationTests {
+struct MistKitConfigurationTests {
   /// Tests MistKitConfiguration initialization with required parameters
   @Test("MistKitConfiguration initialization with required parameters")
-  public func configurationInitialization() {
+  func configurationInitialization() {
     // Given
     let container = "iCloud.com.example.app"
     let apiToken = "test-token"

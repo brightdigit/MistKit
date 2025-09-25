@@ -5,10 +5,10 @@ import Testing
 
 @Suite("Record Info")
 /// Tests for RecordInfo functionality
-public struct RecordInfoTests {
+struct RecordInfoTests {
   /// Tests RecordInfo initialization from Components.Schemas.Record
   @Test("RecordInfo initialization from Components.Schemas.Record")
-  public func recordInfoInitialization() {
+  func recordInfoInitialization() {
     // Create a mock record with fields
     let mockRecord = Components.Schemas.Record(
       recordName: "test-record",
@@ -42,7 +42,7 @@ public struct RecordInfoTests {
 
   /// Tests RecordInfo initialization with empty record data
   @Test("RecordInfo initialization with empty record data")
-  public func recordInfoWithUnknownRecord() {
+  func recordInfoWithUnknownRecord() {
     let mockRecord = Components.Schemas.Record()
     let recordInfo = RecordInfo(from: mockRecord)
 

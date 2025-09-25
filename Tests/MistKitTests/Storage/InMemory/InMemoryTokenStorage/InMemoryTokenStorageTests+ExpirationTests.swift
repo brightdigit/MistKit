@@ -6,7 +6,7 @@ import Testing
 extension InMemoryTokenStorageTests {
   /// Expiration handling tests for InMemoryTokenStorage
   @Suite("Expiration Tests")
-  public struct ExpirationTests {
+  struct ExpirationTests {
     // MARK: - Test Data Setup
 
     private static let testAPIToken =
@@ -16,7 +16,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests storing token with expiration time
     @Test("Store token with expiration time")
-    public func storeTokenWithExpirationTime() async throws {
+    func storeTokenWithExpirationTime() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
       let expirationTime = Date().addingTimeInterval(3_600)  // 1 hour from now
@@ -37,7 +37,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests retrieving expired token
     @Test("Retrieve expired token")
-    public func retrieveExpiredToken() async throws {
+    func retrieveExpiredToken() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
       let expirationTime = Date().addingTimeInterval(-3_600)  // 1 hour ago (expired)
@@ -50,7 +50,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests retrieving non-expired token
     @Test("Retrieve non-expired token")
-    public func retrieveNonExpiredToken() async throws {
+    func retrieveNonExpiredToken() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
       let expirationTime = Date().addingTimeInterval(3_600)  // 1 hour from now
@@ -63,7 +63,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests storing token without expiration time
     @Test("Store token without expiration time")
-    public func storeTokenWithoutExpirationTime() async throws {
+    func storeTokenWithoutExpirationTime() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -75,7 +75,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests token expiration cleanup
     @Test("Token expiration cleanup")
-    public func tokenExpirationCleanup() async throws {
+    func tokenExpirationCleanup() async throws {
       let storage = InMemoryTokenStorage()
       let credentials1 = TokenCredentials.apiToken("token1")
       let credentials2 = TokenCredentials.apiToken("token2")
@@ -122,7 +122,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests automatic expiration during retrieval
     @Test("Automatic expiration during retrieval")
-    public func automaticExpirationDuringRetrieval() async throws {
+    func automaticExpirationDuringRetrieval() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
       let expirationTime = Date().addingTimeInterval(-1)  // Just expired
@@ -144,7 +144,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests storing multiple tokens with different expiration times
     @Test("Store multiple tokens with different expiration times")
-    public func storeMultipleTokensWithDifferentExpirationTimes() async throws {
+    func storeMultipleTokensWithDifferentExpirationTimes() async throws {
       let storage = InMemoryTokenStorage()
       let now = Date()
 
@@ -181,7 +181,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests expiration time edge cases
     @Test("Expiration time edge cases")
-    public func expirationTimeEdgeCases() async throws {
+    func expirationTimeEdgeCases() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -195,7 +195,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests concurrent access with expiration
     @Test("Concurrent access with expiration")
-    public func concurrentAccessWithExpiration() async throws {
+    func concurrentAccessWithExpiration() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
       let expirationTime = Date().addingTimeInterval(3_600)  // 1 hour from now

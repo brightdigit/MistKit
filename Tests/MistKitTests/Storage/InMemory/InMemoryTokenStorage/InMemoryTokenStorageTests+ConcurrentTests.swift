@@ -6,7 +6,7 @@ import Testing
 extension InMemoryTokenStorageTests {
   /// Concurrent access tests for InMemoryTokenStorage
   @Suite("Concurrent Tests")
-  public struct ConcurrentTests {
+  struct ConcurrentTests {
     // MARK: - Test Data Setup
 
     private static let testAPIToken =
@@ -16,7 +16,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests concurrent storage operations
     @Test("Concurrent storage operations")
-    public func concurrentStorageOperations() async throws {
+    func concurrentStorageOperations() async throws {
       let storage = InMemoryTokenStorage()
       let credentials1 = TokenCredentials.apiToken("token1")
       let credentials2 = TokenCredentials.apiToken("token2")
@@ -39,7 +39,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests concurrent retrieval operations
     @Test("Concurrent retrieval operations")
-    public func concurrentRetrievalOperations() async throws {
+    func concurrentRetrievalOperations() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -64,7 +64,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests that InMemoryTokenStorage can be used across async boundaries
     @Test("InMemoryTokenStorage sendable compliance")
-    public func sendableCompliance() async throws {
+    func sendableCompliance() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 

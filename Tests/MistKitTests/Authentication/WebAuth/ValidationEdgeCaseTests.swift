@@ -6,12 +6,12 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Edge case validation tests for WebAuthTokenManager
   @Suite("Validation Edge Case Tests")
-  public struct ValidationEdgeCaseTests {
+  struct ValidationEdgeCaseTests {
     // MARK: - Edge Case Validation Tests
 
     /// Tests validation with whitespace-only tokens
     @Test("Validation with whitespace only tokens")
-    public func validationWithWhitespaceOnlyTokens() async throws {
+    func validationWithWhitespaceOnlyTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: "   ",
         webAuthToken: "\t\n"
@@ -31,7 +31,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with special characters in tokens
     @Test("Validation with special characters in tokens")
-    public func validationWithSpecialCharactersInTokens() async throws {
+    func validationWithSpecialCharactersInTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: "api-token-with-special-chars!@#$%",
         webAuthToken: "web-token-with-special-chars!@#$%"
@@ -51,7 +51,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with very long tokens
     @Test("Validation with very long tokens")
-    public func validationWithVeryLongTokens() async throws {
+    func validationWithVeryLongTokens() async throws {
       let longAPIToken = String(repeating: "a", count: 1_000)
       let longWebAuthToken = String(repeating: "b", count: 1_000)
 

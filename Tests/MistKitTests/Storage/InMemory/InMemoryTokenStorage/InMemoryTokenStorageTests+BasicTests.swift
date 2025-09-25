@@ -4,12 +4,12 @@ import Testing
 @testable import MistKit
 
 @Suite("In-Memory Token Storage")
-public enum InMemoryTokenStorageTests {}
+enum InMemoryTokenStorageTests {}
 
 extension InMemoryTokenStorageTests {
   /// Basic functionality tests for InMemoryTokenStorage
   @Suite("Basic Tests")
-  public struct BasicTests {
+  struct BasicTests {
     // MARK: - Test Data Setup
 
     private static let testAPIToken =
@@ -20,7 +20,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests InMemoryTokenStorage initialization
     @Test("InMemoryTokenStorage initialization")
-    public func initialization() {
+    func initialization() {
       let storage = InMemoryTokenStorage()
       // Storage should be created successfully
       _ = storage
@@ -30,7 +30,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests storing API token
     @Test("Store API token")
-    public func storeAPIToken() async throws {
+    func storeAPIToken() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -50,7 +50,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests storing web auth token
     @Test("Store web auth token")
-    public func storeWebAuthToken() async throws {
+    func storeWebAuthToken() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.webAuthToken(
         apiToken: Self.testAPIToken,
@@ -74,7 +74,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests storing server-to-server credentials
     @Test("Store server-to-server credentials")
-    public func storeServerToServerCredentials() async throws {
+    func storeServerToServerCredentials() async throws {
       let storage = InMemoryTokenStorage()
       let keyID = "test-key-id-12345678"
       let privateKeyData = Data([1, 2, 3, 4, 5])
@@ -100,7 +100,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests storing credentials with metadata
     @Test("Store credentials with metadata")
-    public func storeCredentialsWithMetadata() async throws {
+    func storeCredentialsWithMetadata() async throws {
       let storage = InMemoryTokenStorage()
       let metadata = ["created": "2025-01-01", "environment": "test"]
       let credentials = TokenCredentials(
@@ -123,7 +123,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests retrieving stored token
     @Test("Retrieve stored token")
-    public func retrieveStoredToken() async throws {
+    func retrieveStoredToken() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -136,7 +136,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests retrieving non-existent token
     @Test("Retrieve non-existent token")
-    public func retrieveNonExistentToken() async throws {
+    func retrieveNonExistentToken() async throws {
       let storage = InMemoryTokenStorage()
 
       let retrieved = try await storage.retrieve(identifier: nil)
@@ -145,7 +145,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests retrieving token after clearing storage
     @Test("Retrieve token after clearing storage")
-    public func retrieveTokenAfterClearingStorage() async throws {
+    func retrieveTokenAfterClearingStorage() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -160,7 +160,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests removing stored token
     @Test("Remove stored token")
-    public func removeStoredToken() async throws {
+    func removeStoredToken() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -177,7 +177,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests removing non-existent token
     @Test("Remove non-existent token")
-    public func removeNonExistentToken() async throws {
+    func removeNonExistentToken() async throws {
       let storage = InMemoryTokenStorage()
 
       // Should not throw or crash
@@ -191,7 +191,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests replacing stored token with new token
     @Test("Replace stored token with new token")
-    public func replaceStoredTokenWithNewToken() async throws {
+    func replaceStoredTokenWithNewToken() async throws {
       let storage = InMemoryTokenStorage()
       let originalCredentials = TokenCredentials.apiToken(Self.testAPIToken)
       let newCredentials = TokenCredentials.webAuthToken(
@@ -214,7 +214,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests replacing stored token with same token
     @Test("Replace stored token with same token")
-    public func replaceStoredTokenWithSameToken() async throws {
+    func replaceStoredTokenWithSameToken() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 

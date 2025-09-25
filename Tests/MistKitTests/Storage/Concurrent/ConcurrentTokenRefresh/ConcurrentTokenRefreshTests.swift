@@ -6,12 +6,12 @@ import Testing
 @testable import MistKit
 
 @Suite("Concurrent Token Refresh")
-public enum ConcurrentTokenRefreshTests {}
+enum ConcurrentTokenRefreshTests {}
 
 extension ConcurrentTokenRefreshTests {
   /// Tests for concurrent token refresh functionality
   @Suite("Tests")
-  public struct Tests {
+  struct Tests {
     // MARK: - Helper Methods
 
     /// Creates a standard test request for concurrent token refresh tests
@@ -77,7 +77,7 @@ extension ConcurrentTokenRefreshTests {
 
     /// Tests concurrent token refresh with multiple requests
     @Test("Concurrent token refresh with multiple requests")
-    public func concurrentTokenRefreshWithMultipleRequests() async throws {
+    func concurrentTokenRefreshWithMultipleRequests() async throws {
       let mockTokenManager = MockTokenManagerWithRefresh()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -105,7 +105,7 @@ extension ConcurrentTokenRefreshTests {
 
     /// Tests concurrent token refresh with different token managers
     @Test("Concurrent token refresh with different token managers")
-    public func concurrentTokenRefreshWithDifferentTokenManagers() async throws {
+    func concurrentTokenRefreshWithDifferentTokenManagers() async throws {
       let tokenManagers = [
         MockTokenManagerWithRefresh(),
         MockTokenManagerWithRefresh(),
@@ -174,7 +174,7 @@ extension ConcurrentTokenRefreshTests {
 
     /// Tests concurrent token refresh with refresh failures
     @Test("Concurrent token refresh with refresh failures")
-    public func concurrentTokenRefreshWithRefreshFailures() async throws {
+    func concurrentTokenRefreshWithRefreshFailures() async throws {
       let mockTokenManager = MockTokenManagerWithRefreshFailure()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -201,7 +201,7 @@ extension ConcurrentTokenRefreshTests {
 
     /// Tests concurrent token refresh with timeout scenarios
     @Test("Concurrent token refresh with timeout scenarios")
-    public func concurrentTokenRefreshWithTimeoutScenarios() async throws {
+    func concurrentTokenRefreshWithTimeoutScenarios() async throws {
       let mockTokenManager = MockTokenManagerWithRefreshTimeout()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -230,7 +230,7 @@ extension ConcurrentTokenRefreshTests {
 
     /// Tests concurrent token refresh with rate limiting
     @Test("Concurrent token refresh with rate limiting")
-    public func concurrentTokenRefreshWithRateLimiting() async throws {
+    func concurrentTokenRefreshWithRateLimiting() async throws {
       let mockTokenManager = MockTokenManagerWithRateLimiting()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 

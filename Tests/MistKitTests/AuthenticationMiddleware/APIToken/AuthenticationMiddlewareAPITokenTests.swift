@@ -8,12 +8,12 @@ import Testing
 
 @Suite("Authentication Middleware - API Token")
 /// API Token authentication tests for AuthenticationMiddleware
-public enum AuthenticationMiddlewareAPITokenTests {}
+enum AuthenticationMiddlewareAPITokenTests {}
 
 extension AuthenticationMiddlewareAPITokenTests {
   /// API Token authentication tests
   @Suite("API Token Tests")
-  public struct APITokenTests {
+  struct APITokenTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -30,7 +30,7 @@ extension AuthenticationMiddlewareAPITokenTests {
 
     /// Tests intercept with API token authentication
     @Test("Intercept request with API token authentication")
-    public func interceptWithAPITokenAuthentication() async throws {
+    func interceptWithAPITokenAuthentication() async throws {
       let tokenManager = APITokenManager(apiToken: Self.validAPIToken)
       let middleware = AuthenticationMiddleware(tokenManager: tokenManager)
 
@@ -69,7 +69,7 @@ extension AuthenticationMiddlewareAPITokenTests {
 
     /// Tests intercept with API token authentication and existing query parameters
     @Test("Intercept request with API token and existing query parameters")
-    public func interceptWithAPITokenAuthenticationAndExistingQuery() async throws {
+    func interceptWithAPITokenAuthenticationAndExistingQuery() async throws {
       let tokenManager = APITokenManager(apiToken: Self.validAPIToken)
       let middleware = AuthenticationMiddleware(tokenManager: tokenManager)
 

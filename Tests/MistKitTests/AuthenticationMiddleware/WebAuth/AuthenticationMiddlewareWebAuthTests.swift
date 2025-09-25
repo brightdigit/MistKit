@@ -8,12 +8,12 @@ import Testing
 
 @Suite("Authentication Middleware - Web Auth Token")
 /// Web Auth Token authentication tests for AuthenticationMiddleware
-public enum AuthenticationMiddlewareWebAuthTests {}
+enum AuthenticationMiddlewareWebAuthTests {}
 
 extension AuthenticationMiddlewareWebAuthTests {
   /// Web Auth Token authentication tests
   @Suite("Web Auth Token Tests")
-  public struct WebAuthTokenTests {
+  struct WebAuthTokenTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -31,7 +31,7 @@ extension AuthenticationMiddlewareWebAuthTests {
 
     /// Tests intercept with web auth token authentication
     @Test("Intercept request with web auth token authentication")
-    public func interceptWithWebAuthTokenAuthentication() async throws {
+    func interceptWithWebAuthTokenAuthentication() async throws {
       let tokenManager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -72,7 +72,7 @@ extension AuthenticationMiddlewareWebAuthTests {
 
     /// Tests intercept with web auth token authentication and existing query parameters
     @Test("Intercept request with web auth token and existing query parameters")
-    public func interceptWithWebAuthTokenAuthenticationAndExistingQuery() async throws {
+    func interceptWithWebAuthTokenAuthenticationAndExistingQuery() async throws {
       let tokenManager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken

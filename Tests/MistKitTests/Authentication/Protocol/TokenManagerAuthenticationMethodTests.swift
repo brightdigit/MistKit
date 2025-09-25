@@ -5,12 +5,12 @@ import Testing
 
 @Suite("Token Manager - Authentication Method")
 /// Test suite for AuthenticationMethod enum and related functionality
-public struct TokenManagerAuthenticationMethodTests {
+struct TokenManagerAuthenticationMethodTests {
   // MARK: - AuthenticationMethod Tests
 
   /// Tests AuthenticationMethod enum case creation and equality
   @Test("AuthenticationMethod enum case creation and equality")
-  public func authenticationMethodCases() {
+  func authenticationMethodCases() {
     // Test API token case
     let apiToken = AuthenticationMethod.apiToken("test-token-123")
     if case .apiToken(let token) = apiToken {
@@ -50,7 +50,7 @@ public struct TokenManagerAuthenticationMethodTests {
 
   /// Tests AuthenticationMethod computed properties
   @Test("AuthenticationMethod computed properties")
-  public func authenticationMethodProperties() {
+  func authenticationMethodProperties() {
     let apiToken = AuthenticationMethod.apiToken("api-123")
     let webAuth = AuthenticationMethod.webAuthToken(
       apiToken: "api-456",
@@ -89,7 +89,7 @@ public struct TokenManagerAuthenticationMethodTests {
 
   /// Tests AuthenticationMethod Equatable conformance
   @Test("AuthenticationMethod Equatable conformance")
-  public func authenticationMethodEquality() {
+  func authenticationMethodEquality() {
     let apiToken1 = AuthenticationMethod.apiToken("same-token")
     let apiToken2 = AuthenticationMethod.apiToken("same-token")
     let apiToken3 = AuthenticationMethod.apiToken("different-token")

@@ -5,12 +5,12 @@ import Testing
 
 @Suite("Token Manager - Token Credentials")
 /// Test suite for TokenCredentials and related functionality
-public struct TokenManagerTokenCredentialsTests {
+struct TokenManagerTokenCredentialsTests {
   // MARK: - TokenCredentials Tests
 
   /// Tests TokenCredentials initialization and properties
   @Test("TokenCredentials initialization and properties")
-  public func tokenCredentialsInitialization() {
+  func tokenCredentialsInitialization() {
     let method = AuthenticationMethod.apiToken("test-token")
     let metadata = ["created": "2025-01-01", "environment": "test"]
 
@@ -24,7 +24,7 @@ public struct TokenManagerTokenCredentialsTests {
 
   /// Tests TokenCredentials convenience initializers
   @Test("TokenCredentials convenience initializers")
-  public func tokenCredentialsConvenienceInitializers() {
+  func tokenCredentialsConvenienceInitializers() {
     // Test apiToken convenience initializer
     let apiCredentials = TokenCredentials.apiToken("api-token-123")
     if case .apiToken(let token) = apiCredentials.method {
@@ -64,7 +64,7 @@ public struct TokenManagerTokenCredentialsTests {
 
   /// Tests TokenCredentials computed properties
   @Test("TokenCredentials computed properties")
-  public func tokenCredentialsProperties() {
+  func tokenCredentialsProperties() {
     let apiCredentials = TokenCredentials.apiToken("test")
     let webCredentials = TokenCredentials.webAuthToken(
       apiToken: "api",
@@ -88,7 +88,7 @@ public struct TokenManagerTokenCredentialsTests {
 
   /// Tests TokenCredentials Equatable conformance
   @Test("TokenCredentials Equatable conformance")
-  public func tokenCredentialsEquality() {
+  func tokenCredentialsEquality() {
     let method1 = AuthenticationMethod.apiToken("same-token")
     let method2 = AuthenticationMethod.apiToken("same-token")
     let method3 = AuthenticationMethod.apiToken("different-token")
