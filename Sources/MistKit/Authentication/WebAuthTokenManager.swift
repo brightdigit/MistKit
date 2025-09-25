@@ -69,19 +69,22 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     get async {
       // Check if tokens are non-empty and have valid format
       guard !apiToken.isEmpty && !webAuthToken.isEmpty else {
-        return false
+        return
+          false
       }
 
       // Check API token format (64-character hex string)
       let regex = NSRegularExpression.apiTokenRegex
       let matches = regex.matches(in: apiToken)
       guard !matches.isEmpty else {
-        return false
+        return
+          false
       }
 
       // Check web auth token length (at least 10 characters)
       guard webAuthToken.count >= 10 else {
-        return false
+        return
+          false
       }
 
       return true

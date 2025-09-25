@@ -70,9 +70,7 @@ extension ServerToServerAuthManager {
     print("   Web Service URL: \(webServiceURL)")
     print("   Full Payload: \(signaturePayload)")
 
-    guard let payloadData = signaturePayload.data(using: .utf8) else {
-      throw TokenManagerError.internalError(reason: "Failed to encode signature payload")
-    }
+    let payloadData = Data(signaturePayload.utf8)
 
     // Create ECDSA signature
     let privateKey = try createPrivateKey()

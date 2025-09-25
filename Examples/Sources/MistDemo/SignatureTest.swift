@@ -21,7 +21,7 @@ pDyBVR9+yEjr8zPlMvZkBQYkKPyYl8G5uw==
 
     do {
         let privateKey = try P256.Signing.PrivateKey(pemRepresentation: privateKeyPEM)
-        let payloadData = signaturePayload.data(using: .utf8)!
+        let payloadData = Data(signaturePayload.utf8)
         let signature = try privateKey.signature(for: payloadData)
         let signatureBase64 = signature.rawRepresentation.base64EncodedString()
         
@@ -37,4 +37,5 @@ pDyBVR9+yEjr8zPlMvZkBQYkKPyYl8G5uw==
         print("Error: \(error)")
     }
 }
+
 

@@ -32,10 +32,7 @@ struct TokenManagerAuthenticationMethodTests {
     }
 
     // Test server-to-server case
-    guard let keyData = "test-key".data(using: .utf8) else {
-      Issue.record("Failed to create test key data")
-      return
-    }
+    let keyData = Data("test-key".utf8)
     let serverAuth = AuthenticationMethod.serverToServer(
       keyID: "key-789",
       privateKey: keyData
@@ -113,10 +110,7 @@ struct TokenManagerAuthenticationMethodTests {
     #expect(webAuth1 == webAuth2)
     #expect(webAuth1 != webAuth3)
 
-    guard let keyData = "test".data(using: .utf8) else {
-      Issue.record("Failed to create test data")
-      return
-    }
+    let keyData = Data("test".utf8)
     let serverAuth1 = AuthenticationMethod.serverToServer(
       keyID: "key1",
       privateKey: keyData

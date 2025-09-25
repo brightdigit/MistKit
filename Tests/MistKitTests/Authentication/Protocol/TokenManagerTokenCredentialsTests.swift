@@ -46,10 +46,7 @@ struct TokenManagerTokenCredentialsTests {
     }
 
     // Test serverToServer convenience initializer
-    guard let keyData = "private-key".data(using: .utf8) else {
-      Issue.record("Failed to create private key data")
-      return
-    }
+    let keyData = Data("private-key".utf8)
     let serverCredentials = TokenCredentials.serverToServer(
       keyID: "server-key-id",
       privateKey: keyData

@@ -5,12 +5,12 @@ import Testing
 
 @Suite("Token Manager")
 /// Test suite for TokenManager protocol and related types
-struct TokenManagerTests {
+internal struct TokenManagerTests {
   // MARK: - Integration Tests
 
   /// Tests integration between different TokenManager components
   @Test("TokenManager integration test")
-  func tokenManagerIntegration() async throws {
+  internal func tokenManagerIntegration() async throws {
     let method = AuthenticationMethod.apiToken("integration-test-token")
     let credentials = TokenCredentials(method: method)
     let mockManager = MockTokenManager()

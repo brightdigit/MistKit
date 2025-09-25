@@ -114,7 +114,7 @@ struct AuthTransitionExample {
 
             // Demonstrate signing a request
             let testSignature = try authManager.signRequest(
-                requestBody: "test request".data(using: .utf8),
+                requestBody: Data("test request".utf8),
                 webServiceURL: "https://api.apple-cloudkit.com/database/1/iCloud.com.example.MyApp/development/public/records/query"
             )
 

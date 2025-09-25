@@ -80,7 +80,8 @@ public struct MistKitClient {
 
     // Validate server-to-server authentication restrictions
     try Self.validateServerToServerConfiguration(
-      configuration: configuration, tokenManager: tokenManager
+      configuration: configuration,
+      tokenManager: tokenManager
     )
 
     // Create the OpenAPI client with custom server URL and middleware

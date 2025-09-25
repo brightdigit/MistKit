@@ -4,12 +4,12 @@ import Testing
 @testable import MistKit
 
 @Suite("Adaptive Token Manager")
-enum AdaptiveTokenManagerTests {}
+internal enum AdaptiveTokenManagerTests {}
 
 extension AdaptiveTokenManagerTests {
   /// Integration tests for AdaptiveTokenManager
   @Suite("Integration Tests")
-  struct IntegrationTests {
+  internal struct IntegrationTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -20,7 +20,7 @@ extension AdaptiveTokenManagerTests {
 
     /// Tests AdaptiveTokenManager initialization with API token
     @Test("AdaptiveTokenManager initialization with API token")
-    func initializationWithAPIToken() async {
+    internal func initializationWithAPIToken() async {
       let tokenManager = AdaptiveTokenManager(
         apiToken: Self.validAPIToken
       )
@@ -32,7 +32,7 @@ extension AdaptiveTokenManagerTests {
 
     /// Tests AdaptiveTokenManager initialization with storage
     @Test("AdaptiveTokenManager initialization with storage")
-    func initializationWithStorage() async {
+    internal func initializationWithStorage() async {
       let storage = InMemoryTokenStorage()
       let tokenManager = AdaptiveTokenManager(
         apiToken: Self.validAPIToken,
@@ -46,7 +46,7 @@ extension AdaptiveTokenManagerTests {
 
     /// Tests AdaptiveTokenManager hasCredentials property
     @Test("hasCredentials with valid token")
-    func hasCredentialsWithValidToken() async {
+    internal func hasCredentialsWithValidToken() async {
       let tokenManager = AdaptiveTokenManager(
         apiToken: Self.validAPIToken
       )
@@ -57,7 +57,7 @@ extension AdaptiveTokenManagerTests {
 
     /// Tests AdaptiveTokenManager validateCredentials
     @Test("validateCredentials with valid token")
-    func validateCredentialsWithValidToken() async throws {
+    internal func validateCredentialsWithValidToken() async throws {
       let tokenManager = AdaptiveTokenManager(
         apiToken: Self.validAPIToken
       )
@@ -68,7 +68,7 @@ extension AdaptiveTokenManagerTests {
 
     /// Tests AdaptiveTokenManager getCurrentCredentials
     @Test("getCurrentCredentials with valid token")
-    func getCurrentCredentialsWithValidToken() async throws {
+    internal func getCurrentCredentialsWithValidToken() async throws {
       let tokenManager = AdaptiveTokenManager(
         apiToken: Self.validAPIToken
       )
@@ -87,7 +87,7 @@ extension AdaptiveTokenManagerTests {
 
     /// Tests AdaptiveTokenManager with empty API token
     @Test("AdaptiveTokenManager initialization with empty API token")
-    func initializationWithEmptyAPIToken() async {
+    internal func initializationWithEmptyAPIToken() async {
       // This should crash due to precondition - we can't easily test this with Swift Testing
       // Instead, we'll test that valid tokens work
       let tokenManager = AdaptiveTokenManager(
@@ -100,7 +100,7 @@ extension AdaptiveTokenManagerTests {
 
     /// Tests that AdaptiveTokenManager can be used across async boundaries
     @Test("AdaptiveTokenManager sendable compliance")
-    func sendableCompliance() async throws {
+    internal func sendableCompliance() async throws {
       let tokenManager = AdaptiveTokenManager(
         apiToken: Self.validAPIToken
       )

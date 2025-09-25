@@ -85,9 +85,9 @@ extension CloudKitService {
   /// Create a standard path for queryRecords requests
   /// - Parameter containerIdentifier: The container identifier
   /// - Returns: A configured path for the request
-  internal func createQueryRecordsPath(containerIdentifier: String)
-    -> Operations.queryRecords.Input.Path
-  {
+  internal func createQueryRecordsPath(
+    containerIdentifier: String
+  ) -> Operations.queryRecords.Input.Path {
     .init(
       version: "1",
       container: containerIdentifier,
