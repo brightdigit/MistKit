@@ -32,8 +32,6 @@ public import Foundation
 /// Simple in-memory implementation of TokenStorage for development and testing
 /// This implementation does not persist data across application restarts
 public final class InMemoryTokenStorage: TokenStorage, Sendable {
-  private let storage = Storage()
-
   /// Thread-safe storage using actor
   private actor Storage {
     private var credentials: [String: TokenCredentials] = [:]
@@ -90,6 +88,24 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
     }
   }
 
+  private let storage = Storage()
+
+  /// Returns the number of stored credentials
+  public var count: Int {
+    get async {
+      let identifiers = await storage.listIdentifiers()
+      return identifiers.count
+    }
+  }
+
+  /// Returns true if the storage is empty
+  public var isEmpty: Bool {
+    get async {
+      let identifiers = await storage.listIdentifiers()
+      return identifiers.isEmpty
+    }
+  }
+
   /// Creates a new in-memory token storage
   public init() {}
 
@@ -130,21 +146,5 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
   /// Cleans up expired tokens from storage
   public func cleanupExpiredTokens() async {
     await storage.cleanupExpiredTokens()
-  }
-
-  /// Returns the number of stored credentials
-  public var count: Int {
-    get async {
-      let identifiers = await storage.listIdentifiers()
-      return identifiers.count
-    }
-  }
-
-  /// Returns true if the storage is empty
-  public var isEmpty: Bool {
-    get async {
-      let identifiers = await storage.listIdentifiers()
-      return identifiers.isEmpty
-    }
   }
 }

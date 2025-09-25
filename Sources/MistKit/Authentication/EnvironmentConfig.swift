@@ -29,16 +29,49 @@
 
 public import Foundation
 
+/// Errors related to environment configuration
+public enum EnvironmentConfigError: Error, LocalizedError {
+  case missingRequiredVariable(key: String, description: String)
+  case invalidValue(key: String, value: String, expectedFormat: String)
+
+  public var errorDescription: String? {
+    switch self {
+    case .missingRequiredVariable(let key, let description):
+      return "Missing required environment variable '\(key)': \(description)"
+    case .invalidValue(let key, let value, let expectedFormat):
+      return
+        "Invalid value for environment variable '\(key)': '\(value)'. Expected: \(expectedFormat)"
+    }
+  }
+
+  public var recoverySuggestion: String? {
+    switch self {
+    case .missingRequiredVariable(let key, let description):
+      return "Set the \(key) environment variable with a valid \(description.lowercased())"
+    case .invalidValue(let key, _, let expectedFormat):
+      return
+        "Update the \(key) environment variable to match the expected format: \(expectedFormat)"
+    }
+  }
+}
+
 /// Configuration management using environment variables for sensitive data
 public enum EnvironmentConfig {
   /// Environment variable names for CloudKit configuration
   public enum Keys {
+    /// Environment variable for CloudKit API token
     public static let cloudKitAPIToken = "CLOUDKIT_API_TOKEN"
+    /// Environment variable for CloudKit web authentication token
     public static let cloudKitWebAuthToken = "CLOUDKIT_WEB_AUTH_TOKEN"
+    /// Environment variable for CloudKit key ID
     public static let cloudKitKeyID = "CLOUDKIT_KEY_ID"
+    /// Environment variable for CloudKit private key
     public static let cloudKitPrivateKey = "CLOUDKIT_PRIVATE_KEY"
+    /// Environment variable for CloudKit private key file path
     public static let cloudKitPrivateKeyFile = "CLOUDKIT_PRIVATE_KEY_FILE"
+    /// Environment variable for CloudKit container identifier
     public static let cloudKitContainerIdentifier = "CLOUDKIT_CONTAINER_IDENTIFIER"
+    /// Environment variable for CloudKit environment (development/production)
     public static let cloudKitEnvironment = "CLOUDKIT_ENVIRONMENT"
   }
 
@@ -180,32 +213,6 @@ public enum EnvironmentConfig {
       env[Keys.cloudKitEnvironment] = getEnvironment()
 
       return env
-    }
-  }
-}
-
-/// Errors related to environment configuration
-public enum EnvironmentConfigError: Error, LocalizedError {
-  case missingRequiredVariable(key: String, description: String)
-  case invalidValue(key: String, value: String, expectedFormat: String)
-
-  public var errorDescription: String? {
-    switch self {
-    case .missingRequiredVariable(let key, let description):
-      return "Missing required environment variable '\(key)': \(description)"
-    case .invalidValue(let key, let value, let expectedFormat):
-      return
-        "Invalid value for environment variable '\(key)': '\(value)'. Expected: \(expectedFormat)"
-    }
-  }
-
-  public var recoverySuggestion: String? {
-    switch self {
-    case .missingRequiredVariable(let key, let description):
-      return "Set the \(key) environment variable with a valid \(description.lowercased())"
-    case .invalidValue(let key, _, let expectedFormat):
-      return
-        "Update the \(key) environment variable to match the expected format: \(expectedFormat)"
     }
   }
 }

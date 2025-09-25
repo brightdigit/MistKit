@@ -31,31 +31,6 @@
   public import Foundation
 #endif
 
-/// Protocol for persisting and retrieving authentication tokens/keys
-public protocol TokenStorage: Sendable {
-  /// Stores token credentials with an optional identifier
-  /// - Parameters:
-  ///   - credentials: The credentials to store
-  ///   - identifier: Optional identifier for multiple credential storage
-  /// - Throws: TokenStorageError if storage fails
-  func store(_ credentials: TokenCredentials, identifier: String?) async throws
-
-  /// Retrieves stored token credentials
-  /// - Parameter identifier: Optional identifier for specific credentials
-  /// - Returns: Stored credentials or nil if not found
-  /// - Throws: TokenStorageError if retrieval fails
-  func retrieve(identifier: String?) async throws -> TokenCredentials?
-
-  /// Removes stored credentials
-  /// - Parameter identifier: Optional identifier for specific credentials
-  /// - Throws: TokenStorageError if removal fails
-  func remove(identifier: String?) async throws
-
-  /// Lists all stored credential identifiers
-  /// - Returns: Array of stored identifiers
-  func listIdentifiers() async throws -> [String]
-}
-
 /// Errors that can occur during token storage operations
 public enum TokenStorageError: Error, LocalizedError, Sendable {
   /// Storage operation failed
@@ -86,4 +61,29 @@ public enum TokenStorageError: Error, LocalizedError, Sendable {
       return "Token storage is corrupted or in invalid format"
     }
   }
+}
+
+/// Protocol for persisting and retrieving authentication tokens/keys
+public protocol TokenStorage: Sendable {
+  /// Stores token credentials with an optional identifier
+  /// - Parameters:
+  ///   - credentials: The credentials to store
+  ///   - identifier: Optional identifier for multiple credential storage
+  /// - Throws: TokenStorageError if storage fails
+  func store(_ credentials: TokenCredentials, identifier: String?) async throws
+
+  /// Retrieves stored token credentials
+  /// - Parameter identifier: Optional identifier for specific credentials
+  /// - Returns: Stored credentials or nil if not found
+  /// - Throws: TokenStorageError if retrieval fails
+  func retrieve(identifier: String?) async throws -> TokenCredentials?
+
+  /// Removes stored credentials
+  /// - Parameter identifier: Optional identifier for specific credentials
+  /// - Throws: TokenStorageError if removal fails
+  func remove(identifier: String?) async throws
+
+  /// Lists all stored credential identifiers
+  /// - Returns: Array of stored identifiers
+  func listIdentifiers() async throws -> [String]
 }

@@ -33,6 +33,9 @@
 
 /// Protocol for managing authentication tokens and credentials for CloudKit Web Services
 public protocol TokenManager: Sendable {
+  /// Checks if credentials are currently available
+  var hasCredentials: Bool { get async }
+
   /// Validates the current authentication credentials
   /// - Returns: True if credentials are valid and usable
   /// - Throws: TokenManagerError if validation fails
@@ -42,7 +45,4 @@ public protocol TokenManager: Sendable {
   /// - Returns: Current TokenCredentials or nil if none available
   /// - Throws: TokenManagerError if retrieval fails
   func getCurrentCredentials() async throws -> TokenCredentials?
-
-  /// Checks if credentials are currently available
-  var hasCredentials: Bool { get async }
 }

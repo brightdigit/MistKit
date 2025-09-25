@@ -12,9 +12,7 @@ import Testing
 @testable import MistKit
 
 /// Mock TokenManager that simulates rate limiting
-final class MockTokenManagerWithRateLimiting: TokenManager {
-  private let counter = Counter()
-
+internal final class MockTokenManagerWithRateLimiting: TokenManager {
   private actor Counter {
     private var count = 0
 
@@ -28,15 +26,17 @@ final class MockTokenManagerWithRateLimiting: TokenManager {
     }
   }
 
-  var hasCredentials: Bool {
+  private let counter = Counter()
+
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  var refreshCallCount: Int {
+  internal var refreshCallCount: Int {
     get async { await counter.getCount() }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     let count = await counter.increment()
     // Simulate rate limiting - succeed after multiple attempts
     if count <= 3 {
@@ -46,7 +46,7 @@ final class MockTokenManagerWithRateLimiting: TokenManager {
     return true
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     let count = await counter.increment()
     // Simulate rate limiting - succeed after multiple attempts
     if count <= 3 {

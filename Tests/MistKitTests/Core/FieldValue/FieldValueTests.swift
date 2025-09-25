@@ -5,38 +5,38 @@ import Testing
 
 @Suite("Field Value")
 /// Tests for FieldValue functionality
-struct FieldValueTests {
+internal struct FieldValueTests {
   /// Tests FieldValue string type creation and equality
   @Test("FieldValue string type creation and equality")
-  func fieldValueString() {
+  internal func fieldValueString() {
     let value = FieldValue.string("test")
     #expect(value == .string("test"))
   }
 
   /// Tests FieldValue int64 type creation and equality
   @Test("FieldValue int64 type creation and equality")
-  func fieldValueInt64() {
+  internal func fieldValueInt64() {
     let value = FieldValue.int64(123)
     #expect(value == .int64(123))
   }
 
   /// Tests FieldValue double type creation and equality
   @Test("FieldValue double type creation and equality")
-  func fieldValueDouble() {
+  internal func fieldValueDouble() {
     let value = FieldValue.double(3.14)
     #expect(value == .double(3.14))
   }
 
   /// Tests FieldValue boolean type creation and equality
   @Test("FieldValue boolean type creation and equality")
-  func fieldValueBoolean() {
+  internal func fieldValueBoolean() {
     let value = FieldValue.boolean(true)
     #expect(value == .boolean(true))
   }
 
   /// Tests FieldValue date type creation and equality
   @Test("FieldValue date type creation and equality")
-  func fieldValueDate() {
+  internal func fieldValueDate() {
     let date = Date()
     let value = FieldValue.date(date)
     #expect(value == .date(date))
@@ -44,7 +44,7 @@ struct FieldValueTests {
 
   /// Tests FieldValue location type creation and equality
   @Test("FieldValue location type creation and equality")
-  func fieldValueLocation() {
+  internal func fieldValueLocation() {
     let location = FieldValue.Location(
       latitude: 37.7749,
       longitude: -122.4194,
@@ -56,7 +56,7 @@ struct FieldValueTests {
 
   /// Tests FieldValue reference type creation and equality
   @Test("FieldValue reference type creation and equality")
-  func fieldValueReference() {
+  internal func fieldValueReference() {
     let reference = FieldValue.Reference(recordName: "test-record")
     let value = FieldValue.reference(reference)
     #expect(value == .reference(reference))
@@ -64,7 +64,7 @@ struct FieldValueTests {
 
   /// Tests FieldValue asset type creation and equality
   @Test("FieldValue asset type creation and equality")
-  func fieldValueAsset() {
+  internal func fieldValueAsset() {
     let asset = FieldValue.Asset(
       fileChecksum: "abc123",
       size: 1_024,
@@ -76,7 +76,7 @@ struct FieldValueTests {
 
   /// Tests FieldValue list type creation and equality
   @Test("FieldValue list type creation and equality")
-  func fieldValueList() {
+  internal func fieldValueList() {
     let list = [FieldValue.string("item1"), FieldValue.int64(42)]
     let value = FieldValue.list(list)
     #expect(value == .list(list))
@@ -84,7 +84,7 @@ struct FieldValueTests {
 
   /// Tests FieldValue JSON encoding and decoding
   @Test("FieldValue JSON encoding and decoding")
-  func fieldValueEncodable() throws {
+  internal func fieldValueEncodable() throws {
     let value = FieldValue.string("test")
     let data = try JSONEncoder().encode(value)
     let decoded = try JSONDecoder().decode(FieldValue.self, from: data)

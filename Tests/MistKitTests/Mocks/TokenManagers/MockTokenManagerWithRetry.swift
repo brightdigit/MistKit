@@ -11,9 +11,7 @@ import Testing
 @testable import MistKit
 
 /// Mock TokenManager that simulates retry mechanism
-final class MockTokenManagerWithRetry: TokenManager {
-  private let counter = Counter()
-
+internal final class MockTokenManagerWithRetry: TokenManager {
   private actor Counter {
     private var count = 0
 
@@ -23,33 +21,39 @@ final class MockTokenManagerWithRetry: TokenManager {
     }
   }
 
-  var hasCredentials: Bool {
+  private let counter = Counter()
+
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     let count = await counter.increment()
     if count <= 2 {
       throw TokenManagerError.networkError(
         underlying: NSError(
-          domain: "NetworkError", code: -1_009,
+          domain: "NetworkError",
+          code: -1_009,
           userInfo: [
             NSLocalizedDescriptionKey: "Network error"
-          ])
+          ]
+        )
       )
     }
     return true
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     let count = await counter.increment()
     if count <= 2 {
       throw TokenManagerError.networkError(
         underlying: NSError(
-          domain: "NetworkError", code: -1_009,
+          domain: "NetworkError",
+          code: -1_009,
           userInfo: [
             NSLocalizedDescriptionKey: "Network error"
-          ])
+          ]
+        )
       )
     }
     return TokenCredentials.apiToken("retry-token")

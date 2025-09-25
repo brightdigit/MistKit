@@ -38,6 +38,14 @@ public final class APITokenManager: TokenManager, Sendable {
   private let credentials: TokenCredentials
   private let storage: (any TokenStorage)?
 
+  // MARK: - TokenManager Protocol
+
+  public var hasCredentials: Bool {
+    get async {
+      !apiToken.isEmpty
+    }
+  }
+
   /// Creates a new API token manager
   /// - Parameters:
   ///   - apiToken: The CloudKit API token from Apple Developer Console
@@ -47,14 +55,6 @@ public final class APITokenManager: TokenManager, Sendable {
     self.apiToken = apiToken
     self.storage = storage
     self.credentials = TokenCredentials.apiToken(apiToken)
-  }
-
-  // MARK: - TokenManager Protocol
-
-  public var hasCredentials: Bool {
-    get async {
-      !apiToken.isEmpty
-    }
   }
 
   public func validateCredentials() async throws -> Bool {

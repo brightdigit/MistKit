@@ -10,9 +10,7 @@ import Testing
 
 @testable import MistKit
 
-final class MockTokenManagerWithRecovery: TokenManager {
-  private let counter = Counter()
-
+internal final class MockTokenManagerWithRecovery: TokenManager {
   private actor Counter {
     private var count = 0
 
@@ -22,33 +20,39 @@ final class MockTokenManagerWithRecovery: TokenManager {
     }
   }
 
-  var hasCredentials: Bool {
+  private let counter = Counter()
+
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     let count = await counter.increment()
     if count == 1 {
       throw TokenManagerError.networkError(
         underlying: NSError(
-          domain: "NetworkError", code: -1_009,
+          domain: "NetworkError",
+          code: -1_009,
           userInfo: [
             NSLocalizedDescriptionKey: "Network error"
-          ])
+          ]
+        )
       )
     }
     return true
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     let count = await counter.increment()
     if count == 1 {
       throw TokenManagerError.networkError(
         underlying: NSError(
-          domain: "NetworkError", code: -1_009,
+          domain: "NetworkError",
+          code: -1_009,
           userInfo: [
             NSLocalizedDescriptionKey: "Network error"
-          ])
+          ]
+        )
       )
     }
     return TokenCredentials.apiToken("recovered-token")
