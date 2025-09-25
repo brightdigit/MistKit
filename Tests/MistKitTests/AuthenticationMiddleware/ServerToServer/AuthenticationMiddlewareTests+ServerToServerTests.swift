@@ -6,12 +6,12 @@ import Testing
 
 @testable import MistKit
 
-enum AuthenticationMiddlewareTests {
+internal enum AuthenticationMiddlewareTests {
 }
 extension AuthenticationMiddlewareTests {
   /// Server-to-server authentication tests for AuthenticationMiddleware
   @Suite("Server-to-Server Tests")
-  struct ServerToServerTests {
+  internal struct ServerToServerTests {
     // MARK: - Test Data Setup
 
     private static let testURL: URL = {
@@ -28,7 +28,7 @@ extension AuthenticationMiddlewareTests {
     @Test(
       "Intercept request with server-to-server authentication",
       .enabled(if: Platform.isCryptoAvailable))
-    func interceptWithServerToServerAuthentication() async throws {
+    internal func interceptWithServerToServerAuthentication() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -77,7 +77,7 @@ extension AuthenticationMiddlewareTests {
     @Test(
       "Intercept request with server-to-server authentication and existing headers",
       .enabled(if: Platform.isCryptoAvailable))
-    func interceptWithServerToServerAuthenticationAndExistingHeaders() async throws {
+    internal func interceptWithServerToServerAuthenticationAndExistingHeaders() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -132,7 +132,7 @@ extension AuthenticationMiddlewareTests {
     @Test(
       "Intercept POST request with server-to-server authentication",
       .enabled(if: Platform.isCryptoAvailable))
-    func interceptPOSTWithServerToServerAuthentication() async throws {
+    internal func interceptPOSTWithServerToServerAuthentication() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return

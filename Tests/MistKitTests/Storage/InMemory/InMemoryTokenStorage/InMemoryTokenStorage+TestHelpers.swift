@@ -5,7 +5,7 @@ import Testing
 
 extension InMemoryTokenStorage {
   /// Test helper to store credentials and return a boolean result
-  func storeCredentials(_ credentials: TokenCredentials) async -> Bool {
+  internal func storeCredentials(_ credentials: TokenCredentials) async -> Bool {
     do {
       try await store(credentials, identifier: nil)
       return true
@@ -15,12 +15,12 @@ extension InMemoryTokenStorage {
   }
 
   /// Test helper to get credentials by identifier
-  func getCredentials(identifier: String? = nil) async -> TokenCredentials? {
+  internal func getCredentials(identifier: String? = nil) async -> TokenCredentials? {
     try? await retrieve(identifier: identifier)
   }
 
   /// Test helper to store and retrieve credentials
-  func storeAndRetrieve(_ credentials: TokenCredentials) async -> Bool {
+  internal func storeAndRetrieve(_ credentials: TokenCredentials) async -> Bool {
     do {
       try await store(credentials, identifier: nil)
       let retrieved = try await retrieve(identifier: nil)
@@ -31,7 +31,7 @@ extension InMemoryTokenStorage {
   }
 
   /// Test helper to remove token by identifier
-  func removeToken(identifier: String) async -> Bool {
+  internal func removeToken(identifier: String) async -> Bool {
     do {
       try await remove(identifier: identifier)
       return true
@@ -41,12 +41,12 @@ extension InMemoryTokenStorage {
   }
 
   /// Test helper to get token by identifier
-  func getToken(identifier: String) async -> TokenCredentials? {
+  internal func getToken(identifier: String) async -> TokenCredentials? {
     try? await retrieve(identifier: identifier)
   }
 
   /// Test helper to store token with key and token string
-  func storeToken(key: String, token: String) async throws {
+  internal func storeToken(key: String, token: String) async throws {
     let credentials = TokenCredentials.apiToken(token)
     try await store(credentials, identifier: key)
   }

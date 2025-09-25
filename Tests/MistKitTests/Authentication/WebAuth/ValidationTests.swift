@@ -6,12 +6,12 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Integration validation tests for WebAuthTokenManager
   @Suite("Validation Tests")
-  struct ValidationTests {
+  internal struct ValidationTests {
     // MARK: - Integration Tests
 
     /// Tests comprehensive validation workflow
     @Test("Comprehensive validation workflow")
-    func comprehensiveValidationWorkflow() async throws {
+    internal func comprehensiveValidationWorkflow() async throws {
       let validAPIToken =
         "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
       let validWebAuthToken = "user123_web_auth_token_abcdef"

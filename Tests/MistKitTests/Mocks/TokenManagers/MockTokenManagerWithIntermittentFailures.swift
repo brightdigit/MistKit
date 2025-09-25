@@ -11,9 +11,7 @@ import Testing
 @testable import MistKit
 
 /// Mock TokenManager that simulates intermittent failures
-final class MockTokenManagerWithIntermittentFailures: TokenManager {
-  private let counter = Counter()
-
+internal final class MockTokenManagerWithIntermittentFailures: TokenManager {
   private actor Counter {
     private var count = 0
 
@@ -23,35 +21,41 @@ final class MockTokenManagerWithIntermittentFailures: TokenManager {
     }
   }
 
-  var hasCredentials: Bool {
+  private let counter = Counter()
+
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     let count = await counter.increment()
     // Fail on odd attempts
     if count % 2 == 1 {
       throw TokenManagerError.networkError(
         underlying: NSError(
-          domain: "IntermittentError", code: -1_001,
+          domain: "IntermittentError",
+          code: -1_001,
           userInfo: [
             NSLocalizedDescriptionKey: "Intermittent network failure"
-          ])
+          ]
+        )
       )
     }
     return true
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     let count = await counter.increment()
     // Fail on odd attempts
     if count % 2 == 1 {
       throw TokenManagerError.networkError(
         underlying: NSError(
-          domain: "IntermittentError", code: -1_001,
+          domain: "IntermittentError",
+          code: -1_001,
           userInfo: [
             NSLocalizedDescriptionKey: "Intermittent network failure"
-          ])
+          ]
+        )
       )
     }
     return TokenCredentials.apiToken("intermittent-token")

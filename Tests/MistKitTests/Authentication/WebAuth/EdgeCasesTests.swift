@@ -6,7 +6,7 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Edge cases tests for WebAuthTokenManager
   @Suite("Edge Cases Tests")
-  struct EdgeCasesTests {
+  internal struct EdgeCasesTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -17,7 +17,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests concurrent access to WebAuthTokenManager
     @Test("Concurrent access to WebAuthTokenManager")
-    func concurrentAccessToWebAuthTokenManager() async throws {
+    internal func concurrentAccessToWebAuthTokenManager() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -40,7 +40,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests rapid successive calls to WebAuthTokenManager
     @Test("Rapid successive calls to WebAuthTokenManager")
-    func rapidSuccessiveCallsToWebAuthTokenManager() async throws {
+    internal func rapidSuccessiveCallsToWebAuthTokenManager() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -63,7 +63,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager with weak references
     @Test("WebAuthTokenManager with weak references")
-    func webAuthTokenManagerWithWeakReferences() async throws {
+    internal func webAuthTokenManagerWithWeakReferences() async throws {
       weak var weakManager: WebAuthTokenManager?
 
       do {
@@ -86,7 +86,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager with storage cleanup
     @Test("WebAuthTokenManager with storage cleanup")
-    func webAuthTokenManagerWithStorageCleanup() async throws {
+    internal func webAuthTokenManagerWithStorageCleanup() async throws {
       let storage = InMemoryTokenStorage()
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
@@ -113,7 +113,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager with malformed tokens
     @Test("WebAuthTokenManager with malformed tokens")
-    func webAuthTokenManagerWithMalformedTokens() async throws {
+    internal func webAuthTokenManagerWithMalformedTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: "malformed-api-token",
         webAuthToken: "malformed-web-token"
@@ -133,7 +133,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager with nil-like tokens
     @Test("WebAuthTokenManager with nil-like tokens")
-    func webAuthTokenManagerWithNilLikeTokens() async throws {
+    internal func webAuthTokenManagerWithNilLikeTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: "null",
         webAuthToken: "undefined"

@@ -5,12 +5,12 @@ import Testing
 
 @Suite("Token Manager - Error Handling")
 /// Test suite for TokenManagerError and related functionality
-struct TokenManagerErrorTests {
+internal struct TokenManagerErrorTests {
   // MARK: - TokenManagerError Tests
 
   /// Tests TokenManagerError cases and localized descriptions
   @Test("TokenManagerError cases and localized descriptions")
-  func tokenManagerError() {
+  internal func tokenManagerError() {
     let invalidError = TokenManagerError.invalidCredentials(reason: "Bad format")
     let authError = TokenManagerError.authenticationFailed(underlying: nil)
     let expiredError = TokenManagerError.tokenExpired

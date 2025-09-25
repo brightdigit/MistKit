@@ -5,7 +5,7 @@ import Testing
 
 @Suite("In-Memory Token Storage Retrieval")
 /// Test suite for InMemoryTokenStorage token retrieval and removal functionality
-struct InMemoryTokenStorageRetrievalTests {
+internal struct InMemoryTokenStorageRetrievalTests {
   // MARK: - Test Data Setup
 
   private static let testAPIToken =
@@ -15,7 +15,7 @@ struct InMemoryTokenStorageRetrievalTests {
 
   /// Tests retrieving stored token
   @Test("Retrieve stored token")
-  func retrieveStoredToken() async throws {
+  internal func retrieveStoredToken() async throws {
     let storage = InMemoryTokenStorage()
     let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -28,7 +28,7 @@ struct InMemoryTokenStorageRetrievalTests {
 
   /// Tests retrieving non-existent token
   @Test("Retrieve non-existent token")
-  func retrieveNonExistentToken() async throws {
+  internal func retrieveNonExistentToken() async throws {
     let storage = InMemoryTokenStorage()
 
     let retrieved = try await storage.retrieve(identifier: nil)
@@ -37,7 +37,7 @@ struct InMemoryTokenStorageRetrievalTests {
 
   /// Tests retrieving token after clearing storage
   @Test("Retrieve token after clearing storage")
-  func retrieveTokenAfterClearingStorage() async throws {
+  internal func retrieveTokenAfterClearingStorage() async throws {
     let storage = InMemoryTokenStorage()
     let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -52,7 +52,7 @@ struct InMemoryTokenStorageRetrievalTests {
 
   /// Tests removing stored token
   @Test("Remove stored token")
-  func removeStoredToken() async throws {
+  internal func removeStoredToken() async throws {
     let storage = InMemoryTokenStorage()
     let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -69,7 +69,7 @@ struct InMemoryTokenStorageRetrievalTests {
 
   /// Tests removing non-existent token
   @Test("Remove non-existent token")
-  func removeNonExistentToken() async throws {
+  internal func removeNonExistentToken() async throws {
     let storage = InMemoryTokenStorage()
 
     // Should not throw or crash

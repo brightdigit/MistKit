@@ -9,7 +9,7 @@ import Testing
 extension AuthenticationMiddlewareTests {
   /// Error handling tests for AuthenticationMiddleware
   @Suite("Error Tests")
-  struct ErrorTests {
+  internal struct ErrorTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -26,7 +26,7 @@ extension AuthenticationMiddlewareTests {
 
     /// Tests intercept with invalid token manager
     @Test("Intercept request with invalid token manager")
-    func interceptWithInvalidTokenManager() async throws {
+    internal func interceptWithInvalidTokenManager() async throws {
       let mockTokenManager = MockTokenManagerWithoutCredentials()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -62,7 +62,7 @@ extension AuthenticationMiddlewareTests {
 
     /// Tests intercept with token manager that throws authentication error
     @Test("Intercept request with token manager that throws authentication error")
-    func interceptWithTokenManagerAuthenticationError() async throws {
+    internal func interceptWithTokenManagerAuthenticationError() async throws {
       let mockTokenManager = MockTokenManagerWithAuthenticationError()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -98,7 +98,7 @@ extension AuthenticationMiddlewareTests {
 
     /// Tests intercept with token manager that throws network error
     @Test("Intercept request with token manager that throws network error")
-    func interceptWithTokenManagerNetworkError() async throws {
+    internal func interceptWithTokenManagerNetworkError() async throws {
       let mockTokenManager = MockTokenManagerWithNetworkError()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -134,7 +134,7 @@ extension AuthenticationMiddlewareTests {
 
     /// Tests that errors from next middleware are properly propagated
     @Test("Error propagation from next middleware")
-    func errorPropagationFromNextMiddleware() async throws {
+    internal func errorPropagationFromNextMiddleware() async throws {
       let tokenManager = APITokenManager(apiToken: Self.validAPIToken)
       let middleware = AuthenticationMiddleware(tokenManager: tokenManager)
 
@@ -177,27 +177,27 @@ extension AuthenticationMiddlewareTests {
 // MARK: - Mock Token Managers for Error Testing
 
 /// Mock TokenManager that throws authentication failed error
-final class MockTokenManagerWithAuthenticationError: TokenManager {
-  var hasCredentials: Bool {
+internal final class MockTokenManagerWithAuthenticationError: TokenManager {
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     throw TokenManagerError.authenticationFailed(underlying: nil)
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     throw TokenManagerError.authenticationFailed(underlying: nil)
   }
 }
 
 /// Mock TokenManager that throws network error
-final class MockTokenManagerWithNetworkError: TokenManager {
-  var hasCredentials: Bool {
+internal final class MockTokenManagerWithNetworkError: TokenManager {
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     throw TokenManagerError.networkError(
       underlying: NSError(
         domain: "NetworkError",
@@ -207,7 +207,7 @@ final class MockTokenManagerWithNetworkError: TokenManager {
     )
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     throw TokenManagerError.networkError(
       underlying: NSError(
         domain: "NetworkError",

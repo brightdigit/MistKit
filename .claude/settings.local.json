@@ -18,7 +18,11 @@
       "Bash(./Scripts/lint.sh:*)",
       "Bash(mv:*)",
       "Bash(gh pr view:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(CI=1 Scripts/lint.sh)",
+      "Bash(env CI=1 Scripts/lint.sh)",
+      "Bash(find:*)",
+      "Bash(env CI=1 ./Scripts/lint.sh)"
     ],
     "deny": []
   },

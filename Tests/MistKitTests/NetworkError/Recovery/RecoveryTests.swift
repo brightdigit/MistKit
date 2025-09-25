@@ -7,12 +7,12 @@ import Testing
 @testable import MistKit
 
 @Suite("Network Error")
-enum NetworkErrorTests {}
+internal enum NetworkErrorTests {}
 
 extension NetworkErrorTests {
   /// Network error recovery and retry mechanism tests
   @Suite("Recovery Tests")
-  struct RecoveryTests {
+  internal struct RecoveryTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -22,7 +22,7 @@ extension NetworkErrorTests {
 
     /// Tests error recovery after network failure
     @Test("Error recovery after network failure")
-    func errorRecoveryAfterNetworkFailure() async throws {
+    internal func errorRecoveryAfterNetworkFailure() async throws {
       let mockTokenManager = MockTokenManagerWithRecovery()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -70,7 +70,7 @@ extension NetworkErrorTests {
 
     /// Tests retry mechanism with network failures
     @Test("Retry mechanism with network failures")
-    func retryMechanismWithNetworkFailures() async throws {
+    internal func retryMechanismWithNetworkFailures() async throws {
       let mockTokenManager = MockTokenManagerWithRetry()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -118,7 +118,7 @@ extension NetworkErrorTests {
 
     /// Tests timeout handling in token validation
     @Test("Timeout handling in token validation")
-    func timeoutHandlingInTokenValidation() async throws {
+    internal func timeoutHandlingInTokenValidation() async throws {
       let mockTokenManager = MockTokenManagerWithTimeout()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 

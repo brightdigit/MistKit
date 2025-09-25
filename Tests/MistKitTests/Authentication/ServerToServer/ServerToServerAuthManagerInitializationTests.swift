@@ -6,7 +6,7 @@ import Testing
 
 @Suite("Server-to-Server Auth Manager Initialization")
 /// Test suite for ServerToServerAuthManager initialization functionality
-struct ServerToServerAuthManagerInitializationTests {
+internal struct ServerToServerAuthManagerInitializationTests {
   // MARK: - Test Data Setup
 
   private static func generateTestPrivateKey() throws -> P256.Signing.PrivateKey {
@@ -34,7 +34,7 @@ struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with private key callback
   @Test("Initialization with private key callback", .enabled(if: Platform.isCryptoAvailable))
-  func initializationWithPrivateKeyCallback() async throws {
+  internal func initializationWithPrivateKeyCallback() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -65,7 +65,7 @@ struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with private key data
   @Test("Initialization with private key data", .enabled(if: Platform.isCryptoAvailable))
-  func initializationWithPrivateKeyData() async throws {
+  internal func initializationWithPrivateKeyData() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -97,7 +97,7 @@ struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with PEM string
   @Test("Initialization with PEM string", .enabled(if: Platform.isCryptoAvailable))
-  func initializationWithPEMString() async throws {
+  internal func initializationWithPEMString() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -128,7 +128,7 @@ struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with storage
   @Test("Initialization with storage", .enabled(if: Platform.isCryptoAvailable))
-  func initializationWithStorage() async throws {
+  internal func initializationWithStorage() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -148,7 +148,7 @@ struct ServerToServerAuthManagerInitializationTests {
 
   /// Tests ServerToServerAuthManager initialization with empty key ID (should crash)
   @Test("Initialization with empty key ID", .enabled(if: Platform.isCryptoAvailable))
-  func initializationWithEmptyKeyID() async throws {
+  internal func initializationWithEmptyKeyID() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return

@@ -9,7 +9,7 @@ import Testing
 extension NetworkErrorTests {
   /// Network error storage tests
   @Suite("Storage Tests")
-  struct StorageTests {
+  internal struct StorageTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -19,7 +19,7 @@ extension NetworkErrorTests {
 
     /// Tests token storage with network errors
     @Test("Token storage with network errors")
-    func tokenStorageWithNetworkErrors() async throws {
+    internal func tokenStorageWithNetworkErrors() async throws {
       let storage = InMemoryTokenStorage()
       _ = APITokenManager(apiToken: Self.validAPIToken, storage: storage)
 
@@ -42,7 +42,7 @@ extension NetworkErrorTests {
 
     /// Tests token storage persistence across network failures
     @Test("Token storage persistence across network failures")
-    func tokenStoragePersistenceAcrossNetworkFailures() async throws {
+    internal func tokenStoragePersistenceAcrossNetworkFailures() async throws {
       let storage = InMemoryTokenStorage()
       _ = APITokenManager(apiToken: Self.validAPIToken, storage: storage)
 
@@ -66,7 +66,7 @@ extension NetworkErrorTests {
 
     /// Tests token storage cleanup after network errors
     @Test("Token storage cleanup after network errors")
-    func tokenStorageCleanupAfterNetworkErrors() async throws {
+    internal func tokenStorageCleanupAfterNetworkErrors() async throws {
       let storage = InMemoryTokenStorage()
       _ = APITokenManager(apiToken: Self.validAPIToken, storage: storage)
 
@@ -88,7 +88,7 @@ extension NetworkErrorTests {
 
     /// Tests concurrent token storage operations
     @Test("Concurrent token storage operations")
-    func concurrentTokenStorageOperations() async throws {
+    internal func concurrentTokenStorageOperations() async throws {
       let storage = InMemoryTokenStorage()
       _ = APITokenManager(apiToken: Self.validAPIToken, storage: storage)
 
@@ -113,7 +113,7 @@ extension NetworkErrorTests {
 
     /// Tests token storage with expiration
     @Test("Token storage with expiration")
-    func tokenStorageWithExpiration() async throws {
+    internal func tokenStorageWithExpiration() async throws {
       let storage = InMemoryTokenStorage()
       _ = APITokenManager(apiToken: Self.validAPIToken, storage: storage)
 

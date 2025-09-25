@@ -6,7 +6,7 @@ import Testing
 
 @Suite("Server-to-Server Auth Manager Validation")
 /// Test suite for ServerToServerAuthManager validation functionality
-struct ServerToServerAuthManagerValidationTests {
+internal struct ServerToServerAuthManagerValidationTests {
   // MARK: - Test Data Setup
 
   private static func generateTestPrivateKey() throws -> P256.Signing.PrivateKey {
@@ -23,7 +23,7 @@ struct ServerToServerAuthManagerValidationTests {
 
   /// Tests hasCredentials property
   @Test("hasCredentials", .enabled(if: Platform.isCryptoAvailable))
-  func hasCredentials() async throws {
+  internal func hasCredentials() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -40,7 +40,7 @@ struct ServerToServerAuthManagerValidationTests {
 
   /// Tests hasCredentials property with empty key ID
   @Test("hasCredentials with empty key ID", .enabled(if: Platform.isCryptoAvailable))
-  func hasCredentialsWithEmptyKeyID() async throws {
+  internal func hasCredentialsWithEmptyKeyID() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -60,7 +60,7 @@ struct ServerToServerAuthManagerValidationTests {
 
   /// Tests validateCredentials with valid credentials
   @Test("validateCredentials with valid credentials", .enabled(if: Platform.isCryptoAvailable))
-  func validateCredentialsWithValidCredentials() async throws {
+  internal func validateCredentialsWithValidCredentials() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -77,7 +77,7 @@ struct ServerToServerAuthManagerValidationTests {
 
   /// Tests validateCredentials with short key ID
   @Test("validateCredentials with short key ID", .enabled(if: Platform.isCryptoAvailable))
-  func validateCredentialsWithShortKeyID() async throws {
+  internal func validateCredentialsWithShortKeyID() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -105,7 +105,7 @@ struct ServerToServerAuthManagerValidationTests {
 
   /// Tests validateCredentials with corrupted private key
   @Test("validateCredentials with corrupted private key", .enabled(if: Platform.isCryptoAvailable))
-  func validateCredentialsWithCorruptedPrivateKey() async throws {
+  internal func validateCredentialsWithCorruptedPrivateKey() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -126,7 +126,7 @@ struct ServerToServerAuthManagerValidationTests {
 
   /// Tests getCurrentCredentials with valid credentials
   @Test("getCurrentCredentials with valid credentials", .enabled(if: Platform.isCryptoAvailable))
-  func getCurrentCredentialsWithValidCredentials() async throws {
+  internal func getCurrentCredentialsWithValidCredentials() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -152,7 +152,7 @@ struct ServerToServerAuthManagerValidationTests {
 
   /// Tests getCurrentCredentials with invalid credentials
   @Test("getCurrentCredentials with invalid credentials", .enabled(if: Platform.isCryptoAvailable))
-  func getCurrentCredentialsWithInvalidCredentials() async throws {
+  internal func getCurrentCredentialsWithInvalidCredentials() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -182,7 +182,7 @@ struct ServerToServerAuthManagerValidationTests {
 
   /// Tests various key ID formats
   @Test("Key ID validation", .enabled(if: Platform.isCryptoAvailable))
-  func keyIDValidation() async throws {
+  internal func keyIDValidation() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return

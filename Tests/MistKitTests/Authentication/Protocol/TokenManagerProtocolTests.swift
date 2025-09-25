@@ -5,12 +5,12 @@ import Testing
 
 @Suite("Token Manager - Protocol Conformance")
 /// Test suite for TokenManager protocol conformance and Sendable compliance
-struct TokenManagerProtocolTests {
+internal struct TokenManagerProtocolTests {
   // MARK: - TokenManager Protocol Tests
 
   /// Tests TokenManager protocol conformance with mock implementation
   @Test("TokenManager protocol conformance with mock implementation")
-  func tokenManagerProtocolConformance() async throws {
+  internal func tokenManagerProtocolConformance() async throws {
     let mockManager = MockTokenManager()
 
     // Test protocol methods can be called
@@ -29,7 +29,7 @@ struct TokenManagerProtocolTests {
 
   /// Tests that all types are Sendable and can be used across async boundaries
   @Test("TokenManager sendable compliance")
-  func sendableCompliance() async {
+  internal func sendableCompliance() async {
     let method = AuthenticationMethod.apiToken("test")
     let credentials = TokenCredentials(method: method)
     let error = TokenManagerError.tokenExpired
@@ -49,16 +49,16 @@ struct TokenManagerProtocolTests {
 // MARK: - Mock TokenManager Implementation
 
 /// Mock implementation of TokenManager for testing protocol conformance
-final class MockTokenManager: TokenManager {
-  var hasCredentials: Bool {
+internal final class MockTokenManager: TokenManager {
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     true
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     TokenCredentials.apiToken("mock-token")
   }
 }

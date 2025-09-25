@@ -5,7 +5,7 @@ import Testing
 
 extension TokenCredentials {
   /// Test helper to process credentials and return method type
-  func processCredentials() async -> String {
+  internal func processCredentials() async -> String {
     methodType
   }
 }

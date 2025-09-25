@@ -5,7 +5,7 @@ import Testing
 
 extension AuthenticationMethod {
   /// Test helper to process method and return method type
-  func processMethod() async -> String {
+  internal func processMethod() async -> String {
     methodType
   }
 }

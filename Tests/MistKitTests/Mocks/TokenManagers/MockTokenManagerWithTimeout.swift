@@ -11,28 +11,32 @@ import Testing
 @testable import MistKit
 
 /// Mock TokenManager that simulates timeout
-final class MockTokenManagerWithTimeout: TokenManager {
-  var hasCredentials: Bool {
+internal final class MockTokenManagerWithTimeout: TokenManager {
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     throw TokenManagerError.networkError(
       underlying: NSError(
-        domain: "TimeoutError", code: -1_001,
+        domain: "TimeoutError",
+        code: -1_001,
         userInfo: [
           NSLocalizedDescriptionKey: "Timeout"
-        ])
+        ]
+      )
     )
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     throw TokenManagerError.networkError(
       underlying: NSError(
-        domain: "TimeoutError", code: -1_001,
+        domain: "TimeoutError",
+        code: -1_001,
         userInfo: [
           NSLocalizedDescriptionKey: "Timeout"
-        ])
+        ]
+      )
     )
   }
 }

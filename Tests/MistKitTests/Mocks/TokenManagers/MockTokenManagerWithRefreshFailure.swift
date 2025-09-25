@@ -11,9 +11,7 @@ import Testing
 @testable import MistKit
 
 /// Mock TokenManager that simulates refresh failure
-final class MockTokenManagerWithRefreshFailure: TokenManager {
-  private let counter = Counter()
-
+internal final class MockTokenManagerWithRefreshFailure: TokenManager {
   private actor Counter {
     private var count = 0
 
@@ -27,15 +25,17 @@ final class MockTokenManagerWithRefreshFailure: TokenManager {
     }
   }
 
-  var hasCredentials: Bool {
+  private let counter = Counter()
+
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  var refreshCallCount: Int {
+  internal var refreshCallCount: Int {
     get async { await counter.getCount() }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     let count = await counter.increment()
     // Fail on odd calls
     if count % 2 == 1 {
@@ -44,7 +44,7 @@ final class MockTokenManagerWithRefreshFailure: TokenManager {
     return true
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     let count = await counter.increment()
     // Fail on odd calls
     if count % 2 == 1 {

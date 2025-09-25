@@ -7,7 +7,7 @@ import Testing
 extension ServerToServerAuthManager {
   /// Test helper to validate credentials and return a boolean result
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  func validateManager() async -> Bool {
+  internal func validateManager() async -> Bool {
     do {
       return try await validateCredentials()
     } catch {
@@ -17,7 +17,7 @@ extension ServerToServerAuthManager {
 
   /// Test helper to get credentials and return them or nil
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  func getCredentialsFromManager() async -> TokenCredentials? {
+  internal func getCredentialsFromManager() async -> TokenCredentials? {
     do {
       return try await getCurrentCredentials()
     } catch {
@@ -27,7 +27,7 @@ extension ServerToServerAuthManager {
 
   /// Test helper to check if credentials are available
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  func checkHasCredentials() async -> Bool {
+  internal func checkHasCredentials() async -> Bool {
     await hasCredentials
   }
 }

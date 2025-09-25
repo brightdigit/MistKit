@@ -10,16 +10,16 @@ import Foundation
 @testable import MistKit
 
 /// Mock TokenManager that returns server-to-server credentials but isn't ServerToServerAuthManager
-final class MockServerToServerTokenManager: TokenManager {
-  var hasCredentials: Bool {
+internal final class MockServerToServerTokenManager: TokenManager {
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     true
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     TokenCredentials.serverToServer(keyID: "test-key", privateKey: Data())
   }
 }

@@ -5,10 +5,10 @@ import Testing
 
 @Suite("Environment")
 /// Tests for Environment enum functionality
-struct EnvironmentTests {
+internal struct EnvironmentTests {
   /// Tests Environment enum raw values
   @Test("Environment enum raw values")
-  func environmentRawValues() {
+  internal func environmentRawValues() {
     #expect(Environment.development.rawValue == "development")
     #expect(Environment.production.rawValue == "production")
   }

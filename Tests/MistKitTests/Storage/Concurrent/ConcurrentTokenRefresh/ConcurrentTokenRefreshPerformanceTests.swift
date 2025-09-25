@@ -7,7 +7,7 @@ import Testing
 
 @Suite("Concurrent Token Refresh Performance Tests")
 /// Test suite for concurrent token refresh performance functionality
-struct ConcurrentTokenRefreshPerformanceTests {
+internal struct ConcurrentTokenRefreshPerformanceTests {
   // MARK: - Helper Methods
 
   /// Creates a standard test request for concurrent token refresh tests
@@ -73,7 +73,7 @@ struct ConcurrentTokenRefreshPerformanceTests {
 
   /// Tests concurrent token refresh with rate limiting
   @Test("Concurrent token refresh with rate limiting")
-  func concurrentTokenRefreshWithRateLimiting() async throws {
+  internal func concurrentTokenRefreshWithRateLimiting() async throws {
     let mockTokenManager = MockTokenManagerWithRateLimiting()
     let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 

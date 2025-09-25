@@ -149,3 +149,5 @@ Key endpoints documented in the OpenAPI spec:
 ## Task Master AI Instructions
 **Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
 @./.taskmaster/CLAUDE.md
+- We are using explicit ACLs in the Swift code
+- type order is based on the default in swiftlint: https://realm.github.io/SwiftLint/type_contents_order.html

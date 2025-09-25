@@ -7,7 +7,7 @@ import Testing
 
 extension AuthenticationMiddleware {
   /// Test helper to intercept request and return a boolean result
-  func interceptWithMiddleware(
+  internal func interceptWithMiddleware(
     request: HTTPRequest,
     baseURL: URL,
     operationID: String,

@@ -7,7 +7,7 @@ import Testing
 
 @Suite("Concurrent Token Refresh Error Tests")
 /// Test suite for concurrent token refresh error handling functionality
-struct ConcurrentTokenRefreshErrorTests {
+internal struct ConcurrentTokenRefreshErrorTests {
   // MARK: - Helper Methods
 
   /// Creates a standard test request for concurrent token refresh tests
@@ -73,7 +73,7 @@ struct ConcurrentTokenRefreshErrorTests {
 
   /// Tests concurrent token refresh with refresh failures
   @Test("Concurrent token refresh with refresh failures")
-  func concurrentTokenRefreshWithRefreshFailures() async throws {
+  internal func concurrentTokenRefreshWithRefreshFailures() async throws {
     let mockTokenManager = MockTokenManagerWithRefreshFailure()
     let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -100,7 +100,7 @@ struct ConcurrentTokenRefreshErrorTests {
 
   /// Tests concurrent token refresh with timeout scenarios
   @Test("Concurrent token refresh with timeout scenarios")
-  func concurrentTokenRefreshWithTimeoutScenarios() async throws {
+  internal func concurrentTokenRefreshWithTimeoutScenarios() async throws {
     let mockTokenManager = MockTokenManagerWithRefreshTimeout()
     let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 

@@ -6,7 +6,7 @@ import Testing
 extension InMemoryTokenStorageTests {
   /// Token removal tests for InMemoryTokenStorage
   @Suite("Removal Tests")
-  struct RemovalTests {
+  internal struct RemovalTests {
     // MARK: - Test Data Setup
 
     private static let testAPIToken =
@@ -17,7 +17,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests removing stored token by identifier
     @Test("Remove stored token by identifier")
-    func removeStoredTokenByIdentifier() async throws {
+    internal func removeStoredTokenByIdentifier() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -34,7 +34,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests removing non-existent token
     @Test("Remove non-existent token")
-    func removeNonExistentToken() async throws {
+    internal func removeNonExistentToken() async throws {
       let storage = InMemoryTokenStorage()
 
       // Should not throw or crash
@@ -46,7 +46,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests removing token with nil identifier
     @Test("Remove token with nil identifier")
-    func removeTokenWithNilIdentifier() async throws {
+    internal func removeTokenWithNilIdentifier() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -65,7 +65,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests removing specific token from multiple stored tokens
     @Test("Remove specific token from multiple stored tokens")
-    func removeSpecificTokenFromMultipleStoredTokens() async throws {
+    internal func removeSpecificTokenFromMultipleStoredTokens() async throws {
       let storage = InMemoryTokenStorage()
 
       let credentials1 = TokenCredentials.apiToken("token1")
@@ -107,7 +107,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests removing all tokens by clearing storage
     @Test("Remove all tokens by clearing storage")
-    func removeAllTokensByClearingStorage() async throws {
+    internal func removeAllTokensByClearingStorage() async throws {
       let storage = InMemoryTokenStorage()
 
       let credentials1 = TokenCredentials.apiToken("token1")
@@ -146,7 +146,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests removing token with empty string identifier
     @Test("Remove token with empty string identifier")
-    func removeTokenWithEmptyStringIdentifier() async throws {
+    internal func removeTokenWithEmptyStringIdentifier() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -163,7 +163,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests removing token with special characters in identifier
     @Test("Remove token with special characters in identifier")
-    func removeTokenWithSpecialCharactersInIdentifier() async throws {
+    internal func removeTokenWithSpecialCharactersInIdentifier() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
       let specialIdentifier = "test@#$%^&*()_+-={}[]|\\:;\"'<>?,./"
@@ -181,7 +181,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests removing expired token
     @Test("Remove expired token")
-    func removeExpiredToken() async throws {
+    internal func removeExpiredToken() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
       let expirationTime = Date().addingTimeInterval(-3_600)  // 1 hour ago (expired)

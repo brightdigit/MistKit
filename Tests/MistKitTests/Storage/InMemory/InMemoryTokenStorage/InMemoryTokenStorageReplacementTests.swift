@@ -5,7 +5,7 @@ import Testing
 
 @Suite("In-Memory Token Storage Replacement")
 /// Test suite for InMemoryTokenStorage token replacement functionality
-struct InMemoryTokenStorageReplacementTests {
+internal struct InMemoryTokenStorageReplacementTests {
   // MARK: - Test Data Setup
 
   private static let testAPIToken =
@@ -16,7 +16,7 @@ struct InMemoryTokenStorageReplacementTests {
 
   /// Tests replacing stored token with new token
   @Test("Replace stored token with new token")
-  func replaceStoredTokenWithNewToken() async throws {
+  internal func replaceStoredTokenWithNewToken() async throws {
     let storage = InMemoryTokenStorage()
     let originalCredentials = TokenCredentials.apiToken(Self.testAPIToken)
     let newCredentials = TokenCredentials.webAuthToken(
@@ -39,7 +39,7 @@ struct InMemoryTokenStorageReplacementTests {
 
   /// Tests replacing stored token with same token
   @Test("Replace stored token with same token")
-  func replaceStoredTokenWithSameToken() async throws {
+  internal func replaceStoredTokenWithSameToken() async throws {
     let storage = InMemoryTokenStorage()
     let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 

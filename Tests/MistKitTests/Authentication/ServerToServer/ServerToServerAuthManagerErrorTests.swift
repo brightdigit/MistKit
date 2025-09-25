@@ -6,7 +6,7 @@ import Testing
 
 @Suite("Server-to-Server Auth Manager Error Handling")
 /// Test suite for ServerToServerAuthManager error handling functionality
-struct ServerToServerAuthManagerErrorTests {
+internal struct ServerToServerAuthManagerErrorTests {
   // MARK: - Test Data Setup
 
   private static func generateTestPrivateKeyClosure() -> @Sendable () throws ->
@@ -19,7 +19,7 @@ struct ServerToServerAuthManagerErrorTests {
 
   /// Tests ServerToServerAuthManager initialization with invalid private key data
   @Test("Initialization with invalid private key data", .enabled(if: Platform.isCryptoAvailable))
-  func initializationWithInvalidPrivateKeyData() async throws {
+  internal func initializationWithInvalidPrivateKeyData() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -38,7 +38,7 @@ struct ServerToServerAuthManagerErrorTests {
 
   /// Tests ServerToServerAuthManager initialization with invalid PEM string
   @Test("Initialization with invalid PEM string", .enabled(if: Platform.isCryptoAvailable))
-  func initializationWithInvalidPEMString() async throws {
+  internal func initializationWithInvalidPEMString() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return
@@ -66,7 +66,7 @@ struct ServerToServerAuthManagerErrorTests {
 
   /// Tests ServerToServerAuthManager initialization with malformed PEM string
   @Test("Initialization with malformed PEM string", .enabled(if: Platform.isCryptoAvailable))
-  func initializationWithMalformedPEMString() async throws {
+  internal func initializationWithMalformedPEMString() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("ServerToServerAuthManager is not available on this operating system.")
       return

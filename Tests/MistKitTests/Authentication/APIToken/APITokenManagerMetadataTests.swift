@@ -4,17 +4,17 @@ import Testing
 @testable import MistKit
 
 @Suite("API Token Manager Metadata")
-enum APITokenManagerMetadataTests {}
+internal enum APITokenManagerMetadataTests {}
 
 extension APITokenManagerMetadataTests {
   /// Metadata and sendable compliance tests for APITokenManager
   @Suite("Metadata Tests")
-  struct MetadataTests {
+  internal struct MetadataTests {
     // MARK: - Metadata Tests
 
     /// Tests credentialsWithMetadata method
     @Test("credentialsWithMetadata method")
-    func credentialsWithMetadata() {
+    internal func credentialsWithMetadata() {
       let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
       let manager = APITokenManager(apiToken: validToken)
 
@@ -33,7 +33,7 @@ extension APITokenManagerMetadataTests {
 
     /// Tests credentialsWithMetadata with empty metadata
     @Test("credentialsWithMetadata with empty metadata")
-    func credentialsWithEmptyMetadata() {
+    internal func credentialsWithEmptyMetadata() {
       let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
       let manager = APITokenManager(apiToken: validToken)
 
@@ -52,7 +52,7 @@ extension APITokenManagerMetadataTests {
 
     /// Tests that APITokenManager can be used across async boundaries
     @Test("APITokenManager sendable compliance")
-    func sendableCompliance() async {
+    internal func sendableCompliance() async {
       let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
       let manager = APITokenManager(apiToken: validToken)
 

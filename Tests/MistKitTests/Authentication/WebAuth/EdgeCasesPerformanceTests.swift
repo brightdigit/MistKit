@@ -6,7 +6,7 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Performance edge cases tests for WebAuthTokenManager
   @Suite("Edge Cases Performance Tests")
-  struct EdgeCasesPerformanceTests {
+  internal struct EdgeCasesPerformanceTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -17,7 +17,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager performance with many operations
     @Test("WebAuthTokenManager performance with many operations")
-    func webAuthTokenManagerPerformanceWithManyOperations() async throws {
+    internal func webAuthTokenManagerPerformanceWithManyOperations() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -43,7 +43,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager with large token values
     @Test("WebAuthTokenManager with large token values")
-    func webAuthTokenManagerWithLargeTokenValues() async throws {
+    internal func webAuthTokenManagerWithLargeTokenValues() async throws {
       let largeAPIToken = String(repeating: "a", count: 10_000)
       let largeWebAuthToken = String(repeating: "b", count: 10_000)
 

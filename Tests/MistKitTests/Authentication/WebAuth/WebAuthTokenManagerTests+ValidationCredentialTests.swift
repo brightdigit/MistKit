@@ -6,7 +6,7 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Credential validation tests for WebAuthTokenManager
   @Suite("Validation Credential Tests")
-  struct ValidationCredentialTests {
+  internal struct ValidationCredentialTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -19,7 +19,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests hasCredentials with valid tokens
     @Test("hasCredentials with valid tokens")
-    func hasCredentialsWithValidTokens() async {
+    internal func hasCredentialsWithValidTokens() async {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -31,7 +31,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests hasCredentials with invalid tokens
     @Test("hasCredentials with invalid tokens")
-    func hasCredentialsWithInvalidTokens() async {
+    internal func hasCredentialsWithInvalidTokens() async {
       let manager = WebAuthTokenManager(
         apiToken: Self.invalidAPIToken,
         webAuthToken: Self.shortWebAuthToken
@@ -43,7 +43,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests getCurrentCredentials with valid tokens
     @Test("getCurrentCredentials with valid tokens")
-    func getCurrentCredentialsWithValidTokens() async throws {
+    internal func getCurrentCredentialsWithValidTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -64,7 +64,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests getCurrentCredentials with invalid tokens
     @Test("getCurrentCredentials with invalid tokens")
-    func getCurrentCredentialsWithInvalidTokens() async throws {
+    internal func getCurrentCredentialsWithInvalidTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.invalidAPIToken,
         webAuthToken: Self.shortWebAuthToken

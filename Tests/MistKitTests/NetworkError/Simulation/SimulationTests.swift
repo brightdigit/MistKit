@@ -9,7 +9,7 @@ import Testing
 extension NetworkErrorTests {
   /// Network error simulation tests
   @Suite("Simulation Tests")
-  struct SimulationTests {
+  internal struct SimulationTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -19,7 +19,7 @@ extension NetworkErrorTests {
 
     /// Tests simulation of network timeout errors
     @Test("Simulate network timeout errors")
-    func simulateNetworkTimeoutErrors() async throws {
+    internal func simulateNetworkTimeoutErrors() async throws {
       let mockTokenManager = MockTokenManagerWithTimeout()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -55,7 +55,7 @@ extension NetworkErrorTests {
 
     /// Tests simulation of network connection errors
     @Test("Simulate network connection errors")
-    func simulateNetworkConnectionErrors() async throws {
+    internal func simulateNetworkConnectionErrors() async throws {
       let mockTokenManager = MockTokenManagerWithConnectionError()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
@@ -91,7 +91,7 @@ extension NetworkErrorTests {
 
     /// Tests simulation of intermittent network failures
     @Test("Simulate intermittent network failures")
-    func simulateIntermittentNetworkFailures() async throws {
+    internal func simulateIntermittentNetworkFailures() async throws {
       let mockTokenManager = MockTokenManagerWithIntermittentFailures()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 

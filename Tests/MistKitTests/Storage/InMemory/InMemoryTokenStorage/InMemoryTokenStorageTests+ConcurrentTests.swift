@@ -3,12 +3,12 @@ import Testing
 
 @testable import MistKit
 
-enum InMemoryTokenStorageTests {}
+internal enum InMemoryTokenStorageTests {}
 
 extension InMemoryTokenStorageTests {
   /// Concurrent access tests for InMemoryTokenStorage
   @Suite("Concurrent Tests")
-  struct ConcurrentTests {
+  internal struct ConcurrentTests {
     // MARK: - Test Data Setup
 
     private static let testAPIToken =
@@ -18,7 +18,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests concurrent storage operations
     @Test("Concurrent storage operations")
-    func concurrentStorageOperations() async throws {
+    internal func concurrentStorageOperations() async throws {
       let storage = InMemoryTokenStorage()
       let credentials1 = TokenCredentials.apiToken("token1")
       let credentials2 = TokenCredentials.apiToken("token2")
@@ -41,7 +41,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests concurrent retrieval operations
     @Test("Concurrent retrieval operations")
-    func concurrentRetrievalOperations() async throws {
+    internal func concurrentRetrievalOperations() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
@@ -66,7 +66,7 @@ extension InMemoryTokenStorageTests {
 
     /// Tests that InMemoryTokenStorage can be used across async boundaries
     @Test("InMemoryTokenStorage sendable compliance")
-    func sendableCompliance() async throws {
+    internal func sendableCompliance() async throws {
       let storage = InMemoryTokenStorage()
       let credentials = TokenCredentials.apiToken(Self.testAPIToken)
 
