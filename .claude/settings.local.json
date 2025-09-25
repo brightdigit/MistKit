@@ -22,7 +22,8 @@
       "Bash(CI=1 Scripts/lint.sh)",
       "Bash(env CI=1 Scripts/lint.sh)",
       "Bash(find:*)",
-      "Bash(env CI=1 ./Scripts/lint.sh)"
+      "Bash(env CI=1 ./Scripts/lint.sh)",
+      "Read(//private/tmp/claude/**)"
     ],
     "deny": []
   },

@@ -6,14 +6,10 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Authentication Middleware Initialization")
-/// Initialization tests for AuthenticationMiddleware
-internal enum AuthenticationMiddlewareInitializationTests {}
-
-extension AuthenticationMiddlewareInitializationTests {
+extension AuthenticationMiddlewareTests {
   /// Basic functionality tests for AuthenticationMiddleware
-  @Suite("Basic Tests")
-  internal struct BasicTests {
+  @Suite("Authentication Middleware Initialization")
+  internal struct InitializationTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =

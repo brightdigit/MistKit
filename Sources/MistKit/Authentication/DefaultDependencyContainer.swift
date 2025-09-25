@@ -1,5 +1,5 @@
 //
-//  TokenRefreshManager.swift
+//  DefaultDependencyContainer.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,42 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
 
-/// Protocol for managing token refresh operations
-public protocol TokenRefreshManager: Sendable {
-  /// Refreshes the current token if needed
-  /// - Returns: Updated TokenCredentials or nil if no refresh needed
-  /// - Throws: TokenManagerError if refresh fails
-  func refreshTokenIfNeeded() async throws -> TokenCredentials?
+/// Default implementation of dependency injection container
+public final class DefaultDependencyContainer: DependencyContainer, @unchecked Sendable {
+  private var factories: [String: @Sendable () throws -> Any] = [:]
+  private let lock = NSLock()
 
-  /// Forces a token refresh regardless of expiry
-  /// - Returns: Updated TokenCredentials
-  /// - Throws: TokenManagerError if refresh fails
-  func forceRefreshToken() async throws -> TokenCredentials
+  public init() {}
 
-  /// Checks if token refresh is needed
-  /// - Returns: True if refresh is needed
-  func isRefreshNeeded() async -> Bool
+  public func register<T: Sendable>(_ type: T.Type, factory: @escaping @Sendable () throws -> T) {
+    lock.lock()
+    defer { lock.unlock() }
+
+    let key = String(describing: type)
+    factories[key] = factory
+  }
+
+  public func resolve<T: Sendable>(_ type: T.Type) throws -> T {
+    lock.lock()
+    defer { lock.unlock() }
+
+    let key = String(describing: type)
+    guard let factory = factories[key] else {
+      throw DependencyResolutionError.notRegistered(type: key)
+    }
+
+    do {
+      guard let instance = try factory() as? T else {
+        throw DependencyResolutionError.resolutionFailed(
+          type: key,
+          underlying: DependencyResolutionError.notRegistered(type: key)
+        )
+      }
+      return instance
+    } catch {
+      throw DependencyResolutionError.resolutionFailed(type: key, underlying: error)
+    }
+  }
 }

@@ -1,5 +1,5 @@
 //
-//  TokenRefreshManager.swift
+//  TokenRefreshNotifier.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+/// Protocol for token refresh notifications
+public protocol TokenRefreshNotifier: Sendable {
+  /// AsyncStream of token refresh events
+  var refreshEvents: AsyncStream<TokenRefreshEvent> { get async }
 
-/// Protocol for managing token refresh operations
-public protocol TokenRefreshManager: Sendable {
-  /// Refreshes the current token if needed
-  /// - Returns: Updated TokenCredentials or nil if no refresh needed
-  /// - Throws: TokenManagerError if refresh fails
-  func refreshTokenIfNeeded() async throws -> TokenCredentials?
-
-  /// Forces a token refresh regardless of expiry
-  /// - Returns: Updated TokenCredentials
-  /// - Throws: TokenManagerError if refresh fails
-  func forceRefreshToken() async throws -> TokenCredentials
-
-  /// Checks if token refresh is needed
-  /// - Returns: True if refresh is needed
-  func isRefreshNeeded() async -> Bool
+  /// Notify of a token refresh event
+  /// - Parameter event: The refresh event
+  func notify(_ event: TokenRefreshEvent) async
 }

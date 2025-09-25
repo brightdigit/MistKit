@@ -1,5 +1,5 @@
 //
-//  TokenRefreshManager.swift
+//  DependencyResolutionError.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,19 +29,17 @@
 
 public import Foundation
 
-/// Protocol for managing token refresh operations
-public protocol TokenRefreshManager: Sendable {
-  /// Refreshes the current token if needed
-  /// - Returns: Updated TokenCredentials or nil if no refresh needed
-  /// - Throws: TokenManagerError if refresh fails
-  func refreshTokenIfNeeded() async throws -> TokenCredentials?
+/// Errors that can occur during dependency resolution
+public enum DependencyResolutionError: Error, LocalizedError, Sendable {
+  case notRegistered(type: String)
+  case resolutionFailed(type: String, underlying: any Error)
 
-  /// Forces a token refresh regardless of expiry
-  /// - Returns: Updated TokenCredentials
-  /// - Throws: TokenManagerError if refresh fails
-  func forceRefreshToken() async throws -> TokenCredentials
-
-  /// Checks if token refresh is needed
-  /// - Returns: True if refresh is needed
-  func isRefreshNeeded() async -> Bool
+  public var errorDescription: String? {
+    switch self {
+    case .notRegistered(let type):
+      "Dependency not registered: \(type)"
+    case .resolutionFailed(let type, let error):
+      "Failed to resolve \(type): \(error.localizedDescription)"
+    }
+  }
 }

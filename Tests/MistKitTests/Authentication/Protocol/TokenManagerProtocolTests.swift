@@ -47,18 +47,3 @@ internal struct TokenManagerProtocolTests {
 }
 
 // MARK: - Mock TokenManager Implementation
-
-/// Mock implementation of TokenManager for testing protocol conformance
-internal final class MockTokenManager: TokenManager {
-  internal var hasCredentials: Bool {
-    get async { true }
-  }
-
-  internal func validateCredentials() async throws -> Bool {
-    true
-  }
-
-  internal func getCurrentCredentials() async throws -> TokenCredentials? {
-    TokenCredentials.apiToken("mock-token")
-  }
-}

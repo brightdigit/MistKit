@@ -1,5 +1,5 @@
 //
-//  TokenRefreshManager.swift
+//  TokenManagerFactory.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
-
-/// Protocol for managing token refresh operations
-public protocol TokenRefreshManager: Sendable {
-  /// Refreshes the current token if needed
-  /// - Returns: Updated TokenCredentials or nil if no refresh needed
-  /// - Throws: TokenManagerError if refresh fails
-  func refreshTokenIfNeeded() async throws -> TokenCredentials?
-
-  /// Forces a token refresh regardless of expiry
-  /// - Returns: Updated TokenCredentials
-  /// - Throws: TokenManagerError if refresh fails
-  func forceRefreshToken() async throws -> TokenCredentials
-
-  /// Checks if token refresh is needed
-  /// - Returns: True if refresh is needed
-  func isRefreshNeeded() async -> Bool
+/// Token manager factory for creating appropriate token managers
+public protocol TokenManagerFactory: Sendable {
+  /// Creates a token manager based on configuration
+  /// - Parameters:
+  ///   - configuration: The MistKit configuration
+  ///   - storage: Optional token storage
+  /// - Returns: Appropriate TokenManager instance
+  /// - Throws: TokenManagerError if creation fails
+  func createTokenManager(
+    configuration: MistKitConfiguration,
+    storage: (any TokenStorage)?
+  ) async throws -> any TokenManager
 }

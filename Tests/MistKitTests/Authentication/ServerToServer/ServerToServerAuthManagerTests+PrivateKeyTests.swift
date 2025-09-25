@@ -4,10 +4,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Server-to-Server Auth Manager Private Key Validation")
-internal enum ServerToServerAuthManagerPrivateKeyTests {}
-
-extension ServerToServerAuthManagerPrivateKeyTests {
+extension ServerToServerAuthManagerTests {
   /// Private key validation tests for ServerToServerAuthManager
   @Suite("Private Key Tests")
   internal struct PrivateKeyTests {
