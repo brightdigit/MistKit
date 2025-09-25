@@ -39,7 +39,7 @@ extension NetworkErrorTests {
         _ = try await middleware.intercept(
           originalRequest,
           body: nil,
-          baseURL: URL(string: "https://api.apple-cloudkit.com")!,
+          baseURL: .cloudKitAPI,
           operationID: "test-operation",
           next: next
         )
@@ -75,7 +75,7 @@ extension NetworkErrorTests {
         _ = try await middleware.intercept(
           originalRequest,
           body: nil,
-          baseURL: URL(string: "https://api.apple-cloudkit.com")!,
+          baseURL: .cloudKitAPI,
           operationID: "test-operation",
           next: next
         )
@@ -116,7 +116,7 @@ extension NetworkErrorTests {
           _ = try await middleware.intercept(
             originalRequest,
             body: nil,
-            baseURL: URL(string: "https://api.apple-cloudkit.com")!,
+            baseURL: .cloudKitAPI,
             operationID: "test-operation",
             next: next
           )

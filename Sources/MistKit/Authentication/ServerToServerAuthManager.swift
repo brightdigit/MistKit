@@ -147,9 +147,7 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
 
     // Try to create a test signature to validate the private key
     do {
-      guard let testData = "test".data(using: .utf8) else {
-        throw TokenManagerError.internalError(reason: "Failed to create test data")
-      }
+      let testData = Data("test".utf8)
       let privateKey = try createPrivateKey()
       _ = try privateKey.signature(for: testData)
     } catch {

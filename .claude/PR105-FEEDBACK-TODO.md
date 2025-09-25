@@ -10,6 +10,7 @@
 - [x] **AdaptiveTokenManager.swift:437** - Split file (currently 437 lines, limit 225) *[SwiftLint: file_length]*
 - [x] **WebAuthTokenManager.swift:396** - Split file (currently 396 lines, limit 225) *[SwiftLint: file_length]*
 - [x] **TokenManager.swift:368** - Split file (currently 368 lines, limit 225) *[SwiftLint: file_length]*
+- [ ] **InMemoryTokenStorageTests+BasicTests.swift:233** - Split file (currently 233 lines, limit 225) *[SwiftLint: file_length]*
 
 ## ⚠️ HIGH PRIORITY WARNINGS
 
@@ -53,8 +54,13 @@
 
 ### Code Quality Issues
 - [x] **AuthenticationMiddleware.swift:46** - Reduce cyclomatic complexity (currently 11, limit 6) *[SwiftLint: cyclomatic_complexity]* ✅ Refactored into helper methods
+- [ ] **SecureLogging.swift:94** - Reduce function complexity (currently 7, limit 6) *[SwiftLint: cyclomatic_complexity]*
 - [x] **AuthenticationMiddleware.swift:46** - Reduce function body length (currently 67 lines, limit 50) *[SwiftLint: function_body_length]* ✅ Refactored into helper methods
 - [x] **MistKitClient.swift:133** - Fix line length (currently 197 chars, limit 108) *[SwiftLint: line_length]* ✅ Fixed with multiline string
+- [ ] **MistKitConfiguration.swift:91** - Fix line length (currently 124 chars, limit 108) *[SwiftLint: line_length]*
+- [ ] **MistKitClient.swift:163** - Fix line length (currently 124 chars, limit 108) *[SwiftLint: line_length]*
+- [ ] **MistKitClient.swift:202** - Fix line length (currently 125 chars, limit 108) *[SwiftLint: line_length]*
+- [ ] **AdaptiveTokenManager+Transitions.swift:69** - Fix line length (currently 118 chars, limit 108) *[SwiftLint: line_length]*
 - [x] **AdaptiveTokenManager.swift:52** - Fix variable name 'to' (too short, needs 3+ chars) *[SwiftLint: identifier_name]* ✅ Renamed to 'toMode'
 - [x] **Reduce middleware complexity by extracting per-auth helpers** *[CodeRabbit: code quality]* ✅ AuthenticationMiddleware refactored
 - [x] **Remove unused refreshTokenIfNeeded() method** *[Code cleanup]* ✅ Removed dead code from TokenManager protocol and all implementations
@@ -117,38 +123,41 @@
 - [x] **TokenManagerTests.swift:164** - Remove force unwrap (test file) *[SwiftLint: force_unwrapping]* ✅ Added guard statements
 
 ### String to Data Conversion
-- [ ] **ServerToServerAuthManager.swift:189** - Use non-optional Data initializer *[SwiftLint: non_optional_string_data_conversion]*
-- [ ] **TokenManagerTests.swift:32** - Use non-optional Data initializer *[SwiftLint: non_optional_string_data_conversion]*
-- [ ] **TokenManagerTests.swift:108** - Use non-optional Data initializer *[SwiftLint: non_optional_string_data_conversion]*
-- [ ] **TokenManagerTests.swift:164** - Use non-optional Data initializer *[SwiftLint: non_optional_string_data_conversion]*
+- [x] **ServerToServerAuthManager.swift:189** - Use non-optional Data initializer *[SwiftLint: non_optional_string_data_conversion]* ✅ Fixed
+- [x] **TokenManagerTests.swift:32** - Use non-optional Data initializer *[SwiftLint: non_optional_string_data_conversion]* ✅ Fixed
+- [x] **TokenManagerTests.swift:108** - Use non-optional Data initializer *[SwiftLint: non_optional_string_data_conversion]* ✅ Fixed
+- [x] **TokenManagerTests.swift:164** - Use non-optional Data initializer *[SwiftLint: non_optional_string_data_conversion]* ✅ Fixed
 
-### Access Control Level Issues
-- [ ] **AdaptiveTokenManagerIntegrationTests.swift:5** - Add explicit ACL keywords *[SwiftLint: explicit_acl / explicit_top_level_acl]*
-- [ ] **AdaptiveTokenManagerIntegrationTests.swift:6** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
-- [ ] **AdaptiveTokenManagerIntegrationTests.swift:59** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
-- [ ] **AdaptiveTokenManagerIntegrationTests.swift:82** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
-- [ ] **TokenManagerTests.swift:308** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
-- [ ] **TokenManagerTests.swift:310** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
-- [ ] **TokenManagerTests.swift:314** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
-- [ ] **TokenManagerTests.swift:318** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
-- [ ] **TokenManagerTests.swift:322** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
+### Access Control Level Issues (CRITICAL - 200+ violations)
+- [ ] **ALL TEST FILES** - Add explicit ACL keywords to all declarations *[SwiftLint: explicit_acl / explicit_top_level_acl]* 🔥 **HIGH PRIORITY**
+- [ ] **BaseTokenManager.swift** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
+- [ ] **EnvironmentConfig.swift** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
+- [ ] **All Mock Token Managers** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
+- [ ] **All Test Helper Files** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
+- [ ] **All Storage Test Files** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
+- [ ] **All Authentication Test Files** - Add explicit ACL keywords *[SwiftLint: explicit_acl]*
 
 ### Code Formatting Issues
-- [ ] **AdaptiveTokenManagerIntegrationTests.swift:22** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]*
-- [ ] **MistKitClient.swift:78** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]*
-- [ ] **ServerToServerAuthManager.swift:238** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]*
-- [ ] **AdaptiveTokenManager.swift:270** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]*
-- [ ] **AdaptiveTokenManager.swift:334** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]*
-- [ ] **AdaptiveTokenManager.swift:348** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]*
-- [ ] **AdaptiveTokenManager.swift:392** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]*
-- [ ] **WebAuthTokenManager.swift:195** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]*
-- [ ] **WebAuthTokenManager.swift:274** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]*
-- [ ] **WebAuthTokenManager.swift:317** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]*
-- [ ] **CloudKitService.swift:85** - Fix multiline parameters *[SwiftLint: multiline_parameters]*
+- [x] **AdaptiveTokenManagerIntegrationTests.swift:22** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* ✅ Fixed
+- [x] **MistKitClient.swift:78** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* ✅ Fixed
+- [x] **ServerToServerAuthManager.swift:238** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* ✅ Fixed
+- [x] **AdaptiveTokenManager.swift:270** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* ✅ Fixed
+- [x] **AdaptiveTokenManager.swift:334** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* ✅ Fixed
+- [x] **AdaptiveTokenManager.swift:348** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* ✅ Fixed
+- [x] **AdaptiveTokenManager.swift:392** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* ✅ Fixed
+- [x] **WebAuthTokenManager.swift:195** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* ✅ Fixed
+- [x] **WebAuthTokenManager.swift:274** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* ✅ Fixed
+- [x] **WebAuthTokenManager.swift:317** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* ✅ Fixed
+- [ ] **CloudKitService.swift:85** - Fix multiline parameters *[SwiftLint: multiline_parameters]* (still present in CloudKitService+Initialization.swift:82)
+- [ ] **MistKitClient.swift:160** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* (new violation)
+- [ ] **MistKitClient.swift:75** - Fix multiline parameters *[SwiftLint: multiline_parameters]* (new violation)
+- [ ] **DependencyContainer.swift:177** - Fix multiline arguments brackets *[SwiftLint: multiline_arguments_brackets]* (new violation)
 
 ### Conditional Returns
 - [ ] **ServerToServerAuthManager.swift:222** - Put conditional return on newline *[SwiftLint: conditional_returns_on_newline]*
 - [ ] **WebAuthTokenManager.swift:179** - Put conditional return on newline *[SwiftLint: conditional_returns_on_newline]*
+- [ ] **AuthenticationMiddleware.swift:154** - Put conditional return on newline *[SwiftLint: conditional_returns_on_newline]*
+- [ ] **EnvironmentConfig.swift:81** - Put conditional return on newline *[SwiftLint: conditional_returns_on_newline]*
 
 ### Type Content Order Violations
 - [ ] **APITokenManager.swift** - Reorder initializer placement *[SwiftLint: type_contents_order]*
@@ -176,6 +185,7 @@
 
 ### API Documentation (Current: 66.36% coverage)
 - [ ] Add missing documentation to public APIs *[CodeRabbit: documentation coverage]*
+- [ ] **EnvironmentConfig.swift:36-42** - Add documentation for 7 public declarations *[SwiftLint: missing_docs]*
 - [ ] Document authentication flow patterns *[CodeRabbit: documentation review]*
 - [ ] Add usage examples for token managers *[CodeRabbit: documentation review]*
 - [ ] Document error handling strategies *[CodeRabbit: documentation review]*
@@ -200,24 +210,26 @@
 
 ## 📊 PRIORITY SUMMARY
 
-**🚨 CRITICAL (5 items):** File splitting by type/extension + file length violations ✅ **COMPLETED**
+**🚨 CRITICAL (6 items):** File splitting by type/extension + file length violations (5 completed, 1 remaining)
 **⚠️ HIGH PRIORITY (19 items):** ✅ **COMPLETED:** All security issues resolved, force unwraps eliminated, complexity reduced, middleware refactored
+**⚠️ ACL VIOLATIONS (200+ items):** 🔥 **CRITICAL** - Massive explicit ACL violations across all test files and some source files
 **🔧 ARCHITECTURE (15 items):** Reliability, code organization, protocols
 **📈 TESTING (21 items):** ✅ **MAJOR PROGRESS** - 161 tests across 48 suites, comprehensive coverage implemented
-**📋 MEDIUM PRIORITY (33 items):** Access control, formatting, type organization
+**📋 MEDIUM PRIORITY (33 items):** Access control, formatting, type organization (10+ formatting issues completed)
 **⚡ PERFORMANCE (5 items):** ✅ **MAJOR PROGRESS:** 4/5 completed - regex caching, allocation reduction, efficient patterns
 **🔍 SPECIFIC ISSUES (3 items):** Line-specific bugs from Claude Code Review
 **🏗️ PLATFORM (5 items):** Windows support, CI/CD, Swift versions
 **📚 DOCUMENTATION (12 items):** API coverage from 66.36%, quality improvements
 
-**Total Items: ~118 individual tasks**
+**Total Items: ~118 individual tasks + 437 current lint violations**
 
 ### Implementation Priority:
-1. ✅ **Critical file length violations** - Split oversized files first **COMPLETED**
+1. ✅ **Critical file length violations** - Split oversized files first **COMPLETED** (5/6 done, 1 remaining)
 2. ✅ **Security hardening** - Token management and secret handling **COMPLETED**
-3. 🔄 **Architecture improvements** - Reliability and organization **IN PROGRESS**
-4. ✅ **Test coverage expansion** - From 15.24% to 161 comprehensive tests across 48 test suites **COMPLETED**
-5. ✅ **Code quality** - Force unwraps, complexity, line length **MAJOR PROGRESS**
+3. 🔥 **ACL VIOLATIONS** - Add explicit access control keywords to 200+ declarations across test files
+4. 🔄 **Architecture improvements** - Reliability and organization **IN PROGRESS**
+5. ✅ **Test coverage expansion** - From 15.24% to 161 comprehensive tests across 48 test suites **COMPLETED**
+6. ✅ **Code quality** - Force unwraps, complexity, line length **MAJOR PROGRESS**
 
 ## 🎯 **RECENT ACCOMPLISHMENTS (2025-09-22):**
 - ✅ **ALL SECURITY ISSUES COMPLETED** (token validation, secure memory, safe logging, secret redaction)
@@ -244,6 +256,23 @@
 - ✅ **Code cleanup** - Simplified protocol definitions and removed redundant conditional compilation
 
 **Result:** All specific issues resolved, custom transport support added, dead code eliminated, and codebase significantly cleaned up
+
+## 🎯 **CURRENT LINT STATUS (2025-09-25):**
+- ⚠️ **437 LINT VIOLATIONS FOUND** - Down from previous runs, but still significant cleanup needed
+- ✅ **RECENT FIXES COMPLETED:**
+  - **String to Data Conversion** - All 4 violations fixed ✅
+  - **Multiline Arguments Brackets** - 10+ violations fixed in source files ✅
+  - **Force Unwrapping** - All source file violations fixed (only test file suppressions remain) ✅
+- 🔍 **MAIN ISSUES IDENTIFIED:**
+  - **Explicit ACL Violations** - 200+ missing access control level keywords (explicit_acl, explicit_top_level_acl) 🔥 **HIGHEST PRIORITY**
+  - **Type Contents Order** - 50+ violations of proper type organization (type_contents_order)
+  - **File Types Order** - 4 violations of main type vs supporting type placement (file_types_order)
+  - **Multiline Formatting** - 15+ violations of argument/parameter formatting (multiline_arguments, multiline_parameters)
+  - **Line Length** - 4 violations exceeding 108 character limit (line_length) - **MOVED TO CODE QUALITY SECTION**
+  - **File Length** - 1 violation (InMemoryTokenStorageTests+BasicTests.swift: 233 lines, limit 225) - **MOVED TO CRITICAL SECTION**
+  - **Missing Documentation** - 7 public declarations missing docs (missing_docs) - **MOVED TO DOCUMENTATION SECTION**
+  - **Cyclomatic Complexity** - 1 function exceeding complexity limit (SecureLogging.swift) - **MOVED TO CODE QUALITY SECTION**
+  - **Conditional Returns** - 2 violations of return statement formatting (conditional_returns_on_newline) - **MOVED TO MEDIUM PRIORITY SECTION**
 
 ## 🎯 **TEST COVERAGE ACCOMPLISHMENTS (2025-09-25):**
 - ✅ **MAJOR TEST COVERAGE EXPANSION** - From 15.24% to 161 comprehensive tests across 48 test suites
