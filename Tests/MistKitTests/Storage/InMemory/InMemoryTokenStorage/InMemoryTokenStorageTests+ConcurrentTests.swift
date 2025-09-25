@@ -3,6 +3,8 @@ import Testing
 
 @testable import MistKit
 
+enum InMemoryTokenStorageTests {}
+
 extension InMemoryTokenStorageTests {
   /// Concurrent access tests for InMemoryTokenStorage
   @Suite("Concurrent Tests")
