@@ -88,7 +88,8 @@ public struct MistKitConfiguration: Sendable {
     if apiToken.isEmpty {
       precondition(
         keyID != nil && privateKeyData != nil,
-        "API token cannot be empty unless using server-to-server authentication (keyID and privateKeyData must be provided)"
+        "API token cannot be empty unless using server-to-server authentication "
+          + "(keyID and privateKeyData must be provided)"
       )
     }
 

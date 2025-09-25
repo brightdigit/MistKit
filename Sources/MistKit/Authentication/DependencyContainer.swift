@@ -174,7 +174,9 @@ public struct EnhancedMistKitConfiguration: Sendable {
       do {
         let factory: any TokenManagerFactory = try container.resolve(TokenManagerFactory.self)
         return try await factory.createTokenManager(
-          configuration: toMistKitConfiguration(), storage: storage)
+          configuration: toMistKitConfiguration(),
+          storage: storage
+        )
       } catch {
         // Fall back to default creation
       }

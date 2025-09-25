@@ -5,7 +5,7 @@ import Testing
 
 extension AdaptiveTokenManager {
   /// Test helper to validate credentials and return a boolean result
-  func validateManager() async -> Bool {
+  internal func validateManager() async -> Bool {
     do {
       return try await validateCredentials()
     } catch {
@@ -14,7 +14,7 @@ extension AdaptiveTokenManager {
   }
 
   /// Test helper to get credentials and return them or nil
-  func getCredentialsFromManager() async -> TokenCredentials? {
+  internal func getCredentialsFromManager() async -> TokenCredentials? {
     do {
       return try await getCurrentCredentials()
     } catch {
@@ -23,7 +23,7 @@ extension AdaptiveTokenManager {
   }
 
   /// Test helper to check if credentials are available
-  func checkHasCredentials() async -> Bool {
+  internal func checkHasCredentials() async -> Bool {
     await hasCredentials
   }
 }

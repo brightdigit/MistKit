@@ -97,32 +97,55 @@ public enum SecureLogging {
     for (key, value) in dictionary {
       let lowercasedKey = key.lowercased()
 
-      // Check if this key contains sensitive information
-      if lowercasedKey.contains("token") || lowercasedKey.contains("key")
-        || lowercasedKey.contains("secret") || lowercasedKey.contains("password")
-        || lowercasedKey.contains("auth")
-      {
-        if let stringValue = value as? String {
-          if lowercasedKey.contains("api") {
-            maskedDictionary[key] = maskAPIToken(stringValue)
-          } else if lowercasedKey.contains("web") {
-            maskedDictionary[key] = maskWebAuthToken(stringValue)
-          } else if lowercasedKey.contains("keyid") {
-            maskedDictionary[key] = maskKeyID(stringValue)
-          } else {
-            maskedDictionary[key] = maskToken(stringValue)
-          }
-        } else if let dataValue = value as? Data {
-          maskedDictionary[key] = maskPrivateKey(dataValue)
-        } else {
-          maskedDictionary[key] = "***REDACTED***"
-        }
+      if isSensitiveKey(lowercasedKey) {
+        maskedDictionary[key] = maskSensitiveValue(value, key: lowercasedKey)
       } else {
         maskedDictionary[key] = value
       }
     }
 
     return maskedDictionary
+  }
+
+  /// Checks if a key contains sensitive information
+  /// - Parameter key: The key to check
+  /// - Returns: True if the key contains sensitive information
+  private static func isSensitiveKey(_ key: String) -> Bool {
+    key.contains("token") || key.contains("key")
+      || key.contains("secret") || key.contains("password")
+      || key.contains("auth")
+  }
+
+  /// Masks a sensitive value based on its type and key
+  /// - Parameters:
+  ///   - value: The value to mask
+  ///   - key: The key associated with the value
+  /// - Returns: The masked value
+  private static func maskSensitiveValue(_ value: Any, key: String) -> Any {
+    if let stringValue = value as? String {
+      return maskStringValue(stringValue, key: key)
+    } else if let dataValue = value as? Data {
+      return maskPrivateKey(dataValue)
+    } else {
+      return "***REDACTED***"
+    }
+  }
+
+  /// Masks a string value based on its key
+  /// - Parameters:
+  ///   - value: The string value to mask
+  ///   - key: The key associated with the value
+  /// - Returns: The masked string value
+  private static func maskStringValue(_ value: String, key: String) -> String {
+    if key.contains("api") {
+      return maskAPIToken(value)
+    } else if key.contains("web") {
+      return maskWebAuthToken(value)
+    } else if key.contains("keyid") {
+      return maskKeyID(value)
+    } else {
+      return maskToken(value)
+    }
   }
 
   /// Creates a safe logging string that masks sensitive information

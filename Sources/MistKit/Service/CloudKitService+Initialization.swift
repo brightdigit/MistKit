@@ -80,8 +80,10 @@ extension CloudKitService {
   /// Initialize CloudKit service with a custom TokenManager
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public init(
-    containerIdentifier: String, tokenManager: any TokenManager,
-    environment: Environment = .development, database: Database = .private
+    containerIdentifier: String,
+    tokenManager: any TokenManager,
+    environment: Environment = .development,
+    database: Database = .private
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = ""  // Not used when providing TokenManager directly

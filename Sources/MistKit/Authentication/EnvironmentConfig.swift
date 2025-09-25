@@ -78,7 +78,9 @@ public enum EnvironmentConfig {
   ///   - defaultValue: The default value to use if not set
   /// - Returns: The boolean value of the environment variable
   public static func getBool(_ key: String, default defaultValue: Bool = false) -> Bool {
-    guard let value = getOptional(key) else { return defaultValue }
+    guard let value = getOptional(key) else {
+      return defaultValue
+    }
     return value.lowercased() == "true" || value == "1" || value.lowercased() == "yes"
   }
 

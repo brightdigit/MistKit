@@ -73,7 +73,8 @@ public struct MistKitClient {
   ///   - transport: Custom transport for network requests
   /// - Throws: ClientError if initialization fails
   public init(
-    configuration: MistKitConfiguration, tokenManager: any TokenManager,
+    configuration: MistKitConfiguration,
+    tokenManager: any TokenManager,
     transport: any ClientTransport
   ) throws {
     self.configuration = configuration
@@ -157,10 +158,14 @@ public struct MistKitClient {
   /// - Throws: ClientError if initialization fails
   public init(configuration: MistKitConfiguration, tokenManager: any TokenManager) throws {
     try self.init(
-      configuration: configuration, tokenManager: tokenManager, transport: URLSessionTransport())
+      configuration: configuration,
+      tokenManager: tokenManager,
+      transport: URLSessionTransport()
+    )
   }
 
-  /// Initialize a new MistKit client with a custom TokenManager and individual parameters using default URLSessionTransport
+  /// Initialize a new MistKit client with a custom TokenManager and individual parameters
+  /// using default URLSessionTransport
   /// - Parameters:
   ///   - container: CloudKit container identifier
   ///   - environment: CloudKit environment (development/production)
@@ -199,7 +204,8 @@ public struct MistKitClient {
       guard configuration.database == .public else {
         throw TokenManagerError.invalidCredentials(
           reason: """
-            Server-to-server authentication only supports the public database. Current database: \(configuration.database). \
+            Server-to-server authentication only supports the public database. \
+            Current database: \(configuration.database). \
             Use MistKitConfiguration.serverToServer() for proper configuration.
             """
         )

@@ -7,16 +7,16 @@
 @testable import MistKit
 
 /// Mock TokenManager that returns no credentials
-final class MockTokenManagerWithoutCredentials: TokenManager {
-  var hasCredentials: Bool {
+internal final class MockTokenManagerWithoutCredentials: TokenManager {
+  internal var hasCredentials: Bool {
     get async { false }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     false
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     nil
   }
 }

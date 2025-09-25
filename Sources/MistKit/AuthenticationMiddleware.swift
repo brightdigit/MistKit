@@ -151,7 +151,9 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
   }
 
   private func extractRequestBodyData(from body: HTTPBody?) async throws -> Data? {
-    guard let body = body else { return nil }
+    guard let body = body else {
+      return nil
+    }
 
     do {
       return try await Data(collecting: body, upTo: 1_024 * 1_024)

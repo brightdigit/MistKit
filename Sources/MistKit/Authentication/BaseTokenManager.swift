@@ -41,17 +41,17 @@ internal final class BaseTokenManager: TokenManager, @unchecked Sendable {
 
   // MARK: - TokenManager Protocol
 
-  var hasCredentials: Bool {
+  internal var hasCredentials: Bool {
     get async {
       await validateCredentialsInternal()
     }
   }
 
-  func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws -> Bool {
     await validateCredentialsInternal()
   }
 
-  func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws -> TokenCredentials? {
     _ = try await validateCredentials()
     return try await createCredentials()
   }
