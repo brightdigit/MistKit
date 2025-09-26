@@ -77,16 +77,6 @@ internal struct MistKitConfiguration: Sendable {
     privateKeyData: Data? = nil,
     storage: (any TokenStorage)? = nil
   ) {
-    precondition(!container.isEmpty, "Container identifier cannot be empty")
-    // Allow empty API token only if we have server-to-server authentication parameters
-    if apiToken.isEmpty {
-      precondition(
-        keyID != nil && privateKeyData != nil,
-        "API token cannot be empty unless using server-to-server authentication "
-          + "(keyID and privateKeyData must be provided)"
-      )
-    }
-
     self.container = container
     self.environment = environment
     self.database = database

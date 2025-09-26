@@ -47,7 +47,6 @@ public final class APITokenManager: TokenManager, Sendable {
   /// Creates a new API token manager
   /// - Parameter apiToken: The CloudKit API token from Apple Developer Console
   public init(apiToken: String) {
-    precondition(!apiToken.isEmpty, "API token cannot be empty")
     self.apiToken = apiToken
     self.credentials = TokenCredentials.apiToken(apiToken)
   }

@@ -55,7 +55,6 @@ public actor AdaptiveTokenManager: TokenManager {
     apiToken: String,
     storage: (any TokenStorage)? = nil
   ) {
-    precondition(!apiToken.isEmpty, "API token cannot be empty")
     self.apiToken = apiToken
     self.webAuthToken = nil
     self.storage = storage

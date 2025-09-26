@@ -5,10 +5,10 @@ import Testing
 
 /// Test suite for Database enum functionality and behavior validation
 @Suite("Database")
-public struct DatabaseTests {
+internal struct DatabaseTests {
   /// Tests Database enum raw values
   @Test("Database enum raw values")
-  public func databaseRawValues() {
+  internal func databaseRawValues() {
     #expect(Database.public.rawValue == "public")
     #expect(Database.private.rawValue == "private")
     #expect(Database.shared.rawValue == "shared")

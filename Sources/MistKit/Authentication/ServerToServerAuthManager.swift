@@ -57,7 +57,6 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     keyID: String,
     privateKeyCallback: @autoclosure @escaping @Sendable () throws -> P256.Signing.PrivateKey
   ) throws {
-    precondition(!keyID.isEmpty, "Key ID cannot be empty")
     let privateKey = try privateKeyCallback()
     self.keyID = keyID
     self.privateKeyData = privateKey.rawRepresentation

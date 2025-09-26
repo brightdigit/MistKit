@@ -23,7 +23,8 @@ info:
     name: Apple Developer Support
     url: https://developer.apple.com/support/
 servers:
-  - url: https://api.apple-cloudkit.com
+  - name: CloudKit Web Services API
+    url: https://api.apple-cloudkit.com
     description: CloudKit Web Services API
 
 security:
