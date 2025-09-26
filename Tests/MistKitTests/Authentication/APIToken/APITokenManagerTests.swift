@@ -84,7 +84,11 @@ internal struct APITokenManagerTests {
       Issue.record("Should have thrown TokenManagerError.invalidCredentials")
     } catch let error as TokenManagerError {
       if case .invalidCredentials(let reason) = error {
-        #expect(reason.contains("API token format is invalid"))
+        if case .apiTokenInvalidFormat = reason {
+          // Expected case
+        } else {
+          Issue.record("Expected .apiTokenInvalidFormat, got: \(reason)")
+        }
       } else {
         Issue.record("Expected invalidCredentials error, got: \(error)")
       }
@@ -102,7 +106,11 @@ internal struct APITokenManagerTests {
       Issue.record("Should have thrown TokenManagerError.invalidCredentials")
     } catch let error as TokenManagerError {
       if case .invalidCredentials(let reason) = error {
-        #expect(reason.contains("API token format is invalid"))
+        if case .apiTokenInvalidFormat = reason {
+          // Expected case
+        } else {
+          Issue.record("Expected .apiTokenInvalidFormat, got: \(reason)")
+        }
       } else {
         Issue.record("Expected invalidCredentials error, got: \(error)")
       }
@@ -120,7 +128,11 @@ internal struct APITokenManagerTests {
       Issue.record("Should have thrown TokenManagerError.invalidCredentials")
     } catch let error as TokenManagerError {
       if case .invalidCredentials(let reason) = error {
-        #expect(reason.contains("API token format is invalid"))
+        if case .apiTokenInvalidFormat = reason {
+          // Expected case
+        } else {
+          Issue.record("Expected .apiTokenInvalidFormat, got: \(reason)")
+        }
       } else {
         Issue.record("Expected invalidCredentials error, got: \(error)")
       }
@@ -138,7 +150,11 @@ internal struct APITokenManagerTests {
       Issue.record("Should have thrown TokenManagerError.invalidCredentials")
     } catch let error as TokenManagerError {
       if case .invalidCredentials(let reason) = error {
-        #expect(reason.contains("API token format is invalid"))
+        if case .apiTokenInvalidFormat = reason {
+          // Expected case
+        } else {
+          Issue.record("Expected .apiTokenInvalidFormat, got: \(reason)")
+        }
       } else {
         Issue.record("Expected invalidCredentials error, got: \(error)")
       }
@@ -174,7 +190,11 @@ internal struct APITokenManagerTests {
       Issue.record("Should have thrown TokenManagerError.invalidCredentials")
     } catch let error as TokenManagerError {
       if case .invalidCredentials(let reason) = error {
-        #expect(reason.contains("API token format is invalid"))
+        if case .apiTokenInvalidFormat = reason {
+          // Expected case
+        } else {
+          Issue.record("Expected .apiTokenInvalidFormat, got: \(reason)")
+        }
       } else {
         Issue.record("Expected invalidCredentials error, got: \(error)")
       }

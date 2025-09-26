@@ -84,7 +84,7 @@ extension ServerToServerAuthManagerTests {
         return
       }
       let shortKeyID = "short"
-      let privateKey = try Self.generateTestPrivateKey()
+      _ = try Self.generateTestPrivateKey()
 
       // Create manager with short key ID (this will pass precondition but fail validation)
       let manager = try ServerToServerAuthManager(
@@ -97,7 +97,11 @@ extension ServerToServerAuthManagerTests {
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
       } catch let error as TokenManagerError {
         if case .invalidCredentials(let reason) = error {
-          #expect(reason.contains("Key ID appears to be too short"))
+          if case .keyIdTooShort = reason {
+            // Expected case
+          } else {
+            Issue.record("Expected .keyIdTooShort, got: \(reason)")
+          }
         } else {
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
@@ -161,7 +165,7 @@ extension ServerToServerAuthManagerTests {
         return
       }
       let shortKeyID = "short"
-      let privateKey = try Self.generateTestPrivateKey()
+      _ = try Self.generateTestPrivateKey()
 
       // Create manager with short key ID
       let manager = try ServerToServerAuthManager(
@@ -174,7 +178,11 @@ extension ServerToServerAuthManagerTests {
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
       } catch let error as TokenManagerError {
         if case .invalidCredentials(let reason) = error {
-          #expect(reason.contains("Key ID appears to be too short"))
+          if case .keyIdTooShort = reason {
+            // Expected case
+          } else {
+            Issue.record("Expected .keyIdTooShort, got: \(reason)")
+          }
         } else {
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
@@ -205,7 +213,7 @@ extension ServerToServerAuthManagerTests {
           continue
         }
 
-        let privateKey = try Self.generateTestPrivateKey()
+        _ = try Self.generateTestPrivateKey()
         let manager = try ServerToServerAuthManager(
           keyID: keyID,
           privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
