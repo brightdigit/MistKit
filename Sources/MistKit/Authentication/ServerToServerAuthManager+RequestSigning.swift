@@ -75,14 +75,6 @@ extension ServerToServerAuthManager {
     }
 
     let signaturePayload = "\(iso8601Date):\(bodyHash):\(webServiceURL)"
-
-    // Debug output for troubleshooting
-    print("🔍 Debug - Signature Payload:")
-    print("   Date: \(iso8601Date)")
-    print("   Body Hash: \(bodyHash)")
-    print("   Web Service URL: \(webServiceURL)")
-    print("   Full Payload: \(signaturePayload)")
-
     let payloadData = Data(signaturePayload.utf8)
 
     // Create ECDSA signature
