@@ -99,7 +99,9 @@ extension ServerToServerAuthManager {
   /// Creates credentials with additional metadata
   /// - Parameter metadata: Additional metadata to include
   /// - Returns: TokenCredentials with metadata
-  public func credentialsWithMetadata(_ metadata: [String: String]) throws -> TokenCredentials {
+  public func credentialsWithMetadata(_ metadata: [String: String]) throws(TokenManagerError)
+    -> TokenCredentials
+  {
     try TokenCredentials(
       method: .serverToServer(keyID: keyID, privateKey: createPrivateKey().rawRepresentation),
       metadata: metadata

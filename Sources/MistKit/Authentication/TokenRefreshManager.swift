@@ -34,12 +34,12 @@ public protocol TokenRefreshManager: Sendable {
   /// Refreshes the current token if needed
   /// - Returns: Updated TokenCredentials or nil if no refresh needed
   /// - Throws: TokenManagerError if refresh fails
-  func refreshTokenIfNeeded() async throws -> TokenCredentials?
+  func refreshTokenIfNeeded() async throws(TokenManagerError) -> TokenCredentials?
 
   /// Forces a token refresh regardless of expiry
   /// - Returns: Updated TokenCredentials
   /// - Throws: TokenManagerError if refresh fails
-  func forceRefreshToken() async throws -> TokenCredentials
+  func forceRefreshToken() async throws(TokenManagerError) -> TokenCredentials
 
   /// Checks if token refresh is needed
   /// - Returns: True if refresh is needed

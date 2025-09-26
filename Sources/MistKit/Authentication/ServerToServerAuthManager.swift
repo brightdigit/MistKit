@@ -117,8 +117,12 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
 
   /// Creates a P256.Signing.PrivateKey from the stored private key data
   /// This method is thread-safe as it creates a new instance each time
-  internal func createPrivateKey() throws -> P256.Signing.PrivateKey {
-    try P256.Signing.PrivateKey(rawRepresentation: privateKeyData)
+  internal func createPrivateKey() throws(TokenManagerError) -> P256.Signing.PrivateKey {
+    do {
+      return try P256.Signing.PrivateKey(rawRepresentation: privateKeyData)
+    } catch {
+      throw TokenManagerError.invalidCredentials(.privateKeyInvalidOrCorrupted(error))
+    }
   }
 
   // MARK: - TokenManager Protocol
@@ -129,7 +133,7 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     }
   }
 
-  public func validateCredentials() async throws -> Bool {
+  public func validateCredentials() async throws(TokenManagerError) -> Bool {
     guard !keyID.isEmpty else {
       throw TokenManagerError.invalidCredentials(.keyIdEmpty)
     }
@@ -151,7 +155,7 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     return true
   }
 
-  public func getCurrentCredentials() async throws -> TokenCredentials? {
+  public func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
     // Validate first
     _ = try await validateCredentials()
     return credentials

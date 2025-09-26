@@ -41,7 +41,9 @@ extension AdaptiveTokenManager {
   /// - Parameter webAuthToken: The web authentication token from CloudKit JS
   /// - Returns: New credentials with web authentication
   /// - Throws: TokenManagerError if the web token is invalid
-  public func upgradeToWebAuthentication(webAuthToken: String) async throws -> TokenCredentials {
+  public func upgradeToWebAuthentication(webAuthToken: String) async throws(TokenManagerError)
+    -> TokenCredentials
+  {
     guard !webAuthToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(.webAuthTokenEmpty)
     }
@@ -80,7 +82,7 @@ extension AdaptiveTokenManager {
 
   /// Downgrades to API-only authentication (removes web auth token)
   /// - Returns: New credentials with API-only authentication
-  public func downgradeToAPIOnly() async throws -> TokenCredentials {
+  public func downgradeToAPIOnly() async throws(TokenManagerError) -> TokenCredentials {
     self.webAuthToken = nil
 
     // Mode changed to API-only
@@ -95,7 +97,9 @@ extension AdaptiveTokenManager {
   /// - Parameter newWebAuthToken: The new web authentication token
   /// - Returns: Updated credentials
   /// - Throws: TokenManagerError if not in web auth mode or token is invalid
-  public func updateWebAuthToken(_ newWebAuthToken: String) async throws -> TokenCredentials {
+  public func updateWebAuthToken(_ newWebAuthToken: String) async throws(TokenManagerError)
+    -> TokenCredentials
+  {
     guard webAuthToken != nil else {
       throw TokenManagerError.invalidCredentials(.authenticationModeMismatch)
     }

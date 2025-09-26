@@ -34,65 +34,88 @@ import OpenAPIURLSession
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
   /// Fetch current user information
-  public func fetchCurrentUser() async throws -> UserInfo {
-    let response = try await client.getCurrentUser(
-      .init(
-        path: createGetCurrentUserPath(containerIdentifier: containerIdentifier)
+  public func fetchCurrentUser() async throws(CloudKitError) -> UserInfo {
+    do {
+      let response = try await client.getCurrentUser(
+        .init(
+          path: createGetCurrentUserPath(containerIdentifier: containerIdentifier)
+        )
       )
-    )
 
-    let userData: Components.Schemas.UserResponse =
-      try await responseProcessor.processGetCurrentUserResponse(response)
-    return UserInfo(from: userData)
+      let userData: Components.Schemas.UserResponse =
+        try await responseProcessor.processGetCurrentUserResponse(response)
+      return UserInfo(from: userData)
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 500, rawResponse: error.localizedDescription)
+    }
   }
 
   /// List zones in the user's private database
-  public func listZones() async throws -> [ZoneInfo] {
-    let response = try await client.listZones(
-      .init(
-        path: createListZonesPath(containerIdentifier: containerIdentifier)
+  public func listZones() async throws(CloudKitError) -> [ZoneInfo] {
+    do {
+      let response = try await client.listZones(
+        .init(
+          path: createListZonesPath(containerIdentifier: containerIdentifier)
+        )
       )
-    )
 
-    let zonesData: Components.Schemas.ZonesListResponse =
-      try await responseProcessor.processListZonesResponse(response)
-    return zonesData.zones?.compactMap { zone in
-      guard let zoneID = zone.zoneID else {
-        return nil
-      }
-      return ZoneInfo(
-        zoneName: zoneID.zoneName ?? "Unknown",
-        ownerRecordName: zoneID.ownerName,
-        capabilities: []
-      )
-    } ?? []
+      let zonesData: Components.Schemas.ZonesListResponse =
+        try await responseProcessor.processListZonesResponse(response)
+      return zonesData.zones?.compactMap { zone in
+        guard let zoneID = zone.zoneID else {
+          return nil
+        }
+        return ZoneInfo(
+          zoneName: zoneID.zoneName ?? "Unknown",
+          ownerRecordName: zoneID.ownerName,
+          capabilities: []
+        )
+      } ?? []
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 500, rawResponse: error.localizedDescription)
+    }
   }
 
   /// Query records from the default zone
-  public func queryRecords(recordType: String, limit: Int = 10) async throws -> [RecordInfo] {
-    let response = try await client.queryRecords(
-      .init(
-        path: createQueryRecordsPath(containerIdentifier: containerIdentifier),
-        body: .json(
-          .init(
-            zoneID: .init(zoneName: "_defaultZone"),
-            resultsLimit: limit,
-            query: .init(
-              recordType: recordType,
-              sortBy: [
-                //                            .init(
-                //                                fieldName: "modificationDate",
-                //                                ascending: false
-                //                            )
-              ]
+  public func queryRecords(recordType: String, limit: Int = 10) async throws(CloudKitError)
+    -> [RecordInfo]
+  {
+    do {
+      let response = try await client.queryRecords(
+        .init(
+          path: createQueryRecordsPath(containerIdentifier: containerIdentifier),
+          body: .json(
+            .init(
+              zoneID: .init(zoneName: "_defaultZone"),
+              resultsLimit: limit,
+              query: .init(
+                recordType: recordType,
+                sortBy: [
+                  //                            .init(
+                  //                                fieldName: "modificationDate",
+                  //                                ascending: false
+                  //                            )
+                ]
+              )
             )
           )
         )
       )
-    )
 
-    let recordsData: Components.Schemas.QueryResponse =
-      try await responseProcessor.processQueryRecordsResponse(response)
-    return recordsData.records?.compactMap { RecordInfo(from: $0) } ?? []
+      let recordsData: Components.Schemas.QueryResponse =
+        try await responseProcessor.processQueryRecordsResponse(response)
+      return recordsData.records?.compactMap { RecordInfo(from: $0) } ?? []
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 500, rawResponse: error.localizedDescription)
+    }
   }
 }

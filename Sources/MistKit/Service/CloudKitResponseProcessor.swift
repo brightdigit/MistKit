@@ -39,7 +39,7 @@ internal struct CloudKitResponseProcessor {
   /// - Returns: The extracted user data
   /// - Throws: CloudKitError for various error conditions
   internal func processGetCurrentUserResponse(_ response: Operations.getCurrentUser.Output)
-    async throws -> Components.Schemas.UserResponse
+    async throws(CloudKitError) -> Components.Schemas.UserResponse
   {
     switch response {
     case .ok(let okResponse):
@@ -54,7 +54,7 @@ internal struct CloudKitResponseProcessor {
   /// Extract user data from OK response
   private func extractUserData(
     from response: Operations.getCurrentUser.Output.Ok
-  ) throws -> Components.Schemas.UserResponse {
+  ) throws(CloudKitError) -> Components.Schemas.UserResponse {
     switch response.body {
     case .json(let userData):
       return userData
@@ -63,7 +63,8 @@ internal struct CloudKitResponseProcessor {
 
   // swiftlint:disable cyclomatic_complexity
   /// Handle error cases for getCurrentUser
-  private func handleGetCurrentUserErrors(_ response: Operations.getCurrentUser.Output) async throws
+  private func handleGetCurrentUserErrors(_ response: Operations.getCurrentUser.Output)
+    async throws(CloudKitError)
   {
     switch response {
     case .ok:
@@ -100,7 +101,8 @@ internal struct CloudKitResponseProcessor {
   /// - Parameter response: The response to process
   /// - Returns: The extracted zones data
   /// - Throws: CloudKitError for various error conditions
-  internal func processListZonesResponse(_ response: Operations.listZones.Output) async throws
+  internal func processListZonesResponse(_ response: Operations.listZones.Output)
+    async throws(CloudKitError)
     -> Components.Schemas.ZonesListResponse
   {
     switch response {
@@ -121,7 +123,7 @@ internal struct CloudKitResponseProcessor {
   /// - Returns: The extracted records data
   /// - Throws: CloudKitError for various error conditions
   internal func processQueryRecordsResponse(_ response: Operations.queryRecords.Output)
-    async throws -> Components.Schemas.QueryResponse
+    async throws(CloudKitError) -> Components.Schemas.QueryResponse
   {
     switch response {
     case .ok(let okResponse):
@@ -140,7 +142,7 @@ internal struct CloudKitResponseProcessor {
 // MARK: - Error Handling
 extension CloudKitResponseProcessor {
   /// Process standard error responses common across endpoints
-  private func processStandardErrorResponse<T>(_: T) async throws {
+  private func processStandardErrorResponse<T>(_: T) async throws(CloudKitError) {
     // For now, throw a generic error - specific error handling should be implemented
     // per endpoint as needed to avoid the complexity of reflection-based error handling
     throw CloudKitError.invalidResponse

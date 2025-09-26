@@ -36,7 +36,7 @@ public enum TokenValidation {
   /// Validates API token format using regex
   /// - Parameter apiToken: The API token to validate
   /// - Throws: TokenManagerError if validation fails
-  public static func validateAPITokenFormat(_ apiToken: String) throws {
+  public static func validateAPITokenFormat(_ apiToken: String) throws(TokenManagerError) {
     guard !apiToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(.apiTokenEmpty)
     }
@@ -52,7 +52,7 @@ public enum TokenValidation {
   /// Validates web auth token format
   /// - Parameter webToken: The web auth token to validate
   /// - Throws: TokenManagerError if validation fails
-  public static func validateWebAuthTokenFormat(_ webToken: String) throws {
+  public static func validateWebAuthTokenFormat(_ webToken: String) throws(TokenManagerError) {
     guard !webToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(.webAuthTokenEmpty)
     }
@@ -65,7 +65,7 @@ public enum TokenValidation {
   /// Validates key ID format
   /// - Parameter keyID: The key ID to validate
   /// - Throws: TokenManagerError if validation fails
-  public static func validateKeyIDFormat(_ keyID: String) throws {
+  public static func validateKeyIDFormat(_ keyID: String) throws(TokenManagerError) {
     guard !keyID.isEmpty else {
       throw TokenManagerError.invalidCredentials(.keyIdEmpty)
     }

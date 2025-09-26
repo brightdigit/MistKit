@@ -34,7 +34,8 @@ import OpenAPIRuntime
 internal struct CloudKitErrorHandler {
   // MARK: - Specific Error Handlers
 
-  internal func handleBadRequest(_ response: Components.Responses.BadRequest) async throws -> Never
+  internal func handleBadRequest(_ response: Components.Responses.BadRequest)
+    async throws(CloudKitError) -> Never
   {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
@@ -47,7 +48,8 @@ internal struct CloudKitErrorHandler {
     }
   }
 
-  internal func handleUnauthorized(_ response: Components.Responses.Unauthorized) async throws
+  internal func handleUnauthorized(_ response: Components.Responses.Unauthorized)
+    async throws(CloudKitError)
     -> Never
   {
     if case .json(let errorResponse) = response.body {
@@ -61,7 +63,9 @@ internal struct CloudKitErrorHandler {
     }
   }
 
-  internal func handleForbidden(_ response: Components.Responses.Forbidden) async throws -> Never {
+  internal func handleForbidden(_ response: Components.Responses.Forbidden)
+    async throws(CloudKitError) -> Never
+  {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
         statusCode: 403,
@@ -73,7 +77,9 @@ internal struct CloudKitErrorHandler {
     }
   }
 
-  internal func handleNotFound(_ response: Components.Responses.NotFound) async throws -> Never {
+  internal func handleNotFound(_ response: Components.Responses.NotFound)
+    async throws(CloudKitError) -> Never
+  {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
         statusCode: 404,
@@ -85,7 +91,9 @@ internal struct CloudKitErrorHandler {
     }
   }
 
-  internal func handleConflict(_ response: Components.Responses.Conflict) async throws -> Never {
+  internal func handleConflict(_ response: Components.Responses.Conflict)
+    async throws(CloudKitError) -> Never
+  {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
         statusCode: 409,
@@ -98,7 +106,7 @@ internal struct CloudKitErrorHandler {
   }
 
   internal func handlePreconditionFailed(_ response: Components.Responses.PreconditionFailed)
-    async throws -> Never
+    async throws(CloudKitError) -> Never
   {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
@@ -112,7 +120,7 @@ internal struct CloudKitErrorHandler {
   }
 
   internal func handleContentTooLarge(_ response: Components.Responses.RequestEntityTooLarge)
-    async throws -> Never
+    async throws(CloudKitError) -> Never
   {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
@@ -125,7 +133,8 @@ internal struct CloudKitErrorHandler {
     }
   }
 
-  internal func handleTooManyRequests(_ response: Components.Responses.TooManyRequests) async throws
+  internal func handleTooManyRequests(_ response: Components.Responses.TooManyRequests)
+    async throws(CloudKitError)
     -> Never
   {
     if case .json(let errorResponse) = response.body {
@@ -140,7 +149,7 @@ internal struct CloudKitErrorHandler {
   }
 
   internal func handleMisdirectedRequest(_ response: Components.Responses.UnprocessableEntity)
-    async throws -> Never
+    async throws(CloudKitError) -> Never
   {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
@@ -154,7 +163,7 @@ internal struct CloudKitErrorHandler {
   }
 
   internal func handleInternalServerError(_ response: Components.Responses.InternalServerError)
-    async throws -> Never
+    async throws(CloudKitError) -> Never
   {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(
@@ -168,7 +177,7 @@ internal struct CloudKitErrorHandler {
   }
 
   internal func handleServiceUnavailable(_ response: Components.Responses.ServiceUnavailable)
-    async throws -> Never
+    async throws(CloudKitError) -> Never
   {
     if case .json(let errorResponse) = response.body {
       throw CloudKitError.httpErrorWithDetails(

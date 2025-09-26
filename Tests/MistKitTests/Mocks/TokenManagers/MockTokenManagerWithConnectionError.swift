@@ -15,7 +15,7 @@ internal final class MockTokenManagerWithConnectionError: TokenManager {
     get async { true }
   }
 
-  internal func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws(TokenManagerError) -> Bool {
     throw TokenManagerError.networkError(
       underlying: NSError(
         domain: "ConnectionError",
@@ -27,7 +27,7 @@ internal final class MockTokenManagerWithConnectionError: TokenManager {
     )
   }
 
-  internal func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
     throw TokenManagerError.networkError(
       underlying: NSError(
         domain: "ConnectionError",

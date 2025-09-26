@@ -57,12 +57,12 @@ public final class APITokenManager: TokenManager, Sendable {
     self.credentials = TokenCredentials.apiToken(apiToken)
   }
 
-  public func validateCredentials() async throws -> Bool {
+  public func validateCredentials() async throws(TokenManagerError) -> Bool {
     try Self.validateAPITokenFormat(apiToken)
     return true
   }
 
-  public func getCurrentCredentials() async throws -> TokenCredentials? {
+  public func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
     // Validate first
     _ = try await validateCredentials()
     return credentials

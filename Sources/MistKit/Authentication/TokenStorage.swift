@@ -70,20 +70,20 @@ public protocol TokenStorage: Sendable {
   ///   - credentials: The credentials to store
   ///   - identifier: Optional identifier for multiple credential storage
   /// - Throws: TokenStorageError if storage fails
-  func store(_ credentials: TokenCredentials, identifier: String?) async throws
+  func store(_ credentials: TokenCredentials, identifier: String?) async throws(TokenStorageError)
 
   /// Retrieves stored token credentials
   /// - Parameter identifier: Optional identifier for specific credentials
   /// - Returns: Stored credentials or nil if not found
   /// - Throws: TokenStorageError if retrieval fails
-  func retrieve(identifier: String?) async throws -> TokenCredentials?
+  func retrieve(identifier: String?) async throws(TokenStorageError) -> TokenCredentials?
 
   /// Removes stored credentials
   /// - Parameter identifier: Optional identifier for specific credentials
   /// - Throws: TokenStorageError if removal fails
-  func remove(identifier: String?) async throws
+  func remove(identifier: String?) async throws(TokenStorageError)
 
   /// Lists all stored credential identifiers
   /// - Returns: Array of stored identifiers
-  func listIdentifiers() async throws -> [String]
+  func listIdentifiers() async throws(TokenStorageError) -> [String]
 }

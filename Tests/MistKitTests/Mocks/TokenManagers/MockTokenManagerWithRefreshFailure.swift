@@ -35,7 +35,7 @@ internal final class MockTokenManagerWithRefreshFailure: TokenManager {
     get async { await counter.getCount() }
   }
 
-  internal func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws(TokenManagerError) -> Bool {
     let count = await counter.increment()
     // Fail on odd calls
     if count % 2 == 1 {
@@ -44,7 +44,7 @@ internal final class MockTokenManagerWithRefreshFailure: TokenManager {
     return true
   }
 
-  internal func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
     let count = await counter.increment()
     // Fail on odd calls
     if count % 2 == 1 {

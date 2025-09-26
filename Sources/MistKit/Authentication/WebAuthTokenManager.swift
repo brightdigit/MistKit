@@ -91,7 +91,7 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     }
   }
 
-  public func validateCredentials() async throws -> Bool {
+  public func validateCredentials() async throws(TokenManagerError) -> Bool {
     // Validate API token format
     guard !apiToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(.apiTokenEmpty)
@@ -116,7 +116,7 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     return true
   }
 
-  public func getCurrentCredentials() async throws -> TokenCredentials? {
+  public func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
     // Validate first
     _ = try await validateCredentials()
     return credentials

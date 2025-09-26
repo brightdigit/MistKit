@@ -27,7 +27,7 @@ internal final class MockTokenManagerWithRetry: TokenManager {
     get async { true }
   }
 
-  internal func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws(TokenManagerError) -> Bool {
     let count = await counter.increment()
     if count <= 2 {
       throw TokenManagerError.networkError(
@@ -43,7 +43,7 @@ internal final class MockTokenManagerWithRetry: TokenManager {
     return true
   }
 
-  internal func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
     let count = await counter.increment()
     if count <= 2 {
       throw TokenManagerError.networkError(

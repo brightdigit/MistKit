@@ -39,19 +39,19 @@ public protocol TokenManager: Sendable {
   /// Validates the current authentication credentials
   /// - Returns: True if credentials are valid and usable
   /// - Throws: TokenManagerError if validation fails
-  func validateCredentials() async throws -> Bool
+  func validateCredentials() async throws(TokenManagerError) -> Bool
 
   /// Retrieves the current token credentials
   /// - Returns: Current TokenCredentials or nil if none available
   /// - Throws: TokenManagerError if retrieval fails
-  func getCurrentCredentials() async throws -> TokenCredentials?
+  func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials?
 }
 
 extension TokenManager {
   /// Validates API token format using regex
   /// - Parameter apiToken: The API token to validate
   /// - Throws: TokenManagerError if validation fails
-  internal static func validateAPITokenFormat(_ apiToken: String) throws {
+  internal static func validateAPITokenFormat(_ apiToken: String) throws(TokenManagerError) {
     guard !apiToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(.apiTokenEmpty)
     }
@@ -67,7 +67,7 @@ extension TokenManager {
   /// Validates web auth token format
   /// - Parameter webToken: The web auth token to validate
   /// - Throws: TokenManagerError if validation fails
-  internal static func validateWebAuthTokenFormat(_ webToken: String) throws {
+  internal static func validateWebAuthTokenFormat(_ webToken: String) throws(TokenManagerError) {
     guard !webToken.isEmpty else {
       throw TokenManagerError.invalidCredentials(.webAuthTokenEmpty)
     }
@@ -80,7 +80,7 @@ extension TokenManager {
   /// Validates key ID format
   /// - Parameter keyID: The key ID to validate
   /// - Throws: TokenManagerError if validation fails
-  internal static func validateKeyIDFormat(_ keyID: String) throws {
+  internal static func validateKeyIDFormat(_ keyID: String) throws(TokenManagerError) {
     guard !keyID.isEmpty else {
       throw TokenManagerError.invalidCredentials(.keyIdEmpty)
     }

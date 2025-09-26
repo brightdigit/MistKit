@@ -12,11 +12,11 @@ internal final class MockTokenManagerWithoutCredentials: TokenManager {
     get async { false }
   }
 
-  internal func validateCredentials() async throws -> Bool {
+  internal func validateCredentials() async throws(TokenManagerError) -> Bool {
     false
   }
 
-  internal func getCurrentCredentials() async throws -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
     nil
   }
 }

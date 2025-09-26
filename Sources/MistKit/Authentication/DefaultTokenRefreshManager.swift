@@ -65,7 +65,7 @@ public final class DefaultTokenRefreshManager: TokenRefreshManager, TokenRefresh
 
   // MARK: - TokenRefreshManager
 
-  public func refreshTokenIfNeeded() async throws -> TokenCredentials? {
+  public func refreshTokenIfNeeded() async throws(TokenManagerError) -> TokenCredentials? {
     guard await isRefreshNeeded() else {
       await notify(.refreshSkipped(reason: "Token is still valid"))
       return nil
@@ -74,7 +74,7 @@ public final class DefaultTokenRefreshManager: TokenRefreshManager, TokenRefresh
     return try await performRefresh()
   }
 
-  public func forceRefreshToken() async throws -> TokenCredentials {
+  public func forceRefreshToken() async throws(TokenManagerError) -> TokenCredentials {
     try await performRefresh()
   }
 
@@ -92,7 +92,7 @@ public final class DefaultTokenRefreshManager: TokenRefreshManager, TokenRefresh
 
   // MARK: - Private Methods
 
-  private func performRefresh() async throws -> TokenCredentials {
+  private func performRefresh() async throws(TokenManagerError) -> TokenCredentials {
     await notify(.refreshStarted)
 
     do {
@@ -106,7 +106,11 @@ public final class DefaultTokenRefreshManager: TokenRefreshManager, TokenRefresh
       return credentials
     } catch {
       await notify(.refreshFailed(error))
-      throw error
+      if let tokenError = error as? TokenManagerError {
+        throw tokenError
+      } else {
+        throw TokenManagerError.internalError(.tokenRefreshFailed(error))
+      }
     }
   }
 }

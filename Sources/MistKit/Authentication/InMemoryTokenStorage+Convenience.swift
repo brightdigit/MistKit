@@ -52,7 +52,9 @@ extension InMemoryTokenStorage {
   /// Retrieves credentials by authentication method type
   /// - Parameter methodType: The authentication method type to search for
   /// - Returns: First matching credentials or nil if not found
-  public func retrieve(byMethodType methodType: String) async throws -> TokenCredentials? {
+  public func retrieve(byMethodType methodType: String) async throws(TokenStorageError)
+    -> TokenCredentials?
+  {
     let identifiers = try await listIdentifiers()
 
     for identifier in identifiers {

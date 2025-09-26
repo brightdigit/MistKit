@@ -111,7 +111,9 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
 
   // MARK: - TokenStorage Protocol
 
-  public func store(_ credentials: TokenCredentials, identifier: String?) async throws {
+  public func store(_ credentials: TokenCredentials, identifier: String?)
+    async throws(TokenStorageError)
+  {
     await storage.store(credentials, identifier: identifier, expirationTime: nil)
   }
 
@@ -121,20 +123,20 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
   ///   - identifier: Optional identifier for the credentials
   ///   - expirationTime: When the credentials expire
   public func store(_ credentials: TokenCredentials, identifier: String?, expirationTime: Date?)
-    async throws
+    async throws(TokenStorageError)
   {
     await storage.store(credentials, identifier: identifier, expirationTime: expirationTime)
   }
 
-  public func retrieve(identifier: String?) async throws -> TokenCredentials? {
+  public func retrieve(identifier: String?) async throws(TokenStorageError) -> TokenCredentials? {
     await storage.retrieve(identifier: identifier)
   }
 
-  public func remove(identifier: String?) async throws {
+  public func remove(identifier: String?) async throws(TokenStorageError) {
     await storage.remove(identifier: identifier)
   }
 
-  public func listIdentifiers() async throws -> [String] {
+  public func listIdentifiers() async throws(TokenStorageError) -> [String] {
     await storage.listIdentifiers()
   }
 

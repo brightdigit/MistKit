@@ -29,13 +29,13 @@
 
 public import Foundation
 
-internal enum CloudKitError: LocalizedError {
+public enum CloudKitError: LocalizedError, Sendable {
   case httpError(statusCode: Int)
   case httpErrorWithDetails(statusCode: Int, serverErrorCode: String?, reason: String?)
   case httpErrorWithRawResponse(statusCode: Int, rawResponse: String)
   case invalidResponse
 
-  internal var errorDescription: String? {
+  public var errorDescription: String? {
     switch self {
     case .httpError(let statusCode):
       return "CloudKit API error: HTTP \(statusCode)"

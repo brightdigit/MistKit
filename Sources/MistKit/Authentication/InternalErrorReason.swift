@@ -27,6 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(Foundation)
+  import Foundation
+#endif
+
 /// Specific reasons for internal errors
 public enum InternalErrorReason: Sendable {
   case noCredentialsAvailable
@@ -34,6 +38,7 @@ public enum InternalErrorReason: Sendable {
   case failedCredentialRetrievalAfterDowngrade
   case serverToServerRequiresSpecificManager
   case serverToServerRequiresPlatformSupport
+  case tokenRefreshFailed(any Error)
 
   public var description: String {
     switch self {
@@ -48,6 +53,8 @@ public enum InternalErrorReason: Sendable {
     case .serverToServerRequiresPlatformSupport:
       return
         "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
+    case .tokenRefreshFailed(let error):
+      return "Token refresh failed: \(error.localizedDescription)"
     }
   }
 }
