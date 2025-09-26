@@ -10,7 +10,7 @@ internal struct APITokenManagerTests {
 
   /// Tests APITokenManager initialization with valid API token
   @Test("APITokenManager initialization with valid API token")
-  internal func initializationWithValidToken() {
+  internal func initializationValidToken() {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let manager = APITokenManager(apiToken: validToken)
 
@@ -20,7 +20,7 @@ internal struct APITokenManagerTests {
 
   /// Tests APITokenManager initialization with invalid API token format
   @Test("APITokenManager initialization with invalid API token format")
-  internal func initializationWithInvalidToken() {
+  internal func initializationInvalidToken() {
     let invalidToken = "invalid_token_format"
     let manager = APITokenManager(apiToken: invalidToken)
 
@@ -30,7 +30,7 @@ internal struct APITokenManagerTests {
 
   /// Tests APITokenManager initialization with empty token (should crash)
   @Test("APITokenManager initialization with empty token")
-  internal func initializationWithEmptyToken() {
+  internal func initializationEmptyToken() {
     _ = ""
 
     // This should crash due to precondition - we can't easily test this with Swift Testing
@@ -42,7 +42,7 @@ internal struct APITokenManagerTests {
 
   /// Tests APITokenManager initialization with storage parameter
   @Test("APITokenManager initialization with storage parameter")
-  internal func initializationWithStorage() {
+  internal func initializationStorage() {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let storage = InMemoryTokenStorage()
     let manager = APITokenManager(apiToken: validToken, storage: storage)
@@ -65,7 +65,7 @@ internal struct APITokenManagerTests {
 
   /// Tests validateCredentials with valid token
   @Test("validateCredentials with valid token")
-  internal func validateCredentialsWithValidToken() async throws {
+  internal func validateCredentialsValidToken() async throws {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let manager = APITokenManager(apiToken: validToken)
 
@@ -75,21 +75,22 @@ internal struct APITokenManagerTests {
 
   /// Tests validateCredentials with invalid token
   @Test("validateCredentials with invalid token")
-  internal func validateCredentialsWithInvalidToken() async throws {
+  internal func validateCredentialsInvalidToken() async throws {
     let invalidToken = "invalid_token_format"
     let manager = APITokenManager(apiToken: invalidToken)
 
     do {
       _ = try await manager.validateCredentials()
       Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-    } catch let error as TokenManagerError {
-      if case .invalidCredentials(let reason) = error {
+    } catch {
+      switch error {
+      case TokenManagerError.invalidCredentials(let reason):
         if case .apiTokenInvalidFormat = reason {
           // Expected case
         } else {
           Issue.record("Expected .apiTokenInvalidFormat, got: \(reason)")
         }
-      } else {
+      default:
         Issue.record("Expected invalidCredentials error, got: \(error)")
       }
     }
@@ -97,21 +98,22 @@ internal struct APITokenManagerTests {
 
   /// Tests validateCredentials with token that's too short
   @Test("validateCredentials with token that's too short")
-  internal func validateCredentialsWithShortToken() async throws {
+  internal func validateCredentialsShortToken() async throws {
     let shortToken = "abc123"
     let manager = APITokenManager(apiToken: shortToken)
 
     do {
       _ = try await manager.validateCredentials()
       Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-    } catch let error as TokenManagerError {
-      if case .invalidCredentials(let reason) = error {
+    } catch {
+      switch error {
+      case TokenManagerError.invalidCredentials(let reason):
         if case .apiTokenInvalidFormat = reason {
           // Expected case
         } else {
           Issue.record("Expected .apiTokenInvalidFormat, got: \(reason)")
         }
-      } else {
+      default:
         Issue.record("Expected invalidCredentials error, got: \(error)")
       }
     }
@@ -119,21 +121,22 @@ internal struct APITokenManagerTests {
 
   /// Tests validateCredentials with token that's too long
   @Test("validateCredentials with token that's too long")
-  internal func validateCredentialsWithLongToken() async throws {
+  internal func validateCredentialsLongToken() async throws {
     let longToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd12345"
     let manager = APITokenManager(apiToken: longToken)
 
     do {
       _ = try await manager.validateCredentials()
       Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-    } catch let error as TokenManagerError {
-      if case .invalidCredentials(let reason) = error {
+    } catch {
+      switch error {
+      case TokenManagerError.invalidCredentials(let reason):
         if case .apiTokenInvalidFormat = reason {
           // Expected case
         } else {
           Issue.record("Expected .apiTokenInvalidFormat, got: \(reason)")
         }
-      } else {
+      default:
         Issue.record("Expected invalidCredentials error, got: \(error)")
       }
     }
@@ -141,21 +144,22 @@ internal struct APITokenManagerTests {
 
   /// Tests validateCredentials with non-hex characters
   @Test("validateCredentials with non-hex characters")
-  internal func validateCredentialsWithNonHexToken() async throws {
+  internal func validateCredentialsNonHexToken() async throws {
     let nonHexToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd12gh"
     let manager = APITokenManager(apiToken: nonHexToken)
 
     do {
       _ = try await manager.validateCredentials()
       Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-    } catch let error as TokenManagerError {
-      if case .invalidCredentials(let reason) = error {
+    } catch {
+      switch error {
+      case TokenManagerError.invalidCredentials(let reason):
         if case .apiTokenInvalidFormat = reason {
           // Expected case
         } else {
           Issue.record("Expected .apiTokenInvalidFormat, got: \(reason)")
         }
-      } else {
+      default:
         Issue.record("Expected invalidCredentials error, got: \(error)")
       }
     }
@@ -163,7 +167,7 @@ internal struct APITokenManagerTests {
 
   /// Tests getCurrentCredentials with valid token
   @Test("getCurrentCredentials with valid token")
-  internal func getCurrentCredentialsWithValidToken() async throws {
+  internal func getCurrentCredentialsValidToken() async throws {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let manager = APITokenManager(apiToken: validToken)
 
@@ -181,21 +185,22 @@ internal struct APITokenManagerTests {
 
   /// Tests getCurrentCredentials with invalid token
   @Test("getCurrentCredentials with invalid token")
-  internal func getCurrentCredentialsWithInvalidToken() async throws {
+  internal func getCurrentCredentialsInvalidToken() async throws {
     let invalidToken = "invalid_token_format"
     let manager = APITokenManager(apiToken: invalidToken)
 
     do {
       _ = try await manager.getCurrentCredentials()
       Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-    } catch let error as TokenManagerError {
-      if case .invalidCredentials(let reason) = error {
+    } catch {
+      switch error {
+      case TokenManagerError.invalidCredentials(let reason):
         if case .apiTokenInvalidFormat = reason {
           // Expected case
         } else {
           Issue.record("Expected .apiTokenInvalidFormat, got: \(reason)")
         }
-      } else {
+      default:
         Issue.record("Expected invalidCredentials error, got: \(error)")
       }
     }
@@ -205,7 +210,7 @@ internal struct APITokenManagerTests {
 
   /// Tests isValidFormat property with valid token
   @Test("isValidFormat property with valid token")
-  internal func isValidFormatWithValidToken() {
+  internal func isValidFormatValidToken() {
     let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     let manager = APITokenManager(apiToken: validToken)
 
@@ -214,7 +219,7 @@ internal struct APITokenManagerTests {
 
   /// Tests isValidFormat property with invalid token
   @Test("isValidFormat property with invalid token")
-  internal func isValidFormatWithInvalidToken() {
+  internal func isValidFormatInvalidToken() {
     let invalidToken = "invalid_token_format"
     let manager = APITokenManager(apiToken: invalidToken)
 

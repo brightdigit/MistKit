@@ -113,7 +113,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager with malformed tokens
     @Test("WebAuthTokenManager with malformed tokens")
-    internal func webAuthTokenManagerWithMalformedTokens() async throws {
+    internal func malformedTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: "malformed-api-token",
         webAuthToken: "malformed-web-token"
@@ -122,10 +122,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }
@@ -142,10 +144,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }

@@ -6,7 +6,7 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Performance edge cases tests for WebAuthTokenManager
   @Suite("Edge Cases Performance Tests")
-  internal struct EdgeCasesPerformanceTests {
+  internal struct Performance {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -17,7 +17,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager performance with many operations
     @Test("WebAuthTokenManager performance with many operations")
-    internal func webAuthTokenManagerPerformanceWithManyOperations() async throws {
+    internal func manyOperations() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -43,7 +43,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager with large token values
     @Test("WebAuthTokenManager with large token values")
-    internal func webAuthTokenManagerWithLargeTokenValues() async throws {
+    internal func largeTokenValues() async throws {
       let largeAPIToken = String(repeating: "a", count: 10_000)
       let largeWebAuthToken = String(repeating: "b", count: 10_000)
 
@@ -58,10 +58,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected - API token format is invalid (not 64 hex characters)
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }
@@ -69,10 +71,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.getCurrentCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected - API token format is invalid
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }

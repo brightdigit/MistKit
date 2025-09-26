@@ -6,7 +6,7 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Credential validation tests for WebAuthTokenManager
   @Suite("Validation Credential Tests")
-  internal struct ValidationCredentialTests {
+  internal struct Validation {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
@@ -19,7 +19,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests hasCredentials with valid tokens
     @Test("hasCredentials with valid tokens")
-    internal func hasCredentialsWithValidTokens() async {
+    internal func hasCredentialsValidTokens() async {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -31,7 +31,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests hasCredentials with invalid tokens
     @Test("hasCredentials with invalid tokens")
-    internal func hasCredentialsWithInvalidTokens() async {
+    internal func hasCredentialsInvalidTokens() async {
       let manager = WebAuthTokenManager(
         apiToken: Self.invalidAPIToken,
         webAuthToken: Self.shortWebAuthToken
@@ -43,7 +43,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests getCurrentCredentials with valid tokens
     @Test("getCurrentCredentials with valid tokens")
-    internal func getCurrentCredentialsWithValidTokens() async throws {
+    internal func getCurrentCredentialsValidTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -64,7 +64,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests getCurrentCredentials with invalid tokens
     @Test("getCurrentCredentials with invalid tokens")
-    internal func getCurrentCredentialsWithInvalidTokens() async throws {
+    internal func getCurrentCredentialsInvalidTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.invalidAPIToken,
         webAuthToken: Self.shortWebAuthToken
@@ -73,10 +73,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.getCurrentCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }

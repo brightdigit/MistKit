@@ -6,12 +6,12 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Edge case validation tests for WebAuthTokenManager
   @Suite("Validation Edge Case Tests")
-  internal struct ValidationEdgeCaseTests {
+  internal struct EdgeCases {
     // MARK: - Edge Case Validation Tests
 
     /// Tests validation with whitespace-only tokens
     @Test("Validation with whitespace only tokens")
-    internal func validationWithWhitespaceOnlyTokens() async throws {
+    internal func whitespaceOnlyTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: "   ",
         webAuthToken: "\t\n"
@@ -20,10 +20,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }
@@ -31,7 +33,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with special characters in tokens
     @Test("Validation with special characters in tokens")
-    internal func validationWithSpecialCharactersInTokens() async throws {
+    internal func specialCharactersInTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: "api-token-with-special-chars!@#$%",
         webAuthToken: "web-token-with-special-chars!@#$%"
@@ -40,10 +42,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected - API token format is invalid
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }
@@ -51,7 +55,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with very long tokens
     @Test("Validation with very long tokens")
-    internal func validationWithVeryLongTokens() async throws {
+    internal func veryLongTokens() async throws {
       let longAPIToken = String(repeating: "a", count: 1_000)
       let longWebAuthToken = String(repeating: "b", count: 1_000)
 
@@ -63,10 +67,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected - API token format is invalid (not 64 hex characters)
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }

@@ -21,7 +21,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with valid API token format
     @Test("Validation with valid API token format")
-    internal func validationWithValidAPITokenFormat() async throws {
+    internal func validAPITokenFormat() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -33,7 +33,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with invalid API token format
     @Test("Validation with invalid API token format")
-    internal func validationWithInvalidAPITokenFormat() async throws {
+    internal func invalidAPITokenFormat() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.invalidAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -42,10 +42,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }
@@ -53,7 +55,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with short web auth token
     @Test("Validation with short web auth token")
-    internal func validationWithShortWebAuthToken() async throws {
+    internal func shortWebAuthToken() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.shortWebAuthToken
@@ -62,10 +64,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }
@@ -73,7 +77,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with empty API token
     @Test("Validation with empty API token")
-    internal func validationWithEmptyAPIToken() async throws {
+    internal func emptyAPIToken() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.emptyAPIToken,
         webAuthToken: Self.validWebAuthToken
@@ -82,10 +86,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }
@@ -93,7 +99,7 @@ extension WebAuthTokenManagerTests {
 
     /// Tests validation with empty web auth token
     @Test("Validation with empty web auth token")
-    internal func validationWithEmptyWebAuthToken() async throws {
+    internal func emptyWebAuthToken() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.emptyWebAuthToken
@@ -102,10 +108,12 @@ extension WebAuthTokenManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(_):
           // Expected
-        } else {
+          break
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }

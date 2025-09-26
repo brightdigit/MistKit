@@ -41,7 +41,7 @@ extension ServerToServerAuthManagerTests {
 
     /// Tests hasCredentials property with empty key ID
     @Test("hasCredentials with empty key ID", .enabled(if: Platform.isCryptoAvailable))
-    internal func hasCredentialsWithEmptyKeyID() async throws {
+    internal func hasCredentialsEmptyKeyID() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -61,7 +61,7 @@ extension ServerToServerAuthManagerTests {
 
     /// Tests validateCredentials with valid credentials
     @Test("validateCredentials with valid credentials", .enabled(if: Platform.isCryptoAvailable))
-    internal func validateCredentialsWithValidCredentials() async throws {
+    internal func validateCredentialsValidCredentials() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -78,7 +78,7 @@ extension ServerToServerAuthManagerTests {
 
     /// Tests validateCredentials with short key ID
     @Test("validateCredentials with short key ID", .enabled(if: Platform.isCryptoAvailable))
-    internal func validateCredentialsWithShortKeyID() async throws {
+    internal func validateCredentialsShortKeyID() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -95,14 +95,15 @@ extension ServerToServerAuthManagerTests {
       do {
         _ = try await manager.validateCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials(let reason) = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(let reason):
           if case .keyIdTooShort = reason {
             // Expected case
           } else {
             Issue.record("Expected .keyIdTooShort, got: \(reason)")
           }
-        } else {
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }
@@ -111,7 +112,7 @@ extension ServerToServerAuthManagerTests {
     /// Tests validateCredentials with corrupted private key
     @Test(
       "validateCredentials with corrupted private key", .enabled(if: Platform.isCryptoAvailable))
-    internal func validateCredentialsWithCorruptedPrivateKey() async throws {
+    internal func validateCredentialsCorruptedPrivateKey() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -132,7 +133,7 @@ extension ServerToServerAuthManagerTests {
 
     /// Tests getCurrentCredentials with valid credentials
     @Test("getCurrentCredentials with valid credentials", .enabled(if: Platform.isCryptoAvailable))
-    internal func getCurrentCredentialsWithValidCredentials() async throws {
+    internal func getCurrentCredentialsValidCredentials() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -159,7 +160,7 @@ extension ServerToServerAuthManagerTests {
     /// Tests getCurrentCredentials with invalid credentials
     @Test(
       "getCurrentCredentials with invalid credentials", .enabled(if: Platform.isCryptoAvailable))
-    internal func getCurrentCredentialsWithInvalidCredentials() async throws {
+    internal func getCurrentCredentialsInvalidCredentials() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -176,14 +177,15 @@ extension ServerToServerAuthManagerTests {
       do {
         _ = try await manager.getCurrentCredentials()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
-      } catch let error as TokenManagerError {
-        if case .invalidCredentials(let reason) = error {
+      } catch {
+        switch error {
+        case TokenManagerError.invalidCredentials(let reason):
           if case .keyIdTooShort = reason {
             // Expected case
           } else {
             Issue.record("Expected .keyIdTooShort, got: \(reason)")
           }
-        } else {
+        default:
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
       }
@@ -224,10 +226,11 @@ extension ServerToServerAuthManagerTests {
           #expect(
             isValid == shouldBeValid,
             "Key ID '\(keyID)' should be \(shouldBeValid ? "valid" : "invalid")")
-        } catch let error as TokenManagerError {
-          if case .invalidCredentials(let reason) = error {
+        } catch {
+          switch error {
+          case TokenManagerError.invalidCredentials(let reason):
             #expect(!shouldBeValid, "Key ID '\(keyID)' should be valid but got error: \(reason)")
-          } else {
+          default:
             Issue.record("Unexpected error for key ID '\(keyID)': \(error)")
           }
         }
