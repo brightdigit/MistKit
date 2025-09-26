@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Token Manager - Protocol Conformance")
+@Suite("Token Manager - Protocol Conformance", .serialized)
 /// Test suite for TokenManager protocol conformance and Sendable compliance
 internal struct TokenManagerProtocolTests {
   // MARK: - TokenManager Protocol Tests

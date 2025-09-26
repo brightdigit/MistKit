@@ -27,7 +27,20 @@
       "Bash(swift --version)",
       "Bash(swift test)",
       "Bash(CI=1 ./Scripts/lint.sh)",
-      "Read(//Users/leo/Documents/Projects/**)"
+      "Read(//Users/leo/Documents/Projects/**)",
+      "WebSearch",
+      "Bash(/Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild test -scheme MistKit -sdk iphonesimulator -destination \"platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5\" -only-testing:MistKitTests/ConcurrentTokenRefreshBasicTests)",
+      "Bash(/Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild test -scheme MistKit -sdk iphonesimulator -destination \"platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5\")",
+      "Bash(tee:*)",
+      "Read(//private/tmp/**)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode_16.2.app/Contents/Developer /Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild test -scheme MistKit -sdk iphonesimulator -destination \"platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5\" -only-testing:MistKitTests/ServerToServerAuthManagerTests)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode_16.2.app/Contents/Developer /Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild test -scheme MistKit -sdk iphonesimulator -destination \"platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5\")",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode_16.2.app/Contents/Developer /Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild test -scheme MistKit -sdk iphonesimulator -destination \"platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5\" -only-testing:MistKitTests/TokenManagerErrorTests)",
+      "Bash(for:*)",
+      "Bash(do sed -i.bak 's/@Suite(\\(\"\"[^\"\"]*\"\"\\))/@Suite(\\1, .serialized)/g' \"$file\")",
+      "Bash(done)",
+      "Read(//Users/leo/Library/Developer/Xcode/DerivedData/MistKit-hatrknrbxztlanhcyhjchjvmmztd/Logs/Test/Test-MistKit-2025.09.26_14-53-15--0400.xcresult/**)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode_16.2.app/Contents/Developer /Applications/Xcode_16.2.app/Contents/Developer/usr/bin/xcodebuild test -scheme MistKit -sdk iphonesimulator -destination \"platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5\" -only-testing:MistKitTests)"
     ],
     "deny": []
   },

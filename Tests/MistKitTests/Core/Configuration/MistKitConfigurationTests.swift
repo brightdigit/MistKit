@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("MistKit Configuration")
+@Suite("MistKit Configuration", .serialized)
 /// Tests for MistKitConfiguration functionality
 internal struct MistKitConfigurationTests {
   /// Tests MistKitConfiguration initialization with required parameters

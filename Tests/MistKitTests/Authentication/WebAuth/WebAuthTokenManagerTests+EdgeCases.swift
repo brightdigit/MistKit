@@ -5,7 +5,7 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Edge case validation tests for WebAuthTokenManager
-  @Suite("Validation Edge Case Tests")
+  @Suite("Validation Edge Case Tests", .serialized)
   internal struct EdgeCases {
     // MARK: - Edge Case Validation Tests
 

@@ -8,7 +8,7 @@ import Testing
 
 extension AuthenticationMiddlewareTests {
   /// Error handling tests for AuthenticationMiddleware
-  @Suite("Error Tests")
+  @Suite("Error Tests", .serialized)
   internal struct ErrorTests {
     // MARK: - Test Data Setup
 

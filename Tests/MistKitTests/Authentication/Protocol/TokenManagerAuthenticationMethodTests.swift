@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Token Manager - Authentication Method")
+@Suite("Token Manager - Authentication Method", .serialized)
 /// Test suite for AuthenticationMethod enum and related functionality
 internal struct TokenManagerAuthenticationMethodTests {
   // MARK: - AuthenticationMethod Tests

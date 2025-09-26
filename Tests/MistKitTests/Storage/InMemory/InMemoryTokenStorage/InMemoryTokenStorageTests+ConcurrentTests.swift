@@ -7,7 +7,7 @@ internal enum InMemoryTokenStorageTests {}
 
 extension InMemoryTokenStorageTests {
   /// Concurrent access tests for InMemoryTokenStorage
-  @Suite("Concurrent Tests")
+  @Suite("Concurrent Tests", .serialized)
   internal struct ConcurrentTests {
     // MARK: - Test Data Setup
 

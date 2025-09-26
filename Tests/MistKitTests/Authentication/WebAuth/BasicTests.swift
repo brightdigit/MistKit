@@ -3,12 +3,12 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Web Auth Token Manager")
+@Suite("Web Auth Token Manager", .serialized)
 internal enum WebAuthTokenManagerTests {}
 
 extension WebAuthTokenManagerTests {
   /// Basic functionality tests for WebAuthTokenManager
-  @Suite("Basic Tests")
+  @Suite("Basic Tests", .serialized)
   internal struct BasicTests {
     // MARK: - Test Data Setup
 

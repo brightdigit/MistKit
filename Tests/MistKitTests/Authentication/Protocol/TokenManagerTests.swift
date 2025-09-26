@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Token Manager")
+@Suite("Token Manager", .serialized)
 /// Test suite for TokenManager protocol and related types
 internal struct TokenManagerTests {
   // MARK: - Integration Tests

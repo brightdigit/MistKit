@@ -3,12 +3,12 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Adaptive Token Manager")
+@Suite("Adaptive Token Manager", .serialized)
 internal enum AdaptiveTokenManagerTests {}
 
 extension AdaptiveTokenManagerTests {
   /// Integration tests for AdaptiveTokenManager
-  @Suite("Integration Tests")
+  @Suite("Integration Tests", .serialized)
   internal struct IntegrationTests {
     // MARK: - Test Data Setup
 

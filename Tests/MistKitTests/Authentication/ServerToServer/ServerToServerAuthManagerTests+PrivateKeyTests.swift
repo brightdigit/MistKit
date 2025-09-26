@@ -6,7 +6,7 @@ import Testing
 
 extension ServerToServerAuthManagerTests {
   /// Private key validation tests for ServerToServerAuthManager
-  @Suite("Private Key Tests")
+  @Suite("Private Key Tests", .serialized)
   internal struct PrivateKeyTests {
     private static func generateTestPrivateKeyClosure() -> @Sendable () throws ->
       P256.Signing.PrivateKey

@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Record Info")
+@Suite("Record Info", .serialized)
 /// Tests for RecordInfo functionality
 internal struct RecordInfoTests {
   /// Tests RecordInfo initialization with empty record data

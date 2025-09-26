@@ -5,7 +5,7 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Token format validation tests for WebAuthTokenManager
-  @Suite("Validation Format Tests")
+  @Suite("Validation Format Tests", .serialized)
   internal struct ValidationFormatTests {
     // MARK: - Test Data Setup
 

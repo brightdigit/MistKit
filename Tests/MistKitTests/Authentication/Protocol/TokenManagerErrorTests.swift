@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Token Manager - Error Handling")
+@Suite("Token Manager - Error Handling", .serialized)
 /// Test suite for TokenManagerError and related functionality
 internal struct TokenManagerErrorTests {
   // MARK: - TokenManagerError Tests

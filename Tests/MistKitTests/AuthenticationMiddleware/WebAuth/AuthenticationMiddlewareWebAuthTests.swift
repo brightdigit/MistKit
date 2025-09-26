@@ -6,13 +6,13 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Authentication Middleware - Web Auth Token")
+@Suite("Authentication Middleware - Web Auth Token", .serialized)
 /// Web Auth Token authentication tests for AuthenticationMiddleware
 internal enum AuthenticationMiddlewareWebAuthTests {}
 
 extension AuthenticationMiddlewareWebAuthTests {
   /// Web Auth Token authentication tests
-  @Suite("Web Auth Token Tests")
+  @Suite("Web Auth Token Tests", .serialized)
   internal struct WebAuthTokenTests {
     // MARK: - Test Data Setup
 

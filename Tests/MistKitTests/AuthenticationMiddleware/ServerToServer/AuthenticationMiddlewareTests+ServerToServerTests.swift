@@ -10,7 +10,7 @@ internal enum AuthenticationMiddlewareTests {
 }
 extension AuthenticationMiddlewareTests {
   /// Server-to-server authentication tests for AuthenticationMiddleware
-  @Suite("Server-to-Server Tests")
+  @Suite("Server-to-Server Tests", .serialized)
   internal struct ServerToServerTests {
     // MARK: - Test Data Setup
 

@@ -5,7 +5,7 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Performance edge cases tests for WebAuthTokenManager
-  @Suite("Edge Cases Performance Tests")
+  @Suite("Edge Cases Performance Tests", .serialized)
   internal struct Performance {
     // MARK: - Test Data Setup
 

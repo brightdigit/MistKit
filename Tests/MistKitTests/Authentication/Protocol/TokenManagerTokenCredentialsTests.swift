@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Token Manager - Token Credentials")
+@Suite("Token Manager - Token Credentials", .serialized)
 /// Test suite for TokenCredentials and related functionality
 internal struct TokenManagerTokenCredentialsTests {
   // MARK: - TokenCredentials Tests

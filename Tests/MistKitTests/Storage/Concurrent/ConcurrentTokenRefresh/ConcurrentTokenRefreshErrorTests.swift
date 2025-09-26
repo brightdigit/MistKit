@@ -5,7 +5,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Concurrent Token Refresh Error Tests")
+@Suite("Concurrent Token Refresh Error Tests", .serialized)
 /// Test suite for concurrent token refresh error handling functionality
 internal struct ConcurrentTokenRefreshErrorTests {
   // MARK: - Helper Methods

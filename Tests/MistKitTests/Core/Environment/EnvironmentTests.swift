@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Environment")
+@Suite("Environment", .serialized)
 /// Tests for Environment enum functionality
 internal struct EnvironmentTests {
   /// Tests Environment enum raw values

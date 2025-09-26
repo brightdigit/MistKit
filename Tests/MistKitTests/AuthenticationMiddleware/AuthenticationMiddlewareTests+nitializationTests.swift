@@ -8,7 +8,7 @@ import Testing
 
 extension AuthenticationMiddlewareTests {
   /// Basic functionality tests for AuthenticationMiddleware
-  @Suite("Authentication Middleware Initialization")
+  @Suite("Authentication Middleware Initialization", .serialized)
   internal struct InitializationTests {
     // MARK: - Test Data Setup
 

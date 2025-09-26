@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("API Token Manager")
+@Suite("API Token Manager", .serialized)
 /// Test suite for APITokenManager functionality
 internal struct APITokenManagerTests {
   // MARK: - Initialization Tests
