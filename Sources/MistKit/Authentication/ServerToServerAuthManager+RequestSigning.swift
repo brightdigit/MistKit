@@ -34,6 +34,18 @@ public import Foundation
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension ServerToServerAuthManager {
+  /// The key identifier
+  public var keyIdentifier: String {
+    keyID
+  }
+
+  /// Returns the public key for verification purposes
+  public var publicKey: P256.Signing.PublicKey {
+    get throws {
+      try createPrivateKey().publicKey
+    }
+  }
+
   /// Signs a CloudKit Web Services request
   /// - Parameters:
   ///   - requestBody: The HTTP request body (for POST requests)
@@ -82,18 +94,6 @@ extension ServerToServerAuthManager {
       date: iso8601Date,
       signature: signatureBase64
     )
-  }
-
-  /// The key identifier
-  public var keyIdentifier: String {
-    keyID
-  }
-
-  /// Returns the public key for verification purposes
-  public var publicKey: P256.Signing.PublicKey {
-    get throws {
-      try createPrivateKey().publicKey
-    }
   }
 
   /// Creates credentials with additional metadata

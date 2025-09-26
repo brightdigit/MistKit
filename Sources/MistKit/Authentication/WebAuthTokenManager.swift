@@ -40,29 +40,6 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
   internal let credentials: TokenCredentials
   internal let storage: (any TokenStorage)?
 
-  /// Creates a new web authentication token manager
-  /// - Parameters:
-  ///   - apiToken: The CloudKit API token from Apple Developer Console
-  ///   - webAuthToken: The web authentication token from CloudKit JS authentication
-  ///   - storage: Optional storage for persistence (default: nil for in-memory only)
-  public init(
-    apiToken: String,
-    webAuthToken: String,
-    storage: (any TokenStorage)? = nil
-  ) {
-    self.apiToken = apiToken
-    self.webAuthToken = webAuthToken
-    self.storage = storage
-    self.credentials = TokenCredentials.webAuthToken(
-      apiToken: apiToken,
-      webToken: webAuthToken
-    )
-  }
-
-  deinit {
-    // Clean up any resources
-  }
-
   // MARK: - TokenManager Protocol
 
   public var hasCredentials: Bool {
@@ -89,6 +66,25 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
 
       return true
     }
+  }
+
+  /// Creates a new web authentication token manager
+  /// - Parameters:
+  ///   - apiToken: The CloudKit API token from Apple Developer Console
+  ///   - webAuthToken: The web authentication token from CloudKit JS authentication
+  ///   - storage: Optional storage for persistence (default: nil for in-memory only)
+  public init(
+    apiToken: String,
+    webAuthToken: String,
+    storage: (any TokenStorage)? = nil
+  ) {
+    self.apiToken = apiToken
+    self.webAuthToken = webAuthToken
+    self.storage = storage
+    self.credentials = TokenCredentials.webAuthToken(
+      apiToken: apiToken,
+      webToken: webAuthToken
+    )
   }
 
   public func validateCredentials() async throws(TokenManagerError) -> Bool {
@@ -120,5 +116,9 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     // Validate first
     _ = try await validateCredentials()
     return credentials
+  }
+
+  deinit {
+    // Clean up any resources
   }
 }

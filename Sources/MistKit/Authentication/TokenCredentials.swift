@@ -39,6 +39,21 @@ public struct TokenCredentials: Sendable, Equatable {
   /// Optional metadata for tracking token creation or expiry
   public let metadata: [String: String]
 
+  /// Returns true if these credentials support user-specific operations
+  public var supportsUserOperations: Bool {
+    switch method {
+    case .apiToken:
+      return false
+    case .webAuthToken, .serverToServer:
+      return true
+    }
+  }
+
+  /// Returns the authentication method type as a string
+  public var methodType: String {
+    method.methodType
+  }
+
   /// Creates new token credentials with the specified authentication method
   /// - Parameters:
   ///   - method: The authentication method to use
@@ -47,11 +62,7 @@ public struct TokenCredentials: Sendable, Equatable {
     self.method = method
     self.metadata = metadata
   }
-}
 
-// MARK: - TokenCredentials Extensions
-
-extension TokenCredentials {
   /// Convenience initializer for API token authentication
   /// - Parameter apiToken: The API token string
   public static func apiToken(_ apiToken: String) -> TokenCredentials {
@@ -72,20 +83,5 @@ extension TokenCredentials {
   ///   - privateKey: The ECDSA P-256 private key data
   public static func serverToServer(keyID: String, privateKey: Data) -> TokenCredentials {
     TokenCredentials(method: .serverToServer(keyID: keyID, privateKey: privateKey))
-  }
-
-  /// Returns true if these credentials support user-specific operations
-  public var supportsUserOperations: Bool {
-    switch method {
-    case .apiToken:
-      return false
-    case .webAuthToken, .serverToServer:
-      return true
-    }
-  }
-
-  /// Returns the authentication method type as a string
-  public var methodType: String {
-    method.methodType
   }
 }

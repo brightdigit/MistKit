@@ -37,6 +37,21 @@ extension AdaptiveTokenManager {
     webAuthToken != nil ? .webAuthenticated : .apiOnly
   }
 
+  /// Returns true if currently supports user-specific operations
+  public var supportsUserOperations: Bool {
+    webAuthToken != nil
+  }
+
+  /// Returns the current API token
+  public var currentAPIToken: String {
+    apiToken
+  }
+
+  /// Returns the current web auth token (if any)
+  public var currentWebAuthToken: String? {
+    webAuthToken
+  }
+
   /// Upgrades to web authentication by adding a web auth token
   /// - Parameter webAuthToken: The web authentication token from CloudKit JS
   /// - Returns: New credentials with web authentication
@@ -105,20 +120,5 @@ extension AdaptiveTokenManager {
     }
 
     return try await upgradeToWebAuthentication(webAuthToken: newWebAuthToken)
-  }
-
-  /// Returns true if currently supports user-specific operations
-  public var supportsUserOperations: Bool {
-    webAuthToken != nil
-  }
-
-  /// Returns the current API token
-  public var currentAPIToken: String {
-    apiToken
-  }
-
-  /// Returns the current web auth token (if any)
-  public var currentWebAuthToken: String? {
-    webAuthToken
   }
 }

@@ -59,10 +59,6 @@ public final class DefaultTokenRefreshManager: TokenRefreshManager, TokenRefresh
     self.eventContinuation = continuation
   }
 
-  deinit {
-    eventContinuation.finish()
-  }
-
   // MARK: - TokenRefreshManager
 
   public func refreshTokenIfNeeded() async throws(TokenManagerError) -> TokenCredentials? {
@@ -112,5 +108,9 @@ public final class DefaultTokenRefreshManager: TokenRefreshManager, TokenRefresh
         throw TokenManagerError.internalError(.tokenRefreshFailed(error))
       }
     }
+  }
+
+  deinit {
+    eventContinuation.finish()
   }
 }

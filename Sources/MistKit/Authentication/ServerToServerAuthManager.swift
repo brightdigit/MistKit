@@ -48,6 +48,14 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   internal let credentials: TokenCredentials
   internal let storage: (any TokenStorage)?
 
+  // MARK: - TokenManager Protocol
+
+  public var hasCredentials: Bool {
+    get async {
+      !keyID.isEmpty
+    }
+  }
+
   /// Creates a new server-to-server authentication manager
   /// - Parameters:
   ///   - keyID: The key identifier from Apple Developer Console
@@ -122,14 +130,6 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
       return try P256.Signing.PrivateKey(rawRepresentation: privateKeyData)
     } catch {
       throw TokenManagerError.invalidCredentials(.privateKeyInvalidOrCorrupted(error))
-    }
-  }
-
-  // MARK: - TokenManager Protocol
-
-  public var hasCredentials: Bool {
-    get async {
-      !keyID.isEmpty
     }
   }
 

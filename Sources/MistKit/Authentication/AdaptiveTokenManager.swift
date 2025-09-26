@@ -39,6 +39,14 @@ public actor AdaptiveTokenManager: TokenManager {
   internal var webAuthToken: String?
   internal let storage: (any TokenStorage)?
 
+  // MARK: - TokenManager Protocol
+
+  public var hasCredentials: Bool {
+    get async {
+      !apiToken.isEmpty
+    }
+  }
+
   /// Creates an adaptive token manager starting with API token only
   /// - Parameters:
   ///   - apiToken: The CloudKit API token
@@ -51,14 +59,6 @@ public actor AdaptiveTokenManager: TokenManager {
     self.apiToken = apiToken
     self.webAuthToken = nil
     self.storage = storage
-  }
-
-  // MARK: - TokenManager Protocol
-
-  public var hasCredentials: Bool {
-    get async {
-      !apiToken.isEmpty
-    }
   }
 
   public func validateCredentials() async throws(TokenManagerError) -> Bool {
