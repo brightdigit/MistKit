@@ -204,7 +204,7 @@
 
 ## Final Reviews
 
-- [ ] Error Type Audit
+- [x] Error Type Audit
 - [ ] Audit Preconditions, Asserts, and Error States
 - [ ] Add Job to Test against actual data
 - [ ] Look for code comments for missing implementations
