@@ -32,8 +32,6 @@ import OpenAPIRuntime
 
 /// Processes CloudKit API responses and handles errors
 internal struct CloudKitResponseProcessor {
-  private let errorHandler = CloudKitErrorHandler()
-
   /// Process getCurrentUser response
   /// - Parameter response: The response to process
   /// - Returns: The extracted user data
@@ -70,27 +68,27 @@ internal struct CloudKitResponseProcessor {
     case .ok:
       return  // This case is handled in the main function
     case .badRequest(let badRequestResponse):
-      try await errorHandler.handleBadRequest(badRequestResponse)
+      throw CloudKitError(badRequest: badRequestResponse)
     case .unauthorized(let unauthorizedResponse):
-      try await errorHandler.handleUnauthorized(unauthorizedResponse)
+      throw CloudKitError(unauthorized: unauthorizedResponse)
     case .forbidden(let forbiddenResponse):
-      try await errorHandler.handleForbidden(forbiddenResponse)
+      throw CloudKitError(forbidden: forbiddenResponse)
     case .notFound(let notFoundResponse):
-      try await errorHandler.handleNotFound(notFoundResponse)
+      throw CloudKitError(notFound: notFoundResponse)
     case .conflict(let conflictResponse):
-      try await errorHandler.handleConflict(conflictResponse)
+      throw CloudKitError(conflict: conflictResponse)
     case .preconditionFailed(let preconditionFailedResponse):
-      try await errorHandler.handlePreconditionFailed(preconditionFailedResponse)
+      throw CloudKitError(preconditionFailed: preconditionFailedResponse)
     case .contentTooLarge(let contentTooLargeResponse):
-      try await errorHandler.handleContentTooLarge(contentTooLargeResponse)
+      throw CloudKitError(contentTooLarge: contentTooLargeResponse)
     case .tooManyRequests(let tooManyRequestsResponse):
-      try await errorHandler.handleTooManyRequests(tooManyRequestsResponse)
+      throw CloudKitError(tooManyRequests: tooManyRequestsResponse)
     case .misdirectedRequest(let misdirectedResponse):
-      try await errorHandler.handleMisdirectedRequest(misdirectedResponse)
+      throw CloudKitError(misdirectedRequest: misdirectedResponse)
     case .internalServerError(let internalServerErrorResponse):
-      try await errorHandler.handleInternalServerError(internalServerErrorResponse)
+      throw CloudKitError(internalServerError: internalServerErrorResponse)
     case .serviceUnavailable(let serviceUnavailableResponse):
-      try await errorHandler.handleServiceUnavailable(serviceUnavailableResponse)
+      throw CloudKitError(serviceUnavailable: serviceUnavailableResponse)
     case .undocumented(let statusCode, _):
       throw CloudKitError.httpError(statusCode: statusCode)
     }

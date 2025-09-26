@@ -28,6 +28,7 @@
 //
 
 public import Foundation
+import OpenAPIRuntime
 
 public enum CloudKitError: LocalizedError, Sendable {
   case httpError(statusCode: Int)

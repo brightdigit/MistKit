@@ -25,7 +25,8 @@
       "Bash(env CI=1 ./Scripts/lint.sh)",
       "Read(//private/tmp/claude/**)",
       "Bash(swift --version)",
-      "Bash(swift test)"
+      "Bash(swift test)",
+      "Bash(CI=1 ./Scripts/lint.sh)"
     ],
     "deny": []
   },

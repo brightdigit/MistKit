@@ -1,5 +1,5 @@
 //
-//  CloudKitErrorHandler.swift
+//  CloudKitError+OpenAPI.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,166 +27,147 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
-import OpenAPIRuntime
-
-/// Handles CloudKit API error responses
-internal struct CloudKitErrorHandler {
-  // MARK: - Specific Error Handlers
-
-  internal func handleBadRequest(_ response: Components.Responses.BadRequest)
-    async throws(CloudKitError) -> Never
-  {
+extension CloudKitError {
+  /// Initialize CloudKitError from a BadRequest response
+  internal init(badRequest response: Components.Responses.BadRequest) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 400,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 400)
+      self = .httpError(statusCode: 400)
     }
   }
 
-  internal func handleUnauthorized(_ response: Components.Responses.Unauthorized)
-    async throws(CloudKitError)
-    -> Never
-  {
+  /// Initialize CloudKitError from an Unauthorized response
+  internal init(unauthorized response: Components.Responses.Unauthorized) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 401,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 401)
+      self = .httpError(statusCode: 401)
     }
   }
 
-  internal func handleForbidden(_ response: Components.Responses.Forbidden)
-    async throws(CloudKitError) -> Never
-  {
+  /// Initialize CloudKitError from a Forbidden response
+  internal init(forbidden response: Components.Responses.Forbidden) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 403,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 403)
+      self = .httpError(statusCode: 403)
     }
   }
 
-  internal func handleNotFound(_ response: Components.Responses.NotFound)
-    async throws(CloudKitError) -> Never
-  {
+  /// Initialize CloudKitError from a NotFound response
+  internal init(notFound response: Components.Responses.NotFound) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 404,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 404)
+      self = .httpError(statusCode: 404)
     }
   }
 
-  internal func handleConflict(_ response: Components.Responses.Conflict)
-    async throws(CloudKitError) -> Never
-  {
+  /// Initialize CloudKitError from a Conflict response
+  internal init(conflict response: Components.Responses.Conflict) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 409,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 409)
+      self = .httpError(statusCode: 409)
     }
   }
 
-  internal func handlePreconditionFailed(_ response: Components.Responses.PreconditionFailed)
-    async throws(CloudKitError) -> Never
-  {
+  /// Initialize CloudKitError from a PreconditionFailed response
+  internal init(preconditionFailed response: Components.Responses.PreconditionFailed) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 412,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 412)
+      self = .httpError(statusCode: 412)
     }
   }
 
-  internal func handleContentTooLarge(_ response: Components.Responses.RequestEntityTooLarge)
-    async throws(CloudKitError) -> Never
-  {
+  /// Initialize CloudKitError from a RequestEntityTooLarge response
+  internal init(contentTooLarge response: Components.Responses.RequestEntityTooLarge) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 413,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 413)
+      self = .httpError(statusCode: 413)
     }
   }
 
-  internal func handleTooManyRequests(_ response: Components.Responses.TooManyRequests)
-    async throws(CloudKitError)
-    -> Never
-  {
+  /// Initialize CloudKitError from a TooManyRequests response
+  internal init(tooManyRequests response: Components.Responses.TooManyRequests) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 429,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 429)
+      self = .httpError(statusCode: 429)
     }
   }
 
-  internal func handleMisdirectedRequest(_ response: Components.Responses.UnprocessableEntity)
-    async throws(CloudKitError) -> Never
-  {
+  /// Initialize CloudKitError from an UnprocessableEntity response (misdirected request)
+  internal init(misdirectedRequest response: Components.Responses.UnprocessableEntity) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 421,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 421)
+      self = .httpError(statusCode: 421)
     }
   }
 
-  internal func handleInternalServerError(_ response: Components.Responses.InternalServerError)
-    async throws(CloudKitError) -> Never
-  {
+  /// Initialize CloudKitError from an InternalServerError response
+  internal init(internalServerError response: Components.Responses.InternalServerError) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 500,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 500)
+      self = .httpError(statusCode: 500)
     }
   }
 
-  internal func handleServiceUnavailable(_ response: Components.Responses.ServiceUnavailable)
-    async throws(CloudKitError) -> Never
-  {
+  /// Initialize CloudKitError from a ServiceUnavailable response
+  internal init(serviceUnavailable response: Components.Responses.ServiceUnavailable) {
     if case .json(let errorResponse) = response.body {
-      throw CloudKitError.httpErrorWithDetails(
+      self = .httpErrorWithDetails(
         statusCode: 503,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      throw CloudKitError.httpError(statusCode: 503)
+      self = .httpError(statusCode: 503)
     }
   }
 }
