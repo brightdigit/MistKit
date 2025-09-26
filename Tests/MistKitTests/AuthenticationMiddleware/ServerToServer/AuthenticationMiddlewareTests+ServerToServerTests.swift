@@ -14,12 +14,6 @@ extension AuthenticationMiddlewareTests {
   internal struct ServerToServerTests {
     // MARK: - Test Data Setup
 
-    private static let testURL: URL = {
-      guard let url = URL(string: "https://api.apple-cloudkit.com") else {
-        fatalError("Invalid URL")
-      }
-      return url
-    }()
     private static let testOperationID = "test-operation"
 
     // MARK: - Server-to-Server Authentication Tests
@@ -58,7 +52,7 @@ extension AuthenticationMiddlewareTests {
       _ = try await middleware.intercept(
         originalRequest,
         body: nil as HTTPBody?,
-        baseURL: Self.testURL,
+        baseURL: URL.MistKit.cloudKitAPI,
         operationID: Self.testOperationID,
         next: next
       )
@@ -109,7 +103,7 @@ extension AuthenticationMiddlewareTests {
       _ = try await middleware.intercept(
         originalRequest,
         body: nil as HTTPBody?,
-        baseURL: Self.testURL,
+        baseURL: URL.MistKit.cloudKitAPI,
         operationID: Self.testOperationID,
         next: next
       )
@@ -166,7 +160,7 @@ extension AuthenticationMiddlewareTests {
       _ = try await middleware.intercept(
         originalRequest,
         body: testBody,
-        baseURL: Self.testURL,
+        baseURL: URL.MistKit.cloudKitAPI,
         operationID: Self.testOperationID,
         next: next
       )

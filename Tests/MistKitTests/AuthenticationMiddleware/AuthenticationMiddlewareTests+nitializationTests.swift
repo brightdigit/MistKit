@@ -15,12 +15,6 @@ extension AuthenticationMiddlewareTests {
     private static let validAPIToken =
       "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     private static let validWebAuthToken = "user123_web_auth_token_abcdef"
-    private static let testURL: URL = {
-      guard let url = URL(string: "https://api.apple-cloudkit.com") else {
-        fatalError("Invalid URL")
-      }
-      return url
-    }()
     private static let testOperationID = "test-operation"
 
     // MARK: - Initialization Tests
@@ -68,21 +62,21 @@ extension AuthenticationMiddlewareTests {
       // Test concurrent access patterns with separate closures
       async let task1 = middleware.interceptWithMiddleware(
         request: originalRequest,
-        baseURL: Self.testURL,
+        baseURL: URL.MistKit.cloudKitAPI,
         operationID: Self.testOperationID
       ) { _, _, _ in
         (HTTPResponse(status: .ok), nil)
       }
       async let task2 = middleware.interceptWithMiddleware(
         request: originalRequest,
-        baseURL: Self.testURL,
+        baseURL: URL.MistKit.cloudKitAPI,
         operationID: Self.testOperationID
       ) { _, _, _ in
         (HTTPResponse(status: .ok), nil)
       }
       async let task3 = middleware.interceptWithMiddleware(
         request: originalRequest,
-        baseURL: Self.testURL,
+        baseURL: URL.MistKit.cloudKitAPI,
         operationID: Self.testOperationID
       ) { _, _, _ in
         (HTTPResponse(status: .ok), nil)

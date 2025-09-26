@@ -19,12 +19,6 @@ extension AuthenticationMiddlewareWebAuthTests {
     private static let validAPIToken =
       "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     private static let validWebAuthToken = "user123_web_auth_token_abcdef"
-    private static let testURL: URL = {
-      guard let url = URL(string: "https://api.apple-cloudkit.com") else {
-        fatalError("Invalid URL")
-      }
-      return url
-    }()
     private static let testOperationID = "test-operation"
 
     // MARK: - Web Auth Token Authentication Tests
@@ -56,7 +50,7 @@ extension AuthenticationMiddlewareWebAuthTests {
       _ = try await middleware.intercept(
         originalRequest,
         body: nil as HTTPBody?,
-        baseURL: Self.testURL,
+        baseURL: URL.MistKit.cloudKitAPI,
         operationID: Self.testOperationID,
         next: next
       )
@@ -97,7 +91,7 @@ extension AuthenticationMiddlewareWebAuthTests {
       _ = try await middleware.intercept(
         originalRequest,
         body: nil as HTTPBody?,
-        baseURL: Self.testURL,
+        baseURL: URL.MistKit.cloudKitAPI,
         operationID: Self.testOperationID,
         next: next
       )

@@ -58,19 +58,14 @@ internal struct MistKitConfiguration: Sendable {
   /// Protocol version (currently "1")
   internal let version: String = "1"
 
-  /// Computed server URL based on configuration
-  internal var serverURL: URL {
-    guard let url = URL(string: "https://api.apple-cloudkit.com") else {
-      fatalError("Invalid CloudKit API URL")
-    }
-    return url
-  }
+  internal let serverURL: URL
 
   /// Initialize MistKit configuration
   internal init(
     container: String,
     environment: Environment,
     database: Database = .private,
+    serverURL: URL = .MistKit.cloudKitAPI,
     apiToken: String,
     webAuthToken: String? = nil,
     keyID: String? = nil,
@@ -80,6 +75,7 @@ internal struct MistKitConfiguration: Sendable {
     self.container = container
     self.environment = environment
     self.database = database
+    self.serverURL = serverURL
     self.apiToken = apiToken
     self.webAuthToken = webAuthToken
     self.keyID = keyID

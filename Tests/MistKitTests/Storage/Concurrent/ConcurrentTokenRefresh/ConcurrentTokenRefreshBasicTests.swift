@@ -27,14 +27,6 @@ internal struct ConcurrentTokenRefreshBasicTests {
     { _, _, _ in (HTTPResponse(status: .ok), nil) }
   }
 
-  /// Creates a base URL for testing
-  private func createBaseURL() -> URL {
-    guard let url = URL(string: "https://api.apple-cloudkit.com") else {
-      fatalError("Invalid URL")
-    }
-    return url
-  }
-
   /// Executes concurrent middleware calls and returns results
   private func executeConcurrentMiddlewareCalls(
     middleware: AuthenticationMiddleware,
@@ -79,7 +71,7 @@ internal struct ConcurrentTokenRefreshBasicTests {
 
     let request = createTestRequest()
     let next = createSuccessNextHandler()
-    let baseURL = createBaseURL()
+    let baseURL = URL.MistKit.cloudKitAPI
 
     // Test concurrent access patterns
     let results = await executeConcurrentMiddlewareCalls(
@@ -112,7 +104,7 @@ internal struct ConcurrentTokenRefreshBasicTests {
 
     let request = createTestRequest()
     let next = createSuccessNextHandler()
-    let baseURL = createBaseURL()
+    let baseURL = URL.MistKit.cloudKitAPI
 
     // Test concurrent access with different middlewares
     let results = await executeConcurrentMiddlewareCallsWithDifferentMiddlewares(
