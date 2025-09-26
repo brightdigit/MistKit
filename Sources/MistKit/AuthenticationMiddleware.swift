@@ -52,7 +52,7 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
   ) async throws -> (HTTPResponse, HTTPBody?) {
     // Get credentials from token manager
     guard let credentials = try await tokenManager.getCurrentCredentials() else {
-      throw TokenManagerError.invalidCredentials(reason: "No credentials available")
+      throw TokenManagerError.invalidCredentials(.noCredentialsAvailable)
     }
 
     var modifiedRequest = request
@@ -121,16 +121,11 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
     // Server-to-server authentication uses ECDSA P-256 signature in headers
     // Available on macOS 11.0+, iOS 14.0+, tvOS 14.0+, watchOS 7.0+, and Linux
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      throw TokenManagerError.internalError(
-        reason:
-          "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
-      )
+      throw TokenManagerError.internalError(.serverToServerRequiresPlatformSupport)
     }
 
     guard let serverAuthManager = tokenManager as? ServerToServerAuthManager else {
-      throw TokenManagerError.internalError(
-        reason: "Server-to-server credentials require ServerToServerAuthManager"
-      )
+      throw TokenManagerError.internalError(.serverToServerRequiresSpecificManager)
     }
 
     // Extract body data for signing

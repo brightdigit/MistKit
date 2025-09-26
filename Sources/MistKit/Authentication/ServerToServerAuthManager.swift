@@ -106,13 +106,9 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
       // Provide more specific error handling for PEM parsing failures
       if error.localizedDescription.contains("PEM") || error.localizedDescription.contains("format")
       {
-        throw TokenManagerError.invalidCredentials(
-          reason: "Invalid PEM format for private key: \(error.localizedDescription)"
-        )
+        throw TokenManagerError.invalidCredentials(.invalidPEMFormat(error))
       } else {
-        throw TokenManagerError.invalidCredentials(
-          reason: "Failed to parse private key from PEM string: \(error.localizedDescription)"
-        )
+        throw TokenManagerError.invalidCredentials(.privateKeyParseFailed(error))
       }
     }
   }
@@ -135,14 +131,12 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
 
   public func validateCredentials() async throws -> Bool {
     guard !keyID.isEmpty else {
-      throw TokenManagerError.invalidCredentials(reason: "Key ID is empty")
+      throw TokenManagerError.invalidCredentials(.keyIdEmpty)
     }
 
     // Validate key ID format (typically alphanumeric with specific length)
     guard keyID.count >= 8 else {
-      throw TokenManagerError.invalidCredentials(
-        reason: "Key ID appears to be too short (minimum 8 characters)"
-      )
+      throw TokenManagerError.invalidCredentials(.keyIdTooShort)
     }
 
     // Try to create a test signature to validate the private key
@@ -151,9 +145,7 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
       let privateKey = try createPrivateKey()
       _ = try privateKey.signature(for: testData)
     } catch {
-      throw TokenManagerError.invalidCredentials(
-        reason: "Private key is invalid or corrupted: \(error.localizedDescription)"
-      )
+      throw TokenManagerError.invalidCredentials(.privateKeyInvalidOrCorrupted(error))
     }
 
     return true

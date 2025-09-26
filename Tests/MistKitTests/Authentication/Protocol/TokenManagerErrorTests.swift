@@ -11,17 +11,17 @@ internal struct TokenManagerErrorTests {
   /// Tests TokenManagerError cases and localized descriptions
   @Test("TokenManagerError cases and localized descriptions")
   internal func tokenManagerError() {
-    let invalidError = TokenManagerError.invalidCredentials(reason: "Bad format")
+    let invalidError = TokenManagerError.invalidCredentials(.apiTokenInvalidFormat)
     let authError = TokenManagerError.authenticationFailed(underlying: nil)
     let expiredError = TokenManagerError.tokenExpired
     let networkError = TokenManagerError.networkError(
       underlying: NSError(domain: "test", code: 123, userInfo: nil)
     )
-    let internalError = TokenManagerError.internalError(reason: "System failure")
+    let internalError = TokenManagerError.internalError(.noCredentialsAvailable)
 
     // Test error descriptions
     #expect(invalidError.localizedDescription.contains("Invalid credentials"))
-    #expect(invalidError.localizedDescription.contains("Bad format"))
+    #expect(invalidError.localizedDescription.contains("API token format is invalid"))
 
     #expect(authError.localizedDescription.contains("Authentication failed"))
 
@@ -30,6 +30,6 @@ internal struct TokenManagerErrorTests {
     #expect(networkError.localizedDescription.contains("Network error"))
 
     #expect(internalError.localizedDescription.contains("Internal"))
-    #expect(internalError.localizedDescription.contains("System failure"))
+    #expect(internalError.localizedDescription.contains("No credentials available"))
   }
 }

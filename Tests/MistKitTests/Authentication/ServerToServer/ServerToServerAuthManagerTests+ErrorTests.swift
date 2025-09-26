@@ -57,8 +57,12 @@ extension ServerToServerAuthManagerTests {
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
       } catch let error as TokenManagerError {
         if case .invalidCredentials(let reason) = error {
-          #expect(
-            reason.contains("Invalid PEM format") || reason.contains("Failed to parse private key"))
+          switch reason {
+          case .invalidPEMFormat, .privateKeyParseFailed:
+            break  // Expected error types
+          default:
+            Issue.record("Expected PEM format or parse error, got: \(reason)")
+          }
         } else {
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }
@@ -84,8 +88,12 @@ extension ServerToServerAuthManagerTests {
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
       } catch let error as TokenManagerError {
         if case .invalidCredentials(let reason) = error {
-          #expect(
-            reason.contains("Invalid PEM format") || reason.contains("Failed to parse private key"))
+          switch reason {
+          case .invalidPEMFormat, .privateKeyParseFailed:
+            break  // Expected error types
+          default:
+            Issue.record("Expected PEM format or parse error, got: \(reason)")
+          }
         } else {
           Issue.record("Expected invalidCredentials error, got: \(error)")
         }

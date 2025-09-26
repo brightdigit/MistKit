@@ -94,27 +94,23 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
   public func validateCredentials() async throws -> Bool {
     // Validate API token format
     guard !apiToken.isEmpty else {
-      throw TokenManagerError.invalidCredentials(reason: "API token is empty")
+      throw TokenManagerError.invalidCredentials(.apiTokenEmpty)
     }
 
     let regex = NSRegularExpression.apiTokenRegex
     let matches = regex.matches(in: apiToken)
 
     guard !matches.isEmpty else {
-      throw TokenManagerError.invalidCredentials(
-        reason: "API token format is invalid (expected 64-character hex string)"
-      )
+      throw TokenManagerError.invalidCredentials(.apiTokenInvalidFormat)
     }
 
     // Validate web auth token
     guard !webAuthToken.isEmpty else {
-      throw TokenManagerError.invalidCredentials(reason: "Web auth token is empty")
+      throw TokenManagerError.invalidCredentials(.webAuthTokenEmpty)
     }
 
     guard webAuthToken.count >= 10 else {
-      throw TokenManagerError.invalidCredentials(
-        reason: "Web auth token appears to be too short"
-      )
+      throw TokenManagerError.invalidCredentials(.webAuthTokenTooShort)
     }
 
     return true

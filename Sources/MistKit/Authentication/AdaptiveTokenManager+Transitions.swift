@@ -43,11 +43,11 @@ extension AdaptiveTokenManager {
   /// - Throws: TokenManagerError if the web token is invalid
   public func upgradeToWebAuthentication(webAuthToken: String) async throws -> TokenCredentials {
     guard !webAuthToken.isEmpty else {
-      throw TokenManagerError.invalidCredentials(reason: "Web auth token cannot be empty")
+      throw TokenManagerError.invalidCredentials(.webAuthTokenEmpty)
     }
 
     guard webAuthToken.count >= 10 else {
-      throw TokenManagerError.invalidCredentials(reason: "Web auth token too short")
+      throw TokenManagerError.invalidCredentials(.webAuthTokenTooShort)
     }
 
     self.webAuthToken = webAuthToken
@@ -57,7 +57,7 @@ extension AdaptiveTokenManager {
     // Store credentials if storage is available
     if let storage = storage {
       guard let credentials = try await getCurrentCredentials() else {
-        throw TokenManagerError.internalError(reason: "Failed to get credentials after upgrade")
+        throw TokenManagerError.internalError(.failedCredentialRetrievalAfterUpgrade)
       }
       do {
         try await storage.store(credentials, identifier: apiToken)
@@ -73,7 +73,7 @@ extension AdaptiveTokenManager {
     }
 
     guard let finalCredentials = try await getCurrentCredentials() else {
-      throw TokenManagerError.internalError(reason: "Failed to get credentials after upgrade")
+      throw TokenManagerError.internalError(.failedCredentialRetrievalAfterUpgrade)
     }
     return finalCredentials
   }
@@ -86,7 +86,7 @@ extension AdaptiveTokenManager {
     // Mode changed to API-only
 
     guard let finalCredentials = try await getCurrentCredentials() else {
-      throw TokenManagerError.internalError(reason: "Failed to get credentials after downgrade")
+      throw TokenManagerError.internalError(.failedCredentialRetrievalAfterDowngrade)
     }
     return finalCredentials
   }
@@ -97,9 +97,7 @@ extension AdaptiveTokenManager {
   /// - Throws: TokenManagerError if not in web auth mode or token is invalid
   public func updateWebAuthToken(_ newWebAuthToken: String) async throws -> TokenCredentials {
     guard webAuthToken != nil else {
-      throw TokenManagerError.invalidCredentials(
-        reason: "Cannot update web auth token when not in web authentication mode"
-      )
+      throw TokenManagerError.invalidCredentials(.authenticationModeMismatch)
     }
 
     return try await upgradeToWebAuthentication(webAuthToken: newWebAuthToken)

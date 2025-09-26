@@ -53,16 +53,14 @@ extension TokenManager {
   /// - Throws: TokenManagerError if validation fails
   internal static func validateAPITokenFormat(_ apiToken: String) throws {
     guard !apiToken.isEmpty else {
-      throw TokenManagerError.invalidCredentials(reason: "API token is empty")
+      throw TokenManagerError.invalidCredentials(.apiTokenEmpty)
     }
 
     let regex = NSRegularExpression.apiTokenRegex
     let matches = regex.matches(in: apiToken)
 
     guard !matches.isEmpty else {
-      throw TokenManagerError.invalidCredentials(
-        reason: "API token format is invalid (expected 64-character hex string)"
-      )
+      throw TokenManagerError.invalidCredentials(.apiTokenInvalidFormat)
     }
   }
 
@@ -71,13 +69,11 @@ extension TokenManager {
   /// - Throws: TokenManagerError if validation fails
   internal static func validateWebAuthTokenFormat(_ webToken: String) throws {
     guard !webToken.isEmpty else {
-      throw TokenManagerError.invalidCredentials(reason: "Web auth token is empty")
+      throw TokenManagerError.invalidCredentials(.webAuthTokenEmpty)
     }
 
     guard webToken.count >= 10 else {
-      throw TokenManagerError.invalidCredentials(
-        reason: "Web auth token appears to be too short"
-      )
+      throw TokenManagerError.invalidCredentials(.webAuthTokenTooShort)
     }
   }
 
@@ -86,16 +82,14 @@ extension TokenManager {
   /// - Throws: TokenManagerError if validation fails
   internal static func validateKeyIDFormat(_ keyID: String) throws {
     guard !keyID.isEmpty else {
-      throw TokenManagerError.invalidCredentials(reason: "Key ID is empty")
+      throw TokenManagerError.invalidCredentials(.keyIdEmpty)
     }
 
     let regex = NSRegularExpression.keyIDRegex
     let matches = regex.matches(in: keyID)
 
     guard !matches.isEmpty else {
-      throw TokenManagerError.invalidCredentials(
-        reason: "Key ID format is invalid (expected 64-character hex string)"
-      )
+      throw TokenManagerError.invalidCredentials(.keyIdInvalidFormat)
     }
   }
 }

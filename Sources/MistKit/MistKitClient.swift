@@ -203,11 +203,7 @@ public struct MistKitClient {
       // Server-to-server authentication only supports the public database
       guard configuration.database == .public else {
         throw TokenManagerError.invalidCredentials(
-          reason: """
-            Server-to-server authentication only supports the public database. \
-            Current database: \(configuration.database). \
-            Use MistKitConfiguration.serverToServer() for proper configuration.
-            """
+          .serverToServerOnlySupportsPublicDatabase(configuration.database.rawValue)
         )
       }
     }

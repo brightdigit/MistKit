@@ -99,7 +99,7 @@ public final class DefaultTokenRefreshManager: TokenRefreshManager, TokenRefresh
       // For now, just validate and return current credentials
       // In a real implementation, this would make API calls to refresh
       guard let credentials = try await tokenManager.getCurrentCredentials() else {
-        throw TokenManagerError.internalError(reason: "No credentials available")
+        throw TokenManagerError.internalError(.noCredentialsAvailable)
       }
 
       await notify(.refreshCompleted(credentials))

@@ -34,7 +34,7 @@
 /// Errors that can occur during token management operations
 public enum TokenManagerError: Error, LocalizedError, Sendable {
   /// Invalid or malformed credentials
-  case invalidCredentials(reason: String)
+  case invalidCredentials(InvalidCredentialReason)
 
   /// Authentication failed with external service
   case authenticationFailed(underlying: (any Error)?)
@@ -46,12 +46,12 @@ public enum TokenManagerError: Error, LocalizedError, Sendable {
   case networkError(underlying: any Error)
 
   /// Internal error in token management
-  case internalError(reason: String)
+  case internalError(InternalErrorReason)
 
   public var errorDescription: String? {
     switch self {
     case .invalidCredentials(let reason):
-      return "Invalid credentials: \(reason)"
+      return "Invalid credentials: \(reason.description)"
     case .authenticationFailed(let error):
       return "Authentication failed: \(error?.localizedDescription ?? "Unknown error")"
     case .tokenExpired:
@@ -59,7 +59,7 @@ public enum TokenManagerError: Error, LocalizedError, Sendable {
     case .networkError(let error):
       return "Network error during authentication: \(error.localizedDescription)"
     case .internalError(let reason):
-      return "Internal token manager error: \(reason)"
+      return "Internal token manager error: \(reason.description)"
     }
   }
 }
