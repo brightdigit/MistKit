@@ -106,8 +106,7 @@ internal struct MistKitConfiguration: Sendable {
       do {
         return try ServerToServerAuthManager(
           keyID: keyID,
-          privateKeyData: privateKeyData,
-          storage: storage
+          privateKeyData: privateKeyData
         )
       } catch {
         fatalError("Failed to create ServerToServerAuthManager: \(error)")
