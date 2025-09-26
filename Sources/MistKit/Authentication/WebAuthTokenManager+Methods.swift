@@ -50,8 +50,8 @@ extension WebAuthTokenManager {
   /// Returns true if both tokens appear to be in valid format
   public var areTokensValidFormat: Bool {
     do {
-      try BaseTokenManager.validateAPITokenFormat(apiToken)
-      try BaseTokenManager.validateWebAuthTokenFormat(webAuthToken)
+      try Self.validateAPITokenFormat(apiToken)
+      try Self.validateWebAuthTokenFormat(webAuthToken)
       return true
     } catch {
       return false

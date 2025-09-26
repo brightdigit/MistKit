@@ -58,7 +58,7 @@ public final class APITokenManager: TokenManager, Sendable {
   }
 
   public func validateCredentials() async throws -> Bool {
-    try BaseTokenManager.validateAPITokenFormat(apiToken)
+    try Self.validateAPITokenFormat(apiToken)
     return true
   }
 
@@ -80,7 +80,7 @@ extension APITokenManager {
   /// Returns true if the token appears to be in valid format
   public var isValidFormat: Bool {
     do {
-      try BaseTokenManager.validateAPITokenFormat(apiToken)
+      try Self.validateAPITokenFormat(apiToken)
       return true
     } catch {
       return false

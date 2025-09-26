@@ -4,8 +4,6 @@ import Testing
 
 @testable import MistKit
 
-enum ServerToServerAuthManagerTests {}
-
 extension ServerToServerAuthManagerTests {
   @Suite("Server-to-Server Auth Manager Validation")
   /// Test suite for ServerToServerAuthManager validation functionality

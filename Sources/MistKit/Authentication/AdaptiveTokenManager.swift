@@ -63,11 +63,11 @@ public actor AdaptiveTokenManager: TokenManager {
 
   public func validateCredentials() async throws -> Bool {
     // Validate API token using common validation
-    try BaseTokenManager.validateAPITokenFormat(apiToken)
+    try Self.validateAPITokenFormat(apiToken)
 
     // Validate web token if present
     if let webToken = webAuthToken {
-      try BaseTokenManager.validateWebAuthTokenFormat(webToken)
+      try Self.validateWebAuthTokenFormat(webToken)
     }
 
     return true

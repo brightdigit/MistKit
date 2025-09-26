@@ -46,3 +46,56 @@ public protocol TokenManager: Sendable {
   /// - Throws: TokenManagerError if retrieval fails
   func getCurrentCredentials() async throws -> TokenCredentials?
 }
+
+extension TokenManager {
+  /// Validates API token format using regex
+  /// - Parameter apiToken: The API token to validate
+  /// - Throws: TokenManagerError if validation fails
+  internal static func validateAPITokenFormat(_ apiToken: String) throws {
+    guard !apiToken.isEmpty else {
+      throw TokenManagerError.invalidCredentials(reason: "API token is empty")
+    }
+
+    let regex = NSRegularExpression.apiTokenRegex
+    let matches = regex.matches(in: apiToken)
+
+    guard !matches.isEmpty else {
+      throw TokenManagerError.invalidCredentials(
+        reason: "API token format is invalid (expected 64-character hex string)"
+      )
+    }
+  }
+
+  /// Validates web auth token format
+  /// - Parameter webToken: The web auth token to validate
+  /// - Throws: TokenManagerError if validation fails
+  internal static func validateWebAuthTokenFormat(_ webToken: String) throws {
+    guard !webToken.isEmpty else {
+      throw TokenManagerError.invalidCredentials(reason: "Web auth token is empty")
+    }
+
+    guard webToken.count >= 10 else {
+      throw TokenManagerError.invalidCredentials(
+        reason: "Web auth token appears to be too short"
+      )
+    }
+  }
+
+  /// Validates key ID format
+  /// - Parameter keyID: The key ID to validate
+  /// - Throws: TokenManagerError if validation fails
+  internal static func validateKeyIDFormat(_ keyID: String) throws {
+    guard !keyID.isEmpty else {
+      throw TokenManagerError.invalidCredentials(reason: "Key ID is empty")
+    }
+
+    let regex = NSRegularExpression.keyIDRegex
+    let matches = regex.matches(in: keyID)
+
+    guard !matches.isEmpty else {
+      throw TokenManagerError.invalidCredentials(
+        reason: "Key ID format is invalid (expected 64-character hex string)"
+      )
+    }
+  }
+}
