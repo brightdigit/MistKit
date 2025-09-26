@@ -173,6 +173,20 @@ dev-debug.log
 # Task files
 # tasks.json
 # tasks/ 
-.mint
-Keys
+.mint/
+/Keys/
 .claude/settings.local.json
+
+# Prevent accidental commits of private keys/certificates (server-to-server auth)
+*.p8
+*.pem
+*.key
+*.cer
+*.crt
+*.der
+*.p12
+*.pfx
+
+# Allow placeholder docs/samples in Keys
+!Keys/README.md
+!Keys/*.example.*

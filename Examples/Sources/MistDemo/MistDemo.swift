@@ -1,10 +1,7 @@
 import Foundation
 import MistKit
-import OpenAPIRuntime
-import OpenAPIURLSession
 import Hummingbird
 import ArgumentParser
-import Crypto
 #if canImport(AppKit)
 import AppKit
 #endif
@@ -46,8 +43,6 @@ struct MistDemo: AsyncParsableCommand {
     @Flag(name: .long, help: "Test server-to-server authentication")
     var testServerToServer: Bool = false
 
-    @Flag(name: .long, help: "Test signature generation")
-    var testSignature: Bool = false
 
     @Option(name: .long, help: "Server-to-server key ID")
     var keyID: String?
@@ -90,8 +85,6 @@ struct MistDemo: AsyncParsableCommand {
             try await testAdaptiveTokenManager(apiToken: effectiveApiToken)
         } else if testServerToServer {
             try await testServerToServerAuthentication(apiToken: effectiveApiToken)
-        } else if testSignature {
-            testSignatureGeneration()
         } else if skipAuth, let token = webAuthToken {
             // Run demo directly with provided token
             try await runCloudKitDemo(webAuthToken: token, apiToken: effectiveApiToken)
@@ -406,12 +399,8 @@ struct MistDemo: AsyncParsableCommand {
         // Test 4: Server-to-Server Authentication (basic test only)
         print("\n🔐 Test 4: Server-to-Server Authentication (Test Keys)")
         print(String(repeating: "-", count: 50))
-        if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
-            await testServerToServerBasic()
-        } else {
-            print("⚠️  Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+")
-            print("   Use API-only or Web authentication on older platforms")
-        }
+        print("⚠️  Server-to-server authentication requires real keys from Apple Developer Console")
+        print("   Use --test-server-to-server with --key-id and --private-key-file for testing")
 
         print("\n" + String(repeating: "=", count: 70))
         print("✅ Authentication test suite completed!")
@@ -562,29 +551,24 @@ struct MistDemo: AsyncParsableCommand {
             privateKeyPEM = key
             print("🔑 Using provided private key")
         } else {
-            // Generate a test key
-            print("🔧 No private key provided, generating test key...")
-            if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
-                let testKeys = generateTestKeys()
-                privateKeyPEM = testKeys.privateKeyPEM
-                keyIdentifier = testKeys.keyID
-                print("✅ Generated test key ID: \(keyIdentifier)")
-                print("⚠️  Note: This is a test key and won't work with real CloudKit")
-            } else {
-                print("❌ Key generation requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+")
-                print("💡 Provide a key manually using --private-key-file or --private-key")
-                return
-            }
+            // No private key provided
+            print("❌ No private key provided for server-to-server authentication")
+            print("💡 Please provide a key using one of these options:")
+            print("   --private-key-file 'path/to/private_key.pem'")
+            print("   --private-key 'PEM_STRING'")
+            print("   --key-id 'your_key_id'")
+            print("")
+            print("🔗 For more information:")
+            print("   https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html")
+            return
         }
 
-        // Use provided key ID or default test ID
+        // Use provided key ID
         if let providedKeyID = keyID {
             keyIdentifier = providedKeyID
             print("🔑 Using provided key ID: \(keyIdentifier)")
-        } else if keyID == nil && privateKey == nil && privateKeyFile == nil {
-            // keyIdentifier already set from test key generation
         } else {
-            print("❌ Key ID is required when providing a private key")
+            print("❌ Key ID is required for server-to-server authentication")
             print("💡 Use --key-id 'your_key_id' to specify the key ID")
             return
         }
@@ -668,39 +652,5 @@ struct MistDemo: AsyncParsableCommand {
             print("             --key-id 'your_key_id' \\")
             print("             --private-key-file 'path/to/private_key.pem'")
         }
-    }
-
-    /// Basic server-to-server test for comprehensive suite
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    private func testServerToServerBasic() async {
-        do {
-            print("📋 Testing server-to-server authentication basics...")
-            let testKeys = generateTestKeys()
-            let serverManager = try ServerToServerAuthManager(
-                keyID: testKeys.keyID,
-                pemString: testKeys.privateKeyPEM
-            )
-
-            let isValid = try await serverManager.validateCredentials()
-            print("✅ Server-to-server validation: \(isValid ? "PASSED" : "FAILED")")
-            print("✅ Key generation and authentication setup working")
-        } catch {
-            print("❌ Server-to-server basic test failed: \(error)")
-        }
-    }
-
-    /// Generate test keys for server-to-server authentication testing
-    /// Available on macOS 11.0+, iOS 14.0+, tvOS 14.0+, watchOS 7.0+, and Linux
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    private func generateTestKeys() -> (keyID: String, privateKeyPEM: String) {
-        // Generate a new P-256 private key
-        let privateKey = P256.Signing.PrivateKey()
-
-        // Generate a test key ID (8-character random string)
-        let keyID = String((0..<8).compactMap { _ in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".randomElement() })
-
-        // Convert to PEM format
-        let privateKeyPEM = privateKey.pemRepresentation
-        return (keyID: keyID, privateKeyPEM: privateKeyPEM)
     }
 }
