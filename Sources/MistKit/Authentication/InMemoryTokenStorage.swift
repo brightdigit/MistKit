@@ -111,6 +111,11 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
 
   // MARK: - TokenStorage Protocol
 
+  /// Stores credentials in memory using the provided identifier
+  /// - Parameters:
+  ///   - credentials: The token credentials to store
+  ///   - identifier: Optional identifier for the credentials (uses "default" if nil)
+  /// - Throws: TokenStorageError if storage operation fails
   public func store(_ credentials: TokenCredentials, identifier: String?)
     async throws(TokenStorageError)
   {
@@ -122,20 +127,31 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
   ///   - credentials: The credentials to store
   ///   - identifier: Optional identifier for the credentials
   ///   - expirationTime: When the credentials expire
+  /// - Throws: TokenStorageError if storage operation fails
   public func store(_ credentials: TokenCredentials, identifier: String?, expirationTime: Date?)
     async throws(TokenStorageError)
   {
     await storage.store(credentials, identifier: identifier, expirationTime: expirationTime)
   }
 
+  /// Retrieves credentials from memory using the provided identifier
+  /// - Parameter identifier: Optional identifier for the credentials (uses "default" if nil)
+  /// - Returns: The stored credentials, or nil if not found or expired
+  /// - Throws: TokenStorageError if retrieval operation fails
   public func retrieve(identifier: String?) async throws(TokenStorageError) -> TokenCredentials? {
     await storage.retrieve(identifier: identifier)
   }
 
+  /// Removes credentials from memory using the provided identifier
+  /// - Parameter identifier: Optional identifier for the credentials (uses "default" if nil)
+  /// - Throws: TokenStorageError if removal operation fails
   public func remove(identifier: String?) async throws(TokenStorageError) {
     await storage.remove(identifier: identifier)
   }
 
+  /// Lists all identifiers currently stored in memory
+  /// - Returns: Array of identifier strings for all stored credentials
+  /// - Throws: TokenStorageError if listing operation fails
   public func listIdentifiers() async throws(TokenStorageError) -> [String] {
     await storage.listIdentifiers()
   }

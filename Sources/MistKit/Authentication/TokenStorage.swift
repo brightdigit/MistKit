@@ -43,6 +43,7 @@ public enum TokenStorageError: Error, LocalizedError, Sendable {
   /// Storage corrupted or invalid format
   case corruptedStorage
 
+  /// A localized message describing what error occurred
   public var errorDescription: String? {
     switch self {
     case .storageFailed(let reason):

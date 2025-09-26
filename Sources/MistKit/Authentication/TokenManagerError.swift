@@ -46,6 +46,7 @@ public enum TokenManagerError: Error, LocalizedError, Sendable {
   /// Internal error in token management
   case internalError(InternalErrorReason)
 
+  /// A localized message describing what error occurred
   public var errorDescription: String? {
     switch self {
     case .invalidCredentials(let reason):

@@ -52,6 +52,7 @@ extension ServerToServerAuthManager {
   ///   - webServiceURL: The full CloudKit Web Services URL
   ///   - date: The request date (defaults to current date)
   /// - Returns: Signature components for CloudKit headers
+  /// - Throws: TokenManagerError if signing fails due to invalid key or other errors
   public func signRequest(
     requestBody: Data?,
     webServiceURL: String,
@@ -99,6 +100,7 @@ extension ServerToServerAuthManager {
   /// Creates credentials with additional metadata
   /// - Parameter metadata: Additional metadata to include
   /// - Returns: TokenCredentials with metadata
+  /// - Throws: TokenManagerError if credential creation fails
   public func credentialsWithMetadata(_ metadata: [String: String]) throws(TokenManagerError)
     -> TokenCredentials
   {

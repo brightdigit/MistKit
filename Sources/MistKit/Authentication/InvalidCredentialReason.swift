@@ -45,6 +45,7 @@ public enum InvalidCredentialReason: Sendable {
   case authenticationModeMismatch
   case serverToServerOnlySupportsPublicDatabase(String)
 
+  /// A human-readable description of the invalid credential reason
   public var description: String {
     switch self {
     case .apiTokenEmpty:

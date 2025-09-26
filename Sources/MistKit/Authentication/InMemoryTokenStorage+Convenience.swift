@@ -34,6 +34,7 @@ public import Foundation
 extension InMemoryTokenStorage {
   /// Stores credentials with automatic identifier based on authentication method
   /// - Parameter credentials: The credentials to store
+  /// - Throws: TokenStorageError if the storage operation fails
   public func store(_ credentials: TokenCredentials) async throws {
     let identifier: String
 
@@ -52,6 +53,7 @@ extension InMemoryTokenStorage {
   /// Retrieves credentials by authentication method type
   /// - Parameter methodType: The authentication method type to search for
   /// - Returns: First matching credentials or nil if not found
+  /// - Throws: TokenStorageError if the retrieval operation fails
   public func retrieve(byMethodType methodType: String) async throws(TokenStorageError)
     -> TokenCredentials?
   {

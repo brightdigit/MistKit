@@ -40,6 +40,7 @@ public actor AdaptiveTokenManager: TokenManager {
 
   // MARK: - TokenManager Protocol
 
+  /// Indicates whether valid credentials are currently available
   public var hasCredentials: Bool {
     get async {
       !apiToken.isEmpty
@@ -60,6 +61,9 @@ public actor AdaptiveTokenManager: TokenManager {
     self.storage = storage
   }
 
+  /// Validates the stored credentials for format and completeness
+  /// - Returns: true if credentials are valid, false otherwise
+  /// - Throws: TokenManagerError if credentials are invalid
   public func validateCredentials() async throws(TokenManagerError) -> Bool {
     // Validate API token using common validation
     try Self.validateAPITokenFormat(apiToken)
@@ -72,6 +76,9 @@ public actor AdaptiveTokenManager: TokenManager {
     return true
   }
 
+  /// Retrieves the current credentials for authentication
+  /// - Returns: The current token credentials, or nil if not available
+  /// - Throws: TokenManagerError if credentials are invalid
   public func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
     _ = try await validateCredentials()
 

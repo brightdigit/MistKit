@@ -63,6 +63,7 @@ public struct TokenCredentials: Sendable, Equatable {
 
   /// Convenience initializer for API token authentication
   /// - Parameter apiToken: The API token string
+  /// - Returns: TokenCredentials configured for API token authentication
   public static func apiToken(_ apiToken: String) -> TokenCredentials {
     TokenCredentials(method: .apiToken(apiToken))
   }
@@ -71,6 +72,7 @@ public struct TokenCredentials: Sendable, Equatable {
   /// - Parameters:
   ///   - apiToken: The API token string
   ///   - webToken: The web authentication token string
+  /// - Returns: TokenCredentials configured for web authentication
   public static func webAuthToken(apiToken: String, webToken: String) -> TokenCredentials {
     TokenCredentials(method: .webAuthToken(apiToken: apiToken, webToken: webToken))
   }
@@ -79,6 +81,7 @@ public struct TokenCredentials: Sendable, Equatable {
   /// - Parameters:
   ///   - keyID: The key identifier
   ///   - privateKey: The ECDSA P-256 private key data
+  /// - Returns: TokenCredentials configured for server-to-server authentication
   public static func serverToServer(keyID: String, privateKey: Data) -> TokenCredentials {
     TokenCredentials(method: .serverToServer(keyID: keyID, privateKey: privateKey))
   }

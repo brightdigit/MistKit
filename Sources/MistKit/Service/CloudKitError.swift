@@ -30,12 +30,14 @@
 public import Foundation
 import OpenAPIRuntime
 
+/// Represents errors that can occur when interacting with CloudKit Web Services
 public enum CloudKitError: LocalizedError, Sendable {
   case httpError(statusCode: Int)
   case httpErrorWithDetails(statusCode: Int, serverErrorCode: String?, reason: String?)
   case httpErrorWithRawResponse(statusCode: Int, rawResponse: String)
   case invalidResponse
 
+  /// A localized message describing what error occurred
   public var errorDescription: String? {
     switch self {
     case .httpError(let statusCode):

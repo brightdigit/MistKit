@@ -3,8 +3,8 @@ import Testing
 
 @testable import MistKit
 
+/// Test suite for Database enum functionality and behavior validation
 @Suite("Database")
-/// Tests for Database enum functionality
 public struct DatabaseTests {
   /// Tests Database enum raw values
   @Test("Database enum raw values")

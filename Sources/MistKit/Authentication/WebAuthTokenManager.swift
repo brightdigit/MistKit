@@ -39,6 +39,7 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
 
   // MARK: - TokenManager Protocol
 
+  /// Indicates whether valid credentials are currently available
   public var hasCredentials: Bool {
     get async {
       // Check if tokens are non-empty and have valid format
@@ -69,7 +70,6 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
   /// - Parameters:
   ///   - apiToken: The CloudKit API token from Apple Developer Console
   ///   - webAuthToken: The web authentication token from CloudKit JS authentication
-  ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public init(
     apiToken: String,
     webAuthToken: String
@@ -82,6 +82,9 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     )
   }
 
+  /// Validates the stored credentials for format and completeness
+  /// - Returns: true if credentials are valid, false otherwise
+  /// - Throws: TokenManagerError if credentials are invalid
   public func validateCredentials() async throws(TokenManagerError) -> Bool {
     // Validate API token format
     guard !apiToken.isEmpty else {
@@ -107,6 +110,9 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
     return true
   }
 
+  /// Retrieves the current credentials for authentication
+  /// - Returns: The current token credentials, or nil if not available
+  /// - Throws: TokenManagerError if credentials are invalid
   public func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
     // Validate first
     _ = try await validateCredentials()

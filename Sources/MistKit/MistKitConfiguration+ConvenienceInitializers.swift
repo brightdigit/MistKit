@@ -37,6 +37,7 @@ extension MistKitConfiguration {
   ///   - database: The database type (default: .private)
   ///   - apiToken: The API token
   ///   - storage: Optional token storage for persistence
+  /// - Returns: A configured MistKitConfiguration for API token authentication
   public static func apiToken(
     container: String,
     environment: Environment,
@@ -64,6 +65,7 @@ extension MistKitConfiguration {
   ///   - apiToken: The API token
   ///   - webAuthToken: The web authentication token
   ///   - storage: Optional token storage for persistence
+  /// - Returns: A configured MistKitConfiguration for web authentication
   public static func webAuth(
     container: String,
     environment: Environment,
@@ -92,6 +94,7 @@ extension MistKitConfiguration {
   ///   - keyID: The key identifier from Apple Developer Console
   ///   - privateKeyData: The private key as raw data (32 bytes for P-256)
   ///   - storage: Optional token storage for persistence
+  /// - Returns: A configured MistKitConfiguration for server-to-server authentication
   /// - Note: Database is automatically set to .public as server-to-server authentication
   ///         only supports the public database in CloudKit Web Services
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)

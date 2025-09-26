@@ -38,6 +38,7 @@ public enum InternalErrorReason: Sendable {
   case serverToServerRequiresPlatformSupport
   case tokenRefreshFailed(any Error)
 
+  /// A human-readable description of the internal error reason
   public var description: String {
     switch self {
     case .noCredentialsAvailable:
