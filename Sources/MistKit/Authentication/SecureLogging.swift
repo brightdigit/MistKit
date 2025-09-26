@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// Utilities for secure logging that masks sensitive information
-public enum SecureLogging {
+internal enum SecureLogging {
   /// Masks a token by showing only the first few and last few characters
   /// - Parameters:
   ///   - token: The token to mask
@@ -38,7 +38,7 @@ public enum SecureLogging {
   ///   - suffixLength: Number of characters to show at the end (default: 4)
   ///   - maskCharacter: Character to use for masking (default: "*")
   /// - Returns: A masked version of the token
-  public static func maskToken(
+  internal static func maskToken(
     _ token: String,
     prefixLength: Int = 8,
     suffixLength: Int = 4,
@@ -59,99 +59,14 @@ public enum SecureLogging {
   /// Masks an API token with standard CloudKit format
   /// - Parameter apiToken: The API token to mask
   /// - Returns: A masked version of the API token
-  public static func maskAPIToken(_ apiToken: String) -> String {
+  internal static func maskAPIToken(_ apiToken: String) -> String {
     maskToken(apiToken, prefixLength: 8, suffixLength: 4)
-  }
-
-  /// Masks a web auth token
-  /// - Parameter webAuthToken: The web auth token to mask
-  /// - Returns: A masked version of the web auth token
-  public static func maskWebAuthToken(_ webAuthToken: String) -> String {
-    maskToken(webAuthToken, prefixLength: 12, suffixLength: 8)
-  }
-
-  /// Masks a key ID
-  /// - Parameter keyID: The key ID to mask
-  /// - Returns: A masked version of the key ID
-  public static func maskKeyID(_ keyID: String) -> String {
-    maskToken(keyID, prefixLength: 4, suffixLength: 2)
-  }
-
-  /// Masks private key data by showing only the first few bytes
-  /// - Parameter privateKey: The private key data to mask
-  /// - Returns: A masked representation of the private key
-  public static func maskPrivateKey(_ privateKey: Data) -> String {
-    let prefixLength = min(4, privateKey.count)
-    let prefix = privateKey.prefix(prefixLength).map { String(format: "%02x", $0) }.joined()
-    let maskCount = max(0, privateKey.count - prefixLength)
-    let mask = String(repeating: "*", count: maskCount * 2)  // Each byte is 2 hex chars
-    return "\(prefix)\(mask)"
-  }
-
-  /// Masks sensitive data in a dictionary for logging
-  /// - Parameter dictionary: The dictionary to mask
-  /// - Returns: A dictionary with sensitive values masked
-  public static func maskSensitiveDictionary(_ dictionary: [String: Any]) -> [String: Any] {
-    var maskedDictionary: [String: Any] = [:]
-
-    for (key, value) in dictionary {
-      let lowercasedKey = key.lowercased()
-
-      if isSensitiveKey(lowercasedKey) {
-        maskedDictionary[key] = maskSensitiveValue(value, key: lowercasedKey)
-      } else {
-        maskedDictionary[key] = value
-      }
-    }
-
-    return maskedDictionary
-  }
-
-  /// Checks if a key contains sensitive information
-  /// - Parameter key: The key to check
-  /// - Returns: True if the key contains sensitive information
-  private static func isSensitiveKey(_ key: String) -> Bool {
-    key.contains("token") || key.contains("key")
-      || key.contains("secret") || key.contains("password")
-      || key.contains("auth")
-  }
-
-  /// Masks a sensitive value based on its type and key
-  /// - Parameters:
-  ///   - value: The value to mask
-  ///   - key: The key associated with the value
-  /// - Returns: The masked value
-  private static func maskSensitiveValue(_ value: Any, key: String) -> Any {
-    if let stringValue = value as? String {
-      return maskStringValue(stringValue, key: key)
-    } else if let dataValue = value as? Data {
-      return maskPrivateKey(dataValue)
-    } else {
-      return "***REDACTED***"
-    }
-  }
-
-  /// Masks a string value based on its key
-  /// - Parameters:
-  ///   - value: The string value to mask
-  ///   - key: The key associated with the value
-  /// - Returns: The masked string value
-  private static func maskStringValue(_ value: String, key: String) -> String {
-    if key.contains("api") {
-      return maskAPIToken(value)
-    } else if key.contains("web") {
-      return maskWebAuthToken(value)
-    } else if key.contains("keyid") {
-      return maskKeyID(value)
-    } else {
-      return maskToken(value)
-    }
   }
 
   /// Creates a safe logging string that masks sensitive information
   /// - Parameter message: The message to log
   /// - Returns: A safe version of the message with sensitive data masked
-  public static func safeLogMessage(_ message: String) -> String {
+  internal static func safeLogMessage(_ message: String) -> String {
     var safeMessage = message
 
     // Use static regex patterns for better performance
@@ -182,31 +97,8 @@ public enum SecureLogging {
 
 /// Extension to provide safe logging methods for common types
 extension String {
-  /// Returns a safely masked version of this string for logging
-  public var safeForLogging: String {
-    SecureLogging.safeLogMessage(self)
-  }
-
   /// Returns a masked API token version of this string
   public var maskedAPIToken: String {
     SecureLogging.maskAPIToken(self)
-  }
-
-  /// Returns a masked web auth token version of this string
-  public var maskedWebAuthToken: String {
-    SecureLogging.maskWebAuthToken(self)
-  }
-
-  /// Returns a masked key ID version of this string
-  public var maskedKeyID: String {
-    SecureLogging.maskKeyID(self)
-  }
-}
-
-/// Extension to provide safe logging methods for Data
-extension Data {
-  /// Returns a masked representation of this data for logging
-  public var maskedForLogging: String {
-    SecureLogging.maskPrivateKey(self)
   }
 }

@@ -27,16 +27,13 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Foundation)
-  import Foundation
-#endif
+import Foundation
 
 /// Token manager for simple API token authentication
 /// Provides container-level access to CloudKit Web Services
 public final class APITokenManager: TokenManager, Sendable {
   private let apiToken: String
   private let credentials: TokenCredentials
-  private let storage: (any TokenStorage)?
 
   // MARK: - TokenManager Protocol
 
@@ -50,10 +47,9 @@ public final class APITokenManager: TokenManager, Sendable {
   /// - Parameters:
   ///   - apiToken: The CloudKit API token from Apple Developer Console
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
-  public init(apiToken: String, storage: (any TokenStorage)? = nil) {
+  public init(apiToken: String) {
     precondition(!apiToken.isEmpty, "API token cannot be empty")
     self.apiToken = apiToken
-    self.storage = storage
     self.credentials = TokenCredentials.apiToken(apiToken)
   }
 

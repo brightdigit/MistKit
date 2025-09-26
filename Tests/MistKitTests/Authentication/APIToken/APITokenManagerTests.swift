@@ -40,17 +40,6 @@ internal struct APITokenManagerTests {
     #expect(manager.token == validToken)
   }
 
-  /// Tests APITokenManager initialization with storage parameter
-  @Test("APITokenManager initialization with storage parameter")
-  internal func initializationStorage() {
-    let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
-    let storage = InMemoryTokenStorage()
-    let manager = APITokenManager(apiToken: validToken, storage: storage)
-
-    #expect(manager.token == validToken)
-    #expect(manager.isValidFormat == true)
-  }
-
   // MARK: - TokenManager Protocol Tests
 
   /// Tests hasCredentials property

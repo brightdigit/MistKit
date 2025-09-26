@@ -13,11 +13,6 @@ extension NetworkErrorTests {
   /// Network error recovery and retry mechanism tests
   @Suite("Recovery Tests")
   internal struct RecoveryTests {
-    // MARK: - Test Data Setup
-
-    private static let validAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
-
     // MARK: - Error Recovery Tests
 
     /// Tests error recovery after network failure

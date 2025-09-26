@@ -27,11 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Foundation)
-  public import Foundation
-#endif
-
-// MARK: - Convenience Initializers
+public import Foundation
 
 extension MistKitConfiguration {
   /// Initialize configuration with API token only (container-level access)
@@ -56,8 +52,7 @@ extension MistKitConfiguration {
       webAuthToken: nil,
       keyID: nil,
       privateKeyData: nil,
-      storage: storage,
-      dependencyContainer: nil
+      storage: storage
     )
   }
 
@@ -85,8 +80,7 @@ extension MistKitConfiguration {
       webAuthToken: webAuthToken,
       keyID: nil,
       privateKeyData: nil,
-      storage: storage,
-      dependencyContainer: nil
+      storage: storage
     )
   }
 
@@ -116,8 +110,7 @@ extension MistKitConfiguration {
       webAuthToken: nil,
       keyID: keyID,
       privateKeyData: privateKeyData,
-      storage: storage,
-      dependencyContainer: nil
+      storage: storage
     )
   }
 }

@@ -121,22 +121,4 @@ extension ServerToServerAuthManager {
       privateKey: newPrivateKey.rawRepresentation
     )
   }
-
-  /// Creates a MistKitConfiguration for server-to-server authentication
-  /// This automatically configures the public database as required for server-to-server auth
-  /// - Parameters:
-  ///   - container: The CloudKit container identifier
-  ///   - environment: The CloudKit environment
-  /// - Returns: A properly configured MistKitConfiguration for server-to-server use
-  public func configuration(
-    container: String,
-    environment: Environment
-  ) throws -> MistKitConfiguration {
-    MistKitConfiguration.serverToServer(
-      container: container,
-      environment: environment,
-      keyID: keyID,
-      privateKeyData: privateKeyData
-    )
-  }
 }

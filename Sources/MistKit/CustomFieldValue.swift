@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
 import OpenAPIRuntime
 
 /// Custom implementation of FieldValue with proper ASSETID handling
@@ -49,7 +49,7 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
   /// Custom field value payload supporting various CloudKit types
   public enum CustomFieldValuePayload: Codable, Hashable, Sendable {
     case stringValue(String)
-    case int64Value(Int64)
+    case int64Value(Int)
     case doubleValue(Double)
     case booleanValue(Bool)
     case bytesValue(String)
@@ -69,7 +69,7 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
     [FieldTypePayload: @Sendable (KeyedDecodingContainer<CodingKeys>) throws ->
       CustomFieldValuePayload] = [
         .string: { .stringValue(try $0.decode(String.self, forKey: .value)) },
-        .int64: { .int64Value(try $0.decode(Int64.self, forKey: .value)) },
+        .int64: { .int64Value(try $0.decode(Int.self, forKey: .value)) },
         .double: { .doubleValue(try $0.decode(Double.self, forKey: .value)) },
         .bytes: { .bytesValue(try $0.decode(String.self, forKey: .value)) },
         .reference: {
@@ -95,66 +95,6 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
   internal let value: CustomFieldValuePayload
   /// The field type
   internal let type: FieldTypePayload?
-
-  /// Convenience initializers for creating instances
-  internal init(value: CustomFieldValuePayload, type: FieldTypePayload) {
-    self.value = value
-    self.type = type
-  }
-
-  /// Initialize with string value
-  internal init(stringValue: String) {
-    self.value = .stringValue(stringValue)
-    self.type = .string
-  }
-
-  /// Initialize with int64 value
-  internal init(int64Value: Int64) {
-    self.value = .int64Value(int64Value)
-    self.type = .int64
-  }
-
-  /// Initialize with double value
-  internal init(doubleValue: Double) {
-    self.value = .doubleValue(doubleValue)
-    self.type = .double
-  }
-
-  /// Initialize with boolean value
-  internal init(booleanValue: Bool) {
-    self.value = .booleanValue(booleanValue)
-    self.type = .bytes  // Boolean values are stored as bytes in CloudKit
-  }
-
-  /// Initialize with date value
-  internal init(dateValue: Double) {
-    self.value = .dateValue(dateValue)
-    self.type = .timestamp
-  }
-
-  /// Initialize with location value
-  internal init(locationValue: Components.Schemas.LocationValue) {
-    self.value = .locationValue(locationValue)
-    self.type = .location
-  }
-
-  /// Initialize with reference value
-  internal init(referenceValue: Components.Schemas.ReferenceValue) {
-    self.value = .referenceValue(referenceValue)
-    self.type = .reference
-  }
-
-  /// Initialize with asset value
-  internal init(assetValue: Components.Schemas.AssetValue) {
-    self.value = .assetValue(assetValue)
-    self.type = .asset
-  }
-
-  /// Initialize with list value
-  internal init(listValue: [CustomFieldValuePayload]) {
-    self.value = .listValue(listValue)
-    self.type = .list
-  }
 
   internal init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)

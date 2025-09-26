@@ -35,12 +35,9 @@ import OpenAPIURLSession
 
 /// A client for interacting with CloudKit Web Services
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-public struct MistKitClient {
+internal struct MistKitClient {
   /// The underlying OpenAPI client
   internal let client: Client
-
-  /// The CloudKit container configuration
-  public let configuration: MistKitConfiguration
 
   /// Initialize a new MistKit client
   /// - Parameters:
@@ -49,9 +46,7 @@ public struct MistKitClient {
   ///   - transport: Custom transport for network requests
   /// - Throws: ClientError if initialization fails
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  public init(configuration: MistKitConfiguration, transport: any ClientTransport) throws {
-    self.configuration = configuration
-
+  internal init(configuration: MistKitConfiguration, transport: any ClientTransport) throws {
     // Create appropriate TokenManager from configuration
     let tokenManager = configuration.createTokenManager()
 
@@ -72,13 +67,11 @@ public struct MistKitClient {
   ///   - tokenManager: Custom token manager for authentication
   ///   - transport: Custom transport for network requests
   /// - Throws: ClientError if initialization fails
-  public init(
+  internal init(
     configuration: MistKitConfiguration,
     tokenManager: any TokenManager,
     transport: any ClientTransport
   ) throws {
-    self.configuration = configuration
-
     // Validate server-to-server authentication restrictions
     try Self.validateServerToServerConfiguration(
       configuration: configuration,
@@ -104,7 +97,7 @@ public struct MistKitClient {
   ///   - tokenManager: Custom token manager for authentication
   ///   - transport: Custom transport for network requests
   /// - Throws: ClientError if initialization fails
-  public init(
+  internal init(
     container: String,
     environment: Environment,
     database: Database,
@@ -130,11 +123,8 @@ public struct MistKitClient {
       environment: environment,
       database: database,
       apiToken: apiToken,  // Use extracted API token if available
-      webAuthToken: nil,
       keyID: keyID,
-      privateKeyData: privateKeyData,
-      storage: nil,
-      dependencyContainer: nil
+      privateKeyData: privateKeyData
     )
 
     try self.init(configuration: configuration, tokenManager: tokenManager, transport: transport)
@@ -147,22 +137,22 @@ public struct MistKitClient {
   ///   environment, and authentication
   /// - Throws: ClientError if initialization fails
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  public init(configuration: MistKitConfiguration) throws {
+  internal init(configuration: MistKitConfiguration) throws {
     try self.init(configuration: configuration, transport: URLSessionTransport())
   }
 
-  /// Initialize a new MistKit client with a custom TokenManager and default URLSessionTransport
-  /// - Parameters:
-  ///   - configuration: The CloudKit configuration
-  ///   - tokenManager: Custom token manager for authentication
-  /// - Throws: ClientError if initialization fails
-  public init(configuration: MistKitConfiguration, tokenManager: any TokenManager) throws {
-    try self.init(
-      configuration: configuration,
-      tokenManager: tokenManager,
-      transport: URLSessionTransport()
-    )
-  }
+  //  /// Initialize a new MistKit client with a custom TokenManager and default URLSessionTransport
+  //  /// - Parameters:
+  //  ///   - configuration: The CloudKit configuration
+  //  ///   - tokenManager: Custom token manager for authentication
+  //  /// - Throws: ClientError if initialization fails
+  //  internal init(configuration: MistKitConfiguration, tokenManager: any TokenManager) throws {
+  //    try self.init(
+  //      configuration: configuration,
+  //      tokenManager: tokenManager,
+  //      transport: URLSessionTransport()
+  //    )
+  //  }
 
   /// Initialize a new MistKit client with a custom TokenManager and individual parameters
   /// using default URLSessionTransport
@@ -172,7 +162,7 @@ public struct MistKitClient {
   ///   - database: CloudKit database (public/private/shared)
   ///   - tokenManager: Custom token manager for authentication
   /// - Throws: ClientError if initialization fails
-  public init(
+  internal init(
     container: String,
     environment: Environment,
     database: Database,

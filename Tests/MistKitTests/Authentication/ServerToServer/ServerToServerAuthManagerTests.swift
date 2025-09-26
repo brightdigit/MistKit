@@ -5,4 +5,4 @@
 //  Created by Leo Dion on 9/25/25.
 //
 
-enum ServerToServerAuthManagerTests {}
+internal enum ServerToServerAuthManagerTests {}

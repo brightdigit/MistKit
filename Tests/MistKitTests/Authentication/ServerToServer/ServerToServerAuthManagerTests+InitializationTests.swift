@@ -14,12 +14,6 @@ extension ServerToServerAuthManagerTests {
       P256.Signing.PrivateKey()
     }
 
-    private static func generateTestPrivateKeyClosure() -> @Sendable () throws ->
-      P256.Signing.PrivateKey
-    {
-      { P256.Signing.PrivateKey() }
-    }
-
     private static func generateTestPrivateKeyData() throws -> Data {
       let privateKey = try generateTestPrivateKey()
       return privateKey.rawRepresentation
@@ -44,7 +38,7 @@ extension ServerToServerAuthManagerTests {
 
       let manager = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
+        privateKeyCallback: try Self.generateTestPrivateKey()
       )
 
       // Verify manager properties
@@ -135,12 +129,10 @@ extension ServerToServerAuthManagerTests {
         return
       }
       let keyID = "test-key-id-12345678"
-      let storage = InMemoryTokenStorage()
 
       let manager = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: try Self.generateTestPrivateKeyClosure()(),
-        storage: storage
+        privateKeyCallback: try Self.generateTestPrivateKey()
       )
 
       // Verify manager properties
@@ -160,7 +152,7 @@ extension ServerToServerAuthManagerTests {
 
       let manager = try ServerToServerAuthManager(
         keyID: validKeyID,
-        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
+        privateKeyCallback: try Self.generateTestPrivateKey()
       )
       #expect(manager.keyID == validKeyID)
     }

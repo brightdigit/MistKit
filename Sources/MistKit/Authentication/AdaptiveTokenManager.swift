@@ -27,9 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Foundation)
-  import Foundation
-#endif
+import Foundation
 
 /// Adaptive token manager that can transition between API-only and Web authentication
 /// Starts with API token and can be upgraded to include web authentication
@@ -37,6 +35,7 @@
 public actor AdaptiveTokenManager: TokenManager {
   internal let apiToken: String
   internal var webAuthToken: String?
+
   internal let storage: (any TokenStorage)?
 
   // MARK: - TokenManager Protocol

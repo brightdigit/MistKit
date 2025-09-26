@@ -27,9 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Foundation)
-  import Foundation
-#endif
+import Foundation
 
 /// Specific reasons for internal errors
 public enum InternalErrorReason: Sendable {

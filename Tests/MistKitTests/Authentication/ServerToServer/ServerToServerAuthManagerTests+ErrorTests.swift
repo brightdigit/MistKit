@@ -8,14 +8,6 @@ extension ServerToServerAuthManagerTests {
   @Suite("Server-to-Server Auth Manager Error Handling")
   /// Test suite for ServerToServerAuthManager error handling functionality
   internal struct ErrorTests {
-    // MARK: - Test Data Setup
-
-    private static func generateTestPrivateKeyClosure() -> @Sendable () throws ->
-      P256.Signing.PrivateKey
-    {
-      { P256.Signing.PrivateKey() }
-    }
-
     // MARK: - Error Handling Tests
 
     /// Tests ServerToServerAuthManager initialization with invalid private key data

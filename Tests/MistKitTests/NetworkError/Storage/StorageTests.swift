@@ -21,7 +21,6 @@ extension NetworkErrorTests {
     @Test("Token storage with network errors")
     internal func tokenStorageWithNetworkErrors() async throws {
       let storage = InMemoryTokenStorage()
-      _ = APITokenManager(apiToken: Self.validAPIToken, storage: storage)
 
       // Store token
       let credentials = TokenCredentials.apiToken(Self.validAPIToken)
@@ -44,7 +43,6 @@ extension NetworkErrorTests {
     @Test("Token storage persistence across network failures")
     internal func tokenStoragePersistenceAcrossNetworkFailures() async throws {
       let storage = InMemoryTokenStorage()
-      _ = APITokenManager(apiToken: Self.validAPIToken, storage: storage)
 
       // Store token
       let credentials = TokenCredentials.apiToken(Self.validAPIToken)
@@ -68,7 +66,6 @@ extension NetworkErrorTests {
     @Test("Token storage cleanup after network errors")
     internal func tokenStorageCleanupAfterNetworkErrors() async throws {
       let storage = InMemoryTokenStorage()
-      _ = APITokenManager(apiToken: Self.validAPIToken, storage: storage)
 
       // Store token
       let credentials = TokenCredentials.apiToken(Self.validAPIToken)
@@ -90,7 +87,6 @@ extension NetworkErrorTests {
     @Test("Concurrent token storage operations")
     internal func concurrentTokenStorageOperations() async throws {
       let storage = InMemoryTokenStorage()
-      _ = APITokenManager(apiToken: Self.validAPIToken, storage: storage)
 
       // Test concurrent storage operations
       try await withThrowingTaskGroup(of: Void.self) { group in
@@ -115,7 +111,6 @@ extension NetworkErrorTests {
     @Test("Token storage with expiration")
     internal func tokenStorageWithExpiration() async throws {
       let storage = InMemoryTokenStorage()
-      _ = APITokenManager(apiToken: Self.validAPIToken, storage: storage)
 
       // Store token with short expiration
       let credentials = TokenCredentials.apiToken(Self.validAPIToken)

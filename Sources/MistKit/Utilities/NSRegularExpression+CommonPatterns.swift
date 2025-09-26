@@ -116,11 +116,3 @@ extension NSRegularExpression {
     matches(in: string, range: NSRange(location: 0, length: string.count))
   }
 }
-
-// MARK: - Performance Extensions
-extension String {
-  /// Returns the full NSRange for the string to avoid repeated allocations
-  private var fullNSRange: NSRange {
-    NSRange(location: 0, length: count)
-  }
-}

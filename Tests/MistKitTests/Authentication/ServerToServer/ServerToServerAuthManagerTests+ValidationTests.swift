@@ -8,55 +8,8 @@ extension ServerToServerAuthManagerTests {
   @Suite("Server-to-Server Auth Manager Validation")
   /// Test suite for ServerToServerAuthManager validation functionality
   internal struct ValidationTests {
-    // MARK: - Test Data Setup
-
     private static func generateTestPrivateKey() throws -> P256.Signing.PrivateKey {
       P256.Signing.PrivateKey()
-    }
-
-    private static func generateTestPrivateKeyClosure() -> @Sendable () throws ->
-      P256.Signing.PrivateKey
-    {
-      { P256.Signing.PrivateKey() }
-    }
-
-    // MARK: - TokenManager Protocol Tests
-
-    /// Tests hasCredentials property
-    @Test("hasCredentials", .enabled(if: Platform.isCryptoAvailable))
-    internal func hasCredentials() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("ServerToServerAuthManager is not available on this operating system.")
-        return
-      }
-      let keyID = "test-key-id-12345678"
-      let manager = try ServerToServerAuthManager(
-        keyID: keyID,
-        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
-      )
-
-      let hasCredentials = await manager.hasCredentials
-      #expect(hasCredentials == true)
-    }
-
-    /// Tests hasCredentials property with empty key ID
-    @Test("hasCredentials with empty key ID", .enabled(if: Platform.isCryptoAvailable))
-    internal func hasCredentialsEmptyKeyID() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("ServerToServerAuthManager is not available on this operating system.")
-        return
-      }
-      // Create a manager with empty key ID by using a private initializer
-      // Since we can't create one with empty key ID due to precondition,
-      // we'll test the validation logic indirectly
-      let keyID = "valid-key-id-12345678"
-      let manager = try ServerToServerAuthManager(
-        keyID: keyID,
-        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
-      )
-
-      let hasCredentials = await manager.hasCredentials
-      #expect(hasCredentials == true)
     }
 
     /// Tests validateCredentials with valid credentials
@@ -69,8 +22,11 @@ extension ServerToServerAuthManagerTests {
       let keyID = "test-key-id-12345678"
       let manager = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
+        privateKeyCallback: try Self.generateTestPrivateKey()
       )
+
+      let hasCredentials = await manager.hasCredentials
+      #expect(hasCredentials == true)
 
       let isValid = try await manager.validateCredentials()
       #expect(isValid == true)
@@ -89,7 +45,7 @@ extension ServerToServerAuthManagerTests {
       // Create manager with short key ID (this will pass precondition but fail validation)
       let manager = try ServerToServerAuthManager(
         keyID: shortKeyID,
-        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
+        privateKeyCallback: try Self.generateTestPrivateKey()
       )
 
       do {
@@ -141,7 +97,7 @@ extension ServerToServerAuthManagerTests {
       let keyID = "test-key-id-12345678"
       let manager = try ServerToServerAuthManager(
         keyID: keyID,
-        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
+        privateKeyCallback: try Self.generateTestPrivateKey()
       )
 
       let credentials = try await manager.getCurrentCredentials()
@@ -171,7 +127,7 @@ extension ServerToServerAuthManagerTests {
       // Create manager with short key ID
       let manager = try ServerToServerAuthManager(
         keyID: shortKeyID,
-        privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
+        privateKeyCallback: try Self.generateTestPrivateKey()
       )
 
       do {
@@ -218,7 +174,7 @@ extension ServerToServerAuthManagerTests {
         _ = try Self.generateTestPrivateKey()
         let manager = try ServerToServerAuthManager(
           keyID: keyID,
-          privateKeyCallback: try Self.generateTestPrivateKeyClosure()()
+          privateKeyCallback: try Self.generateTestPrivateKey()
         )
 
         do {

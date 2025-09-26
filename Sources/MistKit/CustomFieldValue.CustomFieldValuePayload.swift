@@ -59,7 +59,7 @@ extension CustomFieldValue.CustomFieldValuePayload {
     if let value = try? container.decode(String.self) {
       return .stringValue(value)
     }
-    if let value = try? container.decode(Int64.self) {
+    if let value = try? container.decode(Int.self) {
       return .int64Value(value)
     }
     if let value = try? container.decode(Double.self) {

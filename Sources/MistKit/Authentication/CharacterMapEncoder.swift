@@ -30,9 +30,9 @@
 public import Foundation
 
 /// A token encoder that replaces specific characters with URL-encoded equivalents
-public struct CharacterMapEncoder: Sendable {
+internal struct CharacterMapEncoder: Sendable {
   /// Default character map for CloudKit web authentication tokens
-  public static let defaultCharacterMap: [Character: String] = [
+  internal static let defaultCharacterMap: [Character: String] = [
     "+": "%2B",
     "/": "%2F",
     "=": "%3D",
@@ -43,14 +43,14 @@ public struct CharacterMapEncoder: Sendable {
 
   /// Initialize with a custom character map
   /// - Parameter characterMap: The character mapping to use for encoding
-  public init(characterMap: [Character: String] = defaultCharacterMap) {
+  internal init(characterMap: [Character: String] = defaultCharacterMap) {
     self.characterMap = characterMap
   }
 
   /// Encode a token by replacing characters according to the character map
   /// - Parameter token: The token to encode
   /// - Returns: The encoded token with characters replaced
-  public func encode(_ token: String) -> String {
+  internal func encode(_ token: String) -> String {
     var encodedToken = token
 
     for (character, replacement) in characterMap {

@@ -87,19 +87,14 @@ extension WebAuthTokenManagerTests {
     /// Tests WebAuthTokenManager with storage cleanup
     @Test("WebAuthTokenManager with storage cleanup")
     internal func webAuthTokenManagerWithStorageCleanup() async throws {
-      let storage = InMemoryTokenStorage()
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
-        webAuthToken: Self.validWebAuthToken,
-        storage: storage
+        webAuthToken: Self.validWebAuthToken
       )
 
       // Store credentials
       let credentials = await manager.getCredentialsFromManager()
       #expect(credentials != nil)
-
-      // Clear storage
-      await storage.clear()
 
       // Manager should still work with its own tokens
       let hasCredentials = await manager.checkHasCredentials()

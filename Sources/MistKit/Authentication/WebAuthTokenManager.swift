@@ -27,9 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Foundation)
-  import Foundation
-#endif
+import Foundation
 
 /// Token manager for web authentication with API token + web auth token
 /// Provides user-specific access to CloudKit Web Services
@@ -38,7 +36,6 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
   internal let webAuthToken: String
   internal let tokenEncoder = CharacterMapEncoder()
   internal let credentials: TokenCredentials
-  internal let storage: (any TokenStorage)?
 
   // MARK: - TokenManager Protocol
 
@@ -75,12 +72,10 @@ public final class WebAuthTokenManager: TokenManager, Sendable {
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public init(
     apiToken: String,
-    webAuthToken: String,
-    storage: (any TokenStorage)? = nil
+    webAuthToken: String
   ) {
     self.apiToken = apiToken
     self.webAuthToken = webAuthToken
-    self.storage = storage
     self.credentials = TokenCredentials.webAuthToken(
       apiToken: apiToken,
       webToken: webAuthToken

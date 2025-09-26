@@ -27,9 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Foundation)
-  import Foundation
-#endif
+import Foundation
 
 /// Protocol for managing authentication tokens and credentials for CloudKit Web Services
 public protocol TokenManager: Sendable {
@@ -74,22 +72,6 @@ extension TokenManager {
 
     guard webToken.count >= 10 else {
       throw TokenManagerError.invalidCredentials(.webAuthTokenTooShort)
-    }
-  }
-
-  /// Validates key ID format
-  /// - Parameter keyID: The key ID to validate
-  /// - Throws: TokenManagerError if validation fails
-  internal static func validateKeyIDFormat(_ keyID: String) throws(TokenManagerError) {
-    guard !keyID.isEmpty else {
-      throw TokenManagerError.invalidCredentials(.keyIdEmpty)
-    }
-
-    let regex = NSRegularExpression.keyIDRegex
-    let matches = regex.matches(in: keyID)
-
-    guard !matches.isEmpty else {
-      throw TokenManagerError.invalidCredentials(.keyIdInvalidFormat)
     }
   }
 }

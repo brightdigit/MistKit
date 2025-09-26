@@ -27,9 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Foundation)
-  public import Foundation
-#endif
+public import Foundation
 
 /// Encapsulates authentication credentials for CloudKit Web Services
 public struct TokenCredentials: Sendable, Equatable {

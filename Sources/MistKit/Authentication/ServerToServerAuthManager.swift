@@ -28,15 +28,7 @@
 //
 
 public import Crypto
-
-#if canImport(Foundation)
-  public import Foundation
-#endif
-
-// Forward declaration for MistKitConfiguration
-#if canImport(MistKit)
-  // Configuration will be available when imported as part of MistKit
-#endif
+public import Foundation
 
 /// Token manager for server-to-server authentication using ECDSA P-256 signing
 /// Provides enterprise-level authentication for CloudKit Web Services
@@ -46,7 +38,6 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   internal let keyID: String
   internal let privateKeyData: Data
   internal let credentials: TokenCredentials
-  internal let storage: (any TokenStorage)?
 
   // MARK: - TokenManager Protocol
 
@@ -63,14 +54,12 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public init(
     keyID: String,
-    privateKeyCallback: @autoclosure @escaping @Sendable () throws -> P256.Signing.PrivateKey,
-    storage: (any TokenStorage)? = nil
+    privateKeyCallback: @autoclosure @escaping @Sendable () throws -> P256.Signing.PrivateKey
   ) throws {
     precondition(!keyID.isEmpty, "Key ID cannot be empty")
     let privateKey = try privateKeyCallback()
     self.keyID = keyID
     self.privateKeyData = privateKey.rawRepresentation
-    self.storage = storage
     self.credentials = TokenCredentials.serverToServer(
       keyID: keyID,
       privateKey: privateKey.rawRepresentation
@@ -89,8 +78,7 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   ) throws {
     try self.init(
       keyID: keyID,
-      privateKeyCallback: try P256.Signing.PrivateKey(rawRepresentation: privateKeyData),
-      storage: storage
+      privateKeyCallback: try P256.Signing.PrivateKey(rawRepresentation: privateKeyData)
     )
   }
 
@@ -101,14 +89,12 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   public convenience init(
     keyID: String,
-    pemString: String,
-    storage: (any TokenStorage)? = nil
+    pemString: String
   ) throws {
     do {
       try self.init(
         keyID: keyID,
-        privateKeyCallback: try P256.Signing.PrivateKey(pemRepresentation: pemString),
-        storage: storage
+        privateKeyCallback: try P256.Signing.PrivateKey(pemRepresentation: pemString)
       )
     } catch {
       // Provide more specific error handling for PEM parsing failures

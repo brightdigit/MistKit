@@ -46,11 +46,7 @@ extension CloudKitService {
       environment: .development,
       database: .private,
       apiToken: apiToken,
-      webAuthToken: webAuthToken,
-      keyID: nil,
-      privateKeyData: nil,
-      storage: nil,
-      dependencyContainer: nil
+      webAuthToken: webAuthToken
     )
     self.mistKitClient = try MistKitClient(configuration: config)
   }
@@ -71,8 +67,7 @@ extension CloudKitService {
       webAuthToken: nil,
       keyID: nil,
       privateKeyData: nil,
-      storage: nil,
-      dependencyContainer: nil
+      storage: nil
     )
     self.mistKitClient = try MistKitClient(configuration: config)
   }

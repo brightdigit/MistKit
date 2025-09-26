@@ -15,8 +15,8 @@ extension WebAuthTokenManagerTests {
     private static let validAPIToken =
       "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
     private static let validWebAuthToken = "user123_web_auth_token_abcdef"
-    private static let invalidAPIToken = "invalid_token_format"
-    private static let shortWebAuthToken = "short"
+    //    private static let invalidAPIToken = "invalid_token_format"
+    //    private static let shortWebAuthToken = "short"
 
     // MARK: - Initialization Tests
 
@@ -35,11 +35,9 @@ extension WebAuthTokenManagerTests {
     /// Tests WebAuthTokenManager initialization with storage
     @Test("WebAuthTokenManager initialization with storage")
     internal func initializationWithStorage() {
-      let storage = InMemoryTokenStorage()
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
-        webAuthToken: Self.validWebAuthToken,
-        storage: storage
+        webAuthToken: Self.validWebAuthToken
       )
 
       #expect(manager.apiToken == Self.validAPIToken)

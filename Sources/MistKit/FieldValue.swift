@@ -32,7 +32,7 @@ public import Foundation
 /// Represents a CloudKit field value as defined in the CloudKit Web Services API
 public enum FieldValue: Codable, Equatable {
   case string(String)
-  case int64(Int64)
+  case int64(Int)
   case double(Double)
   case boolean(Bool)
   case bytes(String)  // Base64-encoded string
@@ -158,7 +158,7 @@ public enum FieldValue: Codable, Equatable {
     if let value = try? container.decode(String.self) {
       return .string(value)
     }
-    if let value = try? container.decode(Int64.self) {
+    if let value = try? container.decode(Int.self) {
       return .int64(value)
     }
     if let value = try? container.decode(Double.self) {

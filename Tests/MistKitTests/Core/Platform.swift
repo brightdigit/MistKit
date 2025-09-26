@@ -1,8 +1,6 @@
 import Foundation
 import Testing
 
-@testable import MistKit
-
 /// Platform detection utilities for testing
 internal enum Platform {
   /// Returns true if the current platform supports the required crypto functionality

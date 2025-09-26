@@ -10,11 +10,6 @@ extension NetworkErrorTests {
   /// Network error simulation tests
   @Suite("Simulation Tests")
   internal struct SimulationTests {
-    // MARK: - Test Data Setup
-
-    private static let validAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
-
     // MARK: - Network Error Simulation Tests
 
     /// Tests simulation of network timeout errors

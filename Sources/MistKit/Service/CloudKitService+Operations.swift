@@ -49,7 +49,9 @@ extension CloudKitService {
       throw cloudKitError
     } catch {
       throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500, rawResponse: error.localizedDescription)
+        statusCode: 500,
+        rawResponse: error.localizedDescription
+      )
     }
   }
 
@@ -78,7 +80,9 @@ extension CloudKitService {
       throw cloudKitError
     } catch {
       throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500, rawResponse: error.localizedDescription)
+        statusCode: 500,
+        rawResponse: error.localizedDescription
+      )
     }
   }
 
@@ -115,7 +119,9 @@ extension CloudKitService {
       throw cloudKitError
     } catch {
       throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500, rawResponse: error.localizedDescription)
+        statusCode: 500,
+        rawResponse: error.localizedDescription
+      )
     }
   }
 }

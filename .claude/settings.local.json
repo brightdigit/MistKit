@@ -26,7 +26,8 @@
       "Read(//private/tmp/claude/**)",
       "Bash(swift --version)",
       "Bash(swift test)",
-      "Bash(CI=1 ./Scripts/lint.sh)"
+      "Bash(CI=1 ./Scripts/lint.sh)",
+      "Read(//Users/leo/Documents/Projects/**)"
     ],
     "deny": []
   },

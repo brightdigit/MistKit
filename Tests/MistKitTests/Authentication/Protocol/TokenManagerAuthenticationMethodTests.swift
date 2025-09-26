@@ -61,7 +61,7 @@ internal struct TokenManagerAuthenticationMethodTests {
     // Test apiToken property
     #expect(apiToken.apiToken == "api-123")
     #expect(webAuth.apiToken == "api-456")
-    #expect(serverAuth.apiToken == "")
+    #expect(serverAuth.apiToken.isEmpty)
 
     // Test webAuthToken property
     #expect(apiToken.webAuthToken == nil)

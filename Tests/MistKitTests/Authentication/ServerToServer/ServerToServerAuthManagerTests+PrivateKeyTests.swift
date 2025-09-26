@@ -8,12 +8,6 @@ extension ServerToServerAuthManagerTests {
   /// Private key validation tests for ServerToServerAuthManager
   @Suite("Private Key Tests")
   internal struct PrivateKeyTests {
-    // MARK: - Helper Methods
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    private static func generateTestPrivateKey() throws -> P256.Signing.PrivateKey {
-      P256.Signing.PrivateKey()
-    }
-
     private static func generateTestPrivateKeyClosure() -> @Sendable () throws ->
       P256.Signing.PrivateKey
     {
