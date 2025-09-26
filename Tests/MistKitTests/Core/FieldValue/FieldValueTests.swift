@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Field Value")
+@Suite("Field Value", .disabledOniOSWithXcode16_2OrOlder())
 /// Tests for FieldValue functionality
 internal struct FieldValueTests {
   /// Tests FieldValue string type creation and equality

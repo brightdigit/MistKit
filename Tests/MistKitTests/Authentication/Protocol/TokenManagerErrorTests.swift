@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Token Manager - Error Handling")
+@Suite("Token Manager - Error Handling", .disabledOniOSWithXcode16_2OrOlder())
 /// Test suite for TokenManagerError and related functionality
 internal struct TokenManagerErrorTests {
   // MARK: - TokenManagerError Tests

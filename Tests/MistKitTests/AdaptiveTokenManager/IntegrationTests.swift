@@ -3,12 +3,12 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Adaptive Token Manager")
+@Suite("Adaptive Token Manager", .disabledOniOSWithXcode16_2OrOlder())
 internal enum AdaptiveTokenManagerTests {}
 
 extension AdaptiveTokenManagerTests {
   /// Integration tests for AdaptiveTokenManager
-  @Suite("Integration Tests")
+  @Suite("Integration Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct IntegrationTests {
     // MARK: - Test Data Setup
 

@@ -5,7 +5,7 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Edge case validation tests for WebAuthTokenManager
-  @Suite("Validation Edge Case Tests")
+  @Suite("Validation Edge Case Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct EdgeCases {
     // MARK: - Edge Case Validation Tests
 

@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("In-Memory Token Storage Initialization")
+@Suite("In-Memory Token Storage Initialization", .disabledOniOSWithXcode16_2OrOlder())
 /// Test suite for InMemoryTokenStorage initialization and basic storage functionality
 internal struct InMemoryTokenStorageInitializationTests {
   // MARK: - Test Data Setup

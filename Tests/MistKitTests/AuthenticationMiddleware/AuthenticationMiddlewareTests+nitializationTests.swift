@@ -8,7 +8,7 @@ import Testing
 
 extension AuthenticationMiddlewareTests {
   /// Basic functionality tests for AuthenticationMiddleware
-  @Suite("Authentication Middleware Initialization")
+  @Suite("Authentication Middleware Initialization", .disabledOniOSWithXcode16_2OrOlder())
   internal struct InitializationTests {
     // MARK: - Test Data Setup
 

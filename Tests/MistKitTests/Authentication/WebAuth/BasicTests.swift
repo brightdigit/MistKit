@@ -3,12 +3,12 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Web Auth Token Manager")
+@Suite("Web Auth Token Manager", .disabledOniOSWithXcode16_2OrOlder())
 internal enum WebAuthTokenManagerTests {}
 
 extension WebAuthTokenManagerTests {
   /// Basic functionality tests for WebAuthTokenManager
-  @Suite("Basic Tests")
+  @Suite("Basic Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct BasicTests {
     // MARK: - Test Data Setup
 

@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("MistKit Configuration")
+@Suite("MistKit Configuration", .disabledOniOSWithXcode16_2OrOlder())
 /// Tests for MistKitConfiguration functionality
 internal struct MistKitConfigurationTests {
   /// Tests MistKitConfiguration initialization with required parameters

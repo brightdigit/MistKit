@@ -5,7 +5,7 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Token format validation tests for WebAuthTokenManager
-  @Suite("Validation Format Tests")
+  @Suite("Validation Format Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct ValidationFormatTests {
     // MARK: - Test Data Setup
 

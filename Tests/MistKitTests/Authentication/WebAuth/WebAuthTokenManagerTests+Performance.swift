@@ -5,7 +5,7 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Performance edge cases tests for WebAuthTokenManager
-  @Suite("Edge Cases Performance Tests")
+  @Suite("Edge Cases Performance Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct Performance {
     // MARK: - Test Data Setup
 

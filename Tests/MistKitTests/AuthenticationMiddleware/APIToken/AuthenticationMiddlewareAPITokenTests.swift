@@ -6,13 +6,13 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Authentication Middleware - API Token")
+@Suite("Authentication Middleware - API Token", .disabledOniOSWithXcode16_2OrOlder())
 /// API Token authentication tests for AuthenticationMiddleware
 internal enum AuthenticationMiddlewareAPITokenTests {}
 
 extension AuthenticationMiddlewareAPITokenTests {
   /// API Token authentication tests
-  @Suite("API Token Tests")
+  @Suite("API Token Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct APITokenTests {
     // MARK: - Test Data Setup
 

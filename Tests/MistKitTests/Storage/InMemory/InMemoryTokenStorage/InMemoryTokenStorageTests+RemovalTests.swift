@@ -5,7 +5,7 @@ import Testing
 
 extension InMemoryTokenStorageTests {
   /// Token removal tests for InMemoryTokenStorage
-  @Suite("Removal Tests")
+  @Suite("Removal Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct RemovalTests {
     // MARK: - Test Data Setup
 

@@ -5,7 +5,7 @@ import Testing
 
 extension InMemoryTokenStorageTests {
   /// Expiration handling tests for InMemoryTokenStorage
-  @Suite("Expiration Tests")
+  @Suite("Expiration Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct ExpirationTests {
     // MARK: - Test Data Setup
 

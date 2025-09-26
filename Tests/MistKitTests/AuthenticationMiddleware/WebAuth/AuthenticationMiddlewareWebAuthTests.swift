@@ -6,13 +6,13 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Authentication Middleware - Web Auth Token")
+@Suite("Authentication Middleware - Web Auth Token", .disabledOniOSWithXcode16_2OrOlder())
 /// Web Auth Token authentication tests for AuthenticationMiddleware
 internal enum AuthenticationMiddlewareWebAuthTests {}
 
 extension AuthenticationMiddlewareWebAuthTests {
   /// Web Auth Token authentication tests
-  @Suite("Web Auth Token Tests")
+  @Suite("Web Auth Token Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct WebAuthTokenTests {
     // MARK: - Test Data Setup
 

@@ -8,7 +8,7 @@ import Testing
 
 extension NetworkErrorTests {
   /// Network error simulation tests
-  @Suite("Simulation Tests")
+  @Suite("Simulation Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct SimulationTests {
     // MARK: - Network Error Simulation Tests
 

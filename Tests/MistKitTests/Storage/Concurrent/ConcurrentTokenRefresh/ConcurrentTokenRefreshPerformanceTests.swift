@@ -5,7 +5,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Concurrent Token Refresh Performance Tests")
+@Suite("Concurrent Token Refresh Performance Tests", .disabledOniOSWithXcode16_2OrOlder())
 /// Test suite for concurrent token refresh performance functionality
 internal struct ConcurrentTokenRefreshPerformanceTests {
   // MARK: - Helper Methods

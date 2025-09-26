@@ -8,7 +8,7 @@ import Testing
 
 extension AuthenticationMiddlewareTests {
   /// Error handling tests for AuthenticationMiddleware
-  @Suite("Error Tests")
+  @Suite("Error Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct ErrorTests {
     // MARK: - Test Data Setup
 

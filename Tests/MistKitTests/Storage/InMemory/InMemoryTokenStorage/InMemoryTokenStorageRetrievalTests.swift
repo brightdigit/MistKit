@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("In-Memory Token Storage Retrieval")
+@Suite("In-Memory Token Storage Retrieval", .disabledOniOSWithXcode16_2OrOlder())
 /// Test suite for InMemoryTokenStorage token retrieval and removal functionality
 internal struct InMemoryTokenStorageRetrievalTests {
   // MARK: - Test Data Setup

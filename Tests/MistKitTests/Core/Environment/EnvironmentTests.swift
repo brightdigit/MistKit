@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Environment")
+@Suite("Environment", .disabledOniOSWithXcode16_2OrOlder())
 /// Tests for Environment enum functionality
 internal struct EnvironmentTests {
   /// Tests Environment enum raw values

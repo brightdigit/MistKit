@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Token Manager")
+@Suite("Token Manager", .disabledOniOSWithXcode16_2OrOlder())
 /// Test suite for TokenManager protocol and related types
 internal struct TokenManagerTests {
   // MARK: - Integration Tests

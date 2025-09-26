@@ -3,12 +3,12 @@ import Testing
 
 @testable import MistKit
 
-@Suite("API Token Manager Metadata")
+@Suite("API Token Manager Metadata", .disabledOniOSWithXcode16_2OrOlder())
 internal enum APITokenManagerMetadataTests {}
 
 extension APITokenManagerMetadataTests {
   /// Metadata and sendable compliance tests for APITokenManager
-  @Suite("Metadata Tests")
+  @Suite("Metadata Tests", .disabledOniOSWithXcode16_2OrOlder())
   internal struct MetadataTests {
     // MARK: - Metadata Tests
 
