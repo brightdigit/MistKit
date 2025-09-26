@@ -175,3 +175,4 @@ dev-debug.log
 # tasks/ 
 .mint
 Keys
+.claude/settings.local.json

@@ -30,8 +30,14 @@
 public import Foundation
 
 extension URL {
+  /// MistKit URL constants and utilities
   public enum MistKit {
     /// The base URL for CloudKit Web Services API
-    public static let cloudKitAPI = try! Servers.Server1.url()
+    public static let cloudKitAPI: URL = {
+      guard let url = try? Servers.Server1.url() else {
+        fatalError("Failed to create CloudKit API URL")
+      }
+      return url
+    }()
   }
 }

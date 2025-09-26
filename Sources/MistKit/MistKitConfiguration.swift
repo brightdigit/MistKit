@@ -52,9 +52,6 @@ internal struct MistKitConfiguration: Sendable {
   /// Optional private key data for server-to-server authentication
   internal let privateKeyData: Data?
 
-  /// Optional token storage for persistence
-  internal let storage: (any TokenStorage)?
-
   /// Protocol version (currently "1")
   internal let version: String = "1"
 
@@ -69,8 +66,7 @@ internal struct MistKitConfiguration: Sendable {
     apiToken: String,
     webAuthToken: String? = nil,
     keyID: String? = nil,
-    privateKeyData: Data? = nil,
-    storage: (any TokenStorage)? = nil
+    privateKeyData: Data? = nil
   ) {
     self.container = container
     self.environment = environment
@@ -80,7 +76,6 @@ internal struct MistKitConfiguration: Sendable {
     self.webAuthToken = webAuthToken
     self.keyID = keyID
     self.privateKeyData = privateKeyData
-    self.storage = storage
   }
 
   /// Creates an appropriate TokenManager based on the configuration

@@ -70,7 +70,6 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   /// - Parameters:
   ///   - keyID: The key identifier from Apple Developer Console
   ///   - privateKeyData: The private key as raw data (32 bytes for P-256)
-  ///   - storage: Optional storage for persistence (default: nil for in-memory only)
   /// - Throws: Error if the private key data is invalid or cannot be parsed
   public convenience init(
     keyID: String,
