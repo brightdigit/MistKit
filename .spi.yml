@@ -1,5 +1,5 @@
 version: 1
 builder:
   configs:
-    - documentation_targets: [PackageDSLKit]    
-      swift_version: 6.0    
+    - documentation_targets: [MistKit]    
+      swift_version: 6.1    
