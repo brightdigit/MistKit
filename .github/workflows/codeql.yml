@@ -23,14 +23,13 @@ on:
 
 jobs:
   analyze:
-    if: false
     name: Analyze
     # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql
     #   - https://gh.io/supported-runners-and-hardware-resources
     #   - https://gh.io/using-larger-runners
     # Consider using larger runners for possible analysis time improvements.
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-13') || 'ubuntu-latest' }}
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-26') || 'ubuntu-latest' }}
     timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
     permissions:
       actions: read
@@ -51,7 +50,12 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Setup Xcode
-      run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
+
+    - name: Verify Swift Version
+      run: |
+        swift --version
+        swift package --version
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
