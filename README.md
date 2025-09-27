@@ -1,822 +1,332 @@
+# MistKit
 
-<p align="center">
-    <img alt="MistKit" title="MistKit" src="Assets/logo.svg" height="200">
-</p>
-<h1 align="center"> MistKit </h1>
+[![Swift 6.1](https://img.shields.io/badge/Swift-6.1-orange.svg)](https://swift.org)
+[![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20iOS%20%7C%20tvOS%20%7C%20watchOS%20%7C%20visionOS%20%7C%20Linux-lightgrey.svg)](https://swift.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
+A Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
 
-[![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
-[![Twitter](https://img.shields.io/badge/twitter-@brightdigit-blue.svg?style=flat)](http://twitter.com/brightdigit)
-![GitHub](https://img.shields.io/github/license/brightdigit/MistKit)
-![GitHub issues](https://img.shields.io/github/issues/brightdigit/MistKit)
+## Overview
 
-[![macOS](https://github.com/brightdigit/MistKit/workflows/macOS/badge.svg)](https://github.com/brightdigit/MistKit/actions?query=workflow%3AmacOS)
-[![ubuntu](https://github.com/brightdigit/MistKit/workflows/ubuntu/badge.svg)](https://github.com/brightdigit/MistKit/actions?query=workflow%3Aubuntu)
-[![Travis (.com)](https://img.shields.io/travis/com/brightdigit/MistKit?logo=travis&?label=travis-ci)](https://travis-ci.com/brightdigit/MistKit)
-[![Bitrise](https://img.shields.io/bitrise/b2595eab70c25d1b?logo=bitrise&?label=bitrise&token=rHUhEUFkU2RUL-KGmrKX1Q)](https://app.bitrise.io/app/b2595eab70c25d1b)
-[![CircleCI](https://img.shields.io/circleci/build/github/brightdigit/MistKit?logo=circleci&?label=circle-ci&token=45c9ff6a86f9ac6c1ec8c85c3bc02f4d8859aa6b)](https://app.circleci.com/pipelines/github/brightdigit/MistKit)
+MistKit provides a modern Swift interface to CloudKit Web Services REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the CloudKit framework isn't available.
 
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FMistKit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/brightdigit/MistKit)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FMistKit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/brightdigit/MistKit)
+Built with Swift concurrency (async/await) and designed for modern Swift applications, MistKit supports all three CloudKit authentication methods and provides type-safe access to CloudKit operations.
 
+## Key Features
 
-[![Codecov](https://img.shields.io/codecov/c/github/brightdigit/MistKit)](https://codecov.io/gh/brightdigit/MistKit)
-[![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/brightdigit/MistKit)](https://www.codefactor.io/repository/github/brightdigit/MistKit)
-[![codebeat badge](https://codebeat.co/badges/c47b7e58-867c-410b-80c5-57e10140ba0f)](https://codebeat.co/projects/github-com-brightdigit-mistkit-main)
-[![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/brightdigit/MistKit)](https://codeclimate.com/github/brightdigit/MistKit)
-[![Code Climate technical debt](https://img.shields.io/codeclimate/tech-debt/brightdigit/MistKit?label=debt)](https://codeclimate.com/github/brightdigit/MistKit)
-[![Code Climate issues](https://img.shields.io/codeclimate/issues/brightdigit/MistKit)](https://codeclimate.com/github/brightdigit/MistKit)
-[![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
+- **🌍 Cross-Platform Support**: Works on macOS, iOS, tvOS, watchOS, visionOS, and Linux
+- **⚡ Modern Swift**: Built with Swift 6 concurrency features and structured error handling
+- **🔐 Multiple Authentication Methods**: API token, web authentication, and server-to-server authentication
+- **🛡️ Type-Safe**: Comprehensive type safety with Swift's type system
+- **📋 OpenAPI-Based**: Generated from CloudKit Web Services OpenAPI specification
+- **🔒 Secure**: Built-in security best practices and credential management
 
-![Demonstration of MistKit via Command-Line App `mistdemoc`](Assets/MistKitDemo.gif)
+## Installation
 
+### Swift Package Manager
 
-# Table of Contents
-
-   * [**Introduction**](#introduction)
-   * [**Features**](#features)
-   * [**Installation**](#installation)
-   * [**Usage**](#usage)
-      * [Composing Web Service Requests](#composing-web-service-requests)
-        * [Setting Up Authenticated Requests](#setting-up-authenticated-requests)
-        * [CloudKit and Vapor](#cloudkit-and-vapor)
-      * [Fetching Records Using a Query (records/query)](#fetching-records-using-a-query-recordsquery)
-      * [Fetching Records by Record Name (records/lookup)](#fetching-records-by-record-name-recordslookup)
-      * [Fetching Current User Identity (users/caller)](#fetching-current-user-identity-userscaller)
-      * [Modifying Records (records/modify)](#modifying-records-recordsmodify)
-      * [Using SwiftNIO](#using-swiftnio)
-         * [Using EventLoops](#using-eventloops)
-         * [Choosing an HTTP Client](#choosing-an-http-client)
-      * [Examples](#examples)
-      * [Further Code Documentation](#further-code-documentation)
-   * [**Roadmap**](#roadmap)
-      * [~~0.1.0~~](#010)
-      * [~~0.2.0~~](#020)
-      * [**0.4.0**](#040)
-      * [0.6.0](#060)
-      * [0.8.0](#080)
-      * [0.9.0](#090)
-      * [v1.0.0](#v100)
-   * [**License**](#license)
-
-# Introduction
-
-Rather than the CloudKit framework this Swift package uses [CloudKit Web Services.](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html#//apple_ref/doc/uid/TP40015240-CH41-SW1). Why?
-
-* Building a **Command Line Application**
-* Use on **Linux** (or any other non-Apple OS)
-* Required for **Server-Side Integration (via Vapor)**
-* Access via **AWS Lambda**
-* **Migrating Data from/to CloudKit**
-
-... and more
-
-In my case, I was using this for **the Vapor back-end for my Apple Watch app [Heartwitch](https://heartwitch.app)**. Here's some example code showing how to setup and use **MistKit** with CloudKit container.
-
-### Demo Example
-
-#### CloudKit Dashboard Schema
-
-![Sample Schema for Todo List](Assets/CloudKitDB-Demo-Schema.jpg)
-
-#### Sample Code using **MistKit**
+Add MistKit to your `Package.swift` file:
 
 ```swift
-// Example for pulling a todo list from CloudKit
-import MistKit
-import MistKitNIOHTTP1Token
-
-// setup your connection to CloudKit
-let connection = MKDatabaseConnection(
-  container: "iCloud.com.brightdigit.MistDemo", 
-  apiToken: "****", 
-  environment: .development
-)
-
-// setup how to manager your user's web authentication token 
-let manager = MKTokenManager(storage: MKUserDefaultsStorage(), client: MKNIOHTTP1TokenClient())
-
-// setup your database manager
-let database = MKDatabase(
-  connection: connection,
-  tokenManager: manager
-)
-
-// create your request to CloudKit
-let query = MKQuery(recordType: TodoListItem.self)
-
-let request = FetchRecordQueryRequest(
-  database: .private, 
-  query: FetchRecordQuery(query: query))
-
-// handle the result
-database.query(request) { result in
-  dump(result)
-}
-
-// wait for query here...
+dependencies: [
+    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0")
+]
 ```
 
-To wait for the CloudKit query to complete synchronously, you can use [CFRunLoop](https://developer.apple.com/documentation/corefoundation/cfrunloop-rht):
+Or add it through Xcode:
+1. File → Add Package Dependencies
+2. Enter: `https://github.com/brightdigit/MistKit.git`
+3. Select version and add to your target
 
-```swift
-...
-// handle the result
-database.query(request) { result in
-  dump(result)
+## Quick Start
 
-  // nessecary if you need run this synchronously
-  CFRunLoopStop(CFRunLoopGetMain())
-}
+### 1. Choose Your Authentication Method
 
-// nessecary if you need run this synchronously
-CFRunLoopRun()
-```
-# Features 
+MistKit supports three authentication methods depending on your use case:
 
-Here's what's currently implemented with this library:
-
-- [x] Composing Web Service Requests
-- [x] Modifying Records (records/modify)
-- [x] Fetching Records Using a Query (records/query)
-- [x] Fetching Records by Record Name (records/lookup)
-- [x] Fetching Current User Identity (users/caller)
-
-# Installation
-
-Swift Package Manager is Apple's decentralized dependency manager to integrate libraries to your Swift projects. It is now fully integrated with Xcode 11.
-
-To integrate **MistKit** into your project using SPM, specify it in your Package.swift file:
-
-```swift    
-let package = Package(
-  ...
-  dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit", from: "0.2.0")
-  ],
-  targets: [
-      .target(
-          name: "YourTarget",
-          dependencies: ["MistKit", ...]),
-      ...
-  ]
-)
-```
-
-There are also products for SwiftNIO as well as Vapor if you are building server-side implmentation:
-
-```swift      
-      .target(
-          name: "YourTarget",
-          dependencies: ["MistKit", 
-            .product(name: "MistKitNIO", package: "MistKit"),  // if you are building a server-side application
-            .product(name: "MistKitVapor", package: "MistKit") // if you are building a Vapor application
-            ...]
-      ),
-```
-
-# Usage 
-
-## Composing Web Service Requests
-
-**MistKit** requires a connection be setup with the following properties:
-
-* `container` name in the format of `iCloud.com.*.*` such as `iCloud.com.brightdigit.MistDemo`
-* `apiToken` which can be [created through the CloudKit Dashboard](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW1)
-* `environment` which can be either `development` or `production`
-
-Here's an example of how to setup an `MKDatabase`:
-
-```swift
-let connection = MKDatabaseConnection(
-  container: options.container, 
-  apiToken: options.apiKey, 
-  environment: options.environment)
-
-// setup your database manager
-let database = MKDatabase(
-  connection: connection,
-  tokenManager: manager
-)
-```
-
-Before getting into make an actual request, you should probably know how to make authenticated request for `private` or `shared` databases.
-
-### Setting Up Authenticated Requests
-
-In order to have access to `private` or `shared` databases, the Cloud Web Services API require a web authentication token. In order for the MistKit to obtain this, an http server is setup to listen to the callback from CloudKit.
-
-Therefore when you setup your API token, make sure to setup a url for the Sign-In Callback:
-
-![CloudKit Dashboard](Assets/CloudKitDB-APIToken.png)
-
-Once that's setup, you can setup a `MKTokenManager`.
-
-![CloudKit Dashboard Callback](Assets/CloudKitDB-APIToken-Callback.png)
-
-#### Managing Web Authentication Tokens
-
-`MKTokenManager` requires a `MKTokenStorage` for storing the token for later.
-There are a few implementations you can use:
-  * `MKFileStorage` stores the token as a simple text file
-  * `MKUserDefaultsStorage` stores the token using `UserDefaults`
-  * `MKVaporModelStorage` stores the token in a database `Model` object via `Fluent`
-  * `MKVaporSessionStorage` stores the token the Vapor `Session` data
-
-Optionally **MistKit** can setup a web server for you if needed to listen to web authentication via a `MKTokenClient`:
-There are a few implementations you can use:
-  * `MKNIOHTTP1TokenClient` sets up an http server using SwiftNIO
-
-Here's an example of how you `MKDatabase`:
-
-```swift
-let connection = MKDatabaseConnection(
-  container: options.container, 
-  apiToken: options.apiKey, 
-  environment: options.environment
- )
-
-// setup how to manager your user's web authentication token
-let manager = MKTokenManager(
-  // store the token in UserDefaults
-  storage: MKUserDefaultsStorage(), 
-  // setup an http server at localhost for port 7000
-  client: MKNIOHTTP1TokenClient(bindTo: .ipAddress(host: "127.0.0.1", port: 7000))
-)
-
-// setup your database manager
-let database = MKDatabase(
-  connection: connection,
-  tokenManager: manager
-)
-```
-
-##### Using `MKNIOHTTP1TokenClient`
-
-If you are not building a server-side application, you can use `MKNIOHTTP1TokenClient`, by adding `MistKitNIO` to your package dependency:
-
-```swift
-let package = Package(
-  ...
-  dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit", .branch("main")
-  ],
-  targets: [
-      .target(
-          name: "YourTarget",
-          dependencies: ["MistKit", "MistKitNIOHTTP1Token", ...]),
-      ...
-  ]
-)
-```
-
-When a request fails due to authentication failure, `MKNIOHTTP1TokenClient` will start an http server to begin listening to web authentication token. By default, `MKNIOHTTP1TokenClient` will simply print the url but you can override the `onRequestURL`:
-
-```swift
-public class MKNIOHTTP1TokenClient: MKTokenClient {
-  
-  public init(bindTo: BindTo, onRedirectURL : ((URL) -> Void)? = nil) {
-    self.bindTo = bindTo
-    self.onRedirectURL = onRedirectURL ?? {print($0)}
-  }
-  ...
-}
-```
-
-### CloudKit and Vapor
-
-#### Static Web Authentication Tokens
-
-If you may already have a `webAuthenticationToken`, you can use `MKStaticTokenManager`. This is a read-only implementation of `MKTokenManagerProtocol` which takes a read-only `String?` for the `webAuthenticationToken`.
-
-Here's some sample code I use in my Vapor app **[Heartwitch](https://heartwitch.app)** for pulling the `webAuthenticationToken` from my database and using that token when I create a `MKDatabase` instance.
-
+#### API Token (Container-level access)
 ```swift
 import MistKit
-import MistKitVapor
 
-extension Application {
-  ...
-  var cloudKitConnection: MKDatabaseConnection {
-    MKDatabaseConnection(
-      container: configuration.cloudkitContainer,
-      apiToken: configuration.cloudkitAPIKey,
-      environment: environment.cloudKitEnvironment
-    )
-  }
+let config = MistKitConfiguration.apiToken(
+    container: "iCloud.com.example.MyApp",
+    environment: .development,
+    database: .public,
+    apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
+)
+```
 
-  func cloudKitDatabase(using client: Client, withWebAuthenticationToken webAuthenticationToken: String? = nil) -> MKDatabase<MKVaporClient> {
-    MKDatabase(
-      connection: cloudKitConnection,
-      client: MKVaporClient(client: client),
-      tokenManager: MKStaticTokenManager(token: webAuthenticationToken, client: nil)
-    )
-  }
-}
+#### Web Authentication (User-specific access)
+```swift
+let config = MistKitConfiguration.webAuth(
+    container: "iCloud.com.example.MyApp",
+    environment: .development,
+    database: .private,
+    apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!,
+    webAuthToken: userWebAuthToken
+)
+```
 
-struct DeviceController {
+#### Server-to-Server (Enterprise access, public database only)
+```swift
+let config = MistKitConfiguration.serverToServer(
+    container: "iCloud.com.example.MyApp",
+    environment: .production,
+    keyID: ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"]!,
+    privateKeyData: privateKeyData
+)
+```
 
-  func fetch(_ request: Request) throws -> EventLoopFuture<MKServerResponse<[DeviceResponseItem]>> {
-    let user = try request.auth.require(User.self)
-    let userID = try user.requireID()
-    let token = user.$appleUsers.query(on: request.db).field(\.$webAuthenticationToken).first().map { $0?.webAuthenticationToken }
+### 2. Create and Use Client
 
-    let cloudKitDatabase: EventLoopFuture<MKDatabase> = token.map {
-      request.application.cloudKitDatabase(using: request.client, withWebAuthenticationToken: $0)
-    }
-    
-    let cloudKitRequest = FetchRecordQueryRequest(
-      database: .private,
-      query: FetchRecordQuery(query: query)
-    )
-    
-    let newEntries = cloudKitDatabase.flatMap {
-      let cloudKitResult = cloudKitDatabase.query(cloudKitRequest, on: request.eventLoop)
-    }
-
-    return newEntries.mistKitResponse()
-  }
-  
-  ...
+```swift
+do {
+    let client = try MistKitClient(configuration: config)
+    // Use client for CloudKit operations
+} catch {
+    print("Failed to create client: \\(error)")
 }
 ```
 
-Besides static strings, you can store your tokens in the session or in your database.
+## Authentication Setup
 
-#### Storing Web Authentication Tokens in Databases and Sessions
+### API Token Authentication
 
-In the `mistdemod` demo Vapor application, there's an example of how to create an `MKDatabase` based on the request using both `MKVaporModelStorage` and `MKVaporSessionStorage`:
+1. **Get API Token**:
+   - Log into [Apple Developer Console](https://developer.apple.com)
+   - Navigate to CloudKit Database
+   - Generate an API Token
+
+2. **Set Environment Variable**:
+   ```bash
+   export CLOUDKIT_API_TOKEN="your_api_token_here"
+   ```
+
+3. **Use in Code**:
+   ```swift
+   let config = MistKitConfiguration.apiToken(
+       container: "iCloud.com.example.MyApp",
+       environment: .development,
+       database: .public,
+       apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
+   )
+   ```
+
+### Web Authentication
+
+Web authentication enables user-specific operations and requires both an API token and a web authentication token obtained through CloudKit JS authentication.
 
 ```swift
-extension MKDatabase where HttpClient == MKVaporClient {
-  init(request: Request) {
-    let storage: MKTokenStorage
-    if let user = request.auth.get(User.self) {
-      storage = MKVaporModelStorage(model: user)
-    } else {
-      storage = MKVaporSessionStorage(session: request.session)
-    }
-    let manager = MKTokenManager(storage: storage, client: nil)
+let config = MistKitConfiguration.webAuth(
+    container: "iCloud.com.example.MyApp",
+    environment: .development,
+    database: .private,
+    apiToken: apiToken,
+    webAuthToken: webAuthToken
+)
+```
 
-    let options = MistDemoDefaultConfiguration(apiKey: request.application.cloudKitAPIKey)
-    let connection = MKDatabaseConnection(container: options.container, apiToken: options.apiKey, environment: options.environment)
+### Server-to-Server Authentication
 
-    // use the webAuthenticationToken which is passed
-    if let token = options.token {
-      manager.webAuthenticationToken = token
-    }
+Server-to-server authentication provides enterprise-level access using ECDSA P-256 key signing. Note that this method only supports the public database.
 
-    self.init(connection: connection, factory: nil, client: MKVaporClient(client: request.client), tokenManager: manager)
-  }
+1. **Generate Key Pair**:
+   ```bash
+   # Generate private key
+   openssl ecparam -genkey -name prime256v1 -noout -out private_key.pem
+
+   # Extract public key
+   openssl ec -in private_key.pem -pubout -out public_key.pem
+   ```
+
+2. **Upload Public Key**: Upload the public key to Apple Developer Console
+
+3. **Use in Code**:
+   ```swift
+   let privateKeyData = try Data(contentsOf: URL(fileURLWithPath: "private_key.pem"))
+
+   let config = MistKitConfiguration.serverToServer(
+       container: "iCloud.com.example.MyApp",
+       environment: .production,
+       keyID: "your_key_id",
+       privateKeyData: privateKeyData
+   )
+   ```
+
+## Platform Support
+
+### Minimum Platform Versions
+
+| Platform | Minimum Version | Server-to-Server Auth |
+|----------|-----------------|----------------------|
+| macOS | 10.15+ | 11.0+ |
+| iOS | 13.0+ | 14.0+ |
+| tvOS | 13.0+ | 14.0+ |
+| watchOS | 6.0+ | 7.0+ |
+| visionOS | 1.0+ | 1.0+ |
+| Linux | Ubuntu 18.04+ | ✅ |
+
+## Error Handling
+
+MistKit provides comprehensive error handling with typed errors:
+
+```swift
+do {
+    let client = try MistKitClient(configuration: config)
+    // Perform operations
+} catch let error as CloudKitError {
+    print("CloudKit error: \\(error.localizedDescription)")
+} catch let error as TokenManagerError {
+    print("Authentication error: \\(error.localizedDescription)")
+} catch {
+    print("Unexpected error: \\(error)")
 }
 ```
 
-In this case, for the `User` model needs to implement `MKModelStorable`.
+### Error Types
 
-```swift
-final class User: Model, Content {
-  ...
+- **`CloudKitError`**: CloudKit Web Services API errors
+- **`TokenManagerError`**: Authentication and credential errors
+- **`TokenStorageError`**: Token storage and persistence errors
 
-  @Field(key: "cloudKitToken")
-  var cloudKitToken: String?
-}
+## Security Best Practices
 
-extension User: MKModelStorable {
-  static var tokenKey: KeyPath<User, Field<String?>> = \User.$cloudKitToken
-}
+### Environment Variables
+
+Always store sensitive credentials in environment variables:
+
+```bash
+# .env file (never commit this!)
+CLOUDKIT_API_TOKEN=your_api_token_here
+CLOUDKIT_KEY_ID=your_key_id_here
 ```
 
-The `MKModelStorable` protocol ensures that the `Model` contains the properties needed for storing the web authentication token.
+### Secure Logging
 
-While the command line tool needs a `MKTokenClient` to listen for the callback from CloudKit, with a server-side application you can just add a API call. Here's an example which listens for the `ckWebAuthToken` and saves it to the `User`:
+MistKit automatically masks sensitive information in logs:
 
 ```swift
-struct CloudKitController: RouteCollection {
-  func token(_ request: Request) -> EventLoopFuture<HTTPStatus> {
-    guard let token: String = request.query["ckWebAuthToken"] else {
-      return request.eventLoop.makeSucceededFuture(.notFound)
-    }
-
-    guard let user = request.auth.get(User.self) else {
-      request.cloudKitAPI.webAuthenticationToken = token
-      return request.eventLoop.makeSucceededFuture(.accepted)
-    }
-
-    user.cloudKitToken = token
-    return user.save(on: request.db).transform(to: .accepted)
-  }
-
-  func boot(routes: RoutesBuilder) throws {
-    routes.get(["token"], use: token)
-  }
-}
+// Sensitive data is automatically redacted in log output
+print("Token: \\(secureToken)") // Outputs: Token: abc12345***
 ```
 
-If you have an app which already uses Apple's existing CloudKit API, you can also [save the webAuthenticationToken to your database with a `CKFetchWebAuthTokenOperation`](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation).
+### Token Storage
 
-## Fetching Records Using a Query (records/query)
-
-There are two ways to fetch records:
-
-* using an `MKAnyQuery` to fetch `MKAnyRecord` items
-* using a custom type which implements `MKQueryRecord`
-
-### Setting Up Queries
-
-To fetch as `MKAnyRecord`, simply create `MKAnyQuery` with the matching `recordType` (i.e. schema name). 
+For persistent applications, use secure token storage:
 
 ```swift
-// create your request to CloudKit
-let query = MKAnyQuery(recordType: "TodoListItem")
+let storage = InMemoryTokenStorage() // For development
+// Use KeychainTokenStorage() for production (implement as needed)
 
-let request = FetchRecordQueryRequest(
-  database: .private,
-  query: FetchRecordQuery(query: query)
+let config = MistKitConfiguration.webAuth(
+    container: "iCloud.com.example.MyApp",
+    environment: .development,
+    database: .private,
+    apiToken: apiToken,
+    webAuthToken: webAuthToken,
+    storage: storage
+)
+```
+
+## Advanced Usage
+
+### Custom Transport
+
+You can provide custom transport for testing or special networking requirements:
+
+```swift
+let customTransport = YourCustomTransport()
+let client = try MistKitClient(
+    configuration: config,
+    transport: customTransport
+)
+```
+
+### Adaptive Token Manager
+
+For applications that might upgrade from API-only to web authentication:
+
+```swift
+let adaptiveManager = AdaptiveTokenManager(
+    apiToken: apiToken,
+    storage: storage
 )
 
-// handle the result
-database.perform(request: request) { result in
-  do {
-    try print(result.get().records.information)
-  } catch {
-    completed(error)
-    return
-  }
-  completed(nil)
-}
-```
-
-This will give you `MKAnyRecord` items which contain a `fields` property with your values:
-
-```swift
-public struct MKAnyRecord: Codable {
-  public let recordType: String
-  public let recordName: UUID?
-  public let recordChangeTag: String?
-  public let fields: [String: MKValue]
-  ...
-```
-
-The `MKValue` type is an enum which contains the type and value of the field.
-
-### Strong-Typed Queries
-
-In order to use a custom type for requests, you need to implement `MKQueryRecord`. Here's an example of a todo item which contains a title property:
-
-```swift
-public class TodoListItem: MKQueryRecord {
-  // required property and methods for MKQueryRecord
-  public static var recordType: String = "TodoItem"
-  public static var desiredKeys: [String]? = ["title"]
-
-  public let recordName: UUID?
-  public let recordChangeTag: String?
-  
-  public required init(record: MKAnyRecord) throws {
-    recordName = record.recordName
-    recordChangeTag = record.recordChangeTag
-    title = try record.string(fromKey: "title")
-  }
-  
-  public var fields: [String: MKValue] {
-    return ["title": .string(title)]
-  }
-  
-  // custom fields and methods to `TodoListItem`
-  public var title: String
-  
-  public init(title: String) {
-    self.title = title
-    recordName = nil
-    recordChangeTag = nil
-  }
-}
-```
-
-Now you can create an `MKQuery` using your custom type.
-
-```swift
-// create your request to CloudKit
-let query = MKQuery(recordType: TodoListItem.self)
-
-let request = FetchRecordQueryRequest(
-  database: .private,
-  query: FetchRecordQuery(query: query)
-)
-
-// handle the result
-database.query(request) { result in
-  do {
-    try print(result.get().information)
-  } catch {
-    completed(error)
-    return
-  }
-  completed(nil)
-}
-```
-
-Rather than using `MKDatabase.perform(request:)`, use `MKDatabase.query(_ query:)` and `MKDatabase` will decode the value to your custom type.
-
-### Filters 
-
-_Coming Soon_
-
-## Fetching Records by Record Name (records/lookup)
-
-```swift
-let recordNames : [UUID] = [...]
-
-let query = LookupRecordQuery(TodoListItem.self, recordNames: recordNames)
-
-let request = LookupRecordQueryRequest(database: .private, query: query)
-
-database.lookup(request) { result in
-  try? print(result.get().count)
-}
-```
-
-_Coming Soon_
-
-## Fetching Current User Identity (users/caller)
-
-```swift
-let request = GetCurrentUserIdentityRequest()
-database.perform(request: request) { (result) in
-  try? print(result.get().userRecordName)
-}
-```
-
-_Coming Soon_
-
-## Modifying Records (records/modify)
-
-### Creating Records
-
-```swift
-let item = TodoListItem(title: title)
-
-let operation = ModifyOperation(operationType: .create, record: item)
-
-let query = ModifyRecordQuery(operations: [operation])
-
-let request = ModifyRecordQueryRequest(database: .private, query: query)
-
-database.perform(operations: request) { result in
-  do {
-    try print(result.get().updated.information)
-  } catch {
-    completed(error)
-    return
-  }
-  completed(nil)
-}
-```
-
-### Deleting Records
-
-In order to delete and update records, you are required to already have the object fetched from CloudKit. Therefore you'll need to run a `LookupRecordQueryRequest` or `FetchRecordQueryRequest` to get access to the record. Once you have access to the records, simply create a delete operation with your record:
-
-```swift
-let query = LookupRecordQuery(TodoListItem.self, recordNames: recordNames)
-
-let request = LookupRecordQueryRequest(database: .private, query: query)
-
-database.lookup(request) { result in
-  let items: [TodoListItem]
-  
-  do {
-    items = try result.get()
-  } catch {
-    completed(error)
-    return
-  }
-  
-  let operations = items.map { (item) in
-    ModifyOperation(operationType: .delete, record: item)
-  }
-
-  let query = ModifyRecordQuery(operations: operations)
-
-  let request = ModifyRecordQueryRequest(database: .private, query: query)
-  
-  database.perform(operations: request) { result in
-    do {
-      try print("Deleted \(result.get().deleted.count) items.")
-    } catch {
-      completed(error)
-      return
-    }
-    completed(nil)
-  }
-}
-```
-
-### Updating Records
-
-Similarly with updating records, you are required to already have the object fetched from CloudKit. Again, run a `LookupRecordQueryRequest` or `FetchRecordQueryRequest` to get access to the record. Once you have access to the records, simply create a update operation with your record:
-
-```swift
-let query = LookupRecordQuery(TodoListItem.self, recordNames: [recordName])
-
-let request = LookupRecordQueryRequest(database: .private, query: query)
-
-database.lookup(request) { result in
-  let items: [TodoListItem]
-  do {
-    items = try result.get()
-
-  } catch {
-    completed(error)
-    return
-  }
-  let operations = items.map { (item) -> ModifyOperation<TodoListItem> in
-    item.title = self.newTitle
-    return ModifyOperation(operationType: .update, record: item)
-  }
-
-  let query = ModifyRecordQuery(operations: operations)
-
-  let request = ModifyRecordQueryRequest(database: .private, query: query)
-  database.perform(operations: request) { result in
-    do {
-      try print("Updated \(result.get().updated.count) items.")
-    } catch {
-      completed(error)
-      return
-    }
-    completed(nil)
-  }
-}
-```
-
-## Using SwiftNIO
-
-If you are building a server-side application and already using [SwiftNIO](https://github.com/apple/swift-nio), you might want to take advantage of some helpers which will work already existing patterns and APIs available. Primarily **[EventLoops](https://apple.github.io/swift-nio/docs/current/NIO/Protocols/EventLoop.html)** from [SwiftNIO](https://github.com/apple/swift-nio) and the respective **HTTP clients** from [SwiftNIO](https://github.com/apple/swift-nio) and [Vapor](https://vapor.codes/).
-
-### Using EventLoops
-
-If you are building a server-side application in [SwiftNIO](https://github.com/apple/swift-nio) (or [Vapor](https://vapor.codes/)), you are likely using [EventLoops](https://apple.github.io/swift-nio/docs/current/NIO/Protocols/EventLoop.html) and [EventLoopFuture](https://apple.github.io/swift-nio/docs/current/NIO/Classes/EventLoopFuture.html) for asyncronous programming. EventLoopFutures are essentially the Future/Promise implementation of [SwiftNIO](https://github.com/apple/swift-nio). Luckily there are helper methods in MistKit which provide [EventLoopFutures](https://apple.github.io/swift-nio/docs/current/NIO/Classes/EventLoopFuture.html) similar to the way they implmented in [SwiftNIO](https://github.com/apple/swift-nio). These implementations augment the already existing callback:
-
-
-```swift
-public extension MKDatabase {
-  func query<RecordType>(
-    _ query: FetchRecordQueryRequest<MKQuery<RecordType>>,
-    on eventLoop: EventLoop
-  ) -> EventLoopFuture<[RecordType]>
-
-  func perform<RecordType>(
-    operations: ModifyRecordQueryRequest<RecordType>,
-    on eventLoop: EventLoop
-  ) -> EventLoopFuture<ModifiedRecordQueryResult<RecordType>>
-  
-  func lookup<RecordType>(
-    _ lookup: LookupRecordQueryRequest<RecordType>,
-    on eventLoop: EventLoop
-  ) -> EventLoopFuture<[RecordType]>
-
-  func perform<RequestType: MKRequest, ResponseType>(
-    request: RequestType,
-    on eventLoop: EventLoop
-  ) -> EventLoopFuture<ResponseType> -> EventLoopFuture<ResponseType>
-    where RequestType.Response == ResponseType
-}
-```
-
-Also if you are using the results as `Content` for a [Vapor](https://vapor.codes/) HTTP response, **MistKit** provides a `MKServerResponse` enum type which distinguishes between an authentication failure (with the redirect URL) and an actual success. 
-
-```swift
-public enum MKServerResponse<Success>: Codable where Success: Codable {
-  public init(attemptRecoveryFrom error: Error) throws
-
-  case failure(URL)
-  case success(Success)
-}
-```
-
-Besides [EventLoopFuture](https://apple.github.io/swift-nio/docs/current/NIO/Classes/EventLoopFuture.html), you can also use a different HTTP client for calling CloudKit Web Services.  
-
-### Choosing an HTTP Client
-
-By default, MistKit uses `URLSession` for making HTTP calls to the CloudKit Web Service via the `MKURLSessionClient`:
-
-```swift
-public struct MKURLSessionClient: MKHttpClient {
-  public init(session: URLSession) {
-    self.session = session
-  }
-
-  public func request(withURL url: URL, data: Data?) -> MKURLRequest
-}
-```
-
-However if you are using [SwiftNIO](https://github.com/apple/swift-nio) or [Vapor](https://vapor.codes/), it makes more sense the use their HTTP clients for making those calls:
-* For **SwiftNIO**, there's **`MKAsyncClient`** which uses an `HTTPClient` provided by the `AsyncHTTPClient` library
-* For **Vapor**, there's **`MKVaporClient`** which uses an `Client` provided by the `Vapor` library
-
-In the mistdemod example, you can see how to use a Vapor `Request` to create an `MKDatabase` with the `client` property of the `Request`:
-
-```swift
-extension MKDatabase where HttpClient == MKVaporClient {
-  init(request: Request) {
-    let manager: MKTokenManager    
-    let connection : MKDatabaseConnection
-    self.init(
-      connection: connection, 
-      factory: nil, 
-      client: MKVaporClient(client: request.client), 
-      tokenManager: manager
-    )
-  }
-}
+// Later, upgrade to web authentication
+try await adaptiveManager.upgradeToWebAuth(webAuthToken: webToken)
 ```
 
 ## Examples
 
-There are two examples on how to do basic CRUD methods in CloudKit via MistKit: 
-* As a command line tool using Swift Argument Parser checkout [the `mistdemoc` Swift package executable here](https://github.com/brightdigit/MistKit/tree/main/Sources/mistdemoc)
-* And a server-side Vapor application [`mistdemod` here](https://github.com/brightdigit/MistKit/tree/main/Sources/mistdemoc)
+Check out the `Examples/` directory for complete working examples:
 
-## Further Code Documentation
+- **Command Line Tool**: Basic CloudKit operations from the command line
+- **Server Application**: Using MistKit in a server-side Swift application
+- **Cross-Platform App**: Shared CloudKit logic across multiple platforms
 
-[Documentation Here](/Documentation/Reference/README.md)
+## Documentation
 
-# Roadmap
+- **[API Documentation](https://brightdigit.github.io/MistKit)**: Complete API reference
+- **[DocC Documentation](./Sources/MistKit/Documentation.docc)**: Interactive documentation
+- **[CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)**: Apple's official CloudKit Web Services documentation
 
-<!-- https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html#//apple_ref/doc/uid/TP40015240-CH41-SW1 -->
+## Contributing
 
-## 0.1.0
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-- [x] Composing Web Service Requests
-- [x] Modifying Records (records/modify)
-- [x] Fetching Records Using a Query (records/query)
-- [x] Fetching Records by Record Name (records/lookup)
-- [x] Fetching Current User Identity (users/caller)
+### Development Setup
 
-## 0.2.0 
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/brightdigit/MistKit.git
+   cd MistKit
+   ```
 
-- [x] Vapor Token Client
-- [x] Vapor Token Storage
-- [x] Vapor URL Client
-- [x] Swift NIO URL Client
+2. **Install dependencies**:
+   ```bash
+   swift package resolve
+   ```
 
-## 0.4.0 
+3. **Run tests**:
+   ```bash
+   swift test
+   ```
 
-- [X] Date Field Types
-- [X] Location Field Types
-- [ ] List Field Types
-- [ ] System Field Integration
+4. **Generate documentation**:
+   ```bash
+   swift package generate-documentation
+   ```
 
-## 0.6.0
+### Code Style
 
-- [ ] Name Component Types
-- [ ] Discovering User Identities (POST users/discover)
-- [ ] Discovering All User Identities (GET users/discover)
-- [ ] Support `postMessage` for Authentication Requests
+We use SwiftLint to maintain code quality. Install it and run:
 
-## 0.8.0
+```bash
+swiftlint --fix
+```
 
-- [ ] Uploading Assets (assets/upload)
-- [ ] Referencing Existing Assets (assets/rereference)
-- [ ] Fetching Records Using a Query (records/query) w/ basic filtering
+## Requirements
 
-## 0.9.0
+- Swift 6.1+
+- Xcode 16.0+ (for iOS/macOS development)
+- Linux: Ubuntu 18.04+ with Swift 6.1+
 
-- [ ] Fetching Contacts (users/lookup/contacts)
-- [ ] Fetching Users by Email (users/lookup/email)
-- [ ] Fetching Users by Record Name (users/lookup/id)
+## License
 
-## v1.0.0
+MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 
-- [ ] Reference Field Types
-- [ ] Error Codes
-- [ ] Handle Data Size Limits
+## Acknowledgments
 
-## v1.x.x+
+- Built on [Swift OpenAPI Generator](https://github.com/apple/swift-openapi-generator)
+- Uses [Swift Crypto](https://github.com/apple/swift-crypto) for server-to-server authentication
+- Inspired by CloudKit Web Services REST API
 
-- [ ] Fetching Record Changes (records/changes)
-- [ ] Fetching Record Information (records/resolve)
-- [ ] Accepting Share Records (records/accept)
-- [ ] Fetching Zones (zones/list)
-- [ ] Fetching Zones by Identifier (zones/lookup)
-- [ ] Modifying Zones (zones/modify)
-- [ ] Fetching Database Changes (changes/database)
-- [ ] Fetching Record Zone Changes (changes/zone)
-- [ ] Fetching Zone Changes (zones/changes)
-- [ ] Fetching Subscriptions (subscriptions/list)
-- [ ] Fetching Subscriptions by Identifier (subscriptions/lookup)
-- [ ] Modifying Subscriptions (subscriptions/modify)
-- [ ] Creating APNs Tokens (tokens/create)
-- [ ] Registering Tokens (tokens/register)
+## Support
 
-<!-- Explain Demo Application -->
+- **Issues**: [GitHub Issues](https://github.com/brightdigit/MistKit/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/brightdigit/MistKit/discussions)
+- **Documentation**: [API Reference](https://brightdigit.github.io/MistKit)
 
-## Not Planned
+---
 
-- [ ] Fetching Current User (users/current) _deprecated_
-
-# License 
-
-This code is distributed under the MIT license. See the [LICENSE](LICENSE) file for more info.
+*MistKit: Bringing CloudKit to every Swift platform* 🌟

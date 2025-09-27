@@ -1,109 +1,123 @@
-// swift-tools-version:5.2
+// swift-tools-version: 6.1
+// The swift-tools-version declares the minimum version of Swift required to build this package.
 
-// swiftlint:disable explicit_top_level_acl
-// swiftlint:disable prefixed_toplevel_constant
-// swiftlint:disable line_length
-// swiftlint:disable explicit_acl
+// swiftlint:disable explicit_acl explicit_top_level_acl
 
 import PackageDescription
 
+// MARK: - Swift Settings Configuration
+
+let swiftSettings: [SwiftSetting] = [
+  // Swift 6.2 Upcoming Features (not yet enabled by default)
+  // SE-0335: Introduce existential `any`
+  .enableUpcomingFeature("ExistentialAny"),
+  // SE-0409: Access-level modifiers on import declarations
+  .enableUpcomingFeature("InternalImportsByDefault"),
+  // SE-0444: Member import visibility (Swift 6.1+)
+  .enableUpcomingFeature("MemberImportVisibility"),
+  // SE-0413: Typed throws
+  .enableUpcomingFeature("FullTypedThrows"),
+
+  // Experimental Features (stable enough for use)
+  // SE-0426: BitwiseCopyable protocol
+  .enableExperimentalFeature("BitwiseCopyable"),
+  // SE-0432: Borrowing and consuming pattern matching for noncopyable types
+  .enableExperimentalFeature("BorrowingSwitch"),
+  // Extension macros
+  .enableExperimentalFeature("ExtensionMacros"),
+  // Freestanding expression macros
+  .enableExperimentalFeature("FreestandingExpressionMacros"),
+  // Init accessors
+  .enableExperimentalFeature("InitAccessors"),
+  // Isolated any types
+  .enableExperimentalFeature("IsolatedAny"),
+  // Move-only classes
+  .enableExperimentalFeature("MoveOnlyClasses"),
+  // Move-only enum deinits
+  .enableExperimentalFeature("MoveOnlyEnumDeinits"),
+  // SE-0429: Partial consumption of noncopyable values
+  .enableExperimentalFeature("MoveOnlyPartialConsumption"),
+  // Move-only resilient types
+  .enableExperimentalFeature("MoveOnlyResilientTypes"),
+  // Move-only tuples
+  .enableExperimentalFeature("MoveOnlyTuples"),
+  // SE-0427: Noncopyable generics
+  .enableExperimentalFeature("NoncopyableGenerics"),
+  // One-way closure parameters
+  // .enableExperimentalFeature("OneWayClosureParameters"),
+  // Raw layout types
+  .enableExperimentalFeature("RawLayout"),
+  // Reference bindings
+  .enableExperimentalFeature("ReferenceBindings"),
+  // SE-0430: sending parameter and result values
+  .enableExperimentalFeature("SendingArgsAndResults"),
+  // Symbol linkage markers
+  .enableExperimentalFeature("SymbolLinkageMarkers"),
+  // Transferring args and results
+  .enableExperimentalFeature("TransferringArgsAndResults"),
+  // SE-0393: Value and Type Parameter Packs
+  .enableExperimentalFeature("VariadicGenerics"),
+  // Warn unsafe reflection
+  .enableExperimentalFeature("WarnUnsafeReflection"),
+
+  // Enhanced compiler checking
+  .unsafeFlags([
+    // Enable concurrency warnings
+    "-warn-concurrency",
+    // Enable actor data race checks
+    "-enable-actor-data-race-checks",
+    // Complete strict concurrency checking
+    "-strict-concurrency=complete",
+    // Enable testing support
+    "-enable-testing",
+    // Warn about functions with >100 lines
+    "-Xfrontend", "-warn-long-function-bodies=100",
+    // Warn about slow type checking expressions
+    "-Xfrontend", "-warn-long-expression-type-checking=100"
+  ])
+]
+
 let package = Package(
   name: "MistKit",
-  platforms: [.macOS(.v10_15)],
+  platforms: [
+    .macOS(.v10_15),   // Minimum for swift-crypto
+    .iOS(.v13),        // Minimum for swift-crypto
+    .tvOS(.v13),       // Minimum for swift-crypto
+    .watchOS(.v6),     // Minimum for swift-crypto
+    .visionOS(.v1)     // Vision OS already requires newer versions
+  ],
   products: [
+    // Products define the executables and libraries a package produces,
+    // making them visible to other packages.
     .library(
       name: "MistKit",
       targets: ["MistKit"]
     ),
-    .library(
-      name: "MistKitNIO",
-      targets: ["MistKitNIO"]
-    ),
-    .library(
-      name: "MistKitVapor",
-      targets: ["MistKitVapor"]
-    ),
-    .executable(name: "mistdemoc", targets: ["mistdemoc"]),
-    .executable(name: "mistdemod", targets: ["mistdemod"])
   ],
   dependencies: [
-    // Dependencies declare other packages that this package depends on.
-    // .package(url: /* package url */, from: "1.0.0"),
-    .package(url: "https://github.com/apple/swift-nio.git", from: "2.20.0"),
-    .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
-    .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
-    .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
-    .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
-    .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.6.0"),
-    // dev
-    .package(url: "https://github.com/shibapm/Komondor", from: "1.1.1"), // dev
-    .package(url: "https://github.com/eneko/SourceDocs", from: "1.2.1"), // dev
-    .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.48.12"), // dev
-    .package(url: "https://github.com/realm/SwiftLint", from: "0.43.0"), // dev
-    .package(url: "https://github.com/shibapm/Rocket", from: "1.2.0"), // dev
-    .package(url: "https://github.com/brightdigit/swift-test-codecov", from: "1.0.0") // dev
+    // Swift OpenAPI Runtime dependencies
+    .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.8.0"),
+    .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
+    // Crypto library for cross-platform cryptographic operations
+    .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
   ],
   targets: [
-    // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-    // Targets can depend on other targets in this package, and on products in packages this package depends on.
+    // Targets are the basic building blocks of a package, defining a module or a test suite.
+    // Targets can depend on other targets in this package and products from dependencies.
     .target(
       name: "MistKit",
-      dependencies: []
+      dependencies: [
+        .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+        .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+        .product(name: "Crypto", package: "swift-crypto"),
+      ],
+      swiftSettings: swiftSettings
     ),
-    .target(name: "MistKitNIO",
-            dependencies: [
-              "MistKit",
-              .product(name: "NIO", package: "swift-nio"),
-              .product(name: "NIOHTTP1", package: "swift-nio"),
-              .product(name: "AsyncHTTPClient", package: "async-http-client")
-            ]),
-    .target(name: "MistKitVapor",
-            dependencies: [
-              "MistKit",
-              "MistKitNIO",
-              .product(name: "Vapor", package: "vapor"),
-              .product(name: "Fluent", package: "fluent")
-            ]),
-    .target(name: "mistdemoc", dependencies: [
-      "MistKit",
-      "MistKitNIO", "MistKitDemo",
-      .product(name: "ArgumentParser", package: "swift-argument-parser")
-    ]),
-    .target(name: "mistdemod", dependencies: [
-      "MistKit", "MistKitVapor", "MistKitDemo",
-      .product(name: "Vapor", package: "vapor"),
-      .product(name: "Fluent", package: "fluent"),
-      .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver")
-    ]),
-    .target(name: "MistKitDemo",
-            dependencies: ["MistKit"]),
     .testTarget(
       name: "MistKitTests",
-      dependencies: ["MistKit"]
-    )
+      dependencies: ["MistKit"],
+      swiftSettings: swiftSettings
+    ),
   ]
 )
-
-#if canImport(PackageConfig)
-  import PackageConfig
-
-  let requiredCoverage: Int = 40
-
-  let config = PackageConfiguration([
-    "komondor": [
-      "pre-push": [
-        "swift test --enable-code-coverage --enable-test-discovery",
-        "swift run swift-test-codecov .build/debug/codecov/MistKit.json --minimum \(requiredCoverage)"
-      ],
-      "pre-commit": [
-        "swift test --enable-code-coverage --enable-test-discovery --generate-linuxmain",
-        "swift run swiftformat .",
-        "swift run swiftlint autocorrect",
-//        "swift run sourcedocs generate build -cra",
-        "git add .",
-        "swift run swiftformat --lint .",
-        "swift run swiftlint"
-      ]
-    ]
-  ]).write()
-#endif
+// swiftlint:enable explicit_acl explicit_top_level_acl
