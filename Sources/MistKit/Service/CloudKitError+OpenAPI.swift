@@ -132,16 +132,16 @@ extension CloudKitError {
     }
   }
 
-  /// Initialize CloudKitError from an UnprocessableEntity response (misdirected request)
-  internal init(misdirectedRequest response: Components.Responses.UnprocessableEntity) {
+  /// Initialize CloudKitError from an UnprocessableEntity response
+  internal init(unprocessableEntity response: Components.Responses.UnprocessableEntity) {
     if case .json(let errorResponse) = response.body {
       self = .httpErrorWithDetails(
-        statusCode: 421,
+        statusCode: 422,
         serverErrorCode: errorResponse.serverErrorCode?.rawValue,
         reason: errorResponse.reason
       )
     } else {
-      self = .httpError(statusCode: 421)
+      self = .httpError(statusCode: 422)
     }
   }
 

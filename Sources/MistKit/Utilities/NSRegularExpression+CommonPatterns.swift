@@ -113,6 +113,7 @@ extension NSRegularExpression {
   /// - Parameter string: The string to search in
   /// - Returns: Array of NSTextCheckingResult objects
   public func matches(in string: String) -> [NSTextCheckingResult] {
-    matches(in: string, range: NSRange(location: 0, length: string.count))
+    let range = NSRange(string.startIndex..<string.endIndex, in: string)
+    return matches(in: string, range: range)
   }
 }

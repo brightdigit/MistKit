@@ -48,7 +48,7 @@ internal struct MistKitClient {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal init(configuration: MistKitConfiguration, transport: any ClientTransport) throws {
     // Create appropriate TokenManager from configuration
-    let tokenManager = configuration.createTokenManager()
+    let tokenManager = try configuration.createTokenManager()
 
     // Create the OpenAPI client with custom server URL and middleware
     self.client = Client(

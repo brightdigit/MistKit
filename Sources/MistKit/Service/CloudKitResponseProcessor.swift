@@ -84,7 +84,7 @@ internal struct CloudKitResponseProcessor {
     case .tooManyRequests(let tooManyRequestsResponse):
       throw CloudKitError(tooManyRequests: tooManyRequestsResponse)
     case .misdirectedRequest(let misdirectedResponse):
-      throw CloudKitError(misdirectedRequest: misdirectedResponse)
+      throw CloudKitError(unprocessableEntity: misdirectedResponse)
     case .internalServerError(let internalServerErrorResponse):
       throw CloudKitError(internalServerError: internalServerErrorResponse)
     case .serviceUnavailable(let serviceUnavailableResponse):

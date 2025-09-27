@@ -40,9 +40,9 @@ public struct TokenCredentials: Sendable, Equatable {
   /// Returns true if these credentials support user-specific operations
   public var supportsUserOperations: Bool {
     switch method {
-    case .apiToken:
+    case .apiToken, .serverToServer:
       return false
-    case .webAuthToken, .serverToServer:
+    case .webAuthToken:
       return true
     }
   }

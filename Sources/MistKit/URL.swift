@@ -32,12 +32,10 @@ public import Foundation
 extension URL {
   /// MistKit URL constants and utilities
   public enum MistKit {
+    // swiftlint:disable force_try
+    // swift-format-ignore: NeverUseForceTry
     /// The base URL for CloudKit Web Services API
-    public static let cloudKitAPI: URL = {
-      guard let url = try? Servers.Server1.url() else {
-        fatalError("Failed to create CloudKit API URL")
-      }
-      return url
-    }()
+    public static let cloudKitAPI: URL = try! Servers.Server1.url()
+    // swiftlint:enable force_try
   }
 }
