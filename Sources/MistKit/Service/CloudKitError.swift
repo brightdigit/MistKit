@@ -1,6 +1,6 @@
 //
 //  CloudKitError.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -28,14 +28,17 @@
 //
 
 public import Foundation
+import OpenAPIRuntime
 
-internal enum CloudKitError: LocalizedError {
+/// Represents errors that can occur when interacting with CloudKit Web Services
+public enum CloudKitError: LocalizedError, Sendable {
   case httpError(statusCode: Int)
   case httpErrorWithDetails(statusCode: Int, serverErrorCode: String?, reason: String?)
   case httpErrorWithRawResponse(statusCode: Int, rawResponse: String)
   case invalidResponse
 
-  internal var errorDescription: String? {
+  /// A localized message describing what error occurred
+  public var errorDescription: String? {
     switch self {
     case .httpError(let statusCode):
       return "CloudKit API error: HTTP \(statusCode)"

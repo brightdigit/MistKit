@@ -15,8 +15,8 @@ jobs:
       matrix:
         os: [noble, jammy]
         swift:
-          - version: "6.0"
           - version: "6.1"
+          - version: "6.2"
           - version: "6.1"
             nightly: true
           - version: "6.2"
@@ -24,7 +24,7 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-      - uses: brightdigit/swift-build@v1.2.0
+      - uses: brightdigit/swift-build@v1.3.3
       - uses: sersoft-gmbh/swift-coverage-action@v4
         id: coverage-files
         with:          
@@ -37,6 +37,34 @@ jobs:
           verbose: true        
           token: ${{ secrets.CODECOV_TOKEN }}  
           files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}    
+  build-windows:
+    name: Build on Windows
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [windows-2022, windows-2025]
+        swift:
+          - version: swift-6.1-release
+            build: 6.1-RELEASE
+          - version: swift-6.2-release
+            build: 6.2-RELEASE
+    steps:
+      - uses: actions/checkout@v4
+      - uses: brightdigit/swift-build@v1.3.3
+        with:
+          windows-swift-version: ${{ matrix.swift.version }}
+          windows-swift-build: ${{ matrix.swift.build }}
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5    
+        with:
+          fail_ci_if_error: true
+          flags: swift-${{ matrix.swift.version }},windows
+          verbose: true        
+          token: ${{ secrets.CODECOV_TOKEN }}
+          os: windows
+          swift_project: MistKit
+          # files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}           
   build-macos:
     name: Build on macOS
     env:
@@ -54,8 +82,6 @@ jobs:
             xcode: "/Applications/Xcode_16.4.app"
           - runs-on: macos-15
             xcode: "/Applications/Xcode_16.3.app"
-          - runs-on: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
 
           # macOS Build Matrix
           - type: macos
@@ -66,14 +92,14 @@ jobs:
           - type: ios
             runs-on: macos-15
             xcode: "/Applications/Xcode_26.0.app"
-            deviceName: "iPhone 16 Pro"
+            deviceName: "iPhone 17 Pro"
             osVersion: "26.0"
             download-platform: true
             
           - type: ios
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.4.app"
-            deviceName: "iPhone 16"
+            deviceName: "iPhone 16e"
             osVersion: "18.5"
             
           - type: ios
@@ -82,39 +108,33 @@ jobs:
             deviceName: "iPhone 16"
             osVersion: "18.4"
             
-          - type: ios
-            runs-on: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
-            deviceName: "iPhone 16"
-            osVersion: "18.3.1" 
-            download-platform: true
   
           # watchOS Build Matrix
           - type: watchos
             runs-on: macos-15
-            xcode: "/Applications/Xcode_16.4.app"
-            deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "11.5"
+            xcode: "/Applications/Xcode_26.0.app"
+            deviceName: "Apple Watch Ultra 3 (49mm)"
+            osVersion: "26.0"
 
           # tvOS Build Matrix
           - type: tvos
             runs-on: macos-15
-            xcode: "/Applications/Xcode_16.4.app"
+            xcode: "/Applications/Xcode_26.0.app"
             deviceName: "Apple TV"
-            osVersion: "18.5"
+            osVersion: "26.0"
 
           # visionOS Build Matrix              
           - type: visionos
             runs-on: macos-15
-            xcode: "/Applications/Xcode_16.4.app"
+            xcode: "/Applications/Xcode_26.0.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "2.5"
+            osVersion: "26.0"
   
     steps:
       - uses: actions/checkout@v4
 
       - name: Build and Test
-        uses: brightdigit/swift-build@v1.2.0
+        uses: brightdigit/swift-build@v1.3.3
         with:
           scheme: ${{ env.PACKAGE_NAME }}
           type: ${{ matrix.type }}
@@ -137,10 +157,11 @@ jobs:
     name: Linting
     if: "!contains(github.event.head_commit.message, 'ci skip')"  
     runs-on: ubuntu-latest
-    needs: [build-ubuntu, build-macos]
+    needs: [build-ubuntu, build-macos, build-windows]
     env:
       MINT_PATH: .mint/lib
       MINT_LINK_PATH: .mint/bin
+      LINT_MODE: STRICT
     steps:
       - uses: actions/checkout@v4    
       - name: Cache mint
@@ -162,4 +183,6 @@ jobs:
           cd Mint
           swift run mint install yonaskolb/mint
       - name: Lint
-        run: ./Scripts/lint.sh
+        run: |
+          set -e
+          ./Scripts/lint.sh

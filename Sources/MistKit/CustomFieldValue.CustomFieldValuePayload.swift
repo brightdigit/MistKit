@@ -1,6 +1,6 @@
 //
 //  CustomFieldValue.CustomFieldValuePayload.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -31,7 +31,7 @@ public import Foundation
 
 extension CustomFieldValue.CustomFieldValuePayload {
   /// Initialize from decoder
-  public init(from decoder: Decoder) throws {
+  public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
 
     if let value = try Self.decodeBasicPayloadTypes(from: container) {
@@ -54,12 +54,12 @@ extension CustomFieldValue.CustomFieldValuePayload {
 
   /// Decode basic payload types (string, int64, double, boolean)
   private static func decodeBasicPayloadTypes(
-    from container: SingleValueDecodingContainer
+    from container: any SingleValueDecodingContainer
   ) throws -> CustomFieldValue.CustomFieldValuePayload? {
     if let value = try? container.decode(String.self) {
       return .stringValue(value)
     }
-    if let value = try? container.decode(Int64.self) {
+    if let value = try? container.decode(Int.self) {
       return .int64Value(value)
     }
     if let value = try? container.decode(Double.self) {
@@ -73,7 +73,7 @@ extension CustomFieldValue.CustomFieldValuePayload {
 
   /// Decode complex payload types (asset, location, reference, list)
   private static func decodeComplexPayloadTypes(
-    from container: SingleValueDecodingContainer
+    from container: any SingleValueDecodingContainer
   ) throws -> CustomFieldValue.CustomFieldValuePayload? {
     if let value = try? container.decode(Components.Schemas.AssetValue.self) {
       return .assetValue(value)
@@ -91,13 +91,13 @@ extension CustomFieldValue.CustomFieldValuePayload {
   }
 
   /// Encode to encoder
-  public func encode(to encoder: Encoder) throws {
+  public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     try encodeValue(to: &container)
   }
 
   // swiftlint:disable:next cyclomatic_complexity
-  private func encodeValue(to container: inout SingleValueEncodingContainer) throws {
+  private func encodeValue(to container: inout any SingleValueEncodingContainer) throws {
     switch self {
     case .stringValue(let val), .bytesValue(let val):
       try container.encode(val)
@@ -119,7 +119,7 @@ extension CustomFieldValue.CustomFieldValuePayload {
   }
 
   private func encodeNumericValue<T: Encodable>(
-    _ value: T, to container: inout SingleValueEncodingContainer
+    _ value: T, to container: inout any SingleValueEncodingContainer
   ) throws {
     try container.encode(value)
   }

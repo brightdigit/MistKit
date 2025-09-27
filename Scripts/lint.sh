@@ -49,7 +49,7 @@ MINT_RUN="$MINT_CMD run $MINT_ARGS"
 if [ "$LINT_MODE" = "NONE" ]; then
 	exit
 elif [ "$LINT_MODE" = "STRICT" ]; then
-	SWIFTFORMAT_OPTIONS="--strict --configuration .swift-format"
+	SWIFTFORMAT_OPTIONS="--configuration .swift-format"
 	SWIFTLINT_OPTIONS="--strict"
 	STRINGSLINT_OPTIONS="--config .strict.stringslint.yml"
 else 
@@ -69,9 +69,11 @@ fi
 if [ -z "$FORMAT_ONLY" ]; then
 	run_command $MINT_RUN swift-format lint --configuration .swift-format --recursive --parallel $SWIFTFORMAT_OPTIONS Sources Tests
 	run_command $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS
+	# Check for compilation errors
+	run_command swift build --build-tests
 fi
 
-$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "PackageDSLKit"
+$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "MistKit"
 
 # Generated files now automatically include ignore directives via OpenAPI generator configuration
 

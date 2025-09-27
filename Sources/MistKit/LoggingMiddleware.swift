@@ -1,6 +1,6 @@
 //
 //  LoggingMiddleware.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -89,9 +89,14 @@ internal struct LoggingMiddleware: ClientMiddleware {
         return "nil"
       }
 
-      if item.name == "ckWebAuthToken" {
-        return "\(value.prefix(20))... (encoded)"
+      // Mask sensitive query parameters
+      let lowercasedName = item.name.lowercased()
+      if lowercasedName.contains("token") || lowercasedName.contains("key")
+        || lowercasedName.contains("secret") || lowercasedName.contains("auth")
+      {
+        return SecureLogging.maskToken(value)
       }
+
       return value
     }
 
@@ -126,7 +131,7 @@ internal struct LoggingMiddleware: ClientMiddleware {
     private func logBodyData(_ bodyData: Data) {
       if let jsonString = String(data: bodyData, encoding: .utf8) {
         print("📄 Response Body:")
-        print(jsonString)
+        print(SecureLogging.safeLogMessage(jsonString))
       } else {
         print("📄 Response Body: <non-UTF8 data, \(bodyData.count) bytes>")
       }
