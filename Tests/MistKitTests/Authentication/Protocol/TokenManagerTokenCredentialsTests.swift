@@ -75,7 +75,7 @@ internal struct TokenManagerTokenCredentialsTests {
     // Test supportsUserOperations
     #expect(apiCredentials.supportsUserOperations == false)
     #expect(webCredentials.supportsUserOperations == true)
-    #expect(serverCredentials.supportsUserOperations == true)
+    #expect(serverCredentials.supportsUserOperations == false)
 
     // Test methodType
     #expect(apiCredentials.methodType == "api-token")

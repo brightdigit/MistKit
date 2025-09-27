@@ -81,17 +81,13 @@ internal struct MistKitConfiguration: Sendable {
   /// Creates an appropriate TokenManager based on the configuration
   /// - Returns: A TokenManager instance matching the authentication method
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal func createTokenManager() -> any TokenManager {
+  internal func createTokenManager() throws -> any TokenManager {
     // Default creation logic
     if let keyID = keyID, let privateKeyData = privateKeyData {
-      do {
-        return try ServerToServerAuthManager(
-          keyID: keyID,
-          privateKeyData: privateKeyData
-        )
-      } catch {
-        fatalError("Failed to create ServerToServerAuthManager: \(error)")
-      }
+      return try ServerToServerAuthManager(
+        keyID: keyID,
+        privateKeyData: privateKeyData
+      )
     } else if let webAuthToken = webAuthToken {
       return WebAuthTokenManager(
         apiToken: apiToken,

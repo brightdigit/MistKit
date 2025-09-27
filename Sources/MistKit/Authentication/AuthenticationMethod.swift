@@ -45,14 +45,14 @@ public enum AuthenticationMethod: Sendable, Equatable {
 
 extension AuthenticationMethod {
   /// Returns the API token for all authentication methods
-  public var apiToken: String {
+  public var apiToken: String? {
     switch self {
     case .apiToken(let token):
       return token
     case .webAuthToken(let apiToken, _):
       return apiToken
     case .serverToServer:
-      return ""  // Server-to-server doesn't use API tokens in the same way
+      return nil
     }
   }
 
