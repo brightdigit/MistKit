@@ -52,6 +52,11 @@ swift run mistdemo --help
 - `--skip-auth`: Skip authentication server
 - `--web-auth-token`: Provide token directly (use with --skip-auth)
 
+### Testing Options:
+- `--test-api-only`: Test API-only authentication (public database)
+- `--test-adaptive`: Test AdaptiveTokenManager transitions
+- `--test-all-auth`: Run comprehensive authentication test suite
+
 ## Usage Examples
 
 ### First Run (with authentication):
@@ -68,6 +73,31 @@ swift run mistdemo \
   --api-token "YOUR_API_TOKEN" \
   --skip-auth \
   --web-auth-token "SESSION_TOKEN_FROM_FIRST_RUN"
+```
+
+### Testing Authentication Methods:
+
+#### Quick API-only Test (no sign-in required):
+```bash
+swift run mistdemo --test-api-only
+```
+
+#### Test AdaptiveTokenManager Transitions:
+```bash
+swift run mistdemo --test-adaptive
+```
+
+#### Comprehensive Test Suite:
+```bash
+swift run mistdemo --test-all-auth
+```
+
+#### Test with Custom Container:
+```bash
+swift run mistdemo \
+  --container-identifier "iCloud.com.yourteam.YourApp" \
+  --api-token "your_64_character_api_token" \
+  --test-all-auth
 ```
 
 ## What the Demo Does
@@ -104,3 +134,17 @@ Examples/
         └── Resources/
             └── index.html      # Authentication web page
 ```
+
+## 📖 Comprehensive Testing Guide
+
+For detailed testing instructions, authentication method explanations, and troubleshooting, see the complete testing guide:
+
+**[TESTING.md](../TESTING.md)** - Complete guide to testing all MistKit authentication methods
+
+This guide covers:
+- All three authentication methods (API-only, Web Auth, Server-to-Server)
+- AdaptiveTokenManager transition testing
+- Unit test execution
+- CloudKit container setup
+- Common issues and solutions
+- Development best practices

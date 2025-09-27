@@ -5,7 +5,7 @@
 //  Created by Leo Dion on 7/9/25.
 //
 
-public import Foundation
+import Foundation
 import MistKit
 
 /// Utility for formatting FieldValue objects for display
@@ -37,7 +37,7 @@ struct FieldValueFormatter {
         case .boolean(let bool):
             return "\(bool)"
         case .bytes(let bytes):
-            return "bytes(\(bytes.prefix(20)))"
+            return "bytes(\(bytes.count) chars, base64: \(bytes))"
         case .date(let date):
             let formatter = DateFormatter()
             formatter.dateStyle = .short

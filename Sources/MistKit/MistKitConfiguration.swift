@@ -1,6 +1,6 @@
 //
 //  MistKitConfiguration.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -30,45 +30,75 @@
 public import Foundation
 
 /// Configuration for MistKit client
-public struct MistKitConfiguration: Sendable {
+internal struct MistKitConfiguration: Sendable {
   /// The CloudKit container identifier (e.g., "iCloud.com.example.app")
-  public let container: String
+  internal let container: String
 
   /// The CloudKit environment
-  public let environment: Environment
+  internal let environment: Environment
 
   /// The CloudKit database type
-  public let database: Database
+  internal let database: Database
 
   /// API Token for authentication
-  public let apiToken: String
+  internal let apiToken: String
 
   /// Optional Web Auth Token for user authentication
-  public let webAuthToken: String?
+  internal let webAuthToken: String?
+
+  /// Optional Key ID for server-to-server authentication
+  internal let keyID: String?
+
+  /// Optional private key data for server-to-server authentication
+  internal let privateKeyData: Data?
 
   /// Protocol version (currently "1")
-  public let version: String = "1"
+  internal let version: String = "1"
 
-  /// Computed server URL based on configuration
-  public var serverURL: URL {
-    guard let url = URL(string: "https://api.apple-cloudkit.com") else {
-      fatalError("Invalid CloudKit API URL")
-    }
-    return url
-  }
+  internal let serverURL: URL
 
   /// Initialize MistKit configuration
-  public init(
+  internal init(
     container: String,
     environment: Environment,
     database: Database = .private,
+    serverURL: URL = .MistKit.cloudKitAPI,
     apiToken: String,
-    webAuthToken: String? = nil
+    webAuthToken: String? = nil,
+    keyID: String? = nil,
+    privateKeyData: Data? = nil
   ) {
     self.container = container
     self.environment = environment
     self.database = database
+    self.serverURL = serverURL
     self.apiToken = apiToken
     self.webAuthToken = webAuthToken
+    self.keyID = keyID
+    self.privateKeyData = privateKeyData
+  }
+
+  /// Creates an appropriate TokenManager based on the configuration
+  /// - Returns: A TokenManager instance matching the authentication method
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  internal func createTokenManager() -> any TokenManager {
+    // Default creation logic
+    if let keyID = keyID, let privateKeyData = privateKeyData {
+      do {
+        return try ServerToServerAuthManager(
+          keyID: keyID,
+          privateKeyData: privateKeyData
+        )
+      } catch {
+        fatalError("Failed to create ServerToServerAuthManager: \(error)")
+      }
+    } else if let webAuthToken = webAuthToken {
+      return WebAuthTokenManager(
+        apiToken: apiToken,
+        webAuthToken: webAuthToken
+      )
+    } else {
+      return APITokenManager(apiToken: apiToken)
+    }
   }
 }
