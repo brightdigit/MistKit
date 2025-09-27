@@ -63,7 +63,7 @@ jobs:
           verbose: true        
           token: ${{ secrets.CODECOV_TOKEN }}
           os: windows
-          swift_project: SyntaxKit
+          swift_project: MistKit
           # files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}           
   build-macos:
     name: Build on macOS
