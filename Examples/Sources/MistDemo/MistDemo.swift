@@ -598,14 +598,6 @@ struct MistDemo: AsyncParsableCommand {
 
                 print("✅ CloudKitService initialized with server-to-server authentication (public database only)")
 
-                // Try listing zones first (GET request with no body)
-//                print("\n📁 Testing zone listing with server-to-server authentication...")
-//                let zones = try await service.listZones()
-//                print("✅ Found \(zones.count) zone(s):")
-//                for zone in zones.prefix(3) {
-//                    print("   • Zone: \(zone.zoneName)")
-//                }
-
                 // Query public records
                 print("\n📋 Querying public records with server-to-server authentication...")
                 let records = try await service.queryRecords(recordType: "TodoItem", limit: 5)
@@ -615,11 +607,7 @@ struct MistDemo: AsyncParsableCommand {
                     print("     Type: \(record.recordType)")
                     print("     Fields: \(FieldValueFormatter.formatFields(record.fields))")
                 }
-//
-//                // Try to fetch current user (should work with server-to-server)
-//                print("\n👤 Testing user operations...")
-//                let userInfo = try await service.fetchCurrentUser()
-//                print("✅ Server identity: \(userInfo.userRecordName)")
+                
             } else {
                 print("❌ Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+")
                 print("💡 On older platforms, use API-only or Web authentication instead")
