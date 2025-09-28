@@ -28,8 +28,8 @@
 //
 
 import Foundation
-import OpenAPIRuntime
-import OpenAPIURLSession
+public import OpenAPIRuntime
+public import OpenAPIURLSession
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
