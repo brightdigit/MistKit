@@ -38,7 +38,7 @@ Add MistKit to your `Package.swift` file:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0")
+    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.1")
 ]
 ```
 
@@ -179,6 +179,7 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
 | watchOS | 6.0+ | 7.0+ |
 | visionOS | 1.0+ | 1.0+ |
 | Linux | Ubuntu 18.04+ | ✅ |
+| Windows | 10+ | ✅ |
 
 ## Error Handling
 
@@ -251,18 +252,39 @@ let service = try CloudKitService(
 
 ## Advanced Usage
 
-### Custom Transport
+### Using AsyncHTTPClient Transport
 
-You can provide custom transport for testing or special networking requirements:
+For server-side applications, MistKit can use [swift-openapi-async-http-client](https://github.com/swift-server/swift-openapi-async-http-client) as the underlying HTTP transport. This is particularly useful for server-side Swift applications that need robust HTTP client capabilities.
 
 ```swift
-let customTransport = YourCustomTransport()
+import MistKit
+import OpenAPIAsyncHTTPClient
+
+// Create an AsyncHTTPClient instance
+let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+
+// Create the transport
+let transport = AsyncHTTPClientTransport(client: httpClient)
+
+// Use with CloudKit service
 let service = try CloudKitService(
     containerIdentifier: "iCloud.com.example.MyApp",
     apiToken: apiToken,
-    transport: customTransport
+    transport: transport
 )
+
+// Don't forget to shutdown the client when done
+defer {
+    try? httpClient.syncShutdown()
+}
 ```
+
+#### Benefits
+
+- **Production Ready**: AsyncHTTPClient is battle-tested in server environments
+- **Performance**: Optimized for high-throughput server applications
+- **Configuration**: Extensive configuration options for timeouts, connection pooling, and more
+- **Platform Support**: Works across all supported platforms including Linux
 
 ### Adaptive Token Manager
 
@@ -329,6 +351,7 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [List Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
 - [x] [Reference Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
 - [x] [Error Codes](https://github.com/brightdigit/MistKit/issues/115) ✅
+- [x] [Fetching Zones (zones/list)](https://github.com/brightdigit/MistKit/issues/116) ✅
 
 ### v1.0.0
 
