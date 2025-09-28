@@ -2,6 +2,8 @@
 
 A Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
 
+![MistKit Logo](logo)
+
 ## Overview
 
 MistKit provides a modern Swift interface to CloudKit Web Services REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the CloudKit framework isn't available.

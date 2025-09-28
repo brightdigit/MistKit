@@ -1,8 +1,33 @@
+![MistKit Logo](Sources/MistKit/Documentation.docc/Resources/logo.svg)
+
 # MistKit
 
 [![Swift 6.1](https://img.shields.io/badge/Swift-6.1-orange.svg)](https://swift.org)
 [![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20iOS%20%7C%20tvOS%20%7C%20watchOS%20%7C%20visionOS%20%7C%20Linux-lightgrey.svg)](https://swift.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+[![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
+[![Twitter](https://img.shields.io/badge/twitter-@brightdigit-blue.svg?style=flat)](http://twitter.com/brightdigit)
+![GitHub](https://img.shields.io/github/license/brightdigit/MistKit)
+![GitHub issues](https://img.shields.io/github/issues/brightdigit/MistKit)
+
+[![macOS](https://github.com/brightdigit/MistKit/workflows/macOS/badge.svg)](https://github.com/brightdigit/MistKit/actions?query=workflow%3AmacOS)
+[![ubuntu](https://github.com/brightdigit/MistKit/workflows/ubuntu/badge.svg)](https://github.com/brightdigit/MistKit/actions?query=workflow%3Aubuntu)
+[![Travis (.com)](https://img.shields.io/travis/com/brightdigit/MistKit?logo=travis&?label=travis-ci)](https://travis-ci.com/brightdigit/MistKit)
+[![Bitrise](https://img.shields.io/bitrise/b2595eab70c25d1b?logo=bitrise&?label=bitrise&token=rHUhEUFkU2RUL-KGmrKX1Q)](https://app.bitrise.io/app/b2595eab70c25d1b)
+[![CircleCI](https://img.shields.io/circleci/build/github/brightdigit/MistKit?logo=circleci&?label=circle-ci&token=45c9ff6a86f9ac6c1ec8c85c3bc02f4d8859aa6b)](https://app.circleci.com/pipelines/github/brightdigit/MistKit)
+
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FMistKit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/brightdigit/MistKit)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FMistKit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/brightdigit/MistKit)
+
+
+[![Codecov](https://img.shields.io/codecov/c/github/brightdigit/MistKit)](https://codecov.io/gh/brightdigit/MistKit)
+[![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/brightdigit/MistKit)](https://www.codefactor.io/repository/github/brightdigit/MistKit)
+[![codebeat badge](https://codebeat.co/badges/c47b7e58-867c-410b-80c5-57e10140ba0f)](https://codebeat.co/projects/github-com-brightdigit-mistkit-main)
+[![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/brightdigit/MistKit)](https://codeclimate.com/github/brightdigit/MistKit)
+[![Code Climate technical debt](https://img.shields.io/codeclimate/tech-debt/brightdigit/MistKit?label=debt)](https://codeclimate.com/github/brightdigit/MistKit)
+[![Code Climate issues](https://img.shields.io/codeclimate/issues/brightdigit/MistKit)](https://codeclimate.com/github/brightdigit/MistKit)
+[![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
 
 A Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
 
@@ -270,41 +295,6 @@ Check out the `Examples/` directory for complete working examples:
 - **[DocC Documentation](./Sources/MistKit/Documentation.docc)**: Interactive documentation
 - **[CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)**: Apple's official CloudKit Web Services documentation
 
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/brightdigit/MistKit.git
-   cd MistKit
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   swift package resolve
-   ```
-
-3. **Run tests**:
-   ```bash
-   swift test
-   ```
-
-4. **Generate documentation**:
-   ```bash
-   swift package generate-documentation
-   ```
-
-### Code Style
-
-We use SwiftLint to maintain code quality. Install it and run:
-
-```bash
-swiftlint --fix
-```
-
 ## Requirements
 
 - Swift 6.1+
@@ -320,6 +310,57 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - Built on [Swift OpenAPI Generator](https://github.com/apple/swift-openapi-generator)
 - Uses [Swift Crypto](https://github.com/apple/swift-crypto) for server-to-server authentication
 - Inspired by CloudKit Web Services REST API
+
+## Roadmap
+
+### v0.2.4
+
+- [x] [Composing Web Service Requests](https://github.com/brightdigit/MistKit/issues/111) ✅
+- [x] [Modifying Records (records/modify)](https://github.com/brightdigit/MistKit/issues/114) ✅
+- [x] [Fetching Records Using a Query (records/query)](https://github.com/brightdigit/MistKit/issues/114) ✅
+- [x] [Fetching Records by Record Name (records/lookup)](https://github.com/brightdigit/MistKit/issues/114) ✅
+- [x] [Fetching Current User Identity (users/caller)](https://github.com/brightdigit/MistKit/issues/114) ✅
+- [x] [Vapor Token Client](https://github.com/brightdigit/MistKit/issues/113) ✅
+- [x] [Vapor Token Storage](https://github.com/brightdigit/MistKit/issues/113) ✅
+- [x] [Vapor URL Client](https://github.com/brightdigit/MistKit/issues/113) ✅
+- [x] [Swift NIO URL Client](https://github.com/brightdigit/MistKit/issues/113) ✅
+- [x] [Date Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
+- [x] [Location Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
+
+### Current Version
+
+- [x] [List Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
+- [x] [Reference Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
+- [x] [Error Codes](https://github.com/brightdigit/MistKit/issues/115) ✅
+
+### v1.0.0
+
+- [ ] [System Field Integration](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Name Component Types](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Discovering User Identities (POST users/discover)](https://github.com/brightdigit/MistKit/issues/113) ❌
+- [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/113) ❌
+- [ ] [Support `postMessage` for Authentication Requests](https://github.com/brightdigit/MistKit/issues/113) ❌
+- [ ] [Uploading Assets (assets/upload)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Referencing Existing Assets (assets/rereference)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Fetching Records Using a Query (records/query) w/ basic filtering](https://github.com/brightdigit/MistKit/issues/114) ❌
+- [ ] [Handle Data Size Limits](https://github.com/brightdigit/MistKit/issues/115) ❌
+- [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/113) ❌
+- [ ] [Fetching Users by Email (users/lookup/email)](https://github.com/brightdigit/MistKit/issues/113) ❌
+- [ ] [Fetching Users by Record Name (users/lookup/id)](https://github.com/brightdigit/MistKit/issues/113) ❌
+- [ ] [Fetching Record Changes (records/changes)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Fetching Zones (zones/list)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Modifying Zones (zones/modify)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Fetching Subscriptions (subscriptions/list)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Fetching Subscriptions by Identifier (subscriptions/lookup)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Modifying Subscriptions (subscriptions/modify)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Creating APNs Tokens (tokens/create)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [Registering Tokens (tokens/register)](https://github.com/brightdigit/MistKit/issues/116) ❌
 
 ## Support
 
