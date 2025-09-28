@@ -35,7 +35,12 @@ import OpenAPIURLSession
 extension CloudKitService {
   /// Initialize CloudKit service with web authentication
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  public init(containerIdentifier: String, apiToken: String, webAuthToken: String) throws {
+  public init(
+    containerIdentifier: String,
+    apiToken: String,
+    webAuthToken: String,
+    transport: any ClientTransport = URLSessionTransport()
+  ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
     self.environment = .development
@@ -48,12 +53,16 @@ extension CloudKitService {
       apiToken: apiToken,
       webAuthToken: webAuthToken
     )
-    self.mistKitClient = try MistKitClient(configuration: config)
+    self.mistKitClient = try MistKitClient(configuration: config, transport: transport)
   }
 
   /// Initialize CloudKit service with API-only authentication
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  public init(containerIdentifier: String, apiToken: String) throws {
+  public init(
+    containerIdentifier: String,
+    apiToken: String,
+    transport: any ClientTransport = URLSessionTransport()
+  ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
     self.environment = .development
@@ -68,7 +77,7 @@ extension CloudKitService {
       keyID: nil,
       privateKeyData: nil
     )
-    self.mistKitClient = try MistKitClient(configuration: config)
+    self.mistKitClient = try MistKitClient(configuration: config, transport: transport)
   }
 
   /// Initialize CloudKit service with a custom TokenManager
@@ -77,7 +86,8 @@ extension CloudKitService {
     containerIdentifier: String,
     tokenManager: any TokenManager,
     environment: Environment = .development,
-    database: Database = .private
+    database: Database = .private,
+    transport: any ClientTransport = URLSessionTransport()
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = ""  // Not used when providing TokenManager directly
@@ -88,7 +98,8 @@ extension CloudKitService {
       container: containerIdentifier,
       environment: environment,
       database: database,
-      tokenManager: tokenManager
+      tokenManager: tokenManager,
+      transport: transport
     )
   }
 }

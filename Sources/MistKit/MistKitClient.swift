@@ -140,20 +140,7 @@ internal struct MistKitClient {
   internal init(configuration: MistKitConfiguration) throws {
     try self.init(configuration: configuration, transport: URLSessionTransport())
   }
-
-  //  /// Initialize a new MistKit client with a custom TokenManager and default URLSessionTransport
-  //  /// - Parameters:
-  //  ///   - configuration: The CloudKit configuration
-  //  ///   - tokenManager: Custom token manager for authentication
-  //  /// - Throws: ClientError if initialization fails
-  //  internal init(configuration: MistKitConfiguration, tokenManager: any TokenManager) throws {
-  //    try self.init(
-  //      configuration: configuration,
-  //      tokenManager: tokenManager,
-  //      transport: URLSessionTransport()
-  //    )
-  //  }
-
+  
   /// Initialize a new MistKit client with a custom TokenManager and individual parameters
   /// using default URLSessionTransport
   /// - Parameters:

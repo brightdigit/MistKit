@@ -73,20 +73,16 @@ MistKit supports three authentication methods depending on your use case:
 ```swift
 import MistKit
 
-let config = MistKitConfiguration.apiToken(
-    container: "iCloud.com.example.MyApp",
-    environment: .development,
-    database: .public,
+let service = try CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
     apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
 )
 ```
 
 #### Web Authentication (User-specific access)
 ```swift
-let config = MistKitConfiguration.webAuth(
-    container: "iCloud.com.example.MyApp",
-    environment: .development,
-    database: .private,
+let service = try CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
     apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!,
     webAuthToken: userWebAuthToken
 )
@@ -94,22 +90,30 @@ let config = MistKitConfiguration.webAuth(
 
 #### Server-to-Server (Enterprise access, public database only)
 ```swift
-let config = MistKitConfiguration.serverToServer(
-    container: "iCloud.com.example.MyApp",
-    environment: .production,
-    keyID: ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"]!,
+let serverManager = try ServerToServerAuthManager(
+    keyIdentifier: ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"]!,
     privateKeyData: privateKeyData
+)
+
+let service = try CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
+    tokenManager: serverManager,
+    environment: .production,
+    database: .public
 )
 ```
 
-### 2. Create and Use Client
+### 2. Create CloudKit Service
 
 ```swift
 do {
-    let client = try MistKitClient(configuration: config)
-    // Use client for CloudKit operations
+    let service = try CloudKitService(
+        containerIdentifier: "iCloud.com.example.MyApp",
+        apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
+    )
+    // Use service for CloudKit operations
 } catch {
-    print("Failed to create client: \\(error)")
+    print("Failed to create service: \\(error)")
 }
 ```
 
@@ -129,10 +133,8 @@ do {
 
 3. **Use in Code**:
    ```swift
-   let config = MistKitConfiguration.apiToken(
-       container: "iCloud.com.example.MyApp",
-       environment: .development,
-       database: .public,
+   let service = try CloudKitService(
+       containerIdentifier: "iCloud.com.example.MyApp",
        apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
    )
    ```
@@ -142,10 +144,8 @@ do {
 Web authentication enables user-specific operations and requires both an API token and a web authentication token obtained through CloudKit JS authentication.
 
 ```swift
-let config = MistKitConfiguration.webAuth(
-    container: "iCloud.com.example.MyApp",
-    environment: .development,
-    database: .private,
+let service = try CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
     apiToken: apiToken,
     webAuthToken: webAuthToken
 )
@@ -170,11 +170,16 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
    ```swift
    let privateKeyData = try Data(contentsOf: URL(fileURLWithPath: "private_key.pem"))
 
-   let config = MistKitConfiguration.serverToServer(
-       container: "iCloud.com.example.MyApp",
-       environment: .production,
-       keyID: "your_key_id",
+   let serverManager = try ServerToServerAuthManager(
+       keyIdentifier: "your_key_id",
        privateKeyData: privateKeyData
+   )
+
+   let service = try CloudKitService(
+       containerIdentifier: "iCloud.com.example.MyApp",
+       tokenManager: serverManager,
+       environment: .production,
+       database: .public
    )
    ```
 
@@ -197,7 +202,10 @@ MistKit provides comprehensive error handling with typed errors:
 
 ```swift
 do {
-    let client = try MistKitClient(configuration: config)
+    let service = try CloudKitService(
+        containerIdentifier: "iCloud.com.example.MyApp",
+        apiToken: apiToken
+    )
     // Perform operations
 } catch let error as CloudKitError {
     print("CloudKit error: \\(error.localizedDescription)")
@@ -243,13 +251,17 @@ For persistent applications, use secure token storage:
 let storage = InMemoryTokenStorage() // For development
 // Use KeychainTokenStorage() for production (implement as needed)
 
-let config = MistKitConfiguration.webAuth(
-    container: "iCloud.com.example.MyApp",
-    environment: .development,
-    database: .private,
+let tokenManager = WebAuthTokenManager(
     apiToken: apiToken,
     webAuthToken: webAuthToken,
     storage: storage
+)
+
+let service = try CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
+    tokenManager: tokenManager,
+    environment: .development,
+    database: .private
 )
 ```
 
@@ -261,8 +273,9 @@ You can provide custom transport for testing or special networking requirements:
 
 ```swift
 let customTransport = YourCustomTransport()
-let client = try MistKitClient(
-    configuration: config,
+let service = try CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
+    apiToken: apiToken,
     transport: customTransport
 )
 ```

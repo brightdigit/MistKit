@@ -26,10 +26,8 @@ Built with Swift concurrency (async/await) and designed for modern Swift applica
 Provides container-level access using an API token from Apple Developer Console:
 
 ```swift
-let configuration = MistKitConfiguration.apiToken(
-    container: "iCloud.com.example.MyApp",
-    environment: .development,
-    database: .public,
+let service = try CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
     apiToken: "your-api-token"
 )
 ```
@@ -39,10 +37,8 @@ let configuration = MistKitConfiguration.apiToken(
 Enables user-specific operations with both API token and web authentication token:
 
 ```swift
-let configuration = MistKitConfiguration.webAuth(
-    container: "iCloud.com.example.MyApp",
-    environment: .development,
-    database: .private,
+let service = try CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
     apiToken: "your-api-token",
     webAuthToken: "user-web-auth-token"
 )
@@ -53,11 +49,16 @@ let configuration = MistKitConfiguration.webAuth(
 Enterprise-level authentication using ECDSA P-256 key signing (public database only):
 
 ```swift
-let configuration = MistKitConfiguration.serverToServer(
-    container: "iCloud.com.example.MyApp",
-    environment: .production,
-    keyID: "your-key-id",
+let serverManager = try ServerToServerAuthManager(
+    keyIdentifier: "your-key-id",
     privateKeyData: privateKeyData
+)
+
+let service = try CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
+    tokenManager: serverManager,
+    environment: .production,
+    database: .public
 )
 ```
 
@@ -75,25 +76,20 @@ dependencies: [
 
 ### Basic Usage
 
-1. **Configure Authentication**: Choose your authentication method based on your needs
-2. **Create Client**: Initialize MistKitClient with your configuration
-3. **Perform Operations**: Use the client to interact with CloudKit Web Services
+1. **Choose Authentication**: Select your authentication method based on your needs
+2. **Create Service**: Initialize CloudKitService with your authentication details
+3. **Perform Operations**: Use the service to interact with CloudKit Web Services
 
 ```swift
 import MistKit
 
-// Configure authentication
-let config = MistKitConfiguration.apiToken(
-    container: "iCloud.com.example.MyApp",
-    environment: .development,
-    database: .public,
+// Create service with API token authentication
+let service = try CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
     apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
 )
 
-// Create client
-let client = try MistKitClient(configuration: config)
-
-// Use the client for CloudKit operations
+// Use the service for CloudKit operations
 // (Specific operations depend on your use case)
 ```
 
