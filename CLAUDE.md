@@ -115,10 +115,13 @@ MistKit/
 - Environments: `development`, `production`
 
 ### Testing Strategy
+- Use Swift Testing framework (`@Test` macro) for all tests
 - Unit tests for all public APIs
 - Integration tests using mock URLSession
-- Use `XCTAssertThrowsError` for error path testing
+- Use `#expect()` and `#require()` for assertions
 - Async test support with `async let` and `await`
+- Parameterized tests for testing multiple scenarios
+- See `testing-enablinganddisabling.md` for Swift Testing patterns
 
 ## Important Implementation Notes
 
@@ -145,6 +148,29 @@ Key endpoints documented in the OpenAPI spec:
 - Users: `/users/current`, `/users/discover`, `/users/lookup/contacts`
 - Assets: `/assets/upload`
 - Tokens: `/tokens/create`, `/tokens/register`
+
+## Reference Documentation
+
+Apple's official CloudKit documentation is available in `.claude/docs/` for offline reference during development:
+
+### When to Consult Each Document
+
+**webservices.md** (289 KB) - CloudKit Web Services REST API
+- **Primary use**: Implementing REST API endpoints
+- **Contains**: Authentication, request formats, all endpoints, data types, error codes
+- **Consult when**: Writing API client code, handling authentication, debugging responses
+
+**cloudkitjs.md** (188 KB) - CloudKit JS Framework
+- **Primary use**: Understanding CloudKit concepts and operation flows
+- **Contains**: Container/database patterns, operations, response objects, error handling
+- **Consult when**: Designing Swift types, implementing queries, working with subscriptions
+
+**testing-enablinganddisabling.md** (126 KB) - Swift Testing Framework
+- **Primary use**: Writing modern Swift tests
+- **Contains**: `@Test` macros, async testing, parameterization, migration from XCTest
+- **Consult when**: Writing or organizing tests, testing async code
+
+See `.claude/docs/README.md` for detailed topic breakdowns and integration guidance.
 
 ## Task Master AI Instructions
 **Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
