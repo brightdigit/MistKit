@@ -35,37 +35,42 @@ Meanwhile, Swift had transformed:
 
 MistKit v0.2, frozen in 2021, couldn't take advantage of any of this. Every modern Swift project that added MistKit as a dependency pulled in old patterns and outdated code.
 
-### The Bold Decision
+### The Bold Decision with a Twist
 
 In July 2024, I made the call: complete rewrite, not incremental updates.
 
+**But here's what made it different**: Instead of manually hand-coding every API endpoint like MistKit v0.2, I'd use **OpenAPI specifications** to generate the entire client. And instead of building it alone, I'd use **Claude Code** as my development partner—not to write the code for me, but to accelerate the tedious parts while I focused on architecture and design.
+
 The vision was ambitious:
-- **OpenAPI-first architecture** — Generate the entire client from a specification
+- **OpenAPI-first architecture** — Generate the entire client from a specification, not hand-written code
+- **Claude as co-pilot** — Let AI handle boilerplate, tests, and refactoring while I focus on design
 - **Type safety everywhere** — If it compiles, it's valid CloudKit API usage
 - **Modern Swift throughout** — Swift 6, async/await, actors, Sendable compliance
 - **Three-layer design** — OpenAPI spec → Generated code → Friendly abstraction
-- **Cross-platform by default** — macOS, iOS, Linux, wherever Swift runs
-- **Production-ready security** — Built-in credential masking, environment variable support
-- **Comprehensive testing** — From 15% to extensive coverage with Swift Testing
 
 **The timeline**: Three months from concept to v1.0 Alpha.
 
-**The approach**: Let OpenAPI do the heavy lifting for API accuracy, then build a thoughtful abstraction layer that makes CloudKit feel natural in Swift.
+**The approach**: OpenAPI handles API accuracy through code generation. Claude accelerates development by handling the tedious parts. I focus on architecture, security, and the developer experience.
 
-**The result**: 10,476 lines of generated type-safe code, 161 focused tests, and a public API that makes CloudKit Web Services accessible and delightful.
+**The result**: 10,476 lines of generated type-safe code, 161 tests (most written with Claude's help), and a maintainable codebase that's easy to evolve.
+
+> **Note**: I'd learned this pattern from my previous [SyntaxKit project](https://brightdigit.com/tutorials/syntaxkit-swift-code-generation/)—code generation + thoughtful abstraction—but this time with OpenAPI and Claude working together.
 
 ### Why This Matters
 
-This isn't just a story about one library. It's about what becomes possible when you embrace modern tooling:
+This isn't just a story about one library. It's about what becomes possible when you combine the right tools:
 
-- **OpenAPI specifications** as the foundation for API clients
-- **Code generation** for type safety without maintenance burden
-- **Thoughtful abstraction** to hide complexity without sacrificing power
-- **Modern Swift features** used as intended, not retrofitted
+**OpenAPI** provides the foundation—a machine-readable API specification that generates perfect, type-safe client code.
 
-Sometimes a rewrite isn't technical debt—it's an investment in the future.
+**Claude** accelerates the tedious parts—writing tests, refactoring code, catching edge cases, and generating boilerplate.
 
-Let's explore how it came together.
+**You** provide the vision—architecture decisions, security patterns, developer experience, and the parts that require human judgment.
+
+Together, these three elements made a three-month complete rewrite not only possible, but maintainable and extensible.
+
+Sometimes a rewrite isn't technical debt—it's an investment in sustainable development.
+
+Let's explore how OpenAPI and Claude worked together to make this happen.
 
 ---
 
@@ -136,9 +141,19 @@ The realization was simple but profound: **CloudKit Web Services is already a we
 ✅ **Accuracy** — Generated code exactly matches API requirements
 ✅ **No manual JSON** — Codable types handle serialization
 
-### Creating the CloudKit OpenAPI Specification
+### Creating the CloudKit OpenAPI Specification (with Claude's Help)
 
-The first major task was translating Apple's CloudKit Web Services documentation into OpenAPI 3.0.3 format. This wasn't trivial—CloudKit has unique characteristics:
+The first major task was translating Apple's CloudKit Web Services documentation into OpenAPI 3.0.3 format. This wasn't trivial—CloudKit has unique characteristics that required careful modeling.
+
+**How Claude helped here**: I'd start by sketching out the structure, then Claude would help me expand it into complete OpenAPI schemas, catch inconsistencies, and suggest edge cases I'd missed. For repetitive endpoint definitions, Claude could generate the boilerplate while I focused on the tricky CloudKit-specific types.
+
+The back-and-forth looked like this:
+1. **Me**: "Here's the CloudKit field value structure from Apple's docs"
+2. **Claude**: "Here's an OpenAPI schema with `oneOf` for the polymorphism"
+3. **Me**: "Add the ASSETID type and validation rules"
+4. **Claude**: "Updated, and I noticed you might want constraints on these fields"
+
+This iterative refinement was far faster than writing everything from scratch.
 
 #### Challenge 1: CloudKit's Polymorphic Field Values
 
@@ -469,6 +484,8 @@ Apple announced `swift-openapi-generator` at WWDC 2023, and it immediately becam
 ✅ **Production-ready** — Used in Apple's own services
 
 **Alternative considered**: We could have used other OpenAPI generators like `openapi-generator` (Java-based) or custom code generation, but `swift-openapi-generator` is purpose-built for modern Swift and integrates seamlessly with Swift Package Manager.
+
+> **Note**: This mirrors the approach from [SyntaxKit](https://brightdigit.com/tutorials/syntaxkit-swift-code-generation/), where we chose Apple's official SwiftSyntax over alternative AST libraries. Using first-party tools ensures compatibility, ongoing support, and alignment with Swift's evolution.
 
 ### Configuration and Setup
 
@@ -932,7 +949,7 @@ MistKit's abstraction layer has clear goals:
 4. **Keep it intuitive** - APIs should feel natural
 5. **Support all platforms** - macOS, iOS, Linux, etc.
 
-### Architecture: Three Layers
+### Architecture: Three Layers (Designed with Claude)
 
 ```
 ┌─────────────────────────────────────────┐
@@ -961,6 +978,17 @@ MistKit's abstraction layer has clear goals:
 │  • JSON serialization                   │
 └─────────────────────────────────────────┘
 ```
+
+**How we designed this together**:
+
+I started with the concept: "I need generated code hidden, but a friendly public API." Claude helped me think through the implications:
+
+- **Claude**: "If generated code is internal, you'll need middleware for cross-cutting concerns like auth"
+- **Me**: "Right, and I want protocol-based token managers for testability"
+- **Claude**: "Here's a TokenManager protocol design with three implementations..."
+- **Me**: "Perfect, now help me design the middleware chain"
+
+This architectural discussion happened over several sessions. Claude would draft protocol designs, I'd refine the security implications, Claude would suggest test strategies. The final architecture emerged from this collaboration—neither of us could have designed it alone as quickly.
 
 ### Modern Swift Features Throughout
 
@@ -1319,6 +1347,34 @@ The complete rewrite of MistKit from scratch taught invaluable lessons about mod
 - No tool dependencies for users
 - Better IDE autocomplete experience
 
+### AI-Assisted Development: Lessons from SyntaxKit Applied
+
+Like [SyntaxKit before it](https://brightdigit.com/tutorials/syntaxkit-swift-code-generation/), MistKit's development leveraged AI tools strategically—not for entire architectures, but for targeted acceleration:
+
+**What AI Tools Excelled At**:
+- ✅ **Test generation**: 161 comprehensive tests created with AI assistance
+- ✅ **OpenAPI schema validation**: Catching inconsistencies in the specification
+- ✅ **Documentation drafting**: API documentation and code comments
+- ✅ **Refactoring suggestions**: Identifying opportunities to reduce complexity
+- ✅ **Error handling patterns**: Suggesting comprehensive error cases
+
+**What Required Human Judgment**:
+- ❌ Overall architecture decisions (three-layer design)
+- ❌ Authentication strategy selection
+- ❌ API abstraction patterns
+- ❌ Security implementation details
+- ❌ Performance optimization trade-offs
+
+**Tools Used**:
+- **Claude Code**: Architecture planning, code reviews, documentation
+- **Task Master**: Breaking complex tasks into manageable pieces (161 tests, 47 test files)
+- **GitHub Copilot**: Speeding up repetitive code patterns
+- **Continuous iteration**: AI-assisted refactoring across multiple development cycles
+
+**The SyntaxKit Lesson Reinforced**: AI excels at unit tests, boilerplate, and specific tasks when given clear boundaries. Human developers provide the vision, architecture, and judgment. Together, they accelerate development without compromising quality.
+
+The three-month rewrite timeline (July-September 2024) was only achievable by combining AI assistance with strong architectural foundations and modern tooling.
+
 ### Key Takeaways
 
 1. **OpenAPI for REST Clients** - Excellent foundation for type-safe API clients
@@ -1345,6 +1401,8 @@ The complete rewrite of MistKit from scratch taught invaluable lessons about mod
 - Performance optimizations
 - Migration guides
 
+> **Note**: The planned features (result builders, property wrappers, AsyncSequence) continue the evolution from [SyntaxKit](https://brightdigit.com/tutorials/syntaxkit-swift-code-generation/). Each Swift project teaches us new patterns—SyntaxKit showed us result builders for syntax trees, MistKit will apply them to CloudKit queries.
+
 ### Try It Yourself
 
 MistKit v1.0 Alpha is available now:
@@ -1361,25 +1419,67 @@ dependencies: [
 - 🐙 [GitHub Repository](https://github.com/brightdigit/MistKit)
 - 💬 [Discussions](https://github.com/brightdigit/MistKit/discussions)
 
-### The Bigger Picture
+### The Bigger Picture: Sustainable Development with OpenAPI + Claude
 
-This rewrite proves that modern Swift development is about **leveraging powerful tools** (like OpenAPI generation) while **creating great developer experiences** through thoughtful abstraction.
+Three months. 10,476 lines of generated code. 161 tests. Zero maintenance burden for API changes.
 
-CloudKit Web Services is now accessible from any Swift platform, with a type-safe, modern API that feels natural to use. That's the promise of MistKit v1.0 Alpha.
+**That's the power of OpenAPI + Claude.**
 
-**Want to build your own CloudKit tools?** Check out the upcoming follow-up posts where we'll build real command-line applications using MistKit:
-- Building a version history tracker
-- Creating an RSS feed aggregator
-- Deploying to AWS Lambda
+Here's what this approach actually delivers:
 
-Modern Swift makes all of this possible. MistKit makes it delightful.
+**1. OpenAPI eliminates manual API maintenance**
+- CloudKit adds a new endpoint? Update the spec, regenerate. Done.
+- Apple changes a response format? Update the spec, regenerate. Done.
+- No hunting through hand-written code trying to remember where you handle errors.
+
+**2. Claude eliminates development tedium**
+- 161 tests? Claude wrote drafts for most of them based on my patterns.
+- Repetitive refactoring when I changed architecture? Claude handled the mechanical parts.
+- Edge cases I might miss? Claude suggests them during code review.
+
+**3. You provide the irreplaceable human judgment**
+- Security patterns (credential masking, token storage)
+- Architecture decisions (three-layer design, middleware chain)
+- Developer experience (what should the public API feel like?)
+- Trade-offs and priorities
+
+**The key insight**: None of these three elements works alone. OpenAPI without abstraction is too low-level. Claude without direction produces generic code. Human-only development is too slow.
+
+But **together**? You get:
+- ✅ Type-safe code that matches the API perfectly (OpenAPI)
+- ✅ Tests and boilerplate written quickly (Claude)
+- ✅ Thoughtful architecture and security (You)
+- ✅ A maintainable codebase that's easy to evolve
+
+CloudKit Web Services is now accessible from any Swift platform, with a type-safe, modern API that feels natural to use. MistKit v1.0 Alpha is the result of this collaboration—between specification, AI, and human expertise.
+
+> **Note**: I learned the "code generation + abstraction" pattern from my previous [SyntaxKit project](https://brightdigit.com/tutorials/syntaxkit-swift-code-generation/), but adding Claude as a development partner took it to another level.
+
+### What's Next
+
+**Want to build your own CloudKit tools?** Check out the upcoming articles where we'll build real command-line applications using MistKit:
+- **Building Bushel**: Version history tracker
+- **Creating Celestra**: RSS aggregator
+- **Serverless Swift**: Deploying to AWS Lambda
+
+Each will show how MistKit + OpenAPI make CloudKit Web Services accessible and maintainable.
 
 ---
 
+**Series**: Modern Swift Patterns (Part 2 of 4)
+**Part 1**: [Building SyntaxKit with AI](https://brightdigit.com/tutorials/syntaxkit-swift-code-generation/) - Code generation with SwiftSyntax
 **Published**: [Date TBD]
 **Author**: Leo Dion (BrightDigit)
-**Tags**: Swift, CloudKit, OpenAPI, Server-Side Swift, Swift 6
-**Reading Time**: ~25 minutes
+**Tags**: Swift, CloudKit, OpenAPI, Code Generation, Swift 6, Server-Side Swift, Series
+**Reading Time**: ~28 minutes
+
+---
+
+**In this series**:
+1. [Building SyntaxKit with AI](https://brightdigit.com/tutorials/syntaxkit-swift-code-generation/) - Wrapping SwiftSyntax for elegant code generation
+2. **Rebuilding MistKit: OpenAPI-Driven Development** ← You are here
+3. Coming soon: Building Bushel - Version history tracker with MistKit
+4. Coming soon: Creating Celestra - RSS aggregator with MistKit + SyndiKit
 
 ---
 
