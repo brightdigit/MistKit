@@ -19,9 +19,11 @@
 ```
 [Your opening paragraph - start with "In my previous article about Building SyntaxKit with AI..."]
 
+It had been more than 5 years since I looked at MistKit, my swift package for doing CloudKit on the server. I no longer had a reason to use the product since Sign In With Apple would suffice. However, I did have a couple use cases where it would handy and it's very reasonable pricing would make it an interesting prospect.
 
+In my previous article, I talked about building SyntaxKit using Cursor and Claude Code based on Apple's documentation, exploring the AST of code examples, and more. In the article, I am going to explain a different tact. 
 
-
+With the creation of the Swift openapi generator, we have a great tool already available to us for generating API from openapi documentation. In this article, I'm going to talk about my approach to create my own openapi document based on the CloudKit documentation, overcoming pitfalls, creating an abstraction layer and my goals for this project.
 
 
 
@@ -32,54 +34,28 @@
 
 ### Section 1.1: State of MistKit v0.2 (~150 words)
 
-**Already exists in draft - KEEP AS-IS**
+Originally developed as an easy way to link Apple Watches to account in Heartwitch, I hadn't touched MistKit in over 5 years and a lot has changed:
 
-From current draft lines 11-24:
-- Last updated October 2021
-- Pre-async/await
-- Manual REST implementation
-- 15% test coverage, 437 SwiftLint violations
+* **Sign In With Apple** offers a simpler way to login from the Apple Watch while not having to maintain 2 databases. Going forward this is the way I would develop authentication on a full stack swift application.
 
-**Action**: ✅ Copy from existing draft
+* **OpenAPI Generator** - in 2020 I had to develop my own abstraction for Vapor vs Async Client vs URLSession. Along with the code generation, this would great simplify my codebase.
+
+* **Swift 6** - in 2020 there were still plenty of completion handlers. With async-await I can create something that's both much cleaner and safer.
+
+On top of these major advances, it was much too difficult in my limited time to continue adding features to the library. However with the advent of LLMs I was offered an opportunity to think differently.
 
 ---
 
 ### Section 1.2: Need for Change (~100 words)
 
-**Already exists in draft - KEEP AS-IS**
+Just as with SyntaxKit, I can take an indirect approach to rebuilding MistKit with these new technologies. Rather then building the Swift API directly, we create an openapi document which the code generator can use to generate the CloudKit API for me.
 
-From current draft lines 26-37:
-- Swift 6, async/await, server-side maturity
-- Modern patterns expected
+> claude: insert an explanation of openapi document for a typical iOS developer
 
-**Action**: ✅ Copy from existing draft
+This worked for the most part except for 2 challenging pieces: dynamic data types and authentication.
 
 ---
 
-### Section 1.3: Learning from SyntaxKit's Pattern (~200 words) **NEW**
-
-**Prompt**: Connect the patterns between SyntaxKit and MistKit
-
-**Questions to answer**:
-1. What was SyntaxKit's pattern? (SwiftSyntax API → code generation → DSL)
-2. How does MistKit apply the same pattern?
-3. What's the core philosophy? ("generate for precision, abstract for ergonomics")
-
-**Write here**:
-```
-**The SyntaxKit Pattern Applied**:
-
-[Explain how SyntaxKit used code generation for correctness]
-
-
-
-
-[Now explain how you realized the same pattern could work for MistKit]
-
-
-
-
-[What's the key insight? Why is code generation not about laziness but correctness?]
 
 
 
