@@ -25,9 +25,7 @@ In my previous article, I talked about building SyntaxKit using Cursor and Claud
 
 With the creation of the Swift openapi generator, we have a great tool already available to us for generating API from openapi documentation. In this article, I'm going to talk about my approach to create my own openapi document based on the CloudKit documentation, overcoming pitfalls, creating an abstraction layer and my goals for this project.
 
-
-
-[End with something like "But this time, I knew exactly what to do."]
+Through building SyntaxKit, I discovered a sustainable pattern: Me + Claude Code + Code Generation working in harmony. It was time to apply this three-way collaboration to MistKit.
 ```
 
 ---
@@ -50,7 +48,7 @@ On top of these major advances, it was much too difficult in my limited time to 
 
 Just as with SyntaxKit, I can take an indirect approach to rebuilding MistKit with these new technologies. Rather then building the Swift API directly, we create an openapi document which the code generator can use to generate the CloudKit API for me.
 
-> claude: insert an explanation of openapi document for a typical iOS developer
+OpenAPI is a specification for documenting HTTP services—essentially a YAML file that defines every endpoint, request/response schema, and error case for an API. Apple's swift-openapi-generator reads this document and generates type-safe Swift code at build time: a `Client` type with methods for each operation, Codable structs for all models, and automatic encoding/decoding. Instead of maintaining thousands of lines of networking boilerplate, you maintain one OpenAPI document, and the generator keeps your code in sync whenever the spec changes.
 
 This worked for the most part except for 2 challenging pieces: dynamic data types and authentication.
 
@@ -84,25 +82,23 @@ Claude Code would parse Apple's documentation and iteratively build the openapi.
 **The Vision - A Three-Way Collaboration**:
 
 1. **OpenAPI specification**:
-[What would OpenAPI handle?]
-
-
+The OpenAPI spec would serve as the foundation, defining all 17 CloudKit Web Services endpoints across six categories (records, zones, subscriptions, users, assets, tokens). The Swift OpenAPI Generator would then transform this single YAML file into over 20,000 lines of type-safe Swift code—complete request/response models, HTTP client logic, and automatic encoding/decoding. Any API changes would simply require updating the spec and regenerating.
 
 2. **Claude Code**:
-[What would Claude accelerate?]
-
-
+Claude would handle the translation of Apple's prose documentation into structured OpenAPI YAML, maintaining consistency across hundreds of schemas. It would also generate comprehensive test suites, draft the abstraction layer code, and assist with refactoring when architectural decisions changed.
 
 3. **Human architecture** (you):
-[What would you focus on?]
-
-I have a better understanding of what a developer would want to do and what is required for a modern Swift library. LLMs can be dated pretty quickly and I have a good understanding of the openapi generator as well as CloudKit. So I spot a misunderstand and an outdated implementation of an API easily.
+I would provide the architectural vision—the three-layer design, protocol-oriented patterns, and security constraints. I have a better understanding of what a developer would want to do and what is required for a modern Swift library. LLMs can be dated pretty quickly and I have a good understanding of the openapi generator as well as CloudKit. So I spot a misunderstanding and an outdated implementation of an API easily. My domain expertise in CloudKit's quirks (like ASSETID vs ASSET) would guide the implementation decisions.
 
 
-**Timeline**: [When to when?]
+**Timeline**: July 2025 - Present (~4 months, ongoing development)
 
 **The Result**:
-- [Key achievements - lines of code, tests, etc.]
+- ✅ **17 CloudKit endpoints** fully specified in OpenAPI specification
+- ✅ **20,952 lines** of auto-generated, type-safe Swift code from the spec
+- ✅ **157 test methods** across 66 test files covering authentication, middleware, field types, and error handling
+- ✅ **45 hand-written Swift files** in the abstraction layer
+- ✅ **Core features working**: Query/modify records, list zones, fetch user info, all 3 authentication methods (API Token, Server-to-Server, Web Auth)
 
 
 
@@ -147,30 +143,23 @@ Claude's role was to translate the documentation into yaml. My role was to guide
 ```
 **The Human Problem**:
 
-[Describe Apple's documentation format]
+Apple's CloudKit documentation exists in two main forms—both written for human readers, not machines. The web services documentation describes endpoints and structures in prose, while the CloudKit JS documentation provides additional structural details. Neither is machine-readable or structured enough to directly generate code from.
 
-There's 2 primary locations for non-Apple platform CloudKit documentation:
-
-The web services documentation which is pretty decent at describing the endpoints and structure of the Rest API:
-https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html
-
-
-The Javascript documentation which gives some more information on structure in case Claude needs it:
-https://developer.apple.com/documentation/cloudkitjs
-
-[What needed to happen to translate this?]
-
-I need to convert it into an easy to use format (ie markdown) for Claude Code. In both cases I used https://llm.codes
+I needed to convert these narrative documents into an easy-to-use format (markdown) that Claude Code could process. Using https://llm.codes, I transformed both documentation sources into markdown that preserved the technical details while being digestible for AI analysis.
 
 
 **Why This Was Perfect for Claude Code**:
 
-[Why was this a good fit for AI collaboration?]
+This translation task played directly to Claude's strengths. Pattern recognition allowed it to identify consistent structures across Apple's documentation—similar endpoint patterns, repeating field types, common error responses. Consistency checking meant Claude could maintain uniformity across the large YAML specification with hundreds of schemas, catching discrepancies I might miss. Most importantly, iteration speed was phenomenal—when I spotted a CloudKit quirk or API edge case, Claude could refine the spec in minutes rather than the hours manual editing would require.
 
 
+**The Workflow That Emerged**:
 
-
-[What was the workflow? You do X, Claude does Y]
+1. **I provide**: Markdown-converted Apple documentation for a specific endpoint or feature
+2. **Claude drafts**: Initial OpenAPI YAML with endpoints, schemas, and types
+3. **I review**: Check for CloudKit-specific quirks and architectural fit
+4. **Claude updates**: Refine based on my domain expertise feedback
+5. **Iterate**: Continue until the endpoint is complete and validated
 
 
 
