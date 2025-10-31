@@ -70,13 +70,17 @@ This worked for the most part except for 2 challenging pieces: dynamic data type
 
 **Questions to answer**:
 1. What role would OpenAPI play?
+We would create a openapi.yml for the CloudKit Rest API. Swift OpenAPI Generator would generate the code to communicate with it.
 2. What role would Claude Code play?
+Claude Code would parse Apple's documentation and iteratively build the openapi.yml.
 3. What role would you play?
+>I would provide requirements and guidance on how I want MistKit to work.
 4. What was the timeline?
+> No timeline
 5. What was the result?
 
-**Write here**:
-```
+> We've been able to successfully write and read record type of all kinds right now.
+
 **The Vision - A Three-Way Collaboration**:
 
 1. **OpenAPI specification**:
@@ -92,6 +96,7 @@ This worked for the most part except for 2 challenging pieces: dynamic data type
 3. **Human architecture** (you):
 [What would you focus on?]
 
+I have a better understanding of what a developer would want to do and what is required for a modern Swift library. LLMs can be dated pretty quickly and I have a good understanding of the openapi generator as well as CloudKit. So I spot a misunderstand and an outdated implementation of an API easily.
 
 
 **Timeline**: [When to when?]
@@ -116,7 +121,8 @@ From current draft lines 77-131 (currently ~250 words, condense to 150)
 
 **Questions to guide condensing**:
 - What is OpenAPI in one sentence?
-- What was the "aha moment"?
+- What was the "aha moment"? 
+> First being to pull results from both the private and the public database.
 - What are the 3-4 key benefits?
 
 **Action**: ✅ Edit existing content to be more concise
@@ -129,9 +135,13 @@ From current draft lines 77-131 (currently ~250 words, condense to 150)
 
 **Questions to answer**:
 1. What format are Apple's CloudKit docs in? (prose, not machine-readable)
+> prose
 2. What needed to be translated? (endpoints, types, errors into structured YAML)
+Yes all of these things needed to be translated correctly.
 3. Why was this perfect for Claude Code collaboration?
+It is really good at reading documentation, requirements, or descriptions of any kind and translating them to code.
 4. What was your role vs Claude's role?
+Claude's role was to translate the documentation into yaml. My role was to guide Claude with my experience working with the CloudKit Rest API.
 
 **Write here**:
 ```
@@ -139,10 +149,18 @@ From current draft lines 77-131 (currently ~250 words, condense to 150)
 
 [Describe Apple's documentation format]
 
+There's 2 primary locations for non-Apple platform CloudKit documentation:
 
+The web services documentation which is pretty decent at describing the endpoints and structure of the Rest API:
+https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html
+
+
+The Javascript documentation which gives some more information on structure in case Claude needs it:
+https://developer.apple.com/documentation/cloudkitjs
 
 [What needed to happen to translate this?]
 
+I need to convert it into an easy to use format (ie markdown) for Claude Code. In both cases I used https://llm.codes
 
 
 **Why This Was Perfect for Claude Code**:
