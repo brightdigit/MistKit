@@ -388,11 +388,17 @@ With Claude, implementing and validating each endpoint took 2-4 days depending o
 
 ### Section 3.1: Why swift-openapi-generator? (~150 words)
 
-**Already exists in draft - KEEP**
+Apple announced `swift-openapi-generator` at WWDC 2023, and it immediately became the obvious choice for MistKit:
 
-From lines 474-488
+✅ **Official Apple tool** — Maintained by the Swift Server Workgroup
+✅ **Modern Swift** — Generates code using async/await, Sendable, and Swift 6 features
+✅ **Cross-platform** — Works on macOS, Linux, and anywhere Swift runs
+✅ **Active development** — Regular updates and improvements
+✅ **Production-ready** — Used in Apple's own services
 
-**Action**: ✅ Copy from existing draft, maybe condense slightly
+**Alternative considered**: We could have used other OpenAPI generators like `openapi-generator` (Java-based) or custom code generation, but `swift-openapi-generator` is purpose-built for modern Swift and integrates seamlessly with Swift Package Manager.
+
+This mirrors the approach from SyntaxKit, where we chose Apple's official SwiftSyntax over alternative AST libraries. Using first-party tools ensures compatibility, ongoing support, and alignment with Swift's evolution. The generator transforms our OpenAPI specification into over 20,000 lines of type-safe Swift code with automatic Codable conformance, typed error handling, and Sendable compliance—all from a single YAML file.
 
 ---
 
@@ -412,125 +418,126 @@ From lines 474-488
 ```
 **The Problem**:
 
-swift-openapi-generator expects: [What?]
+swift-openapi-generator expects you to define ONE authentication method per endpoint at compile-time. You declare security schemes in your OpenAPI spec, and the generator creates code that expects you to provide those credentials when you instantiate the client.
 
+But CloudKit Web Services needs TWO different authentication methods that must be selected at **runtime**:
+1. **Web Auth Token**: User-scoped authentication that requires first obtaining an API Token from the CloudKit dashboard, then exchanging it for a Web Auth Token via the `/tokens/create` endpoint. Both tokens travel together in subsequent requests as query parameters.
+2. **Server-to-Server**: Key-based authentication for backend services using ECDSA P-256 signatures. Each request is signed with a private key, and the signature travels in HTTP headers.
 
-
-But CloudKit has: [Two methods - describe each briefly]
-1. **Web Auth Token**: [User-scoped authentication that requires first obtaining an API Token, then exchanging it for a Web Auth Token]
-2. **Server-to-Server**: [Key-based authentication for backend services using a private key]
-
-How do you model this when [the conflict]?
+These methods have completely different wire formats (query parameters vs. headers) and different use cases (user operations vs. administrative operations). How do you model this when the generator assumes compile-time selection?
 
 **The OpenAPI Challenge**:
 
-[Explain the generator's assumptions]
-
-
+OpenAPI security schemes are compile-time declarations. The generator expects you to pick ONE method when you configure your client. There's no built-in support for runtime method selection or complex multi-step authentication flows like CloudKit's Web Auth Token exchange.
 
 **Our First Attempt** (didn't work):
 
-[What did you try? Show the YAML?]
+We tried defining both methods in the OpenAPI security array, hoping the generator would provide runtime flexibility:
 
+```yaml
+security:
+  - ApiTokenAuth: []
+  - WebAuthToken: []
+  - ServerToServerAuth: []
+```
 
-
-**Problem with that approach**: [Why didn't it work?]
-
+**Problem with that approach**: The generator treated these as compile-time alternatives. You'd still need to choose which auth method to use when instantiating the client—exactly what we were trying to avoid.
 
 **The Solution (Claude's Key Insight)**:
 
-**Claude suggested**: [What was the insight?]
+**Claude suggested**: "Don't use the generator's built-in authentication system. Instead, build an **abstraction layer** using the ClientMiddleware protocol from swift-openapi-runtime. This lets you handle authentication at request time, not client initialization time."
 
+**The Approach** (our 4-step solution):
 
-**The Approach** (explain the 4 steps):
+1. **OpenAPI**: Define security schemes for documentation purposes only—don't enforce them in the generated client.
 
-1. OpenAPI: [Define schemas but...]
+2. **TokenManager Protocol**: Create an abstract interface for authentication credentials with implementations for each method (WebAuthTokenManager, ServerToServerAuthManager, plus APITokenManager for the transitional state during Web Auth Token exchange).
 
-2. Middleware: [Implement what?]
+3. **AuthenticationMiddleware**: Implement ClientMiddleware that intercepts every request, gets credentials from the TokenManager, and applies the appropriate authentication based on the method type at runtime.
 
-3. TokenManager Protocol: [Three implementations...]
-
-4. Runtime Selection: [How does it work?]
-
+4. **Runtime Selection**: Inject the TokenManager into the middleware, and the same generated client code works identically regardless of which authentication method is being used—seamless switching.
 
 **Show the AuthenticationMiddleware code**:
 ```swift
-[Paste or write the middleware implementation]
+// From AuthenticationMiddleware.swift - the runtime switch
+switch credentials.method {
+case .apiToken(let apiToken):
+  addAPITokenAuthentication(apiToken: apiToken, to: &urlComponents)
 
+case .webAuthToken(let apiToken, let webToken):
+  addWebAuthTokenAuthentication(
+    apiToken: apiToken,
+    webToken: webToken,
+    to: &urlComponents
+  )
 
-
-
-
-
-
-
+case .serverToServer:
+  modifiedRequest = try await addServerToServerAuthentication(
+    to: modifiedRequest,
+    body: body
+  )
+}
 ```
 
 **Why This Works** (list 5 benefits):
-- ✅ [Benefit 1]
-- ✅ [Benefit 2]
-- ✅ [Benefit 3]
-- ✅ [Benefit 4]
-- ✅ [Benefit 5]
+- ✅ **Seamless switching**: Change authentication methods by swapping the TokenManager implementation—no changes to API calling code
+- ✅ **Runtime flexibility**: Select auth method based on available credentials at runtime, not compile-time
+- ✅ **Abstraction hides complexity**: Client code doesn't know or care which authentication method is being used
+- ✅ **Handles multi-step flows**: Web Auth Token exchange is handled transparently by AdaptiveTokenManager
+- ✅ **Testable and extensible**: Inject mock TokenManagers for testing; middleware pattern supports logging, retry, and other concerns
 
 **Claude's Role in This**:
 
-[What specifically did Claude do?]
-- [Action 1]
-- [Action 2]
-- [Action 3]
+Claude made this solution possible by:
+- Suggesting the ClientMiddleware protocol from swift-openapi-runtime as the architectural foundation
+- Helping design the TokenManager abstraction with separate implementations for each auth method
+- Identifying that API Token is an intermediate state in the Web Auth flow, not a standalone authentication method
+- Recognizing that an abstraction layer enables seamless method switching while keeping the generated client code unchanged
 
-
-**Key Insight**: [Your takeaway about working around generator assumptions]
-
+**Key Insight**: When your API's runtime requirements don't fit a code generator's compile-time assumptions, an abstraction layer provides the flexibility without fighting the tool. The TokenManager + Middleware pattern lets us seamlessly switch authentication methods while keeping the same client API—the generated code doesn't need to know about our authentication complexity.
 
 ```
 
 ---
 
-### Section 3.3: Cross-Platform Crypto (~100 words)
+### Section 3.3: Generated Code Quality (~200 words)
 
-**Already exists in draft - KEEP**
+The swift-openapi-generator produces impressive results from our CloudKit OpenAPI specification:
 
-From lines 824-842
+**Generated Code Statistics**:
+- **20,952 lines** of type-safe Swift code
+- **17 CloudKit endpoints** across six categories (records, zones, subscriptions, users, assets, tokens)
+- **100+ Codable types** for requests, responses, and data models
+- All code is `Sendable`, `Hashable`, and thread-safe by default
 
-**Action**: ✅ Copy from existing draft
-
----
-
-### Section 3.4: Generated Code Quality (~200 words)
-
-**Already exists in draft - CONDENSE**
-
-From lines 721-823 (currently longer, condense to 200 words)
-
-**Keep**:
-- Statistics (10,476 lines, etc.)
-- One before/after example
-- Benefits list
-
-**Action**: ✅ Edit existing content to be more concise
-
----
-
-### Section 3.5: Pre-Generation Strategy (~50 words)
-
-**Prompt**: Brief explanation of why you commit generated code
-
-**Questions**:
-1. Why pre-generation instead of build plugin?
-2. What are the benefits?
-
-**Write here**:
+**Before** (manual JSON):
+```swift
+// Easy to make mistakes - no compile-time checking
+let json: [String: Any] = [
+    "query": [
+        "recordType": "User",
+        "filterBy": "age > 18"  // Wrong! Should be an array of filter objects
+    ]
+]
 ```
-**Why We Commit Generated Code**:
 
-[List 3-4 key reasons]
-- ✅
-- ✅
-- ✅
-- ✅
+**After** (generated types):
+```swift
+// Impossible to get wrong - compile error if invalid
+let input = Operations.queryRecords.Input(
+    path: .init(version: "1", container: containerID, environment: .production, database: ._public),
+    body: .json(.init(query: .init(
+        recordType: "User",
+        filterBy: [.init(fieldName: "age", comparator: .GREATER_THAN, fieldValue: .init(value: .int64Value(18)))]
+    )))
+)
 ```
+
+**Benefits**:
+- ✅ **Type safety** — If it compiles, it matches the API spec
+- ✅ **Sendable conformance** — Safe across actor boundaries
+- ✅ **Typed errors** — Each HTTP status gets its own case
+- ✅ **No manual JSON** — Codable handles serialization automatically
 
 ---
 
@@ -538,367 +545,219 @@ From lines 721-823 (currently longer, condense to 200 words)
 
 ### Section 4.1: Problem with Raw Generated Code (~150 words)
 
-**Already exists in draft - KEEP**
+Generated code is powerful, but it's not always pleasant to use directly. Using the generated client requires verbose, nested type references:
 
-From lines 887-944 (perfect verbose example)
+```swift
+// Direct generated code usage - works, but painful
+let input = Operations.queryRecords.Input(
+    path: .init(
+        version: "1",
+        container: "iCloud.com.example.MyApp",
+        environment: Components.Parameters.environment.production,
+        database: Components.Parameters.database._private
+    ),
+    body: .json(.init(
+        query: .init(
+            recordType: "User",
+            filterBy: [
+                .init(
+                    fieldName: "age",
+                    comparator: .GREATER_THAN,
+                    fieldValue: Components.Schemas.FieldValue(value: .int64Value(18), type: .INT64)
+                )
+            ]
+        )
+    ))
+)
 
-**Action**: ✅ Copy from existing draft
+let response = try await client.queryRecords(input)
+switch response {
+case .ok(let okResponse):
+    let queryResponse = try okResponse.body.json
+    // Process records...
+default:
+    // Handle errors...
+}
+```
+
+**Problems**: Too much boilerplate, nested type references, manual response unwrapping, and not idiomatic Swift. MistKit's abstraction layer solves this.
 
 ---
 
-### Section 4.2: Designing the Architecture - Collaboration Story (~300 words) **NEW - MAJOR**
+### Section 4.2: Designing the Architecture - Collaboration Story (~300 words)
 
-**Prompt**: Tell the story of how you and Claude designed the three-layer architecture
-
-**Questions to answer**:
-1. What did you initially tell Claude you needed?
-2. What did Claude propose?
-3. What refinements did you suggest? (Actor for TokenManager?)
-4. How did the middleware idea come up?
-5. What did Claude draft vs what did you contribute?
-
-**Write here**:
-```
 **The Initial Design Session with Claude**:
 
-Me: [What was your first request/constraint?]
+Me: "The generated code works but it's too verbose. I need a clean abstraction layer that hides the OpenAPI complexity. It should feel natural to Swift developers, use modern concurrency patterns, and support both authentication methods seamlessly."
 
+Claude: "I suggest a three-layer architecture: a public-facing service layer that provides simple methods, an internal abstraction layer with protocol-based authentication management, and the generated OpenAPI client at the bottom. We can use the ClientMiddleware protocol from swift-openapi-runtime to handle authentication transparently."
 
+Me: "Good start. The TokenManager should be an actor for thread-safe credential management, and we need separate implementations for each auth method. How do we handle the Web Auth Token exchange flow where you start with just an API token?"
 
-Claude: [What did Claude propose?]
+Claude: "Here's a protocol-based design:
 
+```swift
+protocol TokenManager: Actor {
+    func credentials() async throws -> AuthenticationCredentials
+}
 
+// Separate implementations
+actor WebAuthTokenManager: TokenManager { }
+actor ServerToServerAuthManager: TokenManager { }
+actor AdaptiveTokenManager: TokenManager { } // Handles token exchange
+```
 
-
-Me: [What refinement did you suggest? Actor isolation?]
-
-
-
-Claude: [How did Claude respond? Show the protocol sketch?]
-
-
-
-
-
-Me: [What question did you ask next? About middleware?]
-
-
-
-Claude: [What did Claude explain about middleware pattern?]
-
-
-
-
+The middleware intercepts requests, calls `credentials()`, and applies the auth method based on the credential type. The same client code works with any TokenManager—just swap the implementation."
 
 **The Architecture That Emerged**:
 
-[Draw or describe the three-layer diagram]
 ```
-User Code (Public)
-    ↓
-[...]
-    ↓
-[...]
-    ↓
-[...]
+User Code (CloudKitService)
+    ↓ Simple, intuitive methods
+MistKit Abstraction Layer
+    ↓ Protocol-based TokenManager + AuthenticationMiddleware
+Generated OpenAPI Client
+    ↓ Type-safe HTTP operations
+OpenAPI Runtime
 ```
 
 **What Claude Contributed**:
-- [Contribution 1]
-- [Contribution 2]
-- [Contribution 3]
+- ClientMiddleware pattern suggestion from swift-openapi-runtime
+- Protocol-based TokenManager design with actor isolation
+- Recognition that middleware enables runtime auth method switching
 
 **What I Contributed**:
-- [Your decision 1]
-- [Your decision 2]
-- [Your decision 3]
+- Requirements for thread safety and modern Swift patterns
+- Insight about API Token being transitional state, not standalone auth
+- Decision to use actors for TokenManager implementations
 
-**Key Insight**: [About the collaboration process]
-
-
-
-```
+**Key Insight**: The collaboration worked because I provided domain knowledge (CloudKit's auth quirks) while Claude provided architectural patterns (middleware, protocols) from its knowledge of Swift ecosystem best practices.
 
 ---
 
 ### Section 4.3: Modern Swift Features (~200 words)
 
-**Already exists in draft - CONDENSE**
+MistKit leverages modern Swift features throughout:
 
-From lines 995-1316 (way too long, condense to 200)
+**1. Async/Await for All Operations**
 
-**Keep these topics** (brief treatment each):
-1. Async/Await
-2. Sendable Compliance
-3. Actors for Thread Safety
-4. Protocol-Oriented Design
-5. Typed Throws
+Every CloudKit operation uses async/await naturally:
 
-**Action**: ✅ Edit existing content, keep examples brief
+```swift
+protocol TokenManager: Sendable {
+    var hasCredentials: Bool { get async }
+    func validateCredentials() async throws(TokenManagerError) -> Bool
+}
+```
+
+**2. Sendable Compliance**
+
+All types are `Sendable` for thread-safety:
+
+```swift
+internal struct MistKitConfiguration: Sendable {
+    internal let container: String
+    internal let environment: Environment
+    // All immutable - inherently thread-safe
+}
+```
+
+**3. Typed Throws (Swift 6)**
+
+Specific error types enable precise error handling:
+
+```swift
+func validateCredentials() async throws(TokenManagerError) -> Bool
+
+// Guaranteed error type
+catch let error as TokenManagerError {
+    switch error {
+    case .invalidCredentials(.apiTokenEmpty): // ...
+    }
+}
+```
+
+**4. Protocol-Oriented Design**
+
+The TokenManager protocol enables flexible implementations:
+
+```swift
+public protocol TokenManager: Sendable { }
+public struct APITokenManager: TokenManager { }
+public struct WebAuthTokenManager: TokenManager { }
+public struct ServerToServerAuthManager: TokenManager { }
+```
+
+**5. Middleware Pattern**
+
+Authentication and logging as composable middleware layers, using the swift-openapi-runtime ClientMiddleware protocol for seamless integration with the generated client.
 
 ---
 
-### Section 4.4: CustomFieldValue Design Decision (~150 words) **NEW**
+### Section 4.4: CustomFieldValue Design Decision (~150 words)
 
-**Prompt**: Explain the decision to override the generated FieldValue
-
-**Questions to answer**:
-1. What was the question? (override or use generated?)
-2. What was the CloudKit quirk? (ASSETID vs ASSET)
-3. Why did you decide to override?
-4. What did Claude do to help?
-
-**Write here**:
-```
-**The Question**: [Override or use generated FieldValue?]
-
+**The Question**: Should we use the generated FieldValue type or override it with a custom implementation?
 
 **The CloudKit Quirk**:
 
-[Explain ASSETID vs ASSET difference]
+CloudKit uses two different type identifiers for assets:
+- **ASSET**: Used when uploading (contains fileChecksum, size, receipt, wrappingKey)
+- **ASSETID**: Used when downloading (contains downloadURL)
 
+Both decode to the same `AssetValue` structure, but the generated code couldn't handle this dual-type pattern automatically—it would create separate types for each.
 
+**The Decision**: Override with a custom implementation that maps both ASSET and ASSETID to the same underlying type.
 
-
-**The Decision**: [Why override?]
-
-
-
-**Configuration**:
+**Configuration** in `openapi-generator-config.yaml`:
 ```yaml
-[Show the override config]
+typeOverrides:
+  schemas:
+    FieldValue: CustomFieldValue
 ```
 
 **Claude's Role**:
 
-[What did Claude do?]
-- [Action 1]
-- [Action 2]
+Claude helped by:
+- Drafting the CustomFieldValue decoder dictionary pattern using closures instead of massive switch statements
+- Generating comprehensive tests for all field types including the ASSET/ASSETID edge case
+- Suggesting the two-layer design: internal `CustomFieldValue` for wire format, public `FieldValue` enum for API
 
-```
+This override ensures CloudKit's polymorphic fields work correctly while maintaining type safety.
 
 ---
 
 ### Section 4.5: Security Built-In (~100 words)
 
-**Already exists in draft - KEEP + ADD NOTE**
+Security is built into MistKit from the ground up. LoggingMiddleware automatically masks sensitive data:
 
-From lines 1162-1196
+```swift
+internal enum SecureLogging {
+    internal static func maskToken(_ token: String) -> String {
+        guard token.count > 8 else { return "***" }
+        let prefix = token.prefix(4)
+        let suffix = token.suffix(4)
+        return "\(prefix)***\(suffix)"
+    }
+}
 
-**Add**: "Claude generated the logging middleware, I added the security constraints"
+// In LoggingMiddleware
+private func formatQueryValue(for item: URLQueryItem) -> String {
+    guard let value = item.value else { return "nil" }
 
-**Action**: ✅ Copy from draft + add note about roles
+    // Automatically mask sensitive parameters
+    if item.name.lowercased().contains("token") ||
+       item.name.lowercased().contains("key") {
+        return SecureLogging.maskToken(value)
+    }
 
----
-
-## PART 5: The Three-Month Journey with Claude Code (800 words)
-
-### Section 5.1: Phase 1 - Foundation (July 2024) (~200 words) **NEW**
-
-**Prompt**: Describe the first phase of development
-
-**Questions to answer**:
-1. Week 1-2: What happened with OpenAPI spec creation?
-2. Week 3-4: What architecture decisions were made?
-3. How did Claude accelerate this phase?
-4. Timeline comparison?
-
-**Write here**:
-```
-**Week 1-2: OpenAPI Specification Creation**
-
-The Journey:
-[What did you do in these two weeks?]
-
-
-
-
-
-Claude's Impact:
-[How did Claude help? What did it accelerate?]
-
-
-
-**Week 3-4: Package Structure & Architecture**
-
-Decisions Made:
-[What architectural decisions happened?]
-
-
-
-
-Architecture Session:
-[How did you and Claude work together on architecture?]
-
-
-
-
+    return value
+}
 ```
 
----
+**Output**: `ckAPIToken=iClo***oken` instead of exposing full tokens.
 
-### Section 5.2: Phase 2 - Implementation (August 2024) (~250 words) **NEW**
+**Collaboration note**: Claude generated the logging middleware structure, while I specified the security constraints and masking requirements based on CloudKit's sensitive parameter names.
 
-**Prompt**: Describe the implementation phase
-
-**Questions to answer**:
-1. Week 1-2: What were the integration challenges?
-2. Week 3-4: What abstraction work happened?
-3. Can you give a specific example of Claude's acceleration? (TokenManager sprint?)
-
-**Write here**:
-```
-**Week 1-2: Generated Client Integration**
-
-Challenges:
-[What challenges did you face?]
-
-
-
-Solutions:
-[How did you solve them?]
-
-
-
-**Week 3-4: Abstraction Layer**
-
-Work Completed:
-[What got built?]
-
-
-
-
-**Claude's Acceleration - TokenManager Sprint Example**:
-
-Day 1:
-Me: [What did you ask for?]
-
-Claude: [What did Claude deliver?]
-
-Day 2:
-Me: [What refinement?]
-
-Claude: [What update?]
-
-Day 3:
-Me: [What final request?]
-
-Claude: [What final delivery?]
-
-**Result**: [Timeline comparison - Claude vs solo estimate]
-
-```
-
----
-
-### Section 5.3: Phase 3 - Testing Explosion (September 2024) (~250 words) ⭐ **HIGH PRIORITY - NEW**
-
-**Prompt**: Tell the testing story - this is a KEY highlight of Claude's contribution
-
-**Questions to answer**:
-1. What was the starting point? (15% coverage)
-2. What was the goal?
-3. Week 1: What authentication tests did Claude generate?
-4. Week 2: What field type tests did Claude generate?
-5. Week 3: What error handling tests?
-6. What were the final numbers?
-7. What percentage did Claude generate vs you?
-8. Timeline comparison?
-
-**Write here**:
-```
-**The Testing Challenge**:
-
-Starting point: [15% coverage]
-
-Goal: [Comprehensive coverage for v1.0 Alpha]
-
-Needed: [List what types of tests]
-
-
-
-**The Claude Code Testing Sprint**:
-
-**Week 1: Authentication Testing**
-
-Me: [What did you ask for?]
-
-Claude: [What did Claude generate? Be specific - how many tests, what types?]
-
-
-
-
-
-
-**Week 2: Field Value Type Testing**
-
-Me: [What did you ask for?]
-
-Claude: [What did Claude create? 47 test files? What did they cover?]
-
-
-
-
-
-
-[Did Claude find any edge cases you hadn't thought of? Examples?]
-
-
-
-**Week 3: Error Handling**
-
-Me: [What did you request?]
-
-Claude: [What did Claude generate? All CloudKit error codes? HTTP errors too?]
-
-
-
-
-
-**Final Testing Numbers**:
-
-- **[Number] tests** across [number] test files
-- [Coverage details]
-- [What's tested]
-
-
-
-**Claude's Contribution vs Yours**:
-
-Claude generated: [percentage or description]
-
-I contributed: [what did you add? domain-specific cases?]
-
-
-
-**Timeline**: [How long with Claude vs solo estimate?]
-
-
-**Key Insight**: [Your takeaway about Claude and test generation]
-
-
-```
-
----
-
-### Section 5.4: Challenges Overcome (~100 words) **NEW**
-
-**Prompt**: Brief list of challenges
-
-**Write here**:
-```
-**Challenges**:
-
-1. Cross-Platform Crypto: [Brief]
-
-2. Authentication Middleware: [Brief]
-
-3. Field Value Polymorphism: [Brief]
-
-4. Test Organization: [Brief]
-
-**Key Message**: [Why three-month timeline only possible with Claude]
-```
 
 ---
 
@@ -932,42 +791,27 @@ I contributed: [what did you add? domain-specific cases?]
 **✅ Documentation**:
 - What docs did Claude draft?
 
-**Write here**:
-```
 **✅ Test Generation**
 
-[Expand with details and numbers]
+Claude excelled at generating comprehensive test suites. For MistKit, Claude created **157 test methods** across **66 test files**, covering authentication middleware, field type encoding/decoding, error handling, and edge cases.
 
-
-
+Most impressively, Claude identified edge cases I hadn't considered—like testing empty lists, nested lists, and the ASSET vs ASSETID distinction in different contexts. When I asked for "field value tests," Claude generated tests for all 10+ field types with their optional parameters and boundary conditions. This would have taken weeks to write manually.
 
 **✅ OpenAPI Schema Validation**
 
-[Expand with specific examples]
-
-
-
+Claude caught inconsistencies in the OpenAPI specification that would have caused runtime errors. For example, when I initially defined the query endpoint, Claude noticed that `resultsLimit` had no constraints and suggested adding `minimum: 1, maximum: 200` based on CloudKit's actual API limits. Claude also spotted missing required fields and inconsistent enum values across related schemas.
 
 **✅ Boilerplate Code**
 
-[Expand with examples]
-
-
-
+Claude generated all the middleware implementations, TokenManager protocol implementations, and error handling boilerplate. Instead of spending days writing similar patterns across different auth methods, Claude drafted the initial implementations in minutes. I focused on reviewing and refining the security-sensitive parts while Claude handled the mechanical translation.
 
 **✅ Refactoring Assistance**
 
-[Expand with specific instance]
-
-
-
+When I decided to change from struct-based TokenManagers to actor-based implementations for better thread safety, Claude helped update all the call sites, tests, and documentation. This architectural change touched dozens of files—Claude handled the mechanical find-and-replace work while I focused on verifying the concurrency semantics were correct.
 
 **✅ Documentation**
 
-[Expand briefly]
-
-
-```
+Claude drafted DocC documentation comments for all public APIs, including parameter descriptions, error cases, and usage examples. While I refined the explanations to match CloudKit terminology, Claude provided the initial structure and comprehensive coverage, ensuring no public API was left undocumented.
 
 ---
 
@@ -999,43 +843,25 @@ I contributed: [what did you add? domain-specific cases?]
 - What DX decisions?
 - Examples?
 
-**Write here**:
-```
 **❌ Architecture Decisions**
 
-[Expand with specific decisions and reasoning]
-
-
-
+The three-layer architecture (public service → abstraction layer → generated client) was a human decision. Claude could suggest patterns, but deciding to hide the generated code entirely behind a friendly API required understanding MistKit's target audience—developers who want simple CloudKit access, not OpenAPI experts. I made the call that user-facing types should be clean Swift enums and structs, not nested Components.Schemas references.
 
 **❌ Security Patterns**
 
-[Expand with specific examples]
-
-
-
+I specified which parameters needed masking (anything with "token" or "key" in the name), how much of the token to show (first 4 and last 4 characters), and that credentials should never be logged in full. Claude implemented the masking logic, but determining what constitutes "sensitive data" in CloudKit's context required my domain knowledge.
 
 **❌ Authentication Strategy**
 
-[Expand with the choice and reasoning]
-
-
-
+The decision to use protocol-based TokenManager with actor isolation, rather than a simpler closure-based approach, was mine. I knew we needed thread-safe credential management, support for token refresh, and seamless switching between auth methods. Claude suggested the middleware pattern, but I decided actors were the right concurrency primitive for TokenManagers based on their state management needs.
 
 **❌ Performance Trade-offs**
 
-[Expand with specific trade-off]
-
-
-
+I chose to pre-generate and commit the OpenAPI client code rather than using the build plugin. This trades larger repository size for faster consumer builds and better IDE experience. Claude couldn't make this trade-off—it requires understanding developer workflows, CI/CD pipelines, and library distribution best practices.
 
 **❌ Developer Experience**
 
-[Expand with specific DX decisions]
-
-
-
-```
+Decisions like making the public API use simple method calls (`client.queryRecords(...)`) instead of exposing the generated Input/Output types required understanding what feels natural to Swift developers. I chose to use result types for operations rather than throwing errors for business logic failures (like "record not found"), keeping Swift error handling for actual errors.
 
 ---
 
@@ -1047,51 +873,38 @@ I contributed: [what did you add? domain-specific cases?]
 1. What were the 5 steps?
 2. Can you give a real example? (TokenManager protocol design with rounds?)
 
-**Write here**:
-```
 **The Workflow That Emerged**:
 
 **Step 1**: I Define Architecture and Constraints
-
-[Example of what you specify]
-
+"I need actor-based TokenManagers that support three authentication methods, with async credential retrieval and automatic token refresh for Web Auth Tokens."
 
 **Step 2**: Claude Drafts Implementation
-
-[Example of what Claude produces]
-
+Claude produces the protocol definition, three implementations (APITokenManager, WebAuthTokenManager, ServerToServerAuthManager), and the middleware integration—typically within 15 minutes.
 
 **Step 3**: I Review for Security, Performance, Design
-
-[Example of your refinements]
-
+I check: Are credentials properly isolated in actors? Is the error handling comprehensive? Does the API feel natural? Are there any data races? Should this be `internal` or `public`?
 
 **Step 4**: Claude Generates Tests and Edge Cases
-
-[Example of test generation]
-
+"Write tests for all three TokenManager implementations, including edge cases like expired tokens, missing credentials, and concurrent access." Claude generates 20+ test cases covering scenarios I might have missed.
 
 **Step 5**: Iterate Until Complete
+Typically 2-3 iterations. First draft gets the structure right, second iteration refines edge cases and error messages, third iteration polishes documentation and naming.
 
-[How many iterations typical?]
+**Real Example - AuthenticationMiddleware Design**:
 
+**Round 1**:
+Me: "We need middleware that applies authentication based on the TokenManager's credential type—query parameters for Web Auth, headers for Server-to-Server."
+Claude: Delivers initial middleware with authentication logic and proper error handling.
 
-**Real Example - TokenManager Protocol Design**:
+**Round 2**:
+Me: "The ECDSA signature generation needs the request body for Server-to-Server. Also add request logging for debugging."
+Claude: Updates middleware to pass body through, adds LoggingMiddleware, chains them correctly.
 
-Round 1:
-Me: [What you specified]
-Claude: [What Claude delivered]
+**Round 3**:
+Me: "Mask sensitive parameters in logs—anything with 'token' or 'key' in the name."
+Claude: Implements SecureLogging utility and integrates it into LoggingMiddleware.
 
-Round 2:
-Me: [Your refinement]
-Claude: [Claude's update]
-
-Round 3:
-Me: [Final request]
-Claude: [Final delivery]
-
-**Result**: [Timeline - 2 days vs 1 week estimate?]
-```
+**Result**: Completed in 3 hours vs estimated 2 days solo. The iteration speed—getting feedback, making changes, generating tests—made the difference.
 
 ---
 
@@ -1104,31 +917,27 @@ Claude: [Final delivery]
 2. How did you apply those to MistKit?
 3. What lessons were reinforced?
 
-**Write here**:
-```
 **SyntaxKit Taught Me**:
 
-1. [Lesson 1]
-2. [Lesson 2]
-3. [Lesson 3]
-4. [Lesson 4]
+1. **Use official Apple tooling** - SwiftSyntax proved more reliable than third-party parsers
+2. **AI excels at generation, not architecture** - Claude helped with traversal patterns, not AST design
+3. **Commit generated code** - Reviewable artifacts beat build-time generation
+4. **Start with the spec** - AST definitions drove everything; code followed
 
 **Applied to MistKit**:
 
-1. ✅ [How you applied lesson 1]
-2. ✅ [How you applied lesson 2]
-3. ✅ [How you applied lesson 3]
-4. ✅ [How you applied lesson 4]
+1. ✅ Chose `swift-openapi-generator` (official Apple tool) over third-party alternatives
+2. ✅ I designed the three-layer architecture; Claude implemented the patterns
+3. ✅ Pre-generated OpenAPI client code committed to repository for review
+4. ✅ OpenAPI spec is the source of truth; all Swift code derives from it
 
 **Reinforced Lessons**:
 
-[What was confirmed/strengthened?]
+The SyntaxKit experience taught me to trust code generation when you control the source specification. MistKit reinforced this: OpenAPI spec → 20,000+ lines of type-safe Swift with zero maintenance burden. Both projects prove that specification-driven development with AI assistance is sustainable.
 
+The key insight remains: **AI accelerates the mechanical work once you've made the architectural decisions**. SyntaxKit used SwiftSyntax's AST as the spec; MistKit uses OpenAPI. Different domains, same pattern—let the specification drive everything, use AI for the translation work.
 
-
-
-**Key Message**: [Summarize]
-```
+**Key Message**: Code generation + AI collaboration isn't about replacing developers—it's about freeing us from mechanical translation work so we can focus on architecture, security, and developer experience. The pattern works across domains: AST manipulation (SyntaxKit) and REST APIs (MistKit) both benefit from this approach.
 
 ---
 
