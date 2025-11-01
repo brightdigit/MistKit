@@ -534,7 +534,8 @@ While generated code itself isn't tested (it's auto-generated), verify:
 
 ## See Also
 
-- [swift-openapi-generator Documentation](https://github.com/apple/swift-openapi-generator)
+- [Swift OpenAPI Generator Documentation](https://swiftpackageindex.com/apple/swift-openapi-generator/1.10.3/documentation/swift-openapi-generator)
+- [swift-openapi-generator Repository](https://github.com/apple/swift-openapi-generator)
 - [OpenAPI Specification 3.0.3](https://spec.openapis.org/oas/v3.0.3)
 - [CloudKit Web Services API](https://developer.apple.com/documentation/cloudkitwebservices)
 - ``MistKitClient``

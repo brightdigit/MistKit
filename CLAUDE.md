@@ -170,6 +170,11 @@ Apple's official CloudKit documentation is available in `.claude/docs/` for offl
 - **Contains**: `@Test` macros, async testing, parameterization, migration from XCTest
 - **Consult when**: Writing or organizing tests, testing async code
 
+**swift-openapi-generator.md** (235 KB) - Swift OpenAPI Generator Documentation
+- **Primary use**: Understanding code generation configuration and features
+- **Contains**: Generator configuration, type overrides, middleware system, transport protocols, API stability
+- **Consult when**: Configuring openapi-generator-config.yaml, implementing middleware, troubleshooting generated code
+
 See `.claude/docs/README.md` for detailed topic breakdowns and integration guidance.
 
 ## Task Master AI Instructions

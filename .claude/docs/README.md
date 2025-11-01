@@ -92,6 +92,34 @@ This directory contains Apple's official documentation for CloudKit Web Services
 
 ---
 
+### swift-openapi-generator.md (235 KB)
+**Source**: https://swiftpackageindex.com/apple/swift-openapi-generator/1.10.3/documentation/swift-openapi-generator
+
+**Primary Use**: Code generation configuration and troubleshooting
+
+**Key Topics**:
+- **Generator Configuration**: YAML config options, naming strategies (defensive vs idiomatic), access modifiers
+- **Type Overrides**: Replacing generated types with custom implementations (e.g., Foundation.UUID)
+- **Document Filtering**: Generating subsets by operations, paths, or tags
+- **Middleware System**: ClientMiddleware for auth, logging, retry logic
+- **Transport Protocols**: ClientTransport abstraction, URLSession integration
+- **Content Types**: JSON, multipart, URL-encoded, plain text, binary, streaming
+- **Event Streams**: JSON Lines, JSON Sequence, Server-sent Events helpers
+- **API Stability**: Understanding breaking vs non-breaking changes
+- **Naming Strategies**: Defensive (safe) vs idiomatic (Swift-style) identifier mapping
+- **Code Generation Modes**: Build plugin vs manual CLI invocation
+
+**When to Consult**:
+- Configuring `openapi-generator-config.yaml` settings
+- Setting up custom type overrides for CloudKit types
+- Implementing authentication or logging middleware
+- Understanding generated code structure and evolution
+- Troubleshooting "Decl has a package access level" errors
+- Filtering large OpenAPI specs for specific operations
+- Working with streaming responses or multipart uploads
+
+---
+
 ## Quick Reference: When to Use Each Doc
 
 ### Implementing Core API Functionality
@@ -99,6 +127,9 @@ This directory contains Apple's official documentation for CloudKit Web Services
 
 ### Designing Type Systems
 → **cloudkitjs.md**: Model CloudKit's data structures in Swift
+
+### Configuring Code Generation
+→ **swift-openapi-generator.md**: OpenAPI generator setup and troubleshooting
 
 ### Writing Tests
 → **testing-enablinganddisabling.md**: Modern Swift Testing patterns
