@@ -264,11 +264,10 @@ Each required careful modeling to ensure the generated Swift code would handle t
 
 #### Challenge 3: Authentication Methods
 
-CloudKit supports three authentication approaches:
+CloudKit supports two authentication methods:
 
-1. **API Token** — Container-level access via query parameter
-2. **Web Auth** — User-specific access with both API and web auth tokens
-3. **Server-to-Server** — Enterprise access using ECDSA P-256 signatures
+1. **Web Auth Token** — User-specific access that requires first obtaining an API Token, then exchanging it for a Web Auth Token (both sent as query parameters)
+2. **Server-to-Server** — Enterprise access using ECDSA P-256 signatures
 
 In OpenAPI, these become security schemes:
 
@@ -459,7 +458,7 @@ With a comprehensive OpenAPI specification for CloudKit Web Services, we had:
 
 - ✅ All 15 CloudKit operations modeled
 - ✅ Complete request/response schemas
-- ✅ Three authentication methods defined
+- ✅ Both authentication methods defined (Web Auth Token, Server-to-Server)
 - ✅ Error responses documented
 - ✅ CloudKit-specific types (Asset, Reference, Location) properly represented
 
@@ -1386,7 +1385,7 @@ The three-month rewrite timeline (July-September 2024) was only achievable by co
 ### What's Next for MistKit
 
 **v1.0 Alpha Delivers**:
-- ✅ Three authentication methods
+- ✅ Both authentication methods (Web Auth Token, Server-to-Server)
 - ✅ Type-safe CloudKit operations
 - ✅ Cross-platform support
 - ✅ Modern Swift throughout
