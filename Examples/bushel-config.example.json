@@ -1,0 +1,7 @@
+{
+  "containerIdentifier": "iCloud.com.example.app",
+  "environment": "development",
+  "database": "private",
+  "apiToken": "your-api-token-here",
+  "serverToServerKey": null
+}

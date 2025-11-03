@@ -228,7 +228,7 @@
         "dependencies": [
           4
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -236,7 +236,7 @@
             "description": "Create a comprehensive data model for storing version history information in CloudKit records",
             "dependencies": [],
             "details": "Define record types and fields for version numbers (major.minor.patch), release dates, release notes, and metadata. Include relationships between versions if needed. Document field types (String, Date, Number, etc.) and any indexes required for efficient querying. Consider versioning schemes and compatibility with semantic versioning standards. Design should account for future extensibility.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create test records with the schema and verify they can be properly stored and retrieved from CloudKit. Test edge cases like very long version strings or complex metadata."
           },
           {
@@ -247,7 +247,7 @@
               1
             ],
             "details": "Initialize a new Swift package with proper directory structure. Configure Package.swift with MistKit dependency using appropriate version constraints. Set up module organization with clear separation of concerns. Create initial source files and directory structure. Implement configuration management for CloudKit container and database settings. Set up development environment with proper CloudKit entitlements.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify package builds successfully. Test MistKit integration by creating a simple CloudKit operation. Ensure configuration can be properly loaded and validated."
           },
           {
@@ -258,7 +258,7 @@
               2
             ],
             "details": "Implement functions for creating new version records, updating existing versions, retrieving version history, and deleting versions. Create query operations with filtering capabilities (e.g., by version number, date range). Implement proper error handling with Swift's Result type. Use structured concurrency with async/await for all CloudKit operations. Add support for batch operations when appropriate. Ensure data validation before CloudKit operations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test each CRUD operation individually. Verify queries return expected results. Test error conditions like network failures or invalid data. Validate concurrent operations behave correctly."
           },
           {
@@ -269,7 +269,7 @@
               3
             ],
             "details": "Define command structure with subcommands for different operations (add, update, list, delete). Implement argument parsing with proper validation and help text. Create user-friendly output formatting for version data. Add support for different output formats (text, JSON). Implement proper exit codes and error messages. Add verbose mode for debugging. Create help documentation accessible through the CLI. Ensure commands follow consistent patterns.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Test CLI with various command combinations. Verify help text is clear and comprehensive. Test error handling with invalid inputs. Validate output formatting is consistent and readable."
           }
         ]
@@ -535,7 +535,7 @@
     ],
     "metadata": {
       "created": "2025-10-20T17:49:09.227Z",
-      "updated": "2025-10-21T01:35:27.655Z",
+      "updated": "2025-11-03T18:51:15.560Z",
       "description": "Tasks for master context"
     }
   }

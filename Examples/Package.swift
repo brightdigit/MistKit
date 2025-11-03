@@ -9,7 +9,8 @@ let package = Package(
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "MistDemo", targets: ["MistDemo"])
+        .executable(name: "MistDemo", targets: ["MistDemo"]),
+        .executable(name: "Bushel", targets: ["Bushel"])
     ],
     dependencies: [
         .package(path: "../"),
@@ -26,6 +27,13 @@ let package = Package(
             ],
             resources: [
                 .copy("Resources")
+            ]
+        ),
+        .executableTarget(
+            name: "Bushel",
+            dependencies: [
+                .product(name: "MistKit", package: "MistKit"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         )
     ]
