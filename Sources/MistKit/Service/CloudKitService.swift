@@ -33,7 +33,7 @@ import OpenAPIURLSession
 
 /// Service for interacting with CloudKit Web Services
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-public struct CloudKitService {
+public struct CloudKitService: Sendable {
   /// The CloudKit container identifier
   public let containerIdentifier: String
   /// The API token for authentication

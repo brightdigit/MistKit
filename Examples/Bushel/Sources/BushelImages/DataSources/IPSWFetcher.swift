@@ -1,0 +1,45 @@
+import Foundation
+import IPSWDownloads
+import OpenAPIURLSession
+
+/// Fetcher for macOS restore images using the IPSWDownloads package
+struct IPSWFetcher: Sendable {
+    /// Fetch all VirtualMac2,1 restore images from ipsw.me
+    func fetch() async throws -> [RestoreImageRecord] {
+        // Create IPSWDownloads client with URLSession transport
+        let client = IPSWDownloads(
+            transport: URLSessionTransport()
+        )
+
+        // Fetch device firmware data for VirtualMac2,1 (macOS virtual machines)
+        let device = try await client.device(
+            withIdentifier: "VirtualMac2,1",
+            type: .ipsw
+        )
+
+        return device.firmwares.map { firmware in
+            RestoreImageRecord(
+                version: firmware.version.description, // OSVer -> String
+                buildNumber: firmware.buildid,
+                releaseDate: firmware.releasedate,
+                downloadURL: firmware.url.absoluteString,
+                fileSize: Int64(firmware.filesize),
+                sha256Hash: "", // Not provided by ipsw.me API
+                sha1Hash: firmware.sha1sum?.hexString ?? "",
+                isSigned: firmware.signed,
+                isPrerelease: false, // ipsw.me doesn't include beta releases
+                source: "ipsw.me",
+                notes: nil
+            )
+        }
+    }
+}
+
+// MARK: - Data Extension
+
+private extension Data {
+    /// Convert Data to hexadecimal string
+    var hexString: String {
+        map { String(format: "%02x", $0) }.joined()
+    }
+}

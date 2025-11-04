@@ -135,6 +135,48 @@ internal struct CloudKitResponseProcessor {
 
     throw CloudKitError.invalidResponse
   }
+
+  /// Process modifyRecords response
+  /// - Parameter response: The response to process
+  /// - Returns: The extracted modify response data
+  /// - Throws: CloudKitError for various error conditions
+  internal func processModifyRecordsResponse(_ response: Operations.modifyRecords.Output)
+    async throws(CloudKitError) -> Components.Schemas.ModifyResponse
+  {
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let modifyData):
+        return modifyData
+      }
+    case .badRequest(let badResponse):
+      switch badResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 400,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
+    case .unauthorized(let unauthResponse):
+      switch unauthResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 401,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
+    case .forbidden, .notFound, .conflict, .preconditionFailed, .contentTooLarge,
+         .tooManyRequests, .misdirectedRequest, .internalServerError, .serviceUnavailable:
+      // Use generic error handling for these cases
+      try await processStandardErrorResponse(response)
+    case .undocumented(let statusCode, _):
+      throw CloudKitError.httpError(statusCode: statusCode)
+    }
+
+    throw CloudKitError.invalidResponse
+  }
 }
 
 // MARK: - Error Handling

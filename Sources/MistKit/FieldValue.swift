@@ -30,7 +30,7 @@
 public import Foundation
 
 /// Represents a CloudKit field value as defined in the CloudKit Web Services API
-public enum FieldValue: Codable, Equatable {
+public enum FieldValue: Codable, Equatable, Sendable {
   case string(String)
   case int64(Int)
   case double(Double)
@@ -44,7 +44,7 @@ public enum FieldValue: Codable, Equatable {
   case list([FieldValue])
 
   /// Location dictionary as defined in CloudKit Web Services
-  public struct Location: Codable, Equatable {
+  public struct Location: Codable, Equatable, Sendable {
     /// The latitude coordinate
     public let latitude: Double
     /// The longitude coordinate
@@ -85,7 +85,7 @@ public enum FieldValue: Codable, Equatable {
   }
 
   /// Reference dictionary as defined in CloudKit Web Services
-  public struct Reference: Codable, Equatable {
+  public struct Reference: Codable, Equatable, Sendable {
     /// The record name being referenced
     public let recordName: String
     /// The action to take ("DELETE_SELF" or nil)
@@ -99,7 +99,7 @@ public enum FieldValue: Codable, Equatable {
   }
 
   /// Asset dictionary as defined in CloudKit Web Services
-  public struct Asset: Codable, Equatable {
+  public struct Asset: Codable, Equatable, Sendable {
     /// The file checksum
     public let fileChecksum: String?
     /// The file size in bytes
