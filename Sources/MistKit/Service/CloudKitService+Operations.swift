@@ -87,9 +87,15 @@ extension CloudKitService {
   }
 
   /// Query records from the default zone
-  public func queryRecords(recordType: String, limit: Int = 10) async throws(CloudKitError)
-    -> [RecordInfo]
-  {
+  public func queryRecords(
+    recordType: String,
+    filters: [QueryFilter]? = nil,
+    sortBy: [QuerySort]? = nil,
+    limit: Int = 10
+  ) async throws(CloudKitError) -> [RecordInfo] {
+    let componentsFilters = filters?.map { $0.toComponentsFilter() }
+    let componentsSorts = sortBy?.map { $0.toComponentsSort() }
+
     do {
       let response = try await client.queryRecords(
         .init(
@@ -100,12 +106,8 @@ extension CloudKitService {
               resultsLimit: limit,
               query: .init(
                 recordType: recordType,
-                sortBy: [
-                  //                            .init(
-                  //                                fieldName: "modificationDate",
-                  //                                ascending: false
-                  //                            )
-                ]
+                filterBy: componentsFilters,
+                sortBy: componentsSorts
               )
             )
           )
@@ -115,6 +117,72 @@ extension CloudKitService {
       let recordsData: Components.Schemas.QueryResponse =
         try await responseProcessor.processQueryRecordsResponse(response)
       return recordsData.records?.compactMap { RecordInfo(from: $0) } ?? []
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 500,
+        rawResponse: error.localizedDescription
+      )
+    }
+  }
+
+  /// Modify (create, update, delete) records
+  internal func modifyRecords(
+    operations: [Components.Schemas.RecordOperation],
+    atomic: Bool = true
+  ) async throws(CloudKitError) -> [RecordInfo] {
+    do {
+      let response = try await client.modifyRecords(
+        .init(
+          path: createModifyRecordsPath(containerIdentifier: containerIdentifier),
+          body: .json(
+            .init(
+              operations: operations,
+              atomic: atomic
+            )
+          )
+        )
+      )
+
+      let modifyData: Components.Schemas.ModifyResponse =
+        try await responseProcessor.processModifyRecordsResponse(response)
+      return modifyData.records?.compactMap { RecordInfo(from: $0) } ?? []
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 500,
+        rawResponse: error.localizedDescription
+      )
+    }
+  }
+
+  /// Lookup records by record names
+  internal func lookupRecords(
+    recordNames: [String],
+    desiredKeys: [String]? = nil
+  ) async throws(CloudKitError) -> [RecordInfo] {
+    do {
+      let response = try await client.lookupRecords(
+        .init(
+          path: createLookupRecordsPath(containerIdentifier: containerIdentifier),
+          body: .json(
+            .init(
+              records: recordNames.map { recordName in
+                .init(
+                  recordName: recordName,
+                  desiredKeys: desiredKeys
+                )
+              }
+            )
+          )
+        )
+      )
+
+      let lookupData: Components.Schemas.LookupResponse =
+        try await responseProcessor.processLookupRecordsResponse(response)
+      return lookupData.records?.compactMap { RecordInfo(from: $0) } ?? []
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError
     } catch {

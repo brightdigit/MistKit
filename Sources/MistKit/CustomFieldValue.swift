@@ -96,6 +96,12 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
   /// The field type
   internal let type: FieldTypePayload?
 
+  /// Initialize with value and optional type
+  internal init(value: CustomFieldValuePayload, type: FieldTypePayload? = nil) {
+    self.value = value
+    self.type = type
+  }
+
   internal init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let fieldType = try container.decodeIfPresent(FieldTypePayload.self, forKey: .type)

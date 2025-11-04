@@ -135,6 +135,46 @@ internal struct CloudKitResponseProcessor {
 
     throw CloudKitError.invalidResponse
   }
+
+  /// Process modifyRecords response
+  /// - Parameter response: The response to process
+  /// - Returns: The extracted modify response data
+  /// - Throws: CloudKitError for various error conditions
+  internal func processModifyRecordsResponse(_ response: Operations.modifyRecords.Output)
+    async throws(CloudKitError) -> Components.Schemas.ModifyResponse
+  {
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let modifyData):
+        return modifyData
+      }
+    default:
+      try await processStandardErrorResponse(response)
+    }
+
+    throw CloudKitError.invalidResponse
+  }
+
+  /// Process lookupRecords response
+  /// - Parameter response: The response to process
+  /// - Returns: The extracted lookup response data
+  /// - Throws: CloudKitError for various error conditions
+  internal func processLookupRecordsResponse(_ response: Operations.lookupRecords.Output)
+    async throws(CloudKitError) -> Components.Schemas.LookupResponse
+  {
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let lookupData):
+        return lookupData
+      }
+    default:
+      try await processStandardErrorResponse(response)
+    }
+
+    throw CloudKitError.invalidResponse
+  }
 }
 
 // MARK: - Error Handling
