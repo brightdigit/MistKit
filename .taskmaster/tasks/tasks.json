@@ -219,16 +219,16 @@
         ]
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Bushel Version History Tool - Design and Core Implementation",
-        "description": "Create a complete command-line tool demonstrating MistKit usage for managing version history data",
-        "details": "Design CloudKit record schema for version data storage including fields for version numbers, release dates, and metadata. Implement Swift Package with Package.swift using MistKit as dependency. Create core functionality for: version data collection, CloudKit record creation/updates, query operations for version history, and record modification workflows. Use Swift ArgumentParser for command-line interface. Implement proper error handling with Swift's Result type and structured concurrency with async/await. Include configuration management for CloudKit container and database settings.",
-        "testStrategy": "Test with real CloudKit development environment. Verify CRUD operations work correctly. Test query functionality and data integrity. Validate command-line interface handles various input scenarios.",
-        "priority": "medium",
+        "description": "Create a complete command-line tool demonstrating MistKit usage for managing macOS restore images, Xcode versions, and Swift versions for Bushel virtualization",
+        "status": "pending",
         "dependencies": [
           4
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Implement a specialized tool for managing CloudKit data supporting Bushel's macOS virtualization workflow. Based on comprehensive schema design in .taskmaster/docs/cloudkit-schema-plan.md, the tool manages three record types: RestoreImage (macOS IPSW files with SHA-256 hashes, signing status, file sizes), XcodeVersion (with macOS requirements and Swift version references), and SwiftVersion. Data sources include ipsw.me API via IPSWDownloads package for restore images, Mr. Macintosh for beta/RC releases, MESU XML for freshness detection, xcodereleases.com for Xcode data, and swiftversion.net for Swift versions. Demo CLI provides sync command (import/update data to CloudKit) and export command (dump to JSON). Bushel queries the public CloudKit database using native CloudKit framework. Implementation follows defined phases with proper error handling using Swift's Result type and structured concurrency with async/await.",
+        "testStrategy": "Test with real CloudKit development environment using VirtualMac2,1 restore images. Verify data fetching from ipsw.me API via IPSWDownloads package works correctly. Test CRUD operations with all three record types (RestoreImage, XcodeVersion, SwiftVersion). Validate CloudKit reference relationships between records. Test CLI commands with various scenarios including sync incremental mode and export filtering. Ensure MESU XML freshness detection triggers appropriate updates.",
         "subtasks": [
           {
             "id": 1,
@@ -241,36 +241,47 @@
           },
           {
             "id": 2,
-            "title": "Set up Swift Package with MistKit Integration",
-            "description": "Create the Swift package structure and integrate MistKit as a dependency",
+            "title": "Implement Swift Model Types for CloudKit Schema",
+            "description": "Create Codable Swift structures matching the CloudKit schema for RestoreImage, XcodeVersion, and SwiftVersion",
             "dependencies": [
               1
             ],
-            "details": "Initialize a new Swift package with proper directory structure. Configure Package.swift with MistKit dependency using appropriate version constraints. Set up module organization with clear separation of concerns. Create initial source files and directory structure. Implement configuration management for CloudKit container and database settings. Set up development environment with proper CloudKit entitlements.",
+            "details": "Define three main record types based on cloudkit-schema-plan.md: RestoreImageRecord with fields for version, buildNumber, releaseDate, downloadURL, fileSize, sha256Hash, sha1Hash, isSigned, isPrerelease, source, and notes. XcodeVersionRecord with version, buildNumber, releaseDate, downloadURL, fileSize, isPrerelease, minimumMacOS (Reference), includedSwiftVersion (Reference), sdkVersions (JSON string), and notes. SwiftVersionRecord with version, releaseDate, downloadURL, isPrerelease, and notes. Implement CloudKit field mapping helpers and Reference type handling for cross-record relationships. Ensure all types conform to Codable and include proper CodingKeys for CloudKit compatibility.",
             "status": "pending",
-            "testStrategy": "Verify package builds successfully. Test MistKit integration by creating a simple CloudKit operation. Ensure configuration can be properly loaded and validated."
+            "testStrategy": "Test JSON encoding/decoding of all model types. Verify CloudKit Reference creation and resolution works correctly. Test edge cases with missing optional fields and relationship handling."
           },
           {
             "id": 3,
-            "title": "Implement Core CRUD Operations and Query Functionality",
-            "description": "Develop the core functionality for managing version data in CloudKit",
+            "title": "Integrate Data Source Fetchers for External APIs",
+            "description": "Implement data fetching from ipsw.me, Mr. Macintosh, MESU, xcodereleases.com, and swiftversion.net",
             "dependencies": [
               2
             ],
-            "details": "Implement functions for creating new version records, updating existing versions, retrieving version history, and deleting versions. Create query operations with filtering capabilities (e.g., by version number, date range). Implement proper error handling with Swift's Result type. Use structured concurrency with async/await for all CloudKit operations. Add support for batch operations when appropriate. Ensure data validation before CloudKit operations.",
+            "details": "Integrate IPSWDownloads Swift package for ipsw.me API access to VirtualMac2,1 restore images (46 final releases from macOS 12.4+). Implement HTML scraper for Mr. Macintosh database (~100+ beta/RC versions). Create MESU XML parser for freshness detection of latest signed releases. Research and implement parsers for xcodereleases.com and swiftversion.net (determine if APIs exist or scraping needed). Create unified data pipeline that can fetch from all sources, handle duplicates, and merge data appropriately. Implement proper error handling for network failures and parsing errors.",
             "status": "pending",
-            "testStrategy": "Test each CRUD operation individually. Verify queries return expected results. Test error conditions like network failures or invalid data. Validate concurrent operations behave correctly."
+            "testStrategy": "Test each data source individually with real API calls. Verify duplicate detection works correctly when same data appears in multiple sources. Test error handling with network failures and malformed responses. Validate data integrity and completeness across all sources."
           },
           {
             "id": 4,
-            "title": "Build Command-Line Interface with ArgumentParser",
-            "description": "Create a robust CLI for the Bushel tool using Swift ArgumentParser",
+            "title": "Implement Core CRUD Operations with MistKit Integration",
+            "description": "Develop CloudKit operations using MistKit for managing version data with proper batching and error handling",
             "dependencies": [
               3
             ],
-            "details": "Define command structure with subcommands for different operations (add, update, list, delete). Implement argument parsing with proper validation and help text. Create user-friendly output formatting for version data. Add support for different output formats (text, JSON). Implement proper exit codes and error messages. Add verbose mode for debugging. Create help documentation accessible through the CLI. Ensure commands follow consistent patterns.",
+            "details": "Implement CloudKit operations using MistKit for creating, updating, and querying RestoreImage, XcodeVersion, and SwiftVersion records. Create batch upsert operations using record IDs based on version+build for idempotency. Implement query operations with filtering capabilities (signed status, prerelease flag, version ranges). Use structured concurrency with async/await for all CloudKit operations. Add support for Reference resolution between XcodeVersion and RestoreImage/SwiftVersion records. Ensure proper error handling with CloudKit-specific errors and retry logic for rate limiting.",
             "status": "pending",
-            "testStrategy": "Test CLI with various command combinations. Verify help text is clear and comprehensive. Test error handling with invalid inputs. Validate output formatting is consistent and readable."
+            "testStrategy": "Test each CRUD operation with real CloudKit development environment. Verify batch operations handle large datasets efficiently. Test Reference relationships work correctly between record types. Validate error conditions like network failures, quota limits, and authentication issues."
+          },
+          {
+            "id": 5,
+            "title": "Build Demo CLI with Sync and Export Commands",
+            "description": "Create command-line interface using Swift ArgumentParser with sync and export functionality",
+            "dependencies": [
+              4
+            ],
+            "details": "Use Swift ArgumentParser to create demo CLI with two main commands: 'sync' for importing/updating data from external sources to CloudKit (with --incremental, --dry-run, --restore-images-only flags), and 'export' for dumping CloudKit data to JSON (with --output, --pretty, --signed-only, --no-betas flags). Implement comprehensive help text and error messages. Add configuration file support for CloudKit container settings. Include progress reporting for long-running sync operations and proper exit codes. Add verbose logging mode for debugging using os.Logger.",
+            "status": "pending",
+            "testStrategy": "Test CLI with various command combinations and flag permutations. Verify help text is clear and comprehensive. Test error handling with invalid inputs, missing configuration, and CloudKit failures. Validate output formatting consistency and JSON export correctness."
           }
         ]
       },
