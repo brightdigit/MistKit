@@ -216,6 +216,129 @@ public enum FieldValue: Codable, Equatable, Sendable {
       try container.encode(val)
     }
   }
+
+  // MARK: - Components.Schemas.FieldValue Conversion
+
+  /// Convert to Components.Schemas.FieldValue for use with CloudKit API
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  internal func toComponentsFieldValue() -> Components.Schemas.FieldValue {
+    switch self {
+    case .string(let val):
+      return .init(value: .stringValue(val), type: .string)
+    case .int64(let val):
+      return .init(value: .int64Value(val), type: .int64)
+    case .double(let val):
+      return .init(value: .doubleValue(val), type: .double)
+    case .boolean(let val):
+      return .init(value: .booleanValue(val), type: nil)
+    case .bytes(let val):
+      return .init(value: .bytesValue(val), type: .bytes)
+    case .date(let val):
+      return .init(value: .dateValue(val.timeIntervalSince1970 * 1_000), type: .timestamp)
+    case .location(let val):
+      return .init(
+        value: .locationValue(
+          .init(
+            latitude: val.latitude,
+            longitude: val.longitude,
+            horizontalAccuracy: val.horizontalAccuracy,
+            verticalAccuracy: val.verticalAccuracy,
+            altitude: val.altitude,
+            speed: val.speed,
+            course: val.course,
+            timestamp: val.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
+          )
+        ),
+        type: .location
+      )
+    case .reference(let val):
+      let action: Components.Schemas.ReferenceValue.actionPayload? =
+        val.action == "DELETE_SELF" ? .DELETE_SELF : nil
+      return .init(
+        value: .referenceValue(
+          .init(
+            recordName: val.recordName,
+            action: action
+          )
+        ),
+        type: .reference
+      )
+    case .asset(let val):
+      return .init(
+        value: .assetValue(
+          .init(
+            fileChecksum: val.fileChecksum,
+            size: val.size,
+            referenceChecksum: val.referenceChecksum,
+            wrappingKey: val.wrappingKey,
+            receipt: val.receipt,
+            downloadURL: val.downloadURL
+          )
+        ),
+        type: .asset
+      )
+    case .list(let values):
+      return .init(
+        value: .listValue(values.map { convertFieldValueToPayload($0) }),
+        type: .list
+      )
+    }
+  }
+
+  // swiftlint:disable:next cyclomatic_complexity
+  private func convertFieldValueToPayload(_ fieldValue: FieldValue) -> CustomFieldValue
+    .CustomFieldValuePayload
+  {
+    switch fieldValue {
+    case .string(let val):
+      return .stringValue(val)
+    case .int64(let val):
+      return .int64Value(val)
+    case .double(let val):
+      return .doubleValue(val)
+    case .boolean(let val):
+      return .booleanValue(val)
+    case .bytes(let val):
+      return .bytesValue(val)
+    case .date(let val):
+      return .dateValue(val.timeIntervalSince1970 * 1_000)
+    case .location(let val):
+      return .locationValue(
+        .init(
+          latitude: val.latitude,
+          longitude: val.longitude,
+          horizontalAccuracy: val.horizontalAccuracy,
+          verticalAccuracy: val.verticalAccuracy,
+          altitude: val.altitude,
+          speed: val.speed,
+          course: val.course,
+          timestamp: val.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
+        )
+      )
+    case .reference(let val):
+      let action: Components.Schemas.ReferenceValue.actionPayload? =
+        val.action == "DELETE_SELF" ? .DELETE_SELF : nil
+      return .referenceValue(
+        .init(
+          recordName: val.recordName,
+          action: action
+        )
+      )
+    case .asset(let val):
+      return .assetValue(
+        .init(
+          fileChecksum: val.fileChecksum,
+          size: val.size,
+          referenceChecksum: val.referenceChecksum,
+          wrappingKey: val.wrappingKey,
+          receipt: val.receipt,
+          downloadURL: val.downloadURL
+        )
+      )
+    case .list(let values):
+      return .listValue(values.map { convertFieldValueToPayload($0) })
+    }
+  }
 }
 
 // MARK: - Helper Methods

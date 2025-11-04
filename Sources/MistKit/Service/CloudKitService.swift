@@ -95,4 +95,32 @@ extension CloudKitService {
       database: database.toComponentsDatabase()
     )
   }
+
+  /// Create a standard path for modifyRecords requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createModifyRecordsPath(
+    containerIdentifier: String
+  ) -> Operations.modifyRecords.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: environment.toComponentsEnvironment(),
+      database: database.toComponentsDatabase()
+    )
+  }
+
+  /// Create a standard path for lookupRecords requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createLookupRecordsPath(
+    containerIdentifier: String
+  ) -> Operations.lookupRecords.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: environment.toComponentsEnvironment(),
+      database: database.toComponentsDatabase()
+    )
+  }
 }
