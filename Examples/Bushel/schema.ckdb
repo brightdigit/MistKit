@@ -1,0 +1,67 @@
+RECORD TYPE RestoreImage (
+    "__recordID"             RECORD ID,
+    "___createTime"          TIMESTAMP,
+    "___createdBy"           REFERENCE,
+    "___etag"                STRING,
+    "___modTime"             TIMESTAMP,
+    "___modifiedBy"          REFERENCE,
+    "___recordType"          STRING,
+
+    "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
+    "buildNumber"            STRING QUERYABLE SORTABLE,
+    "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
+    "downloadURL"            STRING,
+    "fileSize"               INT64,
+    "sha256Hash"             STRING,
+    "sha1Hash"               STRING,
+    "isSigned"               INT64 QUERYABLE,
+    "isPrerelease"           INT64 QUERYABLE,
+    "source"                 STRING,
+    "notes"                  STRING,
+
+    GRANT WRITE TO "_creator",
+    GRANT READ TO "_world"
+);
+
+RECORD TYPE XcodeVersion (
+    "__recordID"             RECORD ID,
+    "___createTime"          TIMESTAMP,
+    "___createdBy"           REFERENCE,
+    "___etag"                STRING,
+    "___modTime"             TIMESTAMP,
+    "___modifiedBy"          REFERENCE,
+    "___recordType"          STRING,
+
+    "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
+    "buildNumber"            STRING QUERYABLE SORTABLE,
+    "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
+    "isPrerelease"           INT64 QUERYABLE,
+    "downloadURL"            STRING,
+    "fileSize"               INT64,
+    "minimumMacOS"           REFERENCE,
+    "includedSwiftVersion"   REFERENCE,
+    "sdkVersions"            STRING,
+    "notes"                  STRING,
+
+    GRANT WRITE TO "_creator",
+    GRANT READ TO "_world"
+);
+
+RECORD TYPE SwiftVersion (
+    "__recordID"             RECORD ID,
+    "___createTime"          TIMESTAMP,
+    "___createdBy"           REFERENCE,
+    "___etag"                STRING,
+    "___modTime"             TIMESTAMP,
+    "___modifiedBy"          REFERENCE,
+    "___recordType"          STRING,
+
+    "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
+    "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
+    "isPrerelease"           INT64 QUERYABLE,
+    "downloadURL"            STRING,
+    "notes"                  STRING,
+
+    GRANT WRITE TO "_creator",
+    GRANT READ TO "_world"
+);

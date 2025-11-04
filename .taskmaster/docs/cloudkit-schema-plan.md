@@ -194,11 +194,14 @@ let xcodeVersions = queryXcode(where: minimumMacOS.version <= "14.2.1")
 
 ## Database Configuration
 
+- **Schema Level**: Container (schema applies to both public and private databases)
 - **Database**: Public Database (readable by all, writable with authentication)
+- **Write Target**: Demo app writes to public database via `database: .public` parameter
 - **Zone**: Default Zone (sufficient for this use case)
-- **Write Access**: API token authentication for sync tool
+- **Write Access**: API token authentication for sync tool (MistKit)
 - **Read Access**: Public (Bushel queries directly using native CloudKit framework)
-- **Container**: TBD - To be configured during implementation
+- **Permissions**: `GRANT READ TO "_world"` makes records publicly readable
+- **Container**: User-configurable (e.g., `iCloud.com.yourcompany.Bushel`)
 
 ## Data Import Strategy
 

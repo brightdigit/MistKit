@@ -261,8 +261,39 @@ struct DataSourcePipeline: Sendable {
 - macOS 14.0+ (for demonstration purposes; MistKit supports macOS 11.0+)
 - Swift 6.2+
 - Xcode 16.2+ (for development)
-- CloudKit container with appropriate schema
+- CloudKit container with appropriate schema (see setup below)
 - CloudKit API token
+
+## CloudKit Schema Setup
+
+Before running the sync command, you need to set up the CloudKit schema. The schema will be created at the container level, but **Bushel writes all records to the public database** for worldwide accessibility.
+
+You have two options:
+
+### Option 1: Automated Setup (Recommended)
+
+Use `cktool` to automatically import the schema:
+
+```bash
+# Save your CloudKit management token
+xcrun cktool save-token
+
+# Set environment variables
+export CLOUDKIT_CONTAINER_ID="iCloud.com.yourcompany.Bushel"
+export CLOUDKIT_TEAM_ID="YOUR_TEAM_ID"
+
+# Run the setup script
+cd Examples/Bushel
+./Scripts/setup-cloudkit-schema.sh
+```
+
+See [CLOUDKIT_SCHEMA_SETUP.md](./CLOUDKIT_SCHEMA_SETUP.md) for detailed instructions.
+
+### Option 2: Manual Setup
+
+Create the record types manually in [CloudKit Dashboard](https://icloud.developer.apple.com/).
+
+See [XCODE_SCHEME_SETUP.md](./XCODE_SCHEME_SETUP.md#cloudkit-schema-setup) for field definitions.
 
 ## Dependencies
 
