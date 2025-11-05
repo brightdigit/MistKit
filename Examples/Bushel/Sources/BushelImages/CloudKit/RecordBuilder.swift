@@ -15,8 +15,8 @@ enum RecordBuilder {
             "fileSize": .int64(Int(record.fileSize)),
             "sha256Hash": .string(record.sha256Hash),
             "sha1Hash": .string(record.sha1Hash),
-            "isSigned": .boolean(record.isSigned),
-            "isPrerelease": .boolean(record.isPrerelease),
+            "isSigned": .int64(record.isSigned ? 1 : 0),
+            "isPrerelease": .int64(record.isPrerelease ? 1 : 0),
             "source": .string(record.source)
         ]
 
@@ -24,7 +24,8 @@ enum RecordBuilder {
             fields["notes"] = .string(notes)
         }
 
-        return RecordOperation.create(
+        return RecordOperation(
+            operationType: .forceReplace,
             recordType: "RestoreImage",
             recordName: record.recordName,
             fields: fields
@@ -39,7 +40,7 @@ enum RecordBuilder {
             "version": .string(record.version),
             "buildNumber": .string(record.buildNumber),
             "releaseDate": .date(record.releaseDate),
-            "isPrerelease": .boolean(record.isPrerelease)
+            "isPrerelease": .int64(record.isPrerelease ? 1 : 0)
         ]
 
         if let downloadURL = record.downloadURL {
@@ -72,7 +73,8 @@ enum RecordBuilder {
             fields["notes"] = .string(notes)
         }
 
-        return RecordOperation.create(
+        return RecordOperation(
+            operationType: .forceReplace,
             recordType: "XcodeVersion",
             recordName: record.recordName,
             fields: fields
@@ -86,7 +88,7 @@ enum RecordBuilder {
         var fields: [String: FieldValue] = [
             "version": .string(record.version),
             "releaseDate": .date(record.releaseDate),
-            "isPrerelease": .boolean(record.isPrerelease)
+            "isPrerelease": .int64(record.isPrerelease ? 1 : 0)
         ]
 
         if let downloadURL = record.downloadURL {
@@ -97,7 +99,8 @@ enum RecordBuilder {
             fields["notes"] = .string(notes)
         }
 
-        return RecordOperation.create(
+        return RecordOperation(
+            operationType: .forceReplace,
             recordType: "SwiftVersion",
             recordName: record.recordName,
             fields: fields

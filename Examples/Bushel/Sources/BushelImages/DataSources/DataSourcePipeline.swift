@@ -111,7 +111,10 @@ struct DataSourcePipeline: Sendable {
         }
 
         // Deduplicate by build number (keep first occurrence)
-        return deduplicateRestoreImages(allImages)
+        let preDedupeCount = allImages.count
+        let deduped = deduplicateRestoreImages(allImages)
+        print("   📦 Deduplicated: \(preDedupeCount) → \(deduped.count) images")
+        return deduped
     }
 
     private func fetchXcodeVersions(options: Options) async throws -> [XcodeVersionRecord] {

@@ -21,7 +21,7 @@ let package = Package(
         .executableTarget(
             name: "BushelImages",
             dependencies: [
-                .product(name: "MistKit", package: "MistKit-Bushel"),
+                .product(name: "MistKit", package: "MistKit"),
                 .product(name: "IPSWDownloads", package: "IPSWDownloads"),
                 .product(name: "SwiftSoup", package: "SwiftSoup"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser")

@@ -2,6 +2,20 @@
 
 A command-line tool demonstrating MistKit's CloudKit Web Services capabilities by syncing macOS restore images, Xcode versions, and Swift compiler versions to CloudKit.
 
+> 📖 **Tutorial-Friendly Demo** - This example is designed for developers learning CloudKit and MistKit. Use the `--verbose` flag to see detailed explanations of CloudKit operations and MistKit usage patterns.
+
+## 🎓 What You'll Learn
+
+This demo teaches practical CloudKit development patterns:
+
+- ✅ **Server-to-Server Authentication** - How to authenticate CloudKit operations from command-line tools and servers
+- ✅ **Batch Record Operations** - Handling CloudKit's 200-operation-per-request limit efficiently
+- ✅ **Record Relationships** - Using CKReference to create relationships between records
+- ✅ **Multi-Source Data Integration** - Fetching, deduplicating, and merging data from multiple APIs
+- ✅ **Modern Swift Patterns** - async/await, Sendable types, and Swift 6 concurrency
+
+**New to CloudKit?** Start with the [Quick Start Guide](#quick-start) below, then explore verbose mode to see how everything works under the hood.
+
 ## Overview
 
 Bushel is a comprehensive demo application showcasing how to use MistKit to:
@@ -117,7 +131,15 @@ BushelImages/
 - Immutable structs for data models
 - No reference types in concurrent contexts
 
-## Usage
+## Quick Start
+
+### Prerequisites
+
+1. **CloudKit Container** - Create a container in CloudKit Dashboard
+2. **Server-to-Server Key** - Generate from CloudKit Dashboard → API Access
+3. **Private Key File** - Download the `.pem` file when creating the key
+
+See [CLOUDKIT-SETUP.md](./CLOUDKIT-SETUP.md) for detailed setup instructions.
 
 ### Building
 
@@ -125,41 +147,86 @@ BushelImages/
 # From Bushel directory
 swift build
 
-# Or from MistKit root
-swift build --package-path Examples/Bushel
+# Run the demo
+.build/debug/bushel-images --help
 ```
 
-### Running
+### First Sync (Learning Mode)
 
-#### Sync Command
+Run with `--verbose` to see educational explanations of what's happening:
+
+```bash
+export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
+export CLOUDKIT_KEY_FILE="./path/to/private-key.pem"
+
+# Sync with verbose logging to learn how MistKit works
+.build/debug/bushel-images sync --verbose
+
+# Or do a dry run first to see what would be synced
+.build/debug/bushel-images sync --dry-run --verbose
+```
+
+**What the verbose flag shows:**
+- 🔍 How MistKit authenticates with Server-to-Server keys
+- 💡 CloudKit batch processing (200 operations/request limit)
+- 📊 Data source fetching and deduplication
+- ⚙️ Record dependency ordering
+- 🌐 Actual CloudKit API calls and responses
+
+## Usage
+
+### Sync Command
 
 Fetch data from all sources and upload to CloudKit:
 
 ```bash
+# Basic usage
 bushel-images sync \
   --container-id "iCloud.com.brightdigit.Bushel" \
   --key-id "YOUR_KEY_ID" \
   --key-file ./path/to/private-key.pem
 
-# Or use environment variables
+# With verbose logging (recommended for learning)
+bushel-images sync --verbose
+
+# Dry run (fetch data but don't upload to CloudKit)
+bushel-images sync --dry-run
+
+# Selective sync
+bushel-images sync --restore-images-only
+bushel-images sync --xcode-only
+bushel-images sync --swift-only
+bushel-images sync --no-betas  # Exclude beta/RC releases
+
+# Use environment variables (recommended)
 export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
 export CLOUDKIT_KEY_FILE="./path/to/private-key.pem"
-bushel-images sync
+bushel-images sync --verbose
 ```
 
-#### Export Command
+### Export Command
 
 Query and export CloudKit data to JSON file:
 
 ```bash
+# Export to file
 bushel-images export \
   --container-id "iCloud.com.brightdigit.Bushel" \
   --key-id "YOUR_KEY_ID" \
   --key-file ./path/to/private-key.pem \
   --output ./bushel-data.json
+
+# With verbose logging
+bushel-images export --verbose --output ./bushel-data.json
+
+# Pretty-print JSON
+bushel-images export --pretty --output ./bushel-data.json
+
+# Export to stdout for piping
+bushel-images export --pretty | jq '.restoreImages | length'
 ```
 
-#### Help
+### Help
 
 ```bash
 bushel-images --help
@@ -393,7 +460,101 @@ The `export` command queries existing records from your CloudKit database and ex
 - [ ] Validation of record references before upload
 - [ ] Support for CloudKit zones for better organization
 
+## Troubleshooting
+
+### Common Beginner Issues
+
+**❌ "Private key file not found"**
+```
+✅ Solution: Check that your .pem file path is correct
+export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
+ls -la "$CLOUDKIT_KEY_FILE"  # Verify file exists
+```
+
+**❌ "Authentication failed" or "Invalid signature"**
+```
+✅ Solutions:
+1. Verify Key ID matches the key in CloudKit Dashboard
+2. Check that .pem file is the correct private key (not certificate)
+3. Ensure key hasn't been revoked in CloudKit Dashboard
+4. Try regenerating the key if issues persist
+```
+
+**❌ "Record type not found" errors**
+```
+✅ Solution: Set up CloudKit schema first
+cd Examples/Bushel
+./Scripts/setup-cloudkit-schema.sh
+# Or manually create record types in CloudKit Dashboard
+```
+
+**❌ Seeing duplicate records after re-sync**
+```
+✅ This is expected behavior - Bushel creates new records each sync
+See "Limitations" section for details on incremental sync
+```
+
+**❌ "Operation failed" with no details**
+```
+✅ Solution: Use --verbose flag to see CloudKit error details
+bushel-images sync --verbose
+# Look for serverErrorCode and reason in output
+```
+
+### Getting Help
+
+**For verbose logging:**
+- Always run with `--verbose` flag when troubleshooting
+- Check the console for 🔍 (verbose), 💡 (explanations), and ⚠️ (warnings)
+
+**For CloudKit errors:**
+- Review CloudKit Dashboard for schema configuration
+- Verify Server-to-Server key is active
+- Check container identifier matches your CloudKit container
+
+**For MistKit issues:**
+- See [MistKit repository](https://github.com/brightdigit/MistKit) for documentation
+- Check MistKit's test suite for usage examples
+
 ## Learning Resources
+
+### For Beginners
+
+**Start Here:**
+1. Run `bushel-images sync --dry-run --verbose` to see what happens without uploading
+2. Review the code in `SyncEngine.swift` to understand the flow
+3. Check `BushelCloudKitService.swift` for MistKit usage patterns
+4. Explore `RecordBuilder.swift` to see CloudKit record construction
+
+**Key Files to Study:**
+- `BushelCloudKitService.swift` - Server-to-Server authentication and batch operations
+- `SyncEngine.swift` - Overall sync orchestration
+- `RecordBuilder.swift` - CloudKit record field mapping
+- `DataSourcePipeline.swift` - Multi-source data integration
+
+### Using Bushel as a Reference
+
+**This demo is designed to be reusable for your own CloudKit projects:**
+
+✅ **Copy the authentication pattern** from `BushelCloudKitService.swift`
+- Shows how to load private keys from disk
+- Demonstrates ServerToServerAuthManager setup
+- Handles all ECDSA signing automatically
+
+✅ **Adapt the batch processing** from `executeBatchOperations()`
+- Handles CloudKit's 200-operation limit
+- Shows progress reporting
+- Demonstrates error handling for partial failures
+
+✅ **Use the logging pattern** from `Logger.swift`
+- os.Logger with subsystems for organization
+- Verbose mode for development/debugging
+- Educational explanations for documentation
+
+✅ **Reference record building** from `RecordBuilder.swift`
+- Shows CloudKit field mapping
+- Demonstrates CKReference relationships
+- Handles date conversion (milliseconds since epoch)
 
 ### MistKit Documentation
 
@@ -404,11 +565,13 @@ The `export` command queries existing records from your CloudKit database and ex
 
 - [CloudKit Web Services Reference](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/)
 - [CloudKit Dashboard](https://icloud.developer.apple.com/)
+- [Server-to-Server Key Authentication Guide](https://developer.apple.com/documentation/cloudkitjs/ckservertoclientauth)
 
 ### Related Projects
 
 - [IPSWDownloads](https://github.com/brightdigit/IPSWDownloads) - ipsw.me API client
 - [XcodeReleases.com](https://xcodereleases.com/) - Xcode version tracking
+- **Celestra** (coming soon) - RSS aggregator using MistKit (sibling demo)
 
 ## Contributing
 

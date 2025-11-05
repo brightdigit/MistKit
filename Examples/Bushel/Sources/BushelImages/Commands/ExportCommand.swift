@@ -37,9 +37,15 @@ struct ExportCommand: AsyncParsableCommand {
     @Flag(name: .long, help: "Exclude beta/RC releases")
     var noBetas: Bool = false
 
+    @Flag(name: .shortAndLong, help: "Enable verbose logging to see detailed CloudKit operations and learn MistKit usage patterns")
+    var verbose: Bool = false
+
     // MARK: - Execution
 
     mutating func run() async throws {
+        // Enable verbose logging if requested
+        BushelLogger.isVerbose = verbose
+
         // Get Server-to-Server credentials from environment if not provided
         let resolvedKeyID = keyID.isEmpty ?
             ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"] ?? "" :
