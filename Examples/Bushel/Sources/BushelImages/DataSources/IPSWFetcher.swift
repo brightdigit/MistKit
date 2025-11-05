@@ -29,7 +29,8 @@ struct IPSWFetcher: Sendable {
                 isSigned: firmware.signed,
                 isPrerelease: false, // ipsw.me doesn't include beta releases
                 source: "ipsw.me",
-                notes: nil
+                notes: nil,
+                sourceUpdatedAt: firmware.uploaddate // TODO: Use Last-Modified header (see TODO-AppleDB-LastModified.md)
             )
         }
     }

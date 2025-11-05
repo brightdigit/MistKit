@@ -28,37 +28,41 @@ struct MESUFetcher: Sendable {
             throw FetchError.parsingFailed
         }
 
-        // Find the first Universal restore image across all device models
-        // Structure: [ModelID: [BuildVersion: [Restore: {...}]]]
-        for (_, builds) in plist {
-            guard let builds = builds as? [String: Any] else { continue }
+        // Navigate to the firmware data
+        // Structure: MobileDeviceSoftwareVersionsByVersion -> "1" -> MobileDeviceSoftwareVersions -> VirtualMac2,1 -> BuildVersion -> Restore
+        guard let versionsByVersion = plist["MobileDeviceSoftwareVersionsByVersion"] as? [String: Any],
+              let version1 = versionsByVersion["1"] as? [String: Any],
+              let softwareVersions = version1["MobileDeviceSoftwareVersions"] as? [String: Any],
+              let virtualMac = softwareVersions["VirtualMac2,1"] as? [String: Any] else {
+            return nil
+        }
 
-            for (_, buildInfo) in builds {
-                guard let buildInfo = buildInfo as? [String: Any],
-                      let restoreDict = buildInfo["Restore"] as? [String: Any],
-                      let buildVersion = restoreDict["BuildVersion"] as? String,
-                      let productVersion = restoreDict["ProductVersion"] as? String,
-                      let firmwareURL = restoreDict["FirmwareURL"] as? String else {
-                    continue
-                }
-
-                let firmwareSHA1 = restoreDict["FirmwareSHA1"] as? String ?? ""
-
-                // Return the first restore image found (typically the latest)
-                return RestoreImageRecord(
-                    version: productVersion,
-                    buildNumber: buildVersion,
-                    releaseDate: Date(), // MESU doesn't provide release date, use current date
-                    downloadURL: firmwareURL,
-                    fileSize: 0, // Not provided by MESU
-                    sha256Hash: "", // MESU only provides SHA1
-                    sha1Hash: firmwareSHA1,
-                    isSigned: true, // MESU only lists currently signed images
-                    isPrerelease: false, // MESU typically only has final releases
-                    source: "mesu.apple.com",
-                    notes: "Latest signed release from Apple MESU"
-                )
+        // Find the first available build (should be the latest signed)
+        for (buildVersion, buildInfo) in virtualMac {
+            guard let buildInfo = buildInfo as? [String: Any],
+                  let restoreDict = buildInfo["Restore"] as? [String: Any],
+                  let productVersion = restoreDict["ProductVersion"] as? String,
+                  let firmwareURL = restoreDict["FirmwareURL"] as? String else {
+                continue
             }
+
+            let firmwareSHA1 = restoreDict["FirmwareSHA1"] as? String ?? ""
+
+            // Return the first restore image found (typically the latest)
+            return RestoreImageRecord(
+                version: productVersion,
+                buildNumber: buildVersion,
+                releaseDate: Date(), // MESU doesn't provide release date, use current date
+                downloadURL: firmwareURL,
+                fileSize: 0, // Not provided by MESU
+                sha256Hash: "", // MESU only provides SHA1
+                sha1Hash: firmwareSHA1,
+                isSigned: true, // MESU only lists currently signed images
+                isPrerelease: false, // MESU typically only has final releases
+                source: "mesu.apple.com",
+                notes: "Latest signed release from Apple MESU",
+                sourceUpdatedAt: Date() // MESU is always real-time from Apple
+            )
         }
 
         // No restore images found in the plist

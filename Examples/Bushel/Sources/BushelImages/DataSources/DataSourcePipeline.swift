@@ -173,9 +173,49 @@ struct DataSourcePipeline: Sendable {
             merged.fileSize = second.fileSize
         }
 
-        // Prefer non-nil isSigned value (if first is nil, use second's value)
-        if first.isSigned == nil && second.isSigned != nil {
-            merged.isSigned = second.isSigned
+        // Merge isSigned with priority rules:
+        // 1. MESU is always authoritative (Apple's real-time signing status)
+        // 2. For non-MESU sources, prefer the most recently updated
+        // 3. If both have same update time (or both nil) and disagree, prefer false
+
+        if first.source == "mesu.apple.com" && first.isSigned != nil {
+            merged.isSigned = first.isSigned  // MESU first is authoritative
+        } else if second.source == "mesu.apple.com" && second.isSigned != nil {
+            merged.isSigned = second.isSigned // MESU second is authoritative
+        } else {
+            // Neither is MESU, compare update timestamps
+            let firstUpdated = first.sourceUpdatedAt
+            let secondUpdated = second.sourceUpdatedAt
+
+            if let firstDate = firstUpdated, let secondDate = secondUpdated {
+                // Both have dates - use the more recent one
+                if secondDate > firstDate && second.isSigned != nil {
+                    merged.isSigned = second.isSigned
+                } else if firstDate >= secondDate && first.isSigned != nil {
+                    merged.isSigned = first.isSigned
+                } else if first.isSigned != nil {
+                    merged.isSigned = first.isSigned
+                } else {
+                    merged.isSigned = second.isSigned
+                }
+            } else if secondUpdated != nil && second.isSigned != nil {
+                // Second has date, first doesn't - prefer second
+                merged.isSigned = second.isSigned
+            } else if firstUpdated != nil && first.isSigned != nil {
+                // First has date, second doesn't - prefer first
+                merged.isSigned = first.isSigned
+            } else if first.isSigned != nil && second.isSigned != nil {
+                // Both have values but no dates - prefer false when they disagree
+                if first.isSigned == second.isSigned {
+                    merged.isSigned = first.isSigned
+                } else {
+                    merged.isSigned = false
+                }
+            } else if second.isSigned != nil {
+                merged.isSigned = second.isSigned
+            } else if first.isSigned != nil {
+                merged.isSigned = first.isSigned
+            }
         }
 
         // Combine notes

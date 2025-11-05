@@ -107,6 +107,19 @@ struct SyncEngine: Sendable {
         return stats
     }
 
+    /// Delete all records from CloudKit
+    func clear() async throws {
+        print("\n" + String(repeating: "=", count: 60))
+        BushelLogger.info("🗑️  Clearing all CloudKit data", subsystem: BushelLogger.cloudKit)
+        print(String(repeating: "=", count: 60))
+
+        try await cloudKitService.deleteAllRecords()
+
+        print("\n" + String(repeating: "=", count: 60))
+        BushelLogger.success("Clear completed successfully!", subsystem: BushelLogger.sync)
+        print(String(repeating: "=", count: 60))
+    }
+
     /// Export all records from CloudKit to a structured format
     func export() async throws -> ExportResult {
         print("\n" + String(repeating: "=", count: 60))

@@ -19,6 +19,17 @@ struct MrMacintoshFetcher: Sendable {
 
         let doc = try SwiftSoup.parse(html)
 
+        // Extract the page update date from <strong>UPDATED: MM/DD/YY</strong>
+        var pageUpdatedAt: Date?
+        if let strongElements = try? doc.select("strong"),
+           let updateElement = strongElements.first(where: { element in
+               (try? element.text().uppercased().starts(with: "UPDATED:")) == true
+           }),
+           let updateText = try? updateElement.text(),
+           let dateString = updateText.split(separator: ":").last?.trimmingCharacters(in: .whitespaces) {
+            pageUpdatedAt = parseDateMMDDYY(from: String(dateString))
+        }
+
         // Find all table rows
         let rows = try doc.select("table tr")
 
@@ -57,7 +68,7 @@ struct MrMacintoshFetcher: Sendable {
             let releaseDate = parseDate(from: dateStr) ?? Date()
 
             // Check if signed (4th column if present)
-            let isSigned = cells.count >= 4 ? try cells[3].text().uppercased().contains("YES") : false
+            let isSigned: Bool? = cells.count >= 4 ? try cells[3].text().uppercased().contains("YES") : nil
 
             // Determine if it's a beta/RC release from filename or version
             let isPrerelease = filename.lowercased().contains("beta") ||
@@ -76,7 +87,8 @@ struct MrMacintoshFetcher: Sendable {
                 isSigned: isSigned,
                 isPrerelease: isPrerelease,
                 source: "mrmacintosh.com",
-                notes: nil
+                notes: nil,
+                sourceUpdatedAt: pageUpdatedAt // Date when Mr. Macintosh last updated the page
             ))
         }
 
@@ -127,6 +139,13 @@ struct MrMacintoshFetcher: Sendable {
         }
 
         return nil
+    }
+
+    /// Parse date from page update format (MM/DD/YY)
+    private func parseDateMMDDYY(from string: String) -> Date? {
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        let formatter = makeDateFormatter(format: "MM/dd/yy")
+        return formatter.date(from: trimmed)
     }
 
     private func makeDateFormatter(format: String) -> DateFormatter {

@@ -34,7 +34,8 @@ struct TheAppleWikiFetcher: Sendable {
                     isSigned: nil, // Unknown - will be merged from other sources
                     isPrerelease: version.isPrerelease,
                     source: "theapplewiki.com",
-                    notes: "Device: \(version.deviceModel)"
+                    notes: "Device: \(version.deviceModel)",
+                    sourceUpdatedAt: nil // API doesn't provide update metadata
                 )
             }
     }

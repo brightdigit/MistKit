@@ -35,6 +35,9 @@ struct RestoreImageRecord: Codable, Sendable {
     /// Additional metadata or release notes
     var notes: String?
 
+    /// When the source last updated this record (nil if unknown)
+    var sourceUpdatedAt: Date?
+
     /// CloudKit record name based on build number (e.g., "RestoreImage-23C71")
     var recordName: String {
         "RestoreImage-\(buildNumber)"

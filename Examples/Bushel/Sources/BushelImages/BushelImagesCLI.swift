@@ -14,7 +14,8 @@ struct BushelImagesCLI: AsyncParsableCommand {
         version: "1.0.0",
         subcommands: [
             SyncCommand.self,
-            ExportCommand.self
+            ExportCommand.self,
+            ClearCommand.self
         ],
         defaultSubcommand: SyncCommand.self
     )
