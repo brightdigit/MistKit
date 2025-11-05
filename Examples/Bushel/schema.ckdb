@@ -1,7 +1,6 @@
 DEFINE SCHEMA
 
 RECORD TYPE RestoreImage (
-    "___recordName"          QUERYABLE,
     "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
     "buildNumber"            STRING QUERYABLE SORTABLE,
     "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
@@ -14,12 +13,12 @@ RECORD TYPE RestoreImage (
     "source"                 STRING,
     "notes"                  STRING,
 
-    GRANT WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
     GRANT READ TO "_world"
 );
 
 RECORD TYPE XcodeVersion (
-    "___recordName"          QUERYABLE,
     "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
     "buildNumber"            STRING QUERYABLE SORTABLE,
     "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
@@ -31,18 +30,19 @@ RECORD TYPE XcodeVersion (
     "sdkVersions"            STRING,
     "notes"                  STRING,
 
-    GRANT WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
     GRANT READ TO "_world"
 );
 
 RECORD TYPE SwiftVersion (
-    "___recordName"          QUERYABLE,
     "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
     "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
     "isPrerelease"           INT64 QUERYABLE,
     "downloadURL"            STRING,
     "notes"                  STRING,
 
-    GRANT WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
     GRANT READ TO "_world"
 );
