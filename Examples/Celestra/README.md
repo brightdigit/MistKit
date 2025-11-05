@@ -20,13 +20,34 @@ Celestra is a command-line RSS reader that demonstrates MistKit's query filterin
 
 ## CloudKit Setup
 
-### 1. Create CloudKit Container
+You can set up the CloudKit schema either automatically using `cktool` (recommended) or manually through the CloudKit Dashboard.
+
+### Option 1: Automated Setup (Recommended)
+
+Use the provided script to automatically import the schema:
+
+```bash
+# Set your CloudKit credentials
+export CLOUDKIT_CONTAINER_ID="iCloud.com.yourname.Celestra"
+export CLOUDKIT_TEAM_ID="YOUR_TEAM_ID"
+export CLOUDKIT_ENVIRONMENT="development"
+
+# Run the setup script
+cd Examples/Celestra
+./Scripts/setup-cloudkit-schema.sh
+```
+
+For detailed instructions, see [CLOUDKIT_SCHEMA_SETUP.md](./CLOUDKIT_SCHEMA_SETUP.md).
+
+### Option 2: Manual Setup
+
+#### 1. Create CloudKit Container
 
 1. Go to [Apple Developer Console](https://developer.apple.com)
 2. Navigate to CloudKit Dashboard
 3. Create a new container (e.g., `iCloud.com.yourname.Celestra`)
 
-### 2. Configure Record Types
+#### 2. Configure Record Types
 
 In CloudKit Dashboard, create these record types in the **Public Database**:
 
@@ -53,7 +74,7 @@ In CloudKit Dashboard, create these record types in the **Public Database**:
 | fetchedAt | Date/Time | No |
 | expiresAt | Date/Time | Yes |
 
-### 3. Generate Server-to-Server Key
+#### 3. Generate Server-to-Server Key
 
 1. In CloudKit Dashboard, go to **API Tokens**
 2. Click **Server-to-Server Keys**
