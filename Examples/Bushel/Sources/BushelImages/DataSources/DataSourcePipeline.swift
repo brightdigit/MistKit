@@ -24,13 +24,30 @@ struct DataSourcePipeline: Sendable {
 
     /// Fetch all data from configured sources
     func fetch(options: Options = Options()) async throws -> FetchResult {
-        async let restoreImagesTask = fetchRestoreImages(options: options)
-        async let xcodeVersionsTask = fetchXcodeVersions(options: options)
-        async let swiftVersionsTask = fetchSwiftVersions(options: options)
+        var restoreImages: [RestoreImageRecord] = []
+        var xcodeVersions: [XcodeVersionRecord] = []
+        var swiftVersions: [SwiftVersionRecord] = []
 
-        let restoreImages = try await restoreImagesTask
-        let xcodeVersions = try await xcodeVersionsTask
-        let swiftVersions = try await swiftVersionsTask
+        do {
+            restoreImages = try await fetchRestoreImages(options: options)
+        } catch {
+            print("⚠️  Restore images fetch failed: \(error)")
+            throw error
+        }
+
+        do {
+            xcodeVersions = try await fetchXcodeVersions(options: options)
+        } catch {
+            print("⚠️  Xcode versions fetch failed: \(error)")
+            throw error
+        }
+
+        do {
+            swiftVersions = try await fetchSwiftVersions(options: options)
+        } catch {
+            print("⚠️  Swift versions fetch failed: \(error)")
+            throw error
+        }
 
         return FetchResult(
             restoreImages: restoreImages,
@@ -46,25 +63,52 @@ struct DataSourcePipeline: Sendable {
             return []
         }
 
-        // Fetch from all sources in parallel
-        async let ipswImages = IPSWFetcher().fetch()
-        async let mesuImage = MESUFetcher().fetch()
-        async let mrMacImages = options.includeBetaReleases
-            ? MrMacintoshFetcher().fetch()
-            : [RestoreImageRecord]()
-        async let wikiImages = options.includeTheAppleWiki
-            ? TheAppleWikiFetcher().fetch()
-            : [RestoreImageRecord]()
-
         var allImages: [RestoreImageRecord] = []
 
-        // Collect all results
-        allImages.append(contentsOf: try await ipswImages)
-        if let mesu = try await mesuImage {
-            allImages.append(mesu)
+        // Fetch from ipsw.me
+        do {
+            let ipswImages = try await IPSWFetcher().fetch()
+            allImages.append(contentsOf: ipswImages)
+            print("   ✓ ipsw.me: \(ipswImages.count) images")
+        } catch {
+            print("   ⚠️  ipsw.me failed: \(error)")
+            throw error
         }
-        allImages.append(contentsOf: try await mrMacImages)
-        allImages.append(contentsOf: try await wikiImages)
+
+        // Fetch from MESU
+        do {
+            if let mesuImage = try await MESUFetcher().fetch() {
+                allImages.append(mesuImage)
+                print("   ✓ MESU: 1 image")
+            }
+        } catch {
+            print("   ⚠️  MESU failed: \(error)")
+            throw error
+        }
+
+        // Fetch from Mr. Macintosh (betas)
+        if options.includeBetaReleases {
+            do {
+                let mrMacImages = try await MrMacintoshFetcher().fetch()
+                allImages.append(contentsOf: mrMacImages)
+                print("   ✓ Mr. Macintosh: \(mrMacImages.count) images")
+            } catch {
+                print("   ⚠️  Mr. Macintosh failed: \(error)")
+                throw error
+            }
+        }
+
+        // Fetch from TheAppleWiki
+        if options.includeTheAppleWiki {
+            do {
+                let wikiImages = try await TheAppleWikiFetcher().fetch()
+                allImages.append(contentsOf: wikiImages)
+                print("   ✓ TheAppleWiki: \(wikiImages.count) images")
+            } catch {
+                print("   ⚠️  TheAppleWiki failed: \(error)")
+                throw error
+            }
+        }
 
         // Deduplicate by build number (keep first occurrence)
         return deduplicateRestoreImages(allImages)

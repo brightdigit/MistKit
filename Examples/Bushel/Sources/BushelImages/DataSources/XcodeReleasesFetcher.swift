@@ -6,12 +6,12 @@ struct XcodeReleasesFetcher: Sendable {
 
     private struct XcodeRelease: Codable {
         let checksums: Checksums?
-        let compilers: Compilers
+        let compilers: Compilers?
         let date: ReleaseDate
-        let links: Links
+        let links: Links?
         let name: String
         let requires: String
-        let sdks: SDKs
+        let sdks: SDKs?
         let version: Version
 
         struct Checksums: Codable {
@@ -19,14 +19,14 @@ struct XcodeReleasesFetcher: Sendable {
         }
 
         struct Compilers: Codable {
-            let clang: [Compiler]
-            let swift: [Compiler]
+            let clang: [Compiler]?
+            let swift: [Compiler]?
         }
 
         struct Compiler: Codable {
-            let build: String
-            let number: String
-            let release: Release
+            let build: String?
+            let number: String?
+            let release: Release?
         }
 
         struct Release: Codable {
@@ -71,9 +71,9 @@ struct XcodeReleasesFetcher: Sendable {
             let watchOS: [SDK]?
 
             struct SDK: Codable {
-                let build: String
-                let number: String
-                let release: Release
+                let build: String?
+                let number: String?
+                let release: Release?
             }
         }
 
@@ -93,31 +93,33 @@ struct XcodeReleasesFetcher: Sendable {
         let releases = try JSONDecoder().decode([XcodeRelease].self, from: data)
 
         return releases.map { release in
-            // Build SDK versions JSON
+            // Build SDK versions JSON (if SDK info is available)
             var sdkDict: [String: String] = [:]
-            if let ios = release.sdks.iOS?.first { sdkDict["iOS"] = ios.number }
-            if let macos = release.sdks.macOS?.first { sdkDict["macOS"] = macos.number }
-            if let tvos = release.sdks.tvOS?.first { sdkDict["tvOS"] = tvos.number }
-            if let visionos = release.sdks.visionOS?.first { sdkDict["visionOS"] = visionos.number }
-            if let watchos = release.sdks.watchOS?.first { sdkDict["watchOS"] = watchos.number }
+            if let sdks = release.sdks {
+                if let ios = sdks.iOS?.first, let number = ios.number { sdkDict["iOS"] = number }
+                if let macos = sdks.macOS?.first, let number = macos.number { sdkDict["macOS"] = number }
+                if let tvos = sdks.tvOS?.first, let number = tvos.number { sdkDict["tvOS"] = number }
+                if let visionos = sdks.visionOS?.first, let number = visionos.number { sdkDict["visionOS"] = number }
+                if let watchos = sdks.watchOS?.first, let number = watchos.number { sdkDict["watchOS"] = number }
+            }
 
             let sdkJSON = try? JSONEncoder().encode(sdkDict)
             let sdkString = sdkJSON.flatMap { String(data: $0, encoding: .utf8) }
 
-            // Extract Swift version
-            let swiftVersion = release.compilers.swift.first?.number
+            // Extract Swift version (if compilers info is available)
+            let swiftVersion = release.compilers?.swift?.first?.number
 
             return XcodeVersionRecord(
                 version: release.version.number,
                 buildNumber: release.version.build,
                 releaseDate: release.date.toDate,
-                downloadURL: release.links.download?.url,
+                downloadURL: release.links?.download?.url,
                 fileSize: nil, // Not provided by API
                 isPrerelease: release.version.release.isPrerelease,
                 minimumMacOS: minimumMacOSReference(from: release.requires),
                 includedSwiftVersion: swiftVersion.map { "SwiftVersion-\($0)" },
                 sdkVersions: sdkString,
-                notes: release.links.notes?.url
+                notes: release.links?.notes?.url
             )
         }
     }

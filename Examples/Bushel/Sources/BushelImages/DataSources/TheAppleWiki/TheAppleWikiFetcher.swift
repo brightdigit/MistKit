@@ -2,16 +2,17 @@ import Foundation
 
 /// Fetcher for macOS restore images using TheAppleWiki.com
 struct TheAppleWikiFetcher: Sendable {
-    /// Fetch all VirtualMac restore images from TheAppleWiki
+    /// Fetch all macOS restore images from TheAppleWiki
     func fetch() async throws -> [RestoreImageRecord] {
         let parser = IPSWParser()
 
-        // Fetch all versions filtered to VirtualMac devices only
-        let versions = try await parser.fetchAllIPSWVersions(deviceFilter: "VirtualMac")
+        // Fetch all versions without device filtering (UniversalMac images work for all devices)
+        let versions = try await parser.fetchAllIPSWVersions(deviceFilter: nil)
 
-        // Map to RestoreImageRecord, filtering out invalid entries
+        // Map to RestoreImageRecord, filtering out only invalid entries
+        // Deduplication happens later in DataSourcePipeline
         return versions
-            .filter { $0.isValid && $0.isVirtualMac }
+            .filter { $0.isValid }
             .compactMap { version -> RestoreImageRecord? in
                 // Skip if we can't get essential data
                 guard let downloadURL = version.url?.absoluteString,
