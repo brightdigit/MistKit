@@ -31,7 +31,7 @@ struct TheAppleWikiFetcher: Sendable {
                     fileSize: fileSize,
                     sha256Hash: "", // Not available from TheAppleWiki
                     sha1Hash: version.sha1,
-                    isSigned: false, // Unknown - will be merged from other sources
+                    isSigned: nil, // Unknown - will be merged from other sources
                     isPrerelease: version.isPrerelease,
                     source: "theapplewiki.com",
                     notes: "Device: \(version.deviceModel)"

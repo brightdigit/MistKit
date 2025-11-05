@@ -65,9 +65,6 @@ extension CustomFieldValue.CustomFieldValuePayload {
     if let value = try? container.decode(Double.self) {
       return .doubleValue(value)
     }
-    if let value = try? container.decode(Bool.self) {
-      return .booleanValue(value)
-    }
     return nil
   }
 
@@ -102,8 +99,6 @@ extension CustomFieldValue.CustomFieldValuePayload {
     case .stringValue(let val), .bytesValue(let val):
       try container.encode(val)
     case .int64Value(let val):
-      try container.encode(val)
-    case .booleanValue(let val):
       try container.encode(val)
     case .doubleValue(let val), .dateValue(let val):
       try encodeNumericValue(val, to: &container)

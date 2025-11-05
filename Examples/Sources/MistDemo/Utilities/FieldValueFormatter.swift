@@ -34,8 +34,6 @@ struct FieldValueFormatter {
             return "\(int)"
         case .double(let double):
             return "\(double)"
-        case .boolean(let bool):
-            return "\(bool)"
         case .bytes(let bytes):
             return "bytes(\(bytes.count) chars, base64: \(bytes))"
         case .date(let date):

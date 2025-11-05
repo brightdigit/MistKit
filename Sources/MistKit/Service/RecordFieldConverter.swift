@@ -47,8 +47,6 @@ internal enum RecordFieldConverter {
       return Components.Schemas.FieldValue(value: .int64Value(value), type: nil)
     case .double(let value):
       return Components.Schemas.FieldValue(value: .doubleValue(value), type: nil)
-    case .boolean(let value):
-      return Components.Schemas.FieldValue(value: .booleanValue(value), type: nil)
     case .bytes(let value):
       return Components.Schemas.FieldValue(value: .bytesValue(value), type: .bytes)
     case .date(let value):
@@ -119,8 +117,6 @@ internal enum RecordFieldConverter {
         return .int64Value(value)
       case .double(let value):
         return .doubleValue(value)
-      case .boolean(let value):
-        return .booleanValue(value)
       case .bytes(let value):
         return .bytesValue(value)
       case .date(let value):
@@ -158,7 +154,6 @@ internal enum RecordFieldConverter {
           case .string(let v): return .stringValue(v)
           case .int64(let v): return .int64Value(v)
           case .double(let v): return .doubleValue(v)
-          case .boolean(let v): return .booleanValue(v)
           case .bytes(let v): return .bytesValue(v)
           case .date(let v): return .dateValue(v.timeIntervalSince1970 * 1000)
           default: return .stringValue("unsupported")
@@ -182,8 +177,6 @@ internal enum RecordFieldConverter {
     case .doubleValue(let doubleValue):
       return fieldType == .timestamp
         ? .date(Date(timeIntervalSince1970: doubleValue / 1_000)) : .double(doubleValue)
-    case .booleanValue(let boolValue):
-      return .boolean(boolValue)
     case .bytesValue(let bytesValue):
       return .bytes(bytesValue)
     default:
@@ -279,8 +272,6 @@ internal enum RecordFieldConverter {
       return .int64(intValue)
     case .doubleValue(let doubleValue):
       return .double(doubleValue)
-    case .booleanValue(let boolValue):
-      return .boolean(boolValue)
     case .bytesValue(let bytesValue):
       return .bytes(bytesValue)
     default:
@@ -327,8 +318,6 @@ internal enum RecordFieldConverter {
       return .int64(intValue)
     case .doubleValue(let doubleValue):
       return .double(doubleValue)
-    case .booleanValue(let boolValue):
-      return .boolean(boolValue)
     case .bytesValue(let bytesValue):
       return .bytes(bytesValue)
     default:

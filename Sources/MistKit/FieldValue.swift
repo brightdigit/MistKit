@@ -34,7 +34,6 @@ public enum FieldValue: Codable, Equatable, Sendable {
   case string(String)
   case int64(Int)
   case double(Double)
-  case boolean(Bool)
   case bytes(String)  // Base64-encoded string
   case date(Date)  // Date/time value
   case location(Location)
@@ -42,6 +41,12 @@ public enum FieldValue: Codable, Equatable, Sendable {
   case asset(Asset)
   // TODO: Can we make this all the same type
   case list([FieldValue])
+
+  /// Helper method to create a boolean field value using INT64 representation
+  /// CloudKit doesn't have a native boolean type, so we use INT64 with 0/1 values
+  public static func boolean(_ value: Bool) -> FieldValue {
+    .int64(value ? 1 : 0)
+  }
 
   /// Location dictionary as defined in CloudKit Web Services
   public struct Location: Codable, Equatable, Sendable {
@@ -152,7 +157,7 @@ public enum FieldValue: Codable, Equatable, Sendable {
     )
   }
 
-  /// Decode basic field value types (string, int64, double, boolean)
+  /// Decode basic field value types (string, int64, double)
   private static func decodeBasicTypes(from container: any SingleValueDecodingContainer) throws
     -> FieldValue?
   {
@@ -164,9 +169,6 @@ public enum FieldValue: Codable, Equatable, Sendable {
     }
     if let value = try? container.decode(Double.self) {
       return .double(value)
-    }
-    if let value = try? container.decode(Bool.self) {
-      return .boolean(value)
     }
     return nil
   }
@@ -208,8 +210,6 @@ public enum FieldValue: Codable, Equatable, Sendable {
     case .int64(let val):
       try container.encode(val)
     case .double(let val):
-      try container.encode(val)
-    case .boolean(let val):
       try container.encode(val)
     case .date(let val):
       try container.encode(val.timeIntervalSince1970 * 1_000)

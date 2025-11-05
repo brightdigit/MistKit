@@ -15,10 +15,14 @@ enum RecordBuilder {
             "fileSize": .int64(Int(record.fileSize)),
             "sha256Hash": .string(record.sha256Hash),
             "sha1Hash": .string(record.sha1Hash),
-            "isSigned": .int64(record.isSigned ? 1 : 0),
             "isPrerelease": .int64(record.isPrerelease ? 1 : 0),
             "source": .string(record.source)
         ]
+
+        // Only include isSigned if we have a known value
+        if let isSigned = record.isSigned {
+            fields["isSigned"] = .int64(isSigned ? 1 : 0)
+        }
 
         if let notes = record.notes {
             fields["notes"] = .string(notes)

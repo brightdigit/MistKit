@@ -173,6 +173,11 @@ struct DataSourcePipeline: Sendable {
             merged.fileSize = second.fileSize
         }
 
+        // Prefer non-nil isSigned value (if first is nil, use second's value)
+        if first.isSigned == nil && second.isSigned != nil {
+            merged.isSigned = second.isSigned
+        }
+
         // Combine notes
         if let secondNotes = second.notes, !secondNotes.isEmpty {
             if let firstNotes = first.notes, !firstNotes.isEmpty {

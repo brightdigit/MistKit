@@ -111,8 +111,8 @@ struct ExportCommand: AsyncParsableCommand {
         // Filter signed-only restore images
         if signedOnly {
             restoreImages = restoreImages.filter { record in
-                if case .boolean(let isSigned) = record.fields["isSigned"] {
-                    return isSigned
+                if case .int64(let isSigned) = record.fields["isSigned"] {
+                    return isSigned != 0
                 }
                 return false
             }
@@ -121,22 +121,22 @@ struct ExportCommand: AsyncParsableCommand {
         // Filter out betas
         if noBetas {
             restoreImages = restoreImages.filter { record in
-                if case .boolean(let isPrerelease) = record.fields["isPrerelease"] {
-                    return !isPrerelease
+                if case .int64(let isPrerelease) = record.fields["isPrerelease"] {
+                    return isPrerelease == 0
                 }
                 return true
             }
 
             xcodeVersions = xcodeVersions.filter { record in
-                if case .boolean(let isPrerelease) = record.fields["isPrerelease"] {
-                    return !isPrerelease
+                if case .int64(let isPrerelease) = record.fields["isPrerelease"] {
+                    return isPrerelease == 0
                 }
                 return true
             }
 
             swiftVersions = swiftVersions.filter { record in
-                if case .boolean(let isPrerelease) = record.fields["isPrerelease"] {
-                    return !isPrerelease
+                if case .int64(let isPrerelease) = record.fields["isPrerelease"] {
+                    return isPrerelease == 0
                 }
                 return true
             }

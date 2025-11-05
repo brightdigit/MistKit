@@ -13,7 +13,7 @@ enum CloudKitFieldMapping {
         string.map { .string($0) }
     }
 
-    /// Convert a Bool to FieldValue
+    /// Convert a Bool to FieldValue (using INT64 representation: 0 = false, 1 = true)
     static func fieldValue(from bool: Bool) -> FieldValue {
         .boolean(bool)
     }
@@ -51,10 +51,10 @@ enum CloudKitFieldMapping {
         return nil
     }
 
-    /// Extract Bool from FieldValue
+    /// Extract Bool from FieldValue (from INT64 representation: 0 = false, non-zero = true)
     static func bool(from fieldValue: FieldValue) -> Bool? {
-        if case .boolean(let value) = fieldValue {
-            return value
+        if case .int64(let value) = fieldValue {
+            return value != 0
         }
         return nil
     }

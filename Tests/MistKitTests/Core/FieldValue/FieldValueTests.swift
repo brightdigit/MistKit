@@ -27,11 +27,14 @@ internal struct FieldValueTests {
     #expect(value == .double(3.14))
   }
 
-  /// Tests FieldValue boolean type creation and equality
-  @Test("FieldValue boolean type creation and equality")
+  /// Tests FieldValue boolean helper method (converts to INT64)
+  @Test("FieldValue boolean helper method converts to INT64")
   internal func fieldValueBoolean() {
-    let value = FieldValue.boolean(true)
-    #expect(value == .boolean(true))
+    let trueValue = FieldValue.boolean(true)
+    #expect(trueValue == .int64(1))
+
+    let falseValue = FieldValue.boolean(false)
+    #expect(falseValue == .int64(0))
   }
 
   /// Tests FieldValue date type creation and equality

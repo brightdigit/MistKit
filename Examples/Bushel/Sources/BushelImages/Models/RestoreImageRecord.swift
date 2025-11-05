@@ -23,8 +23,8 @@ struct RestoreImageRecord: Codable, Sendable {
     /// SHA-1 hash (from MESU/ipsw.me for compatibility)
     var sha1Hash: String
 
-    /// Whether Apple still signs this restore image
-    var isSigned: Bool
+    /// Whether Apple still signs this restore image (nil if unknown)
+    var isSigned: Bool?
 
     /// Beta/RC release indicator
     var isPrerelease: Bool
