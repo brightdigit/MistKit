@@ -2,6 +2,24 @@
 
 This guide explains how to set up the CloudKit schema for the Celestra RSS reader application.
 
+## CloudKit Credentials Overview
+
+Celestra requires **two different types of CloudKit credentials**:
+
+1. **Management Token** (for schema setup only)
+   - Used by `cktool` to create/modify record types
+   - Only needed during initial schema setup
+   - Generated in CloudKit Dashboard → Profile → "Manage Tokens"
+   - Used in this guide for schema import
+
+2. **Server-to-Server Key** (for runtime operations)
+   - Used by MistKit to authenticate API requests at runtime
+   - Required for the app to read/write CloudKit data
+   - Generated in CloudKit Dashboard → API Tokens → "Server-to-Server Keys"
+   - Configured in `.env` file (see main README)
+
+This guide focuses on setting up the schema using a **Management Token**. After schema setup, you'll generate a **Server-to-Server Key** for the app.
+
 ## Two Approaches
 
 ### Option 1: Automated Setup with cktool (Recommended)
@@ -28,7 +46,7 @@ Use the provided script to automatically import the schema.
 2. **Set environment variables**
 
    ```bash
-   export CLOUDKIT_CONTAINER_ID="iCloud.com.yourname.Celestra"
+   export CLOUDKIT_CONTAINER_ID="iCloud.com.brightdigit.Celestra"
    export CLOUDKIT_TEAM_ID="YOUR_TEAM_ID"
    export CLOUDKIT_ENVIRONMENT="development"  # or "production"
    ```
@@ -64,7 +82,7 @@ For manual setup or if you prefer to use the CloudKit Dashboard directly.
 
 2. **Select your container**
 
-   Choose your Celestra container (e.g., `iCloud.com.yourname.Celestra`)
+   Choose your Celestra container (e.g., `iCloud.com.brightdigit.Celestra`)
 
 3. **Switch to Development environment**
 
@@ -219,7 +237,7 @@ To export your current schema (useful for version control):
 ```bash
 xcrun cktool export-schema \
   --team-id YOUR_TEAM_ID \
-  --container-id iCloud.com.yourname.Celestra \
+  --container-id iCloud.com.brightdigit.Celestra \
   --environment development \
   --output-file schema-backup.ckdb
 ```
@@ -231,7 +249,7 @@ To validate your schema file without importing:
 ```bash
 xcrun cktool validate-schema \
   --team-id YOUR_TEAM_ID \
-  --container-id iCloud.com.yourname.Celestra \
+  --container-id iCloud.com.brightdigit.Celestra \
   --environment development \
   schema.ckdb
 ```
@@ -282,7 +300,7 @@ After testing in development:
    ```bash
    xcrun cktool export-schema \
      --team-id YOUR_TEAM_ID \
-     --container-id iCloud.com.yourname.Celestra \
+     --container-id iCloud.com.brightdigit.Celestra \
      --environment development \
      --output-file celestra-prod-schema.ckdb
    ```

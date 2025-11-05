@@ -28,7 +28,7 @@ Use the provided script to automatically import the schema:
 
 ```bash
 # Set your CloudKit credentials
-export CLOUDKIT_CONTAINER_ID="iCloud.com.yourname.Celestra"
+export CLOUDKIT_CONTAINER_ID="iCloud.com.brightdigit.Celestra"
 export CLOUDKIT_TEAM_ID="YOUR_TEAM_ID"
 export CLOUDKIT_ENVIRONMENT="development"
 
@@ -45,7 +45,7 @@ For detailed instructions, see [CLOUDKIT_SCHEMA_SETUP.md](./CLOUDKIT_SCHEMA_SETU
 
 1. Go to [Apple Developer Console](https://developer.apple.com)
 2. Navigate to CloudKit Dashboard
-3. Create a new container (e.g., `iCloud.com.yourname.Celestra`)
+3. Create a new container (e.g., `iCloud.com.brightdigit.Celestra`)
 
 #### 2. Configure Record Types
 
@@ -104,7 +104,7 @@ nano .env
 Update `.env` with your values:
 
 ```bash
-CLOUDKIT_CONTAINER_ID=iCloud.com.yourname.Celestra
+CLOUDKIT_CONTAINER_ID=iCloud.com.brightdigit.Celestra
 CLOUDKIT_KEY_ID=your-key-id-here
 CLOUDKIT_PRIVATE_KEY_PATH=/path/to/eckey.pem
 CLOUDKIT_ENVIRONMENT=development

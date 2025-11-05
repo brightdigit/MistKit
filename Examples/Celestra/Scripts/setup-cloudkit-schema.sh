@@ -30,7 +30,7 @@ echo ""
 # Check for required parameters
 if [ -z "$CLOUDKIT_CONTAINER_ID" ]; then
     echo -e "${YELLOW}CLOUDKIT_CONTAINER_ID not set.${NC}"
-    read -p "Enter your CloudKit Container ID (e.g., iCloud.com.yourcompany.Celestra): " CLOUDKIT_CONTAINER_ID
+    read -p "Enter your CloudKit Container ID (e.g., iCloud.com.brightdigit.Celestra): " CLOUDKIT_CONTAINER_ID
 fi
 
 if [ -z "$CLOUDKIT_TEAM_ID" ]; then
