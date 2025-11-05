@@ -7,8 +7,31 @@ struct BushelCloudKitService: Sendable {
 
     // MARK: - Initialization
 
-    init(containerIdentifier: String, apiToken: String) throws {
-        let tokenManager = APITokenManager(apiToken: apiToken)
+    /// Initialize CloudKit service with Server-to-Server authentication
+    /// - Parameters:
+    ///   - containerIdentifier: CloudKit container ID (e.g., "iCloud.com.company.App")
+    ///   - keyID: Server-to-Server Key ID from CloudKit Dashboard
+    ///   - privateKeyPath: Path to the private key .pem file
+    /// - Throws: Error if the private key file cannot be read or is invalid
+    init(containerIdentifier: String, keyID: String, privateKeyPath: String) throws {
+        // Read PEM file from disk
+        guard FileManager.default.fileExists(atPath: privateKeyPath) else {
+            throw BushelCloudKitError.privateKeyFileNotFound(path: privateKeyPath)
+        }
+
+        let pemString: String
+        do {
+            pemString = try String(contentsOfFile: privateKeyPath, encoding: .utf8)
+        } catch {
+            throw BushelCloudKitError.privateKeyFileReadFailed(path: privateKeyPath, error: error)
+        }
+
+        // Create Server-to-Server authentication manager
+        let tokenManager = try ServerToServerAuthManager(
+            keyID: keyID,
+            pemString: pemString
+        )
+
         self.service = try CloudKitService(
             containerIdentifier: containerIdentifier,
             tokenManager: tokenManager,
@@ -76,6 +99,22 @@ struct BushelCloudKitService: Sendable {
         }
 
         print("✅ Synced \(operations.count) \(recordType) records")
+    }
+}
+
+// MARK: - Errors
+
+enum BushelCloudKitError: LocalizedError {
+    case privateKeyFileNotFound(path: String)
+    case privateKeyFileReadFailed(path: String, error: Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .privateKeyFileNotFound(let path):
+            return "Private key file not found at path: \(path)"
+        case .privateKeyFileReadFailed(let path, let error):
+            return "Failed to read private key file at \(path): \(error.localizedDescription)"
+        }
     }
 }
 

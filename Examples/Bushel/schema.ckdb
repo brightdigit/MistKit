@@ -1,12 +1,6 @@
-RECORD TYPE RestoreImage (
-    "__recordID"             RECORD ID,
-    "___createTime"          TIMESTAMP,
-    "___createdBy"           REFERENCE,
-    "___etag"                STRING,
-    "___modTime"             TIMESTAMP,
-    "___modifiedBy"          REFERENCE,
-    "___recordType"          STRING,
+DEFINE SCHEMA
 
+RECORD TYPE RestoreImage (
     "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
     "buildNumber"            STRING QUERYABLE SORTABLE,
     "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
@@ -24,14 +18,6 @@ RECORD TYPE RestoreImage (
 );
 
 RECORD TYPE XcodeVersion (
-    "__recordID"             RECORD ID,
-    "___createTime"          TIMESTAMP,
-    "___createdBy"           REFERENCE,
-    "___etag"                STRING,
-    "___modTime"             TIMESTAMP,
-    "___modifiedBy"          REFERENCE,
-    "___recordType"          STRING,
-
     "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
     "buildNumber"            STRING QUERYABLE SORTABLE,
     "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
@@ -48,14 +34,6 @@ RECORD TYPE XcodeVersion (
 );
 
 RECORD TYPE SwiftVersion (
-    "__recordID"             RECORD ID,
-    "___createTime"          TIMESTAMP,
-    "___createdBy"           REFERENCE,
-    "___etag"                STRING,
-    "___modTime"             TIMESTAMP,
-    "___modifiedBy"          REFERENCE,
-    "___recordType"          STRING,
-
     "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
     "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
     "isPrerelease"           INT64 QUERYABLE,

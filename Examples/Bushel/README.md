@@ -6,7 +6,7 @@ A command-line tool demonstrating MistKit's CloudKit Web Services capabilities b
 
 Bushel is a comprehensive demo application showcasing how to use MistKit to:
 
-- Fetch data from multiple sources (ipsw.me, xcodereleases.com, swift.org, MESU, Mr. Macintosh)
+- Fetch data from multiple sources (ipsw.me, TheAppleWiki.com, xcodereleases.com, swift.org, MESU, Mr. Macintosh)
 - Transform data into CloudKit-compatible record structures
 - Batch upload records to CloudKit using the Web Services REST API
 - Handle relationships between records using CloudKit References
@@ -26,21 +26,26 @@ The demo integrates with multiple data sources to gather comprehensive version i
    - macOS restore images for VirtualMac2,1
    - Build numbers, release dates, signatures, file sizes
 
-2. **XcodeReleases.com**
+2. **TheAppleWiki.com**
+   - Historical macOS firmware data
+   - Beta and RC releases
+   - Community-maintained IPSW metadata
+
+3. **XcodeReleases.com**
    - Xcode versions and build numbers
    - Release dates and prerelease status
    - Download URLs and SDK information
 
-3. **Swift.org**
+4. **Swift.org**
    - Swift compiler versions
    - Release dates and download links
    - Official Swift toolchain information
 
-4. **Apple MESU Catalog** (Mobile Equipment Software Update)
+5. **Apple MESU Catalog** (Mobile Equipment Software Update)
    - Official macOS restore image catalog
    - Asset metadata and checksums
 
-5. **Mr. Macintosh's Restore Image Archive**
+6. **Mr. Macintosh's Restore Image Archive**
    - Historical restore image information
    - Community-maintained release data
 
@@ -93,7 +98,8 @@ BushelImages/
 - Error handling for partial failures
 
 ✅ **Authentication**
-- API token authentication with `APITokenManager`
+- Server-to-Server Key authentication with `ServerToServerAuthManager`
+- ECDSA P-256 private key signing
 - Container and environment configuration
 
 ### Swift 6 Best Practices
@@ -131,18 +137,25 @@ Fetch data from all sources and upload to CloudKit:
 
 ```bash
 bushel-images sync \
-  --container-id "iCloud.com.yourcompany.Bushel" \
-  --api-token "your-cloudkit-api-token"
+  --container-id "iCloud.com.brightdigit.Bushel" \
+  --key-id "YOUR_KEY_ID" \
+  --key-file ./path/to/private-key.pem
+
+# Or use environment variables
+export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
+export CLOUDKIT_KEY_FILE="./path/to/private-key.pem"
+bushel-images sync
 ```
 
 #### Export Command
 
-Fetch data and export to JSON file (no CloudKit upload):
+Query and export CloudKit data to JSON file:
 
 ```bash
 bushel-images export \
-  --container-id "iCloud.com.yourcompany.Bushel" \
-  --api-token "your-cloudkit-api-token" \
+  --container-id "iCloud.com.brightdigit.Bushel" \
+  --key-id "YOUR_KEY_ID" \
+  --key-file ./path/to/private-key.pem \
   --output ./bushel-data.json
 ```
 
@@ -262,7 +275,7 @@ struct DataSourcePipeline: Sendable {
 - Swift 6.2+
 - Xcode 16.2+ (for development)
 - CloudKit container with appropriate schema (see setup below)
-- CloudKit API token
+- CloudKit Server-to-Server Key (Key ID + private .pem file)
 
 ## CloudKit Schema Setup
 
@@ -295,6 +308,49 @@ Create the record types manually in [CloudKit Dashboard](https://icloud.develope
 
 See [XCODE_SCHEME_SETUP.md](./XCODE_SCHEME_SETUP.md#cloudkit-schema-setup) for field definitions.
 
+## Authentication Setup
+
+After setting up your CloudKit schema, you need to create a Server-to-Server Key for authentication:
+
+### Getting Your Server-to-Server Key
+
+1. Go to [CloudKit Dashboard](https://icloud.developer.apple.com/dashboard/)
+2. Select your container
+3. Navigate to **API Access** → **Server-to-Server Keys**
+4. Click **Create a Server-to-Server Key**
+5. Enter a key name (e.g., "Bushel Demo Key")
+6. Click **Create**
+7. **Download the private key .pem file** - You won't be able to download it again!
+8. Note the **Key ID** displayed (e.g., "abc123def456")
+
+### Secure Your Private Key
+
+⚠️ **Security Best Practices:**
+
+- Store the `.pem` file in a secure location (e.g., `~/.cloudkit/bushel-private-key.pem`)
+- **Never commit .pem files to version control** (already in `.gitignore`)
+- Use appropriate file permissions: `chmod 600 ~/.cloudkit/bushel-private-key.pem`
+- Consider using environment variables for the key path
+
+### Using Your Credentials
+
+**Method 1: Command-line flags**
+```bash
+bushel-images sync \
+  --key-id "YOUR_KEY_ID" \
+  --key-file ~/.cloudkit/bushel-private-key.pem
+```
+
+**Method 2: Environment variables** (recommended for frequent use)
+```bash
+# Add to your ~/.zshrc or ~/.bashrc
+export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
+export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
+
+# Then simply run
+bushel-images sync
+```
+
 ## Dependencies
 
 - **MistKit** - CloudKit Web Services client (local path dependency)
@@ -302,19 +358,20 @@ See [XCODE_SCHEME_SETUP.md](./XCODE_SCHEME_SETUP.md#cloudkit-schema-setup) for f
 - **SwiftSoup** - HTML parsing for web scraping
 - **ArgumentParser** - CLI argument parsing
 
-## Testing Without CloudKit
+## Data Sources
 
-To test data fetching without a CloudKit container:
+Bushel fetches data from multiple external sources including:
 
-1. Use the `export` command instead of `sync`
-2. Review the exported JSON to verify data fetching works
-3. Set up CloudKit schema when ready for sync
+- **ipsw.me** - macOS restore images for VirtualMac devices
+- **TheAppleWiki.com** - Historical IPSW data and beta releases
+- **xcodereleases.com** - Xcode versions and build information
+- **swift.org** - Swift compiler versions
+- **Apple MESU** - Official restore image metadata
+- **Mr. Macintosh** - Community-maintained release archive
 
-Example:
-```bash
-bushel-images export --output test-data.json
-# No CloudKit credentials needed for export-only mode
-```
+The `sync` command fetches from all sources, deduplicates records, and uploads to CloudKit.
+
+The `export` command queries existing records from your CloudKit database and exports them to JSON format.
 
 ## Limitations & Future Enhancements
 

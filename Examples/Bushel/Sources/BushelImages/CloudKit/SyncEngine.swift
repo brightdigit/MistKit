@@ -15,10 +15,11 @@ struct SyncEngine: Sendable {
 
     // MARK: - Initialization
 
-    init(containerIdentifier: String, apiToken: String) throws {
+    init(containerIdentifier: String, keyID: String, privateKeyPath: String) throws {
         self.cloudKitService = try BushelCloudKitService(
             containerIdentifier: containerIdentifier,
-            apiToken: apiToken
+            keyID: keyID,
+            privateKeyPath: privateKeyPath
         )
         self.pipeline = DataSourcePipeline()
     }

@@ -17,8 +17,11 @@ struct ExportCommand: AsyncParsableCommand {
     @Option(name: .shortAndLong, help: "CloudKit container identifier")
     var containerIdentifier: String = "iCloud.com.brightdigit.Bushel"
 
-    @Option(name: .shortAndLong, help: "CloudKit API token (or set CLOUDKIT_API_TOKEN)")
-    var apiToken: String = ""
+    @Option(name: .long, help: "Server-to-Server Key ID (or set CLOUDKIT_KEY_ID)")
+    var keyID: String = ""
+
+    @Option(name: .long, help: "Path to private key .pem file (or set CLOUDKIT_KEY_FILE)")
+    var keyFile: String = ""
 
     // MARK: - Export Options
 
@@ -37,22 +40,41 @@ struct ExportCommand: AsyncParsableCommand {
     // MARK: - Execution
 
     mutating func run() async throws {
-        // Get API token from environment if not provided
-        let resolvedApiToken = apiToken.isEmpty ?
-            ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"] ?? "" :
-            apiToken
+        // Get Server-to-Server credentials from environment if not provided
+        let resolvedKeyID = keyID.isEmpty ?
+            ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"] ?? "" :
+            keyID
 
-        guard !resolvedApiToken.isEmpty else {
-            print("❌ Error: CloudKit API token is required")
-            print("   Provide via --api-token or set CLOUDKIT_API_TOKEN environment variable")
-            print("   Get your API token from: https://icloud.developer.apple.com/dashboard/")
+        let resolvedKeyFile = keyFile.isEmpty ?
+            ProcessInfo.processInfo.environment["CLOUDKIT_KEY_FILE"] ?? "" :
+            keyFile
+
+        guard !resolvedKeyID.isEmpty && !resolvedKeyFile.isEmpty else {
+            print("❌ Error: CloudKit Server-to-Server Key credentials are required")
+            print("")
+            print("   Provide via command-line flags:")
+            print("     --key-id YOUR_KEY_ID --key-file ./private-key.pem")
+            print("")
+            print("   Or set environment variables:")
+            print("     export CLOUDKIT_KEY_ID=\"YOUR_KEY_ID\"")
+            print("     export CLOUDKIT_KEY_FILE=\"./private-key.pem\"")
+            print("")
+            print("   Get your Server-to-Server Key from:")
+            print("   https://icloud.developer.apple.com/dashboard/")
+            print("   Navigate to: API Access → Server-to-Server Keys")
+            print("")
+            print("   Important:")
+            print("   • Download and save the private key .pem file securely")
+            print("   • Never commit .pem files to version control!")
+            print("")
             throw ExitCode.failure
         }
 
         // Create sync engine
         let syncEngine = try SyncEngine(
             containerIdentifier: containerIdentifier,
-            apiToken: resolvedApiToken
+            keyID: resolvedKeyID,
+            privateKeyPath: resolvedKeyFile
         )
 
         // Execute export

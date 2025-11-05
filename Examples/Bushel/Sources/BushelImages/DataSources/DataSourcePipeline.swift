@@ -9,6 +9,7 @@ struct DataSourcePipeline: Sendable {
         var includeXcodeVersions: Bool = true
         var includeSwiftVersions: Bool = true
         var includeBetaReleases: Bool = true
+        var includeTheAppleWiki: Bool = true
     }
 
     // MARK: - Results
@@ -51,6 +52,9 @@ struct DataSourcePipeline: Sendable {
         async let mrMacImages = options.includeBetaReleases
             ? MrMacintoshFetcher().fetch()
             : [RestoreImageRecord]()
+        async let wikiImages = options.includeTheAppleWiki
+            ? TheAppleWikiFetcher().fetch()
+            : [RestoreImageRecord]()
 
         var allImages: [RestoreImageRecord] = []
 
@@ -60,6 +64,7 @@ struct DataSourcePipeline: Sendable {
             allImages.append(mesu)
         }
         allImages.append(contentsOf: try await mrMacImages)
+        allImages.append(contentsOf: try await wikiImages)
 
         // Deduplicate by build number (keep first occurrence)
         return deduplicateRestoreImages(allImages)
