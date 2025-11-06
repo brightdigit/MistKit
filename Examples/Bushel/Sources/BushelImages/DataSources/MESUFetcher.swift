@@ -2,7 +2,8 @@ import Foundation
 
 /// Fetcher for Apple MESU (Mobile Equipment Software Update) manifest
 /// Used for freshness detection of the latest signed restore image
-struct MESUFetcher: Sendable {
+struct MESUFetcher: DataSourceFetcher, Sendable {
+    typealias Record = RestoreImageRecord?
     // MARK: - Internal Models
 
     fileprivate struct RestoreInfo: Codable {

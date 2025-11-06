@@ -3,7 +3,8 @@ import IPSWDownloads
 import OpenAPIURLSession
 
 /// Fetcher for macOS restore images using the IPSWDownloads package
-struct IPSWFetcher: Sendable {
+struct IPSWFetcher: DataSourceFetcher, Sendable {
+    typealias Record = [RestoreImageRecord]
     /// Fetch all VirtualMac2,1 restore images from ipsw.me
     func fetch() async throws -> [RestoreImageRecord] {
         // Fetch Last-Modified header to know when ipsw.me data was updated
@@ -27,8 +28,8 @@ struct IPSWFetcher: Sendable {
                 buildNumber: firmware.buildid,
                 releaseDate: firmware.releasedate,
                 downloadURL: firmware.url.absoluteString,
-                fileSize: Int64(firmware.filesize),
-                sha256Hash: "", // Not provided by ipsw.me API
+                fileSize: firmware.filesize,
+                sha256Hash: "", // Not provided by ipsw.me; backfilled from AppleDB during merge
                 sha1Hash: firmware.sha1sum?.hexString ?? "",
                 isSigned: firmware.signed,
                 isPrerelease: false, // ipsw.me doesn't include beta releases

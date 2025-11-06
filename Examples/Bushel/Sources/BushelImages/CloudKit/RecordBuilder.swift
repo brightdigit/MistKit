@@ -2,8 +2,13 @@ import Foundation
 import MistKit
 
 /// Builds CloudKit record operations from model types using public MistKit APIs
+///
+/// **Deprecated**: Use the `CloudKitRecord` protocol instead. Models now implement
+/// `toCloudKitFields()` directly, and the generic `sync<T>()` method handles conversion.
+@available(*, deprecated, message: "Use CloudKitRecord protocol and model.toCloudKitFields() instead")
 enum RecordBuilder {
     /// Build a record operation for RestoreImageRecord
+    @available(*, deprecated, message: "Use RestoreImageRecord.toCloudKitFields() via CloudKitRecord protocol")
     static func buildRestoreImageOperation(
         _ record: RestoreImageRecord
     ) -> RecordOperation {
@@ -12,16 +17,16 @@ enum RecordBuilder {
             "buildNumber": .string(record.buildNumber),
             "releaseDate": .date(record.releaseDate),
             "downloadURL": .string(record.downloadURL),
-            "fileSize": .int64(Int(record.fileSize)),
+            "fileSize": .int64(record.fileSize),
             "sha256Hash": .string(record.sha256Hash),
             "sha1Hash": .string(record.sha1Hash),
-            "isPrerelease": .int64(record.isPrerelease ? 1 : 0),
+            "isPrerelease": .boolean(record.isPrerelease),
             "source": .string(record.source)
         ]
 
         // Only include isSigned if we have a known value
         if let isSigned = record.isSigned {
-            fields["isSigned"] = .int64(isSigned ? 1 : 0)
+            fields["isSigned"] = .boolean(isSigned)
         }
 
         if let notes = record.notes {
@@ -37,6 +42,7 @@ enum RecordBuilder {
     }
 
     /// Build a record operation for XcodeVersionRecord
+    @available(*, deprecated, message: "Use XcodeVersionRecord.toCloudKitFields() via CloudKitRecord protocol")
     static func buildXcodeVersionOperation(
         _ record: XcodeVersionRecord
     ) -> RecordOperation {
@@ -44,7 +50,7 @@ enum RecordBuilder {
             "version": .string(record.version),
             "buildNumber": .string(record.buildNumber),
             "releaseDate": .date(record.releaseDate),
-            "isPrerelease": .int64(record.isPrerelease ? 1 : 0)
+            "isPrerelease": .boolean(record.isPrerelease)
         ]
 
         if let downloadURL = record.downloadURL {
@@ -52,7 +58,7 @@ enum RecordBuilder {
         }
 
         if let fileSize = record.fileSize {
-            fields["fileSize"] = .int64(Int(fileSize))
+            fields["fileSize"] = .int64(fileSize)
         }
 
         if let minimumMacOS = record.minimumMacOS {
@@ -86,13 +92,14 @@ enum RecordBuilder {
     }
 
     /// Build a record operation for SwiftVersionRecord
+    @available(*, deprecated, message: "Use SwiftVersionRecord.toCloudKitFields() via CloudKitRecord protocol")
     static func buildSwiftVersionOperation(
         _ record: SwiftVersionRecord
     ) -> RecordOperation {
         var fields: [String: FieldValue] = [
             "version": .string(record.version),
             "releaseDate": .date(record.releaseDate),
-            "isPrerelease": .int64(record.isPrerelease ? 1 : 0)
+            "isPrerelease": .boolean(record.isPrerelease)
         ]
 
         if let downloadURL = record.downloadURL {
@@ -112,6 +119,7 @@ enum RecordBuilder {
     }
 
     /// Build a record operation for DataSourceMetadata
+    @available(*, deprecated, message: "Use DataSourceMetadata.toCloudKitFields() via CloudKitRecord protocol")
     static func buildDataSourceMetadataOperation(
         _ metadata: DataSourceMetadata
     ) -> RecordOperation {

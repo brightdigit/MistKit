@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// Utilities for converting CloudKit field values to FieldValue types
 internal enum RecordFieldConverter {
@@ -110,59 +110,88 @@ internal enum RecordFieldConverter {
   private static func convertListToComponents(
     _ list: [FieldValue]
   ) -> Components.Schemas.FieldValue {
-    let listValues: [CustomFieldValue.CustomFieldValuePayload] = list.map { item in
-      switch item {
-      case .string(let value):
-        return .stringValue(value)
-      case .int64(let value):
-        return .int64Value(value)
-      case .double(let value):
-        return .doubleValue(value)
-      case .bytes(let value):
-        return .bytesValue(value)
-      case .date(let value):
-        return .dateValue(value.timeIntervalSince1970 * 1000)
-      case .location(let location):
-        return .locationValue(Components.Schemas.LocationValue(
-          latitude: location.latitude,
-          longitude: location.longitude,
-          horizontalAccuracy: location.horizontalAccuracy,
-          verticalAccuracy: location.verticalAccuracy,
-          altitude: location.altitude,
-          speed: location.speed,
-          course: location.course,
-          timestamp: location.timestamp.map { $0.timeIntervalSince1970 * 1000 }
-        ))
-      case .reference(let reference):
-        return .referenceValue(Components.Schemas.ReferenceValue(
-          recordName: reference.recordName,
-          action: reference.action.flatMap { .init(rawValue: $0) }
-        ))
-      case .asset(let asset):
-        return .assetValue(Components.Schemas.AssetValue(
-          fileChecksum: asset.fileChecksum,
-          size: asset.size,
-          referenceChecksum: asset.referenceChecksum,
-          wrappingKey: asset.wrappingKey,
-          receipt: asset.receipt,
-          downloadURL: asset.downloadURL
-        ))
-      case .list(let nestedList):
-        // Nested lists - recursive conversion
-        return .listValue(nestedList.map { nestedItem in
-          // For simplicity, only support basic types in nested lists
-          switch nestedItem {
-          case .string(let v): return .stringValue(v)
-          case .int64(let v): return .int64Value(v)
-          case .double(let v): return .doubleValue(v)
-          case .bytes(let v): return .bytesValue(v)
-          case .date(let v): return .dateValue(v.timeIntervalSince1970 * 1000)
-          default: return .stringValue("unsupported")
-          }
-        })
-      }
-    }
+    let listValues = list.map { convertFieldValueToPayload($0) }
     return Components.Schemas.FieldValue(value: .listValue(listValues), type: .list)
+  }
+
+  /// Convert a single FieldValue to CustomFieldValue payload
+  private static func convertFieldValueToPayload(
+    _ item: FieldValue
+  ) -> CustomFieldValue.CustomFieldValuePayload {
+    switch item {
+    case .string(let value):
+      return .stringValue(value)
+    case .int64(let value):
+      return .int64Value(value)
+    case .double(let value):
+      return .doubleValue(value)
+    case .bytes(let value):
+      return .bytesValue(value)
+    case .date(let value):
+      return .dateValue(value.timeIntervalSince1970 * 1000)
+    case .location(let location):
+      return convertLocationToPayload(location)
+    case .reference(let reference):
+      return convertReferenceToPayload(reference)
+    case .asset(let asset):
+      return convertAssetToPayload(asset)
+    case .list(let nestedList):
+      return .listValue(nestedList.map { convertBasicFieldValueToPayload($0) })
+    }
+  }
+
+  /// Convert Location to payload value
+  private static func convertLocationToPayload(
+    _ location: FieldValue.Location
+  ) -> CustomFieldValue.CustomFieldValuePayload {
+    .locationValue(Components.Schemas.LocationValue(
+      latitude: location.latitude,
+      longitude: location.longitude,
+      horizontalAccuracy: location.horizontalAccuracy,
+      verticalAccuracy: location.verticalAccuracy,
+      altitude: location.altitude,
+      speed: location.speed,
+      course: location.course,
+      timestamp: location.timestamp.map { $0.timeIntervalSince1970 * 1000 }
+    ))
+  }
+
+  /// Convert Reference to payload value
+  private static func convertReferenceToPayload(
+    _ reference: FieldValue.Reference
+  ) -> CustomFieldValue.CustomFieldValuePayload {
+    .referenceValue(Components.Schemas.ReferenceValue(
+      recordName: reference.recordName,
+      action: reference.action.flatMap { .init(rawValue: $0) }
+    ))
+  }
+
+  /// Convert Asset to payload value
+  private static func convertAssetToPayload(
+    _ asset: FieldValue.Asset
+  ) -> CustomFieldValue.CustomFieldValuePayload {
+    .assetValue(Components.Schemas.AssetValue(
+      fileChecksum: asset.fileChecksum,
+      size: asset.size,
+      referenceChecksum: asset.referenceChecksum,
+      wrappingKey: asset.wrappingKey,
+      receipt: asset.receipt,
+      downloadURL: asset.downloadURL
+    ))
+  }
+
+  /// Convert basic FieldValue types to payload (for nested lists)
+  private static func convertBasicFieldValueToPayload(
+    _ item: FieldValue
+  ) -> CustomFieldValue.CustomFieldValuePayload {
+    switch item {
+    case .string(let v): return .stringValue(v)
+    case .int64(let v): return .int64Value(v)
+    case .double(let v): return .doubleValue(v)
+    case .bytes(let v): return .bytesValue(v)
+    case .date(let v): return .dateValue(v.timeIntervalSince1970 * 1000)
+    default: return .stringValue("unsupported")
+    }
   }
 
   /// Convert field value based on its type

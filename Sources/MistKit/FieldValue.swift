@@ -42,12 +42,6 @@ public enum FieldValue: Codable, Equatable, Sendable {
   // TODO: Can we make this all the same type
   case list([FieldValue])
 
-  /// Helper method to create a boolean field value using INT64 representation
-  /// CloudKit doesn't have a native boolean type, so we use INT64 with 0/1 values
-  public static func boolean(_ value: Bool) -> FieldValue {
-    .int64(value ? 1 : 0)
-  }
-
   /// Location dictionary as defined in CloudKit Web Services
   public struct Location: Codable, Equatable, Sendable {
     /// The latitude coordinate
@@ -222,5 +216,15 @@ public enum FieldValue: Codable, Equatable, Sendable {
     case .list(let val):
       try container.encode(val)
     }
+  }
+}
+
+// MARK: - Helper Methods
+
+extension FieldValue {
+  /// Helper method to create a boolean field value using INT64 representation
+  /// CloudKit doesn't have a native boolean type, so we use INT64 with 0/1 values
+  public static func boolean(_ value: Bool) -> FieldValue {
+    .int64(value ? 1 : 0)
   }
 }

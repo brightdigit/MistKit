@@ -13,9 +13,9 @@ struct IPSWVersion: Codable, Sendable {
 
     // MARK: - Computed Properties
 
-    /// Parse file size string to Int64 for CloudKit
+    /// Parse file size string to Int for CloudKit
     /// Examples: "10.2 GB" -> bytes, "1.5 MB" -> bytes
-    var fileSizeInBytes: Int64? {
+    var fileSizeInBytes: Int? {
         let components = fileSize.components(separatedBy: " ")
         guard components.count == 2,
               let size = Double(components[0]) else {
@@ -32,7 +32,7 @@ struct IPSWVersion: Codable, Sendable {
         }
 
         guard multiplier > 0 else { return nil }
-        return Int64(size * multiplier)
+        return Int(size * multiplier)
     }
 
     /// Detect if this is a VirtualMac device

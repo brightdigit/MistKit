@@ -28,17 +28,14 @@ struct SyncEngine: Sendable {
         privateKeyPath: String,
         configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
     ) throws {
-        self.cloudKitService = try BushelCloudKitService(
+        let service = try BushelCloudKitService(
             containerIdentifier: containerIdentifier,
             keyID: keyID,
             privateKeyPath: privateKeyPath
         )
+        self.cloudKitService = service
         self.pipeline = DataSourcePipeline(
-            cloudKitService: try? BushelCloudKitService(
-                containerIdentifier: containerIdentifier,
-                keyID: keyID,
-                privateKeyPath: privateKeyPath
-            ),
+            cloudKitService: service,
             configuration: configuration
         )
     }
@@ -98,10 +95,12 @@ struct SyncEngine: Sendable {
                 subsystem: BushelLogger.cloudKit
             )
 
-            try await cloudKitService.syncRecords(
-                restoreImages: fetchResult.restoreImages,
-                xcodeVersions: fetchResult.xcodeVersions,
-                swiftVersions: fetchResult.swiftVersions
+            // Sync in dependency order: SwiftVersion → RestoreImage → XcodeVersion
+            // (Prevents broken CKReference relationships)
+            try await cloudKitService.syncAllRecords(
+                fetchResult.swiftVersions,   // First: no dependencies
+                fetchResult.restoreImages,   // Second: no dependencies
+                fetchResult.xcodeVersions    // Third: references first two
             )
         } else {
             print("\n⏭️  Step 2: Skipped (dry run)")

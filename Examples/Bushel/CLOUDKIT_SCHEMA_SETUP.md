@@ -124,7 +124,7 @@ Management tokens allow `cktool` to modify your CloudKit schema.
 
 The schema is defined in `schema.ckdb` using CloudKit's declarative schema language:
 
-```
+```text
 RECORD TYPE RestoreImage (
     "version"      STRING QUERYABLE SORTABLE SEARCHABLE,
     "buildNumber"  STRING QUERYABLE SORTABLE,
@@ -276,6 +276,6 @@ After setting up the schema:
 For Bushel-specific issues, see the main [README.md](./README.md).
 
 For CloudKit schema issues:
-- Check Apple Developer Forums: https://developer.apple.com/forums/tags/cloudkit
+- Check [Apple Developer Forums](https://developer.apple.com/forums/tags/cloudkit)
 - Review CloudKit Dashboard logs
 - Verify schema file syntax against Apple's documentation

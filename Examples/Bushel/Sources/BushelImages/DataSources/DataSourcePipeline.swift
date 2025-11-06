@@ -55,6 +55,8 @@ struct DataSourcePipeline: Sendable {
 
         do {
             xcodeVersions = try await fetchXcodeVersions(options: options)
+            // Resolve XcodeVersion → RestoreImage references now that we have both datasets
+            xcodeVersions = resolveXcodeVersionReferences(xcodeVersions, restoreImages: restoreImages)
         } catch {
             print("⚠️  Xcode versions fetch failed: \(error)")
             throw error
@@ -165,7 +167,7 @@ struct DataSourcePipeline: Sendable {
                 )
 
                 do {
-                    try await cloudKit.syncDataSourceMetadata([metadata])
+                    try await cloudKit.sync([metadata])
                 } catch {
                     print("   ⚠️  Failed to update metadata for \(source): \(error)")
                 }
@@ -188,7 +190,7 @@ struct DataSourcePipeline: Sendable {
                 )
 
                 do {
-                    try await cloudKit.syncDataSourceMetadata([metadata])
+                    try await cloudKit.sync([metadata])
                 } catch {
                     print("   ⚠️  Failed to update metadata for \(source): \(error)")
                 }
@@ -375,13 +377,18 @@ struct DataSourcePipeline: Sendable {
     }
 
     /// Merge two restore image records, preferring non-empty values
+    ///
+    /// This method handles backfilling missing data from different sources:
+    /// - SHA-256 hashes from AppleDB fill in empty values from ipsw.me
+    /// - File sizes and SHA-1 hashes are similarly backfilled
+    /// - Signing status follows MESU authoritative rules
     private func mergeRestoreImages(
         _ first: RestoreImageRecord,
         _ second: RestoreImageRecord
     ) -> RestoreImageRecord {
         var merged = first
 
-        // Prefer non-empty/non-zero values from second
+        // Backfill missing hashes and file size from second record
         if !second.sha256Hash.isEmpty && first.sha256Hash.isEmpty {
             merged.sha256Hash = second.sha256Hash
         }
@@ -447,6 +454,65 @@ struct DataSourcePipeline: Sendable {
         }
 
         return merged
+    }
+
+    /// Resolve XcodeVersion → RestoreImage references by mapping version strings to record names
+    ///
+    /// Parses the temporary REQUIRES field in notes and matches it to RestoreImage versions
+    private func resolveXcodeVersionReferences(
+        _ versions: [XcodeVersionRecord],
+        restoreImages: [RestoreImageRecord]
+    ) -> [XcodeVersionRecord] {
+        // Build lookup table: version → RestoreImage recordName
+        var versionLookup: [String: String] = [:]
+        for image in restoreImages {
+            // Support multiple version formats: "14.2.1", "14.2", "14"
+            let version = image.version
+            versionLookup[version] = image.recordName
+
+            // Also add short versions for matching (e.g., "14.2.1" → "14.2")
+            let components = version.split(separator: ".")
+            if components.count > 1 {
+                let shortVersion = components.prefix(2).joined(separator: ".")
+                versionLookup[shortVersion] = image.recordName
+            }
+        }
+
+        return versions.map { version in
+            var resolved = version
+
+            // Parse notes field to extract requires string
+            guard let notes = version.notes else { return resolved }
+
+            let parts = notes.split(separator: "|")
+            var requiresString: String?
+            var notesURL: String?
+
+            for part in parts {
+                if part.hasPrefix("REQUIRES:") {
+                    requiresString = String(part.dropFirst("REQUIRES:".count))
+                } else if part.hasPrefix("NOTES_URL:") {
+                    notesURL = String(part.dropFirst("NOTES_URL:".count))
+                }
+            }
+
+            // Try to extract version number from requires (e.g., "macOS 14.2" → "14.2")
+            if let requires = requiresString {
+                // Match version patterns like "14.2", "14.2.1", etc.
+                let versionPattern = #/(\d+\.\d+(?:\.\d+)?(?:\.\d+)?)/#
+                if let match = requires.firstMatch(of: versionPattern) {
+                    let extractedVersion = String(match.1)
+                    if let recordName = versionLookup[extractedVersion] {
+                        resolved.minimumMacOS = recordName
+                    }
+                }
+            }
+
+            // Restore clean notes field
+            resolved.notes = notesURL
+
+            return resolved
+        }
     }
 
     /// Deduplicate Xcode versions by build number

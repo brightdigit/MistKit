@@ -31,17 +31,22 @@ import Foundation
 
 /// Internal conversion between public RecordOperation and OpenAPI types
 extension RecordOperation {
+  /// Mapping from RecordOperation.OperationType to OpenAPI operationTypePayload
+  private static let operationTypeMapping: [RecordOperation.OperationType: Components.Schemas.RecordOperation.operationTypePayload] = [
+    .create: .create,
+    .update: .update,
+    .forceUpdate: .forceUpdate,
+    .replace: .replace,
+    .forceReplace: .forceReplace,
+    .delete: .delete,
+    .forceDelete: .forceDelete
+  ]
+
   /// Convert public RecordOperation to internal OpenAPI RecordOperation
   internal func toComponentsRecordOperation() -> Components.Schemas.RecordOperation {
-    // Convert operation type
-    let apiOperationType: Components.Schemas.RecordOperation.operationTypePayload = switch operationType {
-    case .create: .create
-    case .update: .update
-    case .forceUpdate: .forceUpdate
-    case .replace: .replace
-    case .forceReplace: .forceReplace
-    case .delete: .delete
-    case .forceDelete: .forceDelete
+    // Convert operation type using dictionary lookup
+    guard let apiOperationType = Self.operationTypeMapping[operationType] else {
+      fatalError("Unknown operation type: \(operationType)")
     }
 
     // Convert fields to OpenAPI FieldValue format

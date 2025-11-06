@@ -69,10 +69,8 @@ extension CloudKitService {
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError
     } catch {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500,
-        rawResponse: error.localizedDescription
-      )
+      // Preserve original error context
+      throw CloudKitError.underlyingError(error)
     }
   }
 

@@ -4,8 +4,8 @@ This document contains detailed research on all external data sources and MistKi
 
 ## Table of Contents
 
-1. [xcodereleases.com API](#xcodereleases-com-api)
-2. [swiftversion.net Scraping](#swiftversion-net-scraping)
+1. [xcodereleases.com API](#xcoderereleasescom-api)
+2. [swiftversion.net Scraping](#swiftversionnet-scraping)
 3. [MistKit API Patterns](#mistkit-api-patterns)
 
 ---
