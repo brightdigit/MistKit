@@ -22,13 +22,25 @@ struct SyncEngine: Sendable {
 
     // MARK: - Initialization
 
-    init(containerIdentifier: String, keyID: String, privateKeyPath: String) throws {
+    init(
+        containerIdentifier: String,
+        keyID: String,
+        privateKeyPath: String,
+        configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
+    ) throws {
         self.cloudKitService = try BushelCloudKitService(
             containerIdentifier: containerIdentifier,
             keyID: keyID,
             privateKeyPath: privateKeyPath
         )
-        self.pipeline = DataSourcePipeline()
+        self.pipeline = DataSourcePipeline(
+            cloudKitService: try? BushelCloudKitService(
+                containerIdentifier: containerIdentifier,
+                keyID: keyID,
+                privateKeyPath: privateKeyPath
+            ),
+            configuration: configuration
+        )
     }
 
     // MARK: - Sync Operations

@@ -110,4 +110,32 @@ enum RecordBuilder {
             fields: fields
         )
     }
+
+    /// Build a record operation for DataSourceMetadata
+    static func buildDataSourceMetadataOperation(
+        _ metadata: DataSourceMetadata
+    ) -> RecordOperation {
+        var fields: [String: FieldValue] = [
+            "sourceName": .string(metadata.sourceName),
+            "recordTypeName": .string(metadata.recordTypeName),
+            "lastFetchedAt": .date(metadata.lastFetchedAt),
+            "recordCount": .int64(metadata.recordCount),
+            "fetchDurationSeconds": .double(metadata.fetchDurationSeconds)
+        ]
+
+        if let sourceUpdatedAt = metadata.sourceUpdatedAt {
+            fields["sourceUpdatedAt"] = .date(sourceUpdatedAt)
+        }
+
+        if let lastError = metadata.lastError {
+            fields["lastError"] = .string(lastError)
+        }
+
+        return RecordOperation(
+            operationType: .forceReplace,
+            recordType: "DataSourceMetadata",
+            recordName: metadata.recordName,
+            fields: fields
+        )
+    }
 }

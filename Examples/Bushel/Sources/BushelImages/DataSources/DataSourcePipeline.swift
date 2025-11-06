@@ -11,6 +11,23 @@ struct DataSourcePipeline: Sendable {
         var includeBetaReleases: Bool = true
         var includeAppleDB: Bool = true
         var includeTheAppleWiki: Bool = true
+        var force: Bool = false
+        var specificSource: String?
+    }
+
+    // MARK: - Dependencies
+
+    let cloudKitService: BushelCloudKitService?
+    let configuration: FetchConfiguration
+
+    // MARK: - Initialization
+
+    init(
+        cloudKitService: BushelCloudKitService? = nil,
+        configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
+    ) {
+        self.cloudKitService = cloudKitService
+        self.configuration = configuration
     }
 
     // MARK: - Results
@@ -57,6 +74,130 @@ struct DataSourcePipeline: Sendable {
         )
     }
 
+    // MARK: - Metadata Tracking
+
+    /// Check if a source should be fetched based on throttling rules
+    private func shouldFetch(
+        source: String,
+        recordType: String,
+        force: Bool
+    ) async -> (shouldFetch: Bool, metadata: DataSourceMetadata?) {
+        // If force flag is set, always fetch
+        guard !force else { return (true, nil) }
+
+        // If no CloudKit service, can't check metadata - fetch
+        guard let cloudKit = cloudKitService else { return (true, nil) }
+
+        // Try to fetch metadata from CloudKit
+        do {
+            let metadata = try await cloudKit.queryDataSourceMetadata(
+                source: source,
+                recordType: recordType
+            )
+
+            // If no metadata exists, this is first fetch - allow it
+            guard let existingMetadata = metadata else { return (true, nil) }
+
+            // Check configuration to see if enough time has passed
+            let shouldFetch = configuration.shouldFetch(
+                source: source,
+                lastFetchedAt: existingMetadata.lastFetchedAt,
+                force: force
+            )
+
+            return (shouldFetch, existingMetadata)
+        } catch {
+            // If metadata query fails, allow fetch but log warning
+            print("   ⚠️  Failed to query metadata for \(source): \(error)")
+            return (true, nil)
+        }
+    }
+
+    /// Wrap a fetch operation with metadata tracking
+    private func fetchWithMetadata<T>(
+        source: String,
+        recordType: String,
+        options: Options,
+        fetcher: () async throws -> [T]
+    ) async throws -> [T] {
+        // Check if we should skip this source based on --source flag
+        if let specificSource = options.specificSource, specificSource != source {
+            print("   ⏭️  Skipping \(source) (--source=\(specificSource))")
+            return []
+        }
+
+        // Check throttling
+        let (shouldFetch, existingMetadata) = await shouldFetch(
+            source: source,
+            recordType: recordType,
+            force: options.force
+        )
+
+        if !shouldFetch {
+            if let metadata = existingMetadata {
+                let timeSinceLastFetch = Date().timeIntervalSince(metadata.lastFetchedAt)
+                let minInterval = configuration.minimumInterval(for: source) ?? 0
+                let timeRemaining = minInterval - timeSinceLastFetch
+                print("   ⏰ Skipping \(source) (last fetched \(Int(timeSinceLastFetch / 60))m ago, wait \(Int(timeRemaining / 60))m)")
+            }
+            return []
+        }
+
+        // Perform the fetch with timing
+        let startTime = Date()
+        var fetchError: Error?
+        var recordCount = 0
+
+        do {
+            let results = try await fetcher()
+            recordCount = results.count
+
+            // Update metadata on success
+            if let cloudKit = cloudKitService {
+                let metadata = DataSourceMetadata(
+                    sourceName: source,
+                    recordTypeName: recordType,
+                    lastFetchedAt: startTime,
+                    sourceUpdatedAt: existingMetadata?.sourceUpdatedAt,
+                    recordCount: recordCount,
+                    fetchDurationSeconds: Date().timeIntervalSince(startTime),
+                    lastError: nil
+                )
+
+                do {
+                    try await cloudKit.syncDataSourceMetadata([metadata])
+                } catch {
+                    print("   ⚠️  Failed to update metadata for \(source): \(error)")
+                }
+            }
+
+            return results
+        } catch {
+            fetchError = error
+
+            // Update metadata on error
+            if let cloudKit = cloudKitService {
+                let metadata = DataSourceMetadata(
+                    sourceName: source,
+                    recordTypeName: recordType,
+                    lastFetchedAt: startTime,
+                    sourceUpdatedAt: existingMetadata?.sourceUpdatedAt,
+                    recordCount: 0,
+                    fetchDurationSeconds: Date().timeIntervalSince(startTime),
+                    lastError: error.localizedDescription
+                )
+
+                do {
+                    try await cloudKit.syncDataSourceMetadata([metadata])
+                } catch {
+                    print("   ⚠️  Failed to update metadata for \(source): \(error)")
+                }
+            }
+
+            throw error
+        }
+    }
+
     // MARK: - Private Fetching Methods
 
     private func fetchRestoreImages(options: Options) async throws -> [RestoreImageRecord] {
@@ -68,9 +209,17 @@ struct DataSourcePipeline: Sendable {
 
         // Fetch from ipsw.me
         do {
-            let ipswImages = try await IPSWFetcher().fetch()
+            let ipswImages = try await fetchWithMetadata(
+                source: "ipsw.me",
+                recordType: "RestoreImage",
+                options: options
+            ) {
+                try await IPSWFetcher().fetch()
+            }
             allImages.append(contentsOf: ipswImages)
-            print("   ✓ ipsw.me: \(ipswImages.count) images")
+            if !ipswImages.isEmpty {
+                print("   ✓ ipsw.me: \(ipswImages.count) images")
+            }
         } catch {
             print("   ⚠️  ipsw.me failed: \(error)")
             throw error
@@ -78,9 +227,20 @@ struct DataSourcePipeline: Sendable {
 
         // Fetch from MESU
         do {
-            if let mesuImage = try await MESUFetcher().fetch() {
-                allImages.append(mesuImage)
-                print("   ✓ MESU: 1 image")
+            let mesuImages = try await fetchWithMetadata(
+                source: "mesu.apple.com",
+                recordType: "RestoreImage",
+                options: options
+            ) {
+                if let image = try await MESUFetcher().fetch() {
+                    return [image]
+                } else {
+                    return []
+                }
+            }
+            allImages.append(contentsOf: mesuImages)
+            if !mesuImages.isEmpty {
+                print("   ✓ MESU: \(mesuImages.count) image")
             }
         } catch {
             print("   ⚠️  MESU failed: \(error)")
@@ -90,9 +250,17 @@ struct DataSourcePipeline: Sendable {
         // Fetch from AppleDB
         if options.includeAppleDB {
             do {
-                let appleDBImages = try await AppleDBFetcher().fetch()
+                let appleDBImages = try await fetchWithMetadata(
+                    source: "appledb.dev",
+                    recordType: "RestoreImage",
+                    options: options
+                ) {
+                    try await AppleDBFetcher().fetch()
+                }
                 allImages.append(contentsOf: appleDBImages)
-                print("   ✓ AppleDB: \(appleDBImages.count) images")
+                if !appleDBImages.isEmpty {
+                    print("   ✓ AppleDB: \(appleDBImages.count) images")
+                }
             } catch {
                 print("   ⚠️  AppleDB failed: \(error)")
                 // Don't throw - continue with other sources
@@ -102,9 +270,17 @@ struct DataSourcePipeline: Sendable {
         // Fetch from Mr. Macintosh (betas)
         if options.includeBetaReleases {
             do {
-                let mrMacImages = try await MrMacintoshFetcher().fetch()
+                let mrMacImages = try await fetchWithMetadata(
+                    source: "mrmacintosh.com",
+                    recordType: "RestoreImage",
+                    options: options
+                ) {
+                    try await MrMacintoshFetcher().fetch()
+                }
                 allImages.append(contentsOf: mrMacImages)
-                print("   ✓ Mr. Macintosh: \(mrMacImages.count) images")
+                if !mrMacImages.isEmpty {
+                    print("   ✓ Mr. Macintosh: \(mrMacImages.count) images")
+                }
             } catch {
                 print("   ⚠️  Mr. Macintosh failed: \(error)")
                 throw error
@@ -114,9 +290,17 @@ struct DataSourcePipeline: Sendable {
         // Fetch from TheAppleWiki
         if options.includeTheAppleWiki {
             do {
-                let wikiImages = try await TheAppleWikiFetcher().fetch()
+                let wikiImages = try await fetchWithMetadata(
+                    source: "theapplewiki.com",
+                    recordType: "RestoreImage",
+                    options: options
+                ) {
+                    try await TheAppleWikiFetcher().fetch()
+                }
                 allImages.append(contentsOf: wikiImages)
-                print("   ✓ TheAppleWiki: \(wikiImages.count) images")
+                if !wikiImages.isEmpty {
+                    print("   ✓ TheAppleWiki: \(wikiImages.count) images")
+                }
             } catch {
                 print("   ⚠️  TheAppleWiki failed: \(error)")
                 throw error
@@ -135,7 +319,18 @@ struct DataSourcePipeline: Sendable {
             return []
         }
 
-        let versions = try await XcodeReleasesFetcher().fetch()
+        let versions = try await fetchWithMetadata(
+            source: "xcodereleases.com",
+            recordType: "XcodeVersion",
+            options: options
+        ) {
+            try await XcodeReleasesFetcher().fetch()
+        }
+
+        if !versions.isEmpty {
+            print("   ✓ xcodereleases.com: \(versions.count) versions")
+        }
+
         return deduplicateXcodeVersions(versions)
     }
 
@@ -144,7 +339,18 @@ struct DataSourcePipeline: Sendable {
             return []
         }
 
-        let versions = try await SwiftVersionFetcher().fetch()
+        let versions = try await fetchWithMetadata(
+            source: "swiftversion.net",
+            recordType: "SwiftVersion",
+            options: options
+        ) {
+            try await SwiftVersionFetcher().fetch()
+        }
+
+        if !versions.isEmpty {
+            print("   ✓ swiftversion.net: \(versions.count) versions")
+        }
+
         return deduplicateSwiftVersions(versions)
     }
 

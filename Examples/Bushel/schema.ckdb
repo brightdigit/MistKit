@@ -46,3 +46,17 @@ RECORD TYPE SwiftVersion (
     GRANT READ, CREATE, WRITE TO "_icloud",
     GRANT READ TO "_world"
 );
+
+RECORD TYPE DataSourceMetadata (
+    "sourceName"             STRING QUERYABLE SORTABLE,
+    "recordTypeName"         STRING QUERYABLE,
+    "lastFetchedAt"          TIMESTAMP QUERYABLE SORTABLE,
+    "sourceUpdatedAt"        TIMESTAMP QUERYABLE SORTABLE,
+    "recordCount"            INT64,
+    "fetchDurationSeconds"   DOUBLE,
+    "lastError"              STRING,
+
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
+    GRANT READ TO "_world"
+);

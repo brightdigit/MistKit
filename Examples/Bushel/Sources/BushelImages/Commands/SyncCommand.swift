@@ -50,6 +50,17 @@ struct SyncCommand: AsyncParsableCommand {
     @Flag(name: .shortAndLong, help: "Enable verbose logging to see detailed CloudKit operations and learn MistKit usage patterns")
     var verbose: Bool = false
 
+    // MARK: - Throttling Options
+
+    @Flag(name: .long, help: "Force fetch from all sources, ignoring minimum fetch intervals")
+    var force: Bool = false
+
+    @Option(name: .long, help: "Minimum interval between fetches in seconds (overrides default intervals)")
+    var minInterval: Int?
+
+    @Option(name: .long, help: "Fetch from only this specific source (e.g., 'appledb.dev', 'ipsw.me')")
+    var source: String?
+
     // MARK: - Execution
 
     mutating func run() async throws {
@@ -89,11 +100,15 @@ struct SyncCommand: AsyncParsableCommand {
         // Determine what to sync
         let options = buildSyncOptions()
 
+        // Build fetch configuration
+        let configuration = buildFetchConfiguration()
+
         // Create sync engine
         let syncEngine = try SyncEngine(
             containerIdentifier: containerIdentifier,
             keyID: resolvedKeyID,
-            privateKeyPath: resolvedKeyFile
+            privateKeyPath: resolvedKeyFile,
+            configuration: configuration
         )
 
         // Execute sync
@@ -131,10 +146,30 @@ struct SyncCommand: AsyncParsableCommand {
             pipelineOptions.includeTheAppleWiki = false
         }
 
+        // Apply throttling options
+        pipelineOptions.force = force
+        pipelineOptions.specificSource = source
+
         return SyncEngine.SyncOptions(
             dryRun: dryRun,
             pipelineOptions: pipelineOptions
         )
+    }
+
+    private func buildFetchConfiguration() -> FetchConfiguration {
+        // Load configuration from environment
+        var config = FetchConfiguration.loadFromEnvironment()
+
+        // Override with command-line flag if provided
+        if let interval = minInterval {
+            config = FetchConfiguration(
+                globalMinimumFetchInterval: TimeInterval(interval),
+                perSourceIntervals: config.perSourceIntervals,
+                useDefaults: true
+            )
+        }
+
+        return config
     }
 
     private func printSuccess(_ result: SyncEngine.SyncResult) {
