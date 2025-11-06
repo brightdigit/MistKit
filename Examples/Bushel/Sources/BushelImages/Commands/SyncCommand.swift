@@ -50,6 +50,9 @@ struct SyncCommand: AsyncParsableCommand {
     @Flag(name: .shortAndLong, help: "Enable verbose logging to see detailed CloudKit operations and learn MistKit usage patterns")
     var verbose: Bool = false
 
+    @Flag(name: .long, help: "Disable log redaction for debugging (shows actual CloudKit field names in errors)")
+    var noRedaction: Bool = false
+
     // MARK: - Throttling Options
 
     @Flag(name: .long, help: "Force fetch from all sources, ignoring minimum fetch intervals")
@@ -66,6 +69,11 @@ struct SyncCommand: AsyncParsableCommand {
     mutating func run() async throws {
         // Enable verbose logging if requested
         BushelLogger.isVerbose = verbose
+
+        // Disable log redaction for debugging if requested
+        if noRedaction {
+            setenv("MISTKIT_DISABLE_LOG_REDACTION", "1", 1)
+        }
 
         // Get Server-to-Server credentials from environment if not provided
         let resolvedKeyID = keyID.isEmpty ?

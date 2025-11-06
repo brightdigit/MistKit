@@ -44,13 +44,14 @@ internal enum RecordFieldConverter {
     case .string(let value):
       return Components.Schemas.FieldValue(value: .stringValue(value), type: .string)
     case .int64(let value):
-      return Components.Schemas.FieldValue(value: .int64Value(value), type: nil)
+      return Components.Schemas.FieldValue(value: .int64Value(value), type: .int64)
     case .double(let value):
-      return Components.Schemas.FieldValue(value: .doubleValue(value), type: nil)
+      return Components.Schemas.FieldValue(value: .doubleValue(value), type: .double)
     case .bytes(let value):
       return Components.Schemas.FieldValue(value: .bytesValue(value), type: .bytes)
     case .date(let value):
-      return Components.Schemas.FieldValue(value: .dateValue(value.timeIntervalSince1970 * 1000), type: .timestamp)
+      let milliseconds = Int64(value.timeIntervalSince1970 * 1000)
+      return Components.Schemas.FieldValue(value: .dateValue(Double(milliseconds)), type: .timestamp)
     case .location(let location):
       return convertLocationToComponents(location)
     case .reference(let reference):

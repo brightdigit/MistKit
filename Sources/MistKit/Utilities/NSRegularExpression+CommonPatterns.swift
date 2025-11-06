@@ -47,8 +47,8 @@ extension NSRegularExpression {
   /// Web auth tokens (base64-like strings) for masking
   private static let maskWebAuthTokenPattern = "[A-Za-z0-9+/]{20,}={0,2}"
 
-  /// Key IDs (alphanumeric strings) for masking
-  private static let maskKeyIdPattern = "[A-Za-z0-9]{8,}"
+  /// Key IDs (alphanumeric strings) for masking - CloudKit key IDs are typically 40+ hex characters
+  private static let maskKeyIdPattern = "[a-fA-F0-9]{40,}"
 
   /// Generic token patterns for masking
   private static let maskGenericTokenPattern = "token[=:][\\s]*[A-Za-z0-9+/=]+"

@@ -36,9 +36,17 @@ struct StatusCommand: AsyncParsableCommand {
   @Flag(name: .long, help: "Show detailed timing information")
   var detailed: Bool = false
 
+  @Flag(name: .long, help: "Disable log redaction for debugging (shows actual CloudKit field names in errors)")
+  var noRedaction: Bool = false
+
   // MARK: - Execution
 
   mutating func run() async throws {
+    // Disable log redaction for debugging if requested
+    if noRedaction {
+      setenv("MISTKIT_DISABLE_LOG_REDACTION", "1", 1)
+    }
+
     // Get Server-to-Server credentials from environment if not provided
     let resolvedKeyID = keyID.isEmpty ?
       ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"] ?? "" :
