@@ -15,6 +15,7 @@ struct BushelImagesCLI: AsyncParsableCommand {
         subcommands: [
             SyncCommand.self,
             StatusCommand.self,
+            ListCommand.self,
             ExportCommand.self,
             ClearCommand.self
         ],
