@@ -1,29 +1,30 @@
 import Foundation
 
 /// Fetcher for macOS restore images using AppleDB API
-struct AppleDBFetcher: Sendable {
+struct AppleDBFetcher: DataSourceFetcher, Sendable {
+    typealias Record = [RestoreImageRecord]
     private let deviceIdentifier = "VirtualMac2,1"
 
     /// Fetch all VirtualMac2,1 restore images from AppleDB
     func fetch() async throws -> [RestoreImageRecord] {
         // Fetch when macOS data was last updated using GitHub API
-        let sourceUpdatedAt = await fetchGitHubLastCommitDate()
+        let sourceUpdatedAt = await Self.fetchGitHubLastCommitDate()
 
         // Fetch AppleDB data
-        let entries = try await fetchAppleDBData()
+        let entries = try await Self.fetchAppleDBData()
 
         // Filter for VirtualMac2,1 and map to RestoreImageRecord
         return entries
             .filter { $0.deviceMap.contains(deviceIdentifier) }
             .compactMap { entry in
-                mapToRestoreImage(entry: entry, sourceUpdatedAt: sourceUpdatedAt)
+                Self.mapToRestoreImage(entry: entry, sourceUpdatedAt: sourceUpdatedAt, deviceIdentifier: deviceIdentifier)
             }
     }
 
     // MARK: - Private Methods
 
     /// Fetch the last commit date for macOS data from GitHub API
-    private func fetchGitHubLastCommitDate() async -> Date? {
+    private static func fetchGitHubLastCommitDate() async -> Date? {
         do {
             let url = URL(string: "https://api.github.com/repos/littlebyteorg/appledb/commits?path=osFiles/macOS&per_page=1")!
 
@@ -55,7 +56,7 @@ struct AppleDBFetcher: Sendable {
     }
 
     /// Fetch macOS data from AppleDB API
-    private func fetchAppleDBData() async throws -> [AppleDBEntry] {
+    private static func fetchAppleDBData() async throws -> [AppleDBEntry] {
         let url = URL(string: "https://api.appledb.dev/ios/macOS/main.json")!
 
         BushelLogger.verbose("Fetching AppleDB data from \(url)", subsystem: BushelLogger.dataSource)
@@ -70,7 +71,7 @@ struct AppleDBFetcher: Sendable {
     }
 
     /// Map an AppleDB entry to RestoreImageRecord
-    private func mapToRestoreImage(entry: AppleDBEntry, sourceUpdatedAt: Date?) -> RestoreImageRecord? {
+    private static func mapToRestoreImage(entry: AppleDBEntry, sourceUpdatedAt: Date?, deviceIdentifier: String) -> RestoreImageRecord? {
         // Skip entries without a build number (required for unique identification)
         guard let build = entry.build else {
             BushelLogger.verbose("Skipping AppleDB entry without build number: \(entry.version)", subsystem: BushelLogger.dataSource)

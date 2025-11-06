@@ -1,7 +1,8 @@
 import Foundation
 
 /// Fetcher for Xcode releases from xcodereleases.com JSON API
-struct XcodeReleasesFetcher: Sendable {
+struct XcodeReleasesFetcher: DataSourceFetcher, Sendable {
+    typealias Record = [XcodeVersionRecord]
     // MARK: - API Models
 
     private struct XcodeRelease: Codable {

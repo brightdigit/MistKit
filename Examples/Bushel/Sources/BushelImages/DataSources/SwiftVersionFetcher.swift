@@ -2,7 +2,8 @@ import Foundation
 import SwiftSoup
 
 /// Fetcher for Swift compiler versions from swiftversion.net
-struct SwiftVersionFetcher: Sendable {
+struct SwiftVersionFetcher: DataSourceFetcher, Sendable {
+    typealias Record = [SwiftVersionRecord]
     // MARK: - Internal Models
 
     private struct SwiftVersionEntry {

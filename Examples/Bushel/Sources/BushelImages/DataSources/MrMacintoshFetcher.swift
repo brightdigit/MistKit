@@ -2,7 +2,8 @@ import Foundation
 import SwiftSoup
 
 /// Fetcher for macOS beta/RC restore images from Mr. Macintosh database
-struct MrMacintoshFetcher: Sendable {
+struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
+    typealias Record = [RestoreImageRecord]
     // MARK: - Public API
 
     /// Fetch beta and RC restore images from Mr. Macintosh
@@ -36,29 +37,38 @@ struct MrMacintoshFetcher: Sendable {
         // Find all table rows
         let rows = try doc.select("table tr")
 
-        var records: [RestoreImageRecord] = []
+        let records = rows.compactMap { row in
+            parseTableRow(row, pageUpdatedAt: pageUpdatedAt)
+        }
 
-        for row in rows {
+        return records
+    }
+
+    // MARK: - Helpers
+
+    /// Parse a table row into a RestoreImageRecord
+    private func parseTableRow(_ row: SwiftSoup.Element, pageUpdatedAt: Date?) -> RestoreImageRecord? {
+        do {
             let cells = try row.select("td")
-            guard cells.count >= 3 else { continue }
+            guard cells.count >= 3 else { return nil }
 
             // Expected columns: Download Link | Version | Date | [Optional: Signed Status]
             // Extract filename and URL from first cell
             guard let linkElement = try cells[0].select("a").first(),
                   let downloadURL = try? linkElement.attr("href"),
                   !downloadURL.isEmpty else {
-                continue
+                return nil
             }
 
             let filename = try linkElement.text()
 
             // Parse filename like "UniversalMac_26.1_25B78_Restore.ipsw"
             // Extract version and build from filename
-            guard filename.contains("UniversalMac") else { continue }
+            guard filename.contains("UniversalMac") else { return nil }
 
             let components = filename.replacingOccurrences(of: ".ipsw", with: "")
                 .components(separatedBy: "_")
-            guard components.count >= 3 else { continue }
+            guard components.count >= 3 else { return nil }
 
             let version = components[1]
             let buildNumber = components[2]
@@ -79,7 +89,7 @@ struct MrMacintoshFetcher: Sendable {
                               versionFromCell.lowercased().contains("beta") ||
                               versionFromCell.lowercased().contains("rc")
 
-            records.append(RestoreImageRecord(
+            return RestoreImageRecord(
                 version: version,
                 buildNumber: buildNumber,
                 releaseDate: releaseDate,
@@ -92,13 +102,12 @@ struct MrMacintoshFetcher: Sendable {
                 source: "mrmacintosh.com",
                 notes: nil,
                 sourceUpdatedAt: pageUpdatedAt // Date when Mr. Macintosh last updated the page
-            ))
+            )
+        } catch {
+            BushelLogger.verbose("Failed to parse table row: \(error)", subsystem: BushelLogger.dataSource)
+            return nil
         }
-
-        return records
     }
-
-    // MARK: - Helpers
 
     /// Parse date from Mr. Macintosh format (MM/DD/YY or M/D or M/DD)
     private func parseDate(from string: String) -> Date? {

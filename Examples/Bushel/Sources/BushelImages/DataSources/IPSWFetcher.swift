@@ -3,7 +3,8 @@ import IPSWDownloads
 import OpenAPIURLSession
 
 /// Fetcher for macOS restore images using the IPSWDownloads package
-struct IPSWFetcher: Sendable {
+struct IPSWFetcher: DataSourceFetcher, Sendable {
+    typealias Record = [RestoreImageRecord]
     /// Fetch all VirtualMac2,1 restore images from ipsw.me
     func fetch() async throws -> [RestoreImageRecord] {
         // Fetch Last-Modified header to know when ipsw.me data was updated
