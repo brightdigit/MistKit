@@ -46,7 +46,7 @@ struct XcodeReleasesFetcher: Sendable {
 
             var toDate: Date {
                 let components = DateComponents(year: year, month: month, day: day)
-                return Calendar.current.date(from: components)!
+                return Calendar.current.date(from: components) ?? Date()
             }
         }
 

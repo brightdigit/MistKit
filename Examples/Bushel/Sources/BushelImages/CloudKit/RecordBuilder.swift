@@ -12,16 +12,16 @@ enum RecordBuilder {
             "buildNumber": .string(record.buildNumber),
             "releaseDate": .date(record.releaseDate),
             "downloadURL": .string(record.downloadURL),
-            "fileSize": .int64(Int(record.fileSize)),
+            "fileSize": .int64(record.fileSize),
             "sha256Hash": .string(record.sha256Hash),
             "sha1Hash": .string(record.sha1Hash),
-            "isPrerelease": .int64(record.isPrerelease ? 1 : 0),
+            "isPrerelease": .boolean(record.isPrerelease),
             "source": .string(record.source)
         ]
 
         // Only include isSigned if we have a known value
         if let isSigned = record.isSigned {
-            fields["isSigned"] = .int64(isSigned ? 1 : 0)
+            fields["isSigned"] = .boolean(isSigned)
         }
 
         if let notes = record.notes {
@@ -44,7 +44,7 @@ enum RecordBuilder {
             "version": .string(record.version),
             "buildNumber": .string(record.buildNumber),
             "releaseDate": .date(record.releaseDate),
-            "isPrerelease": .int64(record.isPrerelease ? 1 : 0)
+            "isPrerelease": .boolean(record.isPrerelease)
         ]
 
         if let downloadURL = record.downloadURL {
@@ -52,7 +52,7 @@ enum RecordBuilder {
         }
 
         if let fileSize = record.fileSize {
-            fields["fileSize"] = .int64(Int(fileSize))
+            fields["fileSize"] = .int64(fileSize)
         }
 
         if let minimumMacOS = record.minimumMacOS {
@@ -92,7 +92,7 @@ enum RecordBuilder {
         var fields: [String: FieldValue] = [
             "version": .string(record.version),
             "releaseDate": .date(record.releaseDate),
-            "isPrerelease": .int64(record.isPrerelease ? 1 : 0)
+            "isPrerelease": .boolean(record.isPrerelease)
         ]
 
         if let downloadURL = record.downloadURL {

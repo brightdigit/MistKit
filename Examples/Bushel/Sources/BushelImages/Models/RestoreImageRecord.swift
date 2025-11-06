@@ -15,7 +15,7 @@ struct RestoreImageRecord: Codable, Sendable {
     var downloadURL: String
 
     /// File size in bytes
-    var fileSize: Int64
+    var fileSize: Int
 
     /// SHA-256 checksum for integrity verification
     var sha256Hash: String

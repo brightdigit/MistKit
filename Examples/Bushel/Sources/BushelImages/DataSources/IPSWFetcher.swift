@@ -27,7 +27,7 @@ struct IPSWFetcher: Sendable {
                 buildNumber: firmware.buildid,
                 releaseDate: firmware.releasedate,
                 downloadURL: firmware.url.absoluteString,
-                fileSize: Int64(firmware.filesize),
+                fileSize: firmware.filesize,
                 sha256Hash: "", // Not provided by ipsw.me API
                 sha1Hash: firmware.sha1sum?.hexString ?? "",
                 isSigned: firmware.signed,

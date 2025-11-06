@@ -194,7 +194,7 @@ struct BushelCloudKitService: Sendable {
         }
 
         let sourceUpdatedAt = record.fields["sourceUpdatedAt"]?.dateValue
-        let recordCount = record.fields["recordCount"]?.int64Value ?? 0
+        let recordCount = record.fields["recordCount"]?.intValue ?? 0
         let fetchDurationSeconds = record.fields["fetchDurationSeconds"]?.doubleValue ?? 0
         let lastError = record.fields["lastError"]?.stringValue
 

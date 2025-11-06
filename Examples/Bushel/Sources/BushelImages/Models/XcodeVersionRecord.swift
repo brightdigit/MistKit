@@ -15,7 +15,7 @@ struct XcodeVersionRecord: Codable, Sendable {
     var downloadURL: String?
 
     /// Download size in bytes
-    var fileSize: Int64?
+    var fileSize: Int?
 
     /// Beta/RC indicator
     var isPrerelease: Bool

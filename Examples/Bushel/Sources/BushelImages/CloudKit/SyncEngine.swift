@@ -28,17 +28,14 @@ struct SyncEngine: Sendable {
         privateKeyPath: String,
         configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
     ) throws {
-        self.cloudKitService = try BushelCloudKitService(
+        let service = try BushelCloudKitService(
             containerIdentifier: containerIdentifier,
             keyID: keyID,
             privateKeyPath: privateKeyPath
         )
+        self.cloudKitService = service
         self.pipeline = DataSourcePipeline(
-            cloudKitService: try? BushelCloudKitService(
-                containerIdentifier: containerIdentifier,
-                keyID: keyID,
-                privateKeyPath: privateKeyPath
-            ),
+            cloudKitService: service,
             configuration: configuration
         )
     }

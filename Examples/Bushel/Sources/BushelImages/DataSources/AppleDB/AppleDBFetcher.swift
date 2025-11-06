@@ -109,7 +109,7 @@ struct AppleDBFetcher: Sendable {
             buildNumber: build,
             releaseDate: releaseDate ?? Date(), // Fallback to current date
             downloadURL: link.url,
-            fileSize: Int64(ipswSource.size ?? 0),
+            fileSize: ipswSource.size ?? 0,
             sha256Hash: ipswSource.hashes?.sha2_256 ?? "",
             sha1Hash: ipswSource.hashes?.sha1 ?? "",
             isSigned: isSigned,

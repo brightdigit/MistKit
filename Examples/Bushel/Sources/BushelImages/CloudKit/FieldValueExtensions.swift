@@ -13,8 +13,8 @@ extension FieldValue {
     return nil
   }
 
-  /// Extract an Int64 value if this is an .int64 case
-  var int64Value: Int? {
+  /// Extract an Int value if this is an .int64 case
+  var intValue: Int? {
     if case .int64(let value) = self {
       return value
     }
