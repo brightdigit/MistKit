@@ -2,8 +2,13 @@ import Foundation
 import MistKit
 
 /// Builds CloudKit record operations from model types using public MistKit APIs
+///
+/// **Deprecated**: Use the `CloudKitRecord` protocol instead. Models now implement
+/// `toCloudKitFields()` directly, and the generic `sync<T>()` method handles conversion.
+@available(*, deprecated, message: "Use CloudKitRecord protocol and model.toCloudKitFields() instead")
 enum RecordBuilder {
     /// Build a record operation for RestoreImageRecord
+    @available(*, deprecated, message: "Use RestoreImageRecord.toCloudKitFields() via CloudKitRecord protocol")
     static func buildRestoreImageOperation(
         _ record: RestoreImageRecord
     ) -> RecordOperation {
@@ -37,6 +42,7 @@ enum RecordBuilder {
     }
 
     /// Build a record operation for XcodeVersionRecord
+    @available(*, deprecated, message: "Use XcodeVersionRecord.toCloudKitFields() via CloudKitRecord protocol")
     static func buildXcodeVersionOperation(
         _ record: XcodeVersionRecord
     ) -> RecordOperation {
@@ -86,6 +92,7 @@ enum RecordBuilder {
     }
 
     /// Build a record operation for SwiftVersionRecord
+    @available(*, deprecated, message: "Use SwiftVersionRecord.toCloudKitFields() via CloudKitRecord protocol")
     static func buildSwiftVersionOperation(
         _ record: SwiftVersionRecord
     ) -> RecordOperation {
@@ -112,6 +119,7 @@ enum RecordBuilder {
     }
 
     /// Build a record operation for DataSourceMetadata
+    @available(*, deprecated, message: "Use DataSourceMetadata.toCloudKitFields() via CloudKitRecord protocol")
     static func buildDataSourceMetadataOperation(
         _ metadata: DataSourceMetadata
     ) -> RecordOperation {

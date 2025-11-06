@@ -86,13 +86,13 @@ struct ListCommand: AsyncParsableCommand {
             try await cloudKitService.listAllRecords()
         } else {
             if restoreImages {
-                try await cloudKitService.listRestoreImages()
+                try await cloudKitService.list(RestoreImageRecord.self)
             }
             if xcodeVersions {
-                try await cloudKitService.listXcodeVersions()
+                try await cloudKitService.list(XcodeVersionRecord.self)
             }
             if swiftVersions {
-                try await cloudKitService.listSwiftVersions()
+                try await cloudKitService.list(SwiftVersionRecord.self)
             }
         }
     }

@@ -10,8 +10,13 @@ import MistKit
 /// 4. Use service.modifyRecords() and service.queryRecords() for operations
 ///
 /// This pattern allows command-line tools and servers to access CloudKit without user authentication.
-struct BushelCloudKitService: Sendable, RecordManaging {
+struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCollection {
     private let service: CloudKitService
+
+    // MARK: - CloudKitRecordCollection
+
+    /// All CloudKit record types managed by this service (using variadic generics)
+    typealias RecordTypes = (RestoreImageRecord, XcodeVersionRecord, SwiftVersionRecord)
 
     // MARK: - Initialization
 

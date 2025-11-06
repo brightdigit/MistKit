@@ -1,10 +1,10 @@
 import Foundation
 import MistKit
 
-extension RecordManaging {
+extension RecordManaging where Self: CloudKitRecordCollection {
     // MARK: - Batch Operations
 
-    /// Sync multiple records to CloudKit in batches
+    /// Sync multiple records to CloudKit in batches (convenience wrapper)
     ///
     /// **MistKit Pattern**: Records are synced in dependency order:
     /// 1. SwiftVersion (no dependencies)
@@ -12,6 +12,8 @@ extension RecordManaging {
     /// 3. XcodeVersion (references SwiftVersion and RestoreImage via CKReference)
     ///
     /// This ensures referenced records exist before creating records that reference them.
+    ///
+    /// - Note: This method calls the generic `syncAllRecords()` provided by CloudKitRecordCollection
     func syncRecords(
         restoreImages: [RestoreImageRecord],
         xcodeVersions: [XcodeVersionRecord],
@@ -22,35 +24,13 @@ extension RecordManaging {
             subsystem: BushelLogger.cloudKit
         )
 
-        // Sync in order: Swift -> RestoreImages -> Xcode (due to references)
-        try await syncSwiftVersions(swiftVersions)
-        try await syncRestoreImages(restoreImages)
-        try await syncXcodeVersions(xcodeVersions)
-    }
+        // Build dictionary for generic syncAllRecords
+        let recordsByType: [String: [any CloudKitRecord]] = [
+            "SwiftVersion": swiftVersions,
+            "RestoreImage": restoreImages,
+            "XcodeVersion": xcodeVersions
+        ]
 
-    // MARK: - Individual Type Operations
-
-    /// Sync RestoreImage records to CloudKit
-    func syncRestoreImages(_ records: [RestoreImageRecord]) async throws {
-        let operations = records.map(RecordBuilder.buildRestoreImageOperation)
-        try await executeBatchOperations(operations, recordType: "RestoreImage")
-    }
-
-    /// Sync XcodeVersion records to CloudKit
-    func syncXcodeVersions(_ records: [XcodeVersionRecord]) async throws {
-        let operations = records.map(RecordBuilder.buildXcodeVersionOperation)
-        try await executeBatchOperations(operations, recordType: "XcodeVersion")
-    }
-
-    /// Sync SwiftVersion records to CloudKit
-    func syncSwiftVersions(_ records: [SwiftVersionRecord]) async throws {
-        let operations = records.map(RecordBuilder.buildSwiftVersionOperation)
-        try await executeBatchOperations(operations, recordType: "SwiftVersion")
-    }
-
-    /// Sync DataSourceMetadata records to CloudKit
-    func syncDataSourceMetadata(_ records: [DataSourceMetadata]) async throws {
-        let operations = records.map(RecordBuilder.buildDataSourceMetadataOperation)
-        try await executeBatchOperations(operations, recordType: "DataSourceMetadata")
+        try await syncAllRecords(recordsByType)
     }
 }

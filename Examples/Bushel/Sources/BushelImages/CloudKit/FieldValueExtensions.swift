@@ -45,4 +45,12 @@ extension FieldValue {
         }
         return nil
     }
+
+    /// Extract a Reference value if this is a .reference case
+    var referenceValue: FieldValue.Reference? {
+        if case .reference(let value) = self {
+            return value
+        }
+        return nil
+    }
 }

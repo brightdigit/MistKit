@@ -167,7 +167,7 @@ struct DataSourcePipeline: Sendable {
                 )
 
                 do {
-                    try await cloudKit.syncDataSourceMetadata([metadata])
+                    try await cloudKit.sync([metadata])
                 } catch {
                     print("   ⚠️  Failed to update metadata for \(source): \(error)")
                 }
@@ -190,7 +190,7 @@ struct DataSourcePipeline: Sendable {
                 )
 
                 do {
-                    try await cloudKit.syncDataSourceMetadata([metadata])
+                    try await cloudKit.sync([metadata])
                 } catch {
                     print("   ⚠️  Failed to update metadata for \(source): \(error)")
                 }
