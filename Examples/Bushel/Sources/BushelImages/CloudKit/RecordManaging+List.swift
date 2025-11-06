@@ -1,7 +1,7 @@
 import Foundation
 import MistKit
 
-extension BushelCloudKitService {
+extension RecordManaging {
     // MARK: - List Operations
 
     /// List all RestoreImage records with formatted output

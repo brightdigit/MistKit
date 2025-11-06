@@ -1,7 +1,7 @@
 import Foundation
 import MistKit
 
-extension BushelCloudKitService {
+extension RecordManaging {
     // MARK: - Delete Operations
 
     /// Delete all records from CloudKit (for all record types)

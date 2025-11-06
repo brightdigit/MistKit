@@ -1,13 +1,8 @@
 import Foundation
 import MistKit
 
-extension BushelCloudKitService {
+extension RecordManaging {
     // MARK: - Query Operations
-
-    /// Query all records of a given type
-    func queryRecords(recordType: String) async throws -> [RecordInfo] {
-        try await service.queryRecords(recordType: recordType, limit: 1000)
-    }
 
     /// Query a specific DataSourceMetadata record
     ///
@@ -15,10 +10,7 @@ extension BushelCloudKitService {
     /// Record name format: "metadata-{sourceName}-{recordType}"
     func queryDataSourceMetadata(source: String, recordType: String) async throws -> DataSourceMetadata? {
         let targetRecordName = "metadata-\(source)-\(recordType)"
-        let results = try await service.queryRecords(
-            recordType: "DataSourceMetadata",
-            limit: 1000
-        )
+        let results = try await queryRecords(recordType: "DataSourceMetadata")
 
         // Find the specific record we're looking for
         guard let record = results.first(where: { $0.recordName == targetRecordName }) else {
