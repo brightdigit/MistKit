@@ -48,7 +48,7 @@ Server-to-Server (S2S) authentication allows your backend services, scripts, or 
 ### 1. Apple Developer Account
 
 - Active Apple Developer Program membership
-- Access to CloudKit Dashboard at https://icloud.developer.apple.com/
+- Access to [CloudKit Dashboard](https://icloud.developer.apple.com/)
 
 ### 2. CloudKit Container
 
@@ -91,7 +91,7 @@ openssl ec -in eckey.pem -pubout -out eckey_pub.pem
 ### Step 2: Add Key to CloudKit Dashboard
 
 1. **Navigate to CloudKit Dashboard**
-   - Go to https://icloud.developer.apple.com/
+   - Go to [CloudKit Dashboard](https://icloud.developer.apple.com/)
    - Select your Team
    - Select your Container
 
@@ -141,7 +141,7 @@ CloudKit schemas define your data structure and **security permissions**. For S2
 
 Create a `schema.ckdb` file:
 
-```
+```text
 DEFINE SCHEMA
 
 RECORD TYPE YourRecordType (
@@ -159,7 +159,7 @@ RECORD TYPE YourRecordType (
 
 **For Server-to-Server authentication to work, you MUST include:**
 
-```
+```text
 GRANT READ, CREATE, WRITE TO "_creator",
 GRANT READ, CREATE, WRITE TO "_icloud",
 ```
@@ -175,7 +175,7 @@ GRANT READ, CREATE, WRITE TO "_icloud",
 
 ### Example: Bushel Schema
 
-```
+```text
 DEFINE SCHEMA
 
 RECORD TYPE RestoreImage (
@@ -256,7 +256,7 @@ cat current-schema.ckdb | grep -A 2 "GRANT"
 ```
 
 You should see:
-```
+```text
 GRANT READ, CREATE, WRITE TO "_creator",
 GRANT READ, CREATE, WRITE TO "_icloud",
 GRANT READ TO "_world"
@@ -295,26 +295,26 @@ When you use Server-to-Server authentication:
 ### Common Permission Patterns
 
 **Public read-only data:**
-```
+```text
 GRANT READ TO "_world"
 ```
 
 **User-generated content:**
-```
+```text
 GRANT READ, CREATE, WRITE TO "_creator",
 GRANT READ, WRITE TO "_icloud",
 GRANT READ TO "_world"
 ```
 
 **Server-managed data (our use case):**
-```
+```text
 GRANT READ, CREATE, WRITE TO "_creator",
 GRANT READ, CREATE, WRITE TO "_icloud",
 GRANT READ TO "_world"
 ```
 
 **Admin-only data:**
-```
+```text
 GRANT READ, CREATE, WRITE TO "_creator"
 ```
 
@@ -326,7 +326,7 @@ The CloudKit Dashboard shows permissions with checkboxes:
 - ☑️ Write
 
 In the schema file, these map to:
-```
+```text
 GRANT READ, CREATE, WRITE TO "role_name"
 ```
 
@@ -352,14 +352,14 @@ GRANT READ, CREATE, WRITE TO "role_name"
 1. **Missing `_creator` permissions in schema**
 
    **Solution:** Update schema to include:
-   ```
+   ```text
    GRANT READ, CREATE, WRITE TO "_creator",
    ```
 
 2. **Missing `_icloud` permissions in schema**
 
    **Solution:** Update schema to include:
-   ```
+   ```text
    GRANT READ, CREATE, WRITE TO "_icloud",
    ```
 
@@ -374,7 +374,7 @@ GRANT READ, CREATE, WRITE TO "role_name"
 ### Issue 2: AUTHENTICATION_FAILED (HTTP 401)
 
 **Symptom:**
-```
+```text
 HTTP 401: Authentication failed
 ```
 
@@ -395,7 +395,7 @@ HTTP 401: Authentication failed
 ### Issue 3: Schema Syntax Errors
 
 **Symptom:**
-```
+```text
 Was expecting LIST
 Encountered "QUERYABLE" at line X, column Y
 ```
@@ -405,7 +405,7 @@ Encountered "QUERYABLE" at line X, column Y
 1. **System fields cannot have modifiers**
 
    **Bad:**
-   ```
+   ```text
    ___recordName QUERYABLE
    ```
 
@@ -426,7 +426,7 @@ Encountered "QUERYABLE" at line X, column Y
 ### Issue 4: JSON Parsing Error (HTTP 500)
 
 **Symptom:**
-```
+```text
 HTTP 500: The data couldn't be read because it isn't in the correct format
 ```
 
@@ -467,7 +467,7 @@ CloudKit doesn't have a native `BOOLEAN` type in the schema language.
 Use `INT64` with `0` for false and `1` for true:
 
 **Schema:**
-```
+```text
 isPrerelease  INT64 QUERYABLE,
 isSigned      INT64 QUERYABLE,
 ```
@@ -484,7 +484,7 @@ fields["isPrerelease"] = .int64(record.isPrerelease ? 1 : 0)
 
 ### Swift Package Structure
 
-```
+```text
 Sources/
 ├── YourApp/
 │   ├── CloudKit/
@@ -710,7 +710,7 @@ for record in records {
 
 ### 5. Verify in CloudKit Dashboard
 
-1. Go to https://icloud.developer.apple.com/
+1. Go to [CloudKit Dashboard](https://icloud.developer.apple.com/)
 2. Select your Container
 3. Navigate to **Data** in the left sidebar
 4. Select **Public Database**

@@ -20,7 +20,7 @@ This demo teaches practical CloudKit development patterns:
 
 Bushel is a comprehensive demo application showcasing how to use MistKit to:
 
-- Fetch data from multiple sources (ipsw.me, TheAppleWiki.com, xcodereleases.com, swift.org, MESU, Mr. Macintosh)
+- Fetch data from multiple sources (ipsw.me, AppleDB.dev, xcodereleases.com, swift.org, MESU, Mr. Macintosh)
 - Transform data into CloudKit-compatible record structures
 - Batch upload records to CloudKit using the Web Services REST API
 - Handle relationships between records using CloudKit References
@@ -40,10 +40,11 @@ The demo integrates with multiple data sources to gather comprehensive version i
    - macOS restore images for VirtualMac2,1
    - Build numbers, release dates, signatures, file sizes
 
-2. **TheAppleWiki.com**
-   - Historical macOS firmware data
-   - Beta and RC releases
-   - Community-maintained IPSW metadata
+2. **AppleDB.dev**
+   - Comprehensive macOS restore image database
+   - Device-specific signing status
+   - VirtualMac2,1 compatibility information
+   - Maintained by LittleByte Organization
 
 3. **XcodeReleases.com**
    - Xcode versions and build numbers
@@ -65,7 +66,7 @@ The demo integrates with multiple data sources to gather comprehensive version i
 
 ### Components
 
-```
+```text
 BushelImages/
 ├── DataSources/           # Data fetchers for external APIs
 │   ├── IPSWFetcher.swift
@@ -246,7 +247,7 @@ See [XCODE_SCHEME_SETUP.md](./XCODE_SCHEME_SETUP.md) for detailed instructions o
 
 The demo uses three record types with relationships:
 
-```
+```text
 SwiftVersion
     ↑
     | (reference)
@@ -430,7 +431,7 @@ bushel-images sync
 Bushel fetches data from multiple external sources including:
 
 - **ipsw.me** - macOS restore images for VirtualMac devices
-- **TheAppleWiki.com** - Historical IPSW data and beta releases
+- **AppleDB.dev** - Comprehensive restore image database with device-specific signing information
 - **xcodereleases.com** - Xcode versions and build information
 - **swift.org** - Swift compiler versions
 - **Apple MESU** - Official restore image metadata
@@ -465,14 +466,14 @@ The `export` command queries existing records from your CloudKit database and ex
 ### Common Beginner Issues
 
 **❌ "Private key file not found"**
-```
+```bash
 ✅ Solution: Check that your .pem file path is correct
 export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
 ls -la "$CLOUDKIT_KEY_FILE"  # Verify file exists
 ```
 
 **❌ "Authentication failed" or "Invalid signature"**
-```
+```text
 ✅ Solutions:
 1. Verify Key ID matches the key in CloudKit Dashboard
 2. Check that .pem file is the correct private key (not certificate)
@@ -481,7 +482,7 @@ ls -la "$CLOUDKIT_KEY_FILE"  # Verify file exists
 ```
 
 **❌ "Record type not found" errors**
-```
+```bash
 ✅ Solution: Set up CloudKit schema first
 cd Examples/Bushel
 ./Scripts/setup-cloudkit-schema.sh
@@ -489,13 +490,13 @@ cd Examples/Bushel
 ```
 
 **❌ Seeing duplicate records after re-sync**
-```
+```text
 ✅ This is expected behavior - Bushel creates new records each sync
 See "Limitations" section for details on incremental sync
 ```
 
 **❌ "Operation failed" with no details**
-```
+```bash
 ✅ Solution: Use --verbose flag to see CloudKit error details
 bushel-images sync --verbose
 # Look for serverErrorCode and reason in output

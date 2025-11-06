@@ -1,6 +1,6 @@
 # Bushel Demo Implementation Notes
 
-## Session Summary: TheAppleWiki Integration & S2S Authentication Refactoring
+## Session Summary: AppleDB Integration & S2S Authentication Refactoring
 
 This document captures key implementation decisions, issues encountered, and solutions applied during the development of the Bushel CloudKit demo. Use this as a reference when building similar demos (e.g., Celestra).
 
@@ -8,23 +8,23 @@ This document captures key implementation decisions, issues encountered, and sol
 
 ## Major Changes Completed
 
-### 1. TheAppleWiki Data Source Integration
+### 1. AppleDB Data Source Integration
 
-**Purpose**: Add historical IPSW data and beta/RC releases to complement ipsw.me's final release data.
+**Purpose**: Fetch comprehensive restore image data with device-specific signing status for VirtualMac2,1 to complement ipsw.me's data.
 
 **Implementation**:
-- Moved code from separate `BushelIPSW` package into `Examples/Bushel/Sources/BushelImages/DataSources/TheAppleWiki/`
+- Integrated AppleDB API for device-specific restore image information
 - Created modern, error-handled implementation with Swift 6 concurrency
 - Integrated as an additional fetcher in `DataSourcePipeline`
 
 **Files Created**:
-```
-TheAppleWiki/
-├── IPSWParser.swift           # Fetches from TheAppleWiki.com API
-├── TheAppleWikiFetcher.swift  # Implements fetcher pattern
+```text
+AppleDB/
+├── AppleDBParser.swift        # Fetches from api.appledb.dev
+├── AppleDBFetcher.swift       # Implements fetcher pattern
 └── Models/
-    ├── IPSWVersion.swift      # Domain model with CloudKit helpers
-    └── WikiAPITypes.swift     # API response types
+    ├── AppleDBVersion.swift   # Domain model with CloudKit helpers
+    └── AppleDBAPITypes.swift  # API response types
 ```
 
 **Key Features**:
@@ -36,8 +36,8 @@ TheAppleWiki/
 **Integration Point**:
 ```swift
 // DataSourcePipeline.swift
-async let wikiImages = options.includeTheAppleWiki
-    ? TheAppleWikiFetcher().fetch()
+async let appleDBImages = options.includeAppleDB
+    ? AppleDBFetcher().fetch()
     : [RestoreImageRecord]()
 ```
 
@@ -89,7 +89,7 @@ bushel-images sync
 **Root Cause**: Schema file was missing `DEFINE SCHEMA` header and included CloudKit system fields.
 
 **Solution**:
-```
+```text
 # Before (incorrect)
 RECORD TYPE RestoreImage (
     "__recordID" RECORD ID,  # ❌ System fields shouldn't be in schema
@@ -202,11 +202,11 @@ struct BushelCloudKitService {
 
 ## Data Source Integration Pattern
 
-### Adding a New Data Source (TheAppleWiki Example)
+### Adding a New Data Source (AppleDB Example)
 
 **Step 1: Create Fetcher**
 ```swift
-struct TheAppleWikiFetcher: Sendable {
+struct AppleDBFetcher: Sendable {
     func fetch() async throws -> [RestoreImageRecord] {
         // Fetch and parse data
         // Map to CloudKit record model
@@ -219,7 +219,7 @@ struct TheAppleWikiFetcher: Sendable {
 ```swift
 struct DataSourcePipeline {
     struct Options: Sendable {
-        var includeTheAppleWiki: Bool = true
+        var includeAppleDB: Bool = true
     }
 }
 ```
@@ -228,12 +228,12 @@ struct DataSourcePipeline {
 ```swift
 private func fetchRestoreImages(options: Options) async throws -> [RestoreImageRecord] {
     // Parallel fetching
-    async let wikiImages = options.includeTheAppleWiki
-        ? TheAppleWikiFetcher().fetch()
+    async let appleDBImages = options.includeAppleDB
+        ? AppleDBFetcher().fetch()
         : [RestoreImageRecord]()
 
     // Collect results
-    allImages.append(contentsOf: try await wikiImages)
+    allImages.append(contentsOf: try await appleDBImages)
 
     // Deduplicate by buildNumber
     return deduplicateRestoreImages(allImages)
@@ -243,12 +243,12 @@ private func fetchRestoreImages(options: Options) async throws -> [RestoreImageR
 **Step 4: Add CLI Option**
 ```swift
 struct SyncCommand {
-    @Flag(name: .long, help: "Exclude TheAppleWiki.com as data source")
-    var noAppleWiki: Bool = false
+    @Flag(name: .long, help: "Exclude AppleDB.dev as data source")
+    var noAppleDB: Bool = false
 
     private func buildSyncOptions() -> SyncEngine.SyncOptions {
-        if noAppleWiki {
-            pipelineOptions.includeTheAppleWiki = false
+        if noAppleDB {
+            pipelineOptions.includeAppleDB = false
         }
     }
 }
@@ -279,7 +279,7 @@ private func deduplicateRestoreImages(_ images: [RestoreImageRecord]) -> [Restor
 
 **Merge Priority**:
 1. ipsw.me (most complete: has both SHA1 + SHA256)
-2. TheAppleWiki (SHA1, good historical coverage)
+2. AppleDB (device-specific signing status, comprehensive coverage)
 3. MESU (freshness detection only)
 4. MrMacintosh (beta/RC releases)
 
@@ -332,13 +332,13 @@ export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
 ## Common Error Messages & Solutions
 
 ### "Private key file not found"
-```
+```text
 BushelCloudKitError.privateKeyFileNotFound(path: "./key.pem")
 ```
 **Solution**: Use absolute path or ensure working directory is correct.
 
 ### "PEM string is invalid"
-```
+```text
 TokenManagerError.invalidCredentials(.invalidPEMFormat)
 ```
 **Solution**: Verify .pem file is valid. Check for:
@@ -347,13 +347,13 @@ TokenManagerError.invalidCredentials(.invalidPEMFormat)
 - Proper encoding (UTF-8)
 
 ### "Key ID is empty"
-```
+```text
 TokenManagerError.invalidCredentials(.keyIdEmpty)
 ```
 **Solution**: Ensure `CLOUDKIT_KEY_ID` is set or `--key-id` is provided.
 
 ### "Schema validation failed: Was expecting DEFINE"
-```
+```text
 ❌ Schema validation failed: Encountered "RECORD" at line 1
 Was expecting: "DEFINE" ...
 ```
@@ -364,14 +364,14 @@ Was expecting: "DEFINE" ...
 ## CloudKit Dashboard Navigation
 
 ### Schema Setup (Management Token)
-1. Go to https://icloud.developer.apple.com/dashboard/
+1. Go to [CloudKit Dashboard](https://icloud.developer.apple.com/dashboard/)
 2. Select your container
 3. Navigate to: **API Access** → **CloudKit Web Services**
 4. Click **Generate Management Token**
 5. Copy token and run: `xcrun cktool save-token`
 
 ### Runtime Auth (Server-to-Server Key)
-1. Go to https://icloud.developer.apple.com/dashboard/
+1. Go to [CloudKit Dashboard](https://icloud.developer.apple.com/dashboard/)
 2. Select your container
 3. Navigate to: **API Access** → **Server-to-Server Keys**
 4. Click **Create a Server-to-Server Key**
@@ -386,7 +386,7 @@ Before considering Bushel complete:
 
 - [ ] Schema imports successfully with `setup-cloudkit-schema.sh`
 - [ ] Sync command fetches from all data sources
-- [ ] TheAppleWiki fetcher returns VirtualMac data
+- [ ] AppleDB fetcher returns VirtualMac2,1 data
 - [ ] Deduplication works correctly (no duplicate buildNumbers)
 - [ ] Records upload to CloudKit public database
 - [ ] Export command retrieves and formats data
@@ -427,4 +427,4 @@ When building the Celestra demo, apply these patterns:
 ---
 
 **Last Updated**: Current session
-**Status**: TheAppleWiki integration complete, S2S auth refactoring complete, ready for testing
+**Status**: AppleDB integration complete, S2S auth refactoring complete, ready for testing
