@@ -19,7 +19,8 @@ struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCollection
     static let recordTypes = RecordTypeSet(
         RestoreImageRecord.self,
         XcodeVersionRecord.self,
-        SwiftVersionRecord.self
+        SwiftVersionRecord.self,
+        DataSourceMetadata.self
     )
 
     // MARK: - Initialization
