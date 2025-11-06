@@ -16,7 +16,11 @@ struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCollection
     // MARK: - CloudKitRecordCollection
 
     /// All CloudKit record types managed by this service (using variadic generics)
-    typealias RecordTypes = (RestoreImageRecord, XcodeVersionRecord, SwiftVersionRecord)
+    static let recordTypes = RecordTypeSet(
+        RestoreImageRecord.self,
+        XcodeVersionRecord.self,
+        SwiftVersionRecord.self
+    )
 
     // MARK: - Initialization
 

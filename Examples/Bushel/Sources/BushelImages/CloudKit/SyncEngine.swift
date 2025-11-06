@@ -95,10 +95,12 @@ struct SyncEngine: Sendable {
                 subsystem: BushelLogger.cloudKit
             )
 
-            try await cloudKitService.syncRecords(
-                restoreImages: fetchResult.restoreImages,
-                xcodeVersions: fetchResult.xcodeVersions,
-                swiftVersions: fetchResult.swiftVersions
+            // Sync in dependency order: SwiftVersion → RestoreImage → XcodeVersion
+            // (Prevents broken CKReference relationships)
+            try await cloudKitService.syncAllRecords(
+                fetchResult.swiftVersions,   // First: no dependencies
+                fetchResult.restoreImages,   // Second: no dependencies
+                fetchResult.xcodeVersions    // Third: references first two
             )
         } else {
             print("\n⏭️  Step 2: Skipped (dry run)")

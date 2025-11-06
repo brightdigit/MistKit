@@ -12,7 +12,7 @@ let package = Package(
         .executable(name: "bushel-images", targets: ["BushelImages"])
     ],
     dependencies: [
-        .package(path: "../.."),
+        .package(name: "MistKit", path: "../.."),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0")
