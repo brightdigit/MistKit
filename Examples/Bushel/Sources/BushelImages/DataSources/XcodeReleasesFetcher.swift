@@ -103,11 +103,29 @@ struct XcodeReleasesFetcher: Sendable {
                 if let watchos = sdks.watchOS?.first, let number = watchos.number { sdkDict["watchOS"] = number }
             }
 
-            let sdkJSON = try? JSONEncoder().encode(sdkDict)
-            let sdkString = sdkJSON.flatMap { String(data: $0, encoding: .utf8) }
+            // Encode SDK dictionary to JSON string with proper error handling
+            let sdkString: String? = {
+                do {
+                    let data = try JSONEncoder().encode(sdkDict)
+                    return String(data: data, encoding: .utf8)
+                } catch {
+                    BushelLogger.warning(
+                        "Failed to encode SDK versions for \(release.name): \(error)",
+                        subsystem: BushelLogger.dataSource
+                    )
+                    return nil
+                }
+            }()
 
             // Extract Swift version (if compilers info is available)
             let swiftVersion = release.compilers?.swift?.first?.number
+
+            // Store requires string temporarily for later resolution
+            // Format: "REQUIRES:<version string>|NOTES_URL:<url>"
+            var notesField = "REQUIRES:\(release.requires)"
+            if let notesURL = release.links?.notes?.url {
+                notesField += "|NOTES_URL:\(notesURL)"
+            }
 
             return XcodeVersionRecord(
                 version: release.version.number,
@@ -116,22 +134,12 @@ struct XcodeReleasesFetcher: Sendable {
                 downloadURL: release.links?.download?.url,
                 fileSize: nil, // Not provided by API
                 isPrerelease: release.version.release.isPrerelease,
-                minimumMacOS: minimumMacOSReference(from: release.requires),
+                minimumMacOS: nil, // Will be resolved in DataSourcePipeline
                 includedSwiftVersion: swiftVersion.map { "SwiftVersion-\($0)" },
                 sdkVersions: sdkString,
-                notes: release.links?.notes?.url
+                notes: notesField
             )
         }
     }
 
-    // MARK: - Helpers
-
-    /// Convert minimum macOS version string to RestoreImage record reference
-    private func minimumMacOSReference(from versionString: String) -> String? {
-        // For now, we'll store the version string and resolve it later
-        // during sync when we have all RestoreImage records
-        // Format: "RestoreImage-<buildNumber>" will be resolved by SyncEngine
-        // Return nil for now as we don't have build numbers from version strings
-        nil
-    }
 }

@@ -240,8 +240,8 @@ struct BushelCloudKitService: Sendable {
 
             BushelLogger.verbose("Received \(results.count) RecordInfo responses from CloudKit", subsystem: BushelLogger.cloudKit)
 
-            // Filter out error responses (they have recordType == "Unknown")
-            let successfulRecords = results.filter { $0.recordType != "Unknown" }
+            // Filter out error responses using isError property
+            let successfulRecords = results.filter { !$0.isError }
             let failedCount = results.count - successfulRecords.count
 
             totalSucceeded += successfulRecords.count
@@ -252,7 +252,7 @@ struct BushelCloudKitService: Sendable {
                 print("   ✓ \(successfulRecords.count) records confirmed")
 
                 // Log error details in verbose mode
-                let errorRecords = results.filter { $0.recordType == "Unknown" }
+                let errorRecords = results.filter { $0.isError }
                 for errorRecord in errorRecords {
                     BushelLogger.verbose(
                         "Error: recordName=\(errorRecord.recordName), reason=\(errorRecord.recordType)",

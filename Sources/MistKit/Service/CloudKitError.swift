@@ -36,6 +36,7 @@ public enum CloudKitError: LocalizedError, Sendable {
   case httpErrorWithDetails(statusCode: Int, serverErrorCode: String?, reason: String?)
   case httpErrorWithRawResponse(statusCode: Int, rawResponse: String)
   case invalidResponse
+  case underlyingError(any Error)
 
   /// A localized message describing what error occurred
   public var errorDescription: String? {
@@ -55,6 +56,8 @@ public enum CloudKitError: LocalizedError, Sendable {
       return "CloudKit API error: HTTP \(statusCode)\nRaw Response: \(rawResponse)"
     case .invalidResponse:
       return "Invalid response from CloudKit"
+    case .underlyingError(let error):
+      return "CloudKit operation failed with underlying error: \(String(reflecting: error))"
     }
   }
 }

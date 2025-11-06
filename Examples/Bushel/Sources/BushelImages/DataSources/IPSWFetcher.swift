@@ -28,7 +28,7 @@ struct IPSWFetcher: Sendable {
                 releaseDate: firmware.releasedate,
                 downloadURL: firmware.url.absoluteString,
                 fileSize: firmware.filesize,
-                sha256Hash: "", // Not provided by ipsw.me API
+                sha256Hash: "", // Not provided by ipsw.me; backfilled from AppleDB during merge
                 sha1Hash: firmware.sha1sum?.hexString ?? "",
                 isSigned: firmware.signed,
                 isPrerelease: false, // ipsw.me doesn't include beta releases

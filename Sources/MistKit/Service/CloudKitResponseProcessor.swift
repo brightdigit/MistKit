@@ -110,10 +110,10 @@ internal struct CloudKitResponseProcessor {
         return zonesData
       }
     default:
-      try await processStandardErrorResponse(response)
+      // For non-ok responses, throw a generic error
+      // The response type doesn't expose detailed error info for all cases
+      throw CloudKitError.invalidResponse
     }
-
-    throw CloudKitError.invalidResponse
   }
 
   /// Process queryRecords response
@@ -130,10 +130,10 @@ internal struct CloudKitResponseProcessor {
         return recordsData
       }
     default:
-      try await processStandardErrorResponse(response)
+      // For non-ok responses, throw a generic error
+      // The response type doesn't expose detailed error info for all cases
+      throw CloudKitError.invalidResponse
     }
-
-    throw CloudKitError.invalidResponse
   }
 
   /// Process modifyRecords response
@@ -167,24 +167,89 @@ internal struct CloudKitResponseProcessor {
           reason: errorResponse.reason
         )
       }
-    case .forbidden, .notFound, .conflict, .preconditionFailed, .contentTooLarge,
-         .tooManyRequests, .misdirectedRequest, .internalServerError, .serviceUnavailable:
-      // Use generic error handling for these cases
-      try await processStandardErrorResponse(response)
+    case .forbidden(let forbiddenResponse):
+      switch forbiddenResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 403,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
+    case .notFound(let notFoundResponse):
+      switch notFoundResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 404,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
+    case .conflict(let conflictResponse):
+      switch conflictResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 409,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
+    case .preconditionFailed(let preconditionResponse):
+      switch preconditionResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 412,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
+    case .contentTooLarge(let tooLargeResponse):
+      switch tooLargeResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 413,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
+    case .tooManyRequests(let tooManyResponse):
+      switch tooManyResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 429,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
+    case .misdirectedRequest(let misdirectedResponse):
+      switch misdirectedResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 421,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
+    case .internalServerError(let serverErrorResponse):
+      switch serverErrorResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 500,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
+    case .serviceUnavailable(let unavailableResponse):
+      switch unavailableResponse.body {
+      case .json(let errorResponse):
+        throw CloudKitError.httpErrorWithDetails(
+          statusCode: 503,
+          serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+          reason: errorResponse.reason
+        )
+      }
     case .undocumented(let statusCode, _):
       throw CloudKitError.httpError(statusCode: statusCode)
     }
-
-    throw CloudKitError.invalidResponse
-  }
-}
-
-// MARK: - Error Handling
-extension CloudKitResponseProcessor {
-  /// Process standard error responses common across endpoints
-  private func processStandardErrorResponse<T>(_: T) async throws(CloudKitError) {
-    // For now, throw a generic error - specific error handling should be implemented
-    // per endpoint as needed to avoid the complexity of reflection-based error handling
-    throw CloudKitError.invalidResponse
   }
 }
