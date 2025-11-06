@@ -6,6 +6,10 @@ import OpenAPIURLSession
 struct IPSWFetcher: Sendable {
     /// Fetch all VirtualMac2,1 restore images from ipsw.me
     func fetch() async throws -> [RestoreImageRecord] {
+        // Fetch Last-Modified header to know when ipsw.me data was updated
+        let ipswURL = URL(string: "https://api.ipsw.me/v4/device/VirtualMac2,1?type=ipsw")!
+        let lastModified = await HTTPHeaderHelpers.fetchLastModified(from: ipswURL)
+
         // Create IPSWDownloads client with URLSession transport
         let client = IPSWDownloads(
             transport: URLSessionTransport()
@@ -30,7 +34,7 @@ struct IPSWFetcher: Sendable {
                 isPrerelease: false, // ipsw.me doesn't include beta releases
                 source: "ipsw.me",
                 notes: nil,
-                sourceUpdatedAt: firmware.uploaddate // TODO: Use Last-Modified header (see TODO-AppleDB-LastModified.md)
+                sourceUpdatedAt: lastModified // When ipsw.me last updated their database
             )
         }
     }

@@ -9,6 +9,7 @@ struct DataSourcePipeline: Sendable {
         var includeXcodeVersions: Bool = true
         var includeSwiftVersions: Bool = true
         var includeBetaReleases: Bool = true
+        var includeAppleDB: Bool = true
         var includeTheAppleWiki: Bool = true
     }
 
@@ -84,6 +85,18 @@ struct DataSourcePipeline: Sendable {
         } catch {
             print("   ⚠️  MESU failed: \(error)")
             throw error
+        }
+
+        // Fetch from AppleDB
+        if options.includeAppleDB {
+            do {
+                let appleDBImages = try await AppleDBFetcher().fetch()
+                allImages.append(contentsOf: appleDBImages)
+                print("   ✓ AppleDB: \(appleDBImages.count) images")
+            } catch {
+                print("   ⚠️  AppleDB failed: \(error)")
+                // Don't throw - continue with other sources
+            }
         }
 
         // Fetch from Mr. Macintosh (betas)

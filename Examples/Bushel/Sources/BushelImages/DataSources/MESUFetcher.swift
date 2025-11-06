@@ -21,6 +21,9 @@ struct MESUFetcher: Sendable {
             throw FetchError.invalidURL
         }
 
+        // Fetch Last-Modified header to know when MESU was last updated
+        let lastModified = await HTTPHeaderHelpers.fetchLastModified(from: url)
+
         let (data, _) = try await URLSession.shared.data(from: url)
 
         // Parse as property list (plist)
@@ -61,7 +64,7 @@ struct MESUFetcher: Sendable {
                 isPrerelease: false, // MESU typically only has final releases
                 source: "mesu.apple.com",
                 notes: "Latest signed release from Apple MESU",
-                sourceUpdatedAt: Date() // MESU is always real-time from Apple
+                sourceUpdatedAt: lastModified // When Apple last updated MESU manifest
             )
         }
 

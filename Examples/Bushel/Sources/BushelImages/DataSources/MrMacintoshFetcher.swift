@@ -28,6 +28,9 @@ struct MrMacintoshFetcher: Sendable {
            let updateText = try? updateElement.text(),
            let dateString = updateText.split(separator: ":").last?.trimmingCharacters(in: .whitespaces) {
             pageUpdatedAt = parseDateMMDDYY(from: String(dateString))
+            if let date = pageUpdatedAt {
+                BushelLogger.verbose("Mr. Macintosh page last updated: \(date)", subsystem: BushelLogger.dataSource)
+            }
         }
 
         // Find all table rows
