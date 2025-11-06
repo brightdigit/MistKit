@@ -32,7 +32,7 @@ extension BushelCloudKitService {
     // MARK: - Private Helpers
 
     /// Parse a CloudKit RecordInfo into DataSourceMetadata
-    private func parseDataSourceMetadata(from record: RecordInfo) throws -> DataSourceMetadata {
+    private func parseDataSourceMetadata(from record: RecordInfo) throws(BushelCloudKitError) -> DataSourceMetadata {
         guard let sourceName = record.fields["sourceName"]?.stringValue,
               let recordTypeName = record.fields["recordTypeName"]?.stringValue,
               let lastFetchedAt = record.fields["lastFetchedAt"]?.dateValue

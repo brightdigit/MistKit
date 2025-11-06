@@ -1,8 +1,8 @@
 import ArgumentParser
 
 @main
-struct BushelImagesCLI: AsyncParsableCommand {
-    static let configuration = CommandConfiguration(
+internal struct BushelImagesCLI: AsyncParsableCommand {
+    internal static let configuration = CommandConfiguration(
         commandName: "bushel-images",
         abstract: "CloudKit version history tool for Bushel virtualization",
         discussion: """

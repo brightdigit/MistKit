@@ -2,10 +2,10 @@ import Foundation
 
 /// Fetcher for macOS restore images using TheAppleWiki.com
 @available(*, deprecated, message: "Use AppleDBFetcher instead for more reliable and up-to-date data")
-struct TheAppleWikiFetcher: DataSourceFetcher, Sendable {
-    typealias Record = [RestoreImageRecord]
+internal struct TheAppleWikiFetcher: DataSourceFetcher, Sendable {
+    internal typealias Record = [RestoreImageRecord]
     /// Fetch all macOS restore images from TheAppleWiki
-    func fetch() async throws -> [RestoreImageRecord] {
+    internal func fetch() async throws -> [RestoreImageRecord] {
         // Fetch Last-Modified header from TheAppleWiki API
         let apiURL = URL(string: "https://theapplewiki.com/api.php?action=parse&page=Firmware/Mac&format=json")!
         let lastModified = await HTTPHeaderHelpers.fetchLastModified(from: apiURL)

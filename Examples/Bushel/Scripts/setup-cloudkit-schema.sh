@@ -3,7 +3,7 @@
 # CloudKit Schema Setup Script
 # This script imports the Bushel schema into your CloudKit container
 
-set -e
+set -eo pipefail
 
 # Colors for output
 RED='\033[0;31m'

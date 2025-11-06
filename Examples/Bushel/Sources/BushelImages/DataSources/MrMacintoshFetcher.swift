@@ -2,12 +2,12 @@ import Foundation
 import SwiftSoup
 
 /// Fetcher for macOS beta/RC restore images from Mr. Macintosh database
-struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
-    typealias Record = [RestoreImageRecord]
+internal struct MrMacintoshFetcher: DataSourceFetcher, Sendable {
+    internal typealias Record = [RestoreImageRecord]
     // MARK: - Public API
 
     /// Fetch beta and RC restore images from Mr. Macintosh
-    func fetch() async throws -> [RestoreImageRecord] {
+    internal func fetch() async throws -> [RestoreImageRecord] {
         let urlString = "https://mrmacintosh.com/apple-silicon-m1-full-macos-restore-ipsw-firmware-files-database/"
         guard let url = URL(string: urlString) else {
             throw FetchError.invalidURL
