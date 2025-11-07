@@ -100,6 +100,9 @@ extension CustomFieldValue.CustomFieldValuePayload {
       try container.encode(val)
     case .int64Value(let val):
       try container.encode(val)
+    case .booleanValue(let val):
+      // CloudKit represents booleans as int64 (0 or 1)
+      try container.encode(val ? 1 : 0)
     case .doubleValue(let val), .dateValue(let val):
       try encodeNumericValue(val, to: &container)
     case .locationValue(let val):

@@ -79,18 +79,19 @@ extension CloudKitService {
   /// Create a single record in CloudKit
   /// - Parameters:
   ///   - recordType: The type of record to create (e.g., "RestoreImage")
-  ///   - recordName: The unique record name
+  ///   - recordName: Optional unique record name (if nil, a UUID will be generated)
   ///   - fields: Dictionary of field names to FieldValue
   /// - Returns: RecordInfo for the created record
   /// - Throws: CloudKitError if the operation fails
   public func createRecord(
     recordType: String,
-    recordName: String,
+    recordName: String? = nil,
     fields: [String: FieldValue]
   ) async throws(CloudKitError) -> RecordInfo {
+    let finalRecordName = recordName ?? UUID().uuidString
     let operation = RecordOperation.create(
       recordType: recordType,
-      recordName: recordName,
+      recordName: finalRecordName,
       fields: fields
     )
 

@@ -40,6 +40,8 @@ extension CustomFieldValue.CustomFieldValuePayload {
       self = .int64Value(value)
     case .double(let value):
       self = .doubleValue(value)
+    case .boolean(let value):
+      self = .booleanValue(value)
     case .bytes(let value):
       self = .bytesValue(value)
     case .date(let value):
@@ -104,6 +106,8 @@ extension CustomFieldValue.CustomFieldValuePayload {
       return .int64Value(intValue)
     case .double(let doubleValue):
       return .doubleValue(doubleValue)
+    case .boolean(let boolValue):
+      return .booleanValue(boolValue)
     case .bytes(let bytesValue):
       return .bytesValue(bytesValue)
     case .date(let dateValue):

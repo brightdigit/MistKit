@@ -53,6 +53,7 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
     case doubleValue(Double)
     case bytesValue(String)
     case dateValue(Double)
+    case booleanValue(Bool)
     case locationValue(Components.Schemas.LocationValue)
     case referenceValue(Components.Schemas.ReferenceValue)
     case assetValue(Components.Schemas.AssetValue)
@@ -142,6 +143,9 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
       try container.encode(val, forKey: .value)
     case .dateValue(let val):
       try container.encode(val, forKey: .value)
+    case .booleanValue(let val):
+      // CloudKit represents booleans as int64 (0 or 1)
+      try container.encode(val ? 1 : 0, forKey: .value)
     case .locationValue(let val):
       try container.encode(val, forKey: .value)
     case .referenceValue(let val):

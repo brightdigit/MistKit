@@ -64,6 +64,26 @@ internal struct CloudKitResponseProcessor {
     }
   }
 
+  /// Process lookupRecords response
+  /// - Parameter response: The response to process
+  /// - Returns: The extracted lookup response data
+  /// - Throws: CloudKitError for various error conditions
+  internal func processLookupRecordsResponse(_ response: Operations.lookupRecords.Output)
+    async throws(CloudKitError) -> Components.Schemas.LookupResponse
+  {
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let lookupData):
+        return lookupData
+      }
+    default:
+      // For non-ok responses, throw a generic error
+      // The response type doesn't expose detailed error info for all cases
+      throw CloudKitError.invalidResponse
+    }
+  }
+
   /// Process listZones response
   /// - Parameter response: The response to process
   /// - Returns: The extracted zones data
