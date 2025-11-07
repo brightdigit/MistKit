@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
 
 /// CloudKitService conformance to RecordManaging protocol
 ///
@@ -45,16 +45,12 @@ extension CloudKitService: RecordManaging {
   /// - Returns: Array of record information for matching records (up to 200)
   /// - Throws: CloudKit errors if the query fails
   public func queryRecords(recordType: String) async throws -> [RecordInfo] {
-    do {
-      return try await self.queryRecords(
-        recordType: recordType,
-        filters: nil,
-        sortBy: nil,
-        limit: 200
-      )
-    } catch let error as CloudKitError {
-      throw error
-    }
+    try await self.queryRecords(
+      recordType: recordType,
+      filters: nil,
+      sortBy: nil,
+      limit: 200
+    )
   }
 
   /// Execute a batch of record operations
@@ -75,10 +71,6 @@ extension CloudKitService: RecordManaging {
     _ operations: [RecordOperation],
     recordType: String
   ) async throws {
-    do {
-      _ = try await self.modifyRecords(operations)
-    } catch let error as CloudKitError {
-      throw error
-    }
+    _ = try await self.modifyRecords(operations)
   }
 }
