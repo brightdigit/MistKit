@@ -40,7 +40,7 @@ extension CloudKitError {
       self = .httpError(statusCode: 400)
     }
   }
-
+  
   /// Initialize CloudKitError from an Unauthorized response
   internal init(unauthorized response: Components.Responses.Unauthorized) {
     if case .json(let errorResponse) = response.body {
@@ -53,7 +53,7 @@ extension CloudKitError {
       self = .httpError(statusCode: 401)
     }
   }
-
+  
   /// Initialize CloudKitError from a Forbidden response
   internal init(forbidden response: Components.Responses.Forbidden) {
     if case .json(let errorResponse) = response.body {
@@ -66,7 +66,7 @@ extension CloudKitError {
       self = .httpError(statusCode: 403)
     }
   }
-
+  
   /// Initialize CloudKitError from a NotFound response
   internal init(notFound response: Components.Responses.NotFound) {
     if case .json(let errorResponse) = response.body {
@@ -79,7 +79,7 @@ extension CloudKitError {
       self = .httpError(statusCode: 404)
     }
   }
-
+  
   /// Initialize CloudKitError from a Conflict response
   internal init(conflict response: Components.Responses.Conflict) {
     if case .json(let errorResponse) = response.body {
@@ -92,7 +92,7 @@ extension CloudKitError {
       self = .httpError(statusCode: 409)
     }
   }
-
+  
   /// Initialize CloudKitError from a PreconditionFailed response
   internal init(preconditionFailed response: Components.Responses.PreconditionFailed) {
     if case .json(let errorResponse) = response.body {
@@ -105,7 +105,7 @@ extension CloudKitError {
       self = .httpError(statusCode: 412)
     }
   }
-
+  
   /// Initialize CloudKitError from a RequestEntityTooLarge response
   internal init(contentTooLarge response: Components.Responses.RequestEntityTooLarge) {
     if case .json(let errorResponse) = response.body {
@@ -118,7 +118,7 @@ extension CloudKitError {
       self = .httpError(statusCode: 413)
     }
   }
-
+  
   /// Initialize CloudKitError from a TooManyRequests response
   internal init(tooManyRequests response: Components.Responses.TooManyRequests) {
     if case .json(let errorResponse) = response.body {
@@ -131,7 +131,7 @@ extension CloudKitError {
       self = .httpError(statusCode: 429)
     }
   }
-
+  
   /// Initialize CloudKitError from an UnprocessableEntity response
   internal init(unprocessableEntity response: Components.Responses.UnprocessableEntity) {
     if case .json(let errorResponse) = response.body {
@@ -144,7 +144,7 @@ extension CloudKitError {
       self = .httpError(statusCode: 422)
     }
   }
-
+  
   /// Initialize CloudKitError from an InternalServerError response
   internal init(internalServerError response: Components.Responses.InternalServerError) {
     if case .json(let errorResponse) = response.body {
@@ -157,7 +157,7 @@ extension CloudKitError {
       self = .httpError(statusCode: 500)
     }
   }
-
+  
   /// Initialize CloudKitError from a ServiceUnavailable response
   internal init(serviceUnavailable response: Components.Responses.ServiceUnavailable) {
     if case .json(let errorResponse) = response.body {
@@ -170,4 +170,88 @@ extension CloudKitError {
       self = .httpError(statusCode: 503)
     }
   }
+  
+  /// Static error handlers for modifyRecords response
+  internal static let modifyRecordsErrorHandlers:
+  [@Sendable (
+    Operations.modifyRecords.Output
+  ) -> CloudKitError?] = [
+    {
+      if case .badRequest(let response) = $0 {
+        return CloudKitError(badRequest: response)
+      } else {
+        return nil
+      }
+    },
+    {
+      if case .unauthorized(let response) = $0 {
+        return CloudKitError(unauthorized: response)
+      } else {
+        return nil
+      }
+    },
+    {
+      if case .forbidden(let response) = $0 {
+        return CloudKitError(forbidden: response)
+      } else {
+        return nil
+      }
+    },
+    {
+      if case .notFound(let response) = $0 {
+        return CloudKitError(notFound: response)
+      } else {
+        return nil
+      }
+    },
+    {
+      if case .conflict(let response) = $0 {
+        return CloudKitError(conflict: response)
+      } else {
+        return nil
+      }
+    },
+    {
+      if case .preconditionFailed(let response) = $0 {
+        return CloudKitError(preconditionFailed: response)
+      } else {
+        return nil
+      }
+    },
+    {
+      if case .contentTooLarge(let response) = $0 {
+        return CloudKitError(contentTooLarge: response)
+      } else {
+        return nil
+      }
+    },
+    {
+      if case .misdirectedRequest(let response) = $0 {
+        return CloudKitError(unprocessableEntity: response)
+      } else {
+        return nil
+      }
+    },
+    {
+      if case .tooManyRequests(let response) = $0 {
+        return CloudKitError(tooManyRequests: response)
+      } else {
+        return nil
+      }
+    },
+    {
+      if case .internalServerError(let response) = $0 {
+        return CloudKitError(internalServerError: response)
+      } else {
+        return nil
+      }
+    },
+    {
+      if case .serviceUnavailable(let response) = $0 {
+        return CloudKitError(serviceUnavailable: response)
+      } else {
+        return nil
+      }
+    },
+  ]
 }

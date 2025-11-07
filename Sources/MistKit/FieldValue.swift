@@ -39,7 +39,6 @@ public enum FieldValue: Codable, Equatable, Sendable {
   case location(Location)
   case reference(Reference)
   case asset(Asset)
-  // TODO: Can we make this all the same type
   case list([FieldValue])
 
   /// Location dictionary as defined in CloudKit Web Services

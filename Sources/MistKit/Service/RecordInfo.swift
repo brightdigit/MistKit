@@ -69,7 +69,7 @@ public struct RecordInfo: Encodable {
 
     if let fieldsPayload = record.fields {
       for (fieldName, fieldData) in fieldsPayload.additionalProperties {
-        if let fieldValue = RecordFieldConverter.convertToFieldValue(fieldData) {
+        if let fieldValue = FieldValue(fieldData) {
           convertedFields[fieldName] = fieldValue
         }
       }

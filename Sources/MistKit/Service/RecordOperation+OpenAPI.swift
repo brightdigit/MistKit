@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -32,15 +32,16 @@ import Foundation
 /// Internal conversion between public RecordOperation and OpenAPI types
 extension RecordOperation {
   /// Mapping from RecordOperation.OperationType to OpenAPI operationTypePayload
-  private static let operationTypeMapping: [RecordOperation.OperationType: Components.Schemas.RecordOperation.operationTypePayload] = [
-    .create: .create,
-    .update: .update,
-    .forceUpdate: .forceUpdate,
-    .replace: .replace,
-    .forceReplace: .forceReplace,
-    .delete: .delete,
-    .forceDelete: .forceDelete
-  ]
+  private static let operationTypeMapping:
+    [RecordOperation.OperationType: Components.Schemas.RecordOperation.operationTypePayload] = [
+      .create: .create,
+      .update: .update,
+      .forceUpdate: .forceUpdate,
+      .replace: .replace,
+      .forceReplace: .forceReplace,
+      .delete: .delete,
+      .forceDelete: .forceDelete,
+    ]
 
   /// Convert public RecordOperation to internal OpenAPI RecordOperation
   internal func toComponentsRecordOperation() -> Components.Schemas.RecordOperation {
@@ -51,7 +52,7 @@ extension RecordOperation {
 
     // Convert fields to OpenAPI FieldValue format
     let apiFields = fields.mapValues { fieldValue -> Components.Schemas.FieldValue in
-      RecordFieldConverter.toComponentsFieldValue(fieldValue)
+      Components.Schemas.FieldValue(fieldValue)
     }
 
     // Build the OpenAPI record operation
