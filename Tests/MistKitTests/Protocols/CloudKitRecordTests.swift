@@ -43,6 +43,9 @@ internal struct TestRecord: CloudKitRecord {
   var score: Double?
   var lastUpdated: Date?
 
+  // swiftlint:disable:next empty_count
+  var isEmpty: Bool { count == 0 }
+
   func toCloudKitFields() -> [String: FieldValue] {
     var fields: [String: FieldValue] = [
       "name": .string(name),
@@ -176,7 +179,7 @@ internal struct CloudKitRecordTests {
 
     #expect(record?.recordName == "test-4")
     #expect(record?.name == "Minimal Record")
-    #expect(record?.isEmpty)  // Default value
+    #expect(record?.isEmpty == true)  // Default value (count == 0)
     #expect(record?.isActive == false)
     #expect(record?.score == nil)
     #expect(record?.lastUpdated == nil)
