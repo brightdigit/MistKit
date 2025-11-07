@@ -39,14 +39,19 @@ internal struct CloudKitResponseProcessor {
   internal func processGetCurrentUserResponse(_ response: Operations.getCurrentUser.Output)
     async throws(CloudKitError) -> Components.Schemas.UserResponse
   {
+    // Check for errors first
+    if let error = CloudKitError(response) {
+      throw error
+    }
+
+    // Must be .ok case - extract data
     switch response {
     case .ok(let okResponse):
       return try extractUserData(from: okResponse)
     default:
-      try await handleGetCurrentUserErrors(response)
+      // Should never reach here since all errors are handled above
+      throw CloudKitError.invalidResponse
     }
-
-    throw CloudKitError.invalidResponse
   }
 
   /// Extract user data from OK response
@@ -58,42 +63,6 @@ internal struct CloudKitResponseProcessor {
       return userData
     }
   }
-
-  // swiftlint:disable cyclomatic_complexity
-  /// Handle error cases for getCurrentUser
-  private func handleGetCurrentUserErrors(_ response: Operations.getCurrentUser.Output)
-    async throws(CloudKitError)
-  {
-    switch response {
-    case .ok:
-      return  // This case is handled in the main function
-    case .badRequest(let badRequestResponse):
-      throw CloudKitError(badRequest: badRequestResponse)
-    case .unauthorized(let unauthorizedResponse):
-      throw CloudKitError(unauthorized: unauthorizedResponse)
-    case .forbidden(let forbiddenResponse):
-      throw CloudKitError(forbidden: forbiddenResponse)
-    case .notFound(let notFoundResponse):
-      throw CloudKitError(notFound: notFoundResponse)
-    case .conflict(let conflictResponse):
-      throw CloudKitError(conflict: conflictResponse)
-    case .preconditionFailed(let preconditionFailedResponse):
-      throw CloudKitError(preconditionFailed: preconditionFailedResponse)
-    case .contentTooLarge(let contentTooLargeResponse):
-      throw CloudKitError(contentTooLarge: contentTooLargeResponse)
-    case .tooManyRequests(let tooManyRequestsResponse):
-      throw CloudKitError(tooManyRequests: tooManyRequestsResponse)
-    case .misdirectedRequest(let misdirectedResponse):
-      throw CloudKitError(unprocessableEntity: misdirectedResponse)
-    case .internalServerError(let internalServerErrorResponse):
-      throw CloudKitError(internalServerError: internalServerErrorResponse)
-    case .serviceUnavailable(let serviceUnavailableResponse):
-      throw CloudKitError(serviceUnavailable: serviceUnavailableResponse)
-    case .undocumented(let statusCode, _):
-      throw CloudKitError.httpError(statusCode: statusCode)
-    }
-  }
-  // swiftlint:enable cyclomatic_complexity
 
   /// Process listZones response
   /// - Parameter response: The response to process
