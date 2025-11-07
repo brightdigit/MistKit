@@ -66,7 +66,8 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
   }
 
   private static let fieldTypeDecoders:
-    [FieldTypePayload: @Sendable (KeyedDecodingContainer<CodingKeys>) throws ->
+    [FieldTypePayload:
+      @Sendable (KeyedDecodingContainer<CodingKeys>) throws ->
       CustomFieldValuePayload] = [
         .string: { .stringValue(try $0.decode(String.self, forKey: .value)) },
         .int64: { .int64Value(try $0.decode(Int.self, forKey: .value)) },
