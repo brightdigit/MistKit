@@ -176,7 +176,7 @@ internal struct CloudKitRecordTests {
 
     #expect(record?.recordName == "test-4")
     #expect(record?.name == "Minimal Record")
-    #expect(record?.count == 0)  // Default value
+    #expect(record?.isEmpty)  // Default value
     #expect(record?.isActive == false)
     #expect(record?.score == nil)
     #expect(record?.lastUpdated == nil)
