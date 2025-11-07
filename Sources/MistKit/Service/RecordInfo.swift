@@ -27,9 +27,22 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// Record information from CloudKit
+///
+/// ## Error Detection Pattern
+/// CloudKit Web Services returns error responses as records with nil `recordType` and `recordName`.
+/// This implementation uses "Unknown" as a sentinel value for error responses, which can be detected
+/// using the `isError` property. While this is a fragile pattern, it matches CloudKit's API behavior
+/// where failed operations in a batch return incomplete record data.
+///
+/// Example:
+/// ```swift
+/// let results = try await service.modifyRecords(operations)
+/// let successfulRecords = results.filter { !$0.isError }
+/// let failedRecords = results.filter { $0.isError }
+/// ```
 public struct RecordInfo: Encodable {
   /// The record name
   public let recordName: String
@@ -37,6 +50,15 @@ public struct RecordInfo: Encodable {
   public let recordType: String
   /// The record fields
   public let fields: [String: FieldValue]
+
+  /// Indicates whether this RecordInfo represents an error response
+  ///
+  /// CloudKit returns error responses with nil recordType/recordName, which are converted
+  /// to "Unknown" during initialization. Use this property to detect failed operations
+  /// in batch modify responses.
+  public var isError: Bool {
+    recordType == "Unknown"
+  }
 
   internal init(from record: Components.Schemas.Record) {
     self.recordName = record.recordName ?? "Unknown"
@@ -47,7 +69,7 @@ public struct RecordInfo: Encodable {
 
     if let fieldsPayload = record.fields {
       for (fieldName, fieldData) in fieldsPayload.additionalProperties {
-        if let fieldValue = RecordFieldConverter.convertToFieldValue(fieldData) {
+        if let fieldValue = FieldValue(fieldData) {
           convertedFields[fieldName] = fieldValue
         }
       }

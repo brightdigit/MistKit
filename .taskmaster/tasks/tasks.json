@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Historical Analysis and Development Journey Documentation",
         "description": "Analyze conversation history and extract the complete development story of MistKit's rewrite journey",
         "details": "Review all files in `.claude/conversations/` directory to extract key decisions, milestones, challenges, and solutions. Map the evolution from old MistKit to OpenAPI-driven approach. Document the 'why' behind major architectural decisions. Create a timeline of development phases and extract quotes/insights for the blog narrative. Use tools like `grep`, `awk`, and manual analysis to identify patterns in decision-making. Structure findings into narrative arcs for blog sections. Focus on extracting specific technical challenges encountered and how they were solved.",
@@ -18,7 +18,8 @@
             "dependencies": [],
             "details": "Install and configure grep, awk, and other text processing tools needed for analysis. Create shell scripts for batch processing of conversation files. Set up a structured database or spreadsheet for organizing extracted information. Establish naming conventions and categorization system for findings. Create templates for recording key decisions, milestones, challenges, and solutions.",
             "status": "done",
-            "testStrategy": "Verify tools can successfully extract sample data from conversation files. Test batch processing on a subset of files to ensure proper functioning. Validate that extraction templates capture all required information fields."
+            "testStrategy": "Verify tools can successfully extract sample data from conversation files. Test batch processing on a subset of files to ensure proper functioning. Validate that extraction templates capture all required information fields.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -29,7 +30,8 @@
             ],
             "details": "Use the established tools to search for keywords related to architecture decisions (e.g., 'decided to', 'architecture', 'design'). Extract context around each decision including rationale, alternatives considered, and expected benefits. Categorize decisions by component (API design, code generation, abstraction layer, etc.). Document the evolution from old MistKit architecture to new OpenAPI-driven approach with specific technical details. Cross-reference findings with git commits to verify implementation.",
             "status": "done",
-            "testStrategy": "Validate completeness by comparing extracted decisions against actual code changes. Ensure each architectural decision has documented rationale and context. Verify technical accuracy of architectural understanding through code review."
+            "testStrategy": "Validate completeness by comparing extracted decisions against actual code changes. Ensure each architectural decision has documented rationale and context. Verify technical accuracy of architectural understanding through code review.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -41,7 +43,8 @@
             ],
             "details": "Analyze conversation timestamps to establish chronological order of development events. Identify major milestones in the rewrite process (specification creation, code generation setup, abstraction layer development, etc.). Document technical challenges encountered at each phase and how they were resolved. Create visual timeline representation with key dates and achievements. Extract relevant quotes from conversations that illustrate the development journey. Map timeline against git commit history for verification.",
             "status": "done",
-            "testStrategy": "Verify timeline accuracy by cross-referencing with git commit dates. Ensure all major development phases are represented. Validate that challenge-solution pairs are technically accurate and properly contextualized."
+            "testStrategy": "Verify timeline accuracy by cross-referencing with git commit dates. Ensure all major development phases are represented. Validate that challenge-solution pairs are technically accurate and properly contextualized.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -53,19 +56,23 @@
             ],
             "details": "Develop narrative themes based on extracted architectural decisions and timeline (e.g., 'The OpenAPI Revelation', 'Overcoming Code Generation Challenges'). Structure findings into logical sections that tell the complete development story. Identify compelling quotes and technical insights to highlight in each section. Create transitions between narrative sections to maintain flow. Prepare code examples and technical explanations that illustrate key points. Develop introduction and conclusion that frame the overall journey narrative.",
             "status": "done",
-            "testStrategy": "Review narrative structure with project stakeholders to ensure accuracy and completeness. Verify that technical details are presented in an accessible yet accurate manner. Test readability and flow with sample readers from different technical backgrounds."
+            "testStrategy": "Review narrative structure with project stakeholders to ensure accuracy and completeness. Verify that technical details are presented in an accessible yet accurate manner. Test readability and flow with sample readers from different technical backgrounds.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down the historical analysis task into subtasks covering: 1) Setting up tools for conversation history extraction, 2) Identifying and categorizing key architectural decisions, 3) Creating a chronological development timeline with milestones, and 4) Organizing findings into narrative structures for the blog post."
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "OpenAPI Specification Analysis and Documentation",
         "description": "Deep dive into the openapi.yaml file to document the specification creation process and key design decisions",
         "details": "Analyze the complete `openapi.yaml` file structure focusing on: CloudKit-specific schema definitions (CKRecord, CKAsset, CKReference), authentication patterns, endpoint modeling, error response schemas, and pagination patterns. Document how Apple's REST API documentation was translated into OpenAPI 3.0.3 format. Extract key sections for blog examples showing before/after of documentation-to-spec transformation. Use OpenAPI validation tools like `swagger-codegen validate` or `openapi-generator validate` to ensure spec correctness. Create comparative examples showing raw CloudKit API vs. structured OpenAPI definitions.",
         "testStrategy": "Validate OpenAPI spec using official validation tools. Test spec completeness by comparing against Apple's CloudKit Web Services documentation. Verify all major CloudKit operations are covered in the specification.",
         "priority": "high",
         "dependencies": [
-          1
+          "1"
         ],
         "status": "done",
         "subtasks": [
@@ -76,7 +83,8 @@
             "dependencies": [],
             "details": "Extract and document the schema definitions for CKRecord, CKAsset, and CKReference from the openapi.yaml file. Analyze how these CloudKit-specific data structures are represented in OpenAPI format. Document the authentication patterns implemented in the specification, including JWT token usage, required headers, and security schemes. Create detailed documentation explaining how Apple's proprietary data structures were translated into standard OpenAPI schema objects. Use OpenAPI validation tools to verify the correctness of these schema definitions.",
             "status": "done",
-            "testStrategy": "Validate schema definitions using OpenAPI validation tools. Cross-reference with Apple's CloudKit Web Services documentation to ensure accuracy and completeness of the schema representations."
+            "testStrategy": "Validate schema definitions using OpenAPI validation tools. Cross-reference with Apple's CloudKit Web Services documentation to ensure accuracy and completeness of the schema representations.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -87,7 +95,8 @@
             ],
             "details": "Review all endpoint definitions in the openapi.yaml file, documenting the path structures, HTTP methods, and parameter definitions. Analyze the error response schemas and document how CloudKit-specific errors are represented. Document the pagination implementation patterns used for list operations. Create a comprehensive guide explaining the rationale behind endpoint grouping and naming conventions. Include examples of how complex CloudKit operations were simplified through proper REST API modeling. Document any custom extensions or patterns used to accommodate CloudKit-specific behaviors.",
             "status": "done",
-            "testStrategy": "Verify endpoint definitions match Apple's CloudKit Web Services documentation. Test error response schemas against actual CloudKit error scenarios. Validate pagination patterns through comparison with CloudKit's actual pagination behavior."
+            "testStrategy": "Verify endpoint definitions match Apple's CloudKit Web Services documentation. Test error response schemas against actual CloudKit error scenarios. Validate pagination patterns through comparison with CloudKit's actual pagination behavior.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -99,19 +108,23 @@
             ],
             "details": "Extract key sections from the openapi.yaml file that demonstrate the transformation from Apple's documentation to OpenAPI format. Create side-by-side comparisons showing the original Apple documentation alongside the corresponding OpenAPI YAML. Document the decision-making process for translating ambiguous documentation into precise OpenAPI definitions. Highlight improvements in clarity, consistency, and machine-readability achieved through the OpenAPI structure. Create examples showing raw CloudKit API calls versus the structured OpenAPI definitions. Document any challenges encountered during the translation process and how they were resolved.",
             "status": "done",
-            "testStrategy": "Validate accuracy of comparisons by testing generated client code against actual CloudKit endpoints. Ensure all major CloudKit operations are represented in the comparative examples."
+            "testStrategy": "Validate accuracy of comparisons by testing generated client code against actual CloudKit endpoints. Ensure all major CloudKit operations are represented in the comparative examples.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide the OpenAPI specification analysis into subtasks for: 1) Analyzing and documenting CloudKit-specific schema definitions and authentication patterns, 2) Documenting endpoint modeling, error responses, and pagination patterns, and 3) Creating comparative examples showing the transformation from Apple's documentation to OpenAPI format."
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Generated Code Analysis and swift-openapi-generator Integration",
         "description": "Document the code generation process and analyze the output of swift-openapi-generator",
         "details": "Examine `openapi-generator-config.yaml` configuration and document the swift-openapi-generator setup process. Analyze generated Swift code structure including: API client interfaces, request/response models, error types, and type-safe builders. Document the Swift Package Manager integration and build process. Show examples of generated code with annotations explaining type safety benefits. Use swift-openapi-generator version 1.0+ with proper configuration for Swift 5.9+ features. Document the development workflow for handling generated code updates and version management.",
         "testStrategy": "Verify generated code compiles successfully with latest Swift toolchain. Test that configuration produces expected output structure. Validate that generated types match OpenAPI schema definitions.",
         "priority": "medium",
         "dependencies": [
-          2
+          "2"
         ],
         "status": "done",
         "subtasks": [
@@ -122,7 +135,8 @@
             "dependencies": [],
             "details": "Examine the openapi-generator-config.yaml file in detail. Document installation process for swift-openapi-generator version 1.0+. Explain each configuration option and its impact on generated code. Include command-line examples for running the generator. Document integration with build systems (SPM, Xcode). Create a troubleshooting section for common configuration issues. Ensure documentation covers Swift 5.9+ specific features and configuration options.",
             "status": "done",
-            "testStrategy": "Verify documentation by following the setup process on a clean environment. Validate that all configuration options are accurately described by comparing with official swift-openapi-generator documentation."
+            "testStrategy": "Verify documentation by following the setup process on a clean environment. Validate that all configuration options are accurately described by comparing with official swift-openapi-generator documentation.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -133,7 +147,8 @@
             ],
             "details": "Analyze the structure of generated Swift code including API client interfaces, request/response models, error types, and type-safe builders. Create annotated code examples highlighting key components. Document type safety benefits with before/after comparisons. Explain how the generated code maps to OpenAPI specification elements. Create diagrams showing relationships between generated components. Document Swift Package Manager integration details. Highlight Swift language features leveraged in the generated code.",
             "status": "done",
-            "testStrategy": "Verify technical accuracy by ensuring all code examples compile successfully. Cross-reference generated code structure with swift-openapi-generator documentation to confirm correct interpretation."
+            "testStrategy": "Verify technical accuracy by ensuring all code examples compile successfully. Cross-reference generated code structure with swift-openapi-generator documentation to confirm correct interpretation.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -144,19 +159,23 @@
             ],
             "details": "Document best practices for version control of generated code. Explain strategies for handling manual modifications to generated code. Create guidelines for regenerating code when the OpenAPI spec changes. Document CI/CD integration options for automated code generation. Explain how to manage breaking changes in the generated code. Provide recommendations for code review processes involving generated code. Include real-world examples from the project's development history showing how code generation was integrated into the workflow.",
             "status": "done",
-            "testStrategy": "Test workflow documentation by simulating OpenAPI specification changes and following the documented process. Verify that version management strategies are practical by applying them to the project's codebase."
+            "testStrategy": "Test workflow documentation by simulating OpenAPI specification changes and following the documented process. Verify that version management strategies are practical by applying them to the project's codebase.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down the code generation analysis into: 1) Documenting the swift-openapi-generator setup and configuration process, 2) Analyzing and documenting the structure of generated Swift code with annotated examples, and 3) Documenting the development workflow for managing generated code updates."
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "MistKit Abstraction Layer Architecture Documentation",
         "description": "Document the design and implementation of the friendly Swift abstraction layer built on top of generated code",
         "details": "Analyze MistKit source code to document abstraction patterns and modern Swift features: async/await integration, Actor usage for state management, AsyncSequence for pagination, Result builders for query construction, and Property wrappers for field mapping. Create before/after code comparisons showing generated OpenAPI code vs. MistKit abstraction. Document protocol-oriented design patterns, dependency injection approaches, and separation of concerns between generated and hand-written code. Focus on Swift 5.9+ concurrency features and Sendable compliance throughout the abstraction layer.",
         "testStrategy": "Verify abstraction layer compiles and maintains type safety. Test that modern Swift features are properly implemented. Validate that abstraction successfully hides complexity while maintaining full API access.",
         "priority": "high",
         "dependencies": [
-          3
+          "3"
         ],
         "status": "done",
         "subtasks": [
@@ -167,7 +186,8 @@
             "dependencies": [],
             "details": "Examine MistKit source code to identify async/await implementation patterns. Document how Actors are used for thread-safe state management. Create code examples showing concurrency patterns. Explain how these features improve upon traditional completion handler approaches. Include documentation on Sendable compliance throughout the abstraction layer. Analyze error propagation in async contexts and document best practices implemented in MistKit.",
             "status": "done",
-            "testStrategy": "Verify documentation accurately reflects implementation details by cross-referencing with source code. Ensure code examples compile and demonstrate the described patterns correctly."
+            "testStrategy": "Verify documentation accurately reflects implementation details by cross-referencing with source code. Ensure code examples compile and demonstrate the described patterns correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -178,7 +198,8 @@
             ],
             "details": "Analyze the AsyncSequence implementation in MistKit for handling paginated CloudKit responses. Document the internal structure of the sequence and iterator types. Create diagrams showing the flow of data through the AsyncSequence. Provide code examples demonstrating how consumers can use these sequences with modern Swift features like for-await-in loops. Compare with traditional pagination approaches to highlight advantages. Document performance considerations and any optimizations implemented.",
             "status": "done",
-            "testStrategy": "Test documentation against actual usage patterns. Verify pagination examples work with different query sizes and network conditions."
+            "testStrategy": "Test documentation against actual usage patterns. Verify pagination examples work with different query sizes and network conditions.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -189,7 +210,8 @@
             ],
             "details": "Examine the implementation of result builders in MistKit for query construction. Document the DSL (Domain Specific Language) created for building CloudKit queries. Create examples showing complex query construction using the builder pattern. Compare with raw generated code to demonstrate readability improvements. Document how type safety is maintained throughout the query building process. Analyze how the result builder pattern integrates with other Swift features in the abstraction layer.",
             "status": "done",
-            "testStrategy": "Verify query builder documentation with test cases that construct various query types. Ensure examples demonstrate the full capabilities of the query construction API."
+            "testStrategy": "Verify query builder documentation with test cases that construct various query types. Ensure examples demonstrate the full capabilities of the query construction API.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -200,7 +222,8 @@
             ],
             "details": "Analyze the property wrapper implementations used for field mapping in MistKit. Document how these wrappers handle different data types and relationships. Create examples showing model definitions with property wrappers. Explain the internal mechanisms for serialization and deserialization. Compare with manual mapping approaches to highlight code reduction. Document any performance considerations or limitations. Analyze how property wrappers integrate with the rest of the abstraction layer.",
             "status": "done",
-            "testStrategy": "Test documentation against various model types including simple properties, relationships, and custom types. Verify examples accurately represent the implementation."
+            "testStrategy": "Test documentation against various model types including simple properties, relationships, and custom types. Verify examples accurately represent the implementation.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -214,21 +237,25 @@
             ],
             "details": "Create side-by-side code comparisons for key operations: record creation, querying, updating, and deletion. Document the reduction in code complexity and improved readability. Analyze error handling improvements in the abstraction layer. Create a quantitative analysis of code reduction (lines of code, cognitive complexity). Document how the abstraction layer maintains full access to underlying API capabilities while simplifying common operations. Include real-world usage scenarios demonstrating the benefits of the abstraction.",
             "status": "done",
-            "testStrategy": "Verify all code examples compile and function correctly. Test with different CloudKit operations to ensure comprehensive coverage. Validate that comparisons accurately represent both the generated code and abstraction layer."
+            "testStrategy": "Verify all code examples compile and function correctly. Test with different CloudKit operations to ensure comprehensive coverage. Validate that comparisons accurately represent both the generated code and abstraction layer.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Divide the abstraction layer documentation into: 1) Documenting async/await integration and Actor usage, 2) Analyzing AsyncSequence implementation for pagination, 3) Documenting Result builders for query construction, 4) Analyzing property wrappers for field mapping, and 5) Creating comprehensive before/after code comparisons showing the abstraction benefits."
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Bushel Version History Tool - Design and Core Implementation",
-        "description": "Create a complete command-line tool demonstrating MistKit usage for managing version history data",
-        "details": "Design CloudKit record schema for version data storage including fields for version numbers, release dates, and metadata. Implement Swift Package with Package.swift using MistKit as dependency. Create core functionality for: version data collection, CloudKit record creation/updates, query operations for version history, and record modification workflows. Use Swift ArgumentParser for command-line interface. Implement proper error handling with Swift's Result type and structured concurrency with async/await. Include configuration management for CloudKit container and database settings.",
-        "testStrategy": "Test with real CloudKit development environment. Verify CRUD operations work correctly. Test query functionality and data integrity. Validate command-line interface handles various input scenarios.",
-        "priority": "medium",
+        "description": "Create a complete command-line tool demonstrating MistKit usage for managing macOS restore images, Xcode versions, and Swift versions for Bushel virtualization",
+        "status": "done",
         "dependencies": [
-          4
+          "4"
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Implement a specialized tool for managing CloudKit data supporting Bushel's macOS virtualization workflow. Based on comprehensive schema design in .taskmaster/docs/cloudkit-schema-plan.md, the tool manages three record types: RestoreImage (macOS IPSW files with SHA-256 hashes, signing status, file sizes), XcodeVersion (with macOS requirements and Swift version references), and SwiftVersion. Data sources include ipsw.me API via IPSWDownloads package for restore images, Mr. Macintosh for beta/RC releases, MESU XML for freshness detection, xcodereleases.com for Xcode data, and swiftversion.net for Swift versions. Demo CLI provides sync command (import/update data to CloudKit) and export command (dump to JSON). Bushel queries the public CloudKit database using native CloudKit framework. Implementation follows defined phases with proper error handling using Swift's Result type and structured concurrency with async/await.",
+        "testStrategy": "Test with real CloudKit development environment using VirtualMac2,1 restore images. Verify data fetching from ipsw.me API via IPSWDownloads package works correctly. Test CRUD operations with all three record types (RestoreImage, XcodeVersion, SwiftVersion). Validate CloudKit reference relationships between records. Test CLI commands with various scenarios including sync incremental mode and export filtering. Ensure MESU XML freshness detection triggers appropriate updates.",
         "subtasks": [
           {
             "id": 1,
@@ -237,52 +264,72 @@
             "dependencies": [],
             "details": "Define record types and fields for version numbers (major.minor.patch), release dates, release notes, and metadata. Include relationships between versions if needed. Document field types (String, Date, Number, etc.) and any indexes required for efficient querying. Consider versioning schemes and compatibility with semantic versioning standards. Design should account for future extensibility.",
             "status": "pending",
-            "testStrategy": "Create test records with the schema and verify they can be properly stored and retrieved from CloudKit. Test edge cases like very long version strings or complex metadata."
+            "testStrategy": "Create test records with the schema and verify they can be properly stored and retrieved from CloudKit. Test edge cases like very long version strings or complex metadata.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
-            "title": "Set up Swift Package with MistKit Integration",
-            "description": "Create the Swift package structure and integrate MistKit as a dependency",
+            "title": "Implement Swift Model Types for CloudKit Schema",
+            "description": "Create Codable Swift structures matching the CloudKit schema for RestoreImage, XcodeVersion, and SwiftVersion",
             "dependencies": [
               1
             ],
-            "details": "Initialize a new Swift package with proper directory structure. Configure Package.swift with MistKit dependency using appropriate version constraints. Set up module organization with clear separation of concerns. Create initial source files and directory structure. Implement configuration management for CloudKit container and database settings. Set up development environment with proper CloudKit entitlements.",
+            "details": "Define three main record types based on cloudkit-schema-plan.md: RestoreImageRecord with fields for version, buildNumber, releaseDate, downloadURL, fileSize, sha256Hash, sha1Hash, isSigned, isPrerelease, source, and notes. XcodeVersionRecord with version, buildNumber, releaseDate, downloadURL, fileSize, isPrerelease, minimumMacOS (Reference), includedSwiftVersion (Reference), sdkVersions (JSON string), and notes. SwiftVersionRecord with version, releaseDate, downloadURL, isPrerelease, and notes. Implement CloudKit field mapping helpers and Reference type handling for cross-record relationships. Ensure all types conform to Codable and include proper CodingKeys for CloudKit compatibility.",
             "status": "pending",
-            "testStrategy": "Verify package builds successfully. Test MistKit integration by creating a simple CloudKit operation. Ensure configuration can be properly loaded and validated."
+            "testStrategy": "Test JSON encoding/decoding of all model types. Verify CloudKit Reference creation and resolution works correctly. Test edge cases with missing optional fields and relationship handling.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
-            "title": "Implement Core CRUD Operations and Query Functionality",
-            "description": "Develop the core functionality for managing version data in CloudKit",
+            "title": "Integrate Data Source Fetchers for External APIs",
+            "description": "Implement data fetching from ipsw.me, Mr. Macintosh, MESU, xcodereleases.com, and swiftversion.net",
             "dependencies": [
               2
             ],
-            "details": "Implement functions for creating new version records, updating existing versions, retrieving version history, and deleting versions. Create query operations with filtering capabilities (e.g., by version number, date range). Implement proper error handling with Swift's Result type. Use structured concurrency with async/await for all CloudKit operations. Add support for batch operations when appropriate. Ensure data validation before CloudKit operations.",
+            "details": "Integrate IPSWDownloads Swift package for ipsw.me API access to VirtualMac2,1 restore images (46 final releases from macOS 12.4+). Implement HTML scraper for Mr. Macintosh database (~100+ beta/RC versions). Create MESU XML parser for freshness detection of latest signed releases. Research and implement parsers for xcodereleases.com and swiftversion.net (determine if APIs exist or scraping needed). Create unified data pipeline that can fetch from all sources, handle duplicates, and merge data appropriately. Implement proper error handling for network failures and parsing errors.",
             "status": "pending",
-            "testStrategy": "Test each CRUD operation individually. Verify queries return expected results. Test error conditions like network failures or invalid data. Validate concurrent operations behave correctly."
+            "testStrategy": "Test each data source individually with real API calls. Verify duplicate detection works correctly when same data appears in multiple sources. Test error handling with network failures and malformed responses. Validate data integrity and completeness across all sources.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
-            "title": "Build Command-Line Interface with ArgumentParser",
-            "description": "Create a robust CLI for the Bushel tool using Swift ArgumentParser",
+            "title": "Implement Core CRUD Operations with MistKit Integration",
+            "description": "Develop CloudKit operations using MistKit for managing version data with proper batching and error handling",
             "dependencies": [
               3
             ],
-            "details": "Define command structure with subcommands for different operations (add, update, list, delete). Implement argument parsing with proper validation and help text. Create user-friendly output formatting for version data. Add support for different output formats (text, JSON). Implement proper exit codes and error messages. Add verbose mode for debugging. Create help documentation accessible through the CLI. Ensure commands follow consistent patterns.",
+            "details": "Implement CloudKit operations using MistKit for creating, updating, and querying RestoreImage, XcodeVersion, and SwiftVersion records. Create batch upsert operations using record IDs based on version+build for idempotency. Implement query operations with filtering capabilities (signed status, prerelease flag, version ranges). Use structured concurrency with async/await for all CloudKit operations. Add support for Reference resolution between XcodeVersion and RestoreImage/SwiftVersion records. Ensure proper error handling with CloudKit-specific errors and retry logic for rate limiting.",
             "status": "pending",
-            "testStrategy": "Test CLI with various command combinations. Verify help text is clear and comprehensive. Test error handling with invalid inputs. Validate output formatting is consistent and readable."
+            "testStrategy": "Test each CRUD operation with real CloudKit development environment. Verify batch operations handle large datasets efficiently. Test Reference relationships work correctly between record types. Validate error conditions like network failures, quota limits, and authentication issues.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Build Demo CLI with Sync and Export Commands",
+            "description": "Create command-line interface using Swift ArgumentParser with sync and export functionality",
+            "dependencies": [
+              4
+            ],
+            "details": "Use Swift ArgumentParser to create demo CLI with two main commands: 'sync' for importing/updating data from external sources to CloudKit (with --incremental, --dry-run, --restore-images-only flags), and 'export' for dumping CloudKit data to JSON (with --output, --pretty, --signed-only, --no-betas flags). Implement comprehensive help text and error messages. Add configuration file support for CloudKit container settings. Include progress reporting for long-running sync operations and proper exit codes. Add verbose logging mode for debugging using os.Logger.",
+            "status": "pending",
+            "testStrategy": "Test CLI with various command combinations and flag permutations. Verify help text is clear and comprehensive. Test error handling with invalid inputs, missing configuration, and CloudKit failures. Validate output formatting consistency and JSON export correctness.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down the Bushel tool implementation into: 1) Designing the CloudKit record schema for version data, 2) Setting up the Swift package with MistKit integration, 3) Implementing core CRUD operations and query functionality, and 4) Building the command-line interface with ArgumentParser.",
+        "updatedAt": "2025-11-05T20:57:39.454Z"
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Celestra RSS Feed Tool - Design and SyndiKit Integration",
         "description": "Create a command-line tool that fetches RSS feeds and stores them in CloudKit using MistKit",
         "details": "Design CloudKit schema for RSS feed items including: feed metadata, item content, publication dates, and relationship handling. Create Swift Package structure with dependencies on both MistKit and SyndiKit (latest version 0.4+). Implement RSS feed fetching using SyndiKit's async APIs and URLSession. Parse feed data into structured models compatible with CloudKit record format. Implement duplicate detection logic using content hashing or unique identifiers. Use Swift's structured concurrency for efficient batch processing of feed items.",
         "testStrategy": "Test with various RSS feed formats and sizes. Verify SyndiKit integration works correctly. Test duplicate detection prevents data redundancy. Validate batch operations perform efficiently.",
         "priority": "medium",
         "dependencies": [
-          4
+          "4"
         ],
         "status": "pending",
         "subtasks": [
@@ -293,7 +340,8 @@
             "dependencies": [],
             "details": "Define record types for Feed and FeedItem entities. For Feed records, include fields for feed URL, title, description, update frequency, and last fetched timestamp. For FeedItem records, include fields for title, content, author, publication date, unique identifier, and content hash for duplicate detection. Design relationship between Feed and FeedItem using CloudKit reference fields. Document schema with field types, indexing recommendations, and query patterns. Consider security zones and record accessibility requirements.",
             "status": "pending",
-            "testStrategy": "Create test records manually in CloudKit Dashboard to verify schema design. Validate relationship queries work as expected. Test with various RSS feed formats to ensure schema accommodates all required data."
+            "testStrategy": "Create test records manually in CloudKit Dashboard to verify schema design. Validate relationship queries work as expected. Test with various RSS feed formats to ensure schema accommodates all required data.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -304,7 +352,8 @@
             ],
             "details": "Set up Swift Package with SyndiKit dependency (v0.4+). Implement FeedFetcher class that uses URLSession and SyndiKit to asynchronously fetch RSS feeds. Create parsing logic that handles different RSS formats (RSS 2.0, Atom, etc.). Implement error handling for network failures, malformed feeds, and timeout scenarios. Use Swift's structured concurrency (async/await) for efficient parallel processing of multiple feeds. Add logging using os.Logger to track fetch operations. Implement rate limiting to prevent overloading feed servers.",
             "status": "pending",
-            "testStrategy": "Test with various real-world RSS feeds of different formats and sizes. Create mock URLSession responses for testing error conditions. Measure performance with large feeds and multiple concurrent fetches."
+            "testStrategy": "Test with various real-world RSS feeds of different formats and sizes. Create mock URLSession responses for testing error conditions. Measure performance with large feeds and multiple concurrent fetches.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -316,19 +365,23 @@
             ],
             "details": "Implement model-to-record conversion functions for Feed and FeedItem entities. Create content hashing mechanism for duplicate detection using SHA-256 or similar algorithm. Implement comparison logic to detect changed items in incremental updates. Design batch processing system that respects CloudKit's 200-record batch limit. Create record zone management for efficient data organization. Implement error handling for transformation failures with appropriate recovery strategies. Add unit tests for all transformation functions to ensure data integrity.",
             "status": "pending",
-            "testStrategy": "Test transformation with various RSS feed structures. Verify duplicate detection prevents redundant records. Test batch processing with feeds containing hundreds of items. Validate error handling correctly manages transformation failures."
+            "testStrategy": "Test transformation with various RSS feed structures. Verify duplicate detection prevents redundant records. Test batch processing with feeds containing hundreds of items. Validate error handling correctly manages transformation failures.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide the RSS feed tool initial implementation into: 1) Designing the CloudKit schema for RSS feed data, 2) Implementing RSS feed fetching and parsing with SyndiKit, and 3) Creating the data transformation layer between RSS models and CloudKit records."
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Celestra RSS Tool - CloudKit Storage and Batch Operations",
         "description": "Implement CloudKit storage functionality with efficient batch operations and relationship management",
         "details": "Implement MistKit integration for RSS data storage using batch operations for efficiency. Create record relationship handling for feed-to-items associations. Implement incremental update logic to handle feed changes over time. Add comprehensive error handling for CloudKit operations including retry logic for transient failures. Implement progress reporting and logging using Swift's os.Logger. Use CloudKit's batch operation limits (200 records per batch) and implement proper pagination. Handle CloudKit-specific constraints like record size limits and field type restrictions.",
         "testStrategy": "Test batch operations with large RSS feeds. Verify relationship integrity between feed and item records. Test incremental updates don't create duplicates. Validate error handling and retry mechanisms work correctly.",
         "priority": "medium",
         "dependencies": [
-          6
+          "6"
         ],
         "status": "pending",
         "subtasks": [
@@ -339,7 +392,8 @@
             "dependencies": [],
             "details": "Create CloudKit record types for RSS feeds and items. Implement MistKit integration to handle CloudKit operations. Set up batch processing logic to respect CloudKit's 200-record limit per batch. Implement pagination for large datasets. Configure proper serialization/deserialization of RSS data to CloudKit record format. Optimize for performance with parallel batch operations where appropriate.",
             "status": "pending",
-            "testStrategy": "Test with varying batch sizes to verify efficiency. Validate correct handling of CloudKit's batch limits. Measure performance metrics for different batch configurations."
+            "testStrategy": "Test with varying batch sizes to verify efficiency. Validate correct handling of CloudKit's batch limits. Measure performance metrics for different batch configurations.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -350,7 +404,8 @@
             ],
             "details": "Design and implement CKReference-based relationships between feed records and item records. Create methods for maintaining referential integrity during CRUD operations. Implement cascading updates/deletes where appropriate. Build query capabilities to fetch items by feed reference. Ensure proper handling of relationship metadata. Document relationship patterns for future maintenance.",
             "status": "pending",
-            "testStrategy": "Test relationship integrity after batch operations. Verify proper cascading behavior. Test queries that traverse relationships. Validate referential integrity is maintained during updates."
+            "testStrategy": "Test relationship integrity after batch operations. Verify proper cascading behavior. Test queries that traverse relationships. Validate referential integrity is maintained during updates.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -362,7 +417,8 @@
             ],
             "details": "Implement content hashing or unique identifier tracking for RSS items. Create logic to detect and handle duplicate entries during feed updates. Design incremental update workflow that only processes new or changed items. Implement conflict resolution strategies for simultaneous updates. Add metadata tracking for update timestamps and change history. Optimize for minimal data transfer during updates.",
             "status": "pending",
-            "testStrategy": "Test with feeds containing duplicate items. Verify incremental updates only process new content. Test conflict scenarios with simultaneous updates. Validate proper handling of feed changes over time."
+            "testStrategy": "Test with feeds containing duplicate items. Verify incremental updates only process new content. Test conflict scenarios with simultaneous updates. Validate proper handling of feed changes over time.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -375,20 +431,24 @@
             ],
             "details": "Implement error categorization for CloudKit-specific errors (network, quota, permission, etc.). Create retry logic with exponential backoff for transient failures. Implement circuit breaker pattern for persistent failures. Add detailed logging using Swift's os.Logger. Create user-facing error messages and recovery suggestions. Implement progress reporting for long-running operations. Design recovery mechanisms for interrupted batch operations.",
             "status": "pending",
-            "testStrategy": "Test with simulated network failures. Verify retry logic works correctly with different error types. Validate logging provides sufficient diagnostic information. Test recovery from interrupted operations."
+            "testStrategy": "Test with simulated network failures. Verify retry logic works correctly with different error types. Validate logging provides sufficient diagnostic information. Test recovery from interrupted operations.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down the CloudKit storage implementation into: 1) Implementing MistKit integration with batch operations, 2) Creating record relationship handling between feeds and items, 3) Developing incremental update logic with duplicate detection, and 4) Implementing comprehensive error handling with retry mechanisms."
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Command-Line Tools Polish and Documentation",
         "description": "Finalize both command-line tools with comprehensive documentation, configuration management, and user experience improvements",
         "details": "Refine command-line interfaces for both tools using Swift ArgumentParser with proper help text, validation, and error messages. Implement configuration file support (JSON/YAML) for CloudKit settings and tool-specific options. Add comprehensive logging with different verbosity levels using os.Logger. Create detailed README files with setup instructions, usage examples, and troubleshooting guides. Implement proper exit codes and status reporting. Add example configuration files and sample data. Test tools with various edge cases and error conditions. Package tools for easy distribution and installation.",
         "testStrategy": "Test tools with invalid configurations and network failures. Verify help text and error messages are clear and actionable. Test installation and setup process from scratch. Validate documentation accuracy through fresh environment testing.",
         "priority": "medium",
         "dependencies": [
-          5,
-          7
+          "5",
+          "7"
         ],
         "status": "pending",
         "subtasks": [
@@ -399,7 +459,8 @@
             "dependencies": [],
             "details": "Implement comprehensive help text for all commands and subcommands in both tools. Add input validation with clear error messages for invalid parameters. Implement proper exit codes for different error scenarios. Ensure consistent command naming and parameter styles across both tools. Add examples in help text for common usage patterns. Implement verbose mode flags for debugging. Test all commands with various input combinations to ensure robust error handling.",
             "status": "pending",
-            "testStrategy": "Test all commands with valid and invalid inputs. Verify help text is comprehensive and accurate. Ensure error messages are clear and actionable. Test exit codes match expected values for different scenarios."
+            "testStrategy": "Test all commands with valid and invalid inputs. Verify help text is comprehensive and accurate. Ensure error messages are clear and actionable. Test exit codes match expected values for different scenarios.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -410,7 +471,8 @@
             ],
             "details": "Create configuration file parsers for both JSON and YAML formats. Implement configuration loading from default and user-specified locations. Add validation for configuration file contents with helpful error messages. Implement CloudKit settings storage in configuration files. Integrate os.Logger for comprehensive logging with multiple verbosity levels. Add log rotation and management. Implement configuration override via command-line arguments. Create sample configuration files with documentation.",
             "status": "pending",
-            "testStrategy": "Test configuration loading with valid and invalid files. Verify command-line overrides work correctly. Test logging at different verbosity levels. Validate error handling for missing or malformed configuration files."
+            "testStrategy": "Test configuration loading with valid and invalid files. Verify command-line overrides work correctly. Test logging at different verbosity levels. Validate error handling for missing or malformed configuration files.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -422,22 +484,26 @@
             ],
             "details": "Create detailed README.md files for both tools with clear installation instructions, prerequisites, and configuration steps. Write comprehensive usage guides with examples for all commands and options. Create troubleshooting section addressing common issues. Document all configuration options with examples. Add sample data files and example workflows. Create quick-start guides for new users. Package tools for easy distribution and installation. Create man pages for Unix-like systems. Add license and contribution guidelines.",
             "status": "pending",
-            "testStrategy": "Verify documentation accuracy by following instructions in a fresh environment. Test installation process on different platforms. Have team members review documentation for clarity and completeness. Validate all examples work as described."
+            "testStrategy": "Verify documentation accuracy by following instructions in a fresh environment. Test installation process on different platforms. Have team members review documentation for clarity and completeness. Validate all examples work as described.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide the tools polish task into: 1) Refining command-line interfaces with proper help text and validation, 2) Implementing configuration file support and logging systems, and 3) Creating comprehensive documentation including README files, setup instructions, and example configurations."
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "Blog Post Core Content Creation",
         "description": "Write the main sections of the blog post including introduction, OpenAPI journey, code generation, and abstraction layer",
         "details": "Write comprehensive blog post sections covering: Introduction with rewrite rationale, OpenAPI specification creation process with code examples, swift-openapi-generator integration and configuration, abstraction layer design with before/after code comparisons. Include technical diagrams descriptions for: architecture overview, OpenAPI generation workflow, and request/response flow. Use Markdown format optimized for brightdigit.com with proper syntax highlighting for Swift code blocks. Integrate insights from historical analysis and technical documentation. Create smooth narrative transitions between technical sections. Include links to relevant documentation and resources.",
         "testStrategy": "Verify all code examples compile and run correctly. Test that technical explanations are accurate and complete. Validate that narrative flow maintains reader engagement while covering technical depth.",
         "priority": "high",
         "dependencies": [
-          1,
-          2,
-          3,
-          4
+          "1",
+          "2",
+          "3",
+          "4"
         ],
         "status": "done",
         "subtasks": [
@@ -448,7 +514,8 @@
             "dependencies": [],
             "details": "Draft a compelling introduction that explains the challenges with the previous CloudKit implementation and why a rewrite was necessary. Include context about CloudKit Web Services, the limitations of existing solutions, and the benefits of using OpenAPI specifications with code generation. Format in Markdown with proper headings and emphasis on key points. Include a brief overview of what readers will learn from the blog post.",
             "status": "done",
-            "testStrategy": "Review for clarity, technical accuracy, and engagement. Ensure it sets proper context for technical readers while remaining accessible to those new to CloudKit or OpenAPI."
+            "testStrategy": "Review for clarity, technical accuracy, and engagement. Ensure it sets proper context for technical readers while remaining accessible to those new to CloudKit or OpenAPI.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -459,7 +526,8 @@
             ],
             "details": "Write a comprehensive explanation of translating Apple's REST API documentation into OpenAPI 3.0.3 format. Include code snippets from the openapi.yaml file highlighting key components like schema definitions for CKRecord, CKAsset, and CKReference. Explain endpoint modeling decisions, authentication patterns, and error response schemas. Show before/after examples of documentation-to-spec transformation. Use proper Markdown syntax highlighting for YAML code blocks. Include diagrams describing the OpenAPI generation workflow.",
             "status": "done",
-            "testStrategy": "Validate all YAML examples for syntax correctness. Ensure technical explanations are accurate by cross-referencing with Task 2 documentation. Verify diagram descriptions are clear and technically accurate."
+            "testStrategy": "Validate all YAML examples for syntax correctness. Ensure technical explanations are accurate by cross-referencing with Task 2 documentation. Verify diagram descriptions are clear and technically accurate.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -470,7 +538,8 @@
             ],
             "details": "Document the swift-openapi-generator setup process including configuration options in openapi-generator-config.yaml. Explain Swift Package Manager integration and build process. Provide annotated code samples of generated API client interfaces, request/response models, and type-safe builders. Highlight type safety benefits and Swift 5.9+ features utilized. Include command-line examples showing how to run the generator. Format all Swift code with proper Markdown syntax highlighting. Create narrative explaining how the generated code interfaces with CloudKit Web Services.",
             "status": "done",
-            "testStrategy": "Verify all Swift code examples compile correctly. Test that explanations accurately reflect the actual generated code structure. Ensure command-line examples work as described when followed."
+            "testStrategy": "Verify all Swift code examples compile correctly. Test that explanations accurately reflect the actual generated code structure. Ensure command-line examples work as described when followed.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -481,20 +550,24 @@
             ],
             "details": "Explain the design principles behind the abstraction layer that simplifies interaction with the generated CloudKit client. Show side-by-side code comparisons of using raw generated code versus the abstraction layer for common operations like record fetching, saving, and querying. Highlight improvements in error handling, concurrency support, and developer experience. Include diagrams describing the request/response flow through the abstraction layer. Use proper Markdown formatting for code blocks with Swift syntax highlighting. Explain architectural decisions that influenced the abstraction design.",
             "status": "done",
-            "testStrategy": "Compile and test all code examples to ensure they work as described. Verify before/after comparisons accurately demonstrate the benefits. Ensure explanations are technically accurate and the abstraction layer concepts are clearly communicated."
+            "testStrategy": "Compile and test all code examples to ensure they work as described. Verify before/after comparisons accurately demonstrate the benefits. Ensure explanations are technically accurate and the abstraction layer concepts are clearly communicated.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down the blog post core content creation into: 1) Writing the introduction and rewrite rationale, 2) Documenting the OpenAPI specification creation process with examples, 3) Explaining the swift-openapi-generator integration with code samples, and 4) Describing the abstraction layer design with before/after comparisons."
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Blog Post Integration, Examples, and Final Polish",
         "description": "Complete the blog post with working examples, lessons learned, and comprehensive review",
         "details": "Integrate command-line tool examples with complete source code and usage instructions. Write sections on: development journey insights, lessons learned and challenges, AWS Lambda conversion overview, architecture decisions, and future roadmap. Add comprehensive code comparisons showing generated vs. abstraction layer transformations. Include table of contents, proper cross-references, and links to GitHub repositories. Perform technical accuracy review ensuring all code compiles with latest Swift toolchain (5.9+). Proofread for clarity, flow, and BrightDigit style guidelines. Add call-to-action for community engagement and contributions. Format final Markdown for publication.",
         "testStrategy": "Compile and test all included code examples in fresh environments. Verify all links and references work correctly. Test blog post readability and technical accuracy through peer review. Validate formatting renders correctly on target platform.",
         "priority": "high",
         "dependencies": [
-          8,
-          9
+          "8",
+          "9"
         ],
         "status": "pending",
         "subtasks": [
@@ -505,7 +578,8 @@
             "dependencies": [],
             "details": "Extract relevant code snippets from both command-line tools (Bushel Version History Tool and the other tool). Create step-by-step usage instructions with command examples and expected outputs. Format code with proper syntax highlighting for Markdown. Include installation instructions, configuration file examples, and common use cases. Add screenshots of the tools in action where appropriate. Ensure all code examples are complete and can be copied directly by readers to work in their environment.",
             "status": "pending",
-            "testStrategy": "Compile and run all code examples in a clean environment to verify they work as documented. Test the instructions by following them step-by-step to ensure clarity and accuracy."
+            "testStrategy": "Compile and run all code examples in a clean environment to verify they work as documented. Test the instructions by following them step-by-step to ensure clarity and accuracy.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -516,7 +590,8 @@
             ],
             "details": "Using the historical analysis from Task 1, write narrative sections on: development journey insights, challenges overcome, key decision points, AWS Lambda conversion process, architecture design rationale, and future development plans. Include code comparisons showing generated OpenAPI code versus MistKit abstraction layer with explanations of benefits. Create diagrams illustrating the architecture where helpful. Add cross-references to relevant sections and include links to GitHub repositories. Structure content with clear headings and logical flow.",
             "status": "pending",
-            "testStrategy": "Review technical accuracy of all claims and explanations. Verify that code comparisons accurately represent the differences between approaches. Have a technical peer review the content for clarity and correctness."
+            "testStrategy": "Review technical accuracy of all claims and explanations. Verify that code comparisons accurately represent the differences between approaches. Have a technical peer review the content for clarity and correctness.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -528,15 +603,23 @@
             ],
             "details": "Create a table of contents with proper linking to sections. Verify all code examples compile with Swift 5.9+ toolchain. Check all links to GitHub repositories and external resources. Proofread for clarity, flow, grammar, and adherence to BrightDigit style guidelines. Format final Markdown with consistent styling for headings, code blocks, and callouts. Add appropriate images, diagrams, and visual elements. Include a compelling introduction and conclusion with call-to-action for community engagement and contributions. Prepare final metadata (tags, categories, author info) for publication platform.",
             "status": "pending",
-            "testStrategy": "Validate Markdown rendering on target platform. Test all internal and external links. Verify code examples compile and run correctly. Have a non-technical reader review for clarity and readability."
+            "testStrategy": "Validate Markdown rendering on target platform. Test all internal and external links. Verify code examples compile and run correctly. Have a non-technical reader review for clarity and readability.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide the blog post completion task into: 1) Integrating command-line tool examples with usage instructions, 2) Writing sections on development journey insights, lessons learned, and future roadmap, and 3) Performing technical review, proofreading, and final formatting for publication."
       }
     ],
     "metadata": {
-      "created": "2025-10-20T17:49:09.227Z",
-      "updated": "2025-10-21T01:35:27.655Z",
-      "description": "Tasks for master context"
+      "version": "1.0.0",
+      "lastModified": "2025-11-05T20:57:39.455Z",
+      "taskCount": 10,
+      "completedCount": 6,
+      "tags": [
+        "master"
+      ]
     }
   }
 }

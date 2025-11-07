@@ -1,5 +1,5 @@
 //
-//  RecordFieldConverter.swift
+//  FieldValue+Components.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,70 +27,56 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
-/// Utilities for converting CloudKit field values to FieldValue types
-internal enum RecordFieldConverter {
-  /// Convert a CloudKit field value to FieldValue
-  internal static func convertToFieldValue(_ fieldData: Components.Schemas.FieldValue)
-    -> FieldValue?
-  {
-    convertFieldValueByType(fieldData.value, fieldType: fieldData.type)
+/// Extension to convert OpenAPI Components.Schemas.FieldValue to MistKit FieldValue
+extension FieldValue {
+  /// Initialize from OpenAPI Components.Schemas.FieldValue
+  internal init?(_ fieldData: Components.Schemas.FieldValue) {
+    self.init(value: fieldData.value, fieldType: fieldData.type)
   }
 
-  /// Convert field value based on its type
-  private static func convertFieldValueByType(
-    _ value: CustomFieldValue.CustomFieldValuePayload,
+  /// Initialize from field value and type
+  private init?(
+    value: CustomFieldValue.CustomFieldValuePayload,
     fieldType: CustomFieldValue.FieldTypePayload?
-  ) -> FieldValue? {
+  ) {
     switch value {
     case .stringValue(let stringValue):
-      return .string(stringValue)
+      self = .string(stringValue)
     case .int64Value(let intValue):
-      return .int64(intValue)
+      self = .int64(intValue)
     case .doubleValue(let doubleValue):
-      return fieldType == .timestamp
-        ? .date(Date(timeIntervalSince1970: doubleValue / 1_000)) : .double(doubleValue)
-    case .booleanValue(let boolValue):
-      return .boolean(boolValue)
+      if fieldType == .timestamp {
+        self = .date(Date(timeIntervalSince1970: doubleValue / 1_000))
+      } else {
+        self = .double(doubleValue)
+      }
     case .bytesValue(let bytesValue):
-      return .bytes(bytesValue)
-    default:
-      return convertComplexFieldValue(value)
-    }
-  }
-
-  /// Convert complex field types (date, location, reference, asset, list)
-  private static func convertComplexFieldValue(
-    _ value: CustomFieldValue.CustomFieldValuePayload
-  ) -> FieldValue? {
-    switch value {
+      self = .bytes(bytesValue)
     case .dateValue(let dateValue):
-      return .date(Date(timeIntervalSince1970: dateValue / 1_000))
+      self = .date(Date(timeIntervalSince1970: dateValue / 1_000))
     case .locationValue(let locationValue):
-      return convertLocationFieldValue(locationValue)
+      guard let location = Self.fromLocation(locationValue) else { return nil }
+      self = location
     case .referenceValue(let referenceValue):
-      return convertReferenceFieldValue(referenceValue)
+      self = Self.fromReference(referenceValue)
     case .assetValue(let assetValue):
-      return convertAssetFieldValue(assetValue)
+      self = Self.fromAsset(assetValue)
     case .listValue(let listValue):
-      return convertListFieldValue(listValue)
-    default:
-      return nil
+      self = Self.fromList(listValue)
     }
   }
 
   /// Convert location field value
-  private static func convertLocationFieldValue(
-    _ locationValue: Components.Schemas.LocationValue
-  ) -> FieldValue? {
+  private static func fromLocation(_ locationValue: Components.Schemas.LocationValue) -> Self? {
     guard let latitude = locationValue.latitude,
       let longitude = locationValue.longitude
     else {
       return nil
     }
 
-    let location = FieldValue.Location(
+    let location = Location(
       latitude: latitude,
       longitude: longitude,
       horizontalAccuracy: locationValue.horizontalAccuracy,
@@ -104,10 +90,8 @@ internal enum RecordFieldConverter {
   }
 
   /// Convert reference field value
-  private static func convertReferenceFieldValue(
-    _ referenceValue: Components.Schemas.ReferenceValue
-  ) -> FieldValue? {
-    let reference = FieldValue.Reference(
+  private static func fromReference(_ referenceValue: Components.Schemas.ReferenceValue) -> Self {
+    let reference = Reference(
       recordName: referenceValue.recordName ?? "",
       action: referenceValue.action?.rawValue
     )
@@ -115,10 +99,8 @@ internal enum RecordFieldConverter {
   }
 
   /// Convert asset field value
-  private static func convertAssetFieldValue(
-    _ assetValue: Components.Schemas.AssetValue
-  ) -> FieldValue? {
-    let asset = FieldValue.Asset(
+  private static func fromAsset(_ assetValue: Components.Schemas.AssetValue) -> Self {
+    let asset = Asset(
       fileChecksum: assetValue.fileChecksum,
       size: assetValue.size,
       referenceChecksum: assetValue.referenceChecksum,
@@ -130,17 +112,13 @@ internal enum RecordFieldConverter {
   }
 
   /// Convert list field value
-  private static func convertListFieldValue(
-    _ listValue: [CustomFieldValue.CustomFieldValuePayload]
-  ) -> FieldValue {
-    let convertedList = listValue.compactMap { convertListItem($0) }
+  private static func fromList(_ listValue: [CustomFieldValue.CustomFieldValuePayload]) -> Self {
+    let convertedList = listValue.compactMap { Self.fromListItem($0) }
     return .list(convertedList)
   }
 
   /// Convert individual list item
-  private static func convertListItem(_ listItem: CustomFieldValue.CustomFieldValuePayload)
-    -> FieldValue?
-  {
+  private static func fromListItem(_ listItem: CustomFieldValue.CustomFieldValuePayload) -> Self? {
     switch listItem {
     case .stringValue(let stringValue):
       return .string(stringValue)
@@ -148,47 +126,33 @@ internal enum RecordFieldConverter {
       return .int64(intValue)
     case .doubleValue(let doubleValue):
       return .double(doubleValue)
-    case .booleanValue(let boolValue):
-      return .boolean(boolValue)
     case .bytesValue(let bytesValue):
       return .bytes(bytesValue)
-    default:
-      return convertComplexListItem(listItem)
-    }
-  }
-
-  /// Convert complex list item types
-  private static func convertComplexListItem(
-    _ listItem: CustomFieldValue.CustomFieldValuePayload
-  ) -> FieldValue? {
-    switch listItem {
     case .dateValue(let dateValue):
       return .date(Date(timeIntervalSince1970: dateValue / 1_000))
     case .locationValue(let locationValue):
-      return convertLocationFieldValue(locationValue)
+      return fromLocation(locationValue)
     case .referenceValue(let referenceValue):
-      return convertReferenceFieldValue(referenceValue)
+      return fromReference(referenceValue)
     case .assetValue(let assetValue):
-      return convertAssetFieldValue(assetValue)
+      return fromAsset(assetValue)
     case .listValue(let nestedList):
-      return convertNestedListValue(nestedList)
-    default:
-      return nil
+      return fromNestedList(nestedList)
     }
   }
 
   /// Convert nested list value (simplified for basic types)
-  private static func convertNestedListValue(
+  private static func fromNestedList(
     _ nestedList: [CustomFieldValue.CustomFieldValuePayload]
-  ) -> FieldValue {
-    let convertedNestedList = nestedList.compactMap { convertBasicListItem($0) }
+  ) -> Self {
+    let convertedNestedList = nestedList.compactMap { fromBasicListItem($0) }
     return .list(convertedNestedList)
   }
 
   /// Convert basic list item types only
-  private static func convertBasicListItem(_ nestedItem: CustomFieldValue.CustomFieldValuePayload)
-    -> FieldValue?
-  {
+  private static func fromBasicListItem(
+    _ nestedItem: CustomFieldValue.CustomFieldValuePayload
+  ) -> Self? {
     switch nestedItem {
     case .stringValue(let stringValue):
       return .string(stringValue)
@@ -196,8 +160,6 @@ internal enum RecordFieldConverter {
       return .int64(intValue)
     case .doubleValue(let doubleValue):
       return .double(doubleValue)
-    case .booleanValue(let boolValue):
-      return .boolean(boolValue)
     case .bytesValue(let bytesValue):
       return .bytes(bytesValue)
     default:
