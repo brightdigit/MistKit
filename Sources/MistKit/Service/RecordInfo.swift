@@ -43,7 +43,7 @@ internal import Foundation
 /// let successfulRecords = results.filter { !$0.isError }
 /// let failedRecords = results.filter { $0.isError }
 /// ```
-public struct RecordInfo: Encodable {
+public struct RecordInfo: Encodable, Sendable {
   /// The record name
   public let recordName: String
   /// The record type
@@ -76,5 +76,24 @@ public struct RecordInfo: Encodable {
     }
 
     self.fields = convertedFields
+  }
+
+  /// Public initializer for creating RecordInfo instances
+  ///
+  /// This initializer is primarily intended for testing and cases where you need to
+  /// construct RecordInfo manually rather than receiving it from CloudKit responses.
+  ///
+  /// - Parameters:
+  ///   - recordName: The unique record name
+  ///   - recordType: The CloudKit record type
+  ///   - fields: Dictionary of field names to their values
+  public init(
+    recordName: String,
+    recordType: String,
+    fields: [String: FieldValue]
+  ) {
+    self.recordName = recordName
+    self.recordType = recordType
+    self.fields = fields
   }
 }
