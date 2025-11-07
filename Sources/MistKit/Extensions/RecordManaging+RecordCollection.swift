@@ -63,7 +63,9 @@ extension RecordManaging where Self: CloudKitRecordCollection {
     _ records: repeat [each RecordType]
   ) async throws {
     // Swift 6.0+ pack iteration
-    for recordArray in repeat each records where !recordArray.isEmpty {
+        for recordArray in repeat each records {
+      // Skip empty arrays
+      guard !recordArray.isEmpty else { continue }
       // Extract type information from first record
       let firstRecord = recordArray[0]
       let typeName = type(of: firstRecord).cloudKitRecordType
