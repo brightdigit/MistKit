@@ -66,10 +66,12 @@ struct UpdateCommand: AsyncParsableCommand {
                 recordName: feed.recordName,
                 feedURL: feed.feedURL,
                 title: feed.title,
+                description: feed.description,
                 totalAttempts: feed.totalAttempts + 1,
                 successfulAttempts: feed.successfulAttempts,
                 usageCount: feed.usageCount,
-                lastAttempted: Date()
+                lastAttempted: Date(),
+                isActive: feed.isActive
             )
 
             do {
@@ -103,10 +105,33 @@ struct UpdateCommand: AsyncParsableCommand {
                     )
                 }
 
-                // Upload articles
+                // Duplicate detection: query existing articles by GUID
                 if !articles.isEmpty {
-                    _ = try await service.createArticles(articles)
-                    print("   ✅ Uploaded \(articles.count) articles")
+                    let guids = articles.map { $0.guid }
+                    let existingArticles = try await service.queryArticlesByGUIDs(
+                        guids,
+                        feedRecordName: recordName
+                    )
+
+                    // Create set of existing GUIDs for fast lookup
+                    let existingGUIDs = Set(existingArticles.map { $0.guid })
+
+                    // Filter out duplicates
+                    let newArticles = articles.filter { !existingGUIDs.contains($0.guid) }
+
+                    let duplicateCount = articles.count - newArticles.count
+
+                    if duplicateCount > 0 {
+                        print("   ℹ️  Skipped \(duplicateCount) duplicate(s)")
+                    }
+
+                    // Upload only new articles
+                    if !newArticles.isEmpty {
+                        _ = try await service.createArticles(newArticles)
+                        print("   ✅ Uploaded \(newArticles.count) new article(s)")
+                    } else {
+                        print("   ℹ️  No new articles to upload")
+                    }
                 }
 
                 // Update success counter
@@ -114,10 +139,12 @@ struct UpdateCommand: AsyncParsableCommand {
                     recordName: feed.recordName,
                     feedURL: feed.feedURL,
                     title: feed.title,
+                    description: feed.description,
                     totalAttempts: updatedFeed.totalAttempts,
                     successfulAttempts: feed.successfulAttempts + 1,
                     usageCount: feed.usageCount,
-                    lastAttempted: updatedFeed.lastAttempted
+                    lastAttempted: updatedFeed.lastAttempted,
+                    isActive: feed.isActive
                 )
 
                 successCount += 1

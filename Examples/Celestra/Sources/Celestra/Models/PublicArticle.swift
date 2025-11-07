@@ -1,5 +1,6 @@
 import Foundation
 import MistKit
+import CryptoKit
 
 /// Represents an RSS article stored in CloudKit's public database
 struct PublicArticle {
@@ -14,6 +15,14 @@ struct PublicArticle {
     let fetchedAt: Date
     let expiresAt: Date
 
+    /// Computed content hash for duplicate detection fallback
+    var contentHash: String {
+        let content = "\(title)|\(link)|\(guid)"
+        let data = Data(content.utf8)
+        let hash = SHA256.hash(data: data)
+        return hash.compactMap { String(format: "%02x", $0) }.joined()
+    }
+
     /// Convert to CloudKit record fields dictionary
     func toFieldsDict() -> [String: FieldValue] {
         var fields: [String: FieldValue] = [
@@ -21,6 +30,7 @@ struct PublicArticle {
             "title": .string(title),
             "link": .string(link),
             "guid": .string(guid),
+            "contentHash": .string(contentHash),
             "fetchedAt": .date(fetchedAt),
             "expiresAt": .date(expiresAt)
         ]

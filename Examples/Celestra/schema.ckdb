@@ -1,40 +1,29 @@
-RECORD TYPE PublicFeed (
-    "__recordID"             RECORD ID,
-    "___createTime"          TIMESTAMP,
-    "___createdBy"           REFERENCE,
-    "___etag"                STRING,
-    "___modTime"             TIMESTAMP,
-    "___modifiedBy"          REFERENCE,
-    "___recordType"          STRING,
+DEFINE SCHEMA
 
+RECORD TYPE PublicFeed (
     "feedURL"                STRING QUERYABLE SORTABLE,
-    "title"                  STRING,
+    "title"                  STRING SEARCHABLE,
+    "description"            STRING,
     "totalAttempts"          INT64,
     "successfulAttempts"     INT64,
     "usageCount"             INT64 QUERYABLE SORTABLE,
     "lastAttempted"          TIMESTAMP QUERYABLE SORTABLE,
+    "isActive"               INT64 QUERYABLE,
 
     GRANT WRITE TO "_creator",
     GRANT READ TO "_world"
 );
 
 RECORD TYPE PublicArticle (
-    "__recordID"             RECORD ID,
-    "___createTime"          TIMESTAMP,
-    "___createdBy"           REFERENCE,
-    "___etag"                STRING,
-    "___modTime"             TIMESTAMP,
-    "___modifiedBy"          REFERENCE,
-    "___recordType"          STRING,
-
     "feedRecordName"         STRING QUERYABLE SORTABLE,
-    "title"                  STRING,
+    "title"                  STRING SEARCHABLE,
     "link"                   STRING,
     "description"            STRING,
-    "author"                 STRING,
-    "pubDate"                TIMESTAMP,
+    "author"                 STRING QUERYABLE,
+    "pubDate"                TIMESTAMP QUERYABLE SORTABLE,
     "guid"                   STRING QUERYABLE SORTABLE,
-    "fetchedAt"              TIMESTAMP,
+    "contentHash"            STRING QUERYABLE,
+    "fetchedAt"              TIMESTAMP QUERYABLE SORTABLE,
     "expiresAt"              TIMESTAMP QUERYABLE SORTABLE,
 
     GRANT WRITE TO "_creator",

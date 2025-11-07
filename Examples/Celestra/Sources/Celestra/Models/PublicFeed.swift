@@ -6,10 +6,12 @@ struct PublicFeed {
     let recordName: String?  // nil for new records
     let feedURL: String
     let title: String
+    let description: String?
     let totalAttempts: Int64
     let successfulAttempts: Int64
     let usageCount: Int64
     let lastAttempted: Date?
+    let isActive: Bool
 
     /// Convert to CloudKit record fields dictionary
     func toFieldsDict() -> [String: FieldValue] {
@@ -18,8 +20,12 @@ struct PublicFeed {
             "title": .string(title),
             "totalAttempts": .int64(Int(totalAttempts)),
             "successfulAttempts": .int64(Int(successfulAttempts)),
-            "usageCount": .int64(Int(usageCount))
+            "usageCount": .int64(Int(usageCount)),
+            "isActive": .int64(isActive ? 1 : 0)
         ]
+        if let description = description {
+            fields["description"] = .string(description)
+        }
         if let lastAttempted = lastAttempted {
             fields["lastAttempted"] = .date(lastAttempted)
         }
@@ -43,6 +49,12 @@ struct PublicFeed {
             self.title = ""
         }
 
+        if case .string(let value) = record.fields["description"] {
+            self.description = value
+        } else {
+            self.description = nil
+        }
+
         // Extract Int64 values
         if case .int64(let value) = record.fields["totalAttempts"] {
             self.totalAttempts = Int64(value)
@@ -62,6 +74,13 @@ struct PublicFeed {
             self.usageCount = 0
         }
 
+        // Extract boolean as Int64
+        if case .int64(let value) = record.fields["isActive"] {
+            self.isActive = value != 0
+        } else {
+            self.isActive = true  // Default to active
+        }
+
         // Extract date value
         if case .date(let value) = record.fields["lastAttempted"] {
             self.lastAttempted = value
@@ -75,17 +94,21 @@ struct PublicFeed {
         recordName: String? = nil,
         feedURL: String,
         title: String,
+        description: String? = nil,
         totalAttempts: Int64 = 0,
         successfulAttempts: Int64 = 0,
         usageCount: Int64 = 0,
-        lastAttempted: Date? = nil
+        lastAttempted: Date? = nil,
+        isActive: Bool = true
     ) {
         self.recordName = recordName
         self.feedURL = feedURL
         self.title = title
+        self.description = description
         self.totalAttempts = totalAttempts
         self.successfulAttempts = successfulAttempts
         self.usageCount = usageCount
         self.lastAttempted = lastAttempted
+        self.isActive = isActive
     }
 }

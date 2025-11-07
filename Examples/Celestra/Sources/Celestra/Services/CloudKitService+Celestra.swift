@@ -54,6 +54,80 @@ extension CloudKitService {
 
     // MARK: - PublicArticle Operations
 
+    /// Query existing articles by GUIDs for duplicate detection
+    /// - Parameters:
+    ///   - guids: Array of article GUIDs to check
+    ///   - feedRecordName: Optional feed filter to scope the query
+    /// - Returns: Array of existing PublicArticle records matching the GUIDs
+    func queryArticlesByGUIDs(
+        _ guids: [String],
+        feedRecordName: String? = nil
+    ) async throws -> [PublicArticle] {
+        guard !guids.isEmpty else {
+            return []
+        }
+
+        var filters: [QueryFilter] = []
+
+        // Add feed filter if provided
+        if let feedName = feedRecordName {
+            filters.append(.equals("feedRecordName", .string(feedName)))
+        }
+
+        // For small number of GUIDs, we can query directly
+        // For larger sets, might need multiple queries or alternative strategy
+        if guids.count <= 10 {
+            // Create OR filter for GUIDs
+            let guidFilters = guids.map { guid in
+                QueryFilter.equals("guid", .string(guid))
+            }
+
+            // Combine with feed filter if present
+            if !filters.isEmpty {
+                // When we have both feed and GUID filters, we need to do multiple queries
+                // or fetch all for feed and filter in memory
+                filters.append(.equals("guid", .string(guids[0])))
+
+                let records = try await queryRecords(
+                    recordType: "PublicArticle",
+                    filters: filters,
+                    limit: 500
+                )
+
+                // For now, fetch all articles for this feed and filter in memory
+                let allFeedArticles = records.map { PublicArticle(from: $0) }
+                let guidSet = Set(guids)
+                return allFeedArticles.filter { guidSet.contains($0.guid) }
+            } else {
+                // Just GUID filter - need to query each individually or use contentHash
+                // For simplicity, query by feedRecordName first then filter
+                let records = try await queryRecords(
+                    recordType: "PublicArticle",
+                    limit: 500
+                )
+
+                let articles = records.map { PublicArticle(from: $0) }
+                let guidSet = Set(guids)
+                return articles.filter { guidSet.contains($0.guid) }
+            }
+        } else {
+            // For large GUID sets, fetch all articles for the feed and filter in memory
+            if let feedName = feedRecordName {
+                filters = [.equals("feedRecordName", .string(feedName))]
+            }
+
+            let records = try await queryRecords(
+                recordType: "PublicArticle",
+                filters: filters.isEmpty ? nil : filters,
+                limit: 500
+            )
+
+            let articles = records.map { PublicArticle(from: $0) }
+            let guidSet = Set(guids)
+            return articles.filter { guidSet.contains($0.guid) }
+        }
+    }
+
     /// Create multiple PublicArticle records in a batch (non-atomic)
     func createArticles(_ articles: [PublicArticle]) async throws -> [RecordInfo] {
         guard !articles.isEmpty else {

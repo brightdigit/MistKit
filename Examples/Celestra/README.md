@@ -6,6 +6,7 @@ Celestra is a command-line RSS reader that demonstrates MistKit's query filterin
 
 - **RSS Parsing with SyndiKit**: Parse RSS and Atom feeds using BrightDigit's SyndiKit library
 - **Add RSS Feeds**: Parse and validate RSS feeds, then store metadata in CloudKit
+- **Duplicate Detection**: Automatically detect and skip duplicate articles using GUID-based queries
 - **Filtered Updates**: Query feeds using MistKit's `QueryFilter` API (by date and popularity)
 - **Batch Operations**: Upload multiple articles efficiently using non-atomic operations
 - **Server-to-Server Auth**: Demonstrates CloudKit authentication for backend services
@@ -54,25 +55,28 @@ In CloudKit Dashboard, create these record types in the **Public Database**:
 #### PublicFeed Record Type
 | Field Name | Field Type | Indexed |
 |------------|------------|---------|
-| feedURL | String | Yes |
-| title | String | No |
+| feedURL | String | Yes (Queryable, Sortable) |
+| title | String | Yes (Searchable) |
+| description | String | No |
 | totalAttempts | Int64 | No |
 | successfulAttempts | Int64 | No |
-| usageCount | Int64 | No |
-| lastAttempted | Date/Time | Yes |
+| usageCount | Int64 | Yes (Queryable, Sortable) |
+| lastAttempted | Date/Time | Yes (Queryable, Sortable) |
+| isActive | Int64 | Yes (Queryable) |
 
 #### PublicArticle Record Type
 | Field Name | Field Type | Indexed |
 |------------|------------|---------|
-| feedRecordName | String | Yes |
-| title | String | No |
+| feedRecordName | String | Yes (Queryable, Sortable) |
+| title | String | Yes (Searchable) |
 | link | String | No |
 | description | String | No |
-| author | String | No |
-| pubDate | Date/Time | No |
-| guid | String | Yes |
-| fetchedAt | Date/Time | No |
-| expiresAt | Date/Time | Yes |
+| author | String | Yes (Queryable) |
+| pubDate | Date/Time | Yes (Queryable, Sortable) |
+| guid | String | Yes (Queryable, Sortable) |
+| contentHash | String | Yes (Queryable) |
+| fetchedAt | Date/Time | Yes (Queryable, Sortable) |
+| expiresAt | Date/Time | Yes (Queryable, Sortable) |
 
 #### 3. Generate Server-to-Server Key
 
@@ -175,14 +179,20 @@ Example output:
 
 [1/3] 📰 Example Blog
    ✅ Fetched 25 articles
-   ✅ Uploaded 25 articles
+   ℹ️  Skipped 20 duplicate(s)
+   ✅ Uploaded 5 new article(s)
 
 [2/3] 📰 Tech News
    ✅ Fetched 15 articles
-   ✅ Uploaded 15 articles
+   ℹ️  Skipped 10 duplicate(s)
+   ✅ Uploaded 5 new article(s)
+
+[3/3] 📰 Daily Updates
+   ✅ Fetched 10 articles
+   ℹ️  No new articles to upload
 
 ✅ Update complete!
-   Success: 2
+   Success: 3
    Errors: 0
 ```
 
@@ -237,7 +247,41 @@ Articles are uploaded in batches using non-atomic operations for better performa
 return try await modifyRecords(operations: operations, atomic: false)
 ```
 
-### 4. Server-to-Server Authentication
+### 4. Duplicate Detection
+
+Celestra automatically detects and skips duplicate articles during feed updates:
+
+```swift
+// In UpdateCommand.swift
+// 1. Extract GUIDs from fetched articles
+let guids = articles.map { $0.guid }
+
+// 2. Query existing articles by GUID
+let existingArticles = try await service.queryArticlesByGUIDs(
+    guids,
+    feedRecordName: recordName
+)
+
+// 3. Filter out duplicates
+let existingGUIDs = Set(existingArticles.map { $0.guid })
+let newArticles = articles.filter { !existingGUIDs.contains($0.guid) }
+
+// 4. Only upload new articles
+if !newArticles.isEmpty {
+    _ = try await service.createArticles(newArticles)
+}
+```
+
+#### How Duplicate Detection Works
+
+1. **GUID-Based Identification**: Each article has a unique GUID (Globally Unique Identifier) from the RSS feed
+2. **Pre-Upload Query**: Before uploading, Celestra queries CloudKit for existing articles with the same GUIDs
+3. **Content Hash Fallback**: Articles also include a SHA256 content hash for duplicate detection when GUIDs are unreliable
+4. **Efficient Filtering**: Uses Set-based filtering for O(n) performance with large article counts
+
+This ensures you can run `update` multiple times without creating duplicate articles in CloudKit.
+
+### 5. Server-to-Server Authentication
 
 Demonstrates CloudKit authentication without user interaction:
 

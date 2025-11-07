@@ -6,6 +6,7 @@ import SyndiKit
 struct RSSFetcherService {
     struct FeedData {
         let title: String
+        let description: String?
         let items: [FeedItem]
     }
 
@@ -57,6 +58,7 @@ struct RSSFetcherService {
 
         return FeedData(
             title: feed.title,
+            description: feed.summary,
             items: items
         )
     }

@@ -35,7 +35,11 @@ struct AddFeedCommand: AsyncParsableCommand {
         let service = try CelestraConfig.createCloudKitService()
 
         // 4. Create PublicFeed record
-        let feed = PublicFeed(feedURL: feedURL, title: feedData.title)
+        let feed = PublicFeed(
+            feedURL: feedURL,
+            title: feedData.title,
+            description: feedData.description
+        )
         let record = try await service.createFeed(feed)
 
         print("✅ Feed added to CloudKit")
