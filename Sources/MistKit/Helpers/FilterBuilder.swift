@@ -58,7 +58,8 @@ internal struct FilterBuilder {
   ///   - field: The field name to filter on
   ///   - value: The value to compare
   /// - Returns: A configured Filter
-  internal static func notEquals(_ field: String, _ value: FieldValue) -> Components.Schemas.Filter {
+  internal static func notEquals(_ field: String, _ value: FieldValue) -> Components.Schemas.Filter
+  {
     .init(
       comparator: .NOT_EQUALS,
       fieldName: field,
@@ -149,7 +150,8 @@ internal struct FilterBuilder {
   ///   - field: The field name to filter on
   ///   - value: The prefix value to not match
   /// - Returns: A configured Filter
-  internal static func notBeginsWith(_ field: String, _ value: String) -> Components.Schemas.Filter {
+  internal static func notBeginsWith(_ field: String, _ value: String) -> Components.Schemas.Filter
+  {
     .init(
       comparator: .NOT_BEGINS_WITH,
       fieldName: field,

@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -33,7 +33,7 @@ public import Foundation
 ///
 /// These extensions eliminate the need for type-specific implementations by leveraging
 /// the CloudKitRecord protocol's serialization methods.
-public extension RecordManaging {
+extension RecordManaging {
   // MARK: - Generic Operations
 
   /// Sync records of any CloudKitRecord-conforming type to CloudKit
@@ -50,7 +50,7 @@ public extension RecordManaging {
   ///
   /// - Parameter records: Array of records conforming to CloudKitRecord
   /// - Throws: CloudKit errors if the sync operation fails
-  func sync<T: CloudKitRecord>(_ records: [T]) async throws {
+  public func sync<T: CloudKitRecord>(_ records: [T]) async throws {
     let operations = records.map { record in
       RecordOperation(
         operationType: .forceReplace,
@@ -81,7 +81,7 @@ public extension RecordManaging {
   /// - Parameters:
   ///   - type: The CloudKitRecord type to list
   /// - Throws: CloudKit errors if the query fails
-  func list<T: CloudKitRecord>(_ type: T.Type) async throws {
+  public func list<T: CloudKitRecord>(_ type: T.Type) async throws {
     let records = try await queryRecords(recordType: T.cloudKitRecordType)
 
     print("\n\(T.cloudKitRecordType) (\(records.count) total)")
@@ -118,7 +118,7 @@ public extension RecordManaging {
   ///   - filter: Optional closure to filter RecordInfo results before parsing
   /// - Returns: Array of parsed model instances (nil records are filtered out)
   /// - Throws: CloudKit errors if the query fails
-  func query<T: CloudKitRecord>(
+  public func query<T: CloudKitRecord>(
     _ type: T.Type,
     where filter: (RecordInfo) -> Bool = { _ in true }
   ) async throws -> [T] {

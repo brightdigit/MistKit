@@ -191,7 +191,7 @@ internal struct FieldValueConvenienceTests {
       "count": .int64(42),
       "enabled": .boolean(true),
       "legacyFlag": .int64(1),
-      "score": .double(98.5)
+      "score": .double(98.5),
     ]
 
     #expect(fields["name"]?.stringValue == "Test")

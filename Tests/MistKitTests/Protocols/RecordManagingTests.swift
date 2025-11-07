@@ -88,7 +88,7 @@ internal struct RecordManagingTests {
     let batchSizes = await service.batchSizes
     let lastOperations = await service.lastExecutedOperations
 
-    #expect(executeCount == 1) // Should be a single batch
+    #expect(executeCount == 1)  // Should be a single batch
     #expect(batchSizes == [50])
     #expect(lastOperations.count == 50)
     #expect(lastOperations.first?.recordName == "test-0")
@@ -117,7 +117,7 @@ internal struct RecordManagingTests {
     let batchSizes = await service.batchSizes
     let lastOperations = await service.lastExecutedOperations
 
-    #expect(executeCount == 3) // Should be 3 batches
+    #expect(executeCount == 3)  // Should be 3 batches
     #expect(batchSizes == [200, 200, 50])
     #expect(lastOperations.count == 450)
     #expect(lastOperations.first?.recordName == "test-0")
@@ -171,7 +171,7 @@ internal struct RecordManagingTests {
         fields: [
           "name": .string("First"),
           "count": .int64(10),
-          "isActive": .boolean(true)
+          "isActive": .boolean(true),
         ]
       ),
       RecordInfo(
@@ -180,9 +180,9 @@ internal struct RecordManagingTests {
         fields: [
           "name": .string("Second"),
           "count": .int64(20),
-          "isActive": .boolean(false)
+          "isActive": .boolean(false),
         ]
-      )
+      ),
     ]
     await service.setRecordsToReturn(mockRecords)
 
@@ -211,7 +211,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Active"),
-          "isActive": .boolean(true)
+          "isActive": .boolean(true),
         ]
       ),
       RecordInfo(
@@ -219,7 +219,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Inactive"),
-          "isActive": .boolean(false)
+          "isActive": .boolean(false),
         ]
       ),
       RecordInfo(
@@ -227,9 +227,9 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Also Active"),
-          "isActive": .boolean(true)
+          "isActive": .boolean(true),
         ]
-      )
+      ),
     ]
     await service.setRecordsToReturn(mockRecords)
 
@@ -255,7 +255,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Valid"),
-          "isActive": .boolean(true)
+          "isActive": .boolean(true),
         ]
       ),
       RecordInfo(
@@ -271,9 +271,9 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Also Valid"),
-          "isActive": .boolean(false)
+          "isActive": .boolean(false),
         ]
-      )
+      ),
     ]
     await service.setRecordsToReturn(mockRecords)
 
@@ -323,7 +323,7 @@ internal struct RecordManagingTests {
         fields: [
           "name": .string("First"),
           "count": .int64(1),
-          "isActive": .boolean(true)
+          "isActive": .boolean(true),
         ]
       )
     ]
@@ -356,7 +356,7 @@ internal struct RecordManagingTests {
     let executeCount = await service.executeCallCount
     let batchSizes = await service.batchSizes
 
-    #expect(executeCount == 1) // Exactly 200 should be 1 batch
+    #expect(executeCount == 1)  // Exactly 200 should be 1 batch
     #expect(batchSizes == [200])
   }
 
@@ -380,7 +380,7 @@ internal struct RecordManagingTests {
     let executeCount = await service.executeCallCount
     let batchSizes = await service.batchSizes
 
-    #expect(executeCount == 2) // 201 should be 2 batches
+    #expect(executeCount == 2)  // 201 should be 2 batches
     #expect(batchSizes == [200, 1])
   }
 }

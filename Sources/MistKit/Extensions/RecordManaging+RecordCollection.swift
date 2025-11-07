@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -34,7 +34,7 @@ public import Foundation
 /// Provides generic implementations using Swift variadic generics (parameter packs)
 /// to iterate through CloudKit record types at compile time without runtime reflection.
 @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
-public extension RecordManaging where Self: CloudKitRecordCollection {
+extension RecordManaging where Self: CloudKitRecordCollection {
   /// Synchronize multiple record types to CloudKit using variadic generics
   ///
   /// This method uses Swift parameter packs to accept multiple arrays of different
@@ -59,14 +59,11 @@ public extension RecordManaging where Self: CloudKitRecordCollection {
   /// - Compiler enforces concrete types
   /// - Each array maintains its specific type
   /// - Impossible to pass wrong record type
-  func syncAllRecords<each RecordType: CloudKitRecord>(
+  public func syncAllRecords<each RecordType: CloudKitRecord>(
     _ records: repeat [each RecordType]
   ) async throws {
     // Swift 6.0+ pack iteration
-    for recordArray in repeat each records {
-      // Skip empty arrays
-      guard !recordArray.isEmpty else { continue }
-
+    for recordArray in repeat each records where !recordArray.isEmpty {
       // Extract type information from first record
       let firstRecord = recordArray[0]
       let typeName = type(of: firstRecord).cloudKitRecordType
@@ -92,7 +89,7 @@ public extension RecordManaging where Self: CloudKitRecordCollection {
   /// Prints a summary at the end.
   ///
   /// - Throws: CloudKit errors
-  func listAllRecords() async throws {
+  public func listAllRecords() async throws {
     var totalCount = 0
     var countsByType: [String: Int] = [:]
     var recordTypesList: [any CloudKitRecord.Type] = []
@@ -138,7 +135,7 @@ public extension RecordManaging where Self: CloudKitRecordCollection {
   /// ```swift
   /// try await service.deleteAllRecords()
   /// ```
-  func deleteAllRecords() async throws {
+  public func deleteAllRecords() async throws {
     var totalDeleted = 0
     var deletedByType: [String: Int] = [:]
 

@@ -290,7 +290,8 @@ public enum FieldValue: Codable, Equatable, Sendable {
   }
 
   // swiftlint:disable:next cyclomatic_complexity
-  private func convertFieldValueToPayload(_ fieldValue: FieldValue) -> CustomFieldValue
+  private func convertFieldValueToPayload(_ fieldValue: FieldValue)
+    -> CustomFieldValue
     .CustomFieldValuePayload
   {
     switch fieldValue {

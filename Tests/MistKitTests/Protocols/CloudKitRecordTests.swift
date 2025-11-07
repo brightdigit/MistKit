@@ -47,7 +47,7 @@ internal struct TestRecord: CloudKitRecord {
     var fields: [String: FieldValue] = [
       "name": .string(name),
       "count": .int64(count),
-      "isActive": .boolean(isActive)
+      "isActive": .boolean(isActive),
     ]
 
     if let score {
@@ -148,7 +148,7 @@ internal struct CloudKitRecordTests {
         "name": .string("Parsed Record"),
         "count": .int64(25),
         "isActive": .boolean(true),
-        "score": .double(75.0)
+        "score": .double(75.0),
       ]
     )
 
@@ -168,7 +168,7 @@ internal struct CloudKitRecordTests {
       recordType: "TestRecord",
       fields: [
         "name": .string("Minimal Record"),
-        "isActive": .boolean(false)
+        "isActive": .boolean(false),
       ]
     )
 
@@ -176,7 +176,7 @@ internal struct CloudKitRecordTests {
 
     #expect(record?.recordName == "test-4")
     #expect(record?.name == "Minimal Record")
-    #expect(record?.count == 0) // Default value
+    #expect(record?.isEmpty)  // Default value
     #expect(record?.isActive == false)
     #expect(record?.score == nil)
     #expect(record?.lastUpdated == nil)
@@ -204,7 +204,7 @@ internal struct CloudKitRecordTests {
       recordType: "TestRecord",
       fields: [
         "name": .string("Legacy Record"),
-        "isActive": .int64(1) // Legacy boolean as int64
+        "isActive": .int64(1),  // Legacy boolean as int64
       ]
     )
 
@@ -220,7 +220,7 @@ internal struct CloudKitRecordTests {
       recordType: "TestRecord",
       fields: [
         "name": .string("Display Record"),
-        "count": .int64(99)
+        "count": .int64(99),
       ]
     )
 
@@ -294,7 +294,7 @@ internal struct CloudKitRecordTests {
     // This test verifies that TestRecord (CloudKitRecord) is Sendable
     // by being able to pass it across async/await boundaries
     let task = Task {
-      return record.name
+      record.name
     }
 
     let name = await task.value

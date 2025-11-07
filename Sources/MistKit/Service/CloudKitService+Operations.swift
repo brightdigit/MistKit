@@ -128,7 +128,10 @@ extension CloudKitService {
   }
 
   /// Modify (create, update, delete) records
-  @available(*, deprecated, message: "Use modifyRecords(_:) with RecordOperation in CloudKitService+WriteOperations instead")
+  @available(
+    *, deprecated,
+    message: "Use modifyRecords(_:) with RecordOperation in CloudKitService+WriteOperations instead"
+  )
   internal func modifyRecords(
     operations: [Components.Schemas.RecordOperation],
     atomic: Bool = true
