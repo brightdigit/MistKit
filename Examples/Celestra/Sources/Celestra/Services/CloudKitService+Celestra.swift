@@ -1,25 +1,42 @@
 import Foundation
 import MistKit
+import os
 
 /// CloudKit service extensions for Celestra operations
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
+    /// Retry policy for CloudKit operations
+    private static let retryPolicy = RetryPolicy.default
     // MARK: - PublicFeed Operations
 
-    /// Create a new PublicFeed record
+    /// Create a new PublicFeed record with retry logic
     func createFeed(_ feed: PublicFeed) async throws -> RecordInfo {
-        try await createRecord(
-            recordType: "PublicFeed",
-            fields: feed.toFieldsDict()
+        CelestraLogger.cloudkit.info("📝 Creating feed: \(feed.feedURL)")
+
+        return try await Self.retryPolicy.execute(
+            operation: {
+                try await self.createRecord(
+                    recordType: "PublicFeed",
+                    fields: feed.toFieldsDict()
+                )
+            },
+            logger: CelestraLogger.cloudkit
         )
     }
 
-    /// Update an existing PublicFeed record
+    /// Update an existing PublicFeed record with retry logic
     func updateFeed(recordName: String, feed: PublicFeed) async throws -> RecordInfo {
-        try await updateRecord(
-            recordName: recordName,
-            recordType: "PublicFeed",
-            fields: feed.toFieldsDict()
+        CelestraLogger.cloudkit.info("🔄 Updating feed: \(feed.feedURL)")
+
+        return try await Self.retryPolicy.execute(
+            operation: {
+                try await self.updateRecord(
+                    recordName: recordName,
+                    recordType: "PublicFeed",
+                    fields: feed.toFieldsDict()
+                )
+            },
+            logger: CelestraLogger.cloudkit
         )
     }
 
@@ -128,18 +145,121 @@ extension CloudKitService {
         }
     }
 
-    /// Create multiple PublicArticle records in a batch (non-atomic)
-    func createArticles(_ articles: [PublicArticle]) async throws -> [RecordInfo] {
+    /// Create multiple PublicArticle records in batches with retry logic
+    /// - Parameter articles: Articles to create
+    /// - Returns: Batch operation result with success/failure tracking
+    func createArticles(_ articles: [PublicArticle]) async throws -> BatchOperationResult {
         guard !articles.isEmpty else {
-            return []
+            return BatchOperationResult()
         }
 
-        let records = articles.map { article in
-            (recordType: "PublicArticle", fields: article.toFieldsDict())
+        CelestraLogger.cloudkit.info("📦 Creating \(articles.count) article(s)...")
+
+        // Chunk articles into batches of 200 (CloudKit limit)
+        let batches = articles.chunked(into: 200)
+        var result = BatchOperationResult()
+
+        for (index, batch) in batches.enumerated() {
+            CelestraLogger.operations.info("   Batch \(index + 1)/\(batches.count): \(batch.count) article(s)")
+
+            do {
+                let records = batch.map { article in
+                    (recordType: "PublicArticle", fields: article.toFieldsDict())
+                }
+
+                // Use retry policy for each batch
+                let recordInfos = try await Self.retryPolicy.execute(
+                    operation: {
+                        try await self.createRecords(records, atomic: false)
+                    },
+                    logger: CelestraLogger.cloudkit
+                )
+
+                result.appendSuccesses(recordInfos)
+                CelestraLogger.cloudkit.info("   ✅ Batch \(index + 1) complete: \(recordInfos.count) created")
+            } catch {
+                CelestraLogger.errors.error("   ❌ Batch \(index + 1) failed: \(error.localizedDescription)")
+
+                // Track individual failures
+                for article in batch {
+                    result.appendFailure(article: article, error: error)
+                }
+            }
         }
 
-        // Use non-atomic to allow partial success
-        return try await createRecords(records, atomic: false)
+        CelestraLogger.cloudkit.info(
+            "📊 Batch operation complete: \(result.successCount)/\(result.totalProcessed) succeeded (\(String(format: "%.1f", result.successRate))%)"
+        )
+
+        return result
+    }
+
+    /// Update multiple PublicArticle records in batches with retry logic
+    /// - Parameter articles: Articles to update (must have recordName set)
+    /// - Returns: Batch operation result with success/failure tracking
+    func updateArticles(_ articles: [PublicArticle]) async throws -> BatchOperationResult {
+        guard !articles.isEmpty else {
+            return BatchOperationResult()
+        }
+
+        CelestraLogger.cloudkit.info("🔄 Updating \(articles.count) article(s)...")
+
+        // Filter out articles without recordName
+        let validArticles = articles.filter { $0.recordName != nil }
+        if validArticles.count != articles.count {
+            CelestraLogger.errors.warning(
+                "⚠️ Skipping \(articles.count - validArticles.count) article(s) without recordName"
+            )
+        }
+
+        guard !validArticles.isEmpty else {
+            return BatchOperationResult()
+        }
+
+        // Chunk articles into batches of 200
+        let batches = validArticles.chunked(into: 200)
+        var result = BatchOperationResult()
+
+        for (index, batch) in batches.enumerated() {
+            CelestraLogger.operations.info("   Batch \(index + 1)/\(batches.count): \(batch.count) article(s)")
+
+            do {
+                let operations = batch.compactMap { article -> RecordOperation? in
+                    guard let recordName = article.recordName else { return nil }
+
+                    return RecordOperation.update(
+                        recordType: "PublicArticle",
+                        recordName: recordName,
+                        fields: article.toFieldsDict(),
+                        recordChangeTag: nil
+                    )
+                }
+
+                // Use retry policy for each batch
+                let recordInfos = try await Self.retryPolicy.execute(
+                    operation: {
+                        try await self.modifyRecords(operations)
+                    },
+                    logger: CelestraLogger.cloudkit
+                )
+
+                result.appendSuccesses(recordInfos)
+                CelestraLogger.cloudkit.info("   ✅ Batch \(index + 1) complete: \(recordInfos.count) updated")
+            } catch {
+                CelestraLogger.errors.error("   ❌ Batch \(index + 1) failed: \(error.localizedDescription)")
+
+                // Track individual failures
+                for article in batch {
+                    result.appendFailure(article: article, error: error)
+                }
+            }
+        }
+
+        CelestraLogger.cloudkit.info(
+            "📊 Update complete: \(result.successCount)/\(result.totalProcessed) succeeded (\(String(format: "%.1f", result.successRate))%)"
+        )
+
+        return result
     }
 
     // MARK: - Cleanup Operations

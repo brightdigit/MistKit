@@ -289,23 +289,50 @@ func queryFeeds(
 
 ### Batch Operations Pattern
 
-**Non-Atomic Operations** for partial success:
+**Non-Atomic Operations** with chunking and result tracking:
 
 ```swift
-func createArticles(_ articles: [PublicArticle]) async throws -> [RecordInfo] {
-    let records = articles.map { article in
-        (recordType: "PublicArticle", fields: article.toFieldsDict())
+func createArticles(_ articles: [PublicArticle]) async throws -> BatchOperationResult {
+    guard !articles.isEmpty else {
+        return BatchOperationResult()
     }
 
-    // Use non-atomic to allow partial success
-    return try await createRecords(records, atomic: false)
+    // Chunk articles into batches of 200 (CloudKit limit)
+    let batches = articles.chunked(into: 200)
+    var result = BatchOperationResult()
+
+    for (index, batch) in batches.enumerated() {
+        let records = batch.map { article in
+            (recordType: "PublicArticle", fields: article.toFieldsDict())
+        }
+
+        // Use retry policy for each batch
+        let recordInfos = try await retryPolicy.execute {
+            try await self.createRecords(records, atomic: false)
+        }
+
+        result.appendSuccesses(recordInfos)
+    }
+
+    return result
 }
 ```
 
-**Why Non-Atomic?**
-- If 1 of 100 articles fails, still upload the other 99
-- Better user experience (partial success vs total failure)
-- Appropriate for idempotent operations like article creation
+**Why This Approach?**
+- **Non-atomic operations**: If 1 of 100 articles fails, still upload the other 99
+- **200-record batches**: Respects CloudKit's batch operation limits
+- **Result tracking**: `BatchOperationResult` provides success/failure counts and rates
+- **Retry logic**: Each batch operation uses exponential backoff for transient failures
+- **Better UX**: Partial success vs total failure, with detailed progress reporting
+
+**BatchOperationResult Structure**:
+```swift
+struct BatchOperationResult {
+    var successfulRecords: [RecordInfo] = []
+    var failedRecords: [(article: PublicArticle, error: Error)] = []
+    var successRate: Double  // 0-100%
+}
+```
 
 ### Server-to-Server Authentication
 
@@ -385,24 +412,124 @@ let service = try CloudKitService(
 
 See `BUSHEL_PATTERNS.md` for detailed comparison.
 
+## Error Handling and Retry Logic
+
+### Implemented Features
+
+**Comprehensive Error Categorization** (CelestraError.swift):
+
+```swift
+enum CelestraError: LocalizedError {
+    case cloudKitError(CloudKitError)
+    case rssFetchFailed(URL, underlying: Error)
+    case invalidFeedData(String)
+    case quotaExceeded
+    case networkUnavailable
+
+    var isRetriable: Bool {
+        // Smart retry logic based on error type
+    }
+}
+```
+
+**Exponential Backoff with Jitter** (RetryPolicy.swift):
+
+```swift
+struct RetryPolicy {
+    let maxAttempts: Int = 3
+    let baseDelay: TimeInterval = 1.0
+    let maxDelay: TimeInterval = 30.0
+    let jitter: Bool = true
+
+    func execute<T>(operation: () async throws -> T) async throws -> T {
+        // Implements exponential backoff: 1s, 2s, 4s...
+        // With jitter to avoid thundering herd
+    }
+}
+```
+
+**Structured Logging** (CelestraLogger.swift):
+
+```swift
+import os
+
+enum CelestraLogger {
+    static let cloudkit = Logger(subsystem: "com.brightdigit.Celestra", category: "cloudkit")
+    static let rss = Logger(subsystem: "com.brightdigit.Celestra", category: "rss")
+    static let operations = Logger(subsystem: "com.brightdigit.Celestra", category: "operations")
+    static let errors = Logger(subsystem: "com.brightdigit.Celestra", category: "errors")
+}
+```
+
+**Integration Points**:
+- RSS feed fetching with retry and timeout handling
+- CloudKit batch operations with per-batch retry
+- Query operations with transient error recovery
+- User-facing error messages with recovery suggestions
+
+## Incremental Update System
+
+### Content Change Detection
+
+**Implementation** (UpdateCommand.swift):
+
+```swift
+// Separate articles into new vs modified
+for article in articles {
+    if let existing = existingMap[article.guid] {
+        // Check if content changed
+        if existing.contentHash != article.contentHash {
+            modifiedArticles.append(article.withRecordName(existing.recordName!))
+        }
+    } else {
+        newArticles.append(article)
+    }
+}
+
+// Create new articles
+if !newArticles.isEmpty {
+    let result = try await service.createArticles(newArticles)
+    print("   ✅ Created \(result.successCount) new article(s)")
+}
+
+// Update modified articles
+if !modifiedArticles.isEmpty {
+    let result = try await service.updateArticles(modifiedArticles)
+    print("   🔄 Updated \(result.successCount) modified article(s)")
+}
+```
+
+**Benefits**:
+- Detects content changes using SHA256 contentHash
+- Only updates articles when content actually changes
+- Reduces unnecessary CloudKit write operations
+- Preserves CloudKit metadata (creation date, etc.)
+
+### Update Operations
+
+**New Method** (CloudKitService+Celestra.swift):
+
+```swift
+func updateArticles(_ articles: [PublicArticle]) async throws -> BatchOperationResult {
+    // Filters articles with recordName
+    // Chunks into 200-record batches
+    // Uses RecordOperation.update
+    // Tracks success/failure per batch
+}
+```
+
 ## Future Improvements
 
 ### Potential Enhancements
 
-**1. Incremental Updates**:
-Currently uploads all articles (filtered for duplicates). Could optimize to:
-- Track article modification dates
-- Only query/upload changed articles
-- Reduce CloudKit read operations
-
-**2. Rate Limiting**:
-Add delays between feed fetches:
+**1. Rate Limiting** (Recommended):
+Add delays between feed fetches to avoid overwhelming feed servers:
 ```swift
 // After each feed update
 try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
 ```
 
-**3. CKReference Relationships**:
+**2. CKReference Relationships** (Optional):
 Switch from string-based to proper CloudKit references:
 ```swift
 // Instead of:
@@ -412,40 +539,37 @@ fields["feedRecordName"] = .string(feedRecordName)
 fields["feed"] = .reference(FieldValue.Reference(recordName: feedRecordName))
 ```
 
-Benefits: Type safety, cascade deletes, better relationship queries
+**Trade-off Analysis**:
+- **String-based (Current)**:
+  - ✅ Simpler querying: `filter: .equals("feedRecordName", .string(name))`
+  - ✅ Easier to understand for developers
+  - ✅ More explicit relationship handling
+  - ❌ Manual cascade delete implementation
+  - ❌ No type safety enforcement
 
-**4. Retry Logic**:
-Add exponential backoff for transient failures:
+- **CKReference-based**:
+  - ✅ Type safety and CloudKit validation
+  - ✅ Automatic cascade deletes
+  - ✅ Better relationship queries
+  - ❌ More complex querying
+  - ❌ Additional abstraction layer needed
+
+**Decision**: Kept string-based for educational simplicity and explicit code patterns. For production apps handling complex relationship graphs, CKReference is recommended.
+
+**3. Circuit Breaker Pattern**:
+For feeds with persistent failures:
 ```swift
-func fetchWithRetry(url: URL, attempts: Int = 3) async throws -> Data {
-    for attempt in 1...attempts {
-        do {
-            return try await fetch(url)
-        } catch {
-            if attempt == attempts { throw error }
-            let delay = pow(2.0, Double(attempt))
-            try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-        }
+actor CircuitBreaker {
+    private var failureCount = 0
+    private let threshold = 5
+
+    var isOpen: Bool {
+        failureCount >= threshold
     }
-}
-```
 
-**5. Structured Logging**:
-Replace print() with os.Logger (following Bushel pattern):
-```swift
-import os
-
-enum CelestraLogger {
-    static let cloudkit = Logger(subsystem: "com.brightdigit.Celestra", category: "cloudkit")
-    static let rss = Logger(subsystem: "com.brightdigit.Celestra", category: "rss")
-}
-```
-
-**6. Progress Reporting**:
-For large batch operations:
-```swift
-for (index, article) in articles.enumerated() {
-    print("   Uploading article \(index + 1)/\(articles.count)...")
+    func recordFailure() {
+        failureCount += 1
+    }
 }
 ```
 
@@ -463,11 +587,21 @@ for (index, article) in articles.enumerated() {
 - ✅ Schema improvements (description, isActive, contentHash fields)
 - ✅ Comprehensive documentation
 
-**Phase 3** (Future):
-- ⏳ Incremental update optimization
-- ⏳ Rate limiting
-- ⏳ Structured logging
-- ⏳ Test suite
+**Phase 3** (Completed - Task 7):
+- ✅ Error handling with comprehensive CelestraError types
+- ✅ Retry logic with exponential backoff and jitter
+- ✅ Structured logging using os.Logger
+- ✅ Batch operations with 200-record chunking
+- ✅ BatchOperationResult for success/failure tracking
+- ✅ Incremental update system (create + update)
+- ✅ Content change detection via contentHash
+- ✅ Relationship design documentation
+
+**Phase 4** (Future):
+- ⏳ Rate limiting between feed fetches
+- ⏳ Circuit breaker pattern for persistent failures
+- ⏳ Test suite with mock CloudKit service
+- ⏳ Performance monitoring and metrics
 
 ## Conclusion
 

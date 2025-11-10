@@ -1,6 +1,7 @@
 import ArgumentParser
 import Foundation
 import MistKit
+import os
 
 struct UpdateCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -105,7 +106,7 @@ struct UpdateCommand: AsyncParsableCommand {
                     )
                 }
 
-                // Duplicate detection: query existing articles by GUID
+                // Duplicate detection and update logic
                 if !articles.isEmpty {
                     let guids = articles.map { $0.guid }
                     let existingArticles = try await service.queryArticlesByGUIDs(
@@ -113,24 +114,63 @@ struct UpdateCommand: AsyncParsableCommand {
                         feedRecordName: recordName
                     )
 
-                    // Create set of existing GUIDs for fast lookup
-                    let existingGUIDs = Set(existingArticles.map { $0.guid })
+                    // Create map of existing articles by GUID for fast lookup
+                    let existingMap = Dictionary(
+                        uniqueKeysWithValues: existingArticles.map { ($0.guid, $0) }
+                    )
 
-                    // Filter out duplicates
-                    let newArticles = articles.filter { !existingGUIDs.contains($0.guid) }
+                    // Separate articles into new vs modified
+                    var newArticles: [PublicArticle] = []
+                    var modifiedArticles: [PublicArticle] = []
 
-                    let duplicateCount = articles.count - newArticles.count
-
-                    if duplicateCount > 0 {
-                        print("   ℹ️  Skipped \(duplicateCount) duplicate(s)")
+                    for article in articles {
+                        if let existing = existingMap[article.guid] {
+                            // Check if content changed
+                            if existing.contentHash != article.contentHash {
+                                // Content changed - need to update
+                                modifiedArticles.append(article.withRecordName(existing.recordName!))
+                            }
+                            // else: content unchanged - skip
+                        } else {
+                            // New article
+                            newArticles.append(article)
+                        }
                     }
 
-                    // Upload only new articles
+                    let unchangedCount = articles.count - newArticles.count - modifiedArticles.count
+
+                    // Upload new articles
                     if !newArticles.isEmpty {
-                        _ = try await service.createArticles(newArticles)
-                        print("   ✅ Uploaded \(newArticles.count) new article(s)")
-                    } else {
-                        print("   ℹ️  No new articles to upload")
+                        let createResult = try await service.createArticles(newArticles)
+                        if createResult.isFullSuccess {
+                            print("   ✅ Created \(createResult.successCount) new article(s)")
+                            CelestraLogger.operations.info("Created \(createResult.successCount) articles for \(feed.title)")
+                        } else {
+                            print("   ⚠️ Created \(createResult.successCount)/\(createResult.totalProcessed) article(s)")
+                            CelestraLogger.errors.warning("Partial create failure: \(createResult.failureCount) failures")
+                        }
+                    }
+
+                    // Update modified articles
+                    if !modifiedArticles.isEmpty {
+                        let updateResult = try await service.updateArticles(modifiedArticles)
+                        if updateResult.isFullSuccess {
+                            print("   🔄 Updated \(updateResult.successCount) modified article(s)")
+                            CelestraLogger.operations.info("Updated \(updateResult.successCount) articles for \(feed.title)")
+                        } else {
+                            print("   ⚠️ Updated \(updateResult.successCount)/\(updateResult.totalProcessed) article(s)")
+                            CelestraLogger.errors.warning("Partial update failure: \(updateResult.failureCount) failures")
+                        }
+                    }
+
+                    // Report unchanged articles
+                    if unchangedCount > 0 {
+                        print("   ℹ️  Skipped \(unchangedCount) unchanged article(s)")
+                    }
+
+                    // Report if nothing to do
+                    if newArticles.isEmpty && modifiedArticles.isEmpty {
+                        print("   ℹ️  No new or modified articles")
                     }
                 }
 

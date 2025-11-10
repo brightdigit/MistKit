@@ -131,4 +131,21 @@ struct PublicArticle {
         self.fetchedAt = Date()
         self.expiresAt = Date().addingTimeInterval(TimeInterval(ttlDays * 24 * 60 * 60))
     }
+
+    /// Create a copy of this article with a specific recordName
+    /// - Parameter recordName: The CloudKit record name to set
+    /// - Returns: New PublicArticle instance with the recordName set
+    func withRecordName(_ recordName: String) -> PublicArticle {
+        PublicArticle(
+            recordName: recordName,
+            feedRecordName: self.feedRecordName,
+            title: self.title,
+            link: self.link,
+            description: self.description,
+            author: self.author,
+            pubDate: self.pubDate,
+            guid: self.guid,
+            ttlDays: 30  // Use default TTL since we can't calculate from existing dates
+        )
+    }
 }
