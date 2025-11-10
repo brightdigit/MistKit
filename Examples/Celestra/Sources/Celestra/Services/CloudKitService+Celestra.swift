@@ -70,11 +70,11 @@ extension CloudKitService {
             filters.append(.greaterThanOrEquals("usageCount", .int64(Int(minPop))))
         }
 
-        // Query with filters and sort by popularity (descending)
+        // Query with filters and sort by feedURL (always queryable+sortable)
         let records = try await queryRecords(
             recordType: "Feed",
             filters: filters.isEmpty ? nil : filters,
-            sortBy: [.descending("usageCount")],
+            sortBy: [.ascending("feedURL")],  // Use feedURL since usageCount might have issues
             limit: limit
         )
 
