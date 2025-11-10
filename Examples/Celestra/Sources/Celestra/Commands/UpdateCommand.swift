@@ -95,7 +95,7 @@ struct UpdateCommand: AsyncParsableCommand {
 
                 let articles = feedData.items.map { item in
                     Article(
-                        feedRecordName: recordName,
+                        feed: recordName,
                         title: item.title,
                         link: item.link,
                         description: item.description,

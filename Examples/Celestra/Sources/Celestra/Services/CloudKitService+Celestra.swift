@@ -15,10 +15,16 @@ extension CloudKitService {
 
         return try await Self.retryPolicy.execute(
             operation: {
-                try await self.createRecord(
+                let operation = RecordOperation.create(
                     recordType: "Feed",
+                    recordName: UUID().uuidString,
                     fields: feed.toFieldsDict()
                 )
+                let results = try await self.modifyRecords([operation])
+                guard let record = results.first else {
+                    throw CloudKitError.invalidResponse
+                }
+                return record
             },
             logger: CelestraLogger.cloudkit
         )
@@ -30,11 +36,17 @@ extension CloudKitService {
 
         return try await Self.retryPolicy.execute(
             operation: {
-                try await self.updateRecord(
-                    recordName: recordName,
+                let operation = RecordOperation.update(
                     recordType: "Feed",
-                    fields: feed.toFieldsDict()
+                    recordName: recordName,
+                    fields: feed.toFieldsDict(),
+                    recordChangeTag: nil
                 )
+                let results = try await self.modifyRecords([operation])
+                guard let record = results.first else {
+                    throw CloudKitError.invalidResponse
+                }
+                return record
             },
             logger: CelestraLogger.cloudkit
         )
@@ -74,7 +86,7 @@ extension CloudKitService {
     /// Query existing articles by GUIDs for duplicate detection
     /// - Parameters:
     ///   - guids: Array of article GUIDs to check
-    ///   - feedRecordName: Optional feed filter to scope the query
+    ///   - feedRecordName: Optional feed record name filter to scope the query
     /// - Returns: Array of existing Article records matching the GUIDs
     func queryArticlesByGUIDs(
         _ guids: [String],
@@ -88,7 +100,7 @@ extension CloudKitService {
 
         // Add feed filter if provided
         if let feedName = feedRecordName {
-            filters.append(.equals("feedRecordName", .string(feedName)))
+            filters.append(.equals("feed", .reference(FieldValue.Reference(recordName: feedName))))
         }
 
         // For small number of GUIDs, we can query directly
@@ -130,7 +142,7 @@ extension CloudKitService {
         } else {
             // For large GUID sets, fetch all articles for the feed and filter in memory
             if let feedName = feedRecordName {
-                filters = [.equals("feedRecordName", .string(feedName))]
+                filters = [.equals("feed", .reference(FieldValue.Reference(recordName: feedName)))]
             }
 
             let records = try await queryRecords(
@@ -163,14 +175,18 @@ extension CloudKitService {
             CelestraLogger.operations.info("   Batch \(index + 1)/\(batches.count): \(batch.count) article(s)")
 
             do {
-                let records = batch.map { article in
-                    (recordType: "Article", fields: article.toFieldsDict())
+                let operations = batch.map { article in
+                    RecordOperation.create(
+                        recordType: "Article",
+                        recordName: UUID().uuidString,
+                        fields: article.toFieldsDict()
+                    )
                 }
 
                 // Use retry policy for each batch
                 let recordInfos = try await Self.retryPolicy.execute(
                     operation: {
-                        try await self.createRecords(records, atomic: false)
+                        try await self.modifyRecords(operations)
                     },
                     logger: CelestraLogger.cloudkit
                 )
@@ -275,11 +291,15 @@ extension CloudKitService {
             return
         }
 
-        let records = feeds.map { record in
-            (recordName: record.recordName, recordType: "Feed")
+        let operations = feeds.map { record in
+            RecordOperation.delete(
+                recordType: "Feed",
+                recordName: record.recordName,
+                recordChangeTag: nil
+            )
         }
 
-        _ = try await deleteRecords(records, atomic: false)
+        _ = try await modifyRecords(operations)
     }
 
     /// Delete all Article records
@@ -293,10 +313,14 @@ extension CloudKitService {
             return
         }
 
-        let records = articles.map { record in
-            (recordName: record.recordName, recordType: "Article")
+        let operations = articles.map { record in
+            RecordOperation.delete(
+                recordType: "Article",
+                recordName: record.recordName,
+                recordChangeTag: nil
+            )
         }
 
-        _ = try await deleteRecords(records, atomic: false)
+        _ = try await modifyRecords(operations)
     }
 }

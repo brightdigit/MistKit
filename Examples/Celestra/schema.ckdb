@@ -10,12 +10,13 @@ RECORD TYPE Feed (
     "lastAttempted"          TIMESTAMP QUERYABLE SORTABLE,
     "isActive"               INT64 QUERYABLE,
 
-    GRANT WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
     GRANT READ TO "_world"
 );
 
 RECORD TYPE Article (
-    "feedRecordName"         STRING QUERYABLE SORTABLE,
+    "feed"                   REFERENCE,
     "title"                  STRING SEARCHABLE,
     "link"                   STRING,
     "description"            STRING,
@@ -26,6 +27,7 @@ RECORD TYPE Article (
     "fetchedAt"              TIMESTAMP QUERYABLE SORTABLE,
     "expiresAt"              TIMESTAMP QUERYABLE SORTABLE,
 
-    GRANT WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
     GRANT READ TO "_world"
 );

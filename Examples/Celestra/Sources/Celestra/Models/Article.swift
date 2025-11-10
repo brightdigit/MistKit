@@ -5,7 +5,7 @@ import CryptoKit
 /// Represents an RSS article stored in CloudKit's public database
 struct Article {
     let recordName: String?
-    let feedRecordName: String
+    let feed: String  // Feed record name (stored as REFERENCE in CloudKit)
     let title: String
     let link: String
     let description: String?
@@ -26,7 +26,7 @@ struct Article {
     /// Convert to CloudKit record fields dictionary
     func toFieldsDict() -> [String: FieldValue] {
         var fields: [String: FieldValue] = [
-            "feedRecordName": .string(feedRecordName),
+            "feed": .reference(FieldValue.Reference(recordName: feed)),
             "title": .string(title),
             "link": .string(link),
             "guid": .string(guid),
@@ -50,11 +50,11 @@ struct Article {
     init(from record: RecordInfo) {
         self.recordName = record.recordName
 
-        // Extract required string values
-        if case .string(let value) = record.fields["feedRecordName"] {
-            self.feedRecordName = value
+        // Extract feed reference
+        if case .reference(let ref) = record.fields["feed"] {
+            self.feed = ref.recordName
         } else {
-            self.feedRecordName = ""
+            self.feed = ""
         }
 
         if case .string(let value) = record.fields["title"] {
@@ -111,7 +111,7 @@ struct Article {
     /// Create new article record
     init(
         recordName: String? = nil,
-        feedRecordName: String,
+        feed: String,
         title: String,
         link: String,
         description: String? = nil,
@@ -121,7 +121,7 @@ struct Article {
         ttlDays: Int = 30
     ) {
         self.recordName = recordName
-        self.feedRecordName = feedRecordName
+        self.feed = feed
         self.title = title
         self.link = link
         self.description = description
@@ -138,7 +138,7 @@ struct Article {
     func withRecordName(_ recordName: String) -> Article {
         Article(
             recordName: recordName,
-            feedRecordName: self.feedRecordName,
+            feed: self.feed,
             title: self.title,
             link: self.link,
             description: self.description,
