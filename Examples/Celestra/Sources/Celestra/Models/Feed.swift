@@ -2,7 +2,7 @@ import Foundation
 import MistKit
 
 /// Represents an RSS feed stored in CloudKit's public database
-struct PublicFeed {
+struct Feed {
     let recordName: String?  // nil for new records
     let feedURL: String
     let title: String

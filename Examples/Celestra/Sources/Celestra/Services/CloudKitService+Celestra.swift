@@ -7,16 +7,16 @@ import os
 extension CloudKitService {
     /// Retry policy for CloudKit operations
     private static let retryPolicy = RetryPolicy.default
-    // MARK: - PublicFeed Operations
+    // MARK: - Feed Operations
 
-    /// Create a new PublicFeed record with retry logic
-    func createFeed(_ feed: PublicFeed) async throws -> RecordInfo {
+    /// Create a new Feed record with retry logic
+    func createFeed(_ feed: Feed) async throws -> RecordInfo {
         CelestraLogger.cloudkit.info("📝 Creating feed: \(feed.feedURL)")
 
         return try await Self.retryPolicy.execute(
             operation: {
                 try await self.createRecord(
-                    recordType: "PublicFeed",
+                    recordType: "Feed",
                     fields: feed.toFieldsDict()
                 )
             },
@@ -24,15 +24,15 @@ extension CloudKitService {
         )
     }
 
-    /// Update an existing PublicFeed record with retry logic
-    func updateFeed(recordName: String, feed: PublicFeed) async throws -> RecordInfo {
+    /// Update an existing Feed record with retry logic
+    func updateFeed(recordName: String, feed: Feed) async throws -> RecordInfo {
         CelestraLogger.cloudkit.info("🔄 Updating feed: \(feed.feedURL)")
 
         return try await Self.retryPolicy.execute(
             operation: {
                 try await self.updateRecord(
                     recordName: recordName,
-                    recordType: "PublicFeed",
+                    recordType: "Feed",
                     fields: feed.toFieldsDict()
                 )
             },
@@ -45,7 +45,7 @@ extension CloudKitService {
         lastAttemptedBefore: Date? = nil,
         minPopularity: Int64? = nil,
         limit: Int = 100
-    ) async throws -> [PublicFeed] {
+    ) async throws -> [Feed] {
         var filters: [QueryFilter] = []
 
         // Filter by last attempted date if provided
@@ -60,26 +60,26 @@ extension CloudKitService {
 
         // Query with filters and sort by popularity (descending)
         let records = try await queryRecords(
-            recordType: "PublicFeed",
+            recordType: "Feed",
             filters: filters.isEmpty ? nil : filters,
             sortBy: [.descending("usageCount")],
             limit: limit
         )
 
-        return records.map { PublicFeed(from: $0) }
+        return records.map { Feed(from: $0) }
     }
 
-    // MARK: - PublicArticle Operations
+    // MARK: - Article Operations
 
     /// Query existing articles by GUIDs for duplicate detection
     /// - Parameters:
     ///   - guids: Array of article GUIDs to check
     ///   - feedRecordName: Optional feed filter to scope the query
-    /// - Returns: Array of existing PublicArticle records matching the GUIDs
+    /// - Returns: Array of existing Article records matching the GUIDs
     func queryArticlesByGUIDs(
         _ guids: [String],
         feedRecordName: String? = nil
-    ) async throws -> [PublicArticle] {
+    ) async throws -> [Article] {
         guard !guids.isEmpty else {
             return []
         }
@@ -106,24 +106,24 @@ extension CloudKitService {
                 filters.append(.equals("guid", .string(guids[0])))
 
                 let records = try await queryRecords(
-                    recordType: "PublicArticle",
+                    recordType: "Article",
                     filters: filters,
                     limit: 500
                 )
 
                 // For now, fetch all articles for this feed and filter in memory
-                let allFeedArticles = records.map { PublicArticle(from: $0) }
+                let allFeedArticles = records.map { Article(from: $0) }
                 let guidSet = Set(guids)
                 return allFeedArticles.filter { guidSet.contains($0.guid) }
             } else {
                 // Just GUID filter - need to query each individually or use contentHash
                 // For simplicity, query by feedRecordName first then filter
                 let records = try await queryRecords(
-                    recordType: "PublicArticle",
+                    recordType: "Article",
                     limit: 500
                 )
 
-                let articles = records.map { PublicArticle(from: $0) }
+                let articles = records.map { Article(from: $0) }
                 let guidSet = Set(guids)
                 return articles.filter { guidSet.contains($0.guid) }
             }
@@ -134,21 +134,21 @@ extension CloudKitService {
             }
 
             let records = try await queryRecords(
-                recordType: "PublicArticle",
+                recordType: "Article",
                 filters: filters.isEmpty ? nil : filters,
                 limit: 500
             )
 
-            let articles = records.map { PublicArticle(from: $0) }
+            let articles = records.map { Article(from: $0) }
             let guidSet = Set(guids)
             return articles.filter { guidSet.contains($0.guid) }
         }
     }
 
-    /// Create multiple PublicArticle records in batches with retry logic
+    /// Create multiple Article records in batches with retry logic
     /// - Parameter articles: Articles to create
     /// - Returns: Batch operation result with success/failure tracking
-    func createArticles(_ articles: [PublicArticle]) async throws -> BatchOperationResult {
+    func createArticles(_ articles: [Article]) async throws -> BatchOperationResult {
         guard !articles.isEmpty else {
             return BatchOperationResult()
         }
@@ -164,7 +164,7 @@ extension CloudKitService {
 
             do {
                 let records = batch.map { article in
-                    (recordType: "PublicArticle", fields: article.toFieldsDict())
+                    (recordType: "Article", fields: article.toFieldsDict())
                 }
 
                 // Use retry policy for each batch
@@ -194,10 +194,10 @@ extension CloudKitService {
         return result
     }
 
-    /// Update multiple PublicArticle records in batches with retry logic
+    /// Update multiple Article records in batches with retry logic
     /// - Parameter articles: Articles to update (must have recordName set)
     /// - Returns: Batch operation result with success/failure tracking
-    func updateArticles(_ articles: [PublicArticle]) async throws -> BatchOperationResult {
+    func updateArticles(_ articles: [Article]) async throws -> BatchOperationResult {
         guard !articles.isEmpty else {
             return BatchOperationResult()
         }
@@ -228,7 +228,7 @@ extension CloudKitService {
                     guard let recordName = article.recordName else { return nil }
 
                     return RecordOperation.update(
-                        recordType: "PublicArticle",
+                        recordType: "Article",
                         recordName: recordName,
                         fields: article.toFieldsDict(),
                         recordChangeTag: nil
@@ -264,10 +264,10 @@ extension CloudKitService {
 
     // MARK: - Cleanup Operations
 
-    /// Delete all PublicFeed records
+    /// Delete all Feed records
     func deleteAllFeeds() async throws {
         let feeds = try await queryRecords(
-            recordType: "PublicFeed",
+            recordType: "Feed",
             limit: 200
         )
 
@@ -276,16 +276,16 @@ extension CloudKitService {
         }
 
         let records = feeds.map { record in
-            (recordName: record.recordName, recordType: "PublicFeed")
+            (recordName: record.recordName, recordType: "Feed")
         }
 
         _ = try await deleteRecords(records, atomic: false)
     }
 
-    /// Delete all PublicArticle records
+    /// Delete all Article records
     func deleteAllArticles() async throws {
         let articles = try await queryRecords(
-            recordType: "PublicArticle",
+            recordType: "Article",
             limit: 500
         )
 
@@ -294,7 +294,7 @@ extension CloudKitService {
         }
 
         let records = articles.map { record in
-            (recordName: record.recordName, recordType: "PublicArticle")
+            (recordName: record.recordName, recordType: "Article")
         }
 
         _ = try await deleteRecords(records, atomic: false)

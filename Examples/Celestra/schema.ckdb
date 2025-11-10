@@ -1,6 +1,6 @@
 DEFINE SCHEMA
 
-RECORD TYPE PublicFeed (
+RECORD TYPE Feed (
     "feedURL"                STRING QUERYABLE SORTABLE,
     "title"                  STRING SEARCHABLE,
     "description"            STRING,
@@ -14,7 +14,7 @@ RECORD TYPE PublicFeed (
     GRANT READ TO "_world"
 );
 
-RECORD TYPE PublicArticle (
+RECORD TYPE Article (
     "feedRecordName"         STRING QUERYABLE SORTABLE,
     "title"                  STRING SEARCHABLE,
     "link"                   STRING,

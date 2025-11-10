@@ -52,7 +52,7 @@ For detailed instructions, see [CLOUDKIT_SCHEMA_SETUP.md](./CLOUDKIT_SCHEMA_SETU
 
 In CloudKit Dashboard, create these record types in the **Public Database**:
 
-#### PublicFeed Record Type
+#### Feed Record Type
 | Field Name | Field Type | Indexed |
 |------------|------------|---------|
 | feedURL | String | Yes (Queryable, Sortable) |
@@ -64,7 +64,7 @@ In CloudKit Dashboard, create these record types in the **Public Database**:
 | lastAttempted | Date/Time | Yes (Queryable, Sortable) |
 | isActive | Int64 | Yes (Queryable) |
 
-#### PublicArticle Record Type
+#### Article Record Type
 | Field Name | Field Type | Indexed |
 |------------|------------|---------|
 | feedRecordName | String | Yes (Queryable, Sortable) |
@@ -231,7 +231,7 @@ Results are automatically sorted by popularity (descending):
 
 ```swift
 let records = try await queryRecords(
-    recordType: "PublicFeed",
+    recordType: "Feed",
     filters: filters.isEmpty ? nil : filters,
     sortBy: [.descending("usageCount")],  // Sort by popularity
     limit: limit
@@ -304,8 +304,8 @@ let service = try CloudKitService(
 ```
 Celestra/
 ├── Models/
-│   ├── PublicFeed.swift          # Feed metadata model
-│   └── PublicArticle.swift       # Article model
+│   ├── Feed.swift          # Feed metadata model
+│   └── Article.swift       # Article model
 ├── Services/
 │   ├── RSSFetcherService.swift   # RSS parsing with SyndiKit
 │   └── CloudKitService+Celestra.swift  # CloudKit operations

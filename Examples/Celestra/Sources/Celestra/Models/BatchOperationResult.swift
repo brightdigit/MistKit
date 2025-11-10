@@ -7,7 +7,7 @@ struct BatchOperationResult {
   var successfulRecords: [RecordInfo] = []
 
   /// Records that failed to process
-  var failedRecords: [(article: PublicArticle, error: Error)] = []
+  var failedRecords: [(article: Article, error: Error)] = []
 
   /// Total number of records processed (success + failure)
   var totalProcessed: Int {
@@ -54,7 +54,7 @@ struct BatchOperationResult {
   }
 
   /// Append a failure
-  mutating func appendFailure(article: PublicArticle, error: Error) {
+  mutating func appendFailure(article: Article, error: Error) {
     failedRecords.append((article, error))
   }
 }

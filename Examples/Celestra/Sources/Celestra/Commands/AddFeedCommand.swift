@@ -8,7 +8,7 @@ struct AddFeedCommand: AsyncParsableCommand {
         abstract: "Add a new RSS feed to CloudKit",
         discussion: """
             Fetches the RSS feed to validate it and extract metadata, then creates a \
-            PublicFeed record in CloudKit's public database.
+            Feed record in CloudKit's public database.
             """
     )
 
@@ -34,8 +34,8 @@ struct AddFeedCommand: AsyncParsableCommand {
         // 3. Create CloudKit service
         let service = try CelestraConfig.createCloudKitService()
 
-        // 4. Create PublicFeed record
-        let feed = PublicFeed(
+        // 4. Create Feed record
+        let feed = Feed(
             feedURL: feedURL,
             title: feedData.title,
             description: feedData.description

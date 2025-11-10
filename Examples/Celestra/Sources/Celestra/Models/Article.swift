@@ -3,7 +3,7 @@ import MistKit
 import CryptoKit
 
 /// Represents an RSS article stored in CloudKit's public database
-struct PublicArticle {
+struct Article {
     let recordName: String?
     let feedRecordName: String
     let title: String
@@ -134,9 +134,9 @@ struct PublicArticle {
 
     /// Create a copy of this article with a specific recordName
     /// - Parameter recordName: The CloudKit record name to set
-    /// - Returns: New PublicArticle instance with the recordName set
-    func withRecordName(_ recordName: String) -> PublicArticle {
-        PublicArticle(
+    /// - Returns: New Article instance with the recordName set
+    func withRecordName(_ recordName: String) -> Article {
+        Article(
             recordName: recordName,
             feedRecordName: self.feedRecordName,
             title: self.title,

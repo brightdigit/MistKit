@@ -7,7 +7,7 @@ struct ClearCommand: AsyncParsableCommand {
         commandName: "clear",
         abstract: "Delete all feeds and articles from CloudKit",
         discussion: """
-            Removes all PublicFeed and PublicArticle records from the CloudKit public database. \
+            Removes all Feed and Article records from the CloudKit public database. \
             Use with caution as this operation cannot be undone.
             """
     )

@@ -63,7 +63,7 @@ struct UpdateCommand: AsyncParsableCommand {
             print("\n[\(index + 1)/\(feeds.count)] 📰 \(feed.title)")
 
             // Track attempt
-            var updatedFeed = PublicFeed(
+            var updatedFeed = Feed(
                 recordName: feed.recordName,
                 feedURL: feed.feedURL,
                 title: feed.title,
@@ -94,7 +94,7 @@ struct UpdateCommand: AsyncParsableCommand {
                 }
 
                 let articles = feedData.items.map { item in
-                    PublicArticle(
+                    Article(
                         feedRecordName: recordName,
                         title: item.title,
                         link: item.link,
@@ -120,8 +120,8 @@ struct UpdateCommand: AsyncParsableCommand {
                     )
 
                     // Separate articles into new vs modified
-                    var newArticles: [PublicArticle] = []
-                    var modifiedArticles: [PublicArticle] = []
+                    var newArticles: [Article] = []
+                    var modifiedArticles: [Article] = []
 
                     for article in articles {
                         if let existing = existingMap[article.guid] {
@@ -175,7 +175,7 @@ struct UpdateCommand: AsyncParsableCommand {
                 }
 
                 // Update success counter
-                updatedFeed = PublicFeed(
+                updatedFeed = Feed(
                     recordName: feed.recordName,
                     feedURL: feed.feedURL,
                     title: feed.title,

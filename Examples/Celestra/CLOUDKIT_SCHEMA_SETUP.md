@@ -67,8 +67,8 @@ Use the provided script to automatically import the schema.
 4. **Verify in CloudKit Dashboard**
 
    Open [CloudKit Dashboard](https://icloud.developer.apple.com/) and verify the two record types exist:
-   - PublicFeed
-   - PublicArticle
+   - Feed
+   - Article
 
 ### Option 2: Manual Schema Creation
 
@@ -92,10 +92,10 @@ For manual setup or if you prefer to use the CloudKit Dashboard directly.
 
    Click on "Schema" in the sidebar
 
-5. **Create PublicFeed record type**
+5. **Create Feed record type**
 
    - Click "+" to add a new record type
-   - Name: `PublicFeed`
+   - Name: `Feed`
    - Add the following fields:
 
    | Field Name | Field Type | Options |
@@ -111,10 +111,10 @@ For manual setup or if you prefer to use the CloudKit Dashboard directly.
      - Read: World Readable
      - Write: Requires Creator
 
-6. **Create PublicArticle record type**
+6. **Create Article record type**
 
    - Click "+" to add another record type
-   - Name: `PublicArticle`
+   - Name: `Article`
    - Add the following fields:
 
    | Field Name | Field Type | Options |
@@ -155,7 +155,7 @@ Management tokens allow `cktool` to modify your CloudKit schema.
 The schema is defined in `schema.ckdb` using CloudKit's declarative schema language:
 
 ```
-RECORD TYPE PublicFeed (
+RECORD TYPE Feed (
     "feedURL"          STRING QUERYABLE SORTABLE,
     "title"            STRING,
     "totalAttempts"    INT64,
@@ -167,7 +167,7 @@ RECORD TYPE PublicFeed (
     GRANT READ TO "_world"
 );
 
-RECORD TYPE PublicArticle (
+RECORD TYPE Article (
     "feedRecordName"   STRING QUERYABLE SORTABLE,
     "title"            STRING,
     "link"             STRING,
@@ -205,7 +205,7 @@ RECORD TYPE PublicArticle (
 
 ### Celestra Record Types Explained
 
-#### PublicFeed
+#### Feed
 
 Stores RSS feed metadata and usage statistics:
 
@@ -216,11 +216,11 @@ Stores RSS feed metadata and usage statistics:
 - `usageCount`: Popularity metric (how often this feed is accessed)
 - `lastAttempted`: When the feed was last fetched (indexed for update queries)
 
-#### PublicArticle
+#### Article
 
 Stores individual articles from RSS feeds:
 
-- `feedRecordName`: Reference to the parent PublicFeed record (indexed for queries)
+- `feedRecordName`: Reference to the parent Feed record (indexed for queries)
 - `title`: Article title
 - `link`: Article URL
 - `description`: Article summary/content
@@ -379,7 +379,7 @@ let filters: [QueryFilter] = [
 ```swift
 // Find stale popular feeds, sorted by popularity
 let records = try await queryRecords(
-    recordType: "PublicFeed",
+    recordType: "Feed",
     filters: [
         .lessThan("lastAttempted", .date(cutoffDate)),
         .greaterThanOrEquals("usageCount", .int64(5))
