@@ -3,7 +3,7 @@
 # CloudKit Schema Setup Script
 # This script imports the Celestra schema into your CloudKit container
 
-set -e
+set -eo pipefail
 
 # Colors for output
 RED='\033[0;31m'
@@ -27,15 +27,50 @@ fi
 echo -e "${GREEN}✓${NC} cktool is available"
 echo ""
 
+# Check for CloudKit Management Token
+echo "Checking for CloudKit Management Token..."
+if ! xcrun cktool get-teams 2>&1 | grep -qE "^[A-Z0-9]+:"; then
+    echo -e "${RED}ERROR: CloudKit Management Token not configured.${NC}"
+    echo ""
+    echo "You need to save a CloudKit Web Services Management Token for cktool first."
+    echo ""
+    echo "Steps to configure:"
+    echo "  1. Go to: https://icloud.developer.apple.com/dashboard/"
+    echo "  2. Select your container"
+    echo "  3. Go to 'API Access' → 'CloudKit Web Services'"
+    echo "  4. Generate a Management Token (not Server-to-Server Key)"
+    echo "  5. Copy the token"
+    echo "  6. Save it with cktool:"
+    echo ""
+    echo "     xcrun cktool save-token"
+    echo ""
+    echo "  7. Paste your Management Token when prompted"
+    echo ""
+    echo "Note: Management Token is for schema operations (cktool)."
+    echo "      Server-to-Server Key is for runtime API operations (celestra commands)."
+    echo ""
+    exit 1
+fi
+
+echo -e "${GREEN}✓${NC} CloudKit Management Token is configured"
+echo ""
+
 # Check for required parameters
 if [ -z "$CLOUDKIT_CONTAINER_ID" ]; then
     echo -e "${YELLOW}CLOUDKIT_CONTAINER_ID not set.${NC}"
-    read -p "Enter your CloudKit Container ID (e.g., iCloud.com.brightdigit.Celestra): " CLOUDKIT_CONTAINER_ID
+    read -p "Enter your CloudKit Container ID [iCloud.com.brightdigit.Celestra]: " CLOUDKIT_CONTAINER_ID
+    CLOUDKIT_CONTAINER_ID=${CLOUDKIT_CONTAINER_ID:-iCloud.com.brightdigit.Celestra}
 fi
 
 if [ -z "$CLOUDKIT_TEAM_ID" ]; then
     echo -e "${YELLOW}CLOUDKIT_TEAM_ID not set.${NC}"
     read -p "Enter your Apple Developer Team ID (10-character ID): " CLOUDKIT_TEAM_ID
+fi
+
+# Validate required parameters
+if [ -z "$CLOUDKIT_CONTAINER_ID" ] || [ -z "$CLOUDKIT_TEAM_ID" ]; then
+    echo -e "${RED}ERROR: Container ID and Team ID are required.${NC}"
+    exit 1
 fi
 
 # Default to development environment
@@ -64,7 +99,7 @@ if xcrun cktool validate-schema \
     --team-id "$CLOUDKIT_TEAM_ID" \
     --container-id "$CLOUDKIT_CONTAINER_ID" \
     --environment "$ENVIRONMENT" \
-    "$SCHEMA_FILE" 2>&1; then
+    --file "$SCHEMA_FILE" 2>&1; then
     echo -e "${GREEN}✓${NC} Schema validation passed"
 else
     echo -e "${RED}✗${NC} Schema validation failed"
@@ -91,7 +126,7 @@ if xcrun cktool import-schema \
     --team-id "$CLOUDKIT_TEAM_ID" \
     --container-id "$CLOUDKIT_CONTAINER_ID" \
     --environment "$ENVIRONMENT" \
-    "$SCHEMA_FILE" 2>&1; then
+    --file "$SCHEMA_FILE" 2>&1; then
     echo ""
     echo -e "${GREEN}✓✓✓ Schema import successful! ✓✓✓${NC}"
     echo ""
@@ -100,10 +135,17 @@ if xcrun cktool import-schema \
     echo "  • PublicArticle"
     echo ""
     echo "Next steps:"
-    echo "  1. Configure your .env file with CloudKit credentials"
-    echo "  2. Run 'swift run celestra add-feed <url>' to add an RSS feed"
-    echo "  3. Run 'swift run celestra update' to fetch and sync articles"
-    echo "  4. Verify data in CloudKit Dashboard: https://icloud.developer.apple.com/"
+    echo "  1. Get your Server-to-Server Key:"
+    echo "     a. Go to: https://icloud.developer.apple.com/dashboard/"
+    echo "     b. Navigate to: API Access → Server-to-Server Keys"
+    echo "     c. Create a new key and download the private key .pem file"
+    echo ""
+    echo "  2. Configure your .env file with CloudKit credentials"
+    echo "  3. Run 'swift run celestra add-feed <url>' to add an RSS feed"
+    echo "  4. Run 'swift run celestra update' to fetch and sync articles"
+    echo "  5. Verify data in CloudKit Dashboard: https://icloud.developer.apple.com/"
+    echo ""
+    echo "  Important: Never commit .pem files to version control!"
     echo ""
 else
     echo ""
