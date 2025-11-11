@@ -1,6 +1,7 @@
 DEFINE SCHEMA
 
 RECORD TYPE Feed (
+    "___recordID"            REFERENCE QUERYABLE,
     "feedURL"                STRING QUERYABLE SORTABLE,
     "title"                  STRING SEARCHABLE,
     "description"            STRING,
@@ -16,7 +17,8 @@ RECORD TYPE Feed (
 );
 
 RECORD TYPE Article (
-    "feed"                   REFERENCE,
+    "___recordID"            REFERENCE QUERYABLE,
+    "feed"                   REFERENCE QUERYABLE,
     "title"                  STRING SEARCHABLE,
     "link"                   STRING,
     "description"            STRING,
