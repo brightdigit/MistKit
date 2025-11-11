@@ -22,6 +22,7 @@ RECORD TYPE Article (
     "title"                  STRING SEARCHABLE,
     "link"                   STRING,
     "description"            STRING,
+    "content"                STRING SEARCHABLE,
     "author"                 STRING QUERYABLE,
     "pubDate"                TIMESTAMP QUERYABLE SORTABLE,
     "guid"                   STRING QUERYABLE SORTABLE,

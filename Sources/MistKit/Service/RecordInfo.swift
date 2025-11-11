@@ -48,6 +48,8 @@ public struct RecordInfo: Encodable, Sendable {
   public let recordName: String
   /// The record type
   public let recordType: String
+  /// The record change tag for optimistic locking
+  public let recordChangeTag: String?
   /// The record fields
   public let fields: [String: FieldValue]
 
@@ -63,6 +65,7 @@ public struct RecordInfo: Encodable, Sendable {
   internal init(from record: Components.Schemas.Record) {
     self.recordName = record.recordName ?? "Unknown"
     self.recordType = record.recordType ?? "Unknown"
+    self.recordChangeTag = record.recordChangeTag
 
     // Convert fields to FieldValue representation
     var convertedFields: [String: FieldValue] = [:]
@@ -86,14 +89,17 @@ public struct RecordInfo: Encodable, Sendable {
   /// - Parameters:
   ///   - recordName: The unique record name
   ///   - recordType: The CloudKit record type
+  ///   - recordChangeTag: Optional change tag for optimistic locking
   ///   - fields: Dictionary of field names to their values
   public init(
     recordName: String,
     recordType: String,
+    recordChangeTag: String? = nil,
     fields: [String: FieldValue]
   ) {
     self.recordName = recordName
     self.recordType = recordType
+    self.recordChangeTag = recordChangeTag
     self.fields = fields
   }
 }

@@ -65,6 +65,7 @@ struct UpdateCommand: AsyncParsableCommand {
             // Track attempt
             var updatedFeed = Feed(
                 recordName: feed.recordName,
+                recordChangeTag: feed.recordChangeTag,
                 feedURL: feed.feedURL,
                 title: feed.title,
                 description: feed.description,
@@ -99,6 +100,7 @@ struct UpdateCommand: AsyncParsableCommand {
                         title: item.title,
                         link: item.link,
                         description: item.description,
+                        content: item.content,
                         author: item.author,
                         pubDate: item.pubDate,
                         guid: item.guid,
@@ -177,6 +179,7 @@ struct UpdateCommand: AsyncParsableCommand {
                 // Update success counter
                 updatedFeed = Feed(
                     recordName: feed.recordName,
+                    recordChangeTag: feed.recordChangeTag,
                     feedURL: feed.feedURL,
                     title: feed.title,
                     description: feed.description,

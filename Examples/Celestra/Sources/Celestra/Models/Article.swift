@@ -9,6 +9,7 @@ struct Article {
     let title: String
     let link: String
     let description: String?
+    let content: String?
     let author: String?
     let pubDate: Date?
     let guid: String
@@ -36,6 +37,9 @@ struct Article {
         ]
         if let description = description {
             fields["description"] = .string(description)
+        }
+        if let content = content {
+            fields["content"] = .string(content)
         }
         if let author = author {
             fields["author"] = .string(author)
@@ -82,6 +86,12 @@ struct Article {
             self.description = nil
         }
 
+        if case .string(let value) = record.fields["content"] {
+            self.content = value
+        } else {
+            self.content = nil
+        }
+
         if case .string(let value) = record.fields["author"] {
             self.author = value
         } else {
@@ -115,6 +125,7 @@ struct Article {
         title: String,
         link: String,
         description: String? = nil,
+        content: String? = nil,
         author: String? = nil,
         pubDate: Date? = nil,
         guid: String,
@@ -125,6 +136,7 @@ struct Article {
         self.title = title
         self.link = link
         self.description = description
+        self.content = content
         self.author = author
         self.pubDate = pubDate
         self.guid = guid
@@ -142,6 +154,7 @@ struct Article {
             title: self.title,
             link: self.link,
             description: self.description,
+            content: self.content,
             author: self.author,
             pubDate: self.pubDate,
             guid: self.guid,

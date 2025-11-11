@@ -17,6 +17,7 @@ struct RSSFetcherService {
         let title: String
         let link: String
         let description: String?
+        let content: String?
         let author: String?
         let pubDate: Date?
         let guid: String
@@ -80,6 +81,7 @@ struct RSSFetcherService {
                     title: entry.title,
                     link: link,
                     description: entry.summary,
+                    content: entry.contentHtml,
                     author: entry.authors.first?.name,
                     pubDate: entry.published,
                     guid: entry.id.description  // Use id's description as guid

@@ -40,7 +40,7 @@ extension CloudKitService {
                     recordType: "Feed",
                     recordName: recordName,
                     fields: feed.toFieldsDict(),
-                    recordChangeTag: nil
+                    recordChangeTag: feed.recordChangeTag
                 )
                 let results = try await self.modifyRecords([operation])
                 guard let record = results.first else {
@@ -120,7 +120,8 @@ extension CloudKitService {
                 let records = try await queryRecords(
                     recordType: "Article",
                     filters: filters,
-                    limit: 500
+                    limit: 500,
+                    desiredKeys: ["guid", "contentHash", "___recordID"]
                 )
 
                 // For now, fetch all articles for this feed and filter in memory
@@ -132,7 +133,8 @@ extension CloudKitService {
                 // For simplicity, query by feedRecordName first then filter
                 let records = try await queryRecords(
                     recordType: "Article",
-                    limit: 500
+                    limit: 500,
+                    desiredKeys: ["guid", "contentHash", "___recordID"]
                 )
 
                 let articles = records.map { Article(from: $0) }
@@ -148,7 +150,8 @@ extension CloudKitService {
             let records = try await queryRecords(
                 recordType: "Article",
                 filters: filters.isEmpty ? nil : filters,
-                limit: 500
+                limit: 500,
+                desiredKeys: ["guid", "contentHash", "___recordID"]
             )
 
             let articles = records.map { Article(from: $0) }
@@ -167,8 +170,8 @@ extension CloudKitService {
 
         CelestraLogger.cloudkit.info("📦 Creating \(articles.count) article(s)...")
 
-        // Chunk articles into batches of 200 (CloudKit limit)
-        let batches = articles.chunked(into: 200)
+        // Chunk articles into batches of 10 to keep payload size manageable with full content
+        let batches = articles.chunked(into: 10)
         var result = BatchOperationResult()
 
         for (index, batch) in batches.enumerated() {
@@ -232,8 +235,8 @@ extension CloudKitService {
             return BatchOperationResult()
         }
 
-        // Chunk articles into batches of 200
-        let batches = validArticles.chunked(into: 200)
+        // Chunk articles into batches of 10 to keep payload size manageable with full content
+        let batches = validArticles.chunked(into: 10)
         var result = BatchOperationResult()
 
         for (index, batch) in batches.enumerated() {
@@ -284,7 +287,8 @@ extension CloudKitService {
     func deleteAllFeeds() async throws {
         let feeds = try await queryRecords(
             recordType: "Feed",
-            limit: 200
+            limit: 200,
+            desiredKeys: ["___recordID"]
         )
 
         guard !feeds.isEmpty else {
@@ -295,7 +299,7 @@ extension CloudKitService {
             RecordOperation.delete(
                 recordType: "Feed",
                 recordName: record.recordName,
-                recordChangeTag: nil
+                recordChangeTag: record.recordChangeTag
             )
         }
 
@@ -306,7 +310,8 @@ extension CloudKitService {
     func deleteAllArticles() async throws {
         let articles = try await queryRecords(
             recordType: "Article",
-            limit: 500
+            limit: 500,
+            desiredKeys: ["___recordID"]
         )
 
         guard !articles.isEmpty else {
@@ -317,7 +322,7 @@ extension CloudKitService {
             RecordOperation.delete(
                 recordType: "Article",
                 recordName: record.recordName,
-                recordChangeTag: nil
+                recordChangeTag: record.recordChangeTag
             )
         }
 

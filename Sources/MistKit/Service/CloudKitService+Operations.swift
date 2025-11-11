@@ -91,7 +91,8 @@ extension CloudKitService {
     recordType: String,
     filters: [QueryFilter]? = nil,
     sortBy: [QuerySort]? = nil,
-    limit: Int = 10
+    limit: Int = 10,
+    desiredKeys: [String]? = nil
   ) async throws(CloudKitError) -> [RecordInfo] {
     let componentsFilters = filters?.map { $0.toComponentsFilter() }
     let componentsSorts = sortBy?.map { $0.toComponentsSort() }
@@ -108,7 +109,8 @@ extension CloudKitService {
                 recordType: recordType,
                 filterBy: componentsFilters,
                 sortBy: componentsSorts
-              )
+              ),
+              desiredKeys: desiredKeys
             )
           )
         )

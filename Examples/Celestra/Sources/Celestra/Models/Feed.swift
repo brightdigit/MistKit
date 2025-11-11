@@ -4,6 +4,7 @@ import MistKit
 /// Represents an RSS feed stored in CloudKit's public database
 struct Feed {
     let recordName: String?  // nil for new records
+    let recordChangeTag: String?  // CloudKit change tag for optimistic locking
     let feedURL: String
     let title: String
     let description: String?
@@ -35,6 +36,7 @@ struct Feed {
     /// Create from CloudKit RecordInfo
     init(from record: RecordInfo) {
         self.recordName = record.recordName
+        self.recordChangeTag = record.recordChangeTag
 
         // Extract string values
         if case .string(let value) = record.fields["feedURL"] {
@@ -92,6 +94,7 @@ struct Feed {
     /// Create new feed record
     init(
         recordName: String? = nil,
+        recordChangeTag: String? = nil,
         feedURL: String,
         title: String,
         description: String? = nil,
@@ -102,6 +105,7 @@ struct Feed {
         isActive: Bool = true
     ) {
         self.recordName = recordName
+        self.recordChangeTag = recordChangeTag
         self.feedURL = feedURL
         self.title = title
         self.description = description
