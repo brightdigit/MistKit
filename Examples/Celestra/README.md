@@ -316,6 +316,23 @@ Celestra/
 └── Celestra.swift                # Main CLI entry point
 ```
 
+## Documentation
+
+### CloudKit Schema Guides
+
+Celestra uses CloudKit's text-based schema language for database management. See these guides for working with schemas:
+
+- **[AI Schema Workflow Guide](./AI_SCHEMA_WORKFLOW.md)** - Comprehensive guide for AI agents and developers to understand, design, modify, and validate CloudKit schemas
+- **[CloudKit Schema Setup](./CLOUDKIT_SCHEMA_SETUP.md)** - Detailed setup instructions for both automated (cktool) and manual schema configuration
+- **[Schema Quick Reference](../SCHEMA_QUICK_REFERENCE.md)** - One-page cheat sheet with syntax, patterns, and common operations
+- **[Task Master Schema Integration](../../.taskmaster/docs/schema-design-workflow.md)** - Integrate schema design into Task Master workflows
+
+### Additional Resources
+
+- **[Claude Code Schema Reference](../../.claude/docs/cloudkit-schema-reference.md)** - Quick reference auto-loaded in Claude Code sessions
+- **[Apple's Schema Language Documentation](../../.claude/docs/sosumi-cloudkit-schema-source.md)** - Official CloudKit Schema Language reference from Apple
+- **[Implementation Notes](./IMPLEMENTATION_NOTES.md)** - Design decisions and patterns used in Celestra
+
 ## Troubleshooting
 
 ### Authentication Errors

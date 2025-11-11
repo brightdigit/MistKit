@@ -177,6 +177,26 @@ Apple's official CloudKit documentation is available in `.claude/docs/` for offl
 
 See `.claude/docs/README.md` for detailed topic breakdowns and integration guidance.
 
+### CloudKit Schema Language
+
+**cloudkit-schema-reference.md** - CloudKit Schema Language Quick Reference
+- **Primary use**: Working with text-based .ckdb schema files
+- **Contains**: Complete grammar, field options, data types, permissions, common patterns, MistKit-specific notes
+- **Consult when**: Reading/modifying schemas, understanding indexing, designing record types
+
+**sosumi-cloudkit-schema-source.md** - Apple's Official Schema Language Documentation
+- **Primary use**: Authoritative reference for CloudKit Schema Language
+- **Contains**: Full grammar specification, identifier rules, system fields, permission model
+- **Consult when**: Understanding schema fundamentals, resolving syntax questions
+
+### Comprehensive Schema Guides
+
+For detailed schema workflows and integration:
+
+- **AI Schema Workflow** (`Examples/Celestra/AI_SCHEMA_WORKFLOW.md`) - Comprehensive guide for understanding, designing, modifying, and validating CloudKit schemas with text-based tools
+- **Quick Reference** (`Examples/SCHEMA_QUICK_REFERENCE.md`) - One-page cheat sheet with syntax, patterns, cktool commands, and troubleshooting
+- **Task Master Integration** (`.taskmaster/docs/schema-design-workflow.md`) - Integrate schema design into Task Master PRDs and task decomposition
+
 ## Task Master AI Instructions
 **Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
 @./.taskmaster/CLAUDE.md
