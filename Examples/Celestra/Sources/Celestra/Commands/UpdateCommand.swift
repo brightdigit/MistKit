@@ -1,7 +1,7 @@
 import ArgumentParser
 import Foundation
+import Logging
 import MistKit
-import os
 
 struct UpdateCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(

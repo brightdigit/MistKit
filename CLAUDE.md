@@ -106,6 +106,35 @@ MistKit/
 3. **Error Handling**: Use typed errors conforming to LocalizedError
 4. **Sendable Compliance**: Ensure all types are Sendable for concurrency safety
 
+### Logging
+MistKit uses [swift-log](https://github.com/apple/swift-log) for cross-platform logging support, enabling usage on macOS, Linux, Windows, and other platforms.
+
+**Key Logging Components:**
+- `MistKitLogger` - Centralized logging infrastructure with subsystems for `api`, `auth`, and `network`
+- Environment-based privacy control via `MISTKIT_DISABLE_LOG_REDACTION` environment variable
+- `SecureLogging` utilities for token masking and safe message formatting
+- Structured logging in `LoggingMiddleware` for HTTP request/response debugging (DEBUG builds only)
+
+**Logging Subsystems:**
+```swift
+MistKitLogger.api      // CloudKit API operations
+MistKitLogger.auth     // Authentication and token management
+MistKitLogger.network  // Network operations
+```
+
+**Helper Methods:**
+```swift
+MistKitLogger.logError(_:logger:shouldRedact:)    // Error level
+MistKitLogger.logWarning(_:logger:shouldRedact:)  // Warning level
+MistKitLogger.logInfo(_:logger:shouldRedact:)     // Info level
+MistKitLogger.logDebug(_:logger:shouldRedact:)    // Debug level
+```
+
+**Privacy Controls:**
+- By default, logs use `SecureLogging.safeLogMessage()` to redact sensitive information
+- Set `MISTKIT_DISABLE_LOG_REDACTION=1` to disable redaction for debugging
+- Tokens, keys, and secrets are automatically masked in logged messages
+
 ### CloudKit Web Services Integration
 - Base URL: `https://api.apple-cloudkit.com`
 - Authentication: API Token + Web Auth Token or Server-to-Server Key Authentication

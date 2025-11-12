@@ -1,5 +1,5 @@
 import Foundation
-import os
+import Logging
 
 /// Retry policy for transient failures with exponential backoff
 struct RetryPolicy {

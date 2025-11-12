@@ -29,10 +29,15 @@
 
 public import Foundation
 import HTTPTypes
+import Logging
 import OpenAPIRuntime
 
 /// Logging middleware for debugging
 internal struct LoggingMiddleware: ClientMiddleware {
+  #if DEBUG
+    /// Logger for middleware HTTP request/response logging
+    private let logger = Logger(label: "com.brightdigit.MistKit.middleware")
+  #endif
   internal func intercept(
     _ request: HTTPRequest,
     body: HTTPBody?,
@@ -58,10 +63,10 @@ internal struct LoggingMiddleware: ClientMiddleware {
     /// Log outgoing request details
     private func logRequest(_ request: HTTPRequest, baseURL: URL) {
       let fullPath = baseURL.absoluteString + (request.path ?? "")
-      print("🌐 CloudKit Request: \(request.method.rawValue) \(fullPath)")
-      print("   Base URL: \(baseURL.absoluteString)")
-      print("   Path: \(request.path ?? "none")")
-      print("   Headers: \(request.headerFields)")
+      logger.debug("🌐 CloudKit Request: \(request.method.rawValue) \(fullPath)")
+      logger.debug("   Base URL: \(baseURL.absoluteString)")
+      logger.debug("   Path: \(request.path ?? "none")")
+      logger.debug("   Headers: \(request.headerFields)")
 
       logQueryParameters(for: request, baseURL: baseURL)
     }
@@ -76,10 +81,10 @@ internal struct LoggingMiddleware: ClientMiddleware {
         return
       }
 
-      print("   Query Parameters:")
+      logger.debug("   Query Parameters:")
       for item in queryItems {
         let value = formatQueryValue(for: item)
-        print("     \(item.name): \(value)")
+        logger.debug("     \(item.name): \(value)")
       }
     }
 
@@ -102,10 +107,10 @@ internal struct LoggingMiddleware: ClientMiddleware {
 
     /// Log incoming response details
     private func logResponse(_ response: HTTPResponse, body: HTTPBody?) async -> HTTPBody? {
-      print("✅ CloudKit Response: \(response.status.code)")
+      logger.debug("✅ CloudKit Response: \(response.status.code)")
 
       if response.status.code == 421 {
-        print("⚠️  421 Misdirected Request - The server cannot produce a response for this request")
+        logger.warning("⚠️  421 Misdirected Request - The server cannot produce a response for this request")
       }
 
       return await logResponseBody(body)
@@ -122,7 +127,7 @@ internal struct LoggingMiddleware: ClientMiddleware {
         logBodyData(bodyData)
         return HTTPBody(bodyData)
       } catch {
-        print("📄 Response Body: <failed to read: \(error)>")
+        logger.error("📄 Response Body: <failed to read: \(error)>")
         return responseBody
       }
     }
@@ -130,10 +135,10 @@ internal struct LoggingMiddleware: ClientMiddleware {
     /// Log the actual body data content
     private func logBodyData(_ bodyData: Data) {
       if let jsonString = String(data: bodyData, encoding: .utf8) {
-        print("📄 Response Body:")
-        print(SecureLogging.safeLogMessage(jsonString))
+        logger.debug("📄 Response Body:")
+        logger.debug("\(SecureLogging.safeLogMessage(jsonString))")
       } else {
-        print("📄 Response Body: <non-UTF8 data, \(bodyData.count) bytes>")
+        logger.debug("📄 Response Body: <non-UTF8 data, \(bodyData.count) bytes>")
       }
     }
   #endif
