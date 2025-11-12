@@ -31,11 +31,6 @@ import Foundation
 import OpenAPIRuntime
 import OpenAPIURLSession
 
-// Helper for stderr output
-private func printToStderr(_ message: String) {
-  fputs(message + "\n", stderr)
-}
-
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
   /// Fetch current user information
@@ -134,30 +129,38 @@ extension CloudKitService {
         shouldRedact: false
       )
 
-      // Also print to stderr for debugging
-      printToStderr("⚠️ DECODING ERROR DETAILS:")
-      printToStderr("  Error: \(decodingError)")
-
-      // Print detailed context based on error type
+      // Log detailed context based on error type
       switch decodingError {
       case .keyNotFound(let key, let context):
-        printToStderr("  Missing key: \(key)")
-        printToStderr("  Context: \(context.debugDescription)")
-        printToStderr("  Coding path: \(context.codingPath)")
+        MistKitLogger.logDebug(
+          "Missing key: \(key), Context: \(context.debugDescription), Coding path: \(context.codingPath)",
+          logger: MistKitLogger.api,
+          shouldRedact: false
+        )
       case .typeMismatch(let type, let context):
-        printToStderr("  Type mismatch: expected \(type)")
-        printToStderr("  Context: \(context.debugDescription)")
-        printToStderr("  Coding path: \(context.codingPath)")
+        MistKitLogger.logDebug(
+          "Type mismatch: expected \(type), Context: \(context.debugDescription), Coding path: \(context.codingPath)",
+          logger: MistKitLogger.api,
+          shouldRedact: false
+        )
       case .valueNotFound(let type, let context):
-        printToStderr("  Value not found: expected \(type)")
-        printToStderr("  Context: \(context.debugDescription)")
-        printToStderr("  Coding path: \(context.codingPath)")
+        MistKitLogger.logDebug(
+          "Value not found: expected \(type), Context: \(context.debugDescription), Coding path: \(context.codingPath)",
+          logger: MistKitLogger.api,
+          shouldRedact: false
+        )
       case .dataCorrupted(let context):
-        printToStderr("  Data corrupted")
-        printToStderr("  Context: \(context.debugDescription)")
-        printToStderr("  Coding path: \(context.codingPath)")
+        MistKitLogger.logDebug(
+          "Data corrupted, Context: \(context.debugDescription), Coding path: \(context.codingPath)",
+          logger: MistKitLogger.api,
+          shouldRedact: false
+        )
       @unknown default:
-        printToStderr("  Unknown decoding error type")
+        MistKitLogger.logDebug(
+          "Unknown decoding error type",
+          logger: MistKitLogger.api,
+          shouldRedact: false
+        )
       }
 
       throw CloudKitError.httpErrorWithRawResponse(
@@ -172,10 +175,12 @@ extension CloudKitService {
         shouldRedact: false
       )
 
-      // Print to stderr for debugging
-      printToStderr("⚠️ UNEXPECTED ERROR: \(error)")
-      printToStderr("  Type: \(type(of: error))")
-      printToStderr("  Description: \(String(reflecting: error))")
+      // Log additional debugging details
+      MistKitLogger.logDebug(
+        "Error type: \(type(of: error)), Description: \(String(reflecting: error))",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
 
       throw CloudKitError.httpErrorWithRawResponse(
         statusCode: 500,

@@ -1,6 +1,6 @@
 import Foundation
+import Logging
 import SyndiKit
-import os
 
 /// Service for fetching and parsing RSS feeds using SyndiKit
 @available(macOS 13.0, *)
