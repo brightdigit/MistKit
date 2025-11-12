@@ -928,7 +928,7 @@ components:
           description: The record name being referenced
         action:
           type: string
-          enum: [DELETE_SELF]
+          enum: [NONE, DELETE_SELF]
           description: Action to perform on the referenced record
 
     AssetValue:

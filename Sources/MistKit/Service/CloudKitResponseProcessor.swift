@@ -29,8 +29,10 @@
 
 internal import Foundation
 import OpenAPIRuntime
+import OSLog
 
 /// Processes CloudKit API responses and handles errors
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 internal struct CloudKitResponseProcessor {
   /// Process getCurrentUser response
   /// - Parameter response: The response to process
@@ -119,6 +121,18 @@ internal struct CloudKitResponseProcessor {
         return recordsData
       }
     default:
+      // Log non-ok responses with full details when redaction is disabled
+      MistKitLogger.logError(
+        "CloudKit queryRecords failed with response: \(response)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+
+      // Try to extract detailed error information
+      if let error = CloudKitError(response) {
+        throw error
+      }
+
       // For non-ok responses, throw a generic error
       // The response type doesn't expose detailed error info for all cases
       throw CloudKitError.invalidResponse

@@ -31,6 +31,11 @@ import Foundation
 import OpenAPIRuntime
 import OpenAPIURLSession
 
+// Helper for stderr output
+private func printToStderr(_ message: String) {
+  fputs(message + "\n", stderr)
+}
+
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
   /// Fetch current user information
@@ -121,7 +126,57 @@ extension CloudKitService {
       return recordsData.records?.compactMap { RecordInfo(from: $0) } ?? []
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError
+    } catch let decodingError as DecodingError {
+      // Log detailed decoding error information
+      MistKitLogger.logError(
+        "JSON decoding failed in queryRecords: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+
+      // Also print to stderr for debugging
+      printToStderr("⚠️ DECODING ERROR DETAILS:")
+      printToStderr("  Error: \(decodingError)")
+
+      // Print detailed context based on error type
+      switch decodingError {
+      case .keyNotFound(let key, let context):
+        printToStderr("  Missing key: \(key)")
+        printToStderr("  Context: \(context.debugDescription)")
+        printToStderr("  Coding path: \(context.codingPath)")
+      case .typeMismatch(let type, let context):
+        printToStderr("  Type mismatch: expected \(type)")
+        printToStderr("  Context: \(context.debugDescription)")
+        printToStderr("  Coding path: \(context.codingPath)")
+      case .valueNotFound(let type, let context):
+        printToStderr("  Value not found: expected \(type)")
+        printToStderr("  Context: \(context.debugDescription)")
+        printToStderr("  Coding path: \(context.codingPath)")
+      case .dataCorrupted(let context):
+        printToStderr("  Data corrupted")
+        printToStderr("  Context: \(context.debugDescription)")
+        printToStderr("  Coding path: \(context.codingPath)")
+      @unknown default:
+        printToStderr("  Unknown decoding error type")
+      }
+
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 500,
+        rawResponse: "Decoding error: \(decodingError)"
+      )
     } catch {
+      // Log unexpected errors
+      MistKitLogger.logError(
+        "Unexpected error in queryRecords: \(error)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+
+      // Print to stderr for debugging
+      printToStderr("⚠️ UNEXPECTED ERROR: \(error)")
+      printToStderr("  Type: \(type(of: error))")
+      printToStderr("  Description: \(String(reflecting: error))")
+
       throw CloudKitError.httpErrorWithRawResponse(
         statusCode: 500,
         rawResponse: error.localizedDescription

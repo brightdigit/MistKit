@@ -753,6 +753,7 @@ internal enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/action`.
             internal enum actionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case NONE = "NONE"
                 case DELETE_SELF = "DELETE_SELF"
             }
             /// Action to perform on the referenced record
