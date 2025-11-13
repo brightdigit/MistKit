@@ -75,9 +75,18 @@ extension Components.Schemas.FieldValue {
 
   /// Convert Reference to Components ReferenceValue
   private static func fromReference(_ reference: FieldValue.Reference) -> Self {
+    let action: Components.Schemas.ReferenceValue.actionPayload?
+    switch reference.action {
+    case .some(.deleteSelf):
+      action = .DELETE_SELF
+    case .some(.none):
+      action = .NONE
+    case nil:
+      action = nil
+    }
     let referenceValue = Components.Schemas.ReferenceValue(
       recordName: reference.recordName,
-      action: reference.action.flatMap { .init(rawValue: $0) }
+      action: action
     )
     return Self(value: .referenceValue(referenceValue), type: .reference)
   }

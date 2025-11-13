@@ -96,6 +96,12 @@ enum CelestraError: LocalizedError {
     case .invalidResponse, .underlyingError:
       // Network-related errors are retriable
       return true
+    case .networkError:
+      // Network errors are retriable
+      return true
+    case .decodingError:
+      // Decoding errors are not retriable (data format issue)
+      return false
     }
   }
 }

@@ -31,6 +31,8 @@ public import Foundation
 
 /// Represents a CloudKit field value as defined in the CloudKit Web Services API
 public enum FieldValue: Codable, Equatable, Sendable {
+  /// Conversion factor from seconds to milliseconds for CloudKit timestamps
+  private static let millisecondsPerSecond: Double = 1_000
   case string(String)
   case int64(Int)
   case double(Double)
@@ -85,13 +87,19 @@ public enum FieldValue: Codable, Equatable, Sendable {
 
   /// Reference dictionary as defined in CloudKit Web Services
   public struct Reference: Codable, Equatable, Sendable {
+    /// Reference action types supported by CloudKit
+    public enum Action: String, Codable, Sendable {
+      case deleteSelf = "DELETE_SELF"
+      case none = "NONE"
+    }
+
     /// The record name being referenced
     public let recordName: String
-    /// The action to take ("DELETE_SELF" or nil)
-    public let action: String?
+    /// The action to take (DELETE_SELF, NONE, or nil)
+    public let action: Action?
 
     /// Initialize a reference value
-    public init(recordName: String, action: String? = nil) {
+    public init(recordName: String, action: Action? = nil) {
       self.recordName = recordName
       self.action = action
     }
@@ -185,7 +193,7 @@ public enum FieldValue: Codable, Equatable, Sendable {
     }
     // Try to decode as date (milliseconds since epoch)
     if let value = try? container.decode(Double.self) {
-      return .date(Date(timeIntervalSince1970: value / 1_000))
+      return .date(Date(timeIntervalSince1970: value / Self.millisecondsPerSecond))
     }
     return nil
   }
@@ -209,7 +217,7 @@ public enum FieldValue: Codable, Equatable, Sendable {
     case .double(let val):
       try container.encode(val)
     case .date(let val):
-      try container.encode(val.timeIntervalSince1970 * 1_000)
+      try container.encode(val.timeIntervalSince1970 * Self.millisecondsPerSecond)
     case .location(let val):
       try container.encode(val)
     case .reference(let val):
@@ -238,7 +246,7 @@ public enum FieldValue: Codable, Equatable, Sendable {
     case .bytes(let val):
       return .init(value: .bytesValue(val), type: .bytes)
     case .date(let val):
-      return .init(value: .dateValue(val.timeIntervalSince1970 * 1_000), type: .timestamp)
+      return .init(value: .dateValue(val.timeIntervalSince1970 * Self.millisecondsPerSecond), type: .timestamp)
     case .location(let val):
       return .init(
         value: .locationValue(
@@ -250,14 +258,21 @@ public enum FieldValue: Codable, Equatable, Sendable {
             altitude: val.altitude,
             speed: val.speed,
             course: val.course,
-            timestamp: val.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
+            timestamp: val.timestamp.map { $0.timeIntervalSince1970 * Self.millisecondsPerSecond }
           )
         ),
         type: .location
       )
     case .reference(let val):
-      let action: Components.Schemas.ReferenceValue.actionPayload? =
-        val.action == "DELETE_SELF" ? .DELETE_SELF : nil
+      let action: Components.Schemas.ReferenceValue.actionPayload?
+      switch val.action {
+      case .some(.deleteSelf):
+        action = .DELETE_SELF
+      case .some(.none):
+        action = .NONE
+      case nil:
+        action = nil
+      }
       return .init(
         value: .referenceValue(
           .init(
@@ -306,7 +321,7 @@ public enum FieldValue: Codable, Equatable, Sendable {
     case .bytes(let val):
       return .bytesValue(val)
     case .date(let val):
-      return .dateValue(val.timeIntervalSince1970 * 1_000)
+      return .dateValue(val.timeIntervalSince1970 * Self.millisecondsPerSecond)
     case .location(let val):
       return .locationValue(
         .init(
@@ -317,12 +332,19 @@ public enum FieldValue: Codable, Equatable, Sendable {
           altitude: val.altitude,
           speed: val.speed,
           course: val.course,
-          timestamp: val.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
+          timestamp: val.timestamp.map { $0.timeIntervalSince1970 * Self.millisecondsPerSecond }
         )
       )
     case .reference(let val):
-      let action: Components.Schemas.ReferenceValue.actionPayload? =
-        val.action == "DELETE_SELF" ? .DELETE_SELF : nil
+      let action: Components.Schemas.ReferenceValue.actionPayload?
+      switch val.action {
+      case .some(.deleteSelf):
+        action = .DELETE_SELF
+      case .some(.none):
+        action = .NONE
+      case nil:
+        action = nil
+      }
       return .referenceValue(
         .init(
           recordName: val.recordName,

@@ -56,10 +56,7 @@ extension CloudKitService {
 
     let results = try await modifyRecords(operations: [operation])
     guard let record = results.first else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500,
-        rawResponse: "No record returned after creation"
-      )
+      throw CloudKitError.invalidResponse
     }
     return record
   }
@@ -90,10 +87,7 @@ extension CloudKitService {
 
     let results = try await modifyRecords(operations: [operation])
     guard let record = results.first else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500,
-        rawResponse: "No record returned after update"
-      )
+      throw CloudKitError.invalidResponse
     }
     return record
   }
@@ -121,10 +115,7 @@ extension CloudKitService {
 
     let results = try await modifyRecords(operations: [operation])
     guard let record = results.first else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500,
-        rawResponse: "No record returned after deletion"
-      )
+      throw CloudKitError.invalidResponse
     }
     return record
   }

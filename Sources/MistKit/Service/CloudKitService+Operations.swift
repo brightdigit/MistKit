@@ -47,11 +47,27 @@ extension CloudKitService {
       return UserInfo(from: userData)
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError
-    } catch {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500,
-        rawResponse: error.localizedDescription
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "JSON decoding failed in fetchCurrentUser: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
       )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error in fetchCurrentUser: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
+      MistKitLogger.logError(
+        "Unexpected error in fetchCurrentUser: \(error)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.underlyingError(error)
     }
   }
 
@@ -78,15 +94,112 @@ extension CloudKitService {
       } ?? []
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError
-    } catch {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500,
-        rawResponse: error.localizedDescription
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "JSON decoding failed in listZones: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
       )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error in listZones: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
+      MistKitLogger.logError(
+        "Unexpected error in listZones: \(error)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.underlyingError(error)
     }
   }
 
   /// Query records from the default zone
+  ///
+  /// Queries CloudKit records with optional filtering and sorting. Supports all CloudKit
+  /// filter operations (equals, comparisons, string matching, list operations) and field-based sorting.
+  ///
+  /// - Parameters:
+  ///   - recordType: The type of records to query (must not be empty)
+  ///   - filters: Optional array of filters to apply to the query
+  ///   - sortBy: Optional array of sort descriptors
+  ///   - limit: Maximum number of records to return (1-200, default: 10)
+  ///   - desiredKeys: Optional array of field names to fetch
+  /// - Returns: Array of matching records
+  /// - Throws: CloudKitError if validation fails or the request fails
+  ///
+  /// # Example: Basic Query
+  /// ```swift
+  /// // Query all articles
+  /// let articles = try await service.queryRecords(
+  ///   recordType: "Article"
+  /// )
+  /// ```
+  ///
+  /// # Example: Query with Filters
+  /// ```swift
+  /// // Query published articles from the last week
+  /// let oneWeekAgo = Date().addingTimeInterval(-7 * 24 * 60 * 60)
+  /// let recentArticles = try await service.queryRecords(
+  ///   recordType: "Article",
+  ///   filters: [
+  ///     .greaterThan("publishedDate", .date(oneWeekAgo)),
+  ///     .equals("status", .string("published")),
+  ///     .equals("language", .string("en"))
+  ///   ],
+  ///   limit: 50
+  /// )
+  /// ```
+  ///
+  /// # Example: Query with Sorting
+  /// ```swift
+  /// // Query articles sorted by date (newest first)
+  /// let sortedArticles = try await service.queryRecords(
+  ///   recordType: "Article",
+  ///   sortBy: [.descending("publishedDate")],
+  ///   limit: 20
+  /// )
+  /// ```
+  ///
+  /// # Example: Complex Query with String Matching
+  /// ```swift
+  /// // Search for articles with titles containing "Swift"
+  /// let swiftArticles = try await service.queryRecords(
+  ///   recordType: "Article",
+  ///   filters: [
+  ///     .contains("title", .string("Swift")),
+  ///     .notEquals("status", .string("draft"))
+  ///   ],
+  ///   sortBy: [.descending("publishedDate")],
+  ///   desiredKeys: ["title", "publishedDate", "author"]
+  /// )
+  /// ```
+  ///
+  /// # Example: List Operations
+  /// ```swift
+  /// // Query articles with specific tags
+  /// let taggedArticles = try await service.queryRecords(
+  ///   recordType: "Article",
+  ///   filters: [
+  ///     .in("category", [.string("Technology"), .string("Programming")]),
+  ///     .greaterThanOrEquals("viewCount", .int64(1000))
+  ///   ]
+  /// )
+  /// ```
+  ///
+  /// # Available Filter Operations
+  /// - Equality: `.equals()`, `.notEquals()`
+  /// - Comparison: `.lessThan()`, `.lessThanOrEquals()`, `.greaterThan()`, `.greaterThanOrEquals()`
+  /// - String: `.beginsWith()`, `.contains()`, `.endsWith()`
+  /// - List: `.in()`, `.notIn()`
+  /// - Negation: `.not()`
+  ///
+  /// - Note: For large result sets, consider using pagination (see GitHub issue #145)
+  /// - Note: To query custom zones, see GitHub issue #146
   public func queryRecords(
     recordType: String,
     filters: [QueryFilter]? = nil,
@@ -94,6 +207,21 @@ extension CloudKitService {
     limit: Int = 10,
     desiredKeys: [String]? = nil
   ) async throws(CloudKitError) -> [RecordInfo] {
+    // Validate input parameters
+    guard !recordType.isEmpty else {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 400,
+        rawResponse: "recordType cannot be empty"
+      )
+    }
+
+    guard limit > 0 && limit <= 200 else {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 400,
+        rawResponse: "limit must be between 1 and 200, got \(limit)"
+      )
+    }
+
     let componentsFilters = filters?.map { $0.toComponentsFilter() }
     let componentsSorts = sortBy?.map { $0.toComponentsSort() }
 
@@ -163,10 +291,16 @@ extension CloudKitService {
         )
       }
 
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500,
-        rawResponse: "Decoding error: \(decodingError)"
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      // Log network error information
+      MistKitLogger.logError(
+        "Network error in queryRecords: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
       )
+
+      throw CloudKitError.networkError(urlError)
     } catch {
       // Log unexpected errors
       MistKitLogger.logError(
@@ -182,10 +316,7 @@ extension CloudKitService {
         shouldRedact: false
       )
 
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500,
-        rawResponse: error.localizedDescription
-      )
+      throw CloudKitError.underlyingError(error)
     }
   }
 
@@ -216,11 +347,27 @@ extension CloudKitService {
       return modifyData.records?.compactMap { RecordInfo(from: $0) } ?? []
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError
-    } catch {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500,
-        rawResponse: error.localizedDescription
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "JSON decoding failed in modifyRecords: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
       )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error in modifyRecords: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
+      MistKitLogger.logError(
+        "Unexpected error in modifyRecords: \(error)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.underlyingError(error)
     }
   }
 
@@ -251,11 +398,27 @@ extension CloudKitService {
       return lookupData.records?.compactMap { RecordInfo(from: $0) } ?? []
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError
-    } catch {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 500,
-        rawResponse: error.localizedDescription
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "JSON decoding failed in lookupRecords: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
       )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error in lookupRecords: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
+      MistKitLogger.logError(
+        "Unexpected error in lookupRecords: \(error)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.underlyingError(error)
     }
   }
 }

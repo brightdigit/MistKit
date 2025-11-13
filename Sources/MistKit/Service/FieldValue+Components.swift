@@ -93,9 +93,18 @@ extension FieldValue {
 
   /// Convert reference field value
   private static func fromReference(_ referenceValue: Components.Schemas.ReferenceValue) -> Self {
+    let action: Reference.Action?
+    switch referenceValue.action {
+    case .DELETE_SELF:
+      action = .deleteSelf
+    case .NONE:
+      action = Reference.Action.none
+    case nil:
+      action = nil
+    }
     let reference = Reference(
       recordName: referenceValue.recordName ?? "",
-      action: referenceValue.action?.rawValue
+      action: action
     )
     return .reference(reference)
   }

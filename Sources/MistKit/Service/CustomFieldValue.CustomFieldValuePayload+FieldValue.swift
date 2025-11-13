@@ -75,10 +75,19 @@ extension CustomFieldValue.CustomFieldValuePayload {
 
   /// Convert Reference to payload value
   private static func fromReference(_ reference: FieldValue.Reference) -> Self {
-    .referenceValue(
+    let action: Components.Schemas.ReferenceValue.actionPayload?
+    switch reference.action {
+    case .some(.deleteSelf):
+      action = .DELETE_SELF
+    case .some(.none):
+      action = .NONE
+    case nil:
+      action = nil
+    }
+    return .referenceValue(
       Components.Schemas.ReferenceValue(
         recordName: reference.recordName,
-        action: reference.action.flatMap { .init(rawValue: $0) }
+        action: action
       )
     )
   }

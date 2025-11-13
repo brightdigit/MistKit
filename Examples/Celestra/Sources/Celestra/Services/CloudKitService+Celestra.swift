@@ -120,7 +120,7 @@ extension CloudKitService {
                 let records = try await queryRecords(
                     recordType: "Article",
                     filters: filters,
-                    limit: 500,
+                    limit: 200,
                     desiredKeys: ["guid", "contentHash", "___recordID"]
                 )
 
@@ -133,7 +133,7 @@ extension CloudKitService {
                 // For simplicity, query by feedRecordName first then filter
                 let records = try await queryRecords(
                     recordType: "Article",
-                    limit: 500,
+                    limit: 200,
                     desiredKeys: ["guid", "contentHash", "___recordID"]
                 )
 
@@ -150,7 +150,7 @@ extension CloudKitService {
             let records = try await queryRecords(
                 recordType: "Article",
                 filters: filters.isEmpty ? nil : filters,
-                limit: 500,
+                limit: 200,
                 desiredKeys: ["guid", "contentHash", "___recordID"]
             )
 
@@ -310,7 +310,7 @@ extension CloudKitService {
     func deleteAllArticles() async throws {
         let articles = try await queryRecords(
             recordType: "Article",
-            limit: 500,
+            limit: 200,
             desiredKeys: ["___recordID"]
         )
 
