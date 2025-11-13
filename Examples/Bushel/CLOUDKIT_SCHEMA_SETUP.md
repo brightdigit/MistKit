@@ -86,7 +86,11 @@ For quick development testing, you can use CloudKit's "just-in-time schema" feat
        source: "test"
    )
 
-   let operation = RecordBuilder.buildRestoreImageOperation(testImage)
+   let operation = RecordOperation.create(
+       recordType: RestoreImageRecord.cloudKitRecordType,
+       recordName: testImage.recordName,
+       fields: testImage.toCloudKitFields()
+   )
    try await service.modifyRecords([operation])
    ```
 

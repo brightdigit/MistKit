@@ -3,6 +3,7 @@
 
 import ArgumentParser
 import Foundation
+internal import MistKit
 
 struct StatusCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(

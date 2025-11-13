@@ -583,7 +583,13 @@ CloudKit limits operations to **200 per request**:
 
 ```swift
 func syncRecords(_ records: [RestoreImageRecord]) async throws {
-    let operations = records.map(RecordBuilder.buildRestoreImageOperation)
+    let operations = records.map { record in
+        RecordOperation.create(
+            recordType: RestoreImageRecord.cloudKitRecordType,
+            recordName: record.recordName,
+            fields: record.toCloudKitFields()
+        )
+    }
 
     let batchSize = 200
     let batches = operations.chunked(into: batchSize)
@@ -671,7 +677,11 @@ let testRecord = RestoreImageRecord(
     source: "test"
 )
 
-let operation = RecordBuilder.buildRestoreImageOperation(testRecord)
+let operation = RecordOperation.create(
+    recordType: RestoreImageRecord.cloudKitRecordType,
+    recordName: testRecord.recordName,
+    fields: testRecord.toCloudKitFields()
+)
 let results = try await service.modifyRecords([operation])
 
 if results.first?.recordType == "Unknown" {

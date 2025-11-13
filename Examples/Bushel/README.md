@@ -271,29 +271,31 @@ RestoreImage ← XcodeVersion
 
 ## Implementation Highlights
 
-### RecordBuilder Pattern
+### CloudKitRecord Protocol Pattern
 
-Shows how to convert domain models to CloudKit records using only public APIs:
+Shows how to convert domain models to CloudKit records using the `CloudKitRecord` protocol:
 
 ```swift
-enum RecordBuilder {
-    static func buildRestoreImageOperation(
-        _ record: RestoreImageRecord
-    ) -> RecordOperation {
+extension RestoreImageRecord: CloudKitRecord {
+    static var cloudKitRecordType: String { "RestoreImage" }
+
+    func toCloudKitFields() -> [String: FieldValue] {
         var fields: [String: FieldValue] = [
-            "version": .string(record.version),
-            "buildNumber": .string(record.buildNumber),
-            "releaseDate": .date(record.releaseDate),
-            "fileSize": .int64(Int(record.fileSize)),
-            "isSigned": .boolean(record.isSigned),
+            "version": .string(version),
+            "buildNumber": .string(buildNumber),
+            "releaseDate": .date(releaseDate),
+            "fileSize": .int64(Int(fileSize)),
+            "isSigned": .boolean(isSigned),
             // ... more fields
         ]
+        return fields
+    }
 
-        return RecordOperation.create(
-            recordType: "RestoreImage",
-            recordName: record.recordName,
-            fields: fields
-        )
+    static func from(recordInfo: RecordInfo) -> Self? {
+        // Parse CloudKit record into domain model
+        guard let fields = recordInfo.fields else { return nil }
+        // ... field extraction
+        return RestoreImageRecord(/* ... */)
     }
 }
 ```

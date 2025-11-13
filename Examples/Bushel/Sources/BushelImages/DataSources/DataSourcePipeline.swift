@@ -1,4 +1,5 @@
 import Foundation
+internal import MistKit
 
 /// Orchestrates fetching data from all sources with deduplication and relationship resolution
 struct DataSourcePipeline: Sendable {

@@ -3,6 +3,7 @@
 
 import ArgumentParser
 import Foundation
+import MistKit
 
 struct ListCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
