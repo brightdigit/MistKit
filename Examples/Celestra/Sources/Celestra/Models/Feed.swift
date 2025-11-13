@@ -14,6 +14,13 @@ struct Feed {
     let lastAttempted: Date?
     let isActive: Bool
 
+    // Web etiquette fields
+    let lastModified: String?  // HTTP Last-Modified header for conditional requests
+    let etag: String?  // ETag header for conditional requests
+    let failureCount: Int64  // Consecutive failure count
+    let lastFailureReason: String?  // Last error message
+    let minUpdateInterval: TimeInterval?  // Minimum seconds between updates (from RSS <ttl> or <updatePeriod>)
+
     /// Convert to CloudKit record fields dictionary
     func toFieldsDict() -> [String: FieldValue] {
         var fields: [String: FieldValue] = [
@@ -22,13 +29,26 @@ struct Feed {
             "totalAttempts": .int64(Int(totalAttempts)),
             "successfulAttempts": .int64(Int(successfulAttempts)),
             "usageCount": .int64(Int(usageCount)),
-            "isActive": .int64(isActive ? 1 : 0)
+            "isActive": .int64(isActive ? 1 : 0),
+            "failureCount": .int64(Int(failureCount))
         ]
         if let description = description {
             fields["description"] = .string(description)
         }
         if let lastAttempted = lastAttempted {
             fields["lastAttempted"] = .date(lastAttempted)
+        }
+        if let lastModified = lastModified {
+            fields["lastModified"] = .string(lastModified)
+        }
+        if let etag = etag {
+            fields["etag"] = .string(etag)
+        }
+        if let lastFailureReason = lastFailureReason {
+            fields["lastFailureReason"] = .string(lastFailureReason)
+        }
+        if let minUpdateInterval = minUpdateInterval {
+            fields["minUpdateInterval"] = .double(minUpdateInterval)
         }
         return fields
     }
@@ -89,6 +109,37 @@ struct Feed {
         } else {
             self.lastAttempted = nil
         }
+
+        // Extract web etiquette fields
+        if case .string(let value) = record.fields["lastModified"] {
+            self.lastModified = value
+        } else {
+            self.lastModified = nil
+        }
+
+        if case .string(let value) = record.fields["etag"] {
+            self.etag = value
+        } else {
+            self.etag = nil
+        }
+
+        if case .int64(let value) = record.fields["failureCount"] {
+            self.failureCount = Int64(value)
+        } else {
+            self.failureCount = 0
+        }
+
+        if case .string(let value) = record.fields["lastFailureReason"] {
+            self.lastFailureReason = value
+        } else {
+            self.lastFailureReason = nil
+        }
+
+        if case .double(let value) = record.fields["minUpdateInterval"] {
+            self.minUpdateInterval = value
+        } else {
+            self.minUpdateInterval = nil
+        }
     }
 
     /// Create new feed record
@@ -102,7 +153,12 @@ struct Feed {
         successfulAttempts: Int64 = 0,
         usageCount: Int64 = 0,
         lastAttempted: Date? = nil,
-        isActive: Bool = true
+        isActive: Bool = true,
+        lastModified: String? = nil,
+        etag: String? = nil,
+        failureCount: Int64 = 0,
+        lastFailureReason: String? = nil,
+        minUpdateInterval: TimeInterval? = nil
     ) {
         self.recordName = recordName
         self.recordChangeTag = recordChangeTag
@@ -114,5 +170,10 @@ struct Feed {
         self.usageCount = usageCount
         self.lastAttempted = lastAttempted
         self.isActive = isActive
+        self.lastModified = lastModified
+        self.etag = etag
+        self.failureCount = failureCount
+        self.lastFailureReason = lastFailureReason
+        self.minUpdateInterval = minUpdateInterval
     }
 }

@@ -26,7 +26,11 @@ struct AddFeedCommand: AsyncParsableCommand {
 
         // 2. Fetch RSS content to validate and extract title
         let fetcher = RSSFetcherService()
-        let feedData = try await fetcher.fetchFeed(from: url)
+        let response = try await fetcher.fetchFeed(from: url)
+
+        guard let feedData = response.feedData else {
+            throw ValidationError("Feed was not modified (unexpected)")
+        }
 
         print("✅ Found feed: \(feedData.title)")
         print("   Articles: \(feedData.items.count)")
@@ -34,11 +38,14 @@ struct AddFeedCommand: AsyncParsableCommand {
         // 3. Create CloudKit service
         let service = try CelestraConfig.createCloudKitService()
 
-        // 4. Create Feed record
+        // 4. Create Feed record with initial metadata
         let feed = Feed(
             feedURL: feedURL,
             title: feedData.title,
-            description: feedData.description
+            description: feedData.description,
+            lastModified: response.lastModified,
+            etag: response.etag,
+            minUpdateInterval: feedData.minUpdateInterval
         )
         let record = try await service.createFeed(feed)
 
