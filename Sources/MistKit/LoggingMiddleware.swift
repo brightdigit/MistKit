@@ -110,7 +110,8 @@ internal struct LoggingMiddleware: ClientMiddleware {
       logger.debug("✅ CloudKit Response: \(response.status.code)")
 
       if response.status.code == 421 {
-        logger.warning("⚠️  421 Misdirected Request - The server cannot produce a response for this request")
+        logger.warning(
+          "⚠️  421 Misdirected Request - The server cannot produce a response for this request")
       }
 
       return await logResponseBody(body)

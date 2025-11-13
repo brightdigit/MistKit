@@ -5,7 +5,7 @@ import Testing
 @testable import MistKit
 
 extension ServerToServerAuthManagerTests {
-  @Suite("Server-to-Server Auth Manager Validation")
+  @Suite("Server-to-Server Auth Manager Validation", .enabled(if: Platform.isCryptoAvailable))
   /// Test suite for ServerToServerAuthManager validation functionality
   internal struct ValidationTests {
     private static func generateTestPrivateKey() throws -> P256.Signing.PrivateKey {

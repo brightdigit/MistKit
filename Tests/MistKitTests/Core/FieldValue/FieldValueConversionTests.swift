@@ -3,17 +3,21 @@ import Testing
 
 @testable import MistKit
 
-@Suite("FieldValue Conversion Tests")
+@Suite("FieldValue Conversion Tests", .enabled(if: Platform.isCryptoAvailable))
 internal struct FieldValueConversionTests {
   // MARK: - Basic Type Conversions
 
   @Test("Convert string FieldValue to Components.FieldValue")
   func convertString() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let fieldValue = FieldValue.string("test string")
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .string)
-    if case let .stringValue(value) = components.value {
+    if case .stringValue(let value) = components.value {
       #expect(value == "test string")
     } else {
       Issue.record("Expected stringValue")
@@ -22,11 +26,15 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert int64 FieldValue to Components.FieldValue")
   func convertInt64() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let fieldValue = FieldValue.int64(42)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .int64)
-    if case let .int64Value(value) = components.value {
+    if case .int64Value(let value) = components.value {
       #expect(value == 42)
     } else {
       Issue.record("Expected int64Value")
@@ -35,11 +43,15 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert double FieldValue to Components.FieldValue")
   func convertDouble() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let fieldValue = FieldValue.double(3.14159)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .double)
-    if case let .doubleValue(value) = components.value {
+    if case .doubleValue(let value) = components.value {
       #expect(value == 3.14159)
     } else {
       Issue.record("Expected doubleValue")
@@ -48,10 +60,14 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert boolean FieldValue to Components.FieldValue")
   func convertBoolean() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let trueValue = FieldValue.boolean(true)
     let trueComponents = trueValue.toComponentsFieldValue()
     #expect(trueComponents.type == .int64)
-    if case let .booleanValue(value) = trueComponents.value {
+    if case .booleanValue(let value) = trueComponents.value {
       #expect(value == true)
     } else {
       Issue.record("Expected booleanValue true")
@@ -60,7 +76,7 @@ internal struct FieldValueConversionTests {
     let falseValue = FieldValue.boolean(false)
     let falseComponents = falseValue.toComponentsFieldValue()
     #expect(falseComponents.type == .int64)
-    if case let .booleanValue(value) = falseComponents.value {
+    if case .booleanValue(let value) = falseComponents.value {
       #expect(value == false)
     } else {
       Issue.record("Expected booleanValue false")
@@ -69,11 +85,15 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert bytes FieldValue to Components.FieldValue")
   func convertBytes() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let fieldValue = FieldValue.bytes("base64encodedstring")
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .bytes)
-    if case let .bytesValue(value) = components.value {
+    if case .bytesValue(let value) = components.value {
       #expect(value == "base64encodedstring")
     } else {
       Issue.record("Expected bytesValue")
@@ -82,12 +102,16 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert date FieldValue to Components.FieldValue")
   func convertDate() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let date = Date(timeIntervalSince1970: 1_000_000)
     let fieldValue = FieldValue.date(date)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .timestamp)
-    if case let .dateValue(value) = components.value {
+    if case .dateValue(let value) = components.value {
       #expect(value == date.timeIntervalSince1970 * 1_000)
     } else {
       Issue.record("Expected dateValue")
@@ -98,6 +122,10 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert location FieldValue to Components.FieldValue")
   func convertLocation() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let location = FieldValue.Location(
       latitude: 37.7749,
       longitude: -122.4194,
@@ -112,7 +140,7 @@ internal struct FieldValueConversionTests {
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .location)
-    if case let .locationValue(value) = components.value {
+    if case .locationValue(let value) = components.value {
       #expect(value.latitude == 37.7749)
       #expect(value.longitude == -122.4194)
       #expect(value.horizontalAccuracy == 10.0)
@@ -128,12 +156,16 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert location with minimal fields to Components.FieldValue")
   func convertMinimalLocation() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let location = FieldValue.Location(latitude: 0.0, longitude: 0.0)
     let fieldValue = FieldValue.location(location)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .location)
-    if case let .locationValue(value) = components.value {
+    if case .locationValue(let value) = components.value {
       #expect(value.latitude == 0.0)
       #expect(value.longitude == 0.0)
       #expect(value.horizontalAccuracy == nil)
@@ -149,12 +181,16 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert reference FieldValue without action to Components.FieldValue")
   func convertReferenceWithoutAction() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let reference = FieldValue.Reference(recordName: "test-record-123")
     let fieldValue = FieldValue.reference(reference)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .reference)
-    if case let .referenceValue(value) = components.value {
+    if case .referenceValue(let value) = components.value {
       #expect(value.recordName == "test-record-123")
       #expect(value.action == nil)
     } else {
@@ -164,12 +200,16 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert reference FieldValue with DELETE_SELF action to Components.FieldValue")
   func convertReferenceWithDeleteSelfAction() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let reference = FieldValue.Reference(recordName: "test-record-456", action: "DELETE_SELF")
     let fieldValue = FieldValue.reference(reference)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .reference)
-    if case let .referenceValue(value) = components.value {
+    if case .referenceValue(let value) = components.value {
       #expect(value.recordName == "test-record-456")
       #expect(value.action == .DELETE_SELF)
     } else {
@@ -179,12 +219,16 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert reference FieldValue with non-DELETE_SELF action to Components.FieldValue")
   func convertReferenceWithOtherAction() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let reference = FieldValue.Reference(recordName: "test-record-789", action: "SOME_OTHER_ACTION")
     let fieldValue = FieldValue.reference(reference)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .reference)
-    if case let .referenceValue(value) = components.value {
+    if case .referenceValue(let value) = components.value {
       #expect(value.recordName == "test-record-789")
       #expect(value.action == nil)
     } else {
@@ -194,6 +238,10 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert asset FieldValue with all fields to Components.FieldValue")
   func convertAssetWithAllFields() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let asset = FieldValue.Asset(
       fileChecksum: "abc123",
       size: 1_024,
@@ -206,7 +254,7 @@ internal struct FieldValueConversionTests {
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .asset)
-    if case let .assetValue(value) = components.value {
+    if case .assetValue(let value) = components.value {
       #expect(value.fileChecksum == "abc123")
       #expect(value.size == 1_024)
       #expect(value.referenceChecksum == "def456")
@@ -220,12 +268,16 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert asset FieldValue with minimal fields to Components.FieldValue")
   func convertAssetWithMinimalFields() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let asset = FieldValue.Asset()
     let fieldValue = FieldValue.asset(asset)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .asset)
-    if case let .assetValue(value) = components.value {
+    if case .assetValue(let value) = components.value {
       #expect(value.fileChecksum == nil)
       #expect(value.size == nil)
       #expect(value.referenceChecksum == nil)
@@ -241,12 +293,16 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert list FieldValue with strings to Components.FieldValue")
   func convertListWithStrings() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let list: [FieldValue] = [.string("one"), .string("two"), .string("three")]
     let fieldValue = FieldValue.list(list)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .list)
-    if case let .listValue(values) = components.value {
+    if case .listValue(let values) = components.value {
       #expect(values.count == 3)
     } else {
       Issue.record("Expected listValue")
@@ -255,12 +311,16 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert list FieldValue with numbers to Components.FieldValue")
   func convertListWithNumbers() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let list: [FieldValue] = [.int64(1), .int64(2), .int64(3)]
     let fieldValue = FieldValue.list(list)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .list)
-    if case let .listValue(values) = components.value {
+    if case .listValue(let values) = components.value {
       #expect(values.count == 3)
     } else {
       Issue.record("Expected listValue")
@@ -269,6 +329,10 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert list FieldValue with mixed types to Components.FieldValue")
   func convertListWithMixedTypes() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let list: [FieldValue] = [
       .string("text"),
       .int64(42),
@@ -279,7 +343,7 @@ internal struct FieldValueConversionTests {
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .list)
-    if case let .listValue(values) = components.value {
+    if case .listValue(let values) = components.value {
       #expect(values.count == 4)
     } else {
       Issue.record("Expected listValue")
@@ -288,12 +352,16 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert empty list FieldValue to Components.FieldValue")
   func convertEmptyList() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let list: [FieldValue] = []
     let fieldValue = FieldValue.list(list)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .list)
-    if case let .listValue(values) = components.value {
+    if case .listValue(let values) = components.value {
       #expect(values.isEmpty)
     } else {
       Issue.record("Expected listValue")
@@ -302,13 +370,17 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert nested list FieldValue to Components.FieldValue")
   func convertNestedList() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let innerList: [FieldValue] = [.string("a"), .string("b")]
     let outerList: [FieldValue] = [.list(innerList), .string("c")]
     let fieldValue = FieldValue.list(outerList)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .list)
-    if case let .listValue(values) = components.value {
+    if case .listValue(let values) = components.value {
       #expect(values.count == 2)
     } else {
       Issue.record("Expected listValue")
@@ -319,6 +391,10 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert zero values")
   func convertZeroValues() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let intZero = FieldValue.int64(0)
     let intComponents = intZero.toComponentsFieldValue()
     #expect(intComponents.type == .int64)
@@ -330,6 +406,10 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert negative values")
   func convertNegativeValues() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let negativeInt = FieldValue.int64(-100)
     let intComponents = negativeInt.toComponentsFieldValue()
     #expect(intComponents.type == .int64)
@@ -341,6 +421,10 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert large numbers")
   func convertLargeNumbers() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let largeInt = FieldValue.int64(Int.max)
     let intComponents = largeInt.toComponentsFieldValue()
     #expect(intComponents.type == .int64)
@@ -352,6 +436,10 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert empty string")
   func convertEmptyString() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let emptyString = FieldValue.string("")
     let components = emptyString.toComponentsFieldValue()
     #expect(components.type == .string)
@@ -359,6 +447,10 @@ internal struct FieldValueConversionTests {
 
   @Test("Convert string with special characters")
   func convertStringWithSpecialCharacters() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("FieldValue is not available on this operating system.")
+      return
+    }
     let specialString = FieldValue.string("Hello\nWorld\t🌍")
     let components = specialString.toComponentsFieldValue()
     #expect(components.type == .string)

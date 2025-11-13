@@ -3,10 +3,14 @@ import Testing
 
 @testable import MistKit
 
-@Suite("QuerySort Tests")
+@Suite("QuerySort Tests", .enabled(if: Platform.isCryptoAvailable))
 internal struct QuerySortTests {
   @Test("QuerySort creates ascending sort")
   func ascendingSort() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QuerySort is not available on this operating system.")
+      return
+    }
     let sort = QuerySort.ascending("createdAt")
     let components = sort.toComponentsSort()
     #expect(components.fieldName == "createdAt")
@@ -15,6 +19,10 @@ internal struct QuerySortTests {
 
   @Test("QuerySort creates descending sort")
   func descendingSort() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QuerySort is not available on this operating system.")
+      return
+    }
     let sort = QuerySort.descending("updatedAt")
     let components = sort.toComponentsSort()
     #expect(components.fieldName == "updatedAt")
@@ -23,6 +31,10 @@ internal struct QuerySortTests {
 
   @Test("QuerySort creates sort with explicit ascending direction")
   func sortExplicitAscending() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QuerySort is not available on this operating system.")
+      return
+    }
     let sort = QuerySort.sort("name", ascending: true)
     let components = sort.toComponentsSort()
     #expect(components.fieldName == "name")
@@ -31,6 +43,10 @@ internal struct QuerySortTests {
 
   @Test("QuerySort creates sort with explicit descending direction")
   func sortExplicitDescending() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QuerySort is not available on this operating system.")
+      return
+    }
     let sort = QuerySort.sort("score", ascending: false)
     let components = sort.toComponentsSort()
     #expect(components.fieldName == "score")
@@ -39,6 +55,10 @@ internal struct QuerySortTests {
 
   @Test("QuerySort defaults to ascending when using sort method")
   func sortDefaultsToAscending() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QuerySort is not available on this operating system.")
+      return
+    }
     let sort = QuerySort.sort("title")
     let components = sort.toComponentsSort()
     #expect(components.fieldName == "title")
@@ -47,6 +67,10 @@ internal struct QuerySortTests {
 
   @Test("QuerySort handles field names with underscores")
   func sortFieldWithUnderscores() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QuerySort is not available on this operating system.")
+      return
+    }
     let sort = QuerySort.ascending("user_id")
     let components = sort.toComponentsSort()
     #expect(components.fieldName == "user_id")
@@ -54,6 +78,10 @@ internal struct QuerySortTests {
 
   @Test("QuerySort handles field names with numbers")
   func sortFieldWithNumbers() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QuerySort is not available on this operating system.")
+      return
+    }
     let sort = QuerySort.descending("field123")
     let components = sort.toComponentsSort()
     #expect(components.fieldName == "field123")
@@ -61,6 +89,10 @@ internal struct QuerySortTests {
 
   @Test("QuerySort handles camelCase field names")
   func sortCamelCaseField() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QuerySort is not available on this operating system.")
+      return
+    }
     let sort = QuerySort.ascending("createdAtTimestamp")
     let components = sort.toComponentsSort()
     #expect(components.fieldName == "createdAtTimestamp")

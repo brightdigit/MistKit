@@ -58,7 +58,8 @@ internal enum MistKitLogger {
     logger: Logger,
     shouldRedact: Bool = true
   ) {
-    let finalMessage = (isRedactionDisabled || !shouldRedact) ? message : SecureLogging.safeLogMessage(message)
+    let finalMessage =
+      (isRedactionDisabled || !shouldRedact) ? message : SecureLogging.safeLogMessage(message)
     logger.error("\(finalMessage)")
   }
 
@@ -68,7 +69,8 @@ internal enum MistKitLogger {
     logger: Logger,
     shouldRedact: Bool = true
   ) {
-    let finalMessage = (isRedactionDisabled || !shouldRedact) ? message : SecureLogging.safeLogMessage(message)
+    let finalMessage =
+      (isRedactionDisabled || !shouldRedact) ? message : SecureLogging.safeLogMessage(message)
     logger.warning("\(finalMessage)")
   }
 
@@ -78,7 +80,8 @@ internal enum MistKitLogger {
     logger: Logger,
     shouldRedact: Bool = true
   ) {
-    let finalMessage = (isRedactionDisabled || !shouldRedact) ? message : SecureLogging.safeLogMessage(message)
+    let finalMessage =
+      (isRedactionDisabled || !shouldRedact) ? message : SecureLogging.safeLogMessage(message)
     logger.info("\(finalMessage)")
   }
 
@@ -88,7 +91,8 @@ internal enum MistKitLogger {
     logger: Logger,
     shouldRedact: Bool = true
   ) {
-    let finalMessage = (isRedactionDisabled || !shouldRedact) ? message : SecureLogging.safeLogMessage(message)
+    let finalMessage =
+      (isRedactionDisabled || !shouldRedact) ? message : SecureLogging.safeLogMessage(message)
     logger.debug("\(finalMessage)")
   }
 }

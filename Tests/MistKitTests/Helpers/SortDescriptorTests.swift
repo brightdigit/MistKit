@@ -3,10 +3,14 @@ import Testing
 
 @testable import MistKit
 
-@Suite("SortDescriptor Tests")
+@Suite("SortDescriptor Tests", .enabled(if: Platform.isCryptoAvailable))
 internal struct SortDescriptorTests {
   @Test("SortDescriptor creates ascending sort")
   func ascendingSort() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("SortDescriptor is not available on this operating system.")
+      return
+    }
     let sort = SortDescriptor.ascending("name")
     #expect(sort.fieldName == "name")
     #expect(sort.ascending == true)
@@ -14,6 +18,10 @@ internal struct SortDescriptorTests {
 
   @Test("SortDescriptor creates descending sort")
   func descendingSort() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("SortDescriptor is not available on this operating system.")
+      return
+    }
     let sort = SortDescriptor.descending("age")
     #expect(sort.fieldName == "age")
     #expect(sort.ascending == false)
@@ -21,6 +29,10 @@ internal struct SortDescriptorTests {
 
   @Test("SortDescriptor creates sort with ascending true")
   func sortAscendingTrue() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("SortDescriptor is not available on this operating system.")
+      return
+    }
     let sort = SortDescriptor.sort("score", ascending: true)
     #expect(sort.fieldName == "score")
     #expect(sort.ascending == true)
@@ -28,6 +40,10 @@ internal struct SortDescriptorTests {
 
   @Test("SortDescriptor creates sort with ascending false")
   func sortAscendingFalse() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("SortDescriptor is not available on this operating system.")
+      return
+    }
     let sort = SortDescriptor.sort("rating", ascending: false)
     #expect(sort.fieldName == "rating")
     #expect(sort.ascending == false)
@@ -35,6 +51,10 @@ internal struct SortDescriptorTests {
 
   @Test("SortDescriptor defaults to ascending")
   func sortDefaultAscending() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("SortDescriptor is not available on this operating system.")
+      return
+    }
     let sort = SortDescriptor.sort("title")
     #expect(sort.fieldName == "title")
     #expect(sort.ascending == true)
@@ -42,6 +62,10 @@ internal struct SortDescriptorTests {
 
   @Test("SortDescriptor handles various field name formats")
   func variousFieldNameFormats() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("SortDescriptor is not available on this operating system.")
+      return
+    }
     let sort1 = SortDescriptor.ascending("simple")
     #expect(sort1.fieldName == "simple")
 

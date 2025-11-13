@@ -3,12 +3,16 @@ import Testing
 
 @testable import MistKit
 
-@Suite("QueryFilter Tests")
+@Suite("QueryFilter Tests", .enabled(if: Platform.isCryptoAvailable))
 internal struct QueryFilterTests {
   // MARK: - Equality Filters
 
   @Test("QueryFilter creates equals filter")
   func equalsFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.equals("name", .string("Alice"))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .EQUALS)
@@ -17,6 +21,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates notEquals filter")
   func notEqualsFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.notEquals("status", .string("deleted"))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .NOT_EQUALS)
@@ -27,6 +35,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates lessThan filter")
   func lessThanFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.lessThan("age", .int64(30))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .LESS_THAN)
@@ -35,6 +47,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates lessThanOrEquals filter")
   func lessThanOrEqualsFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.lessThanOrEquals("score", .double(85.5))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .LESS_THAN_OR_EQUALS)
@@ -43,6 +59,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates greaterThan filter")
   func greaterThanFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let date = Date()
     let filter = QueryFilter.greaterThan("updatedAt", .date(date))
     let components = filter.toComponentsFilter()
@@ -52,6 +72,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates greaterThanOrEquals filter")
   func greaterThanOrEqualsFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.greaterThanOrEquals("rating", .int64(4))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .GREATER_THAN_OR_EQUALS)
@@ -62,6 +86,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates beginsWith filter")
   func beginsWithFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.beginsWith("username", "admin")
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .BEGINS_WITH)
@@ -70,6 +98,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates notBeginsWith filter")
   func notBeginsWithFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.notBeginsWith("email", "test")
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .NOT_BEGINS_WITH)
@@ -78,6 +110,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates containsAllTokens filter")
   func containsAllTokensFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.containsAllTokens("content", "apple swift ios")
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .CONTAINS_ALL_TOKENS)
@@ -88,6 +124,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates in filter with strings")
   func inFilterStrings() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let values: [FieldValue] = [.string("draft"), .string("published")]
     let filter = QueryFilter.in("state", values)
     let components = filter.toComponentsFilter()
@@ -97,6 +137,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates notIn filter with numbers")
   func notInFilterNumbers() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let values: [FieldValue] = [.int64(0), .int64(-1)]
     let filter = QueryFilter.notIn("errorCode", values)
     let components = filter.toComponentsFilter()
@@ -106,6 +150,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates in filter with empty array")
   func inFilterEmptyArray() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let values: [FieldValue] = []
     let filter = QueryFilter.in("tags", values)
     let components = filter.toComponentsFilter()
@@ -117,6 +165,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates listContains filter")
   func listContainsFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.listContains("categories", .string("technology"))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .LIST_CONTAINS)
@@ -125,6 +177,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates notListContains filter")
   func notListContainsFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.notListContains("blockedUsers", .string("user-456"))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .NOT_LIST_CONTAINS)
@@ -133,6 +189,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates listMemberBeginsWith filter")
   func listMemberBeginsWithFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.listMemberBeginsWith("urls", "https://")
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .LIST_MEMBER_BEGINS_WITH)
@@ -141,6 +201,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter creates notListMemberBeginsWith filter")
   func notListMemberBeginsWithFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.notListMemberBeginsWith("paths", "/private")
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .NOT_LIST_MEMBER_BEGINS_WITH)
@@ -151,6 +215,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter handles boolean field values")
   func booleanFieldValue() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.equals("isPublished", .boolean(true))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .EQUALS)
@@ -159,6 +227,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter handles reference field values")
   func referenceFieldValue() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let reference = FieldValue.Reference(recordName: "parent-record-123")
     let filter = QueryFilter.equals("parentRef", .reference(reference))
     let components = filter.toComponentsFilter()
@@ -168,6 +240,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter handles date comparisons")
   func dateComparison() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let now = Date()
     let filter = QueryFilter.lessThan("expiresAt", .date(now))
     let components = filter.toComponentsFilter()
@@ -177,6 +253,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter handles double comparisons")
   func doubleComparison() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.greaterThanOrEquals("temperature", .double(98.6))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .GREATER_THAN_OR_EQUALS)
@@ -187,6 +267,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter handles empty string")
   func emptyStringFilter() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.equals("emptyField", .string(""))
     let components = filter.toComponentsFilter()
     #expect(components.fieldName == "emptyField")
@@ -194,6 +278,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter handles special characters in field names")
   func specialCharactersInFieldName() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.equals("field_name_123", .string("value"))
     let components = filter.toComponentsFilter()
     #expect(components.fieldName == "field_name_123")
@@ -201,6 +289,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter handles zero values")
   func zeroValues() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let intFilter = QueryFilter.equals("count", .int64(0))
     #expect(intFilter.toComponentsFilter().fieldName == "count")
 
@@ -210,6 +302,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter handles negative values")
   func negativeValues() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.lessThan("balance", .int64(-100))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .LESS_THAN)
@@ -217,6 +313,10 @@ internal struct QueryFilterTests {
 
   @Test("QueryFilter handles large numbers")
   func largeNumbers() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("QueryFilter is not available on this operating system.")
+      return
+    }
     let filter = QueryFilter.greaterThan("views", .int64(1_000_000))
     let components = filter.toComponentsFilter()
     #expect(components.comparator == .GREATER_THAN)

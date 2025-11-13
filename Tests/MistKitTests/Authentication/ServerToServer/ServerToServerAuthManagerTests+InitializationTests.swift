@@ -5,7 +5,7 @@ import Testing
 @testable import MistKit
 
 extension ServerToServerAuthManagerTests {
-  @Suite("Server-to-Server Auth Manager Initialization")
+  @Suite("Server-to-Server Auth Manager Initialization", .enabled(if: Platform.isCryptoAvailable))
   /// Test suite for ServerToServerAuthManager initialization functionality
   internal struct InitializationTests {
     // MARK: - Test Data Setup
