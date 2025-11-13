@@ -15,7 +15,7 @@ enum CloudKitFieldMapping {
 
     /// Convert a Bool to FieldValue (using INT64 representation: 0 = false, 1 = true)
     static func fieldValue(from bool: Bool) -> FieldValue {
-        .boolean(bool)
+        .from(bool)
     }
 
     /// Convert an Int64 to FieldValue

@@ -171,7 +171,7 @@ internal struct RecordManagingTests {
         fields: [
           "name": .string("First"),
           "count": .int64(10),
-          "isActive": .boolean(true),
+          "isActive": .from(true),
         ]
       ),
       RecordInfo(
@@ -180,7 +180,7 @@ internal struct RecordManagingTests {
         fields: [
           "name": .string("Second"),
           "count": .int64(20),
-          "isActive": .boolean(false),
+          "isActive": .from(false),
         ]
       ),
     ]
@@ -211,7 +211,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Active"),
-          "isActive": .boolean(true),
+          "isActive": .from(true),
         ]
       ),
       RecordInfo(
@@ -219,7 +219,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Inactive"),
-          "isActive": .boolean(false),
+          "isActive": .from(false),
         ]
       ),
       RecordInfo(
@@ -227,7 +227,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Also Active"),
-          "isActive": .boolean(true),
+          "isActive": .from(true),
         ]
       ),
     ]
@@ -255,7 +255,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Valid"),
-          "isActive": .boolean(true),
+          "isActive": .from(true),
         ]
       ),
       RecordInfo(
@@ -271,7 +271,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Also Valid"),
-          "isActive": .boolean(false),
+          "isActive": .from(false),
         ]
       ),
     ]
@@ -323,7 +323,7 @@ internal struct RecordManagingTests {
         fields: [
           "name": .string("First"),
           "count": .int64(1),
-          "isActive": .boolean(true),
+          "isActive": .from(true),
         ]
       )
     ]

@@ -61,21 +61,18 @@ extension FieldValue {
     return nil
   }
 
-  /// Extract a Bool value from either .boolean or .int64 (0/1) cases
+  /// Extract a Bool value from .int64 cases
   ///
-  /// Supports both native boolean representation and legacy int64 encoding
-  /// where CloudKit represents booleans as 0 (false) or 1 (true).
+  /// CloudKit represents booleans as INT64 where 0 is false and 1 is true.
+  /// This method asserts that the value is either 0 or 1.
   ///
-  /// - Returns: The boolean value, or nil if this is neither a .boolean nor a valid .int64 (0/1) case
+  /// - Returns: The boolean value, or nil if this is not an .int64 case
   public var boolValue: Bool? {
-    switch self {
-    case .boolean(let value):
-      return value
-    case .int64(let value) where value == 0 || value == 1:
+    if case .int64(let value) = self {
+      assert(value == 0 || value == 1, "Boolean int64 value must be 0 or 1, got \(value)")
       return value != 0
-    default:
-      return nil
     }
+    return nil
   }
 
   /// Extract a Date value if this is a .date case

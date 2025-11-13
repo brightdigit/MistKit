@@ -59,13 +59,13 @@ extension RestoreImageRecord: CloudKitRecord {
             "fileSize": .int64(fileSize),
             "sha256Hash": .string(sha256Hash),
             "sha1Hash": .string(sha1Hash),
-            "isPrerelease": .boolean(isPrerelease),
+            "isPrerelease": .from(isPrerelease),
             "source": .string(source)
         ]
 
         // Optional fields
         if let isSigned {
-            fields["isSigned"] = .boolean(isSigned)
+            fields["isSigned"] = .from(isSigned)
         }
 
         if let notes {

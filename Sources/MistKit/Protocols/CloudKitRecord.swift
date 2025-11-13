@@ -82,7 +82,7 @@ public protocol CloudKitRecord: Codable, Sendable {
   /// - String properties → `.string(value)`
   /// - Int properties → `.int64(Int64(value))`
   /// - Double properties → `.double(value)`
-  /// - Bool properties → `.boolean(value)`
+  /// - Bool properties → `.from(value)` or `.int64(value ? 1 : 0)`
   /// - Date properties → `.date(value)`
   /// - References → `.reference(recordName: "OtherRecord-ID")`
   ///

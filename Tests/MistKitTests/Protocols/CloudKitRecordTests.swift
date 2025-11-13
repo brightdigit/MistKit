@@ -50,7 +50,7 @@ internal struct TestRecord: CloudKitRecord {
     var fields: [String: FieldValue] = [
       "name": .string(name),
       "count": .int64(count),
-      "isActive": .boolean(isActive),
+      "isActive": .from(isActive),
     ]
 
     if let score {
@@ -150,7 +150,7 @@ internal struct CloudKitRecordTests {
       fields: [
         "name": .string("Parsed Record"),
         "count": .int64(25),
-        "isActive": .boolean(true),
+        "isActive": .from(true),
         "score": .double(75.0),
       ]
     )
@@ -171,7 +171,7 @@ internal struct CloudKitRecordTests {
       recordType: "TestRecord",
       fields: [
         "name": .string("Minimal Record"),
-        "isActive": .boolean(false),
+        "isActive": .from(false),
       ]
     )
 

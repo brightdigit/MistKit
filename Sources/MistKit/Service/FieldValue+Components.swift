@@ -53,7 +53,7 @@ extension FieldValue {
         self = .double(doubleValue)
       }
     case .booleanValue(let boolValue):
-      self = .boolean(boolValue)
+      self = .int64(boolValue ? 1 : 0)
     case .bytesValue(let bytesValue):
       self = .bytes(bytesValue)
     case .dateValue(let dateValue):
@@ -138,7 +138,7 @@ extension FieldValue {
     case .doubleValue(let doubleValue):
       return .double(doubleValue)
     case .booleanValue(let boolValue):
-      return .boolean(boolValue)
+      return .int64(boolValue ? 1 : 0)
     case .bytesValue(let bytesValue):
       return .bytes(bytesValue)
     case .dateValue(let dateValue):

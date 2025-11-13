@@ -33,7 +33,7 @@ extension SwiftVersionRecord: CloudKitRecord {
         var fields: [String: FieldValue] = [
             "version": .string(version),
             "releaseDate": .date(releaseDate),
-            "isPrerelease": .boolean(isPrerelease)
+            "isPrerelease": .from(isPrerelease)
         ]
 
         // Optional fields

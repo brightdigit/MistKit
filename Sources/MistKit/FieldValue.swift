@@ -36,7 +36,6 @@ public enum FieldValue: Codable, Equatable, Sendable {
   case string(String)
   case int64(Int)
   case double(Double)
-  case boolean(Bool)  // Represented as int64 (0 or 1) in CloudKit
   case bytes(String)  // Base64-encoded string
   case date(Date)  // Date/time value
   case location(Location)
@@ -211,9 +210,6 @@ public enum FieldValue: Codable, Equatable, Sendable {
       try container.encode(val)
     case .int64(let val):
       try container.encode(val)
-    case .boolean(let val):
-      // CloudKit represents booleans as int64 (0 or 1)
-      try container.encode(val ? 1 : 0)
     case .double(let val):
       try container.encode(val)
     case .date(let val):
@@ -241,8 +237,6 @@ public enum FieldValue: Codable, Equatable, Sendable {
       return .init(value: .int64Value(val), type: .int64)
     case .double(let val):
       return .init(value: .doubleValue(val), type: .double)
-    case .boolean(let val):
-      return .init(value: .booleanValue(val), type: .int64)
     case .bytes(let val):
       return .init(value: .bytesValue(val), type: .bytes)
     case .date(let val):
@@ -282,8 +276,6 @@ public enum FieldValue: Codable, Equatable, Sendable {
       return .int64Value(val)
     case .double(let val):
       return .doubleValue(val)
-    case .boolean(let val):
-      return .booleanValue(val)
     case .bytes(let val):
       return .bytesValue(val)
     case .date(let val):
@@ -356,6 +348,14 @@ public enum FieldValue: Codable, Equatable, Sendable {
 // MARK: - Helper Methods
 
 extension FieldValue {
-  // Boolean is now a native enum case: .boolean(Bool)
-  // CloudKit represents booleans as INT64 (0/1) on the wire
+  /// Create an int64 FieldValue from a Bool
+  ///
+  /// CloudKit represents booleans as INT64 (0/1) on the wire.
+  /// This helper converts Swift Bool to the appropriate int64 representation.
+  ///
+  /// - Parameter value: The boolean value to convert
+  /// - Returns: A FieldValue.int64 with 1 for true, 0 for false
+  public static func from(_ value: Bool) -> FieldValue {
+    .int64(value ? 1 : 0)
+  }
 }

@@ -219,7 +219,7 @@ internal struct FilterBuilderTests {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
     }
-    let filter = FilterBuilder.equals("isActive", .boolean(true))
+    let filter = FilterBuilder.equals("isActive", .from(true))
     #expect(filter.comparator == .EQUALS)
     #expect(filter.fieldName == "isActive")
   }

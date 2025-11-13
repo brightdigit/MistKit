@@ -40,8 +40,6 @@ extension Components.Schemas.FieldValue {
       self.init(value: .int64Value(value), type: .int64)
     case .double(let value):
       self.init(value: .doubleValue(value), type: .double)
-    case .boolean(let value):
-      self.init(value: .booleanValue(value), type: .int64)
     case .bytes(let value):
       self.init(value: .bytesValue(value), type: .bytes)
     case .date(let value):

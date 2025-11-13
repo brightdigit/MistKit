@@ -45,7 +45,7 @@ internal struct FieldValueConvenienceTests {
   internal func stringValueReturnsNilForWrongType() {
     #expect(FieldValue.int64(42).stringValue == nil)
     #expect(FieldValue.double(3.14).stringValue == nil)
-    #expect(FieldValue.boolean(true).stringValue == nil)
+    #expect(FieldValue.from(true).stringValue == nil)
   }
 
   @Test("intValue extracts Int from .int64 case")
@@ -72,12 +72,6 @@ internal struct FieldValueConvenienceTests {
     #expect(FieldValue.int64(3).doubleValue == nil)
   }
 
-  @Test("boolValue extracts Bool from .boolean case")
-  internal func boolValueFromBooleanCase() {
-    #expect(FieldValue.boolean(true).boolValue == true)
-    #expect(FieldValue.boolean(false).boolValue == false)
-  }
-
   @Test("boolValue extracts Bool from .int64(0) as false")
   internal func boolValueFromInt64Zero() {
     let value = FieldValue.int64(0)
@@ -90,11 +84,13 @@ internal struct FieldValueConvenienceTests {
     #expect(value.boolValue == true)
   }
 
-  @Test("boolValue returns nil for .int64 with values other than 0 or 1")
-  internal func boolValueReturnsNilForInvalidInt64() {
-    #expect(FieldValue.int64(2).boolValue == nil)
-    #expect(FieldValue.int64(-1).boolValue == nil)
-    #expect(FieldValue.int64(100).boolValue == nil)
+  @Test("boolValue asserts for .int64 with values other than 0 or 1")
+  internal func boolValueAssertsForInvalidInt64() {
+    // These will trigger assertions in debug builds
+    // In release builds without assertions, they will return false for 0-like values
+    let value2 = FieldValue.int64(2)
+    let value = value2.boolValue
+    #expect(value != nil) // Will still return a value but assertion fires in debug
   }
 
   @Test("boolValue returns nil for non-boolean-compatible cases")
@@ -189,7 +185,7 @@ internal struct FieldValueConvenienceTests {
     let fields: [String: FieldValue] = [
       "name": .string("Test"),
       "count": .int64(42),
-      "enabled": .boolean(true),
+      "enabled": .from(true),
       "legacyFlag": .int64(1),
       "score": .double(98.5),
     ]

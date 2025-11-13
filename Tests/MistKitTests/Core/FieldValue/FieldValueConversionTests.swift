@@ -64,22 +64,22 @@ internal struct FieldValueConversionTests {
       Issue.record("FieldValue is not available on this operating system.")
       return
     }
-    let trueValue = FieldValue.boolean(true)
+    let trueValue = FieldValue.from(true)
     let trueComponents = trueValue.toComponentsFieldValue()
     #expect(trueComponents.type == .int64)
-    if case .booleanValue(let value) = trueComponents.value {
-      #expect(value == true)
+    if case .int64Value(let value) = trueComponents.value {
+      #expect(value == 1)
     } else {
-      Issue.record("Expected booleanValue true")
+      Issue.record("Expected int64Value 1 for true")
     }
 
-    let falseValue = FieldValue.boolean(false)
+    let falseValue = FieldValue.from(false)
     let falseComponents = falseValue.toComponentsFieldValue()
     #expect(falseComponents.type == .int64)
-    if case .booleanValue(let value) = falseComponents.value {
-      #expect(value == false)
+    if case .int64Value(let value) = falseComponents.value {
+      #expect(value == 0)
     } else {
-      Issue.record("Expected booleanValue false")
+      Issue.record("Expected int64Value 0 for false")
     }
   }
 
@@ -338,7 +338,7 @@ internal struct FieldValueConversionTests {
       .string("text"),
       .int64(42),
       .double(3.14),
-      .boolean(true),
+      .from(true),
     ]
     let fieldValue = FieldValue.list(list)
     let components = fieldValue.toComponentsFieldValue()

@@ -214,7 +214,7 @@ struct CloudKitServiceQueryTests {
       (.string("test"), "string"),
       (.int64(42), "int64"),
       (.double(3.14), "double"),
-      (.boolean(true), "boolean"),
+      (.from(true), "boolean"),
       (.date(Date()), "date"),
     ]
 
