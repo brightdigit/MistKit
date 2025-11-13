@@ -5,51 +5,39 @@ import MistKit
 /// CloudKit service extensions for Celestra operations
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
-    /// Retry policy for CloudKit operations
-    private static let retryPolicy = RetryPolicy.default
     // MARK: - Feed Operations
 
-    /// Create a new Feed record with retry logic
+    /// Create a new Feed record
     func createFeed(_ feed: Feed) async throws -> RecordInfo {
         CelestraLogger.cloudkit.info("📝 Creating feed: \(feed.feedURL)")
 
-        return try await Self.retryPolicy.execute(
-            operation: {
-                let operation = RecordOperation.create(
-                    recordType: "Feed",
-                    recordName: UUID().uuidString,
-                    fields: feed.toFieldsDict()
-                )
-                let results = try await self.modifyRecords([operation])
-                guard let record = results.first else {
-                    throw CloudKitError.invalidResponse
-                }
-                return record
-            },
-            logger: CelestraLogger.cloudkit
+        let operation = RecordOperation.create(
+            recordType: "Feed",
+            recordName: UUID().uuidString,
+            fields: feed.toFieldsDict()
         )
+        let results = try await self.modifyRecords([operation])
+        guard let record = results.first else {
+            throw CloudKitError.invalidResponse
+        }
+        return record
     }
 
-    /// Update an existing Feed record with retry logic
+    /// Update an existing Feed record
     func updateFeed(recordName: String, feed: Feed) async throws -> RecordInfo {
         CelestraLogger.cloudkit.info("🔄 Updating feed: \(feed.feedURL)")
 
-        return try await Self.retryPolicy.execute(
-            operation: {
-                let operation = RecordOperation.update(
-                    recordType: "Feed",
-                    recordName: recordName,
-                    fields: feed.toFieldsDict(),
-                    recordChangeTag: feed.recordChangeTag
-                )
-                let results = try await self.modifyRecords([operation])
-                guard let record = results.first else {
-                    throw CloudKitError.invalidResponse
-                }
-                return record
-            },
-            logger: CelestraLogger.cloudkit
+        let operation = RecordOperation.update(
+            recordType: "Feed",
+            recordName: recordName,
+            fields: feed.toFieldsDict(),
+            recordChangeTag: feed.recordChangeTag
         )
+        let results = try await self.modifyRecords([operation])
+        guard let record = results.first else {
+            throw CloudKitError.invalidResponse
+        }
+        return record
     }
 
     /// Query feeds with optional filters (demonstrates QueryFilter and QuerySort)
@@ -186,13 +174,7 @@ extension CloudKitService {
                     )
                 }
 
-                // Use retry policy for each batch
-                let recordInfos = try await Self.retryPolicy.execute(
-                    operation: {
-                        try await self.modifyRecords(operations)
-                    },
-                    logger: CelestraLogger.cloudkit
-                )
+                let recordInfos = try await self.modifyRecords(operations)
 
                 result.appendSuccesses(recordInfos)
                 CelestraLogger.cloudkit.info("   ✅ Batch \(index + 1) complete: \(recordInfos.count) created")
@@ -254,13 +236,7 @@ extension CloudKitService {
                     )
                 }
 
-                // Use retry policy for each batch
-                let recordInfos = try await Self.retryPolicy.execute(
-                    operation: {
-                        try await self.modifyRecords(operations)
-                    },
-                    logger: CelestraLogger.cloudkit
-                )
+                let recordInfos = try await self.modifyRecords(operations)
 
                 result.appendSuccesses(recordInfos)
                 CelestraLogger.cloudkit.info("   ✅ Batch \(index + 1) complete: \(recordInfos.count) updated")
