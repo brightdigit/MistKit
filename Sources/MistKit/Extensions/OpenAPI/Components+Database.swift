@@ -1,5 +1,5 @@
 //
-//  QuerySort.swift
+//  Components+Database.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,43 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
-/// Public wrapper for CloudKit query sort descriptors
+/// Extension to convert MistKit Database to OpenAPI Components.Parameters.database
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-public struct QuerySort {
-  // MARK: - Lifecycle
-
-  private init(_ sort: Components.Schemas.Sort) {
-    self.sort = sort
+extension Components.Parameters.database {
+  /// Initialize from MistKit Database
+  internal init(from database: Database) {
+    switch database {
+    case .public:
+      self = ._public
+    case .private:
+      self = ._private
+    case .shared:
+      self = .shared
+    }
   }
-
-  // MARK: - Public
-
-  /// Creates an ascending sort descriptor
-  /// - Parameter field: The field name to sort by
-  /// - Returns: A configured QuerySort
-  public static func ascending(_ field: String) -> QuerySort {
-    QuerySort(SortDescriptor.ascending(field))
-  }
-
-  /// Creates a descending sort descriptor
-  /// - Parameter field: The field name to sort by
-  /// - Returns: A configured QuerySort
-  public static func descending(_ field: String) -> QuerySort {
-    QuerySort(SortDescriptor.descending(field))
-  }
-
-  /// Creates a sort descriptor with explicit direction
-  /// - Parameters:
-  ///   - field: The field name to sort by
-  ///   - ascending: Whether to sort in ascending order
-  /// - Returns: A configured QuerySort
-  public static func sort(_ field: String, ascending: Bool = true) -> QuerySort {
-    QuerySort(SortDescriptor.sort(field, ascending: ascending))
-  }
-
-  // MARK: - Internal
-
-  internal let sort: Components.Schemas.Sort
 }

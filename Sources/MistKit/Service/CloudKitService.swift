@@ -69,8 +69,8 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: environment.toComponentsEnvironment(),
-      database: database.toComponentsDatabase()
+      environment: .init(from: environment),
+      database: .init(from: database)
     )
   }
 
@@ -83,8 +83,8 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: environment.toComponentsEnvironment(),
-      database: database.toComponentsDatabase()
+      environment: .init(from: environment),
+      database: .init(from: database)
     )
   }
 
@@ -97,8 +97,8 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: environment.toComponentsEnvironment(),
-      database: database.toComponentsDatabase()
+      environment: .init(from: environment),
+      database: .init(from: database)
     )
   }
 
@@ -111,8 +111,8 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: environment.toComponentsEnvironment(),
-      database: database.toComponentsDatabase()
+      environment: .init(from: environment),
+      database: .init(from: database)
     )
   }
 
@@ -125,8 +125,8 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: environment.toComponentsEnvironment(),
-      database: database.toComponentsDatabase()
+      environment: .init(from: environment),
+      database: .init(from: database)
     )
   }
 }

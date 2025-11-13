@@ -12,7 +12,7 @@ internal struct QuerySortTests {
       return
     }
     let sort = QuerySort.ascending("createdAt")
-    let components = sort.toComponentsSort()
+    let components = Components.Schemas.Sort(from: sort)
     #expect(components.fieldName == "createdAt")
     #expect(components.ascending == true)
   }
@@ -24,7 +24,7 @@ internal struct QuerySortTests {
       return
     }
     let sort = QuerySort.descending("updatedAt")
-    let components = sort.toComponentsSort()
+    let components = Components.Schemas.Sort(from: sort)
     #expect(components.fieldName == "updatedAt")
     #expect(components.ascending == false)
   }
@@ -36,7 +36,7 @@ internal struct QuerySortTests {
       return
     }
     let sort = QuerySort.sort("name", ascending: true)
-    let components = sort.toComponentsSort()
+    let components = Components.Schemas.Sort(from: sort)
     #expect(components.fieldName == "name")
     #expect(components.ascending == true)
   }
@@ -48,7 +48,7 @@ internal struct QuerySortTests {
       return
     }
     let sort = QuerySort.sort("score", ascending: false)
-    let components = sort.toComponentsSort()
+    let components = Components.Schemas.Sort(from: sort)
     #expect(components.fieldName == "score")
     #expect(components.ascending == false)
   }
@@ -60,7 +60,7 @@ internal struct QuerySortTests {
       return
     }
     let sort = QuerySort.sort("title")
-    let components = sort.toComponentsSort()
+    let components = Components.Schemas.Sort(from: sort)
     #expect(components.fieldName == "title")
     #expect(components.ascending == true)
   }
@@ -72,7 +72,7 @@ internal struct QuerySortTests {
       return
     }
     let sort = QuerySort.ascending("user_id")
-    let components = sort.toComponentsSort()
+    let components = Components.Schemas.Sort(from: sort)
     #expect(components.fieldName == "user_id")
   }
 
@@ -83,7 +83,7 @@ internal struct QuerySortTests {
       return
     }
     let sort = QuerySort.descending("field123")
-    let components = sort.toComponentsSort()
+    let components = Components.Schemas.Sort(from: sort)
     #expect(components.fieldName == "field123")
   }
 
@@ -94,7 +94,7 @@ internal struct QuerySortTests {
       return
     }
     let sort = QuerySort.ascending("createdAtTimestamp")
-    let components = sort.toComponentsSort()
+    let components = Components.Schemas.Sort(from: sort)
     #expect(components.fieldName == "createdAtTimestamp")
   }
 }

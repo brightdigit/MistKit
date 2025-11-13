@@ -191,14 +191,14 @@ struct CloudKitServiceQueryTests {
     }
     // Test equality filter
     let equalFilter = QueryFilter.equals("title", .string("Test"))
-    let componentsFilter = equalFilter.toComponentsFilter()
+    let componentsFilter = Components.Schemas.Filter(from: equalFilter)
 
     #expect(componentsFilter.fieldName == "title")
     #expect(componentsFilter.comparator == .EQUALS)
 
     // Test comparison filter
     let greaterThanFilter = QueryFilter.greaterThan("count", .int64(10))
-    let componentsGT = greaterThanFilter.toComponentsFilter()
+    let componentsGT = Components.Schemas.Filter(from: greaterThanFilter)
 
     #expect(componentsGT.fieldName == "count")
     #expect(componentsGT.comparator == .GREATER_THAN)
@@ -220,7 +220,7 @@ struct CloudKitServiceQueryTests {
 
     for (fieldValue, typeName) in testCases {
       let filter = QueryFilter.equals("field", fieldValue)
-      let components = filter.toComponentsFilter()
+      let components = Components.Schemas.Filter(from: filter)
 
       #expect(components.fieldName == "field")
       #expect(components.comparator == .EQUALS, "Failed for \(typeName)")
@@ -237,14 +237,14 @@ struct CloudKitServiceQueryTests {
     }
     // Test ascending sort
     let ascendingSort = QuerySort.ascending("createdAt")
-    let componentsAsc = ascendingSort.toComponentsSort()
+    let componentsAsc = Components.Schemas.Sort(from: ascendingSort)
 
     #expect(componentsAsc.fieldName == "createdAt")
     #expect(componentsAsc.ascending == true)
 
     // Test descending sort
     let descendingSort = QuerySort.descending("modifiedAt")
-    let componentsDesc = descendingSort.toComponentsSort()
+    let componentsDesc = Components.Schemas.Sort(from: descendingSort)
 
     #expect(componentsDesc.fieldName == "modifiedAt")
     #expect(componentsDesc.ascending == false)
@@ -266,7 +266,7 @@ struct CloudKitServiceQueryTests {
 
     for fieldName in fieldNames {
       let sort = QuerySort.ascending(fieldName)
-      let components = sort.toComponentsSort()
+      let components = Components.Schemas.Sort(from: sort)
 
       #expect(components.fieldName == fieldName, "Failed for field name: \(fieldName)")
     }

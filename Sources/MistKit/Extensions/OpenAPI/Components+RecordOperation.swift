@@ -1,5 +1,5 @@
 //
-//  RecordOperation+OpenAPI.swift
+//  Components+RecordOperation.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,10 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
-/// Internal conversion between public RecordOperation and OpenAPI types
-extension RecordOperation {
+/// Extension to convert MistKit RecordOperation to OpenAPI Components.Schemas.RecordOperation
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+extension Components.Schemas.RecordOperation {
   /// Mapping from RecordOperation.OperationType to OpenAPI operationTypePayload
   private static let operationTypeMapping:
     [RecordOperation.OperationType: Components.Schemas.RecordOperation.operationTypePayload] = [
@@ -43,25 +44,26 @@ extension RecordOperation {
       .forceDelete: .forceDelete,
     ]
 
-  /// Convert public RecordOperation to internal OpenAPI RecordOperation
-  internal func toComponentsRecordOperation() -> Components.Schemas.RecordOperation {
+  /// Initialize from MistKit RecordOperation
+  internal init(from recordOperation: RecordOperation) {
     // Convert operation type using dictionary lookup
-    guard let apiOperationType = Self.operationTypeMapping[operationType] else {
-      fatalError("Unknown operation type: \(operationType)")
+    guard let apiOperationType = Self.operationTypeMapping[recordOperation.operationType] else {
+      fatalError("Unknown operation type: \(recordOperation.operationType)")
     }
 
     // Convert fields to OpenAPI FieldValue format
-    let apiFields = fields.mapValues { fieldValue -> Components.Schemas.FieldValue in
-      Components.Schemas.FieldValue(fieldValue)
+    let apiFields = recordOperation.fields.mapValues {
+      fieldValue -> Components.Schemas.FieldValue in
+      Components.Schemas.FieldValue(from: fieldValue)
     }
 
     // Build the OpenAPI record operation
-    return Components.Schemas.RecordOperation(
+    self.init(
       operationType: apiOperationType,
       record: .init(
-        recordName: recordName,
-        recordType: recordType,
-        recordChangeTag: recordChangeTag,
+        recordName: recordOperation.recordName,
+        recordType: recordOperation.recordType,
+        recordChangeTag: recordOperation.recordChangeTag,
         fields: .init(additionalProperties: apiFields)
       )
     )

@@ -85,12 +85,16 @@ internal struct FieldValueConvenienceTests {
   }
 
   @Test("boolValue asserts for .int64 with values other than 0 or 1")
-  internal func boolValueAssertsForInvalidInt64() {
-    // These will trigger assertions in debug builds
-    // In release builds without assertions, they will return false for 0-like values
-    let value2 = FieldValue.int64(2)
-    let value = value2.boolValue
-    #expect(value != nil) // Will still return a value but assertion fires in debug
+  internal func boolValueAssertsForInvalidInt64() async {
+    await confirmation("Assertion handler called", expectedCount: 1) { assertionCalled in
+      let value2 = FieldValue.int64(2)
+      let value = value2.boolValue { condition, message in
+        assertionCalled()
+        #expect(condition == false)
+        #expect(message == "Boolean int64 value must be 0 or 1, got 2")
+      }
+      #expect(value == true) // Value is still returned (2 != 0)
+    }
   }
 
   @Test("boolValue returns nil for non-boolean-compatible cases")

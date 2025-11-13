@@ -225,8 +225,8 @@ extension CloudKitService {
       )
     }
 
-    let componentsFilters = filters?.map { $0.toComponentsFilter() }
-    let componentsSorts = sortBy?.map { $0.toComponentsSort() }
+    let componentsFilters = filters?.map { Components.Schemas.Filter(from: $0) }
+    let componentsSorts = sortBy?.map { Components.Schemas.Sort(from: $0) }
 
     do {
       let response = try await client.queryRecords(
