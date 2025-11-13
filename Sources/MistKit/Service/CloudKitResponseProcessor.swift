@@ -71,6 +71,12 @@ internal struct CloudKitResponseProcessor {
   internal func processLookupRecordsResponse(_ response: Operations.lookupRecords.Output)
     async throws(CloudKitError) -> Components.Schemas.LookupResponse
   {
+    // Check for errors first
+    if let error = CloudKitError(response) {
+      throw error
+    }
+
+    // Must be .ok case - extract data
     switch response {
     case .ok(let okResponse):
       switch okResponse.body {
@@ -78,8 +84,8 @@ internal struct CloudKitResponseProcessor {
         return lookupData
       }
     default:
-      // For non-ok responses, throw a generic error
-      // The response type doesn't expose detailed error info for all cases
+      // Should never reach here since all errors are handled above
+      assertionFailure("Unexpected response case after error handling")
       throw CloudKitError.invalidResponse
     }
   }
@@ -92,6 +98,12 @@ internal struct CloudKitResponseProcessor {
     async throws(CloudKitError)
     -> Components.Schemas.ZonesListResponse
   {
+    // Check for errors first
+    if let error = CloudKitError(response) {
+      throw error
+    }
+
+    // Must be .ok case - extract data
     switch response {
     case .ok(let okResponse):
       switch okResponse.body {
@@ -99,8 +111,8 @@ internal struct CloudKitResponseProcessor {
         return zonesData
       }
     default:
-      // For non-ok responses, throw a generic error
-      // The response type doesn't expose detailed error info for all cases
+      // Should never reach here since all errors are handled above
+      assertionFailure("Unexpected response case after error handling")
       throw CloudKitError.invalidResponse
     }
   }
@@ -112,6 +124,18 @@ internal struct CloudKitResponseProcessor {
   internal func processQueryRecordsResponse(_ response: Operations.queryRecords.Output)
     async throws(CloudKitError) -> Components.Schemas.QueryResponse
   {
+    // Check for errors first
+    if let error = CloudKitError(response) {
+      // Log error with full details when redaction is disabled
+      MistKitLogger.logError(
+        "CloudKit queryRecords failed with response: \(response)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw error
+    }
+
+    // Must be .ok case - extract data
     switch response {
     case .ok(let okResponse):
       switch okResponse.body {
@@ -119,20 +143,8 @@ internal struct CloudKitResponseProcessor {
         return recordsData
       }
     default:
-      // Log non-ok responses with full details when redaction is disabled
-      MistKitLogger.logError(
-        "CloudKit queryRecords failed with response: \(response)",
-        logger: MistKitLogger.api,
-        shouldRedact: false
-      )
-
-      // Try to extract detailed error information
-      if let error = CloudKitError(response) {
-        throw error
-      }
-
-      // For non-ok responses, throw a generic error
-      // The response type doesn't expose detailed error info for all cases
+      // Should never reach here since all errors are handled above
+      assertionFailure("Unexpected response case after error handling")
       throw CloudKitError.invalidResponse
     }
   }
