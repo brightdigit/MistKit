@@ -126,8 +126,4 @@ public struct QueryFilter {
   // MARK: - Internal
 
   internal let filter: Components.Schemas.Filter
-
-  internal func toComponentsFilter() -> Components.Schemas.Filter {
-    filter
-  }
 }

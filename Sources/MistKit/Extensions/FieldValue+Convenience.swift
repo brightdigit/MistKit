@@ -61,6 +61,25 @@ extension FieldValue {
     return nil
   }
 
+  /// Internal method to extract Bool value with custom assertion handler
+  ///
+  /// - Parameter assertionHandler: Custom assertion handler for testing, defaults to system assert
+  /// - Returns: The boolean value, or nil if this is not an .int64 case
+  internal func boolValue(
+    assertionHandler: (_ condition: Bool, _ message: String) -> Void = { condition, message in
+      assert(condition, message)
+    }
+  ) -> Bool? {
+    if case .int64(let value) = self {
+      assertionHandler(
+        value == 0 || value == 1,
+        "Boolean int64 value must be 0 or 1, got \(value)"
+      )
+      return value != 0
+    }
+    return nil
+  }
+
   /// Extract a Bool value from .int64 cases
   ///
   /// CloudKit represents booleans as INT64 where 0 is false and 1 is true.
@@ -68,11 +87,9 @@ extension FieldValue {
   ///
   /// - Returns: The boolean value, or nil if this is not an .int64 case
   public var boolValue: Bool? {
-    if case .int64(let value) = self {
-      assert(value == 0 || value == 1, "Boolean int64 value must be 0 or 1, got \(value)")
-      return value != 0
-    }
-    return nil
+    boolValue(assertionHandler: { condition, message in
+      assert(condition, message)
+    })
   }
 
   /// Extract a Date value if this is a .date case

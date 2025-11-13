@@ -1,5 +1,5 @@
 //
-//  Components.Schemas.FieldValue+FieldValue.swift
+//  Components+FieldValue.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -30,9 +30,10 @@
 internal import Foundation
 
 /// Extension to convert MistKit FieldValue to OpenAPI Components.Schemas.FieldValue
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension Components.Schemas.FieldValue {
   /// Initialize from MistKit FieldValue
-  internal init(_ fieldValue: FieldValue) {
+  internal init(from fieldValue: FieldValue) {
     switch fieldValue {
     case .string(let value):
       self.init(value: .stringValue(value), type: .string)

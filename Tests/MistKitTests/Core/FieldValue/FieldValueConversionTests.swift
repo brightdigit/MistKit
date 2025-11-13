@@ -14,7 +14,7 @@ internal struct FieldValueConversionTests {
       return
     }
     let fieldValue = FieldValue.string("test string")
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .string)
     if case .stringValue(let value) = components.value {
@@ -31,7 +31,7 @@ internal struct FieldValueConversionTests {
       return
     }
     let fieldValue = FieldValue.int64(42)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .int64)
     if case .int64Value(let value) = components.value {
@@ -48,7 +48,7 @@ internal struct FieldValueConversionTests {
       return
     }
     let fieldValue = FieldValue.double(3.14159)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .double)
     if case .doubleValue(let value) = components.value {
@@ -65,7 +65,7 @@ internal struct FieldValueConversionTests {
       return
     }
     let trueValue = FieldValue.from(true)
-    let trueComponents = trueValue.toComponentsFieldValue()
+    let trueComponents = Components.Schemas.FieldValue(from: trueValue)
     #expect(trueComponents.type == .int64)
     if case .int64Value(let value) = trueComponents.value {
       #expect(value == 1)
@@ -74,7 +74,8 @@ internal struct FieldValueConversionTests {
     }
 
     let falseValue = FieldValue.from(false)
-    let falseComponents = falseValue.toComponentsFieldValue()
+    let falseComponents = Components.Schemas.FieldValue(from: falseValue)
+
     #expect(falseComponents.type == .int64)
     if case .int64Value(let value) = falseComponents.value {
       #expect(value == 0)
@@ -90,7 +91,7 @@ internal struct FieldValueConversionTests {
       return
     }
     let fieldValue = FieldValue.bytes("base64encodedstring")
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .bytes)
     if case .bytesValue(let value) = components.value {
@@ -108,7 +109,7 @@ internal struct FieldValueConversionTests {
     }
     let date = Date(timeIntervalSince1970: 1_000_000)
     let fieldValue = FieldValue.date(date)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .timestamp)
     if case .dateValue(let value) = components.value {
@@ -137,7 +138,7 @@ internal struct FieldValueConversionTests {
       timestamp: Date(timeIntervalSince1970: 1_000_000)
     )
     let fieldValue = FieldValue.location(location)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .location)
     if case .locationValue(let value) = components.value {
@@ -162,7 +163,7 @@ internal struct FieldValueConversionTests {
     }
     let location = FieldValue.Location(latitude: 0.0, longitude: 0.0)
     let fieldValue = FieldValue.location(location)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .location)
     if case .locationValue(let value) = components.value {
@@ -187,7 +188,7 @@ internal struct FieldValueConversionTests {
     }
     let reference = FieldValue.Reference(recordName: "test-record-123")
     let fieldValue = FieldValue.reference(reference)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .reference)
     if case .referenceValue(let value) = components.value {
@@ -206,7 +207,7 @@ internal struct FieldValueConversionTests {
     }
     let reference = FieldValue.Reference(recordName: "test-record-456", action: .deleteSelf)
     let fieldValue = FieldValue.reference(reference)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .reference)
     if case .referenceValue(let value) = components.value {
@@ -226,7 +227,7 @@ internal struct FieldValueConversionTests {
     let reference = FieldValue.Reference(
       recordName: "test-record-789", action: FieldValue.Reference.Action.none)
     let fieldValue = FieldValue.reference(reference)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .reference)
     if case .referenceValue(let value) = components.value {
@@ -252,7 +253,7 @@ internal struct FieldValueConversionTests {
       downloadURL: "https://example.com/file.jpg"
     )
     let fieldValue = FieldValue.asset(asset)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .asset)
     if case .assetValue(let value) = components.value {
@@ -275,7 +276,7 @@ internal struct FieldValueConversionTests {
     }
     let asset = FieldValue.Asset()
     let fieldValue = FieldValue.asset(asset)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .asset)
     if case .assetValue(let value) = components.value {
@@ -300,7 +301,7 @@ internal struct FieldValueConversionTests {
     }
     let list: [FieldValue] = [.string("one"), .string("two"), .string("three")]
     let fieldValue = FieldValue.list(list)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .list)
     if case .listValue(let values) = components.value {
@@ -318,7 +319,7 @@ internal struct FieldValueConversionTests {
     }
     let list: [FieldValue] = [.int64(1), .int64(2), .int64(3)]
     let fieldValue = FieldValue.list(list)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .list)
     if case .listValue(let values) = components.value {
@@ -341,7 +342,7 @@ internal struct FieldValueConversionTests {
       .from(true),
     ]
     let fieldValue = FieldValue.list(list)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .list)
     if case .listValue(let values) = components.value {
@@ -359,7 +360,7 @@ internal struct FieldValueConversionTests {
     }
     let list: [FieldValue] = []
     let fieldValue = FieldValue.list(list)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .list)
     if case .listValue(let values) = components.value {
@@ -378,7 +379,7 @@ internal struct FieldValueConversionTests {
     let innerList: [FieldValue] = [.string("a"), .string("b")]
     let outerList: [FieldValue] = [.list(innerList), .string("c")]
     let fieldValue = FieldValue.list(outerList)
-    let components = fieldValue.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: fieldValue)
 
     #expect(components.type == .list)
     if case .listValue(let values) = components.value {
@@ -397,11 +398,11 @@ internal struct FieldValueConversionTests {
       return
     }
     let intZero = FieldValue.int64(0)
-    let intComponents = intZero.toComponentsFieldValue()
+    let intComponents = Components.Schemas.FieldValue(from: intZero)
     #expect(intComponents.type == .int64)
 
     let doubleZero = FieldValue.double(0.0)
-    let doubleComponents = doubleZero.toComponentsFieldValue()
+    let doubleComponents = Components.Schemas.FieldValue(from: doubleZero)
     #expect(doubleComponents.type == .double)
   }
 
@@ -412,11 +413,11 @@ internal struct FieldValueConversionTests {
       return
     }
     let negativeInt = FieldValue.int64(-100)
-    let intComponents = negativeInt.toComponentsFieldValue()
+    let intComponents = Components.Schemas.FieldValue(from: negativeInt)
     #expect(intComponents.type == .int64)
 
     let negativeDouble = FieldValue.double(-3.14)
-    let doubleComponents = negativeDouble.toComponentsFieldValue()
+    let doubleComponents = Components.Schemas.FieldValue(from: negativeDouble)
     #expect(doubleComponents.type == .double)
   }
 
@@ -427,11 +428,11 @@ internal struct FieldValueConversionTests {
       return
     }
     let largeInt = FieldValue.int64(Int.max)
-    let intComponents = largeInt.toComponentsFieldValue()
+    let intComponents = Components.Schemas.FieldValue(from: largeInt)
     #expect(intComponents.type == .int64)
 
     let largeDouble = FieldValue.double(Double.greatestFiniteMagnitude)
-    let doubleComponents = largeDouble.toComponentsFieldValue()
+    let doubleComponents = Components.Schemas.FieldValue(from: largeDouble)
     #expect(doubleComponents.type == .double)
   }
 
@@ -442,7 +443,7 @@ internal struct FieldValueConversionTests {
       return
     }
     let emptyString = FieldValue.string("")
-    let components = emptyString.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: emptyString)
     #expect(components.type == .string)
   }
 
@@ -453,7 +454,7 @@ internal struct FieldValueConversionTests {
       return
     }
     let specialString = FieldValue.string("Hello\nWorld\t🌍")
-    let components = specialString.toComponentsFieldValue()
+    let components = Components.Schemas.FieldValue(from: specialString)
     #expect(components.type == .string)
   }
 }

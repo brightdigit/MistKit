@@ -49,7 +49,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .EQUALS,
       fieldName: field,
-      fieldValue: value.toComponentsFieldValue()
+      fieldValue: .init(from: value)
     )
   }
 
@@ -63,7 +63,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .NOT_EQUALS,
       fieldName: field,
-      fieldValue: value.toComponentsFieldValue()
+      fieldValue: .init(from: value)
     )
   }
 
@@ -78,7 +78,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .LESS_THAN,
       fieldName: field,
-      fieldValue: value.toComponentsFieldValue()
+      fieldValue: .init(from: value)
     )
   }
 
@@ -94,7 +94,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .LESS_THAN_OR_EQUALS,
       fieldName: field,
-      fieldValue: value.toComponentsFieldValue()
+      fieldValue: .init(from: value)
     )
   }
 
@@ -110,7 +110,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .GREATER_THAN,
       fieldName: field,
-      fieldValue: value.toComponentsFieldValue()
+      fieldValue: .init(from: value)
     )
   }
 
@@ -126,7 +126,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .GREATER_THAN_OR_EQUALS,
       fieldName: field,
-      fieldValue: value.toComponentsFieldValue()
+      fieldValue: .init(from: value)
     )
   }
 
@@ -185,7 +185,7 @@ internal struct FilterBuilder {
       comparator: .IN,
       fieldName: field,
       fieldValue: .init(
-        value: .listValue(values.map { $0.toComponentsFieldValue().value }),
+        value: .listValue(values.map { Components.Schemas.FieldValue(from: $0).value }),
         type: .list
       )
     )
@@ -201,7 +201,7 @@ internal struct FilterBuilder {
       comparator: .NOT_IN,
       fieldName: field,
       fieldValue: .init(
-        value: .listValue(values.map { $0.toComponentsFieldValue().value }),
+        value: .listValue(values.map { Components.Schemas.FieldValue(from: $0).value }),
         type: .list
       )
     )
@@ -221,7 +221,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .LIST_CONTAINS,
       fieldName: field,
-      fieldValue: value.toComponentsFieldValue()
+      fieldValue: .init(from: value)
     )
   }
 
@@ -237,7 +237,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .NOT_LIST_CONTAINS,
       fieldName: field,
-      fieldValue: value.toComponentsFieldValue()
+      fieldValue: .init(from: value)
     )
   }
 
