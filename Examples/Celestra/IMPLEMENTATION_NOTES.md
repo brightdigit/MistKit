@@ -10,6 +10,7 @@ This document captures the design decisions, implementation patterns, and techni
 - [Data Model Architecture](#data-model-architecture)
 - [CloudKit Integration Patterns](#cloudkit-integration-patterns)
 - [Comparison with Bushel](#comparison-with-bushel)
+- [Web Etiquette Features](#web-etiquette-features)
 - [Future Improvements](#future-improvements)
 
 ## Project Overview
@@ -38,7 +39,7 @@ We followed Bushel's schema best practices while keeping Celestra focused on sim
 ### PublicFeed Schema
 
 ```text
-RECORD TYPE PublicFeed (
+RECORD TYPE Feed (
     "feedURL"                STRING QUERYABLE SORTABLE,
     "title"                  STRING SEARCHABLE,
     "description"            STRING,
@@ -47,6 +48,13 @@ RECORD TYPE PublicFeed (
     "usageCount"             INT64 QUERYABLE SORTABLE,
     "lastAttempted"          TIMESTAMP QUERYABLE SORTABLE,
     "isActive"               INT64 QUERYABLE,
+
+    // Web etiquette fields
+    "lastModified"           STRING,
+    "etag"                   STRING,
+    "failureCount"           INT64,
+    "lastFailureReason"      STRING,
+    "minUpdateInterval"      DOUBLE,
     ...
 )
 ```
@@ -60,6 +68,14 @@ RECORD TYPE PublicFeed (
 - `usageCount` (QUERYABLE, SORTABLE): Popularity ranking for filtered queries
 - `lastAttempted` (QUERYABLE, SORTABLE): Enable time-based filtering
 - `isActive` (QUERYABLE): Allow filtering active/inactive feeds
+
+**Web Etiquette Fields**:
+
+- `lastModified`: HTTP Last-Modified header for conditional requests
+- `etag`: HTTP ETag header for conditional requests
+- `failureCount`: Consecutive failure counter for circuit breaker pattern
+- `lastFailureReason`: Last error message for debugging
+- `minUpdateInterval`: Minimum seconds between updates (from RSS `<ttl>` or syndication metadata)
 
 ### PublicArticle Schema
 
@@ -518,18 +534,222 @@ func updateArticles(_ articles: [PublicArticle]) async throws -> BatchOperationR
 }
 ```
 
+## Web Etiquette Features
+
+Celestra implements comprehensive web etiquette best practices to be a respectful RSS feed client.
+
+### Rate Limiting
+
+**Implementation**: Configurable delays between feed fetches to avoid overwhelming feed servers.
+
+**Default Behavior**:
+- 2-second delay between different feeds
+- 5-second delay when fetching from the same domain
+- Respects feed's `minUpdateInterval` when available
+
+**Usage**:
+```bash
+# Use default 2-second delay
+celestra update
+
+# Custom delay (5 seconds)
+celestra update --delay 5.0
+```
+
+**Technical Details**:
+- Implemented via `RateLimiter` Actor for thread-safe delay tracking
+- Per-domain tracking prevents hammering same server
+- Async/await pattern ensures non-blocking operation
+
+### Robots.txt Checking
+
+**Implementation**: Fetches and parses robots.txt before accessing feed URLs.
+
+**Behavior**:
+- Checks robots.txt once per domain, cached for 24 hours
+- Matches User-Agent "Celestra" and wildcard "*" rules
+- Defaults to "allow" if robots.txt is unavailable (fail-open approach)
+- Can be bypassed for testing with `--skip-robots-check`
+
+**Usage**:
+```bash
+# Normal operation (checks robots.txt)
+celestra update
+
+# Skip robots.txt for local testing
+celestra update --skip-robots-check
+```
+
+**Technical Details**:
+- Implemented via `RobotsTxtService` Actor
+- Parses User-Agent sections, Disallow rules, and Crawl-delay directives
+- Network errors default to "allow" rather than blocking feeds
+
+### Conditional HTTP Requests
+
+**Implementation**: Uses If-Modified-Since and If-None-Match headers to save bandwidth.
+
+**Benefits**:
+- Reduces data transfer when feeds haven't changed
+- Returns 304 Not Modified for unchanged content
+- Stores `lastModified` and `etag` headers in Feed records
+
+**Technical Details**:
+```swift
+// Sends conditional headers
+GET /feed.xml HTTP/1.1
+If-Modified-Since: Wed, 13 Nov 2024 10:00:00 GMT
+If-None-Match: "abc123-etag"
+User-Agent: Celestra/1.0 (MistKit RSS Reader; +https://github.com/brightdigit/MistKit)
+
+// Server responds with 304 if unchanged
+HTTP/1.1 304 Not Modified
+```
+
+**Feed Model Support**:
+- `lastModified: String?` - Stores Last-Modified header
+- `etag: String?` - Stores ETag header
+- Automatically sent on subsequent requests
+
+### Failure Tracking
+
+**Implementation**: Tracks consecutive failures per feed for circuit breaker pattern.
+
+**Feed Model Fields**:
+- `failureCount: Int64` - Consecutive failure counter
+- `lastFailureReason: String?` - Last error message
+- Reset to 0 on successful fetch
+
+**Usage**:
+```bash
+# Skip feeds with more than 3 consecutive failures
+celestra update --max-failures 3
+```
+
+**Benefits**:
+- Identifies problematic feeds
+- Prevents wasting resources on persistently broken feeds
+- Provides debugging information via `lastFailureReason`
+
+**Future Enhancement**: Auto-disable feeds after threshold (not yet implemented)
+
+### Custom User-Agent
+
+**Implementation**: Identifies as a polite RSS client with contact information.
+
+**User-Agent String**:
+```
+Celestra/1.0 (MistKit RSS Reader; +https://github.com/brightdigit/MistKit)
+```
+
+**Benefits**:
+- Feed publishers can identify traffic source
+- Contact URL for questions or concerns
+- Follows best practices for web scraping etiquette
+
+### Feed Update Interval Tracking
+
+**Implementation**: Infrastructure to respect feed's requested update frequency.
+
+**Feed Model Field**:
+- `minUpdateInterval: TimeInterval?` - Minimum seconds between updates
+
+**Sources** (Priority Order):
+1. RSS `<ttl>` tag (minutes)
+2. Syndication module `<sy:updatePeriod>` + `<sy:updateFrequency>`
+3. HTTP `Cache-Control: max-age` headers
+4. Default: No minimum (respect global rate limit only)
+
+**Current Status**:
+- ✅ Field exists in Feed model
+- ✅ Stored and retrieved from CloudKit
+- ✅ Respected by RateLimiter when present
+- ✅ Used to skip feeds within update window
+- ⏳ RSS parsing not yet implemented (TODO in RSSFetcherService)
+
+**Example Usage**:
+```bash
+# Feed with minUpdateInterval will be skipped if updated recently
+celestra update
+
+# Output:
+# [1/5] 📰 Tech News Feed
+#    ⏭️  Skipped (update requested in 45 minutes)
+```
+
+### Command Examples
+
+```bash
+# Basic update with all web etiquette features
+celestra update
+
+# Custom rate limit and failure filtering
+celestra update --delay 3.0 --max-failures 5
+
+# Update only feeds last attempted before a specific date
+celestra update --last-attempted-before 2025-01-01T00:00:00Z
+
+# Combined filters
+celestra update \
+  --delay 5.0 \
+  --max-failures 3 \
+  --last-attempted-before 2025-01-01T00:00:00Z \
+  --min-popularity 10
+```
+
 ## Future Improvements
 
 ### Potential Enhancements
 
-**1. Rate Limiting** (Recommended):
-Add delays between feed fetches to avoid overwhelming feed servers:
+**1. RSS TTL Parsing** (Recommended):
+Parse RSS `<ttl>` and `<sy:updatePeriod>` tags to populate `minUpdateInterval`:
 ```swift
-// After each feed update
-try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+// In RSSFetcherService.parseUpdateInterval()
+if let ttl = feed.ttl {
+    return TimeInterval(ttl * 60)  // Convert minutes to seconds
+}
+
+if let period = feed.updatePeriod, let frequency = feed.updateFrequency {
+    let periodSeconds = periodToSeconds(period)
+    return periodSeconds / Double(frequency)
+}
 ```
 
-**2. CKReference Relationships** (Optional):
+**Status**: Infrastructure exists, SyndiKit integration needed
+
+**2. Article TTL from Feed Interval**:
+Use feed's `minUpdateInterval` to calculate article expiration:
+```swift
+// Instead of hardcoded 30 days
+let ttl = feed.minUpdateInterval ?? (30 * 24 * 60 * 60)
+let article = Article(
+    // ...
+    expiresAt: Date().addingTimeInterval(ttl * 5)  // 5x multiplier
+)
+```
+
+**Status**: `expiresAt` field exists, calculation logic needs update
+
+**3. Cleanup Command**:
+Add command to delete expired articles:
+```bash
+celestra cleanup-expired
+```
+
+**Status**: Schema supports queries, command not implemented
+
+**4. Auto-Disable Failed Feeds**:
+Automatically set `isActive = false` after reaching failure threshold:
+```swift
+if feed.failureCount >= 10 {
+    updatedFeed.isActive = false
+    print("   🔴 Feed auto-disabled after 10 consecutive failures")
+}
+```
+
+**Status**: Tracking exists, auto-disable logic not implemented
+
+**5. CKReference Relationships** (Optional):
 Switch from string-based to proper CloudKit references:
 ```swift
 // Instead of:
@@ -587,19 +807,26 @@ actor CircuitBreaker {
 - ✅ Schema improvements (description, isActive, contentHash fields)
 - ✅ Comprehensive documentation
 
-**Phase 3** (Completed - Task 7):
+**Phase 3** (Completed):
 - ✅ Error handling with comprehensive CelestraError types
-- ✅ Retry logic with exponential backoff and jitter
 - ✅ Structured logging using os.Logger
 - ✅ Batch operations with 200-record chunking
 - ✅ BatchOperationResult for success/failure tracking
 - ✅ Incremental update system (create + update)
 - ✅ Content change detection via contentHash
 - ✅ Relationship design documentation
+- ✅ Web etiquette: Rate limiting with configurable delays
+- ✅ Web etiquette: Robots.txt checking and parsing
+- ✅ Web etiquette: Conditional HTTP requests (If-Modified-Since/ETag)
+- ✅ Web etiquette: Failure tracking for circuit breaker pattern
+- ✅ Web etiquette: Custom User-Agent header
+- ✅ Feed update interval infrastructure (`minUpdateInterval`)
 
 **Phase 4** (Future):
-- ⏳ Rate limiting between feed fetches
-- ⏳ Circuit breaker pattern for persistent failures
+- ⏳ RSS TTL parsing (`<ttl>`, `<sy:updatePeriod>`)
+- ⏳ Article TTL calculated from feed interval
+- ⏳ Cleanup command for expired articles
+- ⏳ Auto-disable feeds after failure threshold
 - ⏳ Test suite with mock CloudKit service
 - ⏳ Performance monitoring and metrics
 
