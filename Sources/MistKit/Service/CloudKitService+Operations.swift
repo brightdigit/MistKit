@@ -127,7 +127,7 @@ extension CloudKitService {
   ///   - recordType: The type of records to query (must not be empty)
   ///   - filters: Optional array of filters to apply to the query
   ///   - sortBy: Optional array of sort descriptors
-  ///   - limit: Maximum number of records to return (1-200, default: 10)
+  ///   - limit: Maximum number of records to return (1-200, defaults to `defaultQueryLimit`)
   ///   - desiredKeys: Optional array of field names to fetch
   /// - Returns: Array of matching records
   /// - Throws: CloudKitError if validation fails or the request fails
@@ -204,9 +204,12 @@ extension CloudKitService {
     recordType: String,
     filters: [QueryFilter]? = nil,
     sortBy: [QuerySort]? = nil,
-    limit: Int = 10,
+    limit: Int? = nil,
     desiredKeys: [String]? = nil
   ) async throws(CloudKitError) -> [RecordInfo] {
+    // Use provided limit or fall back to default configuration
+    let effectiveLimit = limit ?? defaultQueryLimit
+
     // Validate input parameters
     guard !recordType.isEmpty else {
       throw CloudKitError.httpErrorWithRawResponse(
@@ -215,10 +218,10 @@ extension CloudKitService {
       )
     }
 
-    guard limit > 0 && limit <= 200 else {
+    guard effectiveLimit > 0 && effectiveLimit <= 200 else {
       throw CloudKitError.httpErrorWithRawResponse(
         statusCode: 400,
-        rawResponse: "limit must be between 1 and 200, got \(limit)"
+        rawResponse: "limit must be between 1 and 200, got \(effectiveLimit)"
       )
     }
 
@@ -232,7 +235,7 @@ extension CloudKitService {
           body: .json(
             .init(
               zoneID: .init(zoneName: "_defaultZone"),
-              resultsLimit: limit,
+              resultsLimit: effectiveLimit,
               query: .init(
                 recordType: recordType,
                 filterBy: componentsFilters,

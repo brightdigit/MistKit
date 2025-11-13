@@ -246,54 +246,20 @@ public enum FieldValue: Codable, Equatable, Sendable {
     case .bytes(let val):
       return .init(value: .bytesValue(val), type: .bytes)
     case .date(let val):
-      return .init(value: .dateValue(val.timeIntervalSince1970 * Self.millisecondsPerSecond), type: .timestamp)
+      return .init(value: .dateValue(convertDateToTimestamp(val)), type: .timestamp)
     case .location(let val):
       return .init(
-        value: .locationValue(
-          .init(
-            latitude: val.latitude,
-            longitude: val.longitude,
-            horizontalAccuracy: val.horizontalAccuracy,
-            verticalAccuracy: val.verticalAccuracy,
-            altitude: val.altitude,
-            speed: val.speed,
-            course: val.course,
-            timestamp: val.timestamp.map { $0.timeIntervalSince1970 * Self.millisecondsPerSecond }
-          )
-        ),
+        value: .locationValue(convertLocationToComponents(val)),
         type: .location
       )
     case .reference(let val):
-      let action: Components.Schemas.ReferenceValue.actionPayload?
-      switch val.action {
-      case .some(.deleteSelf):
-        action = .DELETE_SELF
-      case .some(.none):
-        action = .NONE
-      case nil:
-        action = nil
-      }
       return .init(
-        value: .referenceValue(
-          .init(
-            recordName: val.recordName,
-            action: action
-          )
-        ),
+        value: .referenceValue(convertReferenceToComponents(val)),
         type: .reference
       )
     case .asset(let val):
       return .init(
-        value: .assetValue(
-          .init(
-            fileChecksum: val.fileChecksum,
-            size: val.size,
-            referenceChecksum: val.referenceChecksum,
-            wrappingKey: val.wrappingKey,
-            receipt: val.receipt,
-            downloadURL: val.downloadURL
-          )
-        ),
+        value: .assetValue(convertAssetToComponents(val)),
         type: .asset
       )
     case .list(let values):
@@ -321,50 +287,66 @@ public enum FieldValue: Codable, Equatable, Sendable {
     case .bytes(let val):
       return .bytesValue(val)
     case .date(let val):
-      return .dateValue(val.timeIntervalSince1970 * Self.millisecondsPerSecond)
+      return .dateValue(convertDateToTimestamp(val))
     case .location(let val):
-      return .locationValue(
-        .init(
-          latitude: val.latitude,
-          longitude: val.longitude,
-          horizontalAccuracy: val.horizontalAccuracy,
-          verticalAccuracy: val.verticalAccuracy,
-          altitude: val.altitude,
-          speed: val.speed,
-          course: val.course,
-          timestamp: val.timestamp.map { $0.timeIntervalSince1970 * Self.millisecondsPerSecond }
-        )
-      )
+      return .locationValue(convertLocationToComponents(val))
     case .reference(let val):
-      let action: Components.Schemas.ReferenceValue.actionPayload?
-      switch val.action {
-      case .some(.deleteSelf):
-        action = .DELETE_SELF
-      case .some(.none):
-        action = .NONE
-      case nil:
-        action = nil
-      }
-      return .referenceValue(
-        .init(
-          recordName: val.recordName,
-          action: action
-        )
-      )
+      return .referenceValue(convertReferenceToComponents(val))
     case .asset(let val):
-      return .assetValue(
-        .init(
-          fileChecksum: val.fileChecksum,
-          size: val.size,
-          referenceChecksum: val.referenceChecksum,
-          wrappingKey: val.wrappingKey,
-          receipt: val.receipt,
-          downloadURL: val.downloadURL
-        )
-      )
+      return .assetValue(convertAssetToComponents(val))
     case .list(let values):
       return .listValue(values.map { convertFieldValueToPayload($0) })
     }
+  }
+
+  // MARK: - Private Conversion Helpers
+
+  /// Convert Date to CloudKit timestamp (milliseconds since epoch)
+  private func convertDateToTimestamp(_ date: Date) -> Double {
+    date.timeIntervalSince1970 * Self.millisecondsPerSecond
+  }
+
+  /// Convert Location to Components.Schemas.LocationValue
+  private func convertLocationToComponents(_ location: Location) -> Components.Schemas.LocationValue {
+    .init(
+      latitude: location.latitude,
+      longitude: location.longitude,
+      horizontalAccuracy: location.horizontalAccuracy,
+      verticalAccuracy: location.verticalAccuracy,
+      altitude: location.altitude,
+      speed: location.speed,
+      course: location.course,
+      timestamp: location.timestamp.map { convertDateToTimestamp($0) }
+    )
+  }
+
+  /// Convert Reference to Components.Schemas.ReferenceValue
+  private func convertReferenceToComponents(_ reference: Reference) -> Components.Schemas.ReferenceValue {
+    let action: Components.Schemas.ReferenceValue.actionPayload?
+    switch reference.action {
+    case .some(.deleteSelf):
+      action = .DELETE_SELF
+    case .some(.none):
+      action = .NONE
+    case nil:
+      action = nil
+    }
+    return .init(
+      recordName: reference.recordName,
+      action: action
+    )
+  }
+
+  /// Convert Asset to Components.Schemas.AssetValue
+  private func convertAssetToComponents(_ asset: Asset) -> Components.Schemas.AssetValue {
+    .init(
+      fileChecksum: asset.fileChecksum,
+      size: asset.size,
+      referenceChecksum: asset.referenceChecksum,
+      wrappingKey: asset.wrappingKey,
+      receipt: asset.receipt,
+      downloadURL: asset.downloadURL
+    )
   }
 }
 
