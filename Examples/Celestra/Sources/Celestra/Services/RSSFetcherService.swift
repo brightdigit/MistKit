@@ -5,8 +5,6 @@ import SyndiKit
 /// Service for fetching and parsing RSS feeds using SyndiKit
 @available(macOS 13.0, *)
 struct RSSFetcherService {
-    /// Retry policy for feed fetch operations
-    let retryPolicy: RetryPolicy
     struct FeedData {
         let title: String
         let description: String?
@@ -23,34 +21,9 @@ struct RSSFetcherService {
         let guid: String
     }
 
-    /// Initialize with custom retry policy
-    /// - Parameter retryPolicy: Retry policy (defaults to .default)
-    init(retryPolicy: RetryPolicy = .default) {
-        self.retryPolicy = retryPolicy
-    }
-
-    /// Fetch and parse RSS feed from URL with retry logic
+    /// Fetch and parse RSS feed from URL
     func fetchFeed(from url: URL) async throws -> FeedData {
         CelestraLogger.rss.info("📡 Fetching RSS feed from \(url.absoluteString)")
-
-        return try await retryPolicy.execute(
-            operation: {
-                try await self.fetchFeedInternal(from: url)
-            },
-            shouldRetry: { error in
-                // Retry on network errors, not on parsing errors
-                if let celestraError = error as? CelestraError {
-                    return celestraError.isRetriable
-                }
-                // URLSession errors are retriable
-                return true
-            },
-            logger: CelestraLogger.rss
-        )
-    }
-
-    /// Internal method to fetch and parse RSS feed (without retry)
-    private func fetchFeedInternal(from url: URL) async throws -> FeedData {
         do {
             // 1. Fetch RSS XML from URL
             let (data, _) = try await URLSession.shared.data(from: url)
