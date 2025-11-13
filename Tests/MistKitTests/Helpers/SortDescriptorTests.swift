@@ -1,0 +1,57 @@
+import Foundation
+import Testing
+
+@testable import MistKit
+
+@Suite("SortDescriptor Tests")
+internal struct SortDescriptorTests {
+  @Test("SortDescriptor creates ascending sort")
+  func ascendingSort() {
+    let sort = SortDescriptor.ascending("name")
+    #expect(sort.fieldName == "name")
+    #expect(sort.ascending == true)
+  }
+
+  @Test("SortDescriptor creates descending sort")
+  func descendingSort() {
+    let sort = SortDescriptor.descending("age")
+    #expect(sort.fieldName == "age")
+    #expect(sort.ascending == false)
+  }
+
+  @Test("SortDescriptor creates sort with ascending true")
+  func sortAscendingTrue() {
+    let sort = SortDescriptor.sort("score", ascending: true)
+    #expect(sort.fieldName == "score")
+    #expect(sort.ascending == true)
+  }
+
+  @Test("SortDescriptor creates sort with ascending false")
+  func sortAscendingFalse() {
+    let sort = SortDescriptor.sort("rating", ascending: false)
+    #expect(sort.fieldName == "rating")
+    #expect(sort.ascending == false)
+  }
+
+  @Test("SortDescriptor defaults to ascending")
+  func sortDefaultAscending() {
+    let sort = SortDescriptor.sort("title")
+    #expect(sort.fieldName == "title")
+    #expect(sort.ascending == true)
+  }
+
+  @Test("SortDescriptor handles various field name formats")
+  func variousFieldNameFormats() {
+    let sort1 = SortDescriptor.ascending("simple")
+    #expect(sort1.fieldName == "simple")
+
+    let sort2 = SortDescriptor.ascending("camelCase")
+    #expect(sort2.fieldName == "camelCase")
+
+    let sort3 = SortDescriptor.ascending("snake_case")
+    #expect(sort3.fieldName == "snake_case")
+
+    let sort4 = SortDescriptor.ascending("with123Numbers")
+    #expect(sort4.fieldName == "with123Numbers")
+  }
+}
