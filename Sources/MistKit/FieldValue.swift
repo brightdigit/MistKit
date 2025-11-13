@@ -307,7 +307,8 @@ public enum FieldValue: Codable, Equatable, Sendable {
   }
 
   /// Convert Location to Components.Schemas.LocationValue
-  private func convertLocationToComponents(_ location: Location) -> Components.Schemas.LocationValue {
+  private func convertLocationToComponents(_ location: Location) -> Components.Schemas.LocationValue
+  {
     .init(
       latitude: location.latitude,
       longitude: location.longitude,
@@ -321,7 +322,9 @@ public enum FieldValue: Codable, Equatable, Sendable {
   }
 
   /// Convert Reference to Components.Schemas.ReferenceValue
-  private func convertReferenceToComponents(_ reference: Reference) -> Components.Schemas.ReferenceValue {
+  private func convertReferenceToComponents(_ reference: Reference)
+    -> Components.Schemas.ReferenceValue
+  {
     let action: Components.Schemas.ReferenceValue.actionPayload?
     switch reference.action {
     case .some(.deleteSelf):

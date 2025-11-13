@@ -33,12 +33,16 @@ import Testing
 @testable import MistKit
 
 /// Integration tests for CloudKitService queryRecords() functionality
-@Suite("CloudKitService Query Operations")
+@Suite("CloudKitService Query Operations", .enabled(if: Platform.isCryptoAvailable))
 struct CloudKitServiceQueryTests {
   // MARK: - Configuration Tests
 
   @Test("queryRecords() uses default limit from configuration")
   func queryRecordsUsesDefaultLimit() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     // This test verifies that the default limit configuration is respected
     // In a real integration test, we would mock the HTTP client and verify the request
     let service = try CloudKitService(
@@ -53,6 +57,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("queryRecords() with custom default limit")
   func queryRecordsWithCustomDefaultLimit() async throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     var service = try CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: "test-token"
@@ -68,6 +76,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("queryRecords() validates empty recordType")
   func queryRecordsValidatesEmptyRecordType() async {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     let service = try! CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: "test-token"
@@ -91,6 +103,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("queryRecords() validates limit too small", arguments: [-1, 0])
   func queryRecordsValidatesLimitTooSmall(limit: Int) async {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     let service = try! CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: "test-token"
@@ -111,8 +127,12 @@ struct CloudKitServiceQueryTests {
     }
   }
 
-  @Test("queryRecords() validates limit too large", arguments: [201, 300, 1000])
+  @Test("queryRecords() validates limit too large", arguments: [201, 300, 1_000])
   func queryRecordsValidatesLimitTooLarge(limit: Int) async {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     let service = try! CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: "test-token"
@@ -135,6 +155,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("queryRecords() accepts valid limit range", arguments: [1, 50, 100, 200])
   func queryRecordsAcceptsValidLimitRange(limit: Int) async {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     let service = try! CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: "test-token"
@@ -161,6 +185,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("QueryFilter converts to Components.Schemas format correctly")
   func queryFilterConvertsToComponentsFormat() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     // Test equality filter
     let equalFilter = QueryFilter.equals("title", .string("Test"))
     let componentsFilter = equalFilter.toComponentsFilter()
@@ -178,6 +206,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("QueryFilter handles all field value types")
   func queryFilterHandlesAllFieldValueTypes() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     let testCases: [(FieldValue, String)] = [
       (.string("test"), "string"),
       (.int64(42), "int64"),
@@ -199,6 +231,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("QuerySort converts to Components.Schemas format correctly")
   func querySortConvertsToComponentsFormat() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     // Test ascending sort
     let ascendingSort = QuerySort.ascending("createdAt")
     let componentsAsc = ascendingSort.toComponentsSort()
@@ -216,6 +252,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("QuerySort handles various field name formats")
   func querySortHandlesVariousFieldNameFormats() {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     let fieldNames = [
       "simpleField",
       "camelCaseField",
@@ -236,6 +276,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("queryRecords() handles nil limit parameter")
   func queryRecordsHandlesNilLimitParameter() async {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     let service = try! CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: "test-token"
@@ -257,6 +301,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("queryRecords() handles empty filters array")
   func queryRecordsHandlesEmptyFiltersArray() async {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     let service = try! CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: "test-token"
@@ -280,6 +328,10 @@ struct CloudKitServiceQueryTests {
 
   @Test("queryRecords() handles empty sorts array")
   func queryRecordsHandlesEmptySortsArray() async {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("CloudKitService is not available on this operating system.")
+      return
+    }
     let service = try! CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: "test-token"

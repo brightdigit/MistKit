@@ -223,7 +223,8 @@ internal struct FieldValueConversionTests {
       Issue.record("FieldValue is not available on this operating system.")
       return
     }
-    let reference = FieldValue.Reference(recordName: "test-record-789", action: FieldValue.Reference.Action.none)
+    let reference = FieldValue.Reference(
+      recordName: "test-record-789", action: FieldValue.Reference.Action.none)
     let fieldValue = FieldValue.reference(reference)
     let components = fieldValue.toComponentsFieldValue()
 
