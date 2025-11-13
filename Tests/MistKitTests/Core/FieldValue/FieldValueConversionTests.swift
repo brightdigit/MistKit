@@ -204,7 +204,7 @@ internal struct FieldValueConversionTests {
       Issue.record("FieldValue is not available on this operating system.")
       return
     }
-    let reference = FieldValue.Reference(recordName: "test-record-456", action: "DELETE_SELF")
+    let reference = FieldValue.Reference(recordName: "test-record-456", action: .deleteSelf)
     let fieldValue = FieldValue.reference(reference)
     let components = fieldValue.toComponentsFieldValue()
 
@@ -217,20 +217,20 @@ internal struct FieldValueConversionTests {
     }
   }
 
-  @Test("Convert reference FieldValue with non-DELETE_SELF action to Components.FieldValue")
-  func convertReferenceWithOtherAction() {
+  @Test("Convert reference FieldValue with NONE action to Components.FieldValue")
+  func convertReferenceWithNoneAction() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
     }
-    let reference = FieldValue.Reference(recordName: "test-record-789", action: "SOME_OTHER_ACTION")
+    let reference = FieldValue.Reference(recordName: "test-record-789", action: FieldValue.Reference.Action.none)
     let fieldValue = FieldValue.reference(reference)
     let components = fieldValue.toComponentsFieldValue()
 
     #expect(components.type == .reference)
     if case .referenceValue(let value) = components.value {
       #expect(value.recordName == "test-record-789")
-      #expect(value.action == nil)
+      #expect(value.action == .NONE)
     } else {
       Issue.record("Expected referenceValue")
     }
