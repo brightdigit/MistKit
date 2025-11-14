@@ -53,8 +53,8 @@ public struct RecordOperation: Sendable {
   public let operationType: OperationType
   /// The record type (e.g., "RestoreImage", "XcodeVersion")
   public let recordType: String
-  /// The unique record name
-  public let recordName: String
+  /// The unique record name (optional for creates - CloudKit will generate one if not provided)
+  public let recordName: String?
   /// The record fields as FieldValue types
   public let fields: [String: FieldValue]
   /// Optional record change tag for optimistic locking
@@ -64,7 +64,7 @@ public struct RecordOperation: Sendable {
   public init(
     operationType: OperationType,
     recordType: String,
-    recordName: String,
+    recordName: String?,
     fields: [String: FieldValue] = [:],
     recordChangeTag: String? = nil
   ) {
@@ -78,7 +78,7 @@ public struct RecordOperation: Sendable {
   /// Convenience initializer for creating a new record
   public static func create(
     recordType: String,
-    recordName: String,
+    recordName: String? = nil,
     fields: [String: FieldValue]
   ) -> RecordOperation {
     RecordOperation(
