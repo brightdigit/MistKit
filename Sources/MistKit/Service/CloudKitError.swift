@@ -37,6 +37,8 @@ public enum CloudKitError: LocalizedError, Sendable {
   case httpErrorWithRawResponse(statusCode: Int, rawResponse: String)
   case invalidResponse
   case underlyingError(any Error)
+  case decodingError(DecodingError)
+  case networkError(URLError)
 
   /// A localized message describing what error occurred
   public var errorDescription: String? {
@@ -58,6 +60,45 @@ public enum CloudKitError: LocalizedError, Sendable {
       return "Invalid response from CloudKit"
     case .underlyingError(let error):
       return "CloudKit operation failed with underlying error: \(String(reflecting: error))"
+    case .decodingError(let error):
+      var message = "Failed to decode CloudKit response"
+      switch error {
+      case .keyNotFound(let key, let context):
+        message += "\nMissing key: \(key.stringValue)"
+        message += "\nCoding path: \(context.codingPath.map(\.stringValue).joined(separator: "."))"
+        if let underlyingError = context.underlyingError {
+          message += "\nUnderlying error: \(underlyingError.localizedDescription)"
+        }
+      case .typeMismatch(let type, let context):
+        message += "\nType mismatch: expected \(type)"
+        message += "\nCoding path: \(context.codingPath.map(\.stringValue).joined(separator: "."))"
+        if let underlyingError = context.underlyingError {
+          message += "\nUnderlying error: \(underlyingError.localizedDescription)"
+        }
+      case .valueNotFound(let type, let context):
+        message += "\nValue not found: expected \(type)"
+        message += "\nCoding path: \(context.codingPath.map(\.stringValue).joined(separator: "."))"
+        if let underlyingError = context.underlyingError {
+          message += "\nUnderlying error: \(underlyingError.localizedDescription)"
+        }
+      case .dataCorrupted(let context):
+        message += "\nData corrupted"
+        message += "\nCoding path: \(context.codingPath.map(\.stringValue).joined(separator: "."))"
+        if let underlyingError = context.underlyingError {
+          message += "\nUnderlying error: \(underlyingError.localizedDescription)"
+        }
+      @unknown default:
+        message += "\nUnknown decoding error: \(error.localizedDescription)"
+      }
+      return message
+    case .networkError(let error):
+      var message = "Network error occurred"
+      message += "\nError code: \(error.code.rawValue)"
+      if let url = error.failureURLString {
+        message += "\nFailed URL: \(url)"
+      }
+      message += "\nDescription: \(error.localizedDescription)"
+      return message
     }
   }
 }

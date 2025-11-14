@@ -1,6 +1,7 @@
 import Foundation
 import IPSWDownloads
 import OpenAPIURLSession
+import OSVer
 
 /// Fetcher for macOS restore images using the IPSWDownloads package
 struct IPSWFetcher: DataSourceFetcher, Sendable {

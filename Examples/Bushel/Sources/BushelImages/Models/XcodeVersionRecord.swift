@@ -49,7 +49,7 @@ extension XcodeVersionRecord: CloudKitRecord {
             "version": .string(version),
             "buildNumber": .string(buildNumber),
             "releaseDate": .date(releaseDate),
-            "isPrerelease": .boolean(isPrerelease)
+            "isPrerelease": FieldValue(booleanValue: isPrerelease)
         ]
 
         // Optional fields

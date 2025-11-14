@@ -1,5 +1,5 @@
 import Foundation
-import OSLog
+import Logging
 
 /// Centralized logging infrastructure for Bushel demo
 ///
@@ -13,13 +13,13 @@ enum BushelLogger {
     // MARK: - Subsystems
 
     /// Logger for CloudKit operations (sync, queries, batch uploads)
-    static let cloudKit = Logger(subsystem: "com.brightdigit.Bushel", category: "cloudkit")
+    static let cloudKit = Logger(label: "com.brightdigit.Bushel.cloudkit")
 
     /// Logger for external data source fetching (ipsw.me, TheAppleWiki, etc.)
-    static let dataSource = Logger(subsystem: "com.brightdigit.Bushel", category: "datasource")
+    static let dataSource = Logger(label: "com.brightdigit.Bushel.datasource")
 
     /// Logger for sync engine orchestration
-    static let sync = Logger(subsystem: "com.brightdigit.Bushel", category: "sync")
+    static let sync = Logger(label: "com.brightdigit.Bushel.sync")
 
     // MARK: - Verbose Mode State
 

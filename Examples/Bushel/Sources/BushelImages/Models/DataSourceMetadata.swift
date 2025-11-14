@@ -1,8 +1,8 @@
 //  DataSourceMetadata.swift
 //  Created by Claude Code
 
-import Foundation
-import MistKit
+public import Foundation
+public import MistKit
 
 /// Metadata about when a data source was last fetched and updated
 public struct DataSourceMetadata: Codable, Sendable {

@@ -6,12 +6,12 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Network Error")
+@Suite("Network Error", .enabled(if: Platform.isCryptoAvailable))
 internal enum NetworkErrorTests {}
 
 extension NetworkErrorTests {
   /// Network error recovery and retry mechanism tests
-  @Suite("Recovery Tests")
+  @Suite("Recovery Tests", .enabled(if: Platform.isCryptoAvailable))
   internal struct RecoveryTests {
     // MARK: - Error Recovery Tests
 

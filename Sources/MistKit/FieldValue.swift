@@ -31,6 +31,8 @@ public import Foundation
 
 /// Represents a CloudKit field value as defined in the CloudKit Web Services API
 public enum FieldValue: Codable, Equatable, Sendable {
+  /// Conversion factor from seconds to milliseconds for CloudKit timestamps
+  private static let millisecondsPerSecond: Double = 1_000
   case string(String)
   case int64(Int)
   case double(Double)
@@ -84,13 +86,19 @@ public enum FieldValue: Codable, Equatable, Sendable {
 
   /// Reference dictionary as defined in CloudKit Web Services
   public struct Reference: Codable, Equatable, Sendable {
+    /// Reference action types supported by CloudKit
+    public enum Action: String, Codable, Sendable {
+      case deleteSelf = "DELETE_SELF"
+      case none = "NONE"
+    }
+
     /// The record name being referenced
     public let recordName: String
-    /// The action to take ("DELETE_SELF" or nil)
-    public let action: String?
+    /// The action to take (DELETE_SELF, NONE, or nil)
+    public let action: Action?
 
     /// Initialize a reference value
-    public init(recordName: String, action: String? = nil) {
+    public init(recordName: String, action: Action? = nil) {
       self.recordName = recordName
       self.action = action
     }
@@ -184,7 +192,7 @@ public enum FieldValue: Codable, Equatable, Sendable {
     }
     // Try to decode as date (milliseconds since epoch)
     if let value = try? container.decode(Double.self) {
-      return .date(Date(timeIntervalSince1970: value / 1_000))
+      return .date(Date(timeIntervalSince1970: value / Self.millisecondsPerSecond))
     }
     return nil
   }
@@ -205,7 +213,7 @@ public enum FieldValue: Codable, Equatable, Sendable {
     case .double(let val):
       try container.encode(val)
     case .date(let val):
-      try container.encode(val.timeIntervalSince1970 * 1_000)
+      try container.encode(val.timeIntervalSince1970 * Self.millisecondsPerSecond)
     case .location(let val):
       try container.encode(val)
     case .reference(let val):
@@ -221,9 +229,16 @@ public enum FieldValue: Codable, Equatable, Sendable {
 // MARK: - Helper Methods
 
 extension FieldValue {
-  /// Helper method to create a boolean field value using INT64 representation
-  /// CloudKit doesn't have a native boolean type, so we use INT64 with 0/1 values
-  public static func boolean(_ value: Bool) -> FieldValue {
-    .int64(value ? 1 : 0)
+  /// Create an int64 FieldValue from a Bool
+  ///
+  /// CloudKit represents booleans as INT64 (0/1) on the wire.
+  /// Creates a FieldValue from a Swift Bool value.
+  ///
+  /// This initializer converts Swift Bool to the appropriate int64 representation
+  /// used by CloudKit (1 for true, 0 for false).
+  ///
+  /// - Parameter booleanValue: The boolean value to convert
+  public init(booleanValue: Bool) {
+    self = .int64(booleanValue ? 1 : 0)
   }
 }

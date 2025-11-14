@@ -120,6 +120,73 @@ This directory contains Apple's official documentation for CloudKit Web Services
 
 ---
 
+### cktool.md / cktool-full.md
+**Source**: https://developer.apple.com/icloud/ck-tool/
+
+**Primary Use**: CloudKit command-line tool for schema and data management
+
+**Files**:
+- `cktool.md` - Curated summary with command examples
+- `cktool-full.md` - Complete Apple documentation
+
+**Key Topics**:
+- **Authentication**: Management tokens, user tokens, Keychain storage
+- **Schema Management**:
+  - Reset development schema to production
+  - Export schema to `.ckdb` files
+  - Import schema from files to development
+- **Data Commands**:
+  - Query records with filters
+  - Create records with JSON field definitions
+- **Automation**: CI/CD integration, test data seeding
+- **Token Management**: Saving and managing CloudKit tokens
+
+**When to Consult**:
+- Setting up development environments with CloudKit schemas
+- Exporting/importing schemas for version control
+- Automating schema deployment in CI/CD pipelines
+- Seeding test data for MistKit integration tests
+- Resetting development databases
+- Understanding CloudKit Management API workflows
+
+---
+
+### cktooljs.md / cktooljs-full.md
+**Source**: https://developer.apple.com/documentation/cktooljs/
+**Version**: CKTool JS 1.2.15+
+
+**Primary Use**: JavaScript library for CloudKit management operations
+
+**Files**:
+- `cktooljs.md` - Curated summary with key information
+- `cktooljs-full.md` - Complete Apple documentation (41 pages)
+
+**Key Topics**:
+- **Core Modules**:
+  - `@apple/cktool.database` - CloudKit types and operations
+  - `@apple/cktool.target.nodejs` - Node.js configuration
+  - `@apple/cktool.target.browser` - Browser configuration
+- **Capabilities**:
+  - Deploy schemas to Sandbox databases
+  - Seed databases with test data
+  - Restore Sandbox to production settings
+  - Create automated integration test scripts
+- **API Components**:
+  - PromisesApi and CancellablePromise
+  - Configuration for server communication
+  - Container and ContainersResponse structures
+  - Error handling framework
+
+**When to Consult**:
+- Building JavaScript-based CloudKit automation tools
+- Creating CI/CD pipelines with Node.js
+- Understanding CloudKit Management API from JS perspective
+- Automating schema deployment programmatically
+- Building developer tooling for CloudKit workflows
+- Comparing management API patterns across platforms
+
+---
+
 ## Quick Reference: When to Use Each Doc
 
 ### Implementing Core API Functionality
@@ -133,6 +200,10 @@ This directory contains Apple's official documentation for CloudKit Web Services
 
 ### Writing Tests
 → **testing-enablinganddisabling.md**: Modern Swift Testing patterns
+
+### Schema Management & Automation
+→ **cktool.md**: Native command-line tool for schema and data operations
+→ **cktooljs.md**: JavaScript library for programmatic management
 
 ---
 
@@ -162,24 +233,58 @@ When designing MistKit's API surface:
 ### Authentication Flow
 1. **webservices.md** → Request signing, token formats
 2. **cloudkitjs.md** → Authentication state management
+3. **cktool.md** → Management token setup and storage
 
 ### Record Operations
 1. **webservices.md** → `/records/modify` endpoint structure
 2. **cloudkitjs.md** → `Database.saveRecords()` operation flow
+3. **cktool.md** → Creating test records via CLI
 
 ### Query Operations
 1. **webservices.md** → `/records/query` request format
 2. **cloudkitjs.md** → Query filters, sort descriptors, pagination
+3. **cktool.md** → Query filters via command-line
 
 ### Error Handling
 1. **webservices.md** → HTTP status codes, error response format
 2. **cloudkitjs.md** → `CKError` codes and retry logic
+3. **cktooljs.md** → Error handling in management operations
+
+### Development Workflows
+1. **cktool.md** → Export/import schemas for version control
+2. **cktooljs.md** → Programmatic schema deployment and automation
+3. **webservices.md** → Understanding underlying API operations
 
 ---
 
+## Documentation Ecosystem Map
+
+```
+CloudKit Development & Operations
+├── Runtime APIs (Application Level)
+│   ├── webservices.md ────────── REST API reference
+│   ├── cloudkitjs.md ─────────── JS SDK for web apps
+│   └── MistKit ───────────────── Swift implementation
+│
+├── Management APIs (Development Level)
+│   ├── cktool.md ─────────────── Native CLI tool (Xcode)
+│   └── cktooljs.md ───────────── JS library for automation
+│
+├── Code Generation
+│   └── swift-openapi-generator.md ─ Generate Swift from OpenAPI
+│
+└── Testing
+    └── testing-enablinganddisabling.md ─ Swift Testing framework
+```
+
 ## Notes
 
-- These docs are from Apple's official documentation, downloaded via llm.codes
-- Content is filtered for relevant information (URLs filtered, deduplicated)
-- Last updated: October 20, 2025
-- Corresponds to CloudKit Web Services (archived), CloudKit JS 1.0+, Swift Testing (Swift 6.0+)
+- These docs are from Apple's official documentation and community sources
+- Most content downloaded via llm.codes and filtered for relevance
+- Last updated: November 4, 2025
+- Corresponds to:
+  - CloudKit Web Services (archived)
+  - CloudKit JS 1.0+
+  - Swift Testing (Swift 6.0+)
+  - cktool (Xcode 13+)
+  - CKTool JS (latest)

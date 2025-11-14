@@ -106,6 +106,35 @@ MistKit/
 3. **Error Handling**: Use typed errors conforming to LocalizedError
 4. **Sendable Compliance**: Ensure all types are Sendable for concurrency safety
 
+### Logging
+MistKit uses [swift-log](https://github.com/apple/swift-log) for cross-platform logging support, enabling usage on macOS, Linux, Windows, and other platforms.
+
+**Key Logging Components:**
+- `MistKitLogger` - Centralized logging infrastructure with subsystems for `api`, `auth`, and `network`
+- Environment-based privacy control via `MISTKIT_DISABLE_LOG_REDACTION` environment variable
+- `SecureLogging` utilities for token masking and safe message formatting
+- Structured logging in `LoggingMiddleware` for HTTP request/response debugging (DEBUG builds only)
+
+**Logging Subsystems:**
+```swift
+MistKitLogger.api      // CloudKit API operations
+MistKitLogger.auth     // Authentication and token management
+MistKitLogger.network  // Network operations
+```
+
+**Helper Methods:**
+```swift
+MistKitLogger.logError(_:logger:shouldRedact:)    // Error level
+MistKitLogger.logWarning(_:logger:shouldRedact:)  // Warning level
+MistKitLogger.logInfo(_:logger:shouldRedact:)     // Info level
+MistKitLogger.logDebug(_:logger:shouldRedact:)    // Debug level
+```
+
+**Privacy Controls:**
+- By default, logs use `SecureLogging.safeLogMessage()` to redact sensitive information
+- Set `MISTKIT_DISABLE_LOG_REDACTION=1` to disable redaction for debugging
+- Tokens, keys, and secrets are automatically masked in logged messages
+
 ### CloudKit Web Services Integration
 - Base URL: `https://api.apple-cloudkit.com`
 - Authentication: API Token + Web Auth Token or Server-to-Server Key Authentication
@@ -176,6 +205,26 @@ Apple's official CloudKit documentation is available in `.claude/docs/` for offl
 - **Consult when**: Configuring openapi-generator-config.yaml, implementing middleware, troubleshooting generated code
 
 See `.claude/docs/README.md` for detailed topic breakdowns and integration guidance.
+
+### CloudKit Schema Language
+
+**cloudkit-schema-reference.md** - CloudKit Schema Language Quick Reference
+- **Primary use**: Working with text-based .ckdb schema files
+- **Contains**: Complete grammar, field options, data types, permissions, common patterns, MistKit-specific notes
+- **Consult when**: Reading/modifying schemas, understanding indexing, designing record types
+
+**sosumi-cloudkit-schema-source.md** - Apple's Official Schema Language Documentation
+- **Primary use**: Authoritative reference for CloudKit Schema Language
+- **Contains**: Full grammar specification, identifier rules, system fields, permission model
+- **Consult when**: Understanding schema fundamentals, resolving syntax questions
+
+### Comprehensive Schema Guides
+
+For detailed schema workflows and integration:
+
+- **AI Schema Workflow** (`Examples/Celestra/AI_SCHEMA_WORKFLOW.md`) - Comprehensive guide for understanding, designing, modifying, and validating CloudKit schemas with text-based tools
+- **Quick Reference** (`Examples/SCHEMA_QUICK_REFERENCE.md`) - One-page cheat sheet with syntax, patterns, cktool commands, and troubleshooting
+- **Task Master Integration** (`.taskmaster/docs/schema-design-workflow.md`) - Integrate schema design into Task Master PRDs and task decomposition
 
 ## Task Master AI Instructions
 **Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**

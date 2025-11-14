@@ -3,6 +3,7 @@
 
 import ArgumentParser
 import Foundation
+internal import MistKit
 
 struct StatusCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
@@ -25,7 +26,7 @@ struct StatusCommand: AsyncParsableCommand {
   @Option(name: .long, help: "Server-to-Server Key ID (or set CLOUDKIT_KEY_ID)")
   var keyID: String = ""
 
-  @Option(name: .long, help: "Path to private key .pem file (or set CLOUDKIT_KEY_FILE)")
+  @Option(name: .long, help: "Path to private key .pem file (or set CLOUDKIT_PRIVATE_KEY_PATH)")
   var keyFile: String = ""
 
   // MARK: - Display Options
@@ -53,7 +54,7 @@ struct StatusCommand: AsyncParsableCommand {
       keyID
 
     let resolvedKeyFile = keyFile.isEmpty ?
-      ProcessInfo.processInfo.environment["CLOUDKIT_KEY_FILE"] ?? "" :
+      ProcessInfo.processInfo.environment["CLOUDKIT_PRIVATE_KEY_PATH"] ?? "" :
       keyFile
 
     guard !resolvedKeyID.isEmpty, !resolvedKeyFile.isEmpty else {
@@ -64,7 +65,7 @@ struct StatusCommand: AsyncParsableCommand {
       print("")
       print("   Or set environment variables:")
       print("     export CLOUDKIT_KEY_ID=\"YOUR_KEY_ID\"")
-      print("     export CLOUDKIT_KEY_FILE=\"./private-key.pem\"")
+      print("     export CLOUDKIT_PRIVATE_KEY_PATH=\"./private-key.pem\"")
       print("")
       throw ExitCode.failure
     }

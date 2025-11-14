@@ -1,6 +1,7 @@
 DEFINE SCHEMA
 
 RECORD TYPE RestoreImage (
+    "___recordID"            REFERENCE QUERYABLE,
     "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
     "buildNumber"            STRING QUERYABLE SORTABLE,
     "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
@@ -19,6 +20,7 @@ RECORD TYPE RestoreImage (
 );
 
 RECORD TYPE XcodeVersion (
+    "___recordID"            REFERENCE QUERYABLE,
     "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
     "buildNumber"            STRING QUERYABLE SORTABLE,
     "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
@@ -36,6 +38,7 @@ RECORD TYPE XcodeVersion (
 );
 
 RECORD TYPE SwiftVersion (
+    "___recordID"            REFERENCE QUERYABLE,
     "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
     "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
     "isPrerelease"           INT64 QUERYABLE,
@@ -48,6 +51,7 @@ RECORD TYPE SwiftVersion (
 );
 
 RECORD TYPE DataSourceMetadata (
+    "___recordID"            REFERENCE QUERYABLE,
     "sourceName"             STRING QUERYABLE SORTABLE,
     "recordTypeName"         STRING QUERYABLE,
     "lastFetchedAt"          TIMESTAMP QUERYABLE SORTABLE,

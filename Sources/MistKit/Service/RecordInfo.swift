@@ -43,11 +43,13 @@ internal import Foundation
 /// let successfulRecords = results.filter { !$0.isError }
 /// let failedRecords = results.filter { $0.isError }
 /// ```
-public struct RecordInfo: Encodable {
+public struct RecordInfo: Encodable, Sendable {
   /// The record name
   public let recordName: String
   /// The record type
   public let recordType: String
+  /// The record change tag for optimistic locking
+  public let recordChangeTag: String?
   /// The record fields
   public let fields: [String: FieldValue]
 
@@ -63,6 +65,7 @@ public struct RecordInfo: Encodable {
   internal init(from record: Components.Schemas.Record) {
     self.recordName = record.recordName ?? "Unknown"
     self.recordType = record.recordType ?? "Unknown"
+    self.recordChangeTag = record.recordChangeTag
 
     // Convert fields to FieldValue representation
     var convertedFields: [String: FieldValue] = [:]
@@ -76,5 +79,27 @@ public struct RecordInfo: Encodable {
     }
 
     self.fields = convertedFields
+  }
+
+  /// Public initializer for creating RecordInfo instances
+  ///
+  /// This initializer is primarily intended for testing and cases where you need to
+  /// construct RecordInfo manually rather than receiving it from CloudKit responses.
+  ///
+  /// - Parameters:
+  ///   - recordName: The unique record name
+  ///   - recordType: The CloudKit record type
+  ///   - recordChangeTag: Optional change tag for optimistic locking
+  ///   - fields: Dictionary of field names to their values
+  public init(
+    recordName: String,
+    recordType: String,
+    recordChangeTag: String? = nil,
+    fields: [String: FieldValue]
+  ) {
+    self.recordName = recordName
+    self.recordType = recordType
+    self.recordChangeTag = recordChangeTag
+    self.fields = fields
   }
 }

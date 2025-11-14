@@ -42,7 +42,7 @@ extension CloudKitService {
   ) async throws(CloudKitError) -> [RecordInfo] {
     do {
       // Convert public RecordOperation types to internal OpenAPI types
-      let apiOperations = operations.map { $0.toComponentsRecordOperation() }
+      let apiOperations = operations.map { Components.Schemas.RecordOperation(from: $0) }
 
       // Call the underlying OpenAPI client
       let response = try await client.modifyRecords(
@@ -50,8 +50,8 @@ extension CloudKitService {
           path: .init(
             version: "1",
             container: containerIdentifier,
-            environment: environment.toComponentsEnvironment(),
-            database: database.toComponentsDatabase()
+            environment: .init(from: environment),
+            database: .init(from: database)
           ),
           body: .json(
             .init(
@@ -79,13 +79,13 @@ extension CloudKitService {
   /// Create a single record in CloudKit
   /// - Parameters:
   ///   - recordType: The type of record to create (e.g., "RestoreImage")
-  ///   - recordName: The unique record name
+  ///   - recordName: Optional unique record name (if nil, CloudKit will generate one)
   ///   - fields: Dictionary of field names to FieldValue
   /// - Returns: RecordInfo for the created record
   /// - Throws: CloudKitError if the operation fails
   public func createRecord(
     recordType: String,
-    recordName: String,
+    recordName: String? = nil,
     fields: [String: FieldValue]
   ) async throws(CloudKitError) -> RecordInfo {
     let operation = RecordOperation.create(

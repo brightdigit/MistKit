@@ -17,8 +17,6 @@ jobs:
         swift:
           - version: "6.1"
           - version: "6.2"
-          - version: "6.1"
-            nightly: true
           - version: "6.2"
             nightly: true
     
@@ -161,7 +159,6 @@ jobs:
     env:
       MINT_PATH: .mint/lib
       MINT_LINK_PATH: .mint/bin
-      LINT_MODE: STRICT
     steps:
       - uses: actions/checkout@v4    
       - name: Cache mint

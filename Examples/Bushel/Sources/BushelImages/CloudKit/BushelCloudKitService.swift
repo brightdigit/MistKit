@@ -68,7 +68,7 @@ struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCollection
 
     /// Query all records of a given type
     func queryRecords(recordType: String) async throws -> [RecordInfo] {
-        try await service.queryRecords(recordType: recordType, limit: 1000)
+        try await service.queryRecords(recordType: recordType, limit: 200)
     }
 
     /// Execute operations in batches (CloudKit limits to 200 operations per request)

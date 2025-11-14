@@ -45,19 +45,19 @@ extension CustomFieldValue.CustomFieldValuePayload {
     case .date(let value):
       self = .dateValue(value.timeIntervalSince1970 * 1_000)
     case .location(let location):
-      self = Self.fromLocation(location)
+      self.init(location: location)
     case .reference(let reference):
-      self = Self.fromReference(reference)
+      self.init(reference: reference)
     case .asset(let asset):
-      self = Self.fromAsset(asset)
+      self.init(asset: asset)
     case .list(let nestedList):
-      self = .listValue(nestedList.map { Self.fromBasicFieldValue($0) })
+      self = .listValue(nestedList.map { Self(basicFieldValue: $0) })
     }
   }
 
-  /// Convert Location to payload value
-  private static func fromLocation(_ location: FieldValue.Location) -> Self {
-    .locationValue(
+  /// Initialize from Location to payload value
+  private init(location: FieldValue.Location) {
+    self = .locationValue(
       Components.Schemas.LocationValue(
         latitude: location.latitude,
         longitude: location.longitude,
@@ -71,19 +71,28 @@ extension CustomFieldValue.CustomFieldValuePayload {
     )
   }
 
-  /// Convert Reference to payload value
-  private static func fromReference(_ reference: FieldValue.Reference) -> Self {
-    .referenceValue(
+  /// Initialize from Reference to payload value
+  private init(reference: FieldValue.Reference) {
+    let action: Components.Schemas.ReferenceValue.actionPayload?
+    switch reference.action {
+    case .some(.deleteSelf):
+      action = .DELETE_SELF
+    case .some(.none):
+      action = .NONE
+    case nil:
+      action = nil
+    }
+    self = .referenceValue(
       Components.Schemas.ReferenceValue(
         recordName: reference.recordName,
-        action: reference.action.flatMap { .init(rawValue: $0) }
+        action: action
       )
     )
   }
 
-  /// Convert Asset to payload value
-  private static func fromAsset(_ asset: FieldValue.Asset) -> Self {
-    .assetValue(
+  /// Initialize from Asset to payload value
+  private init(asset: FieldValue.Asset) {
+    self = .assetValue(
       Components.Schemas.AssetValue(
         fileChecksum: asset.fileChecksum,
         size: asset.size,
@@ -95,21 +104,21 @@ extension CustomFieldValue.CustomFieldValuePayload {
     )
   }
 
-  /// Convert basic FieldValue types to payload (for nested lists)
-  private static func fromBasicFieldValue(_ item: FieldValue) -> Self {
-    switch item {
+  /// Initialize from basic FieldValue types to payload (for nested lists)
+  private init(basicFieldValue: FieldValue) {
+    switch basicFieldValue {
     case .string(let stringValue):
-      return .stringValue(stringValue)
+      self = .stringValue(stringValue)
     case .int64(let intValue):
-      return .int64Value(intValue)
+      self = .int64Value(intValue)
     case .double(let doubleValue):
-      return .doubleValue(doubleValue)
+      self = .doubleValue(doubleValue)
     case .bytes(let bytesValue):
-      return .bytesValue(bytesValue)
+      self = .bytesValue(bytesValue)
     case .date(let dateValue):
-      return .dateValue(dateValue.timeIntervalSince1970 * 1_000)
+      self = .dateValue(dateValue.timeIntervalSince1970 * 1_000)
     default:
-      return .stringValue("unsupported")
+      self = .stringValue("unsupported")
     }
   }
 }

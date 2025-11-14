@@ -21,7 +21,8 @@ internal struct ConcurrentTokenRefreshPerformanceTests {
   }
 
   /// Creates a standard next handler that returns success
-  private func createSuccessNextHandler() -> @Sendable (HTTPRequest, HTTPBody?, URL) async throws
+  private func createSuccessNextHandler()
+    -> @Sendable (HTTPRequest, HTTPBody?, URL) async throws
     -> (HTTPResponse, HTTPBody?)
   {
     { _, _, _ in (HTTPResponse(status: .ok), nil) }
@@ -32,9 +33,10 @@ internal struct ConcurrentTokenRefreshPerformanceTests {
     middleware: AuthenticationMiddleware,
     request: HTTPRequest,
     baseURL: URL,
-    next: @escaping @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (
-      HTTPResponse, HTTPBody?
-    ),
+    next:
+      @escaping @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (
+        HTTPResponse, HTTPBody?
+      ),
     count: Int
   ) async -> [Bool] {
     let tasks = (1...count).map { _ in

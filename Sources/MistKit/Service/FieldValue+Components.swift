@@ -52,24 +52,26 @@ extension FieldValue {
       } else {
         self = .double(doubleValue)
       }
+    case .booleanValue(let boolValue):
+      self = .int64(boolValue ? 1 : 0)
     case .bytesValue(let bytesValue):
       self = .bytes(bytesValue)
     case .dateValue(let dateValue):
       self = .date(Date(timeIntervalSince1970: dateValue / 1_000))
     case .locationValue(let locationValue):
-      guard let location = Self.fromLocation(locationValue) else { return nil }
+      guard let location = Self(locationValue: locationValue) else { return nil }
       self = location
     case .referenceValue(let referenceValue):
-      self = Self.fromReference(referenceValue)
+      self.init(referenceValue: referenceValue)
     case .assetValue(let assetValue):
-      self = Self.fromAsset(assetValue)
+      self.init(assetValue: assetValue)
     case .listValue(let listValue):
-      self = Self.fromList(listValue)
+      self.init(listValue: listValue)
     }
   }
 
-  /// Convert location field value
-  private static func fromLocation(_ locationValue: Components.Schemas.LocationValue) -> Self? {
+  /// Initialize from location field value
+  private init?(locationValue: Components.Schemas.LocationValue) {
     guard let latitude = locationValue.latitude,
       let longitude = locationValue.longitude
     else {
@@ -86,20 +88,29 @@ extension FieldValue {
       course: locationValue.course,
       timestamp: locationValue.timestamp.map { Date(timeIntervalSince1970: $0 / 1_000) }
     )
-    return .location(location)
+    self = .location(location)
   }
 
-  /// Convert reference field value
-  private static func fromReference(_ referenceValue: Components.Schemas.ReferenceValue) -> Self {
+  /// Initialize from reference field value
+  private init(referenceValue: Components.Schemas.ReferenceValue) {
+    let action: Reference.Action?
+    switch referenceValue.action {
+    case .DELETE_SELF:
+      action = .deleteSelf
+    case .NONE:
+      action = Reference.Action.none
+    case nil:
+      action = nil
+    }
     let reference = Reference(
       recordName: referenceValue.recordName ?? "",
-      action: referenceValue.action?.rawValue
+      action: action
     )
-    return .reference(reference)
+    self = .reference(reference)
   }
 
-  /// Convert asset field value
-  private static func fromAsset(_ assetValue: Components.Schemas.AssetValue) -> Self {
+  /// Initialize from asset field value
+  private init(assetValue: Components.Schemas.AssetValue) {
     let asset = Asset(
       fileChecksum: assetValue.fileChecksum,
       size: assetValue.size,
@@ -108,60 +119,59 @@ extension FieldValue {
       receipt: assetValue.receipt,
       downloadURL: assetValue.downloadURL
     )
-    return .asset(asset)
+    self = .asset(asset)
   }
 
-  /// Convert list field value
-  private static func fromList(_ listValue: [CustomFieldValue.CustomFieldValuePayload]) -> Self {
-    let convertedList = listValue.compactMap { Self.fromListItem($0) }
-    return .list(convertedList)
+  /// Initialize from list field value
+  private init(listValue: [CustomFieldValue.CustomFieldValuePayload]) {
+    let convertedList = listValue.compactMap { Self(listItem: $0) }
+    self = .list(convertedList)
   }
 
-  /// Convert individual list item
-  private static func fromListItem(_ listItem: CustomFieldValue.CustomFieldValuePayload) -> Self? {
+  /// Initialize from individual list item
+  private init?(listItem: CustomFieldValue.CustomFieldValuePayload) {
     switch listItem {
     case .stringValue(let stringValue):
-      return .string(stringValue)
+      self = .string(stringValue)
     case .int64Value(let intValue):
-      return .int64(intValue)
+      self = .int64(intValue)
     case .doubleValue(let doubleValue):
-      return .double(doubleValue)
+      self = .double(doubleValue)
+    case .booleanValue(let boolValue):
+      self = .int64(boolValue ? 1 : 0)
     case .bytesValue(let bytesValue):
-      return .bytes(bytesValue)
+      self = .bytes(bytesValue)
     case .dateValue(let dateValue):
-      return .date(Date(timeIntervalSince1970: dateValue / 1_000))
+      self = .date(Date(timeIntervalSince1970: dateValue / 1_000))
     case .locationValue(let locationValue):
-      return fromLocation(locationValue)
+      guard let location = Self(locationValue: locationValue) else { return nil }
+      self = location
     case .referenceValue(let referenceValue):
-      return fromReference(referenceValue)
+      self.init(referenceValue: referenceValue)
     case .assetValue(let assetValue):
-      return fromAsset(assetValue)
+      self.init(assetValue: assetValue)
     case .listValue(let nestedList):
-      return fromNestedList(nestedList)
+      self.init(nestedListValue: nestedList)
     }
   }
 
-  /// Convert nested list value (simplified for basic types)
-  private static func fromNestedList(
-    _ nestedList: [CustomFieldValue.CustomFieldValuePayload]
-  ) -> Self {
-    let convertedNestedList = nestedList.compactMap { fromBasicListItem($0) }
-    return .list(convertedNestedList)
+  /// Initialize from nested list value (simplified for basic types)
+  private init(nestedListValue: [CustomFieldValue.CustomFieldValuePayload]) {
+    let convertedNestedList = nestedListValue.compactMap { Self(basicListItem: $0) }
+    self = .list(convertedNestedList)
   }
 
-  /// Convert basic list item types only
-  private static func fromBasicListItem(
-    _ nestedItem: CustomFieldValue.CustomFieldValuePayload
-  ) -> Self? {
-    switch nestedItem {
+  /// Initialize from basic list item types only
+  private init?(basicListItem: CustomFieldValue.CustomFieldValuePayload) {
+    switch basicListItem {
     case .stringValue(let stringValue):
-      return .string(stringValue)
+      self = .string(stringValue)
     case .int64Value(let intValue):
-      return .int64(intValue)
+      self = .int64(intValue)
     case .doubleValue(let doubleValue):
-      return .double(doubleValue)
+      self = .double(doubleValue)
     case .bytesValue(let bytesValue):
-      return .bytes(bytesValue)
+      self = .bytes(bytesValue)
     default:
       return nil
     }

@@ -43,6 +43,9 @@ public struct CloudKitService: Sendable {
   /// The CloudKit database (public, private, or shared)
   public let database: Database
 
+  /// Default limit for query operations (1-200, default: 100)
+  internal let defaultQueryLimit: Int = 100
+
   internal let mistKitClient: MistKitClient
   internal let responseProcessor = CloudKitResponseProcessor()
   internal var client: Client {
@@ -63,8 +66,8 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: environment.toComponentsEnvironment(),
-      database: database.toComponentsDatabase()
+      environment: .init(from: environment),
+      database: .init(from: database)
     )
   }
 
@@ -77,8 +80,8 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: environment.toComponentsEnvironment(),
-      database: database.toComponentsDatabase()
+      environment: .init(from: environment),
+      database: .init(from: database)
     )
   }
 
@@ -91,8 +94,36 @@ extension CloudKitService {
     .init(
       version: "1",
       container: containerIdentifier,
-      environment: environment.toComponentsEnvironment(),
-      database: database.toComponentsDatabase()
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for modifyRecords requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createModifyRecordsPath(
+    containerIdentifier: String
+  ) -> Operations.modifyRecords.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for lookupRecords requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createLookupRecordsPath(
+    containerIdentifier: String
+  ) -> Operations.lookupRecords.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
     )
   }
 }
