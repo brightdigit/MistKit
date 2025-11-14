@@ -74,34 +74,34 @@ jobs:
       matrix:
         include:
           # SPM Build Matrix
-          - runs-on: macos-15
+          - runs-on: macOS-15
             xcode: "/Applications/Xcode_26.0.app" 
-          - runs-on: macos-15
+          - runs-on: macOS-15
             xcode: "/Applications/Xcode_16.4.app"
-          - runs-on: macos-15
+          - runs-on: macOS-15
             xcode: "/Applications/Xcode_16.3.app"
 
           # macOS Build Matrix
           - type: macos
-            runs-on: macos-15
+            runs-on: macOS-15
             xcode: "/Applications/Xcode_16.4.app"
                       
           # iOS Build Matrix
           - type: ios
-            runs-on: macos-15
+            runs-on: macOS-15
             xcode: "/Applications/Xcode_26.0.app"
             deviceName: "iPhone 17 Pro"
             osVersion: "26.0.1"
             download-platform: true
             
           - type: ios
-            runs-on: macos-15
+            runs-on: macOS-15
             xcode: "/Applications/Xcode_16.4.app"
             deviceName: "iPhone 16e"
             osVersion: "18.5"
             
           - type: ios
-            runs-on: macos-15
+            runs-on: macOS-15
             xcode: "/Applications/Xcode_16.3.app"
             deviceName: "iPhone 16"
             osVersion: "18.4"
@@ -109,21 +109,21 @@ jobs:
   
           # watchOS Build Matrix
           - type: watchos
-            runs-on: macos-15
+            runs-on: macOS-15
             xcode: "/Applications/Xcode_26.0.app"
             deviceName: "Apple Watch Ultra 3 (49mm)"
             osVersion: "26.0"
 
           # tvOS Build Matrix
           - type: tvos
-            runs-on: macos-15
+            runs-on: macOS-15
             xcode: "/Applications/Xcode_26.0.app"
             deviceName: "Apple TV"
             osVersion: "26.0"
 
           # visionOS Build Matrix              
           - type: visionos
-            runs-on: macos-15
+            runs-on: macOS-15
             xcode: "/Applications/Xcode_26.0.app"
             deviceName: "Apple Vision Pro"
             osVersion: "26.0"
