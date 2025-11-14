@@ -50,26 +50,8 @@ struct CloudKitServiceQueryTests {
       apiToken: "test-token"
     )
 
-    // Verify default configuration
-    #expect(service.defaultQueryLimit == 100)
-    #expect(service.defaultBatchSize == 100)
-  }
-
-  @Test("queryRecords() with custom default limit")
-  func queryRecordsWithCustomDefaultLimit() async throws {
-    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      Issue.record("CloudKitService is not available on this operating system.")
-      return
-    }
-    var service = try CloudKitService(
-      containerIdentifier: "iCloud.com.example.test",
-      apiToken: "test-token"
-    )
-
-    // Set custom default
-    service.defaultQueryLimit = 50
-
-    #expect(service.defaultQueryLimit == 50)
+    // Verify service was created successfully
+    #expect(service.containerIdentifier == "iCloud.com.example.test")
   }
 
   // MARK: - Validation Tests
@@ -214,7 +196,7 @@ struct CloudKitServiceQueryTests {
       (.string("test"), "string"),
       (.int64(42), "int64"),
       (.double(3.14), "double"),
-      (.from(true), "boolean"),
+      (FieldValue(booleanValue: true), "boolean"),
       (.date(Date()), "date"),
     ]
 

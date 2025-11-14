@@ -30,10 +30,10 @@ internal struct FieldValueTests {
   /// Tests FieldValue boolean helper creation and equality
   @Test("FieldValue boolean helper creation and equality")
   internal func fieldValueBoolean() {
-    let trueValue = FieldValue.from(true)
+    let trueValue = FieldValue(booleanValue: true)
     #expect(trueValue == .int64(1))
 
-    let falseValue = FieldValue.from(false)
+    let falseValue = FieldValue(booleanValue: false)
     #expect(falseValue == .int64(0))
   }
 

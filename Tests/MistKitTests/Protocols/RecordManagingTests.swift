@@ -171,7 +171,7 @@ internal struct RecordManagingTests {
         fields: [
           "name": .string("First"),
           "count": .int64(10),
-          "isActive": .from(true),
+          "isActive": FieldValue(booleanValue: true),
         ]
       ),
       RecordInfo(
@@ -180,7 +180,7 @@ internal struct RecordManagingTests {
         fields: [
           "name": .string("Second"),
           "count": .int64(20),
-          "isActive": .from(false),
+          "isActive": FieldValue(booleanValue: false),
         ]
       ),
     ]
@@ -211,7 +211,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Active"),
-          "isActive": .from(true),
+          "isActive": FieldValue(booleanValue: true),
         ]
       ),
       RecordInfo(
@@ -219,7 +219,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Inactive"),
-          "isActive": .from(false),
+          "isActive": FieldValue(booleanValue: false),
         ]
       ),
       RecordInfo(
@@ -227,7 +227,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Also Active"),
-          "isActive": .from(true),
+          "isActive": FieldValue(booleanValue: true),
         ]
       ),
     ]
@@ -255,7 +255,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Valid"),
-          "isActive": .from(true),
+          "isActive": FieldValue(booleanValue: true),
         ]
       ),
       RecordInfo(
@@ -271,7 +271,7 @@ internal struct RecordManagingTests {
         recordType: "TestRecord",
         fields: [
           "name": .string("Also Valid"),
-          "isActive": .from(false),
+          "isActive": FieldValue(booleanValue: false),
         ]
       ),
     ]
@@ -323,7 +323,7 @@ internal struct RecordManagingTests {
         fields: [
           "name": .string("First"),
           "count": .int64(1),
-          "isActive": .from(true),
+          "isActive": FieldValue(booleanValue: true),
         ]
       )
     ]

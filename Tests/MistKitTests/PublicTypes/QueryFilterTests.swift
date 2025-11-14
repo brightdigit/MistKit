@@ -219,8 +219,8 @@ internal struct QueryFilterTests {
       Issue.record("QueryFilter is not available on this operating system.")
       return
     }
-    
-    let filter = QueryFilter.equals("isPublished", .from(true))
+
+    let filter = QueryFilter.equals("isPublished", FieldValue(booleanValue: true))
     let components = Components.Schemas.Filter(from: filter)
     #expect(components.comparator == .EQUALS)
     #expect(components.fieldName == "isPublished")

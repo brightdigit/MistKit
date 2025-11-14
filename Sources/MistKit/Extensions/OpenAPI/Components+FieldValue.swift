@@ -47,18 +47,18 @@ extension Components.Schemas.FieldValue {
       let milliseconds = Int64(value.timeIntervalSince1970 * 1_000)
       self.init(value: .dateValue(Double(milliseconds)), type: .timestamp)
     case .location(let location):
-      self = Self.fromLocation(location)
+      self.init(location: location)
     case .reference(let reference):
-      self = Self.fromReference(reference)
+      self.init(reference: reference)
     case .asset(let asset):
-      self = Self.fromAsset(asset)
+      self.init(asset: asset)
     case .list(let list):
-      self = Self.fromList(list)
+      self.init(list: list)
     }
   }
 
-  /// Convert Location to Components LocationValue
-  private static func fromLocation(_ location: FieldValue.Location) -> Self {
+  /// Initialize from Location to Components LocationValue
+  private init(location: FieldValue.Location) {
     let locationValue = Components.Schemas.LocationValue(
       latitude: location.latitude,
       longitude: location.longitude,
@@ -69,11 +69,11 @@ extension Components.Schemas.FieldValue {
       course: location.course,
       timestamp: location.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
     )
-    return Self(value: .locationValue(locationValue), type: .location)
+    self.init(value: .locationValue(locationValue), type: .location)
   }
 
-  /// Convert Reference to Components ReferenceValue
-  private static func fromReference(_ reference: FieldValue.Reference) -> Self {
+  /// Initialize from Reference to Components ReferenceValue
+  private init(reference: FieldValue.Reference) {
     let action: Components.Schemas.ReferenceValue.actionPayload?
     switch reference.action {
     case .some(.deleteSelf):
@@ -87,11 +87,11 @@ extension Components.Schemas.FieldValue {
       recordName: reference.recordName,
       action: action
     )
-    return Self(value: .referenceValue(referenceValue), type: .reference)
+    self.init(value: .referenceValue(referenceValue), type: .reference)
   }
 
-  /// Convert Asset to Components AssetValue
-  private static func fromAsset(_ asset: FieldValue.Asset) -> Self {
+  /// Initialize from Asset to Components AssetValue
+  private init(asset: FieldValue.Asset) {
     let assetValue = Components.Schemas.AssetValue(
       fileChecksum: asset.fileChecksum,
       size: asset.size,
@@ -100,12 +100,12 @@ extension Components.Schemas.FieldValue {
       receipt: asset.receipt,
       downloadURL: asset.downloadURL
     )
-    return Self(value: .assetValue(assetValue), type: .asset)
+    self.init(value: .assetValue(assetValue), type: .asset)
   }
 
-  /// Convert List to Components list value
-  private static func fromList(_ list: [FieldValue]) -> Self {
+  /// Initialize from List to Components list value
+  private init(list: [FieldValue]) {
     let listValues = list.map { CustomFieldValue.CustomFieldValuePayload($0) }
-    return Self(value: .listValue(listValues), type: .list)
+    self.init(value: .listValue(listValues), type: .list)
   }
 }

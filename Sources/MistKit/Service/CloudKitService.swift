@@ -44,10 +44,7 @@ public struct CloudKitService: Sendable {
   public let database: Database
 
   /// Default limit for query operations (1-200, default: 100)
-  public var defaultQueryLimit: Int = 100
-
-  /// Default batch size for batch operations (1-200, default: 100)
-  public var defaultBatchSize: Int = 100
+  internal let defaultQueryLimit: Int = 100
 
   internal let mistKitClient: MistKitClient
   internal let responseProcessor = CloudKitResponseProcessor()

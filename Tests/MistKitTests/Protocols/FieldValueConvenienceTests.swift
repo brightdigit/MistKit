@@ -45,7 +45,7 @@ internal struct FieldValueConvenienceTests {
   internal func stringValueReturnsNilForWrongType() {
     #expect(FieldValue.int64(42).stringValue == nil)
     #expect(FieldValue.double(3.14).stringValue == nil)
-    #expect(FieldValue.from(true).stringValue == nil)
+    #expect(FieldValue(booleanValue: true).stringValue == nil)
   }
 
   @Test("intValue extracts Int from .int64 case")
@@ -93,7 +93,7 @@ internal struct FieldValueConvenienceTests {
         #expect(condition == false)
         #expect(message == "Boolean int64 value must be 0 or 1, got 2")
       }
-      #expect(value == true) // Value is still returned (2 != 0)
+      #expect(value == true)  // Value is still returned (2 != 0)
     }
   }
 
@@ -189,7 +189,7 @@ internal struct FieldValueConvenienceTests {
     let fields: [String: FieldValue] = [
       "name": .string("Test"),
       "count": .int64(42),
-      "enabled": .from(true),
+      "enabled": FieldValue(booleanValue: true),
       "legacyFlag": .int64(1),
       "score": .double(98.5),
     ]

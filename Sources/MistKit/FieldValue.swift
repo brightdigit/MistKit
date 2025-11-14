@@ -232,11 +232,13 @@ extension FieldValue {
   /// Create an int64 FieldValue from a Bool
   ///
   /// CloudKit represents booleans as INT64 (0/1) on the wire.
-  /// This helper converts Swift Bool to the appropriate int64 representation.
+  /// Creates a FieldValue from a Swift Bool value.
   ///
-  /// - Parameter value: The boolean value to convert
-  /// - Returns: A FieldValue.int64 with 1 for true, 0 for false
-  public static func from(_ value: Bool) -> FieldValue {
-    .int64(value ? 1 : 0)
+  /// This initializer converts Swift Bool to the appropriate int64 representation
+  /// used by CloudKit (1 for true, 0 for false).
+  ///
+  /// - Parameter booleanValue: The boolean value to convert
+  public init(booleanValue: Bool) {
+    self = .int64(booleanValue ? 1 : 0)
   }
 }
