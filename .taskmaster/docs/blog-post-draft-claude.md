@@ -1316,6 +1316,462 @@ MistKit's abstraction layer achieves:
 
 ---
 
+## Part 5: Lessons Learned from Building Real Applications
+
+The real test of any library isn't toy examples—it's production use cases. We built two command-line tools with MistKit: **Bushel** (macOS installer metadata tracker) and **Celestra** (RSS feed aggregator). These applications exposed gaps in the library, revealed Claude Code's limitations, and taught us valuable lessons about AI-assisted development.
+
+### The Development Journey: A Two-Week Intensive
+
+**Phase 1: Data Source Investigation (Days 1-2)**
+
+Before writing any code, we needed to validate our schema designs against actual data sources.
+
+For **Bushel**, we investigated:
+- Apple's MESU (Mobile Software Update) XML feeds for restore image metadata
+- Mr. Macintosh's database for signing status information
+
+**The First Lesson**: MESU provides SHA1 hashes, NOT SHA256. Mr. Macintosh doesn't provide file sizes despite documentation suggesting otherwise. **Always fetch and parse actual data before designing schemas.**
+
+For **Celestra**, we evaluated:
+- FeedKit for RSS/Atom parsing
+- SyndicationKit as an alternative
+- Designed `PublicFeed` and `PublicArticle` CloudKit record types
+
+**Phase 2: API Surface Discovery (Days 3-4)**
+
+**CRITICAL TURNING POINT**: We discovered MistKit's public API was incomplete.
+
+```
+CloudKitService only exposed 3 public methods:
+- fetchCurrentUser()
+- listZones()
+- queryRecords()
+
+NO public methods for:
+- createRecords()
+- modifyRecords()
+- lookupRecords()
+- deleteRecords()
+```
+
+We had to access internal OpenAPI types directly:
+```swift
+// Workaround - accessing internal types
+service.mistKitClient.client.modifyRecords(...)
+```
+
+**Phase 3: Record Operation Type Issues (Days 5-6)**
+
+The code was using `.create` operations exclusively:
+
+```swift
+// PROBLEM: Always tries to CREATE new records
+return RecordOperation.create(...)
+```
+
+**Issue**: No deduplication logic. Second sync would fail with CONFLICT errors because records already exist.
+
+**Solution**: Implement `.forceReplace` for upsert behavior or lookup-before-create logic.
+
+**Phase 4: Build Failures and Missing Methods (Days 7-8)**
+
+Build error revealed:
+```
+error: value of type 'CloudKitResponseProcessor' has no member 'processLookupRecordsResponse'
+```
+
+CloudKitResponseProcessor had processors for:
+- `processCurrentUserResponse`
+- `processListZonesResponse`
+- `processQueryRecordsResponse`
+- `processModifyRecordsResponse`
+
+But NOT `processLookupRecordsResponse`—we were using a method that didn't exist yet.
+
+**Phase 5: Schema and Permission Issues (Days 9-10)**
+
+Discovered QUERYABLE index requirements:
+- Fields used in queries MUST be marked QUERYABLE in schema
+- Forgot to add QUERYABLE to `buildNumber` field initially
+- Queries silently returned no results
+
+**Phase 6: Test Availability Issues (Days 11-12)**
+
+GitHub Actions failures on iOS/tvOS:
+```swift
+// WRONG: @available inside test body
+@Test func testCrypto() {
+    guard #available(macOS 10.15, iOS 13.0, *) else { return }
+    // Test code...
+}
+
+// RIGHT: Use Swift Testing traits
+@Test(.enabled(if: Platform.isCryptoAvailable))
+func testCrypto() {
+    // Test code...
+}
+```
+
+### Claude Code Mistakes: What Went Wrong
+
+**Mistake 1: Using Internal OpenAPI Types**
+
+Claude generated code that referenced `Components.Schemas.RecordOperation` directly—an internal type, not part of the public API.
+
+```swift
+// WRONG: Internal type reference
+let operation = Components.Schemas.RecordOperation(
+    recordType: "RestoreImage",
+    fields: fields
+)
+```
+
+**Why this happened**: Claude saw the type existed and used it without checking if it was `public` or `internal`.
+
+**Lesson**: **Always verify access modifiers before generating usage code.**
+
+---
+
+**Mistake 2: Hardcoded Create Operations**
+
+```swift
+// WRONG: Always create, never update
+func createRecordOperation() -> RecordOperation {
+    return RecordOperation.create(
+        recordType: Self.recordType,
+        recordName: self.recordName,
+        fields: self.toFields()
+    )
+}
+```
+
+**Why this happened**: Claude didn't consider idempotency. CloudKit's `.create` fails if record already exists.
+
+**Better approach**:
+```swift
+// RIGHT: Use forceReplace for upsert behavior
+func upsertRecordOperation() -> RecordOperation {
+    return RecordOperation.forceReplace(
+        recordType: Self.recordType,
+        recordName: self.recordName,
+        fields: self.toFields()
+    )
+}
+```
+
+**Lesson**: **CloudKit distinguishes between create and update. For sync scenarios, use `.forceReplace`.**
+
+---
+
+**Mistake 3: Calling Non-Existent Methods**
+
+Claude generated code that called `processLookupRecordsResponse()` when only 4 processor methods existed.
+
+```swift
+// WRONG: Method doesn't exist
+let records = try processor.processLookupRecordsResponse(response)
+```
+
+**Why this happened**: Claude assumed if `processQueryRecordsResponse()` exists, similar methods must exist.
+
+**Lesson**: **Don't assume patterns extend. Verify methods exist before using them.**
+
+---
+
+**Mistake 4: Incorrect Platform Availability Handling**
+
+```swift
+// WRONG: Guard inside test body
+@Test func testECDSASigning() {
+    guard #available(macOS 10.15, *) else {
+        return  // Swift Testing doesn't see this as "skipped"
+    }
+    // ...
+}
+
+// RIGHT: Swift Testing trait
+@Test(.enabled(if: Platform.isCryptoAvailable))
+func testECDSASigning() {
+    // ...
+}
+```
+
+**Why this happened**: Claude used XCTest patterns, not Swift Testing patterns.
+
+**Lesson**: **Swift Testing requires `.enabled(if:)` traits for conditional execution.**
+
+---
+
+**Mistake 5: Designing Schemas Based on Assumed Data**
+
+Claude designed the schema assuming MESU XML would contain:
+- SHA256 hashes (it only has SHA1)
+- File sizes from Mr. Macintosh (not actually provided)
+
+**Lesson**: **Fetch and parse actual data sources before finalizing schema designs.**
+
+### User Behaviors That Elevated Issues
+
+**Behavior 1: Not Defining Complete API Requirements Upfront**
+
+I started building demos without specifying what MistKit's public API should provide. This led to discovering API gaps mid-development.
+
+**What I should have done**: Define a contract first—"Bushel needs: queryRecords, modifyRecords (with upsert), lookupRecords." Then ensure MistKit provides these before writing demo code.
+
+---
+
+**Behavior 2: Accepting Workarounds Too Quickly**
+
+I allowed Claude to use internal types (`Components.Schemas.*`) as a workaround rather than extending the public API first.
+
+```swift
+// I accepted this workaround
+service.mistKitClient.client.modifyRecords(...)
+// Instead of requiring
+service.modifyRecords(...)
+```
+
+**What I should have done**: Stop and add public methods to MistKit first. The demo should only use the public API—if it can't, that's a sign the library is incomplete.
+
+---
+
+**Behavior 3: Not Testing Against Real CloudKit Early Enough**
+
+The record operation type issues (create vs update) would have been discovered immediately with a real CloudKit sync test.
+
+**What I should have done**: Test with actual CloudKit containers on day 2, not day 8. Real API calls surface issues that unit tests miss.
+
+---
+
+**Behavior 4: Building Examples in Isolation**
+
+Bushel and Celestra were developed somewhat independently. Result: code duplication and inconsistent patterns.
+
+```swift
+// Bushel's approach
+struct BushelCloudKitService { ... }
+
+// Celestra's approach
+struct CelestraCloudKitService { ... }
+// Both doing the same things differently
+```
+
+**What I should have done**: After Bushel worked, immediately extract common patterns into MistKit core before starting Celestra.
+
+### Successful Patterns and Techniques
+
+**Pattern 1: Schema-First Design with Data Validation**
+
+```bash
+# Step 1: Fetch actual data
+curl https://mesu.apple.com/assets/... > actual_data.xml
+
+# Step 2: Parse and analyze
+swift run XMLAnalyzer actual_data.xml
+
+# Step 3: Design schema based on actual fields
+RECORD TYPE RestoreImage (
+    version STRING QUERYABLE,
+    buildNumber STRING QUERYABLE,  # Verified this field exists
+    sha1Digest STRING,              # NOT sha256—verified from actual data
+    ...
+)
+```
+
+**Why it works**: Real data prevents schema mismatches that cause runtime failures.
+
+---
+
+**Pattern 2: Deterministic Record Naming**
+
+```swift
+struct RestoreImageRecord {
+    var recordName: String {
+        "restore-\(version)-\(buildNumber)"
+    }
+}
+```
+
+**Benefits**:
+- Idempotent operations—same input produces same record name
+- No duplicate records
+- Enables `.forceReplace` for true upsert behavior
+- Easy debugging—record names are human-readable
+
+---
+
+**Pattern 3: Protocol-Oriented Abstraction**
+
+```swift
+protocol CloudKitRecord {
+    static var recordType: String { get }
+    var recordName: String { get }
+    func toFields() -> [String: FieldValue]
+}
+
+extension CloudKitRecord {
+    func upsertOperation() -> RecordOperation {
+        .forceReplace(
+            recordType: Self.recordType,
+            recordName: recordName,
+            fields: toFields()
+        )
+    }
+}
+```
+
+**Why it works**: Common behavior in protocol extension, type-specific logic in conformances. DRY and testable.
+
+---
+
+**Pattern 4: Comprehensive Error Handling**
+
+```swift
+switch response {
+case .ok(let okResponse):
+    let records = try okResponse.body.json.records ?? []
+    return records
+
+case .badRequest(let badResponse):
+    let errorBody = try badResponse.body.json
+    if let serverError = errorBody.serverErrorCode {
+        switch serverError {
+        case .CONFLICT:
+            throw SyncError.recordAlreadyExists(recordName)
+        case .NOT_FOUND:
+            throw SyncError.recordNotFound(recordName)
+        default:
+            throw SyncError.cloudKitError(serverError, errorBody.reason)
+        }
+    }
+    throw SyncError.unknownBadRequest(errorBody.reason)
+
+case .unauthorized(let unauthResponse):
+    throw SyncError.authenticationFailed
+
+case .undocumented(let statusCode, _):
+    throw SyncError.unexpectedStatusCode(statusCode)
+}
+```
+
+**Why it works**: Preserves CloudKit's specific error information for debugging. Each error case handled explicitly.
+
+---
+
+**Pattern 5: Swift Testing Traits for Platform Availability**
+
+```swift
+enum Platform {
+    static var isCryptoAvailable: Bool {
+        #if canImport(CryptoKit)
+        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) {
+            return true
+        }
+        #endif
+        return false
+    }
+}
+
+@Test(.enabled(if: Platform.isCryptoAvailable))
+func testServerToServerAuth() async throws {
+    // Test runs only where crypto is available
+}
+```
+
+**Why it works**: Swift Testing framework properly marks tests as "skipped" rather than "passed" on unsupported platforms.
+
+### Key Takeaways for Claude Code Users
+
+**1. Verify Public API Before Generating Usage Code**
+
+Claude will use any type it sees. Check access modifiers (`public` vs `internal`) before accepting generated code.
+
+```swift
+// Ask: Is this type public?
+Components.Schemas.RecordOperation  // Internal - don't use directly
+```
+
+---
+
+**2. Don't Assume Patterns Extend**
+
+If `queryRecords` exists, Claude assumes `lookupRecords`, `modifyRecords`, etc. follow the same pattern. **Verify each method exists.**
+
+---
+
+**3. Test Real Operations Early**
+
+Unit tests validate types. Integration tests validate behavior. Test against actual CloudKit within the first few days.
+
+---
+
+**4. Extract Common Patterns After First Working Example**
+
+Don't build multiple demos with duplicate code. After Bushel works:
+1. Extract `CloudKitRecord` protocol
+2. Extract common sync logic
+3. Then build Celestra using those patterns
+
+---
+
+**5. Validate Data Sources Before Schema Design**
+
+Fetch actual XML/JSON from APIs. Parse it. **Then** design schemas based on what actually exists, not what documentation says should exist.
+
+---
+
+**6. Provide Complete Requirements Upfront**
+
+Before generating demo code:
+- List all CloudKit operations needed
+- Verify library provides them
+- If not, add to library first
+
+---
+
+**7. Reject Workarounds That Use Internal Types**
+
+When Claude suggests accessing internal types as a workaround, **stop**. Add the capability to the public API first.
+
+---
+
+**8. Use Swift Testing Patterns, Not XCTest Patterns**
+
+Claude's knowledge may be dated. Swift Testing uses `.enabled(if:)` traits, not `guard #available` statements.
+
+---
+
+**9. CloudKit Operations Have Semantic Meaning**
+
+`.create` fails if exists. `.update` fails if doesn't exist. `.forceReplace` is true upsert. Use the right operation for your use case.
+
+---
+
+**10. Iterate on Individual Endpoints Until Complete**
+
+Don't move to the next endpoint until the current one passes:
+- ✅ Unit tests pass
+- ✅ Integration test passes
+- ✅ Real CloudKit call succeeds
+- ✅ Error handling is comprehensive
+
+### The Bigger Lesson: AI Accelerates, Doesn't Replace
+
+Claude Code made the development faster—what would have taken 2 weeks solo took 2-4 days per endpoint with AI assistance. But Claude made mistakes that required human correction:
+
+- **Claude provided**: Fast boilerplate, comprehensive tests, pattern consistency
+- **I provided**: Domain knowledge (CloudKit quirks), architectural decisions (public vs internal), quality gates (must test with real CloudKit)
+
+The collaboration worked when I:
+1. Set clear boundaries (use only public API)
+2. Validated assumptions early (test real CloudKit quickly)
+3. Extracted patterns immediately (don't let duplication spread)
+4. Rejected workarounds (internal types are not acceptable)
+
+Without these guardrails, the demos would have "worked" locally but failed in production. Claude accelerated the mechanical work; human judgment ensured correctness.
+
+---
+
 ## Conclusion: Modern Swift, Modern Architecture
 
 The complete rewrite of MistKit from scratch taught invaluable lessons about modern Swift development:
