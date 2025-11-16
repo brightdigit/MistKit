@@ -822,11 +822,9 @@ The real test of any library isn't toy examples—it's production use cases. We 
 
 Before writing any code, we needed to validate our schema designs against actual data sources.
 
-For **Bushel**, we investigated:
-- Apple's MESU (Mobile Software Update) XML feeds for restore image metadata
-- Mr. Macintosh's database for signing status information
+For **Bushel**, we investigated various data sources for restore image metadata and signing status information.
 
-**The First Lesson**: MESU provides SHA1 hashes, NOT SHA256. Mr. Macintosh doesn't provide file sizes despite documentation suggesting otherwise. **Always fetch and parse actual data before designing schemas.**
+**The First Lesson**: External APIs don't always provide the data you expect. **Always fetch and parse actual data before designing schemas.**
 
 For **Celestra**, we evaluated:
 - FeedKit for RSS/Atom parsing
@@ -1000,9 +998,9 @@ func testECDSASigning() {
 
 **Mistake 5: Designing Schemas Based on Assumed Data**
 
-Claude designed the schema assuming MESU XML would contain:
-- SHA256 hashes (it only has SHA1)
-- File sizes from Mr. Macintosh (not actually provided)
+Claude designed the schema assuming external APIs would contain:
+- SHA256 hashes (some sources only provide SHA1)
+- File sizes (not always provided despite documentation)
 
 **Lesson**: **Fetch and parse actual data sources before finalizing schema designs.**
 
