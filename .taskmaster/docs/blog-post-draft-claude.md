@@ -646,110 +646,48 @@ Benefits:
 - ✅ Runtime switching between auth methods
 - ✅ Type safety with Swift 6's typed throws
 
-### Additional Modern Swift Features
+### Handling CloudKit-Specific Quirks
 
-#### Sendable Compliance
+The generated code handles most cases, but CloudKit has some quirks. The OpenAPI generator's `typeOverrides` feature lets us swap in custom implementations:
 
-All types are `Sendable`, ensuring thread-safety across actor boundaries:
-
-```swift
-internal struct MistKitConfiguration: Sendable {
-    internal let container: String
-    internal let environment: Environment
-    internal let database: Database
-    // All let properties - inherently thread-safe
-}
+```yaml
+# openapi-generator-config.yaml
+generate:
+  - types
+  - client
+accessModifier: internal
+typeOverrides:
+  schemas:
+    FieldValue: CustomFieldValue  # Use our implementation
 ```
 
-#### Typed Throws (Swift 6)
+This single line tells the generator: "Whenever you would use the generated `FieldValue`, use `CustomFieldValue` instead."
 
-Specific error types for precise error handling:
-
-```swift
-func validateCredentials() async throws(TokenManagerError) -> Bool
-
-// Compiler guarantees error type
-do {
-    let isValid = try await tokenManager.validateCredentials()
-} catch {
-    // error is TokenManagerError, not any Error
-    switch error {
-    case .invalidCredentials(.apiTokenEmpty):
-        print("API token is empty")
-    case .invalidCredentials(.apiTokenInvalidFormat):
-        print("API token format invalid")
-    }
-}
-```
-
-### Custom Type Mapping
-
-MistKit overrides the generated `FieldValue` with a custom implementation:
+**Why custom?** CloudKit's `ASSETID` type needs special handling. The API returns both `ASSET` and `ASSETID` as separate type discriminators, but they decode to the same structure. A generated enum-based approach can't handle this without custom logic:
 
 ```swift
-/// Custom implementation with CloudKit-specific handling
+/// Custom FieldValue with ASSETID handling
 internal struct CustomFieldValue: Codable, Hashable, Sendable {
-    internal enum FieldTypePayload: String, Codable, Sendable {
-        case string = "STRING"
-        case int64 = "INT64"
-        case asset = "ASSET"
-        case assetid = "ASSETID"  // CloudKit quirk - separate from ASSET
-        case location = "LOCATION"
-        // ... more types
-    }
+  public enum FieldTypePayload: String, Codable, Sendable {
+    case asset = "ASSET"
+    case assetid = "ASSETID"  // CloudKit quirk - both decode to AssetValue
+    case string = "STRING"
+    case int64 = "INT64"
+    // ... more types
+  }
 
-    internal enum CustomFieldValuePayload: Codable, Sendable {
-        case stringValue(String)
-        case int64Value(Int)
-        case assetValue(Components.Schemas.AssetValue)
-        case locationValue(Components.Schemas.LocationValue)
-        // ... more value types
-    }
-
-    internal let value: CustomFieldValuePayload
-    internal let type: FieldTypePayload?
+  // Lookup table for type-based decoding
+  private static let fieldTypeDecoders:
+    [FieldTypePayload: (KeyedDecodingContainer<CodingKeys>) throws -> CustomFieldValuePayload] = [
+      .asset: { .assetValue(try $0.decode(Components.Schemas.AssetValue.self, forKey: .value)) },
+      .assetid: { .assetValue(try $0.decode(Components.Schemas.AssetValue.self, forKey: .value)) },
+      // Both ASSET and ASSETID decode to the same AssetValue type
+      // ... other type handlers
+    ]
 }
 ```
 
-**Why custom?**: CloudKit's `ASSETID` type needs special handling that the generated code can't handle automatically.
-
-### Security Built-In
-
-#### Secure Logging
-
-Automatically masks sensitive data:
-
-```swift
-internal enum SecureLogging {
-    /// Masks tokens in log output
-    internal static func maskToken(_ token: String) -> String {
-        guard token.count > 8 else { return "***" }
-        let prefix = token.prefix(4)
-        let suffix = token.suffix(4)
-        return "\(prefix)***\(suffix)"
-    }
-}
-
-// In LoggingMiddleware
-private func formatQueryValue(for item: URLQueryItem) -> String {
-    guard let value = item.value else { return "nil" }
-
-    // Automatically mask sensitive parameters
-    if item.name.lowercased().contains("token") ||
-       item.name.lowercased().contains("key") {
-        return SecureLogging.maskToken(value)
-    }
-
-    return value
-}
-```
-
-**Output**:
-```
-🌐 CloudKit Request: POST /database/1/iCloud.com.example/production/private/records/query
-  ckAPIToken: c34a***7d9f
-  ckWebAuthToken: 9f2e***4b1a
-```
+The custom implementation seamlessly integrates with the generated code while handling CloudKit's idiosyncrasies.
 
 ### Before and After: Real Usage Comparison
 
