@@ -1004,6 +1004,81 @@ Claude designed the schema assuming external APIs would contain:
 
 **Lesson**: **Fetch and parse actual data sources before finalizing schema designs.**
 
+### Context Management and Knowledge Limitations
+
+One of the biggest challenges working with Claude Code is managing its knowledge cutoffs and lack of familiarity with newer or niche APIs.
+
+**Problem 1: Swift Testing vs XCTest**
+
+Claude's training predates widespread Swift Testing adoption. It defaults to XCTest patterns:
+
+```swift
+// Claude's instinct: XCTest patterns
+XCTAssertEqual(result, expected)
+XCTAssertThrowsError(try badCall())
+
+// What we need: Swift Testing patterns
+#expect(result == expected)
+#expect(throws: MyError.self) { try badCall() }
+```
+
+**Solution**: Provide documentation upfront. We added `.claude/docs/testing-enablinganddisabling.md` (126KB) that Claude reads on demand.
+
+---
+
+**Problem 2: CloudKit Web Services Documentation**
+
+Apple's CloudKit Web Services REST API isn't well-documented online. Claude hallucinates endpoint structures and authentication flows.
+
+**Solution**: We downloaded and included comprehensive documentation:
+- `webservices.md` (289KB) - Complete REST API reference
+- `cloudkitjs.md` (188KB) - Operation patterns and data types
+
+Claude can `Read` these files when needed, giving it accurate information about authentication, endpoints, and error codes.
+
+---
+
+**Problem 3: swift-openapi-generator Specifics**
+
+This is a relatively new tool with limited training data. Claude doesn't know about:
+- `typeOverrides` in config files
+- Middleware patterns
+- The transport layer architecture
+
+**Solution**: We added `swift-openapi-generator.md` (235KB) with full documentation. When Claude needs to configure code generation or implement middleware, it has authoritative reference material.
+
+---
+
+**Key Insight: CLAUDE.md as a Knowledge Router**
+
+Our `CLAUDE.md` file acts as a table of contents:
+
+```markdown
+## Reference Documentation
+
+**webservices.md** (289 KB) - CloudKit Web Services REST API
+- **Primary use**: Implementing REST API endpoints
+- **Consult when**: Writing API client code, handling authentication
+
+**testing-enablinganddisabling.md** (126 KB) - Swift Testing
+- **Primary use**: Writing modern Swift tests
+- **Consult when**: Writing tests, testing async code
+```
+
+Claude doesn't need to memorize everything—it needs to know **where to look**. The CLAUDE.md file provides this map.
+
+---
+
+**Practical Context Management Strategies**
+
+1. **Pre-load critical documentation** in `.claude/docs/`
+2. **Use CLAUDE.md** to describe what each doc contains and when to consult it
+3. **Fetch current information** with WebFetch for APIs that change (Apple's software update feeds)
+4. **Reference actual code** - when Claude hallucinates an API, show it the real implementation
+5. **Correct patterns immediately** - don't let wrong patterns propagate through the codebase
+
+**Result**: With proper context, Claude goes from "guessing at Swift Testing syntax" to "correctly using `@Test(.enabled(if:))` traits" because it has the authoritative source.
+
 ### User Behaviors That Elevated Issues
 
 **Behavior 1: Not Defining Complete API Requirements Upfront**
@@ -1173,6 +1248,101 @@ func testServerToServerAuth() async throws {
 ```
 
 **Why it works**: Swift Testing framework properly marks tests as "skipped" rather than "passed" on unsupported platforms.
+
+### The Value of Code Reviews: AI and Human Perspectives
+
+Code generated or assisted by AI needs extra scrutiny. We found that combining automated AI reviews with human expertise catches different classes of issues.
+
+**Automated AI Reviews (CodeRabbit)**
+
+Tools like CodeRabbit provide consistent, pattern-based feedback:
+
+```
+✅ Detected: Unused import in ServerToServerAuthManager.swift
+✅ Detected: Force unwrap on line 47 could cause crash
+✅ Detected: Missing documentation for public method
+⚠️ Suggestion: Consider extracting repeated JSON parsing into helper
+```
+
+**Strengths**:
+- Catches style violations consistently
+- Identifies potential nil crashes
+- Enforces documentation standards
+- Never gets tired or misses obvious issues
+
+**Limitations**:
+- Doesn't understand CloudKit-specific semantics
+- Can't evaluate architectural decisions
+- Misses subtle logic errors that compile fine
+- Suggests "improvements" that break functionality
+
+---
+
+**Human Code Reviews**
+
+Human reviewers catch what AI misses:
+
+```swift
+// AI generated this, automated review passed
+func syncRecords(_ records: [CloudKitRecord]) async throws {
+    for record in records {
+        try await service.modifyRecords([record.upsertOperation()])
+    }
+}
+```
+
+**Human reviewer**: "Why are we making N network calls? CloudKit supports batch operations. This should be:
+
+```swift
+let operations = records.map { $0.upsertOperation() }
+try await service.modifyRecords(operations)  // Single network call
+```
+
+**Human review catches**:
+- Performance anti-patterns (N+1 queries)
+- CloudKit API misuse (create vs forceReplace semantics)
+- Security concerns (token exposure in logs)
+- Architecture violations (using internal types)
+- Missing error cases (what if batch partially fails?)
+
+---
+
+**Our Review Process**
+
+1. **Claude generates code** → Initial implementation
+2. **Automated linting** (`swiftlint`, `swift-format`) → Style consistency
+3. **Claude self-review** → "Review this code for potential issues"
+4. **CodeRabbit/automated AI** → Pattern-based analysis
+5. **Human expert review** → Architecture, semantics, CloudKit-specific knowledge
+
+**Example catch from human review**:
+
+```swift
+// Claude generated
+public func queryRecords(recordType: String) async throws -> [RecordInfo] {
+    let response = try await client.queryRecords(...)
+    switch response {
+    case .ok(let ok):
+        return try ok.body.json.records ?? []
+    default:
+        throw CloudKitError.unknown  // Human: "This loses error information!"
+    }
+}
+```
+
+Human reviewer: "The `default` case discards CloudKit's error codes. We need specific handling for `.badRequest`, `.unauthorized`, `.forbidden` to provide actionable error messages."
+
+---
+
+**Best Practices for AI-Assisted Code Review**
+
+1. **Don't skip review just because "AI wrote it"** - AI code needs *more* review, not less
+2. **Use multiple review layers** - Automated catches syntax, human catches semantics
+3. **Ask Claude to review its own code** - It often spots issues when prompted to look again
+4. **Focus human review on domain logic** - Let automation handle formatting
+5. **Document review feedback** - Patterns in reviews become future CLAUDE.md guidance
+
+**Result**: Our codebase quality improved significantly when we treated AI-generated code as a first draft requiring thorough review, not a finished product.
 
 ### Key Takeaways for Claude Code Users
 
