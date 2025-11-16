@@ -468,432 +468,63 @@ Next, we'll explore how `swift-openapi-generator` transforms this specification 
 
 ---
 
-## Part 3: Code Generation with swift-openapi-generator
+## Part 3: From Specification to Swift Code
 
-With our CloudKit OpenAPI specification complete, the next step was transforming it into Swift code. Enter `swift-openapi-generator`, Apple's official tool for generating type-safe Swift clients from OpenAPI specifications.
+With our CloudKit OpenAPI specification complete, [swift-openapi-generator](https://github.com/apple/swift-openapi-generator) transforms it into production-ready Swift code. Apple's official tool generates async/await methods, Sendable types, and typed error handling—exactly what we need for modern Swift.
 
-### Why swift-openapi-generator?
-
-Apple announced `swift-openapi-generator` at WWDC 2023, and it immediately became the obvious choice:
-
-✅ **Official Apple tool** — Maintained by the Swift Server Workgroup
-✅ **Modern Swift** — Generates code using async/await, Sendable, and Swift 6 features
-✅ **Cross-platform** — Works on macOS, Linux, and anywhere Swift runs
-✅ **Active development** — Regular updates and improvements
-✅ **Production-ready** — Used in Apple's own services
-
-**Alternative considered**: We could have used other OpenAPI generators like `openapi-generator` (Java-based) or custom code generation, but `swift-openapi-generator` is purpose-built for modern Swift and integrates seamlessly with Swift Package Manager.
-
-> **Note**: This mirrors the approach from [SyntaxKit](https://brightdigit.com/tutorials/syntaxkit-swift-code-generation/), where we chose Apple's official SwiftSyntax over alternative AST libraries. Using first-party tools ensures compatibility, ongoing support, and alignment with Swift's evolution.
-
-### Configuration and Setup
-
-The generator is configured through two files:
-
-#### 1. openapi-generator-config.yaml
-
-```yaml
-generate:
-  - types      # Generate data types (schemas, enums, structs)
-  - client     # Generate API client code
-
-accessModifier: internal  # All generated code uses 'internal' access
-
-typeOverrides:
-  schemas:
-    FieldValue: CustomFieldValue  # Override FieldValue with custom type
-
-additionalFileComments:
-  - periphery:ignore:all         # Ignore in dead code analysis
-  - swift-format-ignore-file     # Skip auto-formatting
-```
-
-**Key decisions**:
-
-- **`internal` access modifier**: Generated code is an implementation detail, not the public API
-- **Type overrides**: CloudKit's polymorphic `FieldValue` needs custom handling, so we override it
-- **File comments**: Prevent tooling from analyzing/formatting generated code
-
-#### 2. Mintfile (Tool Version Management)
-
-```
-apple/swift-openapi-generator@1.10.0
-swiftlang/swift-format@601.0.0
-realm/SwiftLint@0.59.1
-peripheryapp/periphery@3.2.0
-```
-
-We use [Mint](https://github.com/yonaskolb/Mint) to manage command-line tool versions, ensuring consistent code generation across development environments and CI/CD.
-
-### Integration with Swift Package Manager
-
-In `Package.swift`, we add the runtime dependencies:
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.8.0"),
-    .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
-    .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
-],
-targets: [
-    .target(
-        name: "MistKit",
-        dependencies: [
-            .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-            .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
-            .product(name: "Crypto", package: "swift-crypto"),
-        ]
-    ),
-]
-```
-
-**Why not use the build plugin?** `swift-openapi-generator` offers a build plugin that generates code during compilation, but we chose a **pre-generation approach**:
-
-**Pre-generation** (our choice):
-- ✅ Generated code committed to version control
-- ✅ Reviewable in pull requests
-- ✅ Faster builds for library consumers
-- ✅ No tool dependencies for consumers
-- ✅ Better IDE autocomplete
-
-**Build plugin**:
-- ❌ Requires consumers to install generator
-- ❌ Slower builds (generation on every build)
-- ❌ Generated code in build artifacts, not visible
-- ❌ Harder to debug
-
-### Running the Generator
-
-The generation script (`Scripts/generate-openapi.sh`):
+**One command, 10,476 lines of type-safe code**:
 
 ```bash
-#!/bin/bash
-set -e
-
-echo "🔄 Generating OpenAPI code..."
-
-# Bootstrap Mint tools
-mint bootstrap -m Mintfile
-
-# Run generator
-mint run swift-openapi-generator generate \
-    --output-directory Sources/MistKit/Generated \
-    --config openapi-generator-config.yaml \
-    openapi.yaml
-
-echo "✅ OpenAPI code generation complete!"
+./Scripts/generate-openapi.sh
 ```
+
+We use [Mint](https://github.com/yonaskolb/Mint) to manage tool versions, ensuring consistent code generation across environments.
 
 **Output**:
 ```
 Sources/MistKit/Generated/
-├── Client.swift  (3,268 lines)
-└── Types.swift   (7,208 lines)
+├── Client.swift  (3,268 lines)  # API client with 15 operations
+└── Types.swift   (7,208 lines)  # All CloudKit schemas and models
 ```
 
-**Total**: 10,476 lines of generated, type-safe Swift code.
+We chose **pre-generation** (committing generated code) over the build plugin approach. This means faster builds for library consumers, reviewable code in PRs, and no tool dependencies.
 
-### Understanding the Generated Code
+The key configuration decision: **all generated code is `internal`**. Users never see `Operations.queryRecords.Input` or `Components.Schemas.Record`—they use MistKit's friendly public API instead. This separation is crucial for the abstraction layer we'll build next.
 
-#### Client.swift: The HTTP Client
-
-The generator creates two key components in `Client.swift`:
-
-**1. APIProtocol** - The contract:
-
-```swift
-/// A type that performs HTTP operations defined by the OpenAPI document.
-internal protocol APIProtocol: Sendable {
-    /// Query Records
-    ///
-    /// Fetch records using a query with filters and sorting options
-    ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/query`.
-    func queryRecords(_ input: Operations.queryRecords.Input) async throws
-        -> Operations.queryRecords.Output
-
-    /// Modify Records
-    ///
-    /// Create, update, or delete records (supports bulk operations)
-    ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/modify`.
-    func modifyRecords(_ input: Operations.modifyRecords.Input) async throws
-        -> Operations.modifyRecords.Output
-
-    // ... 13 more operations
-}
-```
-
-**2. Client Struct** - The implementation:
-
-```swift
-internal struct Client: APIProtocol {
-    private let client: UniversalClient
-
-    internal init(
-        serverURL: Foundation.URL,
-        configuration: Configuration = .init(),
-        transport: any ClientTransport,
-        middlewares: [any ClientMiddleware] = []
-    ) {
-        self.client = .init(
-            serverURL: serverURL,
-            configuration: configuration,
-            transport: transport,
-            middlewares: middlewares
-        )
-    }
-
-    // Operation implementations...
-}
-```
-
-#### Types.swift: Data Models and Operations
-
-This file contains all the type definitions:
-
-**1. Schema Types** - CloudKit data models:
-
-```swift
-internal enum Components {
-    internal enum Schemas {
-        /// - Remark: Generated from `#/components/schemas/ZoneID`
-        internal struct ZoneID: Codable, Hashable, Sendable {
-            internal var zoneName: Swift.String?
-            internal var ownerName: Swift.String?
-
-            internal init(zoneName: Swift.String? = nil, ownerName: Swift.String? = nil) {
-                self.zoneName = zoneName
-                self.ownerName = ownerName
-            }
-        }
-
-        /// - Remark: Generated from `#/components/schemas/ErrorResponse`
-        internal struct ErrorResponse: Codable, Hashable, Sendable {
-            internal enum serverErrorCodePayload: String, Codable, Sendable {
-                case ACCESS_DENIED = "ACCESS_DENIED"
-                case AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
-                case BAD_REQUEST = "BAD_REQUEST"
-                // ... 11 more error codes
-            }
-
-            internal var uuid: Swift.String?
-            internal var serverErrorCode: serverErrorCodePayload?
-            internal var reason: Swift.String?
-        }
-    }
-}
-```
-
-**2. Operation Types** - Request/response models for each API operation:
-
-```swift
-internal enum Operations {
-    internal enum queryRecords {
-        internal static let id: Swift.String = "queryRecords"
-
-        // Input: path parameters, headers, body
-        internal struct Input: Sendable, Hashable {
-            internal struct Path: Sendable, Hashable {
-                internal var version: Swift.String
-                internal var container: Swift.String
-                internal var environment: Components.Parameters.environment
-                internal var database: Components.Parameters.database
-            }
-
-            internal var path: Path
-            internal var headers: Headers
-            internal var body: Body
-        }
-
-        // Output: enum of possible responses
-        internal enum Output: Sendable, Hashable {
-            case ok(Ok)
-            case badRequest(BadRequest)
-            case unauthorized(Unauthorized)
-            // ... more response cases
-        }
-    }
-}
-```
-
-### The Benefits in Practice
-
-#### 1. Compile-Time Type Safety
-
-**Before** (manual JSON):
-```swift
-// Easy to make mistakes - no compile-time checking
-let json: [String: Any] = [
-    "query": [
-        "recordType": "User",
-        "filterBy": "age > 18"  // Wrong! Should be an array of filter objects
-    ]
-]
-```
-
-**After** (generated types):
-```swift
-// Impossible to get wrong - compile error if invalid
-let input = Operations.queryRecords.Input(
-    path: .init(
-        version: "1",
-        container: containerID,
-        environment: .production,  // Enum - can't typo
-        database: ._public          // Enum - can't typo
-    ),
-    body: .json(.init(
-        query: .init(
-            recordType: "User",
-            filterBy: [  // Must be array of Filter objects
-                .init(
-                    fieldName: "age",
-                    comparator: .GREATER_THAN,  // Enum - autocomplete available
-                    fieldValue: .init(value: .int64Value(18))
-                )
-            ]
-        )
-    ))
-)
-```
-
-#### 2. Automatic Sendable Conformance
-
-All generated types are `Sendable`, ensuring thread-safety:
-
-```swift
-// Safe to use across actor boundaries
-actor RecordProcessor {
-    func processQuery(_ input: Operations.queryRecords.Input) async throws {
-        // input is Sendable - no data race possible
-        let response = try await client.queryRecords(input)
-    }
-}
-```
-
-#### 3. Typed Error Handling
-
-Responses are enums with cases for each HTTP status:
-
-```swift
-let response = try await client.queryRecords(input)
-
-switch response {
-case .ok(let okResponse):
-    // Handle success - strongly typed
-    let queryResponse = try okResponse.body.json
-    print("Found \(queryResponse.records?.count ?? 0) records")
-
-case .badRequest(let error):
-    // Handle 400 error - strongly typed
-    let errorResponse = try error.body.json
-    if errorResponse.serverErrorCode == .AUTHENTICATION_FAILED {
-        print("Auth failed: \(errorResponse.reason ?? "")")
-    }
-
-case .unauthorized(let error):
-    // Handle 401 error
-    print("Unauthorized")
-
-default:
-    print("Unexpected response")
-}
-```
-
-#### 4. No Manual JSON Parsing
-
-All serialization/deserialization is handled automatically:
-
-```swift
-// Generated Codable conformance handles everything
-let record = Components.Schemas.Record(
-    recordType: "User",
-    fields: [
-        "name": .init(value: .stringValue("John"), type: .STRING),
-        "age": .init(value: .int64Value(30), type: .INT64)
-    ]
-)
-
-// Automatically encodes to JSON when sent
-try await client.modifyRecords(...)
-```
-
-### Challenge: Cross-Platform Crypto
-
-One significant challenge emerged: the `import Crypto` statement is ambiguous on different platforms.
-
-**The problem**:
-- macOS: `Crypto` can mean either `CryptoKit` (Apple framework) or `swift-crypto` (SPM package)
-- Linux: Only `swift-crypto` is available
-- Both provide similar APIs but different implementations
-
-**The solution**: Conditional compilation:
-
-```swift
-#if canImport(CryptoKit)
-import CryptoKit
-#else
-import Crypto
-#endif
-```
-
-This ensures the correct crypto library is used on each platform while maintaining API compatibility.
-
-### Development Workflow
-
-**When to regenerate code**:
-
-1. ✅ When `openapi.yaml` changes
-2. ✅ When `openapi-generator-config.yaml` changes
-3. ✅ When updating `swift-openapi-generator` version
-4. ❌ Never manually edit generated files
-
-**Workflow**:
-
-```bash
-# 1. Edit OpenAPI spec
-vim openapi.yaml
-
-# 2. Regenerate code
-./Scripts/generate-openapi.sh
-
-# 3. Verify compilation
-swift build
-
-# 4. Run tests
-swift test
-
-# 5. Commit both spec and generated code
-git add openapi.yaml Sources/MistKit/Generated/
-git commit -m "feat: add uploadAssets endpoint"
-```
-
-### Generated Code Statistics
-
-**Final numbers**:
-- **10,476 total lines** of generated Swift code
-- **3,268 lines** in `Client.swift` (API client implementation)
-- **7,208 lines** in `Types.swift` (data models and operation types)
-- **15 operations** fully implemented
-- **100% CloudKit API coverage** for specified endpoints
-- **Zero manual JSON parsing code**
-
-**Key takeaway**: Code generation isn't about being lazy—it's about being precise. Every line of generated code is exactly what the OpenAPI spec defines, with no room for human error. Maintenance becomes updating the spec and regenerating, not hunting through thousands of lines of hand-written HTTP client code.
-
-Next, we'll explore how we built a friendly abstraction layer on top of this generated foundation.
+**Resources**:
+- [WWDC23: Meet Swift OpenAPI Generator](https://developer.apple.com/videos/play/wwdc2023/10171/) - Official introduction
+- [swift-openapi-generator Documentation](https://swiftpackageindex.com/apple/swift-openapi-generator/documentation) - Complete API reference
+- [GitHub Repository](https://github.com/apple/swift-openapi-generator) - Examples and advanced configuration
 
 ---
 
 ## Part 4: Building the Friendly Abstraction Layer
 
-Generated code is powerful, but it's not always pleasant to use directly. This is where MistKit's abstraction layer comes in—hiding the complexity of generated APIs while maintaining type safety and leveraging modern Swift features.
+Generated code is powerful, but it's not always pleasant to use directly. More importantly, the generated client has no concept of CloudKit's authentication requirements—it's just HTTP requests. This is where MistKit's abstraction layer comes in.
 
-### The Problem with Raw Generated Code
+### Why We Need an Abstraction Layer
 
-Using the generated client directly is verbose and cumbersome:
+The raw generated code has several problems:
+
+**1. No Authentication Support**
+
+The generated client knows nothing about CloudKit's auth methods:
+- Web Auth Token (API Token + User Token as query parameters)
+- Server-to-Server (ECDSA P-256 request signatures)
+
+Every request would need manual auth handling.
+
+**2. Cross-Platform Crypto Challenges**
+
+Server-to-Server auth requires ECDSA signatures, but:
+- macOS/iOS: Use `CryptoKit` (Apple framework)
+- Linux: Use `swift-crypto` (SPM package)
+- Same APIs, different imports
+
+**3. Verbose API Surface**
 
 ```swift
-// Direct generated code usage - works, but painful
+// Too much boilerplate for simple operations
 let input = Operations.queryRecords.Input(
     path: .init(
         version: "1",
@@ -901,54 +532,13 @@ let input = Operations.queryRecords.Input(
         environment: Components.Parameters.environment.production,
         database: Components.Parameters.database._private
     ),
-    headers: .init(
-        accept: [.json]
-    ),
-    body: .json(.init(
-        query: .init(
-            recordType: "User",
-            filterBy: [
-                .init(
-                    fieldName: "age",
-                    comparator: .GREATER_THAN,
-                    fieldValue: Components.Schemas.FieldValue(
-                        value: .int64Value(18),
-                        type: .INT64
-                    )
-                )
-            ]
-        )
-    ))
+    // ... more nesting
 )
-
-let response = try await client.queryRecords(input)
-
-switch response {
-case .ok(let okResponse):
-    let queryResponse = try okResponse.body.json
-    // Process records...
-default:
-    // Handle errors...
-}
 ```
 
-**Problems**:
-- 🔴 Too much boilerplate
-- 🔴 Nested type references (`Components.Parameters.environment.production`)
-- 🔴 Manual response unwrapping
-- 🔴 Not idiomatic Swift
+### The Solution: Middleware + TokenManagers
 
-### The Abstraction Layer Design
-
-MistKit's abstraction layer has clear goals:
-
-1. **Hide OpenAPI complexity** - Users shouldn't know generated code exists
-2. **Leverage modern Swift** - async/await, actors, protocols
-3. **Maintain type safety** - If it compiles, it works
-4. **Keep it intuitive** - APIs should feel natural
-5. **Support all platforms** - macOS, iOS, Linux, etc.
-
-### Architecture: Three Layers (Designed with Claude)
+MistKit's abstraction layer solves these problems through a layered architecture:
 
 ```
 ┌─────────────────────────────────────────┐
@@ -959,10 +549,9 @@ MistKit's abstraction layer has clear goals:
                     ↓
 ┌─────────────────────────────────────────┐
 │  MistKit Abstraction Layer (Internal)   │
-│  • MistKitClient                        │
 │  • TokenManager implementations         │
 │  • Middleware (Auth, Logging)           │
-│  • Custom types (CustomFieldValue)      │
+│  • Cross-platform crypto handling       │
 └─────────────────────────────────────────┘
                     ↓
 ┌─────────────────────────────────────────┐
@@ -970,121 +559,11 @@ MistKit's abstraction layer has clear goals:
 │  • Client.swift (API implementation)    │
 │  • Types.swift (data models)            │
 └─────────────────────────────────────────┘
-                    ↓
-┌─────────────────────────────────────────┐
-│  OpenAPI Runtime & Transport            │
-│  • HTTP handling                        │
-│  • JSON serialization                   │
-└─────────────────────────────────────────┘
 ```
 
-**How we designed this together**:
+### Authentication via Middleware
 
-I started with the concept: "I need generated code hidden, but a friendly public API." Claude helped me think through the implications:
-
-- **Claude**: "If generated code is internal, you'll need middleware for cross-cutting concerns like auth"
-- **Me**: "Right, and I want protocol-based token managers for testability"
-- **Claude**: "Here's a TokenManager protocol design with three implementations..."
-- **Me**: "Perfect, now help me design the middleware chain"
-
-This architectural discussion happened over several sessions. Claude would draft protocol designs, I'd refine the security implications, Claude would suggest test strategies. The final architecture emerged from this collaboration—neither of us could have designed it alone as quickly.
-
-### Modern Swift Features Throughout
-
-#### 1. Async/Await for All Operations
-
-Every CloudKit operation is async:
-
-```swift
-/// Protocol for managing authentication tokens
-public protocol TokenManager: Sendable {
-    /// Async property for credential availability
-    var hasCredentials: Bool { get async }
-
-    /// Async validation
-    func validateCredentials() async throws(TokenManagerError) -> Bool
-
-    /// Async credential retrieval
-    func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials?
-}
-```
-
-**Benefits**:
-- ✅ Natural async/await usage throughout
-- ✅ Structured concurrency support
-- ✅ Automatic task cancellation
-- ✅ No completion handler hell
-
-#### 2. Sendable Compliance for Concurrency Safety
-
-All types are `Sendable`, ensuring thread-safety:
-
-```swift
-/// Configuration is immutable and Sendable
-internal struct MistKitConfiguration: Sendable {
-    internal let container: String
-    internal let environment: Environment
-    internal let database: Database
-    internal let apiToken: String
-    // All let properties - inherently thread-safe
-}
-
-/// Middleware is Sendable
-internal struct AuthenticationMiddleware: ClientMiddleware {
-    internal let tokenManager: any TokenManager  // TokenManager: Sendable
-    // Can be safely used across actors
-}
-```
-
-#### 3. Typed Throws (Swift 6 Feature)
-
-Specific error types for precise error handling:
-
-```swift
-func validateCredentials() async throws(TokenManagerError) -> Bool
-
-// Usage
-do {
-    let isValid = try await tokenManager.validateCredentials()
-} catch let error as TokenManagerError {
-    // Guaranteed to be TokenManagerError
-    switch error {
-    case .invalidCredentials(.apiTokenEmpty):
-        print("API token is empty")
-    case .invalidCredentials(.apiTokenInvalidFormat):
-        print("API token format invalid")
-    default:
-        print("Other token error")
-    }
-}
-```
-
-#### 4. Protocol-Oriented Design
-
-The `TokenManager` hierarchy enables flexibility:
-
-```swift
-// Base protocol
-public protocol TokenManager: Sendable {
-    var hasCredentials: Bool { get async }
-    func validateCredentials() async throws(TokenManagerError) -> Bool
-    func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials?
-}
-
-// Implementations
-public struct APITokenManager: TokenManager { ... }
-public struct WebAuthTokenManager: TokenManager { ... }
-public struct ServerToServerAuthManager: TokenManager { ... }
-```
-
-**Benefits**:
-- ✅ Easy testing with mocks
-- ✅ Flexible implementation swapping
-- ✅ Dependency injection support
-
-#### 5. Middleware Pattern for Cross-Cutting Concerns
-
-Authentication and logging implemented as middleware:
+Rather than scattering auth logic, we use OpenAPI Runtime's middleware system:
 
 ```swift
 internal struct AuthenticationMiddleware: ClientMiddleware {
@@ -1097,21 +576,22 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
         operationID: String,
         next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
     ) async throws -> (HTTPResponse, HTTPBody?) {
-        // Get credentials asynchronously
         guard let credentials = try await tokenManager.getCurrentCredentials() else {
             throw TokenManagerError.invalidCredentials(.noCredentialsAvailable)
         }
 
         var modifiedRequest = request
 
-        // Add authentication based on method
         switch credentials.method {
-        case .apiToken(let token):
-            // Add to query parameters
         case .webAuthToken(let apiToken, let webToken):
-            // Add both tokens
-        case .serverToServer:
-            // Sign request with ECDSA
+            // Add both tokens to query parameters
+            modifiedRequest.addQueryParameter("ckAPIToken", value: apiToken)
+            modifiedRequest.addQueryParameter("ckWebAuthToken", value: webToken)
+
+        case .serverToServer(let keyID, let privateKey):
+            // Sign request with ECDSA P-256
+            let signature = try signRequest(request, body: body, with: privateKey)
+            modifiedRequest.headerFields[.authorization] = "..."
         }
 
         return try await next(modifiedRequest, body, baseURL)
@@ -1122,6 +602,84 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
 **Middleware chain**:
 ```
 Request → AuthMiddleware → LoggingMiddleware → Transport → Network
+```
+
+Every request automatically gets proper authentication without user intervention.
+
+### Cross-Platform Crypto Solution
+
+For Server-to-Server auth, we use conditional compilation:
+
+```swift
+#if canImport(CryptoKit)
+import CryptoKit
+#else
+import Crypto  // swift-crypto package
+#endif
+
+// Now P256, SHA256, etc. work on all platforms
+func signRequest(_ request: HTTPRequest, body: HTTPBody?, with key: P256.Signing.PrivateKey) throws -> String {
+    // Same code works on macOS, iOS, and Linux
+    let signature = try key.signature(for: dataToSign)
+    return signature.rawRepresentation.base64EncodedString()
+}
+```
+
+### TokenManager Protocol Hierarchy
+
+The `TokenManager` protocol provides flexibility:
+
+```swift
+public protocol TokenManager: Sendable {
+    var hasCredentials: Bool { get async }
+    func validateCredentials() async throws(TokenManagerError) -> Bool
+    func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials?
+}
+
+// Implementations for each auth method
+public struct WebAuthTokenManager: TokenManager { ... }
+public struct ServerToServerAuthManager: TokenManager { ... }
+```
+
+Benefits:
+- ✅ Dependency injection for testing
+- ✅ Runtime switching between auth methods
+- ✅ Type safety with Swift 6's typed throws
+
+### Additional Modern Swift Features
+
+#### Sendable Compliance
+
+All types are `Sendable`, ensuring thread-safety across actor boundaries:
+
+```swift
+internal struct MistKitConfiguration: Sendable {
+    internal let container: String
+    internal let environment: Environment
+    internal let database: Database
+    // All let properties - inherently thread-safe
+}
+```
+
+#### Typed Throws (Swift 6)
+
+Specific error types for precise error handling:
+
+```swift
+func validateCredentials() async throws(TokenManagerError) -> Bool
+
+// Compiler guarantees error type
+do {
+    let isValid = try await tokenManager.validateCredentials()
+} catch {
+    // error is TokenManagerError, not any Error
+    switch error {
+    case .invalidCredentials(.apiTokenEmpty):
+        print("API token is empty")
+    case .invalidCredentials(.apiTokenInvalidFormat):
+        print("API token format invalid")
+    }
+}
 ```
 
 ### Custom Type Mapping
