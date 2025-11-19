@@ -134,7 +134,7 @@ I would provide the architectural vision—the three-layer design, protocol-orie
 
 **Questions to answer**:
 1. What format are Apple's CloudKit docs in? (prose, not machine-readable)
-> prose
+prose
 2. What needed to be translated? (endpoints, types, errors into structured YAML)
 Yes all of these things needed to be translated correctly.
 3. Why was this perfect for Claude Code collaboration?
