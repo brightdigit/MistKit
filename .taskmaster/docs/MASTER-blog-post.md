@@ -1139,37 +1139,47 @@ Claude: [Generates tests for:
 
 ## PART 6: Lessons Learned - Building with Claude Code (750 words)
 
-### Section 6.1: What Claude Code Excelled At (~200 words)
+### Section 6.1: What Claude Code Excelled At (~250 words)
 
-**✅ Test Generation**
-- 161 tests, most drafted by Claude
-- Edge cases I hadn't thought of (empty lists, nil values, invalid combinations)
-- Comprehensive coverage in fraction of the time
-- Pattern recognition across similar test scenarios
+**✅ Test Generation** - The Testing Sprint
+
+161 tests across 47 files, most drafted by Claude. Week 2 example:
+
+```
+Me: "Generate tests for all CustomFieldValue types"
+
+Claude: [Creates tests covering:
+         - All 10 field types (STRING, INT64, DOUBLE, TIMESTAMP, BYTES,
+           REFERENCE, ASSET, ASSETID, LOCATION, LIST)
+         - Edge cases: empty lists, nil values, malformed data
+         - Encoding/decoding round-trips
+         - Nested LIST types
+         - Invalid type/value combinations]
+
+         "I also added tests for the ASSET vs ASSETID quirk"
+```
+
+Result: 47 test files in 1 week instead of estimated 2-3 weeks solo. Claude found edge cases I hadn't considered.
 
 **✅ OpenAPI Schema Validation**
-- Caught inconsistencies between endpoint definitions
-- Suggested missing error responses
-- Validated `$ref` schema references
-- Ensured consistent patterns across operations
+- Caught missing `$ref` references before generator errors
+- Suggested error response schemas I'd forgotten
+- Found inconsistencies between endpoint definitions
+- Validated that all operations followed consistent patterns
 
-**✅ Boilerplate Code**
-- Three TokenManager implementations
-- Middleware pattern implementations
-- Error handling code across layers
-- Repetitive endpoint patterns
+**✅ Boilerplate & Repetitive Code**
 
-**✅ Refactoring Assistance**
-- When architecture changed, Claude updated affected implementations
-- Maintained consistent patterns across codebase
-- Found opportunities to reduce code duplication
-- Suggested improvements during iteration
+The TokenManager sprint: 3 implementations in 2 days instead of estimated week:
+- Day 1: Claude drafts all three with actor isolation
+- Day 2: Updates ServerToServerAuthManager with ECDSA signing
+- Day 3: Adds SecureLogging integration for credential masking
 
-**✅ Documentation**
-- API documentation drafts
-- Code comments
-- README sections
-- OpenAPI schema descriptions
+**✅ Refactoring at Scale**
+When authentication middleware architecture changed, Claude updated:
+- All three TokenManager implementations
+- AuthenticationMiddleware integration
+- 30+ related test files
+- Maintained consistent error handling patterns throughout
 
 ### Section 6.2: What Required Human Judgment (~200 words)
 
@@ -1254,7 +1264,60 @@ Multiple rounds of refinement until production-ready
 
 **Result**: Production-ready in 2 days vs estimated 1 week solo.
 
-### Section 6.4: Lessons Applied from SyntaxKit (~150 words)
+### Section 6.4: Common Mistakes & How to Avoid Them (~300 words)
+
+**Mistake 1: API Hallucination**
+
+```swift
+// Claude suggested (DOES NOT EXIST):
+let records = try await processLookupRecordsResponse(response)
+
+// Actual API from generated code:
+let body = try response.body.json
+let records = body.records  // Direct property access
+```
+
+**Why it happened**: Claude assumed helper methods exist from documentation patterns.
+**Fix**: Always verify suggested APIs exist in generated code.
+
+**Mistake 2: Swift Testing vs XCTest Confusion**
+
+```swift
+// Claude initially generated (XCTest):
+class RecordTests: XCTestCase {
+    func testRecordCreation() throws { }
+}
+
+// Needed (Swift Testing):
+import Testing
+@Test func recordCreation() async throws { }
+```
+
+**Why it happened**: XCTest dominates training data; Swift Testing is newer.
+**Fix**: Explicitly specify "use Swift Testing framework with @Test macro" in requests.
+
+**Mistake 3: Internal Type Leakage**
+
+```swift
+// Claude exposed:
+public func fetch() -> Components.Schemas.Record { }
+
+// Should be:
+public func fetch() -> Record { }  // Clean public API
+```
+
+**Why it happened**: Generated types have verbose namespaces; Claude followed literally.
+**Fix**: Request "create clean public wrapper types" for external APIs.
+
+**Pattern Recognition**: All mistakes share common traits—Claude follows patterns from training data or generated code literally without questioning ergonomics or existence. The fix is always the same: **explicit guidance** in prompts and **immediate verification** of suggestions.
+
+**Prevention Strategy**:
+1. Verify APIs exist before using
+2. Specify frameworks explicitly ("Swift Testing", "swift-log")
+3. Request clean abstractions over generated types
+4. Build/test after every Claude suggestion
+
+### Section 6.5: Lessons Applied from SyntaxKit (~150 words)
 
 **SyntaxKit Taught Me**:
 1. Break projects into manageable phases
@@ -1275,6 +1338,87 @@ Multiple rounds of refinement until production-ready
 - Iteration and refinement produce better results than "one-shot" AI
 
 **Key Message**: Claude Code accelerates development. Humans architect and secure it.
+
+### Section 6.6: Context Management Strategies (~250 words)
+
+**Challenge**: Claude Code's context window fills during long sessions, losing project knowledge.
+
+**Strategy 1: Session Continuation Summaries**
+
+When approaching context limits (system shows warnings):
+1. Export conversation to text file
+2. Create structured summary: problem → attempted solutions → current state → blockers
+3. Start fresh session with summary as first message
+
+**Example from MistKit**:
+```
+"Continuing from previous session:
+- Problem: Xcode 16.2 test failures with @Suite
+- Attempted: Individual .serialized annotations → failed
+- Current: Need to apply at Suite level across 42 files
+- Blocker: Uncertainty about batch vs manual approach"
+```
+
+**Strategy 2: Strategic `/clear` Usage**
+
+Clear context between major milestones to prevent "context bleeding":
+- ✅ Between independent subsystems (auth → query → sync)
+- ✅ After completing major features
+- ❌ Too frequently (loses architectural understanding)
+
+**Strategy 3: Explicit Memory Directives**
+
+Use explicit markers for critical preferences:
+```
+<user-memory-input>
+We are using explicit ACLs in Swift code.
+Type order follows SwiftLint defaults.
+Always use Swift Testing, not XCTest.
+</user-memory-input>
+```
+
+**What Worked for MistKit**:
+- 3-month project completed across 30+ Claude sessions
+- Strategic `/clear` between: Foundation → API Client → Sync → Testing
+- Session summaries preserved architectural decisions
+- Memory directives prevented repeated corrections
+
+**Key Insight**: Treat each Claude session like a "sprint" with clear entry/exit criteria. Document decisions explicitly rather than relying on conversational memory.
+
+### Section 6.7: The Collaboration Pattern (~200 words)
+
+**What Claude Provided**:
+- Fast boilerplate generation (protocols, models, middleware)
+- Comprehensive test coverage (161 tests across 47 files)
+- Pattern consistency (uniform error handling, logging)
+
+**What I Provided**:
+- Domain knowledge (CloudKit quirks like ASSET vs ASSETID)
+- Architectural decisions (public vs internal APIs)
+- Quality gates (must test with real CloudKit)
+
+**The Collaboration Worked When I**:
+1. **Set Clear Boundaries**: "Use only public API—no internal types"
+2. **Validated Assumptions Early**: Test with real CloudKit immediately, not just mocks
+3. **Extracted Patterns Immediately**: Prevent duplication before it spreads
+4. **Rejected Workarounds**: Internal types are not acceptable in public API
+
+**Example - Iterative Refinement**:
+```
+Round 1:
+Me: "Generate Record model matching OpenAPI spec"
+Claude: [Creates basic structure]
+
+Round 2:
+Me: "Add BYTES and LOCATION types"
+Claude: [Adds types with correct validation]
+
+Round 3:
+Me: "Add ASSETID and explain difference from ASSET"
+Claude: "Updated, and I noticed you might want constraints on these fields"
+```
+
+**Key Insight**: Without these guardrails, demos would "work" locally but fail in production. Claude accelerated mechanical work (4x speed increase); human judgment ensured correctness and maintainability.
 
 ---
 
