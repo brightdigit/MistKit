@@ -405,6 +405,8 @@ enum FieldValue {
 let field: FieldValue = .string("Mei")
 ```
 
+> **Implementation Note**: See Part 4, Section 4.4 for the CustomFieldValue implementation that solved this challenge.
+
 ### Section 2.4: Authentication - Three Methods, One Spec (~200 words)
 
 **The Three CloudKit Authentication Methods**:
@@ -733,6 +735,8 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
 > **Claude**: "Yes! **Task 5 'Create Authentication Layer' is now completely done!** All 5 subtasks marked as done: TokenManager Protocol, API/WebAuth Managers, Server-to-Server with ECDSA, AuthenticationMiddleware enhancement, and Token Refresh mechanisms."
 
 This iterative implementation—design the protocol abstraction, implement each auth method, integrate with middleware, then validate with real CloudKit—took 3 days with Claude vs an estimated 1-2 weeks solo.
+
+> **Implementation Details**: The TokenManager protocol design is detailed in Part 4, Section 4.3.
 
 ### Section 3.3: Cross-Platform Crypto (~100 words)
 
@@ -1106,6 +1110,8 @@ private func formatQueryValue(for item: URLQueryItem) -> String {
 ```
 
 **Claude Generated Logging**: I added security constraints (never log full tokens, mask private keys)
+
+> **Lessons Learned**: For insights about working with Claude on this architecture, see Part 6: Lessons Learned.
 
 ---
 
@@ -1503,6 +1509,8 @@ public func fetch() -> Record { }  // Clean public API
 2. Specify frameworks explicitly ("Swift Testing", "swift-log")
 3. Request clean abstractions over generated types
 4. Build/test after every Claude suggestion
+
+> **Counterpoint**: For what Claude Code excelled at, see Section 6.1 above.
 
 ### Section 6.5: Lessons Applied from SyntaxKit (~150 words)
 
