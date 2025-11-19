@@ -61,6 +61,12 @@ MistKit would apply the same philosophy to a different domain:
 **The Key Insight**:
 If code generation worked for wrapping SwiftSyntax, why not for wrapping REST APIs?
 
+**[TODO: Verify Section 1.3 completeness and expand if needed]**
+
+**Target**: 200 words
+**Current**: ~150 words (estimated)
+**Consider adding**: More specific SyntaxKit examples or deeper connection to MistKit approach
+
 ### Section 1.4: The Bold Decision (~200 words)
 
 **The Vision - A Three-Way Collaboration**:
@@ -111,6 +117,22 @@ If code generation worked for wrapping SwiftSyntax, why not for wrapping REST AP
 - No manual JSON parsing
 
 ### Section 2.2: The Translation Challenge (~150 words)
+
+**[TODO: Write narrative introduction before technical examples]**
+
+**Word Count Target**: ~150-200 words
+
+**Key Points to Cover**:
+- The llm.codes story (how you manually created OpenAPI for other APIs before)
+- Why CloudKit docs specifically needed translation
+- The challenge of prose → machine-readable transformation
+- How this sets up the technical examples below
+
+**Source Materials**:
+- Your experience with manual OpenAPI creation
+- CloudKit documentation challenges you encountered
+
+---
 
 **The Human Problem**:
 Apple's CloudKit documentation is prose, not machine-readable:
@@ -559,6 +581,50 @@ Like SyntaxKit using SwiftSyntax, we chose Apple's first-party tooling for compa
 
 ### Section 3.2: Authentication Method Conflicts - The Challenge (~300 words)
 
+**[TODO: Write narrative for this section using the content below]**
+
+**Word Count Target**: 300 words
+
+**Key Points to Cover**:
+1. **The Problem**: 3 auth methods, swift-openapi-generator expects 1
+2. **OpenAPI Challenge**: Compile-time security scheme vs runtime selection
+3. **The Solution**: Middleware pattern with TokenManager protocol
+4. **Why It Works**: Runtime selection, testability, isolation
+
+**Content to Incorporate** (from timeline and analysis docs):
+
+**From timeline - The Core Challenge:**
+CloudKit Web Services requires three different authentication methods:
+- API Token authentication
+- Web Auth Token authentication
+- Server-to-Server ECDSA P-256 authentication
+
+But swift-openapi-generator expects a single authentication method.
+
+**From timeline - The Solution: Middleware Architecture:**
+Created an innovative middleware pattern:
+```
+TokenManager Protocol (abstract interface)
+    ↓
+Three Concrete Implementations:
+    - APITokenManager
+    - WebAuthTokenManager
+    - ServerToServerAuthManager
+    ↓
+AuthenticationMiddleware (runtime selection)
+    ↓
+Intercepts all requests and applies correct auth
+```
+
+**From analysis - Authentication Patterns:**
+1. **API Token Auth**: Query parameter (`ckAPIToken`) - web-based applications
+2. **Server-to-Server Auth**: Header-based with key ID - server-side applications
+3. Both specified at root level for flexibility
+
+**Timeline Context to Add**: Search Sept 20-22, 2025 for authentication breakthrough conversation
+
+---
+
 **The Problem**:
 
 swift-openapi-generator expects consistent authentication per endpoint. But CloudKit has THREE different auth methods that can be used interchangeably:
@@ -795,6 +861,44 @@ default:
 **Goal**: Hide this complexity while maintaining type safety.
 
 ### Section 4.2: Designing the Architecture - A Collaboration Story (~300 words)
+
+**[TODO: Write this section - describe the architectural design session]**
+
+**Word Count Target**: 300 words
+
+**Key Points to Cover**:
+1. Initial design session with Claude (conversation format)
+2. The three-layer architecture emergence:
+   - Generated OpenAPI layer
+   - Abstraction layer (public API)
+   - Application layer (your code)
+3. TokenManager protocol design with actor isolation
+4. What Claude contributed vs what you contributed
+5. **[Optional]**: Add architecture diagram if desired
+
+**Content to Incorporate** (from timeline):
+
+**Protocol-Oriented Design Principles:**
+- `TokenManager` protocol for authentication abstraction
+- `CloudKitRecord` protocol for model mapping
+- Dependency injection throughout
+- Highly testable architecture
+
+**Modern Swift Concurrency Decisions:**
+- async/await for all network operations
+- Actor-based state management
+- Sendable compliance everywhere
+- Structured concurrency with TaskGroup
+
+**OpenAPI-First Development Philosophy:**
+- Single source of truth: openapi.yaml
+- Type-safe generated code via swift-openapi-generator
+- Thin abstraction layer
+- Generated code excluded from version control
+
+**Timeline Context to Add**: Search Oct 2025 for "architecture", "three layers", "protocol"
+
+---
 
 **The Initial Design Session with Claude**:
 
@@ -1037,6 +1141,40 @@ Architecture Session:
 
 ### Section 5.2: Phase 2 - Implementation (August 2024) (~250 words)
 
+**[TODO: Expand with timeline specifics and PR #132 details]**
+
+**Key Details to Add** (from timeline):
+
+**Phase 4: Major Refactoring - PR #132 (November 6, 2025)**
+
+**41-Item Code Review Implementation** organized into 5 Priority Phases:
+
+**Phase 1: Type System Migration**
+- Changed Int64 → Int for fileSize fields
+- Updated RecordBuilder to use `.boolean()` helper
+- Migrated data source fetchers
+- Fixed force unwraps
+- Result: Clean build in 3.81 seconds
+
+**Phase 2: Critical Bugs & Error Handling**
+- Enhanced DataSourcePipeline for SHA-256 backfilling
+- Implemented XcodeVersion → RestoreImage reference resolution
+- Fixed CloudKitResponseProcessor error detail extraction
+- Added CloudKitError.underlyingError case
+- Documented sentinel value pattern
+
+**Workflow Innovation:**
+- Used `/compact` command to preserve todo state across sessions
+- 42-item checklist for progress tracking
+- Branch: pr132-code-review-fixes
+- Phased commits for each milestone
+
+**Comparison**: TokenManager sprint: 3 implementations in 2 days vs 1 week solo estimate
+
+**Timeline Context to Add**: Search Oct-Nov 2025 for "refactor", "PR #132"
+
+---
+
 **Week 1-2: Generated Client Integration**
 
 Challenges:
@@ -1076,6 +1214,29 @@ Claude: [Adds SecureLogging integration, masks sensitive data in logs]
 **Result**: Three complete, tested implementations in 2 days instead of estimated week.
 
 ### Section 5.3: Phase 3 - Testing Explosion (September 2024) (~250 words)
+
+**[TODO: Verify completeness - YOUR EXPLICIT REQUEST #2]**
+
+**This section looks complete already!** Contains:
+- Testing challenge (15% → comprehensive)
+- Week-by-week sprint narrative
+- Final metrics: 161 tests, 47 files
+- Timeline: 1 week with Claude vs 2-3 weeks solo
+
+**Optional Addition** (from timeline - Phase 5: Testing Infrastructure, November 13, 2025):
+
+**Xcode 16.2 Testing Challenge:**
+- Discovered critical bug: "Received unexpected event testCaseDidFinish while subtests are still running"
+- Solution: `@Test(.serialized)` attribute for problematic concurrent tests
+- Added availability guards to 57 test methods across 4 files
+- Pattern: `guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)`
+- Test Suite Metrics: 300+ tests passing
+- Platform coverage: macOS, iOS, tvOS, watchOS
+- iOS Simulator testing: iPhone 16 Pro, iOS 18.5
+
+**Timeline Context**: Add excerpt from Nov 13, 2025 about concurrent test bug discovery if desired
+
+---
 
 **The Testing Challenge**:
 - Started with 15% coverage from v0.2
