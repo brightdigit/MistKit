@@ -132,6 +132,91 @@ Apple's CloudKit documentation is prose, not machine-readable:
 - Claude catches inconsistencies and missing references
 - Pattern repetition (15 similar endpoints)
 
+**Example 1: Record Structure - Before and After**
+
+### Before: Apple's Prose Documentation
+
+From Apple's CloudKit Web Services Reference:
+
+> **Creating Records**
+>
+> To create a single record in the specified database, use the `create` operation type.
+>
+> 1. Create an operation dictionary with these key-value pairs:
+>    1. Set the `operationType` key to `create`.
+>    2. Set the `record` key to a record dictionary describing the new record.
+> 2. Create a record dictionary with these key-value pairs:
+>    1. Set the `recordType` key to the record's type.
+>    2. Set the `recordName` key to the record's name. If you don't provide a record name, CloudKit assigns one for you.
+>    3. Set the `fields` key to a dictionary of key-value pairs used to set the record's fields, as described in Record Field Dictionary.
+>
+> For example, this operation dictionary creates an `Artist` record with the first name "Mei" and last name "Chen":
+>
+> ```json
+> {
+>   "operationType": "create",
+>   "record": {
+>     "recordType": "Artist",
+>     "fields": {
+>       "firstName": {"value": "Mei"},
+>       "lastName": {"value": "Chen"}
+>     },
+>     "recordName": "Mei Chen"
+>   }
+> }
+> ```
+
+### After: OpenAPI Specification
+
+```yaml
+components:
+  schemas:
+    Record:
+      type: object
+      properties:
+        recordName:
+          type: string
+          description: The unique identifier for the record
+        recordType:
+          type: string
+          description: The record type (schema name)
+        recordChangeTag:
+          type: string
+          description: Change tag for optimistic concurrency control
+        fields:
+          type: object
+          description: Record fields with their values and types
+          additionalProperties:
+            $ref: '#/components/schemas/FieldValue'
+
+    RecordOperation:
+      type: object
+      properties:
+        operationType:
+          type: string
+          enum: [create, update, forceUpdate, replace, forceReplace, delete, forceDelete]
+        record:
+          $ref: '#/components/schemas/Record'
+```
+
+**Translation Decisions**:
+
+1. **From Prose to Structure**: Converted numbered steps into structured schema definitions
+2. **Type Safety**: Added `enum` for operation types to prevent invalid values
+3. **Reusability**: Created separate `Record` and `RecordOperation` schemas that can be referenced
+4. **Documentation**: Preserved descriptions while making them machine-readable
+5. **Dynamic Fields**: Used `additionalProperties` to allow any field name while maintaining type safety for field values
+
+**Improvements Achieved**:
+
+| Aspect | Apple's Documentation | OpenAPI Specification |
+|--------|----------------------|----------------------|
+| **Machine-Readable** | No - requires human interpretation | Yes - parseable by code generators |
+| **Type Safety** | Implicit - examples only | Explicit - enums and schemas |
+| **Validation** | Manual - developer must verify | Automatic - OpenAPI validators |
+| **Code Generation** | Not possible | `swift-openapi-generator` creates Swift types |
+| **Consistency** | Examples may vary | Schema enforces consistency |
+
 ### Section 2.3: Field Value - The Dynamic Typing Challenge (~250 words)
 
 **The Core Problem**:
@@ -209,6 +294,95 @@ FieldValue:
 
 **Key Insight**: Claude excels at suggesting patterns and expanding them. I provide domain knowledge and edge cases. Together we refine to the final design.
 
+**Example 2: Field Values - Before and After**
+
+### Before: Apple's Prose Documentation
+
+> **Record Field Dictionary**
+>
+> A dictionary that represents a record field. The dictionary contains a single key-value pair. The key is `value`, and the value is the field value whose type depends on the field type. Fields can be strings, numbers, dates, locations, references, assets, or lists.
+>
+> Example field:
+> ```json
+> "firstName": {"value": "Mei"}
+> ```
+
+### After: OpenAPI Specification
+
+```yaml
+components:
+  schemas:
+    FieldValue:
+      type: object
+      description: A CloudKit field value with its type information
+      properties:
+        value:
+          oneOf:
+            - $ref: '#/components/schemas/StringValue'
+            - $ref: '#/components/schemas/Int64Value'
+            - $ref: '#/components/schemas/DoubleValue'
+            - $ref: '#/components/schemas/BooleanValue'
+            - $ref: '#/components/schemas/BytesValue'
+            - $ref: '#/components/schemas/DateValue'
+            - $ref: '#/components/schemas/LocationValue'
+            - $ref: '#/components/schemas/ReferenceValue'
+            - $ref: '#/components/schemas/AssetValue'
+            - $ref: '#/components/schemas/ListValue'
+        type:
+          type: string
+          enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, ASSETID, LOCATION, TIMESTAMP, LIST]
+          description: The CloudKit field type
+
+    StringValue:
+      type: string
+
+    Int64Value:
+      type: integer
+      format: int64
+
+    LocationValue:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        # ... additional properties
+```
+
+**Translation Decisions**:
+
+1. **Discriminated Union**: Used `oneOf` to model CloudKit's dynamic typing
+2. **Type Field**: Added explicit `type` enum for runtime type information
+3. **Individual Schemas**: Created separate schema for each CloudKit type
+4. **Format Hints**: Used OpenAPI `format` for precise type information (int64, double, uri)
+
+**Challenge Solved**: CloudKit fields are dynamically typed - the same `value` key can contain a string, number, location object, etc. OpenAPI is statically typed. The solution uses `oneOf` for the value property to indicate "one of these types" plus a `type` discriminator field for runtime identification.
+
+This enables:
+- **Type-safe code generation**: Swift generator creates appropriate enums/unions
+- **Validation**: Request/response validation against expected types
+- **Documentation**: Clear listing of all possible field types
+
+**Generated Swift Code Example**:
+
+```swift
+enum FieldValue {
+    case string(String)
+    case int64(Int64)
+    case double(Double)
+    case location(LocationValue)
+    case reference(ReferenceValue)
+    case asset(AssetValue)
+    // ... etc
+}
+
+// Usage is type-safe:
+let field: FieldValue = .string("Mei")
+```
+
 ### Section 2.4: Authentication - Three Methods, One Spec (~200 words)
 
 **The Three CloudKit Authentication Methods**:
@@ -250,6 +424,85 @@ components:
 
 **Claude's Contribution**:
 Suggested making security schemes optional (`security: []`) so endpoints can support multiple auth methods at runtime.
+
+**Example 3: Error Responses - Before and After**
+
+### Before: Apple's Prose Documentation
+
+> **Record Fetch Error Dictionary**
+>
+> The error dictionary describing a failed operation with the following keys:
+>
+> - `recordName`: The name of the record that the operation failed on.
+> - `reason`: A string indicating the reason for the error.
+> - `serverErrorCode`: A string containing the code for the error that occurred. For possible values, see Error Codes.
+> - `retryAfter`: The suggested time to wait before trying this operation again.
+> - `uuid`: A unique identifier for this error.
+> - `redirectURL`: A redirect URL for the user to securely sign in.
+
+### After: OpenAPI Specification
+
+```yaml
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      description: Error response object
+      properties:
+        uuid:
+          type: string
+          description: Unique error identifier for support
+        serverErrorCode:
+          type: string
+          enum:
+            - ACCESS_DENIED
+            - ATOMIC_ERROR
+            - AUTHENTICATION_FAILED
+            - AUTHENTICATION_REQUIRED
+            - BAD_REQUEST
+            - CONFLICT
+            - EXISTS
+            - INTERNAL_ERROR
+            - NOT_FOUND
+            - QUOTA_EXCEEDED
+            - THROTTLED
+            - TRY_AGAIN_LATER
+            - VALIDATING_REFERENCE_ERROR
+            - ZONE_NOT_FOUND
+        reason:
+          type: string
+        redirectURL:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized (401) - AUTHENTICATION_FAILED
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    # ... additional error responses for 403, 404, 409, 412, 413, 421, 429, 500, 503
+```
+
+**Translation Decisions**:
+
+1. **Error Code Enum**: Converted prose list of error codes to explicit enum
+2. **HTTP Status Mapping**: Created reusable response components for each HTTP status
+3. **Consistent Schema**: All errors use same `ErrorResponse` schema
+4. **Status Documentation**: Linked HTTP statuses to CloudKit error codes in descriptions
+
+This enables:
+- **Type-Safe Error Handling**: Generated code includes all possible error codes
+- **Automatic Deserialization**: Errors automatically parsed to correct type
+- **Centralized Definitions**: Define once, reference everywhere
 
 ### Section 2.5: The Iterative Refinement Workflow (~150 words)
 
