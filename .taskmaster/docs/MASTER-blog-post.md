@@ -1400,6 +1400,12 @@ Both tools serve as copy-paste starting points for new MistKit projects:
 - Verbose logging modes teach CloudKit concepts as you learn
 - Implementation notes capture design trade-offs and lessons learned
 
+**[TODO: YOUR PROSE - Reflect on Building Real Apps]**
+
+**Suggested themes**: The satisfaction of seeing MistKit power actual applications, the shift from theory to practice
+
+**Word count target**: ~25-50 words
+
 ---
 
 ### Section 6.2: Integration Testing Through Real Applications (~250 words)
@@ -1470,6 +1476,12 @@ Debugging these issues required understanding CloudKit's development toolchain:
 ✅ Real-world usage patterns documented for future developers
 
 MistKit isn't academic—it's battle-tested by building actual software.
+
+**[TODO: YOUR PROSE - Reflect on Integration Testing]**
+
+**Suggested themes**: The unexpected discoveries, validation of design decisions, confidence gained from real-world usage
+
+**Word count target**: ~25-50 words
 
 **[TODO: YOUR PROSE - Transition from Part 6 to Part 7]**
 
