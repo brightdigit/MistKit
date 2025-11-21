@@ -1157,59 +1157,6 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
 - Generated test cases for all field value types
 - Found edge cases (empty lists, nil values, malformed data)
 
-### Section 4.4: Real-World Validation with Bushel and Celestra (~300 words)
-
-MistKit isn't just theory—it powers real applications that validate the API design works in production.
-
-**Bushel: Xcode Version History Tracker**
-
-[Bushel](https://github.com/brightdigit/Bushel) tracks Xcode beta and release versions, storing metadata in CloudKit for version history analysis.
-
-**How Bushel Uses MistKit**:
-- **Xcode restore image metadata** stored as CloudKit records
-- **Authentication**: Server-to-server with ECDSA signatures for automated scraping
-- **Sync operations**: Query latest versions, create/update records, handle conflicts
-- **Type safety**: CustomFieldValue handles version numbers, dates, URLs, and nested metadata
-
-**Example - Storing Xcode Version Data**:
-```swift
-let record = try await mistKit.createRecord(
-    type: "XcodeVersion",
-    fields: [
-        "version": .string("15.0"),
-        "buildNumber": .string("15A240d"),
-        "releaseDate": .timestamp(date),
-        "downloadURL": .string(url),
-        "fileSize": .int64(bytes),
-        "sha256": .bytes(checksum)
-    ]
-)
-```
-
-**What Bushel Validated**:
-- ✅ Server-to-server authentication works for automated tasks
-- ✅ CustomFieldValue handles diverse CloudKit types correctly
-- ✅ Error handling catches API rate limiting and conflicts
-- ✅ Type safety prevents invalid field assignments at compile time
-
-**Celestra: RSS Feed Aggregator**
-
-[Celestra](https://github.com/brightdigit/Celestra) aggregates RSS feeds with CloudKit sync for read-later functionality across devices.
-
-**How Celestra Uses MistKit**:
-- **Feed items and subscriptions** synchronized via CloudKit private database
-- **Authentication**: API token + web auth for user-specific data
-- **Real-time sync**: Query changes, handle merge conflicts, paginate large feed lists
-- **Cross-device**: Same data accessible from macOS, iOS, and web
-
-**What Celestra Validated**:
-- ✅ Web authentication works for user-facing applications
-- ✅ Query pagination handles large result sets efficiently
-- ✅ Record modification and conflict resolution works correctly
-- ✅ Cross-platform Swift (macOS + iOS) works seamlessly
-
-**The Proof**: Both applications are in active development, using MistKit daily. Real-world usage found edge cases, validated design decisions, and proved the abstraction layer works as intended. MistKit isn't academic—it's battle-tested.
-
 ---
 
 ## PART 5: Testing with Claude Code - September 2024 (400 words)
@@ -1292,9 +1239,147 @@ Claude: [Generates tests for:
 
 ---
 
-## PART 6: Lessons Learned - Building with Claude Code (750 words)
+## PART 6: The Proof - Building Real Applications (550 words)
 
 **[TODO: YOUR PROSE - Part 6 Opening]**
+
+**Suggested themes**:
+- Unit tests prove correctness, but real applications prove usability
+- The moment of truth: building Celestra and Bushel with MistKit
+- Would the abstractions actually work in practice?
+- The iterative discovery process as real-world needs emerged
+
+**Word count target**: ~100 words
+
+---
+
+### Section 6.1: The Celestra and Bushel Examples (~300 words)
+
+Tests validate correctness, but real applications validate design. MistKit needed to prove it could power production software, not just pass unit tests. Enter **Celestra** and **Bushel**—two command-line tools built to stress-test MistKit's API in real-world scenarios.
+
+**Celestra: RSS Feed Reader**
+
+[Celestra](https://github.com/brightdigit/Celestra) synchronizes RSS feeds to CloudKit's public database, demonstrating simpler integration patterns perfect for smaller projects.
+
+**What It Does**:
+- Parses RSS feeds via SyndiKit library integration
+- Stores articles in CloudKit with duplicate detection (GUID-based + SHA256 fallback)
+- Batch operations with 10-record chunks and non-atomic uploads
+- Incremental updates with content change detection
+
+**MistKit APIs in Action**:
+```swift
+// Query filtering - find stale feeds
+QueryFilter.lessThan("lastAttempted", .date(cutoff))
+QueryFilter.greaterThanOrEquals("usageCount", .int64(minPop))
+
+// Batch operations
+let operations = articles.map { article in
+    RecordOperation.create(
+        recordType: "Article",
+        recordName: article.guid,
+        fields: article.toCloudKitFields()
+    )
+}
+service.modifyRecords(operations, atomic: false)
+```
+
+**Design Choice**: Celestra uses string-based relationships (storing recordName as string field) rather than CloudKit References—simpler for read-heavy applications where you don't need automatic cascade deletes.
+
+**Bushel: Apple Software Version Tracker**
+
+[Bushel](https://github.com/brightdigit/Bushel) tracks macOS restore images, Xcode versions, and Swift compiler releases, demonstrating advanced CloudKit patterns at scale.
+
+**What It Does**:
+- Aggregates data from 6 sources (ipsw.me, AppleDB.dev, xcodereleases.com, swift.org, MESU, Mr. Macintosh)
+- Deduplicates across sources using buildNumber as unique key
+- Manages three record types with CloudKit References for relationships
+- Respects 200-operation-per-request CloudKit limit
+
+**MistKit APIs in Action**:
+```swift
+// Protocol-based record conversion
+protocol CloudKitRecord {
+    static var cloudKitRecordType: String { get }
+    func toCloudKitFields() -> [String: FieldValue]
+}
+
+// Relationship handling
+fields["minimumMacOS"] = .reference(
+    FieldValue.Reference(recordName: restoreImageRecordName)
+)
+```
+
+**Design Choice**: Bushel uses CloudKit References for type-safe relationships and automatic referential integrity—essential when managing interconnected software version metadata.
+
+**Educational Value**:
+
+Both tools serve as copy-paste starting points for new MistKit projects:
+- Celestra demonstrates simple patterns (string relationships, basic queries)
+- Bushel demonstrates advanced patterns (protocol-oriented design, batch chunking, References)
+- Verbose logging modes teach CloudKit concepts as you learn
+- Implementation notes capture design trade-offs and lessons learned
+
+---
+
+### Section 6.2: Integration Testing Through Real Applications (~250 words)
+
+Building real applications exposed issues no unit test could catch. Here's what Celestra and Bushel revealed:
+
+**Schema Validation Gotchas**
+
+**Problem**: CloudKit schema files failed validation with cryptic parsing errors.
+
+**Root Cause**: Missing `DEFINE SCHEMA` header and accidental inclusion of system fields (`__recordID`, `___createTime`, `___modTime`).
+
+**Solution**: Standardized schema format—system fields are automatically managed by CloudKit, never define them manually. Led to creation of automated schema deployment scripts and comprehensive documentation.
+
+**Authentication Terminology Confusion**
+
+**Problem**: Dashboard uses "API Token", documentation mentions "Server-to-Server Keys", CLI tools expect different formats—which token goes where?
+
+**Root Cause**: CloudKit has multiple authentication methods with overlapping terminology, poorly documented.
+
+**Solution**: Clear taxonomy in MistKit docs:
+- **API Token**: Web dashboard read-only access
+- **Server-to-Server Key**: ECDSA P-256 private key for automated services (what Bushel/Celestra use)
+- **Web Auth Token**: User-specific token for client applications
+- **Management Token**: Admin operations (schema deployment)
+
+**Batch Operation Limits**
+
+**Discovery**: CloudKit enforces 200-operation-per-request limit (not documented clearly).
+
+**Impact**: Bushel's initial implementation tried uploading 500+ records at once and failed mysteriously. Added chunking logic—now both examples chunk correctly (Bushel: 200 records, Celestra: 10 records for RSS content size management).
+
+**Boolean Field Handling**
+
+**Discovery**: CloudKit has no native boolean type.
+
+**Solution**: Standardized INT64 representation (0 = false, 1 = true) across both examples and MistKit's type system.
+
+**API Improvements Driven by Real Use**:
+
+- **`FieldValue` enum design**: Validated through diverse record types (RSS feeds, software versions, metadata)
+- **`QueryFilter` API**: Refined through Celestra's filtered update command (date ranges, numeric comparisons)
+- **Non-atomic batch operations**: Essential for partial failure handling in both examples
+- **Protocol-oriented patterns**: `CloudKitRecord` protocol proven reusable across projects
+
+**The Validation**:
+
+✅ Public API successfully hides OpenAPI complexity
+✅ Swift 6 strict concurrency compliance proven in production
+✅ Server-to-Server authentication works for command-line tools
+✅ Type-safe field mapping prevents runtime errors
+✅ Real-world usage patterns documented for future developers
+
+MistKit isn't academic—it's battle-tested by building actual software.
+
+---
+
+## PART 7: Lessons Learned - Building with Claude Code (750 words)
+
+**[TODO: YOUR PROSE - Part 7 Opening]**
 
 **Suggested themes**:
 - Reflecting on the three-month journey
@@ -1306,7 +1391,7 @@ Claude: [Generates tests for:
 
 ---
 
-### Section 6.1: What Claude Code Excelled At (~250 words)
+### Section 7.1: What Claude Code Excelled At (~250 words)
 
 **✅ Test Generation** - The Testing Sprint
 
@@ -1348,7 +1433,7 @@ When authentication middleware architecture changed, Claude updated:
 - 30+ related test files
 - Maintained consistent error handling patterns throughout
 
-### Section 6.2: What Required Human Judgment (~200 words)
+### Section 7.2: What Required Human Judgment (~200 words)
 
 **❌ Architecture Decisions**
 - Three-layer design choice
@@ -1382,7 +1467,7 @@ When authentication middleware architecture changed, Claude updated:
 - What abstraction level feels "right"
 - Documentation structure and examples
 
-### Section 6.3: The Effective Collaboration Pattern (~200 words)
+### Section 7.3: The Effective Collaboration Pattern (~200 words)
 
 **The Workflow That Emerged**:
 
@@ -1431,7 +1516,7 @@ Multiple rounds of refinement until production-ready
 
 **Result**: Production-ready in 2 days vs estimated 1 week solo.
 
-### Section 6.4: Common Mistakes & How to Avoid Them (~300 words)
+### Section 7.4: Common Mistakes & How to Avoid Them (~300 words)
 
 **Mistake 1: API Hallucination**
 
@@ -1484,9 +1569,9 @@ public func fetch() -> Record { }  // Clean public API
 3. Request clean abstractions over generated types
 4. Build/test after every Claude suggestion
 
-> **Counterpoint**: For what Claude Code excelled at, see Section 6.1 above.
+> **Counterpoint**: For what Claude Code excelled at, see Section 7.1 above.
 
-### Section 6.5: Lessons Applied from SyntaxKit (~150 words)
+### Section 7.5: Lessons Applied from SyntaxKit (~150 words)
 
 **SyntaxKit Taught Me**:
 1. Break projects into manageable phases
@@ -1508,7 +1593,7 @@ public func fetch() -> Record { }  // Clean public API
 
 **Key Message**: Claude Code accelerates development. Humans architect and secure it.
 
-### Section 6.6: Context Management Strategies (~250 words)
+### Section 7.6: Context Management Strategies (~250 words)
 
 **Challenge**: Claude Code's context window fills during long sessions, losing project knowledge.
 
@@ -1554,7 +1639,7 @@ Always use Swift Testing, not XCTest.
 
 **Key Insight**: Treat each Claude session like a "sprint" with clear entry/exit criteria. Document decisions explicitly rather than relying on conversational memory.
 
-### Section 6.7: The Collaboration Pattern (~200 words)
+### Section 7.7: The Collaboration Pattern (~200 words)
 
 **What Claude Provided**:
 - Fast boilerplate generation (protocols, models, middleware)
@@ -1591,9 +1676,9 @@ Claude: "Updated, and I noticed you might want constraints on these fields"
 
 ---
 
-## PART 7: Conclusion - The OpenAPI + Claude Code Pattern (700 words)
+## PART 8: Conclusion - The OpenAPI + Claude Code Pattern (700 words)
 
-**[TODO: YOUR PROSE - Part 7 Opening]**
+**[TODO: YOUR PROSE - Part 8 Opening]**
 
 **Suggested themes**:
 - Looking back at the completed rebuild
@@ -1605,7 +1690,7 @@ Claude: "Updated, and I noticed you might want constraints on these fields"
 
 ---
 
-### Section 7.1: The Pattern Emerges (~200 words)
+### Section 8.1: The Pattern Emerges (~200 words)
 
 **From SyntaxKit to MistKit - A Philosophy**:
 
@@ -1632,7 +1717,7 @@ Source of Truth → Code Generation → Thoughtful Abstraction → AI Accelerati
 3. **AI for acceleration** (Tests, boilerplate, iteration)
 4. **Human for architecture** (Design, security, developer experience)
 
-### Section 7.2: What v1.0 Alpha Delivers (~150 words)
+### Section 8.2: What v1.0 Alpha Delivers (~150 words)
 
 **MistKit v1.0 Alpha**:
 - ✅ Three authentication methods (API Token, Web Auth, Server-to-Server)
@@ -1651,7 +1736,7 @@ Source of Truth → Code Generation → Thoughtful Abstraction → AI Accelerati
 - No SwiftLint violations in generated code
 - Ready for production use
 
-### Section 7.3: Series Continuity & What's Next (~200 words)
+### Section 8.3: Series Continuity & What's Next (~200 words)
 
 **Modern Swift Patterns Series**:
 
@@ -1677,7 +1762,7 @@ Source of Truth → Code Generation → Thoughtful Abstraction → AI Accelerati
 - MistKit: OpenAPI + middleware + AI collaboration
 - Bushel/Celestra: Practical application and composition
 
-### Section 7.4: The Bigger Philosophy (~150 words)
+### Section 8.4: The Bigger Philosophy (~150 words)
 
 **Sustainable Development Through Collaboration**:
 
