@@ -55,7 +55,29 @@ Swift had transformed while MistKit stood still:
 
 MistKit v0.2, frozen in 2021, couldn't take advantage of any of this.
 
-### Section 1.3: Learning from SyntaxKit's Pattern (~200 words)
+### Section 1.3: The Game Changer - swift-openapi-generator (~150 words)
+
+**Why This Rebuild Was Even Possible**:
+
+At WWDC 2023, Apple announced `swift-openapi-generator`—a tool that reads OpenAPI specifications and automatically generates type-safe Swift client code. This single tool made the MistKit rebuild feasible.
+
+**Before swift-openapi-generator**:
+- Hand-write 10,000+ lines of networking boilerplate
+- Manual JSON parsing for every CloudKit type
+- Write URLSession code for every endpoint
+- Keep everything in sync with CloudKit API changes manually
+- **Result**: Overwhelming maintenance burden, error-prone
+
+**After swift-openapi-generator**:
+- Create OpenAPI spec from CloudKit documentation
+- Generator produces all networking code automatically
+- Type-safe by default (compiler catches API misuse)
+- CloudKit API changes = update spec, regenerate
+- **Result**: Maintainable, correct, evolvable
+
+**The Insight**: If CloudKit's REST API could be described in OpenAPI format, swift-openapi-generator would handle all the tedious networking code automatically. The project suddenly became tractable—even ambitious.
+
+### Section 1.4: Learning from SyntaxKit's Pattern (~200 words)
 
 **The SyntaxKit Pattern Applied**:
 
@@ -75,13 +97,13 @@ SyntaxKit taught me that code generation isn't about laziness—it's about corre
 **The Key Insight**:
 If code generation worked for wrapping SwiftSyntax, why not for wrapping REST APIs?
 
-**[TODO: Verify Section 1.3 completeness and expand if needed]**
+**[TODO: Verify Section 1.4 completeness and expand if needed]**
 
 **Target**: 200 words
 **Current**: ~150 words (estimated)
 **Consider adding**: More specific SyntaxKit examples or deeper connection to MistKit approach
 
-### Section 1.4: The Bold Decision (~200 words)
+### Section 1.5: The Bold Decision (~200 words)
 
 **The Vision - A Three-Way Collaboration**:
 
@@ -128,19 +150,30 @@ If code generation worked for wrapping SwiftSyntax, why not for wrapping REST AP
 
 **OpenAPI** = machine-readable specification for REST APIs
 
-**The Breakthrough Insight**:
-- CloudKit Web Services is already a well-defined REST API
-- Apple's documentation describes every endpoint, parameter, response
-- Instead of manually translating docs → Swift code (and keeping in sync):
-  1. Create OpenAPI spec from Apple's docs
-  2. Use swift-openapi-generator (Apple's official OpenAPI code generation tool) for type-safe Swift code
-  3. Build friendly abstraction on top
+**The Strategy**:
+
+With swift-openapi-generator available (see Part 1, Section 1.3), the path forward was clear:
+
+1. **Translate CloudKit documentation → OpenAPI specification**
+   - Apple's prose docs → Machine-readable YAML
+   - Every endpoint, parameter, response type
+
+2. **Let swift-openapi-generator do the heavy lifting**
+   - Auto-generate 10,000+ lines of networking code
+   - Request/response types (Codable structs)
+   - API client methods (async/await)
+   - Type-safe enums, JSON handling, URL building
+
+3. **Build clean abstraction layer on top**
+   - Wrap generated code in friendly, idiomatic Swift API
+   - Add TokenManager for authentication
+   - CustomFieldValue for CloudKit's polymorphic types
 
 **Benefits**:
 - Type safety (if it compiles, it's valid CloudKit usage)
 - Completeness (every endpoint defined)
-- Maintainability (spec changes regenerate code)
-- No manual JSON parsing
+- Maintainability (spec changes = regenerate code)
+- No manual JSON parsing or networking boilerplate
 
 ### Section 2.2: The Translation Challenge (~150 words)
 
@@ -643,28 +676,21 @@ The actual work of creating the OpenAPI specification took 4 days in July 2024:
 
 ---
 
-### Section 3.1: Why swift-openapi-generator? (~150 words)
+### Section 3.1: Integrating swift-openapi-generator (~100 words)
 
-**What Is swift-openapi-generator?**
+With the OpenAPI specification complete (Part 2), the next step was integrating swift-openapi-generator to generate the Swift client code.
 
-Apple announced `swift-openapi-generator` at WWDC 2023—a tool that reads OpenAPI specifications and automatically generates type-safe Swift client code. Think of it as a translator: you give it an OpenAPI YAML file describing a REST API, and it produces Swift types, API client methods, and all the networking boilerplate.
+**Configuration**:
+- `openapi-generator-config.yaml` specifies what to generate
+- Build plugin integration (Swift Package Manager)
+- Generated code placed in `Sources/MistKit/Generated/`
 
-**From OpenAPI spec → Generated Swift code**:
-- Request/response types (Codable structs)
-- API client with async methods
-- Type-safe enums for endpoints, parameters, headers
-- Error handling types
-- URL building and JSON serialization
+**What Gets Generated** (10,476 lines):
+- `Types.swift` - All CloudKit request/response types
+- `Client.swift` - API client with async methods
+- Server stubs (unused, but generated)
 
-**Why It's the Right Choice**:
-- ✅ Official Apple tool (Swift Server Workgroup)
-- ✅ Modern Swift (async/await, Sendable, Swift 6)
-- ✅ Cross-platform (macOS, Linux, server-side Swift)
-- ✅ Active development
-- ✅ Production-ready
-
-**Connection to SyntaxKit Philosophy**:
-Like SyntaxKit using SwiftSyntax, we chose Apple's first-party tooling for compatibility and future-proofing.
+**The Power**: Run `swift build` and 10,000+ lines of type-safe networking code appear automatically. No manual URLSession, no JSON parsing, no boilerplate.
 
 ### Section 3.2: Authentication Method Conflicts - The Challenge (~300 words)
 
