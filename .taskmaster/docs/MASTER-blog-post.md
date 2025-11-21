@@ -1293,15 +1293,25 @@ Claude: [Generates tests for:
 
 Tests validate correctness, but real applications validate design. MistKit needed to prove it could power production software, not just pass unit tests. Enter **Celestra** and **Bushel**—two command-line tools built to stress-test MistKit's API in real-world scenarios.
 
-**Celestra: RSS Feed Reader**
+**Celestra: Automated RSS Feed Sync for a Reader App**
 
-[Celestra](https://github.com/brightdigit/Celestra) synchronizes RSS feeds to CloudKit's public database, demonstrating simpler integration patterns perfect for smaller projects.
+[Celestra](https://github.com/brightdigit/Celestra) is an RSS reader app in development—and its CLI backend demonstrates how MistKit enables scheduled, automated CloudKit updates.
 
-**What It Does**:
-- Parses RSS feeds via SyndiKit library integration
-- Stores articles in CloudKit with duplicate detection (GUID-based + SHA256 fallback)
-- Batch operations with 10-record chunks and non-atomic uploads
-- Incremental updates with content change detection
+**The Big Picture**:
+The Celestra reader app needs its RSS feed data kept current without requiring the app to be open. The CLI tool (built with MistKit) runs on a schedule to fetch new articles and sync them to CloudKit's public database, making fresh content available to all users instantly.
+
+**How CloudKit Powers Celestra**:
+- **Scheduled Updates**: CLI tool runs periodically (cron job, cloud function) to fetch RSS feeds
+- **Public Database**: All users access the same synced articles—no duplicate fetching
+- **Automatic Sync**: Reader app queries CloudKit for new articles since last launch
+- **Offline-First**: Articles cached locally but synchronized across devices via CloudKit
+- **Duplicate Detection**: GUID-based + SHA256 fallback ensures clean data
+
+**Why This Architecture Works**:
+- Reader app stays lightweight (no background RSS parsing)
+- Fresh content available even when app isn't running
+- CloudKit handles sync complexity across all user devices
+- MistKit's batch operations efficiently handle hundreds of articles
 
 **MistKit APIs in Action**:
 ```swift
