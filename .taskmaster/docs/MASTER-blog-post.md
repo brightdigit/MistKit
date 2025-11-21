@@ -1293,6 +1293,16 @@ Claude: [Generates tests for:
 
 Tests validate correctness, but real applications validate design. MistKit needed to prove it could power production software, not just pass unit tests. Enter **Celestra** and **Bushel**—two command-line tools built to stress-test MistKit's API in real-world scenarios.
 
+**Timeline Context - Understanding MistKit's API Before Building**:
+
+> From conversation on November 4, 2025 (before implementing Celestra):
+>
+> **User**: "I need to understand MistKit's API for CloudKit operations to implement the demo CLI tool. **Research Goals:** Find MistKit's main client class/entry point, Record creation and updates, Query operations, Authentication and configuration, Error handling, Async/await patterns... Provide concrete code examples."
+>
+> **Claude**: *[After thorough exploration]* "Based on my exploration of the MistKit codebase, here's a comprehensive guide... **Primary Type: `CloudKitService`**... The main public API is `CloudKitService`... **Initialization Options:** [shows three auth patterns]... **Modify Records (via underlying client):** The `modifyRecords` operation is available through the internal client..."
+>
+> This research-first approach—understanding the actual MistKit API through code exploration rather than assumptions—ensured both examples used idiomatic patterns and discovered rough edges early. Each example became a real-world test of MistKit's ergonomics.
+
 **Celestra: Automated RSS Feed Sync for a Reader App**
 
 [Celestra](https://github.com/brightdigit/Celestra) is an RSS reader app in development—and its CLI backend demonstrates how MistKit enables scheduled, automated CloudKit updates.
@@ -1400,6 +1410,28 @@ Both tools serve as copy-paste starting points for new MistKit projects:
 - Verbose logging modes teach CloudKit concepts as you learn
 - Implementation notes capture design trade-offs and lessons learned
 
+**Timeline Context - Discovery Through Building**:
+
+> From conversation on November 4, 2025 (Celestra implementation planning):
+>
+> **User**: "Create a detailed implementation plan for building the Celestra CLI demo application. Focus on CORE FUNCTIONALITY ONLY (no tests or polish)."
+>
+> **Claude**: "Based on my research, here's a detailed step-by-step implementation plan for building the Celestra RSS reader CLI demo... [discovers] ✅ MistKit has internal modifyRecords() for create/update/delete operations"
+>
+> This moment captured the iterative nature of building with MistKit—each real application revealed what worked, what needed refinement, and what patterns emerged naturally from the type-safe abstractions.
+
+> From conversation on November 3, 2025 (Bushel schema design research):
+>
+> **User**: "I need to understand the Bushel project requirements and current task structure to design CloudKit schemas."
+>
+> **Claude**: *[After thorough exploration]*
+> "**Bushel** is a macOS virtualization application that uses Apple's Virtualization framework to run macOS virtual machines on Apple Silicon... Based on the project structure and dependencies, Bushel manages:
+> 1. **Restore Images (.ipsw files)** - macOS firmware files downloaded from Apple
+> 2. **Virtual Machines** - VM configurations and state
+> 3. **Operating System Versions** - macOS version information"
+>
+> The research phase for each example taught us that CloudKit schemas need to match real-world data models—abstract record types don't prove anything. Bushel's concrete requirements (tracking 6 data sources, managing references between versions and images) drove meaningful schema design decisions.
+
 **[TODO: YOUR PROSE - Reflect on Building Real Apps]**
 
 **Suggested themes**: The satisfaction of seeing MistKit power actual applications, the shift from theory to practice
@@ -1419,6 +1451,16 @@ Building real applications exposed issues no unit test could catch. Here's what 
 **Root Cause**: Missing `DEFINE SCHEMA` header and accidental inclusion of system fields (`__recordID`, `___createTime`, `___modTime`).
 
 **Solution**: Standardized schema format—system fields are automatically managed by CloudKit, never define them manually. Led to creation of automated schema deployment scripts and comprehensive documentation.
+
+**Timeline Context - Schema Validation Discovery**:
+
+> From conversation on November 4, 2025 (validating Bushel data sources):
+>
+> **User**: "I need to verify what data is available from the macOS restore image sources to ensure the CloudKit schema can be populated... Compare available data against the RestoreImage schema fields: version ✓/✗, buildNumber ✓/✗, releaseDate ✓/✗, downloadURL ✓/✗, fileSize ✓/✗, sha256Hash ✓/✗, isSigned ✓/✗, isPrerelease ✓/✗, source ✓/✗. Identify any schema fields that cannot be populated from available sources, and suggest alternatives or adjustments."
+>
+> **Claude**: *[Investigates data sources]* "I'll investigate the available data sources to verify what fields can populate the CloudKit schema."
+>
+> This systematic validation—matching CloudKit schemas to real data sources before writing code—prevented entire categories of runtime failures. The schema design phase caught mismatches between what APIs provide and what our models expected.
 
 **CloudKit Development Tools**
 
