@@ -130,6 +130,15 @@ If code generation worked for wrapping SwiftSyntax, why not for wrapping REST AP
 
 **Key Message**: This isn't just a library rebuild—it's a demonstration of how OpenAPI specifications + AI assistance + code generation create maintainable, evolvable code. When CloudKit's API changes, we update the spec and regenerate. When bugs appear, tests catch them. When features are needed, Claude accelerates implementation. This is sustainable development.
 
+**[TODO: YOUR PROSE - Transition from Part 1 to Part 2]**
+
+**Suggested themes**:
+- Decision made, now comes execution
+- The daunting task of translating Apple's documentation
+- Moving from vision to implementation
+
+**Word count target**: ~50-100 words
+
 ---
 
 ## PART 2: Translating CloudKit Docs to OpenAPI with Claude Code (900 words)
@@ -939,6 +948,15 @@ Day 3: SecureLogging integration added - never log actual private keys or full t
 
 **Result**: Three complete, tested TokenManager implementations in 2 days instead of estimated week.
 
+**[TODO: YOUR PROSE - Transition from Part 3 to Part 4]**
+
+**Suggested themes**:
+- Generated code works, but it's not ergonomic
+- The realization that abstraction is needed
+- Moving from working code to developer-friendly API
+
+**Word count target**: ~50-100 words
+
 ---
 
 ## PART 4: Building the Abstraction Layer with Claude Code (900 words)
@@ -1157,6 +1175,15 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
 - Generated test cases for all field value types
 - Found edge cases (empty lists, nil values, malformed data)
 
+**[TODO: YOUR PROSE - Transition from Part 4 to Part 5]**
+
+**Suggested themes**:
+- API complete, but is it correct?
+- The importance of comprehensive testing
+- Moving from implementation to validation
+
+**Word count target**: ~50-100 words
+
 ---
 
 ## PART 5: Testing with Claude Code - September 2024 (400 words)
@@ -1237,6 +1264,15 @@ Claude: [Generates tests for:
 
 **Key Insight**: Test generation is where Claude really shines—repetitive but critical work done quickly and thoroughly.
 
+**[TODO: YOUR PROSE - Transition from Part 5 to Part 6]**
+
+**Suggested themes**:
+- Tests prove correctness, but do they prove usability?
+- The need to build real applications
+- Moving from unit tests to integration testing
+
+**Word count target**: ~50-100 words
+
 ---
 
 ## PART 6: The Proof - Building Real Applications (550 words)
@@ -1284,17 +1320,51 @@ let operations = articles.map { article in
 service.modifyRecords(operations, atomic: false)
 ```
 
-**Design Choice**: Celestra uses string-based relationships (storing recordName as string field) rather than CloudKit References—simpler for read-heavy applications where you don't need automatic cascade deletes.
+**Design Choice - String-Based vs CloudKit References**:
 
-**Bushel: Apple Software Version Tracker**
+Celestra uses string-based relationships, storing the related record's `recordName` as a String field:
+```swift
+fields["feedID"] = .string("feed-123")  // Store recordName as string
+```
 
-[Bushel](https://github.com/brightdigit/Bushel) tracks macOS restore images, Xcode versions, and Swift compiler releases, demonstrating advanced CloudKit patterns at scale.
+**Why strings work for Celestra:**
+- ✅ **Simple one-way relationships**: Articles → Feeds (just need to display feed name)
+- ✅ **Read-heavy pattern**: Fetch article, show feed name—no need to load full Feed record
+- ✅ **No cascade delete complexity**: Deleting a feed doesn't need to auto-delete articles
+- ❌ **Manual relationship management**: You query related records yourself
 
-**What It Does**:
-- Aggregates data from 6 sources (ipsw.me, AppleDB.dev, xcodereleases.com, swift.org, MESU, Mr. Macintosh)
-- Deduplicates across sources using buildNumber as unique key
-- Manages three record types with CloudKit References for relationships
-- Respects 200-operation-per-request CloudKit limit
+**CloudKit References (what Bushel uses):**
+```swift
+fields["feedID"] = .reference(Reference(recordName: "feed-123"))  // Type-safe reference
+```
+
+**Why Bushel uses References:**
+- ✅ **Referential integrity**: CloudKit validates relationships exist
+- ✅ **Cascade delete options**: Delete parent → optionally delete children
+- ✅ **Type-safe**: Compiler catches invalid relationships
+- ❌ **More complex**: Need to manage reference semantics
+
+**The Trade-Off**: Use strings for simple display relationships; use References for complex data models with referential integrity requirements.
+
+**Bushel: Powering a macOS VM App with CloudKit**
+
+[Bushel](https://getbushel.app) is a macOS virtualization app for developers—and [its data backend](https://github.com/brightdigit/Bushel) demonstrates how MistKit powers real-world CloudKit applications at scale.
+
+**The Big Picture**:
+The Bushel VM app needs a comprehensive, queryable database of macOS restore images and Xcode versions to create VMs. Rather than embedding static data, it queries CloudKit's public database—populated and maintained by the Bushel CLI tool built with MistKit.
+
+**How CloudKit Powers Bushel**:
+- **Public Database**: Worldwide access to version history without embedding static JSON
+- **Automated Updates**: CLI tool syncs latest restore images, Xcode, and Swift versions daily
+- **Queryable**: VM app queries for "macOS 15.2 restore images" → gets latest metadata
+- **Scalable**: 6 data sources (ipsw.me, AppleDB.dev, xcodereleases.com, swift.org, MESU, Mr. Macintosh) aggregated automatically
+- **Deduplication**: buildNumber-based deduplication ensures clean data
+
+**Why This Architecture Works**:
+- VM app stays lightweight (no embedded version database)
+- Data stays current (CLI syncs new releases automatically)
+- Community benefit (public CloudKit database = shared resource)
+- MistKit handles all CloudKit complexity (authentication, batching, relationships)
 
 **MistKit APIs in Action**:
 ```swift
@@ -1334,17 +1404,33 @@ Building real applications exposed issues no unit test could catch. Here's what 
 
 **Solution**: Standardized schema format—system fields are automatically managed by CloudKit, never define them manually. Led to creation of automated schema deployment scripts and comprehensive documentation.
 
-**Authentication Terminology Confusion**
+**CloudKit Development Tools**
 
-**Problem**: Dashboard uses "API Token", documentation mentions "Server-to-Server Keys", CLI tools expect different formats—which token goes where?
+Debugging these issues required understanding CloudKit's development toolchain:
 
-**Root Cause**: CloudKit has multiple authentication methods with overlapping terminology, poorly documented.
+**cktool** - Command-line interface for CloudKit management
+- `cktool import-schema --file schema.ckdb` - Deploy schemas programmatically
+- `cktool get-teams` - Validate authentication and container access
+- `cktool export-schema` - Extract current schema for version control
+- Essential for automated schema deployment in CI/CD pipelines
 
-**Solution**: Clear taxonomy in MistKit docs:
-- **API Token**: Web dashboard read-only access
-- **Server-to-Server Key**: ECDSA P-256 private key for automated services (what Bushel/Celestra use)
-- **Web Auth Token**: User-specific token for client applications
-- **Management Token**: Admin operations (schema deployment)
+**CloudKit Console** - Web dashboard (icloud.developer.apple.com)
+- Visual schema editor for designing record types
+- Data browser for inspecting live records
+- API Access section for Server-to-Server Key management
+- Container configuration and environment settings
+
+**Swift Package Manager Integration**
+- Schema validation during builds (parse .ckdb files for syntax errors)
+- Automated cktool invocation via build scripts
+- Environment variable management for credentials
+
+**The Development Loop**:
+1. Design schema in .ckdb file (version controlled)
+2. Validate locally: `cktool import-schema --dry-run --file schema.ckdb`
+3. Deploy to development: `cktool import-schema --file schema.ckdb`
+4. Test with MistKit-powered CLI tools (Bushel/Celestra)
+5. Iterate based on real-world usage
 
 **Batch Operation Limits**
 
@@ -1374,6 +1460,15 @@ Building real applications exposed issues no unit test could catch. Here's what 
 ✅ Real-world usage patterns documented for future developers
 
 MistKit isn't academic—it's battle-tested by building actual software.
+
+**[TODO: YOUR PROSE - Transition from Part 6 to Part 7]**
+
+**Suggested themes**:
+- Real apps validated the design—now, reflecting on the journey
+- Stepping back to learn from the process
+- What worked, what didn't, what surprised you
+
+**Word count target**: ~50-100 words
 
 ---
 
@@ -1673,6 +1768,15 @@ Claude: "Updated, and I noticed you might want constraints on these fields"
 ```
 
 **Key Insight**: Without these guardrails, demos would "work" locally but fail in production. Claude accelerated mechanical work (4x speed increase); human judgment ensured correctness and maintainability.
+
+**[TODO: YOUR PROSE - Transition from Part 7 to Part 8]**
+
+**Suggested themes**:
+- Lessons learned, patterns established—time to wrap up
+- Looking at the bigger picture
+- What this means for future development
+
+**Word count target**: ~50-100 words
 
 ---
 
