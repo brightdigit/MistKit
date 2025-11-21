@@ -14,6 +14,18 @@
 
 ## PART 1: Introduction - The Decision to Rebuild (650 words)
 
+**[TODO: YOUR PROSE - Part 1 Opening]**
+
+**Suggested themes**:
+- Personal reflection on the state of MistKit v0.2 in summer 2024
+- The feeling of seeing a project you care about fall behind
+- What motivated you to tackle this rebuild rather than abandon it
+- Connection to SyntaxKit success giving you confidence
+
+**Word count target**: ~100-150 words
+
+---
+
 ### Opening: Transition from SyntaxKit
 
 **Opening Paragraph**:
@@ -33,8 +45,6 @@ MistKit v0.2 was showing its age:
 - Only 15% test coverage
 - 437 SwiftLint violations
 
-For a library meant to make CloudKit easier, it had become difficult to maintain.
-
 ### Section 1.2: The Need for Change (~100 words)
 
 Swift had transformed while MistKit stood still:
@@ -49,14 +59,18 @@ MistKit v0.2, frozen in 2021, couldn't take advantage of any of this.
 
 **The SyntaxKit Pattern Applied**:
 
-SyntaxKit taught me that code generation isn't about laziness—it's about correctness:
-- **SwiftSyntax** (verbose API) → Code generation → **Elegant DSL**
-- Pattern: Generate for precision, abstract for ergonomics
-- Used result builders for compile-time generation
+SyntaxKit taught me that code generation isn't about laziness—it's about correctness. When you hand-write API calls, typos and mistakes slip through until runtime. But when you generate code from a specification (like SwiftSyntax's AST or an OpenAPI document), the compiler catches errors immediately. If it compiles, it's correct.
 
-MistKit would apply the same philosophy to a different domain:
+**The Pattern**:
+- **Generate for precision**: Use code generation to ensure API calls are always valid
+- **Abstract for ergonomics**: Wrap generated code in friendly, idiomatic interfaces
+- **Let the compiler enforce correctness**: Type system prevents invalid usage
+
+**SyntaxKit Example**: Transformed 80+ lines of SwiftSyntax boilerplate into 10 lines of elegant DSL—guaranteed correct by the compiler.
+
+**MistKit Application**: Same philosophy, different domain:
 - **CloudKit REST API** (complex, prose documentation) → OpenAPI specification → **Type-safe Swift client** → Clean abstraction
-- Same pattern, different application
+- If the OpenAPI spec is correct and code generation is reliable, the resulting client is automatically correct
 
 **The Key Insight**:
 If code generation worked for wrapping SwiftSyntax, why not for wrapping REST APIs?
@@ -73,7 +87,7 @@ If code generation worked for wrapping SwiftSyntax, why not for wrapping REST AP
 
 1. **OpenAPI specification** = Source of truth for CloudKit API
    - Handles API accuracy through code generation
-   - 10,476 lines of type-safe code
+   - 10,476 lines of generated type-safe code (via swift-openapi-generator)
 
 2. **Claude Code** = Development partner
    - Accelerates tests, refactoring, iteration
@@ -87,16 +101,28 @@ If code generation worked for wrapping SwiftSyntax, why not for wrapping REST AP
 **Timeline**: Three months (July-September 2024)
 
 **The Result**:
-- 10,476 lines of generated type-safe code
+- 10,476 lines of generated type-safe code (via swift-openapi-generator)
 - 161 comprehensive tests (most written with Claude's help)
 - Three authentication methods
 - Maintainable, evolvable codebase
 
-**Key Message**: This isn't just a library rebuild—it's a demonstration of sustainable development through collaboration.
+**Key Message**: This isn't just a library rebuild—it's a demonstration of how OpenAPI specifications + AI assistance + code generation create maintainable, evolvable code. When CloudKit's API changes, we update the spec and regenerate. When bugs appear, tests catch them. When features are needed, Claude accelerates implementation. This is sustainable development.
 
 ---
 
 ## PART 2: Translating CloudKit Docs to OpenAPI with Claude Code (900 words)
+
+**[TODO: YOUR PROSE - Part 2 Opening]**
+
+**Suggested themes**:
+- The moment you decided OpenAPI was the right approach
+- Your mindset starting the OpenAPI translation work
+- First impressions of Apple's CloudKit documentation
+- Anticipation/anxiety about the translation challenge ahead
+
+**Word count target**: ~100-150 words
+
+---
 
 ### Section 2.1: Why OpenAPI? (~150 words)
 
@@ -107,7 +133,7 @@ If code generation worked for wrapping SwiftSyntax, why not for wrapping REST AP
 - Apple's documentation describes every endpoint, parameter, response
 - Instead of manually translating docs → Swift code (and keeping in sync):
   1. Create OpenAPI spec from Apple's docs
-  2. Use swift-openapi-generator for type-safe Swift code
+  2. Use swift-openapi-generator (Apple's official OpenAPI code generation tool) for type-safe Swift code
   3. Build friendly abstraction on top
 
 **Benefits**:
@@ -118,19 +144,15 @@ If code generation worked for wrapping SwiftSyntax, why not for wrapping REST AP
 
 ### Section 2.2: The Translation Challenge (~150 words)
 
-**[TODO: Write narrative introduction before technical examples]**
+**[TODO: YOUR PROSE - Introduction to translation challenge]**
 
-**Word Count Target**: ~150-200 words
+**Suggested themes**:
+- Your experience creating OpenAPI specs for other APIs
+- Why CloudKit's prose documentation needed translation to machine-readable format
+- The challenge of transforming Apple's documentation style into structured YAML
+- Setting up the technical examples that follow
 
-**Key Points to Cover**:
-- The llm.codes story (how you manually created OpenAPI for other APIs before)
-- Why CloudKit docs specifically needed translation
-- The challenge of prose → machine-readable transformation
-- How this sets up the technical examples below
-
-**Source Materials**:
-- Your experience with manual OpenAPI creation
-- CloudKit documentation challenges you encountered
+**Word count target**: ~150-200 words
 
 ---
 
@@ -316,6 +338,18 @@ FieldValue:
 
 **Key Insight**: Claude excels at suggesting patterns and expanding them. I provide domain knowledge and edge cases. Together we refine to the final design.
 
+**[TODO: YOUR PROSE - Breakthrough moment: Solving FieldValue polymorphism]**
+
+**Suggested themes**:
+- The satisfaction/relief of solving the dynamic typing challenge
+- How this collaboration with Claude felt different from solo problem-solving
+- The moment you realized the `oneOf` pattern would work
+- Confidence boost from solving a hard problem together
+
+**Word count target**: ~100 words
+
+---
+
 **Example 2: Field Values - Before and After**
 
 ### Before: Apple's Prose Documentation
@@ -405,7 +439,7 @@ enum FieldValue {
 let field: FieldValue = .string("Mei")
 ```
 
-> **Implementation Note**: See Part 4, Section 4.4 for the CustomFieldValue implementation that solved this challenge.
+> **Implementation Note**: See Part 4, Section 4.3 for the CustomFieldValue implementation that solved this challenge.
 
 ### Section 2.4: Authentication - Three Methods, One Spec (~200 words)
 
@@ -563,13 +597,64 @@ This enables:
 
 **Key Message**: Claude Code shines at iterative refinement of structured data.
 
+**Timeline Excerpt - July 2024: The OpenAPI Creation Sprint**
+
+The actual work of creating the OpenAPI specification took 4 days in July 2024:
+- **Week 1-2**: Started with Apple's CloudKit Web Services documentation
+- Iterative refinement with Claude (sketch → expand → review → refine)
+- Field Value polymorphism solved (oneOf pattern with ASSETID quirk)
+- Authentication modeling complete (three security schemes)
+
+**Claude's Impact**:
+- **Accelerated spec creation**: 4 days vs estimated 1 week solo
+- Suggested middleware pattern for auth early
+- Generated consistent endpoint patterns across 15 operations
+
+**Week 3-4: Package Structure & Architecture**
+- Three-layer architecture chosen
+- TokenManager protocol designed with Claude
+- Middleware chain planned (Auth → Logging)
+- I defined goals (security, testability, clean public API)
+- Claude proposed three-layer pattern with middleware
+- Together refined TokenManager protocol with actor isolation
+
+**[TODO: YOUR PROSE - Transition from OpenAPI spec to code generation]**
+
+**Suggested themes**:
+- The satisfying moment of completing the OpenAPI spec
+- Anticipation of running the generator for the first time
+- Shift from "design" mode to "implementation" mode
+
+**Word count target**: ~75-100 words
+
 ---
 
 ## PART 3: swift-openapi-generator Integration and Challenges (800 words)
 
+**[TODO: YOUR PROSE - Part 3 Opening]**
+
+**Suggested themes**:
+- Transition from spec creation to actual code generation
+- Excitement/nervousness about seeing generated code for the first time
+- First impressions of swift-openapi-generator output
+- Realizing you'll need to solve the auth method challenge
+
+**Word count target**: ~100-150 words
+
+---
+
 ### Section 3.1: Why swift-openapi-generator? (~150 words)
 
-Apple announced `swift-openapi-generator` at WWDC 2023:
+**What Is swift-openapi-generator?**
+
+Apple announced `swift-openapi-generator` at WWDC 2023—a tool that reads OpenAPI specifications and automatically generates type-safe Swift client code. Think of it as a translator: you give it an OpenAPI YAML file describing a REST API, and it produces Swift types, API client methods, and all the networking boilerplate.
+
+**From OpenAPI spec → Generated Swift code**:
+- Request/response types (Codable structs)
+- API client with async methods
+- Type-safe enums for endpoints, parameters, headers
+- Error handling types
+- URL building and JSON serialization
 
 **Why It's the Right Choice**:
 - ✅ Official Apple tool (Swift Server Workgroup)
@@ -736,27 +821,21 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
 
 This iterative implementation—design the protocol abstraction, implement each auth method, integrate with middleware, then validate with real CloudKit—took 3 days with Claude vs an estimated 1-2 weeks solo.
 
-> **Implementation Details**: The TokenManager protocol design is detailed in Part 4, Section 4.3.
+**[TODO: YOUR PROSE - Breakthrough: Authentication working end-to-end]**
 
-### Section 3.3: Cross-Platform Crypto (~100 words)
+**Suggested themes**:
+- The excitement of seeing the first successful authenticated CloudKit request
+- Relief that the middleware pattern actually worked
+- Validation that the architecture decisions were sound
+- Confidence boost for tackling remaining challenges
 
-**The Issue**:
-- macOS: `import Crypto` is ambiguous (CryptoKit vs swift-crypto)
-- Linux: Only swift-crypto available
-- Both provide similar APIs but different implementations
+**Word count target**: ~100 words
 
-**The Solution**:
-```swift
-#if canImport(CryptoKit)
-import CryptoKit
-#else
-import Crypto
-#endif
-```
+---
 
-Ensures correct crypto library on each platform while maintaining API compatibility.
+> **Implementation Details**: The TokenManager protocol design is detailed in Part 4, Section 4.2.
 
-### Section 3.4: Generated Code Quality (~200 words)
+### Section 3.3: Generated Code Quality (~200 words)
 
 **What Gets Generated**:
 
@@ -812,19 +891,43 @@ let input = Operations.queryRecords.Input(
 
 If it compiles, it's valid CloudKit API usage.
 
-### Section 3.5: Pre-Generation Strategy (~50 words)
+**Timeline Excerpt - August 2024: Implementation Sprint**
 
-**Why We Commit Generated Code**:
-- ✅ Faster builds for library consumers
-- ✅ Reviewable generated code in PRs
-- ✅ No tool dependencies for users
-- ✅ Better IDE autocomplete experience
+**Week 1-2: Generated Client Integration**
+- swift-openapi-generator setup and configuration
+- Authentication middleware challenge (runtime selection) - solved with middleware pattern
+- Type overrides for CustomFieldValue
 
-**Workflow**: Edit spec → Regenerate → Review → Commit both
+**Week 3-4: Abstraction Layer**
+- Public API design (CloudKitService wrapper)
+- Three TokenManager implementations
+- Middleware chain integration
+- Error handling patterns
+
+**The TokenManager Sprint - 2 Days**:
+```
+Day 1: Claude generates drafts for all three implementations with actor isolation (30 minutes)
+Day 2: ServerToServer updated with ECDSA signing based on Apple's signature format
+Day 3: SecureLogging integration added - never log actual private keys or full tokens
+```
+
+**Result**: Three complete, tested TokenManager implementations in 2 days instead of estimated week.
 
 ---
 
 ## PART 4: Building the Abstraction Layer with Claude Code (900 words)
+
+**[TODO: YOUR PROSE - Part 4 Opening]**
+
+**Suggested themes**:
+- Realizing generated code needed an abstraction layer
+- Tension between type safety and developer experience
+- Design session planning the public API
+- Vision for what you wanted the final API to feel like
+
+**Word count target**: ~100-150 words
+
+---
 
 ### Section 4.1: The Problem with Raw Generated Code (~150 words)
 
@@ -989,52 +1092,7 @@ Claude: "ClientMiddleware pattern:
 
 **Key Point**: This architectural discussion happened over multiple sessions. Claude would draft, I'd refine security/performance, Claude would regenerate. True collaboration.
 
-### Section 4.3: Modern Swift Features (~200 words)
-
-**1. Async/Await Throughout**:
-```swift
-protocol TokenManager: Sendable {
-    var hasCredentials: Bool { get async }
-    func validateCredentials() async throws -> Bool
-    func getCurrentCredentials() async throws -> TokenCredentials?
-}
-```
-
-**2. Sendable Compliance**:
-All types are `Sendable` for concurrency safety:
-```swift
-internal struct MistKitConfiguration: Sendable {
-    internal let container: String
-    internal let environment: Environment
-    internal let database: Database
-    internal let apiToken: String
-    // All let properties - inherently thread-safe
-}
-```
-
-**3. Actors for Thread Safety**:
-```swift
-actor ServerToServerAuthManager: TokenManager {
-    private var privateKey: P256.Signing.PrivateKey
-
-    func signRequest(_ request: URLRequest) async throws -> URLRequest {
-        // Thread-safe by design
-    }
-}
-```
-
-**4. Protocol-Oriented Design**:
-- TokenManager protocol
-- Three implementations: APITokenManager, WebAuthTokenManager, ServerToServerAuthManager
-- Easy testing with mocks
-- Flexible implementation swapping
-
-**5. Typed Throws (Swift 6)**:
-```swift
-func validateCredentials() async throws(TokenManagerError) -> Bool
-```
-
-### Section 4.4: CustomFieldValue - The Design Decision (~150 words)
+### Section 4.3: CustomFieldValue - The Design Decision (~150 words)
 
 **The Question**: Override generated `FieldValue` or use it as-is?
 
@@ -1073,174 +1131,72 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
 - Generated test cases for all field value types
 - Found edge cases (empty lists, nil values, malformed data)
 
-### Section 4.5: Security Built-In (~100 words)
+### Section 4.4: Real-World Validation with Bushel and Celestra (~300 words)
 
-**Automatic Credential Masking**:
+MistKit isn't just theory—it powers real applications that validate the API design works in production.
 
+**Bushel: Xcode Version History Tracker**
+
+[Bushel](https://github.com/brightdigit/Bushel) tracks Xcode beta and release versions, storing metadata in CloudKit for version history analysis.
+
+**How Bushel Uses MistKit**:
+- **Xcode restore image metadata** stored as CloudKit records
+- **Authentication**: Server-to-server with ECDSA signatures for automated scraping
+- **Sync operations**: Query latest versions, create/update records, handle conflicts
+- **Type safety**: CustomFieldValue handles version numbers, dates, URLs, and nested metadata
+
+**Example - Storing Xcode Version Data**:
 ```swift
-internal enum SecureLogging {
-    internal static func maskToken(_ token: String) -> String {
-        guard token.count > 8 else { return "***" }
-        let prefix = token.prefix(4)
-        let suffix = token.suffix(4)
-        return "\(prefix)***\(suffix)"
-    }
-}
+let record = try await mistKit.createRecord(
+    type: "XcodeVersion",
+    fields: [
+        "version": .string("15.0"),
+        "buildNumber": .string("15A240d"),
+        "releaseDate": .timestamp(date),
+        "downloadURL": .string(url),
+        "fileSize": .int64(bytes),
+        "sha256": .bytes(checksum)
+    ]
+)
 ```
 
-**In LoggingMiddleware**:
-```swift
-private func formatQueryValue(for item: URLQueryItem) -> String {
-    guard let value = item.value else { return "nil" }
+**What Bushel Validated**:
+- ✅ Server-to-server authentication works for automated tasks
+- ✅ CustomFieldValue handles diverse CloudKit types correctly
+- ✅ Error handling catches API rate limiting and conflicts
+- ✅ Type safety prevents invalid field assignments at compile time
 
-    if item.name.lowercased().contains("token") ||
-       item.name.lowercased().contains("key") {
-        return SecureLogging.maskToken(value)
-    }
+**Celestra: RSS Feed Aggregator**
 
-    return value
-}
-```
+[Celestra](https://github.com/brightdigit/Celestra) aggregates RSS feeds with CloudKit sync for read-later functionality across devices.
 
-**Output**:
-```
-🌐 CloudKit Request: POST /database/1/iCloud.com.example/production/private/records/query
-  ckAPIToken: c34a***7d9f
-  ckWebAuthToken: 9f2e***4b1a
-```
+**How Celestra Uses MistKit**:
+- **Feed items and subscriptions** synchronized via CloudKit private database
+- **Authentication**: API token + web auth for user-specific data
+- **Real-time sync**: Query changes, handle merge conflicts, paginate large feed lists
+- **Cross-device**: Same data accessible from macOS, iOS, and web
 
-**Claude Generated Logging**: I added security constraints (never log full tokens, mask private keys)
+**What Celestra Validated**:
+- ✅ Web authentication works for user-facing applications
+- ✅ Query pagination handles large result sets efficiently
+- ✅ Record modification and conflict resolution works correctly
+- ✅ Cross-platform Swift (macOS + iOS) works seamlessly
 
-> **Lessons Learned**: For insights about working with Claude on this architecture, see Part 6: Lessons Learned.
+**The Proof**: Both applications are in active development, using MistKit daily. Real-world usage found edge cases, validated design decisions, and proved the abstraction layer works as intended. MistKit isn't academic—it's battle-tested.
 
 ---
 
-## PART 5: The Three-Month Journey with Claude Code (800 words)
+## PART 5: Testing with Claude Code - September 2024 (400 words)
 
-### Section 5.1: Phase 1 - Foundation (July 2024) (~200 words)
+**[TODO: YOUR PROSE - Part 5 Opening]**
 
-**Week 1-2: OpenAPI Specification Creation**
+**Suggested themes**:
+- The daunting feeling of 15% test coverage needing to become comprehensive
+- Why testing mattered so much for this project
+- Decision to use Claude for test generation
+- Expectations vs. reality of AI-generated tests
 
-The Journey:
-- Started with Apple's CloudKit Web Services documentation
-- Iterative refinement with Claude (sketch → expand → review → refine)
-- Field Value polymorphism solved (oneOf pattern with ASSETID quirk)
-- Authentication modeling complete (three security schemes)
-
-Claude's Impact:
-- **Accelerated spec creation**: 4 days vs estimated 1 week solo
-- Suggested middleware pattern for auth early
-- Generated consistent endpoint patterns across 15 operations
-
-**Week 3-4: Package Structure & Architecture**
-
-Decisions Made:
-- Three-layer architecture chosen
-- TokenManager protocol designed with Claude
-- Middleware chain planned (Auth → Logging)
-- Pre-generation strategy selected
-
-Architecture Session:
-- I defined goals (security, testability, clean public API)
-- Claude proposed three-layer pattern with middleware
-- Together refined TokenManager protocol with actor isolation
-
-### Section 5.2: Phase 2 - Implementation (August 2024) (~250 words)
-
-**[TODO: Expand with timeline specifics and PR #132 details]**
-
-**Key Details to Add** (from timeline):
-
-**Phase 4: Major Refactoring - PR #132 (November 6, 2025)**
-
-**41-Item Code Review Implementation** organized into 5 Priority Phases:
-
-**Phase 1: Type System Migration**
-- Changed Int64 → Int for fileSize fields
-- Updated RecordBuilder to use `.boolean()` helper
-- Migrated data source fetchers
-- Fixed force unwraps
-- Result: Clean build in 3.81 seconds
-
-**Phase 2: Critical Bugs & Error Handling**
-- Enhanced DataSourcePipeline for SHA-256 backfilling
-- Implemented XcodeVersion → RestoreImage reference resolution
-- Fixed CloudKitResponseProcessor error detail extraction
-- Added CloudKitError.underlyingError case
-- Documented sentinel value pattern
-
-**Workflow Innovation:**
-- Used `/compact` command to preserve todo state across sessions
-- 42-item checklist for progress tracking
-- Branch: pr132-code-review-fixes
-- Phased commits for each milestone
-
-**Comparison**: TokenManager sprint: 3 implementations in 2 days vs 1 week solo estimate
-
-**Timeline Context to Add**: Search Oct-Nov 2025 for "refactor", "PR #132"
-
----
-
-**Week 1-2: Generated Client Integration**
-
-Challenges:
-- swift-openapi-generator setup and configuration
-- Authentication middleware challenge (runtime selection)
-- Cross-platform crypto issues (CryptoKit vs swift-crypto)
-
-Solutions:
-- Middleware pattern for runtime auth selection
-- Conditional imports for crypto compatibility
-- Type overrides for CustomFieldValue
-
-**Week 3-4: Abstraction Layer**
-
-Work Completed:
-- Public API design (CloudKitService wrapper)
-- Three TokenManager implementations
-- Middleware chain integration
-- Error handling patterns
-
-**Claude's Acceleration - TokenManager Sprint**:
-
-```
-Day 1:
-Me: "I need three TokenManager implementations: API, WebAuth, ServerToServer"
-Claude: [Generates drafts for all three with actor isolation in 30 minutes]
-
-Day 2:
-Me: "ServerToServer needs ECDSA signing. Here's Apple's signature format."
-Claude: [Updates ServerToServerAuthManager with ECDSA implementation]
-
-Day 3:
-Me: "Add secure logging - never log actual private keys or full tokens"
-Claude: [Adds SecureLogging integration, masks sensitive data in logs]
-```
-
-**Result**: Three complete, tested implementations in 2 days instead of estimated week.
-
-### Section 5.3: Phase 3 - Testing Explosion (September 2024) (~250 words)
-
-**[TODO: Verify completeness - YOUR EXPLICIT REQUEST #2]**
-
-**This section looks complete already!** Contains:
-- Testing challenge (15% → comprehensive)
-- Week-by-week sprint narrative
-- Final metrics: 161 tests, 47 files
-- Timeline: 1 week with Claude vs 2-3 weeks solo
-
-**Optional Addition** (from timeline - Phase 5: Testing Infrastructure, November 13, 2025):
-
-**Xcode 16.2 Testing Challenge:**
-- Discovered critical bug: "Received unexpected event testCaseDidFinish while subtests are still running"
-- Solution: `@Test(.serialized)` attribute for problematic concurrent tests
-- Added availability guards to 57 test methods across 4 files
-- Pattern: `guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)`
-- Test Suite Metrics: 300+ tests passing
-- Platform coverage: macOS, iOS, tvOS, watchOS
-- iOS Simulator testing: iPhone 16 Pro, iOS 18.5
-
-**Timeline Context**: Add excerpt from Nov 13, 2025 about concurrent test bug discovery if desired
+**Word count target**: ~100-150 words
 
 ---
 
@@ -1249,7 +1205,7 @@ Claude: [Adds SecureLogging integration, masks sensitive data in logs]
 - Goal: Comprehensive tests for v1.0 Alpha
 - Needed: Authentication tests, all field types, error cases, edge cases
 
-**The Claude Code Testing Sprint**:
+**The Claude Code Testing Sprint - September 2024**:
 
 **Week 1: Authentication Testing**
 ```
@@ -1308,29 +1264,21 @@ Claude: [Generates tests for:
 
 **Key Insight**: Test generation is where Claude really shines—repetitive but critical work done quickly and thoroughly.
 
-### Section 5.4: Challenges Overcome (~100 words)
-
-**Cross-Platform Crypto**:
-- Challenge: Import ambiguity
-- Solution: Conditional compilation
-
-**Authentication Middleware**:
-- Challenge: Three methods, one endpoint
-- Solution: Runtime selection pattern with TokenManager
-
-**Field Value Polymorphism**:
-- Challenge: Dynamic typing in static language
-- Solution: CustomFieldValue override with oneOf pattern
-
-**Test Organization**:
-- Challenge: 161 tests maintainability
-- Solution: 47 focused test files by feature/type
-
-**Key Message**: Three-month timeline only possible with Claude's acceleration.
-
 ---
 
 ## PART 6: Lessons Learned - Building with Claude Code (750 words)
+
+**[TODO: YOUR PROSE - Part 6 Opening]**
+
+**Suggested themes**:
+- Reflecting on the three-month journey
+- What surprised you most about working with Claude
+- Contrasting this experience with previous AI-assisted projects
+- Key realizations about AI's role in development
+
+**Word count target**: ~100-150 words
+
+---
 
 ### Section 6.1: What Claude Code Excelled At (~250 words)
 
@@ -1618,6 +1566,18 @@ Claude: "Updated, and I noticed you might want constraints on these fields"
 ---
 
 ## PART 7: Conclusion - The OpenAPI + Claude Code Pattern (700 words)
+
+**[TODO: YOUR PROSE - Part 7 Opening]**
+
+**Suggested themes**:
+- Looking back at the completed rebuild
+- Feelings about the final result
+- What this project taught you about modern development
+- Vision for where this approach goes next
+
+**Word count target**: ~100-150 words
+
+---
 
 ### Section 7.1: The Pattern Emerges (~200 words)
 
