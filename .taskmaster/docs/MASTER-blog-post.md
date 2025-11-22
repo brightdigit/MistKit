@@ -153,6 +153,16 @@ If code generation worked for wrapping SwiftSyntax, why not for wrapping REST AP
 
 **Word count target**: ~100-150 words
 
+**[REFERENCE NARRATIVE: From blog-post-outline-restructured.md]**
+
+The restructured outline included your personal experience with the OpenAPI translation process, including:
+- How you used https://llm.codes to transform Apple's documentation sources into markdown
+- The iterative workflow that emerged with Claude (sketch → expand → review → refine)
+- Your specific decision-making process for Field Value polymorphism
+- The authentication challenge and how you arrived at the middleware solution
+
+Consider incorporating elements of this workflow into your prose to make the technical journey more personal and relatable.
+
 ---
 
 ### Section 2.1: Why OpenAPI? (~150 words)
@@ -389,6 +399,17 @@ FieldValue:
 - Confidence boost from solving a hard problem together
 
 **Word count target**: ~100 words
+
+**[REFERENCE NARRATIVE: From blog-post-outline-restructured.md]**
+
+Your outline described the specific conversation flow where:
+1. You presented CloudKit's field value structure from Apple's docs
+2. Claude suggested the `oneOf` pattern for discriminated unions
+3. You identified the ASSETID quirk (different from ASSET, despite similar structure)
+4. Claude suggested the type override approach with CustomFieldValue
+5. You requested test cases, Claude generated comprehensive coverage for all 10 field types
+
+This collaborative problem-solving—where you provided domain knowledge and Claude provided OpenAPI patterns—became the template for the entire specification creation process.
 
 ---
 
@@ -866,6 +887,16 @@ This iterative implementation—design the protocol abstraction, implement each 
 
 **Word count target**: ~100 words
 
+**[REFERENCE NARRATIVE: From mistkit-development-timeline.md]**
+
+The timeline documents show that on September 20, 2025, after completing the authentication layer implementation, you ran MistDemo successfully for the first time. The demo:
+- ✅ Used Web Authentication (API token + web auth token)
+- ✅ Made multiple successful CloudKit API calls
+- ✅ AuthenticationMiddleware properly added all required parameters
+- ✅ Successfully retrieved TodoItem records from CloudKit
+
+This moment validated the entire middleware architecture - the TokenManager protocol abstraction, the runtime authentication selection, and the actor isolation for thread safety all worked together seamlessly. The 3-day authentication implementation sprint (vs. estimated 1-2 weeks solo) proved that the Claude Code collaboration approach was not just faster, but produced production-quality results.
+
 ---
 
 > **Implementation Details**: The TokenManager protocol design is detailed in Part 4, Section 4.2.
@@ -876,10 +907,13 @@ This iterative implementation—design the protocol abstraction, implement each 
 
 **Final Numbers**:
 - **10,476 total lines** of generated Swift code
-- **Client.swift** (3,268 lines) - API client implementation
-- **Types.swift** (7,208 lines) - Data models and operation types
+  - **Client.swift** (3,268 lines) - API client implementation with 15 async operations
+  - **Types.swift** (7,208 lines) - Data models and operation types
 - **15 operations** fully implemented
 - **100% CloudKit API coverage** for specified endpoints
+- All types are `Codable` (automatic JSON serialization)
+- All types are `Sendable` (concurrency-safe)
+- All operations use `async/await`
 
 **Generated Features**:
 - All types are `Codable` (automatic JSON serialization)
@@ -1247,12 +1281,16 @@ Claude: [Generates tests for:
 ```
 
 **Final Testing Numbers**:
-- **161 tests** across 47 test files
+- **300+ tests** total across the entire test suite
+- **161 test methods** covering core functionality
+- **66 test files** organized by feature
+- **47 test files** for CloudKit operations specifically
 - All operations tested
 - All authentication methods tested
 - All field value types tested
 - All error codes tested
 - Comprehensive edge case coverage
+- Platform coverage: macOS, iOS, tvOS, watchOS
 
 **Claude's Contribution**:
 - Generated ~80% of test code
@@ -1263,6 +1301,23 @@ Claude: [Generates tests for:
 **Timeline**: Would have taken 2-3 weeks solo, completed in 1 week with Claude.
 
 **Key Insight**: Test generation is where Claude really shines—repetitive but critical work done quickly and thoroughly.
+
+**The Xcode 16.2 Test Serialization Challenge**:
+
+During the testing phase, we discovered a critical bug in Xcode 16.2's Swift Testing framework:
+
+```
+Error: Received unexpected event testCaseDidFinish while subtests are still running
+```
+
+**The Problem**: Concurrent test execution was causing race conditions in the test runner itself.
+
+**The Solution**: Applied `@Test(.serialized)` attribute to problematic tests
+- 57 test methods across 4 files required serialization
+- Added platform availability guards for crypto-dependent tests
+- Pattern: `guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)`
+
+**Result**: All 300+ tests passing reliably across all platforms (macOS, iOS, tvOS, watchOS)
 
 **[TODO: YOUR PROSE - Transition from Part 5 to Part 6]**
 
@@ -1276,6 +1331,15 @@ Claude: [Generates tests for:
 ---
 
 ## PART 6: The Proof - Building Real Applications (550 words)
+
+**Development Timeline Context**:
+- **Total Timeframe**: ~2 months (September 20 - November 14, 2025)
+- **Conversation Sessions**: 428 documented sessions with Claude Code
+- **Major Milestones**:
+  - September 20-22: Core authentication architecture and middleware pattern
+  - October 20: Comprehensive documentation phase (3,500+ lines)
+  - November 2-14: Real-world examples (Bushel, Celestra) and refinement
+  - November 6: PR #132 with 41-item code review checklist implementation
 
 **[TODO: YOUR PROSE - Part 6 Opening]**
 
@@ -1677,48 +1741,107 @@ Multiple rounds of refinement until production-ready
 
 ### Section 7.4: Common Mistakes & How to Avoid Them (~300 words)
 
-**Mistake 1: API Hallucination**
+**Mistake 1: Using Internal OpenAPI Types**
+
+Claude generated code that referenced `Components.Schemas.RecordOperation` directly—an internal type, not part of the public API.
 
 ```swift
-// Claude suggested (DOES NOT EXIST):
-let records = try await processLookupRecordsResponse(response)
+// WRONG: Internal type reference
+let operation = Components.Schemas.RecordOperation(
+    recordType: "RestoreImage",
+    fields: fields
+)
+```
+
+**Why this happened**: Claude saw the type existed and used it without checking if it was `public` or `internal`.
+
+**Lesson**: **Always verify access modifiers before generating usage code.**
+
+---
+
+**Mistake 2: Hardcoded Create Operations**
+
+```swift
+// WRONG: Always create, never update
+func createRecordOperation() -> RecordOperation {
+    return RecordOperation.create(
+        recordType: Self.recordType,
+        recordName: self.recordName,
+        fields: self.toFields()
+    )
+}
+```
+
+**Why this happened**: Claude didn't consider idempotency. CloudKit's `.create` fails if record already exists.
+
+**Better approach**:
+```swift
+// RIGHT: Use forceReplace for upsert behavior
+func upsertRecordOperation() -> RecordOperation {
+    return RecordOperation.forceReplace(
+        recordType: Self.recordType,
+        recordName: self.recordName,
+        fields: self.toFields()
+    )
+}
+```
+
+**Lesson**: **CloudKit distinguishes between create and update. For sync scenarios, use `.forceReplace`.**
+
+---
+
+**Mistake 3: Calling Non-Existent Methods**
+
+Claude generated code that called `processLookupRecordsResponse()` when only 4 processor methods existed.
+
+```swift
+// WRONG: Method doesn't exist
+let records = try processor.processLookupRecordsResponse(response)
 
 // Actual API from generated code:
 let body = try response.body.json
 let records = body.records  // Direct property access
 ```
 
-**Why it happened**: Claude assumed helper methods exist from documentation patterns.
-**Fix**: Always verify suggested APIs exist in generated code.
+**Why it happened**: Claude assumed if `processQueryRecordsResponse()` exists, similar methods must exist.
 
-**Mistake 2: Swift Testing vs XCTest Confusion**
+**Lesson**: **Don't assume patterns extend. Verify methods exist before using them.**
+
+---
+
+**Mistake 4: Incorrect Platform Availability Handling**
 
 ```swift
-// Claude initially generated (XCTest):
-class RecordTests: XCTestCase {
-    func testRecordCreation() throws { }
+// WRONG: Guard inside test body (Swift Testing doesn't see this as "skipped")
+@Test func testECDSASigning() {
+    guard #available(macOS 10.15, *) else {
+        return
+    }
+    // Test code...
 }
 
-// Needed (Swift Testing):
-import Testing
-@Test func recordCreation() async throws { }
+// RIGHT: Swift Testing trait
+@Test(.enabled(if: Platform.isCryptoAvailable))
+func testECDSASigning() {
+    // Test code...
+}
 ```
 
-**Why it happened**: XCTest dominates training data; Swift Testing is newer.
-**Fix**: Explicitly specify "use Swift Testing framework with @Test macro" in requests.
+**Why this happened**: Claude used XCTest patterns, not Swift Testing patterns.
 
-**Mistake 3: Internal Type Leakage**
+**Lesson**: **Swift Testing requires `.enabled(if:)` traits for conditional execution.**
 
-```swift
-// Claude exposed:
-public func fetch() -> Components.Schemas.Record { }
+---
 
-// Should be:
-public func fetch() -> Record { }  // Clean public API
-```
+**Mistake 5: Designing Schemas Based on Assumed Data**
 
-**Why it happened**: Generated types have verbose namespaces; Claude followed literally.
-**Fix**: Request "create clean public wrapper types" for external APIs.
+Claude designed the schema assuming external APIs would contain:
+- SHA256 hashes (some sources only provide SHA1)
+- File sizes (not always provided despite documentation)
+
+**Lesson**: **Fetch and parse actual data sources before finalizing schema designs.**
+
+---
 
 **Pattern Recognition**: All mistakes share common traits—Claude follows patterns from training data or generated code literally without questioning ergonomics or existence. The fix is always the same: **explicit guidance** in prompts and **immediate verification** of suggestions.
 
@@ -1727,6 +1850,7 @@ public func fetch() -> Record { }  // Clean public API
 2. Specify frameworks explicitly ("Swift Testing", "swift-log")
 3. Request clean abstractions over generated types
 4. Build/test after every Claude suggestion
+5. Test real operations early (unit tests validate types, integration tests validate behavior)
 
 > **Counterpoint**: For what Claude Code excelled at, see Section 7.1 above.
 
@@ -1752,7 +1876,177 @@ public func fetch() -> Record { }  // Clean public API
 
 **Key Message**: Claude Code accelerates development. Humans architect and secure it.
 
-### Section 7.6: Context Management Strategies (~250 words)
+### Section 7.6: Context Management and Knowledge Limitations (~300 words)
+
+One of the biggest challenges working with Claude Code is managing its knowledge cutoffs and lack of familiarity with newer or niche APIs.
+
+**Problem 1: Swift Testing vs XCTest**
+
+Claude's training predates widespread Swift Testing adoption. It defaults to XCTest patterns:
+
+```swift
+// Claude's instinct: XCTest patterns
+XCTAssertEqual(result, expected)
+XCTAssertThrowsError(try badCall())
+
+// What we need: Swift Testing patterns
+#expect(result == expected)
+#expect(throws: MyError.self) { try badCall() }
+```
+
+**Solution**: Provide documentation upfront. We added `.claude/docs/testing-enablinganddisabling.md` (126KB) that Claude reads on demand.
+
+---
+
+**Problem 2: CloudKit Web Services Documentation**
+
+Apple's CloudKit Web Services REST API isn't well-documented online. Claude hallucinates endpoint structures and authentication flows.
+
+**Solution**: We downloaded and included comprehensive documentation:
+- `webservices.md` (289KB) - Complete REST API reference
+- `cloudkitjs.md` (188KB) - Operation patterns and data types
+
+Claude can `Read` these files when needed, giving it accurate information about authentication, endpoints, and error codes.
+
+---
+
+**Problem 3: swift-openapi-generator Specifics**
+
+This is a relatively new tool with limited training data. Claude doesn't know about:
+- `typeOverrides` in config files
+- Middleware patterns
+- The transport layer architecture
+
+**Solution**: We added `swift-openapi-generator.md` (235KB) with full documentation. When Claude needs to configure code generation or implement middleware, it has authoritative reference material.
+
+---
+
+**Key Insight: CLAUDE.md as a Knowledge Router**
+
+Our `CLAUDE.md` file acts as a table of contents:
+
+```markdown
+## Reference Documentation
+
+**webservices.md** (289 KB) - CloudKit Web Services REST API
+- **Primary use**: Implementing REST API endpoints
+- **Consult when**: Writing API client code, handling authentication
+
+**testing-enablinganddisabling.md** (126 KB) - Swift Testing
+- **Primary use**: Writing modern Swift tests
+- **Consult when**: Writing tests, testing async code
+```
+
+Claude doesn't need to memorize everything—it needs to know **where to look**. The CLAUDE.md file provides this map.
+
+---
+
+**Practical Context Management Strategies**
+
+1. **Pre-load critical documentation** in `.claude/docs/`
+2. **Use CLAUDE.md** to describe what each doc contains and when to consult it
+3. **Fetch current information** with WebFetch for APIs that change (Apple's software update feeds)
+4. **Reference actual code** - when Claude hallucinates an API, show it the real implementation
+5. **Correct patterns immediately** - don't let wrong patterns propagate through the codebase
+
+**Result**: With proper context, Claude goes from "guessing at Swift Testing syntax" to "correctly using `@Test(.enabled(if:))` traits" because it has the authoritative source.
+
+### Section 7.7: Code Review - AI and Human Perspectives (~250 words)
+
+Code generated or assisted by AI needs extra scrutiny. We found that combining automated AI reviews with human expertise catches different classes of issues.
+
+**Automated AI Reviews (CodeRabbit)**
+
+Tools like CodeRabbit provide consistent, pattern-based feedback:
+
+```
+✅ Detected: Unused import in ServerToServerAuthManager.swift
+✅ Detected: Force unwrap on line 47 could cause crash
+✅ Detected: Missing documentation for public method
+⚠️ Suggestion: Consider extracting repeated JSON parsing into helper
+```
+
+**Strengths**:
+- Catches style violations consistently
+- Identifies potential nil crashes
+- Enforces documentation standards
+- Never gets tired or misses obvious issues
+
+**Limitations**:
+- Doesn't understand CloudKit-specific semantics
+- Can't evaluate architectural decisions
+- Misses subtle logic errors that compile fine
+- Suggests "improvements" that break functionality
+
+---
+
+**Human Code Reviews**
+
+Human reviewers catch what AI misses:
+
+```swift
+// AI generated this, automated review passed
+func syncRecords(_ records: [CloudKitRecord]) async throws {
+    for record in records {
+        try await service.modifyRecords([record.upsertOperation()])
+    }
+}
+```
+
+**Human reviewer**: "Why are we making N network calls? CloudKit supports batch operations. This should be:
+
+```swift
+let operations = records.map { $0.upsertOperation() }
+try await service.modifyRecords(operations)  // Single network call
+```
+
+**Human review catches**:
+- Performance anti-patterns (N+1 queries)
+- CloudKit API misuse (create vs forceReplace semantics)
+- Security concerns (token exposure in logs)
+- Architecture violations (using internal types)
+- Missing error cases (what if batch partially fails?)
+
+---
+
+**Our Review Process**
+
+1. **Claude generates code** → Initial implementation
+2. **Automated linting** (`swiftlint`, `swift-format`) → Style consistency
+3. **Claude self-review** → "Review this code for potential issues"
+4. **CodeRabbit/automated AI** → Pattern-based analysis
+5. **Human expert review** → Architecture, semantics, CloudKit-specific knowledge
+
+**Example catch from human review**:
+
+```swift
+// Claude generated
+public func queryRecords(recordType: String) async throws -> [RecordInfo] {
+    let response = try await client.queryRecords(...)
+    switch response {
+    case .ok(let ok):
+        return try ok.body.json.records ?? []
+    default:
+        throw CloudKitError.unknown  // Human: "This loses error information!"
+    }
+}
+```
+
+Human reviewer: "The `default` case discards CloudKit's error codes. We need specific handling for `.badRequest`, `.unauthorized`, `.forbidden` to provide actionable error messages."
+
+---
+
+**Best Practices for AI-Assisted Code Review**
+
+1. **Don't skip review just because "AI wrote it"** - AI code needs *more* review, not less
+2. **Use multiple review layers** - Automated catches syntax, human catches semantics
+3. **Ask Claude to review its own code** - It often spots issues when prompted to look again
+4. **Focus human review on domain logic** - Let automation handle formatting
+5. **Document review feedback** - Patterns in reviews become future CLAUDE.md guidance
+
+**Result**: Our codebase quality improved significantly when we treated AI-generated code as a first draft requiring thorough review, not a finished product.
+
+### Section 7.8: Session Continuation Strategies (~250 words)
 
 **Challenge**: Claude Code's context window fills during long sessions, losing project knowledge.
 
