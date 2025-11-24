@@ -228,6 +228,40 @@ Apple's CloudKit documentation is prose, not machine-readable:
 - Claude catches inconsistencies and missing references
 - Pattern repetition (15 similar endpoints)
 
+**URL Structure and Path Parameters**:
+
+CloudKit's REST API follows a consistent URL pattern that we modeled using OpenAPI path parameters:
+
+```yaml
+paths:
+  /database/{version}/{container}/{environment}/{database}/records/query:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+
+components:
+  parameters:
+    environment:
+      name: environment
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [development, production]
+    database:
+      name: database
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [public, private, shared]
+```
+
+This approach uses enums for type safety—the generated Swift client won't compile if you try to pass an invalid environment or database value.
+
 **Example 1: Record Structure - Before and After**
 
 ### Before: Apple's Prose Documentation
@@ -390,6 +424,33 @@ FieldValue:
 
 **Key Insight**: Claude excels at suggesting patterns and expanding them. I provide domain knowledge and edge cases. Together we refine to the final design.
 
+> **Deep Dive: AssetValue Structure**
+>
+> CloudKit's `ASSET` type includes comprehensive metadata for binary file handling:
+>
+> ```yaml
+> AssetValue:
+>   type: object
+>   properties:
+>     fileChecksum:
+>       type: string
+>       description: Checksum of the asset file
+>     size:
+>       type: integer
+>       format: int64
+>     downloadURL:
+>       type: string
+>       format: uri
+>     wrappingKey:
+>       type: string
+>       description: Wrapping key for encryption
+>     receipt:
+>       type: string
+>       description: Receipt for upload/download workflow
+> ```
+>
+> This structure supports CloudKit's encryption-at-rest and secure upload/download token system. The `wrappingKey` enables end-to-end encryption, while `receipt` and `downloadURL` follow CloudKit's asset token workflow.
+
 **[TODO: YOUR PROSE - Breakthrough moment: Solving FieldValue polymorphism]**
 
 **Suggested themes**:
@@ -468,7 +529,25 @@ components:
         longitude:
           type: number
           format: double
-        # ... additional properties
+        horizontalAccuracy:
+          type: number
+          format: double
+          description: Accuracy in meters
+        altitude:
+          type: number
+          format: double
+        speed:
+          type: number
+          format: double
+          description: Speed in meters per second
+        course:
+          type: number
+          format: double
+          description: Direction in degrees
+        timestamp:
+          type: number
+          format: double
+          description: Milliseconds since epoch
 ```
 
 **Translation Decisions**:
@@ -477,6 +556,7 @@ components:
 2. **Type Field**: Added explicit `type` enum for runtime type information
 3. **Individual Schemas**: Created separate schema for each CloudKit type
 4. **Format Hints**: Used OpenAPI `format` for precise type information (int64, double, uri)
+5. **Complete CLLocation Mapping**: LocationValue includes all properties from Apple's `CLLocation` class—not just coordinates, but accuracy, altitude, motion data, and timestamps
 
 **Challenge Solved**: CloudKit fields are dynamically typed - the same `value` key can contain a string, number, location object, etc. OpenAPI is statically typed. The solution uses `oneOf` for the value property to indicate "one of these types" plus a `type` discriminator field for runtime identification.
 
@@ -625,6 +705,23 @@ This enables:
 - **Automatic Deserialization**: Errors automatically parsed to correct type
 - **Centralized Definitions**: Define once, reference everywhere
 
+**HTTP Status Code to CloudKit Error Mapping**:
+
+| HTTP Status | CloudKit Error Codes | Client Action |
+|-------------|---------------------|---------------|
+| **400 Bad Request** | `BAD_REQUEST`, `ATOMIC_ERROR` | Fix request parameters or retry non-atomically |
+| **401 Unauthorized** | `AUTHENTICATION_FAILED` | Re-authenticate or check credentials |
+| **403 Forbidden** | `ACCESS_DENIED` | User lacks permissions |
+| **404 Not Found** | `NOT_FOUND`, `ZONE_NOT_FOUND` | Verify resource exists |
+| **409 Conflict** | `CONFLICT`, `EXISTS` | Fetch latest version and retry, or use force operations |
+| **412 Precondition Failed** | `VALIDATING_REFERENCE_ERROR` | Referenced record doesn't exist |
+| **413 Request Too Large** | `QUOTA_EXCEEDED` | Reduce request size or upgrade quota |
+| **429 Too Many Requests** | `THROTTLED` | Implement exponential backoff |
+| **500 Internal Error** | `INTERNAL_ERROR` | Retry with backoff |
+| **503 Service Unavailable** | `TRY_AGAIN_LATER` | Temporary issue, retry later |
+
+This structured error handling enables the generated client to provide specific, actionable error messages rather than generic HTTP failures.
+
 ### Section 2.5: The Iterative Refinement Workflow (~150 words)
 
 **The Pattern That Emerged**:
@@ -680,6 +777,115 @@ The actual work of creating the OpenAPI specification took 4 days in July 2024:
 - I defined goals (security, testability, clean public API)
 - Claude proposed three-layer pattern with middleware
 - Together refined TokenManager protocol with actor isolation
+
+### Section 2.6: Pagination - CloudKit's Two Approaches (~200 words)
+
+**Example 4: Pagination - Before and After**
+
+#### Before: Apple's Prose Documentation
+
+> **Query Response**
+>
+> The response contains an array of records and optionally, a continuation marker:
+>
+> - `records`: An array of record dictionaries.
+> - `continuationMarker`: If present, use this value in the next request to fetch more results.
+
+#### After: OpenAPI Specification
+
+```yaml
+components:
+  schemas:
+    QueryResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/Record'
+        continuationMarker:
+          type: string
+          description: Marker for pagination
+
+paths:
+  /records/query:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                continuationMarker:
+                  type: string
+                  description: Marker for pagination
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+```
+
+**Translation Benefits**:
+- **Type-safe iteration**: Compiler enforces optional continuation marker
+- **Clear API contract**: Response schema explicitly includes pagination field
+- **Self-documenting**: Description clarifies purpose immediately
+
+This bidirectional pagination modeling—both request and response include the continuation marker—enables robust pagination loops in generated code.
+
+**CloudKit's Two Pagination Patterns**:
+
+CloudKit uses different pagination approaches depending on operation type:
+
+**Pattern 1: Continuation Marker (Query Operations)**
+
+Used for: Records Query
+
+```swift
+var continuationMarker: String? = nil
+repeat {
+    let response = try await queryRecords(
+        query: query,
+        continuationMarker: continuationMarker
+    )
+    processRecords(response.records)
+    continuationMarker = response.continuationMarker
+} while continuationMarker != nil
+```
+
+- **Opaque token**: Server maintains query cursor
+- **Temporary**: Session-bound, not persisted
+- **Use case**: Results may change between pages
+
+**Pattern 2: Sync Token (Change Operations)**
+
+Used for: Record Changes, Zone Changes
+
+```swift
+var syncToken: String? = loadPersistedToken()
+repeat {
+    let response = try await fetchRecordChanges(
+        zoneID: zoneID,
+        syncToken: syncToken
+    )
+    processChanges(response.records)
+    syncToken = response.syncToken
+    persistToken(syncToken)
+} while response.moreComing
+```
+
+- **Persistent token**: Represents timeline position
+- **Long-lived**: Stored between app launches
+- **Use case**: Incremental sync, offline-first architecture
+
+**Why Two Patterns?**
+
+- Query operations need flexible, re-executable searches
+- Sync operations need reliable, resumable change tracking
+- Different patterns optimize for different use cases
+
+The OpenAPI spec models both patterns with appropriate request/response schemas, enabling the generator to create idiomatic Swift pagination APIs for each scenario.
 
 **[TODO: YOUR PROSE - Transition from OpenAPI spec to code generation]**
 
