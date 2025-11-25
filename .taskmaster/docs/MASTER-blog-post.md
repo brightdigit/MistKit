@@ -14,7 +14,6 @@
 
 ## PART 1: Introduction - The Decision to Rebuild (650 words)
 
-**[TODO: YOUR PROSE - Part 1 Opening]**
 
 **Suggested themes**:
 - Personal reflection on the state of MistKit v0.2 in summer 2024
@@ -29,11 +28,14 @@
 ### Opening: Transition from SyntaxKit
 
 **Opening Paragraph**:
-> In my previous article about [Building SyntaxKit with AI](link), I explored how code generation could transform SwiftSyntax's 80+ lines of verbose API calls into 10 lines of elegant, declarative Swift. That project taught me something crucial: **generate for precision, abstract for ergonomics**.
+
+[CONTENT]
+In my previous article about [Building SyntaxKit with AI](link), I explored how code generation could transform SwiftSyntax's 80+ lines of verbose API calls into 10 lines of elegant, declarative Swift. That project taught me something crucial: **generate for precision, abstract for ergonomics**.
 >
-> Now it was July 2024, and I was staring at MistKit v0.2—a CloudKit Web Services client last updated in October 2021, pre-async/await, with 437 SwiftLint violations and 15% test coverage. For a library meant to make CloudKit easier, it had become a maintenance burden.
->
-> But this time, I knew exactly what to do.
+Now it was July 2024, and I was staring at MistKit v0.2—a CloudKit Web Services client last updated in October 2021, pre-async/await, with 437 SwiftLint violations and 15% test coverage. For a library meant to make CloudKit easier, it had become a maintenance burden.
+
+But this time, I knew exactly what to do.
+[/CONTENT]
 
 ### Section 1.1: The State of MistKit v0.2 (~150 words)
 
@@ -46,7 +48,7 @@ MistKit v0.2 was showing its age:
 - 437 SwiftLint violations
 
 ### Section 1.2: The Need for Change (~100 words)
-
+[CONTENT]
 Swift had transformed while MistKit stood still:
 - **Swift 6** with strict concurrency checking
 - **async/await** as standard (not experimental)
@@ -54,96 +56,31 @@ Swift had transformed while MistKit stood still:
 - **Modern patterns** expected (Result types, AsyncSequence, property wrappers)
 
 MistKit v0.2, frozen in 2021, couldn't take advantage of any of this.
-
+[/CONTENT]
 ### Section 1.3: The Game Changer - swift-openapi-generator (~150 words)
+[CONTENT]
 
-**Why This Rebuild Was Even Possible**:
+At WWDC 2023, Apple announced `swift-openapi-generator`—a tool that reads OpenAPI specifications and automatically generates type-safe Swift client code. This single tool made the MistKit rebuild feasible. If I had an openapi spec I could easily create a library which made the nessecary calls to CloudKit as needed as well as compability with server-side (AsyncHTTP) or client-side APIs (URLSession).
 
-At WWDC 2023, Apple announced `swift-openapi-generator`—a tool that reads OpenAPI specifications and automatically generates type-safe Swift client code. This single tool made the MistKit rebuild feasible.
-
-**Before swift-openapi-generator**:
-- Hand-write 10,000+ lines of networking boilerplate
-- Manual JSON parsing for every CloudKit type
-- Write URLSession code for every endpoint
-- Keep everything in sync with CloudKit API changes manually
-- **Result**: Overwhelming maintenance burden, error-prone
-
-**After swift-openapi-generator**:
-- Create OpenAPI spec from CloudKit documentation
-- Generator produces all networking code automatically
-- Type-safe by default (compiler catches API misuse)
-- CloudKit API changes = update spec, regenerate
-- **Result**: Maintainable, correct, evolvable
-
-**The Insight**: If CloudKit's REST API could be described in OpenAPI format, swift-openapi-generator would handle all the tedious networking code automatically. The project suddenly became tractable—even ambitious.
-
+What I needed was a way to easily create that spec since Apple only provides documentation for the CloudKit Rest API.
+[/CONTENT]
 ### Section 1.4: Learning from SyntaxKit's Pattern (~200 words)
 
 **The SyntaxKit Pattern Applied**:
+[CONTENT]
+With my work on SyntaxKit I could see that if I fed sufficient documentation on an API to an LLM, it can understand how to develop against it. Even so any failures come with the ability to learn and adapt either with internal documentation or writing sufficient tests.
 
-SyntaxKit taught me that code generation isn't about laziness—it's about correctness. When you hand-write API calls, typos and mistakes slip through until runtime. But when you generate code from a specification (like SwiftSyntax's AST or an OpenAPI document), the compiler catches errors immediately. If it compiles, it's correct.
-
-**The Pattern**:
-- **Generate for precision**: Use code generation to ensure API calls are always valid
-- **Abstract for ergonomics**: Wrap generated code in friendly, idiomatic interfaces
-- **Let the compiler enforce correctness**: Type system prevents invalid usage
-
-**SyntaxKit Example**: Transformed 80+ lines of SwiftSyntax boilerplate into 10 lines of elegant DSL—guaranteed correct by the compiler.
-
-**MistKit Application**: Same philosophy, different domain:
-- **CloudKit REST API** (complex, prose documentation) → OpenAPI specification → **Type-safe Swift client** → Clean abstraction
-- If the OpenAPI spec is correct and code generation is reliable, the resulting client is automatically correct
-
-**The Key Insight**:
-If code generation worked for wrapping SwiftSyntax, why not for wrapping REST APIs?
-
-**[TODO: Verify Section 1.4 completeness and expand if needed]**
-
+Just as I was able to simplify SwiftSyntax into a simpler API, I can have an LLM create an openAPI spec for CloudKit and build an API on top of the generated code.
+[/CONTENT]
 **Target**: 200 words
 **Current**: ~150 words (estimated)
 **Consider adding**: More specific SyntaxKit examples or deeper connection to MistKit approach
 
-### Section 1.5: The Bold Decision (~200 words)
-
-**The Vision - A Three-Way Collaboration**:
-
-1. **OpenAPI specification** = Source of truth for CloudKit API
-   - Handles API accuracy through code generation
-   - 10,476 lines of generated type-safe code (via swift-openapi-generator)
-
-2. **Claude Code** = Development partner
-   - Accelerates tests, refactoring, iteration
-   - Handles tedious but important work
-
-3. **Human architecture** = Vision and design
-   - Security patterns
-   - Architecture decisions
-   - Developer experience
-
-**Timeline**: Three months (July-September 2024)
-
-**The Result**:
-- 10,476 lines of generated type-safe code (via swift-openapi-generator)
-- 161 comprehensive tests (most written with Claude's help)
-- Three authentication methods
-- Maintainable, evolvable codebase
-
-**Key Message**: This isn't just a library rebuild—it's a demonstration of how OpenAPI specifications + AI assistance + code generation create maintainable, evolvable code. When CloudKit's API changes, we update the spec and regenerate. When bugs appear, tests catch them. When features are needed, Claude accelerates implementation. This is sustainable development.
-
-**[TODO: YOUR PROSE - Transition from Part 1 to Part 2]**
-
-**Suggested themes**:
-- Decision made, now comes execution
-- The daunting task of translating Apple's documentation
-- Moving from vision to implementation
-
-**Word count target**: ~50-100 words
 
 ---
 
 ## PART 2: Translating CloudKit Docs to OpenAPI with Claude Code (900 words)
 
-**[TODO: YOUR PROSE - Part 2 Opening]**
 
 **Suggested themes**:
 - The moment you decided OpenAPI was the right approach
@@ -153,15 +90,11 @@ If code generation worked for wrapping SwiftSyntax, why not for wrapping REST AP
 
 **Word count target**: ~100-150 words
 
-**[REFERENCE NARRATIVE: From blog-post-outline-restructured.md]**
 
-The restructured outline included your personal experience with the OpenAPI translation process, including:
-- How you used https://llm.codes to transform Apple's documentation sources into markdown
-- The iterative workflow that emerged with Claude (sketch → expand → review → refine)
-- Your specific decision-making process for Field Value polymorphism
-- The authentication challenge and how you arrived at the middleware solution
-
-Consider incorporating elements of this workflow into your prose to make the technical journey more personal and relatable.
+[CONTENT]
+I needed a way for Claude Code to understand how the CloudKit Rest API worked. There was 1 main document I used - the [CloudKit Web Services Documentation Site](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/). The CloudKit Web Services Documentation Site which hasn't been updated since June of 2016 contains the most thorough documentation on how the REST API works and hopefully can provide enough for Claude to start crafting the openaPI spec.
+By running the site (as well as the swift-openapi-generator documentation) through llm.codes, and saving the exported markdown documentation in the `.claude` directory and letting Claude Code know about it (i.e. add a reference to it in Claude.md). I could know start having Claude Code translate the documentation into a usable API.
+[/CONTENT]
 
 ---
 
@@ -196,7 +129,7 @@ With swift-openapi-generator available (see Part 1, Section 1.3), the path forwa
 
 ### Section 2.2: The Translation Challenge (~150 words)
 
-**[TODO: YOUR PROSE - Introduction to translation challenge]**
+
 
 **Suggested themes**:
 - Your experience creating OpenAPI specs for other APIs
@@ -396,6 +329,7 @@ Claude: "Here are test cases for STRING, INT64, DOUBLE, TIMESTAMP,
          BYTES, REFERENCE, ASSET, ASSETID, LOCATION, and LIST..."
 ```
 
+Claude ended up suggesting the `oneOf` which worked as well as anything dynamic could in Swift. However we found one quirk - ASSET vs ASSETID.
 **The Iterative Design**:
 1. Claude suggests `oneOf` pattern ✅
 2. I identify CloudKit-specific quirk (ASSETID)
@@ -451,7 +385,7 @@ FieldValue:
 >
 > This structure supports CloudKit's encryption-at-rest and secure upload/download token system. The `wrappingKey` enables end-to-end encryption, while `receipt` and `downloadURL` follow CloudKit's asset token workflow.
 
-**[TODO: YOUR PROSE - Breakthrough moment: Solving FieldValue polymorphism]**
+
 
 **Suggested themes**:
 - The satisfaction/relief of solving the dynamic typing challenge
