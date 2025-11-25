@@ -329,34 +329,19 @@ Claude: "Here are test cases for STRING, INT64, DOUBLE, TIMESTAMP,
          BYTES, REFERENCE, ASSET, ASSETID, LOCATION, and LIST..."
 ```
 
-Claude ended up suggesting the `oneOf` which worked as well as anything dynamic could in Swift. However we found one quirk - ASSET vs ASSETID.
-**The Iterative Design**:
-1. Claude suggests `oneOf` pattern ✅
-2. I identify CloudKit-specific quirk (ASSETID)
-3. Claude suggests type override approach
-4. Together we arrive at CustomFieldValue design
-5. Claude generates comprehensive tests
+**[TODO: YOUR PROSE - Reflection on collaboration]**
 
-**Final OpenAPI Schema**:
-```yaml
-FieldValue:
-  type: object
-  required:
-    - value
-  properties:
-    value:
-      oneOf:
-        - type: string
-        - type: integer
-        - type: number
-        - type: object
-    type:
-      type: string
-      enum: [STRING, INT64, DOUBLE, TIMESTAMP, BYTES,
-             REFERENCE, ASSET, ASSETID, LOCATION, LIST]
-```
+**Suggested themes**: What this conversation revealed about working with Claude, domain knowledge + AI patterns, satisfaction of solving the polymorphism challenge
 
-**Key Insight**: Claude excels at suggesting patterns and expanding them. I provide domain knowledge and edge cases. Together we refine to the final design.
+**Word count target**: ~40 words
+
+---
+
+**[TODO: YOUR PROSE - Transition to AssetValue]**
+
+**Suggested themes**: Why AssetValue matters, connection to previous dialogue, setting up the deep dive
+
+**Word count target**: ~30 words
 
 > **Deep Dive: AssetValue Structure**
 >
@@ -385,138 +370,42 @@ FieldValue:
 >
 > This structure supports CloudKit's encryption-at-rest and secure upload/download token system. The `wrappingKey` enables end-to-end encryption, while `receipt` and `downloadURL` follow CloudKit's asset token workflow.
 
+**Solving the ASSETID Quirk**:
 
+During our conversation, I mentioned that ASSETID is different from ASSET. Here's how we solved it.
 
-**Suggested themes**:
-- The satisfaction/relief of solving the dynamic typing challenge
-- How this collaboration with Claude felt different from solo problem-solving
-- The moment you realized the `oneOf` pattern would work
-- Confidence boost from solving a hard problem together
-
-**Word count target**: ~100 words
-
-**[REFERENCE NARRATIVE: From blog-post-outline-restructured.md]**
-
-Your outline described the specific conversation flow where:
-1. You presented CloudKit's field value structure from Apple's docs
-2. Claude suggested the `oneOf` pattern for discriminated unions
-3. You identified the ASSETID quirk (different from ASSET, despite similar structure)
-4. Claude suggested the type override approach with CustomFieldValue
-5. You requested test cases, Claude generated comprehensive coverage for all 10 field types
-
-This collaborative problem-solving—where you provided domain knowledge and Claude provided OpenAPI patterns—became the template for the entire specification creation process.
-
----
-
-**Example 2: Field Values - Before and After**
-
-### Before: Apple's Prose Documentation
-
-> **Record Field Dictionary**
->
-> A dictionary that represents a record field. The dictionary contains a single key-value pair. The key is `value`, and the value is the field value whose type depends on the field type. Fields can be strings, numbers, dates, locations, references, assets, or lists.
->
-> Example field:
-> ```json
-> "firstName": {"value": "Mei"}
-> ```
-
-### After: OpenAPI Specification
+We configured the generator to use our custom implementation:
 
 ```yaml
-components:
+# openapi-generator-config.yaml
+typeOverrides:
   schemas:
-    FieldValue:
-      type: object
-      description: A CloudKit field value with its type information
-      properties:
-        value:
-          oneOf:
-            - $ref: '#/components/schemas/StringValue'
-            - $ref: '#/components/schemas/Int64Value'
-            - $ref: '#/components/schemas/DoubleValue'
-            - $ref: '#/components/schemas/BooleanValue'
-            - $ref: '#/components/schemas/BytesValue'
-            - $ref: '#/components/schemas/DateValue'
-            - $ref: '#/components/schemas/LocationValue'
-            - $ref: '#/components/schemas/ReferenceValue'
-            - $ref: '#/components/schemas/AssetValue'
-            - $ref: '#/components/schemas/ListValue'
-        type:
-          type: string
-          enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, ASSETID, LOCATION, TIMESTAMP, LIST]
-          description: The CloudKit field type
-
-    StringValue:
-      type: string
-
-    Int64Value:
-      type: integer
-      format: int64
-
-    LocationValue:
-      type: object
-      properties:
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
-        horizontalAccuracy:
-          type: number
-          format: double
-          description: Accuracy in meters
-        altitude:
-          type: number
-          format: double
-        speed:
-          type: number
-          format: double
-          description: Speed in meters per second
-        course:
-          type: number
-          format: double
-          description: Direction in degrees
-        timestamp:
-          type: number
-          format: double
-          description: Milliseconds since epoch
+    FieldValue: CustomFieldValue
 ```
 
-**Translation Decisions**:
+This told swift-openapi-generator: "Whenever you'd use `FieldValue`, use `CustomFieldValue` instead."
 
-1. **Discriminated Union**: Used `oneOf` to model CloudKit's dynamic typing
-2. **Type Field**: Added explicit `type` enum for runtime type information
-3. **Individual Schemas**: Created separate schema for each CloudKit type
-4. **Format Hints**: Used OpenAPI `format` for precise type information (int64, double, uri)
-5. **Complete CLLocation Mapping**: LocationValue includes all properties from Apple's `CLLocation` class—not just coordinates, but accuracy, altitude, motion data, and timestamps
-
-**Challenge Solved**: CloudKit fields are dynamically typed - the same `value` key can contain a string, number, location object, etc. OpenAPI is statically typed. The solution uses `oneOf` for the value property to indicate "one of these types" plus a `type` discriminator field for runtime identification.
-
-This enables:
-- **Type-safe code generation**: Swift generator creates appropriate enums/unions
-- **Validation**: Request/response validation against expected types
-- **Documentation**: Clear listing of all possible field types
-
-**Generated Swift Code Example**:
+**Why custom?** CloudKit's `ASSET` and `ASSETID` are separate type discriminators but decode to the same structure. Our implementation handles this elegantly:
 
 ```swift
-enum FieldValue {
-    case string(String)
-    case int64(Int64)
-    case double(Double)
-    case location(LocationValue)
-    case reference(ReferenceValue)
-    case asset(AssetValue)
-    // ... etc
-}
+internal struct CustomFieldValue: Codable, Hashable, Sendable {
+    internal enum FieldTypePayload: String, Codable, Sendable {
+        case asset = "ASSET"
+        case assetid = "ASSETID"  // Both decode to AssetValue
+        case string = "STRING"
+        case int64 = "INT64"
+        // ... more types
+    }
 
-// Usage is type-safe:
-let field: FieldValue = .string("Mei")
+    // Custom decoding handles both ASSET and ASSETID → AssetValue
+    internal let value: CustomFieldValuePayload
+    internal let type: FieldTypePayload?
+}
 ```
 
-> **Implementation Note**: See Part 4, Section 4.3 for the CustomFieldValue implementation that solved this challenge.
+**Result**: Type-safe field values with CloudKit-specific quirks baked in.
+
+> **Deep Dive**: See Part 4, Section 4.3 for the complete `CustomFieldValue` implementation with decoding logic and test coverage.
 
 ### Section 2.4: Authentication - Three Methods, One Spec (~200 words)
 
