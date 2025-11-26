@@ -8,7 +8,7 @@ import Testing
 
 extension NetworkErrorTests {
   /// Network error storage tests
-  @Suite("Storage Tests")
+  @Suite("Storage Tests", .enabled(if: Platform.isCryptoAvailable))
   internal struct StorageTests {
     // MARK: - Test Data Setup
 

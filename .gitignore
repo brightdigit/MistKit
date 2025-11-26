@@ -170,9 +170,6 @@ dev-debug.log
 *.sw?
 # OS specific
 
-# Task files
-# tasks.json
-# tasks/ 
 .mint/
 /Keys/
 .claude/settings.local.json
@@ -190,3 +187,7 @@ dev-debug.log
 # Allow placeholder docs/samples in Keys
 !Keys/README.md
 !Keys/*.example.*
+
+# Task files
+# tasks.json
+# tasks/ 

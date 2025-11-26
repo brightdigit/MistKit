@@ -65,8 +65,13 @@ internal enum SecureLogging {
 
   /// Creates a safe logging string that masks sensitive information
   /// - Parameter message: The message to log
-  /// - Returns: A safe version of the message with sensitive data masked
+  /// - Returns: The message as-is (redaction disabled by default, enable with MISTKIT_ENABLE_LOG_REDACTION)
   internal static func safeLogMessage(_ message: String) -> String {
+    // Redaction disabled by default - enable with environment variable if needed
+    guard ProcessInfo.processInfo.environment["MISTKIT_ENABLE_LOG_REDACTION"] != nil else {
+      return message
+    }
+
     var safeMessage = message
 
     // Use static regex patterns for better performance

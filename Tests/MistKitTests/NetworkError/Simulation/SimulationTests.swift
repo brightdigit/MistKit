@@ -8,7 +8,7 @@ import Testing
 
 extension NetworkErrorTests {
   /// Network error simulation tests
-  @Suite("Simulation Tests")
+  @Suite("Simulation Tests", .enabled(if: Platform.isCryptoAvailable))
   internal struct SimulationTests {
     // MARK: - Network Error Simulation Tests
 
@@ -34,7 +34,7 @@ extension NetworkErrorTests {
         _ = try await middleware.intercept(
           originalRequest,
           body: nil,
-          baseURL: URL.MistKit.cloudKitAPI,
+          baseURL: .MistKit.cloudKitAPI,
           operationID: "test-operation",
           next: next
         )
@@ -70,7 +70,7 @@ extension NetworkErrorTests {
         _ = try await middleware.intercept(
           originalRequest,
           body: nil,
-          baseURL: URL.MistKit.cloudKitAPI,
+          baseURL: .MistKit.cloudKitAPI,
           operationID: "test-operation",
           next: next
         )
@@ -111,7 +111,7 @@ extension NetworkErrorTests {
           _ = try await middleware.intercept(
             originalRequest,
             body: nil,
-            baseURL: URL.MistKit.cloudKitAPI,
+            baseURL: .MistKit.cloudKitAPI,
             operationID: "test-operation",
             next: next
           )

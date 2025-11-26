@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
 
 extension CustomFieldValue.CustomFieldValuePayload {
   /// Initialize from decoder
@@ -65,9 +65,6 @@ extension CustomFieldValue.CustomFieldValuePayload {
     if let value = try? container.decode(Double.self) {
       return .doubleValue(value)
     }
-    if let value = try? container.decode(Bool.self) {
-      return .booleanValue(value)
-    }
     return nil
   }
 
@@ -104,7 +101,8 @@ extension CustomFieldValue.CustomFieldValuePayload {
     case .int64Value(let val):
       try container.encode(val)
     case .booleanValue(let val):
-      try container.encode(val)
+      // CloudKit represents booleans as int64 (0 or 1)
+      try container.encode(val ? 1 : 0)
     case .doubleValue(let val), .dateValue(let val):
       try encodeNumericValue(val, to: &container)
     case .locationValue(let val):

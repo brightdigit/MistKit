@@ -30,11 +30,12 @@
 public import Foundation
 
 /// Represents a CloudKit field value as defined in the CloudKit Web Services API
-public enum FieldValue: Codable, Equatable {
+public enum FieldValue: Codable, Equatable, Sendable {
+  /// Conversion factor from seconds to milliseconds for CloudKit timestamps
+  private static let millisecondsPerSecond: Double = 1_000
   case string(String)
   case int64(Int)
   case double(Double)
-  case boolean(Bool)
   case bytes(String)  // Base64-encoded string
   case date(Date)  // Date/time value
   case location(Location)
@@ -43,7 +44,7 @@ public enum FieldValue: Codable, Equatable {
   case list([FieldValue])
 
   /// Location dictionary as defined in CloudKit Web Services
-  public struct Location: Codable, Equatable {
+  public struct Location: Codable, Equatable, Sendable {
     /// The latitude coordinate
     public let latitude: Double
     /// The longitude coordinate
@@ -84,21 +85,27 @@ public enum FieldValue: Codable, Equatable {
   }
 
   /// Reference dictionary as defined in CloudKit Web Services
-  public struct Reference: Codable, Equatable {
+  public struct Reference: Codable, Equatable, Sendable {
+    /// Reference action types supported by CloudKit
+    public enum Action: String, Codable, Sendable {
+      case deleteSelf = "DELETE_SELF"
+      case none = "NONE"
+    }
+
     /// The record name being referenced
     public let recordName: String
-    /// The action to take ("DELETE_SELF" or nil)
-    public let action: String?
+    /// The action to take (DELETE_SELF, NONE, or nil)
+    public let action: Action?
 
     /// Initialize a reference value
-    public init(recordName: String, action: String? = nil) {
+    public init(recordName: String, action: Action? = nil) {
       self.recordName = recordName
       self.action = action
     }
   }
 
   /// Asset dictionary as defined in CloudKit Web Services
-  public struct Asset: Codable, Equatable {
+  public struct Asset: Codable, Equatable, Sendable {
     /// The file checksum
     public let fileChecksum: String?
     /// The file size in bytes
@@ -151,7 +158,7 @@ public enum FieldValue: Codable, Equatable {
     )
   }
 
-  /// Decode basic field value types (string, int64, double, boolean)
+  /// Decode basic field value types (string, int64, double)
   private static func decodeBasicTypes(from container: any SingleValueDecodingContainer) throws
     -> FieldValue?
   {
@@ -163,9 +170,6 @@ public enum FieldValue: Codable, Equatable {
     }
     if let value = try? container.decode(Double.self) {
       return .double(value)
-    }
-    if let value = try? container.decode(Bool.self) {
-      return .boolean(value)
     }
     return nil
   }
@@ -188,7 +192,7 @@ public enum FieldValue: Codable, Equatable {
     }
     // Try to decode as date (milliseconds since epoch)
     if let value = try? container.decode(Double.self) {
-      return .date(Date(timeIntervalSince1970: value / 1_000))
+      return .date(Date(timeIntervalSince1970: value / Self.millisecondsPerSecond))
     }
     return nil
   }
@@ -208,10 +212,8 @@ public enum FieldValue: Codable, Equatable {
       try container.encode(val)
     case .double(let val):
       try container.encode(val)
-    case .boolean(let val):
-      try container.encode(val)
     case .date(let val):
-      try container.encode(val.timeIntervalSince1970 * 1_000)
+      try container.encode(val.timeIntervalSince1970 * Self.millisecondsPerSecond)
     case .location(let val):
       try container.encode(val)
     case .reference(let val):
@@ -221,5 +223,22 @@ public enum FieldValue: Codable, Equatable {
     case .list(let val):
       try container.encode(val)
     }
+  }
+}
+
+// MARK: - Helper Methods
+
+extension FieldValue {
+  /// Create an int64 FieldValue from a Bool
+  ///
+  /// CloudKit represents booleans as INT64 (0/1) on the wire.
+  /// Creates a FieldValue from a Swift Bool value.
+  ///
+  /// This initializer converts Swift Bool to the appropriate int64 representation
+  /// used by CloudKit (1 for true, 0 for false).
+  ///
+  /// - Parameter booleanValue: The boolean value to convert
+  public init(booleanValue: Bool) {
+    self = .int64(booleanValue ? 1 : 0)
   }
 }

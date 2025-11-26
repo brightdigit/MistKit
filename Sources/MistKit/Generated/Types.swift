@@ -656,10 +656,6 @@ internal enum Components {
         ///
         /// - Remark: Generated from `#/components/schemas/DoubleValue`.
         internal typealias DoubleValue = Swift.Double
-        /// A true or false value
-        ///
-        /// - Remark: Generated from `#/components/schemas/BooleanValue`.
-        internal typealias BooleanValue = Swift.Bool
         /// Base64-encoded string representing binary data
         ///
         /// - Remark: Generated from `#/components/schemas/BytesValue`.
@@ -757,6 +753,7 @@ internal enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/action`.
             internal enum actionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case NONE = "NONE"
                 case DELETE_SELF = "DELETE_SELF"
             }
             /// Action to perform on the referenced record
@@ -850,18 +847,16 @@ internal enum Components {
             /// - Remark: Generated from `#/components/schemas/ListValue/case3`.
             case DoubleValue(Components.Schemas.DoubleValue)
             /// - Remark: Generated from `#/components/schemas/ListValue/case4`.
-            case BooleanValue(Components.Schemas.BooleanValue)
-            /// - Remark: Generated from `#/components/schemas/ListValue/case5`.
             case BytesValue(Components.Schemas.BytesValue)
-            /// - Remark: Generated from `#/components/schemas/ListValue/case6`.
+            /// - Remark: Generated from `#/components/schemas/ListValue/case5`.
             case DateValue(Components.Schemas.DateValue)
-            /// - Remark: Generated from `#/components/schemas/ListValue/case7`.
+            /// - Remark: Generated from `#/components/schemas/ListValue/case6`.
             case LocationValue(Components.Schemas.LocationValue)
-            /// - Remark: Generated from `#/components/schemas/ListValue/case8`.
+            /// - Remark: Generated from `#/components/schemas/ListValue/case7`.
             case ReferenceValue(Components.Schemas.ReferenceValue)
-            /// - Remark: Generated from `#/components/schemas/ListValue/case9`.
+            /// - Remark: Generated from `#/components/schemas/ListValue/case8`.
             case AssetValue(Components.Schemas.AssetValue)
-            /// - Remark: Generated from `#/components/schemas/ListValue/case10`.
+            /// - Remark: Generated from `#/components/schemas/ListValue/case9`.
             case ListValue(Components.Schemas.ListValue)
             internal init(from decoder: any Decoder) throws {
                 var errors: [any Error] = []
@@ -879,12 +874,6 @@ internal enum Components {
                 }
                 do {
                     self = .DoubleValue(try decoder.decodeFromSingleValueContainer())
-                    return
-                } catch {
-                    errors.append(error)
-                }
-                do {
-                    self = .BooleanValue(try decoder.decodeFromSingleValueContainer())
                     return
                 } catch {
                     errors.append(error)
@@ -938,8 +927,6 @@ internal enum Components {
                 case let .Int64Value(value):
                     try encoder.encodeToSingleValueContainer(value)
                 case let .DoubleValue(value):
-                    try encoder.encodeToSingleValueContainer(value)
-                case let .BooleanValue(value):
                     try encoder.encodeToSingleValueContainer(value)
                 case let .BytesValue(value):
                     try encoder.encodeToSingleValueContainer(value)

@@ -23,7 +23,7 @@ info:
     name: Apple Developer Support
     url: https://developer.apple.com/support/
 servers:
-    url: https://api.apple-cloudkit.com
+  - url: https://api.apple-cloudkit.com
     description: CloudKit Web Services API
 
 security:
@@ -848,7 +848,6 @@ components:
             - $ref: '#/components/schemas/StringValue'
             - $ref: '#/components/schemas/Int64Value'
             - $ref: '#/components/schemas/DoubleValue'
-            - $ref: '#/components/schemas/BooleanValue'
             - $ref: '#/components/schemas/BytesValue'
             - $ref: '#/components/schemas/DateValue'
             - $ref: '#/components/schemas/LocationValue'
@@ -873,10 +872,6 @@ components:
       type: number
       format: double
       description: A double-precision floating point value
-
-    BooleanValue:
-      type: boolean
-      description: A true or false value
 
     BytesValue:
       type: string
@@ -933,7 +928,7 @@ components:
           description: The record name being referenced
         action:
           type: string
-          enum: [DELETE_SELF]
+          enum: [NONE, DELETE_SELF]
           description: Action to perform on the referenced record
 
     AssetValue:
@@ -969,7 +964,6 @@ components:
           - $ref: '#/components/schemas/StringValue'
           - $ref: '#/components/schemas/Int64Value'
           - $ref: '#/components/schemas/DoubleValue'
-          - $ref: '#/components/schemas/BooleanValue'
           - $ref: '#/components/schemas/BytesValue'
           - $ref: '#/components/schemas/DateValue'
           - $ref: '#/components/schemas/LocationValue'

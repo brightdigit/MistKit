@@ -132,6 +132,13 @@ Server-to-server authentication requires Crypto framework support:
 
 ## Topics
 
+### Architecture and Development
+
+- <doc:OpenAPICodeGeneration>
+- <doc:GeneratedCodeAnalysis>
+- <doc:GeneratedCodeWorkflow>
+- <doc:AbstractionLayerArchitecture>
+
 ### Services
 
 - ``CloudKitService``
