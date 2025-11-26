@@ -31,7 +31,7 @@
 
 [CONTENT]
 In my previous article about [Building SyntaxKit with AI](link), I explored how code generation could transform SwiftSyntax's 80+ lines of verbose API calls into 10 lines of elegant, declarative Swift. That project taught me something crucial: **generate for precision, abstract for ergonomics**.
->
+
 Now it was July 2024, and I was staring at MistKit v0.2—a CloudKit Web Services client last updated in October 2021, pre-async/await, with 437 SwiftLint violations and 15% test coverage. For a library meant to make CloudKit easier, it had become a maintenance burden.
 
 But this time, I knew exactly what to do.
@@ -81,7 +81,11 @@ Just as I was able to simplify SwiftSyntax into a simpler API, I can have an LLM
 
 ## PART 2: Building with Claude Code - Challenges and Solutions (1,900 words)
 
-**[TODO: YOUR PROSE - Part 2 Opening]**
+[CONTENT]
+I needed a way for Claude Code to understand how the CloudKit Rest API worked. There was 1 main document I used - the [CloudKit Web Services Documentation Site](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/). The CloudKit Web Services Documentation Site which hasn't been updated since June of 2016 contains the most thorough documentation on how the REST API works and hopefully can provide enough for Claude to start crafting the openaPI spec.
+By running the site (as well as the swift-openapi-generator documentation) through llm.codes, and saving the exported markdown documentation in the `.claude` directory and letting Claude Code know about it (i.e. add a reference to it in Claude.md). I could know start having Claude Code translate the documentation into a usable API.
+[/CONTENT]
+
 
 **Suggested themes**:
 - The moment you realized this rebuild would be different from typical development
@@ -91,10 +95,6 @@ Just as I was able to simplify SwiftSyntax into a simpler API, I can have an LLM
 
 **Word count target**: ~100 words
 
-[CONTENT]
-I needed a way for Claude Code to understand how the CloudKit Rest API worked. There was 1 main document I used - the [CloudKit Web Services Documentation Site](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/). The CloudKit Web Services Documentation Site which hasn't been updated since June of 2016 contains the most thorough documentation on how the REST API works and hopefully can provide enough for Claude to start crafting the openaPI spec.
-By running the site (as well as the swift-openapi-generator documentation) through llm.codes, and saving the exported markdown documentation in the `.claude` directory and letting Claude Code know about it (i.e. add a reference to it in Claude.md). I could know start having Claude Code translate the documentation into a usable API.
-[/CONTENT]
 
 ---
 
@@ -221,6 +221,24 @@ There are many field value types which are more complex such as Reference, Locat
 >
 > This structure supports CloudKit's encryption-at-rest and secure upload/download token system. The `wrappingKey` enables end-to-end encryption, while `receipt` and `downloadURL` follow CloudKit's asset token workflow.
 
+**Understanding ASSET vs ASSETID**:
+
+CloudKit uses two different type discriminators for asset fields, and understanding when each appears is crucial:
+
+**ASSET** - Full asset metadata returned by CloudKit
+- Appears in: Query responses, lookup responses, modification responses
+- Contains: `fileChecksum`, `size`, `downloadURL`, `wrappingKey`, `receipt`
+- Use case: When you need to download or verify the asset file
+- Example: Querying records returns ASSET with downloadURL for immediate use
+
+**ASSETID** - Asset reference placeholder
+- Appears in: Record creation/update requests
+- Contains: Same structure as ASSET, but typically only `downloadURL` populated
+- Use case: When you're referencing an already-uploaded asset
+- Example: Creating a record with an asset you've already uploaded
+
+**The Quirk**: Both decode to the same `AssetValue` structure, but CloudKit distinguishes them with different type strings (`"ASSET"` vs `"ASSETID"`). This creates a challenge for type-safe code generation—we need to accept both type discriminators while using the same underlying data structure.
+
 **Solving the ASSETID Quirk**:
 
 During our conversation, I mentioned that ASSETID is different from ASSET. Here's how we solved it.
@@ -263,9 +281,18 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
 **The Result**:
 Type-safe field values with CloudKit-specific quirks (like ASSET/ASSETID) baked into the implementation. If it compiles, the field values are valid.
 
+[CONTENT]
+With the `CustomFieldValue`, Claude Code was able to work around the quirks of the CloudKit field value types using Swift code.
+[/CONTENT]
+
 ---
 
 ### Section 2.3: Challenge #2 - Authentication Complexity (~400 words)
+
+
+[CONTENT]
+The most difficult challenge was dealing with the 3 different methods of authentication:
+[/CONTENT]
 
 **The Three CloudKit Authentication Methods**:
 
@@ -305,6 +332,10 @@ components:
 ```
 
 **The Generator Limitation**:
+
+[CONTENT]
+While we can model these in OpenAPI yaml, this isn't helpful to the developer using MistKit. Specifically if you intend to the use **Web Auth Token** method. To acquire a **Web Auth Token**, you need to start with just your service's **API Token** and then authenticate (typically through the web) to get the **Web Auth Token**. At this point you'd need to switch to using the **Web Auth Token** authentication method. Switching between different authentication methods aren't supported necessarily via the swift-openapi-generator.
+[/CONTENT]
 
 swift-openapi-generator expects consistent authentication per endpoint. But CloudKit has THREE different auth methods that can be used interchangeably. How do you model this when endpoints need to support all three?
 
@@ -405,6 +436,107 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
 
 **The Result**:
 Runtime authentication method selection. The client chooses auth via TokenManager injection, and the middleware handles the rest transparently.
+
+**Switching Authentication Methods at Runtime**:
+
+The abstraction API's real power shows when you need to change authentication methods during a session. MistKit provides **AdaptiveTokenManager** for this exact scenario—a TokenManager that can transition between authentication modes without recreating the client.
+
+A common CloudKit workflow:
+
+1. **Start with API Token** - Initial authentication
+2. **Authenticate user** - Obtain Web Auth Token through CloudKit's authentication flow
+3. **Upgrade to Web Auth** - Same client, enhanced permissions
+
+**Without AdaptiveTokenManager**, this would require:
+- Recreating the entire client with new TokenManager
+- Managing different client instances
+- Coordinating which client to use when
+
+**With AdaptiveTokenManager**, switching happens internally:
+
+```swift
+// Create AdaptiveTokenManager starting with API-only authentication
+let adaptiveManager = AdaptiveTokenManager(apiToken: containerAPIToken)
+
+// Create client once - TokenManager handles auth transitions internally
+let client = MistKitClient(
+    container: "iCloud.com.brightdigit.MistDemo",
+    environment: .development,
+    tokenManager: adaptiveManager
+)
+
+// Initially in API-only mode
+let initialCreds = try await adaptiveManager.getCurrentCredentials()
+// Returns: TokenCredentials.apiToken(containerAPIToken)
+
+// Check current authentication mode
+await adaptiveManager.authenticationMode  // .apiOnly
+await adaptiveManager.supportsUserOperations  // false
+
+// ... User authenticates via CloudKit JS and provides webAuthToken ...
+
+// Upgrade to Web Auth Token - no client recreation needed
+let upgradedCreds = try await adaptiveManager.upgradeToWebAuthentication(
+    webAuthToken: webAuthToken
+)
+// Returns: TokenCredentials.webAuthToken(apiToken: containerAPIToken, webToken: webAuthToken)
+
+// Same client now has full CloudKit access
+await adaptiveManager.authenticationMode  // .webAuthenticated
+await adaptiveManager.supportsUserOperations  // true
+
+// Access private user data with the same client instance
+let privateRecords = try await client.queryRecords(
+    database: .private,
+    recordType: "TodoItem"
+)
+
+// Can downgrade back to API-only if needed
+let downgradedCreds = try await adaptiveManager.downgradeToAPIOnly()
+// Returns: TokenCredentials.apiToken(containerAPIToken)
+```
+
+**Key Benefits**:
+
+✅ **No client recreation** - Upgrade/downgrade happens within the same TokenManager
+✅ **Type-safe transitions** - Compiler ensures valid authentication states
+✅ **Runtime flexibility** - Switch authentication modes as user logs in/out
+✅ **Optional persistence** - Can store credentials with `TokenStorage`
+
+> **See it in action:** [Examples/MistDemo](../../Examples/MistDemo/) includes an AdaptiveTokenManager test mode (`--test-adaptive` flag) that demonstrates:
+> - Creating AdaptiveTokenManager with API token
+> - Upgrading to web authentication after user sign-in
+> - Validating credentials at each transition
+> - Downgrading back to API-only authentication
+>
+> Run with: `mistdemo --test-adaptive --web-auth-token <token>`
+
+**Why This Matters**:
+
+✅ **Same public API** - No changes to how you call CloudKit operations
+✅ **Type-safe** - Compiler ensures correct TokenManager conformance
+✅ **Testable** - Inject mock TokenManager for testing without network calls
+✅ **Flexible** - Switch auth methods anytime without architectural changes
+✅ **Clean separation** - Authentication logic isolated from CloudKit operations
+
+**The Abstraction Layers Working Together**:
+
+```
+User Code: Switch TokenManager
+    ↓
+MistKitClient: Accepts any TokenManager
+    ↓
+AuthenticationMiddleware: Reads current credentials
+    ↓
+Applies correct auth automatically (API Token vs Web Auth vs Server-to-Server)
+    ↓
+CloudKit receives properly authenticated request
+```
+
+This abstraction made switching authentication methods as simple as swapping a single object—the rest of the system adapts automatically.
+
+
+
 
 ---
 
