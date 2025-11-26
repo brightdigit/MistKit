@@ -660,89 +660,7 @@ A clean public API that hides all OpenAPI complexity. Generated code stays inter
 
 ---
 
-### Section 2.5: Challenge #4 - Pagination Patterns (~200 words)
-
-**The Challenge**:
-
-CloudKit uses different pagination approaches depending on operation type. How do we model both patterns in OpenAPI while maintaining type safety?
-
-**CloudKit's Two Pagination Patterns**:
-
-**Pattern 1: Continuation Marker (Query Operations)**
-
-Used for: Records Query
-
-```swift
-var continuationMarker: String? = nil
-repeat {
-    let response = try await queryRecords(
-        query: query,
-        continuationMarker: continuationMarker
-    )
-    processRecords(response.records)
-    continuationMarker = response.continuationMarker
-} while continuationMarker != nil
-```
-
-- **Opaque token**: Server maintains query cursor
-- **Temporary**: Session-bound, not persisted
-- **Use case**: Results may change between pages
-
-**Pattern 2: Sync Token (Change Operations)**
-
-Used for: Record Changes, Zone Changes
-
-```swift
-var syncToken: String? = loadPersistedToken()
-repeat {
-    let response = try await fetchRecordChanges(
-        zoneID: zoneID,
-        syncToken: syncToken
-    )
-    processChanges(response.records)
-    syncToken = response.syncToken
-    persistToken(syncToken)
-} while response.moreComing
-```
-
-- **Persistent token**: Represents timeline position
-- **Long-lived**: Stored between app launches
-- **Use case**: Incremental sync, offline-first architecture
-
-**Why Two Patterns?**
-
-- Query operations need flexible, re-executable searches
-- Sync operations need reliable, resumable change tracking
-- Different patterns optimize for different use cases
-
-**The OpenAPI Solution**:
-
-```yaml
-components:
-  schemas:
-    QueryResponse:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/Record'
-        continuationMarker:
-          type: string
-          description: Marker for pagination
-```
-
-**Translation Benefits**:
-- **Type-safe iteration**: Compiler enforces optional continuation marker
-- **Clear API contract**: Response schema explicitly includes pagination field
-- **Self-documenting**: Description clarifies purpose immediately
-
-**The Result**:
-The OpenAPI spec models both patterns with appropriate request/response schemas, enabling the generator to create idiomatic Swift pagination APIs for each scenario.
-
----
-
-### Section 2.6: Challenge #5 - Error Handling (~200 words)
+### Section 2.5: Challenge #4 - Error Handling (~200 words)
 
 **Example: Error Responses - Before and After**
 
@@ -844,7 +762,7 @@ This structured error handling enables the generated client to provide specific,
 
 ---
 
-### Section 2.7: The Iterative Workflow with Claude (~200 words)
+### Section 2.6: The Iterative Workflow with Claude (~200 words)
 
 **The Pattern That Emerged**:
 
