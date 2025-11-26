@@ -80,46 +80,61 @@ convert_conversation() {
     done < "$jsonl_file"
 }
 
-# Find the current project directory in Claude's storage
-PROJECT_DIR=$(find "$CLAUDE_DIR" -type d -name "*$(echo "$CURRENT_DIR" | sed 's/\//-/g' | sed 's/^-//')" | head -1)
+# Find all project directories related to this git repository
+# This includes the main project and all git worktrees
+PROJECT_DIRS=()
 
-if [ -z "$PROJECT_DIR" ]; then
-    echo "Warning: Could not find Claude project directory for current path"
-    echo "Searching for: $CURRENT_DIR"
-    echo "Looking for all projects instead..."
-    PROJECT_DIR="$CLAUDE_DIR"
+# Get the base project name (e.g., "MistKit")
+BASE_PROJECT_NAME="$CURRENT_PROJECT_NAME"
+
+# Find all directories that contain this project name
+while IFS= read -r dir; do
+    PROJECT_DIRS+=("$dir")
+done < <(find "$CLAUDE_DIR" -type d -name "*$BASE_PROJECT_NAME*" 2>/dev/null)
+
+if [ ${#PROJECT_DIRS[@]} -eq 0 ]; then
+    echo "Warning: Could not find any Claude project directories for: $BASE_PROJECT_NAME"
+    echo "Falling back to searching all projects..."
+    PROJECT_DIRS=("$CLAUDE_DIR")
 fi
 
-echo "Searching in: $PROJECT_DIR"
+echo "Found ${#PROJECT_DIRS[@]} project directory(ies):"
+for dir in "${PROJECT_DIRS[@]}"; do
+    echo "  - $(basename "$dir")"
+done
 echo ""
 
 # Counter
 count=0
 
-# Find and convert all JSONL files
-while IFS= read -r jsonl_file; do
-    if [ ! -f "$jsonl_file" ]; then
-        continue
-    fi
+# Find and convert all JSONL files from all related project directories
+for PROJECT_DIR in "${PROJECT_DIRS[@]}"; do
+    echo "Searching in: $(basename "$PROJECT_DIR")"
 
-    session_id="$(basename "$jsonl_file" .jsonl)"
+    while IFS= read -r jsonl_file; do
+        if [ ! -f "$jsonl_file" ]; then
+            continue
+        fi
 
-    # Get first message timestamp for filename
-    first_timestamp=$(head -1 "$jsonl_file" | jq -r '.timestamp // empty' 2>/dev/null || echo "")
+        session_id="$(basename "$jsonl_file" .jsonl)"
 
-    if [ -n "$first_timestamp" ] && [ "$first_timestamp" != "null" ]; then
-        date_prefix=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${first_timestamp%.*}" "+%Y%m%d-%H%M%S" 2>/dev/null || echo "unknown")
-    else
-        date_prefix="unknown"
-    fi
+        # Get first message timestamp for filename
+        first_timestamp=$(head -1 "$jsonl_file" | jq -r '.timestamp // empty' 2>/dev/null || echo "")
 
-    output_file="$OUTPUT_DIR/${date_prefix}_${session_id}.md"
+        if [ -n "$first_timestamp" ] && [ "$first_timestamp" != "null" ]; then
+            date_prefix=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${first_timestamp%.*}" "+%Y%m%d-%H%M%S" 2>/dev/null || echo "unknown")
+        else
+            date_prefix="unknown"
+        fi
 
-    echo "Exporting: $session_id"
-    convert_conversation "$jsonl_file" "$output_file"
+        output_file="$OUTPUT_DIR/${date_prefix}_${session_id}.md"
 
-    ((count++))
-done < <(find "$PROJECT_DIR" -name "*.jsonl" -type f | sort)
+        echo "  Exporting: $session_id"
+        convert_conversation "$jsonl_file" "$output_file"
+
+        ((count++))
+    done < <(find "$PROJECT_DIR" -name "*.jsonl" -type f 2>/dev/null | sort)
+done
 
 echo ""
 echo "=== Export Complete ==="

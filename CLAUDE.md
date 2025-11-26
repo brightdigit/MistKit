@@ -231,3 +231,4 @@ For detailed schema workflows and integration:
 @./.taskmaster/CLAUDE.md
 - We are using explicit ACLs in the Swift code
 - type order is based on the default in swiftlint: https://realm.github.io/SwiftLint/type_contents_order.html
+- Anything inside [CONTENT] [/CONTENT] is written by me
