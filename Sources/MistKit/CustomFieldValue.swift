@@ -51,9 +51,9 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
     case stringValue(String)
     case int64Value(Int)
     case doubleValue(Double)
-    case booleanValue(Bool)
     case bytesValue(String)
     case dateValue(Double)
+    case booleanValue(Bool)
     case locationValue(Components.Schemas.LocationValue)
     case referenceValue(Components.Schemas.ReferenceValue)
     case assetValue(Components.Schemas.AssetValue)
@@ -66,7 +66,8 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
   }
 
   private static let fieldTypeDecoders:
-    [FieldTypePayload: @Sendable (KeyedDecodingContainer<CodingKeys>) throws ->
+    [FieldTypePayload:
+      @Sendable (KeyedDecodingContainer<CodingKeys>) throws ->
       CustomFieldValuePayload] = [
         .string: { .stringValue(try $0.decode(String.self, forKey: .value)) },
         .int64: { .int64Value(try $0.decode(Int.self, forKey: .value)) },
@@ -95,6 +96,12 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
   internal let value: CustomFieldValuePayload
   /// The field type
   internal let type: FieldTypePayload?
+
+  /// Internal initializer for constructing field values programmatically
+  internal init(value: CustomFieldValuePayload, type: FieldTypePayload?) {
+    self.value = value
+    self.type = type
+  }
 
   internal init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -135,10 +142,11 @@ internal struct CustomFieldValue: Codable, Hashable, Sendable {
       try container.encode(val, forKey: .value)
     case .doubleValue(let val):
       try container.encode(val, forKey: .value)
-    case .booleanValue(let val):
-      try container.encode(val, forKey: .value)
     case .dateValue(let val):
       try container.encode(val, forKey: .value)
+    case .booleanValue(let val):
+      // CloudKit represents booleans as int64 (0 or 1)
+      try container.encode(val ? 1 : 0, forKey: .value)
     case .locationValue(let val):
       try container.encode(val, forKey: .value)
     case .referenceValue(let val):

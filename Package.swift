@@ -100,6 +100,8 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
     // Crypto library for cross-platform cryptographic operations
     .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
+    // Logging library for cross-platform logging
+    .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -110,6 +112,7 @@ let package = Package(
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
         .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
         .product(name: "Crypto", package: "swift-crypto"),
+        .product(name: "Logging", package: "swift-log"),
       ],
       swiftSettings: swiftSettings
     ),

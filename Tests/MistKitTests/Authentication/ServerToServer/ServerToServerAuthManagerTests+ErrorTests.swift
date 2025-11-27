@@ -5,7 +5,7 @@ import Testing
 @testable import MistKit
 
 extension ServerToServerAuthManagerTests {
-  @Suite("Server-to-Server Auth Manager Error Handling")
+  @Suite("Server-to-Server Auth Manager Error Handling", .enabled(if: Platform.isCryptoAvailable))
   /// Test suite for ServerToServerAuthManager error handling functionality
   internal struct ErrorTests {
     // MARK: - Error Handling Tests

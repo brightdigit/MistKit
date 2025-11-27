@@ -1,0 +1,16 @@
+# CloudKit Server-to-Server Private Keys
+*.pem
+
+# Environment variables
+.env
+
+# Build artifacts
+.build/
+.swiftpm/
+
+# Xcode
+xcuserdata/
+*.xcworkspace
+
+# macOS
+.DS_Store
