@@ -36,13 +36,16 @@ A Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
 
 ## Overview
 
-### Key Features
+MistKit provides a modern Swift interface to CloudKit Web Services REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the CloudKit framework isn't available. Built with Swift concurrency (async/await) and designed for modern Swift applications, MistKit supports all three CloudKit authentication methods and provides type-safe access to CloudKit operations.
 
-MistKit supports three authentication methods depending on your use case:
+## Key Features
 
-- **API Token Authentication**: Container-level access for basic CloudKit operations
-- **Web Authentication**: User-specific access with web authentication tokens
-- **Server-to-Server Authentication**: Enterprise-level access using ECDSA P-256 key signing
+- **🌍 Cross-Platform Support**: Works on macOS, iOS, tvOS, watchOS, visionOS, and Linux
+- **⚡ Modern Swift**: Built with Swift 6 concurrency features and structured error handling
+- **🔐 Multiple Authentication Methods**: API token, web authentication, and server-to-server authentication
+- **🛡️ Type-Safe**: Comprehensive type safety with Swift's type system
+- **📋 OpenAPI-Based**: Generated from CloudKit Web Services OpenAPI specification
+- **🔒 Secure**: Built-in security best practices and credential management
 
 ## Getting Started
 
