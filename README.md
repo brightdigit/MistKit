@@ -332,55 +332,70 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Roadmap
 
-### v0.2.4
+### v1.0.0-alpha.1
 
 - [x] [Composing Web Service Requests](https://github.com/brightdigit/MistKit/issues/111) ✅
 - [x] [Modifying Records (records/modify)](https://github.com/brightdigit/MistKit/issues/114) ✅
 - [x] [Fetching Records Using a Query (records/query)](https://github.com/brightdigit/MistKit/issues/114) ✅
 - [x] [Fetching Records by Record Name (records/lookup)](https://github.com/brightdigit/MistKit/issues/114) ✅
 - [x] [Fetching Current User Identity (users/caller)](https://github.com/brightdigit/MistKit/issues/114) ✅
+
+### v1.0.0-alpha.2
+
 - [x] [Vapor Token Client](https://github.com/brightdigit/MistKit/issues/113) ✅
 - [x] [Vapor Token Storage](https://github.com/brightdigit/MistKit/issues/113) ✅
 - [x] [Vapor URL Client](https://github.com/brightdigit/MistKit/issues/113) ✅
 - [x] [Swift NIO URL Client](https://github.com/brightdigit/MistKit/issues/113) ✅
 - [x] [Date Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
 - [x] [Location Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
-
-### Current Version
-
 - [x] [List Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
 - [x] [Reference Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
 - [x] [Error Codes](https://github.com/brightdigit/MistKit/issues/115) ✅
 - [x] [Fetching Zones (zones/list)](https://github.com/brightdigit/MistKit/issues/116) ✅
 
+### v1.0.0-alpha.3
+
+- [ ] [Name Component Types](https://github.com/brightdigit/MistKit/issues/26)
+- [ ] [Uploading Assets (assets/upload)](https://github.com/brightdigit/MistKit/issues/30)
+- [ ] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/44)
+- [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46)
+- [ ] [Add Support for swiftlang/swift-source-compat-suite](https://github.com/brightdigit/MistKit/issues/185)
+
+### v1.0.0-alpha.X
+
+- [ ] [Discovering User Identities (POST users/discover)](https://github.com/brightdigit/MistKit/issues/27)
+- [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/28)
+- [ ] [Referencing Existing Assets (assets/rereference)](https://github.com/brightdigit/MistKit/issues/31)
+- [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/33)
+- [ ] [Fetching Users by Email (users/lookup/email)](https://github.com/brightdigit/MistKit/issues/34)
+- [ ] [Fetching Users by Record Name (users/lookup/id)](https://github.com/brightdigit/MistKit/issues/35)
+- [ ] [Fetching Record Changes (records/changes)](https://github.com/brightdigit/MistKit/issues/40)
+- [ ] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/41)
+- [ ] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/42)
+- [ ] [Modifying Zones (zones/modify)](https://github.com/brightdigit/MistKit/issues/45)
+- [ ] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/47)
+- [ ] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/48)
+- [ ] [Fetching Subscriptions (subscriptions/list)](https://github.com/brightdigit/MistKit/issues/49)
+- [ ] [Fetching Subscriptions by Identifier (subscriptions/lookup)](https://github.com/brightdigit/MistKit/issues/50)
+- [ ] [Modifying Subscriptions (subscriptions/modify)](https://github.com/brightdigit/MistKit/issues/51)
+- [ ] [Creating APNs Tokens (tokens/create)](https://github.com/brightdigit/MistKit/issues/52)
+- [ ] [Registering Tokens (tokens/register)](https://github.com/brightdigit/MistKit/issues/53)
+- [ ] [Feature: Add custom CloudKit zone support for queries](https://github.com/brightdigit/MistKit/issues/146)
+
 ### v1.0.0
 
-- [ ] [System Field Integration](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Name Component Types](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Discovering User Identities (POST users/discover)](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Support `postMessage` for Authentication Requests](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Uploading Assets (assets/upload)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Referencing Existing Assets (assets/rereference)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Records Using a Query (records/query) w/ basic filtering](https://github.com/brightdigit/MistKit/issues/114) ❌
-- [ ] [Handle Data Size Limits](https://github.com/brightdigit/MistKit/issues/115) ❌
-- [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Fetching Users by Email (users/lookup/email)](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Fetching Users by Record Name (users/lookup/id)](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Fetching Record Changes (records/changes)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Zones (zones/list)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Modifying Zones (zones/modify)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Subscriptions (subscriptions/list)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Subscriptions by Identifier (subscriptions/lookup)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Modifying Subscriptions (subscriptions/modify)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Creating APNs Tokens (tokens/create)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Registering Tokens (tokens/register)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [System Field Integration](https://github.com/brightdigit/MistKit/issues/116)
+- [ ] [Handle Data Size Limits](https://github.com/brightdigit/MistKit/issues/38)
+- [ ] [Add architecture diagrams to Bushel documentation](https://github.com/brightdigit/MistKit/issues/140)
+- [ ] [Add comprehensive test suite for Bushel demo](https://github.com/brightdigit/MistKit/issues/136)
+- [ ] [Implement incremental sync with change tracking for Bushel](https://github.com/brightdigit/MistKit/issues/137)
+- [ ] [Migrate Bushel Demo to it's own Repository](https://github.com/brightdigit/MistKit/issues/183)
+- [ ] [Migrate Celestra Demo to it's own Repository](https://github.com/brightdigit/MistKit/issues/184)
+
+### v1.1.0
+
+- [ ] [Add CloudKit Schema Management APIs (cktool/cktooljs functionality)](https://github.com/brightdigit/MistKit/issues/135)
+- [ ] [Add KeyPath-based QueryFilter API for Type-Safe Filtering](https://github.com/brightdigit/MistKit/issues/149)
 
 ## Support
 
