@@ -21,22 +21,24 @@ A Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
 - [Getting Started](#getting-started)
     - [Installation](#installation)
     - [Requirements](#requirements)
+    - [Platform Support](#platform-support)
     - [Quick Start](#quick-start)
 - [Usage](#usage)
     - [Authentication](#authentication)
-    - [Platform Support](#platform-support)
     - [Error Handling](#error-handling)
     - [Advanced Usage](#advanced-usage)
     - [Examples](#examples)
- - [Documentation](#documentation)
- - [License](#license)
- - [Acknowledgments](#acknowledgments)
+- [Documentation](#documentation)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 - [Roadmap](#roadmap)
 - [Support](#support)
 
 ## Overview
 
-MistKit provides a modern Swift interface to CloudKit Web Services REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the CloudKit framework isn't available. Built with Swift concurrency (async/await) and designed for modern Swift applications, MistKit supports all three CloudKit authentication methods and provides type-safe access to CloudKit operations.
+MistKit provides a modern Swift interface to CloudKit Web Services REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the CloudKit framework isn't available. 
+
+Built with Swift concurrency (async/await) and designed for modern Swift applications, MistKit supports all three CloudKit authentication methods and provides type-safe access to CloudKit operations.
 
 ## Key Features
 
@@ -55,7 +57,7 @@ Add MistKit to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0")
+    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.1")
 ]
 ```
 
@@ -64,11 +66,26 @@ Or add it through Xcode:
 2. Enter: `https://github.com/brightdigit/MistKit.git`
 3. Select version and add to your target
 
+
 ### Requirements
 
 - Swift 6.1+
 - Xcode 16.0+ (for iOS/macOS development)
 - Linux: Ubuntu 18.04+ with Swift 6.1+
+
+### Platform Support
+
+#### Minimum Platform Versions
+
+| Platform | Minimum Version | Server-to-Server Auth |
+|----------|-----------------|----------------------|
+| macOS | 10.15+ | 11.0+ |
+| iOS | 13.0+ | 14.0+ |
+| tvOS | 13.0+ | 14.0+ |
+| watchOS | 6.0+ | 7.0+ |
+| visionOS | 1.0+ | 1.0+ |
+| Linux | Ubuntu 18.04+ | ✅ |
+| Windows | 10+ | ✅ |
 
 ### Quick Start
 
@@ -191,20 +208,6 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
    )
    ```
 
-### Platform Support
-
-#### Minimum Platform Versions
-
-| Platform | Minimum Version | Server-to-Server Auth |
-|----------|-----------------|----------------------|
-| macOS | 10.15+ | 11.0+ |
-| iOS | 13.0+ | 14.0+ |
-| tvOS | 13.0+ | 14.0+ |
-| watchOS | 6.0+ | 7.0+ |
-| visionOS | 1.0+ | 1.0+ |
-| Linux | Ubuntu 18.04+ | ✅ |
-| Windows | 10+ | ✅ |
-
 ### Error Handling
 
 MistKit provides comprehensive error handling with typed errors:
@@ -233,9 +236,7 @@ do {
 
 ### Advanced Usage
 
-#### Advanced Authentication
-
-##### Using AsyncHTTPClient Transport
+#### Using AsyncHTTPClient Transport
 
 For server-side applications, MistKit can use [swift-openapi-async-http-client](https://github.com/swift-server/swift-openapi-async-http-client) as the underlying HTTP transport. This is particularly useful for server-side Swift applications that need robust HTTP client capabilities.
 
@@ -257,7 +258,7 @@ let service = try CloudKitService(
 )
 ```
 
-##### Adaptive Token Manager
+#### Adaptive Token Manager
 
 For applications that might upgrade from API-only to web authentication:
 
