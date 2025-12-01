@@ -15,45 +15,58 @@
 
 A Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
 
-## Overview
+## Table of Contents
+- [Overview](#overview)
+    - [Key Features](#key-features)
+- [Getting Started](#getting-started)
+    - [Installation](#installation)
+    - [Requirements](#requirements)
+    - [Quick Start](#quick-start)
+- [Usage](#usage)
+    - [Authentication](#authentication)
+    - [Platform Support](#platform-support)
+    - [Error Handling](#error-handling)
+    - [Advanced Usage](#advanced-usage)
+    - [Examples](#examples)
+ - [Documentation](#documentation)
+ - [License](#license)
+ - [Acknowledgments](#acknowledgments)
+- [Roadmap](#roadmap)
+- [Support](#support)
 
-MistKit provides a modern Swift interface to CloudKit Web Services REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the CloudKit framework isn't available.
+### Examples
 
-Built with Swift concurrency (async/await) and designed for modern Swift applications, MistKit supports all three CloudKit authentication methods and provides type-safe access to CloudKit operations.
+Check out the `Examples/` directory for complete working examples:
 
-## Key Features
+- **Command Line Tool**: Basic CloudKit operations from the command line
+- **Server Application**: Using MistKit in a server-side Swift application
+- **Cross-Platform App**: Shared CloudKit logic across multiple platforms
 
-- **🌍 Cross-Platform Support**: Works on macOS, iOS, tvOS, watchOS, visionOS, and Linux
-- **⚡ Modern Swift**: Built with Swift 6 concurrency features and structured error handling
-- **🔐 Multiple Authentication Methods**: API token, web authentication, and server-to-server authentication
-- **🛡️ Type-Safe**: Comprehensive type safety with Swift's type system
-- **📋 OpenAPI-Based**: Generated from CloudKit Web Services OpenAPI specification
-- **🔒 Secure**: Built-in security best practices and credential management
+## Documentation
+- **[API Documentation](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation))**: Complete API reference
+- **[CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)**: Apple's official CloudKit Web Services documentation
 
-## Installation
+## License
+MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 
-### Swift Package Manager
+## Acknowledgments
 
-Add MistKit to your `Package.swift` file:
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.1")
-]
-```
-
+- Built on [Swift OpenAPI Generator](https://github.com/apple/swift-openapi-generator)
+- Uses [Swift Crypto](https://github.com/apple/swift-crypto) for server-to-server authentication
+- Inspired by CloudKit Web Services REST API
 Or add it through Xcode:
 1. File → Add Package Dependencies
+### Key Features
 2. Enter: `https://github.com/brightdigit/MistKit.git`
 3. Select version and add to your target
 
-## Quick Start
+### Quick Start
 
-### 1. Choose Your Authentication Method
+#### 1. Choose Your Authentication Method
 
 MistKit supports three authentication methods depending on your use case:
 
-#### API Token (Container-level access)
+##### API Token (Container-level access)
 ```swift
 import MistKit
 
@@ -61,18 +74,24 @@ let service = try CloudKitService(
     containerIdentifier: "iCloud.com.example.MyApp",
     apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
 )
-```
 
-#### Web Authentication (User-specific access)
+### Installation
+##### Web Authentication (User-specific access)
 ```swift
 let service = try CloudKitService(
     containerIdentifier: "iCloud.com.example.MyApp",
     apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!,
     webAuthToken: userWebAuthToken
 )
-```
 
-#### Server-to-Server (Enterprise access, public database only)
+### Requirements
+
+- Swift 6.1+
+- Xcode 16.0+ (for iOS/macOS development)
+- Linux: Ubuntu 18.04+ with Swift 6.1+
+
+### Quick Start
+##### Server-to-Server (Enterprise access, public database only)
 ```swift
 let serverManager = try ServerToServerAuthManager(
     keyIdentifier: ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"]!,
@@ -87,7 +106,7 @@ let service = try CloudKitService(
 )
 ```
 
-### 2. Create CloudKit Service
+#### 2. Create CloudKit Service
 
 ```swift
 do {
@@ -101,9 +120,14 @@ do {
 }
 ```
 
-## Authentication Setup
 
-### API Token Authentication
+## Usage
+
+### Authentication
+
+#### Authentication Setup
+
+#### API Token Authentication
 
 1. **Get API Token**:
    - Log into [Apple Developer Console](https://developer.apple.com)
@@ -121,9 +145,9 @@ do {
        containerIdentifier: "iCloud.com.example.MyApp",
        apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
    )
-   ```
 
-### Web Authentication
+##### API Token Authentication
+#### Web Authentication
 
 Web authentication enables user-specific operations and requires both an API token and a web authentication token obtained through CloudKit JS authentication.
 
@@ -133,9 +157,9 @@ let service = try CloudKitService(
     apiToken: apiToken,
     webAuthToken: webAuthToken
 )
-```
 
-### Server-to-Server Authentication
+##### Web Authentication
+#### Server-to-Server Authentication
 
 Server-to-server authentication provides enterprise-level access using ECDSA P-256 key signing. Note that this method only supports the public database.
 
@@ -158,8 +182,8 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
        keyIdentifier: "your_key_id",
        privateKeyData: privateKeyData
    )
-
    let service = try CloudKitService(
+##### Server-to-Server Authentication
        containerIdentifier: "iCloud.com.example.MyApp",
        tokenManager: serverManager,
        environment: .production,
@@ -167,8 +191,10 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
    )
    ```
 
-## Platform Support
 
+### Platform Support
+
+### Platform Support
 ### Minimum Platform Versions
 
 | Platform | Minimum Version | Server-to-Server Auth |
@@ -181,8 +207,8 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
 | Linux | Ubuntu 18.04+ | ✅ |
 | Windows | 10+ | ✅ |
 
-## Error Handling
 
+### Error Handling
 MistKit provides comprehensive error handling with typed errors:
 
 ```swift
@@ -207,61 +233,22 @@ do {
 - **`TokenManagerError`**: Authentication and credential errors
 - **`TokenStorageError`**: Token storage and persistence errors
 
-## Security Best Practices
 
-### Environment Variables
 
-Always store sensitive credentials in environment variables:
 
-```bash
-# .env file (never commit this!)
-CLOUDKIT_API_TOKEN=your_api_token_here
-CLOUDKIT_KEY_ID=your_key_id_here
-```
+### Advanced Usage
 
-### Secure Logging
+#### Advanced Authentication
 
-MistKit automatically masks sensitive information in logs:
-
-```swift
-// Sensitive data is automatically redacted in log output
-print("Token: \\(secureToken)") // Outputs: Token: abc12345***
-```
-
-### Token Storage
-
-For persistent applications, use secure token storage:
-
-```swift
-let storage = InMemoryTokenStorage() // For development
-// Use KeychainTokenStorage() for production (implement as needed)
-
-let tokenManager = WebAuthTokenManager(
-    apiToken: apiToken,
-    webAuthToken: webAuthToken,
-    storage: storage
-)
-
-let service = try CloudKitService(
-    containerIdentifier: "iCloud.com.example.MyApp",
-    tokenManager: tokenManager,
-    environment: .development,
-    database: .private
-)
-```
-
-## Advanced Usage
-
-### Using AsyncHTTPClient Transport
-
+##### Using AsyncHTTPClient Transport
 For server-side applications, MistKit can use [swift-openapi-async-http-client](https://github.com/swift-server/swift-openapi-async-http-client) as the underlying HTTP transport. This is particularly useful for server-side Swift applications that need robust HTTP client capabilities.
 
 ```swift
 import MistKit
 import OpenAPIAsyncHTTPClient
 
-// Create an AsyncHTTPClient instance
-let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+// AsyncHTTPClient instance usually supplied by the Server API
+let httpClient : HTTPClient
 
 // Create the transport
 let transport = AsyncHTTPClientTransport(client: httpClient)
@@ -272,22 +259,10 @@ let service = try CloudKitService(
     apiToken: apiToken,
     transport: transport
 )
-
-// Don't forget to shutdown the client when done
-defer {
-    try? httpClient.syncShutdown()
-}
 ```
 
-#### Benefits
 
-- **Production Ready**: AsyncHTTPClient is battle-tested in server environments
-- **Performance**: Optimized for high-throughput server applications
-- **Configuration**: Extensive configuration options for timeouts, connection pooling, and more
-- **Platform Support**: Works across all supported platforms including Linux
-
-### Adaptive Token Manager
-
+##### Adaptive Token Manager
 For applications that might upgrade from API-only to web authentication:
 
 ```swift
@@ -300,31 +275,30 @@ let adaptiveManager = AdaptiveTokenManager(
 try await adaptiveManager.upgradeToWebAuth(webAuthToken: webToken)
 ```
 
-## Examples
 
+### Examples
+
+### Examples
 Check out the `Examples/` directory for complete working examples:
 
 - **Command Line Tool**: Basic CloudKit operations from the command line
 - **Server Application**: Using MistKit in a server-side Swift application
 - **Cross-Platform App**: Shared CloudKit logic across multiple platforms
 
-## Documentation
 
-- **[API Documentation](https://brightdigit.github.io/MistKit)**: Complete API reference
-- **[DocC Documentation](./Sources/MistKit/Documentation.docc)**: Interactive documentation
+### Documentation
+- **[API Documentation](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation))**: Complete API reference
 - **[CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)**: Apple's official CloudKit Web Services documentation
 
-## Requirements
 
-- Swift 6.1+
-- Xcode 16.0+ (for iOS/macOS development)
-- Linux: Ubuntu 18.04+ with Swift 6.1+
 
-## License
 
+## Project Information
+
+### License
 MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 
-## Acknowledgments
+### Acknowledgments
 
 - Built on [Swift OpenAPI Generator](https://github.com/apple/swift-openapi-generator)
 - Uses [Swift Crypto](https://github.com/apple/swift-crypto) for server-to-server authentication
