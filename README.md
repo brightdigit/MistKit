@@ -15,9 +15,28 @@
 
 A Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
 
+## Table of Contents
+- [Overview](#overview)
+    - [Key Features](#key-features)
+- [Getting Started](#getting-started)
+    - [Installation](#installation)
+    - [Requirements](#requirements)
+    - [Platform Support](#platform-support)
+    - [Quick Start](#quick-start)
+- [Usage](#usage)
+    - [Authentication](#authentication)
+    - [Error Handling](#error-handling)
+    - [Advanced Usage](#advanced-usage)
+    - [Examples](#examples)
+- [Documentation](#documentation)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+- [Roadmap](#roadmap)
+- [Support](#support)
+
 ## Overview
 
-MistKit provides a modern Swift interface to CloudKit Web Services REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the CloudKit framework isn't available.
+MistKit provides a modern Swift interface to CloudKit Web Services REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the CloudKit framework isn't available. 
 
 Built with Swift concurrency (async/await) and designed for modern Swift applications, MistKit supports all three CloudKit authentication methods and provides type-safe access to CloudKit operations.
 
@@ -30,11 +49,11 @@ Built with Swift concurrency (async/await) and designed for modern Swift applica
 - **📋 OpenAPI-Based**: Generated from CloudKit Web Services OpenAPI specification
 - **🔒 Secure**: Built-in security best practices and credential management
 
-## Installation
+## Getting Started
 
-### Swift Package Manager
+### Installation
 
-Add MistKit to your `Package.swift` file:
+Add MistKit to your `Package.swift`:
 
 ```swift
 dependencies: [
@@ -47,13 +66,34 @@ Or add it through Xcode:
 2. Enter: `https://github.com/brightdigit/MistKit.git`
 3. Select version and add to your target
 
-## Quick Start
 
-### 1. Choose Your Authentication Method
+### Requirements
+
+- Swift 6.1+
+- Xcode 16.0+ (for iOS/macOS development)
+- Linux: Ubuntu 18.04+ with Swift 6.1+
+
+### Platform Support
+
+#### Minimum Platform Versions
+
+| Platform | Minimum Version | Server-to-Server Auth |
+|----------|-----------------|----------------------|
+| macOS | 10.15+ | 11.0+ |
+| iOS | 13.0+ | 14.0+ |
+| tvOS | 13.0+ | 14.0+ |
+| watchOS | 6.0+ | 7.0+ |
+| visionOS | 1.0+ | 1.0+ |
+| Linux | Ubuntu 18.04+ | ✅ |
+| Windows | 10+ | ✅ |
+
+### Quick Start
+
+#### 1. Choose Your Authentication Method
 
 MistKit supports three authentication methods depending on your use case:
 
-#### API Token (Container-level access)
+##### API Token (Container-level access)
 ```swift
 import MistKit
 
@@ -63,7 +103,7 @@ let service = try CloudKitService(
 )
 ```
 
-#### Web Authentication (User-specific access)
+##### Web Authentication (User-specific access)
 ```swift
 let service = try CloudKitService(
     containerIdentifier: "iCloud.com.example.MyApp",
@@ -72,7 +112,7 @@ let service = try CloudKitService(
 )
 ```
 
-#### Server-to-Server (Enterprise access, public database only)
+##### Server-to-Server (Enterprise access, public database only)
 ```swift
 let serverManager = try ServerToServerAuthManager(
     keyIdentifier: ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"]!,
@@ -87,7 +127,7 @@ let service = try CloudKitService(
 )
 ```
 
-### 2. Create CloudKit Service
+#### 2. Create CloudKit Service
 
 ```swift
 do {
@@ -101,9 +141,11 @@ do {
 }
 ```
 
-## Authentication Setup
+## Usage
 
-### API Token Authentication
+### Authentication
+
+#### API Token Authentication
 
 1. **Get API Token**:
    - Log into [Apple Developer Console](https://developer.apple.com)
@@ -123,7 +165,7 @@ do {
    )
    ```
 
-### Web Authentication
+#### Web Authentication
 
 Web authentication enables user-specific operations and requires both an API token and a web authentication token obtained through CloudKit JS authentication.
 
@@ -135,7 +177,7 @@ let service = try CloudKitService(
 )
 ```
 
-### Server-to-Server Authentication
+#### Server-to-Server Authentication
 
 Server-to-server authentication provides enterprise-level access using ECDSA P-256 key signing. Note that this method only supports the public database.
 
@@ -158,7 +200,6 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
        keyIdentifier: "your_key_id",
        privateKeyData: privateKeyData
    )
-
    let service = try CloudKitService(
        containerIdentifier: "iCloud.com.example.MyApp",
        tokenManager: serverManager,
@@ -167,21 +208,7 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
    )
    ```
 
-## Platform Support
-
-### Minimum Platform Versions
-
-| Platform | Minimum Version | Server-to-Server Auth |
-|----------|-----------------|----------------------|
-| macOS | 10.15+ | 11.0+ |
-| iOS | 13.0+ | 14.0+ |
-| tvOS | 13.0+ | 14.0+ |
-| watchOS | 6.0+ | 7.0+ |
-| visionOS | 1.0+ | 1.0+ |
-| Linux | Ubuntu 18.04+ | ✅ |
-| Windows | 10+ | ✅ |
-
-## Error Handling
+### Error Handling
 
 MistKit provides comprehensive error handling with typed errors:
 
@@ -201,58 +228,15 @@ do {
 }
 ```
 
-### Error Types
+#### Error Types
 
 - **`CloudKitError`**: CloudKit Web Services API errors
 - **`TokenManagerError`**: Authentication and credential errors
 - **`TokenStorageError`**: Token storage and persistence errors
 
-## Security Best Practices
+### Advanced Usage
 
-### Environment Variables
-
-Always store sensitive credentials in environment variables:
-
-```bash
-# .env file (never commit this!)
-CLOUDKIT_API_TOKEN=your_api_token_here
-CLOUDKIT_KEY_ID=your_key_id_here
-```
-
-### Secure Logging
-
-MistKit automatically masks sensitive information in logs:
-
-```swift
-// Sensitive data is automatically redacted in log output
-print("Token: \\(secureToken)") // Outputs: Token: abc12345***
-```
-
-### Token Storage
-
-For persistent applications, use secure token storage:
-
-```swift
-let storage = InMemoryTokenStorage() // For development
-// Use KeychainTokenStorage() for production (implement as needed)
-
-let tokenManager = WebAuthTokenManager(
-    apiToken: apiToken,
-    webAuthToken: webAuthToken,
-    storage: storage
-)
-
-let service = try CloudKitService(
-    containerIdentifier: "iCloud.com.example.MyApp",
-    tokenManager: tokenManager,
-    environment: .development,
-    database: .private
-)
-```
-
-## Advanced Usage
-
-### Using AsyncHTTPClient Transport
+#### Using AsyncHTTPClient Transport
 
 For server-side applications, MistKit can use [swift-openapi-async-http-client](https://github.com/swift-server/swift-openapi-async-http-client) as the underlying HTTP transport. This is particularly useful for server-side Swift applications that need robust HTTP client capabilities.
 
@@ -260,8 +244,8 @@ For server-side applications, MistKit can use [swift-openapi-async-http-client](
 import MistKit
 import OpenAPIAsyncHTTPClient
 
-// Create an AsyncHTTPClient instance
-let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+// AsyncHTTPClient instance usually supplied by the Server API
+let httpClient : HTTPClient
 
 // Create the transport
 let transport = AsyncHTTPClientTransport(client: httpClient)
@@ -272,21 +256,9 @@ let service = try CloudKitService(
     apiToken: apiToken,
     transport: transport
 )
-
-// Don't forget to shutdown the client when done
-defer {
-    try? httpClient.syncShutdown()
-}
 ```
 
-#### Benefits
-
-- **Production Ready**: AsyncHTTPClient is battle-tested in server environments
-- **Performance**: Optimized for high-throughput server applications
-- **Configuration**: Extensive configuration options for timeouts, connection pooling, and more
-- **Platform Support**: Works across all supported platforms including Linux
-
-### Adaptive Token Manager
+#### Adaptive Token Manager
 
 For applications that might upgrade from API-only to web authentication:
 
@@ -300,7 +272,7 @@ let adaptiveManager = AdaptiveTokenManager(
 try await adaptiveManager.upgradeToWebAuth(webAuthToken: webToken)
 ```
 
-## Examples
+### Examples
 
 Check out the `Examples/` directory for complete working examples:
 
@@ -310,15 +282,8 @@ Check out the `Examples/` directory for complete working examples:
 
 ## Documentation
 
-- **[API Documentation](https://brightdigit.github.io/MistKit)**: Complete API reference
-- **[DocC Documentation](./Sources/MistKit/Documentation.docc)**: Interactive documentation
+- **[API Documentation](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation)**: Complete API reference
 - **[CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)**: Apple's official CloudKit Web Services documentation
-
-## Requirements
-
-- Swift 6.1+
-- Xcode 16.0+ (for iOS/macOS development)
-- Linux: Ubuntu 18.04+ with Swift 6.1+
 
 ## License
 
@@ -332,55 +297,70 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Roadmap
 
-### v0.2.4
+### v1.0.0-alpha.1
 
 - [x] [Composing Web Service Requests](https://github.com/brightdigit/MistKit/issues/111) ✅
 - [x] [Modifying Records (records/modify)](https://github.com/brightdigit/MistKit/issues/114) ✅
 - [x] [Fetching Records Using a Query (records/query)](https://github.com/brightdigit/MistKit/issues/114) ✅
 - [x] [Fetching Records by Record Name (records/lookup)](https://github.com/brightdigit/MistKit/issues/114) ✅
 - [x] [Fetching Current User Identity (users/caller)](https://github.com/brightdigit/MistKit/issues/114) ✅
+
+### v1.0.0-alpha.2
+
 - [x] [Vapor Token Client](https://github.com/brightdigit/MistKit/issues/113) ✅
 - [x] [Vapor Token Storage](https://github.com/brightdigit/MistKit/issues/113) ✅
 - [x] [Vapor URL Client](https://github.com/brightdigit/MistKit/issues/113) ✅
 - [x] [Swift NIO URL Client](https://github.com/brightdigit/MistKit/issues/113) ✅
 - [x] [Date Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
 - [x] [Location Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
-
-### Current Version
-
 - [x] [List Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
 - [x] [Reference Field Types](https://github.com/brightdigit/MistKit/issues/110) ✅
 - [x] [Error Codes](https://github.com/brightdigit/MistKit/issues/115) ✅
 - [x] [Fetching Zones (zones/list)](https://github.com/brightdigit/MistKit/issues/116) ✅
 
+### v1.0.0-alpha.3
+
+- [ ] [Name Component Types](https://github.com/brightdigit/MistKit/issues/26)
+- [ ] [Uploading Assets (assets/upload)](https://github.com/brightdigit/MistKit/issues/30)
+- [ ] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/44)
+- [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46)
+- [ ] [Add Support for swiftlang/swift-source-compat-suite](https://github.com/brightdigit/MistKit/issues/185)
+
+### v1.0.0-alpha.X
+
+- [ ] [Discovering User Identities (POST users/discover)](https://github.com/brightdigit/MistKit/issues/27)
+- [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/28)
+- [ ] [Referencing Existing Assets (assets/rereference)](https://github.com/brightdigit/MistKit/issues/31)
+- [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/33)
+- [ ] [Fetching Users by Email (users/lookup/email)](https://github.com/brightdigit/MistKit/issues/34)
+- [ ] [Fetching Users by Record Name (users/lookup/id)](https://github.com/brightdigit/MistKit/issues/35)
+- [ ] [Fetching Record Changes (records/changes)](https://github.com/brightdigit/MistKit/issues/40)
+- [ ] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/41)
+- [ ] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/42)
+- [ ] [Modifying Zones (zones/modify)](https://github.com/brightdigit/MistKit/issues/45)
+- [ ] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/47)
+- [ ] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/48)
+- [ ] [Fetching Subscriptions (subscriptions/list)](https://github.com/brightdigit/MistKit/issues/49)
+- [ ] [Fetching Subscriptions by Identifier (subscriptions/lookup)](https://github.com/brightdigit/MistKit/issues/50)
+- [ ] [Modifying Subscriptions (subscriptions/modify)](https://github.com/brightdigit/MistKit/issues/51)
+- [ ] [Creating APNs Tokens (tokens/create)](https://github.com/brightdigit/MistKit/issues/52)
+- [ ] [Registering Tokens (tokens/register)](https://github.com/brightdigit/MistKit/issues/53)
+- [ ] [Feature: Add custom CloudKit zone support for queries](https://github.com/brightdigit/MistKit/issues/146)
+
 ### v1.0.0
 
-- [ ] [System Field Integration](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Name Component Types](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Discovering User Identities (POST users/discover)](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Support `postMessage` for Authentication Requests](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Uploading Assets (assets/upload)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Referencing Existing Assets (assets/rereference)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Records Using a Query (records/query) w/ basic filtering](https://github.com/brightdigit/MistKit/issues/114) ❌
-- [ ] [Handle Data Size Limits](https://github.com/brightdigit/MistKit/issues/115) ❌
-- [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Fetching Users by Email (users/lookup/email)](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Fetching Users by Record Name (users/lookup/id)](https://github.com/brightdigit/MistKit/issues/113) ❌
-- [ ] [Fetching Record Changes (records/changes)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Zones (zones/list)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Modifying Zones (zones/modify)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Subscriptions (subscriptions/list)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Fetching Subscriptions by Identifier (subscriptions/lookup)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Modifying Subscriptions (subscriptions/modify)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Creating APNs Tokens (tokens/create)](https://github.com/brightdigit/MistKit/issues/116) ❌
-- [ ] [Registering Tokens (tokens/register)](https://github.com/brightdigit/MistKit/issues/116) ❌
+- [ ] [System Field Integration](https://github.com/brightdigit/MistKit/issues/116)
+- [ ] [Handle Data Size Limits](https://github.com/brightdigit/MistKit/issues/38)
+- [ ] [Add architecture diagrams to Bushel documentation](https://github.com/brightdigit/MistKit/issues/140)
+- [ ] [Add comprehensive test suite for Bushel demo](https://github.com/brightdigit/MistKit/issues/136)
+- [ ] [Implement incremental sync with change tracking for Bushel](https://github.com/brightdigit/MistKit/issues/137)
+- [ ] [Migrate Bushel Demo to it's own Repository](https://github.com/brightdigit/MistKit/issues/183)
+- [ ] [Migrate Celestra Demo to it's own Repository](https://github.com/brightdigit/MistKit/issues/184)
+
+### v1.1.0
+
+- [ ] [Add CloudKit Schema Management APIs (cktool/cktooljs functionality)](https://github.com/brightdigit/MistKit/issues/135)
+- [ ] [Add KeyPath-based QueryFilter API for Type-Safe Filtering](https://github.com/brightdigit/MistKit/issues/149)
 
 ## Support
 
