@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:brightdigit/CelestraCloud.git
+	branch = main
+	commit = cb3527ef31f084f74290a55b50a8bb03d4710088
+	parent = e8348bc55ca0ddbfde8c463850a35b59c11af626
+	method = merge
+	cmdver = 0.4.9

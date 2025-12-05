@@ -1,0 +1,36 @@
+DEFINE SCHEMA
+
+RECORD TYPE Feed (
+    "___recordID"            REFERENCE QUERYABLE,
+    "feedURL"                STRING QUERYABLE SORTABLE,
+    "title"                  STRING SEARCHABLE,
+    "description"            STRING,
+    "totalAttempts"          INT64,
+    "successfulAttempts"     INT64,
+    "usageCount"             INT64 QUERYABLE SORTABLE,
+    "lastAttempted"          TIMESTAMP QUERYABLE SORTABLE,
+    "isActive"               INT64 QUERYABLE,
+
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
+    GRANT READ TO "_world"
+);
+
+RECORD TYPE Article (
+    "___recordID"            REFERENCE QUERYABLE,
+    "feed"                   REFERENCE QUERYABLE,
+    "title"                  STRING SEARCHABLE,
+    "link"                   STRING,
+    "description"            STRING,
+    "content"                STRING SEARCHABLE,
+    "author"                 STRING QUERYABLE,
+    "pubDate"                TIMESTAMP QUERYABLE SORTABLE,
+    "guid"                   STRING QUERYABLE SORTABLE,
+    "contentHash"            STRING QUERYABLE,
+    "fetchedAt"              TIMESTAMP QUERYABLE SORTABLE,
+    "expiresAt"              TIMESTAMP QUERYABLE SORTABLE,
+
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
+    GRANT READ TO "_world"
+);
