@@ -1,0 +1,66 @@
+DEFINE SCHEMA
+
+RECORD TYPE RestoreImage (
+    "___recordID"            REFERENCE QUERYABLE,
+    "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
+    "buildNumber"            STRING QUERYABLE SORTABLE,
+    "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
+    "downloadURL"            STRING,
+    "fileSize"               INT64,
+    "sha256Hash"             STRING,
+    "sha1Hash"               STRING,
+    "isSigned"               INT64 QUERYABLE,
+    "isPrerelease"           INT64 QUERYABLE,
+    "source"                 STRING,
+    "notes"                  STRING,
+
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
+    GRANT READ TO "_world"
+);
+
+RECORD TYPE XcodeVersion (
+    "___recordID"            REFERENCE QUERYABLE,
+    "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
+    "buildNumber"            STRING QUERYABLE SORTABLE,
+    "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
+    "isPrerelease"           INT64 QUERYABLE,
+    "downloadURL"            STRING,
+    "fileSize"               INT64,
+    "minimumMacOS"           REFERENCE,
+    "includedSwiftVersion"   REFERENCE,
+    "sdkVersions"            STRING,
+    "notes"                  STRING,
+
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
+    GRANT READ TO "_world"
+);
+
+RECORD TYPE SwiftVersion (
+    "___recordID"            REFERENCE QUERYABLE,
+    "version"                STRING QUERYABLE SORTABLE SEARCHABLE,
+    "releaseDate"            TIMESTAMP QUERYABLE SORTABLE,
+    "isPrerelease"           INT64 QUERYABLE,
+    "downloadURL"            STRING,
+    "notes"                  STRING,
+
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
+    GRANT READ TO "_world"
+);
+
+RECORD TYPE DataSourceMetadata (
+    "___recordID"            REFERENCE QUERYABLE,
+    "sourceName"             STRING QUERYABLE SORTABLE,
+    "recordTypeName"         STRING QUERYABLE,
+    "lastFetchedAt"          TIMESTAMP QUERYABLE SORTABLE,
+    "sourceUpdatedAt"        TIMESTAMP QUERYABLE SORTABLE,
+    "recordCount"            INT64,
+    "fetchDurationSeconds"   DOUBLE,
+    "lastError"              STRING,
+
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
+    GRANT READ TO "_world"
+);

@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:brightdigit/BushelCloud.git
+	branch = main
+	commit = eaa12decf5ef8574d08fe6c32c70da80cdff6089
+	parent = af248d60ea4180d5f717bf7e913840a4bf9a2807
+	method = merge
+	cmdver = 0.4.9
