@@ -60,21 +60,21 @@ let swiftSettings: [SwiftSetting] = [
   // Warn unsafe reflection
   .enableExperimentalFeature("WarnUnsafeReflection"),
 
-  // Enhanced compiler checking
-  .unsafeFlags([
-    // Enable concurrency warnings
-    "-warn-concurrency",
-    // Enable actor data race checks
-    "-enable-actor-data-race-checks",
-    // Complete strict concurrency checking
-    "-strict-concurrency=complete",
-    // Enable testing support
-    "-enable-testing",
-    // Warn about functions with >100 lines
-    "-Xfrontend", "-warn-long-function-bodies=100",
-    // Warn about slow type checking expressions
-    "-Xfrontend", "-warn-long-expression-type-checking=100"
-  ])
+  // // Enhanced compiler checking
+  // .unsafeFlags([
+  //   // Enable concurrency warnings
+  //   "-warn-concurrency",
+  //   // Enable actor data race checks
+  //   "-enable-actor-data-race-checks",
+  //   // Complete strict concurrency checking
+  //   "-strict-concurrency=complete",
+  //   // Enable testing support
+  //   "-enable-testing",
+  //   // Warn about functions with >100 lines
+  //   "-Xfrontend", "-warn-long-function-bodies=100",
+  //   // Warn about slow type checking expressions
+  //   "-Xfrontend", "-warn-long-expression-type-checking=100"
+  // ])
 ]
 
 let package = Package(
