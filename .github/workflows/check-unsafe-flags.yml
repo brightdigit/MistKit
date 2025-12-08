@@ -19,14 +19,15 @@ jobs:
       - name: Dump package JSON and check for unsafeFlags
         run: |
           set -euo pipefail
-          # Ensure we have a clean workspace
-          swift --version || true
-          swift package dump-package > package.json
-          if grep -q '"unsafeFlags"' package.json; then
+          # Compute unsafeFlags array directly from the dump (don't store the full dump variable)
+          unsafe_flags=$(swift package dump-package | jq -c '[.. | objects | .unsafeFlags? // empty]')
+          # Check array length to decide failure
+          if [ "$(echo "$unsafe_flags" | jq 'length')" -gt 0 ]; then
             echo "ERROR: unsafeFlags found in resolved package JSON:"
-            grep -n '"unsafeFlags"' package.json || true
-            echo "--- package.json ---"
-            sed -n '1,200p' package.json || true
+            echo "$unsafe_flags" | jq '.' || true
+            echo "--- resolved package dump (first 200 lines) ---"
+            # Print a sample of the authoritative dump (re-run dump-package for the sample)
+            swift package dump-package | sed -n '1,200p' || true
             exit 1
           else
             echo "No unsafeFlags in resolved package JSON."
