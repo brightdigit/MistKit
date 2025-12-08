@@ -7,53 +7,11 @@ on:
     branches: [ "main" ]
 
 jobs:
-  fast-scan:
-    name: Fast Python scanner (text-based)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Run quick Python scanner (ignores comments)
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-import sys,os,re
-found=False
-for root,_,files in os.walk('.'):
-  for f in files:
-    if f == 'Package.swift':
-      path=os.path.join(root,f)
-      try:
-        with open(path, 'r', encoding='utf-8') as fh:
-          in_block_comment=False
-          for i,line in enumerate(fh, start=1):
-            s=line.rstrip('\n')
-            if '/*' in s:
-              in_block_comment=True
-            if '*/' in s:
-              in_block_comment=False
-              continue
-            if in_block_comment:
-              continue
-            if re.match(r'^\s*//', s):
-              continue
-            if 'unsafeFlags' in s:
-              print(f"{path}:{i}: {s}")
-              found=True
-      except Exception as e:
-        print(f"Error reading {path}: {e}", file=sys.stderr)
-if found:
-  sys.exit(1)
-else:
-  print('No unsafeFlags found in tracked Package.swift files.')
-PY
-
   dump-package-check:
     name: Dump Swift package (authoritative) and scan JSON
     runs-on: ubuntu-latest
     container:
-      image: swift:5.10
+      image: swift:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
