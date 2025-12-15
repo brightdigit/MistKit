@@ -62,7 +62,34 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           os: windows
           swift_project: MistKit
-          # files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}           
+          # files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
+  build-android:
+    name: Build on Android
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        swift:
+          - version: "6.1"
+          - version: "6.2"
+        android-api-level: [28, 33, 34]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: brightdigit/swift-build@14-android-skip
+        with:
+          scheme: ${{ env.PACKAGE_NAME }}
+          type: android
+          android-swift-version: ${{ matrix.swift.version }}
+          android-api-level: ${{ matrix.android-api-level }}
+          android-run-tests: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: true
+          flags: android-${{ matrix.swift.version }}-api${{ matrix.android-api-level }}
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
   build-macos:
     name: Build on macOS
     env:
@@ -153,9 +180,9 @@ jobs:
 
   lint:
     name: Linting
-    if: "!contains(github.event.head_commit.message, 'ci skip')"  
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
     runs-on: ubuntu-latest
-    needs: [build-ubuntu, build-macos, build-windows]
+    needs: [build-ubuntu, build-macos, build-windows, build-android]
     env:
       MINT_PATH: .mint/lib
       MINT_LINK_PATH: .mint/bin
