@@ -97,7 +97,7 @@ let package = Package(
   dependencies: [
     // Swift OpenAPI Runtime dependencies
     .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.8.0"),
-    .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
+    .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.2.0"),
     // Crypto library for cross-platform cryptographic operations
     .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
     // Logging library for cross-platform logging
