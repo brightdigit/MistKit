@@ -83,6 +83,7 @@ jobs:
           android-swift-version: ${{ matrix.swift.version }}
           android-api-level: ${{ matrix.android-api-level }}
           android-run-tests: true
+          android-swift-test-flags: --enable-code-coverage
       - uses: sersoft-gmbh/swift-coverage-action@v4
         id: coverage-files
         with:
