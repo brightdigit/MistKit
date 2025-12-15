@@ -83,7 +83,27 @@ jobs:
           android-swift-version: ${{ matrix.swift.version }}
           android-api-level: ${{ matrix.android-api-level }}
           android-run-tests: true
-          android-swift-test-flags: --enable-code-coverage
+      - name: Search for coverage files
+        run: |
+          echo "=== Searching for Swift coverage files ==="
+          find .build -name "*.profdata" -o -name "*.profraw" 2>/dev/null || echo "No Swift coverage files found"
+
+          echo ""
+          echo "=== Searching for Android/Java coverage files ==="
+          find .build -name "*.ec" -o -name "*.exec" -o -name "jacoco.xml" 2>/dev/null || echo "No Android coverage files found"
+
+          echo ""
+          echo "=== Searching for any coverage-related files ==="
+          find .build -type f -iname "*coverage*" -o -iname "*profdata*" -o -iname "*profraw*" 2>/dev/null || echo "No coverage-related files found"
+
+          echo ""
+          echo "=== Build directory structure (first 200 lines) ==="
+          find .build -type f | head -200
+
+          echo ""
+          echo "=== Checking for LLVM coverage tools ==="
+          which llvm-profdata || echo "llvm-profdata not found"
+          which llvm-cov || echo "llvm-cov not found"
       - uses: sersoft-gmbh/swift-coverage-action@v4
         id: coverage-files
         with:
