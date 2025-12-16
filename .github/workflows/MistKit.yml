@@ -163,7 +163,7 @@ jobs:
       - name: Build and Test on Android
         uses: ./.github/actions/swift-android-action
         with:
-          swift-version: "DEVELOPMENT-SNAPSHOT-2025-11-03-a"  # Use November snapshot for LLVM v9 compatibility
+          swift-version: "6.2-DEVELOPMENT-SNAPSHOT-2025-08-28-a"  # Use August snapshot for LLVM v9 compatibility
           android-api-level: 34
           build-package: true
           build-tests: true
