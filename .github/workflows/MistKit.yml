@@ -173,50 +173,15 @@ jobs:
           collect-coverage: true
           coverage-output-dir: .build/coverage-android
 
-      - name: Debug - List files
-        run: |
-          echo "=== Listing repository root ==="
-          ls -la
-          echo "=== Listing .build directory ==="
-          ls -la .build/ || echo ".build not found"
-          echo "=== Listing coverage-android directory ==="
-          ls -la coverage-android/ || echo "coverage-android not found"
-          echo "=== Finding all .profraw files ==="
-          find . -name "*.profraw" -ls || echo "No .profraw files found"
-          echo "=== Finding test binaries ==="
-          find .build -name "*.xctest" -ls || echo "No .xctest files found"
-
-      - name: Generate Coverage Report
-        run: |
-          echo "Generating coverage report with nightly Swift toolchain..."
-
-          # Find the test binary
-          TEST_BINARY=$(find .build/x86_64-unknown-linux-android28/debug -name "*.xctest" | head -n 1)
-          echo "Test binary: ${TEST_BINARY}"
-
-          # Try to generate coverage report
-          ${SWIFT_INSTALLATION}/bin/llvm-cov export \
-            -format=lcov \
-            -instr-profile=coverage-android/default.profraw \
-            ${TEST_BINARY} \
-            > coverage-android/coverage.lcov || {
-              echo "::warning::Coverage generation failed - LLVM version mismatch"
-              echo "::notice::Uploading raw coverage files as artifacts"
-              exit 0
-            }
-
-          echo "Coverage report generated successfully!"
-          ls -lh coverage-android/
-
       - name: Upload coverage to Codecov
-        if: success() && hashFiles('coverage-android/coverage.lcov') != ''
+        if: success() && hashFiles('coverage-android/*.profraw') != ''
         uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: false
           flags: android-api34-swift-nightly
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage-android/coverage.lcov
+          # Let Codecov auto-discover profraw files - it has better format support than local llvm-cov
 
       - name: Upload Android coverage files as artifact
         if: always()
