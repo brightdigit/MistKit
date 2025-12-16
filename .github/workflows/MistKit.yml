@@ -186,22 +186,28 @@ jobs:
           echo "=== Finding test binaries ==="
           find .build -name "*.xctest" -ls || echo "No .xctest files found"
 
-      - name: Merge Coverage Data
+      - name: Generate Coverage Report with llvm-cov
         run: |
-          # Merge the profraw files into profdata using Swift's llvm-profdata
-          echo "Merging coverage data..."
-          ${SWIFT_INSTALLATION}/bin/llvm-profdata merge -sparse coverage-android/default.profraw -o coverage-android/default.profdata
-          echo "Coverage data merged successfully"
+          # Use llvm-cov to generate coverage report directly from profraw
+          echo "Generating coverage report..."
+
+          # Find the test binary
+          TEST_BINARY=$(find .build/x86_64-unknown-linux-android28/debug -name "*.xctest" | head -n 1)
+          echo "Test binary: ${TEST_BINARY}"
+
+          # Use Swift's llvm-cov to export coverage to lcov format
+          ${SWIFT_INSTALLATION}/bin/llvm-cov export \
+            -format=lcov \
+            -instr-profile=coverage-android/default.profraw \
+            ${TEST_BINARY} \
+            > coverage-android/coverage.lcov
+
+          echo "Coverage report generated"
           ls -lh coverage-android/
 
-      - name: Process Coverage
-        uses: sersoft-gmbh/swift-coverage-action@v4
-        id: coverage-files
-        with:
-          search-paths: |
-            ./.build
-            ./coverage-android
-          fail-on-empty-output: true
+          # Create .swiftcov directory for compatibility
+          mkdir -p .swiftcov
+          cp coverage-android/coverage.lcov .swiftcov/
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -210,7 +216,7 @@ jobs:
           flags: android-api34-swift6.2
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
+          files: coverage-android/coverage.lcov
 
   lint:
     name: Linting
