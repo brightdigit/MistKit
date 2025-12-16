@@ -188,9 +188,9 @@ jobs:
 
       - name: Merge Coverage Data
         run: |
-          # Merge the profraw files into profdata
+          # Merge the profraw files into profdata using Swift's llvm-profdata
           echo "Merging coverage data..."
-          llvm-profdata merge -sparse coverage-android/default.profraw -o coverage-android/default.profdata
+          ${SWIFT_INSTALLATION}/bin/llvm-profdata merge -sparse coverage-android/default.profraw -o coverage-android/default.profdata
           echo "Coverage data merged successfully"
           ls -lh coverage-android/
 
