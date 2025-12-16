@@ -163,7 +163,7 @@ jobs:
       - name: Build and Test on Android
         uses: ./.github/actions/swift-android-action
         with:
-          swift-version: "6.2"  # Use stable 6.2 release for LLVM v9 compatibility
+          swift-version: "6.1.1"  # Use older Swift 6.1.1 for LLVM v9 compatibility
           android-api-level: 34
           build-package: true
           build-tests: true
