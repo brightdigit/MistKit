@@ -599,8 +599,30 @@ runs:
           echo "  fi" >> ${SCRIPT_FILE}
           echo "done" >> ${SCRIPT_FILE}
 
-          echo "echo '==> NOTE: profraw files from Swift Android cannot be processed by llvm-cov'" >> ${SCRIPT_FILE}
-          echo "echo '==> Files saved to artifacts for investigation'" >> ${SCRIPT_FILE}
+          # Convert profraw to LCOV using Swift toolchain (2-step process per Android docs)
+          echo "echo '==> Converting profraw to LCOV format...'" >> ${SCRIPT_FILE}
+          echo "if [ -f '${COVERAGE_DIR}/default.profraw' ]; then" >> ${SCRIPT_FILE}
+          echo "  # Find the test binary" >> ${SCRIPT_FILE}
+          echo "  TEST_BINARY=\$(find \${SWIFT_SDK_TARGET}/debug -name '*.xctest' | head -n 1)" >> ${SCRIPT_FILE}
+          echo "  if [ -n \"\$TEST_BINARY\" ]; then" >> ${SCRIPT_FILE}
+          echo "    # Step 1: Merge profraw -> profdata (required even for single file)" >> ${SCRIPT_FILE}
+          echo "    SWIFT_PROFDATA=\"\${SWIFT_INSTALLATION}/bin/llvm-profdata\"" >> ${SCRIPT_FILE}
+          echo "    SWIFT_LLVM_COV=\"\${SWIFT_INSTALLATION}/bin/llvm-cov\"" >> ${SCRIPT_FILE}
+          echo "    if [ -f \"\$SWIFT_PROFDATA\" ] && [ -f \"\$SWIFT_LLVM_COV\" ]; then" >> ${SCRIPT_FILE}
+          echo "      echo \"Step 1: Merging profraw to profdata...\"" >> ${SCRIPT_FILE}
+          echo "      \"\$SWIFT_PROFDATA\" merge -sparse '${COVERAGE_DIR}/default.profraw' -o '${COVERAGE_DIR}/default.profdata' && {" >> ${SCRIPT_FILE}
+          echo "        echo \"Step 2: Exporting profdata to LCOV...\"" >> ${SCRIPT_FILE}
+          echo "        \"\$SWIFT_LLVM_COV\" export -format=lcov -instr-profile='${COVERAGE_DIR}/default.profdata' \"\$TEST_BINARY\" > '${COVERAGE_DIR}/coverage.lcov' && {" >> ${SCRIPT_FILE}
+          echo "          echo \"Successfully generated coverage.lcov\"" >> ${SCRIPT_FILE}
+          echo "        } || echo \"Warning: llvm-cov export failed\"" >> ${SCRIPT_FILE}
+          echo "      } || echo \"Warning: llvm-profdata merge failed\"" >> ${SCRIPT_FILE}
+          echo "    else" >> ${SCRIPT_FILE}
+          echo "      echo \"Warning: Swift LLVM tools not found\"" >> ${SCRIPT_FILE}
+          echo "    fi" >> ${SCRIPT_FILE}
+          echo "  else" >> ${SCRIPT_FILE}
+          echo "    echo \"Warning: Test binary not found\"" >> ${SCRIPT_FILE}
+          echo "  fi" >> ${SCRIPT_FILE}
+          echo "fi" >> ${SCRIPT_FILE}
 
           # List retrieved files for verification
           echo "echo '==> Coverage files retrieved:'" >> ${SCRIPT_FILE}

@@ -173,10 +173,16 @@ jobs:
           collect-coverage: true
           coverage-output-dir: .build/coverage-android
 
-      # Note: Android coverage cannot be uploaded to Codecov due to Swift Android tooling limitations
-      # The profraw files cannot be processed by any available llvm-cov (host, NDK, or Swift toolchain)
-      # All attempts result in "bad magic" or "version mismatch" errors
-      # Keeping profraw files as artifacts for future investigation
+      - name: Upload coverage to Codecov
+        if: success() && hashFiles('coverage-android/coverage.lcov') != ''
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: false
+          flags: android-api34-swift-nightly
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage-android/coverage.lcov
+          # LCOV generated via llvm-profdata merge + llvm-cov export (Android native workflow)
 
       - name: Upload Android coverage files as artifact
         if: always()
