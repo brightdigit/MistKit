@@ -173,6 +173,17 @@ jobs:
           collect-coverage: true
           coverage-output-dir: .build/coverage-android
 
+      - name: Debug - List files
+        run: |
+          echo "=== Listing repository root ==="
+          ls -la
+          echo "=== Listing .build directory ==="
+          ls -la .build/ || echo ".build not found"
+          echo "=== Listing coverage-android directory ==="
+          ls -la coverage-android/ || echo "coverage-android not found"
+          echo "=== Finding all .profraw files ==="
+          find . -name "*.profraw" -ls || echo "No .profraw files found"
+
       - name: Process Coverage
         uses: sersoft-gmbh/swift-coverage-action@v4
         id: coverage-files
