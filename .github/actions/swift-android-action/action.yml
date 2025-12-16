@@ -574,22 +574,34 @@ runs:
 
         # Coverage retrieval (before emulator termination)
         if [[ "${{ inputs.collect-coverage }}" == "true" ]]; then
+          # The script runs in .build/ directory, so we need to adjust the path
+          # Remove leading .build/ from coverage-output-dir since we're already in .build/
+          COVERAGE_DIR="${{ inputs.coverage-output-dir }}"
+          # If path starts with .build/, strip it
+          if [[ "${COVERAGE_DIR}" == .build/* ]]; then
+            COVERAGE_DIR="${COVERAGE_DIR#.build/}"
+          fi
+          # If path is absolute or starts with ../, use as-is, otherwise make it relative to parent
+          if [[ "${COVERAGE_DIR}" != /* ]] && [[ "${COVERAGE_DIR}" != ../* ]]; then
+            COVERAGE_DIR="../${COVERAGE_DIR}"
+          fi
+
           echo "" >> ${SCRIPT_FILE}
           echo "# Retrieve coverage data" >> ${SCRIPT_FILE}
           echo "echo '==> Retrieving coverage data...'" >> ${SCRIPT_FILE}
-          echo "mkdir -p '${{ inputs.coverage-output-dir }}'" >> ${SCRIPT_FILE}
+          echo "mkdir -p '${COVERAGE_DIR}'" >> ${SCRIPT_FILE}
 
           # Find and pull all .profraw files
           echo "adb -s emulator-5554 shell 'find ${REMOTE_FOLDER} -name \"*.profraw\" 2>/dev/null' | while read profraw; do" >> ${SCRIPT_FILE}
           echo "  if [ -n \"\$profraw\" ]; then" >> ${SCRIPT_FILE}
           echo "    echo \"Pulling coverage file: \$profraw\"" >> ${SCRIPT_FILE}
-          echo "    adb -s emulator-5554 pull \"\$profraw\" '${{ inputs.coverage-output-dir }}/' || echo \"Failed to pull \$profraw\"" >> ${SCRIPT_FILE}
+          echo "    adb -s emulator-5554 pull \"\$profraw\" '${COVERAGE_DIR}/' || echo \"Failed to pull \$profraw\"" >> ${SCRIPT_FILE}
           echo "  fi" >> ${SCRIPT_FILE}
           echo "done" >> ${SCRIPT_FILE}
 
           # List retrieved files for verification
           echo "echo '==> Coverage files retrieved:'" >> ${SCRIPT_FILE}
-          echo "ls -lh '${{ inputs.coverage-output-dir }}' 2>/dev/null || echo 'No coverage files found'" >> ${SCRIPT_FILE}
+          echo "ls -lh '${COVERAGE_DIR}' 2>/dev/null || echo 'No coverage files found'" >> ${SCRIPT_FILE}
           echo "" >> ${SCRIPT_FILE}
         fi
 
