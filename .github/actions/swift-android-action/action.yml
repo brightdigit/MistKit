@@ -605,10 +605,34 @@ runs:
           echo "  # Find the test binary" >> ${SCRIPT_FILE}
           echo "  TEST_BINARY=\$(find \${SWIFT_SDK_TARGET}/debug -name '*.xctest' | head -n 1)" >> ${SCRIPT_FILE}
           echo "  if [ -n \"\$TEST_BINARY\" ]; then" >> ${SCRIPT_FILE}
-          echo "    # Step 1: Merge profraw -> profdata (required even for single file)" >> ${SCRIPT_FILE}
-          echo "    SWIFT_PROFDATA=\"\${SWIFT_INSTALLATION}/bin/llvm-profdata\"" >> ${SCRIPT_FILE}
-          echo "    SWIFT_LLVM_COV=\"\${SWIFT_INSTALLATION}/bin/llvm-cov\"" >> ${SCRIPT_FILE}
-          echo "    if [ -f \"\$SWIFT_PROFDATA\" ] && [ -f \"\$SWIFT_LLVM_COV\" ]; then" >> ${SCRIPT_FILE}
+          echo "    # Step 1: Find LLVM tools - prefer Android SDK tools to match profraw version" >> ${SCRIPT_FILE}
+          echo "    SWIFT_PROFDATA=\"\"" >> ${SCRIPT_FILE}
+          echo "    SWIFT_LLVM_COV=\"\"" >> ${SCRIPT_FILE}
+          echo "    " >> ${SCRIPT_FILE}
+          echo "    # Search Android SDK artifactbundle for matching LLVM tools" >> ${SCRIPT_FILE}
+          echo "    if [ -n \"\${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}\" ]; then" >> ${SCRIPT_FILE}
+          echo "      ANDROID_SDK_BASE=\$(dirname \"\${SWIFT_ARTIFACTBUNDLE_SDK_ROOT_PATH}\")" >> ${SCRIPT_FILE}
+          echo "      for search_path in \"\${ANDROID_SDK_BASE}/bin\" \"\${ANDROID_SDK_BASE}/usr/bin\" \"\${ANDROID_SDK_BASE}/toolset/bin\" \"\${ANDROID_SDK_BASE}/../bin\"; do" >> ${SCRIPT_FILE}
+          echo "        if [ -f \"\${search_path}/llvm-profdata\" ] && [ -f \"\${search_path}/llvm-cov\" ]; then" >> ${SCRIPT_FILE}
+          echo "          SWIFT_PROFDATA=\"\${search_path}/llvm-profdata\"" >> ${SCRIPT_FILE}
+          echo "          SWIFT_LLVM_COV=\"\${search_path}/llvm-cov\"" >> ${SCRIPT_FILE}
+          echo "          echo \"Found Android SDK LLVM tools in \${search_path}\"" >> ${SCRIPT_FILE}
+          echo "          break" >> ${SCRIPT_FILE}
+          echo "        fi" >> ${SCRIPT_FILE}
+          echo "      done" >> ${SCRIPT_FILE}
+          echo "    fi" >> ${SCRIPT_FILE}
+          echo "    " >> ${SCRIPT_FILE}
+          echo "    # Fall back to host Swift installation if not found in Android SDK" >> ${SCRIPT_FILE}
+          echo "    if [ -z \"\$SWIFT_PROFDATA\" ]; then" >> ${SCRIPT_FILE}
+          echo "      if [ -f \"\${SWIFT_INSTALLATION}/bin/llvm-profdata\" ] && [ -f \"\${SWIFT_INSTALLATION}/bin/llvm-cov\" ]; then" >> ${SCRIPT_FILE}
+          echo "        SWIFT_PROFDATA=\"\${SWIFT_INSTALLATION}/bin/llvm-profdata\"" >> ${SCRIPT_FILE}
+          echo "        SWIFT_LLVM_COV=\"\${SWIFT_INSTALLATION}/bin/llvm-cov\"" >> ${SCRIPT_FILE}
+          echo "        echo \"Using host Swift LLVM tools from \${SWIFT_INSTALLATION}/bin\"" >> ${SCRIPT_FILE}
+          echo "      fi" >> ${SCRIPT_FILE}
+          echo "    fi" >> ${SCRIPT_FILE}
+          echo "    " >> ${SCRIPT_FILE}
+          echo "    # Step 2: Process coverage if tools were found" >> ${SCRIPT_FILE}
+          echo "    if [ -n \"\$SWIFT_PROFDATA\" ] && [ -n \"\$SWIFT_LLVM_COV\" ]; then" >> ${SCRIPT_FILE}
           echo "      echo \"Step 1: Merging profraw to profdata...\"" >> ${SCRIPT_FILE}
           echo "      \"\$SWIFT_PROFDATA\" merge -sparse '${COVERAGE_DIR}/default.profraw' -o '${COVERAGE_DIR}/default.profdata' && {" >> ${SCRIPT_FILE}
           echo "        echo \"Step 2: Exporting profdata to LCOV...\"" >> ${SCRIPT_FILE}
@@ -617,7 +641,7 @@ runs:
           echo "        } || echo \"Warning: llvm-cov export failed\"" >> ${SCRIPT_FILE}
           echo "      } || echo \"Warning: llvm-profdata merge failed\"" >> ${SCRIPT_FILE}
           echo "    else" >> ${SCRIPT_FILE}
-          echo "      echo \"Warning: Swift LLVM tools not found\"" >> ${SCRIPT_FILE}
+          echo "      echo \"Warning: Swift LLVM tools not found in Android SDK or host installation\"" >> ${SCRIPT_FILE}
           echo "    fi" >> ${SCRIPT_FILE}
           echo "  else" >> ${SCRIPT_FILE}
           echo "    echo \"Warning: Test binary not found\"" >> ${SCRIPT_FILE}
