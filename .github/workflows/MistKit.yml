@@ -163,7 +163,7 @@ jobs:
       - name: Build and Test on Android
         uses: ./.github/actions/swift-android-action
         with:
-          swift-version: "6.2"
+          swift-version: "nightly-main"  # Use latest development snapshot for LLVM v10 compatibility
           android-api-level: 34
           build-package: true
           build-tests: true
@@ -186,20 +186,46 @@ jobs:
           echo "=== Finding test binaries ==="
           find .build -name "*.xctest" -ls || echo "No .xctest files found"
 
+      - name: Generate Coverage Report
+        run: |
+          echo "Generating coverage report with nightly Swift toolchain..."
+
+          # Find the test binary
+          TEST_BINARY=$(find .build/x86_64-unknown-linux-android28/debug -name "*.xctest" | head -n 1)
+          echo "Test binary: ${TEST_BINARY}"
+
+          # Try to generate coverage report
+          ${SWIFT_INSTALLATION}/bin/llvm-cov export \
+            -format=lcov \
+            -instr-profile=coverage-android/default.profraw \
+            ${TEST_BINARY} \
+            > coverage-android/coverage.lcov || {
+              echo "::warning::Coverage generation failed - LLVM version mismatch"
+              echo "::notice::Uploading raw coverage files as artifacts"
+              exit 0
+            }
+
+          echo "Coverage report generated successfully!"
+          ls -lh coverage-android/
+
+      - name: Upload coverage to Codecov
+        if: success() && hashFiles('coverage-android/coverage.lcov') != ''
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: false
+          flags: android-api34-swift-nightly
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage-android/coverage.lcov
+
       - name: Upload Android coverage files as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-coverage
           path: |
             coverage-android/
             .build/x86_64-unknown-linux-android28/debug/*.xctest
-
-      - name: Note about Android coverage
-        run: |
-          echo "::notice::Android coverage files collected but cannot be processed locally due to LLVM version mismatch"
-          echo "::notice::The profraw file uses LLVM v9 format (from Android SDK) but host Swift 6.2 uses LLVM v10"
-          echo "::notice::Coverage files have been uploaded as artifacts for manual processing if needed"
-          ls -lh coverage-android/
 
   lint:
     name: Linting
