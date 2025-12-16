@@ -181,7 +181,8 @@ jobs:
           flags: android-api34-swift-nightly
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
-          # Let Codecov auto-discover profraw files - it has better format support than local llvm-cov
+          directory: coverage-android
+          # Codecov will discover and process profraw files from the specified directory
 
       - name: Upload Android coverage files as artifact
         if: always()
