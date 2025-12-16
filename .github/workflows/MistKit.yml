@@ -183,6 +183,16 @@ jobs:
           ls -la coverage-android/ || echo "coverage-android not found"
           echo "=== Finding all .profraw files ==="
           find . -name "*.profraw" -ls || echo "No .profraw files found"
+          echo "=== Finding test binaries ==="
+          find .build -name "*.xctest" -ls || echo "No .xctest files found"
+
+      - name: Merge Coverage Data
+        run: |
+          # Merge the profraw files into profdata
+          echo "Merging coverage data..."
+          llvm-profdata merge -sparse coverage-android/default.profraw -o coverage-android/default.profdata
+          echo "Coverage data merged successfully"
+          ls -lh coverage-android/
 
       - name: Process Coverage
         uses: sersoft-gmbh/swift-coverage-action@v4
