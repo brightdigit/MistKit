@@ -171,10 +171,31 @@ jobs:
           swift-configuration: debug
           swift-build-flags: "-Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate"
 
+      - name: List files on Android emulator
+        run: |
+          echo "Listing files in test directory:"
+          adb -s emulator-5554 shell ls -la /data/local/tmp/android-xctest/ || true
+          echo "Searching for .profraw files:"
+          adb -s emulator-5554 shell find /data/local/tmp -name "*.profraw" || true
+          adb -s emulator-5554 shell find /data/local/tmp -name "*.profdata" || true
+
+      - name: Pull coverage data from Android
+        run: |
+          echo "Creating coverage directory..."
+          mkdir -p .build/coverage-android
+          echo "Pulling .profraw files from Android emulator..."
+          adb -s emulator-5554 pull /data/local/tmp/android-xctest/default.profraw .build/coverage-android/ || true
+          adb -s emulator-5554 shell find /data/local/tmp/android-xctest -name "*.profraw" -exec adb -s emulator-5554 pull {} .build/coverage-android/ \; || true
+          echo "Listing pulled files:"
+          ls -la .build/coverage-android/ || true
+
       - name: Process Coverage
         uses: sersoft-gmbh/swift-coverage-action@v4
         id: coverage-files
         with:
+          search-paths: |
+            ./.build
+            ./.build/coverage-android
           fail-on-empty-output: true
 
       - name: Upload coverage to Codecov
