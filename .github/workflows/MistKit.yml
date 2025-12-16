@@ -169,7 +169,7 @@ jobs:
           build-tests: true
           run-tests: true
           swift-configuration: debug
-          swift-test-flags: "--enable-code-coverage"
+          swift-build-flags: "-Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate"
 
       - name: Process Coverage
         uses: sersoft-gmbh/swift-coverage-action@v4
