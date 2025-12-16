@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:brightdigit/swift-android-action.git
+	branch = main
+	commit = 89e9cc6f738c819d234dcb036521dc7574a522d7
+	parent = e79f75963f6c50d1890c2f392099526dbaf8dc71
+	method = merge
+	cmdver = 0.4.9

@@ -1,0 +1,84 @@
+name: swift-android-action ci
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-24.04', 'macos-15-intel']
+        swift-version: ['6.2', 'nightly-6.3', 'nightly-main']
+        ndk-version: ['27', 'latest']
+    steps:
+      - name: Free Disk Space
+        run: |
+          df -h
+
+          if [[ "${RUNNER_OS}" == "macOS" ]]; then
+            sudo rm -rf /Applications/Xcode_14*.app /Applications/Xcode_15*.app /Applications/Xcode_16.app /Applications/Xcode_16.1.app /Applications/Xcode_16_2.app /Applications/Xcode_16.3.app
+          else
+            sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/share/chromium /opt/microsoft /opt/google /opt/az
+            docker image prune --all --force
+            docker builder prune -a
+          fi
+          df -h
+
+      - name: Checkout Action
+        uses: actions/checkout@v4
+        with:
+          path: swift-android-action
+
+      - name: Checkout apple/swift-algorithms
+        uses: actions/checkout@v4
+        with:
+          repository: apple/swift-algorithms
+          path: apple/swift-algorithms
+      - name: Test apple/swift-algorithms
+        uses: ./swift-android-action/
+        with:
+          package-path: apple/swift-algorithms
+          swift-version: ${{ matrix.swift-version }}
+          ndk-version: ${{ matrix.ndk-version }}
+          run-tests: ${{ env.RUNNER_ARCH != 'ARM64' }} # no tests on macOS ARM
+
+  setup:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-22.04', 'macos-26']
+        swift-version: ['6.1', '6.2', 'nightly-6.3', 'nightly-main']
+        ndk-version: ['27', 'latest']
+    steps:
+      - name: Checkout Action
+        uses: actions/checkout@v4
+        with:
+          path: swift-android-action
+      - name: Setup Toolchain
+        id: setup-toolchain
+        uses: ./swift-android-action/
+        #uses: swift-android-sdk/swift-android-action@v2
+        with:
+          # just set up the toolchain and don't build anything
+          build-package: false
+          swift-version: ${{ matrix.swift-version }}
+          ndk-version: ${{ matrix.ndk-version }}
+      - name: Checkout skiptools/swift-android-native
+        uses: actions/checkout@v4
+        with:
+          repository: skiptools/swift-android-native
+          path: skiptools/swift-android-native
+      - name: Build Package With Toolchain
+        working-directory: skiptools/swift-android-native
+        run: |
+          echo "SWIFT COMMAND: ${{ steps.setup-toolchain.outputs.swift-build }}"
+          ${{ steps.setup-toolchain.outputs.swift-build }} -c debug
+          ls -la .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/debug
+          ${{ steps.setup-toolchain.outputs.swift-build }} -c release
+          ls -la .build/${{ steps.setup-toolchain.outputs.swift-sdk }}/release
+
