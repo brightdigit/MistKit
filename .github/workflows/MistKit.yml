@@ -169,18 +169,18 @@ jobs:
           build-tests: true
           run-tests: true
           swift-configuration: debug
+          swift-test-flags: "--enable-code-coverage"
 
       - name: Process Coverage
         uses: sersoft-gmbh/swift-coverage-action@v4
         id: coverage-files
         with:
-          fail-on-empty-output: false
+          fail-on-empty-output: true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
-        if: steps.coverage-files.outputs.files != ''
         with:
-          fail_ci_if_error: false
+          fail_ci_if_error: true
           flags: android-api34-swift6.2
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
