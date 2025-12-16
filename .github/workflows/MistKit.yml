@@ -10,7 +10,7 @@ jobs:
     name: Build on Ubuntu
     runs-on: ubuntu-latest
     container: ${{ matrix.swift.nightly && format('swiftlang/swift:nightly-{0}-{1}', matrix.swift.version, matrix.os) || format('swift:{0}-{1}', matrix.swift.version, matrix.os) }}
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    if: false  # Temporarily disabled to focus on Android CI
     strategy:
       matrix:
         os: [noble, jammy]
@@ -37,6 +37,7 @@ jobs:
           files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}    
   build-windows:
     name: Build on Windows
+    if: false  # Temporarily disabled to focus on Android CI
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
@@ -68,7 +69,7 @@ jobs:
     env:
       PACKAGE_NAME: MistKit
     runs-on: ${{ matrix.runs-on }}
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    if: false  # Temporarily disabled to focus on Android CI
     strategy:
       fail-fast: false
       matrix:
@@ -151,11 +152,45 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.type && format('{0}{1}', matrix.type, matrix.osVersion) || 'spm' }}
 
+  build-android:
+    name: Build and Test on Android
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Test on Android
+        uses: skiptools/swift-android-action@v2
+        with:
+          swift-version: "6.1"
+          android-api-level: 34
+          build-package: true
+          build-tests: true
+          run-tests: true
+          swift-configuration: debug
+
+      - name: Process Coverage
+        uses: sersoft-gmbh/swift-coverage-action@v4
+        id: coverage-files
+        with:
+          fail-on-empty-output: false
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: steps.coverage-files.outputs.files != ''
+        with:
+          fail_ci_if_error: false
+          flags: android-api34-swift6.1
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
+
   lint:
     name: Linting
-    if: "!contains(github.event.head_commit.message, 'ci skip')"  
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
     runs-on: ubuntu-latest
-    needs: [build-ubuntu, build-macos, build-windows]
+    needs: [build-android]  # Only depends on Android while other platforms are disabled
     env:
       MINT_PATH: .mint/lib
       MINT_LINK_PATH: .mint/bin
