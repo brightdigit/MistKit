@@ -111,6 +111,14 @@ inputs:
     required: false
     type: string
     default: ''
+  collect-coverage:
+    description: 'Collect code coverage data from tests'
+    required: false
+    default: 'false'
+  coverage-output-dir:
+    description: 'Directory to store retrieved coverage files'
+    required: false
+    default: '.build/coverage'
 
 runs:
   using: "composite"
@@ -563,6 +571,27 @@ runs:
           fi
           echo "adb shell '${TEST_SHELL}'" >> ${SCRIPT_FILE}
         done
+
+        # Coverage retrieval (before emulator termination)
+        if [[ "${{ inputs.collect-coverage }}" == "true" ]]; then
+          echo "" >> ${SCRIPT_FILE}
+          echo "# Retrieve coverage data" >> ${SCRIPT_FILE}
+          echo "echo '==> Retrieving coverage data...'" >> ${SCRIPT_FILE}
+          echo "mkdir -p '${{ inputs.coverage-output-dir }}'" >> ${SCRIPT_FILE}
+
+          # Find and pull all .profraw files
+          echo "adb -s emulator-5554 shell 'find ${REMOTE_FOLDER} -name \"*.profraw\" 2>/dev/null' | while read profraw; do" >> ${SCRIPT_FILE}
+          echo "  if [ -n \"\$profraw\" ]; then" >> ${SCRIPT_FILE}
+          echo "    echo \"Pulling coverage file: \$profraw\"" >> ${SCRIPT_FILE}
+          echo "    adb -s emulator-5554 pull \"\$profraw\" '${{ inputs.coverage-output-dir }}/' || echo \"Failed to pull \$profraw\"" >> ${SCRIPT_FILE}
+          echo "  fi" >> ${SCRIPT_FILE}
+          echo "done" >> ${SCRIPT_FILE}
+
+          # List retrieved files for verification
+          echo "echo '==> Coverage files retrieved:'" >> ${SCRIPT_FILE}
+          echo "ls -lh '${{ inputs.coverage-output-dir }}' 2>/dev/null || echo 'No coverage files found'" >> ${SCRIPT_FILE}
+          echo "" >> ${SCRIPT_FILE}
+        fi
 
         # ensure the emulator stops when we are done
         # https://github.com/ReactiveCircus/android-emulator-runner/issues/385#issuecomment-2492035091
