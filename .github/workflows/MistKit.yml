@@ -163,7 +163,7 @@ jobs:
       - name: Build and Test on Android
         uses: skiptools/swift-android-action@v2
         with:
-          swift-version: "6.1"
+          swift-version: "6.2"
           android-api-level: 34
           build-package: true
           build-tests: true
@@ -181,7 +181,7 @@ jobs:
         if: steps.coverage-files.outputs.files != ''
         with:
           fail_ci_if_error: false
-          flags: android-api34-swift6.1
+          flags: android-api34-swift6.2
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
