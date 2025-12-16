@@ -179,7 +179,7 @@ jobs:
         with:
           search-paths: |
             ./.build
-            ./.build/coverage-android
+            ./coverage-android
           fail-on-empty-output: true
 
       - name: Upload coverage to Codecov
