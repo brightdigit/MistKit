@@ -599,28 +599,8 @@ runs:
           echo "  fi" >> ${SCRIPT_FILE}
           echo "done" >> ${SCRIPT_FILE}
 
-          # Convert profraw to LCOV using Swift toolchain's llvm-cov (same nightly version)
-          echo "echo '==> Converting profraw to LCOV format...'" >> ${SCRIPT_FILE}
-          echo "if [ -f '${COVERAGE_DIR}/default.profraw' ]; then" >> ${SCRIPT_FILE}
-          echo "  # Find the test binary" >> ${SCRIPT_FILE}
-          echo "  TEST_BINARY=\$(find \${SWIFT_SDK_TARGET}/debug -name '*.xctest' | head -n 1)" >> ${SCRIPT_FILE}
-          echo "  if [ -n \"\$TEST_BINARY\" ]; then" >> ${SCRIPT_FILE}
-          echo "    # Use Swift toolchain's llvm-cov (matches the Swift compiler that generated profraw)" >> ${SCRIPT_FILE}
-          echo "    SWIFT_LLVM_COV=\"\${SWIFT_INSTALLATION}/bin/llvm-cov\"" >> ${SCRIPT_FILE}
-          echo "    if [ -f \"\$SWIFT_LLVM_COV\" ]; then" >> ${SCRIPT_FILE}
-          echo "      \"\$SWIFT_LLVM_COV\" export -format=lcov -instr-profile='${COVERAGE_DIR}/default.profraw' \"\$TEST_BINARY\" > '${COVERAGE_DIR}/coverage.lcov' 2>&1 && {" >> ${SCRIPT_FILE}
-          echo "        echo \"Successfully converted profraw to LCOV\"" >> ${SCRIPT_FILE}
-          echo "      } || {" >> ${SCRIPT_FILE}
-          echo "        echo \"Warning: Failed to convert profraw to LCOV\"" >> ${SCRIPT_FILE}
-          echo "        echo \"Keeping profraw file for artifact upload\"" >> ${SCRIPT_FILE}
-          echo "      }" >> ${SCRIPT_FILE}
-          echo "    else" >> ${SCRIPT_FILE}
-          echo "      echo \"Warning: Swift llvm-cov not found at \$SWIFT_LLVM_COV\"" >> ${SCRIPT_FILE}
-          echo "    fi" >> ${SCRIPT_FILE}
-          echo "  else" >> ${SCRIPT_FILE}
-          echo "    echo \"Warning: Test binary not found\"" >> ${SCRIPT_FILE}
-          echo "  fi" >> ${SCRIPT_FILE}
-          echo "fi" >> ${SCRIPT_FILE}
+          echo "echo '==> NOTE: profraw files from Swift Android cannot be processed by llvm-cov'" >> ${SCRIPT_FILE}
+          echo "echo '==> Files saved to artifacts for investigation'" >> ${SCRIPT_FILE}
 
           # List retrieved files for verification
           echo "echo '==> Coverage files retrieved:'" >> ${SCRIPT_FILE}
