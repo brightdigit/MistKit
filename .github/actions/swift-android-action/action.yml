@@ -599,6 +599,27 @@ runs:
           echo "  fi" >> ${SCRIPT_FILE}
           echo "done" >> ${SCRIPT_FILE}
 
+          # Convert profraw to LCOV using Android NDK's llvm-cov (matches Android clang version)
+          echo "echo '==> Converting profraw to LCOV format...'" >> ${SCRIPT_FILE}
+          echo "if [ -f '${COVERAGE_DIR}/default.profraw' ]; then" >> ${SCRIPT_FILE}
+          echo "  # Find the test binary" >> ${SCRIPT_FILE}
+          echo "  TEST_BINARY=\$(find \${SWIFT_SDK_TARGET}/debug -name '*.xctest' | head -n 1)" >> ${SCRIPT_FILE}
+          echo "  if [ -n \"\$TEST_BINARY\" ]; then" >> ${SCRIPT_FILE}
+          echo "    # Use Android NDK's llvm-cov which matches the Android clang version" >> ${SCRIPT_FILE}
+          echo "    NDK_LLVM_COV=\"\${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-cov\"" >> ${SCRIPT_FILE}
+          echo "    if [ -f \"\$NDK_LLVM_COV\" ]; then" >> ${SCRIPT_FILE}
+          echo "      \"\$NDK_LLVM_COV\" export -format=lcov -instr-profile='${COVERAGE_DIR}/default.profraw' \"\$TEST_BINARY\" > '${COVERAGE_DIR}/coverage.lcov' 2>&1 || {" >> ${SCRIPT_FILE}
+          echo "        echo \"Warning: Failed to convert profraw to LCOV - LLVM version mismatch\"" >> ${SCRIPT_FILE}
+          echo "        echo \"Keeping profraw file for artifact upload\"" >> ${SCRIPT_FILE}
+          echo "      }" >> ${SCRIPT_FILE}
+          echo "    else" >> ${SCRIPT_FILE}
+          echo "      echo \"Warning: Android NDK llvm-cov not found at \$NDK_LLVM_COV\"" >> ${SCRIPT_FILE}
+          echo "    fi" >> ${SCRIPT_FILE}
+          echo "  else" >> ${SCRIPT_FILE}
+          echo "    echo \"Warning: Test binary not found\"" >> ${SCRIPT_FILE}
+          echo "  fi" >> ${SCRIPT_FILE}
+          echo "fi" >> ${SCRIPT_FILE}
+
           # List retrieved files for verification
           echo "echo '==> Coverage files retrieved:'" >> ${SCRIPT_FILE}
           echo "ls -lh '${COVERAGE_DIR}' 2>/dev/null || echo 'No coverage files found'" >> ${SCRIPT_FILE}
