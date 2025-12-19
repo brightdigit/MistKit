@@ -76,6 +76,17 @@ jobs:
         android-api-level: [28, 33, 34]
     steps:
       - uses: actions/checkout@v4
+      - name: Free disk space
+        if: matrix.build-only == false
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
       - uses: brightdigit/swift-build@14-android-skip
         with:
           scheme: ${{ env.PACKAGE_NAME }}
