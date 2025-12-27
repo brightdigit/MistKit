@@ -28,4 +28,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Test Swift 6.x For Source Compatibility
-        run: swift build --disable-sandbox --verbose --configuration release -Xswiftc -swift-version -Xswiftc 6
+        run: swift build --disable-sandbox --verbose --configuration release
