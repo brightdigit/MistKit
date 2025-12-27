@@ -17,7 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         container:
-          - swift:6.0
           - swift:6.1
           - swift:6.2
           - swiftlang/swift:nightly-6.3-noble
