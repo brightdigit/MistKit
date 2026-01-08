@@ -1,9 +1,38 @@
 #!/bin/bash
 
 # CloudKit Schema Setup Script
-# This script imports the Bushel schema into your CloudKit container
+# This script imports the BushelCloud schema into your CloudKit container
 
 set -eo pipefail
+
+# Parse command line arguments
+DRY_RUN=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: $0 [OPTIONS]"
+      echo ""
+      echo "Options:"
+      echo "  --dry-run    Validate schema without importing"
+      echo "  --help, -h   Show this help message"
+      echo ""
+      echo "Environment variables:"
+      echo "  CLOUDKIT_CONTAINER_ID   CloudKit container ID (default: iCloud.com.brightdigit.Bushel)"
+      echo "  CLOUDKIT_TEAM_ID        Apple Developer Team ID (10-character)"
+      echo "  CLOUDKIT_ENVIRONMENT    Environment (development or production, default: development)"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use --help for usage information"
+      exit 1
+      ;;
+  esac
+done
 
 # Colors for output
 RED='\033[0;31m'
@@ -12,8 +41,11 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo "========================================"
-echo "CloudKit Schema Setup for Bushel"
+echo "CloudKit Schema Setup for BushelCloud"
 echo "========================================"
+if [ "$DRY_RUN" = true ]; then
+  echo "(DRY RUN MODE - No changes will be made)"
+fi
 echo ""
 
 # Check if cktool is available
@@ -47,7 +79,7 @@ if ! xcrun cktool get-teams 2>&1 | grep -qE "^[A-Z0-9]+:"; then
     echo "  7. Paste your Management Token when prompted"
     echo ""
     echo "Note: Management Token is for schema operations (cktool)."
-    echo "      Server-to-Server Key is for runtime API operations (bushel-images sync)."
+    echo "      Server-to-Server Key is for runtime API operations (bushel-cloud sync)."
     echo ""
     exit 1
 fi
@@ -108,6 +140,15 @@ fi
 
 echo ""
 
+# Skip import if dry-run
+if [ "$DRY_RUN" = true ]; then
+    echo ""
+    echo -e "${GREEN}✓✓✓ Dry run complete! ✓✓✓${NC}"
+    echo ""
+    echo "Schema validation passed. Run without --dry-run to import."
+    exit 0
+fi
+
 # Confirm before import
 echo -e "${YELLOW}Warning: This will import the schema into your CloudKit container.${NC}"
 echo "This operation will create/modify record types in the $ENVIRONMENT environment."
@@ -131,20 +172,27 @@ if xcrun cktool import-schema \
     echo -e "${GREEN}✓✓✓ Schema import successful! ✓✓✓${NC}"
     echo ""
     echo "Your CloudKit container now has the following record types:"
-    echo "  • RestoreImage"
-    echo "  • XcodeVersion"
-    echo "  • SwiftVersion"
+    echo "  • RestoreImage - macOS restore images for virtualization"
+    echo "  • XcodeVersion - Xcode releases with requirements"
+    echo "  • SwiftVersion - Swift compiler versions"
+    echo "  • DataSourceMetadata - Data source tracking metadata"
     echo ""
     echo "Next steps:"
     echo "  1. Get your Server-to-Server Key:"
     echo "     a. Go to: https://icloud.developer.apple.com/dashboard/"
     echo "     b. Navigate to: API Access → Server-to-Server Keys"
     echo "     c. Create a new key and download the private key .pem file"
+    echo "     d. Store it securely (e.g., ~/.cloudkit/bushel-private-key.pem)"
     echo ""
-    echo "  2. Run 'bushel-images sync' with your credentials:"
-    echo "     bushel-images sync --key-id YOUR_KEY_ID --key-file ./private-key.pem"
+    echo "  2. Set environment variables:"
+    echo "     export CLOUDKIT_KEY_ID=YOUR_KEY_ID"
+    echo "     export CLOUDKIT_KEY_FILE=~/.cloudkit/bushel-private-key.pem"
+    echo "     export CLOUDKIT_CONTAINER_ID=$CLOUDKIT_CONTAINER_ID"
     echo ""
-    echo "  3. Verify data in CloudKit Dashboard: https://icloud.developer.apple.com/"
+    echo "  3. Run 'bushel-cloud sync' to populate data:"
+    echo "     .build/debug/bushel-cloud sync --verbose"
+    echo ""
+    echo "  4. Verify data in CloudKit Dashboard: https://icloud.developer.apple.com/"
     echo ""
     echo "  Important: Never commit .pem files to version control!"
     echo ""

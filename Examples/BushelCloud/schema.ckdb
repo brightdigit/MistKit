@@ -13,6 +13,7 @@ RECORD TYPE RestoreImage (
     "isPrerelease"           INT64 QUERYABLE,
     "source"                 STRING,
     "notes"                  STRING,
+    "sourceUpdatedAt"        TIMESTAMP QUERYABLE SORTABLE,
 
     GRANT READ, CREATE, WRITE TO "_creator",
     GRANT READ, CREATE, WRITE TO "_icloud",

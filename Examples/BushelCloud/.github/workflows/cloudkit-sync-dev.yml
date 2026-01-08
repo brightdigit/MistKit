@@ -1,0 +1,86 @@
+# Development CloudKit Sync Workflow
+#
+# Automatically syncs macOS restore images, Xcode versions, and Swift versions to
+# CloudKit development environment. Runs 3x daily on schedule, after binary builds,
+# and supports manual triggers for testing.
+#
+# **Trigger Strategy**:
+# - Scheduled: 3x daily at randomized minutes (avoids GitHub "thundering herd")
+# - Automatic: After bushel-cloud binary build succeeds (testing integration)
+# - Manual: workflow_dispatch for on-demand testing
+#
+# **Concurrency**: cancel-in-progress (newer syncs supersede older ones)
+#
+# **Export**: Enabled to verify sync results and track signing status changes
+#
+# For implementation details, see ./.github/actions/cloudkit-sync/action.yml
+
+name: Scheduled CloudKit Sync (Development)
+
+on:
+  # Scheduled sync: 3x daily at randomized minutes
+  # Why randomized minutes (17, 43, 29)?
+  # - Avoids predictable traffic patterns
+  # - Reduces GitHub Actions "thundering herd" at :00 minutes
+  # - Aligns with VirtualBuddy TSS cache lifetime (12h)
+  schedule:
+    - cron: '17 2 * * *'   # 02:17 UTC
+    - cron: '43 10 * * *'  # 10:43 UTC
+    - cron: '29 18 * * *'  # 18:29 UTC
+
+  # Manual trigger for testing
+  workflow_dispatch:
+
+  # Automatic trigger after binary build completes
+  # Why use workflow_run?
+  # - Waits for build to complete before syncing
+  # - Prevents race condition: sync starting before binary is ready
+  # - Only runs on success, skips on build failures
+  # - Branch filter: Only for testing on 8-scheduled-job
+  workflow_run:
+    workflows: ["Build bushel-cloud Binary"]
+    types: [completed]
+    branches:
+      - 8-scheduled-job
+
+# Why cancel-in-progress for dev environment?
+# - Syncs are idempotent (safe to retry)
+# - Newer data supersedes older data
+# - Saves CI minutes by canceling outdated syncs
+# - Multiple triggers may fire close together (build + schedule)
+concurrency:
+  group: cloudkit-sync-dev
+  cancel-in-progress: true
+
+jobs:
+  sync-dev:
+    name: Sync to CloudKit (Development)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # Condition explanation:
+    # - Always run for: schedule triggers (cron) or manual triggers (workflow_dispatch)
+    # - Conditionally run for: workflow_run ONLY if the build succeeded
+    #
+    # Why this condition?
+    # - Prevents sync from running when build fails
+    # - Allows manual testing without waiting for schedule
+    # - Supports feature branch testing on 8-scheduled-job
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+
+    permissions:
+      contents: read  # Read repository code
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: CloudKit Sync
+        uses: ./.github/actions/cloudkit-sync
+        with:
+          environment: development
+          container-id: iCloud.com.brightdigit.Bushel
+          cloudkit-key-id: ${{ secrets.CLOUDKIT_KEY_ID }}
+          cloudkit-private-key: ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
+          virtualbuddy-api-key: ${{ secrets.VIRTUALBUDDY_API_KEY }}
+          enable-export: 'false'  # Optional: export is only for data audit, summary comes from sync

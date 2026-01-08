@@ -1,0 +1,171 @@
+name: BushelCloud
+on:
+  push:
+    branches-ignore:
+      - '*WIP'
+env:
+  PACKAGE_NAME: BushelCloud
+jobs:
+  build-ubuntu:
+    name: Build on Ubuntu
+    runs-on: ubuntu-latest
+    container: ${{ matrix.swift.nightly && format('swiftlang/swift:nightly-{0}-{1}', matrix.swift.version, matrix.os) || format('swift:{0}-{1}', matrix.swift.version, matrix.os) }}
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      matrix:
+        os: [noble, jammy]
+        swift:
+          - version: "6.2"
+          - version: "6.3"
+            nightly: true
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: brightdigit/swift-build@v1.4.2
+      - uses: sersoft-gmbh/swift-coverage-action@v4
+        id: coverage-files
+        with:
+          fail-on-empty-output: true
+          minimum-coverage: 70
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: true
+          flags: swift-${{ matrix.swift.version }}-${{ matrix.os }}${{ matrix.swift.nightly && '-nightly' || '' }}
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
+  # build-windows:
+  #   name: Build on Windows
+  #   runs-on: ${{ matrix.runs-on }}
+  #   if: "!contains(github.event.head_commit.message, 'ci skip')"
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       runs-on: [windows-2022, windows-2025]
+  #       swift:
+  #         - version: swift-6.2-release
+  #           build: 6.2-RELEASE
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: brightdigit/swift-build@v1.4.2
+  #       with:
+  #         windows-swift-version: ${{ matrix.swift.version }}
+  #         windows-swift-build: ${{ matrix.swift.build }}
+  #     - name: Upload coverage to Codecov
+  #       uses: codecov/codecov-action@v5
+  #       with:
+  #         fail_ci_if_error: true
+  #         flags: swift-${{ matrix.swift.version }},windows
+  #         verbose: true
+  #         token: ${{ secrets.CODECOV_TOKEN }}
+  #         os: windows
+  #         swift_project: BushelCloud-Package
+  build-macos:
+    name: Build on macOS
+    env:
+      PACKAGE_NAME: BushelCloud
+    runs-on: ${{ matrix.runs-on }}
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # SPM Build Matrix
+          - runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
+
+          # macOS Build Matrix
+          - type: macos
+            runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
+                      
+          # iOS Build Matrix
+          - type: ios
+            runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
+            deviceName: "iPhone 17 Pro"
+            osVersion: "26.0.1"
+            download-platform: true
+  
+          # watchOS Build Matrix
+          - type: watchos
+            runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
+            deviceName: "Apple Watch Ultra 3 (49mm)"
+            osVersion: "26.0"
+            download-platform: true
+
+          # tvOS Build Matrix
+          - type: tvos
+            runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
+            deviceName: "Apple TV"
+            osVersion: "26.0"
+            download-platform: true
+
+          # visionOS Build Matrix              
+          - type: visionos
+            runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
+            deviceName: "Apple Vision Pro"
+            osVersion: "26.0"
+            download-platform: true
+  
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Test
+        uses: brightdigit/swift-build@v1.4.2
+        with:
+          scheme: ${{ env.PACKAGE_NAME }}-Package
+          type: ${{ matrix.type }}
+          xcode: ${{ matrix.xcode }}
+          deviceName: ${{ matrix.deviceName }}
+          osVersion: ${{ matrix.osVersion }}
+          download-platform: ${{ matrix.download-platform }}
+          
+      # Coverage Steps
+      - name: Process Coverage
+        uses: sersoft-gmbh/swift-coverage-action@v4
+        with:
+          minimum-coverage: 70
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.type && format('{0}{1}', matrix.type, matrix.osVersion) || 'spm' }}
+
+  lint:
+    name: Linting
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    runs-on: ubuntu-latest
+    needs: [build-ubuntu, build-macos] # , build-windows]
+    env:
+      MINT_PATH: .mint/lib
+      MINT_LINK_PATH: .mint/bin
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache mint
+        id: cache-mint
+        uses: actions/cache@v4
+        env:
+          cache-name: cache
+        with:
+          path: |
+            .mint
+            Mint
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
+      - name: Install mint
+        if: steps.cache-mint.outputs.cache-hit == ''
+        run: |
+          git clone https://github.com/yonaskolb/Mint.git
+          cd Mint
+          swift run mint install yonaskolb/mint
+      - name: Lint
+        run: |
+          set -e
+          ./Scripts/lint.sh

@@ -61,46 +61,86 @@ let swiftSettings: [SwiftSetting] = [
   .enableExperimentalFeature("WarnUnsafeReflection"),
 
   // Enhanced compiler checking
-  .unsafeFlags([
-    // Enable concurrency warnings
-    "-warn-concurrency",
-    // Enable actor data race checks
-    "-enable-actor-data-race-checks",
-    // Complete strict concurrency checking
-    "-strict-concurrency=complete",
-    // Enable testing support
-    "-enable-testing",
-    // Warn about functions with >100 lines
-    "-Xfrontend", "-warn-long-function-bodies=100",
-    // Warn about slow type checking expressions
-    "-Xfrontend", "-warn-long-expression-type-checking=100"
-  ])
+  // .unsafeFlags([
+  //   // Enable concurrency warnings
+  //   "-warn-concurrency",
+  //   // Enable actor data race checks
+  //   "-enable-actor-data-race-checks",
+  //   // Complete strict concurrency checking
+  //   "-strict-concurrency=complete",
+  //   // Enable testing support
+  //   "-enable-testing",
+  //   // Warn about functions with >100 lines
+  //   "-Xfrontend", "-warn-long-function-bodies=100",
+  //   // Warn about slow type checking expressions
+  //   "-Xfrontend", "-warn-long-expression-type-checking=100"
+  // ])
 ]
 
 let package = Package(
-    name: "Bushel",
+    name: "BushelCloud",
     platforms: [
-        .macOS(.v14)
+        .macOS(.v15),
+        .iOS(.v18),
+        .watchOS(.v11),
+        .tvOS(.v18),
+        .visionOS(.v2)
     ],
     products: [
-        .executable(name: "bushel-images", targets: ["BushelImages"])
+        .library(name: "ConfigKeyKit", targets: ["ConfigKeyKit"]),
+        .library(name: "BushelCloudKit", targets: ["BushelCloudKit"]),
+        .executable(name: "bushel-cloud", targets: ["BushelCloudCLI"])
     ],
     dependencies: [
-        .package(name: "MistKit", path: "../.."),
+        .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.3"),
+        .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.0.0-alpha.2"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0"),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0")
+        .package(
+            url: "https://github.com/apple/swift-configuration.git",
+            from: "1.0.0",
+            traits: ["CommandLineArguments"]
+        )
     ],
     targets: [
-        .executableTarget(
-            name: "BushelImages",
+        .target(
+            name: "ConfigKeyKit",
+            dependencies: [],
+            swiftSettings: swiftSettings
+        ),
+        .target(
+            name: "BushelCloudKit",
             dependencies: [
+                .target(name: "ConfigKeyKit"),
                 .product(name: "MistKit", package: "MistKit"),
+                .product(name: "BushelLogging", package: "BushelKit"),
+                .product(name: "BushelFoundation", package: "BushelKit"),
+                .product(name: "BushelUtilities", package: "BushelKit"),
+                .product(name: "BushelVirtualBuddy", package: "BushelKit"),
                 .product(name: "IPSWDownloads", package: "IPSWDownloads"),
                 .product(name: "SwiftSoup", package: "SwiftSoup"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "Logging", package: "swift-log")
+                .product(name: "Configuration", package: "swift-configuration")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .executableTarget(
+            name: "BushelCloudCLI",
+            dependencies: [
+                .target(name: "BushelCloudKit")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "ConfigKeyKitTests",
+            dependencies: [
+                .target(name: "ConfigKeyKit")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "BushelCloudKitTests",
+            dependencies: [
+                .target(name: "BushelCloudKit")
             ],
             swiftSettings: swiftSettings
         )

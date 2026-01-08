@@ -1,0 +1,58 @@
+# Production CloudKit Sync Workflow
+#
+# Syncs data to CloudKit production environment. Manual trigger only for controlled
+# production deploys. Recommend testing in development first.
+#
+# **Trigger Strategy**:
+# - Manual only (workflow_dispatch) for explicit production control
+# - Optional scheduled sync available (commented out until production ready)
+#
+# **Concurrency**: cancel-in-progress (prevents race conditions)
+#
+# **Export**: Disabled to reduce CI minutes (export is optional for production)
+#
+# For implementation details, see ./.github/actions/cloudkit-sync/action.yml
+
+name: Scheduled CloudKit Sync (Production)
+
+on:
+  # Manual trigger only for production
+  # Recommend running after testing in development
+  workflow_dispatch:
+
+  # Optional: Less frequent scheduled sync for production
+  # Uncomment to enable once production is ready
+  # schedule:
+  #   - cron: '0 6 * * *'  # Once daily at 6:00 UTC
+
+# Prevent concurrent sync runs
+# Why cancel-in-progress?
+# - Only latest sync matters (syncs are idempotent)
+# - Prevents race conditions when writing to CloudKit
+# - Saves resources by canceling redundant syncs
+concurrency:
+  group: cloudkit-sync-prod
+  cancel-in-progress: true
+
+jobs:
+  sync-prod:
+    name: Sync to CloudKit (Production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read  # Read repository code
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: CloudKit Sync
+        uses: ./.github/actions/cloudkit-sync
+        with:
+          environment: production
+          container-id: iCloud.com.brightdigit.Bushel
+          cloudkit-key-id: ${{ secrets.CLOUDKIT_KEY_ID_PROD }}
+          cloudkit-private-key: ${{ secrets.CLOUDKIT_PRIVATE_KEY_PROD }}
+          virtualbuddy-api-key: ${{ secrets.VIRTUALBUDDY_API_KEY }}
+          enable-export: 'false'  # Optional: export is only for data audit, summary comes from sync

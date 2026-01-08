@@ -1,5 +1,13 @@
 # Bushel Demo - CloudKit Data Synchronization
 
+[![CI](https://github.com/brightdigit/BushelCloud/actions/workflows/BushelCloud.yml/badge.svg)](https://github.com/brightdigit/BushelCloud/actions/workflows/BushelCloud.yml)
+[![CodeQL](https://github.com/brightdigit/BushelCloud/actions/workflows/codeql.yml/badge.svg)](https://github.com/brightdigit/BushelCloud/actions/workflows/codeql.yml)
+[![codecov](https://codecov.io/gh/brightdigit/BushelCloud/branch/main/graph/badge.svg)](https://codecov.io/gh/brightdigit/BushelCloud)
+[![SwiftLint](https://img.shields.io/badge/SwiftLint-passing-success.svg)](https://github.com/realm/SwiftLint)
+[![Swift 6.2+](https://img.shields.io/badge/Swift-6.2%2B-orange.svg)](https://swift.org)
+[![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Windows-blue.svg)](https://swift.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A command-line tool demonstrating MistKit's CloudKit Web Services capabilities by syncing macOS restore images, Xcode versions, and Swift compiler versions to CloudKit.
 
 > 📖 **Tutorial-Friendly Demo** - This example is designed for developers learning CloudKit and MistKit. Use the `--verbose` flag to see detailed explanations of CloudKit operations and MistKit usage patterns.
@@ -67,7 +75,7 @@ The demo integrates with multiple data sources to gather comprehensive version i
 ### Components
 
 ```text
-BushelImages/
+BushelCloud/
 ├── DataSources/           # Data fetchers for external APIs
 │   ├── IPSWFetcher.swift
 │   ├── XcodeReleasesFetcher.swift
@@ -84,10 +92,29 @@ BushelImages/
 │   ├── RecordBuilder.swift
 │   └── SyncEngine.swift
 └── Commands/              # CLI commands
-    ├── BushelImagesCLI.swift
+    ├── BushelCloudCLI.swift
     ├── SyncCommand.swift
     └── ExportCommand.swift
 ```
+
+### BushelKit Integration
+
+BushelCloud uses [BushelKit](https://github.com/brightdigit/BushelKit) as its modular foundation, providing:
+
+**Core Modules:**
+- **BushelFoundation** - Domain models (RestoreImageRecord, XcodeVersionRecord, SwiftVersionRecord)
+- **BushelUtilities** - Formatting helpers, JSON decoding, console output
+- **BushelLogging** - Unified logging abstractions
+
+**Current Integration:**
+- Git subrepo at `Packages/BushelKit/` for rapid development
+- Local path dependency during migration phase
+
+**Future:**
+- After BushelKit v2.0 stable release → versioned remote dependency
+- BushelKit will support VM management features
+
+**Documentation:** [BushelKit Docs](https://docs.getbushel.app/docc)
 
 ## Features Demonstrated
 
@@ -140,7 +167,7 @@ BushelImages/
 2. **Server-to-Server Key** - Generate from CloudKit Dashboard → API Access
 3. **Private Key File** - Download the `.pem` file when creating the key
 
-See [CLOUDKIT-SETUP.md](./CLOUDKIT-SETUP.md) for detailed setup instructions.
+For detailed setup instructions, run `swift package generate-documentation` and view the CloudKit Setup guide in the generated documentation.
 
 ### Building
 
@@ -149,7 +176,7 @@ See [CLOUDKIT-SETUP.md](./CLOUDKIT-SETUP.md) for detailed setup instructions.
 swift build
 
 # Run the demo
-.build/debug/bushel-images --help
+.build/debug/bushel-cloud --help
 ```
 
 ### First Sync (Learning Mode)
@@ -160,11 +187,14 @@ Run with `--verbose` to see educational explanations of what's happening:
 export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
 export CLOUDKIT_KEY_FILE="./path/to/private-key.pem"
 
+# Optional: Enable VirtualBuddy TSS signing status
+export VIRTUALBUDDY_API_KEY="YOUR_VIRTUALBUDDY_API_KEY"
+
 # Sync with verbose logging to learn how MistKit works
-.build/debug/bushel-images sync --verbose
+.build/debug/bushel-cloud sync --verbose
 
 # Or do a dry run first to see what would be synced
-.build/debug/bushel-images sync --dry-run --verbose
+.build/debug/bushel-cloud sync --dry-run --verbose
 ```
 
 **What the verbose flag shows:**
@@ -174,6 +204,50 @@ export CLOUDKIT_KEY_FILE="./path/to/private-key.pem"
 - ⚙️ Record dependency ordering
 - 🌐 Actual CloudKit API calls and responses
 
+## Installation
+
+### Method 1: Build from Source (Recommended)
+
+Clone and build the project:
+
+```bash
+git clone https://github.com/brightdigit/BushelCloud.git
+cd BushelCloud
+swift build -c release
+.build/release/bushel-cloud --help
+```
+
+### Method 2: Install to System Path
+
+Build and install to `/usr/local/bin`:
+
+```bash
+git clone https://github.com/brightdigit/BushelCloud.git
+cd BushelCloud
+make install
+```
+
+This makes `bushel-cloud` available globally.
+
+### Method 3: Docker
+
+Run without local Swift installation:
+
+```bash
+git clone https://github.com/brightdigit/BushelCloud.git
+cd BushelCloud
+make docker-run
+```
+
+### Prerequisites for All Methods
+
+Before running any sync operations, you'll need:
+1. CloudKit container (create in [CloudKit Dashboard](https://icloud.developer.apple.com/dashboard/))
+2. Server-to-Server Key (generate from API Access section)
+3. Private key `.pem` file (downloaded when creating key)
+
+See [Authentication Setup](#authentication-setup) for detailed instructions.
+
 ## Usage
 
 ### Sync Command
@@ -182,27 +256,27 @@ Fetch data from all sources and upload to CloudKit:
 
 ```bash
 # Basic usage
-bushel-images sync \
+bushel-cloud sync \
   --container-id "iCloud.com.brightdigit.Bushel" \
   --key-id "YOUR_KEY_ID" \
   --key-file ./path/to/private-key.pem
 
 # With verbose logging (recommended for learning)
-bushel-images sync --verbose
+bushel-cloud sync --verbose
 
 # Dry run (fetch data but don't upload to CloudKit)
-bushel-images sync --dry-run
+bushel-cloud sync --dry-run
 
 # Selective sync
-bushel-images sync --restore-images-only
-bushel-images sync --xcode-only
-bushel-images sync --swift-only
-bushel-images sync --no-betas  # Exclude beta/RC releases
+bushel-cloud sync --restore-images-only
+bushel-cloud sync --xcode-only
+bushel-cloud sync --swift-only
+bushel-cloud sync --no-betas  # Exclude beta/RC releases
 
 # Use environment variables (recommended)
 export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
 export CLOUDKIT_KEY_FILE="./path/to/private-key.pem"
-bushel-images sync --verbose
+bushel-cloud sync --verbose
 ```
 
 ### Export Command
@@ -211,37 +285,33 @@ Query and export CloudKit data to JSON file:
 
 ```bash
 # Export to file
-bushel-images export \
+bushel-cloud export \
   --container-id "iCloud.com.brightdigit.Bushel" \
   --key-id "YOUR_KEY_ID" \
   --key-file ./path/to/private-key.pem \
   --output ./bushel-data.json
 
 # With verbose logging
-bushel-images export --verbose --output ./bushel-data.json
+bushel-cloud export --verbose --output ./bushel-data.json
 
 # Pretty-print JSON
-bushel-images export --pretty --output ./bushel-data.json
+bushel-cloud export --pretty --output ./bushel-data.json
 
 # Export to stdout for piping
-bushel-images export --pretty | jq '.restoreImages | length'
+bushel-cloud export --pretty | jq '.restoreImages | length'
 ```
 
 ### Help
 
 ```bash
-bushel-images --help
-bushel-images sync --help
-bushel-images export --help
+bushel-cloud --help
+bushel-cloud sync --help
+bushel-cloud export --help
 ```
 
 ### Xcode Setup
 
-See [XCODE_SCHEME_SETUP.md](./XCODE_SCHEME_SETUP.md) for detailed instructions on:
-- Configuring the Xcode scheme
-- Setting environment variables
-- Getting CloudKit credentials
-- Debugging tips
+For Xcode setup and debugging instructions, see the "Xcode Development Setup" section in CLAUDE.md.
 
 ## CloudKit Schema
 
@@ -370,13 +440,13 @@ cd Examples/Bushel
 ./Scripts/setup-cloudkit-schema.sh
 ```
 
-See [CLOUDKIT_SCHEMA_SETUP.md](./CLOUDKIT_SCHEMA_SETUP.md) for detailed instructions.
+Run the automated setup script: `./Scripts/setup-cloudkit-schema.sh` or view the CloudKit Setup guide in the documentation.
 
 ### Option 2: Manual Setup
 
 Create the record types manually in [CloudKit Dashboard](https://icloud.developer.apple.com/).
 
-See [XCODE_SCHEME_SETUP.md](./XCODE_SCHEME_SETUP.md#cloudkit-schema-setup) for field definitions.
+See the "CloudKit Schema Field Reference" section in CLAUDE.md for complete field definitions.
 
 ## Authentication Setup
 
@@ -406,7 +476,7 @@ After setting up your CloudKit schema, you need to create a Server-to-Server Key
 
 **Method 1: Command-line flags**
 ```bash
-bushel-images sync \
+bushel-cloud sync \
   --key-id "YOUR_KEY_ID" \
   --key-file ~/.cloudkit/bushel-private-key.pem
 ```
@@ -417,8 +487,11 @@ bushel-images sync \
 export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
 export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
 
+# Optional: VirtualBuddy TSS signing status (get from https://tss.virtualbuddy.app/)
+export VIRTUALBUDDY_API_KEY="YOUR_VIRTUALBUDDY_API_KEY"
+
 # Then simply run
-bushel-images sync
+bushel-cloud sync
 ```
 
 ## Dependencies
@@ -427,6 +500,130 @@ bushel-images sync
 - **IPSWDownloads** - ipsw.me API wrapper
 - **SwiftSoup** - HTML parsing for web scraping
 - **ArgumentParser** - CLI argument parsing
+
+## Development
+
+### Prerequisites
+
+- Swift 6.1 or later
+- macOS 14.0+ (for full CloudKit functionality)
+- Mint (for linting tools): `brew install mint`
+
+### Dev Containers
+
+Develop with Linux and test multiple Swift versions using VS Code Dev Containers:
+
+**Available configurations:**
+- Swift 6.1 (Ubuntu Jammy)
+- Swift 6.2 (Ubuntu Jammy)
+- Swift 6.2 (Ubuntu Noble) - Default
+
+**Usage:**
+1. Install [VS Code Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+2. Open project in VS Code
+3. Click "Reopen in Container" or use Command Palette: `Dev Containers: Reopen in Container`
+4. Select desired Swift version when prompted
+
+**Or use directly with Docker:**
+```bash
+# Swift 6.2 on Ubuntu Noble
+docker run -it -v $PWD:/workspace -w /workspace swift:6.2-noble bash
+
+# Run tests
+docker run -v $PWD:/workspace -w /workspace swift:6.2-noble swift test
+```
+
+### Quick Start with Make
+
+```bash
+make build    # Build the project
+make test     # Run tests
+make lint     # Run linting
+make format   # Format code
+make xcode    # Generate Xcode project
+make install  # Install to /usr/local/bin
+make help     # Show all targets
+```
+
+### Building
+
+```bash
+swift build
+# Or with make:
+make build
+```
+
+### Testing
+
+```bash
+swift test
+# Or with make:
+make test
+```
+
+### Linting
+
+```bash
+./Scripts/lint.sh
+# Or with make:
+make lint
+```
+
+This will:
+- Format code with swift-format
+- Check style with SwiftLint
+- Verify code compiles
+- Add copyright headers
+
+### Docker Commands
+
+```bash
+make docker-build    # Build in Docker
+make docker-test     # Test in Docker
+make docker-run      # Interactive shell
+```
+
+### Xcode Project Generation
+
+Generate Xcode project using XcodeGen:
+
+```bash
+make xcode
+# Or directly:
+mint run xcodegen generate
+```
+
+This creates `BushelCloud.xcodeproj` from `project.yml`. The project file is gitignored and regenerated as needed.
+
+**Targets included:**
+- BushelCloud - Main executable
+- BushelCloudTests - Unit tests
+- Linting - Aggregate target that runs SwiftLint
+
+### CI/CD
+
+This project uses GitHub Actions for continuous integration:
+
+- **Multi-platform builds**: Ubuntu (Noble, Jammy), Windows (2022, 2025), macOS 15
+- **Swift versions**: 6.1, 6.2, 6.2-nightly
+- **Xcode versions**: 16.3, 16.4, 26.0
+- **Linting**: SwiftLint, swift-format, periphery
+- **Security**: CodeQL static analysis
+- **Coverage**: Codecov integration
+- **AI Review**: Claude Code for automated PR reviews
+
+See `.github/workflows/` for workflow configurations.
+
+### Code Quality Tools
+
+**Managed via Mint (see `Mintfile`):**
+- `swift-format@602.0.0` - Code formatting
+- `SwiftLint@0.62.2` - Style and convention linting
+- `periphery@3.2.0` - Unused code detection
+
+**Configuration files:**
+- `.swiftlint.yml` - 90+ opt-in rules, strict mode
+- `.swift-format` - 2-space indentation, 100-char lines
 
 ## Data Sources
 
@@ -438,6 +635,7 @@ Bushel fetches data from multiple external sources including:
 - **swift.org** - Swift compiler versions
 - **Apple MESU** - Official restore image metadata
 - **Mr. Macintosh** - Community-maintained release archive
+- **VirtualBuddy TSS API** (optional) - Real-time TSS signing status verification (requires API key from [tss.virtualbuddy.app](https://tss.virtualbuddy.app/))
 
 The `sync` command fetches from all sources, deduplicates records, and uploads to CloudKit.
 
@@ -500,7 +698,7 @@ See "Limitations" section for details on incremental sync
 **❌ "Operation failed" with no details**
 ```bash
 ✅ Solution: Use --verbose flag to see CloudKit error details
-bushel-images sync --verbose
+bushel-cloud sync --verbose
 # Look for serverErrorCode and reason in output
 ```
 
@@ -524,7 +722,7 @@ bushel-images sync --verbose
 ### For Beginners
 
 **Start Here:**
-1. Run `bushel-images sync --dry-run --verbose` to see what happens without uploading
+1. Run `bushel-cloud sync --dry-run --verbose` to see what happens without uploading
 2. Review the code in `SyncEngine.swift` to understand the flow
 3. Check `BushelCloudKitService.swift` for MistKit usage patterns
 4. Explore `RecordBuilder.swift` to see CloudKit record construction
@@ -587,7 +785,7 @@ Same as MistKit - MIT License. See main repository LICENSE file.
 ## Questions?
 
 For issues specific to this demo:
-- Check [XCODE_SCHEME_SETUP.md](./XCODE_SCHEME_SETUP.md) for configuration help
+- Check the "Xcode Development Setup" section in CLAUDE.md for configuration help
 - Review CloudKit Dashboard for schema and authentication issues
 
 For MistKit issues:
