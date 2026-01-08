@@ -1,0 +1,574 @@
+name: Update RSS Feeds
+
+on:
+  # Conservative schedule for testing
+  schedule:
+    # Standard feeds (daily at 2 AM UTC)
+    - cron: '0 2 * * *'
+
+    # Stale feeds (weekly on Sundays at 3 AM UTC)
+    - cron: '0 3 * * 0'
+
+  # Pull request testing
+  pull_request:
+    branches: [main]
+
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: 'Feed tier to update (high/standard/stale/all)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - high
+          - standard
+          - stale
+          - all
+      environment:
+        description: 'CloudKit environment'
+        required: false
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - production
+      delay:
+        description: 'Rate limit delay in seconds'
+        required: false
+        default: '2.0'
+      force_rebuild:
+        description: 'Force rebuild binary (ignore cache)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  CLOUDKIT_CONTAINER_ID: ${{ secrets.CLOUDKIT_CONTAINER_ID || 'iCloud.com.brightdigit.Celestra' }}
+  CLOUDKIT_KEY_ID: ${{ secrets.CLOUDKIT_KEY_ID }}
+  CLOUDKIT_ENVIRONMENT: ${{ (github.event_name == 'pull_request' || github.event_name == 'push') && 'development' || github.event.inputs.environment || 'production' }}
+  CLOUDKIT_PRIVATE_KEY_PATH: /tmp/cloudkit_key.pem
+
+jobs:
+  # Determine which tier to run based on schedule or manual input
+  determine-tier:
+    runs-on: ubuntu-latest
+    outputs:
+      tier: ${{ steps.set-tier.outputs.tier }}
+      runs_high: ${{ steps.set-tier.outputs.runs_high }}
+      runs_standard: ${{ steps.set-tier.outputs.runs_standard }}
+      runs_stale: ${{ steps.set-tier.outputs.runs_stale }}
+      runs_pr_test: ${{ steps.set-tier.outputs.runs_pr_test }}
+      is_fork_pr: ${{ steps.set-tier.outputs.is_fork_pr }}
+
+    steps:
+      - id: set-tier
+        run: |
+          # Check if pull request
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # Check if fork PR (secrets not available)
+            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+              echo "::notice::Fork PR detected - integration tests will be skipped (secrets not available)"
+              TIER="pr-test"
+              IS_FORK_PR="true"
+            else
+              echo "PR from repository branch - running integration tests"
+              TIER="pr-test"
+              IS_FORK_PR="false"
+            fi
+          # Check if push to branch
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            echo "Push to branch ${{ github.ref_name }} - running integration tests"
+            TIER="pr-test"
+            IS_FORK_PR="false"
+          # Check if manual dispatch
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TIER="${{ github.event.inputs.tier }}"
+            echo "Manual dispatch: tier=$TIER"
+            IS_FORK_PR="false"
+          else
+            # Determine tier based on current time
+            HOUR=$(date -u +%H)
+
+            # Check if this is 2 AM UTC (daily standard run)
+            if [ "$HOUR" -eq 2 ]; then
+              TIER="standard"
+              echo "Scheduled run (daily): tier=$TIER"
+            # Check if this is 3 AM UTC (weekly stale run on Sundays)
+            elif [ "$HOUR" -eq 3 ]; then
+              TIER="stale"
+              echo "Scheduled run (weekly): tier=$TIER"
+            # Default to high priority for any other scheduled times
+            else
+              TIER="high"
+              echo "Scheduled run (unexpected time): tier=$TIER"
+            fi
+            IS_FORK_PR="false"
+          fi
+
+          echo "tier=$TIER" >> $GITHUB_OUTPUT
+          echo "is_fork_pr=$IS_FORK_PR" >> $GITHUB_OUTPUT
+
+          # Set run flags for each tier
+          if [ "$TIER" = "all" ]; then
+            echo "runs_high=true" >> $GITHUB_OUTPUT
+            echo "runs_standard=true" >> $GITHUB_OUTPUT
+            echo "runs_stale=true" >> $GITHUB_OUTPUT
+            echo "runs_pr_test=false" >> $GITHUB_OUTPUT
+          elif [ "$TIER" = "pr-test" ]; then
+            echo "runs_high=false" >> $GITHUB_OUTPUT
+            echo "runs_standard=false" >> $GITHUB_OUTPUT
+            echo "runs_stale=false" >> $GITHUB_OUTPUT
+            # Only run PR test if not a fork PR
+            echo "runs_pr_test=$( [ "$IS_FORK_PR" = "false" ] && echo true || echo false )" >> $GITHUB_OUTPUT
+          else
+            echo "runs_high=$( [ "$TIER" = "high" ] && echo true || echo false )" >> $GITHUB_OUTPUT
+            echo "runs_standard=$( [ "$TIER" = "standard" ] && echo true || echo false )" >> $GITHUB_OUTPUT
+            echo "runs_stale=$( [ "$TIER" = "stale" ] && echo true || echo false )" >> $GITHUB_OUTPUT
+            echo "runs_pr_test=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Build the binary (cached based on code changes)
+  build:
+    runs-on: ubuntu-latest
+    container: swift:6.2-noble
+    outputs:
+      cache-hit: ${{ steps.cache-binary.outputs.cache-hit }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache compiled binary
+        id: cache-binary
+        uses: actions/cache@v4
+        with:
+          path: .build/release/celestra-cloud
+          key: celestra-cloud-${{ runner.os }}-${{ hashFiles('Sources/**/*.swift', 'Package.swift', 'Package.resolved') }}-${{ github.event.inputs.force_rebuild || 'false' }}
+
+      - name: Build CelestraCloud
+        if: steps.cache-binary.outputs.cache-hit != 'true'
+        run: swift build -c release --static-swift-stdlib
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: celestra-cloud-binary
+          path: .build/release/celestra-cloud
+          retention-days: 1
+
+  # High-priority feeds (hourly)
+  update-high-priority:
+    needs: [determine-tier, build]
+    if: needs.determine-tier.outputs.runs_high == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    strategy:
+      matrix:
+        include:
+          - name: "Pass 1: Very popular feeds"
+            args: "--update-min-popularity 100 --update-max-failures 2 --update-delay 2.0 --update-limit 100"
+          - name: "Pass 2: Popular feeds"
+            args: "--update-min-popularity 10 --update-max-failures 5 --update-delay 2.5 --update-limit 100"
+
+      fail-fast: false
+
+    steps:
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: celestra-cloud-binary
+          path: ./bin
+
+      - name: Make binary executable
+        run: chmod +x ./bin/celestra-cloud
+
+      - name: Create CloudKit private key file
+        run: |
+          cat <<'EOF' > $CLOUDKIT_PRIVATE_KEY_PATH
+          ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
+          EOF
+          chmod 600 $CLOUDKIT_PRIVATE_KEY_PATH
+
+      - name: ${{ matrix.name }}
+        run: |
+          echo "::group::${{ matrix.name }}"
+          echo "Running: ./bin/celestra-cloud update ${{ matrix.args }}"
+          ./bin/celestra-cloud update ${{ matrix.args }} --update-json-output-path ./feed-update-high-${{ strategy.job-index }}.json
+          echo "::endgroup::"
+        continue-on-error: true
+
+      - name: Upload JSON report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: feed-update-high-${{ strategy.job-index }}
+          path: ./feed-update-high-${{ strategy.job-index }}.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Cleanup private key
+        if: always()
+        run: rm -f $CLOUDKIT_PRIVATE_KEY_PATH
+
+  # Standard feeds (every 6 hours)
+  update-standard:
+    needs: [determine-tier, build]
+    if: needs.determine-tier.outputs.runs_standard == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: celestra-cloud-binary
+          path: ./bin
+
+      - name: Make binary executable
+        run: chmod +x ./bin/celestra-cloud
+
+      - name: Create CloudKit private key file
+        run: |
+          cat <<'EOF' > $CLOUDKIT_PRIVATE_KEY_PATH
+          ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
+          EOF
+          chmod 600 $CLOUDKIT_PRIVATE_KEY_PATH
+
+      - name: Update standard popularity feeds
+        run: |
+          echo "::group::Standard Feeds Update"
+          echo "Running feeds with minimum popularity of 10, max failures 5"
+          ./bin/celestra-cloud update \
+            --update-min-popularity 10 \
+            --update-max-failures 5 \
+            --update-delay 2.5 \
+            --update-limit 200 \
+            --update-json-output-path ./feed-update-standard.json
+          echo "::endgroup::"
+        continue-on-error: true
+
+      - name: Upload JSON report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: feed-update-standard
+          path: ./feed-update-standard.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Cleanup private key
+        if: always()
+        run: rm -f $CLOUDKIT_PRIVATE_KEY_PATH
+
+  # Stale feeds (daily)
+  update-stale:
+    needs: [determine-tier, build]
+    if: needs.determine-tier.outputs.runs_stale == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: celestra-cloud-binary
+          path: ./bin
+
+      - name: Make binary executable
+        run: chmod +x ./bin/celestra-cloud
+
+      - name: Create CloudKit private key file
+        run: |
+          cat <<'EOF' > $CLOUDKIT_PRIVATE_KEY_PATH
+          ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
+          EOF
+          chmod 600 $CLOUDKIT_PRIVATE_KEY_PATH
+
+      - name: Update stale feeds
+        run: |
+          echo "::group::Stale Feeds Update"
+          # Calculate date 7 days ago in ISO8601 format (Linux date command)
+          WEEK_AGO=$(date -u -d '7 days ago' '+%Y-%m-%dT%H:%M:%SZ')
+          echo "Updating feeds not attempted since: $WEEK_AGO"
+          ./bin/celestra-cloud update \
+            --update-last-attempted-before "$WEEK_AGO" \
+            --update-max-failures 10 \
+            --update-delay 3.0 \
+            --update-limit 300 \
+            --update-json-output-path ./feed-update-stale.json
+          echo "::endgroup::"
+        continue-on-error: true
+
+      - name: Upload JSON report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: feed-update-stale
+          path: ./feed-update-stale.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Cleanup private key
+        if: always()
+        run: rm -f $CLOUDKIT_PRIVATE_KEY_PATH
+
+  # PR integration test (limited scope)
+  update-pr-test:
+    needs: [determine-tier, build]
+    if: needs.determine-tier.outputs.runs_pr_test == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: celestra-cloud-binary
+          path: ./bin
+
+      - name: Make binary executable
+        run: chmod +x ./bin/celestra-cloud
+
+      - name: Create CloudKit private key file
+        run: |
+          cat <<'EOF' > $CLOUDKIT_PRIVATE_KEY_PATH
+          ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
+          EOF
+          chmod 600 $CLOUDKIT_PRIVATE_KEY_PATH
+
+      - name: Run PR integration test
+        run: |
+          echo "::group::PR Integration Test"
+          echo "Environment: $CLOUDKIT_ENVIRONMENT (development)"
+          echo "Testing with limited feeds (smoke test)"
+          echo ""
+          ./bin/celestra-cloud update \
+            --update-limit 5 \
+            --update-max-failures 0 \
+            --update-delay 1.0 \
+            --update-json-output-path ./feed-update-pr-test.json
+          echo "::endgroup::"
+        continue-on-error: false
+
+      - name: Upload JSON report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: feed-update-pr-test
+          path: ./feed-update-pr-test.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Cleanup private key
+        if: always()
+        run: rm -f $CLOUDKIT_PRIVATE_KEY_PATH
+
+  # Summary report
+  summary:
+    needs: [determine-tier, build, update-high-priority, update-standard, update-stale, update-pr-test]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download JSON reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: feed-update-*
+          path: ./reports
+          merge-multiple: false
+        continue-on-error: true
+
+      - name: Generate enhanced summary
+        run: |
+          echo "## RSS Feed Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tier:** ${{ needs.determine-tier.outputs.tier }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ env.CLOUDKIT_ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Binary Cache:** ${{ needs.build.outputs.cache-hit == 'true' && '✅ Hit (reused)' || '🔨 Miss (rebuilt)' }}" >> $GITHUB_STEP_SUMMARY
+
+          # Show fork PR notice if applicable
+          if [ "${{ needs.determine-tier.outputs.is_fork_pr }}" = "true" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Fork PR**: Integration tests skipped (secrets not available for security)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Build: ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- High Priority: ${{ needs.update-high-priority.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Standard: ${{ needs.update-standard.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Stale: ${{ needs.update-stale.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- PR Test: ${{ needs.update-pr-test.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+
+          # Parse JSON reports if available
+          if [ -d "./reports" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Update Statistics" >> $GITHUB_STEP_SUMMARY
+
+            # Aggregate stats from all JSON files
+            total_feeds=0
+            success_count=0
+            error_count=0
+            skipped_count=0
+            not_modified_count=0
+            articles_created=0
+            articles_updated=0
+
+            for report_dir in ./reports/feed-update-*; do
+              if [ -d "$report_dir" ]; then
+                for json_file in "$report_dir"/*.json; do
+                  if [ -f "$json_file" ]; then
+                    total_feeds=$((total_feeds + $(jq -r '.summary.totalFeeds // 0' "$json_file")))
+                    success_count=$((success_count + $(jq -r '.summary.successCount // 0' "$json_file")))
+                    error_count=$((error_count + $(jq -r '.summary.errorCount // 0' "$json_file")))
+                    skipped_count=$((skipped_count + $(jq -r '.summary.skippedCount // 0' "$json_file")))
+                    not_modified_count=$((not_modified_count + $(jq -r '.summary.notModifiedCount // 0' "$json_file")))
+                    articles_created=$((articles_created + $(jq -r '.summary.articlesCreated // 0' "$json_file")))
+                    articles_updated=$((articles_updated + $(jq -r '.summary.articlesUpdated // 0' "$json_file")))
+                  fi
+                done
+              fi
+            done
+
+            echo "- **Total Feeds Processed:** $total_feeds" >> $GITHUB_STEP_SUMMARY
+            echo "- **Successful:** ✅ $success_count" >> $GITHUB_STEP_SUMMARY
+            echo "- **Errors:** ❌ $error_count" >> $GITHUB_STEP_SUMMARY
+            echo "- **Skipped (robots.txt):** ⏭️ $skipped_count" >> $GITHUB_STEP_SUMMARY
+            echo "- **Not Modified (304):** ℹ️ $not_modified_count" >> $GITHUB_STEP_SUMMARY
+            echo "- **Articles Created:** 📝 $articles_created" >> $GITHUB_STEP_SUMMARY
+            echo "- **Articles Updated:** 📝 $articles_updated" >> $GITHUB_STEP_SUMMARY
+
+            # Calculate success rate if we have data
+            if [ $total_feeds -gt 0 ]; then
+              success_rate=$((success_count * 100 / total_feeds))
+              echo "- **Success Rate:** ${success_rate}%" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Smart Scheduling Strategy" >> $GITHUB_STEP_SUMMARY
+          echo "- **High Priority (Hourly)**: Popular feeds (min 10-100 subscribers), max 5 failures" >> $GITHUB_STEP_SUMMARY
+          echo "- **Standard (Every 6h)**: Medium popularity feeds (min 10 subscribers), max 5 failures" >> $GITHUB_STEP_SUMMARY
+          echo "- **Stale (Daily)**: Feeds not updated in 7+ days, max 10 failures" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR Test**: Limited to 5 feeds, max 0 failures (smoke test)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate detailed markdown report
+        if: success() || failure()
+        run: |
+          REPORT_FILE="feed-update-detailed-report.md"
+
+          cat > "$REPORT_FILE" <<'REPORT_HEADER'
+          # RSS Feed Update - Detailed Report
+
+          ## Overview
+          REPORT_HEADER
+
+          echo "- **Tier:** ${{ needs.determine-tier.outputs.tier }}" >> "$REPORT_FILE"
+          echo "- **Environment:** ${{ env.CLOUDKIT_ENVIRONMENT }}" >> "$REPORT_FILE"
+          echo "- **Trigger:** ${{ github.event_name }}" >> "$REPORT_FILE"
+          echo "- **Workflow Run:** https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+
+          # Add aggregate statistics if JSON reports are available
+          if [ -d "./reports" ]; then
+            echo "## Summary Statistics" >> "$REPORT_FILE"
+            echo "" >> "$REPORT_FILE"
+
+            # Aggregate stats (same as above)
+            total_feeds=0
+            success_count=0
+            error_count=0
+            skipped_count=0
+            not_modified_count=0
+            articles_created=0
+            articles_updated=0
+
+            for report_dir in ./reports/feed-update-*; do
+              if [ -d "$report_dir" ]; then
+                for json_file in "$report_dir"/*.json; do
+                  if [ -f "$json_file" ]; then
+                    total_feeds=$((total_feeds + $(jq -r '.summary.totalFeeds // 0' "$json_file")))
+                    success_count=$((success_count + $(jq -r '.summary.successCount // 0' "$json_file")))
+                    error_count=$((error_count + $(jq -r '.summary.errorCount // 0' "$json_file")))
+                    skipped_count=$((skipped_count + $(jq -r '.summary.skippedCount // 0' "$json_file")))
+                    not_modified_count=$((not_modified_count + $(jq -r '.summary.notModifiedCount // 0' "$json_file")))
+                    articles_created=$((articles_created + $(jq -r '.summary.articlesCreated // 0' "$json_file")))
+                    articles_updated=$((articles_updated + $(jq -r '.summary.articlesUpdated // 0' "$json_file")))
+                  fi
+                done
+              fi
+            done
+
+            echo "| Metric | Count |" >> "$REPORT_FILE"
+            echo "|--------|-------|" >> "$REPORT_FILE"
+            echo "| Total Feeds | $total_feeds |" >> "$REPORT_FILE"
+            echo "| Successful | $success_count |" >> "$REPORT_FILE"
+            echo "| Errors | $error_count |" >> "$REPORT_FILE"
+            echo "| Skipped (robots.txt) | $skipped_count |" >> "$REPORT_FILE"
+            echo "| Not Modified (304) | $not_modified_count |" >> "$REPORT_FILE"
+            echo "| Articles Created | $articles_created |" >> "$REPORT_FILE"
+            echo "| Articles Updated | $articles_updated |" >> "$REPORT_FILE"
+
+            if [ $total_feeds -gt 0 ]; then
+              success_rate=$((success_count * 100 / total_feeds))
+              echo "| Success Rate | ${success_rate}% |" >> "$REPORT_FILE"
+            fi
+
+            echo "" >> "$REPORT_FILE"
+
+            # Add per-tier breakdown with per-feed details
+            echo "## Detailed Feed Results" >> "$REPORT_FILE"
+            echo "" >> "$REPORT_FILE"
+
+            for report_dir in ./reports/feed-update-*; do
+              if [ -d "$report_dir" ]; then
+                tier_name=$(basename "$report_dir" | sed 's/feed-update-//')
+                echo "### Tier: $tier_name" >> "$REPORT_FILE"
+                echo "" >> "$REPORT_FILE"
+
+                for json_file in "$report_dir"/*.json; do
+                  if [ -f "$json_file" ]; then
+                    # Extract tier summary
+                    tier_total=$(jq -r '.summary.totalFeeds // 0' "$json_file")
+                    tier_success=$(jq -r '.summary.successCount // 0' "$json_file")
+                    tier_errors=$(jq -r '.summary.errorCount // 0' "$json_file")
+
+                    echo "**Summary:** $tier_total feeds processed ($tier_success successful, $tier_errors errors)" >> "$REPORT_FILE"
+                    echo "" >> "$REPORT_FILE"
+
+                    # List all feeds with their status
+                    echo "| Feed URL | Status | Articles Created | Articles Updated | Duration (s) | Error |" >> "$REPORT_FILE"
+                    echo "|----------|--------|------------------|------------------|--------------|-------|" >> "$REPORT_FILE"
+
+                    jq -r '.feeds[] | [.feedURL, .status, .articlesCreated, .articlesUpdated, (.duration | tostring), (.error // "N/A")] | @tsv' "$json_file" | \
+                    while IFS=$'\t' read -r url status created updated duration error; do
+                      # Truncate URL for readability
+                      short_url=$(echo "$url" | sed 's|https\?://||' | cut -c1-50)
+                      echo "| $short_url | $status | $created | $updated | $(printf "%.2f" $duration) | $error |" >> "$REPORT_FILE"
+                    done
+
+                    echo "" >> "$REPORT_FILE"
+                  fi
+                done
+              fi
+            done
+          else
+            echo "## No JSON Reports Available" >> "$REPORT_FILE"
+            echo "" >> "$REPORT_FILE"
+            echo "JSON reports were not generated or could not be downloaded." >> "$REPORT_FILE"
+          fi
+
+          echo "Report generated: $REPORT_FILE"
+
+      - name: Upload detailed markdown report
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: feed-update-detailed-report
+          path: feed-update-detailed-report.md
+          if-no-files-found: ignore
+          retention-days: 90

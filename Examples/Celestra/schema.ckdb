@@ -1,36 +1,116 @@
 DEFINE SCHEMA
 
+// Feed - RSS feed metadata shared across all users in public database
 RECORD TYPE Feed (
+    // CloudKit system fields
     "___recordID"            REFERENCE QUERYABLE,
-    "feedURL"                STRING QUERYABLE SORTABLE,
-    "title"                  STRING SEARCHABLE,
-    "description"            STRING,
-    "totalAttempts"          INT64,
-    "successfulAttempts"     INT64,
-    "usageCount"             INT64 QUERYABLE SORTABLE,
-    "lastAttempted"          TIMESTAMP QUERYABLE SORTABLE,
-    "isActive"               INT64 QUERYABLE,
 
-    GRANT READ, CREATE, WRITE TO "_creator",
-    GRANT READ, CREATE, WRITE TO "_icloud",
-    GRANT READ TO "_world"
+    // Core feed metadata
+    "feedURL"                STRING QUERYABLE SORTABLE,     // Unique RSS/Atom feed URL
+    "title"                  STRING SEARCHABLE SORTABLE,    // Feed title
+    "description"            STRING,                        // Feed description/subtitle
+    "category"               STRING QUERYABLE,              // Content category (e.g. "Technology", "News")
+    "imageURL"               STRING,                        // Feed logo/icon URL
+    "siteURL"                STRING,                        // Website home page URL
+    "language"               STRING QUERYABLE,              // ISO language code (e.g. "en", "es")
+    "tags"                   LIST<STRING>,                  // User-defined tags for categorization
+
+    // Quality & verification indicators
+    "isFeatured"             INT64 QUERYABLE,               // 1 if featured feed, 0 otherwise
+    "isVerified"             INT64 QUERYABLE,               // 1 if verified/trusted source, 0 otherwise
+    "qualityScore"           INT64 QUERYABLE SORTABLE,      // CALCULATED: 0-100 score based on reliability (40%) + popularity (30%) + update consistency (20%) + verification (10%)
+    "subscriberCount"        INT64 QUERYABLE SORTABLE,      // Number of subscribers (from external system)
+
+    // Timestamps (NOTE: Use CloudKit's built-in createdTimestamp for creation time)
+    "verifiedTimestamp"      TIMESTAMP QUERYABLE SORTABLE,  // Last time feed URL was verified
+    "attemptedTimestamp"     TIMESTAMP QUERYABLE SORTABLE,  // Last fetch attempt timestamp
+
+    // Calculated feed characteristics
+    "updateFrequency"        DOUBLE,                        // CALCULATED: Average articles per day (articlesPublished / daysSinceFirstArticle)
+    "minUpdateInterval"      DOUBLE,                        // CALCULATED: Minimum hours between requests (respects RSS <ttl> tag, default 1.0)
+
+    // Server-side fetch metrics
+    "totalAttempts"          INT64,                         // Total fetch attempts counter
+    "successfulAttempts"     INT64,                         // Successful fetch counter
+    "failureCount"           INT64,                         // Consecutive failure count (reset on success)
+    "lastFailureReason"      STRING,                        // Most recent error message (detailed errors logged locally)
+    "isActive"               INT64 QUERYABLE,               // 1 if feed is active, 0 if disabled due to persistent failures
+
+    // HTTP caching headers (for conditional requests)
+    "etag"                   STRING,                        // Last ETag from server for 304 Not Modified support
+    "lastModified"           STRING,                        // Last-Modified header value
+
+    // Permissions: Public read, users and server can add feeds, server maintains metadata
+    // _world: All users can read feed catalog (public database)
+    // _creator: Authenticated users can create new feeds (iOS app)
+    // _icloud: Server-to-server auth can create and modify feeds (CLI/backend)
+    // Note: Users cannot modify feeds after creation - server manages all metadata updates
+    GRANT READ TO "_world",
+    GRANT CREATE TO "_creator",
+    GRANT CREATE TO "_icloud",
+    GRANT WRITE TO "_icloud"
 );
 
+// Article - RSS article content shared across all users in public database
 RECORD TYPE Article (
+    // CloudKit system fields
     "___recordID"            REFERENCE QUERYABLE,
-    "feed"                   REFERENCE QUERYABLE,
-    "title"                  STRING SEARCHABLE,
-    "link"                   STRING,
-    "description"            STRING,
-    "content"                STRING SEARCHABLE,
-    "author"                 STRING QUERYABLE,
-    "pubDate"                TIMESTAMP QUERYABLE SORTABLE,
-    "guid"                   STRING QUERYABLE SORTABLE,
-    "contentHash"            STRING QUERYABLE,
-    "fetchedAt"              TIMESTAMP QUERYABLE SORTABLE,
-    "expiresAt"              TIMESTAMP QUERYABLE SORTABLE,
 
-    GRANT READ, CREATE, WRITE TO "_creator",
-    GRANT READ, CREATE, WRITE TO "_icloud",
-    GRANT READ TO "_world"
+    // Article identity & relationships
+    "feedRecordName"         STRING QUERYABLE SORTABLE,     // Parent Feed recordName (foreign key)
+    "guid"                   STRING QUERYABLE SORTABLE,     // Article unique ID from RSS (unique per feed)
+
+    // Core article content
+    "title"                  STRING SEARCHABLE,             // Article title
+    "excerpt"                STRING,                        // Summary/description text
+    "content"                STRING SEARCHABLE,             // Full HTML content
+    "contentText"            STRING SEARCHABLE,             // CALCULATED: Plain text extracted from HTML (stripHTML)
+    "author"                 STRING QUERYABLE,              // Article author name
+    "url"                    STRING,                        // Article permalink URL
+    "imageURL"               STRING,                        // Article hero/featured image URL (manually enriched)
+
+    // Publishing metadata
+    "publishedTimestamp"     TIMESTAMP QUERYABLE SORTABLE,  // When article was originally published
+    "fetchedTimestamp"       TIMESTAMP QUERYABLE SORTABLE,  // When article was fetched from RSS feed
+    "expiresTimestamp"       TIMESTAMP QUERYABLE SORTABLE,  // CALCULATED: Cache expiration (fetchedTimestamp + ttlDays * 24h)
+
+    // Deduplication & content analysis
+    "contentHash"            STRING QUERYABLE,              // CALCULATED: SHA256 composite key (title|url|guid) for change detection
+    "wordCount"              INT64,                         // CALCULATED: Word count from contentText (split by whitespace)
+    "estimatedReadingTime"   INT64,                         // CALCULATED: Reading time in minutes (wordCount / 200 words per minute)
+
+    // Enrichment fields (manually set or ML-detected)
+    "language"               STRING QUERYABLE,              // ISO language code (manually enriched or ML-detected)
+    "tags"                   LIST<STRING>,                  // Content tags/keywords (manually enriched)
+
+    // Permissions: Public read, users and server can create articles, server maintains
+    // _world: All users can read article content (public database)
+    // _creator: Authenticated users can create articles when adding new feeds (iOS app)
+    // _icloud: Server-to-server auth can create and modify articles (CLI/backend)
+    // Note: iOS app creates articles on first feed add for immediate display
+    //       Server handles all subsequent updates via scheduled jobs
+    GRANT READ TO "_world",
+    GRANT CREATE TO "_creator",
+    GRANT CREATE TO "_icloud",
+    GRANT WRITE TO "_icloud"
+);
+
+// FeedSubscription - Anonymous subscription tracking for popularity metrics (public database)
+RECORD TYPE FeedSubscription (
+    // CloudKit system fields
+    // NOTE: recordName is SHA256("\(feedRecordName)-\(userRecordID)") for privacy
+    //       Same user + same feed = same record ID (deduplication across devices)
+    //       Hash includes feedRecordName so subscriptions can't be correlated across feeds
+    //       One-way hash prevents reversing to identify users
+    "___recordID"            REFERENCE QUERYABLE,
+
+    // Subscription relationship
+    "feedRecordName"         STRING QUERYABLE SORTABLE,     // References Feed recordName in public database
+
+    // Permissions: Public database with hashed record IDs for anonymity
+    // _world: All users can read subscription records (for count queries)
+    // _creator: Users can create/delete their own hashed subscription records
+    // Server periodically queries subscription counts to update Feed.subscriberCount
+    GRANT READ TO "_world",
+    GRANT CREATE, WRITE TO "_creator"
 );
