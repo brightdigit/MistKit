@@ -57,6 +57,11 @@ jobs:
         swift --version
         swift package --version
 
+    - name: Update Package.swift to use remote MistKit branch
+      run: |
+        sed -i '' 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "main")|g' Package.swift
+        rm -f Package.resolved
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4

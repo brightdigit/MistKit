@@ -145,7 +145,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .build/release/celestra-cloud
-          key: celestra-cloud-${{ runner.os }}-${{ hashFiles('Sources/**/*.swift', 'Package.swift', 'Package.resolved') }}-${{ github.event.inputs.force_rebuild || 'false' }}
+          key: celestra-cloud-${{ runner.os }}-${{ hashFiles('Sources/**/*.swift', 'Package.swift') }}-${{ github.event.inputs.force_rebuild || 'false' }}
+
+      - name: Update Package.swift to use remote MistKit branch
+        if: steps.cache-binary.outputs.cache-hit != 'true'
+        run: |
+          sed -i 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "main")|g' Package.swift
+          rm -f Package.resolved
 
       - name: Build CelestraCloud
         if: steps.cache-binary.outputs.cache-hit != 'true'
