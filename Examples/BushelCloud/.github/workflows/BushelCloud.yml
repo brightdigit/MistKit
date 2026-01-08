@@ -21,7 +21,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Update Package.swift to use remote MistKit branch
+        run: |
+          sed -i 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "main")|g' Package.swift
+          rm -f Package.resolved
+
       - uses: brightdigit/swift-build@v1.4.2
+        with:
+          skip-package-resolved: true
       - uses: sersoft-gmbh/swift-coverage-action@v4
         id: coverage-files
         with:
@@ -115,6 +123,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Update Package.swift to use remote MistKit branch
+        run: |
+          sed -i '' 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "main")|g' Package.swift
+          rm -f Package.resolved
+
       - name: Build and Test
         uses: brightdigit/swift-build@v1.4.2
         with:
@@ -124,6 +137,7 @@ jobs:
           deviceName: ${{ matrix.deviceName }}
           osVersion: ${{ matrix.osVersion }}
           download-platform: ${{ matrix.download-platform }}
+          skip-package-resolved: true
           
       # Coverage Steps
       - name: Process Coverage
