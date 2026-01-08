@@ -56,9 +56,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Update Package.swift to use remote MistKit branch
         run: |
-          sed -i 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "main")|g' Package.swift
-          rm -f Package.resolved
-      - uses: brightdigit/swift-build@v1.4.2          
+          (Get-Content Package.swift) -replace '\.package\(name: "MistKit", path: "\.\./\.\."\)', '.package(url: "https://github.com/brightdigit/MistKit.git", branch: "main")' | Set-Content Package.swift
+          Remove-Item -Path Package.resolved -Force -ErrorAction SilentlyContinue
+      - uses: brightdigit/swift-build@v1.4.2
         with:
           windows-swift-version: ${{ matrix.swift.version }}
           windows-swift-build: ${{ matrix.swift.build }}
