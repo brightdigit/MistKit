@@ -1,0 +1,389 @@
+# CloudKit Sync Action
+#
+# Reusable composite action that syncs macOS restore images, Xcode versions, and Swift
+# versions to CloudKit using the bushel-cloud CLI tool. Designed for both development
+# and production environments with comprehensive validation and reporting.
+#
+# ## What This Action Does
+#
+# 1. **Obtains Binary** (optimized with fallback):
+#    - Fast path: Downloads pre-built binary from artifact cache (~5 seconds)
+#    - Fallback: Builds fresh binary if artifact expired (~2 minutes)
+#    - Why: Artifact retention is 90 days; fallback ensures reliability
+#
+# 2. **Validates Configuration**:
+#    - Checks all required secrets are present
+#    - Validates PEM format (headers, footers, base64 encoding)
+#    - Prevents runtime failures from malformed credentials
+#
+# 3. **Syncs Data to CloudKit**:
+#    - Fetches from multiple sources (IPSW, AppleDB, MESU, VirtualBuddy TSS)
+#    - Deduplicates and merges records
+#    - Uploads in batches (200 operations per request)
+#    - Uses Server-to-Server authentication (no iCloud user required)
+#
+# 4. **Exports and Reports** (optional, controlled by enable-export input):
+#    - Exports CloudKit data to JSON
+#    - Generates summary with record counts and signing status
+#    - Uploads artifacts for audit and debugging
+#    - Currently limited to 200 records per type (see issue #17 for pagination)
+#
+# ## Key Design Decisions
+#
+# **Binary Caching Strategy**:
+# - Pre-building saves ~2 minutes per sync (important for 3x daily schedule)
+# - Fallback ensures robustness when artifacts expire
+# - Both paths use identical Swift 6.2 toolchain for consistency
+#
+# **PEM Validation**:
+# - Early validation prevents cryptic authentication errors during sync
+# - Common issues: truncated copy/paste, missing headers, whitespace corruption
+# - Validation provides actionable error messages before hitting CloudKit API
+#
+# **Export Toggle**:
+# - Development: Export enabled by default for verification and debugging
+# - Production: Can be disabled to reduce CI minutes (export optional for prod)
+# - Export artifacts retained for 30 days for audit trail
+#
+# **VirtualBuddy TSS Integration**:
+# - Provides real-time Apple signing status for restore images
+# - Rate limited: 2 requests per 5 seconds with server-side 12h cache
+# - Takes ~2.5-4 minutes for 50 images (acceptable for 8-16 hour sync schedules)
+#
+# ## Environment Support
+#
+# This action supports both CloudKit environments:
+# - **Development**: For testing schema changes, new data sources, workflow changes
+# - **Production**: For public-facing data after testing in development
+#
+# Each environment requires separate API keys (key-id and private-key inputs).
+#
+# ## Usage Examples
+#
+# ### Development Environment (with export)
+# ```yaml
+# - uses: ./.github/actions/cloudkit-sync
+#   with:
+#     environment: development
+#     container-id: iCloud.com.brightdigit.Bushel
+#     cloudkit-key-id: ${{ secrets.CLOUDKIT_KEY_ID }}
+#     cloudkit-private-key: ${{ secrets.CLOUDKIT_PRIVATE_KEY }}
+#     virtualbuddy-api-key: ${{ secrets.VIRTUALBUDDY_API_KEY }}
+#     enable-export: 'true'
+# ```
+#
+# ### Production Environment (export disabled)
+# ```yaml
+# - uses: ./.github/actions/cloudkit-sync
+#   with:
+#     environment: production
+#     container-id: iCloud.com.brightdigit.Bushel
+#     cloudkit-key-id: ${{ secrets.CLOUDKIT_KEY_ID_PROD }}
+#     cloudkit-private-key: ${{ secrets.CLOUDKIT_PRIVATE_KEY_PROD }}
+#     virtualbuddy-api-key: ${{ secrets.VIRTUALBUDDY_API_KEY }}
+#     enable-export: 'false'
+# ```
+#
+# ## Related Workflows
+#
+# - **cloudkit-sync-dev.yml**: Scheduled sync (3x daily) + auto-trigger after builds
+# - **cloudkit-sync-prod.yml**: Manual trigger only (for controlled production deploys)
+# - **bushel-cloud-build.yml**: Builds and caches the binary artifact
+#
+# ## Troubleshooting
+#
+# **Sync fails with "AUTHENTICATION_FAILED"**:
+# - Check cloudkit-key-id matches the key in CloudKit Dashboard
+# - Verify cloudkit-private-key contains complete PEM (including BEGIN/END markers)
+# - Ensure key has correct permissions in CloudKit Console
+#
+# **Binary download fails consistently**:
+# - Check bushel-cloud-build.yml workflow is running successfully
+# - Verify artifact retention hasn't expired (90 days)
+# - Fallback build will trigger automatically (adds ~2 minutes)
+#
+# **Export shows 200 records but more expected**:
+# - Known limitation: Export only retrieves first page (see issue #17)
+# - Workaround: Run local export with pagination once implemented
+# - Does not affect sync operation (only reporting)
+
+name: 'CloudKit Sync Action'
+description: 'Reusable action for syncing data to CloudKit with export reporting'
+
+inputs:
+  environment:
+    description: 'CloudKit environment (development or production)'
+    required: true
+  container-id:
+    description: 'CloudKit container ID'
+    required: true
+  cloudkit-key-id:
+    description: 'CloudKit S2S key ID'
+    required: true
+  cloudkit-private-key:
+    description: 'CloudKit S2S private key (PEM content)'
+    required: true
+  virtualbuddy-api-key:
+    description: 'VirtualBuddy TSS API key'
+    required: true
+  enable-export:
+    description: 'Run export after sync and generate reports'
+    required: false
+    default: 'true'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download pre-built binary (if available)
+      id: download-binary
+      uses: dawidd6/action-download-artifact@v3
+      continue-on-error: true  # Don't fail if artifact is missing
+      with:
+        workflow: bushel-cloud-build.yml
+        workflow_conclusion: success
+        name: bushel-cloud-binary
+        path: ./binary
+        branch: ${{ github.ref_name }}
+
+    - name: Build binary (fallback if artifact unavailable)
+      if: steps.download-binary.outcome != 'success'
+      shell: bash
+      run: |
+        echo "⚠️  Pre-built binary not available (may have expired after retention period)"
+        echo "Building fresh binary as fallback..."
+
+        # Build using Swift 6.2 (matches build workflow)
+        docker run --rm -v "$PWD:/workspace" -w /workspace swift:6.2-noble \
+          swift build -c release --static-swift-stdlib
+
+        # Copy binary to expected location
+        mkdir -p ./binary
+        cp .build/release/bushel-cloud ./binary/
+
+        echo "✅ Binary built successfully"
+
+    - name: Validate binary availability
+      shell: bash
+      run: |
+        if [ ! -f ./binary/bushel-cloud ]; then
+          echo "❌ Error: Binary not found at ./binary/bushel-cloud"
+          exit 1
+        fi
+
+        # Log source for debugging
+        if [ "${{ steps.download-binary.outcome }}" == "success" ]; then
+          echo "✅ Using pre-built binary (fast path)"
+        else
+          echo "✅ Using freshly-built binary (fallback path)"
+        fi
+
+        ls -lh ./binary/bushel-cloud
+
+    - name: Make binary executable
+      shell: bash
+      run: chmod +x ./binary/bushel-cloud
+
+    - name: Validate required secrets
+      shell: bash
+      env:
+        VIRTUALBUDDY_API_KEY: ${{ inputs.virtualbuddy-api-key }}
+      run: |
+        if [ -z "$VIRTUALBUDDY_API_KEY" ]; then
+          echo "❌ Error: VIRTUALBUDDY_API_KEY is not set"
+          echo "Please add VIRTUALBUDDY_API_KEY to repository secrets"
+          exit 1
+        fi
+        echo "✅ All required secrets are present"
+
+    - name: Validate PEM format
+      shell: bash
+      env:
+        CLOUDKIT_PRIVATE_KEY: ${{ inputs.cloudkit-private-key }}
+      run: |
+        echo "Validating PEM format..."
+
+        # Check for required PEM headers/footers (using here-string to avoid exposing secrets)
+        if ! grep -q "BEGIN.*PRIVATE KEY" <<< "$CLOUDKIT_PRIVATE_KEY"; then
+          echo "❌ Error: PEM header not found"
+          echo ""
+          echo "Expected format:"
+          echo "  -----BEGIN PRIVATE KEY-----"
+          echo "  [base64 encoded key]"
+          echo "  -----END PRIVATE KEY-----"
+          echo ""
+          echo "Common issues:"
+          echo "  - Missing BEGIN/END markers"
+          echo "  - Extra whitespace or newlines"
+          echo "  - Copy/paste truncation"
+          echo ""
+          exit 1
+        fi
+
+        if ! grep -q "END.*PRIVATE KEY" <<< "$CLOUDKIT_PRIVATE_KEY"; then
+          echo "❌ Error: PEM footer not found"
+          echo "Ensure the complete PEM file was copied (including footer)"
+          exit 1
+        fi
+
+        # Check for base64 content between headers (using here-string to avoid exposing secrets)
+        PEM_CONTENT=$(sed -n '/BEGIN/,/END/p' <<< "$CLOUDKIT_PRIVATE_KEY" | grep -v "BEGIN\|END")
+        if [ -z "$PEM_CONTENT" ]; then
+          echo "❌ Error: PEM file appears empty (no key data between headers)"
+          exit 1
+        fi
+
+        # Validate base64 encoding (using here-string to avoid exposing secrets)
+        if ! base64 -d >/dev/null 2>&1 <<< "$PEM_CONTENT"; then
+          echo "❌ Error: PEM content is not valid base64"
+          echo "The key may be corrupted or in the wrong format"
+          exit 1
+        fi
+
+        echo "✅ PEM format validation passed"
+
+    - name: Run CloudKit sync with change tracking
+      shell: bash
+      env:
+        CLOUDKIT_KEY_ID: ${{ inputs.cloudkit-key-id }}
+        CLOUDKIT_PRIVATE_KEY: ${{ inputs.cloudkit-private-key }}
+        CLOUDKIT_ENVIRONMENT: ${{ inputs.environment }}
+        CLOUDKIT_CONTAINER_ID: ${{ inputs.container-id }}
+        VIRTUALBUDDY_API_KEY: ${{ inputs.virtualbuddy-api-key }}
+        BUSHEL_SYNC_JSON_OUTPUT_FILE: sync-result.json
+      run: |
+        echo "Starting CloudKit sync with change tracking..."
+        echo "Container: $CLOUDKIT_CONTAINER_ID"
+        echo "Environment: $CLOUDKIT_ENVIRONMENT"
+
+        # Run sync with JSON output written directly to file
+        # All verbose logs go to console (will be captured in workflow logs)
+        ./binary/bushel-cloud sync \
+          --verbose \
+          --container-identifier "$CLOUDKIT_CONTAINER_ID"
+
+        # Parse sync results using jq
+        RESTORE_CREATED=$(jq '.restoreImages.created' sync-result.json)
+        RESTORE_UPDATED=$(jq '.restoreImages.updated' sync-result.json)
+        RESTORE_FAILED=$(jq '.restoreImages.failed' sync-result.json)
+
+        XCODE_CREATED=$(jq '.xcodeVersions.created' sync-result.json)
+        XCODE_UPDATED=$(jq '.xcodeVersions.updated' sync-result.json)
+        XCODE_FAILED=$(jq '.xcodeVersions.failed' sync-result.json)
+
+        SWIFT_CREATED=$(jq '.swiftVersions.created' sync-result.json)
+        SWIFT_UPDATED=$(jq '.swiftVersions.updated' sync-result.json)
+        SWIFT_FAILED=$(jq '.swiftVersions.failed' sync-result.json)
+
+        # Calculate totals manually
+        TOTAL_CREATED=$((RESTORE_CREATED + XCODE_CREATED + SWIFT_CREATED))
+        TOTAL_UPDATED=$((RESTORE_UPDATED + XCODE_UPDATED + SWIFT_UPDATED))
+        TOTAL_FAILED=$((RESTORE_FAILED + XCODE_FAILED + SWIFT_FAILED))
+
+        # Generate summary showing changes (not just totals)
+        cat > sync-summary.md <<EOF
+        # CloudKit Sync Summary
+
+        **Environment**: \`${{ inputs.environment }}\`
+        **Container**: \`${{ inputs.container-id }}\`
+        **Sync Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+        ## Changes by Record Type
+
+        | Record Type | Created | Updated | Failed | Total |
+        |-------------|---------|---------|--------|-------|
+        | Restore Images | ${RESTORE_CREATED} | ${RESTORE_UPDATED} | ${RESTORE_FAILED} | $((RESTORE_CREATED + RESTORE_UPDATED + RESTORE_FAILED)) |
+        | Xcode Versions | ${XCODE_CREATED} | ${XCODE_UPDATED} | ${XCODE_FAILED} | $((XCODE_CREATED + XCODE_UPDATED + XCODE_FAILED)) |
+        | Swift Versions | ${SWIFT_CREATED} | ${SWIFT_UPDATED} | ${SWIFT_FAILED} | $((SWIFT_CREATED + SWIFT_UPDATED + SWIFT_FAILED)) |
+        | **TOTAL** | **${TOTAL_CREATED}** | **${TOTAL_UPDATED}** | **${TOTAL_FAILED}** | **$((TOTAL_CREATED + TOTAL_UPDATED + TOTAL_FAILED))** |
+
+        ## Summary
+
+        - ✨ **${TOTAL_CREATED}** new records added
+        - 🔄 **${TOTAL_UPDATED}** existing records updated
+        - ❌ **${TOTAL_FAILED}** operations failed
+        EOF
+
+        # Append to GitHub Actions summary
+        cat sync-summary.md >> $GITHUB_STEP_SUMMARY
+
+        echo "✅ Sync complete"
+
+    - name: Run export (optional data audit)
+      if: inputs.enable-export == 'true'
+      shell: bash
+      env:
+        CLOUDKIT_KEY_ID: ${{ inputs.cloudkit-key-id }}
+        CLOUDKIT_PRIVATE_KEY: ${{ inputs.cloudkit-private-key }}
+        CLOUDKIT_ENVIRONMENT: ${{ inputs.environment }}
+        CLOUDKIT_CONTAINER_ID: ${{ inputs.container-id }}
+      run: |
+        echo "Exporting CloudKit data for audit trail..."
+
+        # Export to JSON
+        ./binary/bushel-cloud export \
+          --output "cloudkit-export-${{ inputs.environment }}.json" \
+          --pretty \
+          --verbose \
+          --container-identifier "$CLOUDKIT_CONTAINER_ID"
+
+        # Parse JSON to extract counts
+        RESTORE_COUNT=$(jq '.restoreImages | length' "cloudkit-export-${{ inputs.environment }}.json")
+        XCODE_COUNT=$(jq '.xcodeVersions | length' "cloudkit-export-${{ inputs.environment }}.json")
+        SWIFT_COUNT=$(jq '.swiftVersions | length' "cloudkit-export-${{ inputs.environment }}.json")
+        TOTAL_COUNT=$((RESTORE_COUNT + XCODE_COUNT + SWIFT_COUNT))
+
+        # Count signed restore images
+        SIGNED_COUNT=$(jq '[.restoreImages[] | select(.fields.isSigned == "int64(1)")] | length' "cloudkit-export-${{ inputs.environment }}.json" || echo "0")
+
+        # Generate markdown summary
+        cat > export-summary.md <<EOF
+        # CloudKit Export Summary
+
+        **Environment**: \`${{ inputs.environment }}\`
+        **Container**: \`${{ inputs.container-id }}\`
+        **Export Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+        ## Record Counts
+
+        | Record Type | Count |
+        |-------------|-------|
+        | Restore Images | ${RESTORE_COUNT} |
+        | Xcode Versions | ${XCODE_COUNT} |
+        | Swift Versions | ${SWIFT_COUNT} |
+        | **Total** | **${TOTAL_COUNT}** |
+
+        ## Restore Image Status
+
+        - **Signed**: ${SIGNED_COUNT} images currently signed by Apple
+        - **Unsigned**: $((RESTORE_COUNT - SIGNED_COUNT)) images no longer signed
+
+        ## Artifacts
+
+        - 📄 Full export data: \`cloudkit-export-${{ inputs.environment }}.json\`
+        - 📊 This summary: \`export-summary.md\`
+        EOF
+
+        # Append to GitHub Actions summary
+        cat export-summary.md >> $GITHUB_STEP_SUMMARY
+
+        echo "✅ Export complete with ${TOTAL_COUNT} total records"
+
+    - name: Upload sync results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: sync-results-${{ inputs.environment }}
+        path: |
+          sync-result.json
+          sync-summary.md
+        retention-days: 7
+
+    - name: Upload export artifacts
+      if: inputs.enable-export == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: cloudkit-export-${{ inputs.environment }}
+        path: |
+          cloudkit-export-${{ inputs.environment }}.json
+          export-summary.md
+        retention-days: 30

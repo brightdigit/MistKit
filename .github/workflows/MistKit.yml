@@ -17,7 +17,7 @@ jobs:
         swift:
           - version: "6.1"
           - version: "6.2"
-          - version: "6.2"
+          - version: "6.3"
             nightly: true
     
     steps:
@@ -107,8 +107,8 @@ jobs:
       matrix:
         include:
           # SPM Build Matrix
-          - runs-on: macos-15
-            xcode: "/Applications/Xcode_26.0.app" 
+          - runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app" 
           - runs-on: macos-15
             xcode: "/Applications/Xcode_16.4.app"
           - runs-on: macos-15
@@ -116,15 +116,15 @@ jobs:
 
           # macOS Build Matrix
           - type: macos
-            runs-on: macos-15
-            xcode: "/Applications/Xcode_16.4.app"
+          - runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app" 
                       
           # iOS Build Matrix
           - type: ios
-            runs-on: macos-15
-            xcode: "/Applications/Xcode_26.0.app"
+            runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
             deviceName: "iPhone 17 Pro"
-            osVersion: "26.0.1"
+            osVersion: "26.2"
             download-platform: true
             
           - type: ios
@@ -144,24 +144,24 @@ jobs:
   
           # watchOS Build Matrix
           - type: watchos
-            runs-on: macos-15
-            xcode: "/Applications/Xcode_26.0.app"
+            runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
             deviceName: "Apple Watch Ultra 3 (49mm)"
             osVersion: "26.0"
             download-platform: true
 
           # tvOS Build Matrix
           - type: tvos
-            runs-on: macos-15
-            xcode: "/Applications/Xcode_26.0.app"
+            runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
             deviceName: "Apple TV"
             osVersion: "26.0"
             download-platform: true
 
           # visionOS Build Matrix              
           - type: visionos
-            runs-on: macos-15
-            xcode: "/Applications/Xcode_26.0.app"
+            runs-on: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
             deviceName: "Apple Vision Pro"
             osVersion: "26.0"
             download-platform: true
