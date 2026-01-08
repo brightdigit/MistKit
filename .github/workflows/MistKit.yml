@@ -12,7 +12,6 @@ jobs:
     container: ${{ matrix.swift.nightly && format('swiftlang/swift:nightly-{0}-{1}', matrix.swift.version, matrix.os) || format('swift:{0}-{1}', matrix.swift.version, matrix.os) }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
-      fail-fast: false
       matrix:
         os: [noble, jammy]
         swift:
@@ -20,38 +19,16 @@ jobs:
           - version: "6.2"
           - version: "6.3"
             nightly: true
-        type: ["", "wasm", "wasm-embedded"]
-        exclude:
-          # Exclude Swift 6.1 from wasm builds
-          - swift: { version: "6.1" }
-            type: "wasm"
-          - swift: { version: "6.1" }
-            type: "wasm-embedded"
-          # Exclude Swift 6.3 from wasm builds
-          - swift: { version: "6.3", nightly: true }
-            type: "wasm"
-          - swift: { version: "6.3", nightly: true }
-            type: "wasm-embedded"
+    
     steps:
       - uses: actions/checkout@v4
-      - uses: brightdigit/swift-build@v1.5.0-beta.2
-        id: build
-        with:
-          type: ${{ matrix.type }}
-          wasmtime-version: "40.0.2"
-          wasm-swift-flags: >-
-            -Xcc -D_WASI_EMULATED_SIGNAL
-            -Xcc -D_WASI_EMULATED_MMAN
-            -Xlinker -lwasi-emulated-signal
-            -Xlinker -lwasi-emulated-mman
+      - uses: brightdigit/swift-build@v1.4.1
       - uses: sersoft-gmbh/swift-coverage-action@v4
-        if: steps.build.outputs.contains-code-coverage == 'true'
         id: coverage-files
-        with:
+        with:          
           fail-on-empty-output: true
       - name: Upload coverage to Codecov
-        if: steps.build.outputs.contains-code-coverage == 'true'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v4       
         with:
           fail_ci_if_error: true
           flags: swift-${{ matrix.swift.version }}-${{ matrix.os }}${{ matrix.swift.nightly && 'nightly' || '' }}
@@ -61,7 +38,6 @@ jobs:
   build-windows:
     name: Build on Windows
     runs-on: ${{ matrix.runs-on }}
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
@@ -73,14 +49,12 @@ jobs:
             build: 6.2-RELEASE
     steps:
       - uses: actions/checkout@v4
-      - uses: brightdigit/swift-build@v1.5.0-beta.2
-        id: build
+      - uses: brightdigit/swift-build@v1.4.1
         with:
           windows-swift-version: ${{ matrix.swift.version }}
           windows-swift-build: ${{ matrix.swift.build }}
       - name: Upload coverage to Codecov
-        if: steps.build.outputs.contains-code-coverage == 'true'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v5    
         with:
           fail_ci_if_error: true
           flags: swift-${{ matrix.swift.version }},windows
@@ -99,7 +73,7 @@ jobs:
         swift:
           - version: "6.1"
           - version: "6.2"
-        android-api-level: [33, 34]
+        android-api-level: [28, 33, 34]
     steps:
       - uses: actions/checkout@v4
       - name: Free disk space
@@ -113,7 +87,7 @@ jobs:
           large-packages: true
           docker-images: true
           swap-storage: true
-      - uses: brightdigit/swift-build@v1.5.0-beta.2
+      - uses: brightdigit/swift-build@v1.4.1
         with:
           scheme: ${{ env.PACKAGE_NAME }}
           type: android
@@ -127,7 +101,7 @@ jobs:
     env:
       PACKAGE_NAME: MistKit
     runs-on: ${{ matrix.runs-on }}
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
     strategy:
       fail-fast: false
       matrix:
@@ -142,7 +116,7 @@ jobs:
 
           # macOS Build Matrix
           - type: macos
-            runs-on: macos-26
+          - runs-on: macos-26
             xcode: "/Applications/Xcode_26.2.app" 
                       
           # iOS Build Matrix
@@ -155,17 +129,9 @@ jobs:
             
           - type: ios
             runs-on: macos-15
-            xcode: "/Applications/Xcode_16.4.app"
-            deviceName: "iPhone 16e"
-            osVersion: "18.5"
-            download-platform: true
-            
-          - type: ios
-            runs-on: macos-15
             xcode: "/Applications/Xcode_16.3.app"
             deviceName: "iPhone 16"
             osVersion: "18.4"
-            download-platform: true
             
   
           # watchOS Build Matrix
@@ -173,31 +139,27 @@ jobs:
             runs-on: macos-26
             xcode: "/Applications/Xcode_26.2.app"
             deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "26.0"
-            download-platform: true
+            osVersion: "26.2"
 
           # tvOS Build Matrix
           - type: tvos
             runs-on: macos-26
             xcode: "/Applications/Xcode_26.2.app"
             deviceName: "Apple TV"
-            osVersion: "26.0"
-            download-platform: true
+            osVersion: "26.2"
 
           # visionOS Build Matrix              
           - type: visionos
             runs-on: macos-26
             xcode: "/Applications/Xcode_26.2.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.0"
-            download-platform: true
+            osVersion: "26.2"
   
     steps:
       - uses: actions/checkout@v4
 
       - name: Build and Test
-        id: build
-        uses: brightdigit/swift-build@v1.5.0-beta.2
+        uses: brightdigit/swift-build@v1.4.1
         with:
           scheme: ${{ env.PACKAGE_NAME }}
           type: ${{ matrix.type }}
@@ -205,14 +167,12 @@ jobs:
           deviceName: ${{ matrix.deviceName }}
           osVersion: ${{ matrix.osVersion }}
           download-platform: ${{ matrix.download-platform }}
-
+          
       # Common Coverage Steps
       - name: Process Coverage
-        if: steps.build.outputs.contains-code-coverage == 'true'
         uses: sersoft-gmbh/swift-coverage-action@v4
-
+  
       - name: Upload Coverage
-        if: steps.build.outputs.contains-code-coverage == 'true'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -220,8 +180,8 @@ jobs:
 
   lint:
     name: Linting
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     needs: [build-ubuntu, build-macos, build-windows, build-android]
     env:
       MINT_PATH: .mint/lib
