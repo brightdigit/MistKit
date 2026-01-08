@@ -185,7 +185,7 @@ Run with `--verbose` to see educational explanations of what's happening:
 
 ```bash
 export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
-export CLOUDKIT_KEY_FILE="./path/to/private-key.pem"
+export CLOUDKIT_PRIVATE_KEY_PATH="./path/to/private-key.pem"
 
 # Optional: Enable VirtualBuddy TSS signing status
 export VIRTUALBUDDY_API_KEY="YOUR_VIRTUALBUDDY_API_KEY"
@@ -275,7 +275,7 @@ bushel-cloud sync --no-betas  # Exclude beta/RC releases
 
 # Use environment variables (recommended)
 export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
-export CLOUDKIT_KEY_FILE="./path/to/private-key.pem"
+export CLOUDKIT_PRIVATE_KEY_PATH="./path/to/private-key.pem"
 bushel-cloud sync --verbose
 ```
 
@@ -485,7 +485,7 @@ bushel-cloud sync \
 ```bash
 # Add to your ~/.zshrc or ~/.bashrc
 export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
-export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
+export CLOUDKIT_PRIVATE_KEY_PATH="$HOME/.cloudkit/bushel-private-key.pem"
 
 # Optional: VirtualBuddy TSS signing status (get from https://tss.virtualbuddy.app/)
 export VIRTUALBUDDY_API_KEY="YOUR_VIRTUALBUDDY_API_KEY"
@@ -668,8 +668,8 @@ The `export` command queries existing records from your CloudKit database and ex
 **❌ "Private key file not found"**
 ```bash
 ✅ Solution: Check that your .pem file path is correct
-export CLOUDKIT_KEY_FILE="$HOME/.cloudkit/bushel-private-key.pem"
-ls -la "$CLOUDKIT_KEY_FILE"  # Verify file exists
+export CLOUDKIT_PRIVATE_KEY_PATH="$HOME/.cloudkit/bushel-private-key.pem"
+ls -la "$CLOUDKIT_PRIVATE_KEY_PATH"  # Verify file exists
 ```
 
 **❌ "Authentication failed" or "Invalid signature"**
