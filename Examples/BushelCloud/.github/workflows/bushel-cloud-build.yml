@@ -1,0 +1,86 @@
+name: Build bushel-cloud Binary
+
+on:
+  # Build on code changes to main branch
+  push:
+    branches:
+      - main
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+  # Build on PRs for validation
+  pull_request:
+
+# Prevent concurrent builds
+# Why cancel-in-progress?
+# - Newer code changes supersede older builds
+# - Saves CI minutes by canceling outdated builds
+# - Each branch gets independent builds via ${{ github.ref }}
+concurrency:
+  group: bushel-cloud-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build bushel-cloud
+    runs-on: ubuntu-latest
+    container: swift:6.2-noble
+    timeout-minutes: 20
+
+    permissions:
+      contents: read  # Read repository code
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Swift version
+        run: |
+          swift --version
+          swift package --version
+
+      - name: Build bushel-cloud executable
+        id: build
+        run: |
+          swift build -c release --static-swift-stdlib
+          BIN_PATH=$(swift build -c release --static-swift-stdlib --show-bin-path)
+          echo "bin-path=$BIN_PATH" >> $GITHUB_OUTPUT
+          echo "Binary location: $BIN_PATH/bushel-cloud"
+          ls -lh "$BIN_PATH/bushel-cloud"
+
+      - name: Prepare binary for upload
+        id: prepare
+        run: |
+          # Create a clean directory for the artifact
+          mkdir -p artifact
+
+          # Copy binary to artifact directory
+          cp "${{ steps.build.outputs.bin-path }}/bushel-cloud" artifact/
+
+          # Create build metadata
+          cat > artifact/build-metadata.json <<EOF
+          {
+            "commit_sha": "${{ github.sha }}",
+            "commit_ref": "${{ github.ref }}",
+            "build_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workflow_run_id": "${{ github.run_id }}",
+            "workflow_run_number": "${{ github.run_number }}"
+          }
+          EOF
+
+          # Show what we're uploading
+          ls -lh artifact/
+          cat artifact/build-metadata.json
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bushel-cloud-binary
+          path: artifact/
+          # Why 90 days?
+          # - Free repos get 90 days maximum retention
+          # - Provides 3x safety margin for 3x daily syncs
+          # - Fallback build handles expiration gracefully
+          retention-days: 90
+          if-no-files-found: error
