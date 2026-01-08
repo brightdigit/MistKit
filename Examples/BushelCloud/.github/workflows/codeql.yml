@@ -73,7 +73,7 @@ jobs:
     # Update Package.swift to use remote MistKit branch
     - name: Update Package.swift to use remote MistKit branch
       run: |
-        sed -i 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "main")|g' Package.swift
+        sed -i '' 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "main")|g' Package.swift
         rm -f Package.resolved
 
     # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
