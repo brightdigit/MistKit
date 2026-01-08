@@ -47,7 +47,6 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     if: "!contains(github.event.head_commit.message, 'ci skip')"
     strategy:
-      fail-fast: false
       matrix:
         runs-on: [windows-2022, windows-2025]
         swift:
@@ -55,7 +54,11 @@ jobs:
             build: 6.3-DEVELOPMENT-SNAPSHOT-2025-12-21-a
     steps:
       - uses: actions/checkout@v4
-      - uses: brightdigit/swift-build@v1.4.2
+      - name: Update Package.swift to use remote MistKit branch
+        run: |
+          sed -i 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "main")|g' Package.swift
+          rm -f Package.resolved
+      - uses: brightdigit/swift-build@v1.4.2          
         with:
           windows-swift-version: ${{ matrix.swift.version }}
           windows-swift-build: ${{ matrix.swift.build }}
