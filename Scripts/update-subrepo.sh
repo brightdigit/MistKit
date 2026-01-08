@@ -36,6 +36,15 @@ echo ""
 echo "📥 Pulling latest from remote..."
 git subrepo pull "$SUBREPO_PATH" --branch="$CURRENT_BRANCH"
 
+# Handle local MistKit dependencies (for BushelCloud and CelestraCloud)
+echo ""
+echo "🔄 Checking for local MistKit dependencies..."
+if grep -q '\.package(name: "MistKit", path:' "$SUBREPO_PATH/Package.swift"; then
+    echo "✓ Found local MistKit dependency - preserving for local development"
+else
+    echo "✓ No local MistKit dependency found"
+fi
+
 # Resolve dependencies
 echo ""
 echo "📦 Resolving Swift package dependencies..."
