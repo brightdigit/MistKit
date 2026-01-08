@@ -1,5 +1,5 @@
 {
-  "originHash" : "bbd640282f58ad4bccefff3c996439a09c057833d73d19833ba3f89ad42d634b",
+  "originHash" : "c3ac1cf77d89f143a19ef295fe93dc532ed8453816f62104a1d89923205611da",
   "pins" : [
     {
       "identity" : "bushelkit",
@@ -44,15 +44,6 @@
       "state" : {
         "revision" : "0d91406ecd4d6c1c56275866f00508d9aeacc92a",
         "version" : "1.2.0"
-      }
-    },
-    {
-      "identity" : "mistkit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/brightdigit/MistKit.git",
-      "state" : {
-        "revision" : "cb27cef097314c78cf4e126aebb0efb8def56537",
-        "version" : "1.0.0-alpha.3"
       }
     },
     {
