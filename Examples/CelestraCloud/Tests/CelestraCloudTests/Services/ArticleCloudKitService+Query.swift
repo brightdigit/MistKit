@@ -114,14 +114,12 @@ extension ArticleCloudKitService {
       let mock = MockCloudKitRecordOperator()
       let service = CelestraCloudKit.ArticleCloudKitService(recordOperator: mock)
 
-      // Mock returns 2 articles: one matching feed, one not
+      // Now that issue #192 is fixed, feedRecordName filter is applied at query time.
+      // Mock returns only the matching article (CloudKit would filter server-side).
       let matchingFields = createArticleRecordFields(guid: "guid-1")
-      let nonMatchingFields = createArticleRecordFields(guid: "guid-2")
-        .merging(["feedRecordName": .string("other-feed")]) { _, new in new }
 
       mock.queryRecordsResult = .success([
-        createMockRecordInfo(recordName: "article-1", fields: matchingFields),
-        createMockRecordInfo(recordName: "article-2", fields: nonMatchingFields)
+        createMockRecordInfo(recordName: "article-1", fields: matchingFields)
       ])
 
       let result = try await service.queryArticlesByGUIDs(
@@ -129,12 +127,12 @@ extension ArticleCloudKitService {
         feedRecordName: "feed-123"
       )
 
-      // Verify CloudKit query behavior
+      // Verify CloudKit query combines filters
       #expect(mock.queryCalls.count == 1)
-      // Should have 1 filter (GUID only), feedRecordName filtered in-memory
-      #expect(mock.queryCalls[0].filters?.count == 1)
+      // Should have 2 filters: IN for GUID + EQUALS for feedRecordName
+      #expect(mock.queryCalls[0].filters?.count == 2)
 
-      // Verify in-memory filtering works
+      // Verify filtering at query time works correctly
       #expect(result.count == 1)  // Only matching article returned
       #expect(result[0].guid == "guid-1")
       #expect(result[0].feedRecordName == "feed-123")
