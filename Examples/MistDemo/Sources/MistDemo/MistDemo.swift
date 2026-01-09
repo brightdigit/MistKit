@@ -56,7 +56,31 @@ struct MistDemo: AsyncParsableCommand {
 
     @Option(name: .long, help: "CloudKit environment (development or production)")
     var environment: String = "development"
-    
+
+    @Flag(name: .long, help: "Test lookupZones operation")
+    var testLookupZones: Bool = false
+
+    @Option(name: .long, help: "Comma-separated zone names to lookup")
+    var zoneNames: String?
+
+    @Flag(name: .long, help: "Test fetchRecordChanges operation")
+    var testFetchChanges: Bool = false
+
+    @Option(name: .long, help: "Sync token from previous fetch")
+    var syncToken: String?
+
+    @Flag(name: .long, help: "Fetch all changes automatically (pagination)")
+    var fetchAll: Bool = false
+
+    @Flag(name: .long, help: "Test uploadAssets operation")
+    var testUploadAsset: Bool = false
+
+    @Option(name: .long, help: "Path to file to upload")
+    var file: String?
+
+    @Option(name: .long, help: "Create record of this type with uploaded asset")
+    var createRecord: String?
+
     func run() async throws {
         // Get API token from environment variable if not provided
         let resolvedApiToken = apiToken.isEmpty ? 
@@ -78,7 +102,13 @@ struct MistDemo: AsyncParsableCommand {
         // Use the resolved API token for all operations
         let effectiveApiToken = resolvedApiToken
         
-        if testAllAuth {
+        if testLookupZones {
+            try await demonstrateLookupZones(apiToken: effectiveApiToken)
+        } else if testFetchChanges {
+            try await demonstrateFetchChanges(apiToken: effectiveApiToken)
+        } else if testUploadAsset {
+            try await demonstrateUploadAsset(apiToken: effectiveApiToken)
+        } else if testAllAuth {
             try await testAllAuthenticationMethods(apiToken: effectiveApiToken)
         } else if testApiOnly {
             try await testAPIOnlyAuthentication(apiToken: effectiveApiToken)
@@ -641,5 +671,230 @@ struct MistDemo: AsyncParsableCommand {
             print("             --key-id 'your_key_id' \\")
             print("             --private-key-file 'path/to/private_key.pem'")
         }
+    }
+
+    // MARK: - New Operation Demonstrations
+
+    private func demonstrateLookupZones(apiToken: String) async throws {
+        print("\n" + String(repeating: "=", count: 60))
+        print("🔍 Testing lookupZones() Operation")
+        print(String(repeating: "=", count: 60))
+
+        let tokenManager = APITokenManager(apiToken: apiToken)
+        let service = try CloudKitService(
+            containerIdentifier: containerIdentifier,
+            tokenManager: tokenManager,
+            environment: environment == "production" ? .production : .development,
+            database: .public
+        )
+
+        let zoneNamesList = self.zoneNames?.split(separator: ",").map(String.init) ?? ["_defaultZone"]
+        let zoneIDs = zoneNamesList.map { ZoneID(zoneName: $0, ownerName: nil) }
+
+        print("\n📋 Looking up \(zoneIDs.count) zone(s):")
+        for zoneName in zoneNamesList {
+            print("   - \(zoneName)")
+        }
+
+        do {
+            let zones = try await service.lookupZones(zoneIDs: zoneIDs)
+            print("\n✅ Found \(zones.count) zone(s):")
+            for zone in zones {
+                print("   - \(zone.zoneName)")
+                if let owner = zone.ownerRecordName {
+                    print("     Owner: \(owner)")
+                }
+                if !zone.capabilities.isEmpty {
+                    print("     Capabilities: \(zone.capabilities.joined(separator: ", "))")
+                }
+            }
+        } catch {
+            print("\n❌ Error: \(error)")
+        }
+
+        print("\n" + String(repeating: "=", count: 60))
+        print("✅ lookupZones test completed!")
+        print(String(repeating: "=", count: 60))
+    }
+
+    private func demonstrateFetchChanges(apiToken: String) async throws {
+        print("\n" + String(repeating: "=", count: 60))
+        print("🔄 Testing fetchRecordChanges() Operation")
+        print(String(repeating: "=", count: 60))
+
+        let tokenManager = APITokenManager(apiToken: apiToken)
+        let service = try CloudKitService(
+            containerIdentifier: containerIdentifier,
+            tokenManager: tokenManager,
+            environment: environment == "production" ? .production : .development,
+            database: .public
+        )
+
+        do {
+            if fetchAll {
+                print("\n📦 Fetching all changes (automatic pagination)...")
+                if let token = syncToken {
+                    print("   Using sync token: \(token.prefix(20))...")
+                } else {
+                    print("   Performing initial fetch (no sync token)")
+                }
+
+                let (records, newToken) = try await service.fetchAllRecordChanges(
+                    syncToken: syncToken
+                )
+                print("\n✅ Fetched \(records.count) record(s)")
+                displayRecords(records, limit: 5)
+                if let token = newToken {
+                    print("\n💾 New sync token: \(token.prefix(20))...")
+                    print("   Save this token to fetch only new changes next time:")
+                    print("   mistdemo --test-fetch-changes --sync-token '\(token)'")
+                }
+            } else {
+                print("\n📄 Fetching single page...")
+                if let token = syncToken {
+                    print("   Using sync token: \(token.prefix(20))...")
+                } else {
+                    print("   Performing initial fetch (no sync token)")
+                }
+
+                let result = try await service.fetchRecordChanges(
+                    syncToken: syncToken,
+                    resultsLimit: 10
+                )
+                print("\n✅ Fetched \(result.records.count) record(s)")
+                displayRecords(result.records, limit: 5)
+
+                if result.moreComing {
+                    print("\n⚠️  More changes available! Use --sync-token with:")
+                    if let token = result.syncToken {
+                        print("   mistdemo --test-fetch-changes --sync-token '\(token)'")
+                    }
+                }
+
+                if let token = result.syncToken {
+                    print("\n💾 Sync token: \(token.prefix(20))...")
+                }
+            }
+        } catch {
+            print("\n❌ Error: \(error)")
+        }
+
+        print("\n" + String(repeating: "=", count: 60))
+        print("✅ fetchRecordChanges test completed!")
+        print(String(repeating: "=", count: 60))
+    }
+
+    private func displayRecords(_ records: [RecordInfo], limit: Int) {
+        let displayed = records.prefix(limit)
+        for record in displayed {
+            print("   📝 \(record.recordType) - \(record.recordName)")
+            if !record.fields.isEmpty {
+                print("      Fields: \(record.fields.keys.joined(separator: ", "))")
+            }
+        }
+        if records.count > limit {
+            print("   ... and \(records.count - limit) more")
+        }
+    }
+
+    private func demonstrateUploadAsset(apiToken: String) async throws {
+        print("\n" + String(repeating: "=", count: 60))
+        print("📤 Testing uploadAssets() Operation")
+        print(String(repeating: "=", count: 60))
+
+        guard let filePath = file else {
+            print("\n❌ Error: --file required")
+            print("   Usage: mistdemo --test-upload-asset --file path/to/file.png")
+            return
+        }
+
+        let fileURL = URL(fileURLWithPath: filePath)
+
+        guard FileManager.default.fileExists(atPath: filePath) else {
+            print("\n❌ Error: File not found at path: \(filePath)")
+            return
+        }
+
+        let tokenManager = APITokenManager(apiToken: apiToken)
+        let service = try CloudKitService(
+            containerIdentifier: containerIdentifier,
+            tokenManager: tokenManager,
+            environment: environment == "production" ? .production : .development,
+            database: .public
+        )
+
+        do {
+            let data = try Data(contentsOf: fileURL)
+            let sizeInMB = Double(data.count) / 1024 / 1024
+            print("\n📁 File: \(fileURL.lastPathComponent) (\(String(format: "%.2f", sizeInMB)) MB)")
+
+            print("⬆️  Uploading...")
+            let result = try await service.uploadAssets(data: data)
+
+            print("\n✅ Upload successful!")
+            print("🎫 Received \(result.tokens.count) token(s):")
+            for (index, token) in result.tokens.enumerated() {
+                print("   Token \(index + 1):")
+                if let url = token.url {
+                    print("      URL: \(url.prefix(50))...")
+                }
+                if let recordName = token.recordName {
+                    print("      Record: \(recordName)")
+                }
+                if let fieldName = token.fieldName {
+                    print("      Field: \(fieldName)")
+                }
+            }
+
+            // Optional: Create record with asset
+            if let recordType = createRecord, let token = result.tokens.first {
+                print("\n📝 Creating \(recordType) record with asset...")
+                try await createRecordWithAsset(
+                    service: service,
+                    recordType: recordType,
+                    filename: fileURL.lastPathComponent,
+                    token: token,
+                    fileSize: data.count
+                )
+            }
+
+        } catch let error as CloudKitError {
+            print("\n❌ CloudKit Error: \(error)")
+        } catch {
+            print("\n❌ Error: \(error)")
+        }
+
+        print("\n" + String(repeating: "=", count: 60))
+        print("✅ uploadAssets test completed!")
+        print(String(repeating: "=", count: 60))
+    }
+
+    private func createRecordWithAsset(
+        service: CloudKitService,
+        recordType: String,
+        filename: String,
+        token: AssetUploadToken,
+        fileSize: Int
+    ) async throws {
+        let asset = FieldValue.Asset(
+            fileChecksum: nil,
+            size: Int64(fileSize),
+            referenceChecksum: nil,
+            wrappingKey: nil,
+            receipt: nil,
+            downloadURL: token.url
+        )
+
+        let record = try await service.createRecord(
+            recordType: recordType,
+            fields: [
+                "filename": .string(filename),
+                "file": .asset(asset)
+            ]
+        )
+
+        print("   ✅ Created record: \(record.recordName)")
+        print("   📝 Type: \(record.recordType)")
+        print("   🆔 Record ID: \(record.recordName)")
     }
 }

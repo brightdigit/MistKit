@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 import OpenAPIRuntime
 
 #if !os(WASI)
@@ -150,5 +150,116 @@ extension CloudKitService {
     )
 
     _ = try await modifyRecords([operation])
+  }
+
+  /// Upload binary asset data to CloudKit
+  ///
+  /// Uploads binary data (images, files, etc.) to CloudKit and returns tokens
+  /// that can be used to associate the assets with record fields.
+  ///
+  /// This is a two-step process:
+  /// 1. Upload the binary data using this method to get tokens
+  /// 2. Create/update a record with the tokens in asset fields
+  ///
+  /// - Parameter data: The binary data to upload
+  /// - Returns: AssetUploadResult containing tokens for record association
+  /// - Throws: CloudKitError if the upload fails
+  ///
+  /// Example - Upload and Associate:
+  /// ```swift
+  /// // Step 1: Upload the asset
+  /// let imageData = try Data(contentsOf: imageURL)
+  /// let uploadResult = try await service.uploadAssets(data: imageData)
+  ///
+  /// guard let token = uploadResult.tokens.first else {
+  ///   throw CloudKitError.invalidResponse
+  /// }
+  ///
+  /// // Step 2: Create a record with the asset
+  /// let asset = FieldValue.Asset(
+  ///   fileChecksum: nil,
+  ///   size: Int64(imageData.count),
+  ///   referenceChecksum: nil,
+  ///   wrappingKey: nil,
+  ///   receipt: nil,
+  ///   downloadURL: token.url
+  /// )
+  ///
+  /// let record = try await service.createRecord(
+  ///   recordType: "Photo",
+  ///   fields: [
+  ///     "image": .asset(asset),
+  ///     "title": .string("My Photo")
+  ///   ]
+  /// )
+  /// ```
+  ///
+  /// - Note: The uploaded data must be associated with a record field within
+  ///         a reasonable time frame, or CloudKit may garbage collect it.
+  /// - Warning: Maximum upload size is 250 MB per asset
+  public func uploadAssets(data: Data) async throws(CloudKitError) -> AssetUploadResult {
+    // Validate data size (CloudKit limit is 250 MB)
+    let maxSize: Int = 250 * 1024 * 1024 // 250 MB
+    guard data.count <= maxSize else {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 413,
+        rawResponse: "Asset size \(data.count) exceeds maximum of \(maxSize) bytes"
+      )
+    }
+
+    guard !data.isEmpty else {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 400,
+        rawResponse: "Asset data cannot be empty"
+      )
+    }
+
+    do {
+      // Create multipart body
+      let filePayload = Operations.uploadAssets.Input.Body.multipartFormPayload.filePayload(
+        body: OpenAPIRuntime.HTTPBody(data)
+      )
+      let filePart = OpenAPIRuntime.MultipartPart(
+        payload: filePayload,
+        filename: nil
+      )
+      let multipartParts: [Operations.uploadAssets.Input.Body.multipartFormPayload] = [
+        .file(filePart)
+      ]
+      let multipartBody = OpenAPIRuntime.MultipartBody(multipartParts)
+
+      let response = try await client.uploadAssets(
+        path: createUploadAssetsPath(containerIdentifier: containerIdentifier),
+        body: .multipartForm(multipartBody)
+      )
+
+      let uploadData: Components.Schemas.AssetUploadResponse =
+        try await responseProcessor.processUploadAssetsResponse(response)
+
+      return AssetUploadResult(from: uploadData)
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "JSON decoding failed in uploadAssets: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error in uploadAssets: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
+      MistKitLogger.logError(
+        "Unexpected error in uploadAssets: \(error)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.underlyingError(error)
+    }
   }
 }
