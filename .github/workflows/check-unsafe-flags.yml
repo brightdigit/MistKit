@@ -16,7 +16,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install jq
+        run: |
+          apt-get update && apt-get install -y jq
+
       - name: Dump package JSON and check for unsafeFlags
+        shell: bash
         run: |
           set -euo pipefail
           # Compute unsafeFlags array directly from the dump (don't store the full dump variable)
