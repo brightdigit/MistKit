@@ -22,7 +22,9 @@ jobs:
         type: ["", "wasm", "wasm-embedded"]
     steps:
       - uses: actions/checkout@v4
-      - uses: brightdigit/swift-build@v1.4.1
+      - uses: brightdigit/swift-build@1.5.0-beta.1
+        with:
+          type: ${{ matrix.type }}
       - uses: sersoft-gmbh/swift-coverage-action@v4
         id: coverage-files
         with:          
