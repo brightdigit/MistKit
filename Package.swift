@@ -7,7 +7,8 @@ import PackageDescription
 
 // MARK: - Swift Settings Configuration
 
-let swiftSettings: [SwiftSetting] = [
+// Base Swift settings for all platforms
+let baseSwiftSettings: [SwiftSetting] = [
   // Swift 6.2 Upcoming Features (not yet enabled by default)
   // SE-0335: Introduce existential `any`
   .enableUpcomingFeature("ExistentialAny"),
@@ -77,6 +78,24 @@ let swiftSettings: [SwiftSetting] = [
   // ])
 ]
 
+// WASM-specific settings for WASI emulation
+// These flags enable CoreFoundation support on WASM by providing emulated signal and mman support
+// The .when(platforms:) conditional ensures these only apply when building for WASM
+let swiftSettings: [SwiftSetting] = baseSwiftSettings + [
+  .unsafeFlags([
+    "-Xcc", "-D_WASI_EMULATED_SIGNAL",
+    "-Xcc", "-D_WASI_EMULATED_MMAN",
+  ], .when(platforms: [.wasi]))
+]
+
+let linkerSettings: [LinkerSetting] = [
+  .unsafeFlags([
+    "-Xlinker", "-lwasi-emulated-signal",
+    "-Xlinker", "-lwasi-emulated-mman",
+    "-Xlinker", "-lwasi-emulated-getpid",
+  ], .when(platforms: [.wasi]))
+]
+
 let package = Package(
   name: "MistKit",
   platforms: [
@@ -85,6 +104,8 @@ let package = Package(
     .tvOS(.v13),       // Minimum for swift-crypto
     .watchOS(.v6),     // Minimum for swift-crypto
     .visionOS(.v1)     // Vision OS already requires newer versions
+    // Note: WASM/WASI support doesn't require explicit platform declaration
+    // Use --swift-sdk wasm32-unknown-wasi when building for WASM
   ],
   products: [
     // Products define the executables and libraries a package produces,
@@ -110,11 +131,17 @@ let package = Package(
       name: "MistKit",
       dependencies: [
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-        .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+        // URLSession transport only available on non-WASM platforms
+        .product(
+          name: "OpenAPIURLSession",
+          package: "swift-openapi-urlsession",
+          condition: .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .visionOS, .linux, .windows])
+        ),
         .product(name: "Crypto", package: "swift-crypto"),
         .product(name: "Logging", package: "swift-log"),
       ],
-      swiftSettings: swiftSettings
+      swiftSettings: swiftSettings,
+      linkerSettings: linkerSettings
     ),
     .testTarget(
       name: "MistKitTests",

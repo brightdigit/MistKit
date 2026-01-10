@@ -31,7 +31,9 @@ import Crypto
 import Foundation
 import HTTPTypes
 public import OpenAPIRuntime
+#if !os(WASI)
 import OpenAPIURLSession
+#endif
 
 /// A client for interacting with CloudKit Web Services
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -132,6 +134,7 @@ internal struct MistKitClient {
 
   // MARK: - Convenience Initializers
 
+  #if !os(WASI)
   /// Initialize a new MistKit client with default URLSessionTransport
   /// - Parameter configuration: The CloudKit configuration including container,
   ///   environment, and authentication
@@ -163,6 +166,7 @@ internal struct MistKitClient {
       transport: URLSessionTransport()
     )
   }
+  #endif
 
   // MARK: - Server-to-Server Validation
 

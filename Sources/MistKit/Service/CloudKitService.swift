@@ -29,7 +29,9 @@
 
 import Foundation
 import OpenAPIRuntime
+#if !os(WASI)
 import OpenAPIURLSession
+#endif
 
 /// Service for interacting with CloudKit Web Services
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
