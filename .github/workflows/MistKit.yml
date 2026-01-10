@@ -19,7 +19,7 @@ jobs:
           - version: "6.2"
           - version: "6.3"
             nightly: true
-    
+        type: ["", "wasm", "wasm-embedded"]
     steps:
       - uses: actions/checkout@v4
       - uses: brightdigit/swift-build@v1.4.1
