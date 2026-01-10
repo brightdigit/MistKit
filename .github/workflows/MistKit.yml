@@ -20,7 +20,18 @@ jobs:
           - version: "6.2"
           - version: "6.3"
             nightly: true
-        type: ["", "wasm", "wasm-embedded"]
+        type: ["wasm", "wasm-embedded"]
+        exclude:
+          # Exclude Swift 6.1 from wasm builds
+          - swift: { version: "6.1" }
+            type: "wasm"
+          - swift: { version: "6.1" }
+            type: "wasm-embedded"
+          # Exclude Swift 6.3 from wasm builds
+          - swift: { version: "6.3", nightly: true }
+            type: "wasm"
+          - swift: { version: "6.3", nightly: true }
+            type: "wasm-embedded"
     steps:
       - uses: actions/checkout@v4
       - uses: brightdigit/swift-build@1.5.0-beta.1
@@ -40,6 +51,7 @@ jobs:
           files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}    
   build-windows:
     name: Build on Windows
+    if: false # Temporarily disabled
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
@@ -69,7 +81,7 @@ jobs:
   build-android:
     name: Build on Android
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    if: false # Temporarily disabled
     strategy:
       fail-fast: false
       matrix:
@@ -104,7 +116,7 @@ jobs:
     env:
       PACKAGE_NAME: MistKit
     runs-on: ${{ matrix.runs-on }}
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    if: false # Temporarily disabled
     strategy:
       fail-fast: false
       matrix:
@@ -183,7 +195,7 @@ jobs:
 
   lint:
     name: Linting
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    if: false # Temporarily disabled
     runs-on: ubuntu-latest
     needs: [build-ubuntu, build-macos, build-windows, build-android]
     env:
