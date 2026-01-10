@@ -44,11 +44,8 @@ struct CloudKitServiceQueryTests {
       return
     }
     // This test verifies that the default limit configuration is respected
-    // In a real integration test, we would mock the HTTP client and verify the request
-    let service = try CloudKitService(
-      containerIdentifier: "iCloud.com.example.test",
-      apiToken: "test-token"
-    )
+    // Using MockTransport to avoid actual network calls
+    let service = try makeSuccessfulService()
 
     // Verify service was created successfully
     #expect(service.containerIdentifier == "iCloud.com.example.test")
@@ -62,10 +59,7 @@ struct CloudKitServiceQueryTests {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! CloudKitService(
-      containerIdentifier: "iCloud.com.example.test",
-      apiToken: "test-token"
-    )
+    let service = try! makeValidationErrorService(.emptyRecordType)
 
     do {
       _ = try await service.queryRecords(recordType: "")
@@ -89,10 +83,7 @@ struct CloudKitServiceQueryTests {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! CloudKitService(
-      containerIdentifier: "iCloud.com.example.test",
-      apiToken: "test-token"
-    )
+    let service = try! makeValidationErrorService(.limitTooSmall(limit))
 
     do {
       _ = try await service.queryRecords(recordType: "Article", limit: limit)
@@ -115,10 +106,7 @@ struct CloudKitServiceQueryTests {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! CloudKitService(
-      containerIdentifier: "iCloud.com.example.test",
-      apiToken: "test-token"
-    )
+    let service = try! makeValidationErrorService(.limitTooLarge(limit))
 
     do {
       _ = try await service.queryRecords(recordType: "Article", limit: limit)
@@ -141,10 +129,7 @@ struct CloudKitServiceQueryTests {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! CloudKitService(
-      containerIdentifier: "iCloud.com.example.test",
-      apiToken: "test-token"
-    )
+    let service = try! makeSuccessfulService()
 
     // This test verifies validation passes - actual API call will fail without real credentials
     // but we're testing that validation doesn't throw
@@ -262,10 +247,7 @@ struct CloudKitServiceQueryTests {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! CloudKitService(
-      containerIdentifier: "iCloud.com.example.test",
-      apiToken: "test-token"
-    )
+    let service = try! makeSuccessfulService()
 
     // With nil limit, should use defaultQueryLimit (100)
     // This test verifies the parameter handling - actual call will fail without auth
@@ -287,10 +269,7 @@ struct CloudKitServiceQueryTests {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! CloudKitService(
-      containerIdentifier: "iCloud.com.example.test",
-      apiToken: "test-token"
-    )
+    let service = try! makeSuccessfulService()
 
     do {
       _ = try await service.queryRecords(
@@ -314,10 +293,7 @@ struct CloudKitServiceQueryTests {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! CloudKitService(
-      containerIdentifier: "iCloud.com.example.test",
-      apiToken: "test-token"
-    )
+    let service = try! makeSuccessfulService()
 
     do {
       _ = try await service.queryRecords(
@@ -333,5 +309,47 @@ struct CloudKitServiceQueryTests {
     } catch {
       // Other errors expected
     }
+  }
+
+  // MARK: - Test Helpers
+
+  /// Create service for validation error testing
+  private func makeValidationErrorService(
+    _ errorType: ValidationErrorType
+  ) throws -> CloudKitService {
+    let transport = MockTransport(
+      responseProvider: .validationError(errorType)
+    )
+    return try CloudKitService(
+      containerIdentifier: "iCloud.com.example.test",
+      apiToken: "test-token",
+      transport: transport
+    )
+  }
+
+  /// Create service for successful operations
+  private func makeSuccessfulService(
+    records: [String: Any] = [:]
+  ) throws -> CloudKitService {
+    let transport = MockTransport(
+      responseProvider: .successfulQuery(records: records)
+    )
+    return try CloudKitService(
+      containerIdentifier: "iCloud.com.example.test",
+      apiToken: "test-token",
+      transport: transport
+    )
+  }
+
+  /// Create service for auth errors
+  private func makeAuthErrorService() throws -> CloudKitService {
+    let transport = MockTransport(
+      responseProvider: .authenticationError()
+    )
+    return try CloudKitService(
+      containerIdentifier: "iCloud.com.example.test",
+      apiToken: "test-token",
+      transport: transport
+    )
   }
 }
