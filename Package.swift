@@ -7,6 +7,20 @@ import PackageDescription
 
 // MARK: - Swift Settings Configuration
 
+extension Platform {
+  static let all : [Platform] = [
+    .macOS, .iOS, .tvOS, .watchOS, .visionOS, .linux, .windows, android, .driverKit, .wasi
+  ]
+  
+  static func without(_ platform: Platform) -> [Platform] {
+    var result = all
+    result.removeAll{
+    $0 == platform
+    }
+    return result
+  }
+}
+
 // Base Swift settings for all platforms
 let baseSwiftSettings: [SwiftSetting] = [
   // Swift 6.2 Upcoming Features (not yet enabled by default)
@@ -135,7 +149,7 @@ let package = Package(
         .product(
           name: "OpenAPIURLSession",
           package: "swift-openapi-urlsession",
-          condition: .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .visionOS, .linux, .windows])
+          condition: .when(platforms: Platform.without(Platform.wasi))
         ),
         .product(name: "Crypto", package: "swift-crypto"),
         .product(name: "Logging", package: "swift-log"),
