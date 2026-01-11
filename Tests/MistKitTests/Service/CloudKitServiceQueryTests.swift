@@ -314,6 +314,7 @@ struct CloudKitServiceQueryTests {
   // MARK: - Test Helpers
 
   /// Create service for validation error testing
+  @available(iOS 14.0, *)
   private func makeValidationErrorService(
     _ errorType: ValidationErrorType
   ) throws -> CloudKitService {
@@ -328,6 +329,7 @@ struct CloudKitServiceQueryTests {
   }
 
   /// Create service for successful operations
+  @available(iOS 14.0, *)
   private func makeSuccessfulService(
     records: [String: Any] = [:]
   ) throws -> CloudKitService {
@@ -342,6 +344,7 @@ struct CloudKitServiceQueryTests {
   }
 
   /// Create service for auth errors
+  @available(iOS 14.0, *)
   private func makeAuthErrorService() throws -> CloudKitService {
     let transport = MockTransport(
       responseProvider: .authenticationError()
