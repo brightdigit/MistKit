@@ -5,9 +5,9 @@ packages:
   MistKit:
     path: .
   Bushel:
-    path: Examples/Bushel
+    path: Examples/BushelCloud
   Celestra:
-    path: Examples/Celestra
+    path: Examples/CelestraCloud
 aggregateTargets:
   Lint:
     buildScripts:
