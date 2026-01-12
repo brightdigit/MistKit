@@ -29,8 +29,9 @@
 
 import Foundation
 public import OpenAPIRuntime
+
 #if !os(WASI)
-public import OpenAPIURLSession
+  public import OpenAPIURLSession
 #endif
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -59,20 +60,20 @@ extension CloudKitService {
   }
 
   #if !os(WASI)
-  /// Initialize CloudKit service with web authentication using default URLSessionTransport
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  public init(
-    containerIdentifier: String,
-    apiToken: String,
-    webAuthToken: String
-  ) throws {
-    try self.init(
-      containerIdentifier: containerIdentifier,
-      apiToken: apiToken,
-      webAuthToken: webAuthToken,
-      transport: URLSessionTransport()
-    )
-  }
+    /// Initialize CloudKit service with web authentication using default URLSessionTransport
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    public init(
+      containerIdentifier: String,
+      apiToken: String,
+      webAuthToken: String
+    ) throws {
+      try self.init(
+        containerIdentifier: containerIdentifier,
+        apiToken: apiToken,
+        webAuthToken: webAuthToken,
+        transport: URLSessionTransport()
+      )
+    }
   #endif
 
   /// Initialize CloudKit service with API-only authentication
@@ -100,18 +101,18 @@ extension CloudKitService {
   }
 
   #if !os(WASI)
-  /// Initialize CloudKit service with API-only authentication using default URLSessionTransport
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  public init(
-    containerIdentifier: String,
-    apiToken: String
-  ) throws {
-    try self.init(
-      containerIdentifier: containerIdentifier,
-      apiToken: apiToken,
-      transport: URLSessionTransport()
-    )
-  }
+    /// Initialize CloudKit service with API-only authentication using default URLSessionTransport
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    public init(
+      containerIdentifier: String,
+      apiToken: String
+    ) throws {
+      try self.init(
+        containerIdentifier: containerIdentifier,
+        apiToken: apiToken,
+        transport: URLSessionTransport()
+      )
+    }
   #endif
 
   /// Initialize CloudKit service with a custom TokenManager
@@ -138,21 +139,21 @@ extension CloudKitService {
   }
 
   #if !os(WASI)
-  /// Initialize CloudKit service with a custom TokenManager using default URLSessionTransport
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  public init(
-    containerIdentifier: String,
-    tokenManager: any TokenManager,
-    environment: Environment = .development,
-    database: Database = .private
-  ) throws {
-    try self.init(
-      containerIdentifier: containerIdentifier,
-      tokenManager: tokenManager,
-      environment: environment,
-      database: database,
-      transport: URLSessionTransport()
-    )
-  }
+    /// Initialize CloudKit service with a custom TokenManager using default URLSessionTransport
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    public init(
+      containerIdentifier: String,
+      tokenManager: any TokenManager,
+      environment: Environment = .development,
+      database: Database = .private
+    ) throws {
+      try self.init(
+        containerIdentifier: containerIdentifier,
+        tokenManager: tokenManager,
+        environment: environment,
+        database: database,
+        transport: URLSessionTransport()
+      )
+    }
   #endif
 }

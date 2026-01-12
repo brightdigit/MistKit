@@ -31,8 +31,9 @@ import Crypto
 import Foundation
 import HTTPTypes
 public import OpenAPIRuntime
+
 #if !os(WASI)
-import OpenAPIURLSession
+  import OpenAPIURLSession
 #endif
 
 /// A client for interacting with CloudKit Web Services
@@ -135,37 +136,37 @@ internal struct MistKitClient {
   // MARK: - Convenience Initializers
 
   #if !os(WASI)
-  /// Initialize a new MistKit client with default URLSessionTransport
-  /// - Parameter configuration: The CloudKit configuration including container,
-  ///   environment, and authentication
-  /// - Throws: ClientError if initialization fails
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal init(configuration: MistKitConfiguration) throws {
-    try self.init(configuration: configuration, transport: URLSessionTransport())
-  }
+    /// Initialize a new MistKit client with default URLSessionTransport
+    /// - Parameter configuration: The CloudKit configuration including container,
+    ///   environment, and authentication
+    /// - Throws: ClientError if initialization fails
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    internal init(configuration: MistKitConfiguration) throws {
+      try self.init(configuration: configuration, transport: URLSessionTransport())
+    }
 
-  /// Initialize a new MistKit client with a custom TokenManager and individual parameters
-  /// using default URLSessionTransport
-  /// - Parameters:
-  ///   - container: CloudKit container identifier
-  ///   - environment: CloudKit environment (development/production)
-  ///   - database: CloudKit database (public/private/shared)
-  ///   - tokenManager: Custom token manager for authentication
-  /// - Throws: ClientError if initialization fails
-  internal init(
-    container: String,
-    environment: Environment,
-    database: Database,
-    tokenManager: any TokenManager
-  ) throws {
-    try self.init(
-      container: container,
-      environment: environment,
-      database: database,
-      tokenManager: tokenManager,
-      transport: URLSessionTransport()
-    )
-  }
+    /// Initialize a new MistKit client with a custom TokenManager and individual parameters
+    /// using default URLSessionTransport
+    /// - Parameters:
+    ///   - container: CloudKit container identifier
+    ///   - environment: CloudKit environment (development/production)
+    ///   - database: CloudKit database (public/private/shared)
+    ///   - tokenManager: Custom token manager for authentication
+    /// - Throws: ClientError if initialization fails
+    internal init(
+      container: String,
+      environment: Environment,
+      database: Database,
+      tokenManager: any TokenManager
+    ) throws {
+      try self.init(
+        container: container,
+        environment: environment,
+        database: database,
+        tokenManager: tokenManager,
+        transport: URLSessionTransport()
+      )
+    }
   #endif
 
   // MARK: - Server-to-Server Validation

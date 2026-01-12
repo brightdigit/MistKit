@@ -85,11 +85,12 @@ actor ResponseProvider {
       headerFields: config.headers
     )
 
-    let body: HTTPBody? = if let data = config.body {
-      HTTPBody(data)
-    } else {
-      nil
-    }
+    let body: HTTPBody? =
+      if let data = config.body {
+        HTTPBody(data)
+      } else {
+        nil
+      }
 
     return (response, body)
   }
@@ -154,15 +155,16 @@ struct ResponseConfig: Sendable {
 
   /// HTTP error with status code
   static func httpError(statusCode: Int, message: String? = nil) -> ResponseConfig {
-    let body: Data? = if let msg = message {
-      """
-      {
-        "error": "\(msg)"
+    let body: Data? =
+      if let msg = message {
+        """
+        {
+          "error": "\(msg)"
+        }
+        """.data(using: .utf8)
+      } else {
+        nil
       }
-      """.data(using: .utf8)
-    } else {
-      nil
-    }
 
     var headers = HTTPFields()
     if body != nil {

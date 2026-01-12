@@ -29,8 +29,9 @@
 
 import Foundation
 import OpenAPIRuntime
+
 #if !os(WASI)
-import OpenAPIURLSession
+  import OpenAPIURLSession
 #endif
 
 /// Service for interacting with CloudKit Web Services

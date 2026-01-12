@@ -8,10 +8,10 @@ import PackageDescription
 // MARK: - Swift Settings Configuration
 
 extension Platform {
-  static let all : [Platform] = [
+  static let all: [Platform] = [
     .macOS, .iOS, .tvOS, .watchOS, .visionOS, .linux, .windows, android, .driverKit, .wasi
   ]
-  
+
   static func without(_ platform: Platform) -> [Platform] {
     var result = all
     result.removeAll{
