@@ -157,6 +157,7 @@ jobs:
             xcode: "/Applications/Xcode_16.3.app"
             deviceName: "iPhone 16"
             osVersion: "18.4"
+            download-platform: true
             
   
           # watchOS Build Matrix
