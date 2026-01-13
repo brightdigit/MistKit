@@ -73,7 +73,7 @@ if [ -z "$FORMAT_ONLY" ]; then
 	run_command swift build --build-tests
 fi
 
-$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "MistKit" -y 2025
+$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "MistKit"
 
 # Generated files now automatically include ignore directives via OpenAPI generator configuration
 
