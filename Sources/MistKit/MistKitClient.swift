@@ -30,7 +30,7 @@
 import Crypto
 import Foundation
 import HTTPTypes
-public import OpenAPIRuntime
+import OpenAPIRuntime
 
 #if !os(WASI)
   import OpenAPIURLSession

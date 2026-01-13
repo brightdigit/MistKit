@@ -6,7 +6,7 @@ import Testing
 @Suite("QuerySort Tests", .enabled(if: Platform.isCryptoAvailable))
 internal struct QuerySortTests {
   @Test("QuerySort creates ascending sort")
-  func ascendingSort() {
+  internal func ascendingSort() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QuerySort is not available on this operating system.")
       return
@@ -18,7 +18,7 @@ internal struct QuerySortTests {
   }
 
   @Test("QuerySort creates descending sort")
-  func descendingSort() {
+  internal func descendingSort() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QuerySort is not available on this operating system.")
       return
@@ -30,7 +30,7 @@ internal struct QuerySortTests {
   }
 
   @Test("QuerySort creates sort with explicit ascending direction")
-  func sortExplicitAscending() {
+  internal func sortExplicitAscending() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QuerySort is not available on this operating system.")
       return
@@ -42,7 +42,7 @@ internal struct QuerySortTests {
   }
 
   @Test("QuerySort creates sort with explicit descending direction")
-  func sortExplicitDescending() {
+  internal func sortExplicitDescending() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QuerySort is not available on this operating system.")
       return
@@ -54,7 +54,7 @@ internal struct QuerySortTests {
   }
 
   @Test("QuerySort defaults to ascending when using sort method")
-  func sortDefaultsToAscending() {
+  internal func sortDefaultsToAscending() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QuerySort is not available on this operating system.")
       return
@@ -66,7 +66,7 @@ internal struct QuerySortTests {
   }
 
   @Test("QuerySort handles field names with underscores")
-  func sortFieldWithUnderscores() {
+  internal func sortFieldWithUnderscores() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QuerySort is not available on this operating system.")
       return
@@ -77,7 +77,7 @@ internal struct QuerySortTests {
   }
 
   @Test("QuerySort handles field names with numbers")
-  func sortFieldWithNumbers() {
+  internal func sortFieldWithNumbers() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QuerySort is not available on this operating system.")
       return
@@ -88,7 +88,7 @@ internal struct QuerySortTests {
   }
 
   @Test("QuerySort handles camelCase field names")
-  func sortCamelCaseField() {
+  internal func sortCamelCaseField() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QuerySort is not available on this operating system.")
       return

@@ -8,7 +8,7 @@ internal struct QueryFilterTests {
   // MARK: - Equality Filters
 
   @Test("QueryFilter creates equals filter")
-  func equalsFilter() {
+  internal func equalsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -20,7 +20,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates notEquals filter")
-  func notEqualsFilter() {
+  internal func notEqualsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -34,7 +34,7 @@ internal struct QueryFilterTests {
   // MARK: - Comparison Filters
 
   @Test("QueryFilter creates lessThan filter")
-  func lessThanFilter() {
+  internal func lessThanFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -46,7 +46,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates lessThanOrEquals filter")
-  func lessThanOrEqualsFilter() {
+  internal func lessThanOrEqualsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -58,7 +58,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates greaterThan filter")
-  func greaterThanFilter() {
+  internal func greaterThanFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -71,7 +71,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates greaterThanOrEquals filter")
-  func greaterThanOrEqualsFilter() {
+  internal func greaterThanOrEqualsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -85,7 +85,7 @@ internal struct QueryFilterTests {
   // MARK: - String Filters
 
   @Test("QueryFilter creates beginsWith filter")
-  func beginsWithFilter() {
+  internal func beginsWithFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -97,7 +97,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates notBeginsWith filter")
-  func notBeginsWithFilter() {
+  internal func notBeginsWithFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -109,7 +109,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates containsAllTokens filter")
-  func containsAllTokensFilter() {
+  internal func containsAllTokensFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -123,7 +123,7 @@ internal struct QueryFilterTests {
   // MARK: - List Filters
 
   @Test("QueryFilter creates in filter with strings")
-  func inFilterStrings() {
+  internal func inFilterStrings() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -136,7 +136,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates notIn filter with numbers")
-  func notInFilterNumbers() {
+  internal func notInFilterNumbers() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -149,7 +149,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates in filter with empty array")
-  func inFilterEmptyArray() {
+  internal func inFilterEmptyArray() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -164,7 +164,7 @@ internal struct QueryFilterTests {
   // MARK: - List Member Filters
 
   @Test("QueryFilter creates listContains filter")
-  func listContainsFilter() {
+  internal func listContainsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -176,7 +176,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates notListContains filter")
-  func notListContainsFilter() {
+  internal func notListContainsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -188,7 +188,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates listMemberBeginsWith filter")
-  func listMemberBeginsWithFilter() {
+  internal func listMemberBeginsWithFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -200,7 +200,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter creates notListMemberBeginsWith filter")
-  func notListMemberBeginsWithFilter() {
+  internal func notListMemberBeginsWithFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -214,7 +214,7 @@ internal struct QueryFilterTests {
   // MARK: - Complex Field Types
 
   @Test("QueryFilter handles boolean field values")
-  func booleanFieldValue() {
+  internal func booleanFieldValue() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -227,7 +227,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter handles reference field values")
-  func referenceFieldValue() {
+  internal func referenceFieldValue() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -240,7 +240,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter handles date comparisons")
-  func dateComparison() {
+  internal func dateComparison() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -253,7 +253,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter handles double comparisons")
-  func doubleComparison() {
+  internal func doubleComparison() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -267,7 +267,7 @@ internal struct QueryFilterTests {
   // MARK: - Edge Cases
 
   @Test("QueryFilter handles empty string")
-  func emptyStringFilter() {
+  internal func emptyStringFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -278,7 +278,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter handles special characters in field names")
-  func specialCharactersInFieldName() {
+  internal func specialCharactersInFieldName() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -289,7 +289,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter handles zero values")
-  func zeroValues() {
+  internal func zeroValues() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -304,7 +304,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter handles negative values")
-  func negativeValues() {
+  internal func negativeValues() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return
@@ -315,7 +315,7 @@ internal struct QueryFilterTests {
   }
 
   @Test("QueryFilter handles large numbers")
-  func largeNumbers() {
+  internal func largeNumbers() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("QueryFilter is not available on this operating system.")
       return

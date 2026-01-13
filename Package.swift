@@ -7,22 +7,8 @@ import PackageDescription
 
 // MARK: - Swift Settings Configuration
 
-extension Platform {
-  static let all: [Platform] = [
-    .macOS, .iOS, .tvOS, .watchOS, .visionOS, .linux, .windows, android, .driverKit, .wasi
-  ]
-
-  static func without(_ platform: Platform) -> [Platform] {
-    var result = all
-    result.removeAll{
-    $0 == platform
-    }
-    return result
-  }
-}
-
 // Base Swift settings for all platforms
-let baseSwiftSettings: [SwiftSetting] = [
+let swiftSettings: [SwiftSetting] = [
   // Swift 6.2 Upcoming Features (not yet enabled by default)
   // SE-0335: Introduce existential `any`
   .enableUpcomingFeature("ExistentialAny"),
@@ -92,24 +78,6 @@ let baseSwiftSettings: [SwiftSetting] = [
   // ])
 ]
 
-// WASM-specific settings for WASI emulation
-// These flags enable CoreFoundation support on WASM by providing emulated signal and mman support
-// The .when(platforms:) conditional ensures these only apply when building for WASM
-let swiftSettings: [SwiftSetting] = baseSwiftSettings + [
-  .unsafeFlags([
-    "-Xcc", "-D_WASI_EMULATED_SIGNAL",
-    "-Xcc", "-D_WASI_EMULATED_MMAN",
-  ], .when(platforms: [.wasi]))
-]
-
-let linkerSettings: [LinkerSetting] = [
-  .unsafeFlags([
-    "-Xlinker", "-lwasi-emulated-signal",
-    "-Xlinker", "-lwasi-emulated-mman",
-    "-Xlinker", "-lwasi-emulated-getpid",
-  ], .when(platforms: [.wasi]))
-]
-
 let package = Package(
   name: "MistKit",
   platforms: [
@@ -154,8 +122,7 @@ let package = Package(
         .product(name: "Crypto", package: "swift-crypto"),
         .product(name: "Logging", package: "swift-log"),
       ],
-      swiftSettings: swiftSettings,
-      linkerSettings: linkerSettings
+      swiftSettings: swiftSettings
     ),
     .testTarget(
       name: "MistKitTests",
@@ -164,4 +131,19 @@ let package = Package(
     ),
   ]
 )
+
+extension Platform {
+  static let all: [Platform] = [
+    .macOS, .iOS, .tvOS, .watchOS, .visionOS, .linux, .windows, android, .driverKit, .wasi
+  ]
+
+  static func without(_ platform: Platform) -> [Platform] {
+    var result = all
+    result.removeAll{
+    $0 == platform
+    }
+    return result
+  }
+}
+
 // swiftlint:enable explicit_acl explicit_top_level_acl

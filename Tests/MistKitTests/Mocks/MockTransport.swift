@@ -32,14 +32,14 @@ import HTTPTypes
 import OpenAPIRuntime
 
 /// Mock transport for testing that doesn't make actual network calls
-struct MockTransport: ClientTransport, Sendable {
-  let responseProvider: ResponseProvider
+internal struct MockTransport: ClientTransport, Sendable {
+  internal let responseProvider: ResponseProvider
 
-  init(responseProvider: ResponseProvider = .default) {
+  internal init(responseProvider: ResponseProvider = .default) {
     self.responseProvider = responseProvider
   }
 
-  func send(
+  internal func send(
     _ request: HTTPRequest,
     body: HTTPBody?,
     baseURL: URL,
@@ -50,11 +50,32 @@ struct MockTransport: ClientTransport, Sendable {
 }
 
 /// Thread-safe provider for configuring mock responses
-actor ResponseProvider {
-  private var responses: [String: ResponseConfig]
-  private var defaultResponse: ResponseConfig
+internal actor ResponseProvider {
+  // MARK: - Factory Methods
 
-  init(
+  /// Default successful response
+  internal static var `default`: ResponseProvider {
+    ResponseProvider(defaultResponse: .success())
+  }
+
+  /// Response provider for validation errors
+  internal static func validationError(_ type: ValidationErrorType) -> ResponseProvider {
+    ResponseProvider(defaultResponse: .validationError(type))
+  }
+
+  /// Response provider for authentication errors
+  internal static func authenticationError() -> ResponseProvider {
+    ResponseProvider(defaultResponse: .authenticationError())
+  }
+
+  /// Response provider for successful query operations
+  internal static func successfulQuery(records: [String: Any] = [:]) -> ResponseProvider {
+    ResponseProvider(defaultResponse: .successfulQuery(records: records))
+  }
+
+  // MARK: - Lifecycle
+
+  internal init(
     responses: [String: ResponseConfig] = [:],
     defaultResponse: ResponseConfig = .success()
   ) {
@@ -62,15 +83,20 @@ actor ResponseProvider {
     self.defaultResponse = defaultResponse
   }
 
-  func configure(operationID: String, response: ResponseConfig) {
+  // MARK: - Internal
+
+  private var responses: [String: ResponseConfig]
+  private var defaultResponse: ResponseConfig
+
+  internal func configure(operationID: String, response: ResponseConfig) {
     responses[operationID] = response
   }
 
-  func configureDefault(response: ResponseConfig) {
+  internal func configureDefault(response: ResponseConfig) {
     defaultResponse = response
   }
 
-  func response(
+  internal func response(
     for operationID: String,
     request: HTTPRequest
   ) throws -> (HTTPResponse, HTTPBody?) {
@@ -94,38 +120,16 @@ actor ResponseProvider {
 
     return (response, body)
   }
-
-  // MARK: - Factory Methods
-
-  /// Default successful response
-  static var `default`: ResponseProvider {
-    ResponseProvider(defaultResponse: .success())
-  }
-
-  /// Response provider for validation errors
-  static func validationError(_ type: ValidationErrorType) -> ResponseProvider {
-    ResponseProvider(defaultResponse: .validationError(type))
-  }
-
-  /// Response provider for authentication errors
-  static func authenticationError() -> ResponseProvider {
-    ResponseProvider(defaultResponse: .authenticationError())
-  }
-
-  /// Response provider for successful query operations
-  static func successfulQuery(records: [String: Any] = [:]) -> ResponseProvider {
-    ResponseProvider(defaultResponse: .successfulQuery(records: records))
-  }
 }
 
 /// Configuration for a mock HTTP response
-struct ResponseConfig: Sendable {
-  let statusCode: Int
-  let headers: HTTPFields
-  let body: Data?
-  let error: (any Error)?
+internal struct ResponseConfig: Sendable {
+  internal let statusCode: Int
+  internal let headers: HTTPFields
+  internal let body: Data?
+  internal let error: (any Error)?
 
-  init(
+  internal init(
     statusCode: Int,
     headers: HTTPFields = HTTPFields(),
     body: Data? = nil,
@@ -140,7 +144,7 @@ struct ResponseConfig: Sendable {
   // MARK: - Factory Methods
 
   /// Successful response (200 OK)
-  static func success(body: Data? = nil) -> ResponseConfig {
+  internal static func success(body: Data? = nil) -> ResponseConfig {
     var headers = HTTPFields()
     if body != nil {
       headers[.contentType] = "application/json"
@@ -154,7 +158,7 @@ struct ResponseConfig: Sendable {
   }
 
   /// HTTP error with status code
-  static func httpError(statusCode: Int, message: String? = nil) -> ResponseConfig {
+  internal static func httpError(statusCode: Int, message: String? = nil) -> ResponseConfig {
     let body: Data? =
       if let msg = message {
         """
@@ -181,7 +185,7 @@ struct ResponseConfig: Sendable {
 }
 
 /// Types of validation errors that can occur
-enum ValidationErrorType: Sendable {
+internal enum ValidationErrorType: Sendable {
   case emptyRecordType
   case limitTooSmall(Int)
   case limitTooLarge(Int)
@@ -198,7 +202,7 @@ extension ResponseConfig {
   ///   - reason: Human-readable error reason
   ///   - uuid: Optional UUID for the error (generated if not provided)
   /// - Returns: ResponseConfig with CloudKit-formatted error JSON
-  static func cloudKitError(
+  internal static func cloudKitError(
     statusCode: Int,
     serverErrorCode: String = "BAD_REQUEST",
     reason: String,
@@ -227,7 +231,7 @@ extension ResponseConfig {
   ///
   /// - Parameter type: The type of validation error
   /// - Returns: ResponseConfig with appropriate validation error message
-  static func validationError(_ type: ValidationErrorType) -> ResponseConfig {
+  internal static func validationError(_ type: ValidationErrorType) -> ResponseConfig {
     let reason: String
     switch type {
     case .emptyRecordType:
@@ -248,7 +252,7 @@ extension ResponseConfig {
   /// Creates an authentication error response (401 Unauthorized)
   ///
   /// - Returns: ResponseConfig with authentication error
-  static func authenticationError() -> ResponseConfig {
+  internal static func authenticationError() -> ResponseConfig {
     cloudKitError(
       statusCode: 401,
       serverErrorCode: "AUTHENTICATION_FAILED",
@@ -260,7 +264,7 @@ extension ResponseConfig {
   ///
   /// - Parameter records: Dictionary of record data to include in the response
   /// - Returns: ResponseConfig with successful query response
-  static func successfulQuery(records: [String: Any] = [:]) -> ResponseConfig {
+  internal static func successfulQuery(records: [String: Any] = [:]) -> ResponseConfig {
     // Simple empty records response for now
     // Can be expanded later to support actual record data
     let responseJSON = """

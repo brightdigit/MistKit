@@ -8,7 +8,7 @@ internal struct FieldValueConversionTests {
   // MARK: - Basic Type Conversions
 
   @Test("Convert string FieldValue to Components.FieldValue")
-  func convertString() {
+  internal func convertString() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -25,7 +25,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert int64 FieldValue to Components.FieldValue")
-  func convertInt64() {
+  internal func convertInt64() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -42,7 +42,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert double FieldValue to Components.FieldValue")
-  func convertDouble() {
+  internal func convertDouble() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -59,7 +59,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert boolean FieldValue to Components.FieldValue")
-  func convertBoolean() {
+  internal func convertBoolean() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -85,7 +85,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert bytes FieldValue to Components.FieldValue")
-  func convertBytes() {
+  internal func convertBytes() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -102,7 +102,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert date FieldValue to Components.FieldValue")
-  func convertDate() {
+  internal func convertDate() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -122,7 +122,7 @@ internal struct FieldValueConversionTests {
   // MARK: - Complex Type Conversions
 
   @Test("Convert location FieldValue to Components.FieldValue")
-  func convertLocation() {
+  internal func convertLocation() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -156,7 +156,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert location with minimal fields to Components.FieldValue")
-  func convertMinimalLocation() {
+  internal func convertMinimalLocation() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -181,7 +181,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert reference FieldValue without action to Components.FieldValue")
-  func convertReferenceWithoutAction() {
+  internal func convertReferenceWithoutAction() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -200,7 +200,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert reference FieldValue with DELETE_SELF action to Components.FieldValue")
-  func convertReferenceWithDeleteSelfAction() {
+  internal func convertReferenceWithDeleteSelfAction() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -219,7 +219,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert reference FieldValue with NONE action to Components.FieldValue")
-  func convertReferenceWithNoneAction() {
+  internal func convertReferenceWithNoneAction() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -239,7 +239,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert asset FieldValue with all fields to Components.FieldValue")
-  func convertAssetWithAllFields() {
+  internal func convertAssetWithAllFields() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -269,7 +269,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert asset FieldValue with minimal fields to Components.FieldValue")
-  func convertAssetWithMinimalFields() {
+  internal func convertAssetWithMinimalFields() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -294,7 +294,7 @@ internal struct FieldValueConversionTests {
   // MARK: - List Conversions
 
   @Test("Convert list FieldValue with strings to Components.FieldValue")
-  func convertListWithStrings() {
+  internal func convertListWithStrings() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -312,7 +312,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert list FieldValue with numbers to Components.FieldValue")
-  func convertListWithNumbers() {
+  internal func convertListWithNumbers() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -330,7 +330,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert list FieldValue with mixed types to Components.FieldValue")
-  func convertListWithMixedTypes() {
+  internal func convertListWithMixedTypes() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -353,7 +353,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert empty list FieldValue to Components.FieldValue")
-  func convertEmptyList() {
+  internal func convertEmptyList() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -371,7 +371,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert nested list FieldValue to Components.FieldValue")
-  func convertNestedList() {
+  internal func convertNestedList() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -392,7 +392,7 @@ internal struct FieldValueConversionTests {
   // MARK: - Edge Cases
 
   @Test("Convert zero values")
-  func convertZeroValues() {
+  internal func convertZeroValues() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -407,7 +407,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert negative values")
-  func convertNegativeValues() {
+  internal func convertNegativeValues() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -422,7 +422,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert large numbers")
-  func convertLargeNumbers() {
+  internal func convertLargeNumbers() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -437,7 +437,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert empty string")
-  func convertEmptyString() {
+  internal func convertEmptyString() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return
@@ -448,7 +448,7 @@ internal struct FieldValueConversionTests {
   }
 
   @Test("Convert string with special characters")
-  func convertStringWithSpecialCharacters() {
+  internal func convertStringWithSpecialCharacters() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FieldValue is not available on this operating system.")
       return

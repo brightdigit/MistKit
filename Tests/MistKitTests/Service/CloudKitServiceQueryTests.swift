@@ -38,7 +38,7 @@ struct CloudKitServiceQueryTests {
   // MARK: - Configuration Tests
 
   @Test("queryRecords() uses default limit from configuration")
-  func queryRecordsUsesDefaultLimit() async throws {
+  internal func queryRecordsUsesDefaultLimit() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
@@ -54,12 +54,12 @@ struct CloudKitServiceQueryTests {
   // MARK: - Validation Tests
 
   @Test("queryRecords() validates empty recordType")
-  func queryRecordsValidatesEmptyRecordType() async {
+  internal func queryRecordsValidatesEmptyRecordType() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! makeValidationErrorService(.emptyRecordType)
+    let service = try makeValidationErrorService(.emptyRecordType)
 
     do {
       _ = try await service.queryRecords(recordType: "")
@@ -78,80 +78,74 @@ struct CloudKitServiceQueryTests {
   }
 
   @Test("queryRecords() validates limit too small", arguments: [-1, 0])
-  func queryRecordsValidatesLimitTooSmall(limit: Int) async {
+  internal func queryRecordsValidatesLimitTooSmall(limit: Int) async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! makeValidationErrorService(.limitTooSmall(limit))
+    let service = try makeValidationErrorService(.limitTooSmall(limit))
 
     do {
       _ = try await service.queryRecords(recordType: "Article", limit: limit)
       Issue.record("Expected error for limit \(limit)")
-    } catch let error as CloudKitError {
+    } catch {
       if case .httpErrorWithRawResponse(let statusCode, let response) = error {
         #expect(statusCode == 400)
         #expect(response.contains("limit must be between 1 and 200"))
       } else {
         Issue.record("Expected httpErrorWithRawResponse error")
       }
-    } catch {
-      Issue.record("Expected CloudKitError")
     }
   }
 
   @Test("queryRecords() validates limit too large", arguments: [201, 300, 1_000])
-  func queryRecordsValidatesLimitTooLarge(limit: Int) async {
+  internal func queryRecordsValidatesLimitTooLarge(limit: Int) async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! makeValidationErrorService(.limitTooLarge(limit))
+    let service = try makeValidationErrorService(.limitTooLarge(limit))
 
     do {
       _ = try await service.queryRecords(recordType: "Article", limit: limit)
       Issue.record("Expected error for limit \(limit)")
-    } catch let error as CloudKitError {
+    } catch {
       if case .httpErrorWithRawResponse(let statusCode, let response) = error {
         #expect(statusCode == 400)
         #expect(response.contains("limit must be between 1 and 200"))
       } else {
         Issue.record("Expected httpErrorWithRawResponse error")
       }
-    } catch {
-      Issue.record("Expected CloudKitError")
     }
   }
 
   @Test("queryRecords() accepts valid limit range", arguments: [1, 50, 100, 200])
-  func queryRecordsAcceptsValidLimitRange(limit: Int) async {
+  internal func queryRecordsAcceptsValidLimitRange(limit: Int) async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! makeSuccessfulService()
+    let service = try makeSuccessfulService()
 
     // This test verifies validation passes - actual API call will fail without real credentials
     // but we're testing that validation doesn't throw
     do {
       _ = try await service.queryRecords(recordType: "Article", limit: limit)
       Issue.record("Expected network error since we don't have real credentials")
-    } catch let error as CloudKitError {
+    } catch {
       // We expect a network/auth error, not a validation error
       // Validation errors have status code 400
       if case .httpErrorWithRawResponse(let statusCode, _) = error {
         #expect(statusCode != 400, "Validation should not fail for limit \(limit)")
       }
       // Other CloudKit errors are expected (auth, network, etc.)
-    } catch {
-      // Network errors are expected
     }
   }
 
   // MARK: - Filter Conversion Tests
 
   @Test("QueryFilter converts to Components.Schemas format correctly")
-  func queryFilterConvertsToComponentsFormat() {
+  internal func queryFilterConvertsToComponentsFormat() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
@@ -172,7 +166,7 @@ struct CloudKitServiceQueryTests {
   }
 
   @Test("QueryFilter handles all field value types")
-  func queryFilterHandlesAllFieldValueTypes() {
+  internal func queryFilterHandlesAllFieldValueTypes() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
@@ -197,7 +191,7 @@ struct CloudKitServiceQueryTests {
   // MARK: - Sort Conversion Tests
 
   @Test("QuerySort converts to Components.Schemas format correctly")
-  func querySortConvertsToComponentsFormat() {
+  internal func querySortConvertsToComponentsFormat() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
@@ -218,7 +212,7 @@ struct CloudKitServiceQueryTests {
   }
 
   @Test("QuerySort handles various field name formats")
-  func querySortHandlesVariousFieldNameFormats() {
+  internal func querySortHandlesVariousFieldNameFormats() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
@@ -242,34 +236,32 @@ struct CloudKitServiceQueryTests {
   // MARK: - Edge Cases
 
   @Test("queryRecords() handles nil limit parameter")
-  func queryRecordsHandlesNilLimitParameter() async {
+  internal func queryRecordsHandlesNilLimitParameter() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! makeSuccessfulService()
+    let service = try makeSuccessfulService()
 
     // With nil limit, should use defaultQueryLimit (100)
     // This test verifies the parameter handling - actual call will fail without auth
     do {
       _ = try await service.queryRecords(recordType: "Article", limit: nil as Int?)
-    } catch let error as CloudKitError {
+    } catch {
       // Validation should pass (no 400 error)
       if case .httpErrorWithRawResponse(let statusCode, _) = error {
         #expect(statusCode != 400, "Should not fail validation with nil limit")
       }
-    } catch {
-      // Other errors are expected
     }
   }
 
   @Test("queryRecords() handles empty filters array")
-  func queryRecordsHandlesEmptyFiltersArray() async {
+  internal func queryRecordsHandlesEmptyFiltersArray() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! makeSuccessfulService()
+    let service = try makeSuccessfulService()
 
     do {
       _ = try await service.queryRecords(
@@ -277,23 +269,21 @@ struct CloudKitServiceQueryTests {
         filters: [],
         limit: 10
       )
-    } catch let error as CloudKitError {
+    } catch {
       // Should not fail validation
       if case .httpErrorWithRawResponse(let statusCode, _) = error {
         #expect(statusCode != 400, "Should not fail validation with empty filters")
       }
-    } catch {
-      // Other errors expected
     }
   }
 
   @Test("queryRecords() handles empty sorts array")
-  func queryRecordsHandlesEmptySortsArray() async {
+  internal func queryRecordsHandlesEmptySortsArray() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("CloudKitService is not available on this operating system.")
       return
     }
-    let service = try! makeSuccessfulService()
+    let service = try makeSuccessfulService()
 
     do {
       _ = try await service.queryRecords(
@@ -301,13 +291,11 @@ struct CloudKitServiceQueryTests {
         sortBy: [],
         limit: 10
       )
-    } catch let error as CloudKitError {
+    } catch {
       // Should not fail validation
       if case .httpErrorWithRawResponse(let statusCode, _) = error {
         #expect(statusCode != 400, "Should not fail validation with empty sorts")
       }
-    } catch {
-      // Other errors expected
     }
   }
 

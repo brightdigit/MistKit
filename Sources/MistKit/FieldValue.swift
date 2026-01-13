@@ -31,8 +31,6 @@ public import Foundation
 
 /// Represents a CloudKit field value as defined in the CloudKit Web Services API
 public enum FieldValue: Codable, Equatable, Sendable {
-  /// Conversion factor from seconds to milliseconds for CloudKit timestamps
-  private static let millisecondsPerSecond: Double = 1_000
   case string(String)
   case int64(Int)
   case double(Double)
@@ -42,6 +40,9 @@ public enum FieldValue: Codable, Equatable, Sendable {
   case reference(Reference)
   case asset(Asset)
   case list([FieldValue])
+
+  /// Conversion factor from seconds to milliseconds for CloudKit timestamps
+  private static let millisecondsPerSecond: Double = 1_000
 
   /// Location dictionary as defined in CloudKit Web Services
   public struct Location: Codable, Equatable, Sendable {
