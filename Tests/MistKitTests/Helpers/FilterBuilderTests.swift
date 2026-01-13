@@ -8,7 +8,7 @@ internal struct FilterBuilderTests {
   // MARK: - Equality Filters
 
   @Test("FilterBuilder creates EQUALS filter")
-  func equalsFilter() {
+  internal func equalsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -20,7 +20,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates NOT_EQUALS filter")
-  func notEqualsFilter() {
+  internal func notEqualsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -34,7 +34,7 @@ internal struct FilterBuilderTests {
   // MARK: - Comparison Filters
 
   @Test("FilterBuilder creates LESS_THAN filter")
-  func lessThanFilter() {
+  internal func lessThanFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -46,7 +46,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates LESS_THAN_OR_EQUALS filter")
-  func lessThanOrEqualsFilter() {
+  internal func lessThanOrEqualsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -58,7 +58,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates GREATER_THAN filter")
-  func greaterThanFilter() {
+  internal func greaterThanFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -71,7 +71,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates GREATER_THAN_OR_EQUALS filter")
-  func greaterThanOrEqualsFilter() {
+  internal func greaterThanOrEqualsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -85,7 +85,7 @@ internal struct FilterBuilderTests {
   // MARK: - String Filters
 
   @Test("FilterBuilder creates BEGINS_WITH filter")
-  func beginsWithFilter() {
+  internal func beginsWithFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -97,7 +97,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates NOT_BEGINS_WITH filter")
-  func notBeginsWithFilter() {
+  internal func notBeginsWithFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -109,7 +109,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates CONTAINS_ALL_TOKENS filter")
-  func containsAllTokensFilter() {
+  internal func containsAllTokensFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -123,7 +123,7 @@ internal struct FilterBuilderTests {
   // MARK: - List Filters
 
   @Test("FilterBuilder creates IN filter")
-  func inFilter() {
+  internal func inFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -136,7 +136,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates NOT_IN filter")
-  func notInFilter() {
+  internal func notInFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -149,7 +149,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates IN filter with numbers")
-  func inFilterWithNumbers() {
+  internal func inFilterWithNumbers() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -164,7 +164,7 @@ internal struct FilterBuilderTests {
   // MARK: - List Member Filters
 
   @Test("FilterBuilder creates LIST_CONTAINS filter")
-  func listContainsFilter() {
+  internal func listContainsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -176,7 +176,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates NOT_LIST_CONTAINS filter")
-  func notListContainsFilter() {
+  internal func notListContainsFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -188,7 +188,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates LIST_MEMBER_BEGINS_WITH filter")
-  func listMemberBeginsWithFilter() {
+  internal func listMemberBeginsWithFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -200,7 +200,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder creates NOT_LIST_MEMBER_BEGINS_WITH filter")
-  func notListMemberBeginsWithFilter() {
+  internal func notListMemberBeginsWithFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -214,7 +214,7 @@ internal struct FilterBuilderTests {
   // MARK: - Complex Value Tests
 
   @Test("FilterBuilder handles boolean values")
-  func booleanValueFilter() {
+  internal func booleanValueFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -225,7 +225,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder handles reference values")
-  func referenceValueFilter() {
+  internal func referenceValueFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return
@@ -238,7 +238,7 @@ internal struct FilterBuilderTests {
   }
 
   @Test("FilterBuilder handles location values")
-  func locationValueFilter() {
+  internal func locationValueFilter() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("FilterBuilder is not available on this operating system.")
       return

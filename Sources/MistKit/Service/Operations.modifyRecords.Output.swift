@@ -28,55 +28,55 @@
 //
 
 extension Operations.modifyRecords.Output: CloudKitResponseType {
-  var badRequestResponse: Components.Responses.BadRequest? {
+  internal var badRequestResponse: Components.Responses.BadRequest? {
     if case .badRequest(let response) = self { return response } else { return nil }
   }
 
-  var unauthorizedResponse: Components.Responses.Unauthorized? {
+  internal var unauthorizedResponse: Components.Responses.Unauthorized? {
     if case .unauthorized(let response) = self { return response } else { return nil }
   }
 
-  var forbiddenResponse: Components.Responses.Forbidden? {
+  internal var forbiddenResponse: Components.Responses.Forbidden? {
     if case .forbidden(let response) = self { return response } else { return nil }
   }
 
-  var notFoundResponse: Components.Responses.NotFound? {
+  internal var notFoundResponse: Components.Responses.NotFound? {
     if case .notFound(let response) = self { return response } else { return nil }
   }
 
-  var conflictResponse: Components.Responses.Conflict? {
+  internal var conflictResponse: Components.Responses.Conflict? {
     if case .conflict(let response) = self { return response } else { return nil }
   }
 
-  var preconditionFailedResponse: Components.Responses.PreconditionFailed? {
+  internal var preconditionFailedResponse: Components.Responses.PreconditionFailed? {
     if case .preconditionFailed(let response) = self { return response } else { return nil }
   }
 
-  var contentTooLargeResponse: Components.Responses.RequestEntityTooLarge? {
+  internal var contentTooLargeResponse: Components.Responses.RequestEntityTooLarge? {
     if case .contentTooLarge(let response) = self { return response } else { return nil }
   }
 
-  var misdirectedRequestResponse: Components.Responses.UnprocessableEntity? {
+  internal var misdirectedRequestResponse: Components.Responses.UnprocessableEntity? {
     if case .misdirectedRequest(let response) = self { return response } else { return nil }
   }
 
-  var tooManyRequestsResponse: Components.Responses.TooManyRequests? {
+  internal var tooManyRequestsResponse: Components.Responses.TooManyRequests? {
     if case .tooManyRequests(let response) = self { return response } else { return nil }
   }
 
-  var internalServerErrorResponse: Components.Responses.InternalServerError? {
+  internal var internalServerErrorResponse: Components.Responses.InternalServerError? {
     if case .internalServerError(let response) = self { return response } else { return nil }
   }
 
-  var serviceUnavailableResponse: Components.Responses.ServiceUnavailable? {
+  internal var serviceUnavailableResponse: Components.Responses.ServiceUnavailable? {
     if case .serviceUnavailable(let response) = self { return response } else { return nil }
   }
 
-  var isOk: Bool {
+  internal var isOk: Bool {
     if case .ok = self { return true } else { return false }
   }
 
-  var undocumentedStatusCode: Int? {
+  internal var undocumentedStatusCode: Int? {
     if case .undocumented(let statusCode, _) = self { return statusCode } else { return nil }
   }
 }
