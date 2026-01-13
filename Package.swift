@@ -7,6 +7,7 @@ import PackageDescription
 
 // MARK: - Swift Settings Configuration
 
+// Base Swift settings for all platforms
 let swiftSettings: [SwiftSetting] = [
   // Swift 6.2 Upcoming Features (not yet enabled by default)
   // SE-0335: Introduce existential `any`
@@ -77,6 +78,8 @@ let package = Package(
     .tvOS(.v13),       // Minimum for swift-crypto
     .watchOS(.v6),     // Minimum for swift-crypto
     .visionOS(.v1)     // Vision OS already requires newer versions
+    // Note: WASM/WASI support doesn't require explicit platform declaration
+    // Use --swift-sdk wasm32-unknown-wasi when building for WASM
   ],
   products: [
     // Products define the executables and libraries a package produces,
@@ -102,7 +105,12 @@ let package = Package(
       name: "MistKit",
       dependencies: [
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-        .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+        // URLSession transport only available on non-WASM platforms
+        .product(
+          name: "OpenAPIURLSession",
+          package: "swift-openapi-urlsession",
+          condition: .when(platforms: Platform.without(Platform.wasi))
+        ),
         .product(name: "Crypto", package: "swift-crypto"),
         .product(name: "Logging", package: "swift-log"),
       ],
@@ -115,4 +123,19 @@ let package = Package(
     ),
   ]
 )
+
+extension Platform {
+  static let all: [Platform] = [
+    .macOS, .iOS, .tvOS, .watchOS, .visionOS, .linux, .windows, android, .driverKit, .wasi
+  ]
+
+  static func without(_ platform: Platform) -> [Platform] {
+    var result = all
+    result.removeAll{
+    $0 == platform
+    }
+    return result
+  }
+}
+
 // swiftlint:enable explicit_acl explicit_top_level_acl

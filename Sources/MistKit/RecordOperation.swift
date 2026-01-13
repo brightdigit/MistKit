@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
 
 /// Represents a CloudKit record operation (create, update, delete, etc.)
 public struct RecordOperation: Sendable {

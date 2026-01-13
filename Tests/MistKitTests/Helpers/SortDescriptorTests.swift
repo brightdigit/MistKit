@@ -6,7 +6,7 @@ import Testing
 @Suite("SortDescriptor Tests", .enabled(if: Platform.isCryptoAvailable))
 internal struct SortDescriptorTests {
   @Test("SortDescriptor creates ascending sort")
-  func ascendingSort() {
+  internal func ascendingSort() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("SortDescriptor is not available on this operating system.")
       return
@@ -17,7 +17,7 @@ internal struct SortDescriptorTests {
   }
 
   @Test("SortDescriptor creates descending sort")
-  func descendingSort() {
+  internal func descendingSort() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("SortDescriptor is not available on this operating system.")
       return
@@ -28,7 +28,7 @@ internal struct SortDescriptorTests {
   }
 
   @Test("SortDescriptor creates sort with ascending true")
-  func sortAscendingTrue() {
+  internal func sortAscendingTrue() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("SortDescriptor is not available on this operating system.")
       return
@@ -39,7 +39,7 @@ internal struct SortDescriptorTests {
   }
 
   @Test("SortDescriptor creates sort with ascending false")
-  func sortAscendingFalse() {
+  internal func sortAscendingFalse() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("SortDescriptor is not available on this operating system.")
       return
@@ -50,7 +50,7 @@ internal struct SortDescriptorTests {
   }
 
   @Test("SortDescriptor defaults to ascending")
-  func sortDefaultAscending() {
+  internal func sortDefaultAscending() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("SortDescriptor is not available on this operating system.")
       return
@@ -61,7 +61,7 @@ internal struct SortDescriptorTests {
   }
 
   @Test("SortDescriptor handles various field name formats")
-  func variousFieldNameFormats() {
+  internal func variousFieldNameFormats() {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       Issue.record("SortDescriptor is not available on this operating system.")
       return

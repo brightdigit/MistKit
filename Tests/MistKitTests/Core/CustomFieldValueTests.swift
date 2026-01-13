@@ -8,7 +8,7 @@ internal struct CustomFieldValueTests {
   // MARK: - Initialization Tests
 
   @Test("CustomFieldValue init with string value and type")
-  func initWithStringValue() {
+  internal func initWithStringValue() {
     let fieldValue = CustomFieldValue(
       value: .stringValue("test"),
       type: .string
@@ -23,7 +23,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with int64 value and type")
-  func initWithInt64Value() {
+  internal func initWithInt64Value() {
     let fieldValue = CustomFieldValue(
       value: .int64Value(42),
       type: .int64
@@ -38,7 +38,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with double value and type")
-  func initWithDoubleValue() {
+  internal func initWithDoubleValue() {
     let fieldValue = CustomFieldValue(
       value: .doubleValue(3.14),
       type: .double
@@ -53,7 +53,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with boolean value and type")
-  func initWithBooleanValue() {
+  internal func initWithBooleanValue() {
     let fieldValue = CustomFieldValue(
       value: .booleanValue(true),
       type: .int64
@@ -68,7 +68,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with date value and type")
-  func initWithDateValue() {
+  internal func initWithDateValue() {
     let timestamp = 1_000_000.0
     let fieldValue = CustomFieldValue(
       value: .dateValue(timestamp),
@@ -84,7 +84,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with bytes value and type")
-  func initWithBytesValue() {
+  internal func initWithBytesValue() {
     let fieldValue = CustomFieldValue(
       value: .bytesValue("base64data"),
       type: .bytes
@@ -99,7 +99,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with reference value and type")
-  func initWithReferenceValue() {
+  internal func initWithReferenceValue() {
     let reference = Components.Schemas.ReferenceValue(
       recordName: "test-record",
       action: .DELETE_SELF
@@ -119,7 +119,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with location value and type")
-  func initWithLocationValue() {
+  internal func initWithLocationValue() {
     let location = Components.Schemas.LocationValue(
       latitude: 37.7749,
       longitude: -122.4194
@@ -139,7 +139,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with asset value and type")
-  func initWithAssetValue() {
+  internal func initWithAssetValue() {
     let asset = Components.Schemas.AssetValue(
       fileChecksum: "checksum123",
       size: 1_024
@@ -159,7 +159,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with asset value and assetid type")
-  func initWithAssetValueAndAssetidType() {
+  internal func initWithAssetValueAndAssetidType() {
     let asset = Components.Schemas.AssetValue(
       fileChecksum: "checksum456",
       size: 2_048
@@ -179,7 +179,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with list value and type")
-  func initWithListValue() {
+  internal func initWithListValue() {
     let list: [CustomFieldValue.CustomFieldValuePayload] = [
       .stringValue("one"),
       .int64Value(2),
@@ -199,7 +199,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with empty list")
-  func initWithEmptyList() {
+  internal func initWithEmptyList() {
     let fieldValue = CustomFieldValue(
       value: .listValue([]),
       type: .list
@@ -214,7 +214,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue init with nil type")
-  func initWithNilType() {
+  internal func initWithNilType() {
     let fieldValue = CustomFieldValue(
       value: .stringValue("test"),
       type: nil
@@ -231,7 +231,7 @@ internal struct CustomFieldValueTests {
   // MARK: - Encoding/Decoding Tests
 
   @Test("CustomFieldValue encodes and decodes string correctly")
-  func encodeDecodeString() throws {
+  internal func encodeDecodeString() throws {
     let original = CustomFieldValue(
       value: .stringValue("test string"),
       type: .string
@@ -249,7 +249,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue encodes and decodes int64 correctly")
-  func encodeDecodeInt64() throws {
+  internal func encodeDecodeInt64() throws {
     let original = CustomFieldValue(
       value: .int64Value(123),
       type: .int64
@@ -267,7 +267,7 @@ internal struct CustomFieldValueTests {
   }
 
   @Test("CustomFieldValue encodes and decodes boolean correctly")
-  func encodeDecodeBoolean() throws {
+  internal func encodeDecodeBoolean() throws {
     let original = CustomFieldValue(
       value: .booleanValue(true),
       type: .int64
