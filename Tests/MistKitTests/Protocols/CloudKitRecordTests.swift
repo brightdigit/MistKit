@@ -36,34 +36,6 @@ import Testing
 internal struct TestRecord: CloudKitRecord {
   static var cloudKitRecordType: String { "TestRecord" }
 
-  var recordName: String
-  var name: String
-  var count: Int
-  var isActive: Bool
-  var score: Double?
-  var lastUpdated: Date?
-
-  // swiftlint:disable:next empty_count
-  var isEmpty: Bool { count == 0 }
-
-  func toCloudKitFields() -> [String: FieldValue] {
-    var fields: [String: FieldValue] = [
-      "name": .string(name),
-      "count": .int64(count),
-      "isActive": FieldValue(booleanValue: isActive),
-    ]
-
-    if let score {
-      fields["score"] = .double(score)
-    }
-
-    if let lastUpdated {
-      fields["lastUpdated"] = .date(lastUpdated)
-    }
-
-    return fields
-  }
-
   static func from(recordInfo: RecordInfo) -> TestRecord? {
     guard
       let name = recordInfo.fields["name"]?.stringValue,
@@ -90,6 +62,34 @@ internal struct TestRecord: CloudKitRecord {
     let name = recordInfo.fields["name"]?.stringValue ?? "Unknown"
     let count = recordInfo.fields["count"]?.intValue ?? 0
     return "  \(recordInfo.recordName): \(name) (count: \(count))"
+  }
+
+  internal var recordName: String
+  internal var name: String
+  internal var count: Int
+  internal var isActive: Bool
+  internal var score: Double?
+  internal var lastUpdated: Date?
+
+  // swiftlint:disable:next empty_count
+  internal var isEmpty: Bool { count == 0 }
+
+  internal func toCloudKitFields() -> [String: FieldValue] {
+    var fields: [String: FieldValue] = [
+      "name": .string(name),
+      "count": .int64(count),
+      "isActive": FieldValue(booleanValue: isActive),
+    ]
+
+    if let score {
+      fields["score"] = .double(score)
+    }
+
+    if let lastUpdated {
+      fields["lastUpdated"] = .date(lastUpdated)
+    }
+
+    return fields
   }
 }
 

@@ -34,24 +34,26 @@ import Testing
 
 /// Mock implementation of RecordManaging for testing
 internal actor MockRecordManagingService: RecordManaging {
-  var queryCallCount = 0
-  var executeCallCount = 0
-  var lastExecutedOperations: [RecordOperation] = []
-  var batchSizes: [Int] = []
-  var recordsToReturn: [RecordInfo] = []
+  internal var queryCallCount = 0
+  internal var executeCallCount = 0
+  internal var lastExecutedOperations: [RecordOperation] = []
+  internal var batchSizes: [Int] = []
+  internal var recordsToReturn: [RecordInfo] = []
 
-  func queryRecords(recordType: String) async throws -> [RecordInfo] {
+  internal func queryRecords(recordType: String) async throws -> [RecordInfo] {
     queryCallCount += 1
     return recordsToReturn
   }
 
-  func executeBatchOperations(_ operations: [RecordOperation], recordType: String) async throws {
+  internal func executeBatchOperations(_ operations: [RecordOperation], recordType: String)
+    async throws
+  {
     executeCallCount += 1
     batchSizes.append(operations.count)
     lastExecutedOperations.append(contentsOf: operations)
   }
 
-  func reset() {
+  internal func reset() {
     queryCallCount = 0
     executeCallCount = 0
     lastExecutedOperations = []
@@ -59,7 +61,7 @@ internal actor MockRecordManagingService: RecordManaging {
     recordsToReturn = []
   }
 
-  func setRecordsToReturn(_ records: [RecordInfo]) {
+  internal func setRecordsToReturn(_ records: [RecordInfo]) {
     recordsToReturn = records
   }
 }

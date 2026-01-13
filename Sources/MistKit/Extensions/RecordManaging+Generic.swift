@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
 
 /// Generic extensions for RecordManaging protocol that work with any CloudKitRecord type
 ///
