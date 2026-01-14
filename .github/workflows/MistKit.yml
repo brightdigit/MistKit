@@ -34,7 +34,7 @@ jobs:
             type: "wasm-embedded"
     steps:
       - uses: actions/checkout@v4
-      - uses: brightdigit/swift-build@v1.5.0-beta.1
+      - uses: brightdigit/swift-build@1.5.0-beta.2
         id: build
         with:
           type: ${{ matrix.type }}
@@ -72,7 +72,7 @@ jobs:
             build: 6.2-RELEASE
     steps:
       - uses: actions/checkout@v4
-      - uses: brightdigit/swift-build@v1.5.0-beta.1
+      - uses: brightdigit/swift-build@1.5.0-beta.2
         id: build
         with:
           windows-swift-version: ${{ matrix.swift.version }}
@@ -112,7 +112,7 @@ jobs:
           large-packages: true
           docker-images: true
           swap-storage: true
-      - uses: brightdigit/swift-build@v1.5.0-beta.1
+      - uses: brightdigit/swift-build@1.5.0-beta.2
         with:
           scheme: ${{ env.PACKAGE_NAME }}
           type: android
@@ -186,7 +186,7 @@ jobs:
 
       - name: Build and Test
         id: build
-        uses: brightdigit/swift-build@v1.5.0-beta.1
+        uses: brightdigit/swift-build@1.5.0-beta.2
         with:
           scheme: ${{ env.PACKAGE_NAME }}
           type: ${{ matrix.type }}
