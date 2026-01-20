@@ -7,8 +7,171 @@ import Logging
 import AppKit
 #endif
 
+// MARK: - CloudKit Command Protocol
+
+/// Protocol for commands that interact with CloudKit
+protocol CloudKitCommand {
+    var containerIdentifier: String { get }
+    var apiToken: String { get }
+    var environment: String { get }
+}
+
+extension CloudKitCommand {
+    /// Resolve API token from option or environment variable
+    func resolvedApiToken() -> String {
+        apiToken.isEmpty ?
+            EnvironmentConfig.getOptional(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" :
+            apiToken
+    }
+
+    /// Convert environment string to MistKit Environment
+    func cloudKitEnvironment() -> MistKit.Environment {
+        environment == "production" ? .production : .development
+    }
+}
+
+// MARK: - Main Command Group
+
 @main
 struct MistDemo: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "mistdemo",
+        abstract: "MistKit demo with CloudKit Web Services",
+        subcommands: [
+            Auth.self,
+            UploadAsset.self,
+            LookupZones.self,
+            FetchChanges.self,
+            TestIntegration.self
+        ],
+        defaultSubcommand: Auth.self
+    )
+}
+
+// MARK: - Legacy Auth Command (Temporary)
+
+struct Auth: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "auth",
+        abstract: "Start authentication server with browser UI (legacy)"
+    )
+
+    @Option(name: .shortAndLong, help: "CloudKit container identifier")
+    var containerIdentifier: String = "iCloud.com.brightdigit.MistDemo"
+
+    @Option(name: .shortAndLong, help: "CloudKit API token")
+    var apiToken: String = ""
+
+    @Option(name: .long, help: "Host to bind the server to")
+    var host: String = "127.0.0.1"
+
+    @Option(name: .shortAndLong, help: "Port to bind the server to")
+    var port: Int = 8080
+
+    @Option(name: .long, help: "Environment (development or production)")
+    var environment: String = "development"
+
+    @Flag(name: .long, help: "Skip authentication and use provided web auth token")
+    var skipAuth: Bool = false
+
+    @Option(name: .long, help: "Web auth token (use with --skip-auth)")
+    var webAuthToken: String?
+
+    // Legacy test flags
+    @Flag(name: .long, help: "Test all authentication methods")
+    var testAllAuth: Bool = false
+
+    @Flag(name: .long, help: "Test API-only authentication")
+    var testApiOnly: Bool = false
+
+    @Flag(name: .long, help: "Test AdaptiveTokenManager transitions")
+    var testAdaptive: Bool = false
+
+    @Flag(name: .long, help: "Test server-to-server authentication")
+    var testServerToServer: Bool = false
+
+    @Option(name: .long, help: "Server-to-server key ID")
+    var keyID: String?
+
+    @Option(name: .long, help: "Server-to-server private key (PEM format)")
+    var privateKey: String?
+
+    @Option(name: .long, help: "Path to private key file")
+    var privateKeyFile: String?
+
+    func run() async throws {
+        print("\n⚠️  NOTE: The 'auth' subcommand preserves the original authentication server")
+        print("   For new operation commands, use: upload-asset, lookup-zones, fetch-changes, test-integration\n")
+
+        // Get API token from environment variable if not provided
+        let resolvedApiToken = apiToken.isEmpty ?
+            EnvironmentConfig.getOptional(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" :
+            apiToken
+
+        guard !resolvedApiToken.isEmpty else {
+            print("❌ Error: CloudKit API token is required")
+            print("   Provide it via --api-token or set CLOUDKIT_API_TOKEN environment variable")
+            print("   Get your API token from: https://icloud.developer.apple.com/dashboard/")
+            print("\n💡 Environment variables available:")
+            let maskedEnv = EnvironmentConfig.CloudKit.getMaskedEnvironment()
+            for (key, value) in maskedEnv.sorted(by: { $0.key < $1.key }) {
+                print("   \(key): \(value)")
+            }
+            return
+        }
+
+        // Use the resolved API token for all operations
+        let effectiveApiToken = resolvedApiToken
+
+        if testAllAuth {
+            try await legacyTestAllAuthenticationMethods(apiToken: effectiveApiToken)
+        } else if testApiOnly {
+            try await legacyTestAPIOnlyAuthentication(apiToken: effectiveApiToken)
+        } else if testAdaptive {
+            try await legacyTestAdaptiveTokenManager(apiToken: effectiveApiToken)
+        } else if testServerToServer {
+            try await legacyTestServerToServerAuthentication(apiToken: effectiveApiToken)
+        } else if skipAuth, let token = webAuthToken {
+            // Run demo directly with provided token
+            try await legacyRunCloudKitDemo(webAuthToken: token, apiToken: effectiveApiToken)
+        } else {
+            // Start server and wait for authentication
+            try await legacyStartAuthenticationServer(apiToken: effectiveApiToken)
+        }
+    }
+
+    // Note: The actual implementation methods would reference the existing code
+    // For now, these are placeholders that need the full existing implementation
+    func legacyStartAuthenticationServer(apiToken: String) async throws {
+        print("Legacy auth server not yet migrated - use existing MistDemo for now")
+    }
+
+    func legacyRunCloudKitDemo(webAuthToken: String, apiToken: String) async throws {
+        print("Legacy CloudKit demo not yet migrated")
+    }
+
+    func legacyTestAllAuthenticationMethods(apiToken: String) async throws {
+        print("Legacy all auth test not yet migrated")
+    }
+
+    func legacyTestAPIOnlyAuthentication(apiToken: String) async throws {
+        print("Legacy API-only test not yet migrated")
+    }
+
+    func legacyTestAdaptiveTokenManager(apiToken: String) async throws {
+        print("Legacy adaptive test not yet migrated")
+    }
+
+    func legacyTestServerToServerAuthentication(apiToken: String) async throws {
+        print("Legacy S2S test not yet migrated")
+    }
+}
+
+// MARK: - Legacy Code Below (To Be Migrated)
+// The code below this line preserves the existing implementation
+// It will be gradually migrated to the Auth subcommand
+
+struct LegacyMistDemo: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "mistdemo",
         abstract: "MistKit demo with CloudKit authentication server"
