@@ -190,18 +190,31 @@ func startWebAuthenticationServer(
     port: Int
 ) async throws {
     let router = Router()
-    
-    // Serve the CloudKit sign-in page
-    router.get("/") { _, _ in
-        let html = createCloudKitAuthHTML(
-            apiToken: apiToken,
-            containerIdentifier: containerIdentifier,
-            environment: environment
-        )
-        var response = Response(status: .ok, body: .init(byteBuffer: ByteBuffer(string: html)))
-        response.headers[.contentType] = "text/html"
-        return response
+
+    // Serve static files from Resources directory (includes enhanced index.html)
+    let possiblePaths = [
+        Bundle.main.resourcePath ?? "",
+        Bundle.main.bundlePath + "/Contents/Resources",
+        "./Sources/MistDemo/Resources",
+        "./Examples/MistDemo/Sources/MistDemo/Resources",
+        URL(fileURLWithPath: #file).deletingLastPathComponent().appendingPathComponent("Resources").path
+    ]
+
+    var resourcesPath = "./Sources/MistDemo/Resources" // default fallback
+    for path in possiblePaths {
+        if !path.isEmpty && FileManager.default.fileExists(atPath: path + "/index.html") {
+            resourcesPath = path
+            print("📁 Serving static files from: \(resourcesPath)")
+            break
+        }
     }
+
+    router.middlewares.add(
+        FileMiddleware(
+            resourcesPath,
+            searchForIndexHtml: true
+        )
+    )
     
     // Handle the authentication callback
     router.post("/auth/callback") { request, context in
@@ -400,53 +413,39 @@ func createCloudKitAuthHTML(
 
             async function sendTokenToServer(container) {
                 try {
-                    console.log('Container object:', container);
-                    console.log('Available properties:', Object.keys(container));
-                    
-                    // Try multiple ways to get the web auth token
-                    let webAuthToken = null;
-                    
-                    // Method 1: session property
-                    if (container.session && container.session.webAuthToken) {
-                        webAuthToken = container.session.webAuthToken;
-                        console.log('Found token in session.webAuthToken');
+                    // Token should be captured via postMessage/network interception
+                    const token = window.cloudKitWebAuthToken || container._auth?._ckSession;
+
+                    if (!token) {
+                        console.error('No web auth token available');
+                        console.log('Container:', container);
+                        console.log('Try waiting a moment and checking window.cloudKitWebAuthToken');
+
+                        // Wait 2 more seconds in case token is still arriving
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        const retryToken = window.cloudKitWebAuthToken || container._auth?._ckSession;
+
+                        if (!retryToken) {
+                            throw new Error('No web auth token available after retry');
+                        }
+
+                        setStatus('Token found after retry, sending to server...', false);
+                        return sendTokenToServer(container);  // Retry
                     }
-                    // Method 2: direct property
-                    else if (container.webAuthToken) {
-                        webAuthToken = container.webAuthToken;
-                        console.log('Found token in container.webAuthToken');
-                    }
-                    // Method 3: auth property
-                    else if (container.auth && container.auth.webAuthToken) {
-                        webAuthToken = container.auth.webAuthToken;
-                        console.log('Found token in auth.webAuthToken');
-                    }
-                    // Method 4: _auth property (internal)
-                    else if (container._auth && container._auth.webAuthToken) {
-                        webAuthToken = container._auth.webAuthToken;
-                        console.log('Found token in _auth.webAuthToken');
-                    }
-                    
-                    if (!webAuthToken) {
-                        console.error('No web auth token found. Container structure:', container);
-                        throw new Error('No web auth token available');
-                    }
-                    
+
                     const userInfo = container.userIdentity;
-                    console.log('Sending web auth token to server...', webAuthToken.substring(0, 20) + '...');
-                    
-                    // Send to server
+                    console.log('Sending token to server...');
+                    console.log('Token preview:', token.substring(0, 30) + '...');
+
                     const response = await fetch('/auth/callback', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            webAuthToken: webAuthToken,
+                            webAuthToken: token,
                             userInfo: userInfo
                         })
                     });
-                    
+
                     if (response.ok) {
                         const html = await response.text();
                         document.body.innerHTML = html;
