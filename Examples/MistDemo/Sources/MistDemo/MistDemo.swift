@@ -143,7 +143,19 @@ struct Auth: AsyncParsableCommand {
     // Note: The actual implementation methods would reference the existing code
     // For now, these are placeholders that need the full existing implementation
     func legacyStartAuthenticationServer(apiToken: String) async throws {
-        print("Legacy auth server not yet migrated - use existing MistDemo for now")
+        print("\n🌐 Starting CloudKit Web Authentication Server")
+        print("Container: \(containerIdentifier)")
+        print("Environment: \(environment)")
+        print("Server: http://\(host):\(port)")
+        print(String(repeating: "=", count: 60))
+        
+        try await startWebAuthenticationServer(
+            apiToken: apiToken,
+            containerIdentifier: containerIdentifier,
+            environment: environment == "production" ? .production : .development,
+            host: host,
+            port: port
+        )
     }
 
     func legacyRunCloudKitDemo(webAuthToken: String, apiToken: String) async throws {
@@ -165,6 +177,361 @@ struct Auth: AsyncParsableCommand {
     func legacyTestServerToServerAuthentication(apiToken: String) async throws {
         print("Legacy S2S test not yet migrated")
     }
+}
+
+// MARK: - Web Authentication Server
+
+/// Starts a web authentication server for CloudKit sign-in
+func startWebAuthenticationServer(
+    apiToken: String,
+    containerIdentifier: String,
+    environment: MistKit.Environment,
+    host: String,
+    port: Int
+) async throws {
+    let router = Router()
+    
+    // Serve the CloudKit sign-in page
+    router.get("/") { _, _ in
+        let html = createCloudKitAuthHTML(
+            apiToken: apiToken,
+            containerIdentifier: containerIdentifier,
+            environment: environment
+        )
+        var response = Response(status: .ok, body: .init(byteBuffer: ByteBuffer(string: html)))
+        response.headers[.contentType] = "text/html"
+        return response
+    }
+    
+    // Handle the authentication callback
+    router.post("/auth/callback") { request, context in
+        do {
+            let body = try await request.body.collect(upTo: 1024 * 1024)
+            let bodyString = String(buffer: body)
+            
+            if let webAuthToken = extractWebAuthToken(from: bodyString) {
+                print("\n✅ Web Authentication Successful!")
+                print("Web Auth Token: \(webAuthToken)")
+                print("\n💡 Use this token with:")
+                print("export CLOUDKIT_WEBAUTH_TOKEN='\(webAuthToken)'")
+                print("swift run mistdemo test-integration --web-auth-token '\(webAuthToken)'")
+                
+                var response = Response(status: .ok, body: .init(byteBuffer: ByteBuffer(string: createSuccessHTML())))
+                response.headers[.contentType] = "text/html"
+                return response
+            } else {
+                print("❌ Failed to extract web auth token from callback")
+                var response = Response(status: .badRequest, body: .init(byteBuffer: ByteBuffer(string: "Failed to extract token")))
+                response.headers[.contentType] = "text/plain"
+                return response
+            }
+        } catch {
+            print("❌ Authentication error: \(error)")
+            return Response(status: .internalServerError)
+        }
+    }
+    
+    let app = Application(
+        router: router,
+        configuration: .init(address: .hostname(host, port: port))
+    )
+    
+    print("\n🚀 Server starting on http://\(host):\(port)")
+    print("📱 Opening browser for CloudKit authentication...")
+    
+    // Open browser
+    BrowserOpener.openBrowser(url: "http://\(host):\(port)")
+    
+    try await app.runService()
+}
+
+// MARK: - HTML Generation and Token Extraction
+
+/// Creates the CloudKit authentication HTML page
+func createCloudKitAuthHTML(
+    apiToken: String,
+    containerIdentifier: String,
+    environment: MistKit.Environment
+) -> String {
+    let environmentString = environment == .production ? "production" : "development"
+    
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>CloudKit Authentication - MistDemo</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body { 
+                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                max-width: 600px; 
+                margin: 50px auto; 
+                padding: 20px;
+                line-height: 1.6;
+            }
+            .container { 
+                text-align: center; 
+                background: #f5f5f5; 
+                padding: 30px; 
+                border-radius: 10px; 
+            }
+            .info { 
+                background: #e8f4fd; 
+                padding: 15px; 
+                border-radius: 5px; 
+                margin: 20px 0;
+                text-align: left;
+            }
+            button { 
+                background: #007AFF; 
+                color: white; 
+                border: none; 
+                padding: 15px 30px; 
+                font-size: 16px; 
+                border-radius: 8px; 
+                cursor: pointer; 
+            }
+            button:hover { background: #0056CC; }
+            button:disabled { background: #ccc; cursor: not-allowed; }
+            #status { margin: 20px 0; font-weight: bold; }
+            .error { color: #ff3b30; }
+            .success { color: #34c759; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>CloudKit Authentication</h1>
+            <div class="info">
+                <strong>Container:</strong> \(containerIdentifier)<br>
+                <strong>Environment:</strong> \(environmentString)
+            </div>
+            
+            <p>Click the button below to sign in with your Apple ID and authorize CloudKit access.</p>
+            
+            <button id="authButton" onclick="authenticateWithCloudKit()">
+                Sign In with Apple ID
+            </button>
+            
+            <div id="status"></div>
+        </div>
+
+        <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js"></script>
+        <script>
+            const config = {
+                containers: [{
+                    containerIdentifier: '\(containerIdentifier)',
+                    apiTokenAuth: {
+                        apiToken: '\(apiToken)',
+                        persist: true,
+                        signInButton: {
+                            id: 'apple-sign-in-button',
+                            theme: 'black'
+                        },
+                        signOutButton: {
+                            id: 'apple-sign-out-button',
+                            theme: 'black'
+                        }
+                    },
+                    environment: '\(environmentString)'
+                }]
+            };
+
+            let cloudKit;
+
+            function setStatus(message, isError = false) {
+                const statusDiv = document.getElementById('status');
+                statusDiv.innerHTML = message;
+                statusDiv.className = isError ? 'error' : 'success';
+            }
+
+            function disableButton(disabled = true) {
+                document.getElementById('authButton').disabled = disabled;
+            }
+
+            async function authenticateWithCloudKit() {
+                try {
+                    disableButton(true);
+                    setStatus('Initializing CloudKit...', false);
+                    
+                    cloudKit = await window.CloudKit.configure(config);
+                    const container = cloudKit.getDefaultContainer();
+                    
+                    setStatus('Checking authentication status...', false);
+                    
+                    // Check if already authenticated
+                    const userIdentity = container.userIdentity;
+                    
+                    if (userIdentity) {
+                        setStatus('Already authenticated! Getting web auth token...', false);
+                        await sendTokenToServer(container);
+                        return;
+                    }
+                    
+                    setStatus('Setting up authentication...', false);
+                    
+                    // Set up auth and check again
+                    await container.setUpAuth();
+                    
+                    if (container.userIdentity) {
+                        setStatus('Authentication successful! Getting web auth token...', false);
+                        await sendTokenToServer(container);
+                    } else {
+                        setStatus('Please sign in with Apple ID...', false);
+                        
+                        // Wait for sign in event
+                        container.whenUserSignsIn().then(function(userInfo) {
+                            setStatus('Sign in successful! Getting web auth token...', false);
+                            sendTokenToServer(container);
+                        }).catch(function(error) {
+                            setStatus('Sign in failed: ' + error.message, true);
+                            disableButton(false);
+                        });
+                        
+                        // Trigger sign in
+                        container.signInWithAppleID();
+                    }
+                } catch (error) {
+                    console.error('CloudKit error:', error);
+                    setStatus('CloudKit error: ' + error.message, true);
+                    disableButton(false);
+                }
+            }
+
+            async function sendTokenToServer(container) {
+                try {
+                    console.log('Container object:', container);
+                    console.log('Available properties:', Object.keys(container));
+                    
+                    // Try multiple ways to get the web auth token
+                    let webAuthToken = null;
+                    
+                    // Method 1: session property
+                    if (container.session && container.session.webAuthToken) {
+                        webAuthToken = container.session.webAuthToken;
+                        console.log('Found token in session.webAuthToken');
+                    }
+                    // Method 2: direct property
+                    else if (container.webAuthToken) {
+                        webAuthToken = container.webAuthToken;
+                        console.log('Found token in container.webAuthToken');
+                    }
+                    // Method 3: auth property
+                    else if (container.auth && container.auth.webAuthToken) {
+                        webAuthToken = container.auth.webAuthToken;
+                        console.log('Found token in auth.webAuthToken');
+                    }
+                    // Method 4: _auth property (internal)
+                    else if (container._auth && container._auth.webAuthToken) {
+                        webAuthToken = container._auth.webAuthToken;
+                        console.log('Found token in _auth.webAuthToken');
+                    }
+                    
+                    if (!webAuthToken) {
+                        console.error('No web auth token found. Container structure:', container);
+                        throw new Error('No web auth token available');
+                    }
+                    
+                    const userInfo = container.userIdentity;
+                    console.log('Sending web auth token to server...', webAuthToken.substring(0, 20) + '...');
+                    
+                    // Send to server
+                    const response = await fetch('/auth/callback', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            webAuthToken: webAuthToken,
+                            userInfo: userInfo
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const html = await response.text();
+                        document.body.innerHTML = html;
+                    } else {
+                        throw new Error('Server responded with: ' + response.status);
+                    }
+                } catch (error) {
+                    console.error('Token submission error:', error);
+                    setStatus('Failed to submit token: ' + error.message, true);
+                    disableButton(false);
+                }
+            }
+        </script>
+    </body>
+    </html>
+    """
+}
+
+/// Extracts web auth token from the callback request body
+func extractWebAuthToken(from body: String) -> String? {
+    // Parse JSON body to extract the web auth token
+    guard let data = body.data(using: .utf8) else { return nil }
+    
+    do {
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        return json?["webAuthToken"] as? String
+    } catch {
+        print("Failed to parse JSON: \(error)")
+        return nil
+    }
+}
+
+/// Creates the success HTML page shown after authentication
+func createSuccessHTML() -> String {
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Authentication Successful</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body { 
+                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                max-width: 600px; 
+                margin: 50px auto; 
+                padding: 20px;
+                text-align: center;
+            }
+            .success { 
+                background: #d4edda; 
+                border: 1px solid #c3e6cb;
+                color: #155724;
+                padding: 30px; 
+                border-radius: 10px;
+                margin: 20px 0;
+            }
+            .code {
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+                padding: 15px;
+                border-radius: 5px;
+                font-family: monospace;
+                margin: 20px 0;
+                text-align: left;
+                overflow-x: auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="success">
+            <h1>✅ Authentication Successful!</h1>
+            <p>Your CloudKit web authentication token has been captured.</p>
+            <p>Check the terminal output for the token and usage instructions.</p>
+        </div>
+        
+        <div class="code">
+            <p><strong>Next steps:</strong></p>
+            <p>1. Copy the web auth token from the terminal</p>
+            <p>2. Run the integration tests with the token</p>
+            <p>3. You can now close this browser tab</p>
+        </div>
+    </body>
+    </html>
+    """
 }
 
 // MARK: - Legacy Code Below (To Be Migrated)
