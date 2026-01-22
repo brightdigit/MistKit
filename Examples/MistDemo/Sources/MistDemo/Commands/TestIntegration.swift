@@ -47,6 +47,12 @@ struct TestIntegration: AsyncParsableCommand, CloudKitCommand {
     @Option(name: .long, help: "Environment (development or production)")
     var environment: String = "development"
 
+    @Option(name: .long, help: "Database to use (public or private)")
+    var database: String = "private"
+
+    @Option(name: .long, help: "Web auth token for private database access")
+    var webAuthToken: String = ""
+
     @Option(name: .long, help: "Number of test records to create (default: 10)")
     var recordCount: Int = 10
 
@@ -69,10 +75,27 @@ struct TestIntegration: AsyncParsableCommand, CloudKitCommand {
             return
         }
 
+        // Resolve web auth token from option or environment variable
+        let resolvedWebAuthToken = webAuthToken.isEmpty ?
+            ProcessInfo.processInfo.environment["CLOUDKIT_WEBAUTH_TOKEN"] ?? "" :
+            webAuthToken
+
+        // Check if web auth token is required for private database
+        if database == "private" && resolvedWebAuthToken.isEmpty {
+            print("❌ Error: Web auth token is required for private database access")
+            print("   Provide it via --web-auth-token or set CLOUDKIT_WEBAUTH_TOKEN environment variable")
+            print("   Use the 'auth' command to authenticate and get a web auth token")
+            return
+        }
+
+        let cloudKitDatabase: MistKit.Database = database == "public" ? .public : .private
+
         let runner = IntegrationTestRunner(
             containerIdentifier: containerIdentifier,
             apiToken: resolvedToken,
+            webAuthToken: resolvedWebAuthToken,
             environment: cloudKitEnvironment(),
+            database: cloudKitDatabase,
             recordCount: recordCount,
             assetSizeKB: assetSize,
             skipCleanup: skipCleanup,

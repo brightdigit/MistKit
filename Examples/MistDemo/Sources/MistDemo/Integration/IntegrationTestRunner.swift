@@ -34,7 +34,9 @@ import MistKit
 struct IntegrationTestRunner {
     let containerIdentifier: String
     let apiToken: String
+    let webAuthToken: String
     let environment: MistKit.Environment
+    let database: MistKit.Database
     let recordCount: Int
     let assetSizeKB: Int
     let skipCleanup: Bool
@@ -47,18 +49,37 @@ struct IntegrationTestRunner {
         print(String(repeating: "=", count: 80))
         print("Container: \(containerIdentifier)")
         print("Environment: \(environment == .production ? "production" : "development")")
-        print("Database: public")
+        print("Database: \(database == .public ? "public" : "private")")
         print("Record Count: \(recordCount)")
         print("Asset Size: \(assetSizeKB) KB")
+        print("Web Auth: \(webAuthToken.isEmpty ? "No" : "Yes")")
         print(String(repeating: "=", count: 80))
 
         // Initialize service
-        let tokenManager = APITokenManager(apiToken: apiToken)
+        let tokenManager: any TokenManager
+        if database == .private && !webAuthToken.isEmpty {
+            // Use AdaptiveTokenManager for private database with web auth
+            let storage = InMemoryTokenStorage()
+            // Pre-populate storage with web auth credentials
+            let credentials = TokenCredentials(
+                method: .webAuthToken(apiToken: apiToken, webToken: webAuthToken)
+            )
+            try await storage.store(credentials)
+            
+            tokenManager = AdaptiveTokenManager(
+                apiToken: apiToken,
+                storage: storage
+            )
+        } else {
+            // Use APITokenManager for public database
+            tokenManager = APITokenManager(apiToken: apiToken)
+        }
+        
         let service = try CloudKitService(
             containerIdentifier: containerIdentifier,
             tokenManager: tokenManager,
             environment: environment,
-            database: .public
+            database: database
         )
 
         var createdRecordNames: [String] = []
