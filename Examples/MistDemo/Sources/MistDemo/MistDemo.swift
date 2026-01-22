@@ -89,6 +89,13 @@ struct MistDemo {
       }
       return
     }
+
+    router.middlewares.add(
+        FileMiddleware(
+            resourcesPath,
+            searchForIndexHtml: true
+        )
+    )
     
     // Check if a command was specified
     if let commandName = parser.parseCommandName() {
