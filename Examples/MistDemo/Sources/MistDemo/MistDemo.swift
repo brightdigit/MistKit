@@ -1,68 +1,19 @@
 import Foundation
 import MistKit
 import Hummingbird
-import ArgumentParser
 import Logging
 #if canImport(AppKit)
 import AppKit
 #endif
 
 @main
-struct MistDemo: AsyncParsableCommand {
-    static let configuration = CommandConfiguration(
-        commandName: "mistdemo",
-        abstract: "MistKit demo with CloudKit authentication server"
-    )
-    
-    @Option(name: .shortAndLong, help: "CloudKit container identifier")
-    var containerIdentifier: String = "iCloud.com.brightdigit.MistDemo"
-    
-    @Option(name: .shortAndLong, help: "CloudKit API token (or set CLOUDKIT_API_TOKEN environment variable)")
-    var apiToken: String = ""
-    
-    @Option(name: .long, help: "Host to bind the server to")
-    var host: String = "127.0.0.1"
-    
-    @Option(name: .shortAndLong, help: "Port to bind the server to")
-    var port: Int = 8080
-    
-    @Flag(name: .long, help: "Skip authentication and use provided web auth token")
-    var skipAuth: Bool = false
+struct MistDemo {
+    static func main() async throws {
+        let config = MistDemoConfig()
 
-    @Option(name: .long, help: "Web auth token (use with --skip-auth)")
-    var webAuthToken: String?
+        // Get resolved API token
+        let resolvedApiToken = config.resolvedApiToken()
 
-    @Flag(name: .long, help: "Test all authentication methods")
-    var testAllAuth: Bool = false
-
-    @Flag(name: .long, help: "Test API-only authentication")
-    var testApiOnly: Bool = false
-
-    @Flag(name: .long, help: "Test AdaptiveTokenManager transitions")
-    var testAdaptive: Bool = false
-
-    @Flag(name: .long, help: "Test server-to-server authentication")
-    var testServerToServer: Bool = false
-
-
-    @Option(name: .long, help: "Server-to-server key ID")
-    var keyID: String?
-
-    @Option(name: .long, help: "Server-to-server private key (PEM format)")
-    var privateKey: String?
-
-    @Option(name: .long, help: "Path to private key file")
-    var privateKeyFile: String?
-
-    @Option(name: .long, help: "CloudKit environment (development or production)")
-    var environment: String = "development"
-    
-    func run() async throws {
-        // Get API token from environment variable if not provided
-        let resolvedApiToken = apiToken.isEmpty ? 
-            EnvironmentConfig.getOptional(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" : 
-            apiToken
-        
         guard !resolvedApiToken.isEmpty else {
             print("❌ Error: CloudKit API token is required")
             print("   Provide it via --api-token or set CLOUDKIT_API_TOKEN environment variable")
@@ -74,28 +25,61 @@ struct MistDemo: AsyncParsableCommand {
             }
             return
         }
-        
+
         // Use the resolved API token for all operations
         let effectiveApiToken = resolvedApiToken
-        
-        if testAllAuth {
-            try await testAllAuthenticationMethods(apiToken: effectiveApiToken)
-        } else if testApiOnly {
-            try await testAPIOnlyAuthentication(apiToken: effectiveApiToken)
-        } else if testAdaptive {
-            try await testAdaptiveTokenManager(apiToken: effectiveApiToken)
-        } else if testServerToServer {
-            try await testServerToServerAuthentication(apiToken: effectiveApiToken)
-        } else if skipAuth, let token = webAuthToken {
+
+        if config.testAllAuth {
+            try await testAllAuthenticationMethods(
+                apiToken: effectiveApiToken,
+                containerIdentifier: config.containerIdentifier,
+                webAuthToken: config.resolvedWebAuthToken(),
+                environment: config.environment
+            )
+        } else if config.testApiOnly {
+            try await testAPIOnlyAuthentication(
+                apiToken: effectiveApiToken,
+                containerIdentifier: config.containerIdentifier,
+                environment: config.environment
+            )
+        } else if config.testAdaptive {
+            try await testAdaptiveTokenManager(
+                apiToken: effectiveApiToken,
+                webAuthToken: config.resolvedWebAuthToken()
+            )
+        } else if config.testServerToServer {
+            try await testServerToServerAuthentication(
+                apiToken: effectiveApiToken,
+                containerIdentifier: config.containerIdentifier,
+                keyID: config.keyID,
+                privateKey: config.privateKey,
+                privateKeyFile: config.privateKeyFile,
+                environment: config.environment
+            )
+        } else if config.skipAuth, let token = config.resolvedWebAuthToken() {
             // Run demo directly with provided token
-            try await runCloudKitDemo(webAuthToken: token, apiToken: effectiveApiToken)
+            try await runCloudKitDemo(
+                webAuthToken: token,
+                apiToken: effectiveApiToken,
+                containerIdentifier: config.containerIdentifier
+            )
         } else {
             // Start server and wait for authentication
-            try await startAuthenticationServer(apiToken: effectiveApiToken)
+            try await startAuthenticationServer(
+                apiToken: effectiveApiToken,
+                containerIdentifier: config.containerIdentifier,
+                host: config.host,
+                port: config.port
+            )
         }
     }
-    
-    func startAuthenticationServer(apiToken: String) async throws {
+
+    static func startAuthenticationServer(
+        apiToken: String,
+        containerIdentifier: String,
+        host: String,
+        port: Int
+    ) async throws {
         print("\n" + String(repeating: "=", count: 60))
         print("🚀 MistKit CloudKit Authentication Server")
         print(String(repeating: "=", count: 60))
@@ -114,14 +98,14 @@ struct MistDemo: AsyncParsableCommand {
         print("   • apiToken: 'YOUR_VALID_API_TOKEN' (get from CloudKit Console)")
         print("   • Ensure container exists and API token is valid")
         print(String(repeating: "=", count: 60) + "\n")
-        
+
         // Create channels for communication
         let tokenChannel = AsyncChannel<String>()
         let responseCompleteChannel = AsyncChannel<Void>()
-        
+
         let router = Router(context: BasicRequestContext.self)
         router.middlewares.add(LogRequestsMiddleware(.info))
-        
+
         // Serve static files - try multiple potential paths
         let possiblePaths = [
             Bundle.main.resourcePath ?? "",
@@ -130,7 +114,7 @@ struct MistDemo: AsyncParsableCommand {
             "./Examples/Sources/MistDemo/Resources",
             URL(fileURLWithPath: #file).deletingLastPathComponent().appendingPathComponent("Resources").path
         ]
-        
+
         var resourcesPath = "./Sources/MistDemo/Resources" // default fallback
         for path in possiblePaths {
             if !path.isEmpty && FileManager.default.fileExists(atPath: path + "/index.html") {
@@ -138,7 +122,7 @@ struct MistDemo: AsyncParsableCommand {
                 break
             }
         }
-        
+
         print("📁 Serving static files from: \(resourcesPath)")
         router.middlewares.add(
             FileMiddleware(
@@ -146,23 +130,23 @@ struct MistDemo: AsyncParsableCommand {
                 searchForIndexHtml: true
             )
         )
-        
-        // API routes  
+
+        // API routes
         let api = router.group("api")
         // Authentication endpoint
         api.post("authenticate") { request, context -> Response in
                 let authRequest = try await request.decode(as: AuthRequest.self, context: context)
-                
+
                 // Send token to the channel
                 await tokenChannel.send(authRequest.sessionToken)
-                
+
                 // Use the session token as web auth token
                 let webAuthToken = authRequest.sessionToken
-                
+
                 var userData: UserInfo?
                 var zones: [ZoneInfo] = []
                 var errorMessage: String?
-                
+
                 // Try to fetch user data and zones
                 do {
                     let service = try CloudKitService(
@@ -176,7 +160,7 @@ struct MistDemo: AsyncParsableCommand {
                     errorMessage = error.localizedDescription
                     print("CloudKit error: \(error)")
                 }
-                
+
                 let response = AuthResponse(
                     userRecordName: authRequest.userRecordName,
                     cloudKitData: .init(
@@ -186,16 +170,16 @@ struct MistDemo: AsyncParsableCommand {
                     ),
                     message: "Authentication successful! The demo will start automatically..."
                 )
-                
+
                 let jsonData = try JSONEncoder().encode(response)
-                
+
                 // Notify that the response is about to be sent
                 Task {
                     // Give a small delay to ensure response is fully sent
                     try await Task.sleep(nanoseconds: 200_000_000) // 200ms
                     await responseCompleteChannel.send(())
                 }
-                
+
                 return Response(
                     status: .ok,
                     headers: [.contentType: "application/json"],
@@ -205,64 +189,72 @@ struct MistDemo: AsyncParsableCommand {
                     }
                 )
             }
-        
+
         let app = Application(
             router: router,
             configuration: .init(
                 address: .hostname(host, port: port)
             )
         )
-        
+
         // Start server in background
         let serverTask = Task {
             try await app.runService()
         }
-        
+
         // Open browser after server starts
         Task {
             try await Task.sleep(nanoseconds: 1_000_000_000) // Wait 1 second
             print("🌐 Opening browser...")
             BrowserOpener.openBrowser(url: "http://\(host):\(port)")
         }
-        
+
         // Wait for authentication token
         print("\n⏳ Waiting for authentication...")
         let token = await tokenChannel.receive()
-        
+
         print("\n✅ Authentication successful! Received session token.")
         print("⏳ Waiting for response to complete...")
-        
+
         // Wait for the response to be fully sent to the web page
         await responseCompleteChannel.receive()
-        
+
         print("🔄 Shutting down server...")
-        
+
         // Shutdown the server
         serverTask.cancel()
-        
+
         // Give it a moment to clean up
         try await Task.sleep(nanoseconds: 500_000_000)
-        
+
         // Run the demo with the token
         print("\n📱 Starting CloudKit demo...\n")
-        try await runCloudKitDemo(webAuthToken: token, apiToken: apiToken)
+        try await runCloudKitDemo(
+            webAuthToken: token,
+            apiToken: apiToken,
+            containerIdentifier: containerIdentifier
+        )
     }
-    
-    func runCloudKitDemo(webAuthToken: String, apiToken: String) async throws {
+
+    static func runCloudKitDemo(
+        webAuthToken: String,
+        apiToken: String,
+        containerIdentifier: String
+    ) async throws {
         print(String(repeating: "=", count: 50))
         print("🌩️  MistKit CloudKit Demo")
         print(String(repeating: "=", count: 50))
         print("Container: \(containerIdentifier)")
         print("Environment: development")
         print(String(repeating: "-", count: 50))
-        
+
         // Initialize CloudKit service
         let cloudKitService = try CloudKitService(
             containerIdentifier: containerIdentifier,
             apiToken: apiToken,
             webAuthToken: webAuthToken
         )
-        
+
         // Fetch current user
         print("\n👤 Fetching current user...")
         do {
@@ -280,7 +272,7 @@ struct MistDemo: AsyncParsableCommand {
         } catch {
             print("❌ Failed to fetch user: \(error)")
         }
-        
+
         // List zones
         print("\n📁 Listing zones...")
         do {
@@ -292,7 +284,7 @@ struct MistDemo: AsyncParsableCommand {
         } catch {
             print("❌ Failed to list zones: \(error)")
         }
-        
+
         // Query records
         print("\n📋 Querying records...")
         do {
@@ -311,18 +303,23 @@ struct MistDemo: AsyncParsableCommand {
         } catch {
             print("❌ Failed to query records: \(error)")
         }
-        
+
         print("\n" + String(repeating: "=", count: 50))
         print("✅ Demo completed!")
         print(String(repeating: "=", count: 50))
-        
+
         // Print usage tip
         print("\n💡 Tip: You can skip authentication next time by running:")
         print("   mistdemo --skip-auth --web-auth-token \"\(webAuthToken)\"")
     }
 
     /// Test all authentication methods
-    func testAllAuthenticationMethods(apiToken: String) async throws {
+    static func testAllAuthenticationMethods(
+        apiToken: String,
+        containerIdentifier: String,
+        webAuthToken: String?,
+        environment: MistKit.Environment
+    ) async throws {
         print("\n" + String(repeating: "=", count: 70))
         print("🧪 MistKit Authentication Methods Test Suite")
         print(String(repeating: "=", count: 70))
@@ -338,7 +335,7 @@ struct MistDemo: AsyncParsableCommand {
             let service = try CloudKitService(
                 containerIdentifier: containerIdentifier,
                 tokenManager: apiTokenManager,
-                environment: .development,
+                environment: environment,
                 database: .public
             )
 
@@ -365,7 +362,7 @@ struct MistDemo: AsyncParsableCommand {
                 let service = try CloudKitService(
                     containerIdentifier: containerIdentifier,
                     tokenManager: webTokenManager,
-                    environment: .development,
+                    environment: environment,
                     database: .private
                 )
 
@@ -395,7 +392,7 @@ struct MistDemo: AsyncParsableCommand {
         // Test 3: AdaptiveTokenManager
         print("\n🔄 Test 3: AdaptiveTokenManager Transitions")
         print(String(repeating: "-", count: 50))
-        await testAdaptiveTokenManagerInternal(apiToken: apiToken)
+        await testAdaptiveTokenManagerInternal(apiToken: apiToken, webAuthToken: webAuthToken)
 
         // Test 4: Server-to-Server Authentication (basic test only)
         print("\n🔐 Test 4: Server-to-Server Authentication (Test Keys)")
@@ -409,7 +406,11 @@ struct MistDemo: AsyncParsableCommand {
     }
 
     /// Test API-only authentication
-    func testAPIOnlyAuthentication(apiToken: String) async throws {
+    static func testAPIOnlyAuthentication(
+        apiToken: String,
+        containerIdentifier: String,
+        environment: MistKit.Environment
+    ) async throws {
         print("\n" + String(repeating: "=", count: 60))
         print("🔐 API-only Authentication Test")
         print(String(repeating: "=", count: 60))
@@ -418,13 +419,11 @@ struct MistDemo: AsyncParsableCommand {
         print(String(repeating: "-", count: 60))
 
         do {
-            // Use API-only service initializer with environment
-            let cloudKitEnvironment: MistKit.Environment = environment == "production" ? .production : .development
             let tokenManager = APITokenManager(apiToken: apiToken)
             let service = try CloudKitService(
-                containerIdentifier: containerIdentifier, 
+                containerIdentifier: containerIdentifier,
                 tokenManager: tokenManager,
-                environment: cloudKitEnvironment,
+                environment: environment,
                 database: .public
             )
 
@@ -459,18 +458,24 @@ struct MistDemo: AsyncParsableCommand {
     }
 
     /// Test AdaptiveTokenManager
-    func testAdaptiveTokenManager(apiToken: String) async throws {
+    static func testAdaptiveTokenManager(
+        apiToken: String,
+        webAuthToken: String?
+    ) async throws {
         print("\n" + String(repeating: "=", count: 60))
         print("🔄 AdaptiveTokenManager Transition Test")
         print(String(repeating: "=", count: 60))
-        await testAdaptiveTokenManagerInternal(apiToken: apiToken)
+        await testAdaptiveTokenManagerInternal(apiToken: apiToken, webAuthToken: webAuthToken)
         print(String(repeating: "=", count: 60))
         print("✅ AdaptiveTokenManager test completed!")
         print(String(repeating: "=", count: 60))
     }
 
     /// Internal AdaptiveTokenManager test implementation
-    func testAdaptiveTokenManagerInternal(apiToken: String) async {
+    static func testAdaptiveTokenManagerInternal(
+        apiToken: String,
+        webAuthToken: String?
+    ) async {
         do {
             print("📋 Creating AdaptiveTokenManager with API token...")
             let adaptiveManager = AdaptiveTokenManager(apiToken: apiToken)
@@ -522,7 +527,14 @@ struct MistDemo: AsyncParsableCommand {
     }
 
     /// Test server-to-server authentication
-    func testServerToServerAuthentication(apiToken: String) async throws {
+    static func testServerToServerAuthentication(
+        apiToken: String,
+        containerIdentifier: String,
+        keyID: String?,
+        privateKey: String?,
+        privateKeyFile: String?,
+        environment: MistKit.Environment
+    ) async throws {
         print("\n" + String(repeating: "=", count: 60))
         print("🔐 Server-to-Server Authentication Test")
         print(String(repeating: "=", count: 60))
@@ -589,11 +601,10 @@ struct MistDemo: AsyncParsableCommand {
 
                 // Test with CloudKit service
                 print("\n🌐 Testing CloudKit integration...")
-                let cloudKitEnvironment: MistKit.Environment = environment == "production" ? .production : .development
                 let service = try CloudKitService(
                     containerIdentifier: containerIdentifier,
                     tokenManager: serverManager,
-                    environment: cloudKitEnvironment,
+                    environment: environment,
                     database: .public  // Server-to-server only supports public database
                 )
 
@@ -608,7 +619,7 @@ struct MistDemo: AsyncParsableCommand {
                     print("     Type: \(record.recordType)")
                     print("     Fields: \(FieldValueFormatter.formatFields(record.fields))")
                 }
-                
+
             } else {
                 print("❌ Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+")
                 print("💡 On older platforms, use API-only or Web authentication instead")
