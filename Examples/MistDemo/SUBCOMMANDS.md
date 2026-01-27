@@ -377,30 +377,40 @@ mistdemo modify-zones --operations-file <file> [options]
 
 ## Authentication Operations
 
-### `mistdemo auth`
-Interactive authentication flow for web authentication.
+### `mistdemo auth-token`
+Obtain a web authentication token by signing in with Apple ID. Outputs the token to stdout.
+
+**Requires:** `--api-token` or `CLOUDKIT_API_TOKEN` environment variable
 
 ```bash
-mistdemo auth [options]
+mistdemo auth-token [options]
 ```
 
 **Options:**
 - `--port` / `-p` - Local server port (default: 8080)
 - `--host` - Local server host (default: 127.0.0.1)
 - `--no-browser` - Don't open browser automatically
-- `--save-token` - Save token to config file
+- `--api-token` / `-a` - CloudKit API token (required, or set `CLOUDKIT_API_TOKEN`)
 
 **Examples:**
 ```bash
-# Start authentication flow
-mistdemo auth
+# Get web auth token (outputs to stdout)
+mistdemo auth-token --api-token YOUR_API_TOKEN
+
+# Save token to environment variable
+export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token --api-token YOUR_API_TOKEN)
+
+# Save token to file
+mistdemo auth-token --api-token YOUR_API_TOKEN > ~/.mistdemo/token.txt
 
 # Custom port
-mistdemo auth --port 3000
+mistdemo auth-token --api-token YOUR_API_TOKEN --port 3000
 
-# Save token for reuse
-mistdemo auth --save-token
+# Don't open browser automatically
+mistdemo auth-token --api-token YOUR_API_TOKEN --no-browser
 ```
+
+**Note:** The token is output to stdout. You can redirect it to a file, set it as an environment variable, or use it directly in scripts. The token is required for accessing private or shared databases.
 
 ### `mistdemo validate`
 Validate current authentication credentials.
@@ -660,7 +670,7 @@ extension ConfigurationSet {
    - `query` - Most commonly used operation
    - `create` - Basic record creation
    - `current-user` - Authentication verification
-   - `auth` - Web authentication flow
+   - `auth-token` - Obtain web authentication token
 
 3. **Phase 3 - CRUD Operations**
    - `update` - Record updates
