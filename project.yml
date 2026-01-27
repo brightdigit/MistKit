@@ -4,8 +4,10 @@ settings:
 packages:
   MistKit:
     path: .
+  MistDemo:
+    path: .
   Bushel:
-    path: Examples/BushelCloud
+    path: Examples/MistDemo
   Celestra:
     path: Examples/CelestraCloud
 aggregateTargets:
