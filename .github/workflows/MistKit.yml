@@ -99,7 +99,7 @@ jobs:
         swift:
           - version: "6.1"
           - version: "6.2"
-        android-api-level: [28, 33, 34]
+        android-api-level: [33, 34]
     steps:
       - uses: actions/checkout@v4
       - name: Free disk space
