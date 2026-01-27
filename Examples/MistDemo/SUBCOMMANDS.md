@@ -434,7 +434,20 @@ mistdemo validate --test-query
 ## Configuration Management
 
 ### Configuration Files
-MistDemo supports JSON and YAML configuration files:
+MistDemo supports JSON and YAML configuration files using Swift Configuration package:
+- **JSON**: Uses `JSONSnapshot` (default trait, included automatically)
+- **YAML**: Uses `YAMLSnapshot` (requires `"YAML"` trait)
+- **Environment Variables**: Uses `EnvironmentVariablesProvider` (core functionality, no trait needed)
+- **Command Line Arguments**: Uses `CommandLineArgumentsProvider` (requires `"CommandLineArguments"` trait)
+
+Add the dependency to your `Package.swift`:
+```swift
+.package(
+    url: "https://github.com/apple/swift-configuration",
+    from: "1.0.0",
+    traits: [.defaults, "CommandLineArguments", "YAML"]  // JSON (default) + CommandLineArguments + YAML support
+)
+```
 
 **config.json:**
 ```json
@@ -643,20 +656,47 @@ struct CreateConfig: ConfigurationSet {
 
 ### 5. Configuration File Support
 ```swift
+import Configuration
+
 extension ConfigurationSet {
     static func load(from file: URL) throws -> Self {
-        let data = try Data(contentsOf: file)
+        let provider: ConfigurationProvider
         
         switch file.pathExtension {
         case "json":
-            return try JSONDecoder().decode(Self.self, from: data)
+            // Uses JSONSnapshot (default trait, included automatically)
+            let snapshot = try JSONSnapshot(
+                data: try Data(contentsOf: file),
+                providerName: "config-file",
+                parsingOptions: []
+            )
+            provider = FileProvider(snapshot: snapshot, filePath: file.path)
         case "yaml", "yml":
-            return try YAMLDecoder().decode(Self.self, from: data)
+            // Uses YAMLSnapshot (requires "YAML" trait enabled)
+            let snapshot = try YAMLSnapshot(
+                data: try Data(contentsOf: file),
+                providerName: "config-file",
+                parsingOptions: []
+            )
+            provider = FileProvider(snapshot: snapshot, filePath: file.path)
         default:
             throw ConfigError.unsupportedFormat
         }
+        
+        let reader = ConfigReader(provider: provider)
+        // Read configuration values using reader
+        // Example: reader.string(forKey: "container_id")
+        // ...
     }
 }
+
+// Environment variables (no trait needed)
+let envProvider = EnvironmentVariablesProvider()
+let envConfig = ConfigReader(provider: envProvider)
+
+// Command line arguments (requires "CommandLineArguments" trait)
+let cliProvider = CommandLineArgumentsProvider()
+let cliConfig = ConfigReader(provider: cliProvider)
 ```
 
 ## Implementation Priority
