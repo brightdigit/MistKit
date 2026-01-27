@@ -1,0 +1,14 @@
+DEFINE SCHEMA
+
+RECORD TYPE MistKitIntegrationTest (
+    "___recordID"            REFERENCE QUERYABLE,
+    "title"                  STRING QUERYABLE SORTABLE SEARCHABLE,
+    "index"                  INT64 QUERYABLE SORTABLE,
+    "image"                  ASSET,
+    "createdAt"              TIMESTAMP QUERYABLE SORTABLE,
+    "modified"               INT64 QUERYABLE,
+
+    GRANT READ, CREATE, WRITE TO "_creator",
+    GRANT READ, CREATE, WRITE TO "_icloud",
+    GRANT READ TO "_world"
+);
