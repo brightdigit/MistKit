@@ -1,6 +1,6 @@
 DEFINE SCHEMA
 
-RECORD TYPE MistKitIntegrationTest (
+RECORD TYPE Note (
     "___recordID"            REFERENCE QUERYABLE,
     "title"                  STRING QUERYABLE SORTABLE SEARCHABLE,
     "index"                  INT64 QUERYABLE SORTABLE,

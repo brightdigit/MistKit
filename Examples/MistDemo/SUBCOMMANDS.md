@@ -21,11 +21,18 @@ All subcommands accept these global options:
 
 ## Record Operations
 
+MistDemo works with the `Note` record type defined in `schema.ckdb`. This record type has the following fields:
+- `title` (STRING) - Queryable, sortable, searchable
+- `index` (INT64) - Queryable, sortable
+- `image` (ASSET) - Optional asset reference
+- `createdAt` (TIMESTAMP) - Queryable, sortable
+- `modified` (INT64) - Queryable
+
 ### `mistdemo query`
-Query records from CloudKit with filtering and sorting.
+Query Note records from CloudKit with filtering and sorting.
 
 ```bash
-mistdemo query <record-type> [options]
+mistdemo query [options]
 ```
 
 **Options:**
@@ -39,25 +46,28 @@ mistdemo query <record-type> [options]
 
 **Examples:**
 ```bash
-# Query all TodoItem records
-mistdemo query TodoItem
+# Query all Note records
+mistdemo query
 
 # Query with filters
-mistdemo query Article \
-  --filter "publishedDate > '2024-01-01'" \
-  --filter "status = 'published'" \
-  --sort "publishedDate:desc" \
+mistdemo query \
+  --filter "title CONTAINS 'test'" \
+  --filter "index > 10" \
+  --sort "createdAt:desc" \
   --limit 50
 
 # Query specific fields only
-mistdemo query User --fields "name,email,createdAt"
+mistdemo query --fields "title,index,createdAt"
+
+# Sort by index
+mistdemo query --sort "index:asc"
 ```
 
 ### `mistdemo create`
-Create a new record in CloudKit.
+Create a new Note record in CloudKit.
 
 ```bash
-mistdemo create <record-type> [options]
+mistdemo create [options]
 ```
 
 **Options:**
@@ -68,42 +78,39 @@ mistdemo create <record-type> [options]
 - `--stdin` - Read record data from stdin
 
 **Field Types:**
-- `string` - Text value
-- `int64` - Integer value
-- `double` - Floating point value
-- `date` - ISO8601 date string
-- `bytes` - Base64 encoded data
-- `reference` - Record reference (recordName)
-- `asset` - Asset reference
-- `location` - Latitude,longitude
-- `string_list` - Comma-separated strings
-- `int64_list` - Comma-separated integers
+- `string` - Text value (for `title`)
+- `int64` - Integer value (for `index`, `modified`)
+- `timestamp` - ISO8601 date string (for `createdAt`)
+- `asset` - Asset reference (for `image`)
 
 **Examples:**
 ```bash
 # Create a simple record
-mistdemo create TodoItem \
-  --field "title:string:Buy groceries" \
-  --field "completed:int64:0" \
-  --field "dueDate:date:2024-12-31T23:59:59Z"
+mistdemo create \
+  --field "title:string:My Note" \
+  --field "index:int64:1" \
+  --field "modified:int64:0"
 
-# Create with custom record name
-mistdemo create Article \
-  --record-name "article_2024_001" \
-  --field "title:string:Getting Started with CloudKit"
+# Create with custom record name and all fields
+mistdemo create \
+  --record-name "note_001" \
+  --field "title:string:Getting Started with CloudKit" \
+  --field "index:int64:42" \
+  --field "createdAt:timestamp:2024-01-01T00:00:00Z" \
+  --field "modified:int64:0"
 
 # Create from JSON file
-mistdemo create Product --json-file product.json
+mistdemo create --json-file testitem.json
 
 # Create from stdin
-echo '{"title": {"value": "Test"}}' | mistdemo create TodoItem --stdin
+echo '{"title": {"value": "Test"}, "index": {"value": 1}}' | mistdemo create --stdin
 ```
 
 ### `mistdemo update`
-Update an existing record in CloudKit.
+Update an existing Note record in CloudKit.
 
 ```bash
-mistdemo update <record-type> <record-name> [options]
+mistdemo update <record-name> [options]
 ```
 
 **Options:**
@@ -117,24 +124,25 @@ mistdemo update <record-type> <record-name> [options]
 **Examples:**
 ```bash
 # Update a single field
-mistdemo update TodoItem todo_001 \
-  --field "completed:int64:1"
+mistdemo update note_001 \
+  --field "title:string:Updated Title"
 
 # Update multiple fields with change tag
-mistdemo update Article article_2024_001 \
+mistdemo update note_001 \
   --field "title:string:Updated Title" \
-  --field "modifiedDate:date:2024-12-01T00:00:00Z" \
+  --field "index:int64:100" \
+  --field "modified:int64:1" \
   --change-tag "abc123"
 
 # Force update from JSON
-mistdemo update Product prod_123 --json-file updates.json --force
+mistdemo update note_001 --json-file updates.json --force
 ```
 
 ### `mistdemo delete`
-Delete a record from CloudKit.
+Delete a Note record from CloudKit.
 
 ```bash
-mistdemo delete <record-type> <record-name> [options]
+mistdemo delete <record-name> [options]
 ```
 
 **Options:**
@@ -145,17 +153,17 @@ mistdemo delete <record-type> <record-name> [options]
 **Examples:**
 ```bash
 # Delete a record
-mistdemo delete TodoItem todo_001
+mistdemo delete note_001
 
 # Delete with change tag
-mistdemo delete Article article_old --change-tag "xyz789"
+mistdemo delete note_old --change-tag "xyz789"
 
 # Force delete
-mistdemo delete Product temp_product --force
+mistdemo delete temp_note --force
 ```
 
 ### `mistdemo lookup`
-Lookup specific records by their record names.
+Lookup specific Note records by their record names.
 
 ```bash
 mistdemo lookup <record-names...> [options]
@@ -168,13 +176,13 @@ mistdemo lookup <record-names...> [options]
 **Examples:**
 ```bash
 # Lookup a single record
-mistdemo lookup todo_001
+mistdemo lookup note_001
 
 # Lookup multiple records
-mistdemo lookup todo_001 todo_002 todo_003
+mistdemo lookup note_001 note_002 note_003
 
 # Lookup with specific fields
-mistdemo lookup article_2024_001 --fields "title,author,publishedDate"
+mistdemo lookup note_001 --fields "title,index,createdAt"
 ```
 
 ### `mistdemo modify`
@@ -195,23 +203,26 @@ mistdemo modify --operations-file <file> [options]
   "operations": [
     {
       "type": "create",
-      "recordType": "TodoItem",
+      "recordType": "Note",
       "fields": {
-        "title": {"value": "New Todo"}
+        "title": {"value": "New Note"},
+        "index": {"value": 1},
+        "modified": {"value": 0}
       }
     },
     {
       "type": "update",
-      "recordType": "TodoItem",
-      "recordName": "todo_001",
+      "recordType": "Note",
+      "recordName": "note_001",
       "fields": {
-        "completed": {"value": 1}
+        "title": {"value": "Updated Title"},
+        "modified": {"value": 1}
       }
     },
     {
       "type": "delete",
-      "recordType": "TodoItem",
-      "recordName": "todo_old"
+      "recordType": "Note",
+      "recordName": "note_old"
     }
   ]
 }
@@ -456,10 +467,10 @@ profiles:
 ### Using Profiles
 ```bash
 # Use production profile
-mistdemo query TodoItem --profile production
+mistdemo query --profile production
 
 # Use testing profile with override
-mistdemo create TodoItem --profile testing --database private
+mistdemo create --profile testing --database private
 ```
 
 ### Environment Variables
@@ -482,10 +493,13 @@ export MISTDEMO_PROFILE="production"
 {
   "records": [
     {
-      "recordName": "todo_001",
-      "recordType": "TodoItem",
+      "recordName": "note_001",
+      "recordType": "Note",
       "fields": {
-        "title": {"value": "Buy groceries"}
+        "title": {"value": "My Note"},
+        "index": {"value": 1},
+        "createdAt": {"value": "2024-01-01T00:00:00Z"},
+        "modified": {"value": 0}
       }
     }
   ]
@@ -494,27 +508,29 @@ export MISTDEMO_PROFILE="production"
 
 ### Table
 ```
-┌────────────┬───────────┬────────────────┐
-│ Record Name│ Type      │ Title          │
-├────────────┼───────────┼────────────────┤
-│ todo_001   │ TodoItem  │ Buy groceries  │
-└────────────┴───────────┴────────────────┘
+┌───────────────┬──────────┬──────────────┬───────┐
+│ Record Name   │ Type     │ Title        │ Index │
+├───────────────┼──────────┼──────────────┼───────┤
+│ note_001      │ Note     │ My Note      │ 1     │
+└───────────────┴──────────┴──────────────┴───────┘
 ```
 
 ### CSV
 ```csv
-record_name,record_type,title
-todo_001,TodoItem,Buy groceries
+record_name,record_type,title,index
+note_001,Note,My Note,1
 ```
 
 ### YAML
 ```yaml
 records:
-  - recordName: todo_001
-    recordType: TodoItem
+  - recordName: note_001
+    recordType: Note
     fields:
       title:
-        value: Buy groceries
+        value: My Note
+      index:
+        value: 1
 ```
 
 ## ConfigKeyKit Extension Strategy
@@ -672,10 +688,10 @@ Consistent error reporting across all subcommands:
 ```
 Error: CloudKit operation failed
   Operation: query
-  Record Type: TodoItem
+  Record Type: Note
   Status: 400 Bad Request
   Reason: Invalid filter expression
-  Details: Unknown field 'invalidField' in filter
+  Details: Unknown field 'invalidField' in filter. Valid fields: title, index, createdAt, modified, image
 
 Try 'mistdemo query --help' for more information.
 ```
