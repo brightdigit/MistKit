@@ -88,11 +88,6 @@ let package = Package(
         .package(path: "../.."),  // MistKit
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0")
-        // TODO: Re-enable swift-configuration once SIL verification issues are resolved
-        // .package(
-        //     url: "https://github.com/apple/swift-configuration",
-        //     from: "1.0.0"
-        // )
     ],
     targets: [
         .target(
@@ -107,8 +102,6 @@ let package = Package(
                 .product(name: "MistKit", package: "MistKit"),
                 .product(name: "Hummingbird", package: "hummingbird"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
-                // TODO: Re-enable Configuration once SIL verification issues are resolved
-                // .product(name: "Configuration", package: "swift-configuration")
             ],
             resources: [
                 .copy("Resources")

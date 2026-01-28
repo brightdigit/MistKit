@@ -32,7 +32,7 @@ import MistKit
 
 /// Centralized configuration for MistDemo
 /// Implements hierarchical configuration (CLI → ENV → defaults)
-public struct MistDemoConfig {
+public struct MistDemoConfig: Sendable {
     // MARK: - CloudKit Core Configuration
 
     /// CloudKit container identifier

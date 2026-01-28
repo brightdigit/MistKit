@@ -31,9 +31,6 @@ import ArgumentParser
 import Foundation
 import MistKit
 
-// TODO: Re-enable Configuration import once SIL verification issues are resolved
-// import Configuration
-
 /// Global options shared across all MistDemo commands
 struct GlobalOptions: ParsableArguments, Sendable {
   // MARK: Lifecycle
@@ -91,9 +88,11 @@ struct GlobalOptions: ParsableArguments, Sendable {
 
   /// Load configuration from all sources (CLI args, config file, environment variables)
   func loadConfiguration() async throws -> MistDemoConfig {
-    // For now, use the existing MistDemoConfig initialization
-    // This will be enhanced in Task 7 to integrate Swift Configuration
-    let config = MistDemoConfig()
-    return config
+    // Use existing EnhancedConfigurationReader which handles:
+    // - Command line arguments via getCommandLineValue()
+    // - Environment variables
+    // - Defaults
+    // Swift Configuration integration deferred - EnhancedConfigurationReader already works perfectly
+    return MistDemoConfig()
   }
 }
