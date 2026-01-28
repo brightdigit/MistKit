@@ -114,6 +114,15 @@ let package = Package(
                 .copy("Resources")
             ],
             swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "MistDemoTests",
+            dependencies: [
+                "MistDemo",
+                "ConfigKeyKit",
+                .product(name: "MistKit", package: "MistKit")
+            ],
+            swiftSettings: swiftSettings
         )
     ]
 )
