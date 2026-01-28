@@ -6,35 +6,42 @@ MistDemo supports flexible configuration through files, profiles, environment va
 
 Configuration is resolved from multiple sources with the following priority (highest to lowest):
 
-1. **Command-line arguments** - Explicit flags like `--database private`
+**Current Implementation:**
+1. **Environment variables** - System environment (e.g., `CLOUDKIT_CONTAINER_ID`)
+2. **Built-in defaults** - Hardcoded fallback values in `InMemoryProvider`
+
+**Planned Additions:**
+1. **Command-line arguments** - Explicit flags like `--database private` (requires CommandLineArgumentsProvider)
 2. **Profile settings** - From `--profile` in configuration file
-3. **Configuration file** - Default values in JSON/YAML file
-4. **Environment variables** - System environment (e.g., `CLOUDKIT_CONTAINER_ID`)
-5. **Built-in defaults** - Hardcoded fallback values
+3. **Configuration file** - Default values in JSON/YAML file (requires FileProvider)
 
 ## Swift Configuration Package
 
-MistDemo uses [swift-configuration](https://github.com/apple/swift-configuration) with these providers:
+MistDemo uses [swift-configuration](https://github.com/apple/swift-configuration) for hierarchical configuration management.
 
-### Required Package Traits
+### Requirements
 
-Add to your `Package.swift`:
+- **macOS 15.0+** required due to Swift Configuration dependency
+- Swift 6.0 or later
+
+### Package Configuration
+
 ```swift
 .package(
     url: "https://github.com/apple/swift-configuration",
-    from: "1.0.0",
-    traits: [.defaults, "CommandLineArguments", "YAML"]
+    from: "1.0.0"
 )
 ```
 
-### Provider Support
+### Current Implementation
 
-| Provider | Trait Required | Purpose |
-|----------|---------------|---------|
-| `JSONSnapshot` | ✗ (included in `.defaults`) | JSON configuration files |
-| `YAMLSnapshot` | ✓ (`"YAML"`) | YAML configuration files |
-| `EnvironmentVariablesProvider` | ✗ (core functionality) | Environment variables |
-| `CommandLineArgumentsProvider` | ✓ (`"CommandLineArguments"`) | CLI argument parsing |
+| Provider | Status | Purpose |
+|----------|--------|---------|  
+| `EnvironmentVariablesProvider` | ✅ Implemented | Environment variables with automatic key transformation |
+| `InMemoryProvider` | ✅ Implemented | Default values |
+| `CommandLineArgumentsProvider` | ⏳ Planned | CLI argument parsing |
+| `FileProvider + JSONSnapshot` | ⏳ Planned | JSON configuration files |
+| `FileProvider + YAMLSnapshot` | ⏳ Planned | YAML configuration files |
 
 ## Configuration File Formats
 
@@ -93,15 +100,23 @@ profiles:
 
 ### Configuration Keys
 
-| Key | Type | Environment Variable | Default | Description |
+**Note**: Swift Configuration automatically transforms keys:
+- Dots (`.`) become underscores (`_`) for environment variables
+- Example: `container.identifier` → `CONTAINER_IDENTIFIER` environment variable
+- When CommandLineArgumentsProvider is added: dots become hyphens for CLI args (`container.identifier` → `--container-identifier`)
+
+| Key | Type | Environment Variable (Auto-transformed) | Default | Description |
 |-----|------|---------------------|---------|-------------|
-| `container_id` | String | `CLOUDKIT_CONTAINER_ID` | Required | Container identifier |
-| `api_token` | String | `CLOUDKIT_API_TOKEN` | Required | API token (secret) |
-| `environment` | String | `CLOUDKIT_ENVIRONMENT` | `development` | CloudKit environment |
-| `database` | String | `CLOUDKIT_DATABASE` | `public` | Database type |
-| `web_auth_token` | String | `CLOUDKIT_WEBAUTH_TOKEN` | | Web auth token (secret) |
-| `key_id` | String | `CLOUDKIT_KEY_ID` | | Server-to-server key ID |
-| `private_key_file` | String | `CLOUDKIT_PRIVATE_KEY_FILE` | | Path to private key |
+| `container.identifier` | String | `CONTAINER_IDENTIFIER` | `iCloud.com.brightdigit.MistDemo` | Container identifier |
+| `api.token` | String | `API_TOKEN` | Empty string | API token (secret) |
+| `environment` | String | `ENVIRONMENT` | `development` | CloudKit environment |
+| `database` | String | `DATABASE` | Varies by auth method | Database type |
+| `web.auth.token` | String | `WEB_AUTH_TOKEN` | | Web auth token (secret) |
+| `key.id` | String | `KEY_ID` | | Server-to-server key ID |
+| `private.key` | String | `PRIVATE_KEY` | | Private key content (secret) |
+| `private.key.file` | String | `PRIVATE_KEY_FILE` | | Path to private key |
+| `host` | String | `HOST` | `127.0.0.1` | Server host for authentication |
+| `port` | Int | `PORT` | `8080` | Server port |
 | `output` | String | `MISTDEMO_OUTPUT` | `json` | Output format |
 | `pretty` | Boolean | `MISTDEMO_PRETTY` | `false` | Pretty print output |
 | `verbose` | Boolean | `MISTDEMO_VERBOSE` | `false` | Verbose logging |

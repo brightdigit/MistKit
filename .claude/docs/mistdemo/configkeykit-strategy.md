@@ -1,15 +1,24 @@
 # ConfigKeyKit Extension Strategy
 
-This document outlines the configuration architecture for MistDemo using the Swift Configuration package with ConfigKeyKit-style patterns.
+This document outlines the configuration architecture for MistDemo, combining Swift Configuration with a lightweight ConfigKeyKit module.
 
-## Overview
+## Current Implementation
 
-MistDemo extends Swift Configuration to support:
-1. Hierarchical configuration keys
-2. Command-specific configuration
-3. Configuration profiles
-4. Dynamic resolution with priority
-5. Type-safe configuration access
+MistDemo uses a two-module approach:
+1. **ConfigKeyKit** - Lightweight module containing only reusable configuration key types (no dependencies)
+2. **MistDemoConfiguration** - Swift Configuration wrapper in the MistDemo module (requires macOS 15.0+)
+
+## Architecture Decisions
+
+### Module Separation
+- ConfigKeyKit remains dependency-free for maximum reusability
+- MistDemo module contains the Swift Configuration dependency
+- This allows ConfigKeyKit to be used in other projects without forcing Swift Configuration
+
+### Swift Configuration Integration
+- Uses `ConfigReader` with provider hierarchy
+- Currently supports: Environment variables → Defaults
+- Planned: Command-line arguments → Files → Environment → Defaults
 
 ## Architecture
 

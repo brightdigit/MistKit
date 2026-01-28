@@ -32,15 +32,7 @@ import MistKit
 
 /// Helper utilities for managing CloudKit authentication
 enum AuthenticationHelper {
-    
-    /// Result of authentication setup including token manager and selected database
-    struct AuthenticationResult {
-        let tokenManager: TokenManager
-        let database: MistKit.Database
-        let authMethod: String  // Description for logging
-    }
-    
-    /// Creates appropriate TokenManager and determines database based on credentials
+  /// Creates appropriate TokenManager and determines database based on credentials
     /// - Parameters:
     ///   - apiToken: CloudKit API token (always required)
     ///   - webAuthToken: Web authentication token from Sign in with Apple
@@ -141,7 +133,10 @@ enum AuthenticationHelper {
             do {
                 privateKeyPEM = try String(contentsOfFile: keyFile, encoding: .utf8)
             } catch {
-                throw AuthenticationError.failedToReadPrivateKeyFile(keyFile, error)
+                throw AuthenticationError.failedToReadPrivateKeyFile(
+                  path: keyFile,
+                  errorDescription: error.localizedDescription
+                )
             }
         } else if let key = privateKey {
             privateKeyPEM = key
@@ -201,41 +196,5 @@ enum AuthenticationHelper {
             ProcessInfo.processInfo.environment["CLOUDKIT_WEBAUTH_TOKEN"] ?? "" :
             webAuthToken
         return token.isEmpty ? nil : token
-    }
-}
-
-/// Errors that can occur during authentication setup
-enum AuthenticationError: LocalizedError {
-    case serverToServerRequiresPublicDatabase
-    case failedToReadPrivateKeyFile(String, any Error)
-    case missingPrivateKey
-    case serverToServerNotSupported
-    case invalidServerToServerCredentials
-    case privateRequiresWebAuth
-    case invalidWebAuthCredentials
-    case invalidAPIToken
-    case noValidAuthenticationMethod
-    
-    var errorDescription: String? {
-        switch self {
-        case .serverToServerRequiresPublicDatabase:
-            return "Server-to-server authentication only supports public database access"
-        case .failedToReadPrivateKeyFile(let path, let error):
-            return "Failed to read private key file at \(path): \(error.localizedDescription)"
-        case .missingPrivateKey:
-            return "Server-to-server authentication requires a private key (use --private-key or --private-key-file)"
-        case .serverToServerNotSupported:
-            return "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
-        case .invalidServerToServerCredentials:
-            return "Server-to-server credentials validation failed. Check your key ID and private key."
-        case .privateRequiresWebAuth:
-            return "Private database access requires web authentication token. Use 'mistdemo auth' to sign in with Apple ID or provide --web-auth-token"
-        case .invalidWebAuthCredentials:
-            return "Web authentication credentials validation failed. Token may be expired."
-        case .invalidAPIToken:
-            return "API token validation failed. Check your CloudKit API token."
-        case .noValidAuthenticationMethod:
-            return "No valid authentication method could be determined from provided credentials"
-        }
     }
 }
