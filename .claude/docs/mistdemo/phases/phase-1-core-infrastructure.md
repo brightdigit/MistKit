@@ -34,43 +34,42 @@ protocol MistDemoCommand: AsyncParsableCommand {
 - [ ] Configuration loading hooks
 - [ ] Unit tests for protocol conformance
 
-### 2. ConfigKeyKit Extensions
+### 2. Configuration Management with Swift Configuration
 
-**File**: `Sources/MistDemo/Configuration/ConfigurationManager.swift`
+**Implementation Status**: ✅ Partially Complete
 
-Implement Swift Configuration integration:
+Implemented Swift Configuration integration using Apple's official configuration library:
 
-```swift
-class ConfigurationManager {
-    static let shared = ConfigurationManager()
+**Completed Features:**
+- [x] Environment variable provider (EnvironmentVariablesProvider)
+- [x] In-memory defaults provider (InMemoryProvider)
+- [x] Hierarchical resolution (Environment > Defaults)
+- [x] Type-safe configuration with ConfigReader
+- [x] MistDemoConfiguration wrapper for clean API
+- [x] Automatic key transformation (dots to underscores for env vars)
+- [x] Secret handling for sensitive values
 
-    func loadConfiguration(
-        configFile: String?,
-        profile: String?
-    ) throws -> ConfigReader
-}
-```
+**Files Implemented:**
+- `Sources/MistDemo/Configuration/MistDemoConfiguration.swift` - Swift Configuration wrapper
+- `Sources/MistDemo/Configuration/MistDemoConfig.swift` - Configuration data model
+- `Sources/ConfigKeyKit/` - Reusable configuration key types
 
-**Features:**
-- [x] JSON configuration file support (JSONSnapshot, default trait)
-- [x] YAML configuration file support (YAMLSnapshot, requires "YAML" trait)
-- [x] Environment variable provider (core functionality)
-- [x] Command-line arguments provider (requires "CommandLineArguments" trait)
-- [x] Profile merging
-- [x] Priority resolution (CLI > Profile > File > Environment > Defaults)
+**Pending Features:**
+- [ ] Command-line arguments provider (requires CommandLineArgumentsProvider)
+- [ ] JSON configuration file support (requires FileProvider with JSONSnapshot)
+- [ ] YAML configuration file support (requires FileProvider with YAMLSnapshot)
+- [ ] Profile merging and selection
+- [ ] Full priority resolution (CLI > Profile > File > Environment > Defaults)
 
-**Files:**
-- `Sources/MistDemo/Configuration/ConfigurationManager.swift`
-- `Sources/MistDemo/Configuration/MistDemoConfig.swift`
-- `Sources/MistDemo/Configuration/ConfigError.swift`
+**Note**: Requires macOS 15.0+ due to Swift Configuration dependency.
 
 **Acceptance Criteria:**
 - [ ] Load JSON configuration files
 - [ ] Load YAML configuration files
-- [ ] Read environment variables
+- [x] Read environment variables
 - [ ] Merge profiles with base configuration
-- [ ] Resolve configuration priority correctly
-- [ ] Handle missing configuration gracefully
+- [x] Resolve configuration priority correctly (for implemented providers)
+- [x] Handle missing configuration gracefully
 - [ ] Unit tests for all configuration sources
 - [ ] Integration tests for priority resolution
 
@@ -147,63 +146,68 @@ enum MistDemoError: Error {
 
 ## Package Dependencies
 
-Update `Package.swift`:
+Current `Package.swift` configuration:
 
 ```swift
+platforms: [
+    .macOS(.v15)  // Required for Swift Configuration
+],
 dependencies: [
-    .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
-    .package(
-        url: "https://github.com/apple/swift-configuration",
-        from: "1.0.0",
-        traits: [.defaults, "CommandLineArguments", "YAML"]
-    ),
-    .package(url: "https://github.com/apple/swift-log", from: "1.5.0"),
     .package(path: "../.."),  // MistKit
+    .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
+    .package(url: "https://github.com/apple/swift-configuration", from: "1.0.0")
 ],
 targets: [
+    .target(
+        name: "ConfigKeyKit",
+        dependencies: []  // Lightweight, no dependencies
+    ),
     .executableTarget(
         name: "MistDemo",
         dependencies: [
-            .product(name: "ArgumentParser", package: "swift-argument-parser"),
-            .product(name: "Configuration", package: "swift-configuration"),
-            .product(name: "Logging", package: "swift-log"),
-            "MistKit",
+            "ConfigKeyKit",
+            .product(name: "MistKit", package: "MistKit"),
+            .product(name: "Hummingbird", package: "hummingbird"),
+            .product(name: "Configuration", package: "swift-configuration")
         ]
-    ),
+    )
 ]
 ```
 
+**Note**: ArgumentParser was removed in favor of direct Swift Configuration usage.
+
 ## File Structure
 
+**Current Implementation:**
 ```
-Sources/MistDemo/
-├── MistDemo.swift              # Main entry point
-├── Commands/
-│   └── CommandProtocol.swift   # Base command protocol
-├── Configuration/
-│   ├── ConfigurationManager.swift
-│   ├── MistDemoConfig.swift
-│   └── ConfigError.swift
-├── Output/
-│   ├── OutputFormatter.swift   # Protocol
-│   ├── JSONFormatter.swift
-│   ├── TableFormatter.swift
-│   ├── CSVFormatter.swift
-│   └── YAMLFormatter.swift
-└── Errors/
-    └── MistDemoError.swift
+Sources/
+├── ConfigKeyKit/               # Reusable configuration key types
+│   ├── ConfigKey.swift
+│   ├── ConfigurationKey.swift
+│   └── OptionalConfigKey.swift
+└── MistDemo/
+    ├── MistDemo.swift          # Main entry point
+    ├── Configuration/
+    │   ├── MistDemoConfiguration.swift  # Swift Configuration wrapper
+    │   └── MistDemoConfig.swift         # Configuration data model
+    ├── Utilities/
+    │   ├── AuthenticationHelper.swift   # Authentication setup logic
+    │   └── AuthenticationResult.swift   # Auth result model
+    └── Errors/
+        └── AuthenticationError.swift    # Authentication errors
 
 Tests/MistDemoTests/
 ├── Configuration/
-│   ├── ConfigurationManagerTests.swift
-│   ├── ProfileMergingTests.swift
-│   └── PriorityResolutionTests.swift
-└── Output/
-    ├── JSONFormatterTests.swift
-    ├── TableFormatterTests.swift
-    ├── CSVFormatterTests.swift
-    └── YAMLFormatterTests.swift
+│   └── (Tests pending)
+└── Utilities/
+    └── (Tests pending)
 ```
+
+**Pending Implementation:**
+- Command protocol structure
+- Output formatters (JSON, Table, CSV, YAML)
+- Comprehensive error handling
+- Test coverage
 
 ## Testing Requirements
 
