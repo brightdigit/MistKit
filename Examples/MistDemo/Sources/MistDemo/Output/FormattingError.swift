@@ -1,5 +1,5 @@
 //
-//  OutputFormatter.swift
+//  FormattingError.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -29,28 +29,22 @@
 
 import Foundation
 
-/// Protocol for formatting output in different formats
-public protocol OutputFormatter: Sendable {
-  /// Format an encodable value to a string
-  func format<T: Encodable>(_ value: T) throws -> String
-}
+/// Formatting errors
+enum FormattingError: LocalizedError, Sendable {
+  case encodingFailed
+  case invalidStructure(String)
+  case unsupportedFormat(OutputFormat)
 
-/// Supported output formats
-public enum OutputFormat: String, Sendable, CaseIterable {
-  case json
-  case table
-  case csv
-  case yaml
+  // MARK: Internal
 
-  // MARK: Public
-
-  /// Create the appropriate formatter for this format
-  public func createFormatter(pretty: Bool = false) throws -> any OutputFormatter {
+  var errorDescription: String? {
     switch self {
-    case .json:
-      JSONFormatter(pretty: pretty)
-    case .table, .csv, .yaml:
-      throw FormattingError.unsupportedFormat(self)
+    case .encodingFailed:
+      "Failed to encode data to UTF-8 string"
+    case let .invalidStructure(message):
+      "Invalid data structure: \(message)"
+    case let .unsupportedFormat(format):
+      "\(format.rawValue) format is not yet implemented. Use 'json' format instead."
     }
   }
 }

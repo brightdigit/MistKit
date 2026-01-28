@@ -81,6 +81,9 @@ extension ErrorOutput {
       encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     }
     let data = try encoder.encode(self)
-    return String(data: data, encoding: .utf8) ?? ""
+    guard let string = String(data: data, encoding: .utf8) else {
+      throw FormattingError.encodingFailed
+    }
+    return string
   }
 }

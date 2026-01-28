@@ -39,9 +39,8 @@ struct MistDemoErrorTests {
 
   @Test("Authentication failed error has correct code")
   func authenticationFailedErrorCode() {
-    struct TestError: Error {}
     let error = MistDemoError.authenticationFailed(
-      underlying: TestError(),
+      description: "Test error description",
       context: "test context"
     )
 
@@ -77,9 +76,8 @@ struct MistDemoErrorTests {
 
   @Test("Authentication failed error has descriptive message")
   func authenticationFailedDescription() {
-    struct TestError: Error {}
     let error = MistDemoError.authenticationFailed(
-      underlying: TestError(),
+      description: "Invalid credentials",
       context: "credential validation"
     )
 
@@ -118,9 +116,8 @@ struct MistDemoErrorTests {
 
   @Test("Authentication failed has recovery suggestion")
   func authenticationFailedRecoverySuggestion() {
-    struct TestError: Error {}
     let error = MistDemoError.authenticationFailed(
-      underlying: TestError(),
+      description: "Test error description",
       context: "test"
     )
 
@@ -155,9 +152,8 @@ struct MistDemoErrorTests {
 
   @Test("Authentication failed includes context in details")
   func authenticationFailedDetails() {
-    struct TestError: Error {}
     let error = MistDemoError.authenticationFailed(
-      underlying: TestError(),
+      description: "Invalid token",
       context: "web auth validation"
     )
 
@@ -216,7 +212,7 @@ struct MistDemoErrorTests {
   @Test("ErrorOutput omits empty details")
   func errorOutputOmitsEmptyDetails() {
     let error = MistDemoError.outputFormattingFailed(
-      NSError(domain: "test", code: 1)
+      description: "Encoding failed"
     )
     let output = error.errorOutput
 

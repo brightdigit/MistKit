@@ -1,5 +1,5 @@
 //
-//  OutputFormatter.swift
+//  AuthenticationResult.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,29 +28,11 @@
 //
 
 import Foundation
+import MistKit
 
-/// Protocol for formatting output in different formats
-public protocol OutputFormatter: Sendable {
-  /// Format an encodable value to a string
-  func format<T: Encodable>(_ value: T) throws -> String
-}
-
-/// Supported output formats
-public enum OutputFormat: String, Sendable, CaseIterable {
-  case json
-  case table
-  case csv
-  case yaml
-
-  // MARK: Public
-
-  /// Create the appropriate formatter for this format
-  public func createFormatter(pretty: Bool = false) throws -> any OutputFormatter {
-    switch self {
-    case .json:
-      JSONFormatter(pretty: pretty)
-    case .table, .csv, .yaml:
-      throw FormattingError.unsupportedFormat(self)
-    }
-  }
+/// Result of authentication setup including token manager and selected database
+struct AuthenticationResult {
+  let tokenManager: TokenManager
+  let database: MistKit.Database
+  let authMethod: String  // Description for logging
 }

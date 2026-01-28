@@ -33,7 +33,7 @@ import MistKit
 /// Comprehensive error type for MistDemo operations
 enum MistDemoError: LocalizedError, Sendable {
   /// Authentication failed with underlying error
-  case authenticationFailed(underlying: any Error, context: String)
+  case authenticationFailed(description: String, context: String)
 
   /// Configuration error
   case configurationError(String, suggestion: String?)
@@ -45,7 +45,7 @@ enum MistDemoError: LocalizedError, Sendable {
   case invalidInput(field: String, value: String, reason: String)
 
   /// Output formatting failed
-  case outputFormattingFailed(any Error)
+  case outputFormattingFailed(description: String)
 
   /// File not found
   case fileNotFound(String)
@@ -141,48 +141,5 @@ enum MistDemoError: LocalizedError, Sendable {
       details: errorDetails.isEmpty ? nil : errorDetails,
       suggestion: recoverySuggestion
     )
-  }
-}
-
-// MARK: - Configuration Errors
-
-/// Configuration-specific errors
-enum ConfigError: LocalizedError, Sendable {
-  case missingAPIToken
-  case invalidEnvironment(String)
-  case fileNotFound(String)
-  case invalidFormat(String, details: String)
-  case profileNotFound(String)
-
-  // MARK: Internal
-
-  var errorDescription: String? {
-    switch self {
-    case .missingAPIToken:
-      "CloudKit API token is required"
-    case let .invalidEnvironment(env):
-      "Invalid environment: \(env)"
-    case let .fileNotFound(path):
-      "Configuration file not found: \(path)"
-    case let .invalidFormat(format, details):
-      "Invalid \(format) format: \(details)"
-    case let .profileNotFound(profile):
-      "Profile not found: \(profile)"
-    }
-  }
-
-  var recoverySuggestion: String? {
-    switch self {
-    case .missingAPIToken:
-      "Set CLOUDKIT_API_TOKEN environment variable or use --api-token flag"
-    case let .invalidEnvironment(env):
-      "Use 'development' or 'production' instead of '\(env)'"
-    case let .fileNotFound(path):
-      "Create a configuration file at \(path)"
-    case let .invalidFormat(format, _):
-      "Check your \(format) configuration file syntax"
-    case let .profileNotFound(profile):
-      "Check available profiles or create '\(profile)' profile"
-    }
   }
 }

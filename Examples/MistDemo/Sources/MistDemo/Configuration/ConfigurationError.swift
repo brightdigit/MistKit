@@ -1,5 +1,5 @@
 //
-//  OutputFormatter.swift
+//  ConfigurationError.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -29,28 +29,19 @@
 
 import Foundation
 
-/// Protocol for formatting output in different formats
-public protocol OutputFormatter: Sendable {
-  /// Format an encodable value to a string
-  func format<T: Encodable>(_ value: T) throws -> String
-}
+/// Configuration errors
+enum ConfigurationError: LocalizedError {
+  case missingAPIToken
+  case invalidEnvironment(String)
 
-/// Supported output formats
-public enum OutputFormat: String, Sendable, CaseIterable {
-  case json
-  case table
-  case csv
-  case yaml
+  // MARK: Internal
 
-  // MARK: Public
-
-  /// Create the appropriate formatter for this format
-  public func createFormatter(pretty: Bool = false) throws -> any OutputFormatter {
+  var errorDescription: String? {
     switch self {
-    case .json:
-      JSONFormatter(pretty: pretty)
-    case .table, .csv, .yaml:
-      throw FormattingError.unsupportedFormat(self)
+    case .missingAPIToken:
+      "CloudKit API token is required. Set CLOUDKIT_API_TOKEN environment variable or use --api-token"
+    case let .invalidEnvironment(env):
+      "Invalid environment '\(env)'. Must be 'development' or 'production'"
     }
   }
 }

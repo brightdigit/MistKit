@@ -54,21 +54,3 @@ public struct JSONFormatter: OutputFormatter {
     return string
   }
 }
-
-// MARK: - Formatting Errors
-
-enum FormattingError: LocalizedError {
-  case encodingFailed
-  case invalidStructure(String)
-
-  // MARK: Internal
-
-  var errorDescription: String? {
-    switch self {
-    case .encodingFailed:
-      "Failed to encode data to UTF-8 string"
-    case let .invalidStructure(message):
-      "Invalid data structure: \(message)"
-    }
-  }
-}
