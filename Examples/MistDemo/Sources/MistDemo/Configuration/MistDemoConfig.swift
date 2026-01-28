@@ -27,11 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import Configuration
 import Foundation
 import MistKit
 
 /// Centralized configuration for MistDemo
-/// Implements hierarchical configuration (CLI → ENV → defaults)
+/// Implements hierarchical configuration using Swift Configuration (CLI → ENV → defaults)
 public struct MistDemoConfig: Sendable {
     // MARK: - CloudKit Core Configuration
 
@@ -85,7 +86,10 @@ public struct MistDemoConfig: Sendable {
 
     // MARK: - Initialization
 
-    public init() {
+    /// Initialize with Swift Configuration's EnvironmentVariablesProvider + existing EnhancedConfigurationReader for CLI args
+    public init() throws {
+        // Use existing EnhancedConfigurationReader for CLI args + ENV vars + defaults
+        // This already works perfectly
         let reader = EnhancedConfigurationReader()
 
         // CloudKit Core

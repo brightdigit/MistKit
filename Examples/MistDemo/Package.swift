@@ -87,7 +87,7 @@ let package = Package(
     dependencies: [
         .package(path: "../.."),  // MistKit
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0")
+        .package(url: "https://github.com/apple/swift-configuration", from: "1.0.0")
     ],
     targets: [
         .target(
@@ -101,7 +101,7 @@ let package = Package(
                 "ConfigKeyKit",
                 .product(name: "MistKit", package: "MistKit"),
                 .product(name: "Hummingbird", package: "hummingbird"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser")
+                .product(name: "Configuration", package: "swift-configuration")
             ],
             resources: [
                 .copy("Resources")

@@ -38,8 +38,8 @@ struct MistDemoConfigTests {
   // MARK: - Default Values Tests
 
   @Test("Config initializes with default values")
-  func configInitializesWithDefaults() {
-    let config = MistDemoConfig()
+  func configInitializesWithDefaults() throws {
+    let config = try MistDemoConfig()
 
     #expect(config.containerIdentifier == "iCloud.com.brightdigit.MistDemo")
     #expect(config.environment == .development)
@@ -55,8 +55,8 @@ struct MistDemoConfigTests {
   // MARK: - Public API Tests
 
   @Test("Config properties are accessible")
-  func configPropertiesAccessible() {
-    let config = MistDemoConfig()
+  func configPropertiesAccessible() throws {
+    let config = try MistDemoConfig()
 
     // Verify all properties can be read
     _ = config.containerIdentifier
@@ -76,8 +76,8 @@ struct MistDemoConfigTests {
   }
 
   @Test("Resolved API token method exists")
-  func resolvedAPITokenMethodExists() {
-    let config = MistDemoConfig()
+  func resolvedAPITokenMethodExists() throws {
+    let config = try MistDemoConfig()
     let token = config.resolvedApiToken()
 
     // Should return empty string when no token is set
@@ -85,8 +85,8 @@ struct MistDemoConfigTests {
   }
 
   @Test("Resolved web auth token method exists")
-  func resolvedWebAuthTokenMethodExists() {
-    let config = MistDemoConfig()
+  func resolvedWebAuthTokenMethodExists() throws {
+    let config = try MistDemoConfig()
     let token = config.resolvedWebAuthToken()
 
     // Should return nil when no token is set
@@ -96,30 +96,30 @@ struct MistDemoConfigTests {
   // MARK: - Environment Tests
 
   @Test("Development environment is default")
-  func developmentEnvironmentIsDefault() {
-    let config = MistDemoConfig()
+  func developmentEnvironmentIsDefault() throws {
+    let config = try MistDemoConfig()
     #expect(config.environment == .development)
   }
 
   // MARK: - Server Configuration Tests
 
   @Test("Default host is localhost")
-  func defaultHostIsLocalhost() {
-    let config = MistDemoConfig()
+  func defaultHostIsLocalhost() throws {
+    let config = try MistDemoConfig()
     #expect(config.host == "127.0.0.1")
   }
 
   @Test("Default port is 8080")
-  func defaultPortIs8080() {
-    let config = MistDemoConfig()
+  func defaultPortIs8080() throws {
+    let config = try MistDemoConfig()
     #expect(config.port == 8080)
   }
 
   // MARK: - Test Flags Tests
 
   @Test("All test flags default to false")
-  func allTestFlagsDefaultToFalse() {
-    let config = MistDemoConfig()
+  func allTestFlagsDefaultToFalse() throws {
+    let config = try MistDemoConfig()
 
     #expect(config.skipAuth == false)
     #expect(config.testAllAuth == false)

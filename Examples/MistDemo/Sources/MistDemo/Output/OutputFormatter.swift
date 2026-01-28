@@ -28,7 +28,6 @@
 //
 
 import Foundation
-public import ArgumentParser
 
 /// Protocol for formatting output in different formats
 public protocol OutputFormatter: Sendable {
@@ -37,7 +36,7 @@ public protocol OutputFormatter: Sendable {
 }
 
 /// Supported output formats
-public enum OutputFormat: String, Sendable, CaseIterable, ExpressibleByArgument {
+public enum OutputFormat: String, Sendable, CaseIterable {
   case json
   case table
   case csv
