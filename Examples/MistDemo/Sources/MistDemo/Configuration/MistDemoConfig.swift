@@ -28,6 +28,7 @@
 //
 
 import ConfigKeyKit
+import Configuration
 import Foundation
 import MistKit
 

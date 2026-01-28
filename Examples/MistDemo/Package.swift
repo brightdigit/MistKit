@@ -92,9 +92,7 @@ let package = Package(
     targets: [
         .target(
             name: "ConfigKeyKit",
-            dependencies: [
-                .product(name: "Configuration", package: "swift-configuration")
-            ],
+            dependencies: [],
             swiftSettings: swiftSettings
         ),
         .executableTarget(
