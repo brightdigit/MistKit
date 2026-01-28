@@ -32,7 +32,7 @@ import MistKit
 
 /// Centralized configuration for MistDemo
 /// Implements hierarchical configuration (CLI → ENV → defaults)
-internal struct MistDemoConfig {
+public struct MistDemoConfig {
     // MARK: - CloudKit Core Configuration
 
     /// CloudKit container identifier
@@ -85,7 +85,7 @@ internal struct MistDemoConfig {
 
     // MARK: - Initialization
 
-    init() {
+    public init() {
         let reader = EnhancedConfigurationReader()
 
         // CloudKit Core
@@ -182,12 +182,12 @@ internal struct MistDemoConfig {
 
 extension MistDemoConfig {
     /// Resolve API token from configuration or environment
-    func resolvedApiToken() -> String {
+    public func resolvedApiToken() -> String {
         AuthenticationHelper.resolveAPIToken(apiToken)
     }
 
     /// Resolve web auth token from configuration or environment
-    func resolvedWebAuthToken() -> String? {
+    public func resolvedWebAuthToken() -> String? {
         AuthenticationHelper.resolveWebAuthToken(webAuthToken ?? "")
     }
 }

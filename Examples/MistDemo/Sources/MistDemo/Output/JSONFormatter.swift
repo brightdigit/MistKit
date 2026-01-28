@@ -1,5 +1,5 @@
 //
-//  MistDemo.swift
+//  JSONFormatter.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,31 +27,48 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ArgumentParser
 import Foundation
 
-/// MistDemo - CloudKit Web Services CLI tool
-@main
-struct MistDemo: AsyncParsableCommand {
-  static let configuration = CommandConfiguration(
-    commandName: "mistdemo",
-    abstract: "CloudKit Web Services CLI tool",
-    discussion: """
-      MistDemo provides a command-line interface to CloudKit Web Services.
-      Use it to authenticate, query records, manage zones, and more.
+/// Formatter for JSON output
+public struct JSONFormatter: OutputFormatter {
+  // MARK: Lifecycle
 
-      The tool supports multiple authentication methods:
-      - Interactive Sign in with Apple ID
-      - API-only authentication (public database)
-      - Server-to-server authentication
-      - Token management and validation
+  public init(pretty: Bool = false) {
+    self.pretty = pretty
+  }
 
-      For more information, visit: https://github.com/brightdigit/MistKit
-      """,
-    version: "1.0.0-alpha.4",
-    subcommands: [
-      DemoCommand.self
-    ],
-    defaultSubcommand: DemoCommand.self
-  )
+  // MARK: Public
+
+  /// Whether to use pretty printing
+  public let pretty: Bool
+
+  public func format<T: Encodable>(_ value: T) throws -> String {
+    let encoder = JSONEncoder()
+    if pretty {
+      encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    }
+    let data = try encoder.encode(value)
+    guard let string = String(data: data, encoding: .utf8) else {
+      throw FormattingError.encodingFailed
+    }
+    return string
+  }
+}
+
+// MARK: - Formatting Errors
+
+enum FormattingError: LocalizedError {
+  case encodingFailed
+  case invalidStructure(String)
+
+  // MARK: Internal
+
+  var errorDescription: String? {
+    switch self {
+    case .encodingFailed:
+      "Failed to encode data to UTF-8 string"
+    case let .invalidStructure(message):
+      "Invalid data structure: \(message)"
+    }
+  }
 }

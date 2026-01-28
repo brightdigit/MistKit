@@ -1,5 +1,5 @@
 //
-//  MistDemo.swift
+//  OutputFormatter.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,31 +27,38 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ArgumentParser
 import Foundation
+public import ArgumentParser
 
-/// MistDemo - CloudKit Web Services CLI tool
-@main
-struct MistDemo: AsyncParsableCommand {
-  static let configuration = CommandConfiguration(
-    commandName: "mistdemo",
-    abstract: "CloudKit Web Services CLI tool",
-    discussion: """
-      MistDemo provides a command-line interface to CloudKit Web Services.
-      Use it to authenticate, query records, manage zones, and more.
+/// Protocol for formatting output in different formats
+public protocol OutputFormatter: Sendable {
+  /// Format an encodable value to a string
+  func format<T: Encodable>(_ value: T) throws -> String
+}
 
-      The tool supports multiple authentication methods:
-      - Interactive Sign in with Apple ID
-      - API-only authentication (public database)
-      - Server-to-server authentication
-      - Token management and validation
+/// Supported output formats
+public enum OutputFormat: String, Sendable, CaseIterable, ExpressibleByArgument {
+  case json
+  case table
+  case csv
+  case yaml
 
-      For more information, visit: https://github.com/brightdigit/MistKit
-      """,
-    version: "1.0.0-alpha.4",
-    subcommands: [
-      DemoCommand.self
-    ],
-    defaultSubcommand: DemoCommand.self
-  )
+  // MARK: Public
+
+  /// Create the appropriate formatter for this format
+  public func createFormatter(pretty: Bool = false) -> any OutputFormatter {
+    switch self {
+    case .json:
+      JSONFormatter(pretty: pretty)
+    case .table:
+      // TODO: Implement TableFormatter
+      JSONFormatter(pretty: pretty)
+    case .csv:
+      // TODO: Implement CSVFormatter
+      JSONFormatter(pretty: pretty)
+    case .yaml:
+      // TODO: Implement YAMLFormatter
+      JSONFormatter(pretty: pretty)
+    }
+  }
 }

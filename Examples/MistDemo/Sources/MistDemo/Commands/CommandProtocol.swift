@@ -1,5 +1,5 @@
 //
-//  MistDemo.swift
+//  CommandProtocol.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,28 +30,22 @@
 import ArgumentParser
 import Foundation
 
-/// MistDemo - CloudKit Web Services CLI tool
-@main
-struct MistDemo: AsyncParsableCommand {
-  static let configuration = CommandConfiguration(
-    commandName: "mistdemo",
-    abstract: "CloudKit Web Services CLI tool",
-    discussion: """
-      MistDemo provides a command-line interface to CloudKit Web Services.
-      Use it to authenticate, query records, manage zones, and more.
+/// Protocol for MistDemo commands with shared configuration loading
+protocol MistDemoCommand: AsyncParsableCommand {
+  /// Global options shared across all commands
+  var globalOptions: GlobalOptions { get set }
 
-      The tool supports multiple authentication methods:
-      - Interactive Sign in with Apple ID
-      - API-only authentication (public database)
-      - Server-to-server authentication
-      - Token management and validation
+  /// Execute the command with loaded configuration
+  func execute(with config: MistDemoConfig) async throws
+}
 
-      For more information, visit: https://github.com/brightdigit/MistKit
-      """,
-    version: "1.0.0-alpha.4",
-    subcommands: [
-      DemoCommand.self
-    ],
-    defaultSubcommand: DemoCommand.self
-  )
+extension MistDemoCommand {
+  /// Default run implementation that loads configuration and executes the command
+  mutating func run() async throws {
+    // Load configuration from all sources
+    let config = try await globalOptions.loadConfiguration()
+
+    // Execute the command with the loaded configuration
+    try await execute(with: config)
+  }
 }
