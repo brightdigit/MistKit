@@ -79,14 +79,15 @@ let swiftSettings: [SwiftSetting] = [
 let package = Package(
     name: "MistDemo",
     platforms: [
-        .macOS(.v14)
+        .macOS(.v15)
     ],
     products: [
         .executable(name: "mistdemo", targets: ["MistDemo"])
     ],
     dependencies: [
         .package(path: "../.."),  // MistKit
-        .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0")
+        .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-configuration", from: "1.0.0")
     ],
     targets: [
         .target(
@@ -99,10 +100,20 @@ let package = Package(
             dependencies: [
                 "ConfigKeyKit",
                 .product(name: "MistKit", package: "MistKit"),
-                .product(name: "Hummingbird", package: "hummingbird")
+                .product(name: "Hummingbird", package: "hummingbird"),
+                .product(name: "Configuration", package: "swift-configuration")
             ],
             resources: [
                 .copy("Resources")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "MistDemoTests",
+            dependencies: [
+                "MistDemo",
+                "ConfigKeyKit",
+                .product(name: "MistKit", package: "MistKit")
             ],
             swiftSettings: swiftSettings
         )
