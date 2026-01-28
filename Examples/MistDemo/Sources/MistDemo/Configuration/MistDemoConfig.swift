@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Configuration
+import ConfigKeyKit
 import Foundation
 import MistKit
 
@@ -86,97 +86,81 @@ public struct MistDemoConfig: Sendable {
 
     // MARK: - Initialization
 
-    /// Initialize with Swift Configuration's EnvironmentVariablesProvider + existing EnhancedConfigurationReader for CLI args
+    /// Initialize with Swift Configuration's hierarchical provider setup
     public init() throws {
-        // Use existing EnhancedConfigurationReader for CLI args + ENV vars + defaults
-        // This already works perfectly
-        let reader = EnhancedConfigurationReader()
+        let config = try MistDemoConfiguration()
 
         // CloudKit Core
-        self.containerIdentifier = reader.string(
-            key: "container.identifier",
-            environmentKey: "CLOUDKIT_CONTAINER_ID",
+        self.containerIdentifier = config.string(
+            forKey: "container.identifier",
             default: "iCloud.com.brightdigit.MistDemo"
         ) ?? "iCloud.com.brightdigit.MistDemo"
 
-        self.apiToken = reader.string(
-            key: "api.token",
-            environmentKey: "CLOUDKIT_API_TOKEN",
+        self.apiToken = config.string(
+            forKey: "api.token",
             default: "",
             isSecret: true
         ) ?? ""
 
-        let envString = reader.string(
-            key: "environment",
-            environmentKey: "CLOUDKIT_ENVIRONMENT",
+        let envString = config.string(
+            forKey: "environment",
             default: "development"
         ) ?? "development"
         self.environment = envString == "production" ? .production : .development
 
         // Authentication
-        self.webAuthToken = reader.string(
-            key: "web.auth.token",
-            environmentKey: "CLOUDKIT_WEBAUTH_TOKEN",
+        self.webAuthToken = config.string(
+            forKey: "web.auth.token",
             isSecret: true
         )
 
-        self.keyID = reader.string(
-            key: "key.id",
-            environmentKey: "CLOUDKIT_KEY_ID"
+        self.keyID = config.string(
+            forKey: "key.id"
         )
 
-        self.privateKey = reader.string(
-            key: "private.key",
-            environmentKey: "CLOUDKIT_PRIVATE_KEY",
+        self.privateKey = config.string(
+            forKey: "private.key",
             isSecret: true
         )
 
-        self.privateKeyFile = reader.string(
-            key: "private.key.file",
-            environmentKey: "CLOUDKIT_PRIVATE_KEY_FILE"
+        self.privateKeyFile = config.string(
+            forKey: "private.key.file"
         )
 
         // Server
-        self.host = reader.string(
-            key: "host",
-            environmentKey: "MISTDEMO_HOST",
+        self.host = config.string(
+            forKey: "host",
             default: "127.0.0.1"
         ) ?? "127.0.0.1"
 
-        self.port = reader.int(
-            key: "port",
-            environmentKey: "MISTDEMO_PORT",
+        self.port = config.int(
+            forKey: "port",
             default: 8080
         ) ?? 8080
 
         // Test flags
-        self.skipAuth = reader.bool(
-            key: "skip.auth",
-            environmentKey: "MISTDEMO_SKIP_AUTH",
+        self.skipAuth = config.bool(
+            forKey: "skip.auth",
             default: false
         )
 
-        self.testAllAuth = reader.bool(
-            key: "test.all.auth",
-            environmentKey: "MISTDEMO_TEST_ALL_AUTH",
+        self.testAllAuth = config.bool(
+            forKey: "test.all.auth",
             default: false
         )
 
-        self.testApiOnly = reader.bool(
-            key: "test.api.only",
-            environmentKey: "MISTDEMO_TEST_API_ONLY",
+        self.testApiOnly = config.bool(
+            forKey: "test.api.only",
             default: false
         )
 
-        self.testAdaptive = reader.bool(
-            key: "test.adaptive",
-            environmentKey: "MISTDEMO_TEST_ADAPTIVE",
+        self.testAdaptive = config.bool(
+            forKey: "test.adaptive",
             default: false
         )
 
-        self.testServerToServer = reader.bool(
-            key: "test.server.to.server",
-            environmentKey: "MISTDEMO_TEST_SERVER_TO_SERVER",
+        self.testServerToServer = config.bool(
+            forKey: "test.server.to.server",
             default: false
         )
     }

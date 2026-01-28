@@ -79,7 +79,7 @@ let swiftSettings: [SwiftSetting] = [
 let package = Package(
     name: "MistDemo",
     platforms: [
-        .macOS(.v14)
+        .macOS(.v15)
     ],
     products: [
         .executable(name: "mistdemo", targets: ["MistDemo"])
@@ -92,7 +92,9 @@ let package = Package(
     targets: [
         .target(
             name: "ConfigKeyKit",
-            dependencies: [],
+            dependencies: [
+                .product(name: "Configuration", package: "swift-configuration")
+            ],
             swiftSettings: swiftSettings
         ),
         .executableTarget(
