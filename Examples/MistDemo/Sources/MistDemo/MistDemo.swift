@@ -490,7 +490,8 @@ struct MistDemo {
     print(String(repeating: "=", count: 50))
 
     print("\n💡 Tip: You can skip authentication next time by running:")
-    print("   mistdemo --web-auth-token \"\(webAuthToken)\"")
+    print("   mistdemo --api-token \"\(apiToken.maskedAPIToken)\" \\")
+    print("            --web-auth-token \"\(webAuthToken)\"")
     print("   (Authentication server is automatically skipped when token is provided)")
   }
 
