@@ -31,6 +31,7 @@ import Foundation
 import Hummingbird
 import Logging
 import MistKit
+import UnixSignals
 
 #if canImport(AppKit)
 import AppKit
@@ -231,7 +232,11 @@ struct MistDemo {
         privateKeyFile: config.privateKeyFile,
         environment: config.environment
       )
-    } else if config.skipAuth, let token = config.resolvedWebAuthToken() {
+    } else if let token = config.resolvedWebAuthToken(), !token.isEmpty {
+      // Auto-detect: Web auth token provided → skip auth server
+      if config.skipAuth {
+        print("⚠️  Warning: --skip-auth is deprecated. Token presence is now auto-detected.")
+      }
       try await runCloudKitDemo(
         webAuthToken: token,
         apiToken: effectiveApiToken,
@@ -242,7 +247,8 @@ struct MistDemo {
         apiToken: effectiveApiToken,
         containerIdentifier: config.containerIdentifier,
         host: config.host,
-        port: config.port
+        port: config.port,
+        timeout: config.authTimeout
       )
     }
   }
@@ -251,7 +257,8 @@ struct MistDemo {
     apiToken: String,
     containerIdentifier: String,
     host: String,
-    port: Int
+    port: Int,
+    timeout: Double = 300
   ) async throws {
     print("\n" + String(repeating: "=", count: 60))
     print("🚀 MistKit CloudKit Authentication Server")
@@ -370,24 +377,48 @@ struct MistDemo {
     }
 
     print("\n⏳ Waiting for authentication...")
-    let token = await tokenChannel.receive()
+    print("   Timeout: \(formatTimeout(timeout))")
+    print("   Press Ctrl+C to cancel")
 
-    print("\n✅ Authentication successful! Received session token.")
-    print("⏳ Waiting for response to complete...")
+    do {
+      let token = try await withTimeoutAndSignals(seconds: timeout) {
+        await tokenChannel.receive()
+      }
 
-    await responseCompleteChannel.receive()
+      print("\n✅ Authentication successful! Received session token.")
+      print("⏳ Waiting for response to complete...")
 
-    print("🔄 Shutting down server...")
-    serverTask.cancel()
+      await responseCompleteChannel.receive()
 
-    try await Task.sleep(nanoseconds: 500_000_000)
+      print("🔄 Shutting down server...")
+      serverTask.cancel()
 
-    print("\n📱 Starting CloudKit demo...\n")
-    try await runCloudKitDemo(
-      webAuthToken: token,
-      apiToken: apiToken,
-      containerIdentifier: containerIdentifier
-    )
+      try await Task.sleep(nanoseconds: 500_000_000)
+
+      print("\n📱 Starting CloudKit demo...\n")
+      try await runCloudKitDemo(
+        webAuthToken: token,
+        apiToken: apiToken,
+        containerIdentifier: containerIdentifier
+      )
+
+    } catch let error as AsyncTimeoutError {
+      serverTask.cancel()
+
+      switch error {
+      case .timeout(let message):
+        print("\n❌ \(message)")
+        print("💡 Try increasing timeout with --auth-timeout <seconds>")
+      case .cancelled(let message):
+        print("\n❌ \(message)")
+        print("💡 Authentication cancelled by user")
+      }
+
+      throw error
+    } catch {
+      serverTask.cancel()
+      throw error
+    }
   }
 
   static func runCloudKitDemo(
@@ -438,7 +469,7 @@ struct MistDemo {
 
     print("\n📋 Querying records...")
     do {
-      let records = try await cloudKitService.queryRecords(recordType: "TodoItem", limit: 5)
+      let records = try await cloudKitService.queryRecords(recordType: "Note", limit: 5)
       if !records.isEmpty {
         print("✅ Found \(records.count) record(s)")
         for record in records.prefix(3) {
@@ -459,7 +490,8 @@ struct MistDemo {
     print(String(repeating: "=", count: 50))
 
     print("\n💡 Tip: You can skip authentication next time by running:")
-    print("   mistdemo --skip-auth --web-auth-token \"\(webAuthToken)\"")
+    print("   mistdemo --web-auth-token \"\(webAuthToken)\"")
+    print("   (Authentication server is automatically skipped when token is provided)")
   }
 
   /// Test all authentication methods
@@ -580,7 +612,7 @@ struct MistDemo {
       }
 
       print("\n📋 Querying records from public database...")
-      let records = try await service.queryRecords(recordType: "TodoItem", limit: 5)
+      let records = try await service.queryRecords(recordType: "Note", limit: 5)
       print("✅ Found \(records.count) record(s) in public database")
       for record in records.prefix(3) {
         print("   Record: \(record.recordName)")
@@ -736,7 +768,7 @@ struct MistDemo {
         print("✅ CloudKitService initialized with server-to-server authentication (public database only)")
 
         print("\n📋 Querying public records with server-to-server authentication...")
-        let records = try await service.queryRecords(recordType: "TodoItem", limit: 5)
+        let records = try await service.queryRecords(recordType: "Note", limit: 5)
         print("✅ Found \(records.count) public record(s):")
         for record in records.prefix(3) {
           print("   • Record: \(record.recordName)")

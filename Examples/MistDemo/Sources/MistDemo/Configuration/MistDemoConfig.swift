@@ -68,9 +68,13 @@ public struct MistDemoConfig: Sendable {
     /// Server port for authentication
     let port: Int
 
+    /// Authentication timeout in seconds (default: 300 = 5 minutes)
+    let authTimeout: Double
+
     // MARK: - Test Flags
 
     /// Skip authentication and use provided token directly
+    /// @deprecated: Automatic detection based on web-auth-token presence. This flag is ignored.
     let skipAuth: Bool
 
     /// Test all authentication methods
@@ -138,6 +142,11 @@ public struct MistDemoConfig: Sendable {
             forKey: "port",
             default: 8080
         ) ?? 8080
+
+        self.authTimeout = Double(config.int(
+            forKey: "auth.timeout",
+            default: 300
+        ) ?? 300)
 
         // Test flags
         self.skipAuth = config.bool(

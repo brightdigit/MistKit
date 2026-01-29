@@ -143,16 +143,20 @@ public struct AuthTokenCommand: MistDemoCommand {
         }
         
         print("⏳ Waiting for authentication...")
-        
-        // Wait for token with timeout
+        print("   Timeout: 5 minutes")
+        print("   Press Ctrl+C to cancel")
+
         let token: String
         do {
-            token = try await withTimeout(seconds: 300) {
+            token = try await withTimeoutAndSignals(seconds: 300) {
                 await tokenChannel.receive()
             }
+        } catch let error as AsyncTimeoutError {
+            serverTask.cancel()
+            throw AuthTokenError.timeout(error.localizedDescription)
         } catch {
             serverTask.cancel()
-            throw AuthTokenError.timeout("Authentication timed out after 5 minutes")
+            throw error
         }
         
         print("✅ Authentication successful! Received token.")
@@ -185,27 +189,6 @@ public struct AuthTokenCommand: MistDemoCommand {
         }
         
         throw AuthTokenError.missingResource("index.html not found in any expected location")
-    }
-}
-
-/// Helper function for timeout operations
-private func withTimeout<T: Sendable>(seconds: Double, operation: @escaping @Sendable () async throws -> T) async throws -> T {
-    try await withThrowingTaskGroup(of: T.self) { group in
-        group.addTask {
-            return try await operation()
-        }
-        
-        group.addTask {
-            try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-            throw AuthTokenError.timeout("Operation timed out after \(seconds) seconds")
-        }
-        
-        guard let result = try await group.next() else {
-            throw AuthTokenError.timeout("Timeout task failed")
-        }
-        
-        group.cancelAll()
-        return result
     }
 }
 
