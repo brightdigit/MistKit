@@ -38,7 +38,152 @@ import AppKit
 
 @main
 struct MistDemo {
+  @MainActor
   static func main() async throws {
+    // Register available commands
+    CommandRegistry.register(AuthTokenCommand.self)
+    CommandRegistry.register(CurrentUserCommand.self)
+    CommandRegistry.register(QueryCommand.self)
+    CommandRegistry.register(CreateCommand.self)
+    
+    // Parse command line arguments
+    let parser = CommandLineParser()
+    
+    // Check for help
+    if parser.isHelpRequested() {
+      printHelp(commandName: parser.parseCommandName())
+      return
+    }
+    
+    // Check if a command was specified
+    if let commandName = parser.parseCommandName() {
+      // Execute specific command
+      try await executeCommand(commandName)
+    } else {
+      // Fall back to legacy behavior for backward compatibility
+      try await executeLegacyMode()
+    }
+  }
+  
+  /// Execute a specific command
+  private static func executeCommand(_ commandName: String) async throws {
+    switch commandName {
+    case "auth-token":
+      let command = try AuthTokenCommand()
+      try await command.execute()
+    case "current-user":
+      let command = try CurrentUserCommand()
+      try await command.execute()
+    case "query":
+      let command = try QueryCommand()
+      try await command.execute()
+    case "create":
+      let command = try CreateCommand()
+      try await command.execute()
+    default:
+      print("❌ Unknown command: \(commandName)")
+      print("Available commands: \(await CommandRegistry.availableCommands.joined(separator: ", "))")
+      print("Run 'mistdemo help' for usage information.")
+      throw MistDemoError.unknownCommand(commandName)
+    }
+  }
+  
+  /// Print help information
+  private static func printHelp(commandName: String? = nil) {
+    if let commandName = commandName {
+      printCommandHelp(commandName)
+    } else {
+      printGeneralHelp()
+    }
+  }
+  
+  /// Print general help
+  private static func printGeneralHelp() {
+    print("MistDemo - CloudKit Web Services Command Line Tool")
+    print("")
+    print("USAGE:")
+    print("    mistdemo <command> [options]")
+    print("")
+    print("COMMANDS:")
+    print("    auth-token    Obtain a web authentication token via browser flow")
+    print("    current-user  Get current user information")
+    print("    query         Query records from CloudKit with filtering and sorting")
+    print("    create        Create a new record in CloudKit")
+    print("")
+    print("OPTIONS:")
+    print("    --help, -h    Show help information")
+    print("")
+    print("Run 'mistdemo <command> --help' for command-specific help.")
+    print("")
+    print("LEGACY MODE:")
+    print("    Running without a command starts the legacy authentication server.")
+  }
+  
+  /// Print command-specific help
+  private static func printCommandHelp(_ commandName: String) {
+    switch commandName {
+    case "auth-token":
+      print("AUTH-TOKEN - Obtain web authentication token")
+      print("")
+      print("USAGE:")
+      print("    mistdemo auth-token [options]")
+      print("")
+      print("OPTIONS:")
+      print("    --api-token <token>     CloudKit API token (or CLOUDKIT_API_TOKEN env)")
+      print("    --port <port>           Server port (default: 8080)")
+      print("    --host <host>           Server host (default: 127.0.0.1)")
+      print("    --no-browser           Don't open browser automatically")
+      
+    case "current-user":
+      print("CURRENT-USER - Get current user information")
+      print("")
+      print("USAGE:")
+      print("    mistdemo current-user [options]")
+      print("")
+      print("OPTIONS:")
+      print("    --api-token <token>        CloudKit API token")
+      print("    --web-auth-token <token>   Web authentication token")
+      print("    --fields <fields>          Comma-separated list of fields to include")
+      print("    --output-format <format>   Output format: json, table, csv, yaml")
+      
+    case "query":
+      print("QUERY - Query records from CloudKit")
+      print("")
+      print("USAGE:")
+      print("    mistdemo query [options]")
+      print("")
+      print("OPTIONS:")
+      print("    --record-type <type>       Record type to query (default: Note)")
+      print("    --zone <zone>              Zone name (default: _defaultZone)")
+      print("    --filter <filter>          Filter expression (field:operator:value)")
+      print("    --sort <field:order>       Sort by field (order: asc/desc)")
+      print("    --limit <count>            Maximum records to return (1-200)")
+      print("    --fields <fields>          Comma-separated fields to include")
+      print("    --output-format <format>   Output format: json, table, csv, yaml")
+      
+    case "create":
+      print("CREATE - Create a new record")
+      print("")
+      print("USAGE:")
+      print("    mistdemo create [options]")
+      print("")
+      print("OPTIONS:")
+      print("    --record-type <type>       Record type to create (default: Note)")
+      print("    --zone <zone>              Zone name (default: _defaultZone)")
+      print("    --record-name <name>       Custom record name (auto-generated if not provided)")
+      print("    --field <name:type:value>  Field definition (can be repeated)")
+      print("    --json-file <file>         Load fields from JSON file")
+      print("    --stdin                    Read fields from stdin as JSON")
+      print("    --output-format <format>   Output format: json, table, csv, yaml")
+      
+    default:
+      print("Unknown command: \(commandName)")
+      printGeneralHelp()
+    }
+  }
+  
+  /// Execute legacy mode for backward compatibility
+  private static func executeLegacyMode() async throws {
     // Load configuration using Swift Configuration
     let config = try MistDemoConfig()
 

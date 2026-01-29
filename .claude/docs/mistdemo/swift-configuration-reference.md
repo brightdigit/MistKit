@@ -24,14 +24,23 @@ When a configuration key is requested, Swift Configuration checks each provider 
 ### Current Implementation
 
 **Implemented Providers:**
-1. **CLI Arguments** (Highest priority) - Manual parsing via `CommandLine.arguments`
+1. **CLI Arguments** (Highest priority) - `CommandLineArgumentsProvider` with automatic key transformation
 2. **Environment Variables** - `EnvironmentVariablesProvider` with automatic key transformation
 3. **Defaults** - `InMemoryProvider` with fallback values
 
-**Planned Providers:**
-- JSON configuration files via `FileProvider` with `JSONSnapshot`
+**Available Providers:**
+- JSON configuration files via `FileProvider` with `JSONSnapshot` 
 - YAML configuration files via `FileProvider` with `YAMLSnapshot`
 - Profile-based configuration merging
+
+**Note:** The `CommandLineArgumentsProvider` requires the `CommandLineArguments` trait to be enabled in Package.swift. This is automatically enabled in MistDemo via:
+```swift
+.package(
+    url: "https://github.com/apple/swift-configuration", 
+    from: "1.0.0", 
+    traits: ["CommandLineArguments"]
+)
+```
 
 ## Key Naming Conventions
 

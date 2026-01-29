@@ -87,7 +87,11 @@ let package = Package(
     dependencies: [
         .package(path: "../.."),  // MistKit
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
-        .package(url: "https://github.com/apple/swift-configuration", from: "1.0.0")
+        .package(
+            url: "https://github.com/apple/swift-configuration", 
+            from: "1.0.0", 
+            traits: ["CommandLineArguments"]
+        )
     ],
     targets: [
         .target(
