@@ -223,7 +223,7 @@ struct MistDemo {
       print("NOTES:")
       print("  • Record name is auto-generated if not provided")
       print("  • JSON files auto-detect field types from values")
-      print("  • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN")
+      print("  • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEBAUTH_TOKEN")
       print("    to avoid repeating tokens")
       
     default:
