@@ -28,7 +28,7 @@
 //
 
 public import Foundation
-public import MistKit
+import MistKit
 
 /// Command to get information about the authenticated user
 public struct CurrentUserCommand: MistDemoCommand {

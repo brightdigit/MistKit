@@ -28,7 +28,7 @@
 //
 
 public import Foundation
-public import MistKit
+import MistKit
 
 /// Command to create a new record in CloudKit
 public struct CreateCommand: MistDemoCommand {
