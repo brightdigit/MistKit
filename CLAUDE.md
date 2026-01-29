@@ -206,6 +206,11 @@ Apple's official CloudKit documentation is available in `.claude/docs/` for offl
 
 See `.claude/docs/README.md` for detailed topic breakdowns and integration guidance.
 
+### MistDemo Documentation
+
+- **Swift Configuration Reference** (`.claude/docs/mistdemo/swift-configuration-reference.md`) - Guide for using Swift Configuration in MistDemo
+- **Official Swift Configuration Docs** (`.claude/docs/https_-swiftpackageindex.com-apple-swift-configuration-1.0.0-documentation-configuration.md`) - Full API reference
+
 ### CloudKit Schema Language
 
 **cloudkit-schema-reference.md** - CloudKit Schema Language Quick Reference
