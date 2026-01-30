@@ -49,7 +49,12 @@ public struct CurrentUserConfig: Sendable, ConfigurationParseable {
     /// Parse configuration from command line arguments
     public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
         let configReader = configuration
-        let baseConfig = try await base ?? MistDemoConfig(configuration: configuration, base: nil)
+        let baseConfig: MistDemoConfig
+        if let base = base {
+            baseConfig = base
+        } else {
+            baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+        }
         
         // Parse fields filter
         let fieldsString = configReader.string(forKey: "fields")

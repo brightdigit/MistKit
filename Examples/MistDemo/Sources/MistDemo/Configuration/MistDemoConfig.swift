@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ConfigKeyKit
+public import ConfigKeyKit
 import Configuration
 import Foundation
 import MistKit

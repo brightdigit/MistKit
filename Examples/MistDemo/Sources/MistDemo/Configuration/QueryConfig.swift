@@ -74,7 +74,12 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
     /// Parse configuration from command line arguments
     public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
         let configReader = configuration
-        let baseConfig = try await base ?? MistDemoConfig(configuration: configuration, base: nil)
+        let baseConfig: MistDemoConfig
+        if let base = base {
+            baseConfig = base
+        } else {
+            baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+        }
         
         // Parse query-specific options
         let zone = configReader.string(forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone) ?? MistDemoConstants.Defaults.zone

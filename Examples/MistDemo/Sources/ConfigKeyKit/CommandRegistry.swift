@@ -29,15 +29,9 @@
 
 import Foundation
 
-/// Protocol for type-erased command creation
-public protocol _AnyCommand: Sendable {
-    /// Create a command instance with configuration
-    static func _createInstance() async throws -> any Command
-}
-
 /// Actor-based registry for managing available commands
 public actor CommandRegistry {
-    private var registeredCommands: [String: any _AnyCommand.Type] = [:]
+    private var registeredCommands: [String: any Command.Type] = [:]
     private var commandMetadata: [String: CommandMetadata] = [:]
 
     /// Metadata about a command
@@ -53,7 +47,7 @@ public actor CommandRegistry {
     private init() {}
 
     /// Register a command type with the registry
-    public func register<T: Command & _AnyCommand>(_ commandType: T.Type) {
+    public func register<T: Command>(_ commandType: T.Type) {
         registeredCommands[T.commandName] = commandType
         commandMetadata[T.commandName] = CommandMetadata(
             commandName: T.commandName,
@@ -73,7 +67,7 @@ public actor CommandRegistry {
     }
 
     /// Get command type for the given name
-    public func commandType(named name: String) -> (any _AnyCommand.Type)? {
+    public func commandType(named name: String) -> (any Command.Type)? {
         return registeredCommands[name]
     }
 
@@ -83,7 +77,7 @@ public actor CommandRegistry {
             throw CommandRegistryError.unknownCommand(name)
         }
 
-        return try await commandType._createInstance()
+        return try await commandType.createInstance()
     }
 
     /// Check if a command is registered

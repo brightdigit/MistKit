@@ -27,20 +27,14 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ConfigKeyKit
+public import ConfigKeyKit
 import Foundation
 
-/// Extension to make all MistDemo commands conform to _AnyCommand
+/// Default implementation of createInstance for all MistDemo commands
 extension Command where Config.ConfigReader == MistDemoConfiguration {
-    public static func _createInstance() async throws -> any Command {
+    public static func createInstance() async throws -> Self {
         let configuration = try MistDemoConfiguration()
         let config = try await Config(configuration: configuration, base: nil)
         return Self(config: config)
     }
 }
-
-/// Conformance for all MistDemo commands
-extension AuthTokenCommand: _AnyCommand {}
-extension CurrentUserCommand: _AnyCommand {}
-extension QueryCommand: _AnyCommand {}
-extension CreateCommand: _AnyCommand {}

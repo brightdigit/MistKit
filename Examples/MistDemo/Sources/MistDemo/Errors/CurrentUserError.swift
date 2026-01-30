@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
 /// Errors specific to current-user command
 public enum CurrentUserError: Error, LocalizedError {

@@ -28,7 +28,7 @@
 //
 
 import Foundation
-import MistKit
+public import MistKit
 
 extension FieldValue {
     /// Initialize FieldValue from a parsed value and field type
