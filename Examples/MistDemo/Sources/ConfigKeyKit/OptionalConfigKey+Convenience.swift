@@ -27,12 +27,5 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// MARK: - Convenience Initializers for BUSHEL Prefix
-
-extension OptionalConfigKey {
-  /// Convenience initializer for keys with BUSHEL prefix
-  /// - Parameter base: Base key string (e.g., "sync.min_interval")
-  public init(bushelPrefixed base: String) {
-    self.init(base, envPrefix: "BUSHEL")
-  }
-}
+// File intentionally left with no additional convenience methods
+// Application-specific helpers should be added in application code

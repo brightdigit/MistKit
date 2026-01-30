@@ -33,20 +33,23 @@ public import ConfigKeyKit
 
 /// Configuration for current-user command
 public struct CurrentUserConfig: Sendable, ConfigurationParseable {
+    public typealias ConfigReader = MistDemoConfiguration
+    public typealias BaseConfig = MistDemoConfig
+
     public let base: MistDemoConfig
     public let fields: [String]?
     public let output: OutputFormat
-    
+
     public init(base: MistDemoConfig, fields: [String]? = nil, output: OutputFormat = .json) {
         self.base = base
         self.fields = fields
         self.output = output
     }
-    
+
     /// Parse configuration from command line arguments
-    public init() async throws {
-        let configReader = try MistDemoConfiguration()
-        let baseConfig = try MistDemoConfig()
+    public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+        let configReader = configuration
+        let baseConfig = try await base ?? MistDemoConfig(configuration: configuration, base: nil)
         
         // Parse fields filter
         let fieldsString = configReader.string(forKey: "fields")

@@ -1,5 +1,5 @@
 //
-//  MistDemoConfig+Extensions.swift
+//  JSONEscaper.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,16 +27,22 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// MARK: - Configuration Extensions
+import Foundation
 
-extension MistDemoConfig {
-    /// Resolve API token from configuration or environment
-    public func resolvedApiToken() -> String {
-        AuthenticationHelper.resolveAPIToken(apiToken)
-    }
+/// JSON escaper (usually handled by JSONEncoder, but useful for manual JSON building)
+public struct JSONEscaper: OutputEscaper {
+    public init() {}
 
-    /// Resolve web auth token from configuration or environment
-    public func resolvedWebAuthToken() -> String? {
-        AuthenticationHelper.resolveWebAuthToken(webAuthToken ?? "")
+    public func escape(_ string: String) -> String {
+        let escaped = string
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+            .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "\r", with: "\\r")
+            .replacingOccurrences(of: "\t", with: "\\t")
+            .replacingOccurrences(of: "\u{000C}", with: "\\f")
+            .replacingOccurrences(of: "\u{0008}", with: "\\b")
+
+        return escaped
     }
 }

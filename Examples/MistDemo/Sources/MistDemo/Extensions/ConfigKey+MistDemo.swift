@@ -1,6 +1,6 @@
 //
-//  ConfigurationParseable.swift
-//  ConfigKeyKit
+//  ConfigKey+MistDemo.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,28 +27,35 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import ConfigKeyKit
 import Foundation
 
-/// Protocol for configuration types that can parse themselves from command line arguments and environment variables
-public protocol ConfigurationParseable: Sendable {
-    /// Associated type for the configuration reader
-    associatedtype ConfigReader: Sendable
+// MARK: - MistDemo-Specific Config Key Helpers
 
-    /// Associated type for the parent configuration
-    /// Use `Never` for root configurations that have no parent
-    associatedtype BaseConfig: Sendable
-
-    /// Initialize the configuration by parsing from available sources (CLI args, environment variables, defaults)
+extension ConfigKey {
+    /// Convenience initializer for keys with MISTDEMO prefix
     /// - Parameters:
-    ///   - configuration: The configuration reader to parse values from
-    ///   - base: Optional parent configuration (nil for root configs)
-    init(configuration: ConfigReader, base: BaseConfig?) async throws
+    ///   - base: Base key string (e.g., "cloudkit.container.id")
+    ///   - defaultVal: Required default value
+    public init(mistDemoPrefixed base: String, default defaultVal: Value) {
+        self.init(base, envPrefix: "MISTDEMO", default: defaultVal)
+    }
 }
 
-/// Extension for root configurations (where BaseConfig == Never)
-public extension ConfigurationParseable where BaseConfig == Never {
-    /// Convenience initializer for root configs that don't need a parent
-    init(configuration: ConfigReader) async throws {
-        try await self.init(configuration: configuration, base: nil)
+extension OptionalConfigKey {
+    /// Convenience initializer for keys with MISTDEMO prefix
+    /// - Parameter base: Base key string (e.g., "api.token")
+    public init(mistDemoPrefixed base: String) {
+        self.init(base, envPrefix: "MISTDEMO")
+    }
+}
+
+extension ConfigKey where Value == Bool {
+    /// Convenience initializer for boolean keys with MISTDEMO prefix
+    /// - Parameters:
+    ///   - base: Base key string (e.g., "debug.enabled")
+    ///   - defaultVal: Default value (defaults to false)
+    public init(mistDemoPrefixed base: String, default defaultVal: Bool = false) {
+        self.init(base, envPrefix: "MISTDEMO", default: defaultVal)
     }
 }

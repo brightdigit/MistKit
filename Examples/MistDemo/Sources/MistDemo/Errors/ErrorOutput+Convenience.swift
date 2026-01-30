@@ -39,9 +39,6 @@ extension ErrorOutput {
       encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     }
     let data = try encoder.encode(self)
-    guard let string = String(data: data, encoding: .utf8) else {
-      throw FormattingError.encodingFailed
-    }
-    return string
+    return String(decoding: data, as: UTF8.self)
   }
 }

@@ -69,14 +69,4 @@ extension ConfigKey where Value == Bool {
   }
 }
 
-// MARK: - BUSHEL Prefix Convenience
-
-extension ConfigKey where Value == Bool {
-  /// Convenience initializer for boolean keys with BUSHEL prefix
-  /// - Parameters:
-  ///   - base: Base key string (e.g., "sync.verbose")
-  ///   - defaultVal: Default value (defaults to false)
-  public init(bushelPrefixed base: String, default defaultVal: Bool = false) {
-    self.init(base, envPrefix: "BUSHEL", default: defaultVal)
-  }
-}
+// Application-specific boolean key helpers should be added in application code

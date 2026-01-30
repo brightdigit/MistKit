@@ -34,7 +34,9 @@ import MistKit
 
 /// Centralized configuration for MistDemo
 /// Implements hierarchical configuration using Swift Configuration (CLI → ENV → defaults)
-public struct MistDemoConfig: Sendable {
+public struct MistDemoConfig: Sendable, ConfigurationParseable {
+    public typealias ConfigReader = MistDemoConfiguration
+    public typealias BaseConfig = Never
     // MARK: - CloudKit Core Configuration
 
     /// CloudKit container identifier
@@ -92,8 +94,8 @@ public struct MistDemoConfig: Sendable {
     // MARK: - Initialization
 
     /// Initialize with Swift Configuration's hierarchical provider setup
-    public init() throws {
-        let config = try MistDemoConfiguration()
+    public init(configuration: MistDemoConfiguration, base: Never? = nil) async throws {
+        let config = configuration
 
         // CloudKit Core
         self.containerIdentifier = config.string(

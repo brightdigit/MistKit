@@ -33,6 +33,9 @@ public import ConfigKeyKit
 
 /// Configuration for query command
 public struct QueryConfig: Sendable, ConfigurationParseable {
+    public typealias ConfigReader = MistDemoConfiguration
+    public typealias BaseConfig = MistDemoConfig
+
     public let base: MistDemoConfig
     public let zone: String
     public let recordType: String
@@ -43,7 +46,7 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
     public let fields: [String]?
     public let continuationMarker: String?
     public let output: OutputFormat
-    
+
     public init(
         base: MistDemoConfig,
         zone: String = "_defaultZone",
@@ -67,11 +70,11 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
         self.continuationMarker = continuationMarker
         self.output = output
     }
-    
+
     /// Parse configuration from command line arguments
-    public init() async throws {
-        let configReader = try MistDemoConfiguration()
-        let baseConfig = try MistDemoConfig()
+    public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+        let configReader = configuration
+        let baseConfig = try await base ?? MistDemoConfig(configuration: configuration, base: nil)
         
         // Parse query-specific options
         let zone = configReader.string(forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone) ?? MistDemoConstants.Defaults.zone

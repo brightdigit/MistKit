@@ -41,7 +41,7 @@ import Foundation
 /// ```swift
 /// let containerID = ConfigKey<String>(
 ///   base: "cloudkit.container_id",
-///   default: "iCloud.com.brightdigit.Bushel"
+///   default: "iCloud.com.example.MyApp"
 /// )
 /// // read(containerID) returns String (non-optional)
 /// ```

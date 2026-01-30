@@ -34,7 +34,7 @@ public enum StandardNamingStyle: NamingStyle, Sendable {
   /// Dot-separated lowercase (e.g., "cloudkit.container_id")
   case dotSeparated
 
-  /// Screaming snake case with prefix (e.g., "BUSHEL_CLOUDKIT_CONTAINER_ID")
+  /// Screaming snake case with prefix (e.g., "APP_CLOUDKIT_CONTAINER_ID")
   case screamingSnakeCase(prefix: String?)
 
   public func transform(_ base: String) -> String {

@@ -27,14 +27,5 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// MARK: - Convenience Initializers for BUSHEL Prefix
-
-extension ConfigKey {
-  /// Convenience initializer for keys with BUSHEL prefix
-  /// - Parameters:
-  ///   - base: Base key string (e.g., "sync.dry_run")
-  ///   - defaultVal: Required default value
-  public init(bushelPrefixed base: String, default defaultVal: Value) {
-    self.init(base, envPrefix: "BUSHEL", default: defaultVal)
-  }
-}
+// File intentionally left with no additional convenience methods
+// Application-specific helpers should be added in application code

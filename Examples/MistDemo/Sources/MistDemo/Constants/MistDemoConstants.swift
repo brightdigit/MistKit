@@ -84,7 +84,7 @@ public enum MistDemoConstants {
     }
     
     // MARK: - Field Names
-    
+
     /// Standard CloudKit field names
     public enum FieldNames {
         public static let recordName = "recordName"
@@ -97,6 +97,16 @@ public enum MistDemoConstants {
         public static let created = "created"
         public static let modified = "modified"
         public static let recordID = "recordID"
+    }
+
+    // MARK: - Field Aliases
+
+    /// Aliases for field names to support various naming conventions
+    public enum FieldAliases {
+        public static let firstNameAliases = ["firstname", "first_name"]
+        public static let lastNameAliases = ["lastname", "last_name"]
+        public static let emailAliases = ["email", "emailaddress", "email_address"]
+        public static let recordNameAliases = ["userrecordname", "user_record_name", "recordname", "record_name"]
     }
     
     // MARK: - CloudKit Parameters

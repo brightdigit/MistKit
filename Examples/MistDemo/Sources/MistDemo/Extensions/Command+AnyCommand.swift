@@ -1,6 +1,6 @@
 //
-//  ConfigurationParseable.swift
-//  ConfigKeyKit
+//  Command+AnyCommand.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,28 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import ConfigKeyKit
 import Foundation
 
-/// Protocol for configuration types that can parse themselves from command line arguments and environment variables
-public protocol ConfigurationParseable: Sendable {
-    /// Associated type for the configuration reader
-    associatedtype ConfigReader: Sendable
-
-    /// Associated type for the parent configuration
-    /// Use `Never` for root configurations that have no parent
-    associatedtype BaseConfig: Sendable
-
-    /// Initialize the configuration by parsing from available sources (CLI args, environment variables, defaults)
-    /// - Parameters:
-    ///   - configuration: The configuration reader to parse values from
-    ///   - base: Optional parent configuration (nil for root configs)
-    init(configuration: ConfigReader, base: BaseConfig?) async throws
-}
-
-/// Extension for root configurations (where BaseConfig == Never)
-public extension ConfigurationParseable where BaseConfig == Never {
-    /// Convenience initializer for root configs that don't need a parent
-    init(configuration: ConfigReader) async throws {
-        try await self.init(configuration: configuration, base: nil)
+/// Extension to make all MistDemo commands conform to _AnyCommand
+extension Command where Config.ConfigReader == MistDemoConfiguration {
+    public static func _createInstance() async throws -> any Command {
+        let configuration = try MistDemoConfiguration()
+        let config = try await Config(configuration: configuration, base: nil)
+        return Self(config: config)
     }
 }
+
+/// Conformance for all MistDemo commands
+extension AuthTokenCommand: _AnyCommand {}
+extension CurrentUserCommand: _AnyCommand {}
+extension QueryCommand: _AnyCommand {}
+extension CreateCommand: _AnyCommand {}

@@ -1,6 +1,6 @@
 //
-//  ConfigurationParseable.swift
-//  ConfigKeyKit
+//  CSVEscaper.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -29,26 +29,28 @@
 
 import Foundation
 
-/// Protocol for configuration types that can parse themselves from command line arguments and environment variables
-public protocol ConfigurationParseable: Sendable {
-    /// Associated type for the configuration reader
-    associatedtype ConfigReader: Sendable
+/// CSV escaper conforming to RFC 4180
+public struct CSVEscaper: OutputEscaper {
+    public init() {}
 
-    /// Associated type for the parent configuration
-    /// Use `Never` for root configurations that have no parent
-    associatedtype BaseConfig: Sendable
+    public func escape(_ string: String) -> String {
+        // Check if escaping is needed
+        let needsEscaping = string.contains { character in
+            switch character {
+            case ",", "\"", "\n", "\r", "\t":
+                return true
+            default:
+                return false
+            }
+        }
 
-    /// Initialize the configuration by parsing from available sources (CLI args, environment variables, defaults)
-    /// - Parameters:
-    ///   - configuration: The configuration reader to parse values from
-    ///   - base: Optional parent configuration (nil for root configs)
-    init(configuration: ConfigReader, base: BaseConfig?) async throws
-}
+        // If no special characters, return as-is
+        guard needsEscaping else {
+            return string
+        }
 
-/// Extension for root configurations (where BaseConfig == Never)
-public extension ConfigurationParseable where BaseConfig == Never {
-    /// Convenience initializer for root configs that don't need a parent
-    init(configuration: ConfigReader) async throws {
-        try await self.init(configuration: configuration, base: nil)
+        // Escape quotes by doubling them and wrap in quotes
+        let escaped = string.replacingOccurrences(of: "\"", with: "\"\"")
+        return "\"\(escaped)\""
     }
 }

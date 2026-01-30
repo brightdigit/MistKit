@@ -98,9 +98,9 @@ struct MistDemo {
     print("COMMANDS:")
     let availableCommands = await registry.availableCommands
     for commandName in availableCommands {
-      if let commandType = await registry.commandType(named: commandName) {
+      if let metadata = await registry.metadata(for: commandName) {
         let paddedName = commandName.padding(toLength: 12, withPad: " ", startingAt: 0)
-        print("    \(paddedName) \(commandType.abstract)")
+        print("    \(paddedName) \(metadata.abstract)")
       }
     }
     print("")
@@ -113,8 +113,8 @@ struct MistDemo {
   /// Print command-specific help
   @MainActor
   private static func printCommandHelp(_ commandName: String, registry: CommandRegistry) async {
-    if let commandType = await registry.commandType(named: commandName) {
-      commandType.printHelp()
+    if let metadata = await registry.metadata(for: commandName) {
+      print(metadata.helpText)
     } else {
       print("Unknown command: \(commandName)")
       await printGeneralHelp(registry: registry)

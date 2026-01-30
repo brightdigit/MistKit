@@ -33,21 +33,24 @@ public import ConfigKeyKit
 
 /// Configuration for auth-token command
 public struct AuthTokenConfig: Sendable, ConfigurationParseable {
+    public typealias ConfigReader = MistDemoConfiguration
+    public typealias BaseConfig = Never
+
     public let apiToken: String
     public let port: Int
     public let host: String
     public let noBrowser: Bool
-    
+
     public init(apiToken: String, port: Int = 8080, host: String = "127.0.0.1", noBrowser: Bool = false) {
         self.apiToken = apiToken
         self.port = port
         self.host = host
         self.noBrowser = noBrowser
     }
-    
+
     /// Parse configuration from command line arguments
-    public init() async throws {
-        let configReader = try MistDemoConfiguration()
+    public init(configuration: MistDemoConfiguration, base: Never? = nil) async throws {
+        let configReader = configuration
         
         // Parse command-specific options
         let apiToken = configReader.string(forKey: "api.token", isSecret: true) ?? ""

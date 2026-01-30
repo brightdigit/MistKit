@@ -27,51 +27,67 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
+
+/// Protocol for type-erased command creation
+public protocol _AnyCommand: Sendable {
+    /// Create a command instance with configuration
+    static func _createInstance() async throws -> any Command
+}
 
 /// Actor-based registry for managing available commands
 public actor CommandRegistry {
-    private var registeredCommands: [String: any Command.Type] = [:]
-    
+    private var registeredCommands: [String: any _AnyCommand.Type] = [:]
+    private var commandMetadata: [String: CommandMetadata] = [:]
+
+    /// Metadata about a command
+    public struct CommandMetadata: Sendable {
+        public let commandName: String
+        public let abstract: String
+        public let helpText: String
+    }
+
     /// Shared instance
     public static let shared = CommandRegistry()
-    
+
     private init() {}
-    
+
     /// Register a command type with the registry
-    public func register<T: Command>(_ commandType: T.Type) {
-        registeredCommands[commandType.commandName] = commandType
+    public func register<T: Command & _AnyCommand>(_ commandType: T.Type) {
+        registeredCommands[T.commandName] = commandType
+        commandMetadata[T.commandName] = CommandMetadata(
+            commandName: T.commandName,
+            abstract: T.abstract,
+            helpText: T.helpText
+        )
     }
-    
+
     /// Get all registered command names
     public var availableCommands: [String] {
         Array(registeredCommands.keys).sorted()
     }
-    
+
+    /// Get command metadata
+    public func metadata(for name: String) -> CommandMetadata? {
+        commandMetadata[name]
+    }
+
     /// Get command type for the given name
-    public func commandType(named name: String) -> (any Command.Type)? {
+    public func commandType(named name: String) -> (any _AnyCommand.Type)? {
         return registeredCommands[name]
     }
-    
+
     /// Create a command instance dynamically with automatic config parsing
     public func createCommand(named name: String) async throws -> any Command {
         guard let commandType = registeredCommands[name] else {
             throw CommandRegistryError.unknownCommand(name)
         }
-        
-        // Use existential type to handle associated type
-        return try await Self.createCommandWithType(commandType)
+
+        return try await commandType._createInstance()
     }
-    
-    /// Helper method to create command with dynamic type
-    private static func createCommandWithType<T: Command>(_ commandType: T.Type) async throws -> T {
-        let config = try await T.Config()
-        return T(config: config)
-    }
-    
+
     /// Check if a command is registered
     public func isRegistered(_ name: String) -> Bool {
         return registeredCommands[name] != nil
     }
 }
-

@@ -39,16 +39,17 @@ public struct MistKitClientFactory: Sendable {
     /// - Throws: ConfigurationError if required values are missing or invalid
     public static func create(from config: MistDemoConfig) throws -> CloudKitService {
         // Resolve API token
-        let apiToken = config.resolvedApiToken()
+        let apiToken = AuthenticationHelper.resolveAPIToken(config.apiToken)
         guard !apiToken.isEmpty else {
-            throw ConfigurationError.missingRequired("api.token", 
+            throw ConfigurationError.missingRequired("api.token",
                 suggestion: "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable")
         }
-        
+
         // Determine the best token manager based on available credentials
         let tokenManager: any TokenManager
-        
-        if let webAuthToken = config.resolvedWebAuthToken(), !webAuthToken.isEmpty {
+
+        let webAuthToken = config.webAuthToken.map { AuthenticationHelper.resolveWebAuthToken($0) } ?? nil
+        if let webAuthToken = webAuthToken, !webAuthToken.isEmpty {
             // Use web authentication if available
             tokenManager = WebAuthTokenManager(apiToken: apiToken, webAuthToken: webAuthToken)
         } else if let keyID = config.keyID, 
@@ -81,7 +82,7 @@ public struct MistKitClientFactory: Sendable {
     /// - Returns: A configured CloudKitService instance for public database
     /// - Throws: ConfigurationError if required values are missing or invalid
     public static func createForPublicDatabase(from config: MistDemoConfig) throws -> CloudKitService {
-        let apiToken = config.resolvedApiToken()
+        let apiToken = AuthenticationHelper.resolveAPIToken(config.apiToken)
         guard !apiToken.isEmpty else {
             throw ConfigurationError.missingRequired("api.token",
                 suggestion: "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable")

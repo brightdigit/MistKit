@@ -1,6 +1,6 @@
 //
-//  ConfigurationParseable.swift
-//  ConfigKeyKit
+//  OutputFormatterFactory.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -29,26 +29,23 @@
 
 import Foundation
 
-/// Protocol for configuration types that can parse themselves from command line arguments and environment variables
-public protocol ConfigurationParseable: Sendable {
-    /// Associated type for the configuration reader
-    associatedtype ConfigReader: Sendable
-
-    /// Associated type for the parent configuration
-    /// Use `Never` for root configurations that have no parent
-    associatedtype BaseConfig: Sendable
-
-    /// Initialize the configuration by parsing from available sources (CLI args, environment variables, defaults)
+/// Factory for creating output formatters based on output format
+public enum OutputFormatterFactory {
+    /// Create an appropriate formatter for the given output format
     /// - Parameters:
-    ///   - configuration: The configuration reader to parse values from
-    ///   - base: Optional parent configuration (nil for root configs)
-    init(configuration: ConfigReader, base: BaseConfig?) async throws
-}
-
-/// Extension for root configurations (where BaseConfig == Never)
-public extension ConfigurationParseable where BaseConfig == Never {
-    /// Convenience initializer for root configs that don't need a parent
-    init(configuration: ConfigReader) async throws {
-        try await self.init(configuration: configuration, base: nil)
+    ///   - format: The output format
+    ///   - pretty: Whether to use pretty printing (applies to JSON)
+    /// - Returns: A formatter configured for the specified format
+    public static func formatter(for format: OutputFormat, pretty: Bool = false) -> OutputFormatter {
+        switch format {
+        case .json:
+            return JSONFormatter(pretty: pretty)
+        case .table:
+            return TableFormatter()
+        case .csv:
+            return CSVFormatter()
+        case .yaml:
+            return YAMLFormatter()
+        }
     }
 }

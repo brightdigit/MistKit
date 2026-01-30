@@ -170,29 +170,4 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
     }
 }
 
-/// Errors specific to query command
-public enum QueryError: Error, LocalizedError {
-    case invalidLimit(Int)
-    case invalidFilter(String, expected: String)
-    case emptyFieldName(String)
-    case invalidSortOrder(String, available: [String])
-    case unsupportedOperator(String)
-    case operationFailed(String)
-    
-    public var errorDescription: String? {
-        switch self {
-        case .invalidLimit(let limit):
-            return String(format: MistDemoConstants.Messages.invalidLimit, limit, MistDemoConstants.Limits.minQueryLimit, MistDemoConstants.Limits.maxQueryLimit)
-        case .invalidFilter(let filter, let expected):
-            return "Invalid filter '\(filter)'. Expected format: \(expected)"
-        case .emptyFieldName(let filter):
-            return "Empty field name in filter '\(filter)'"
-        case .invalidSortOrder(let order, let available):
-            return "Invalid sort order '\(order)'. Available orders: \(available.joined(separator: ", "))"
-        case .unsupportedOperator(let op):
-            return "Unsupported filter operator '\(op)'. Supported: eq, ne, gt, gte, lt, lte, contains, begins_with, in, not_in"
-        case .operationFailed(let message):
-            return "Query operation failed: \(message)"
-        }
-    }
-}
+// QueryError is now defined in Errors/QueryError.swift

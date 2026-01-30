@@ -187,32 +187,4 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
     }
 }
 
-/// Errors specific to create command
-public enum CreateError: Error, LocalizedError {
-    case noFieldsProvided
-    case invalidJSONFormat(String)
-    case jsonFileError(String, String)
-    case emptyStdin
-    case stdinError(String)
-    case fieldConversionError(String, FieldType, String, String)
-    case operationFailed(String)
-    
-    public var errorDescription: String? {
-        switch self {
-        case .noFieldsProvided:
-            return MistDemoConstants.Messages.noFieldsProvided
-        case .invalidJSONFormat(let message):
-            return "Invalid JSON format: \(message)"
-        case .jsonFileError(let file, let error):
-            return "Error reading JSON file '\(file)': \(error)"
-        case .emptyStdin:
-            return "Empty stdin provided. Expected JSON object with field definitions."
-        case .stdinError(let error):
-            return "Error reading from stdin: \(error)"
-        case .fieldConversionError(let name, let type, let value, let error):
-            return "Failed to convert field '\(name)' of type '\(type.rawValue)' with value '\(value)': \(error)"
-        case .operationFailed(let message):
-            return "Create operation failed: \(message)"
-        }
-    }
-}
+// CreateError is now defined in Errors/CreateError.swift
