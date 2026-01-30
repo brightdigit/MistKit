@@ -1,6 +1,6 @@
 //
-//  Command.swift
-//  ConfigKeyKit
+//  StandardNamingStyle.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -29,30 +29,25 @@
 
 import Foundation
 
-/// Generic protocol for CLI commands using Swift Configuration
-public protocol Command: Sendable {
-    /// Associated configuration type for this command
-    associatedtype Config: Sendable & ConfigurationParseable
-    
-    /// Command name for CLI parsing
-    static var commandName: String { get }
-    
-    /// Abstract description of the command
-    static var abstract: String { get }
-    
-    /// Detailed help text for the command
-    static var helpText: String { get }
-    
-    /// Initialize command with configuration
-    init(config: Config)
-    
-    /// Execute the command asynchronously
-    func execute() async throws
-}
+/// Common naming styles for configuration keys
+public enum StandardNamingStyle: NamingStyle, Sendable {
+  /// Dot-separated lowercase (e.g., "cloudkit.container_id")
+  case dotSeparated
 
-public extension Command {
-    /// Print help information for this command
-    static func printHelp() {
-        print(helpText)
+  /// Screaming snake case with prefix (e.g., "BUSHEL_CLOUDKIT_CONTAINER_ID")
+  case screamingSnakeCase(prefix: String?)
+
+  public func transform(_ base: String) -> String {
+    switch self {
+    case .dotSeparated:
+      return base
+
+    case .screamingSnakeCase(let prefix):
+      let snakeCase = base.uppercased().replacingOccurrences(of: ".", with: "_")
+      if let prefix = prefix {
+        return "\(prefix)_\(snakeCase)"
+      }
+      return snakeCase
     }
+  }
 }

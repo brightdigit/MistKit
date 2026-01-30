@@ -1,5 +1,5 @@
 //
-//  Command.swift
+//  ConfigurationParseable.swift
 //  ConfigKeyKit
 //
 //  Created by Leo Dion.
@@ -29,30 +29,8 @@
 
 import Foundation
 
-/// Generic protocol for CLI commands using Swift Configuration
-public protocol Command: Sendable {
-    /// Associated configuration type for this command
-    associatedtype Config: Sendable & ConfigurationParseable
-    
-    /// Command name for CLI parsing
-    static var commandName: String { get }
-    
-    /// Abstract description of the command
-    static var abstract: String { get }
-    
-    /// Detailed help text for the command
-    static var helpText: String { get }
-    
-    /// Initialize command with configuration
-    init(config: Config)
-    
-    /// Execute the command asynchronously
-    func execute() async throws
-}
-
-public extension Command {
-    /// Print help information for this command
-    static func printHelp() {
-        print(helpText)
-    }
+/// Protocol for configuration types that can parse themselves from command line arguments and environment variables
+public protocol ConfigurationParseable: Sendable {
+    /// Initialize the configuration by parsing from available sources (CLI args, environment variables, defaults)
+    init() async throws
 }

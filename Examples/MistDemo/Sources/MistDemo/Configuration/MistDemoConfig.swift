@@ -176,16 +176,3 @@ public struct MistDemoConfig: Sendable {
     }
 }
 
-// MARK: - Configuration Extensions
-
-extension MistDemoConfig {
-    /// Resolve API token from configuration or environment
-    public func resolvedApiToken() -> String {
-        AuthenticationHelper.resolveAPIToken(apiToken)
-    }
-
-    /// Resolve web auth token from configuration or environment
-    public func resolvedWebAuthToken() -> String? {
-        AuthenticationHelper.resolveWebAuthToken(webAuthToken ?? "")
-    }
-}

@@ -1,6 +1,6 @@
 //
-//  Command.swift
-//  ConfigKeyKit
+//  DynamicKey.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,32 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
-/// Generic protocol for CLI commands using Swift Configuration
-public protocol Command: Sendable {
-    /// Associated configuration type for this command
-    associatedtype Config: Sendable & ConfigurationParseable
+/// Dynamic coding key for handling arbitrary JSON object keys
+struct DynamicKey: CodingKey {
+    var stringValue: String
+    var intValue: Int?
     
-    /// Command name for CLI parsing
-    static var commandName: String { get }
+    init?(stringValue: String) {
+        self.stringValue = stringValue
+        self.intValue = nil
+    }
     
-    /// Abstract description of the command
-    static var abstract: String { get }
-    
-    /// Detailed help text for the command
-    static var helpText: String { get }
-    
-    /// Initialize command with configuration
-    init(config: Config)
-    
-    /// Execute the command asynchronously
-    func execute() async throws
-}
-
-public extension Command {
-    /// Print help information for this command
-    static func printHelp() {
-        print(helpText)
+    init?(intValue: Int) {
+        self.stringValue = String(intValue)
+        self.intValue = intValue
     }
 }

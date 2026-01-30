@@ -1,6 +1,6 @@
 //
-//  Command.swift
-//  ConfigKeyKit
+//  FieldParsingError.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,32 +27,28 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
-/// Generic protocol for CLI commands using Swift Configuration
-public protocol Command: Sendable {
-    /// Associated configuration type for this command
-    associatedtype Config: Sendable & ConfigurationParseable
+/// Errors that can occur during field parsing
+public enum FieldParsingError: Error, LocalizedError {
+    case invalidFormat(String, expected: String)
+    case emptyFieldName(String)
+    case unknownFieldType(String, available: [String])
+    case invalidValueForType(String, type: FieldType)
+    case unsupportedFieldType(FieldType)
     
-    /// Command name for CLI parsing
-    static var commandName: String { get }
-    
-    /// Abstract description of the command
-    static var abstract: String { get }
-    
-    /// Detailed help text for the command
-    static var helpText: String { get }
-    
-    /// Initialize command with configuration
-    init(config: Config)
-    
-    /// Execute the command asynchronously
-    func execute() async throws
-}
-
-public extension Command {
-    /// Print help information for this command
-    static func printHelp() {
-        print(helpText)
+    public var errorDescription: String? {
+        switch self {
+        case .invalidFormat(let input, let expected):
+            return "Invalid field format '\(input)'. Expected format: \(expected)"
+        case .emptyFieldName(let input):
+            return "Empty field name in '\(input)'"
+        case .unknownFieldType(let type, let available):
+            return "Unknown field type '\(type)'. Available types: \(available.joined(separator: ", "))"
+        case .invalidValueForType(let value, let type):
+            return "Invalid value '\(value)' for field type '\(type.rawValue)'"
+        case .unsupportedFieldType(let type):
+            return "Field type '\(type.rawValue)' is not yet supported"
+        }
     }
 }

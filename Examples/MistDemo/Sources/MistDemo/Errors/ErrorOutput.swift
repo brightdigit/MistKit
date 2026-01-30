@@ -71,19 +71,3 @@ public struct ErrorOutput: Sendable, Codable {
   }
 }
 
-// MARK: - JSON Encoding
-
-extension ErrorOutput {
-  /// Convert to JSON string
-  public func toJSON(pretty: Bool = true) throws -> String {
-    let encoder = JSONEncoder()
-    if pretty {
-      encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    }
-    let data = try encoder.encode(self)
-    guard let string = String(data: data, encoding: .utf8) else {
-      throw FormattingError.encodingFailed
-    }
-    return string
-  }
-}

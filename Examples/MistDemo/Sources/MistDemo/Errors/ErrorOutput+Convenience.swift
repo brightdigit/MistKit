@@ -1,6 +1,6 @@
 //
-//  Command.swift
-//  ConfigKeyKit
+//  ErrorOutput+Convenience.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -29,30 +29,19 @@
 
 import Foundation
 
-/// Generic protocol for CLI commands using Swift Configuration
-public protocol Command: Sendable {
-    /// Associated configuration type for this command
-    associatedtype Config: Sendable & ConfigurationParseable
-    
-    /// Command name for CLI parsing
-    static var commandName: String { get }
-    
-    /// Abstract description of the command
-    static var abstract: String { get }
-    
-    /// Detailed help text for the command
-    static var helpText: String { get }
-    
-    /// Initialize command with configuration
-    init(config: Config)
-    
-    /// Execute the command asynchronously
-    func execute() async throws
-}
+// MARK: - JSON Encoding
 
-public extension Command {
-    /// Print help information for this command
-    static func printHelp() {
-        print(helpText)
+extension ErrorOutput {
+  /// Convert to JSON string
+  public func toJSON(pretty: Bool = true) throws -> String {
+    let encoder = JSONEncoder()
+    if pretty {
+      encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     }
+    let data = try encoder.encode(self)
+    guard let string = String(data: data, encoding: .utf8) else {
+      throw FormattingError.encodingFailed
+    }
+    return string
+  }
 }

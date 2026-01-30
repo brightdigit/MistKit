@@ -1,6 +1,6 @@
 //
-//  Command.swift
-//  ConfigKeyKit
+//  FieldInputValue.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,32 +27,26 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
-/// Generic protocol for CLI commands using Swift Configuration
-public protocol Command: Sendable {
-    /// Associated configuration type for this command
-    associatedtype Config: Sendable & ConfigurationParseable
+/// Enum representing different types of field input values
+public enum FieldInputValue {
+    case string(String)
+    case int(Int)
+    case double(Double)
+    case bool(Bool)
     
-    /// Command name for CLI parsing
-    static var commandName: String { get }
-    
-    /// Abstract description of the command
-    static var abstract: String { get }
-    
-    /// Detailed help text for the command
-    static var helpText: String { get }
-    
-    /// Initialize command with configuration
-    init(config: Config)
-    
-    /// Execute the command asynchronously
-    func execute() async throws
-}
-
-public extension Command {
-    /// Print help information for this command
-    static func printHelp() {
-        print(helpText)
+    /// Convert to FieldType and string value for Field creation
+    func toFieldComponents() throws -> (FieldType, String) {
+        switch self {
+        case .string(let value):
+            return (.string, value)
+        case .int(let value):
+            return (.int64, String(value))
+        case .double(let value):
+            return (.double, String(value))
+        case .bool(let value):
+            return (.string, value ? "true" : "false")
+        }
     }
 }

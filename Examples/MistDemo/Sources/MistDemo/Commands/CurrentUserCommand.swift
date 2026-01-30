@@ -54,26 +54,6 @@ public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
         self.config = config
     }
     
-    /// Parse configuration from command line arguments
-    public static func parseConfig() async throws -> CurrentUserConfig {
-        let configReader = try MistDemoConfiguration()
-        let baseConfig = try MistDemoConfig()
-        
-        // Parse fields filter
-        let fieldsString = configReader.string(forKey: "fields")
-        let fields = fieldsString?.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-        
-        // Parse output format
-        let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
-        let output = OutputFormat(rawValue: outputString) ?? .json
-        
-        return CurrentUserConfig(
-            base: baseConfig,
-            fields: fields,
-            output: output
-        )
-    }
-    
     public func execute() async throws {
         do {
             // Create CloudKit client

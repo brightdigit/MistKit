@@ -1,6 +1,6 @@
 //
-//  Command.swift
-//  ConfigKeyKit
+//  ConfigKeySource.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,32 +27,13 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+// MARK: - Configuration Key Source
 
-/// Generic protocol for CLI commands using Swift Configuration
-public protocol Command: Sendable {
-    /// Associated configuration type for this command
-    associatedtype Config: Sendable & ConfigurationParseable
-    
-    /// Command name for CLI parsing
-    static var commandName: String { get }
-    
-    /// Abstract description of the command
-    static var abstract: String { get }
-    
-    /// Detailed help text for the command
-    static var helpText: String { get }
-    
-    /// Initialize command with configuration
-    init(config: Config)
-    
-    /// Execute the command asynchronously
-    func execute() async throws
-}
+/// Source for configuration keys (CLI arguments or environment variables)
+public enum ConfigKeySource: CaseIterable, Sendable {
+  /// Command-line arguments (e.g., --cloudkit-container-id)
+  case commandLine
 
-public extension Command {
-    /// Print help information for this command
-    static func printHelp() {
-        print(helpText)
-    }
+  /// Environment variables (e.g., CLOUDKIT_CONTAINER_ID)
+  case environment
 }

@@ -56,29 +56,6 @@ public struct AuthTokenCommand: MistDemoCommand {
         self.config = config
     }
     
-    /// Parse configuration from command line arguments
-    public static func parseConfig() async throws -> AuthTokenConfig {
-        let configReader = try MistDemoConfiguration()
-        
-        // Parse command-specific options
-        let apiToken = configReader.string(forKey: "api.token", isSecret: true) ?? ""
-        guard !apiToken.isEmpty else {
-            throw ConfigurationError.missingRequired("api.token", 
-                suggestion: "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable")
-        }
-        
-        let port = configReader.int(forKey: "port", default: 8080) ?? 8080
-        let host = configReader.string(forKey: "host", default: "127.0.0.1") ?? "127.0.0.1"
-        let noBrowser = configReader.bool(forKey: "no.browser", default: false)
-        
-        return AuthTokenConfig(
-            apiToken: apiToken,
-            port: port,
-            host: host,
-            noBrowser: noBrowser
-        )
-    }
-    
     public func execute() async throws {
         print("🚀 Starting CloudKit Authentication Server")
         print("📍 Server URL: http://\(config.host):\(config.port)")

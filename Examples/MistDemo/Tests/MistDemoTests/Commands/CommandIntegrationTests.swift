@@ -321,10 +321,10 @@ struct CommandIntegrationTests {
         let createCommand = CreateCommand(config: createConfig)
         
         // Verify all commands are properly configured
-        #expect(authCommand.commandName == "auth-token")
-        #expect(userCommand.commandName == "current-user")
-        #expect(queryCommand.commandName == "query")
-        #expect(createCommand.commandName == "create")
+        #expect(AuthTokenCommand.commandName == "auth-token")
+        #expect(CurrentUserCommand.commandName == "current-user")
+        #expect(QueryCommand.commandName == "query")
+        #expect(CreateCommand.commandName == "create")
     }
 }
 

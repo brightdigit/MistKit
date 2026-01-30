@@ -57,56 +57,6 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
         self.config = config
     }
     
-    /// Parse configuration from command line arguments
-    public static func parseConfig() async throws -> QueryConfig {
-        let configReader = try MistDemoConfiguration()
-        let baseConfig = try MistDemoConfig()
-        
-        // Parse query-specific options
-        let zone = configReader.string(forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone) ?? MistDemoConstants.Defaults.zone
-        let recordType = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordType, default: MistDemoConstants.Defaults.recordType) ?? MistDemoConstants.Defaults.recordType
-        
-        // Parse filters (can be multiple)
-        let filtersString = configReader.string(forKey: MistDemoConstants.ConfigKeys.filter)
-        let filters = filtersString?.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) } ?? []
-        
-        // Parse sort option
-        let sortString = configReader.string(forKey: MistDemoConstants.ConfigKeys.sort)
-        let sort = try Self.parseSortOption(sortString)
-        
-        // Parse limits and pagination
-        let limit = configReader.int(forKey: MistDemoConstants.ConfigKeys.limit, default: MistDemoConstants.Defaults.queryLimit) ?? MistDemoConstants.Defaults.queryLimit
-        guard limit >= MistDemoConstants.Limits.minQueryLimit && limit <= MistDemoConstants.Limits.maxQueryLimit else {
-            throw QueryError.invalidLimit(limit)
-        }
-        
-        let offset = configReader.int(forKey: "offset", default: 0) ?? 0
-        
-        // Parse fields filter
-        let fieldsString = configReader.string(forKey: MistDemoConstants.ConfigKeys.fields)
-        let fields = fieldsString?.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-        
-        // Parse continuation marker
-        let continuationMarker = configReader.string(forKey: "continuation.marker")
-        
-        // Parse output format
-        let outputString = configReader.string(forKey: MistDemoConstants.ConfigKeys.outputFormat, default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
-        let output = OutputFormat(rawValue: outputString) ?? .json
-        
-        return QueryConfig(
-            base: baseConfig,
-            zone: zone,
-            recordType: recordType,
-            filters: filters,
-            sort: sort,
-            limit: limit,
-            offset: offset,
-            fields: Array(fields ?? []),
-            continuationMarker: continuationMarker,
-            output: output
-        )
-    }
-    
     public func execute() async throws {
         do {
             // Create CloudKit client
@@ -146,23 +96,6 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
         } catch {
             throw QueryError.operationFailed(error.localizedDescription)
         }
-    }
-    
-    /// Parse sort option from string format "field:order"
-    private static func parseSortOption(_ sortString: String?) throws -> (field: String, order: SortOrder)? {
-        guard let sortString = sortString, !sortString.isEmpty else { return nil }
-        
-        let components = sortString.split(separator: ":", maxSplits: 1)
-        guard components.count >= 1 else { return nil }
-        
-        let field = String(components[0]).trimmingCharacters(in: .whitespaces)
-        let orderString = components.count > 1 ? String(components[1]).trimmingCharacters(in: .whitespaces) : "asc"
-        
-        guard let order = SortOrder(rawValue: orderString.lowercased()) else {
-            throw QueryError.invalidSortOrder(orderString, available: SortOrder.allCases.map(\.rawValue))
-        }
-        
-        return (field: field, order: order)
     }
     
     /// Parse filter expressions

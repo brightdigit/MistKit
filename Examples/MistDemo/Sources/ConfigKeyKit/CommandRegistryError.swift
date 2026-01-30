@@ -1,5 +1,5 @@
 //
-//  Command.swift
+//  CommandRegistryError.swift
 //  ConfigKeyKit
 //
 //  Created by Leo Dion.
@@ -27,32 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
-/// Generic protocol for CLI commands using Swift Configuration
-public protocol Command: Sendable {
-    /// Associated configuration type for this command
-    associatedtype Config: Sendable & ConfigurationParseable
+/// Errors that can occur in command registry operations
+public enum CommandRegistryError: Error, LocalizedError {
+    case unknownCommand(String)
     
-    /// Command name for CLI parsing
-    static var commandName: String { get }
-    
-    /// Abstract description of the command
-    static var abstract: String { get }
-    
-    /// Detailed help text for the command
-    static var helpText: String { get }
-    
-    /// Initialize command with configuration
-    init(config: Config)
-    
-    /// Execute the command asynchronously
-    func execute() async throws
-}
-
-public extension Command {
-    /// Print help information for this command
-    static func printHelp() {
-        print(helpText)
+    public var errorDescription: String? {
+        switch self {
+        case .unknownCommand(let name):
+            return "Unknown command: \(name)"
+        }
     }
 }

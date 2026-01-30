@@ -65,7 +65,7 @@ public actor CommandRegistry {
     
     /// Helper method to create command with dynamic type
     private static func createCommandWithType<T: Command>(_ commandType: T.Type) async throws -> T {
-        let config = try await commandType.parseConfig()
+        let config = try await T.Config()
         return T(config: config)
     }
     
@@ -75,25 +75,3 @@ public actor CommandRegistry {
     }
 }
 
-/// Command configuration for identifying and routing commands
-public struct CommandConfiguration {
-    public let commandName: String
-    public let abstract: String
-    
-    public init(commandName: String, abstract: String) {
-        self.commandName = commandName
-        self.abstract = abstract
-    }
-}
-
-/// Errors that can occur in command registry operations
-public enum CommandRegistryError: Error, LocalizedError {
-    case unknownCommand(String)
-    
-    public var errorDescription: String? {
-        switch self {
-        case .unknownCommand(let name):
-            return "Unknown command: \(name)"
-        }
-    }
-}

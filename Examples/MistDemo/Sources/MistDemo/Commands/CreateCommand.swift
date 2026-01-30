@@ -106,33 +106,6 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
         self.config = config
     }
     
-    /// Parse configuration from command line arguments
-    public static func parseConfig() async throws -> CreateConfig {
-        let configReader = try MistDemoConfiguration()
-        let baseConfig = try MistDemoConfig()
-        
-        // Parse create-specific options
-        let zone = configReader.string(forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone) ?? MistDemoConstants.Defaults.zone
-        let recordType = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordType, default: MistDemoConstants.Defaults.recordType) ?? MistDemoConstants.Defaults.recordType
-        let recordName = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordName)
-        
-        // Parse fields from various sources
-        let fields = try Self.parseFieldsFromSources(configReader)
-        
-        // Parse output format
-        let outputString = configReader.string(forKey: MistDemoConstants.ConfigKeys.outputFormat, default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
-        let output = OutputFormat(rawValue: outputString) ?? .json
-        
-        return CreateConfig(
-            base: baseConfig,
-            zone: zone,
-            recordType: recordType,
-            recordName: recordName,
-            fields: fields,
-            output: output
-        )
-    }
-    
     public func execute() async throws {
         do {
             // Create CloudKit client
@@ -160,64 +133,6 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
             throw CreateError.operationFailed(error.localizedDescription)
         }
     }
-    
-    /// Parse fields from multiple sources (CLI args, JSON file, stdin)
-    private static func parseFieldsFromSources(_ configReader: MistDemoConfiguration) throws -> [Field] {
-        var fields: [Field] = []
-        
-        // 1. Parse inline field definitions
-        if let fieldString = configReader.string(forKey: "field") {
-            let fieldDefinitions = fieldString.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-            let inlineFields = try Field.parseFields(fieldDefinitions)
-            fields.append(contentsOf: inlineFields)
-        }
-        
-        // 2. Parse from JSON file
-        if let jsonFile = configReader.string(forKey: MistDemoConstants.ConfigKeys.jsonFile) {
-            let jsonFields = try parseFieldsFromJSONFile(jsonFile)
-            fields.append(contentsOf: jsonFields)
-        }
-        
-        // 3. Parse from stdin (check if data is available)
-        if configReader.bool(forKey: MistDemoConstants.ConfigKeys.stdin, default: false) {
-            let stdinFields = try parseFieldsFromStdin()
-            fields.append(contentsOf: stdinFields)
-        }
-        
-        guard !fields.isEmpty else {
-            throw CreateError.noFieldsProvided
-        }
-        
-        return fields
-    }
-    
-    /// Parse fields from JSON file
-    private static func parseFieldsFromJSONFile(_ filePath: String) throws -> [Field] {
-        do {
-            let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
-            let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
-            return try fieldsInput.toFields()
-        } catch {
-            throw CreateError.jsonFileError(filePath, error.localizedDescription)
-        }
-    }
-    
-    /// Parse fields from stdin
-    private static func parseFieldsFromStdin() throws -> [Field] {
-        let stdinData = FileHandle.standardInput.readDataToEndOfFile()
-        
-        guard !stdinData.isEmpty else {
-            throw CreateError.emptyStdin
-        }
-        
-        do {
-            let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: stdinData)
-            return try fieldsInput.toFields()
-        } catch {
-            throw CreateError.stdinError(error.localizedDescription)
-        }
-    }
-    
     
     /// Generate a unique record name
     private func generateRecordName() -> String {
