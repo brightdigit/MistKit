@@ -32,6 +32,7 @@ public import MistKit
 
 /// Command to query Note records from CloudKit with filtering and sorting
 public struct QueryCommand: MistDemoCommand, OutputFormatting {
+    public typealias Config = QueryConfig
     public static let commandName = "query"
     public static let abstract = "Query records from CloudKit with filtering and sorting"
     public static let helpText = """
@@ -56,8 +57,8 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
         self.config = config
     }
     
-    /// Initialize from command line arguments using Swift Configuration
-    public init() throws {
+    /// Parse configuration from command line arguments
+    public static func parseConfig() async throws -> QueryConfig {
         let configReader = try MistDemoConfiguration()
         let baseConfig = try MistDemoConfig()
         
@@ -92,7 +93,7 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
         let outputString = configReader.string(forKey: MistDemoConstants.ConfigKeys.outputFormat, default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
         let output = OutputFormat(rawValue: outputString) ?? .json
         
-        self.config = QueryConfig(
+        return QueryConfig(
             base: baseConfig,
             zone: zone,
             recordType: recordType,

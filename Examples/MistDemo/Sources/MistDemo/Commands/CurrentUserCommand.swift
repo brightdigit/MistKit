@@ -32,6 +32,7 @@ import MistKit
 
 /// Command to get information about the authenticated user
 public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
+    public typealias Config = CurrentUserConfig
     public static let commandName = "current-user"
     public static let abstract = "Get current user information"
     public static let helpText = """
@@ -53,8 +54,8 @@ public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
         self.config = config
     }
     
-    /// Initialize from command line arguments using Swift Configuration
-    public init() throws {
+    /// Parse configuration from command line arguments
+    public static func parseConfig() async throws -> CurrentUserConfig {
         let configReader = try MistDemoConfiguration()
         let baseConfig = try MistDemoConfig()
         
@@ -66,7 +67,7 @@ public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
         let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
         let output = OutputFormat(rawValue: outputString) ?? .json
         
-        self.config = CurrentUserConfig(
+        return CurrentUserConfig(
             base: baseConfig,
             fields: fields,
             output: output

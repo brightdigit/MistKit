@@ -34,6 +34,7 @@ import MistKit
 
 /// Command to obtain web authentication token via browser flow
 public struct AuthTokenCommand: MistDemoCommand {
+    public typealias Config = AuthTokenConfig
     public static let commandName = "auth-token"
     public static let abstract = "Obtain a web authentication token via browser flow"
     public static let helpText = """
@@ -55,8 +56,8 @@ public struct AuthTokenCommand: MistDemoCommand {
         self.config = config
     }
     
-    /// Initialize from command line arguments using Swift Configuration
-    public init() throws {
+    /// Parse configuration from command line arguments
+    public static func parseConfig() async throws -> AuthTokenConfig {
         let configReader = try MistDemoConfiguration()
         
         // Parse command-specific options
@@ -70,7 +71,7 @@ public struct AuthTokenCommand: MistDemoCommand {
         let host = configReader.string(forKey: "host", default: "127.0.0.1") ?? "127.0.0.1"
         let noBrowser = configReader.bool(forKey: "no.browser", default: false)
         
-        self.config = AuthTokenConfig(
+        return AuthTokenConfig(
             apiToken: apiToken,
             port: port,
             host: host,

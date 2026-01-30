@@ -42,11 +42,13 @@ import AppKit
 struct MistDemo {
   @MainActor
   static func main() async throws {
+    let registry = CommandRegistry.shared
+    
     // Register available commands
-    CommandRegistry.register(AuthTokenCommand.self)
-    CommandRegistry.register(CurrentUserCommand.self)
-    CommandRegistry.register(QueryCommand.self)
-    CommandRegistry.register(CreateCommand.self)
+    await registry.register(AuthTokenCommand.self)
+    await registry.register(CurrentUserCommand.self)
+    await registry.register(QueryCommand.self)
+    await registry.register(CreateCommand.self)
     
     // Parse command line arguments
     let parser = CommandLineParser()
@@ -54,9 +56,9 @@ struct MistDemo {
     // Check for help
     if parser.isHelpRequested() {
       if let commandName = parser.parseCommandName() {
-        await printCommandHelp(commandName)
+        await printCommandHelp(commandName, registry: registry)
       } else {
-        await printGeneralHelp()
+        await printGeneralHelp(registry: registry)
       }
       return
     }
@@ -64,21 +66,22 @@ struct MistDemo {
     // Check if a command was specified
     if let commandName = parser.parseCommandName() {
       // Execute specific command
-      try await executeCommand(commandName)
+      try await executeCommand(commandName, registry: registry)
     } else {
-      // Fall back to legacy behavior for backward compatibility
-      try await executeLegacyMode()
+      // Show error and available commands
+      await printMissingCommandError(registry: registry)
     }
   }
   
   /// Execute a specific command
-  private static func executeCommand(_ commandName: String) async throws {
+  private static func executeCommand(_ commandName: String, registry: CommandRegistry) async throws {
     do {
-      let command = try CommandRegistry.createCommand(named: commandName)
+      let command = try await registry.createCommand(named: commandName)
       try await command.execute()
     } catch let error as CommandRegistryError {
       print("❌ \(error.localizedDescription)")
-      print("Available commands: \(await CommandRegistry.availableCommands.joined(separator: ", "))")
+      let availableCommands = await registry.availableCommands
+      print("Available commands: \(availableCommands.joined(separator: ", "))")
       print("Run 'mistdemo help' for usage information.")
       throw error
     }
@@ -86,15 +89,16 @@ struct MistDemo {
   
   /// Print general help
   @MainActor
-  private static func printGeneralHelp() {
+  private static func printGeneralHelp(registry: CommandRegistry) async {
     print("MistDemo - CloudKit Web Services Command Line Tool")
     print("")
     print("USAGE:")
     print("    mistdemo <command> [options]")
     print("")
     print("COMMANDS:")
-    for commandName in CommandRegistry.availableCommands {
-      if let commandType = CommandRegistry.commandType(named: commandName) {
+    let availableCommands = await registry.availableCommands
+    for commandName in availableCommands {
+      if let commandType = await registry.commandType(named: commandName) {
         let paddedName = commandName.padding(toLength: 12, withPad: " ", startingAt: 0)
         print("    \(paddedName) \(commandType.abstract)")
       }
@@ -108,27 +112,21 @@ struct MistDemo {
   
   /// Print command-specific help
   @MainActor
-  private static func printCommandHelp(_ commandName: String) async {
-    if let commandType = CommandRegistry.commandType(named: commandName) {
+  private static func printCommandHelp(_ commandName: String, registry: CommandRegistry) async {
+    if let commandType = await registry.commandType(named: commandName) {
       commandType.printHelp()
     } else {
       print("Unknown command: \(commandName)")
-      await printGeneralHelp()
+      await printGeneralHelp(registry: registry)
     }
   }
   
-  /// Execute legacy mode for backward compatibility
-  private static func executeLegacyMode() async throws {
-    print("❌ Legacy mode has been removed.")
-    print("💡 Use the new command-based interface:")
+  /// Print error when no command is specified
+  @MainActor
+  private static func printMissingCommandError(registry: CommandRegistry) async {
+    print("❌ No command specified.")
+    print("💡 Use the command-based interface:")
     print("")
-    print("Available commands:")
-    print("  mistdemo auth-token     - Get authentication token")
-    print("  mistdemo current-user   - Get current user info")
-    print("  mistdemo query          - Query CloudKit records")
-    print("  mistdemo create         - Create CloudKit records")
-    print("")
-    print("Run 'mistdemo <command> --help' for detailed help.")
-    print("Or 'mistdemo --help' for general help.")
+    await printGeneralHelp(registry: registry)
   }
 }

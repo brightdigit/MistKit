@@ -31,6 +31,9 @@ import Foundation
 
 /// Generic protocol for CLI commands using Swift Configuration
 public protocol Command: Sendable {
+    /// Associated configuration type for this command
+    associatedtype Config: Sendable
+    
     /// Command name for CLI parsing
     static var commandName: String { get }
     
@@ -40,8 +43,11 @@ public protocol Command: Sendable {
     /// Detailed help text for the command
     static var helpText: String { get }
     
-    /// Initialize command with automatic config parsing from command line
-    init() throws
+    /// Initialize command with configuration
+    init(config: Config)
+    
+    /// Parse configuration from command line arguments
+    static func parseConfig() async throws -> Config
     
     /// Execute the command asynchronously
     func execute() async throws

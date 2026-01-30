@@ -32,6 +32,7 @@ import MistKit
 
 /// Command to create a new record in CloudKit
 public struct CreateCommand: MistDemoCommand, OutputFormatting {
+    public typealias Config = CreateConfig
     public static let commandName = "create"
     public static let abstract = "Create a new record in CloudKit"
     public static let helpText = """
@@ -105,8 +106,8 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
         self.config = config
     }
     
-    /// Initialize from command line arguments using Swift Configuration
-    public init() throws {
+    /// Parse configuration from command line arguments
+    public static func parseConfig() async throws -> CreateConfig {
         let configReader = try MistDemoConfiguration()
         let baseConfig = try MistDemoConfig()
         
@@ -122,7 +123,7 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
         let outputString = configReader.string(forKey: MistDemoConstants.ConfigKeys.outputFormat, default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
         let output = OutputFormat(rawValue: outputString) ?? .json
         
-        self.config = CreateConfig(
+        return CreateConfig(
             base: baseConfig,
             zone: zone,
             recordType: recordType,

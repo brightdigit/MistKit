@@ -27,39 +27,50 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
-/// Generic registry for managing available commands
-@MainActor
-public struct CommandRegistry {
-    private static var registeredCommands: [String: any Command.Type] = [:]
+/// Actor-based registry for managing available commands
+public actor CommandRegistry {
+    private var registeredCommands: [String: any Command.Type] = [:]
+    
+    /// Shared instance
+    public static let shared = CommandRegistry()
+    
+    private init() {}
     
     /// Register a command type with the registry
-    public static func register<T: Command>(_ commandType: T.Type) {
+    public func register<T: Command>(_ commandType: T.Type) {
         registeredCommands[commandType.commandName] = commandType
     }
     
     /// Get all registered command names
-    public static var availableCommands: [String] {
+    public var availableCommands: [String] {
         Array(registeredCommands.keys).sorted()
     }
     
     /// Get command type for the given name
-    public static func commandType(named name: String) -> (any Command.Type)? {
+    public func commandType(named name: String) -> (any Command.Type)? {
         return registeredCommands[name]
     }
     
     /// Create a command instance dynamically with automatic config parsing
-    public static func createCommand(named name: String) throws -> any Command {
+    public func createCommand(named name: String) async throws -> any Command {
         guard let commandType = registeredCommands[name] else {
             throw CommandRegistryError.unknownCommand(name)
         }
         
-        return try commandType.init()
+        // Use existential type to handle associated type
+        return try await Self.createCommandWithType(commandType)
+    }
+    
+    /// Helper method to create command with dynamic type
+    private static func createCommandWithType<T: Command>(_ commandType: T.Type) async throws -> T {
+        let config = try await commandType.parseConfig()
+        return T(config: config)
     }
     
     /// Check if a command is registered
-    public static func isRegistered(_ name: String) -> Bool {
+    public func isRegistered(_ name: String) -> Bool {
         return registeredCommands[name] != nil
     }
 }
