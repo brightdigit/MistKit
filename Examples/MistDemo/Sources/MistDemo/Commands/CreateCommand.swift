@@ -47,15 +47,15 @@ public struct CreateCommand: MistDemoCommand {
         let baseConfig = try MistDemoConfig()
         
         // Parse create-specific options
-        let zone = configReader.string(forKey: "zone", default: "_defaultZone") ?? "_defaultZone"
-        let recordType = configReader.string(forKey: "record.type", default: "Note") ?? "Note"
-        let recordName = configReader.string(forKey: "record.name")
+        let zone = configReader.string(forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone) ?? MistDemoConstants.Defaults.zone
+        let recordType = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordType, default: MistDemoConstants.Defaults.recordType) ?? MistDemoConstants.Defaults.recordType
+        let recordName = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordName)
         
         // Parse fields from various sources
         let fields = try Self.parseFieldsFromSources(configReader)
         
         // Parse output format
-        let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
+        let outputString = configReader.string(forKey: MistDemoConstants.ConfigKeys.outputFormat, default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
         let output = OutputFormat(rawValue: outputString) ?? .json
         
         self.config = CreateConfig(
@@ -80,11 +80,12 @@ public struct CreateCommand: MistDemoCommand {
             let cloudKitFields = try convertFieldsToCloudKit(config.fields)
             
             // Create the record
+            // NOTE: Zone support requires enhancements to CloudKitService.createRecord method
             let recordInfo = try await client.createRecord(
                 recordType: config.recordType,
                 recordName: recordName,
                 fields: cloudKitFields
-                // TODO: Add zone support
+                // Zone: config.zone - to be added when CloudKitService supports it
             )
             
             // Format and output result
@@ -107,13 +108,13 @@ public struct CreateCommand: MistDemoCommand {
         }
         
         // 2. Parse from JSON file
-        if let jsonFile = configReader.string(forKey: "json.file") {
+        if let jsonFile = configReader.string(forKey: MistDemoConstants.ConfigKeys.jsonFile) {
             let jsonFields = try parseFieldsFromJSONFile(jsonFile)
             fields.append(contentsOf: jsonFields)
         }
         
         // 3. Parse from stdin (check if data is available)
-        if configReader.bool(forKey: "stdin", default: false) {
+        if configReader.bool(forKey: MistDemoConstants.ConfigKeys.stdin, default: false) {
             let stdinFields = try parseFieldsFromStdin()
             fields.append(contentsOf: stdinFields)
         }
@@ -207,7 +208,7 @@ public struct CreateCommand: MistDemoCommand {
     /// Generate a unique record name
     private func generateRecordName() -> String {
         let timestamp = Int(Date().timeIntervalSince1970)
-        let randomSuffix = String(Int.random(in: 1000...9999))
+        let randomSuffix = String(Int.random(in: MistDemoConstants.Limits.randomSuffixMin...MistDemoConstants.Limits.randomSuffixMax))
         return "\(config.recordType.lowercased())-\(timestamp)-\(randomSuffix)"
     }
     
@@ -267,7 +268,7 @@ public struct CreateCommand: MistDemoCommand {
             print(jsonString)
             
         case .table:
-            print("Created Record:")
+            print(MistDemoConstants.Messages.recordCreated)
             print("├─ Name: \(recordInfo.recordName)")
             print("├─ Type: \(recordInfo.recordType)")
             if let changeTag = recordInfo.recordChangeTag {
@@ -281,7 +282,11 @@ public struct CreateCommand: MistDemoCommand {
             }
             
         case .csv:
-            let allFieldNames = ["recordName", "recordType", "recordChangeTag"] + recordInfo.fields.keys.sorted()
+            let allFieldNames = [
+                MistDemoConstants.FieldNames.recordName,
+                MistDemoConstants.FieldNames.recordType,
+                MistDemoConstants.FieldNames.recordChangeTag
+            ] + recordInfo.fields.keys.sorted()
             
             // Print header
             print(allFieldNames.joined(separator: ","))
@@ -290,16 +295,16 @@ public struct CreateCommand: MistDemoCommand {
             var values: [String] = []
             for fieldName in allFieldNames {
                 switch fieldName {
-                case "recordName":
-                    values.append(csvEscape(recordInfo.recordName))
-                case "recordType":
-                    values.append(csvEscape(recordInfo.recordType))
-                case "recordChangeTag":
-                    values.append(csvEscape(recordInfo.recordChangeTag ?? ""))
+                case MistDemoConstants.FieldNames.recordName:
+                    values.append(OutputEscaping.csvEscape(recordInfo.recordName))
+                case MistDemoConstants.FieldNames.recordType:
+                    values.append(OutputEscaping.csvEscape(recordInfo.recordType))
+                case MistDemoConstants.FieldNames.recordChangeTag:
+                    values.append(OutputEscaping.csvEscape(recordInfo.recordChangeTag ?? ""))
                 default:
                     if let fieldValue = recordInfo.fields[fieldName] {
                         let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                        values.append(csvEscape(formatted))
+                        values.append(OutputEscaping.csvEscape(formatted))
                     } else {
                         values.append("")
                     }
@@ -309,33 +314,17 @@ public struct CreateCommand: MistDemoCommand {
             
         case .yaml:
             print("record:")
-            print("  recordName: \(yamlEscape(recordInfo.recordName))")
-            print("  recordType: \(yamlEscape(recordInfo.recordType))")
+            print("  \(MistDemoConstants.FieldNames.recordName): \(OutputEscaping.yamlEscape(recordInfo.recordName))")
+            print("  \(MistDemoConstants.FieldNames.recordType): \(OutputEscaping.yamlEscape(recordInfo.recordType))")
             if let changeTag = recordInfo.recordChangeTag {
-                print("  recordChangeTag: \(yamlEscape(changeTag))")
+                print("  \(MistDemoConstants.FieldNames.recordChangeTag): \(OutputEscaping.yamlEscape(changeTag))")
             }
             print("  fields:")
             for (fieldName, fieldValue) in recordInfo.fields {
                 let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                print("    \(fieldName): \(yamlEscape(formatted))")
+                print("    \(fieldName): \(OutputEscaping.yamlEscape(formatted))")
             }
         }
-    }
-    
-    /// Escape string for CSV output
-    private func csvEscape(_ string: String) -> String {
-        if string.contains(",") || string.contains("\"") || string.contains("\n") {
-            return "\"\(string.replacingOccurrences(of: "\"", with: "\"\""))\""
-        }
-        return string
-    }
-    
-    /// Escape string for YAML output
-    private func yamlEscape(_ string: String) -> String {
-        if string.contains(":") || string.contains("\"") || string.contains("'") || string.contains("\n") {
-            return "\"\(string.replacingOccurrences(of: "\"", with: "\"\""))\""
-        }
-        return string
     }
 }
 
@@ -353,7 +342,7 @@ public enum CreateError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .noFieldsProvided:
-            return "No fields provided. Use --field, --json-file, or --stdin to specify fields."
+            return MistDemoConstants.Messages.noFieldsProvided
         case .invalidJSONFormat(let message):
             return "Invalid JSON format: \(message)"
         case .jsonFileError(let file, let error):

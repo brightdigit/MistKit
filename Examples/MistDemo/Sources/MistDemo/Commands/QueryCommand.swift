@@ -47,34 +47,34 @@ public struct QueryCommand: MistDemoCommand {
         let baseConfig = try MistDemoConfig()
         
         // Parse query-specific options
-        let zone = configReader.string(forKey: "zone", default: "_defaultZone") ?? "_defaultZone"
-        let recordType = configReader.string(forKey: "record.type", default: "Note") ?? "Note"
+        let zone = configReader.string(forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone) ?? MistDemoConstants.Defaults.zone
+        let recordType = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordType, default: MistDemoConstants.Defaults.recordType) ?? MistDemoConstants.Defaults.recordType
         
         // Parse filters (can be multiple)
-        let filtersString = configReader.string(forKey: "filter")
+        let filtersString = configReader.string(forKey: MistDemoConstants.ConfigKeys.filter)
         let filters = filtersString?.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) } ?? []
         
         // Parse sort option
-        let sortString = configReader.string(forKey: "sort")
+        let sortString = configReader.string(forKey: MistDemoConstants.ConfigKeys.sort)
         let sort = try Self.parseSortOption(sortString)
         
         // Parse limits and pagination
-        let limit = configReader.int(forKey: "limit", default: 20) ?? 20
-        guard limit >= 1 && limit <= 200 else {
+        let limit = configReader.int(forKey: MistDemoConstants.ConfigKeys.limit, default: MistDemoConstants.Defaults.queryLimit) ?? MistDemoConstants.Defaults.queryLimit
+        guard limit >= MistDemoConstants.Limits.minQueryLimit && limit <= MistDemoConstants.Limits.maxQueryLimit else {
             throw QueryError.invalidLimit(limit)
         }
         
         let offset = configReader.int(forKey: "offset", default: 0) ?? 0
         
         // Parse fields filter
-        let fieldsString = configReader.string(forKey: "fields")
+        let fieldsString = configReader.string(forKey: MistDemoConstants.ConfigKeys.fields)
         let fields = fieldsString?.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
         
         // Parse continuation marker
         let continuationMarker = configReader.string(forKey: "continuation.marker")
         
         // Parse output format
-        let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
+        let outputString = configReader.string(forKey: MistDemoConstants.ConfigKeys.outputFormat, default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
         let output = OutputFormat(rawValue: outputString) ?? .json
         
         self.config = QueryConfig(
@@ -111,14 +111,18 @@ public struct QueryCommand: MistDemoCommand {
             }
             
             // Execute query
+            // NOTE: Zone, offset, and continuation marker support require
+            // enhancements to CloudKitService.queryRecords method (GitHub issues #145, #146)
             let recordInfos = try await client.queryRecords(
                 recordType: config.recordType,
+                filters: nil, // TODO: Pass parsed filters once supported
+                sortBy: nil, // TODO: Pass parsed sort once supported
                 limit: config.limit
-                // TODO: Add zone, offset, continuation marker support
             )
             
-            // Filter fields if requested
-            let filteredRecords = filterRecordFields(recordInfos, fields: config.fields)
+            // Note: Field filtering is applied during output formatting
+            // to work around RecordInfo's immutable structure
+            let filteredRecords = recordInfos
             
             // Format and output results
             try await outputResults(filteredRecords)
@@ -205,22 +209,14 @@ public struct QueryCommand: MistDemoCommand {
         }
     }
     
-    /// Filter record fields based on requested fields
-    private func filterRecordFields(_ records: [RecordInfo], fields: [String]?) -> [RecordInfo] {
+    /// Check if a field should be included based on field filter
+    private func shouldIncludeField(_ fieldName: String, fields: [String]?) -> Bool {
         guard let fields = fields, !fields.isEmpty else {
-            return records // Return all fields
+            return true // Include all fields if no filter specified
         }
         
-        return records.map { record in
-            let filteredFields = record.fields.filter { fieldName, _ in
-                fields.contains { requestedField in
-                    fieldName.lowercased() == requestedField.lowercased()
-                }
-            }
-            
-            // Since RecordInfo constructor is internal, we can't filter fields by creating new instances
-            // Return the original record and apply filtering in output methods
-            return record
+        return fields.contains { requestedField in
+            fieldName.lowercased() == requestedField.lowercased()
         }
     }
     
@@ -236,11 +232,11 @@ public struct QueryCommand: MistDemoCommand {
             
         case .table:
             if records.isEmpty {
-                print("No records found")
+                print(MistDemoConstants.Messages.noRecordsFound)
                 return
             }
             
-            print("Query Results (\(records.count) record(s)):")
+            print("Found \(records.count) record(s):")
             print(String(repeating: "=", count: 50))
             
             for (index, record) in records.enumerated() {
@@ -252,12 +248,9 @@ public struct QueryCommand: MistDemoCommand {
                 print("    Fields:")
                 
                 // Apply field filtering during output
-                let fieldsToShow = config.fields?.isEmpty == false ? 
-                    record.fields.filter { fieldName, _ in
-                        config.fields?.contains { requestedField in
-                            fieldName.lowercased() == requestedField.lowercased()
-                        } ?? true
-                    } : record.fields
+                let fieldsToShow = record.fields.filter { fieldName, _ in
+                    shouldIncludeField(fieldName, fields: config.fields)
+                }
                 
                 for (fieldName, fieldValue) in fieldsToShow {
                     let formattedValue = FieldValueFormatter.formatFieldValue(fieldValue)
@@ -268,15 +261,15 @@ public struct QueryCommand: MistDemoCommand {
         case .csv:
             // Collect all unique field names (filtered if requested)
             let allFieldNames = Set(records.flatMap { record in
-                let fieldsToShow = config.fields?.isEmpty == false ? 
-                    record.fields.keys.filter { fieldName in
-                        config.fields?.contains { requestedField in
-                            fieldName.lowercased() == requestedField.lowercased()
-                        } ?? true
-                    } : Array(record.fields.keys)
-                return fieldsToShow
+                record.fields.keys.filter { fieldName in
+                    shouldIncludeField(fieldName, fields: config.fields)
+                }
             })
-            let sortedFieldNames = ["recordName", "recordType", "recordChangeTag"] + allFieldNames.sorted()
+            let sortedFieldNames = [
+                MistDemoConstants.FieldNames.recordName,
+                MistDemoConstants.FieldNames.recordType,
+                MistDemoConstants.FieldNames.recordChangeTag
+            ].filter { shouldIncludeField($0, fields: config.fields) } + allFieldNames.sorted()
             
             // Print header
             print(sortedFieldNames.joined(separator: ","))
@@ -286,16 +279,16 @@ public struct QueryCommand: MistDemoCommand {
                 var values: [String] = []
                 for fieldName in sortedFieldNames {
                     switch fieldName {
-                    case "recordName":
-                        values.append(csvEscape(record.recordName))
-                    case "recordType":
-                        values.append(csvEscape(record.recordType))
-                    case "recordChangeTag":
-                        values.append(csvEscape(record.recordChangeTag ?? ""))
+                    case MistDemoConstants.FieldNames.recordName:
+                        values.append(OutputEscaping.csvEscape(record.recordName))
+                    case MistDemoConstants.FieldNames.recordType:
+                        values.append(OutputEscaping.csvEscape(record.recordType))
+                    case MistDemoConstants.FieldNames.recordChangeTag:
+                        values.append(OutputEscaping.csvEscape(record.recordChangeTag ?? ""))
                     default:
                         if let fieldValue = record.fields[fieldName] {
                             let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                            values.append(csvEscape(formatted))
+                            values.append(OutputEscaping.csvEscape(formatted))
                         } else {
                             values.append("")
                         }
@@ -307,43 +300,24 @@ public struct QueryCommand: MistDemoCommand {
         case .yaml:
             print("records:")
             for record in records {
-                print("  - recordName: \(yamlEscape(record.recordName))")
-                print("    recordType: \(yamlEscape(record.recordType))")
+                print("  - \(MistDemoConstants.FieldNames.recordName): \(OutputEscaping.yamlEscape(record.recordName))")
+                print("    \(MistDemoConstants.FieldNames.recordType): \(OutputEscaping.yamlEscape(record.recordType))")
                 if let changeTag = record.recordChangeTag {
-                    print("    recordChangeTag: \(yamlEscape(changeTag))")
+                    print("    \(MistDemoConstants.FieldNames.recordChangeTag): \(OutputEscaping.yamlEscape(changeTag))")
                 }
                 print("    fields:")
                 
                 // Apply field filtering during output
-                let fieldsToShow = config.fields?.isEmpty == false ? 
-                    record.fields.filter { fieldName, _ in
-                        config.fields?.contains { requestedField in
-                            fieldName.lowercased() == requestedField.lowercased()
-                        } ?? true
-                    } : record.fields
+                let fieldsToShow = record.fields.filter { fieldName, _ in
+                    shouldIncludeField(fieldName, fields: config.fields)
+                }
                 
                 for (fieldName, fieldValue) in fieldsToShow {
                     let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                    print("      \(fieldName): \(yamlEscape(formatted))")
+                    print("      \(fieldName): \(OutputEscaping.yamlEscape(formatted))")
                 }
             }
         }
-    }
-    
-    /// Escape string for CSV output
-    private func csvEscape(_ string: String) -> String {
-        if string.contains(",") || string.contains("\"") || string.contains("\n") {
-            return "\"\(string.replacingOccurrences(of: "\"", with: "\"\""))\""
-        }
-        return string
-    }
-    
-    /// Escape string for YAML output
-    private func yamlEscape(_ string: String) -> String {
-        if string.contains(":") || string.contains("\"") || string.contains("'") || string.contains("\n") {
-            return "\"\(string.replacingOccurrences(of: "\"", with: "\"\""))\""
-        }
-        return string
     }
 }
 
@@ -360,7 +334,7 @@ public enum QueryError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .invalidLimit(let limit):
-            return "Invalid limit \(limit). Must be between 1 and 200."
+            return String(format: MistDemoConstants.Messages.invalidLimit, limit, MistDemoConstants.Limits.minQueryLimit, MistDemoConstants.Limits.maxQueryLimit)
         case .invalidFilter(let filter, let expected):
             return "Invalid filter '\(filter)'. Expected format: \(expected)"
         case .emptyFieldName(let filter):
