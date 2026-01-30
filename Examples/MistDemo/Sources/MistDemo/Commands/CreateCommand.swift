@@ -34,6 +34,70 @@ import MistKit
 public struct CreateCommand: MistDemoCommand {
     public static let commandName = "create"
     public static let abstract = "Create a new record in CloudKit"
+    public static let helpText = """
+        CREATE - Create a new record in CloudKit
+
+        USAGE:
+            mistdemo create [options]
+
+        REQUIRED:
+            --api-token <token>            CloudKit API token
+            --web-auth-token <token>       Web authentication token
+
+        OPTIONS:
+            --record-type <type>           Record type to create (default: Note)
+            --zone <zone>                  Zone name (default: _defaultZone)
+            --record-name <name>           Custom record name (auto-generated if omitted)
+            --output-format <format>       Output format: json, table, csv, yaml
+
+        FIELD DEFINITION (choose one method):
+            --field <name:type:value>      Inline field definition
+            --json-file <file>             Load fields from JSON file
+            --stdin                        Read fields from stdin as JSON
+
+        FIELD FORMAT:
+            Format: name:type:value
+            Multiple fields: separate with commas
+
+        FIELD TYPES:
+            string      Text values
+            int64       Integer numbers
+            double      Decimal numbers
+            timestamp   Dates (ISO 8601 or Unix timestamp)
+
+        EXAMPLES:
+
+          1. Single field:
+             mistdemo create --field "title:string:My Note"
+
+          2. Multiple fields (comma-separated):
+             mistdemo create --field "title:string:My Note, priority:int64:5"
+
+          3. With timestamp:
+             mistdemo create --field "title:string:Task, due:timestamp:2026-02-01T09:00:00Z"
+
+          4. From JSON file:
+             mistdemo create --json-file fields.json
+
+             Example fields.json:
+             {
+               "title": "Project Plan",
+               "priority": 8,
+               "progress": 0.35
+             }
+
+          5. From stdin:
+             echo '{"title":"Quick Note"}' | mistdemo create --stdin
+
+          6. Table output format:
+             mistdemo create --field "title:string:Test" --output-format table
+
+        NOTES:
+          • Record name is auto-generated if not provided
+          • JSON files auto-detect field types from values
+          • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEBAUTH_TOKEN
+            to avoid repeating tokens
+        """
     
     private let config: CreateConfig
     
@@ -130,14 +194,8 @@ public struct CreateCommand: MistDemoCommand {
     private static func parseFieldsFromJSONFile(_ filePath: String) throws -> [Field] {
         do {
             let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
-            let jsonObject = try JSONSerialization.jsonObject(with: data)
-            
-            guard let fieldDict = jsonObject as? [String: Any] else {
-                throw CreateError.invalidJSONFormat("JSON file must contain an object with field definitions")
-            }
-            
-            return try convertJSONObjectToFields(fieldDict)
-            
+            let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
+            return try fieldsInput.toFields()
         } catch {
             throw CreateError.jsonFileError(filePath, error.localizedDescription)
         }
@@ -152,58 +210,13 @@ public struct CreateCommand: MistDemoCommand {
         }
         
         do {
-            let jsonObject = try JSONSerialization.jsonObject(with: stdinData)
-            
-            guard let fieldDict = jsonObject as? [String: Any] else {
-                throw CreateError.invalidJSONFormat("Stdin must contain a JSON object with field definitions")
-            }
-            
-            return try convertJSONObjectToFields(fieldDict)
-            
+            let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: stdinData)
+            return try fieldsInput.toFields()
         } catch {
             throw CreateError.stdinError(error.localizedDescription)
         }
     }
     
-    /// Convert JSON object to Field array
-    private static func convertJSONObjectToFields(_ jsonDict: [String: Any]) throws -> [Field] {
-        var fields: [Field] = []
-        
-        for (fieldName, value) in jsonDict {
-            // Infer field type from JSON value
-            let field = try inferFieldFromJSONValue(name: fieldName, value: value)
-            fields.append(field)
-        }
-        
-        return fields
-    }
-    
-    /// Infer Field from JSON value
-    private static func inferFieldFromJSONValue(name: String, value: Any) throws -> Field {
-        let fieldType: FieldType
-        let stringValue: String
-        
-        switch value {
-        case let stringVal as String:
-            fieldType = .string
-            stringValue = stringVal
-        case let intVal as Int:
-            fieldType = .int64
-            stringValue = String(intVal)
-        case let doubleVal as Double:
-            fieldType = .double
-            stringValue = String(doubleVal)
-        case let boolVal as Bool:
-            fieldType = .string // Convert bool to string
-            stringValue = boolVal ? "true" : "false"
-        default:
-            // Try to convert to string
-            fieldType = .string
-            stringValue = String(describing: value)
-        }
-        
-        return Field(name: name, type: fieldType, value: stringValue)
-    }
     
     /// Generate a unique record name
     private func generateRecordName() -> String {

@@ -1,6 +1,6 @@
 //
-//  MistDemoCommand.swift
-//  MistDemo
+//  Command.swift
+//  ConfigKeyKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,8 +27,26 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
-public import ConfigKeyKit
+import Foundation
 
-/// Typealias for MistDemo commands - now uses generic Command protocol
-public typealias MistDemoCommand = Command
+/// Generic protocol for CLI commands using Swift Configuration
+public protocol Command: Sendable {
+    /// Command name for CLI parsing
+    static var commandName: String { get }
+    
+    /// Abstract description of the command
+    static var abstract: String { get }
+    
+    /// Detailed help text for the command
+    static var helpText: String { get }
+    
+    /// Execute the command asynchronously
+    func execute() async throws
+}
+
+public extension Command {
+    /// Print help information for this command
+    static func printHelp() {
+        print(helpText)
+    }
+}

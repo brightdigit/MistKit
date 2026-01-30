@@ -34,6 +34,18 @@ import MistKit
 public struct CurrentUserCommand: MistDemoCommand {
     public static let commandName = "current-user"
     public static let abstract = "Get current user information"
+    public static let helpText = """
+        CURRENT-USER - Get current user information
+
+        USAGE:
+            mistdemo current-user [options]
+
+        OPTIONS:
+            --api-token <token>        CloudKit API token
+            --web-auth-token <token>   Web authentication token
+            --fields <fields>          Comma-separated list of fields to include
+            --output-format <format>   Output format: json, table, csv, yaml
+        """
     
     private let config: CurrentUserConfig
     

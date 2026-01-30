@@ -36,6 +36,18 @@ import MistKit
 public struct AuthTokenCommand: MistDemoCommand {
     public static let commandName = "auth-token"
     public static let abstract = "Obtain a web authentication token via browser flow"
+    public static let helpText = """
+        AUTH-TOKEN - Obtain web authentication token
+
+        USAGE:
+            mistdemo auth-token [options]
+
+        OPTIONS:
+            --api-token <token>     CloudKit API token (or CLOUDKIT_API_TOKEN env)
+            --port <port>           Server port (default: 8080)
+            --host <host>           Server host (default: 127.0.0.1)
+            --no-browser           Don't open browser automatically
+        """
     
     private let config: AuthTokenConfig
     

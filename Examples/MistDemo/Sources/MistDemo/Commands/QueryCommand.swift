@@ -34,6 +34,21 @@ public import MistKit
 public struct QueryCommand: MistDemoCommand {
     public static let commandName = "query"
     public static let abstract = "Query records from CloudKit with filtering and sorting"
+    public static let helpText = """
+        QUERY - Query records from CloudKit
+
+        USAGE:
+            mistdemo query [options]
+
+        OPTIONS:
+            --record-type <type>       Record type to query (default: Note)
+            --zone <zone>              Zone name (default: _defaultZone)
+            --filter <filter>          Filter expression (field:operator:value)
+            --sort <field:order>       Sort by field (order: asc/desc)
+            --limit <count>            Maximum records to return (1-200)
+            --fields <fields>          Comma-separated fields to include
+            --output-format <format>   Output format: json, table, csv, yaml
+        """
     
     private let config: QueryConfig
     

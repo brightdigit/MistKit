@@ -1,0 +1,175 @@
+//
+//  FieldsInput.swift
+//  MistDemo
+//
+//  Created by Leo Dion.
+//  Copyright © 2026 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+public import Foundation
+
+/// Type-safe representation of field input from JSON
+public struct FieldsInput: Codable {
+    private let storage: [String: FieldInputValue]
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicKey.self)
+        var fields: [String: FieldInputValue] = [:]
+        
+        for key in container.allKeys {
+            if let stringValue = try? container.decode(String.self, forKey: key) {
+                fields[key.stringValue] = .string(stringValue)
+            } else if let intValue = try? container.decode(Int.self, forKey: key) {
+                fields[key.stringValue] = .int(intValue)
+            } else if let doubleValue = try? container.decode(Double.self, forKey: key) {
+                fields[key.stringValue] = .double(doubleValue)
+            } else if let boolValue = try? container.decode(Bool.self, forKey: key) {
+                fields[key.stringValue] = .bool(boolValue)
+            } else {
+                // Try to decode as a generic JSON value and convert to string
+                let jsonValue = try container.decode(AnyCodable.self, forKey: key)
+                fields[key.stringValue] = .string(String(describing: jsonValue.value))
+            }
+        }
+        
+        self.storage = fields
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: DynamicKey.self)
+        
+        for (key, value) in storage {
+            let dynamicKey = DynamicKey(stringValue: key)!
+            switch value {
+            case .string(let stringValue):
+                try container.encode(stringValue, forKey: dynamicKey)
+            case .int(let intValue):
+                try container.encode(intValue, forKey: dynamicKey)
+            case .double(let doubleValue):
+                try container.encode(doubleValue, forKey: dynamicKey)
+            case .bool(let boolValue):
+                try container.encode(boolValue, forKey: dynamicKey)
+            }
+        }
+    }
+    
+    /// Convert to Field array for CloudKit processing
+    public func toFields() throws -> [Field] {
+        return try storage.map { (name, value) in
+            let (fieldType, stringValue) = try value.toFieldComponents()
+            return Field(name: name, type: fieldType, value: stringValue)
+        }
+    }
+}
+
+/// Enum representing different types of field input values
+public enum FieldInputValue {
+    case string(String)
+    case int(Int)
+    case double(Double)
+    case bool(Bool)
+    
+    /// Convert to FieldType and string value for Field creation
+    func toFieldComponents() throws -> (FieldType, String) {
+        switch self {
+        case .string(let value):
+            return (.string, value)
+        case .int(let value):
+            return (.int64, String(value))
+        case .double(let value):
+            return (.double, String(value))
+        case .bool(let value):
+            return (.string, value ? "true" : "false")
+        }
+    }
+}
+
+/// Dynamic coding key for handling arbitrary JSON object keys
+private struct DynamicKey: CodingKey {
+    var stringValue: String
+    var intValue: Int?
+    
+    init?(stringValue: String) {
+        self.stringValue = stringValue
+        self.intValue = nil
+    }
+    
+    init?(intValue: Int) {
+        self.stringValue = String(intValue)
+        self.intValue = intValue
+    }
+}
+
+/// Helper for decoding arbitrary JSON values
+private struct AnyCodable: Codable {
+    let value: Any
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        
+        if let stringValue = try? container.decode(String.self) {
+            value = stringValue
+        } else if let intValue = try? container.decode(Int.self) {
+            value = intValue
+        } else if let doubleValue = try? container.decode(Double.self) {
+            value = doubleValue
+        } else if let boolValue = try? container.decode(Bool.self) {
+            value = boolValue
+        } else if container.decodeNil() {
+            value = NSNull()
+        } else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Unable to decode value"
+                )
+            )
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        
+        switch value {
+        case let stringValue as String:
+            try container.encode(stringValue)
+        case let intValue as Int:
+            try container.encode(intValue)
+        case let doubleValue as Double:
+            try container.encode(doubleValue)
+        case let boolValue as Bool:
+            try container.encode(boolValue)
+        case is NSNull:
+            try container.encodeNil()
+        default:
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(
+                    codingPath: encoder.codingPath,
+                    debugDescription: "Unable to encode value of type \(type(of: value))"
+                )
+            )
+        }
+    }
+}
