@@ -158,32 +158,17 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
         return cloudKitFields
     }
     
-    /// Convert a value to the appropriate FieldValue enum case
+    /// Convert a value to the appropriate FieldValue enum case using the FieldValue extension
     private func convertToFieldValue(_ value: Any, type: FieldType) throws -> FieldValue {
-        switch type {
-        case .string:
-            guard let stringValue = value as? String else {
-                throw CreateError.fieldConversionError("", type, String(describing: value), "Expected string value")
-            }
-            return .string(stringValue)
-        case .int64:
-            guard let intValue = value as? Int64 else {
-                throw CreateError.fieldConversionError("", type, String(describing: value), "Expected Int64 value")
-            }
-            return .int64(Int(intValue))
-        case .double:
-            guard let doubleValue = value as? Double else {
-                throw CreateError.fieldConversionError("", type, String(describing: value), "Expected Double value")
-            }
-            return .double(doubleValue)
-        case .timestamp:
-            guard let dateValue = value as? Date else {
-                throw CreateError.fieldConversionError("", type, String(describing: value), "Expected Date value")
-            }
-            return .date(dateValue)
-        case .asset, .location, .reference, .bytes:
-            throw CreateError.fieldConversionError("", type, String(describing: value), "Field type not yet supported")
+        guard let fieldValue = FieldValue(value: value, fieldType: type) else {
+            throw CreateError.fieldConversionError(
+                "",
+                type,
+                String(describing: value),
+                "Unable to convert value to FieldValue"
+            )
         }
+        return fieldValue
     }
 }
 

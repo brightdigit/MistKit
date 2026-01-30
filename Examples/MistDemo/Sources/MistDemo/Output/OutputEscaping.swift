@@ -26,6 +26,8 @@
 import Foundation
 
 /// Utilities for escaping strings in various output formats
+/// - Warning: Deprecated. Use protocol-based escapers (CSVEscaper, YAMLEscaper, JSONEscaper) instead.
+@available(*, deprecated, message: "Use protocol-based escapers (CSVEscaper, YAMLEscaper, JSONEscaper) instead")
 public enum OutputEscaping {
     
     // MARK: - CSV Escaping
@@ -33,6 +35,8 @@ public enum OutputEscaping {
     /// Escape a string for CSV output according to RFC 4180
     /// - Parameter string: The string to escape
     /// - Returns: The escaped string suitable for CSV output
+    /// - Warning: Deprecated. Use CSVEscaper instead.
+    @available(*, deprecated, message: "Use CSVEscaper().escape(_:) instead")
     public static func csvEscape(_ string: String) -> String {
         // Check if escaping is needed
         let needsEscaping = string.contains { character in
@@ -59,6 +63,8 @@ public enum OutputEscaping {
     /// Escape a string for YAML output
     /// - Parameter string: The string to escape
     /// - Returns: The escaped string suitable for YAML output
+    /// - Warning: Deprecated. Use YAMLEscaper instead.
+    @available(*, deprecated, message: "Use YAMLEscaper().escape(_:) instead")
     public static func yamlEscape(_ string: String) -> String {
         // Check if the string needs escaping
         let needsEscaping = yamlNeedsEscaping(string)
@@ -170,6 +176,8 @@ public enum OutputEscaping {
     /// Escape a string for JSON output (usually handled by JSONEncoder, but useful for manual JSON building)
     /// - Parameter string: The string to escape
     /// - Returns: The escaped string suitable for JSON output
+    /// - Warning: Deprecated. Use JSONEscaper instead.
+    @available(*, deprecated, message: "Use JSONEscaper().escape(_:) instead")
     public static func jsonEscape(_ string: String) -> String {
         let escaped = string
             .replacingOccurrences(of: "\\", with: "\\\\")

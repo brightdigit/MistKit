@@ -87,20 +87,25 @@ public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
         guard let fields = fields, !fields.isEmpty else {
             return true // Include all fields if no filter specified
         }
-        
-        return fields.contains { requestedField in
-            switch fieldName.lowercased() {
+
+        let normalizedFieldName = fieldName.lowercased()
+        let aliases: [String] = {
+            switch normalizedFieldName {
             case "firstname", "first_name":
-                return requestedField.lowercased() == "firstname" || requestedField.lowercased() == "first_name"
+                return MistDemoConstants.FieldAliases.firstNameAliases
             case "lastname", "last_name":
-                return requestedField.lowercased() == "lastname" || requestedField.lowercased() == "last_name"
+                return MistDemoConstants.FieldAliases.lastNameAliases
             case "email", "emailaddress", "email_address":
-                return requestedField.lowercased() == "email" || requestedField.lowercased() == "emailaddress" || requestedField.lowercased() == "email_address"
+                return MistDemoConstants.FieldAliases.emailAliases
             case "userrecordname", "user_record_name", "recordname", "record_name":
-                return requestedField.lowercased() == "userrecordname" || requestedField.lowercased() == "user_record_name" || requestedField.lowercased() == "recordname" || requestedField.lowercased() == "record_name"
+                return MistDemoConstants.FieldAliases.recordNameAliases
             default:
-                return requestedField.lowercased() == fieldName.lowercased()
+                return [normalizedFieldName]
             }
+        }()
+
+        return fields.contains { requestedField in
+            aliases.contains(requestedField.lowercased())
         }
     }
 }

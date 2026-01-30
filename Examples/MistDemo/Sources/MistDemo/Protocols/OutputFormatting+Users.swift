@@ -72,38 +72,40 @@ extension OutputFormatting {
         print(headers.joined(separator: ","))
         
         // Output user data
+        let csvEscaper = CSVEscaper()
         for user in users {
-            var values: [String] = [OutputEscaping.csvEscape(user.userRecordName)]
-            
+            var values: [String] = [csvEscaper.escape(user.userRecordName)]
+
             if shouldIncludeUserField("firstName", fields: fields) {
-                values.append(OutputEscaping.csvEscape(user.firstName ?? ""))
+                values.append(csvEscaper.escape(user.firstName ?? ""))
             }
             if shouldIncludeUserField("lastName", fields: fields) {
-                values.append(OutputEscaping.csvEscape(user.lastName ?? ""))
+                values.append(csvEscaper.escape(user.lastName ?? ""))
             }
             if shouldIncludeUserField("emailAddress", fields: fields) {
-                values.append(OutputEscaping.csvEscape(user.emailAddress ?? ""))
+                values.append(csvEscaper.escape(user.emailAddress ?? ""))
             }
-            
+
             print(values.joined(separator: ","))
         }
     }
     
     /// Output UserInfo result in YAML format
     func outputUserYAML(_ userInfo: UserInfo, fields: [String]? = nil) async throws {
+        let yamlEscaper = YAMLEscaper()
         print("user:")
-        print("  userRecordName: \(OutputEscaping.yamlEscape(userInfo.userRecordName))")
-        
+        print("  userRecordName: \(yamlEscaper.escape(userInfo.userRecordName))")
+
         if shouldIncludeUserField("firstName", fields: fields), let firstName = userInfo.firstName {
-            print("  firstName: \(OutputEscaping.yamlEscape(firstName))")
+            print("  firstName: \(yamlEscaper.escape(firstName))")
         }
-        
+
         if shouldIncludeUserField("lastName", fields: fields), let lastName = userInfo.lastName {
-            print("  lastName: \(OutputEscaping.yamlEscape(lastName))")
+            print("  lastName: \(yamlEscaper.escape(lastName))")
         }
-        
+
         if shouldIncludeUserField("emailAddress", fields: fields), let email = userInfo.emailAddress {
-            print("  emailAddress: \(OutputEscaping.yamlEscape(email))")
+            print("  emailAddress: \(yamlEscaper.escape(email))")
         }
     }
     

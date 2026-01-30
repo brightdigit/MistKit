@@ -97,20 +97,21 @@ extension OutputFormatting {
         print(sortedFieldNames.joined(separator: ","))
         
         // Print records
+        let csvEscaper = CSVEscaper()
         for record in records {
             var values: [String] = []
             for fieldName in sortedFieldNames {
                 switch fieldName {
                 case MistDemoConstants.FieldNames.recordName:
-                    values.append(OutputEscaping.csvEscape(record.recordName))
+                    values.append(csvEscaper.escape(record.recordName))
                 case MistDemoConstants.FieldNames.recordType:
-                    values.append(OutputEscaping.csvEscape(record.recordType))
+                    values.append(csvEscaper.escape(record.recordType))
                 case MistDemoConstants.FieldNames.recordChangeTag:
-                    values.append(OutputEscaping.csvEscape(record.recordChangeTag ?? ""))
+                    values.append(csvEscaper.escape(record.recordChangeTag ?? ""))
                 default:
                     if let fieldValue = record.fields[fieldName] {
                         let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                        values.append(OutputEscaping.csvEscape(formatted))
+                        values.append(csvEscaper.escape(formatted))
                     } else {
                         values.append("")
                     }
@@ -122,35 +123,36 @@ extension OutputFormatting {
     
     /// Output RecordInfo results in YAML format
     func outputRecordYAML(_ records: [RecordInfo], fields: [String]? = nil) async throws {
+        let yamlEscaper = YAMLEscaper()
         if records.count == 1 {
             let record = records[0]
             print("record:")
-            print("  \(MistDemoConstants.FieldNames.recordName): \(OutputEscaping.yamlEscape(record.recordName))")
-            print("  \(MistDemoConstants.FieldNames.recordType): \(OutputEscaping.yamlEscape(record.recordType))")
+            print("  \(MistDemoConstants.FieldNames.recordName): \(yamlEscaper.escape(record.recordName))")
+            print("  \(MistDemoConstants.FieldNames.recordType): \(yamlEscaper.escape(record.recordType))")
             if let changeTag = record.recordChangeTag {
-                print("  \(MistDemoConstants.FieldNames.recordChangeTag): \(OutputEscaping.yamlEscape(changeTag))")
+                print("  \(MistDemoConstants.FieldNames.recordChangeTag): \(yamlEscaper.escape(changeTag))")
             }
             print("  fields:")
-            
+
             let fieldsToShow = filterFields(record.fields, fields: fields)
             for (fieldName, fieldValue) in fieldsToShow {
                 let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                print("    \(fieldName): \(OutputEscaping.yamlEscape(formatted))")
+                print("    \(fieldName): \(yamlEscaper.escape(formatted))")
             }
         } else {
             print("records:")
             for record in records {
-                print("  - \(MistDemoConstants.FieldNames.recordName): \(OutputEscaping.yamlEscape(record.recordName))")
-                print("    \(MistDemoConstants.FieldNames.recordType): \(OutputEscaping.yamlEscape(record.recordType))")
+                print("  - \(MistDemoConstants.FieldNames.recordName): \(yamlEscaper.escape(record.recordName))")
+                print("    \(MistDemoConstants.FieldNames.recordType): \(yamlEscaper.escape(record.recordType))")
                 if let changeTag = record.recordChangeTag {
-                    print("    \(MistDemoConstants.FieldNames.recordChangeTag): \(OutputEscaping.yamlEscape(changeTag))")
+                    print("    \(MistDemoConstants.FieldNames.recordChangeTag): \(yamlEscaper.escape(changeTag))")
                 }
                 print("    fields:")
-                
+
                 let fieldsToShow = filterFields(record.fields, fields: fields)
                 for (fieldName, fieldValue) in fieldsToShow {
                     let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                    print("      \(fieldName): \(OutputEscaping.yamlEscape(formatted))")
+                    print("      \(fieldName): \(yamlEscaper.escape(formatted))")
                 }
             }
         }

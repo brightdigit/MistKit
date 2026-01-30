@@ -32,7 +32,7 @@ import Foundation
 /// Generic protocol for CLI commands using Swift Configuration
 public protocol Command: Sendable {
     /// Associated configuration type for this command
-    associatedtype Config: Sendable & ConfigurationParseable
+    associatedtype Config: ConfigurationParseable
     
     /// Command name for CLI parsing
     static var commandName: String { get }
