@@ -31,7 +31,7 @@ public import Foundation
 import MistKit
 
 /// Command to create a new record in CloudKit
-public struct CreateCommand: MistDemoCommand {
+public struct CreateCommand: MistDemoCommand, OutputFormatting {
     public static let commandName = "create"
     public static let abstract = "Create a new record in CloudKit"
     public static let helpText = """
@@ -153,7 +153,7 @@ public struct CreateCommand: MistDemoCommand {
             )
             
             // Format and output result
-            try await outputResult(recordInfo)
+            try await outputResult(recordInfo, format: config.output)
             
         } catch {
             throw CreateError.operationFailed(error.localizedDescription)
@@ -269,76 +269,6 @@ public struct CreateCommand: MistDemoCommand {
             throw CreateError.fieldConversionError("", type, String(describing: value), "Field type not yet supported")
         }
     }
-    
-    /// Output the created record in the requested format
-    private func outputResult(_ recordInfo: RecordInfo) async throws {
-        switch config.output {
-        case .json:
-            let jsonData = try JSONEncoder().encode(recordInfo)
-            guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                throw CreateError.outputError("Failed to encode JSON")
-            }
-            print(jsonString)
-            
-        case .table:
-            print(MistDemoConstants.Messages.recordCreated)
-            print("├─ Name: \(recordInfo.recordName)")
-            print("├─ Type: \(recordInfo.recordType)")
-            if let changeTag = recordInfo.recordChangeTag {
-                print("├─ Change Tag: \(changeTag)")
-            }
-            print("└─ Fields:")
-            
-            for (fieldName, fieldValue) in recordInfo.fields {
-                let formattedValue = FieldValueFormatter.formatFieldValue(fieldValue)
-                print("   ├─ \(fieldName): \(formattedValue)")
-            }
-            
-        case .csv:
-            let allFieldNames = [
-                MistDemoConstants.FieldNames.recordName,
-                MistDemoConstants.FieldNames.recordType,
-                MistDemoConstants.FieldNames.recordChangeTag
-            ] + recordInfo.fields.keys.sorted()
-            
-            // Print header
-            print(allFieldNames.joined(separator: ","))
-            
-            // Print record
-            var values: [String] = []
-            for fieldName in allFieldNames {
-                switch fieldName {
-                case MistDemoConstants.FieldNames.recordName:
-                    values.append(OutputEscaping.csvEscape(recordInfo.recordName))
-                case MistDemoConstants.FieldNames.recordType:
-                    values.append(OutputEscaping.csvEscape(recordInfo.recordType))
-                case MistDemoConstants.FieldNames.recordChangeTag:
-                    values.append(OutputEscaping.csvEscape(recordInfo.recordChangeTag ?? ""))
-                default:
-                    if let fieldValue = recordInfo.fields[fieldName] {
-                        let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                        values.append(OutputEscaping.csvEscape(formatted))
-                    } else {
-                        values.append("")
-                    }
-                }
-            }
-            print(values.joined(separator: ","))
-            
-        case .yaml:
-            print("record:")
-            print("  \(MistDemoConstants.FieldNames.recordName): \(OutputEscaping.yamlEscape(recordInfo.recordName))")
-            print("  \(MistDemoConstants.FieldNames.recordType): \(OutputEscaping.yamlEscape(recordInfo.recordType))")
-            if let changeTag = recordInfo.recordChangeTag {
-                print("  \(MistDemoConstants.FieldNames.recordChangeTag): \(OutputEscaping.yamlEscape(changeTag))")
-            }
-            print("  fields:")
-            for (fieldName, fieldValue) in recordInfo.fields {
-                let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                print("    \(fieldName): \(OutputEscaping.yamlEscape(formatted))")
-            }
-        }
-    }
 }
 
 /// Errors specific to create command
@@ -350,7 +280,6 @@ public enum CreateError: Error, LocalizedError {
     case stdinError(String)
     case fieldConversionError(String, FieldType, String, String)
     case operationFailed(String)
-    case outputError(String)
     
     public var errorDescription: String? {
         switch self {
@@ -368,8 +297,6 @@ public enum CreateError: Error, LocalizedError {
             return "Failed to convert field '\(name)' of type '\(type.rawValue)' with value '\(value)': \(error)"
         case .operationFailed(let message):
             return "Create operation failed: \(message)"
-        case .outputError(let message):
-            return "Output formatting error: \(message)"
         }
     }
 }

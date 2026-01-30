@@ -73,24 +73,14 @@ struct MistDemo {
   
   /// Execute a specific command
   private static func executeCommand(_ commandName: String) async throws {
-    switch commandName {
-    case "auth-token":
-      let command = try AuthTokenCommand()
+    do {
+      let command = try CommandRegistry.createCommand(named: commandName)
       try await command.execute()
-    case "current-user":
-      let command = try CurrentUserCommand()
-      try await command.execute()
-    case "query":
-      let command = try QueryCommand()
-      try await command.execute()
-    case "create":
-      let command = try CreateCommand()
-      try await command.execute()
-    default:
-      print("❌ Unknown command: \(commandName)")
+    } catch let error as CommandRegistryError {
+      print("❌ \(error.localizedDescription)")
       print("Available commands: \(await CommandRegistry.availableCommands.joined(separator: ", "))")
       print("Run 'mistdemo help' for usage information.")
-      throw MistDemoError.unknownCommand(commandName)
+      throw error
     }
   }
   
@@ -104,17 +94,9 @@ struct MistDemo {
     print("")
     print("COMMANDS:")
     for commandName in CommandRegistry.availableCommands {
-      switch commandName {
-      case "auth-token":
-        print("    \(commandName)    \(AuthTokenCommand.abstract)")
-      case "current-user":
-        print("    \(commandName)  \(CurrentUserCommand.abstract)")
-      case "query":
-        print("    \(commandName)         \(QueryCommand.abstract)")
-      case "create":
-        print("    \(commandName)        \(CreateCommand.abstract)")
-      default:
-        print("    \(commandName)")
+      if let commandType = CommandRegistry.commandType(named: commandName) {
+        let paddedName = commandName.padding(toLength: 12, withPad: " ", startingAt: 0)
+        print("    \(paddedName) \(commandType.abstract)")
       }
     }
     print("")
@@ -127,16 +109,9 @@ struct MistDemo {
   /// Print command-specific help
   @MainActor
   private static func printCommandHelp(_ commandName: String) async {
-    switch commandName {
-    case "auth-token":
-      AuthTokenCommand.printHelp()
-    case "current-user":
-      CurrentUserCommand.printHelp()
-    case "query":
-      QueryCommand.printHelp()
-    case "create":
-      CreateCommand.printHelp()
-    default:
+    if let commandType = CommandRegistry.commandType(named: commandName) {
+      commandType.printHelp()
+    } else {
       print("Unknown command: \(commandName)")
       await printGeneralHelp()
     }

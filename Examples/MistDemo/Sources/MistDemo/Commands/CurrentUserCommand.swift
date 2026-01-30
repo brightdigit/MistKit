@@ -31,7 +31,7 @@ public import Foundation
 import MistKit
 
 /// Command to get information about the authenticated user
-public struct CurrentUserCommand: MistDemoCommand {
+public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
     public static let commandName = "current-user"
     public static let abstract = "Get current user information"
     public static let helpText = """
@@ -85,7 +85,7 @@ public struct CurrentUserCommand: MistDemoCommand {
             let filteredUser = filterUserFields(userInfo, fields: config.fields)
             
             // Format and output result
-            try await outputResult(filteredUser)
+            try await outputResult(filteredUser, format: config.output)
             
         } catch {
             throw CurrentUserError.operationFailed(error.localizedDescription)
@@ -122,104 +122,17 @@ public struct CurrentUserCommand: MistDemoCommand {
             }
         }
     }
-    
-    /// Output the user information in the requested format
-    private func outputResult(_ userInfo: UserInfo) async throws {
-        switch config.output {
-        case .json:
-            let jsonData = try JSONEncoder().encode(userInfo)
-            guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                throw CurrentUserError.outputError("Failed to encode JSON")
-            }
-            print(jsonString)
-            
-        case .table:
-            print("User Information:")
-            if shouldIncludeField("userRecordName", fields: config.fields) {
-                print("├─ Record Name: \(userInfo.userRecordName)")
-            }
-            if shouldIncludeField("firstName", fields: config.fields), let firstName = userInfo.firstName {
-                print("├─ First Name: \(firstName)")
-            }
-            if shouldIncludeField("lastName", fields: config.fields), let lastName = userInfo.lastName {
-                print("├─ Last Name: \(lastName)")
-            }
-            if shouldIncludeField("emailAddress", fields: config.fields), let email = userInfo.emailAddress {
-                print("└─ Email: \(email)")
-            }
-            
-        case .csv:
-            // CSV header
-            var headers: [String] = []
-            var values: [String] = []
-            
-            if shouldIncludeField("userRecordName", fields: config.fields) {
-                headers.append("userRecordName")
-                values.append(userInfo.userRecordName)
-            }
-            if shouldIncludeField("firstName", fields: config.fields), let firstName = userInfo.firstName {
-                headers.append("firstName")
-                values.append(firstName)
-            }
-            if shouldIncludeField("lastName", fields: config.fields), let lastName = userInfo.lastName {
-                headers.append("lastName")
-                values.append(lastName)
-            }
-            if shouldIncludeField("emailAddress", fields: config.fields), let email = userInfo.emailAddress {
-                headers.append("emailAddress")
-                values.append(email)
-            }
-            
-            if !headers.isEmpty {
-                print(headers.joined(separator: ","))
-                print(values.map { csvEscape($0) }.joined(separator: ","))
-            }
-            
-        case .yaml:
-            if shouldIncludeField("userRecordName", fields: config.fields) {
-                print("userRecordName: \(yamlEscape(userInfo.userRecordName))")
-            }
-            if shouldIncludeField("firstName", fields: config.fields), let firstName = userInfo.firstName {
-                print("firstName: \(yamlEscape(firstName))")
-            }
-            if shouldIncludeField("lastName", fields: config.fields), let lastName = userInfo.lastName {
-                print("lastName: \(yamlEscape(lastName))")
-            }
-            if shouldIncludeField("emailAddress", fields: config.fields), let email = userInfo.emailAddress {
-                print("emailAddress: \(yamlEscape(email))")
-            }
-        }
-    }
-    
-    /// Escape string for CSV output
-    private func csvEscape(_ string: String) -> String {
-        if string.contains(",") || string.contains("\"") || string.contains("\n") {
-            return "\"\(string.replacingOccurrences(of: "\"", with: "\"\""))\""
-        }
-        return string
-    }
-    
-    /// Escape string for YAML output
-    private func yamlEscape(_ string: String) -> String {
-        if string.contains(":") || string.contains("\"") || string.contains("'") || string.contains("\n") {
-            return "\"\(string.replacingOccurrences(of: "\"", with: "\"\""))\""
-        }
-        return string
-    }
 }
 
 /// Errors specific to current-user command
 public enum CurrentUserError: Error, LocalizedError {
     case operationFailed(String)
-    case outputError(String)
     case authenticationRequired
     
     public var errorDescription: String? {
         switch self {
         case .operationFailed(let message):
             return "Current user operation failed: \(message)"
-        case .outputError(let message):
-            return "Output formatting error: \(message)"
         case .authenticationRequired:
             return "Authentication is required for current-user command. Use auth-token command first or provide --web-auth-token."
         }

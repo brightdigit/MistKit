@@ -31,7 +31,7 @@ public import Foundation
 public import MistKit
 
 /// Command to query Note records from CloudKit with filtering and sorting
-public struct QueryCommand: MistDemoCommand {
+public struct QueryCommand: MistDemoCommand, OutputFormatting {
     public static let commandName = "query"
     public static let abstract = "Query records from CloudKit with filtering and sorting"
     public static let helpText = """
@@ -140,7 +140,7 @@ public struct QueryCommand: MistDemoCommand {
             let filteredRecords = recordInfos
             
             // Format and output results
-            try await outputResults(filteredRecords)
+            try await outputResults(filteredRecords, format: config.output)
             
         } catch {
             throw QueryError.operationFailed(error.localizedDescription)
@@ -234,106 +234,6 @@ public struct QueryCommand: MistDemoCommand {
             fieldName.lowercased() == requestedField.lowercased()
         }
     }
-    
-    /// Output the query results in the requested format
-    private func outputResults(_ records: [RecordInfo]) async throws {
-        switch config.output {
-        case .json:
-            let jsonData = try JSONEncoder().encode(records)
-            guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                throw QueryError.outputError("Failed to encode JSON")
-            }
-            print(jsonString)
-            
-        case .table:
-            if records.isEmpty {
-                print(MistDemoConstants.Messages.noRecordsFound)
-                return
-            }
-            
-            print("Found \(records.count) record(s):")
-            print(String(repeating: "=", count: 50))
-            
-            for (index, record) in records.enumerated() {
-                print("\n[\(index + 1)] Record: \(record.recordName)")
-                print("    Type: \(record.recordType)")
-                if let changeTag = record.recordChangeTag {
-                    print("    Change Tag: \(changeTag)")
-                }
-                print("    Fields:")
-                
-                // Apply field filtering during output
-                let fieldsToShow = record.fields.filter { fieldName, _ in
-                    shouldIncludeField(fieldName, fields: config.fields)
-                }
-                
-                for (fieldName, fieldValue) in fieldsToShow {
-                    let formattedValue = FieldValueFormatter.formatFieldValue(fieldValue)
-                    print("      \(fieldName): \(formattedValue)")
-                }
-            }
-            
-        case .csv:
-            // Collect all unique field names (filtered if requested)
-            let allFieldNames = Set(records.flatMap { record in
-                record.fields.keys.filter { fieldName in
-                    shouldIncludeField(fieldName, fields: config.fields)
-                }
-            })
-            let sortedFieldNames = [
-                MistDemoConstants.FieldNames.recordName,
-                MistDemoConstants.FieldNames.recordType,
-                MistDemoConstants.FieldNames.recordChangeTag
-            ].filter { shouldIncludeField($0, fields: config.fields) } + allFieldNames.sorted()
-            
-            // Print header
-            print(sortedFieldNames.joined(separator: ","))
-            
-            // Print records
-            for record in records {
-                var values: [String] = []
-                for fieldName in sortedFieldNames {
-                    switch fieldName {
-                    case MistDemoConstants.FieldNames.recordName:
-                        values.append(OutputEscaping.csvEscape(record.recordName))
-                    case MistDemoConstants.FieldNames.recordType:
-                        values.append(OutputEscaping.csvEscape(record.recordType))
-                    case MistDemoConstants.FieldNames.recordChangeTag:
-                        values.append(OutputEscaping.csvEscape(record.recordChangeTag ?? ""))
-                    default:
-                        if let fieldValue = record.fields[fieldName] {
-                            let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                            values.append(OutputEscaping.csvEscape(formatted))
-                        } else {
-                            values.append("")
-                        }
-                    }
-                }
-                print(values.joined(separator: ","))
-            }
-            
-        case .yaml:
-            print("records:")
-            for record in records {
-                print("  - \(MistDemoConstants.FieldNames.recordName): \(OutputEscaping.yamlEscape(record.recordName))")
-                print("    \(MistDemoConstants.FieldNames.recordType): \(OutputEscaping.yamlEscape(record.recordType))")
-                if let changeTag = record.recordChangeTag {
-                    print("    \(MistDemoConstants.FieldNames.recordChangeTag): \(OutputEscaping.yamlEscape(changeTag))")
-                }
-                print("    fields:")
-                
-                // Apply field filtering during output
-                let fieldsToShow = record.fields.filter { fieldName, _ in
-                    shouldIncludeField(fieldName, fields: config.fields)
-                }
-                
-                for (fieldName, fieldValue) in fieldsToShow {
-                    let formatted = FieldValueFormatter.formatFieldValue(fieldValue)
-                    print("      \(fieldName): \(OutputEscaping.yamlEscape(formatted))")
-                }
-            }
-        }
-    }
 }
 
 /// Errors specific to query command
@@ -344,7 +244,6 @@ public enum QueryError: Error, LocalizedError {
     case invalidSortOrder(String, available: [String])
     case unsupportedOperator(String)
     case operationFailed(String)
-    case outputError(String)
     
     public var errorDescription: String? {
         switch self {
@@ -360,8 +259,6 @@ public enum QueryError: Error, LocalizedError {
             return "Unsupported filter operator '\(op)'. Supported: eq, ne, gt, gte, lt, lte, contains, begins_with, in, not_in"
         case .operationFailed(let message):
             return "Query operation failed: \(message)"
-        case .outputError(let message):
-            return "Output formatting error: \(message)"
         }
     }
 }

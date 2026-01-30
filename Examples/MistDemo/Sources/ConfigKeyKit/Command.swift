@@ -40,6 +40,9 @@ public protocol Command: Sendable {
     /// Detailed help text for the command
     static var helpText: String { get }
     
+    /// Initialize command with automatic config parsing from command line
+    init() throws
+    
     /// Execute the command asynchronously
     func execute() async throws
 }

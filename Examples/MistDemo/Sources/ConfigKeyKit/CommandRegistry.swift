@@ -49,6 +49,15 @@ public struct CommandRegistry {
         return registeredCommands[name]
     }
     
+    /// Create a command instance dynamically with automatic config parsing
+    public static func createCommand(named name: String) throws -> any Command {
+        guard let commandType = registeredCommands[name] else {
+            throw CommandRegistryError.unknownCommand(name)
+        }
+        
+        return try commandType.init()
+    }
+    
     /// Check if a command is registered
     public static func isRegistered(_ name: String) -> Bool {
         return registeredCommands[name] != nil
@@ -63,5 +72,17 @@ public struct CommandConfiguration {
     public init(commandName: String, abstract: String) {
         self.commandName = commandName
         self.abstract = abstract
+    }
+}
+
+/// Errors that can occur in command registry operations
+public enum CommandRegistryError: Error, LocalizedError {
+    case unknownCommand(String)
+    
+    public var errorDescription: String? {
+        switch self {
+        case .unknownCommand(let name):
+            return "Unknown command: \(name)"
+        }
     }
 }
