@@ -1,5 +1,5 @@
 //
-//  RecordManagingTests.swift
+//  RecordManagingTests+List.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -32,39 +32,32 @@ import Testing
 
 @testable import MistKit
 
-/// Mock implementation of RecordManaging for testing
-internal actor MockRecordManagingService: RecordManaging {
-  internal var queryCallCount = 0
-  internal var executeCallCount = 0
-  internal var lastExecutedOperations: [RecordOperation] = []
-  internal var batchSizes: [Int] = []
-  internal var recordsToReturn: [RecordInfo] = []
+extension RecordManagingTests {
+  @Suite("List Operations")
+  internal struct List {
+    @Test("list() calls queryRecords and doesn't throw")
+    internal func listCallsQueryRecords() async throws {
+      let service = MockRecordManagingService()
 
-  internal func queryRecords(recordType: String) async throws -> [RecordInfo] {
-    queryCallCount += 1
-    return recordsToReturn
-  }
+      await service.reset()
+      let mockRecords = [
+        RecordInfo(
+          recordName: "test-1",
+          recordType: "TestRecord",
+          fields: [
+            "name": .string("First"),
+            "count": .int64(1),
+            "isActive": FieldValue(booleanValue: true),
+          ]
+        )
+      ]
+      await service.setRecordsToReturn(mockRecords)
 
-  internal func executeBatchOperations(_ operations: [RecordOperation], recordType: String)
-    async throws
-  {
-    executeCallCount += 1
-    batchSizes.append(operations.count)
-    lastExecutedOperations.append(contentsOf: operations)
-  }
+      // list() outputs to console, so we just verify it doesn't throw
+      try await service.list(TestRecord.self)
 
-  internal func reset() {
-    queryCallCount = 0
-    executeCallCount = 0
-    lastExecutedOperations = []
-    batchSizes = []
-    recordsToReturn = []
-  }
-
-  internal func setRecordsToReturn(_ records: [RecordInfo]) {
-    recordsToReturn = records
+      let queryCount = await service.queryCallCount
+      #expect(queryCount == 1)
+    }
   }
 }
-
-@Suite("RecordManaging Protocol")
-internal enum RecordManagingTests {}

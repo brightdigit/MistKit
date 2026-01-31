@@ -1,5 +1,5 @@
 //
-//  RecordManagingTests.swift
+//  CloudKitRecordTests+Formatting.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -32,39 +32,24 @@ import Testing
 
 @testable import MistKit
 
-/// Mock implementation of RecordManaging for testing
-internal actor MockRecordManagingService: RecordManaging {
-  internal var queryCallCount = 0
-  internal var executeCallCount = 0
-  internal var lastExecutedOperations: [RecordOperation] = []
-  internal var batchSizes: [Int] = []
-  internal var recordsToReturn: [RecordInfo] = []
+extension CloudKitRecordTests {
+  @Suite("Display Formatting")
+  internal struct Formatting {
+    @Test("formatForDisplay generates expected output")
+    internal func formatForDisplay() {
+      let recordInfo = RecordInfo(
+        recordName: "test-7",
+        recordType: "TestRecord",
+        fields: [
+          "name": .string("Display Record"),
+          "count": .int64(99),
+        ]
+      )
 
-  internal func queryRecords(recordType: String) async throws -> [RecordInfo] {
-    queryCallCount += 1
-    return recordsToReturn
-  }
-
-  internal func executeBatchOperations(_ operations: [RecordOperation], recordType: String)
-    async throws
-  {
-    executeCallCount += 1
-    batchSizes.append(operations.count)
-    lastExecutedOperations.append(contentsOf: operations)
-  }
-
-  internal func reset() {
-    queryCallCount = 0
-    executeCallCount = 0
-    lastExecutedOperations = []
-    batchSizes = []
-    recordsToReturn = []
-  }
-
-  internal func setRecordsToReturn(_ records: [RecordInfo]) {
-    recordsToReturn = records
+      let formatted = TestRecord.formatForDisplay(recordInfo)
+      #expect(formatted.contains("test-7"))
+      #expect(formatted.contains("Display Record"))
+      #expect(formatted.contains("99"))
+    }
   }
 }
-
-@Suite("RecordManaging Protocol")
-internal enum RecordManagingTests {}

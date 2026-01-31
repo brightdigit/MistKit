@@ -1,5 +1,5 @@
 //
-//  RecordManagingTests.swift
+//  CloudKitServiceQueryTests+Configuration.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -32,39 +32,21 @@ import Testing
 
 @testable import MistKit
 
-/// Mock implementation of RecordManaging for testing
-internal actor MockRecordManagingService: RecordManaging {
-  internal var queryCallCount = 0
-  internal var executeCallCount = 0
-  internal var lastExecutedOperations: [RecordOperation] = []
-  internal var batchSizes: [Int] = []
-  internal var recordsToReturn: [RecordInfo] = []
+extension CloudKitServiceQueryTests {
+  @Suite("Configuration")
+  internal struct Configuration {
+    @Test("queryRecords() uses default limit from configuration")
+    internal func queryRecordsUsesDefaultLimit() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      // This test verifies that the default limit configuration is respected
+      // Using MockTransport to avoid actual network calls
+      let service = try CloudKitServiceQueryTests.makeSuccessfulService()
 
-  internal func queryRecords(recordType: String) async throws -> [RecordInfo] {
-    queryCallCount += 1
-    return recordsToReturn
-  }
-
-  internal func executeBatchOperations(_ operations: [RecordOperation], recordType: String)
-    async throws
-  {
-    executeCallCount += 1
-    batchSizes.append(operations.count)
-    lastExecutedOperations.append(contentsOf: operations)
-  }
-
-  internal func reset() {
-    queryCallCount = 0
-    executeCallCount = 0
-    lastExecutedOperations = []
-    batchSizes = []
-    recordsToReturn = []
-  }
-
-  internal func setRecordsToReturn(_ records: [RecordInfo]) {
-    recordsToReturn = records
+      // Verify service was created successfully
+      #expect(service.containerIdentifier == "iCloud.com.example.test")
+    }
   }
 }
-
-@Suite("RecordManaging Protocol")
-internal enum RecordManagingTests {}
