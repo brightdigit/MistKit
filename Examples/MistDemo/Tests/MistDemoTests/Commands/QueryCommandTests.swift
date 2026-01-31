@@ -93,8 +93,8 @@ struct QueryCommandTests {
     func commandInitializesWithConfig() throws {
         let baseConfig = try MistDemoConfig()
         let config = QueryConfig(base: baseConfig)
-        let command = QueryCommand(config: config)
-        
+        let _ = QueryCommand(config: config)
+
         #expect(QueryCommand.commandName == "query")
     }
     

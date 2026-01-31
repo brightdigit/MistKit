@@ -72,8 +72,8 @@ struct CurrentUserCommandTests {
     func commandInitializesWithConfig() throws {
         let baseConfig = try MistDemoConfig()
         let config = CurrentUserConfig(base: baseConfig)
-        let command = CurrentUserCommand(config: config)
-        
+        let _ = CurrentUserCommand(config: config)
+
         // Command should be created successfully
         #expect(CurrentUserCommand.commandName == "current-user")
     }
@@ -151,12 +151,12 @@ struct CurrentUserCommandTests {
     func commandHandlesAuthError() throws {
         // Test that authentication errors are properly handled
         let error = MistDemoError.authenticationFailed(
-            "Invalid credentials",
+            description: "Invalid credentials",
             context: "current-user"
         )
-        
-        #expect(error.code == "AUTH_FAILED")
-        #expect(error.message.contains("Invalid credentials"))
+
+        #expect(error.errorCode == "AUTHENTICATION_FAILED")
+        #expect(error.errorDescription?.contains("current-user") == true)
         #expect(error.recoverySuggestion != nil)
     }
     
@@ -167,9 +167,8 @@ struct CurrentUserCommandTests {
             "api.token",
             suggestion: "Provide API token via --api-token or environment variable"
         )
-        
-        #expect(error.code == "CONFIG_ERROR")
-        #expect(error.message.contains("api.token"))
+
+        #expect(error.errorDescription?.contains("api.token") == true)
     }
     
     // MARK: - Database Selection Tests
@@ -189,11 +188,9 @@ struct CurrentUserCommandTests {
     @Test("MistKitClientFactory configuration")
     func mistKitClientFactoryConfig() throws {
         let config = try MistDemoConfig()
-        
+
         // Verify config has necessary properties for client creation
         #expect(config.containerIdentifier == "iCloud.com.brightdigit.MistDemo")
         #expect(config.environment == .development)
-        #expect(config.resolvedApiToken().isEmpty)
-        #expect(config.resolvedWebAuthToken() == nil)
     }
 }

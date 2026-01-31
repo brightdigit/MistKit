@@ -88,8 +88,8 @@ struct CreateCommandTests {
             recordName: nil,
             fields: []
         )
-        let command = CreateCommand(config: config)
-        
+        let _ = CreateCommand(config: config)
+
         #expect(CreateCommand.commandName == "create")
     }
     
@@ -110,7 +110,7 @@ struct CreateCommandTests {
     
     @Test("Parse string field")
     func parseStringField() throws {
-        let field = try Field.parse("title:string:My Note")
+        let field = try Field(parsing:"title:string:My Note")
         
         #expect(field.name == "title")
         #expect(field.type == .string)
@@ -119,7 +119,7 @@ struct CreateCommandTests {
     
     @Test("Parse int64 field")
     func parseInt64Field() throws {
-        let field = try Field.parse("priority:int64:5")
+        let field = try Field(parsing:"priority:int64:5")
         
         #expect(field.name == "priority")
         #expect(field.type == .int64)
@@ -128,7 +128,7 @@ struct CreateCommandTests {
     
     @Test("Parse double field")
     func parseDoubleField() throws {
-        let field = try Field.parse("progress:double:0.75")
+        let field = try Field(parsing:"progress:double:0.75")
         
         #expect(field.name == "progress")
         #expect(field.type == .double)
@@ -137,7 +137,7 @@ struct CreateCommandTests {
     
     @Test("Parse timestamp field")
     func parseTimestampField() throws {
-        let field = try Field.parse("dueDate:timestamp:2026-02-01T09:00:00Z")
+        let field = try Field(parsing:"dueDate:timestamp:2026-02-01T09:00:00Z")
         
         #expect(field.name == "dueDate")
         #expect(field.type == .timestamp)
@@ -146,7 +146,7 @@ struct CreateCommandTests {
     
     @Test("Parse field with colon in value")
     func parseFieldWithColonInValue() throws {
-        let field = try Field.parse("url:string:https://example.com:8080")
+        let field = try Field(parsing:"url:string:https://example.com:8080")
         
         #expect(field.name == "url")
         #expect(field.type == .string)
@@ -155,7 +155,7 @@ struct CreateCommandTests {
     
     @Test("Parse field with spaces in value")
     func parseFieldWithSpacesInValue() throws {
-        let field = try Field.parse("description:string:This is a long description with spaces")
+        let field = try Field(parsing:"description:string:This is a long description with spaces")
         
         #expect(field.name == "description")
         #expect(field.type == .string)
@@ -167,29 +167,29 @@ struct CreateCommandTests {
     @Test("Field parsing throws on invalid format")
     func fieldParsingThrowsOnInvalidFormat() throws {
         #expect(throws: Error.self) {
-            _ = try Field.parse("invalid-format")
+            _ = try Field(parsing:"invalid-format")
         }
         
         #expect(throws: Error.self) {
-            _ = try Field.parse("field:missing-value")
+            _ = try Field(parsing:"field:missing-value")
         }
         
         #expect(throws: Error.self) {
-            _ = try Field.parse("field:invalid-type:value")
+            _ = try Field(parsing:"field:invalid-type:value")
         }
     }
     
     @Test("Field parsing validates field name")
     func fieldParsingValidatesFieldName() throws {
         #expect(throws: Error.self) {
-            _ = try Field.parse(":string:value")
+            _ = try Field(parsing:":string:value")
         }
     }
     
     @Test("Field parsing validates type")
     func fieldParsingValidatesType() throws {
         #expect(throws: Error.self) {
-            _ = try Field.parse("field:invalidtype:value")
+            _ = try Field(parsing:"field:invalidtype:value")
         }
     }
     
@@ -200,8 +200,8 @@ struct CreateCommandTests {
         let fieldsString = "title:string:Test Note, priority:int64:5, progress:double:0.5"
         let fields = try fieldsString.split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespaces) }
-            .map(Field.parse)
-        
+            .map { try Field(parsing: String($0)) }
+
         #expect(fields.count == 3)
         #expect(fields[0].name == "title")
         #expect(fields[1].name == "priority")

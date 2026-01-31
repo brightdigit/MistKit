@@ -60,9 +60,9 @@ struct CommandIntegrationTests {
             host: "127.0.0.1",
             noBrowser: true
         )
-        
-        let command = AuthTokenCommand(config: config)
-        
+
+        let _ = AuthTokenCommand(config: config)
+
         // Verify command is properly configured
         #expect(AuthTokenCommand.commandName == "auth-token")
         #expect(AuthTokenCommand.abstract.contains("authentication token"))
@@ -71,8 +71,8 @@ struct CommandIntegrationTests {
     @Test("AuthTokenCommand resource path validation")
     func authTokenCommandResourcePathValidation() throws {
         let config = AuthTokenConfig(apiToken: "test-token")
-        let command = AuthTokenCommand(config: config)
-        
+        let _ = AuthTokenCommand(config: config)
+
         // Test that resource finding logic doesn't crash
         // This tests the findResourcesPath method indirectly
         #expect(AuthTokenCommand.commandName == "auth-token")
@@ -88,12 +88,12 @@ struct CommandIntegrationTests {
             fields: ["userRecordName", "emailAddress"],
             output: .json
         )
-        
-        let command = CurrentUserCommand(config: config)
-        
+
+        let _ = CurrentUserCommand(config: config)
+
         // Verify command configuration
-        #expect(type(of: command).commandName == "current-user")
-        
+        #expect(CurrentUserCommand.commandName == "current-user")
+
         // Verify config properties
         #expect(config.fields?.count == 2)
         #expect(config.output == .json)
@@ -107,9 +107,9 @@ struct CommandIntegrationTests {
             fields: ["userRecordName", "firstName", "lastName"],
             output: .table
         )
-        
-        let command = CurrentUserCommand(config: config)
-        
+
+        let _ = CurrentUserCommand(config: config)
+
         // Verify field filtering setup
         #expect(config.fields?.contains("userRecordName") == true)
         #expect(config.fields?.contains("firstName") == true)
@@ -131,11 +131,11 @@ struct CommandIntegrationTests {
             limit: 50,
             fields: ["title", "content", "createdAt"]
         )
-        
-        let command = QueryCommand(config: config)
-        
+
+        let _ = QueryCommand(config: config)
+
         // Verify query configuration
-        #expect(type(of: command).commandName == "query")
+        #expect(QueryCommand.commandName == "query")
         #expect(config.filters.count == 2)
         #expect(config.sort?.field == "createdAt")
         #expect(config.sort?.order == .descending)
@@ -151,9 +151,9 @@ struct CommandIntegrationTests {
             offset: 20,
             continuationMarker: "next-page-token"
         )
-        
-        let command = QueryCommand(config: config)
-        
+
+        let _ = QueryCommand(config: config)
+
         // Verify pagination configuration
         #expect(config.limit == 10)
         #expect(config.offset == 20)
@@ -166,25 +166,25 @@ struct CommandIntegrationTests {
     func createCommandWithParsedFields() throws {
         let baseConfig = try createTestConfig()
         let fields = [
-            try Field.parse("title:string:Integration Test Note"),
-            try Field.parse("priority:int64:8"),
-            try Field.parse("progress:double:0.85")
+            try Field(parsing: "title:string:Integration Test Note"),
+            try Field(parsing: "priority:int64:8"),
+            try Field(parsing: "progress:double:0.85")
         ]
-        
+
         let config = CreateConfig(
             base: baseConfig,
             zone: "_defaultZone",
             recordName: "test-record-123",
             fields: fields
         )
-        
-        let command = CreateCommand(config: config)
-        
+
+        let _ = CreateCommand(config: config)
+
         // Verify create configuration
-        #expect(type(of: command).commandName == "create")
+        #expect(CreateCommand.commandName == "create")
         #expect(config.fields.count == 3)
         #expect(config.recordName == "test-record-123")
-        
+
         // Verify field parsing
         let titleField = config.fields.first { $0.name == "title" }
         #expect(titleField?.type == .string)
@@ -194,24 +194,24 @@ struct CommandIntegrationTests {
     @Test("CreateCommand field type validation")
     func createCommandFieldTypeValidation() throws {
         let baseConfig = try createTestConfig()
-        
+
         // Test different field types
-        let stringField = try Field.parse("description:string:This is a test description")
-        let intField = try Field.parse("count:int64:42")
-        let doubleField = try Field.parse("rating:double:4.5")
-        let timestampField = try Field.parse("deadline:timestamp:2026-12-31T23:59:59Z")
-        
+        let stringField = try Field(parsing: "description:string:This is a test description")
+        let intField = try Field(parsing: "count:int64:42")
+        let doubleField = try Field(parsing: "rating:double:4.5")
+        let timestampField = try Field(parsing: "deadline:timestamp:2026-12-31T23:59:59Z")
+
         let config = CreateConfig(
             base: baseConfig,
             zone: "_defaultZone",
             recordName: nil,
             fields: [stringField, intField, doubleField, timestampField]
         )
-        
-        let command = CreateCommand(config: config)
-        
+
+        let _ = CreateCommand(config: config)
+
         #expect(config.fields.count == 4)
-        
+
         // Verify each field type
         let fieldTypes = config.fields.map(\.type)
         #expect(fieldTypes.contains(.string))
@@ -227,7 +227,7 @@ struct CommandIntegrationTests {
         let baseConfig = try createTestConfig()
         
         // Create configs for all commands
-        let authConfig = AuthTokenConfig(apiToken: "test-token")
+        let _ = AuthTokenConfig(apiToken: "test-token")
         let userConfig = CurrentUserConfig(base: baseConfig)
         let queryConfig = QueryConfig(base: baseConfig)
         let createConfig = CreateConfig(base: baseConfig, zone: "_defaultZone", recordName: nil, fields: [])
@@ -266,12 +266,12 @@ struct CommandIntegrationTests {
     @Test("Authentication error propagation")
     func authenticationErrorPropagation() throws {
         let authError = MistDemoError.authenticationFailed(
-            "Invalid token",
+            description: "Invalid token",
             context: "integration-test"
         )
-        
-        #expect(authError.code == "AUTH_FAILED")
-        #expect(authError.message.contains("Invalid token"))
+
+        #expect(authError.errorCode == "AUTHENTICATION_FAILED")
+        #expect(authError.errorDescription?.contains("integration-test") == true)
         #expect(authError.recoverySuggestion != nil)
     }
     
@@ -281,9 +281,9 @@ struct CommandIntegrationTests {
             "api.token",
             suggestion: "Provide token via --api-token"
         )
-        
-        #expect(configError.code == "CONFIG_ERROR")
-        #expect(configError.suggestion?.contains("--api-token") == true)
+
+        #expect(configError.errorDescription?.contains("api.token") == true)
+        #expect(configError.errorDescription?.contains("Provide token via --api-token") == true)
     }
     
     // MARK: - Real-world Usage Simulation
@@ -295,30 +295,30 @@ struct CommandIntegrationTests {
             apiToken: "mock-api-token-for-test",
             noBrowser: true
         )
-        let authCommand = AuthTokenCommand(config: authConfig)
-        
+        let _ = AuthTokenCommand(config: authConfig)
+
         // 2. Current user check
         let baseConfig = try createTestConfig()
         let userConfig = CurrentUserConfig(base: baseConfig)
-        let userCommand = CurrentUserCommand(config: userConfig)
-        
+        let _ = CurrentUserCommand(config: userConfig)
+
         // 3. Query existing records
         let queryConfig = QueryConfig(
             base: baseConfig,
             filters: ["title:contains:test"],
             limit: 10
         )
-        let queryCommand = QueryCommand(config: queryConfig)
+        let _ = QueryCommand(config: queryConfig)
         
         // 4. Create new record
-        let fields = [try Field.parse("title:string:Workflow Test")]
+        let fields = [try Field(parsing: "title:string:Workflow Test")]
         let createConfig = CreateConfig(
             base: baseConfig,
             zone: "_defaultZone",
             recordName: nil,
             fields: fields
         )
-        let createCommand = CreateCommand(config: createConfig)
+        let _ = CreateCommand(config: createConfig)
         
         // Verify all commands are properly configured
         #expect(AuthTokenCommand.commandName == "auth-token")
@@ -340,6 +340,6 @@ internal final class MockCommandTokenManager: TokenManager {
     }
     
     func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
-        return .webAuth(apiToken: "mock-api", webAuthToken: "mock-web-auth")
+        return .webAuthToken(apiToken: "mock-api", webToken: "mock-web-auth")
     }
 }
