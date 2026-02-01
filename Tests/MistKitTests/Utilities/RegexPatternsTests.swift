@@ -172,7 +172,8 @@ struct RegexPatternsTests {
     let testCases = [
       "token=abc123def456",
       "token: xyz789",
-      "token = BASE64STRING=="
+      "token=BASE64STRING==",
+      "token: BASE64+/=="
     ]
 
     for text in testCases {
@@ -186,7 +187,8 @@ struct RegexPatternsTests {
     let testCases = [
       "key=secretvalue123",
       "key: privatekey456",
-      "key = KEYDATA789"
+      "key=KEYDATA789",
+      "key:KEY+DATA/123"
     ]
 
     for text in testCases {
@@ -200,7 +202,8 @@ struct RegexPatternsTests {
     let testCases = [
       "secret=mysecret123",
       "secret: topsecret456",
-      "secret = CLASSIFIED789"
+      "secret=CLASSIFIED789",
+      "secret:SECRET+VALUE/="
     ]
 
     for text in testCases {
