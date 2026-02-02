@@ -36,16 +36,16 @@ extension Components.Schemas.FieldValue {
   internal init(from fieldValue: FieldValue) {
     switch fieldValue {
     case .string(let value):
-      self.init(value: .stringValue(value), type: .string)
+      self.init(value: .stringValue(value), type: nil)
     case .int64(let value):
-      self.init(value: .int64Value(value), type: .int64)
+      self.init(value: .int64Value(value), type: nil)
     case .double(let value):
-      self.init(value: .doubleValue(value), type: .double)
+      self.init(value: .doubleValue(value), type: nil)
     case .bytes(let value):
-      self.init(value: .bytesValue(value), type: .bytes)
+      self.init(value: .bytesValue(value), type: nil)
     case .date(let value):
       let milliseconds = Int64(value.timeIntervalSince1970 * 1_000)
-      self.init(value: .dateValue(Double(milliseconds)), type: .timestamp)
+      self.init(value: .dateValue(Double(milliseconds)), type: nil)
     case .location(let location):
       self.init(location: location)
     case .reference(let reference):
@@ -69,7 +69,7 @@ extension Components.Schemas.FieldValue {
       course: location.course,
       timestamp: location.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
     )
-    self.init(value: .locationValue(locationValue), type: .location)
+    self.init(value: .locationValue(locationValue), type: nil)
   }
 
   /// Initialize from Reference to Components ReferenceValue
@@ -87,7 +87,7 @@ extension Components.Schemas.FieldValue {
       recordName: reference.recordName,
       action: action
     )
-    self.init(value: .referenceValue(referenceValue), type: .reference)
+    self.init(value: .referenceValue(referenceValue), type: nil)
   }
 
   /// Initialize from Asset to Components AssetValue
@@ -100,12 +100,12 @@ extension Components.Schemas.FieldValue {
       receipt: asset.receipt,
       downloadURL: asset.downloadURL
     )
-    self.init(value: .assetValue(assetValue), type: .asset)
+    self.init(value: .assetValue(assetValue), type: nil)
   }
 
   /// Initialize from List to Components list value
   private init(list: [FieldValue]) {
     let listValues = list.map { CustomFieldValue.CustomFieldValuePayload($0) }
-    self.init(value: .listValue(listValues), type: .list)
+    self.init(value: .listValue(listValues), type: nil)
   }
 }

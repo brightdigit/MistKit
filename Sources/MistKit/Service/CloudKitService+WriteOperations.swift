@@ -47,6 +47,24 @@ extension CloudKitService {
       // Convert public RecordOperation types to internal OpenAPI types
       let apiOperations = operations.map { Components.Schemas.RecordOperation(from: $0) }
 
+      // Debug: Print the operations being sent
+      print("\n[DEBUG] Sending \(apiOperations.count) operation(s) to CloudKit:")
+      for (index, operation) in apiOperations.enumerated() {
+        print("[DEBUG] Operation \(index):")
+        print("[DEBUG]   Type: \(operation.operationType)")
+        if let record = operation.record {
+          print("[DEBUG]   Record:")
+          print("[DEBUG]     recordType: \(record.recordType ?? "nil")")
+          print("[DEBUG]     recordName: \(record.recordName ?? "nil")")
+          if let fields = record.fields {
+            print("[DEBUG]     fields count: \(fields.additionalProperties.count)")
+            for (fieldName, fieldValue) in fields.additionalProperties {
+              print("[DEBUG]       Field '\(fieldName)': \(fieldValue)")
+            }
+          }
+        }
+      }
+
       // Call the underlying OpenAPI client
       let response = try await client.modifyRecords(
         .init(
@@ -154,28 +172,29 @@ extension CloudKitService {
 
   /// Upload binary asset data to CloudKit
   ///
-  /// Uploads binary data (images, files, etc.) to CloudKit and returns tokens
-  /// that can be used to associate the assets with record fields.
+  /// This is a convenience method that performs a complete two-step asset upload:
+  /// 1. Requests an upload URL from CloudKit
+  /// 2. Uploads the binary data to that URL
   ///
-  /// This is a two-step process:
-  /// 1. Upload the binary data using this method to get tokens
-  /// 2. Create/update a record with the tokens in asset fields
-  ///
-  /// - Parameter data: The binary data to upload
-  /// - Returns: AssetUploadResult containing tokens for record association
+  /// - Parameters:
+  ///   - data: The binary data to upload
+  ///   - recordType: The type of record that will use this asset (e.g., "Photo")
+  ///   - fieldName: The name of the asset field (e.g., "image")
+  ///   - recordName: Optional unique record name (defaults to CloudKit-generated UUID)
+  /// - Returns: AssetUploadToken containing the upload URL for record association
   /// - Throws: CloudKitError if the upload fails
   ///
-  /// Example - Upload and Associate:
+  /// Example:
   /// ```swift
-  /// // Step 1: Upload the asset
+  /// // Upload the asset
   /// let imageData = try Data(contentsOf: imageURL)
-  /// let uploadResult = try await service.uploadAssets(data: imageData)
+  /// let token = try await service.uploadAssets(
+  ///   data: imageData,
+  ///   recordType: "Photo",
+  ///   fieldName: "image"
+  /// )
   ///
-  /// guard let token = uploadResult.tokens.first else {
-  ///   throw CloudKitError.invalidResponse
-  /// }
-  ///
-  /// // Step 2: Create a record with the asset
+  /// // Create a record with the asset
   /// let asset = FieldValue.Asset(
   ///   fileChecksum: nil,
   ///   size: Int64(imageData.count),
@@ -194,12 +213,16 @@ extension CloudKitService {
   /// )
   /// ```
   ///
-  /// - Note: The uploaded data must be associated with a record field within
-  ///         a reasonable time frame, or CloudKit may garbage collect it.
-  /// - Warning: Maximum upload size is 250 MB per asset
-  public func uploadAssets(data: Data) async throws(CloudKitError) -> AssetUploadResult {
-    // Validate data size (CloudKit limit is 250 MB)
-    let maxSize: Int = 250 * 1024 * 1024 // 250 MB
+  /// - Note: Upload URLs are valid for 15 minutes
+  /// - Warning: Maximum upload size is 15 MB per asset
+  public func uploadAssets(
+    data: Data,
+    recordType: String,
+    fieldName: String,
+    recordName: String? = nil
+  ) async throws(CloudKitError) -> AssetUploadResult {
+    // Validate data size (CloudKit limit is 15 MB)
+    let maxSize: Int = 15 * 1024 * 1024 // 15 MB
     guard data.count <= maxSize else {
       throw CloudKitError.httpErrorWithRawResponse(
         statusCode: 413,
@@ -215,28 +238,28 @@ extension CloudKitService {
     }
 
     do {
-      // Create multipart body
-      let filePayload = Operations.uploadAssets.Input.Body.multipartFormPayload.filePayload(
-        body: OpenAPIRuntime.HTTPBody(data)
-      )
-      let filePart = OpenAPIRuntime.MultipartPart(
-        payload: filePayload,
-        filename: nil
-      )
-      let multipartParts: [Operations.uploadAssets.Input.Body.multipartFormPayload] = [
-        .file(filePart)
-      ]
-      let multipartBody = OpenAPIRuntime.MultipartBody(multipartParts)
-
-      let response = try await client.uploadAssets(
-        path: createUploadAssetsPath(containerIdentifier: containerIdentifier),
-        body: .multipartForm(multipartBody)
+      // Step 1: Request upload URL
+      let urlToken = try await requestAssetUploadURL(
+        recordType: recordType,
+        fieldName: fieldName,
+        recordName: recordName
       )
 
-      let uploadData: Components.Schemas.AssetUploadResponse =
-        try await responseProcessor.processUploadAssetsResponse(response)
+      guard let uploadURLString = urlToken.url,
+        let uploadURL = URL(string: uploadURLString)
+      else {
+        throw CloudKitError.invalidResponse
+      }
 
-      return AssetUploadResult(from: uploadData)
+      // Step 2: Upload binary data to the URL and get asset dictionary
+      let asset = try await uploadAssetData(data, to: uploadURL)
+
+      // Return complete result with asset data
+      return AssetUploadResult(
+        asset: asset,
+        recordName: urlToken.recordName ?? "unknown",
+        fieldName: urlToken.fieldName ?? fieldName
+      )
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError
     } catch let decodingError as DecodingError {
@@ -259,6 +282,153 @@ extension CloudKitService {
         logger: MistKitLogger.api,
         shouldRedact: false
       )
+      throw CloudKitError.underlyingError(error)
+    }
+  }
+
+  /// Request an upload URL for an asset field
+  ///
+  /// This is step 1 of the two-step asset upload process. Use `uploadAssetData(_:to:)`
+  /// to complete step 2, or use the convenience method `uploadAssets(data:recordType:fieldName:)`
+  /// to perform both steps.
+  ///
+  /// - Parameters:
+  ///   - recordType: The type of record that will use this asset
+  ///   - fieldName: The name of the asset field
+  ///   - recordName: Optional unique record name (defaults to CloudKit-generated UUID)
+  ///   - zoneID: Optional zone ID (defaults to default zone)
+  /// - Returns: AssetUploadToken containing the upload URL
+  /// - Throws: CloudKitError if the request fails
+  public func requestAssetUploadURL(
+    recordType: String,
+    fieldName: String,
+    recordName: String? = nil,
+    zoneID: ZoneID? = nil
+  ) async throws(CloudKitError) -> AssetUploadToken {
+    do {
+      // Create token request
+      let tokenRequest = Operations.uploadAssets.Input.Body.jsonPayload.tokensPayloadPayload(
+        recordName: recordName,
+        recordType: recordType,
+        fieldName: fieldName
+      )
+
+      let requestBody = Operations.uploadAssets.Input.Body.jsonPayload(
+        zoneID: zoneID.map { Components.Schemas.ZoneID(from: $0) },
+        tokens: [tokenRequest]
+      )
+
+      let response = try await client.uploadAssets(
+        path: createUploadAssetsPath(containerIdentifier: containerIdentifier),
+        body: .json(requestBody)
+      )
+
+      let uploadData: Components.Schemas.AssetUploadResponse =
+        try await responseProcessor.processUploadAssetsResponse(response)
+
+      guard let token = uploadData.tokens?.first else {
+        throw CloudKitError.invalidResponse
+      }
+
+      return AssetUploadToken(from: token)
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch {
+      throw CloudKitError.underlyingError(error)
+    }
+  }
+
+  /// Upload binary data to a CloudKit asset upload URL
+  ///
+  /// This is step 2 of the two-step asset upload process. Use `requestAssetUploadURL`
+  /// to get the upload URL first, or use the convenience method
+  /// `uploadAssets(data:recordType:fieldName:)` to perform both steps.
+  ///
+  /// - Parameters:
+  ///   - data: The binary data to upload
+  ///   - url: The upload URL from CloudKit
+  /// - Returns: The asset dictionary returned by CloudKit containing receipt, checksums, etc.
+  /// - Throws: CloudKitError if the upload fails
+  /// - Note: Upload URLs are valid for 15 minutes
+  /// - Important: The returned asset dictionary must be used when creating/updating records with this asset
+  public func uploadAssetData(_ data: Data, to url: URL) async throws(CloudKitError) -> FieldValue.Asset {
+    do {
+      var request = URLRequest(url: url)
+      request.httpMethod = "POST"
+      request.httpBody = data
+      request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+
+      #if !os(WASI)
+        let (responseData, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+          throw CloudKitError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+          throw CloudKitError.httpError(statusCode: httpResponse.statusCode)
+        }
+
+        // Parse the asset dictionary from the response
+        // CloudKit returns: { "singleFile": { "wrappingKey": ..., "fileChecksum": ..., "receipt": ..., etc. } }
+        struct AssetUploadResponse: Codable {
+          let singleFile: AssetData
+
+          struct AssetData: Codable {
+            let wrappingKey: String?
+            let fileChecksum: String?
+            let receipt: String?
+            let referenceChecksum: String?
+            let size: Int64?
+          }
+        }
+
+        // Debug: log the raw response
+        if let responseString = String(data: responseData, encoding: .utf8) {
+          MistKitLogger.logDebug(
+            "Asset upload response: \(responseString)",
+            logger: MistKitLogger.api,
+            shouldRedact: false
+          )
+        }
+
+        let uploadResponse = try JSONDecoder().decode(AssetUploadResponse.self, from: responseData)
+
+        // Convert to FieldValue.Asset
+        return FieldValue.Asset(
+          fileChecksum: uploadResponse.singleFile.fileChecksum,
+          size: uploadResponse.singleFile.size,
+          referenceChecksum: uploadResponse.singleFile.referenceChecksum,
+          wrappingKey: uploadResponse.singleFile.wrappingKey,
+          receipt: uploadResponse.singleFile.receipt,
+          downloadURL: nil  // Download URL is provided by CloudKit when fetching the record later
+        )
+      #else
+        throw CloudKitError.underlyingError(
+          NSError(
+            domain: "MistKit",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: "Asset upload not supported on WASI"]
+          )
+        )
+      #endif
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "Failed to decode asset upload response: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error uploading asset data: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
       throw CloudKitError.underlyingError(error)
     }
   }

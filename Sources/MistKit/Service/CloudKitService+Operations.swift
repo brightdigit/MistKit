@@ -603,7 +603,7 @@ extension CloudKitService {
   }
 
   /// Lookup records by record names
-  internal func lookupRecords(
+  public func lookupRecords(
     recordNames: [String],
     desiredKeys: [String]? = nil
   ) async throws(CloudKitError) -> [RecordInfo] {

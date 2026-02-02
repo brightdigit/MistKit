@@ -44,7 +44,11 @@ extension CloudKitServiceUploadTests {
       let service = try CloudKitServiceUploadTests.makeUploadValidationErrorService(.emptyData)
 
       do {
-        _ = try await service.uploadAssets(data: Data())
+        _ = try await service.uploadAssets(
+          data: Data(),
+          recordType: "Note",
+          fieldName: "image"
+        )
         Issue.record("Expected error for empty data")
       } catch let error as CloudKitError {
         // Verify we get the correct validation error
@@ -59,27 +63,30 @@ extension CloudKitServiceUploadTests {
       }
     }
 
-    @Test("uploadAssets() validates 250 MB size limit")
-    internal func uploadAssetsValidates250MBLimit() async throws {
+    @Test("uploadAssets() validates 15 MB size limit")
+    internal func uploadAssetsValidates15MBLimit() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      // Create data just over 250 MB (250 * 1024 * 1024 + 1 bytes)
-      let oversizedData = Data(count: 262_144_001)
+      // Create data just over 15 MB (15 * 1024 * 1024 + 1 bytes)
+      let oversizedData = Data(count: 15_728_641)
       let service = try CloudKitServiceUploadTests.makeUploadValidationErrorService(
         .oversizedAsset(oversizedData.count)
       )
 
       do {
-        _ = try await service.uploadAssets(data: oversizedData)
+        _ = try await service.uploadAssets(
+          data: oversizedData,
+          recordType: "Note",
+          fieldName: "image"
+        )
         Issue.record("Expected error for oversized asset")
       } catch let error as CloudKitError {
         // Verify we get the correct validation error
         if case .httpErrorWithRawResponse(let statusCode, let response) = error {
-          #expect(statusCode == 400)
-          #expect(response.contains("exceeds maximum allowed size"))
-          #expect(response.contains("250 MB"))
+          #expect(statusCode == 413)
+          #expect(response.contains("exceeds maximum"))
         } else {
           Issue.record("Expected httpErrorWithRawResponse error, got \(error)")
         }
@@ -96,21 +103,24 @@ extension CloudKitServiceUploadTests {
       }
       let service = try CloudKitServiceUploadTests.makeSuccessfulUploadService()
 
-      // Test various valid sizes
+      // Test various valid sizes (CloudKit limit is 15 MB)
       let validSizes = [
         1,  // 1 byte
         1024,  // 1 KB
         1024 * 1024,  // 1 MB
         10 * 1024 * 1024,  // 10 MB
-        100 * 1024 * 1024,  // 100 MB
-        250 * 1024 * 1024  // Exactly 250 MB (maximum allowed)
+        15 * 1024 * 1024  // Exactly 15 MB (maximum allowed)
       ]
 
       for size in validSizes {
         let data = Data(count: size)
         do {
-          let result = try await service.uploadAssets(data: data)
-          #expect(result.tokens.count >= 1, "Should receive at least one upload token")
+          let result = try await service.uploadAssets(
+            data: data,
+            recordType: "Note",
+            fieldName: "image"
+          )
+          #expect(result.asset.receipt != nil, "Should receive asset with receipt")
         } catch {
           Issue.record("Valid size \(size) bytes should not throw error: \(error)")
         }

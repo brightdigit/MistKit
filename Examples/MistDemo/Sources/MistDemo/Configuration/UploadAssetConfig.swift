@@ -38,18 +38,24 @@ public struct UploadAssetConfig: Sendable, ConfigurationParseable {
 
     public let base: MistDemoConfig
     public let file: String
-    public let createRecord: String?
+    public let recordType: String
+    public let fieldName: String
+    public let recordName: String?
     public let output: OutputFormat
 
     public init(
         base: MistDemoConfig,
         file: String,
-        createRecord: String? = nil,
+        recordType: String,
+        fieldName: String,
+        recordName: String? = nil,
         output: OutputFormat = .json
     ) {
         self.base = base
         self.file = file
-        self.createRecord = createRecord
+        self.recordType = recordType
+        self.fieldName = fieldName
+        self.recordName = recordName
         self.output = output
     }
 
@@ -64,13 +70,18 @@ public struct UploadAssetConfig: Sendable, ConfigurationParseable {
         }
 
         // Get file path from configuration
-        // The file can be specified via --file flag or as a positional argument
         guard let filePath = configReader.string(forKey: "file") else {
             throw UploadAssetError.filePathRequired
         }
 
-        // Parse optional record type to create
-        let createRecord = configReader.string(forKey: "create-record")
+        // Get record type (defaults to "Note")
+        let recordType = configReader.string(forKey: "record-type") ?? "Note"
+
+        // Get field name (defaults to "image")
+        let fieldName = configReader.string(forKey: "field-name") ?? "image"
+
+        // Parse optional record name
+        let recordName = configReader.string(forKey: "record-name")
 
         // Parse output format
         let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
@@ -79,7 +90,9 @@ public struct UploadAssetConfig: Sendable, ConfigurationParseable {
         self.init(
             base: baseConfig,
             file: filePath,
-            createRecord: createRecord,
+            recordType: recordType,
+            fieldName: fieldName,
+            recordName: recordName,
             output: output
         )
     }

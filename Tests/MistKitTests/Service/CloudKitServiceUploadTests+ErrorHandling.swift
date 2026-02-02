@@ -45,7 +45,11 @@ extension CloudKitServiceUploadTests {
       let testData = Data(count: 1024)
 
       do {
-        _ = try await service.uploadAssets(data: testData)
+        _ = try await service.uploadAssets(
+          data: testData,
+          recordType: "Note",
+          fieldName: "image"
+        )
         Issue.record("Expected authentication error")
       } catch let error as CloudKitError {
         if case .httpErrorWithRawResponse(let statusCode, let response) = error {
@@ -69,7 +73,11 @@ extension CloudKitServiceUploadTests {
       let testData = Data()  // Empty data triggers 400
 
       do {
-        _ = try await service.uploadAssets(data: testData)
+        _ = try await service.uploadAssets(
+          data: testData,
+          recordType: "Note",
+          fieldName: "image"
+        )
         Issue.record("Expected bad request error")
       } catch let error as CloudKitError {
         if case .httpErrorWithRawResponse(let statusCode, _) = error {

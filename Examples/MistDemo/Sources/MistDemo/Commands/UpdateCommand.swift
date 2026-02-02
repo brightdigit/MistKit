@@ -1,5 +1,5 @@
 //
-//  CreateCommand.swift
+//  UpdateCommand.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,25 +30,26 @@
 public import Foundation
 import MistKit
 
-/// Command to create a new record in CloudKit
-public struct CreateCommand: MistDemoCommand, OutputFormatting {
-    public typealias Config = CreateConfig
-    public static let commandName = "create"
-    public static let abstract = "Create a new record in CloudKit"
+/// Command to update an existing record in CloudKit
+public struct UpdateCommand: MistDemoCommand, OutputFormatting {
+    public typealias Config = UpdateConfig
+    public static let commandName = "update"
+    public static let abstract = "Update an existing record in CloudKit"
     public static let helpText = """
-        CREATE - Create a new record in CloudKit
+        UPDATE - Update an existing record in CloudKit
 
         USAGE:
-            mistdemo create [options]
+            mistdemo update --record-name <name> [options]
 
         REQUIRED:
             --api-token <token>            CloudKit API token
             --web-auth-token <token>       Web authentication token
+            --record-name <name>           Record name to update (REQUIRED)
 
         OPTIONS:
-            --record-type <type>           Record type to create (default: Note)
+            --record-type <type>           Record type (default: Note)
             --zone <zone>                  Zone name (default: _defaultZone)
-            --record-name <name>           Custom record name (auto-generated if omitted)
+            --record-change-tag <tag>      Change tag for optimistic locking
             --output-format <format>       Output format: json, table, csv, yaml
 
         FIELD DEFINITION (choose one method):
@@ -69,81 +70,71 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
 
         EXAMPLES:
 
-          1. Single field:
-             mistdemo create --field "title:string:My Note"
+          1. Update single field:
+             mistdemo update --record-name my-note-123 --field "title:string:Updated Title"
 
-          2. Multiple fields (comma-separated):
-             mistdemo create --field "title:string:My Note, priority:int64:5"
+          2. Update multiple fields (comma-separated):
+             mistdemo update --record-name my-note-123 --field "title:string:New Title, priority:int64:8"
 
-          3. With timestamp:
-             mistdemo create --field "title:string:Task, due:timestamp:2026-02-01T09:00:00Z"
+          3. With optimistic locking:
+             mistdemo update --record-name my-note-123 \\
+               --record-change-tag abc123 --field "title:string:Safe Update"
 
           4. From JSON file:
-             mistdemo create --json-file fields.json
+             mistdemo update --record-name my-note-123 --json-file updates.json
 
-             Example fields.json:
+             Example updates.json:
              {
-               "title": "Project Plan",
-               "priority": 8,
-               "progress": 0.35
+               "title": "Updated Project Plan",
+               "priority": 9,
+               "progress": 0.75
              }
 
           5. From stdin:
-             echo '{"title":"Quick Note"}' | mistdemo create --stdin
+             echo '{"title":"Quick Update"}' | mistdemo update --record-name my-note-123 --stdin
 
           6. Table output format:
-             mistdemo create --field "title:string:Test" --output-format table
+             mistdemo update --record-name my-note-123 --field "title:string:Test" --output-format table
 
-          7. With asset (after upload-asset):
-             mistdemo create --field "title:string:My Photo, image:asset:https://cws.icloud-content.com:443/..."
+          7. Update asset field (after upload-asset):
+             mistdemo update --record-name my-note-123 \\
+               --field "image:asset:https://cws.icloud-content.com:443/..."
 
         NOTES:
-          • Record name is auto-generated if not provided
-          • JSON files auto-detect field types from values
+          • Record name is REQUIRED for updates
+          • Only specified fields will be updated, others remain unchanged
+          • Use record-change-tag for safe concurrent updates
           • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN
             to avoid repeating tokens
         """
-    
-    private let config: CreateConfig
-    
-    public init(config: CreateConfig) {
+
+    private let config: UpdateConfig
+
+    public init(config: UpdateConfig) {
         self.config = config
     }
-    
+
     public func execute() async throws {
         do {
             // Create CloudKit client
             let client = try MistKitClientFactory.create(from: config.base)
-            
-            // Generate record name if not provided
-            let recordName = config.recordName ?? generateRecordName()
-            
+
             // Convert fields to CloudKit format using shared utilities
             let cloudKitFields = try FieldConversionUtilities.convertFieldsToCloudKit(config.fields)
 
-            // Create the record
-            // NOTE: Zone support requires enhancements to CloudKitService.createRecord method
-            let recordInfo = try await client.createRecord(
+            // Update the record
+            let recordInfo = try await client.updateRecord(
                 recordType: config.recordType,
-                recordName: recordName,
-                fields: cloudKitFields
-                // Zone: config.zone - to be added when CloudKitService supports it
+                recordName: config.recordName,
+                fields: cloudKitFields,
+                recordChangeTag: config.recordChangeTag
             )
-            
+
             // Format and output result
             try await outputResult(recordInfo, format: config.output)
-            
+
         } catch {
-            throw CreateError.operationFailed(error.localizedDescription)
+            throw UpdateError.operationFailed(error.localizedDescription)
         }
     }
-    
-    /// Generate a unique record name
-    private func generateRecordName() -> String {
-        let timestamp = Int(Date().timeIntervalSince1970)
-        let randomSuffix = String(Int.random(in: MistDemoConstants.Limits.randomSuffixMin...MistDemoConstants.Limits.randomSuffixMax))
-        return "\(config.recordType.lowercased())-\(timestamp)-\(randomSuffix)"
-    }
 }
-
-// CreateError is now defined in Errors/CreateError.swift

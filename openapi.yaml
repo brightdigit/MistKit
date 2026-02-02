@@ -642,8 +642,13 @@ paths:
 
   /database/{version}/{container}/{environment}/{database}/assets/upload:
     post:
-      summary: Upload Assets
-      description: Upload binary assets to CloudKit
+      summary: Request Asset Upload URLs
+      description: |
+        Request upload URLs for asset fields. This is the first step in a two-step process:
+        1. Request upload URLs by specifying the record type and field name
+        2. Upload the actual binary data to the returned URL (separate HTTP request)
+
+        Upload URLs are valid for 15 minutes. Maximum file size is 15 MB.
       operationId: uploadAssets
       tags:
         - Assets
@@ -655,16 +660,36 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
-                file:
-                  type: string
-                  format: binary
+                zoneID:
+                  $ref: '#/components/schemas/ZoneID'
+                  description: Optional zone ID. Defaults to default zone if not specified.
+                tokens:
+                  type: array
+                  description: Array of asset fields to request upload URLs for
+                  items:
+                    type: object
+                    required:
+                      - recordType
+                      - fieldName
+                    properties:
+                      recordName:
+                        type: string
+                        description: Unique name to identify the record. Defaults to random UUID if not specified.
+                      recordType:
+                        type: string
+                        description: Name of the record type
+                      fieldName:
+                        type: string
+                        description: Name of the Asset or Asset list field
+              required:
+                - tokens
       responses:
         '200':
-          description: Asset uploaded successfully
+          description: Upload URLs returned successfully
           content:
             application/json:
               schema:

@@ -32,6 +32,8 @@ public import Foundation
 /// Errors that can occur during asset upload operations
 public enum UploadAssetError: Error, LocalizedError {
     case filePathRequired
+    case recordTypeRequired
+    case fieldNameRequired
     case fileNotFound(String)
     case fileTooLarge(Int64, maximum: Int64)
     case invalidRecordType(String)
@@ -40,7 +42,11 @@ public enum UploadAssetError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .filePathRequired:
-            return "File path is required. Usage: mistdemo upload-asset <file-path>"
+            return "File path is required. Usage: mistdemo upload-asset --file <path> --record-type <type> --field-name <field>"
+        case .recordTypeRequired:
+            return "Record type is required. Specify with --record-type <type>"
+        case .fieldNameRequired:
+            return "Field name is required. Specify with --field-name <field>"
         case .fileNotFound(let path):
             return "File not found at path: \(path)"
         case .fileTooLarge(let size, let maximum):

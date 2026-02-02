@@ -112,9 +112,14 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)`.
     @available(*, deprecated)
     func lookupContacts(_ input: Operations.lookupContacts.Input) async throws -> Operations.lookupContacts.Output
-    /// Upload Assets
+    /// Request Asset Upload URLs
     ///
-    /// Upload binary assets to CloudKit
+    /// Request upload URLs for asset fields. This is the first step in a two-step process:
+    /// 1. Request upload URLs by specifying the record type and field name
+    /// 2. Upload the actual binary data to the returned URL (separate HTTP request)
+    ///
+    /// Upload URLs are valid for 15 minutes. Maximum file size is 15 MB.
+    ///
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/upload`.
     /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)`.
@@ -370,9 +375,14 @@ extension APIProtocol {
             body: body
         ))
     }
-    /// Upload Assets
+    /// Request Asset Upload URLs
     ///
-    /// Upload binary assets to CloudKit
+    /// Request upload URLs for asset fields. This is the first step in a two-step process:
+    /// 1. Request upload URLs by specifying the record type and field name
+    /// 2. Upload the actual binary data to the returned URL (separate HTTP request)
+    ///
+    /// Upload URLs are valid for 15 minutes. Maximum file size is 15 MB.
+    ///
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/upload`.
     /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)`.
@@ -6504,9 +6514,14 @@ internal enum Operations {
             }
         }
     }
-    /// Upload Assets
+    /// Request Asset Upload URLs
     ///
-    /// Upload binary assets to CloudKit
+    /// Request upload URLs for asset fields. This is the first step in a two-step process:
+    /// 1. Request upload URLs by specifying the record type and field name
+    /// 2. Upload the actual binary data to the returned URL (separate HTTP request)
+    ///
+    /// Upload URLs are valid for 15 minutes. Maximum file size is 15 MB.
+    ///
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/upload`.
     /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)`.
@@ -6572,24 +6587,72 @@ internal enum Operations {
             internal var headers: Operations.uploadAssets.Input.Headers
             /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody`.
             internal enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/multipartForm`.
-                internal enum multipartFormPayload: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/multipartForm/file`.
-                    internal struct filePayload: Sendable, Hashable {
-                        internal var body: OpenAPIRuntime.HTTPBody
-                        /// Creates a new `filePayload`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/json`.
+                internal struct jsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/json/zoneID`.
+                    internal var zoneID: Components.Schemas.ZoneID?
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/json/tokensPayload`.
+                    internal struct tokensPayloadPayload: Codable, Hashable, Sendable {
+                        /// Unique name to identify the record. Defaults to random UUID if not specified.
+                        ///
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/json/tokensPayload/recordName`.
+                        internal var recordName: Swift.String?
+                        /// Name of the record type
+                        ///
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/json/tokensPayload/recordType`.
+                        internal var recordType: Swift.String
+                        /// Name of the Asset or Asset list field
+                        ///
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/json/tokensPayload/fieldName`.
+                        internal var fieldName: Swift.String
+                        /// Creates a new `tokensPayloadPayload`.
                         ///
                         /// - Parameters:
-                        ///   - body:
-                        internal init(body: OpenAPIRuntime.HTTPBody) {
-                            self.body = body
+                        ///   - recordName: Unique name to identify the record. Defaults to random UUID if not specified.
+                        ///   - recordType: Name of the record type
+                        ///   - fieldName: Name of the Asset or Asset list field
+                        internal init(
+                            recordName: Swift.String? = nil,
+                            recordType: Swift.String,
+                            fieldName: Swift.String
+                        ) {
+                            self.recordName = recordName
+                            self.recordType = recordType
+                            self.fieldName = fieldName
+                        }
+                        internal enum CodingKeys: String, CodingKey {
+                            case recordName
+                            case recordType
+                            case fieldName
                         }
                     }
-                    case file(OpenAPIRuntime.MultipartPart<Operations.uploadAssets.Input.Body.multipartFormPayload.filePayload>)
-                    case undocumented(OpenAPIRuntime.MultipartRawPart)
+                    /// Array of asset fields to request upload URLs for
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/json/tokens`.
+                    internal typealias tokensPayload = [Operations.uploadAssets.Input.Body.jsonPayload.tokensPayloadPayload]
+                    /// Array of asset fields to request upload URLs for
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/json/tokens`.
+                    internal var tokens: Operations.uploadAssets.Input.Body.jsonPayload.tokensPayload
+                    /// Creates a new `jsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - zoneID:
+                    ///   - tokens: Array of asset fields to request upload URLs for
+                    internal init(
+                        zoneID: Components.Schemas.ZoneID? = nil,
+                        tokens: Operations.uploadAssets.Input.Body.jsonPayload.tokensPayload
+                    ) {
+                        self.zoneID = zoneID
+                        self.tokens = tokens
+                    }
+                    internal enum CodingKeys: String, CodingKey {
+                        case zoneID
+                        case tokens
+                    }
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/content/multipart\/form-data`.
-                case multipartForm(OpenAPIRuntime.MultipartBody<Operations.uploadAssets.Input.Body.multipartFormPayload>)
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/upload/POST/requestBody/content/application\/json`.
+                case json(Operations.uploadAssets.Input.Body.jsonPayload)
             }
             internal var body: Operations.uploadAssets.Input.Body
             /// Creates a new `Input`.
@@ -6637,7 +6700,7 @@ internal enum Operations {
                     self.body = body
                 }
             }
-            /// Asset uploaded successfully
+            /// Upload URLs returned successfully
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)/responses/200`.
             ///

@@ -134,7 +134,7 @@ All commands support multiple output formats:
 ### Environment Variables
 ```bash
 export CLOUDKIT_API_TOKEN=your_api_token
-export CLOUDKIT_WEBAUTH_TOKEN=your_web_auth_token
+export CLOUDKIT_WEB_AUTH_TOKEN=your_web_auth_token
 ```
 
 ### Configuration File

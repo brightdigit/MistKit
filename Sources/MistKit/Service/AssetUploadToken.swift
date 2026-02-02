@@ -57,18 +57,24 @@ public struct AssetUploadToken: Sendable, Equatable {
 
 /// Result of an asset upload operation
 ///
-/// Contains tokens that can be used to associate uploaded assets with
-/// record fields in a subsequent modify operation.
+/// After uploading binary data to CloudKit, you receive an asset dictionary containing
+/// the receipt, checksums, and other metadata needed to associate the asset with a record.
+/// This type contains that complete asset information.
 public struct AssetUploadResult: Sendable {
-  /// Array of upload tokens for the uploaded assets
-  public let tokens: [AssetUploadToken]
+  /// The complete asset data including receipt and checksums
+  /// Use this when creating or updating records
+  public let asset: FieldValue.Asset
+
+  /// The record name this asset is associated with
+  public let recordName: String
+
+  /// The field name this asset should be assigned to
+  public let fieldName: String
 
   /// Initialize an asset upload result
-  public init(tokens: [AssetUploadToken]) {
-    self.tokens = tokens
-  }
-
-  internal init(from response: Components.Schemas.AssetUploadResponse) {
-    self.tokens = response.tokens?.map { AssetUploadToken(from: $0) } ?? []
+  public init(asset: FieldValue.Asset, recordName: String, fieldName: String) {
+    self.asset = asset
+    self.recordName = recordName
+    self.fieldName = fieldName
   }
 }

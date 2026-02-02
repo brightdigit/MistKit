@@ -39,29 +39,47 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
         UPLOAD-ASSET - Upload binary assets to CloudKit
 
         USAGE:
-            mistdemo upload-asset <file-path> [options]
+            mistdemo upload-asset --file <path> [options]
 
-        ARGUMENTS:
-            <file-path>                Path to the file to upload
+        REQUIRED OPTIONS:
+            --file <path>              Path to the file to upload
 
-        OPTIONS:
+        OPTIONAL:
+            --record-type <type>       Record type name (default: "Note")
+            --field-name <field>       Asset field name (default: "image")
+            --record-name <name>       Unique record name (optional, auto-generated if omitted)
             --api-token <token>        CloudKit API token
-            --create-record <type>     Create a record of this type with the uploaded asset
             --output-format <format>   Output format: json, table, csv, yaml
 
         EXAMPLES:
-            # Upload a photo
-            mistdemo upload-asset photo.jpg --api-token YOUR_TOKEN
+            # Upload with defaults (Note.image)
+            mistdemo upload-asset --file photo.jpg
 
-            # Upload and create a record
-            mistdemo upload-asset document.pdf \\
-              --create-record Document \\
-              --api-token YOUR_TOKEN
+            # Upload to custom record type and field
+            mistdemo upload-asset \\
+              --file photo.jpg \\
+              --record-type Photo \\
+              --field-name thumbnail
+
+            # Upload with specific record name
+            mistdemo upload-asset \\
+              --file document.pdf \\
+              --record-type Document \\
+              --field-name file \\
+              --record-name my-document-123
+
+        WORKFLOW:
+            1. Upload the asset using this command
+            2. Note the returned record name and asset details
+            3. Use 'create' or 'update' command to associate the asset with a record
 
         NOTES:
-            - Maximum file size: 250 MB
-            - Supported in public database only (API-only authentication)
-            - Upload tokens must be associated with a record within a reasonable time
+            - Maximum file size: 15 MB
+            - Upload URLs valid for 15 minutes
+            - With web authentication: uploads to private database
+            - With API-only authentication: uploads to public database
+            - Returns asset metadata (receipt, checksums) needed for record operations
+            - Defaults match MistDemo schema: Note record type, image field
         """
 
     private let config: UploadAssetConfig
@@ -86,49 +104,70 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
             let data = try Data(contentsOf: fileURL)
             let sizeInMB = Double(data.count) / 1024 / 1024
             print("\n📁 File: \(fileURL.lastPathComponent) (\(String(format: "%.2f", sizeInMB)) MB)")
+            print("📝 Record Type: \(config.recordType)")
+            print("🏷️  Field Name: \(config.fieldName)")
+            if let recordName = config.recordName {
+                print("🆔 Record Name: \(recordName)")
+            }
 
-            // Check file size (250 MB limit)
-            let maxSize: Int64 = 250 * 1024 * 1024
+            // Check file size (15 MB limit)
+            let maxSize: Int64 = 15 * 1024 * 1024
             if data.count > maxSize {
                 throw UploadAssetError.fileTooLarge(Int64(data.count), maximum: maxSize)
             }
 
-            // Create CloudKit service for public database (upload assets only works with public)
-            let service = try MistKitClientFactory.createForPublicDatabase(from: config.base)
+            // Create CloudKit service (will use appropriate database based on authentication)
+            // With web-auth: private database, with API-only: public database
+            let service = try MistKitClientFactory.create(from: config.base)
 
             // Upload asset
-            print("⬆️  Uploading...")
-            let result = try await service.uploadAssets(data: data)
+            print("\n⬆️  Uploading...")
+            let result = try await service.uploadAssets(
+                data: data,
+                recordType: config.recordType,
+                fieldName: config.fieldName,
+                recordName: config.recordName
+            )
 
-            print("\n✅ Upload successful!")
-            print("🎫 Received \(result.tokens.count) token(s):")
-            for (index, token) in result.tokens.enumerated() {
-                print("   Token \(index + 1):")
-                if let url = token.url {
-                    print("      URL: \(url.prefix(50))...")
-                }
-                if let recordName = token.recordName {
-                    print("      Record: \(recordName)")
-                }
-                if let fieldName = token.fieldName {
-                    print("      Field: \(fieldName)")
-                }
+            print("\n✅ Asset uploaded successfully!")
+            print("   Record Name: \(result.recordName)")
+            print("   Field Name: \(result.fieldName)")
+            if let receipt = result.asset.receipt {
+                print("   Receipt: \(receipt.prefix(40))...")
             }
 
-            // Optional: Create record with asset
-            if let recordType = config.createRecord, let token = result.tokens.first {
-                print("\n📝 Creating \(recordType) record with asset...")
-                try await createRecordWithAsset(
-                    service: service,
-                    recordType: recordType,
-                    filename: fileURL.lastPathComponent,
-                    token: token,
-                    fileSize: data.count
+            // Now create/update the record with the asset
+            print("\n📝 Creating record with asset...")
+            do {
+                let recordInfo = try await createOrUpdateRecordWithAsset(
+                    result: result,
+                    service: service
                 )
-            }
 
-            // Output result in requested format
-            try await outputUploadResult(result, format: config.output)
+                if config.recordName != nil {
+                    print("✅ Record updated with asset!")
+                } else {
+                    print("✅ New record created with asset!")
+                }
+
+                print("   Record Name: \(recordInfo.recordName)")
+                print("   Record Type: \(recordInfo.recordType)")
+                if let changeTag = recordInfo.recordChangeTag {
+                    print("   Change Tag: \(changeTag)")
+                }
+
+                // Output in requested format
+                try await outputResult(recordInfo, format: config.output)
+
+            } catch {
+                print("\n⚠️  Asset uploaded but record operation failed:")
+                print("   \(error.localizedDescription)")
+                print("\n   The asset is uploaded but not associated with a record.")
+                print("   Asset details:")
+                print("   - Record Name: \(result.recordName)")
+                print("   - Field Name: \(result.fieldName)")
+                // Don't throw - asset upload succeeded
+            }
 
         } catch let error as CloudKitError {
             print("\n❌ CloudKit Error: \(error)")
@@ -146,47 +185,62 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
         print(String(repeating: "=", count: 60))
     }
 
-    /// Create a record with the uploaded asset
-    private func createRecordWithAsset(
-        service: CloudKitService,
-        recordType: String,
-        filename: String,
-        token: AssetUploadToken,
-        fileSize: Int
-    ) async throws {
-        let asset = FieldValue.Asset(
-            fileChecksum: nil,
-            size: Int64(fileSize),
-            referenceChecksum: nil,
-            wrappingKey: nil,
-            receipt: nil,
-            downloadURL: token.url
-        )
+    /// Create or update a record with the uploaded asset
+    /// The asset metadata (receipt, checksums) from CloudKit must be used in the record
+    private func createOrUpdateRecordWithAsset(
+        result: AssetUploadResult,
+        service: CloudKitService
+    ) async throws -> RecordInfo {
+        // Use the complete asset data from the upload result
+        // This contains the receipt and checksums returned by CloudKit
+        var fields: [String: FieldValue] = [
+            config.fieldName: .asset(result.asset)
+        ]
 
-        let record = try await service.createRecord(
-            recordType: recordType,
-            fields: [
-                "filename": .string(filename),
-                "file": .asset(asset)
-            ]
-        )
+        // Debug: Print asset details
+        print("   Asset details:")
+        print("     - Receipt: \(result.asset.receipt ?? "nil")")
+        print("     - File checksum: \(result.asset.fileChecksum ?? "nil")")
+        print("     - Size: \(result.asset.size.map(String.init) ?? "nil")")
+        print("     - Wrapping key: \(result.asset.wrappingKey ?? "nil")")
+        print("     - Reference checksum: \(result.asset.referenceChecksum ?? "nil")")
 
-        print("   ✅ Created record: \(record.recordName)")
-        print("   📝 Type: \(record.recordType)")
-        print("   🆔 Record ID: \(record.recordName)")
-    }
+        if let recordName = config.recordName {
+            // User provided recordName → UPDATE existing record's asset field
+            // First fetch the existing record to get its current recordChangeTag
+            print("   Fetching existing record to get change tag...")
+            let existingRecords = try await service.lookupRecords(
+                recordNames: [recordName]
+            )
 
-    /// Output upload result in the requested format
-    private func outputUploadResult(_ result: AssetUploadResult, format: OutputFormat) async throws {
-        // For now, we've already printed the result above in a user-friendly format
-        // If JSON/table output is needed, implement it here
-        switch format {
-        case .json:
-            // Already displayed in console output
-            break
-        case .table, .csv, .yaml:
-            // Could implement formatted output here if needed
-            break
+            guard let existingRecord = existingRecords.first else {
+                throw UploadAssetError.operationFailed("Record '\(recordName)' not found")
+            }
+
+            print("   Updating record with change tag: \(existingRecord.recordChangeTag ?? "nil")")
+            return try await service.updateRecord(
+                recordType: config.recordType,
+                recordName: recordName,
+                fields: fields,
+                recordChangeTag: existingRecord.recordChangeTag
+            )
+        } else {
+            // No recordName → CREATE new record with the asset field
+            // For Note records, add a default title to ensure validity
+            if config.recordType == "Note" {
+                fields["title"] = .string("Uploaded Image - \(Date().formatted())")
+            }
+
+            // Generate a NEW recordName for the record (don't reuse the upload token's recordName)
+            // The upload recordName is just for the asset upload, not the actual record
+            let newRecordName = UUID().uuidString.lowercased()
+            print("   Creating record with new name: \(newRecordName)")
+
+            return try await service.createRecord(
+                recordType: config.recordType,
+                recordName: newRecordName,
+                fields: fields
+            )
         }
     }
 }

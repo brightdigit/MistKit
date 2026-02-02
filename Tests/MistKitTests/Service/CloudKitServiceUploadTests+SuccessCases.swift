@@ -44,12 +44,15 @@ extension CloudKitServiceUploadTests {
       let service = try CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
       let testData = Data(count: 1024)  // 1 KB of test data
 
-      let result = try await service.uploadAssets(data: testData)
+      let result = try await service.uploadAssets(
+        data: testData,
+        recordType: "Note",
+        fieldName: "image"
+      )
 
-      #expect(result.tokens.count == 1, "Should receive exactly one upload token")
-      #expect(result.tokens[0].url != nil, "Upload token should have a URL")
-      #expect(result.tokens[0].recordName != nil, "Upload token should have a record name")
-      #expect(result.tokens[0].fieldName != nil, "Upload token should have a field name")
+      #expect(result.recordName.isEmpty == false, "Result should have a record name")
+      #expect(result.fieldName == "image", "Result should have the correct field name")
+      #expect(result.asset.receipt != nil, "Asset should have a receipt from CloudKit")
     }
 
     @Test("uploadAssets() parses single token from response")
@@ -61,34 +64,36 @@ extension CloudKitServiceUploadTests {
       let service = try CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
       let testData = Data(count: 2048)
 
-      let result = try await service.uploadAssets(data: testData)
+      let result = try await service.uploadAssets(
+        data: testData,
+        recordType: "Note",
+        fieldName: "image"
+      )
 
-      #expect(result.tokens.count == 1)
-      let token = result.tokens[0]
-      #expect(token.url?.contains("test-token-0") == true)
-      #expect(token.recordName == "test-record-0")
-      #expect(token.fieldName == "file")
+      #expect(result.recordName == "test-record-0")
+      #expect(result.fieldName == "image")
+      #expect(result.asset.receipt != nil)
     }
 
-    @Test("uploadAssets() parses multiple tokens from response")
-    internal func uploadAssetsParseMultipleTokens() async throws {
+    @Test("uploadAssets() returns a single token")
+    internal func uploadAssetsReturnsSingleToken() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 3)
+      let service = try CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
       let testData = Data(count: 4096)
 
-      let result = try await service.uploadAssets(data: testData)
+      let result = try await service.uploadAssets(
+        data: testData,
+        recordType: "Note",
+        fieldName: "image"
+      )
 
-      #expect(result.tokens.count == 3, "Should receive three upload tokens")
-
-      // Verify each token has the expected fields
-      for (index, token) in result.tokens.enumerated() {
-        #expect(token.url?.contains("test-token-\(index)") == true)
-        #expect(token.recordName == "test-record-\(index)")
-        #expect(token.fieldName == "file")
-      }
+      // Verify result has the expected fields
+      #expect(result.recordName == "test-record-0")
+      #expect(result.fieldName == "image")
+      #expect(result.asset.receipt != nil)
     }
   }
 }
