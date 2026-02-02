@@ -43,9 +43,9 @@ import Foundation
 /// // read(apiKey) returns String?
 /// ```
 public struct OptionalConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
-  private let baseKey: String?
-  private let styles: [ConfigKeySource: any NamingStyle]
-  private let explicitKeys: [ConfigKeySource: String]
+  internal let baseKey: String?
+  internal let styles: [ConfigKeySource: any NamingStyle]
+  internal let explicitKeys: [ConfigKeySource: String]
 
   /// Initialize with explicit CLI and ENV keys (no default)
   public init(cli: String? = nil, env: String? = nil) {
@@ -98,20 +98,3 @@ public struct OptionalConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
   }
 }
 
-extension OptionalConfigKey: CustomDebugStringConvertible {
-  public var debugDescription: String {
-    let cliKey = key(for: .commandLine) ?? "nil"
-    let envKey = key(for: .environment) ?? "nil"
-    return "OptionalConfigKey(cli: \(cliKey), env: \(envKey))"
-  }
-}
-
-// MARK: - Convenience Initializers for BUSHEL Prefix
-
-extension OptionalConfigKey {
-  /// Convenience initializer for keys with BUSHEL prefix
-  /// - Parameter base: Base key string (e.g., "sync.min_interval")
-  public init(bushelPrefixed base: String) {
-    self.init(base, envPrefix: "BUSHEL")
-  }
-}

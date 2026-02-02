@@ -32,7 +32,7 @@ import MistKit
 
 /// Result of authentication setup including token manager and selected database
 struct AuthenticationResult {
-  let tokenManager: TokenManager
+  let tokenManager: any TokenManager
   let database: MistKit.Database
   let authMethod: String  // Description for logging
 }

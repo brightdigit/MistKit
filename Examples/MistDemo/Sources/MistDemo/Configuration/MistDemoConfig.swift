@@ -27,14 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ConfigKeyKit
+public import ConfigKeyKit
 import Configuration
 import Foundation
 import MistKit
 
 /// Centralized configuration for MistDemo
 /// Implements hierarchical configuration using Swift Configuration (CLI → ENV → defaults)
-public struct MistDemoConfig: Sendable {
+public struct MistDemoConfig: Sendable, ConfigurationParseable {
+    public typealias ConfigReader = MistDemoConfiguration
+    public typealias BaseConfig = Never
     // MARK: - CloudKit Core Configuration
 
     /// CloudKit container identifier
@@ -68,9 +70,13 @@ public struct MistDemoConfig: Sendable {
     /// Server port for authentication
     let port: Int
 
+    /// Authentication timeout in seconds (default: 300 = 5 minutes)
+    let authTimeout: Double
+
     // MARK: - Test Flags
 
     /// Skip authentication and use provided token directly
+    /// @deprecated: Automatic detection based on web-auth-token presence. This flag is ignored.
     let skipAuth: Bool
 
     /// Test all authentication methods
@@ -88,8 +94,8 @@ public struct MistDemoConfig: Sendable {
     // MARK: - Initialization
 
     /// Initialize with Swift Configuration's hierarchical provider setup
-    public init() throws {
-        let config = try MistDemoConfiguration()
+    public init(configuration: MistDemoConfiguration, base: Never? = nil) async throws {
+        let config = configuration
 
         // CloudKit Core
         self.containerIdentifier = config.string(
@@ -139,6 +145,11 @@ public struct MistDemoConfig: Sendable {
             default: 8080
         ) ?? 8080
 
+        self.authTimeout = Double(config.int(
+            forKey: "auth.timeout",
+            default: 300
+        ) ?? 300)
+
         // Test flags
         self.skipAuth = config.bool(
             forKey: "skip.auth",
@@ -167,16 +178,3 @@ public struct MistDemoConfig: Sendable {
     }
 }
 
-// MARK: - Configuration Extensions
-
-extension MistDemoConfig {
-    /// Resolve API token from configuration or environment
-    public func resolvedApiToken() -> String {
-        AuthenticationHelper.resolveAPIToken(apiToken)
-    }
-
-    /// Resolve web auth token from configuration or environment
-    public func resolvedWebAuthToken() -> String? {
-        AuthenticationHelper.resolveWebAuthToken(webAuthToken ?? "")
-    }
-}

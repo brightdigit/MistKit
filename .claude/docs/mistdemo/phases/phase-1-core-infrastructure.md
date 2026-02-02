@@ -15,16 +15,23 @@ This phase builds the infrastructure that all subcommands will depend on. No use
 Define the base protocol that all subcommands implement:
 
 ```swift
-import ArgumentParser
+import Configuration
+import Foundation
 
-protocol MistDemoCommand: AsyncParsableCommand {
+/// Base configuration pattern using Swift Configuration
+/// Note: MistDemo uses direct main() approach rather than command-based architecture
+protocol MistDemoCommand {
     associatedtype Config
-
-    var configFile: String? { get }
-    var profile: String? { get }
 
     func loadConfig() throws -> Config
     func execute(with config: Config) async throws
+}
+
+extension MistDemoCommand {
+    func loadConfig() throws -> Config {
+        let configReader = try MistDemoConfiguration()
+        return try Config(reader: configReader)
+    }
 }
 ```
 
@@ -156,6 +163,7 @@ dependencies: [
     .package(path: "../.."),  // MistKit
     .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
     .package(url: "https://github.com/apple/swift-configuration", from: "1.0.0")
+    // Note: CommandLineArgumentsProvider trait may be needed for future CLI parsing enhancements
 ],
 targets: [
     .target(
@@ -174,7 +182,11 @@ targets: [
 ]
 ```
 
-**Note**: ArgumentParser was removed in favor of direct Swift Configuration usage.
+**Note**: MistDemo uses Swift Configuration (v1.0.0+) for configuration management, replacing ArgumentParser during Phase 1 (issue #212). The current architecture uses manual argument parsing with hierarchical provider resolution (CLI → Environment → Defaults). See `MistDemoConfig.swift` for the implementation pattern.
+
+**Reference Documentation:**
+- [Swift Configuration Guide](.claude/docs/https_-swiftpackageindex.com-apple-swift-configuration-1.0.0-documentation-configuration.md)
+- [MistDemo Swift Configuration Reference](./swift-configuration-reference.md)
 
 ## File Structure
 

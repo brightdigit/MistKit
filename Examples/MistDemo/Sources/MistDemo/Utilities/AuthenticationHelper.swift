@@ -125,7 +125,7 @@ enum AuthenticationHelper {
         keyID: String,
         privateKey: String?,
         privateKeyFile: String?
-    ) async throws -> TokenManager {
+    ) async throws -> any TokenManager {
         
         // Get the private key PEM string
         let privateKeyPEM: String
@@ -168,7 +168,7 @@ enum AuthenticationHelper {
     private static func createWebAuthManager(
         apiToken: String,
         webAuthToken: String
-    ) async throws -> TokenManager {
+    ) async throws -> any TokenManager {
         let manager = WebAuthTokenManager(
             apiToken: apiToken,
             webAuthToken: webAuthToken
