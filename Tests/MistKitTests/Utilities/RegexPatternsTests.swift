@@ -28,12 +28,11 @@
 //
 
 import Foundation
-import Testing
 @testable import MistKit
+import Testing
 
 @Suite("NSRegularExpression CommonPatterns Tests")
 struct RegexPatternsTests {
-
   // MARK: - API Token Validation Tests
 
   @Test("API token regex validates correct 64-character hex strings")

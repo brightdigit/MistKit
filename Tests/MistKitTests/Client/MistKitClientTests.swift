@@ -28,12 +28,11 @@
 //
 
 import Foundation
-import Testing
 @testable import MistKit
+import Testing
 
 @Suite("MistKitClient Tests")
 struct MistKitClientTests {
-
   // MARK: - Configuration-Based Initialization Tests
 
   @Test("MistKitClient initializes with valid configuration and transport")
