@@ -49,6 +49,7 @@ struct MistDemo {
     await registry.register(CurrentUserCommand.self)
     await registry.register(QueryCommand.self)
     await registry.register(CreateCommand.self)
+    await registry.register(UploadAssetCommand.self)
     
     // Parse command line arguments
     let parser = CommandLineParser()
