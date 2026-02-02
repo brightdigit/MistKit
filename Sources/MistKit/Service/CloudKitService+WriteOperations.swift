@@ -27,7 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if os(Linux)
 public import Foundation
+import FoundationNetworking
+#else
+public import Foundation
+#endif
 import OpenAPIRuntime
 
 #if !os(WASI)

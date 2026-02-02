@@ -27,7 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if os(Linux)
+@preconcurrency import Foundation
+import FoundationNetworking
+#else
 import Foundation
+#endif
 import OpenAPIRuntime
 
 #if !os(WASI)

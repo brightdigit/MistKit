@@ -27,7 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if os(Linux)
 public import Foundation
+import FoundationNetworking
+#else
+public import Foundation
+#endif
 import OpenAPIRuntime
 
 /// Represents errors that can occur when interacting with CloudKit Web Services
