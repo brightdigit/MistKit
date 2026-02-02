@@ -46,6 +46,8 @@ import OpenAPIRuntime
 internal struct MistKitClient {
   /// The underlying OpenAPI client
   internal let client: Client
+  /// The transport used for network requests
+  internal let transport: any ClientTransport
 
   /// Initialize a new MistKit client
   /// - Parameters:
@@ -58,6 +60,7 @@ internal struct MistKitClient {
     // Create appropriate TokenManager from configuration
     let tokenManager = try configuration.createTokenManager()
 
+    self.transport = transport
     // Create the OpenAPI client with custom server URL and middleware
     self.client = Client(
       serverURL: configuration.serverURL,
@@ -86,6 +89,7 @@ internal struct MistKitClient {
       tokenManager: tokenManager
     )
 
+    self.transport = transport
     // Create the OpenAPI client with custom server URL and middleware
     self.client = Client(
       serverURL: configuration.serverURL,

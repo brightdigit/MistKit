@@ -41,7 +41,7 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceUploadTests.makeUploadValidationErrorService(.emptyData)
+      let service = try await CloudKitServiceUploadTests.makeUploadValidationErrorService(.emptyData)
 
       do {
         _ = try await service.uploadAssets(
@@ -71,7 +71,7 @@ extension CloudKitServiceUploadTests {
       }
       // Create data just over 15 MB (15 * 1024 * 1024 + 1 bytes)
       let oversizedData = Data(count: 15_728_641)
-      let service = try CloudKitServiceUploadTests.makeUploadValidationErrorService(
+      let service = try await CloudKitServiceUploadTests.makeUploadValidationErrorService(
         .oversizedAsset(oversizedData.count)
       )
 
@@ -101,7 +101,7 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceUploadTests.makeSuccessfulUploadService()
+      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService()
 
       // Test various valid sizes (CloudKit limit is 15 MB)
       let validSizes = [

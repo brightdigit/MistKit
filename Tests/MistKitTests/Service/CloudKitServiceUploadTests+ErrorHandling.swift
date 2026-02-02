@@ -41,7 +41,7 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceUploadTests.makeAuthErrorService()
+      let service = try await CloudKitServiceUploadTests.makeAuthErrorService()
       let testData = Data(count: 1024)
 
       do {
@@ -52,11 +52,12 @@ extension CloudKitServiceUploadTests {
         )
         Issue.record("Expected authentication error")
       } catch let error as CloudKitError {
-        if case .httpErrorWithRawResponse(let statusCode, let response) = error {
+        if case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason) = error {
           #expect(statusCode == 401, "Should return 401 Unauthorized")
-          #expect(response.contains("AUTHENTICATION_FAILED") || response.contains("Authentication failed"))
+          #expect(serverErrorCode == "AUTHENTICATION_FAILED")
+          #expect(reason == "Authentication failed")
         } else {
-          Issue.record("Expected httpErrorWithRawResponse error, got \(error)")
+          Issue.record("Expected httpErrorWithDetails error, got \(error)")
         }
       } catch {
         Issue.record("Expected CloudKitError, got \(type(of: error))")
@@ -69,7 +70,7 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceUploadTests.makeUploadValidationErrorService(.emptyData)
+      let service = try await CloudKitServiceUploadTests.makeUploadValidationErrorService(.emptyData)
       let testData = Data()  // Empty data triggers 400
 
       do {

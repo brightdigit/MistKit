@@ -41,10 +41,12 @@ extension CloudKitServiceUploadTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeSuccessfulUploadService(
     tokenCount: Int = 1
-  ) throws -> CloudKitService {
-    let transport = MockTransport(
-      responseProvider: .successfulUpload(tokenCount: tokenCount)
-    )
+  ) async throws -> CloudKitService {
+    let responseProvider = ResponseProvider.successfulUpload(tokenCount: tokenCount)
+    // Configure the asset data upload response for the second step
+    await responseProvider.configure(operationID: "uploadAssetData", response: .successfulAssetDataUpload())
+
+    let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: testAPIToken,
@@ -56,10 +58,12 @@ extension CloudKitServiceUploadTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeUploadValidationErrorService(
     _ errorType: UploadValidationErrorType
-  ) throws -> CloudKitService {
-    let transport = MockTransport(
-      responseProvider: .uploadValidationError(errorType)
-    )
+  ) async throws -> CloudKitService {
+    let responseProvider = ResponseProvider.uploadValidationError(errorType)
+    // Configure asset data upload to also return validation error
+    await responseProvider.configure(operationID: "uploadAssetData", response: .uploadValidationError(errorType))
+
+    let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: testAPIToken,
@@ -69,10 +73,26 @@ extension CloudKitServiceUploadTests {
 
   /// Create service for auth errors
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal static func makeAuthErrorService() throws -> CloudKitService {
-    let transport = MockTransport(
-      responseProvider: .authenticationError()
+  internal static func makeAuthErrorService() async throws -> CloudKitService {
+    let responseProvider = ResponseProvider.authenticationError()
+    // Configure asset data upload to also return auth error
+    await responseProvider.configure(operationID: "uploadAssetData", response: .authenticationError())
+
+    let transport = MockTransport(responseProvider: responseProvider)
+    return try CloudKitService(
+      containerIdentifier: "iCloud.com.example.test",
+      apiToken: testAPIToken,
+      transport: transport
     )
+  }
+
+  /// Create service for asset data upload testing
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  internal static func makeAssetDataUploadService(tokenCount: Int = 1) async throws -> CloudKitService {
+    let responseProvider = ResponseProvider.successfulUpload(tokenCount: tokenCount)
+    await responseProvider.configure(operationID: "uploadAssetData", response: .successfulAssetDataUpload())
+
+    let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: testAPIToken,
@@ -153,6 +173,33 @@ extension ResponseConfig {
       statusCode: 400,
       serverErrorCode: "BAD_REQUEST",
       reason: reason
+    )
+  }
+
+  /// Creates a successful asset data upload response (binary upload to CDN)
+  ///
+  /// - Returns: ResponseConfig with CloudKit asset upload response
+  internal static func successfulAssetDataUpload() -> ResponseConfig {
+    let responseJSON = """
+      {
+        "singleFile": {
+          "wrappingKey": "test-wrapping-key-abc123",
+          "fileChecksum": "test-checksum-def456",
+          "receipt": "test-receipt-token-xyz",
+          "referenceChecksum": "test-ref-checksum-789",
+          "size": 1024
+        }
+      }
+      """
+
+    var headers = HTTPFields()
+    headers[.contentType] = "application/json"
+
+    return ResponseConfig(
+      statusCode: 200,
+      headers: headers,
+      body: responseJSON.data(using: .utf8),
+      error: nil
     )
   }
 }

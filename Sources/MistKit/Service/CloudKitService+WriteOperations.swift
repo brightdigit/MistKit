@@ -33,6 +33,7 @@ import FoundationNetworking
 #else
 public import Foundation
 #endif
+import HTTPTypes
 import OpenAPIRuntime
 
 #if !os(WASI)
@@ -358,21 +359,53 @@ extension CloudKitService {
   /// - Important: The returned asset dictionary must be used when creating/updating records with this asset
   public func uploadAssetData(_ data: Data, to url: URL) async throws(CloudKitError) -> FieldValue.Asset {
     do {
-      var request = URLRequest(url: url)
-      request.httpMethod = "POST"
-      request.httpBody = data
-      request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+      // Parse URL components for HTTPRequest
+      guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+            let scheme = components.scheme,
+            let host = components.host
+      else {
+        throw CloudKitError.invalidResponse
+      }
+
+      let authority = if let port = components.port {
+        "\(host):\(port)"
+      } else {
+        host
+      }
+
+      // Build HTTPRequest
+      var request = HTTPRequest(
+        method: .post,
+        scheme: scheme,
+        authority: authority,
+        path: components.path.isEmpty ? "/" : components.path
+      )
+
+      // Add Content-Type header
+      request.headerFields[.contentType] = "application/octet-stream"
+
+      // Create HTTPBody from data
+      let body = HTTPBody(data)
 
       #if !os(WASI)
-        let (responseData, response) = try await URLSession.shared.data(for: request)
+        // Use the injected transport instead of URLSession.shared
+        let (httpResponse, responseBody) = try await mistKitClient.transport.send(
+          request,
+          body: body,
+          baseURL: URL(string: "\(scheme)://\(authority)")!,
+          operationID: "uploadAssetData"
+        )
 
-        guard let httpResponse = response as? HTTPURLResponse else {
+        guard (200...299).contains(httpResponse.status.code) else {
+          throw CloudKitError.httpError(statusCode: httpResponse.status.code)
+        }
+
+        // Extract response data
+        guard let responseBody = responseBody else {
           throw CloudKitError.invalidResponse
         }
 
-        guard (200...299).contains(httpResponse.statusCode) else {
-          throw CloudKitError.httpError(statusCode: httpResponse.statusCode)
-        }
+        let responseData = try await Data(collecting: responseBody, upTo: .max)
 
         // Parse the asset dictionary from the response
         // CloudKit returns: { "singleFile": { "wrappingKey": ..., "fileChecksum": ..., "receipt": ..., etc. } }
@@ -426,14 +459,13 @@ extension CloudKitService {
         shouldRedact: false
       )
       throw CloudKitError.decodingError(decodingError)
-    } catch let urlError as URLError {
+    } catch {
+      // General error handling (no longer URLError-specific)
       MistKitLogger.logError(
-        "Network error uploading asset data: \(urlError)",
+        "Error uploading asset data: \(error)",
         logger: MistKitLogger.network,
         shouldRedact: false
       )
-      throw CloudKitError.networkError(urlError)
-    } catch {
       throw CloudKitError.underlyingError(error)
     }
   }
