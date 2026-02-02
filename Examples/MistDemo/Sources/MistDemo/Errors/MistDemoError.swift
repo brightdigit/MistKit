@@ -52,6 +52,9 @@ enum MistDemoError: LocalizedError, Sendable {
 
   /// Invalid format
   case invalidFormat(String)
+  
+  /// Unknown command
+  case unknownCommand(String)
 
   // MARK: Public
 
@@ -71,6 +74,8 @@ enum MistDemoError: LocalizedError, Sendable {
       "File not found: \(path)"
     case let .invalidFormat(message):
       "Invalid format: \(message)"
+    case let .unknownCommand(command):
+      "Unknown command: \(command)"
     }
   }
 
@@ -90,6 +95,8 @@ enum MistDemoError: LocalizedError, Sendable {
       "Check the file path and try again."
     case .invalidFormat:
       "Check the format and try again."
+    case .unknownCommand:
+      "Use 'mistdemo help' to see available commands."
     }
   }
 
@@ -110,6 +117,8 @@ enum MistDemoError: LocalizedError, Sendable {
       "FILE_NOT_FOUND"
     case .invalidFormat:
       "INVALID_FORMAT"
+    case .unknownCommand:
+      "UNKNOWN_COMMAND"
     }
   }
 
@@ -130,6 +139,8 @@ enum MistDemoError: LocalizedError, Sendable {
       ["path": path]
     case let .invalidFormat(message):
       ["message": message]
+    case let .unknownCommand(command):
+      ["command": command]
     }
   }
 

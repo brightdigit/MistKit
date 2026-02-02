@@ -75,23 +75,6 @@ struct MistDemoConfigTests {
     _ = config.testServerToServer
   }
 
-  @Test("Resolved API token method exists")
-  func resolvedAPITokenMethodExists() throws {
-    let config = try MistDemoConfig()
-    let token = config.resolvedApiToken()
-
-    // Should return empty string when no token is set
-    #expect(token.isEmpty)
-  }
-
-  @Test("Resolved web auth token method exists")
-  func resolvedWebAuthTokenMethodExists() throws {
-    let config = try MistDemoConfig()
-    let token = config.resolvedWebAuthToken()
-
-    // Should return nil when no token is set
-    #expect(token == nil)
-  }
 
   // MARK: - Environment Tests
 

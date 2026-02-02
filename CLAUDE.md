@@ -76,6 +76,25 @@ swiftlint
 swiftlint --fix
 ```
 
+### MistDemo Commands
+```bash
+# MistDemo is located in Examples/MistDemo and must be run from there
+cd Examples/MistDemo
+
+# Build MistDemo
+swift build
+
+# Run MistDemo commands
+swift run mistdemo --help
+swift run mistdemo auth-token
+swift run mistdemo current-user
+swift run mistdemo query
+swift run mistdemo create
+
+# Run with specific configuration
+swift run mistdemo --config-file ~/.mistdemo/config.json query
+```
+
 ## Architecture Considerations
 
 ### Modern Swift Features to Utilize
@@ -205,6 +224,11 @@ Apple's official CloudKit documentation is available in `.claude/docs/` for offl
 - **Consult when**: Configuring openapi-generator-config.yaml, implementing middleware, troubleshooting generated code
 
 See `.claude/docs/README.md` for detailed topic breakdowns and integration guidance.
+
+### MistDemo Documentation
+
+- **Swift Configuration Reference** (`.claude/docs/mistdemo/swift-configuration-reference.md`) - Guide for using Swift Configuration in MistDemo
+- **Official Swift Configuration Docs** (`.claude/docs/https_-swiftpackageindex.com-apple-swift-configuration-1.0.0-documentation-configuration.md`) - Full API reference
 
 ### CloudKit Schema Language
 
