@@ -29,13 +29,12 @@
 
 import Foundation
 import HTTPTypes
+@testable import MistKit
 import OpenAPIRuntime
 import Testing
-@testable import MistKit
 
 @Suite("LoggingMiddleware Tests")
 struct LoggingMiddlewareTests {
-
   // MARK: - Basic Middleware Tests
 
   @Test("LoggingMiddleware intercepts and passes through requests")

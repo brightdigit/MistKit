@@ -28,12 +28,11 @@
 //
 
 import Foundation
-import Testing
 @testable import MistKit
+import Testing
 
 @Suite("Array Chunked Tests")
 struct ArrayChunkedTests {
-
   @Test("chunked splits array into correct chunks")
   func chunkedSplitsCorrectly() {
     let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -159,19 +158,19 @@ struct ArrayChunkedTests {
 
   @Test("chunked large array performance")
   func chunkedLargeArray() {
-    let array = Array(1...10000)
+    let array = Array(1...10_000)
     let chunks = array.chunked(into: 200)
 
     #expect(chunks.count == 50)
     #expect(chunks.allSatisfy { $0.count <= 200 })
 
     let totalElements = chunks.flatMap { $0 }.count
-    #expect(totalElements == 10000)
+    #expect(totalElements == 10_000)
   }
 
   @Test("chunked with various CloudKit batch sizes", arguments: [50, 100, 150, 200, 250])
   func chunkedVariousBatchSizes(batchSize: Int) {
-    let array = Array(1...1000)
+    let array = Array(1...1_000)
     let chunks = array.chunked(into: batchSize)
 
     // Verify no chunk exceeds batch size
@@ -179,7 +178,7 @@ struct ArrayChunkedTests {
 
     // Verify we didn't lose any elements
     let totalElements = chunks.flatMap { $0 }.count
-    #expect(totalElements == 1000)
+    #expect(totalElements == 1_000)
 
     // Verify all chunks except last are full
     for (index, chunk) in chunks.enumerated() {
