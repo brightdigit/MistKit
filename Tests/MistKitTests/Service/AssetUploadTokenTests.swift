@@ -84,25 +84,43 @@ internal struct AssetUploadTokenTests {
     #expect(token1 != token3, "Tokens with different URLs should not be equal")
   }
 
-  @Test("AssetUploadResult initializes with tokens")
-  internal func assetUploadResultInitializesWithTokens() {
-    let tokens = [
-      AssetUploadToken(url: "url1", recordName: "record1", fieldName: "field1"),
-      AssetUploadToken(url: "url2", recordName: "record2", fieldName: "field2")
-    ]
+  @Test("AssetUploadResult initializes with all fields")
+  internal func assetUploadResultInitializesWithAllFields() {
+    let asset = FieldValue.Asset(
+      fileChecksum: "abc123",
+      size: 1024,
+      referenceChecksum: "ref456",
+      wrappingKey: "wrap789",
+      receipt: "receipt-token-xyz",
+      downloadURL: "https://cvws.icloud-content.com/download"
+    )
 
-    let result = AssetUploadResult(tokens: tokens)
+    let result = AssetUploadResult(
+      asset: asset,
+      recordName: "test-record",
+      fieldName: "testField"
+    )
 
-    #expect(result.tokens.count == 2)
-    #expect(result.tokens[0].url == "url1")
-    #expect(result.tokens[1].url == "url2")
+    #expect(result.asset.fileChecksum == "abc123")
+    #expect(result.asset.size == 1024)
+    #expect(result.asset.receipt == "receipt-token-xyz")
+    #expect(result.recordName == "test-record")
+    #expect(result.fieldName == "testField")
   }
 
-  @Test("AssetUploadResult handles empty token array")
-  internal func assetUploadResultHandlesEmptyTokenArray() {
-    let result = AssetUploadResult(tokens: [])
+  @Test("AssetUploadResult initializes with minimal asset data")
+  internal func assetUploadResultInitializesWithMinimalAssetData() {
+    let asset = FieldValue.Asset(receipt: "minimal-receipt")
 
-    #expect(result.tokens.isEmpty)
-    #expect(result.tokens.count == 0)
+    let result = AssetUploadResult(
+      asset: asset,
+      recordName: "record1",
+      fieldName: "field1"
+    )
+
+    #expect(result.asset.receipt == "minimal-receipt")
+    #expect(result.asset.fileChecksum == nil)
+    #expect(result.recordName == "record1")
+    #expect(result.fieldName == "field1")
   }
 }
