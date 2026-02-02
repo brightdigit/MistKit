@@ -45,7 +45,8 @@ extension CloudKitService {
     containerIdentifier: String,
     apiToken: String,
     webAuthToken: String,
-    transport: any ClientTransport
+    transport: any ClientTransport,
+    assetUploader: (any AssetUploader)? = nil
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
@@ -59,7 +60,11 @@ extension CloudKitService {
       apiToken: apiToken,
       webAuthToken: webAuthToken
     )
-    self.mistKitClient = try MistKitClient(configuration: config, transport: transport)
+    self.mistKitClient = try MistKitClient(
+      configuration: config,
+      transport: transport,
+      assetUploader: assetUploader
+    )
   }
 
   /// Initialize CloudKit service with API-only authentication
@@ -67,7 +72,8 @@ extension CloudKitService {
   public init(
     containerIdentifier: String,
     apiToken: String,
-    transport: any ClientTransport
+    transport: any ClientTransport,
+    assetUploader: (any AssetUploader)? = nil
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
@@ -83,7 +89,11 @@ extension CloudKitService {
       keyID: nil,
       privateKeyData: nil
     )
-    self.mistKitClient = try MistKitClient(configuration: config, transport: transport)
+    self.mistKitClient = try MistKitClient(
+      configuration: config,
+      transport: transport,
+      assetUploader: assetUploader
+    )
   }
 
   /// Initialize CloudKit service with a custom TokenManager
@@ -93,7 +103,8 @@ extension CloudKitService {
     tokenManager: any TokenManager,
     environment: Environment = .development,
     database: Database = .private,
-    transport: any ClientTransport
+    transport: any ClientTransport,
+    assetUploader: (any AssetUploader)? = nil
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = ""  // Not used when providing TokenManager directly
@@ -105,7 +116,8 @@ extension CloudKitService {
       environment: environment,
       database: database,
       tokenManager: tokenManager,
-      transport: transport
+      transport: transport,
+      assetUploader: assetUploader
     )
   }
 }
