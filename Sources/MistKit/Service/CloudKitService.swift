@@ -129,4 +129,46 @@ extension CloudKitService {
       database: .init(from: database)
     )
   }
+
+  /// Create a standard path for lookupZones requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createLookupZonesPath(
+    containerIdentifier: String
+  ) -> Operations.lookupZones.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for fetchRecordChanges requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createFetchRecordChangesPath(
+    containerIdentifier: String
+  ) -> Operations.fetchRecordChanges.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for uploadAssets requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createUploadAssetsPath(
+    containerIdentifier: String
+  ) -> Operations.uploadAssets.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
 }
