@@ -45,12 +45,9 @@ public enum OutputFormat: String, Sendable, CaseIterable {
   // MARK: Public
 
   /// Create the appropriate formatter for this format
-  public func createFormatter(pretty: Bool = false) throws -> any OutputFormatter {
-    switch self {
-    case .json:
-      JSONFormatter(pretty: pretty)
-    case .table, .csv, .yaml:
-      throw FormattingError.unsupportedFormat(self)
-    }
+  /// - Parameter pretty: Whether to use pretty printing (applies to JSON)
+  /// - Returns: A formatter configured for this format
+  public func createFormatter(pretty: Bool = false) -> any OutputFormatter {
+    OutputFormatterFactory.formatter(for: self, pretty: pretty)
   }
 }

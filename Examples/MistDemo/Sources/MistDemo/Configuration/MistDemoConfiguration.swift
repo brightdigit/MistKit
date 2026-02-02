@@ -36,10 +36,13 @@ public struct MistDemoConfiguration: Sendable {
 
   public init() throws {
     self.configReader = ConfigReader(providers: [
-      // 1. Environment variables (highest priority for now)
+      // 1. Command line arguments (highest priority)
+      CommandLineArgumentsProvider(),
+      
+      // 2. Environment variables 
       EnvironmentVariablesProvider(),
       
-      // 2. In-memory defaults (lowest priority)
+      // 3. In-memory defaults (lowest priority)
       InMemoryProvider(values: [
         "port": 8080,
         "skip.auth": false,

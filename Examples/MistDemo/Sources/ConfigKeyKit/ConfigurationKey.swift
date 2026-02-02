@@ -29,50 +29,6 @@
 
 import Foundation
 
-// MARK: - Configuration Key Source
-
-/// Source for configuration keys (CLI arguments or environment variables)
-public enum ConfigKeySource: CaseIterable, Sendable {
-  /// Command-line arguments (e.g., --cloudkit-container-id)
-  case commandLine
-
-  /// Environment variables (e.g., CLOUDKIT_CONTAINER_ID)
-  case environment
-}
-
-// MARK: - Naming Style
-
-/// Protocol for transforming base key strings into different naming conventions
-public protocol NamingStyle: Sendable {
-  /// Transform a base key string according to this naming style
-  /// - Parameter base: Base key string (e.g., "cloudkit.container_id")
-  /// - Returns: Transformed key string
-  func transform(_ base: String) -> String
-}
-
-/// Common naming styles for configuration keys
-public enum StandardNamingStyle: NamingStyle, Sendable {
-  /// Dot-separated lowercase (e.g., "cloudkit.container_id")
-  case dotSeparated
-
-  /// Screaming snake case with prefix (e.g., "BUSHEL_CLOUDKIT_CONTAINER_ID")
-  case screamingSnakeCase(prefix: String?)
-
-  public func transform(_ base: String) -> String {
-    switch self {
-    case .dotSeparated:
-      return base
-
-    case .screamingSnakeCase(let prefix):
-      let snakeCase = base.uppercased().replacingOccurrences(of: ".", with: "_")
-      if let prefix = prefix {
-        return "\(prefix)_\(snakeCase)"
-      }
-      return snakeCase
-    }
-  }
-}
-
 // MARK: - Configuration Key Protocol
 
 /// Protocol for configuration keys that support multiple sources

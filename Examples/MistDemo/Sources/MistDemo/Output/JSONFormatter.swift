@@ -48,9 +48,6 @@ public struct JSONFormatter: OutputFormatter {
       encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     }
     let data = try encoder.encode(value)
-    guard let string = String(data: data, encoding: .utf8) else {
-      throw FormattingError.encodingFailed
-    }
-    return string
+    return String(decoding: data, as: UTF8.self)
   }
 }

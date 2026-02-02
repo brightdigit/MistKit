@@ -119,6 +119,9 @@ enum SortOrder: String {
 import Configuration
 import Foundation
 
+/// Example configuration manager showing hierarchical provider setup
+/// Note: This is aspirational architecture. Current MistDemo uses simpler direct approach.
+/// See MistDemoConfig.swift for actual implementation.
 class ConfigurationManager {
     static let shared = ConfigurationManager()
 
@@ -237,22 +240,25 @@ enum ConfigError: Error {
 ### Command Protocol
 
 ```swift
-import ArgumentParser
+import Configuration
+import Foundation
 
-protocol MistDemoCommand: AsyncParsableCommand {
+/// Configuration-based command pattern using Swift Configuration
+protocol MistDemoCommand {
     associatedtype Config
-
-    var configFile: String? { get }
-    var profile: String? { get }
 
     func loadConfig() throws -> Config
     func execute(with config: Config) async throws
 }
 
 extension MistDemoCommand {
-    mutating func run() async throws {
+    func run() async throws {
         let config = try loadConfig()
         try await execute(with: config)
+    }
+
+    func loadConfig() throws -> Config where Config == MistDemoConfig {
+        return try MistDemoConfig()
     }
 }
 ```
@@ -260,84 +266,80 @@ extension MistDemoCommand {
 ### Query Command Example
 
 ```swift
-import ArgumentParser
+import Configuration
+import Foundation
+import MistKit
 
+/// Example: Query command using Swift Configuration
 struct QueryCommand: MistDemoCommand {
-    static let configuration = CommandConfiguration(
-        commandName: "query",
-        abstract: "Query Note records from CloudKit"
-    )
-
-    // Global options
-    @Option(name: .long, help: "Path to configuration file")
-    var configFile: String?
-
-    @Option(name: .long, help: "Configuration profile to use")
-    var profile: String?
-
-    @Option(name: .shortAndLong, help: "Container ID")
-    var containerID: String?
-
-    @Option(name: .shortAndLong, help: "API token")
-    var apiToken: String?
-
-    @Option(name: .shortAndLong, help: "Database")
-    var database: String?
-
-    @Option(name: .shortAndLong, help: "Output format")
-    var output: String?
-
-    // Query-specific options
-    @Option(name: .long, help: "Zone name")
-    var zone: String?
-
-    @Option(name: .long, help: "Filter expression")
-    var filter: [String] = []
-
-    @Option(name: .long, help: "Sort field and direction")
-    var sort: String?
-
-    @Option(name: .long, help: "Maximum records to return")
-    var limit: Int?
-
     func loadConfig() throws -> QueryConfig {
-        let manager = ConfigurationManager.shared
-        let reader = try manager.loadConfiguration(
-            configFile: configFile,
-            profile: profile
-        )
-
-        return try QueryConfig(reader: reader)
+        return try QueryConfig()
     }
 
     func execute(with config: QueryConfig) async throws {
-        // Use config values, with CLI overrides
-        let containerID = self.containerID ?? config.base.containerID
-        let database = self.database.map { CloudKitDatabase(rawValue: $0) ?? .public }
-                       ?? config.base.database
-        let zone = self.zone ?? config.zone
-        let limit = self.limit ?? config.limit
-
-        // Execute query...
         let client = try MistKitClient(
-            containerID: containerID,
+            containerID: config.base.containerIdentifier,
             apiToken: config.base.apiToken,
             webAuthToken: config.base.webAuthToken
         )
 
         let results = try await client.queryRecords(
             recordType: "Note",
-            database: database,
-            zone: zone,
-            filters: filter,
-            limit: limit
+            database: config.base.environment.database,
+            zone: config.zone,
+            filters: config.filters,
+            limit: config.limit
         )
 
-        // Format output
-        let formatter = OutputFormatter(format: output ?? config.base.output)
+        let formatter = OutputFormatter(format: config.base.outputFormat)
         try formatter.print(results)
     }
 }
+
+/// Query-specific configuration using Swift Configuration
+struct QueryConfig {
+    let base: MistDemoConfig
+    let zone: String
+    let limit: Int
+    let filters: [String]
+
+    init() throws {
+        let configReader = try MistDemoConfiguration()
+        self.base = try MistDemoConfig()
+
+        // Query-specific config with hierarchical resolution
+        self.zone = configReader.string(
+            forKey: "query.zone",
+            default: "_defaultZone"
+        ) ?? "_defaultZone"
+
+        self.limit = configReader.int(
+            forKey: "query.limit",
+            default: 20
+        ) ?? 20
+
+        self.filters = configReader.stringArray(
+            forKey: "query.filters"
+        ) ?? []
+    }
+}
+```
+
+**CLI Usage Examples:**
+```bash
+# Command-line arguments (highest priority)
+mistdemo query --container-identifier iCloud.com.example.App \
+               --api-token YOUR_TOKEN \
+               --query-zone CustomZone
+
+# Environment variables (fallback)
+export CONTAINER_IDENTIFIER="iCloud.com.example.App"
+export API_TOKEN="YOUR_TOKEN"
+mistdemo query
+
+# Mixed: CLI overrides environment
+export API_TOKEN="YOUR_TOKEN"
+mistdemo query --container-identifier iCloud.com.example.App
 ```
 
 ## Configuration File Examples
