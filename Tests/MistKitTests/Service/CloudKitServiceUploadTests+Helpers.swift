@@ -35,9 +35,8 @@ import Testing
 
 extension CloudKitServiceUploadTests {
   /// Create service for successful upload operations
-  /// Realistic CloudKit API token format for testing
-  /// CloudKit tokens are base64-encoded and typically start with "AQAAAA"
-  private static let testAPIToken = "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+  /// Test API token in 64-character hexadecimal format as required by MistKit validation
+  private static let testAPIToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
 
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeSuccessfulUploadService(
