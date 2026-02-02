@@ -1,5 +1,7 @@
 # Server-Side CloudKit - Elevator Pitches
 
+Last Updated: 2026-02-02
+
 ## 30-Second Pitch (Hallway/Networking)
 
 "Danijela's client-side CloudKit talk just got accepted. Perfect timing—I'm proposing the server-side companion. She covers iOS apps using CloudKit, I cover backend services with server-to-server auth. Together: complete CloudKit ecosystem. 10,476 lines of production code (BushelCloud, CelestraCloud) fills Apple's documentation gaps. Want to create a CloudKit Track?"

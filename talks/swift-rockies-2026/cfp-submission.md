@@ -1,5 +1,7 @@
 # Swift Rockies 2026 - MistKit/Server-Side CloudKit CFP Draft
 
+Last Updated: 2026-02-02
+
 **Conference**: Swift Rockies 2026 (July 2026, Denver, CO)
 **Submission Date**: TBD
 **Speaker**: Leo Dion
