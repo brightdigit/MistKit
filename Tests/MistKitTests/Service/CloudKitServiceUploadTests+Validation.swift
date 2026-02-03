@@ -63,7 +63,7 @@ extension CloudKitServiceUploadTests {
       }
     }
 
-    @Test("uploadAssets() validates 15 MB size limit")
+    @Test("uploadAssets() validates 15 MB size limit", .disabled(if: Platform.isWasm))
     internal func uploadAssetsValidates15MBLimit() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
@@ -95,7 +95,7 @@ extension CloudKitServiceUploadTests {
       }
     }
 
-    @Test("uploadAssets() accepts valid data sizes")
+    @Test("uploadAssets() accepts valid data sizes", .disabled(if: Platform.isWasm))
     internal func uploadAssetsAcceptsValidSizes() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
