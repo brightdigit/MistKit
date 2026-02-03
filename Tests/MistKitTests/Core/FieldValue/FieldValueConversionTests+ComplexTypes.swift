@@ -25,7 +25,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.location(location)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .location)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(components.type == nil)
       if case .locationValue(let value) = components.value {
         #expect(value.latitude == 37.7749)
         #expect(value.longitude == -122.4194)
@@ -50,7 +51,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.location(location)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .location)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(components.type == nil)
       if case .locationValue(let value) = components.value {
         #expect(value.latitude == 0.0)
         #expect(value.longitude == 0.0)
@@ -75,7 +77,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.reference(reference)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .reference)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(components.type == nil)
       if case .referenceValue(let value) = components.value {
         #expect(value.recordName == "test-record-123")
         #expect(value.action == nil)
@@ -94,7 +97,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.reference(reference)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .reference)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(components.type == nil)
       if case .referenceValue(let value) = components.value {
         #expect(value.recordName == "test-record-456")
         #expect(value.action == .DELETE_SELF)
@@ -114,7 +118,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.reference(reference)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .reference)
+      #expect(#expect(components.type == .type == nil)  // CloudKit API does not expect type field
+    // #expect(#expect(components.type == .reference)
       if case .referenceValue(let value) = components.value {
         #expect(value.recordName == "test-record-789")
         #expect(value.action == .NONE)
@@ -140,7 +145,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.asset(asset)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .asset)
+      #expect(#expect(components.type == .type == nil)  // CloudKit API does not expect type field
+    // #expect(#expect(components.type == .asset)
       if case .assetValue(let value) = components.value {
         #expect(value.fileChecksum == "abc123")
         #expect(value.size == 1_024)
@@ -163,7 +169,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.asset(asset)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .asset)
+      #expect(#expect(components.type == .type == nil)  // CloudKit API does not expect type field
+    // #expect(#expect(components.type == .asset)
       if case .assetValue(let value) = components.value {
         #expect(value.fileChecksum == nil)
         #expect(value.size == nil)

@@ -16,7 +16,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.list(list)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .list)
+      #expect(#expect(components.type == .type == nil)  // CloudKit API does not expect type field
+    // #expect(#expect(components.type == .list)
       if case .listValue(let values) = components.value {
         #expect(values.count == 3)
       } else {
@@ -34,7 +35,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.list(list)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .list)
+      #expect(#expect(components.type == .type == nil)  // CloudKit API does not expect type field
+    // #expect(#expect(components.type == .list)
       if case .listValue(let values) = components.value {
         #expect(values.count == 3)
       } else {
@@ -57,7 +59,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.list(list)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .list)
+      #expect(#expect(components.type == .type == nil)  // CloudKit API does not expect type field
+    // #expect(#expect(components.type == .list)
       if case .listValue(let values) = components.value {
         #expect(values.count == 4)
       } else {
@@ -75,7 +78,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.list(list)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .list)
+      #expect(#expect(components.type == .type == nil)  // CloudKit API does not expect type field
+    // #expect(#expect(components.type == .list)
       if case .listValue(let values) = components.value {
         #expect(values.isEmpty)
       } else {
@@ -94,7 +98,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.list(outerList)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .list)
+      #expect(#expect(components.type == .type == nil)  // CloudKit API does not expect type field
+    // #expect(#expect(components.type == .list)
       if case .listValue(let values) = components.value {
         #expect(values.count == 2)
       } else {

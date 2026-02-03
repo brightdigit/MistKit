@@ -1,12 +1,11 @@
 //
-//  ClientTransport+AssetUpload.swift
+//  URLSession+AssetUpload.swift
 //  MistKit
 //
 //  Created by Claude on 2026-02-02.
 //
 
 public import Foundation
-public import OpenAPIRuntime
 
 #if !os(WASI)
 // Response structure for CloudKit asset upload
@@ -23,13 +22,11 @@ private struct AssetUploadResponse: Codable {
     }
 }
 
-extension ClientTransport {
-    /// Default asset upload implementation using URLSession directly
+extension URLSession {
+    /// Upload asset data directly to CloudKit CDN
     ///
-    /// IMPORTANT: This uses URLSession.shared directly instead of the transport to avoid
-    /// HTTP/2 connection reuse issues. The transport is connected to api.apple-cloudkit.com,
-    /// but asset uploads go to CloudKit's CDN (cvws.icloud-content.com), causing 421
-    /// "Misdirected Request" errors if we try to reuse the same connection.
+    /// Uses URLSession directly to avoid OpenAPI transport layer complications
+    /// when uploading to a different host (CDN) than the API.
     ///
     /// - Parameters:
     ///   - data: Binary data to upload
@@ -44,8 +41,8 @@ extension ClientTransport {
             request.httpBody = data
             request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
 
-            // Use URLSession directly to avoid HTTP/2 connection reuse issues
-            let (responseData, response) = try await URLSession.shared.data(for: request)
+            // Upload directly via URLSession
+            let (responseData, response) = try await self.data(for: request)
 
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw CloudKitError.invalidResponse
@@ -73,7 +70,7 @@ extension ClientTransport {
                 referenceChecksum: uploadResponse.singleFile.referenceChecksum,
                 wrappingKey: uploadResponse.singleFile.wrappingKey,
                 receipt: uploadResponse.singleFile.receipt,
-                downloadURL: nil  // Download URL is provided by CloudKit when fetching the record later
+                downloadURL: nil
             )
         } catch let cloudKitError as CloudKitError {
             throw cloudKitError
@@ -85,7 +82,6 @@ extension ClientTransport {
             )
             throw CloudKitError.decodingError(decodingError)
         } catch {
-            // General error handling
             MistKitLogger.logError(
                 "Error uploading asset data: \(error)",
                 logger: MistKitLogger.network,

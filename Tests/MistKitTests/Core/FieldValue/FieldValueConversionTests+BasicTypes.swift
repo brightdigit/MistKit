@@ -33,7 +33,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.int64(42)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .int64)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(components.type == nil)
       if case .int64Value(let value) = components.value {
         #expect(value == 42)
       } else {
@@ -50,7 +51,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.double(3.14159)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .double)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(components.type == nil)
       if case .doubleValue(let value) = components.value {
         #expect(value == 3.14159)
       } else {
@@ -66,7 +68,8 @@ extension FieldValueConversionTests {
       }
       let trueValue = FieldValue(booleanValue: true)
       let trueComponents = Components.Schemas.FieldValue(from: trueValue)
-      #expect(trueComponents.type == .int64)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(trueComponents.type == nil)
       if case .int64Value(let value) = trueComponents.value {
         #expect(value == 1)
       } else {
@@ -76,7 +79,8 @@ extension FieldValueConversionTests {
       let falseValue = FieldValue(booleanValue: false)
       let falseComponents = Components.Schemas.FieldValue(from: falseValue)
 
-      #expect(falseComponents.type == .int64)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(falseComponents.type == nil)
       if case .int64Value(let value) = falseComponents.value {
         #expect(value == 0)
       } else {
@@ -93,7 +97,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.bytes("base64encodedstring")
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .bytes)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(components.type == nil)
       if case .bytesValue(let value) = components.value {
         #expect(value == "base64encodedstring")
       } else {
@@ -111,7 +116,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.date(date)
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .timestamp)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(components.type == nil)
       if case .dateValue(let value) = components.value {
         #expect(value == date.timeIntervalSince1970 * 1_000)
       } else {

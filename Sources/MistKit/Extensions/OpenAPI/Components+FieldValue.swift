@@ -33,6 +33,7 @@ internal import Foundation
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension Components.Schemas.FieldValue {
   /// Initialize from MistKit FieldValue
+  /// CloudKit API doesn't expect/accept the type field - it infers type from the value structure
   internal init(from fieldValue: FieldValue) {
     switch fieldValue {
     case .string(let value):

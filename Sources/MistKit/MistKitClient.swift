@@ -66,7 +66,11 @@ internal struct MistKitClient {
     let tokenManager = try configuration.createTokenManager()
 
     #if !os(WASI)
-      self.assetUploader = assetUploader ?? DefaultAssetUploader(transport: transport)
+      // Create dedicated URLSession for CDN uploads
+      // Using a separate URLSession ensures separate HTTP/2 connection pools
+      // to avoid 421 "Misdirected Request" errors between API and CDN hosts
+      let cdnSession = URLSession(configuration: .default)
+      self.assetUploader = assetUploader ?? DefaultAssetUploader(urlSession: cdnSession)
     #else
       self.assetUploader = assetUploader ?? WASIAssetUploader()
     #endif
@@ -102,7 +106,11 @@ internal struct MistKitClient {
     )
 
     #if !os(WASI)
-      self.assetUploader = assetUploader ?? DefaultAssetUploader(transport: transport)
+      // Create dedicated URLSession for CDN uploads
+      // Using a separate URLSession ensures separate HTTP/2 connection pools
+      // to avoid 421 "Misdirected Request" errors between API and CDN hosts
+      let cdnSession = URLSession(configuration: .default)
+      self.assetUploader = assetUploader ?? DefaultAssetUploader(urlSession: cdnSession)
     #else
       self.assetUploader = assetUploader ?? WASIAssetUploader()
     #endif
