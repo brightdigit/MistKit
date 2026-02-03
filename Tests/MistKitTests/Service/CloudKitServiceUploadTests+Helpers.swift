@@ -38,13 +38,29 @@ extension CloudKitServiceUploadTests {
   /// Test API token in 64-character hexadecimal format as required by MistKit validation
   private static let testAPIToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
 
+  /// Create a mock asset uploader that returns a successful upload response
+  internal static func makeMockAssetUploader() -> AssetUploadHandler {
+    { data, url in
+      let response = """
+      {
+        "singleFile": {
+          "wrappingKey": "test-wrapping-key-abc123",
+          "fileChecksum": "test-checksum-def456",
+          "receipt": "test-receipt-token-xyz",
+          "referenceChecksum": "test-ref-checksum-789",
+          "size": \(data.count)
+        }
+      }
+      """
+      return (200, response.data(using: .utf8)!)
+    }
+  }
+
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeSuccessfulUploadService(
     tokenCount: Int = 1
   ) async throws -> CloudKitService {
     let responseProvider = ResponseProvider.successfulUpload(tokenCount: tokenCount)
-    // Configure the asset data upload response for the second step
-    await responseProvider.configure(operationID: "uploadAssetData", response: .successfulAssetDataUpload())
 
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
@@ -60,8 +76,6 @@ extension CloudKitServiceUploadTests {
     _ errorType: UploadValidationErrorType
   ) async throws -> CloudKitService {
     let responseProvider = ResponseProvider.uploadValidationError(errorType)
-    // Configure asset data upload to also return validation error
-    await responseProvider.configure(operationID: "uploadAssetData", response: .uploadValidationError(errorType))
 
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
@@ -75,8 +89,6 @@ extension CloudKitServiceUploadTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeAuthErrorService() async throws -> CloudKitService {
     let responseProvider = ResponseProvider.authenticationError()
-    // Configure asset data upload to also return auth error
-    await responseProvider.configure(operationID: "uploadAssetData", response: .authenticationError())
 
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
@@ -90,7 +102,6 @@ extension CloudKitServiceUploadTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeAssetDataUploadService(tokenCount: Int = 1) async throws -> CloudKitService {
     let responseProvider = ResponseProvider.successfulUpload(tokenCount: tokenCount)
-    await responseProvider.configure(operationID: "uploadAssetData", response: .successfulAssetDataUpload())
 
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(

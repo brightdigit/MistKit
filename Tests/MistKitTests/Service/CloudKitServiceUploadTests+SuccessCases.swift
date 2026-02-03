@@ -47,7 +47,8 @@ extension CloudKitServiceUploadTests {
       let result = try await service.uploadAssets(
         data: testData,
         recordType: "Note",
-        fieldName: "image"
+        fieldName: "image",
+        uploader: CloudKitServiceUploadTests.makeMockAssetUploader()
       )
 
       #expect(result.recordName.isEmpty == false, "Result should have a record name")
@@ -67,7 +68,8 @@ extension CloudKitServiceUploadTests {
       let result = try await service.uploadAssets(
         data: testData,
         recordType: "Note",
-        fieldName: "image"
+        fieldName: "image",
+        uploader: CloudKitServiceUploadTests.makeMockAssetUploader()
       )
 
       #expect(result.recordName == "test-record-0")
@@ -87,7 +89,8 @@ extension CloudKitServiceUploadTests {
       let result = try await service.uploadAssets(
         data: testData,
         recordType: "Note",
-        fieldName: "image"
+        fieldName: "image",
+        uploader: CloudKitServiceUploadTests.makeMockAssetUploader()
       )
 
       // Verify result has the expected fields

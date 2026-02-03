@@ -9,6 +9,7 @@ public import Foundation
 import HTTPTypes
 
 /// Protocol for uploading binary asset data to CloudKit CDN
+@available(*, deprecated, message: "Use AssetUploadHandler closure instead")
 public protocol AssetUploader: Sendable {
     /// Upload binary data to a CloudKit asset URL
     /// - Parameters:

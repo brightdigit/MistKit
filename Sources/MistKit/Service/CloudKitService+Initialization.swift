@@ -45,8 +45,7 @@ extension CloudKitService {
     containerIdentifier: String,
     apiToken: String,
     webAuthToken: String,
-    transport: any ClientTransport,
-    assetUploader: (any AssetUploader)? = nil
+    transport: any ClientTransport
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
@@ -62,8 +61,7 @@ extension CloudKitService {
     )
     self.mistKitClient = try MistKitClient(
       configuration: config,
-      transport: transport,
-      assetUploader: assetUploader
+      transport: transport
     )
   }
 
@@ -72,8 +70,7 @@ extension CloudKitService {
   public init(
     containerIdentifier: String,
     apiToken: String,
-    transport: any ClientTransport,
-    assetUploader: (any AssetUploader)? = nil
+    transport: any ClientTransport
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
@@ -91,8 +88,7 @@ extension CloudKitService {
     )
     self.mistKitClient = try MistKitClient(
       configuration: config,
-      transport: transport,
-      assetUploader: assetUploader
+      transport: transport
     )
   }
 
@@ -103,8 +99,7 @@ extension CloudKitService {
     tokenManager: any TokenManager,
     environment: Environment = .development,
     database: Database = .private,
-    transport: any ClientTransport,
-    assetUploader: (any AssetUploader)? = nil
+    transport: any ClientTransport
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = ""  // Not used when providing TokenManager directly
@@ -116,8 +111,7 @@ extension CloudKitService {
       environment: environment,
       database: database,
       tokenManager: tokenManager,
-      transport: transport,
-      assetUploader: assetUploader
+      transport: transport
     )
   }
 }

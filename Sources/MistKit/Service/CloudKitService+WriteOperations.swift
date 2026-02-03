@@ -40,6 +40,20 @@ import OpenAPIRuntime
   import OpenAPIURLSession
 #endif
 
+// Response structure for CloudKit asset upload
+// CloudKit returns: { "singleFile": { "wrappingKey": ..., "fileChecksum": ..., "receipt": ..., etc. } }
+private struct AssetUploadResponse: Codable {
+    let singleFile: AssetData
+
+    struct AssetData: Codable {
+        let wrappingKey: String?
+        let fileChecksum: String?
+        let receipt: String?
+        let referenceChecksum: String?
+        let size: Int64?
+    }
+}
+
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
   /// Modify (create, update, or delete) CloudKit records
@@ -225,7 +239,8 @@ extension CloudKitService {
     data: Data,
     recordType: String,
     fieldName: String,
-    recordName: String? = nil
+    recordName: String? = nil,
+    uploader: AssetUploadHandler? = nil
   ) async throws(CloudKitError) -> AssetUploadResult {
     // Validate data size (CloudKit limit is 15 MB)
     let maxSize: Int = 15 * 1024 * 1024 // 15 MB
@@ -258,7 +273,7 @@ extension CloudKitService {
       }
 
       // Step 2: Upload binary data to the URL and get asset dictionary
-      let asset = try await uploadAssetData(data, to: uploadURL)
+      let asset = try await uploadAssetData(data, to: uploadURL, uploader: uploader)
 
       // Return complete result with asset data
       return AssetUploadResult(
@@ -353,11 +368,81 @@ extension CloudKitService {
   /// - Parameters:
   ///   - data: The binary data to upload
   ///   - url: The upload URL from CloudKit
+  ///   - uploader: Optional custom upload handler. If nil, uses URLSession.shared
   /// - Returns: The asset dictionary returned by CloudKit containing receipt, checksums, etc.
   /// - Throws: CloudKitError if the upload fails
   /// - Note: Upload URLs are valid for 15 minutes
   /// - Important: The returned asset dictionary must be used when creating/updating records with this asset
-  public func uploadAssetData(_ data: Data, to url: URL) async throws(CloudKitError) -> FieldValue.Asset {
-    return try await mistKitClient.assetUploader.uploadAsset(data, to: url)
+  public func uploadAssetData(
+    _ data: Data,
+    to url: URL,
+    uploader: AssetUploadHandler? = nil
+  ) async throws(CloudKitError) -> FieldValue.Asset {
+    do {
+      // Use provided uploader or default to URLSession.shared
+      let uploadHandler = uploader ?? { data, url in
+        #if os(WASI)
+          throw CloudKitError.httpErrorWithRawResponse(
+            statusCode: 501,
+            rawResponse: "Asset uploads not supported on WASI"
+          )
+        #else
+          return try await URLSession.shared.uploadAsset(data, to: url)
+        #endif
+      }
+
+      // Perform the upload
+      let (statusCode, responseData) = try await uploadHandler(data, url)
+
+      // Validate HTTP status code
+      guard let httpStatusCode = statusCode, (200...299).contains(httpStatusCode) else {
+        throw CloudKitError.httpError(statusCode: statusCode ?? 0)
+      }
+
+      // Debug: log the raw response
+      if let responseString = String(data: responseData, encoding: .utf8) {
+        MistKitLogger.logDebug(
+          "Asset upload response: \(responseString)",
+          logger: MistKitLogger.api,
+          shouldRedact: false
+        )
+      }
+
+      // Decode the response
+      let uploadResponse = try JSONDecoder().decode(AssetUploadResponse.self, from: responseData)
+
+      // Convert to FieldValue.Asset
+      return FieldValue.Asset(
+        fileChecksum: uploadResponse.singleFile.fileChecksum,
+        size: uploadResponse.singleFile.size,
+        referenceChecksum: uploadResponse.singleFile.referenceChecksum,
+        wrappingKey: uploadResponse.singleFile.wrappingKey,
+        receipt: uploadResponse.singleFile.receipt,
+        downloadURL: nil
+      )
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "Failed to decode asset upload response: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error uploading asset: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
+      MistKitLogger.logError(
+        "Error uploading asset data: \(error)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.underlyingError(error)
+    }
   }
 }

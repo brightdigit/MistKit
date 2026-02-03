@@ -9,6 +9,7 @@ import Foundation
 
 #if os(WASI)
 /// Placeholder asset uploader for WASI platform (not supported)
+@available(*, deprecated, message: "Use AssetUploadHandler closure instead")
 internal struct WASIAssetUploader: AssetUploader {
     internal init() {}
 

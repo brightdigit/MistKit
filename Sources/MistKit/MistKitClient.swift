@@ -46,34 +46,20 @@ import OpenAPIRuntime
 internal struct MistKitClient {
   /// The underlying OpenAPI client
   internal let client: Client
-  /// The asset uploader for CloudKit CDN uploads
-  internal let assetUploader: any AssetUploader
 
   /// Initialize a new MistKit client
   /// - Parameters:
   ///   - configuration: The CloudKit configuration including container,
   ///     environment, and authentication
   ///   - transport: Custom transport for network requests
-  ///   - assetUploader: Optional custom asset uploader
   /// - Throws: ClientError if initialization fails
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal init(
     configuration: MistKitConfiguration,
-    transport: any ClientTransport,
-    assetUploader: (any AssetUploader)? = nil
+    transport: any ClientTransport
   ) throws {
     // Create appropriate TokenManager from configuration
     let tokenManager = try configuration.createTokenManager()
-
-    #if !os(WASI)
-      // Create dedicated URLSession for CDN uploads
-      // Using a separate URLSession ensures separate HTTP/2 connection pools
-      // to avoid 421 "Misdirected Request" errors between API and CDN hosts
-      let cdnSession = URLSession(configuration: .default)
-      self.assetUploader = assetUploader ?? DefaultAssetUploader(urlSession: cdnSession)
-    #else
-      self.assetUploader = assetUploader ?? WASIAssetUploader()
-    #endif
 
     // Create the OpenAPI client with custom server URL and middleware
     self.client = Client(
@@ -91,29 +77,17 @@ internal struct MistKitClient {
   ///   - configuration: The CloudKit configuration
   ///   - tokenManager: Custom token manager for authentication
   ///   - transport: Custom transport for network requests
-  ///   - assetUploader: Optional custom asset uploader
   /// - Throws: ClientError if initialization fails
   internal init(
     configuration: MistKitConfiguration,
     tokenManager: any TokenManager,
-    transport: any ClientTransport,
-    assetUploader: (any AssetUploader)? = nil
+    transport: any ClientTransport
   ) throws {
     // Validate server-to-server authentication restrictions
     try Self.validateServerToServerConfiguration(
       configuration: configuration,
       tokenManager: tokenManager
     )
-
-    #if !os(WASI)
-      // Create dedicated URLSession for CDN uploads
-      // Using a separate URLSession ensures separate HTTP/2 connection pools
-      // to avoid 421 "Misdirected Request" errors between API and CDN hosts
-      let cdnSession = URLSession(configuration: .default)
-      self.assetUploader = assetUploader ?? DefaultAssetUploader(urlSession: cdnSession)
-    #else
-      self.assetUploader = assetUploader ?? WASIAssetUploader()
-    #endif
 
     // Create the OpenAPI client with custom server URL and middleware
     self.client = Client(
@@ -133,15 +107,13 @@ internal struct MistKitClient {
   ///   - database: CloudKit database (public/private/shared)
   ///   - tokenManager: Custom token manager for authentication
   ///   - transport: Custom transport for network requests
-  ///   - assetUploader: Optional custom asset uploader
   /// - Throws: ClientError if initialization fails
   internal init(
     container: String,
     environment: Environment,
     database: Database,
     tokenManager: any TokenManager,
-    transport: any ClientTransport,
-    assetUploader: (any AssetUploader)? = nil
+    transport: any ClientTransport
   ) throws {
     // Check if this is a server-to-server token manager
     var keyID: String?
@@ -169,8 +141,7 @@ internal struct MistKitClient {
     try self.init(
       configuration: configuration,
       tokenManager: tokenManager,
-      transport: transport,
-      assetUploader: assetUploader
+      transport: transport
     )
   }
 
@@ -181,17 +152,14 @@ internal struct MistKitClient {
     /// - Parameters:
     ///   - configuration: The CloudKit configuration including container,
     ///     environment, and authentication
-    ///   - assetUploader: Optional custom asset uploader
     /// - Throws: ClientError if initialization fails
     @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     internal init(
-      configuration: MistKitConfiguration,
-      assetUploader: (any AssetUploader)? = nil
+      configuration: MistKitConfiguration
     ) throws {
       try self.init(
         configuration: configuration,
-        transport: URLSessionTransport(),
-        assetUploader: assetUploader
+        transport: URLSessionTransport()
       )
     }
 
@@ -202,22 +170,19 @@ internal struct MistKitClient {
     ///   - environment: CloudKit environment (development/production)
     ///   - database: CloudKit database (public/private/shared)
     ///   - tokenManager: Custom token manager for authentication
-    ///   - assetUploader: Optional custom asset uploader
     /// - Throws: ClientError if initialization fails
     internal init(
       container: String,
       environment: Environment,
       database: Database,
-      tokenManager: any TokenManager,
-      assetUploader: (any AssetUploader)? = nil
+      tokenManager: any TokenManager
     ) throws {
       try self.init(
         container: container,
         environment: environment,
         database: database,
         tokenManager: tokenManager,
-        transport: URLSessionTransport(),
-        assetUploader: assetUploader
+        transport: URLSessionTransport()
       )
     }
   #endif
