@@ -111,7 +111,7 @@ struct ErrorOutputTests {
     )
 
     let jsonString = try errorOutput.toJSON(pretty: false)
-    let jsonData = jsonString.data(using: .utf8)!
+    let jsonData = Data(jsonString.utf8)
     let decoded = try JSONDecoder().decode(ErrorOutput.self, from: jsonData)
 
     #expect(decoded.error.code == "TEST")

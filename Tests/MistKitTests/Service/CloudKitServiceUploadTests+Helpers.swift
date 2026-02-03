@@ -52,7 +52,7 @@ extension CloudKitServiceUploadTests {
         }
       }
       """
-      return (200, response.data(using: .utf8)!)
+      return (200, Data(response.utf8))
     }
   }
 
