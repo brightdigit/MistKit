@@ -20,8 +20,7 @@ jobs:
           - version: "6.2"
           - version: "6.3"
             nightly: true
-        # TEMPORARY: Only WASM builds enabled for testing
-        type: ["wasm", "wasm-embedded"]
+        type: ["", "wasm", "wasm-embedded"]
         exclude:
           # Exclude Swift 6.1 from wasm builds
           - swift: { version: "6.1" }
@@ -62,8 +61,7 @@ jobs:
   build-windows:
     name: Build on Windows
     runs-on: ${{ matrix.runs-on }}
-    # TEMPORARY: Disabled for WASM testing
-    if: false
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
@@ -94,8 +92,7 @@ jobs:
   build-android:
     name: Build on Android
     runs-on: ubuntu-latest
-    # TEMPORARY: Disabled for WASM testing
-    if: false
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
@@ -130,8 +127,7 @@ jobs:
     env:
       PACKAGE_NAME: MistKit
     runs-on: ${{ matrix.runs-on }}
-    # TEMPORARY: Disabled for WASM testing
-    if: false
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
@@ -216,8 +212,7 @@ jobs:
     name: Linting
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
-    # TEMPORARY: Only depends on WASM builds during testing
-    needs: [build-ubuntu]
+    needs: [build-ubuntu, build-macos, build-windows, build-android]
     env:
       MINT_PATH: .mint/lib
       MINT_LINK_PATH: .mint/bin
