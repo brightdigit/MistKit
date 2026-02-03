@@ -27,11 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if os(Linux)
 public import Foundation
+#if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-public import Foundation
 #endif
 import HTTPTypes
 import OpenAPIRuntime

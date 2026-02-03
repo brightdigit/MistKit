@@ -27,11 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if os(Linux)
-@preconcurrency import Foundation
-import FoundationNetworking
-#else
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
 #endif
 public import OpenAPIRuntime
 

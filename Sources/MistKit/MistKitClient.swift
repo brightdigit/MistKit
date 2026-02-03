@@ -28,11 +28,9 @@
 //
 
 import Crypto
-#if os(Linux)
-@preconcurrency import Foundation
-import FoundationNetworking
-#else
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
 #endif
 import HTTPTypes
 import OpenAPIRuntime
