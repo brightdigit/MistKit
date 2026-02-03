@@ -65,24 +65,6 @@ extension CloudKitService {
       // Convert public RecordOperation types to internal OpenAPI types
       let apiOperations = operations.map { Components.Schemas.RecordOperation(from: $0) }
 
-      // Debug: Print the operations being sent
-      print("\n[DEBUG] Sending \(apiOperations.count) operation(s) to CloudKit:")
-      for (index, operation) in apiOperations.enumerated() {
-        print("[DEBUG] Operation \(index):")
-        print("[DEBUG]   Type: \(operation.operationType)")
-        if let record = operation.record {
-          print("[DEBUG]   Record:")
-          print("[DEBUG]     recordType: \(record.recordType ?? "nil")")
-          print("[DEBUG]     recordName: \(record.recordName ?? "nil")")
-          if let fields = record.fields {
-            print("[DEBUG]     fields count: \(fields.additionalProperties.count)")
-            for (fieldName, fieldValue) in fields.additionalProperties {
-              print("[DEBUG]       Field '\(fieldName)': \(fieldValue)")
-            }
-          }
-        }
-      }
-
       // Call the underlying OpenAPI client
       let response = try await client.modifyRecords(
         .init(

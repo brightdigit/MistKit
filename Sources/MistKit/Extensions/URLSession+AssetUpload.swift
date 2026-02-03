@@ -11,6 +11,19 @@ public import FoundationNetworking
 #endif
 
 #if !os(WASI)
+extension URLRequest {
+  /// Initialize URLRequest for CloudKit asset upload
+  /// - Parameters:
+  ///   - data: Binary asset data to upload
+  ///   - url: CloudKit CDN upload URL
+  internal init(forAssetUpload data: Data, to url: URL) {
+    self.init(url: url)
+    self.httpMethod = "POST"
+    self.httpBody = data
+    self.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+  }
+}
+
 extension URLSession {
     /// Upload asset data directly to CloudKit CDN
     ///
@@ -23,10 +36,7 @@ extension URLSession {
     /// - Throws: Error if upload fails
     public func upload(_ data: Data, to url: URL) async throws -> (statusCode: Int?, data: Data) {
         // Create URLRequest for direct upload to CDN
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.httpBody = data
-        request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+        let request = URLRequest(forAssetUpload: data, to: url)
 
         // Upload directly via URLSession
         let (responseData, response) = try await self.data(for: request)

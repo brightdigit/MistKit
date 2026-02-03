@@ -107,24 +107,26 @@ extension Components.Schemas.FieldValueRequest {
 
   /// Initialize from List to Components list value
   private init(list: [FieldValue]) {
-    let listValues = list.map { Self.convertToListValuePayload($0) }
+    let listValues = list.map { Components.Schemas.ListValuePayload(from: $0) }
     self.init(value: .ListValue(listValues))
   }
+}
 
-  /// Convert a FieldValue to ListValuePayload (used for list elements)
-  internal static func convertToListValuePayload(_ fieldValue: FieldValue) -> Components.Schemas.ListValuePayload {
+extension Components.Schemas.ListValuePayload {
+  /// Initialize from MistKit FieldValue for list elements
+  internal init(from fieldValue: FieldValue) {
     switch fieldValue {
     case .string(let value):
-      return .StringValue(value)
+      self = .StringValue(value)
     case .int64(let value):
-      return .Int64Value(Int64(value))
+      self = .Int64Value(Int64(value))
     case .double(let value):
-      return .DoubleValue(value)
+      self = .DoubleValue(value)
     case .bytes(let value):
-      return .BytesValue(value)
+      self = .BytesValue(value)
     case .date(let value):
       let milliseconds = value.timeIntervalSince1970 * 1_000
-      return .DateValue(milliseconds)
+      self = .DateValue(milliseconds)
     case .location(let location):
       let locationValue = Components.Schemas.LocationValue(
         latitude: location.latitude,
@@ -136,7 +138,7 @@ extension Components.Schemas.FieldValueRequest {
         course: location.course,
         timestamp: location.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
       )
-      return .LocationValue(locationValue)
+      self = .LocationValue(locationValue)
     case .reference(let reference):
       let action: Components.Schemas.ReferenceValue.actionPayload?
       switch reference.action {
@@ -151,7 +153,7 @@ extension Components.Schemas.FieldValueRequest {
         recordName: reference.recordName,
         action: action
       )
-      return .ReferenceValue(referenceValue)
+      self = .ReferenceValue(referenceValue)
     case .asset(let asset):
       let assetValue = Components.Schemas.AssetValue(
         fileChecksum: asset.fileChecksum,
@@ -161,11 +163,11 @@ extension Components.Schemas.FieldValueRequest {
         receipt: asset.receipt,
         downloadURL: asset.downloadURL
       )
-      return .AssetValue(assetValue)
+      self = .AssetValue(assetValue)
     case .list(let nestedList):
       // Recursively convert nested lists
-      let nestedPayloads = nestedList.map { convertToListValuePayload($0) }
-      return .ListValue(nestedPayloads)
+      let nestedPayloads = nestedList.map { Self(from: $0) }
+      self = .ListValue(nestedPayloads)
     }
   }
 }

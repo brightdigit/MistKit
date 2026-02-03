@@ -1,5 +1,5 @@
 //
-//  AssetUploadToken.swift
+//  AssetUploadResult.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,28 +29,26 @@
 
 public import Foundation
 
-/// Token returned after uploading an asset
+/// Result of an asset upload operation
 ///
-/// After uploading binary data, CloudKit returns tokens that must be
-/// associated with record fields using a subsequent modifyRecords operation.
-public struct AssetUploadToken: Sendable, Equatable {
-  /// The upload URL (may be used for download reference)
-  public let url: String?
-  /// The record name this token is associated with
-  public let recordName: String?
-  /// The field name this token should be assigned to
-  public let fieldName: String?
+/// After uploading binary data to CloudKit, you receive an asset dictionary containing
+/// the receipt, checksums, and other metadata needed to associate the asset with a record.
+/// This type contains that complete asset information.
+public struct AssetUploadResult: Sendable {
+  /// The complete asset data including receipt and checksums
+  /// Use this when creating or updating records
+  public let asset: FieldValue.Asset
 
-  /// Initialize an asset upload token
-  public init(url: String?, recordName: String?, fieldName: String?) {
-    self.url = url
+  /// The record name this asset is associated with
+  public let recordName: String
+
+  /// The field name this asset should be assigned to
+  public let fieldName: String
+
+  /// Initialize an asset upload result
+  public init(asset: FieldValue.Asset, recordName: String, fieldName: String) {
+    self.asset = asset
     self.recordName = recordName
     self.fieldName = fieldName
-  }
-
-  internal init(from token: Components.Schemas.AssetUploadResponse.tokensPayloadPayload) {
-    self.url = token.url
-    self.recordName = token.recordName
-    self.fieldName = token.fieldName
   }
 }

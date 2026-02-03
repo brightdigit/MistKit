@@ -119,8 +119,8 @@ public struct UpdateCommand: MistDemoCommand, OutputFormatting {
             // Create CloudKit client
             let client = try MistKitClientFactory.create(from: config.base)
 
-            // Convert fields to CloudKit format using shared utilities
-            let cloudKitFields = try FieldConversionUtilities.convertFieldsToCloudKit(config.fields)
+            // Convert fields to CloudKit format
+            let cloudKitFields = try config.fields.toCloudKitFields()
 
             // Update the record
             let recordInfo = try await client.updateRecord(

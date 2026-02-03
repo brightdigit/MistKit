@@ -185,7 +185,7 @@ internal struct FilterBuilder {
       comparator: .IN,
       fieldName: field,
       fieldValue: .init(
-        value: .ListValue(values.map { Components.Schemas.FieldValueRequest.convertToListValuePayload($0) })
+        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) })
       )
     )
   }
@@ -200,7 +200,7 @@ internal struct FilterBuilder {
       comparator: .NOT_IN,
       fieldName: field,
       fieldValue: .init(
-        value: .ListValue(values.map { Components.Schemas.FieldValueRequest.convertToListValuePayload($0) })
+        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) })
       )
     )
   }

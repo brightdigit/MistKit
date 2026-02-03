@@ -118,8 +118,8 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
             // Generate record name if not provided
             let recordName = config.recordName ?? generateRecordName()
             
-            // Convert fields to CloudKit format using shared utilities
-            let cloudKitFields = try FieldConversionUtilities.convertFieldsToCloudKit(config.fields)
+            // Convert fields to CloudKit format
+            let cloudKitFields = try config.fields.toCloudKitFields()
 
             // Create the record
             // NOTE: Zone support requires enhancements to CloudKitService.createRecord method
