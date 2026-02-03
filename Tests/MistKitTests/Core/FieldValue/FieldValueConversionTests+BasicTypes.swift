@@ -15,7 +15,8 @@ extension FieldValueConversionTests {
       let fieldValue = FieldValue.string("test string")
       let components = Components.Schemas.FieldValue(from: fieldValue)
 
-      #expect(components.type == .string)
+      // CloudKit API doesn't expect the type field, so it should be nil
+      #expect(components.type == nil)
       if case .stringValue(let value) = components.value {
         #expect(value == "test string")
       } else {

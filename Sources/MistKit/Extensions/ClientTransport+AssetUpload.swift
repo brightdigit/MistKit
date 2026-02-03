@@ -6,7 +6,6 @@
 //
 
 public import Foundation
-import HTTPTypes
 public import OpenAPIRuntime
 
 #if !os(WASI)
@@ -25,7 +24,13 @@ private struct AssetUploadResponse: Codable {
 }
 
 extension ClientTransport {
-    /// Default asset upload implementation using the transport's send method
+    /// Default asset upload implementation using URLSession directly
+    ///
+    /// IMPORTANT: This uses URLSession.shared directly instead of the transport to avoid
+    /// HTTP/2 connection reuse issues. The transport is connected to api.apple-cloudkit.com,
+    /// but asset uploads go to CloudKit's CDN (cvws.icloud-content.com), causing 421
+    /// "Misdirected Request" errors if we try to reuse the same connection.
+    ///
     /// - Parameters:
     ///   - data: Binary data to upload
     ///   - url: CloudKit CDN upload URL
@@ -33,52 +38,22 @@ extension ClientTransport {
     /// - Throws: CloudKitError if upload fails
     public func uploadAsset(_ data: Data, to url: URL) async throws(CloudKitError) -> FieldValue.Asset {
         do {
-            // Parse URL components for HTTPRequest
-            guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-                  let scheme = components.scheme,
-                  let host = components.host
-            else {
+            // Create URLRequest for direct upload to CDN
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.httpBody = data
+            request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+
+            // Use URLSession directly to avoid HTTP/2 connection reuse issues
+            let (responseData, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse else {
                 throw CloudKitError.invalidResponse
             }
 
-            let authority = if let port = components.port {
-                "\(host):\(port)"
-            } else {
-                host
+            guard (200...299).contains(httpResponse.statusCode) else {
+                throw CloudKitError.httpError(statusCode: httpResponse.statusCode)
             }
-
-            // Build HTTPRequest
-            var request = HTTPRequest(
-                method: .post,
-                scheme: scheme,
-                authority: authority,
-                path: components.path.isEmpty ? "/" : components.path
-            )
-
-            // Add Content-Type header
-            request.headerFields[.contentType] = "application/octet-stream"
-
-            // Create HTTPBody from data
-            let body = HTTPBody(data)
-
-            // Send the request
-            let (httpResponse, responseBody) = try await self.send(
-                request,
-                body: body,
-                baseURL: URL(string: "\(scheme)://\(authority)")!,
-                operationID: "uploadAssetData"
-            )
-
-            guard (200...299).contains(httpResponse.status.code) else {
-                throw CloudKitError.httpError(statusCode: httpResponse.status.code)
-            }
-
-            // Extract response data
-            guard let responseBody = responseBody else {
-                throw CloudKitError.invalidResponse
-            }
-
-            let responseData = try await Data(collecting: responseBody, upTo: .max)
 
             // Debug: log the raw response
             if let responseString = String(data: responseData, encoding: .utf8) {
