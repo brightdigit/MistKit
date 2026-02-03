@@ -180,6 +180,28 @@ MistKitLogger.logDebug(_:logger:shouldRedact:)    // Debug level
 - Set `MISTKIT_DISABLE_LOG_REDACTION=1` to disable redaction for debugging
 - Tokens, keys, and secrets are automatically masked in logged messages
 
+### Asset Upload Transport Design
+
+**Why URLSession instead of ClientTransport?**
+
+Asset uploads use `URLSession.shared` directly rather than the injected `ClientTransport` to avoid HTTP/2 connection reuse issues:
+
+1. **Problem:** CloudKit API (api.apple-cloudkit.com) and CDN (cvws.icloud-content.com) are different hosts
+2. **HTTP/2 Issue:** Reusing the same HTTP/2 connection for both hosts causes 421 Misdirected Request errors
+3. **Solution:** Use separate URLSession for CDN uploads, maintaining distinct connection pools
+
+**Design:**
+- `AssetUploader` closure type allows dependency injection for testing
+- Default implementation uses `URLSession.shared.upload(_:to:)`
+- Tests provide mock uploader closures without network calls
+- Platform-specific: WASI compilation excludes URLSession code via `#if !os(WASI)`
+
+**Future Consideration:**
+A `ClientTransport` extension could provide a generic upload method, but would need to:
+- Handle connection pooling separately for different hosts
+- Provide platform-specific implementations (URLSession, custom transports)
+- Maintain the same testability via dependency injection
+
 ### CloudKit Web Services Integration
 - Base URL: `https://api.apple-cloudkit.com`
 - Authentication: API Token + Web Auth Token or Server-to-Server Key Authentication

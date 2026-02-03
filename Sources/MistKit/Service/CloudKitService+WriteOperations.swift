@@ -238,7 +238,7 @@ extension CloudKitService {
     recordType: String,
     fieldName: String,
     recordName: String? = nil,
-    uploader: AssetUploadHandler? = nil
+    using uploader: AssetUploader? = nil
   ) async throws(CloudKitError) -> AssetUploadResult {
     // Validate data size (CloudKit limit is 15 MB)
     let maxSize: Int = 15 * 1024 * 1024 // 15 MB
@@ -271,7 +271,7 @@ extension CloudKitService {
       }
 
       // Step 2: Upload binary data to the URL and get asset dictionary
-      let asset = try await uploadAssetData(data, to: uploadURL, uploader: uploader)
+      let asset = try await uploadAssetData(data, to: uploadURL, using: uploader)
 
       // Return complete result with asset data
       return AssetUploadResult(
@@ -374,7 +374,7 @@ extension CloudKitService {
   public func uploadAssetData(
     _ data: Data,
     to url: URL,
-    uploader: AssetUploadHandler? = nil
+    using uploader: AssetUploader? = nil
   ) async throws(CloudKitError) -> FieldValue.Asset {
     do {
       // Use provided uploader or default to URLSession.shared
@@ -385,7 +385,7 @@ extension CloudKitService {
             rawResponse: "Asset uploads not supported on WASI"
           )
         #else
-          return try await URLSession.shared.uploadAsset(data, to: url)
+          return try await URLSession.shared.upload(data, to: url)
         #endif
       }
 

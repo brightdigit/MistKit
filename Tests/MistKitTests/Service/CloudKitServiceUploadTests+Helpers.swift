@@ -39,7 +39,7 @@ extension CloudKitServiceUploadTests {
   private static let testAPIToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
 
   /// Create a mock asset uploader that returns a successful upload response
-  internal static func makeMockAssetUploader() -> AssetUploadHandler {
+  internal static func makeMockAssetUploader() -> AssetUploader {
     { data, url in
       let response = """
       {

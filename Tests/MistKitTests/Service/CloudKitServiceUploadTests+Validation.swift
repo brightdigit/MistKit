@@ -119,7 +119,7 @@ extension CloudKitServiceUploadTests {
             data: data,
             recordType: "Note",
             fieldName: "image",
-            uploader: CloudKitServiceUploadTests.makeMockAssetUploader()
+            using: CloudKitServiceUploadTests.makeMockAssetUploader()
           )
           #expect(result.asset.receipt != nil, "Should receive asset with receipt")
         } catch {

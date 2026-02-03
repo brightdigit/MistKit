@@ -48,7 +48,7 @@ extension CloudKitServiceUploadTests {
         data: testData,
         recordType: "Note",
         fieldName: "image",
-        uploader: CloudKitServiceUploadTests.makeMockAssetUploader()
+        using: CloudKitServiceUploadTests.makeMockAssetUploader()
       )
 
       #expect(result.recordName.isEmpty == false, "Result should have a record name")
@@ -69,7 +69,7 @@ extension CloudKitServiceUploadTests {
         data: testData,
         recordType: "Note",
         fieldName: "image",
-        uploader: CloudKitServiceUploadTests.makeMockAssetUploader()
+        using: CloudKitServiceUploadTests.makeMockAssetUploader()
       )
 
       #expect(result.recordName == "test-record-0")
@@ -90,7 +90,7 @@ extension CloudKitServiceUploadTests {
         data: testData,
         recordType: "Note",
         fieldName: "image",
-        uploader: CloudKitServiceUploadTests.makeMockAssetUploader()
+        using: CloudKitServiceUploadTests.makeMockAssetUploader()
       )
 
       // Verify result has the expected fields

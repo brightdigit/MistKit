@@ -21,7 +21,7 @@ extension URLSession {
     ///   - url: CloudKit CDN upload URL
     /// - Returns: Tuple containing optional HTTP status code and response data
     /// - Throws: Error if upload fails
-    public func uploadAsset(_ data: Data, to url: URL) async throws -> (statusCode: Int?, data: Data) {
+    public func upload(_ data: Data, to url: URL) async throws -> (statusCode: Int?, data: Data) {
         // Create URLRequest for direct upload to CDN
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
