@@ -182,6 +182,15 @@ MistKitLogger.logDebug(_:logger:shouldRedact:)    // Debug level
 
 ### Asset Upload Transport Design
 
+**⚠️ CRITICAL WARNING: Transport Separation**
+
+When providing a custom `AssetUploader` implementation:
+- **NEVER** use the CloudKit API transport (`ClientTransport`) for asset uploads
+- **MUST** use a separate URLSession instance, NOT shared with api.apple-cloudkit.com
+- **MUST NOT** share HTTP/2 connections between CloudKit API and CDN hosts
+- Custom uploaders should **ONLY** be used for testing or specialized CDN configurations
+- Production code should use the default implementation (`URLSession.shared`)
+
 **Why URLSession instead of ClientTransport?**
 
 Asset uploads use `URLSession.shared` directly rather than the injected `ClientTransport` to avoid HTTP/2 connection reuse issues:
@@ -192,9 +201,19 @@ Asset uploads use `URLSession.shared` directly rather than the injected `ClientT
 
 **Design:**
 - `AssetUploader` closure type allows dependency injection for testing
-- Default implementation uses `URLSession.shared.upload(_:to:)`
+- Default implementation uses `URLSession.shared.upload(_:to:)` with separate connection pool
 - Tests provide mock uploader closures without network calls
 - Platform-specific: WASI compilation excludes URLSession code via `#if !os(WASI)`
+- **CRITICAL:** Custom uploaders must maintain connection pool separation from CloudKit API
+
+**Implementation Details:**
+- AssetUploader type: `(Data, URL) async throws -> (statusCode: Int?, data: Data)`
+- Defined in: `Sources/MistKit/Core/AssetUploader.swift`
+- URLSession extension: `Sources/MistKit/Extensions/URLSession+AssetUpload.swift`
+- Upload orchestration: `Sources/MistKit/Service/CloudKitService+WriteOperations.swift`
+  - `uploadAssets()` - Complete two-step upload workflow
+  - `requestAssetUploadURL()` - Step 1: Get CDN upload URL
+  - `uploadAssetData()` - Step 2: Upload binary data to CDN
 
 **Future Consideration:**
 A `ClientTransport` extension could provide a generic upload method, but would need to:
@@ -218,6 +237,18 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 - Async test support with `async let` and `await`
 - Parameterized tests for testing multiple scenarios
 - See `testing-enablinganddisabling.md` for Swift Testing patterns
+
+### Asset Upload Testing
+
+**Integration Test Requirements:**
+- Verify connection pool separation between CloudKit API and CDN
+- Test HTTP/2 connection reuse prevention
+- Validate 421 Misdirected Request error handling
+- Mock uploaders should simulate realistic HTTP responses
+
+**Test Files:**
+- `Tests/MistKitTests/Service/CloudKitServiceUploadTests+*.swift`
+- `Tests/MistKitTests/Service/AssetUploadTokenTests.swift`
 
 ## Important Implementation Notes
 

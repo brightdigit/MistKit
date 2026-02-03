@@ -377,24 +377,26 @@ extension CloudKitService {
     using uploader: AssetUploader? = nil
   ) async throws(CloudKitError) -> FieldValue.Asset {
     do {
+      #if os(WASI)
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 501,
+        rawResponse: "Asset uploads not supported on WASI"
+      )
+      #else
       // Use provided uploader or default to URLSession.shared
       let uploadHandler = uploader ?? { data, url in
-        #if os(WASI)
-          throw CloudKitError.httpErrorWithRawResponse(
-            statusCode: 501,
-            rawResponse: "Asset uploads not supported on WASI"
-          )
-        #else
-          return try await URLSession.shared.upload(data, to: url)
-        #endif
+        return try await URLSession.shared.upload(data, to: url)
       }
 
       // Perform the upload
       let (statusCode, responseData) = try await uploadHandler(data, url)
 
       // Validate HTTP status code
-      guard let httpStatusCode = statusCode, (200...299).contains(httpStatusCode) else {
-        throw CloudKitError.httpError(statusCode: statusCode ?? 0)
+      guard let httpStatusCode = statusCode else {
+        throw CloudKitError.invalidResponse
+      }
+      guard (200...299).contains(httpStatusCode) else {
+        throw CloudKitError.httpError(statusCode: httpStatusCode)
       }
 
       // Debug: log the raw response
@@ -418,6 +420,7 @@ extension CloudKitService {
         receipt: uploadResponse.singleFile.receipt,
         downloadURL: nil
       )
+      #endif
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError
     } catch let decodingError as DecodingError {
