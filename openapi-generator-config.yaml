@@ -2,9 +2,6 @@ generate:
   - types
   - client
 accessModifier: internal
-typeOverrides:
-  schemas:
-    FieldValue: CustomFieldValue
 additionalFileComments:
   - periphery:ignore:all
   - swift-format-ignore-file

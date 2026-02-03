@@ -13,13 +13,11 @@ extension FieldValueConversionTests {
         return
       }
       let intZero = FieldValue.int64(0)
-      let intComponents = Components.Schemas.FieldValue(from: intZero)
-      #expect(#expect(intComponents.type == .type == nil)  // CloudKit API does not expect type field
+      let intComponents = Components.Schemas.FieldValueRequest(from: intZero)
     // #expect(#expect(intComponents.type == .int64)
 
       let doubleZero = FieldValue.double(0.0)
-      let doubleComponents = Components.Schemas.FieldValue(from: doubleZero)
-      #expect(#expect(doubleComponents.type == .type == nil)  // CloudKit API does not expect type field
+      let doubleComponents = Components.Schemas.FieldValueRequest(from: doubleZero)
     // #expect(#expect(doubleComponents.type == .double)
     }
 
@@ -30,13 +28,11 @@ extension FieldValueConversionTests {
         return
       }
       let negativeInt = FieldValue.int64(-100)
-      let intComponents = Components.Schemas.FieldValue(from: negativeInt)
-      #expect(#expect(intComponents.type == .type == nil)  // CloudKit API does not expect type field
+      let intComponents = Components.Schemas.FieldValueRequest(from: negativeInt)
     // #expect(#expect(intComponents.type == .int64)
 
       let negativeDouble = FieldValue.double(-3.14)
-      let doubleComponents = Components.Schemas.FieldValue(from: negativeDouble)
-      #expect(#expect(doubleComponents.type == .type == nil)  // CloudKit API does not expect type field
+      let doubleComponents = Components.Schemas.FieldValueRequest(from: negativeDouble)
     // #expect(#expect(doubleComponents.type == .double)
     }
 
@@ -47,13 +43,11 @@ extension FieldValueConversionTests {
         return
       }
       let largeInt = FieldValue.int64(Int.max)
-      let intComponents = Components.Schemas.FieldValue(from: largeInt)
-      #expect(#expect(intComponents.type == .type == nil)  // CloudKit API does not expect type field
+      let intComponents = Components.Schemas.FieldValueRequest(from: largeInt)
     // #expect(#expect(intComponents.type == .int64)
 
       let largeDouble = FieldValue.double(Double.greatestFiniteMagnitude)
-      let doubleComponents = Components.Schemas.FieldValue(from: largeDouble)
-      #expect(#expect(doubleComponents.type == .type == nil)  // CloudKit API does not expect type field
+      let doubleComponents = Components.Schemas.FieldValueRequest(from: largeDouble)
     // #expect(#expect(doubleComponents.type == .double)
     }
 
@@ -64,9 +58,7 @@ extension FieldValueConversionTests {
         return
       }
       let emptyString = FieldValue.string("")
-      let components = Components.Schemas.FieldValue(from: emptyString)
-      #expect(#expect(components.type == .type == nil)  // CloudKit API does not expect type field
-    // #expect(#expect(components.type == .string)
+      let components = Components.Schemas.FieldValueRequest(from: emptyString)
     }
 
     @Test("Convert string with special characters")
@@ -76,9 +68,7 @@ extension FieldValueConversionTests {
         return
       }
       let specialString = FieldValue.string("Hello\nWorld\t🌍")
-      let components = Components.Schemas.FieldValue(from: specialString)
-      #expect(#expect(components.type == .type == nil)  // CloudKit API does not expect type field
-    // #expect(#expect(components.type == .string)
+      let components = Components.Schemas.FieldValueRequest(from: specialString)
     }
   }
 }

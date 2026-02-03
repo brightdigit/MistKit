@@ -13,11 +13,9 @@ extension FieldValueConversionTests {
         return
       }
       let fieldValue = FieldValue.string("test string")
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      // CloudKit API doesn't expect the type field, so it should be nil
-      #expect(components.type == nil)
-      if case .stringValue(let value) = components.value {
+      if case .StringValue(let value) = components.value {
         #expect(value == "test string")
       } else {
         Issue.record("Expected stringValue")
@@ -31,11 +29,9 @@ extension FieldValueConversionTests {
         return
       }
       let fieldValue = FieldValue.int64(42)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      // CloudKit API doesn't expect the type field, so it should be nil
-      #expect(components.type == nil)
-      if case .int64Value(let value) = components.value {
+      if case .Int64Value(let value) = components.value {
         #expect(value == 42)
       } else {
         Issue.record("Expected int64Value")
@@ -49,11 +45,9 @@ extension FieldValueConversionTests {
         return
       }
       let fieldValue = FieldValue.double(3.14159)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      // CloudKit API doesn't expect the type field, so it should be nil
-      #expect(components.type == nil)
-      if case .doubleValue(let value) = components.value {
+      if case .DoubleValue(let value) = components.value {
         #expect(value == 3.14159)
       } else {
         Issue.record("Expected doubleValue")
@@ -67,21 +61,17 @@ extension FieldValueConversionTests {
         return
       }
       let trueValue = FieldValue(booleanValue: true)
-      let trueComponents = Components.Schemas.FieldValue(from: trueValue)
-      // CloudKit API doesn't expect the type field, so it should be nil
-      #expect(trueComponents.type == nil)
-      if case .int64Value(let value) = trueComponents.value {
+      let trueComponents = Components.Schemas.FieldValueRequest(from: trueValue)
+      if case .Int64Value(let value) = trueComponents.value {
         #expect(value == 1)
       } else {
         Issue.record("Expected int64Value 1 for true")
       }
 
       let falseValue = FieldValue(booleanValue: false)
-      let falseComponents = Components.Schemas.FieldValue(from: falseValue)
+      let falseComponents = Components.Schemas.FieldValueRequest(from: falseValue)
 
-      // CloudKit API doesn't expect the type field, so it should be nil
-      #expect(falseComponents.type == nil)
-      if case .int64Value(let value) = falseComponents.value {
+      if case .Int64Value(let value) = falseComponents.value {
         #expect(value == 0)
       } else {
         Issue.record("Expected int64Value 0 for false")
@@ -95,11 +85,9 @@ extension FieldValueConversionTests {
         return
       }
       let fieldValue = FieldValue.bytes("base64encodedstring")
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      // CloudKit API doesn't expect the type field, so it should be nil
-      #expect(components.type == nil)
-      if case .bytesValue(let value) = components.value {
+      if case .BytesValue(let value) = components.value {
         #expect(value == "base64encodedstring")
       } else {
         Issue.record("Expected bytesValue")
@@ -114,11 +102,9 @@ extension FieldValueConversionTests {
       }
       let date = Date(timeIntervalSince1970: 1_000_000)
       let fieldValue = FieldValue.date(date)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      // CloudKit API doesn't expect the type field, so it should be nil
-      #expect(components.type == nil)
-      if case .dateValue(let value) = components.value {
+      if case .DateValue(let value) = components.value {
         #expect(value == date.timeIntervalSince1970 * 1_000)
       } else {
         Issue.record("Expected dateValue")

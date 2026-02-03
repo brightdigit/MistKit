@@ -29,43 +29,43 @@
 
 internal import Foundation
 
-/// Extension to convert OpenAPI Components.Schemas.FieldValue to MistKit FieldValue
+/// Extension to convert OpenAPI Components.Schemas.FieldValueResponse to MistKit FieldValue
 extension FieldValue {
-  /// Initialize from OpenAPI Components.Schemas.FieldValue
-  internal init?(_ fieldData: Components.Schemas.FieldValue) {
-    self.init(value: fieldData.value, fieldType: fieldData.type)
+  /// Initialize from OpenAPI Components.Schemas.FieldValueResponse (from API responses)
+  internal init?(_ fieldData: Components.Schemas.FieldValueResponse) {
+    self.init(valuePayload: fieldData.value, typePayload: fieldData._type)
   }
 
   /// Initialize from field value and type
   private init?(
-    value: CustomFieldValue.CustomFieldValuePayload,
-    fieldType: CustomFieldValue.FieldTypePayload?
+    valuePayload: Components.Schemas.FieldValueResponse.valuePayload,
+    typePayload: Components.Schemas.FieldValueResponse._typePayload?
   ) {
+    let value = valuePayload
+    let fieldType = typePayload
     switch value {
-    case .stringValue(let stringValue):
+    case .StringValue(let stringValue):
       self = .string(stringValue)
-    case .int64Value(let intValue):
-      self = .int64(intValue)
-    case .doubleValue(let doubleValue):
-      if fieldType == .timestamp {
+    case .Int64Value(let intValue):
+      self = .int64(Int(intValue))
+    case .DoubleValue(let doubleValue):
+      if fieldType == .TIMESTAMP {
         self = .date(Date(timeIntervalSince1970: doubleValue / 1_000))
       } else {
         self = .double(doubleValue)
       }
-    case .booleanValue(let boolValue):
-      self = .int64(boolValue ? 1 : 0)
-    case .bytesValue(let bytesValue):
+    case .BytesValue(let bytesValue):
       self = .bytes(bytesValue)
-    case .dateValue(let dateValue):
+    case .DateValue(let dateValue):
       self = .date(Date(timeIntervalSince1970: dateValue / 1_000))
-    case .locationValue(let locationValue):
+    case .LocationValue(let locationValue):
       guard let location = Self(locationValue: locationValue) else { return nil }
       self = location
-    case .referenceValue(let referenceValue):
+    case .ReferenceValue(let referenceValue):
       self.init(referenceValue: referenceValue)
-    case .assetValue(let assetValue):
+    case .AssetValue(let assetValue):
       self.init(assetValue: assetValue)
-    case .listValue(let listValue):
+    case .ListValue(let listValue):
       self.init(listValue: listValue)
     }
   }
@@ -123,54 +123,52 @@ extension FieldValue {
   }
 
   /// Initialize from list field value
-  private init(listValue: [CustomFieldValue.CustomFieldValuePayload]) {
+  private init(listValue: [Components.Schemas.ListValuePayload]) {
     let convertedList = listValue.compactMap { Self(listItem: $0) }
     self = .list(convertedList)
   }
 
   /// Initialize from individual list item
-  private init?(listItem: CustomFieldValue.CustomFieldValuePayload) {
+  private init?(listItem: Components.Schemas.ListValuePayload) {
     switch listItem {
-    case .stringValue(let stringValue):
+    case .StringValue(let stringValue):
       self = .string(stringValue)
-    case .int64Value(let intValue):
-      self = .int64(intValue)
-    case .doubleValue(let doubleValue):
+    case .Int64Value(let intValue):
+      self = .int64(Int(intValue))
+    case .DoubleValue(let doubleValue):
       self = .double(doubleValue)
-    case .booleanValue(let boolValue):
-      self = .int64(boolValue ? 1 : 0)
-    case .bytesValue(let bytesValue):
+    case .BytesValue(let bytesValue):
       self = .bytes(bytesValue)
-    case .dateValue(let dateValue):
+    case .DateValue(let dateValue):
       self = .date(Date(timeIntervalSince1970: dateValue / 1_000))
-    case .locationValue(let locationValue):
+    case .LocationValue(let locationValue):
       guard let location = Self(locationValue: locationValue) else { return nil }
       self = location
-    case .referenceValue(let referenceValue):
+    case .ReferenceValue(let referenceValue):
       self.init(referenceValue: referenceValue)
-    case .assetValue(let assetValue):
+    case .AssetValue(let assetValue):
       self.init(assetValue: assetValue)
-    case .listValue(let nestedList):
+    case .ListValue(let nestedList):
       self.init(nestedListValue: nestedList)
     }
   }
 
   /// Initialize from nested list value (simplified for basic types)
-  private init(nestedListValue: [CustomFieldValue.CustomFieldValuePayload]) {
+  private init(nestedListValue: [Components.Schemas.ListValuePayload]) {
     let convertedNestedList = nestedListValue.compactMap { Self(basicListItem: $0) }
     self = .list(convertedNestedList)
   }
 
   /// Initialize from basic list item types only
-  private init?(basicListItem: CustomFieldValue.CustomFieldValuePayload) {
+  private init?(basicListItem: Components.Schemas.ListValuePayload) {
     switch basicListItem {
-    case .stringValue(let stringValue):
+    case .StringValue(let stringValue):
       self = .string(stringValue)
-    case .int64Value(let intValue):
-      self = .int64(intValue)
-    case .doubleValue(let doubleValue):
+    case .Int64Value(let intValue):
+      self = .int64(Int(intValue))
+    case .DoubleValue(let doubleValue):
       self = .double(doubleValue)
-    case .bytesValue(let bytesValue):
+    case .BytesValue(let bytesValue):
       self = .bytes(bytesValue)
     default:
       return nil

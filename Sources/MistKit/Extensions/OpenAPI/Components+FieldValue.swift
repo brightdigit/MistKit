@@ -29,24 +29,25 @@
 
 internal import Foundation
 
-/// Extension to convert MistKit FieldValue to OpenAPI Components.Schemas.FieldValue
+/// Extension to convert MistKit FieldValue to OpenAPI FieldValueRequest for API requests
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension Components.Schemas.FieldValue {
-  /// Initialize from MistKit FieldValue
-  /// CloudKit API doesn't expect/accept the type field - it infers type from the value structure
+extension Components.Schemas.FieldValueRequest {
+  /// Initialize from MistKit FieldValue for CloudKit API requests.
+  ///
+  /// CloudKit infers field types from the value structure, so no type field is sent.
   internal init(from fieldValue: FieldValue) {
     switch fieldValue {
     case .string(let value):
-      self.init(value: .stringValue(value), type: nil)
+      self.init(value: .StringValue(value))
     case .int64(let value):
-      self.init(value: .int64Value(value), type: nil)
+      self.init(value: .Int64Value(Int64(value)))
     case .double(let value):
-      self.init(value: .doubleValue(value), type: nil)
+      self.init(value: .DoubleValue(value))
     case .bytes(let value):
-      self.init(value: .bytesValue(value), type: nil)
+      self.init(value: .BytesValue(value))
     case .date(let value):
-      let milliseconds = Int64(value.timeIntervalSince1970 * 1_000)
-      self.init(value: .dateValue(Double(milliseconds)), type: nil)
+      let milliseconds = value.timeIntervalSince1970 * 1_000
+      self.init(value: .DateValue(milliseconds))
     case .location(let location):
       self.init(location: location)
     case .reference(let reference):
@@ -70,7 +71,7 @@ extension Components.Schemas.FieldValue {
       course: location.course,
       timestamp: location.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
     )
-    self.init(value: .locationValue(locationValue), type: nil)
+    self.init(value: .LocationValue(locationValue))
   }
 
   /// Initialize from Reference to Components ReferenceValue
@@ -88,7 +89,7 @@ extension Components.Schemas.FieldValue {
       recordName: reference.recordName,
       action: action
     )
-    self.init(value: .referenceValue(referenceValue), type: nil)
+    self.init(value: .ReferenceValue(referenceValue))
   }
 
   /// Initialize from Asset to Components AssetValue
@@ -101,12 +102,70 @@ extension Components.Schemas.FieldValue {
       receipt: asset.receipt,
       downloadURL: asset.downloadURL
     )
-    self.init(value: .assetValue(assetValue), type: nil)
+    self.init(value: .AssetValue(assetValue))
   }
 
   /// Initialize from List to Components list value
   private init(list: [FieldValue]) {
-    let listValues = list.map { CustomFieldValue.CustomFieldValuePayload($0) }
-    self.init(value: .listValue(listValues), type: nil)
+    let listValues = list.map { Self.convertToListValuePayload($0) }
+    self.init(value: .ListValue(listValues))
+  }
+
+  /// Convert a FieldValue to ListValuePayload (used for list elements)
+  internal static func convertToListValuePayload(_ fieldValue: FieldValue) -> Components.Schemas.ListValuePayload {
+    switch fieldValue {
+    case .string(let value):
+      return .StringValue(value)
+    case .int64(let value):
+      return .Int64Value(Int64(value))
+    case .double(let value):
+      return .DoubleValue(value)
+    case .bytes(let value):
+      return .BytesValue(value)
+    case .date(let value):
+      let milliseconds = value.timeIntervalSince1970 * 1_000
+      return .DateValue(milliseconds)
+    case .location(let location):
+      let locationValue = Components.Schemas.LocationValue(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        horizontalAccuracy: location.horizontalAccuracy,
+        verticalAccuracy: location.verticalAccuracy,
+        altitude: location.altitude,
+        speed: location.speed,
+        course: location.course,
+        timestamp: location.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
+      )
+      return .LocationValue(locationValue)
+    case .reference(let reference):
+      let action: Components.Schemas.ReferenceValue.actionPayload?
+      switch reference.action {
+      case .some(.deleteSelf):
+        action = .DELETE_SELF
+      case .some(.none):
+        action = .NONE
+      case nil:
+        action = nil
+      }
+      let referenceValue = Components.Schemas.ReferenceValue(
+        recordName: reference.recordName,
+        action: action
+      )
+      return .ReferenceValue(referenceValue)
+    case .asset(let asset):
+      let assetValue = Components.Schemas.AssetValue(
+        fileChecksum: asset.fileChecksum,
+        size: asset.size,
+        referenceChecksum: asset.referenceChecksum,
+        wrappingKey: asset.wrappingKey,
+        receipt: asset.receipt,
+        downloadURL: asset.downloadURL
+      )
+      return .AssetValue(assetValue)
+    case .list(let nestedList):
+      // Recursively convert nested lists
+      let nestedPayloads = nestedList.map { convertToListValuePayload($0) }
+      return .ListValue(nestedPayloads)
+    }
   }
 }

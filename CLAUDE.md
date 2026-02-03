@@ -97,6 +97,32 @@ swift run mistdemo --config-file ~/.mistdemo/config.json query
 
 ## Architecture Considerations
 
+### FieldValue Type Architecture
+
+MistKit uses separate types for requests and responses at the OpenAPI schema level to accurately model CloudKit's asymmetric API behavior:
+
+**Type Layers:**
+1. **Domain Layer**: `FieldValue` enum - Pure Swift types, no API metadata (Sources/MistKit/FieldValue.swift)
+2. **API Request Layer**: `FieldValueRequest` - No type field, CloudKit infers type from value structure
+3. **API Response Layer**: `FieldValueResponse` - Optional type field for explicit type information
+
+**Why Separate Request/Response Types?**
+- CloudKit API has asymmetric behavior: requests omit type field, responses may include it
+- OpenAPI schema accurately models this asymmetry (openapi.yaml:867-920)
+- Swift code generation produces type-safe request/response types
+- Compiler prevents accidentally using response types in requests
+- Cleaner architecture without nil type values in conversion code
+
+**Generated Types:**
+- `Components.Schemas.FieldValueRequest` - Used for modify, create, filter operations
+- `Components.Schemas.FieldValueResponse` - Used for query, lookup, changes responses
+- `Components.Schemas.RecordRequest` - Records in request bodies
+- `Components.Schemas.RecordResponse` - Records in response bodies
+
+**Conversion:**
+- Request conversion: `Extensions/OpenAPI/Components+FieldValue.swift` converts domain `FieldValue` → `FieldValueRequest`
+- Response conversion: `Service/FieldValue+Components.swift` converts `FieldValueResponse` → domain `FieldValue`
+
 ### Modern Swift Features to Utilize
 - Swift Concurrency (async/await) for all network operations
 - Structured concurrency with TaskGroup for parallel operations
