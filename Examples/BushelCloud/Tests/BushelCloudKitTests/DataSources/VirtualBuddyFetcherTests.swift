@@ -160,7 +160,7 @@ internal struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySonoma1421Response.data(using: .utf8)!
+        let data = Data(TestFixtures.virtualBuddySonoma1421Response.utf8)
         return (response, data)
       }
 
@@ -198,7 +198,7 @@ internal struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddyUnsignedResponse.data(using: .utf8)!
+        let data = Data(TestFixtures.virtualBuddyUnsignedResponse.utf8)
         return (response, data)
       }
 
@@ -287,7 +287,7 @@ internal struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySonoma1421Response.data(using: .utf8)!
+        let data = Data(TestFixtures.virtualBuddySonoma1421Response.utf8)
         return (response, data)
       }
 
@@ -339,7 +339,7 @@ internal struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddyBuildMismatchResponse.data(using: .utf8)!
+        let data = Data(TestFixtures.virtualBuddyBuildMismatchResponse.utf8)
         return (response, data)
       }
 
@@ -483,7 +483,7 @@ internal struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let invalidJSON = "{ invalid json }".data(using: .utf8)!
+        let invalidJSON = Data("{ invalid json }".utf8)
         return (response, invalidJSON)
       }
 
@@ -517,7 +517,7 @@ internal struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySonoma1421Response.data(using: .utf8)!
+        let data = Data(TestFixtures.virtualBuddySonoma1421Response.utf8)
         return (response, data)
       }
 
@@ -547,7 +547,7 @@ internal struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySonoma1421Response.data(using: .utf8)!
+        let data = Data(TestFixtures.virtualBuddySonoma1421Response.utf8)
         return (response, data)
       }
 
@@ -641,7 +641,7 @@ internal struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySignedResponse.data(using: .utf8)!
+        let data = Data(TestFixtures.virtualBuddySignedResponse.utf8)
         return (response, data)
       }
 
@@ -685,7 +685,7 @@ internal struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddyUnsignedResponse.data(using: .utf8)!
+        let data = Data(TestFixtures.virtualBuddyUnsignedResponse.utf8)
         return (response, data)
       }
 
@@ -731,7 +731,7 @@ internal struct VirtualBuddyFetcherTests {
           httpVersion: nil,
           headerFields: nil
         )!
-        let data = TestFixtures.virtualBuddySonoma1421Response.data(using: .utf8)!
+        let data = Data(TestFixtures.virtualBuddySonoma1421Response.utf8)
         return (response, data)
       }
 

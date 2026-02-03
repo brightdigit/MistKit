@@ -103,7 +103,7 @@ struct DynamicKeyTests {
             "anotherField": 123
         }
         """
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
 
         struct TestWrapper: Decodable {
             let fields: [String: String]

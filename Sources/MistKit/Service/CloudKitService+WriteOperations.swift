@@ -27,17 +27,30 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if os(Linux)
 public import Foundation
+#if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-public import Foundation
 #endif
+import HTTPTypes
 import OpenAPIRuntime
 
 #if !os(WASI)
   import OpenAPIURLSession
 #endif
+
+// Response structure for CloudKit asset upload
+// CloudKit returns: { "singleFile": { "wrappingKey": ..., "fileChecksum": ..., "receipt": ..., etc. } }
+private struct AssetUploadResponse: Codable {
+    let singleFile: AssetData
+
+    struct AssetData: Codable {
+        let wrappingKey: String?
+        let fileChecksum: String?
+        let receipt: String?
+        let referenceChecksum: String?
+        let size: Int64?
+    }
+}
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
@@ -224,7 +237,8 @@ extension CloudKitService {
     data: Data,
     recordType: String,
     fieldName: String,
-    recordName: String? = nil
+    recordName: String? = nil,
+    using uploader: AssetUploader? = nil
   ) async throws(CloudKitError) -> AssetUploadResult {
     // Validate data size (CloudKit limit is 15 MB)
     let maxSize: Int = 15 * 1024 * 1024 // 15 MB
@@ -257,7 +271,7 @@ extension CloudKitService {
       }
 
       // Step 2: Upload binary data to the URL and get asset dictionary
-      let asset = try await uploadAssetData(data, to: uploadURL)
+      let asset = try await uploadAssetData(data, to: uploadURL, using: uploader)
 
       // Return complete result with asset data
       return AssetUploadResult(
@@ -352,71 +366,61 @@ extension CloudKitService {
   /// - Parameters:
   ///   - data: The binary data to upload
   ///   - url: The upload URL from CloudKit
+  ///   - uploader: Optional custom upload handler. If nil, uses URLSession.shared
   /// - Returns: The asset dictionary returned by CloudKit containing receipt, checksums, etc.
   /// - Throws: CloudKitError if the upload fails
   /// - Note: Upload URLs are valid for 15 minutes
   /// - Important: The returned asset dictionary must be used when creating/updating records with this asset
-  public func uploadAssetData(_ data: Data, to url: URL) async throws(CloudKitError) -> FieldValue.Asset {
+  public func uploadAssetData(
+    _ data: Data,
+    to url: URL,
+    using uploader: AssetUploader? = nil
+  ) async throws(CloudKitError) -> FieldValue.Asset {
     do {
-      var request = URLRequest(url: url)
-      request.httpMethod = "POST"
-      request.httpBody = data
-      request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
-
-      #if !os(WASI)
-        let (responseData, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-          throw CloudKitError.invalidResponse
-        }
-
-        guard (200...299).contains(httpResponse.statusCode) else {
-          throw CloudKitError.httpError(statusCode: httpResponse.statusCode)
-        }
-
-        // Parse the asset dictionary from the response
-        // CloudKit returns: { "singleFile": { "wrappingKey": ..., "fileChecksum": ..., "receipt": ..., etc. } }
-        struct AssetUploadResponse: Codable {
-          let singleFile: AssetData
-
-          struct AssetData: Codable {
-            let wrappingKey: String?
-            let fileChecksum: String?
-            let receipt: String?
-            let referenceChecksum: String?
-            let size: Int64?
-          }
-        }
-
-        // Debug: log the raw response
-        if let responseString = String(data: responseData, encoding: .utf8) {
-          MistKitLogger.logDebug(
-            "Asset upload response: \(responseString)",
-            logger: MistKitLogger.api,
-            shouldRedact: false
+      // Use provided uploader or default to URLSession.shared
+      let uploadHandler = uploader ?? { data, url in
+        #if os(WASI)
+          throw CloudKitError.httpErrorWithRawResponse(
+            statusCode: 501,
+            rawResponse: "Asset uploads not supported on WASI"
           )
-        }
+        #else
+          return try await URLSession.shared.upload(data, to: url)
+        #endif
+      }
 
-        let uploadResponse = try JSONDecoder().decode(AssetUploadResponse.self, from: responseData)
+      // Perform the upload
+      let (statusCode, responseData) = try await uploadHandler(data, url)
 
-        // Convert to FieldValue.Asset
-        return FieldValue.Asset(
-          fileChecksum: uploadResponse.singleFile.fileChecksum,
-          size: uploadResponse.singleFile.size,
-          referenceChecksum: uploadResponse.singleFile.referenceChecksum,
-          wrappingKey: uploadResponse.singleFile.wrappingKey,
-          receipt: uploadResponse.singleFile.receipt,
-          downloadURL: nil  // Download URL is provided by CloudKit when fetching the record later
+      // Validate HTTP status code
+      guard let httpStatusCode = statusCode else {
+        throw CloudKitError.invalidResponse
+      }
+      guard (200...299).contains(httpStatusCode) else {
+        throw CloudKitError.httpError(statusCode: httpStatusCode)
+      }
+
+      // Debug: log the raw response
+      if let responseString = String(data: responseData, encoding: .utf8) {
+        MistKitLogger.logDebug(
+          "Asset upload response: \(responseString)",
+          logger: MistKitLogger.api,
+          shouldRedact: false
         )
-      #else
-        throw CloudKitError.underlyingError(
-          NSError(
-            domain: "MistKit",
-            code: -1,
-            userInfo: [NSLocalizedDescriptionKey: "Asset upload not supported on WASI"]
-          )
-        )
-      #endif
+      }
+
+      // Decode the response
+      let uploadResponse = try JSONDecoder().decode(AssetUploadResponse.self, from: responseData)
+
+      // Convert to FieldValue.Asset
+      return FieldValue.Asset(
+        fileChecksum: uploadResponse.singleFile.fileChecksum,
+        size: uploadResponse.singleFile.size,
+        referenceChecksum: uploadResponse.singleFile.referenceChecksum,
+        wrappingKey: uploadResponse.singleFile.wrappingKey,
+        receipt: uploadResponse.singleFile.receipt,
+        downloadURL: nil
+      )
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError
     } catch let decodingError as DecodingError {
@@ -428,12 +432,17 @@ extension CloudKitService {
       throw CloudKitError.decodingError(decodingError)
     } catch let urlError as URLError {
       MistKitLogger.logError(
-        "Network error uploading asset data: \(urlError)",
+        "Network error uploading asset: \(urlError)",
         logger: MistKitLogger.network,
         shouldRedact: false
       )
       throw CloudKitError.networkError(urlError)
     } catch {
+      MistKitLogger.logError(
+        "Error uploading asset data: \(error)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
       throw CloudKitError.underlyingError(error)
     }
   }

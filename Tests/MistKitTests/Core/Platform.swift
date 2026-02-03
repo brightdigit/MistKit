@@ -11,4 +11,14 @@ internal enum Platform {
     }
     return false
   }()
+
+  /// Returns true if running on WASM/WASI platform
+  /// WASM has limited memory (~65 MB linear), large allocations (15+ MB) will fail
+  internal static let isWasm: Bool = {
+    #if os(WASI)
+      return true
+    #else
+      return false
+    #endif
+  }()
 }

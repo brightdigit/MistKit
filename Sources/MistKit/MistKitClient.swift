@@ -28,11 +28,9 @@
 //
 
 import Crypto
-#if os(Linux)
-@preconcurrency import Foundation
-import FoundationNetworking
-#else
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
 #endif
 import HTTPTypes
 import OpenAPIRuntime
@@ -54,7 +52,10 @@ internal struct MistKitClient {
   ///   - transport: Custom transport for network requests
   /// - Throws: ClientError if initialization fails
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal init(configuration: MistKitConfiguration, transport: any ClientTransport) throws {
+  internal init(
+    configuration: MistKitConfiguration,
+    transport: any ClientTransport
+  ) throws {
     // Create appropriate TokenManager from configuration
     let tokenManager = try configuration.createTokenManager()
 
@@ -135,19 +136,29 @@ internal struct MistKitClient {
       privateKeyData: privateKeyData
     )
 
-    try self.init(configuration: configuration, tokenManager: tokenManager, transport: transport)
+    try self.init(
+      configuration: configuration,
+      tokenManager: tokenManager,
+      transport: transport
+    )
   }
 
   // MARK: - Convenience Initializers
 
   #if !os(WASI)
     /// Initialize a new MistKit client with default URLSessionTransport
-    /// - Parameter configuration: The CloudKit configuration including container,
-    ///   environment, and authentication
+    /// - Parameters:
+    ///   - configuration: The CloudKit configuration including container,
+    ///     environment, and authentication
     /// - Throws: ClientError if initialization fails
     @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    internal init(configuration: MistKitConfiguration) throws {
-      try self.init(configuration: configuration, transport: URLSessionTransport())
+    internal init(
+      configuration: MistKitConfiguration
+    ) throws {
+      try self.init(
+        configuration: configuration,
+        transport: URLSessionTransport()
+      )
     }
 
     /// Initialize a new MistKit client with a custom TokenManager and individual parameters

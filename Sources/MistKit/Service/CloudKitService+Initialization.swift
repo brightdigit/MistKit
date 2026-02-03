@@ -27,11 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if os(Linux)
-@preconcurrency import Foundation
-import FoundationNetworking
-#else
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
 #endif
 public import OpenAPIRuntime
 
@@ -59,7 +57,10 @@ extension CloudKitService {
       apiToken: apiToken,
       webAuthToken: webAuthToken
     )
-    self.mistKitClient = try MistKitClient(configuration: config, transport: transport)
+    self.mistKitClient = try MistKitClient(
+      configuration: config,
+      transport: transport
+    )
   }
 
   /// Initialize CloudKit service with API-only authentication
@@ -83,7 +84,10 @@ extension CloudKitService {
       keyID: nil,
       privateKeyData: nil
     )
-    self.mistKitClient = try MistKitClient(configuration: config, transport: transport)
+    self.mistKitClient = try MistKitClient(
+      configuration: config,
+      transport: transport
+    )
   }
 
   /// Initialize CloudKit service with a custom TokenManager

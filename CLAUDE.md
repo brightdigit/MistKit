@@ -97,6 +97,32 @@ swift run mistdemo --config-file ~/.mistdemo/config.json query
 
 ## Architecture Considerations
 
+### FieldValue Type Architecture
+
+MistKit uses separate types for requests and responses at the OpenAPI schema level to accurately model CloudKit's asymmetric API behavior:
+
+**Type Layers:**
+1. **Domain Layer**: `FieldValue` enum - Pure Swift types, no API metadata (Sources/MistKit/FieldValue.swift)
+2. **API Request Layer**: `FieldValueRequest` - No type field, CloudKit infers type from value structure
+3. **API Response Layer**: `FieldValueResponse` - Optional type field for explicit type information
+
+**Why Separate Request/Response Types?**
+- CloudKit API has asymmetric behavior: requests omit type field, responses may include it
+- OpenAPI schema accurately models this asymmetry (openapi.yaml:867-920)
+- Swift code generation produces type-safe request/response types
+- Compiler prevents accidentally using response types in requests
+- Cleaner architecture without nil type values in conversion code
+
+**Generated Types:**
+- `Components.Schemas.FieldValueRequest` - Used for modify, create, filter operations
+- `Components.Schemas.FieldValueResponse` - Used for query, lookup, changes responses
+- `Components.Schemas.RecordRequest` - Records in request bodies
+- `Components.Schemas.RecordResponse` - Records in response bodies
+
+**Conversion:**
+- Request conversion: `Extensions/OpenAPI/Components+FieldValue.swift` converts domain `FieldValue` → `FieldValueRequest`
+- Response conversion: `Service/FieldValue+Components.swift` converts `FieldValueResponse` → domain `FieldValue`
+
 ### Modern Swift Features to Utilize
 - Swift Concurrency (async/await) for all network operations
 - Structured concurrency with TaskGroup for parallel operations
@@ -154,6 +180,47 @@ MistKitLogger.logDebug(_:logger:shouldRedact:)    // Debug level
 - Set `MISTKIT_DISABLE_LOG_REDACTION=1` to disable redaction for debugging
 - Tokens, keys, and secrets are automatically masked in logged messages
 
+### Asset Upload Transport Design
+
+**⚠️ CRITICAL WARNING: Transport Separation**
+
+When providing a custom `AssetUploader` implementation:
+- **NEVER** use the CloudKit API transport (`ClientTransport`) for asset uploads
+- **MUST** use a separate URLSession instance, NOT shared with api.apple-cloudkit.com
+- **MUST NOT** share HTTP/2 connections between CloudKit API and CDN hosts
+- Custom uploaders should **ONLY** be used for testing or specialized CDN configurations
+- Production code should use the default implementation (`URLSession.shared`)
+
+**Why URLSession instead of ClientTransport?**
+
+Asset uploads use `URLSession.shared` directly rather than the injected `ClientTransport` to avoid HTTP/2 connection reuse issues:
+
+1. **Problem:** CloudKit API (api.apple-cloudkit.com) and CDN (cvws.icloud-content.com) are different hosts
+2. **HTTP/2 Issue:** Reusing the same HTTP/2 connection for both hosts causes 421 Misdirected Request errors
+3. **Solution:** Use separate URLSession for CDN uploads, maintaining distinct connection pools
+
+**Design:**
+- `AssetUploader` closure type allows dependency injection for testing
+- Default implementation uses `URLSession.shared.upload(_:to:)` with separate connection pool
+- Tests provide mock uploader closures without network calls
+- Platform-specific: WASI compilation excludes URLSession code via `#if !os(WASI)`
+- **CRITICAL:** Custom uploaders must maintain connection pool separation from CloudKit API
+
+**Implementation Details:**
+- AssetUploader type: `(Data, URL) async throws -> (statusCode: Int?, data: Data)`
+- Defined in: `Sources/MistKit/Core/AssetUploader.swift`
+- URLSession extension: `Sources/MistKit/Extensions/URLSession+AssetUpload.swift`
+- Upload orchestration: `Sources/MistKit/Service/CloudKitService+WriteOperations.swift`
+  - `uploadAssets()` - Complete two-step upload workflow
+  - `requestAssetUploadURL()` - Step 1: Get CDN upload URL
+  - `uploadAssetData()` - Step 2: Upload binary data to CDN
+
+**Future Consideration:**
+A `ClientTransport` extension could provide a generic upload method, but would need to:
+- Handle connection pooling separately for different hosts
+- Provide platform-specific implementations (URLSession, custom transports)
+- Maintain the same testability via dependency injection
+
 ### CloudKit Web Services Integration
 - Base URL: `https://api.apple-cloudkit.com`
 - Authentication: API Token + Web Auth Token or Server-to-Server Key Authentication
@@ -170,6 +237,18 @@ MistKitLogger.logDebug(_:logger:shouldRedact:)    // Debug level
 - Async test support with `async let` and `await`
 - Parameterized tests for testing multiple scenarios
 - See `testing-enablinganddisabling.md` for Swift Testing patterns
+
+### Asset Upload Testing
+
+**Integration Test Requirements:**
+- Verify connection pool separation between CloudKit API and CDN
+- Test HTTP/2 connection reuse prevention
+- Validate 421 Misdirected Request error handling
+- Mock uploaders should simulate realistic HTTP responses
+
+**Test Files:**
+- `Tests/MistKitTests/Service/CloudKitServiceUploadTests+*.swift`
+- `Tests/MistKitTests/Service/AssetUploadTokenTests.swift`
 
 ## Important Implementation Notes
 

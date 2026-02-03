@@ -16,7 +16,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.equals("name", .string("John"))
     #expect(filter.comparator == .EQUALS)
     #expect(filter.fieldName == "name")
-    #expect(filter.fieldValue?.type == .string)
   }
 
   @Test("FilterBuilder creates NOT_EQUALS filter")
@@ -28,7 +27,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.notEquals("age", .int64(25))
     #expect(filter.comparator == .NOT_EQUALS)
     #expect(filter.fieldName == "age")
-    #expect(filter.fieldValue?.type == .int64)
   }
 
   // MARK: - Comparison Filters
@@ -42,7 +40,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.lessThan("score", .double(100.0))
     #expect(filter.comparator == .LESS_THAN)
     #expect(filter.fieldName == "score")
-    #expect(filter.fieldValue?.type == .double)
   }
 
   @Test("FilterBuilder creates LESS_THAN_OR_EQUALS filter")
@@ -54,7 +51,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.lessThanOrEquals("count", .int64(50))
     #expect(filter.comparator == .LESS_THAN_OR_EQUALS)
     #expect(filter.fieldName == "count")
-    #expect(filter.fieldValue?.type == .int64)
   }
 
   @Test("FilterBuilder creates GREATER_THAN filter")
@@ -67,7 +63,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.greaterThan("createdAt", .date(date))
     #expect(filter.comparator == .GREATER_THAN)
     #expect(filter.fieldName == "createdAt")
-    #expect(filter.fieldValue?.type == .timestamp)
   }
 
   @Test("FilterBuilder creates GREATER_THAN_OR_EQUALS filter")
@@ -79,7 +74,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.greaterThanOrEquals("priority", .int64(3))
     #expect(filter.comparator == .GREATER_THAN_OR_EQUALS)
     #expect(filter.fieldName == "priority")
-    #expect(filter.fieldValue?.type == .int64)
   }
 
   // MARK: - String Filters
@@ -93,7 +87,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.beginsWith("title", "Hello")
     #expect(filter.comparator == .BEGINS_WITH)
     #expect(filter.fieldName == "title")
-    #expect(filter.fieldValue?.type == .string)
   }
 
   @Test("FilterBuilder creates NOT_BEGINS_WITH filter")
@@ -105,7 +98,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.notBeginsWith("email", "spam")
     #expect(filter.comparator == .NOT_BEGINS_WITH)
     #expect(filter.fieldName == "email")
-    #expect(filter.fieldValue?.type == .string)
   }
 
   @Test("FilterBuilder creates CONTAINS_ALL_TOKENS filter")
@@ -117,7 +109,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.containsAllTokens("description", "swift cloudkit")
     #expect(filter.comparator == .CONTAINS_ALL_TOKENS)
     #expect(filter.fieldName == "description")
-    #expect(filter.fieldValue?.type == .string)
   }
 
   // MARK: - List Filters
@@ -132,7 +123,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.in("status", values)
     #expect(filter.comparator == .IN)
     #expect(filter.fieldName == "status")
-    #expect(filter.fieldValue?.type == .list)
   }
 
   @Test("FilterBuilder creates NOT_IN filter")
@@ -145,7 +135,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.notIn("status", values)
     #expect(filter.comparator == .NOT_IN)
     #expect(filter.fieldName == "status")
-    #expect(filter.fieldValue?.type == .list)
   }
 
   @Test("FilterBuilder creates IN filter with numbers")
@@ -158,7 +147,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.in("categoryId", values)
     #expect(filter.comparator == .IN)
     #expect(filter.fieldName == "categoryId")
-    #expect(filter.fieldValue?.type == .list)
   }
 
   // MARK: - List Member Filters
@@ -172,7 +160,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.listContains("tags", .string("important"))
     #expect(filter.comparator == .LIST_CONTAINS)
     #expect(filter.fieldName == "tags")
-    #expect(filter.fieldValue?.type == .string)
   }
 
   @Test("FilterBuilder creates NOT_LIST_CONTAINS filter")
@@ -184,7 +171,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.notListContains("tags", .string("spam"))
     #expect(filter.comparator == .NOT_LIST_CONTAINS)
     #expect(filter.fieldName == "tags")
-    #expect(filter.fieldValue?.type == .string)
   }
 
   @Test("FilterBuilder creates LIST_MEMBER_BEGINS_WITH filter")
@@ -196,7 +182,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.listMemberBeginsWith("emails", "admin@")
     #expect(filter.comparator == .LIST_MEMBER_BEGINS_WITH)
     #expect(filter.fieldName == "emails")
-    #expect(filter.fieldValue?.type == .string)
   }
 
   @Test("FilterBuilder creates NOT_LIST_MEMBER_BEGINS_WITH filter")
@@ -208,7 +193,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.notListMemberBeginsWith("domains", "spam")
     #expect(filter.comparator == .NOT_LIST_MEMBER_BEGINS_WITH)
     #expect(filter.fieldName == "domains")
-    #expect(filter.fieldValue?.type == .string)
   }
 
   // MARK: - Complex Value Tests
@@ -234,7 +218,6 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.equals("owner", .reference(reference))
     #expect(filter.comparator == .EQUALS)
     #expect(filter.fieldName == "owner")
-    #expect(filter.fieldValue?.type == .reference)
   }
 
   @Test("FilterBuilder handles location values")
@@ -250,6 +233,5 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.equals("location", .location(location))
     #expect(filter.comparator == .EQUALS)
     #expect(filter.fieldName == "location")
-    #expect(filter.fieldValue?.type == .location)
   }
 }

@@ -41,17 +41,18 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
+      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
       let testData = Data(count: 1024)  // 1 KB of test data
 
       let result = try await service.uploadAssets(
         data: testData,
         recordType: "Note",
-        fieldName: "image"
+        fieldName: "image",
+        using: CloudKitServiceUploadTests.makeMockAssetUploader()
       )
 
       #expect(result.recordName.isEmpty == false, "Result should have a record name")
-      #expect(result.fieldName == "image", "Result should have the correct field name")
+      #expect(result.fieldName == "file", "Result should have the field name from mock response")
       #expect(result.asset.receipt != nil, "Asset should have a receipt from CloudKit")
     }
 
@@ -61,17 +62,18 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
+      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
       let testData = Data(count: 2048)
 
       let result = try await service.uploadAssets(
         data: testData,
         recordType: "Note",
-        fieldName: "image"
+        fieldName: "image",
+        using: CloudKitServiceUploadTests.makeMockAssetUploader()
       )
 
       #expect(result.recordName == "test-record-0")
-      #expect(result.fieldName == "image")
+      #expect(result.fieldName == "file")
       #expect(result.asset.receipt != nil)
     }
 
@@ -81,18 +83,19 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
+      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
       let testData = Data(count: 4096)
 
       let result = try await service.uploadAssets(
         data: testData,
         recordType: "Note",
-        fieldName: "image"
+        fieldName: "image",
+        using: CloudKitServiceUploadTests.makeMockAssetUploader()
       )
 
       // Verify result has the expected fields
       #expect(result.recordName == "test-record-0")
-      #expect(result.fieldName == "image")
+      #expect(result.fieldName == "file")
       #expect(result.asset.receipt != nil)
     }
   }

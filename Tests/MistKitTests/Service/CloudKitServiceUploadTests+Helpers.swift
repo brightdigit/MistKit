@@ -38,13 +38,31 @@ extension CloudKitServiceUploadTests {
   /// Test API token in 64-character hexadecimal format as required by MistKit validation
   private static let testAPIToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
 
+  /// Create a mock asset uploader that returns a successful upload response
+  internal static func makeMockAssetUploader() -> AssetUploader {
+    { data, url in
+      let response = """
+      {
+        "singleFile": {
+          "wrappingKey": "test-wrapping-key-abc123",
+          "fileChecksum": "test-checksum-def456",
+          "receipt": "test-receipt-token-xyz",
+          "referenceChecksum": "test-ref-checksum-789",
+          "size": \(data.count)
+        }
+      }
+      """
+      return (200, Data(response.utf8))
+    }
+  }
+
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeSuccessfulUploadService(
     tokenCount: Int = 1
-  ) throws -> CloudKitService {
-    let transport = MockTransport(
-      responseProvider: .successfulUpload(tokenCount: tokenCount)
-    )
+  ) async throws -> CloudKitService {
+    let responseProvider = ResponseProvider.successfulUpload(tokenCount: tokenCount)
+
+    let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: testAPIToken,
@@ -56,10 +74,10 @@ extension CloudKitServiceUploadTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeUploadValidationErrorService(
     _ errorType: UploadValidationErrorType
-  ) throws -> CloudKitService {
-    let transport = MockTransport(
-      responseProvider: .uploadValidationError(errorType)
-    )
+  ) async throws -> CloudKitService {
+    let responseProvider = ResponseProvider.uploadValidationError(errorType)
+
+    let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: testAPIToken,
@@ -69,10 +87,23 @@ extension CloudKitServiceUploadTests {
 
   /// Create service for auth errors
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal static func makeAuthErrorService() throws -> CloudKitService {
-    let transport = MockTransport(
-      responseProvider: .authenticationError()
+  internal static func makeAuthErrorService() async throws -> CloudKitService {
+    let responseProvider = ResponseProvider.authenticationError()
+
+    let transport = MockTransport(responseProvider: responseProvider)
+    return try CloudKitService(
+      containerIdentifier: "iCloud.com.example.test",
+      apiToken: testAPIToken,
+      transport: transport
     )
+  }
+
+  /// Create service for asset data upload testing
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  internal static func makeAssetDataUploadService(tokenCount: Int = 1) async throws -> CloudKitService {
+    let responseProvider = ResponseProvider.successfulUpload(tokenCount: tokenCount)
+
+    let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
       apiToken: testAPIToken,
@@ -153,6 +184,33 @@ extension ResponseConfig {
       statusCode: 400,
       serverErrorCode: "BAD_REQUEST",
       reason: reason
+    )
+  }
+
+  /// Creates a successful asset data upload response (binary upload to CDN)
+  ///
+  /// - Returns: ResponseConfig with CloudKit asset upload response
+  internal static func successfulAssetDataUpload() -> ResponseConfig {
+    let responseJSON = """
+      {
+        "singleFile": {
+          "wrappingKey": "test-wrapping-key-abc123",
+          "fileChecksum": "test-checksum-def456",
+          "receipt": "test-receipt-token-xyz",
+          "referenceChecksum": "test-ref-checksum-789",
+          "size": 1024
+        }
+      }
+      """
+
+    var headers = HTTPFields()
+    headers[.contentType] = "application/json"
+
+    return ResponseConfig(
+      statusCode: 200,
+      headers: headers,
+      body: responseJSON.data(using: .utf8),
+      error: nil
     )
   }
 }
