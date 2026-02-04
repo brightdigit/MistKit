@@ -209,7 +209,7 @@ extension CloudKitService {
     using uploader: AssetUploader? = nil
   ) async throws(CloudKitError) -> AssetUploadReceipt {
     // Validate data size (CloudKit limit is 15 MB)
-    let maxSize: Int = 15 * 1024 * 1024 // 15 MB
+    let maxSize: Int = 15 * 1_024 * 1_024 // 15 MB
     guard data.count <= maxSize else {
       throw CloudKitError.httpErrorWithRawResponse(
         statusCode: 413,

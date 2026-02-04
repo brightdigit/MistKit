@@ -106,10 +106,10 @@ extension CloudKitServiceUploadTests {
       // Test various valid sizes (CloudKit limit is 15 MB)
       let validSizes = [
         1,  // 1 byte
-        1024,  // 1 KB
-        1024 * 1024,  // 1 MB
-        10 * 1024 * 1024,  // 10 MB
-        15 * 1024 * 1024  // Exactly 15 MB (maximum allowed)
+        1_024,  // 1 KB
+        1_024 * 1_024,  // 1 MB
+        10 * 1_024 * 1_024,  // 10 MB
+        15 * 1_024 * 1_024  // Exactly 15 MB (maximum allowed)
       ]
 
       for size in validSizes {

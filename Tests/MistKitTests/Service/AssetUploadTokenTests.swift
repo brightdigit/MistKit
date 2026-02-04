@@ -88,7 +88,7 @@ internal struct AssetUploadTokenTests {
   internal func assetUploadReceiptInitializesWithAllFields() {
     let asset = FieldValue.Asset(
       fileChecksum: "abc123",
-      size: 1024,
+      size: 1_024,
       referenceChecksum: "ref456",
       wrappingKey: "wrap789",
       receipt: "receipt-token-xyz",
@@ -102,7 +102,7 @@ internal struct AssetUploadTokenTests {
     )
 
     #expect(result.asset.fileChecksum == "abc123")
-    #expect(result.asset.size == 1024)
+    #expect(result.asset.size == 1_024)
     #expect(result.asset.receipt == "receipt-token-xyz")
     #expect(result.recordName == "test-record")
     #expect(result.fieldName == "testField")

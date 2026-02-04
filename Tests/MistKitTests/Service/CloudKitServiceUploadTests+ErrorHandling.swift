@@ -42,7 +42,7 @@ extension CloudKitServiceUploadTests {
         return
       }
       let service = try await CloudKitServiceUploadTests.makeAuthErrorService()
-      let testData = Data(count: 1024)
+      let testData = Data(count: 1_024)
 
       do {
         _ = try await service.uploadAssets(
