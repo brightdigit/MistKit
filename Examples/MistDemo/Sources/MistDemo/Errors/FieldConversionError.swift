@@ -1,5 +1,5 @@
 //
-//  Array+Field.swift
+//  FieldConversionError.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,29 +30,17 @@
 public import Foundation
 public import MistKit
 
-extension Array where Element == Field {
-  /// Convert Field array to CloudKit fields dictionary
-  /// - Returns: Dictionary of field names to FieldValue enums
-  /// - Throws: FieldConversionError if conversion fails
-  public func toCloudKitFields() throws -> [String: FieldValue] {
-    try reduce(into: [:]) { result, field in
-      do {
-        let convertedValue = try field.type.convertValue(field.value)
-        guard let fieldValue = FieldValue(value: convertedValue, fieldType: field.type) else {
-          throw FieldConversionError.invalidFieldValue(
-            fieldType: field.type,
-            value: String(describing: convertedValue)
-          )
-        }
-        result[field.name] = fieldValue
-      } catch {
-        throw FieldConversionError.conversionFailed(
-          fieldName: field.name,
-          fieldType: field.type,
-          value: field.value,
-          reason: error.localizedDescription
-        )
-      }
+/// Errors that can occur during field conversion
+public enum FieldConversionError: Error, LocalizedError {
+  case conversionFailed(fieldName: String, fieldType: FieldType, value: String, reason: String)
+  case invalidFieldValue(fieldType: FieldType, value: String)
+
+  public var errorDescription: String? {
+    switch self {
+    case .conversionFailed(let fieldName, let fieldType, let value, let reason):
+      return "Failed to convert field '\(fieldName)' of type '\(fieldType.rawValue)' with value '\(value)': \(reason)"
+    case .invalidFieldValue(let fieldType, let value):
+      return "Unable to convert value '\(value)' to FieldValue for type '\(fieldType.rawValue)'"
     }
   }
 }
