@@ -15,20 +15,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: [MistDemo, BushelCloud, CelestraCloud]
         swift:
           - version: "6.2"
         include:
           - example: MistDemo
             os: ubuntu-latest
           - example: MistDemo
-            os: macos-latest
+            os: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
           - example: BushelCloud
             os: ubuntu-latest
           - example: BushelCloud
-            os: macos-latest
+            os: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
           - example: CelestraCloud
             os: macos-26
+            xcode: "/Applications/Xcode_26.2.app"
 
     steps:
       - name: Checkout
@@ -40,6 +42,7 @@ jobs:
         with:
           working-directory: Examples/${{ matrix.example }}
           type: ""
+          xcode: ${{ matrix.xcode }}
 
       - name: Process Coverage for ${{ matrix.example }}
         if: steps.build.outputs.contains-code-coverage == 'true'
