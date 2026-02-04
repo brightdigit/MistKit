@@ -42,7 +42,7 @@ extension CloudKitServiceUploadTests {
         return
       }
       let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
-      let testData = Data(count: 1024)  // 1 KB of test data
+      let testData = Data(count: 1_024)  // 1 KB of test data
 
       let result = try await service.uploadAssets(
         data: testData,
@@ -63,7 +63,7 @@ extension CloudKitServiceUploadTests {
         return
       }
       let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
-      let testData = Data(count: 2048)
+      let testData = Data(count: 2_048)
 
       let result = try await service.uploadAssets(
         data: testData,
@@ -84,7 +84,7 @@ extension CloudKitServiceUploadTests {
         return
       }
       let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
-      let testData = Data(count: 4096)
+      let testData = Data(count: 4_096)
 
       let result = try await service.uploadAssets(
         data: testData,
