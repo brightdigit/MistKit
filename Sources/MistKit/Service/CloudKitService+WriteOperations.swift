@@ -38,17 +38,51 @@ import OpenAPIRuntime
   import OpenAPIURLSession
 #endif
 
-// Response structure for CloudKit asset upload
-// CloudKit returns: { "singleFile": { "wrappingKey": ..., "fileChecksum": ..., "receipt": ..., etc. } }
-private struct AssetUploadResponse: Codable {
-    let singleFile: AssetData
+/// Response structure for CloudKit CDN asset upload
+///
+/// After uploading binary data to the CloudKit CDN, the server returns this structure
+/// containing the asset metadata needed to associate the upload with a record field.
+///
+/// This type is useful when implementing custom upload workflows or when you need
+/// to perform the upload steps individually rather than using the combined `uploadAssets()` method.
+///
+/// Response format: `{ "singleFile": { "wrappingKey": ..., "fileChecksum": ..., "receipt": ..., etc. } }`
+public struct AssetUploadResponse: Codable, Sendable {
+    /// The uploaded asset data containing checksums and receipt
+    public let singleFile: AssetData
 
-    struct AssetData: Codable {
-        let wrappingKey: String?
-        let fileChecksum: String?
-        let receipt: String?
-        let referenceChecksum: String?
-        let size: Int64?
+    /// Asset metadata returned from CloudKit CDN
+    public struct AssetData: Codable, Sendable {
+        /// Wrapping key for encrypted assets
+        public let wrappingKey: String?
+        /// SHA256 checksum of the uploaded file
+        public let fileChecksum: String?
+        /// Receipt token proving successful upload
+        public let receipt: String?
+        /// Reference checksum for asset verification
+        public let referenceChecksum: String?
+        /// Size of the uploaded asset in bytes
+        public let size: Int64?
+
+        /// Initialize asset data
+        public init(
+            wrappingKey: String?,
+            fileChecksum: String?,
+            receipt: String?,
+            referenceChecksum: String?,
+            size: Int64?
+        ) {
+            self.wrappingKey = wrappingKey
+            self.fileChecksum = fileChecksum
+            self.receipt = receipt
+            self.referenceChecksum = referenceChecksum
+            self.size = size
+        }
+    }
+
+    /// Initialize asset upload response
+    public init(singleFile: AssetData) {
+        self.singleFile = singleFile
     }
 }
 
