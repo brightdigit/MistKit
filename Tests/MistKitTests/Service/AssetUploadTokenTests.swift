@@ -84,8 +84,8 @@ internal struct AssetUploadTokenTests {
     #expect(token1 != token3, "Tokens with different URLs should not be equal")
   }
 
-  @Test("AssetUploadResult initializes with all fields")
-  internal func assetUploadResultInitializesWithAllFields() {
+  @Test("AssetUploadReceipt initializes with all fields")
+  internal func assetUploadReceiptInitializesWithAllFields() {
     let asset = FieldValue.Asset(
       fileChecksum: "abc123",
       size: 1024,
@@ -95,7 +95,7 @@ internal struct AssetUploadTokenTests {
       downloadURL: "https://cvws.icloud-content.com/download"
     )
 
-    let result = AssetUploadResult(
+    let result = AssetUploadReceipt(
       asset: asset,
       recordName: "test-record",
       fieldName: "testField"
@@ -108,11 +108,11 @@ internal struct AssetUploadTokenTests {
     #expect(result.fieldName == "testField")
   }
 
-  @Test("AssetUploadResult initializes with minimal asset data")
-  internal func assetUploadResultInitializesWithMinimalAssetData() {
+  @Test("AssetUploadReceipt initializes with minimal asset data")
+  internal func assetUploadReceiptInitializesWithMinimalAssetData() {
     let asset = FieldValue.Asset(receipt: "minimal-receipt")
 
-    let result = AssetUploadResult(
+    let result = AssetUploadReceipt(
       asset: asset,
       recordName: "record1",
       fieldName: "field1"

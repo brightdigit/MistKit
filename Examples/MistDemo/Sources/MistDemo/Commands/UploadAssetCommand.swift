@@ -188,7 +188,7 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
     /// Create or update a record with the uploaded asset
     /// The asset metadata (receipt, checksums) from CloudKit must be used in the record
     private func createOrUpdateRecordWithAsset(
-        result: AssetUploadResult,
+        result: AssetUploadReceipt,
         service: CloudKitService
     ) async throws -> RecordInfo {
         // Use the complete asset data from the upload result

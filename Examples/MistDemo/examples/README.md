@@ -124,7 +124,7 @@ swift run mistdemo upload-asset --file-path document.pdf --output json
 
 **What it demonstrates**:
 1. Binary asset upload to CloudKit CDN
-2. AssetUploadResult containing receipt and checksums
+2. AssetUploadReceipt containing receipt and checksums
 3. Two-step workflow: upload asset, then associate with record
 4. Error handling for missing files and size limits
 5. Using asset metadata in subsequent record operations

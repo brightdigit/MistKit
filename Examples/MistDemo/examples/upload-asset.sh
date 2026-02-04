@@ -84,7 +84,7 @@ ASSET_CHECKSUM=$(echo "$UPLOAD_OUTPUT" | jq -r '.asset.fileChecksum')
 
 echo ""
 echo -e "${YELLOW}Step 2: Create record with asset field${NC}"
-echo "Note: The upload-asset command returns an AssetUploadResult containing the complete asset dictionary"
+echo "Note: The upload-asset command returns an AssetUploadReceipt containing the complete asset dictionary"
 echo "      Use this asset data when creating or updating records with asset fields"
 echo ""
 
@@ -149,7 +149,7 @@ echo -e "${BLUE}Asset Upload Examples Complete${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 echo -e "${YELLOW}💡 Key Takeaways:${NC}"
-echo "  • upload-asset returns AssetUploadResult with complete asset metadata"
+echo "  • upload-asset returns AssetUploadReceipt with complete asset metadata"
 echo "  • Asset includes receipt, checksums, and download URL"
 echo "  • Use this asset data when creating/updating records with asset fields"
 echo "  • CloudKit enforces file size limits on uploads"

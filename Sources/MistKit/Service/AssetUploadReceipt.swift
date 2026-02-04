@@ -1,5 +1,5 @@
 //
-//  AssetUploadResult.swift
+//  AssetUploadReceipt.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,12 +29,12 @@
 
 public import Foundation
 
-/// Result of an asset upload operation
+/// Receipt from uploading an asset to CloudKit
 ///
 /// After uploading binary data to CloudKit, you receive an asset dictionary containing
 /// the receipt, checksums, and other metadata needed to associate the asset with a record.
-/// This type contains that complete asset information.
-public struct AssetUploadResult: Sendable {
+/// This type contains that complete asset information along with the target record and field.
+public struct AssetUploadReceipt: Sendable {
   /// The complete asset data including receipt and checksums
   /// Use this when creating or updating records
   public let asset: FieldValue.Asset
@@ -45,7 +45,7 @@ public struct AssetUploadResult: Sendable {
   /// The field name this asset should be assigned to
   public let fieldName: String
 
-  /// Initialize an asset upload result
+  /// Initialize an asset upload receipt
   public init(asset: FieldValue.Asset, recordName: String, fieldName: String) {
     self.asset = asset
     self.recordName = recordName

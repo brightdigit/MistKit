@@ -255,7 +255,7 @@ extension CloudKitService {
     fieldName: String,
     recordName: String? = nil,
     using uploader: AssetUploader? = nil
-  ) async throws(CloudKitError) -> AssetUploadResult {
+  ) async throws(CloudKitError) -> AssetUploadReceipt {
     // Validate data size (CloudKit limit is 15 MB)
     let maxSize: Int = 15 * 1024 * 1024 // 15 MB
     guard data.count <= maxSize else {
@@ -290,7 +290,7 @@ extension CloudKitService {
       let asset = try await uploadAssetData(data, to: uploadURL, using: uploader)
 
       // Return complete result with asset data
-      return AssetUploadResult(
+      return AssetUploadReceipt(
         asset: asset,
         recordName: urlToken.recordName ?? "unknown",
         fieldName: urlToken.fieldName ?? fieldName
