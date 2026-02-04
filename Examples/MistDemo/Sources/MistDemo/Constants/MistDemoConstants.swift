@@ -49,6 +49,7 @@ public enum MistDemoConstants {
         public static let port = "port"
         public static let jsonFile = "json.file"
         public static let stdin = "stdin"
+        public static let recordChangeTag = "record.change.tag"
     }
     
     // MARK: - Default Values
@@ -180,6 +181,7 @@ public enum MistDemoConstants {
     public enum Commands {
         public static let query = "query"
         public static let create = "create"
+        public static let update = "update"
         public static let currentUser = "current-user"
         public static let authToken = "auth-token"
     }

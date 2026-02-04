@@ -114,7 +114,11 @@ internal struct LoggingMiddleware: ClientMiddleware {
           "⚠️  421 Misdirected Request - The server cannot produce a response for this request")
       }
 
-      return await logResponseBody(body)
+      #if !os(WASI)
+        return await logResponseBody(body)
+      #else
+        return body
+      #endif
     }
 
     /// Log response body content

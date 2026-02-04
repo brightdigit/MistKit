@@ -51,10 +51,10 @@ extension Components.Schemas.RecordOperation {
       fatalError("Unknown operation type: \(recordOperation.operationType)")
     }
 
-    // Convert fields to OpenAPI FieldValue format
+    // Convert fields to OpenAPI FieldValueRequest format (for requests)
     let apiFields = recordOperation.fields.mapValues {
-      fieldValue -> Components.Schemas.FieldValue in
-      Components.Schemas.FieldValue(from: fieldValue)
+      fieldValue -> Components.Schemas.FieldValueRequest in
+      Components.Schemas.FieldValueRequest(from: fieldValue)
     }
 
     // Build the OpenAPI record operation

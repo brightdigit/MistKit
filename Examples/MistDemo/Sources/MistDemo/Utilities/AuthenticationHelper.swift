@@ -193,7 +193,7 @@ enum AuthenticationHelper {
     /// Resolves web auth token from option or environment variable
     static func resolveWebAuthToken(_ webAuthToken: String) -> String? {
         let token = webAuthToken.isEmpty ?
-            ProcessInfo.processInfo.environment["CLOUDKIT_WEBAUTH_TOKEN"] ?? "" :
+            EnvironmentConfig.getOptional(MistDemoConstants.EnvironmentVars.cloudKitWebAuthToken) ?? "" :
             webAuthToken
         return token.isEmpty ? nil : token
     }

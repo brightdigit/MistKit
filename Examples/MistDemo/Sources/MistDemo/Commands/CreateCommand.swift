@@ -65,6 +65,7 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
             int64       Integer numbers
             double      Decimal numbers
             timestamp   Dates (ISO 8601 or Unix timestamp)
+            asset       Asset URL (from upload-asset command)
 
         EXAMPLES:
 
@@ -93,10 +94,13 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
           6. Table output format:
              mistdemo create --field "title:string:Test" --output-format table
 
+          7. With asset (after upload-asset):
+             mistdemo create --field "title:string:My Photo, image:asset:https://cws.icloud-content.com:443/..."
+
         NOTES:
           • Record name is auto-generated if not provided
           • JSON files auto-detect field types from values
-          • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEBAUTH_TOKEN
+          • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN
             to avoid repeating tokens
         """
     
@@ -115,8 +119,8 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
             let recordName = config.recordName ?? generateRecordName()
             
             // Convert fields to CloudKit format
-            let cloudKitFields = try convertFieldsToCloudKit(config.fields)
-            
+            let cloudKitFields = try config.fields.toCloudKitFields()
+
             // Create the record
             // NOTE: Zone support requires enhancements to CloudKitService.createRecord method
             let recordInfo = try await client.createRecord(
@@ -139,36 +143,6 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
         let timestamp = Int(Date().timeIntervalSince1970)
         let randomSuffix = String(Int.random(in: MistDemoConstants.Limits.randomSuffixMin...MistDemoConstants.Limits.randomSuffixMax))
         return "\(config.recordType.lowercased())-\(timestamp)-\(randomSuffix)"
-    }
-    
-    /// Convert Field array to CloudKit fields dictionary
-    private func convertFieldsToCloudKit(_ fields: [Field]) throws -> [String: FieldValue] {
-        var cloudKitFields: [String: FieldValue] = [:]
-        
-        for field in fields {
-            do {
-                let convertedValue = try field.type.convertValue(field.value)
-                let fieldValue = try convertToFieldValue(convertedValue, type: field.type)
-                cloudKitFields[field.name] = fieldValue
-            } catch {
-                throw CreateError.fieldConversionError(field.name, field.type, field.value, error.localizedDescription)
-            }
-        }
-        
-        return cloudKitFields
-    }
-    
-    /// Convert a value to the appropriate FieldValue enum case using the FieldValue extension
-    private func convertToFieldValue(_ value: Any, type: FieldType) throws -> FieldValue {
-        guard let fieldValue = FieldValue(value: value, fieldType: type) else {
-            throw CreateError.fieldConversionError(
-                "",
-                type,
-                String(describing: value),
-                "Unable to convert value to FieldValue"
-            )
-        }
-        return fieldValue
     }
 }
 

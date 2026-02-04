@@ -316,7 +316,7 @@ struct AuthenticationHelperTests {
   func resolveWebAuthTokenReturnsNilForEmpty() {
     let resolved = AuthenticationHelper.resolveWebAuthToken("")
     // Should return nil if environment variable not set
-    if ProcessInfo.processInfo.environment["CLOUDKIT_WEBAUTH_TOKEN"] == nil {
+    if ProcessInfo.processInfo.environment["CLOUDKIT_WEB_AUTH_TOKEN"] == nil {
       #expect(resolved == nil)
     }
   }
@@ -324,8 +324,8 @@ struct AuthenticationHelperTests {
   @Test("resolveWebAuthToken checks environment variable")
   func resolveWebAuthTokenChecksEnvironment() {
     // Set environment variable temporarily
-    setenv("CLOUDKIT_WEBAUTH_TOKEN", "env-token", 1)
-    defer { unsetenv("CLOUDKIT_WEBAUTH_TOKEN") }
+    setenv("CLOUDKIT_WEB_AUTH_TOKEN", "env-token", 1)
+    defer { unsetenv("CLOUDKIT_WEB_AUTH_TOKEN") }
 
     let resolved = AuthenticationHelper.resolveWebAuthToken("")
     #expect(resolved == "env-token")

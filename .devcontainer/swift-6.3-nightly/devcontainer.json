@@ -1,0 +1,15 @@
+{
+  "name": "Swift 6.3 Nightly Development Container",
+  "image": "swift:6.3-nightly-jammy",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "sswg.swift-lang"
+      ]
+    }
+  },
+  "postCreateCommand": "swift --version"
+}

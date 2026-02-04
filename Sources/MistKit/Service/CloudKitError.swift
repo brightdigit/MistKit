@@ -28,6 +28,9 @@
 //
 
 public import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 import OpenAPIRuntime
 
 /// Represents errors that can occur when interacting with CloudKit Web Services
