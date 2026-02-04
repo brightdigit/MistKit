@@ -36,7 +36,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          plugin_marketplaces: 'anthropics/claude-code'
+          plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review'
           allowed_bots: 'codefactor-io[bot]'
           prompt: |
