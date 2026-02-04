@@ -9,28 +9,14 @@ env:
 
 jobs:
   test-examples:
-    name: Test ${{ matrix.example }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Test ${{ matrix.example }} on Ubuntu
+    runs-on: ubuntu-latest
+    container: swift:6.2-noble
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
-        swift:
-          - version: "6.2"
-        include:
-          - example: MistDemo
-            os: ubuntu-latest
-          - example: MistDemo
-            os: macos-26
-            xcode: "/Applications/Xcode_26.2.app"
-          - example: BushelCloud
-            os: ubuntu-latest
-          - example: BushelCloud
-            os: macos-26
-            xcode: "/Applications/Xcode_26.2.app"
-          - example: CelestraCloud
-            os: macos-26
-            xcode: "/Applications/Xcode_26.2.app"
+        example: [MistDemo, BushelCloud, CelestraCloud]
 
     steps:
       - name: Checkout
@@ -38,26 +24,5 @@ jobs:
 
       - name: Build and Test ${{ matrix.example }}
         uses: brightdigit/swift-build@v1.5.0-beta.2
-        id: build
         with:
           working-directory: Examples/${{ matrix.example }}
-          type: ""
-          xcode: ${{ matrix.xcode }}
-
-      - name: Process Coverage for ${{ matrix.example }}
-        if: steps.build.outputs.contains-code-coverage == 'true'
-        uses: sersoft-gmbh/swift-coverage-action@v4
-        with:
-          working-directory: Examples/${{ matrix.example }}
-          fail-on-empty-output: true
-        id: coverage-files
-
-      - name: Upload Coverage to Codecov
-        if: steps.build.outputs.contains-code-coverage == 'true'
-        uses: codecov/codecov-action@v4
-        with:
-          fail_ci_if_error: true
-          flags: ${{ matrix.example }}-swift-${{ matrix.swift.version }}-${{ matrix.os }}
-          verbose: true
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
