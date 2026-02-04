@@ -38,10 +38,10 @@ public struct MistDemoConfiguration: Sendable {
     self.configReader = ConfigReader(providers: [
       // 1. Command line arguments (highest priority)
       CommandLineArgumentsProvider(),
-      
-      // 2. Environment variables 
+
+      // 2. Environment variables
       EnvironmentVariablesProvider(),
-      
+
       // 3. In-memory defaults (lowest priority)
       InMemoryProvider(values: [
         "port": 8080,
@@ -51,6 +51,13 @@ public struct MistDemoConfiguration: Sendable {
         "test.adaptive": false,
         "test.server.to.server": false
       ])
+    ])
+  }
+
+  /// Internal initializer for testing with InMemoryProvider
+  init(testProvider: InMemoryProvider) {
+    self.configReader = ConfigReader(providers: [
+      testProvider
     ])
   }
 

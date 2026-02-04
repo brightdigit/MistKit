@@ -53,8 +53,8 @@ struct MistKitClientFactoryTests {
         testApiOnly: Bool = false,
         testAdaptive: Bool = false,
         testServerToServer: Bool = false
-    ) -> MistDemoConfig {
-        return MistDemoConfig(
+    ) throws -> MistDemoConfig {
+        return try MistDemoConfig(
             containerIdentifier: containerIdentifier,
             apiToken: apiToken,
             environment: environment,
@@ -77,7 +77,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Create client with API token only")
     func createWithAPITokenOnly() throws {
-        let config = makeConfig(apiToken: "api-token-123")
+        let config = try makeConfig(apiToken: "api-token-123")
 
         let client = try MistKitClientFactory.create(from: config)
 
@@ -86,7 +86,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Throw error when API token is missing")
     func throwErrorWhenAPITokenMissing() {
-        let config = makeConfig(apiToken: "")
+        let config = try! makeConfig(apiToken: "")
 
         #expect(throws: ConfigurationError.self) {
             try MistKitClientFactory.create(from: config)
@@ -97,7 +97,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Create client with web auth token")
     func createWithWebAuthToken() throws {
-        let config = makeConfig(
+        let config = try makeConfig(
             apiToken: "api-token",
             webAuthToken: "web-auth-token"
         )
@@ -109,7 +109,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Web auth token takes precedence over server-to-server")
     func webAuthTokenPrecedence() throws {
-        let config = makeConfig(
+        let config = try makeConfig(
             apiToken: "api-token",
             webAuthToken: "web-auth-token",
             keyID: "key-id",
@@ -125,7 +125,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Create client with server-to-server auth", .enabled(if: isServerToServerSupported()))
     func createWithServerToServerAuth() throws {
-        let config = makeConfig(
+        let config = try makeConfig(
             apiToken: "api-token",
             keyID: "test-key-id",
             privateKey: validPrivateKey
@@ -138,7 +138,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Throw error when server-to-server auth incomplete", .enabled(if: isServerToServerSupported()))
     func throwErrorWhenServerToServerIncomplete() {
-        let config = makeConfig(
+        let config = try! makeConfig(
             apiToken: "api-token",
             keyID: "test-key-id"
             // privateKey missing
@@ -153,7 +153,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Create client for public database")
     func createForPublicDatabase() throws {
-        let config = makeConfig(apiToken: "api-token")
+        let config = try makeConfig(apiToken: "api-token")
 
         let client = try MistKitClientFactory.createForPublicDatabase(from: config)
 
@@ -162,7 +162,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Public database creation requires API token")
     func publicDatabaseRequiresAPIToken() {
-        let config = makeConfig(apiToken: "")
+        let config = try! makeConfig(apiToken: "")
 
         #expect(throws: ConfigurationError.self) {
             try MistKitClientFactory.createForPublicDatabase(from: config)
@@ -173,7 +173,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Create client with custom token manager")
     func createWithCustomTokenManager() throws {
-        let config = makeConfig(apiToken: "api-token")
+        let config = try makeConfig(apiToken: "api-token")
         let tokenManager = APITokenManager(apiToken: "custom-token")
 
         let client = try MistKitClientFactory.create(
@@ -187,7 +187,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Create client with custom token manager for public database")
     func createWithCustomTokenManagerPublicDB() throws {
-        let config = makeConfig(apiToken: "api-token")
+        let config = try makeConfig(apiToken: "api-token")
         let tokenManager = APITokenManager(apiToken: "custom-token")
 
         let client = try MistKitClientFactory.create(
@@ -203,7 +203,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Create client with development environment")
     func createWithDevelopmentEnvironment() throws {
-        let config = makeConfig(
+        let config = try makeConfig(
             apiToken: "api-token",
             environment: .development
         )
@@ -215,7 +215,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Create client with production environment")
     func createWithProductionEnvironment() throws {
-        let config = makeConfig(
+        let config = try makeConfig(
             apiToken: "api-token",
             environment: .production
         )
@@ -229,7 +229,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Create client with custom container identifier")
     func createWithCustomContainerIdentifier() throws {
-        let config = makeConfig(
+        let config = try makeConfig(
             containerIdentifier: "iCloud.com.custom.App",
             apiToken: "api-token"
         )
@@ -245,7 +245,7 @@ struct MistKitClientFactoryTests {
     func privateKeyFileNotImplemented() throws {
         // Since loadPrivateKeyFromFile is private and returns nil on error,
         // we test the behavior indirectly
-        let config = makeConfig(
+        let config = try makeConfig(
             apiToken: "api-token",
             keyID: "key-id",
             privateKeyFile: "/non/existent/file.pem"
@@ -260,7 +260,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Missing API token throws ConfigurationError")
     func missingAPITokenError() {
-        let config = makeConfig(apiToken: "")
+        let config = try! makeConfig(apiToken: "")
 
         do {
             _ = try MistKitClientFactory.create(from: config)
@@ -278,7 +278,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Empty web auth token falls back to other auth")
     func emptyWebAuthTokenFallback() throws {
-        let config = makeConfig(
+        let config = try makeConfig(
             apiToken: "api-token",
             webAuthToken: ""
         )
@@ -290,7 +290,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Empty keyID falls back to API-only auth")
     func emptyKeyIDFallback() throws {
-        let config = makeConfig(
+        let config = try makeConfig(
             apiToken: "api-token",
             keyID: "",
             privateKey: validPrivateKey
@@ -303,7 +303,7 @@ struct MistKitClientFactoryTests {
 
     @Test("Empty private key falls back to API-only auth")
     func emptyPrivateKeyFallback() throws {
-        let config = makeConfig(
+        let config = try makeConfig(
             apiToken: "api-token",
             keyID: "key-id",
             privateKey: ""
@@ -332,43 +332,5 @@ struct MistKitClientFactoryTests {
         BAsTJ0FwcGxlIFdvcmxkd2lkZSBEZXZlbG9wZXIgUmVsYXRpb25zMRQwEgYDVQQD
         -----END PRIVATE KEY-----
         """
-    }
-}
-
-// MARK: - MistDemoConfig Extension for Testing
-
-extension MistDemoConfig {
-    init(
-        containerIdentifier: String,
-        apiToken: String,
-        environment: MistKit.Environment,
-        webAuthToken: String?,
-        keyID: String?,
-        privateKey: String?,
-        privateKeyFile: String?,
-        host: String,
-        port: Int,
-        authTimeout: Double,
-        skipAuth: Bool,
-        testAllAuth: Bool,
-        testApiOnly: Bool,
-        testAdaptive: Bool,
-        testServerToServer: Bool
-    ) {
-        self.containerIdentifier = containerIdentifier
-        self.apiToken = apiToken
-        self.environment = environment
-        self.webAuthToken = webAuthToken
-        self.keyID = keyID
-        self.privateKey = privateKey
-        self.privateKeyFile = privateKeyFile
-        self.host = host
-        self.port = port
-        self.authTimeout = authTimeout
-        self.skipAuth = skipAuth
-        self.testAllAuth = testAllAuth
-        self.testApiOnly = testApiOnly
-        self.testAdaptive = testAdaptive
-        self.testServerToServer = testServerToServer
     }
 }

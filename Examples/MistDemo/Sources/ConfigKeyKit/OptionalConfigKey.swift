@@ -47,6 +47,9 @@ public struct OptionalConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
   internal let styles: [ConfigKeySource: any NamingStyle]
   internal let explicitKeys: [ConfigKeySource: String]
 
+  /// The base key string used for this configuration key
+  public var base: String? { baseKey }
+
   /// Initialize with explicit CLI and ENV keys (no default)
   public init(cli: String? = nil, env: String? = nil) {
     self.baseKey = nil
