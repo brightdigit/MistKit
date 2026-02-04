@@ -2,7 +2,7 @@ name: Examples
 
 on:
   pull_request:
-    branches: [main]
+    branches: [v1.0.0-alpha.4]
 
 env:
   PACKAGE_NAME: MistKit
