@@ -40,7 +40,7 @@ extension CloudKitServiceUploadTests {
 
   /// Create a mock asset uploader that returns a successful upload response
   internal static func makeMockAssetUploader() -> AssetUploader {
-    { data, url in
+    { data, _ in
       let response = """
       {
         "singleFile": {
