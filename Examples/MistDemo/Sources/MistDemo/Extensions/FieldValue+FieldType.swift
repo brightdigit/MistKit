@@ -76,7 +76,20 @@ extension FieldValue {
             guard let stringValue = value as? String else { return nil }
             self = .bytes(stringValue)
 
-        case .asset, .location, .reference:
+        case .asset:
+            // Value should be the URL from upload token
+            guard let urlString = value as? String else { return nil }
+            let asset = FieldValue.Asset(
+                fileChecksum: nil,
+                size: nil,
+                referenceChecksum: nil,
+                wrappingKey: nil,
+                receipt: nil,
+                downloadURL: urlString
+            )
+            self = .asset(asset)
+
+        case .location, .reference:
             // These complex types require specialized handling
             // For now, return nil to indicate they're not supported via simple conversion
             return nil

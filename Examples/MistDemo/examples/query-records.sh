@@ -20,7 +20,7 @@ NC='\033[0m'
 
 # Configuration
 API_TOKEN="${CLOUDKIT_API_TOKEN}"
-WEB_AUTH_TOKEN="${CLOUDKIT_WEBAUTH_TOKEN}"
+WEB_AUTH_TOKEN="${CLOUDKIT_WEB_AUTH_TOKEN}"
 CONFIG_FILE="$HOME/.mistdemo/config.json"
 
 echo -e "${GREEN}🔍 MistDemo Query Examples${NC}"
@@ -36,7 +36,7 @@ if [ -z "$API_TOKEN" ] || [ -z "$WEB_AUTH_TOKEN" ]; then
         echo "❌ No authentication tokens found."
         echo "Run ./examples/auth-flow.sh first or set environment variables:"
         echo "   export CLOUDKIT_API_TOKEN=your_api_token"
-        echo "   export CLOUDKIT_WEBAUTH_TOKEN=your_web_auth_token"
+        echo "   export CLOUDKIT_WEB_AUTH_TOKEN=your_web_auth_token"
         exit 1
     fi
 fi

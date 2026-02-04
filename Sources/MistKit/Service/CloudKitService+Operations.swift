@@ -28,6 +28,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 import OpenAPIRuntime
 
 #if !os(WASI)
@@ -114,6 +117,85 @@ extension CloudKitService {
     } catch {
       MistKitLogger.logError(
         "Unexpected error in listZones: \(error)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.underlyingError(error)
+    }
+  }
+
+  /// Lookup specific zones by their IDs
+  ///
+  /// Fetches detailed information about multiple zones in a single request.
+  /// Unlike listZones which returns all zones, this operation retrieves
+  /// specific zones identified by their zone IDs.
+  ///
+  /// - Parameter zoneIDs: Array of zone identifiers to lookup
+  /// - Returns: Array of ZoneInfo objects for the requested zones
+  /// - Throws: CloudKitError if the lookup fails
+  ///
+  /// Example:
+  /// ```swift
+  /// let zones = try await service.lookupZones(
+  ///   zoneIDs: [
+  ///     ZoneID(zoneName: "Articles", ownerName: nil),
+  ///     ZoneID(zoneName: "Images", ownerName: nil)
+  ///   ]
+  /// )
+  /// ```
+  public func lookupZones(zoneIDs: [ZoneID]) async throws(CloudKitError) -> [ZoneInfo] {
+    // Validation
+    guard !zoneIDs.isEmpty else {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 400,
+        rawResponse: "zoneIDs cannot be empty"
+      )
+    }
+
+    do {
+      let response = try await client.lookupZones(
+        .init(
+          path: createLookupZonesPath(containerIdentifier: containerIdentifier),
+          body: .json(
+            .init(
+              zones: zoneIDs.map { Components.Schemas.ZoneID(from: $0) }
+            )
+          )
+        )
+      )
+
+      let zonesData: Components.Schemas.ZonesLookupResponse =
+        try await responseProcessor.processLookupZonesResponse(response)
+
+      return zonesData.zones?.compactMap { zone in
+        guard let zoneID = zone.zoneID else {
+          return nil
+        }
+        return ZoneInfo(
+          zoneName: zoneID.zoneName ?? "Unknown",
+          ownerRecordName: zoneID.ownerName,
+          capabilities: []
+        )
+      } ?? []
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "JSON decoding failed in lookupZones: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error in lookupZones: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
+      MistKitLogger.logError(
+        "Unexpected error in lookupZones: \(error)",
         logger: MistKitLogger.api,
         shouldRedact: false
       )
@@ -326,6 +408,152 @@ extension CloudKitService {
     }
   }
 
+  /// Fetch record changes since a sync token
+  ///
+  /// Retrieves all records that have changed (created, updated, or deleted)
+  /// since the provided sync token. Use this for efficient incremental sync
+  /// operations rather than repeatedly querying all records.
+  ///
+  /// - Parameters:
+  ///   - zoneID: Optional zone to fetch changes from (defaults to _defaultZone)
+  ///   - syncToken: Optional token from previous fetch (nil = initial fetch)
+  ///   - resultsLimit: Optional maximum number of records (1-200)
+  /// - Returns: RecordChangesResult containing changed records and new sync token
+  /// - Throws: CloudKitError if the fetch fails
+  ///
+  /// Example - Initial Sync:
+  /// ```swift
+  /// let result = try await service.fetchRecordChanges()
+  /// // Store result.syncToken for next fetch
+  /// processRecords(result.records)
+  /// ```
+  ///
+  /// Example - Incremental Sync:
+  /// ```swift
+  /// let result = try await service.fetchRecordChanges(
+  ///   syncToken: previousToken
+  /// )
+  /// if result.moreComing {
+  ///   // More changes available, fetch again with new token
+  ///   let next = try await service.fetchRecordChanges(
+  ///     syncToken: result.syncToken
+  ///   )
+  /// }
+  /// ```
+  ///
+  /// - Note: If moreComing is true, call again with the returned syncToken
+  ///         to fetch remaining changes
+  public func fetchRecordChanges(
+    zoneID: ZoneID? = nil,
+    syncToken: String? = nil,
+    resultsLimit: Int? = nil
+  ) async throws(CloudKitError) -> RecordChangesResult {
+    // Validate limit if provided
+    if let limit = resultsLimit {
+      guard limit > 0 && limit <= 200 else {
+        throw CloudKitError.httpErrorWithRawResponse(
+          statusCode: 400,
+          rawResponse: "resultsLimit must be between 1 and 200, got \(limit)"
+        )
+      }
+    }
+
+    // Use provided zoneID or default zone
+    let effectiveZoneID = zoneID ?? .defaultZone
+
+    do {
+      let response = try await client.fetchRecordChanges(
+        .init(
+          path: createFetchRecordChangesPath(containerIdentifier: containerIdentifier),
+          body: .json(
+            .init(
+              zoneID: Components.Schemas.ZoneID(from: effectiveZoneID),
+              syncToken: syncToken,
+              resultsLimit: resultsLimit
+            )
+          )
+        )
+      )
+
+      let changesData: Components.Schemas.ChangesResponse =
+        try await responseProcessor.processFetchRecordChangesResponse(response)
+
+      return RecordChangesResult(from: changesData)
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "JSON decoding failed in fetchRecordChanges: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error in fetchRecordChanges: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
+      MistKitLogger.logError(
+        "Unexpected error in fetchRecordChanges: \(error)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.underlyingError(error)
+    }
+  }
+
+  /// Fetch all record changes, handling pagination automatically
+  ///
+  /// Convenience method that automatically fetches all available changes
+  /// by following the moreComing flag and making multiple requests if needed.
+  ///
+  /// - Parameters:
+  ///   - zoneID: Optional zone to fetch changes from (defaults to _defaultZone)
+  ///   - syncToken: Optional token from previous fetch (nil = initial fetch)
+  ///   - resultsLimit: Optional maximum records per request (1-200)
+  /// - Returns: Array of all changed records and final sync token
+  /// - Throws: CloudKitError if any fetch fails
+  ///
+  /// Example:
+  /// ```swift
+  /// let (records, newToken) = try await service.fetchAllRecordChanges(
+  ///   syncToken: lastSyncToken
+  /// )
+  /// // Process all records
+  /// processRecords(records)
+  /// // Store newToken for next sync
+  /// ```
+  ///
+  /// - Warning: For zones with many changes, this may make multiple requests
+  ///           and return a large array. Consider using fetchRecordChanges()
+  ///           with manual pagination for better memory control.
+  public func fetchAllRecordChanges(
+    zoneID: ZoneID? = nil,
+    syncToken: String? = nil,
+    resultsLimit: Int? = nil
+  ) async throws(CloudKitError) -> (records: [RecordInfo], syncToken: String?) {
+    var allRecords: [RecordInfo] = []
+    var currentToken = syncToken
+    var moreComing = true
+
+    while moreComing {
+      let result = try await fetchRecordChanges(
+        zoneID: zoneID,
+        syncToken: currentToken,
+        resultsLimit: resultsLimit
+      )
+
+      allRecords.append(contentsOf: result.records)
+      currentToken = result.syncToken
+      moreComing = result.moreComing
+    }
+
+    return (allRecords, currentToken)
+  }
+
   /// Modify (create, update, delete) records
   @available(
     *, deprecated,
@@ -378,7 +606,7 @@ extension CloudKitService {
   }
 
   /// Lookup records by record names
-  internal func lookupRecords(
+  public func lookupRecords(
     recordNames: [String],
     desiredKeys: [String]? = nil
   ) async throws(CloudKitError) -> [RecordInfo] {

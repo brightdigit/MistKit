@@ -35,7 +35,8 @@ public enum FieldInputValue {
     case int(Int)
     case double(Double)
     case bool(Bool)
-    
+    case asset(String) // Asset URL from upload token
+
     /// Convert to FieldType and string value for Field creation
     func toFieldComponents() throws -> (FieldType, String) {
         switch self {
@@ -47,6 +48,8 @@ public enum FieldInputValue {
             return (.double, String(value))
         case .bool(let value):
             return (.string, value ? "true" : "false")
+        case .asset(let url):
+            return (.asset, url)
         }
     }
 }

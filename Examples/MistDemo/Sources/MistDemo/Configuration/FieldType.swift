@@ -64,7 +64,10 @@ public enum FieldType: String, CaseIterable, Sendable {
             } else {
                 throw FieldParsingError.invalidValueForType(stringValue, type: self)
             }
-        case .asset, .location, .reference, .bytes:
+        case .asset:
+            // stringValue should be the URL from the upload token
+            return stringValue // Will be converted to FieldValue.Asset later
+        case .location, .reference, .bytes:
             // These require more complex parsing - implement later
             throw FieldParsingError.unsupportedFieldType(self)
         }
