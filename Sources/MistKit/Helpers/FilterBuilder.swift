@@ -141,7 +141,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .BEGINS_WITH,
       fieldName: field,
-      fieldValue: .init(value: .stringValue(value), type: .string)
+      fieldValue: .init(value: .StringValue(value))
     )
   }
 
@@ -155,7 +155,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .NOT_BEGINS_WITH,
       fieldName: field,
-      fieldValue: .init(value: .stringValue(value), type: .string)
+      fieldValue: .init(value: .StringValue(value))
     )
   }
 
@@ -171,7 +171,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .CONTAINS_ALL_TOKENS,
       fieldName: field,
-      fieldValue: .init(value: .stringValue(tokens), type: .string)
+      fieldValue: .init(value: .StringValue(tokens))
     )
   }
 
@@ -185,8 +185,7 @@ internal struct FilterBuilder {
       comparator: .IN,
       fieldName: field,
       fieldValue: .init(
-        value: .listValue(values.map { Components.Schemas.FieldValue(from: $0).value }),
-        type: .list
+        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) })
       )
     )
   }
@@ -201,8 +200,7 @@ internal struct FilterBuilder {
       comparator: .NOT_IN,
       fieldName: field,
       fieldValue: .init(
-        value: .listValue(values.map { Components.Schemas.FieldValue(from: $0).value }),
-        type: .list
+        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) })
       )
     )
   }
@@ -253,7 +251,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .LIST_MEMBER_BEGINS_WITH,
       fieldName: field,
-      fieldValue: .init(value: .stringValue(prefix), type: .string)
+      fieldValue: .init(value: .StringValue(prefix))
     )
   }
 
@@ -269,7 +267,7 @@ internal struct FilterBuilder {
     .init(
       comparator: .NOT_LIST_MEMBER_BEGINS_WITH,
       fieldName: field,
-      fieldValue: .init(value: .stringValue(prefix), type: .string)
+      fieldValue: .init(value: .StringValue(prefix))
     )
   }
 }

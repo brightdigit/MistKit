@@ -173,4 +173,82 @@ internal struct CloudKitResponseProcessor {
       throw CloudKitError.invalidResponse
     }
   }
+
+  /// Process lookupZones response
+  /// - Parameter response: The response to process
+  /// - Returns: The extracted zones lookup data
+  /// - Throws: CloudKitError for various error conditions
+  internal func processLookupZonesResponse(_ response: Operations.lookupZones.Output)
+    async throws(CloudKitError) -> Components.Schemas.ZonesLookupResponse
+  {
+    // Check for errors first
+    if let error = CloudKitError(response) {
+      throw error
+    }
+
+    // Must be .ok case - extract data
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let zonesData):
+        return zonesData
+      }
+    default:
+      // Should never reach here since all errors are handled above
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
+  }
+
+  /// Process fetchRecordChanges response
+  /// - Parameter response: The response to process
+  /// - Returns: The extracted changes response data
+  /// - Throws: CloudKitError for various error conditions
+  internal func processFetchRecordChangesResponse(_ response: Operations.fetchRecordChanges.Output)
+    async throws(CloudKitError) -> Components.Schemas.ChangesResponse
+  {
+    // Check for errors first
+    if let error = CloudKitError(response) {
+      throw error
+    }
+
+    // Must be .ok case - extract data
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let changesData):
+        return changesData
+      }
+    default:
+      // Should never reach here since all errors are handled above
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
+  }
+
+  /// Process uploadAssets response
+  /// - Parameter response: The response to process
+  /// - Returns: The extracted asset upload response data
+  /// - Throws: CloudKitError for various error conditions
+  internal func processUploadAssetsResponse(_ response: Operations.uploadAssets.Output)
+    async throws(CloudKitError) -> Components.Schemas.AssetUploadResponse
+  {
+    // Check for errors first
+    if let error = CloudKitError(response) {
+      throw error
+    }
+
+    // Must be .ok case - extract data
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let uploadData):
+        return uploadData
+      }
+    default:
+      // Should never reach here since all errors are handled above
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
+  }
 }

@@ -39,7 +39,7 @@ struct AnyCodableTests {
     @Test("Decode string value")
     func decodeString() throws {
         let json = "\"hello world\""
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? String == "hello world")
     }
@@ -47,7 +47,7 @@ struct AnyCodableTests {
     @Test("Decode empty string")
     func decodeEmptyString() throws {
         let json = "\"\""
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? String == "")
     }
@@ -57,7 +57,7 @@ struct AnyCodableTests {
     @Test("Decode positive integer")
     func decodePositiveInt() throws {
         let json = "42"
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Int == 42)
     }
@@ -65,7 +65,7 @@ struct AnyCodableTests {
     @Test("Decode negative integer")
     func decodeNegativeInt() throws {
         let json = "-123"
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Int == -123)
     }
@@ -73,7 +73,7 @@ struct AnyCodableTests {
     @Test("Decode zero")
     func decodeZero() throws {
         let json = "0"
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Int == 0)
     }
@@ -83,7 +83,7 @@ struct AnyCodableTests {
     @Test("Decode positive double")
     func decodePositiveDouble() throws {
         let json = "3.14"
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Double == 3.14)
     }
@@ -91,7 +91,7 @@ struct AnyCodableTests {
     @Test("Decode negative double")
     func decodeNegativeDouble() throws {
         let json = "-2.5"
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Double == -2.5)
     }
@@ -99,7 +99,7 @@ struct AnyCodableTests {
     @Test("Decode double with scientific notation")
     func decodeScientificNotation() throws {
         let json = "1.23e-4"
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Double == 1.23e-4)
     }
@@ -109,7 +109,7 @@ struct AnyCodableTests {
     @Test("Decode true")
     func decodeTrue() throws {
         let json = "true"
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Bool == true)
     }
@@ -117,7 +117,7 @@ struct AnyCodableTests {
     @Test("Decode false")
     func decodeFalse() throws {
         let json = "false"
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Bool == false)
     }
@@ -127,7 +127,7 @@ struct AnyCodableTests {
     @Test("Decode null value")
     func decodeNull() throws {
         let json = "null"
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value is NSNull)
     }
@@ -179,7 +179,7 @@ struct AnyCodableTests {
     @Test("Decode invalid value throws error")
     func decodeInvalidValue() throws {
         let json = "[1, 2, 3]"  // Arrays not supported
-        let data = json.data(using: .utf8)!
+        let data = Data(json.utf8)
         #expect(throws: DecodingError.self) {
             try JSONDecoder().decode(AnyCodable.self, from: data)
         }

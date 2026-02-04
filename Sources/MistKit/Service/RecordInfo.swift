@@ -62,7 +62,7 @@ public struct RecordInfo: Encodable, Sendable {
     recordType == "Unknown"
   }
 
-  internal init(from record: Components.Schemas.Record) {
+  internal init(from record: Components.Schemas.RecordResponse) {
     self.recordName = record.recordName ?? "Unknown"
     self.recordType = record.recordType ?? "Unknown"
     self.recordChangeTag = record.recordChangeTag

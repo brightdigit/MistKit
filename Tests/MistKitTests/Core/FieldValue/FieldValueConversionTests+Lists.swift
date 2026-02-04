@@ -14,10 +14,9 @@ extension FieldValueConversionTests {
       }
       let list: [FieldValue] = [.string("one"), .string("two"), .string("three")]
       let fieldValue = FieldValue.list(list)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .list)
-      if case .listValue(let values) = components.value {
+      if case .ListValue(let values) = components.value {
         #expect(values.count == 3)
       } else {
         Issue.record("Expected listValue")
@@ -32,10 +31,9 @@ extension FieldValueConversionTests {
       }
       let list: [FieldValue] = [.int64(1), .int64(2), .int64(3)]
       let fieldValue = FieldValue.list(list)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .list)
-      if case .listValue(let values) = components.value {
+      if case .ListValue(let values) = components.value {
         #expect(values.count == 3)
       } else {
         Issue.record("Expected listValue")
@@ -55,10 +53,9 @@ extension FieldValueConversionTests {
         FieldValue(booleanValue: true),
       ]
       let fieldValue = FieldValue.list(list)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .list)
-      if case .listValue(let values) = components.value {
+      if case .ListValue(let values) = components.value {
         #expect(values.count == 4)
       } else {
         Issue.record("Expected listValue")
@@ -73,10 +70,9 @@ extension FieldValueConversionTests {
       }
       let list: [FieldValue] = []
       let fieldValue = FieldValue.list(list)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .list)
-      if case .listValue(let values) = components.value {
+      if case .ListValue(let values) = components.value {
         #expect(values.isEmpty)
       } else {
         Issue.record("Expected listValue")
@@ -92,13 +88,13 @@ extension FieldValueConversionTests {
       let innerList: [FieldValue] = [.string("a"), .string("b")]
       let outerList: [FieldValue] = [.list(innerList), .string("c")]
       let fieldValue = FieldValue.list(outerList)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .list)
-      if case .listValue(let values) = components.value {
+      // FieldValueRequest does not have a type field - CloudKit infers type from structure
+      if case .ListValue(let values) = components.value {
         #expect(values.count == 2)
       } else {
-        Issue.record("Expected listValue")
+        Issue.record("Expected ListValue")
       }
     }
   }

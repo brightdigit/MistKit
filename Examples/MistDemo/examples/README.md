@@ -19,6 +19,11 @@ This directory contains example scripts demonstrating how to use MistDemo's esse
    ./query-records.sh
    ```
 
+4. **Upload assets**:
+   ```bash
+   ./upload-asset.sh
+   ```
+
 ## Example Scripts
 
 ### 🔐 auth-flow.sh
@@ -95,6 +100,35 @@ swift run mistdemo query --sort "createdAt:desc" --limit 5
 swift run mistdemo query --fields "title,createdAt,priority"
 ```
 
+### 📤 upload-asset.sh
+**Asset upload workflow examples**
+
+Shows how to upload binary assets to CloudKit:
+- Upload image files to default Note.image field
+- Upload to custom record types and fields
+- Complete workflow: upload then create record
+- Complete workflow: upload then update existing record
+- Error handling for file size limits and invalid paths
+
+**Examples**:
+```bash
+# Simple upload to Note.image
+swift run mistdemo upload-asset --file-path image.png
+
+# Upload to custom record type
+swift run mistdemo upload-asset --file-path photo.jpg --record-type Photo --field-name thumbnail
+
+# Upload and get JSON output for record creation
+swift run mistdemo upload-asset --file-path document.pdf --output json
+```
+
+**What it demonstrates**:
+1. Binary asset upload to CloudKit CDN
+2. AssetUploadReceipt containing receipt and checksums
+3. Two-step workflow: upload asset, then associate with record
+4. Error handling for missing files and size limits
+5. Using asset metadata in subsequent record operations
+
 ## Field Types
 
 MistDemo supports four CloudKit field types:
@@ -134,7 +168,7 @@ All commands support multiple output formats:
 ### Environment Variables
 ```bash
 export CLOUDKIT_API_TOKEN=your_api_token
-export CLOUDKIT_WEBAUTH_TOKEN=your_web_auth_token
+export CLOUDKIT_WEB_AUTH_TOKEN=your_web_auth_token
 ```
 
 ### Configuration File

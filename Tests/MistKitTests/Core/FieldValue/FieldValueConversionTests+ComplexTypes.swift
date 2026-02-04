@@ -23,10 +23,9 @@ extension FieldValueConversionTests {
         timestamp: Date(timeIntervalSince1970: 1_000_000)
       )
       let fieldValue = FieldValue.location(location)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .location)
-      if case .locationValue(let value) = components.value {
+      if case .LocationValue(let value) = components.value {
         #expect(value.latitude == 37.7749)
         #expect(value.longitude == -122.4194)
         #expect(value.horizontalAccuracy == 10.0)
@@ -48,10 +47,9 @@ extension FieldValueConversionTests {
       }
       let location = FieldValue.Location(latitude: 0.0, longitude: 0.0)
       let fieldValue = FieldValue.location(location)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .location)
-      if case .locationValue(let value) = components.value {
+      if case .LocationValue(let value) = components.value {
         #expect(value.latitude == 0.0)
         #expect(value.longitude == 0.0)
         #expect(value.horizontalAccuracy == nil)
@@ -73,10 +71,9 @@ extension FieldValueConversionTests {
       }
       let reference = FieldValue.Reference(recordName: "test-record-123")
       let fieldValue = FieldValue.reference(reference)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .reference)
-      if case .referenceValue(let value) = components.value {
+      if case .ReferenceValue(let value) = components.value {
         #expect(value.recordName == "test-record-123")
         #expect(value.action == nil)
       } else {
@@ -92,10 +89,9 @@ extension FieldValueConversionTests {
       }
       let reference = FieldValue.Reference(recordName: "test-record-456", action: .deleteSelf)
       let fieldValue = FieldValue.reference(reference)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .reference)
-      if case .referenceValue(let value) = components.value {
+      if case .ReferenceValue(let value) = components.value {
         #expect(value.recordName == "test-record-456")
         #expect(value.action == .DELETE_SELF)
       } else {
@@ -112,10 +108,9 @@ extension FieldValueConversionTests {
       let reference = FieldValue.Reference(
         recordName: "test-record-789", action: FieldValue.Reference.Action.none)
       let fieldValue = FieldValue.reference(reference)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .reference)
-      if case .referenceValue(let value) = components.value {
+      if case .ReferenceValue(let value) = components.value {
         #expect(value.recordName == "test-record-789")
         #expect(value.action == .NONE)
       } else {
@@ -138,10 +133,9 @@ extension FieldValueConversionTests {
         downloadURL: "https://example.com/file.jpg"
       )
       let fieldValue = FieldValue.asset(asset)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .asset)
-      if case .assetValue(let value) = components.value {
+      if case .AssetValue(let value) = components.value {
         #expect(value.fileChecksum == "abc123")
         #expect(value.size == 1_024)
         #expect(value.referenceChecksum == "def456")
@@ -161,10 +155,9 @@ extension FieldValueConversionTests {
       }
       let asset = FieldValue.Asset()
       let fieldValue = FieldValue.asset(asset)
-      let components = Components.Schemas.FieldValue(from: fieldValue)
+      let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
-      #expect(components.type == .asset)
-      if case .assetValue(let value) = components.value {
+      if case .AssetValue(let value) = components.value {
         #expect(value.fileChecksum == nil)
         #expect(value.size == nil)
         #expect(value.referenceChecksum == nil)

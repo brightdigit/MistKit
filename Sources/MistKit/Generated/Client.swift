@@ -2898,9 +2898,14 @@ internal struct Client: APIProtocol {
             }
         )
     }
-    /// Upload Assets
+    /// Request Asset Upload URLs
     ///
-    /// Upload binary assets to CloudKit
+    /// Request upload URLs for asset fields. This is the first step in a two-step process:
+    /// 1. Request upload URLs by specifying the record type and field name
+    /// 2. Upload the actual binary data to the returned URL (separate HTTP request)
+    ///
+    /// Upload URLs are valid for 15 minutes. Maximum file size is 15 MB.
+    ///
     ///
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/upload`.
     /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)`.
@@ -2929,38 +2934,11 @@ internal struct Client: APIProtocol {
                 )
                 let body: OpenAPIRuntime.HTTPBody?
                 switch input.body {
-                case let .multipartForm(value):
-                    body = try converter.setRequiredRequestBodyAsMultipart(
+                case let .json(value):
+                    body = try converter.setRequiredRequestBodyAsJSON(
                         value,
                         headerFields: &request.headerFields,
-                        contentType: "multipart/form-data",
-                        allowsUnknownParts: true,
-                        requiredExactlyOncePartNames: [],
-                        requiredAtLeastOncePartNames: [],
-                        atMostOncePartNames: [
-                            "file"
-                        ],
-                        zeroOrMoreTimesPartNames: [],
-                        encoding: { part in
-                            switch part {
-                            case let .file(wrapped):
-                                var headerFields: HTTPTypes.HTTPFields = .init()
-                                let value = wrapped.payload
-                                let body = try converter.setRequiredRequestBodyAsBinary(
-                                    value.body,
-                                    headerFields: &headerFields,
-                                    contentType: "application/octet-stream"
-                                )
-                                return .init(
-                                    name: "file",
-                                    filename: wrapped.filename,
-                                    headerFields: headerFields,
-                                    body: body
-                                )
-                            case let .undocumented(value):
-                                return value
-                            }
-                        }
+                        contentType: "application/json; charset=utf-8"
                     )
                 }
                 return (request, body)

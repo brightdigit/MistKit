@@ -70,6 +70,8 @@ public struct FieldsInput: Codable {
                 try container.encode(doubleValue, forKey: dynamicKey)
             case .bool(let boolValue):
                 try container.encode(boolValue, forKey: dynamicKey)
+            case .asset(let url):
+                try container.encode(url, forKey: dynamicKey)
             }
         }
     }
