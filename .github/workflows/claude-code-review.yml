@@ -39,11 +39,8 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review'
           allowed_bots: 'codefactor-io[bot]'
-          additional_permissions: |
-            - tool: Bash
-              prompt: run gh commands
-            - tool: Skill
-              prompt: use code-review skill
+          claude_args: |
+            --allowedTools "Bash(gh *),Skill(code-review:*)"
           prompt: |
             Please review this PR and provide feedback on:
             - Code quality and best practices
