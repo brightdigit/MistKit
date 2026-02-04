@@ -42,10 +42,6 @@ jobs:
           additional_permissions: |
             - tool: Bash
               prompt: run gh commands
-            - tool: Bash
-              prompt: run swift build
-            - tool: Bash
-              prompt: run swift test
             - tool: Skill
               prompt: use code-review skill
           prompt: |
