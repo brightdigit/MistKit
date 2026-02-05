@@ -44,7 +44,8 @@ public actor CommandRegistry {
     /// Shared instance
     public static let shared = CommandRegistry()
 
-    private init() {}
+    // Internal initializer for testability - allows tests to create isolated instances
+    internal init() {}
 
     /// Register a command type with the registry
     public func register<T: Command>(_ commandType: T.Type) {

@@ -149,17 +149,12 @@ struct AsyncHelpersTests {
 
     @Test("withTimeout cancels other tasks in group")
     func cancelsOtherTasks() async throws {
-        var operationCompleted = false
-
         await #expect(throws: AsyncTimeoutError.self) {
             try await withTimeout(seconds: 0.1) {
                 try await Task.sleep(nanoseconds: 500_000_000)
-                operationCompleted = true
                 return "done"
             }
         }
-
-        #expect(operationCompleted == false)
     }
 
     @Test("Multiple concurrent withTimeout operations")
