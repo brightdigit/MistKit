@@ -327,11 +327,8 @@ For detailed schema workflows and integration:
 
 - **AI Schema Workflow** (`Examples/Celestra/AI_SCHEMA_WORKFLOW.md`) - Comprehensive guide for understanding, designing, modifying, and validating CloudKit schemas with text-based tools
 - **Quick Reference** (`Examples/SCHEMA_QUICK_REFERENCE.md`) - One-page cheat sheet with syntax, patterns, cktool commands, and troubleshooting
-- **Task Master Integration** (`.taskmaster/docs/schema-design-workflow.md`) - Integrate schema design into Task Master PRDs and task decomposition
 
-## Task Master AI Instructions
-**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
-@./.taskmaster/CLAUDE.md
+## Additional Notes
 - We are using explicit ACLs in the Swift code
 - type order is based on the default in swiftlint: https://realm.github.io/SwiftLint/type_contents_order.html
 - Anything inside [CONTENT] [/CONTENT] is written by me

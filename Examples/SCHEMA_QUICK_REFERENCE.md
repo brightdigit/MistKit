@@ -287,5 +287,4 @@ RECORD TYPE Article (
 
 - **Detailed Guide:** [Celestra/AI_SCHEMA_WORKFLOW.md](Celestra/AI_SCHEMA_WORKFLOW.md)
 - **Claude Reference:** [.claude/docs/cloudkit-schema-reference.md](../.claude/docs/cloudkit-schema-reference.md)
-- **Task Master Integration:** [.taskmaster/docs/schema-design-workflow.md](../.taskmaster/docs/schema-design-workflow.md)
 - **Setup Guide:** [Celestra/CLOUDKIT_SCHEMA_SETUP.md](Celestra/CLOUDKIT_SCHEMA_SETUP.md)

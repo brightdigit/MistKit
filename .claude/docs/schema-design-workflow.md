@@ -489,66 +489,23 @@ Improve performance of [query description] by adding/modifying indexes.
 
 ### Workflow Commands
 
-```bash
-# 1. Parse PRD with schema requirements
-task-master parse-prd .taskmaster/docs/prd.txt
+Schema design and implementation workflow is best managed using Claude Code's planning and execution features:
 
-# 2. Analyze complexity of schema tasks
-task-master analyze-complexity --research
+1. Create implementation plan with detailed schema design
+2. Break down into subtasks (record types, fields, indexes)
+3. Implement schema file incrementally
+4. Validate with cktool at each step
+5. Document decisions and constraints
 
-# 3. Expand schema design task into subtasks
-task-master expand --id=5 --research
+### Example Workflow
 
-# 4. Get next schema task to work on
-task-master next
-
-# 5. Update subtask with implementation notes
-task-master update-subtask --id=5.1 --prompt="Added lastError field, validated successfully"
-
-# 6. Mark subtask complete
-task-master set-status --id=5.1 --status=done
-
-# 7. Research best practices
-task-master research \
-  --query="CloudKit schema indexing best practices for article queries" \
-  --save-to=12.1
-```
-
-### Example Session
-
-```bash
-# Start working on schema tasks
-$ task-master next
-📋 Next Available Task: #8 - Add Category Record Type
-
-# Show task details
-$ task-master show 8
-Task 8: Add Category Record Type
-Status: pending
-Description: Implement feed categorization...
-Subtasks:
-  8.1 - Design Category schema [pending]
-  8.2 - Update Feed schema [pending]
-  ...
-
-# Expand subtask 8.1 if needed
-$ task-master expand --id=8.1 --research
-
-# Mark as in progress
-$ task-master set-status --id=8.1 --status=in-progress
-
-# Work on schema file...
-# Edit Examples/Celestra/schema.ckdb
-
-# Log progress
-$ task-master update-subtask --id=8.1 --prompt="Defined Category record type with name (queryable sortable), description, iconURL, colorHex, and sortOrder (queryable sortable). Used standard public permissions."
-
-# Complete subtask
-$ task-master set-status --id=8.1 --status=done
-
-# Move to next subtask
-$ task-master set-status --id=8.2 --status=in-progress
-```
+1. **Design Phase**: Review PRD requirements and identify record types needed
+2. **Schema Definition**: Create/update .ckdb file with record types, fields, and indexes
+3. **Validation**: Use `cktool validate` to check syntax
+4. **Deployment**: Deploy to development environment with `./Scripts/setup-cloudkit-schema.sh`
+5. **Testing**: Verify with test data using MistKit or CloudKit Console
+6. **Iteration**: Refine based on query patterns and performance
+7. **Documentation**: Update schema documentation with design decisions
 
 ---
 
@@ -557,4 +514,3 @@ $ task-master set-status --id=8.2 --status=in-progress
 - **Schema Workflow Guide:** [Examples/Celestra/AI_SCHEMA_WORKFLOW.md](../../Examples/Celestra/AI_SCHEMA_WORKFLOW.md)
 - **Quick Reference:** [Examples/SCHEMA_QUICK_REFERENCE.md](../../Examples/SCHEMA_QUICK_REFERENCE.md)
 - **Claude Reference:** [.claude/docs/cloudkit-schema-reference.md](../../.claude/docs/cloudkit-schema-reference.md)
-- **Task Master Guide:** [.taskmaster/CLAUDE.md](../CLAUDE.md)
