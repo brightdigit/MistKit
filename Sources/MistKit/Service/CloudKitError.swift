@@ -28,10 +28,11 @@
 //
 
 public import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 import OpenAPIRuntime
+
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
 
 /// Represents errors that can occur when interacting with CloudKit Web Services
 public enum CloudKitError: LocalizedError, Sendable {

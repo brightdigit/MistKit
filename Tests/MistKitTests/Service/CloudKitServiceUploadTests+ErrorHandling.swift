@@ -70,7 +70,8 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceUploadTests.makeUploadValidationErrorService(.emptyData)
+      let service = try await CloudKitServiceUploadTests.makeUploadValidationErrorService(
+        .emptyData)
       let testData = Data()  // Empty data triggers 400
 
       do {

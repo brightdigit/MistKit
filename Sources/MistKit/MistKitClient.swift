@@ -29,11 +29,12 @@
 
 import Crypto
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 import HTTPTypes
 import OpenAPIRuntime
+
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
 
 #if !os(WASI)
   import OpenAPIURLSession

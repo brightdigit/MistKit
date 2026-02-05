@@ -28,8 +28,9 @@
 //
 
 import Foundation
-@testable import MistKit
 import Testing
+
+@testable import MistKit
 
 @Suite("NSRegularExpression CommonPatterns Tests")
 struct RegexPatternsTests {
@@ -41,7 +42,7 @@ struct RegexPatternsTests {
       "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
       "ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789",
       "0000000000000000000000000000000000000000000000000000000000000000",
-      "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
     ]
 
     for token in validTokens {
@@ -58,7 +59,7 @@ struct RegexPatternsTests {
       "abcdef0123456789abcdef0123456789abcdef0123456789abcdef01234567890",  // 65 chars
       "abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345678g",  // Invalid char
       "abcdef0123456789 abcdef0123456789abcdef0123456789abcdef0123456789",  // Space
-      ""  // Empty
+      "",  // Empty
     ]
 
     for token in invalidTokens {
@@ -75,8 +76,9 @@ struct RegexPatternsTests {
       String(repeating: "A", count: 100),
       String(repeating: "a", count: 150),
       String(repeating: "0", count: 100) + "==",
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=" + String(repeating: "A", count: 40),
-      String(repeating: "Z", count: 200) + "_"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+        + String(repeating: "A", count: 40),
+      String(repeating: "Z", count: 200) + "_",
     ]
 
     for token in validTokens {
@@ -92,7 +94,7 @@ struct RegexPatternsTests {
       "invalid chars !@#$%",
       "",
       "abc",
-      String(repeating: " ", count: 100)  // Spaces not allowed
+      String(repeating: " ", count: 100),  // Spaces not allowed
     ]
 
     for token in invalidTokens {
@@ -108,7 +110,7 @@ struct RegexPatternsTests {
     let validKeyIDs = [
       "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       "FEDCBA0987654321FEDCBA0987654321FEDCBA0987654321FEDCBA0987654321",
-      "0123456789abcdefABCDEF0123456789abcdefABCDEF0123456789abcdefABCD"
+      "0123456789abcdefABCDEF0123456789abcdefABCDEF0123456789abcdefABCD",
     ]
 
     for keyID in validKeyIDs {
@@ -124,7 +126,7 @@ struct RegexPatternsTests {
       String(repeating: "a", count: 65),  // Too long
       "g" + String(repeating: "a", count: 63),  // Invalid character
       "",
-      "key-id-with-dashes"
+      "key-id-with-dashes",
     ]
 
     for keyID in invalidKeyIDs {
@@ -172,7 +174,7 @@ struct RegexPatternsTests {
       "token=abc123def456",
       "token: xyz789",
       "token=BASE64STRING==",
-      "token: BASE64+/=="
+      "token: BASE64+/==",
     ]
 
     for text in testCases {
@@ -187,7 +189,7 @@ struct RegexPatternsTests {
       "key=secretvalue123",
       "key: privatekey456",
       "key=KEYDATA789",
-      "key:KEY+DATA/123"
+      "key:KEY+DATA/123",
     ]
 
     for text in testCases {
@@ -202,7 +204,7 @@ struct RegexPatternsTests {
       "secret=mysecret123",
       "secret: topsecret456",
       "secret=CLASSIFIED789",
-      "secret:SECRET+VALUE/="
+      "secret:SECRET+VALUE/=",
     ]
 
     for text in testCases {
