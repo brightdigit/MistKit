@@ -51,6 +51,9 @@ public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
   internal let explicitKeys: [ConfigKeySource: String]
   public let defaultValue: Value  // Non-optional!
 
+  /// The base key string used for this configuration key
+  public var base: String? { baseKey }
+
   /// Initialize with explicit CLI and ENV keys and required default
   public init(cli: String? = nil, env: String? = nil, default defaultVal: Value) {
     self.baseKey = nil

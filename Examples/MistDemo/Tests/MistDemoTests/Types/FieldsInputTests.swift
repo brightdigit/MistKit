@@ -43,7 +43,7 @@ struct FieldsInputTests {
             "title": "Hello World"
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -60,7 +60,7 @@ struct FieldsInputTests {
             "description": ""
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -79,7 +79,7 @@ struct FieldsInputTests {
             "count": 42
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -96,7 +96,7 @@ struct FieldsInputTests {
             "temperature": -10
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -113,7 +113,7 @@ struct FieldsInputTests {
             "balance": 0
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -132,7 +132,7 @@ struct FieldsInputTests {
             "price": 19.99
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -149,7 +149,7 @@ struct FieldsInputTests {
             "latitude": -33.8688
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -168,7 +168,7 @@ struct FieldsInputTests {
             "isActive": true
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -185,7 +185,7 @@ struct FieldsInputTests {
             "isEnabled": false
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -207,7 +207,7 @@ struct FieldsInputTests {
             "active": true
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -231,7 +231,7 @@ struct FieldsInputTests {
     @Test("Decode empty object")
     func decodeEmptyObject() throws {
         let json = "{}"
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -247,7 +247,7 @@ struct FieldsInputTests {
             "name": "Test"
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
 
         let encoded = try JSONEncoder().encode(fieldsInput)
@@ -266,7 +266,7 @@ struct FieldsInputTests {
             "count": 100
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
 
         let encoded = try JSONEncoder().encode(fieldsInput)
@@ -288,7 +288,7 @@ struct FieldsInputTests {
             "price": 15.50
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
 
         let encoded = try JSONEncoder().encode(fieldsInput)
@@ -307,7 +307,7 @@ struct FieldsInputTests {
             "field_name": "value"
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -322,7 +322,7 @@ struct FieldsInputTests {
             "firstName": "John"
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -339,7 +339,7 @@ struct FieldsInputTests {
             "description": "  spaced text  "
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 
@@ -354,7 +354,7 @@ struct FieldsInputTests {
             "emoji": "🎉"
         }
         """
-        let data = jsonData(json.utf8)
+        let data = Data(json.utf8)
         let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
         let fields = try fieldsInput.toFields()
 

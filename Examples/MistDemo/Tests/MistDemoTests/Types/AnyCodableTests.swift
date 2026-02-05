@@ -136,7 +136,7 @@ struct AnyCodableTests {
 
     @Test("Encode string value")
     func encodeString() throws {
-        let anyCodable = AnyCodable(value: "test")
+        let anyCodable = try AnyCodable(value: "test")
         let data = try JSONEncoder().encode(anyCodable)
         let json = String(data: data, encoding: .utf8)!
         #expect(json == "\"test\"")
@@ -144,7 +144,7 @@ struct AnyCodableTests {
 
     @Test("Encode integer value")
     func encodeInteger() throws {
-        let anyCodable = AnyCodable(value: 123)
+        let anyCodable = try AnyCodable(value: 123)
         let data = try JSONEncoder().encode(anyCodable)
         let json = String(data: data, encoding: .utf8)!
         #expect(json == "123")
@@ -152,7 +152,7 @@ struct AnyCodableTests {
 
     @Test("Encode double value")
     func encodeDouble() throws {
-        let anyCodable = AnyCodable(value: 3.14)
+        let anyCodable = try AnyCodable(value: 3.14)
         let data = try JSONEncoder().encode(anyCodable)
         let json = String(data: data, encoding: .utf8)!
         #expect(json.contains("3.14"))
@@ -160,7 +160,7 @@ struct AnyCodableTests {
 
     @Test("Encode boolean value")
     func encodeBoolean() throws {
-        let anyCodable = AnyCodable(value: true)
+        let anyCodable = try AnyCodable(value: true)
         let data = try JSONEncoder().encode(anyCodable)
         let json = String(data: data, encoding: .utf8)!
         #expect(json == "true")
@@ -168,7 +168,7 @@ struct AnyCodableTests {
 
     @Test("Encode null value")
     func encodeNull() throws {
-        let anyCodable = AnyCodable(value: NSNull())
+        let anyCodable = try AnyCodable(value: NSNull())
         let data = try JSONEncoder().encode(anyCodable)
         let json = String(data: data, encoding: .utf8)!
         #expect(json == "null")
@@ -188,7 +188,7 @@ struct AnyCodableTests {
     @Test("Encode unsupported type throws error")
     func encodeUnsupportedType() throws {
         struct CustomType {}
-        let anyCodable = AnyCodable(value: CustomType())
+        let anyCodable = try AnyCodable(value: CustomType())
         #expect(throws: EncodingError.self) {
             try JSONEncoder().encode(anyCodable)
         }
@@ -199,7 +199,7 @@ struct AnyCodableTests {
     @Test("Round-trip string value")
     func roundTripString() throws {
         let original = "hello"
-        let anyCodable = AnyCodable(value: original)
+        let anyCodable = try AnyCodable(value: original)
         let data = try JSONEncoder().encode(anyCodable)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? String == original)
@@ -208,7 +208,7 @@ struct AnyCodableTests {
     @Test("Round-trip integer value")
     func roundTripInteger() throws {
         let original = 42
-        let anyCodable = AnyCodable(value: original)
+        let anyCodable = try AnyCodable(value: original)
         let data = try JSONEncoder().encode(anyCodable)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Int == original)
@@ -217,7 +217,7 @@ struct AnyCodableTests {
     @Test("Round-trip double value")
     func roundTripDouble() throws {
         let original = 3.14159
-        let anyCodable = AnyCodable(value: original)
+        let anyCodable = try AnyCodable(value: original)
         let data = try JSONEncoder().encode(anyCodable)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Double == original)
@@ -226,17 +226,46 @@ struct AnyCodableTests {
     @Test("Round-trip boolean value")
     func roundTripBoolean() throws {
         let original = true
-        let anyCodable = AnyCodable(value: original)
+        let anyCodable = try AnyCodable(value: original)
         let data = try JSONEncoder().encode(anyCodable)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
         #expect(decoded.value as? Bool == original)
     }
 }
 
-// MARK: - AnyCodable Extension for Testing
+// MARK: - AnyCodable Test Helper
 
 extension AnyCodable {
-    init(value: Any) {
-        self.value = value
+    /// Test helper that creates AnyCodable by encoding and decoding a value
+    init(value: Any) throws {
+        // For simple Codable types, encode to JSON and decode as AnyCodable
+        struct Wrapper: Codable {
+            let value: AnyCodable
+        }
+
+        // Encode the value to JSON data
+        let jsonData: Data
+        if let stringValue = value as? String {
+            jsonData = try JSONEncoder().encode(stringValue)
+        } else if let intValue = value as? Int {
+            jsonData = try JSONEncoder().encode(intValue)
+        } else if let doubleValue = value as? Double {
+            jsonData = try JSONEncoder().encode(doubleValue)
+        } else if let boolValue = value as? Bool {
+            jsonData = try JSONEncoder().encode(boolValue)
+        } else if value is NSNull {
+            jsonData = "null".data(using: .utf8)!
+        } else {
+            // For other types, fail gracefully
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: [],
+                    debugDescription: "Unsupported type for test helper: \(type(of: value))"
+                )
+            )
+        }
+
+        // Decode as AnyCodable
+        self = try JSONDecoder().decode(AnyCodable.self, from: jsonData)
     }
 }

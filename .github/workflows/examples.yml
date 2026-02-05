@@ -1,0 +1,28 @@
+name: Examples
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  PACKAGE_NAME: MistKit
+
+jobs:
+  test-examples:
+    name: Test ${{ matrix.example }} on Ubuntu
+    runs-on: ubuntu-latest
+    container: swift:6.2-noble
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [MistDemo, BushelCloud, CelestraCloud]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and Test ${{ matrix.example }}
+        uses: brightdigit/swift-build@v1.5.0-beta.2
+        with:
+          working-directory: Examples/${{ matrix.example }}

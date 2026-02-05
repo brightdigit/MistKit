@@ -155,13 +155,6 @@ jobs:
             
           - type: ios
             runs-on: macos-15
-            xcode: "/Applications/Xcode_16.4.app"
-            deviceName: "iPhone 16e"
-            osVersion: "18.5"
-            download-platform: true
-            
-          - type: ios
-            runs-on: macos-15
             xcode: "/Applications/Xcode_16.3.app"
             deviceName: "iPhone 16"
             osVersion: "18.4"
@@ -173,7 +166,7 @@ jobs:
             runs-on: macos-26
             xcode: "/Applications/Xcode_26.2.app"
             deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "26.0"
+            osVersion: "26.2"
             download-platform: true
 
           # tvOS Build Matrix
@@ -181,7 +174,7 @@ jobs:
             runs-on: macos-26
             xcode: "/Applications/Xcode_26.2.app"
             deviceName: "Apple TV"
-            osVersion: "26.0"
+            osVersion: "26.2"
             download-platform: true
 
           # visionOS Build Matrix              
@@ -189,7 +182,7 @@ jobs:
             runs-on: macos-26
             xcode: "/Applications/Xcode_26.2.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.0"
+            osVersion: "26.2"
             download-platform: true
   
     steps:
