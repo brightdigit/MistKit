@@ -474,7 +474,7 @@ Bushel can display:
 
 ### Phase 1: Schema Documentation ✓
 
-- [x] Create `.taskmaster/docs/cloudkit-schema-plan.md` with complete schema definition
+- [x] Create `cloudkit-schema-plan.md` with complete schema definition
 - [x] Document all fields, indexes, relationships
 - [x] Include query patterns and examples
 
@@ -526,8 +526,6 @@ Key insights from TheAppleWiki MobileAsset documentation:
   - `visionos/com_apple_visionOSIPSW/com_apple_visionOSIPSW.xml`
 - These contain URLs for **.ipsw files for the latest version** only
 - MESU is intentionally limited to current signed releases
-
-Full documentation saved to: `.taskmaster/docs/mobileasset-wiki.md` (to be created)
 
 ### Firmware Wiki
 
