@@ -1065,4 +1065,3 @@ RECORD TYPE UserProfile (
 - **Setup Guide:** [CLOUDKIT_SCHEMA_SETUP.md](CLOUDKIT_SCHEMA_SETUP.md)
 - **Apple Documentation:** [.claude/docs/sosumi-cloudkit-schema-source.md](../../.claude/docs/sosumi-cloudkit-schema-source.md)
 - **Celestra README:** [README.md](README.md)
-- **Task Master Integration:** [.taskmaster/docs/schema-design-workflow.md](../../.taskmaster/docs/schema-design-workflow.md)
