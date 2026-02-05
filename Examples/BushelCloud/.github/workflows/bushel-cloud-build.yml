@@ -9,8 +9,10 @@ on:
   # Allow manual trigger
   workflow_dispatch:
 
-  # Build on PRs for validation
+  # Build on PRs for validation (only PRs targeting main)
   pull_request:
+    branches:
+      - main
 
 # Prevent concurrent builds
 # Why cancel-in-progress?
