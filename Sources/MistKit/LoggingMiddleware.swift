@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
 import HTTPTypes
 import Logging
 import OpenAPIRuntime
@@ -114,7 +114,11 @@ internal struct LoggingMiddleware: ClientMiddleware {
           "⚠️  421 Misdirected Request - The server cannot produce a response for this request")
       }
 
-      return await logResponseBody(body)
+      #if !os(WASI)
+        return await logResponseBody(body)
+      #else
+        return body
+      #endif
     }
 
     /// Log response body content

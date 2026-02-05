@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -51,10 +51,10 @@ extension Components.Schemas.RecordOperation {
       fatalError("Unknown operation type: \(recordOperation.operationType)")
     }
 
-    // Convert fields to OpenAPI FieldValue format
+    // Convert fields to OpenAPI FieldValueRequest format (for requests)
     let apiFields = recordOperation.fields.mapValues {
-      fieldValue -> Components.Schemas.FieldValue in
-      Components.Schemas.FieldValue(from: fieldValue)
+      fieldValue -> Components.Schemas.FieldValueRequest in
+      Components.Schemas.FieldValueRequest(from: fieldValue)
     }
 
     // Build the OpenAPI record operation

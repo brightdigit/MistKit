@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -29,7 +29,14 @@
 
 import Foundation
 import OpenAPIRuntime
-import OpenAPIURLSession
+
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
+
+#if !os(WASI)
+  import OpenAPIURLSession
+#endif
 
 /// Service for interacting with CloudKit Web Services
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -119,6 +126,48 @@ extension CloudKitService {
   internal func createLookupRecordsPath(
     containerIdentifier: String
   ) -> Operations.lookupRecords.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for lookupZones requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createLookupZonesPath(
+    containerIdentifier: String
+  ) -> Operations.lookupZones.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for fetchRecordChanges requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createFetchRecordChangesPath(
+    containerIdentifier: String
+  ) -> Operations.fetchRecordChanges.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for uploadAssets requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createUploadAssetsPath(
+    containerIdentifier: String
+  ) -> Operations.uploadAssets.Input.Path {
     .init(
       version: "1",
       container: containerIdentifier,

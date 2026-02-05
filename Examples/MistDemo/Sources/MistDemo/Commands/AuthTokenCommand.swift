@@ -1,0 +1,201 @@
+//
+//  AuthTokenCommand.swift
+//  MistDemo
+//
+//  Created by Leo Dion.
+//  Copyright © 2026 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+public import Foundation
+import Hummingbird
+import Logging
+import MistKit
+
+/// Command to obtain web authentication token via browser flow
+public struct AuthTokenCommand: MistDemoCommand {
+    public typealias Config = AuthTokenConfig
+    public static let commandName = "auth-token"
+    public static let abstract = "Obtain a web authentication token via browser flow"
+    public static let helpText = """
+        AUTH-TOKEN - Obtain web authentication token
+
+        USAGE:
+            mistdemo auth-token [options]
+
+        OPTIONS:
+            --api-token <token>     CloudKit API token (or CLOUDKIT_API_TOKEN env)
+            --port <port>           Server port (default: 8080)
+            --host <host>           Server host (default: 127.0.0.1)
+            --no-browser           Don't open browser automatically
+        """
+    
+    private let config: AuthTokenConfig
+    
+    public init(config: AuthTokenConfig) {
+        self.config = config
+    }
+    
+    public func execute() async throws {
+        print("🚀 Starting CloudKit Authentication Server")
+        print("📍 Server URL: http://\(config.host):\(config.port)")
+        print("🔑 API Token: \(config.apiToken.maskedAPIToken)")
+        
+        let tokenChannel = AsyncChannel<String>()
+        let responseCompleteChannel = AsyncChannel<Void>()
+        
+        let router = Router(context: BasicRequestContext.self)
+        router.middlewares.add(LogRequestsMiddleware(.info))
+        
+        // Find and serve static resources (index.html)
+        let resourcesPath = try findResourcesPath()
+        print("📁 Serving static files from: \(resourcesPath)")
+        
+        router.middlewares.add(
+            FileMiddleware(
+                resourcesPath,
+                searchForIndexHtml: true
+            )
+        )
+        
+        // API endpoint for authentication callback
+        let api = router.group("api")
+        api.post("authenticate") { request, context -> Response in
+            let authRequest = try await request.decode(as: AuthRequest.self, context: context)
+            await tokenChannel.send(authRequest.sessionToken)
+            
+            // Validate the received token quickly
+            let response = AuthResponse(
+                userRecordName: authRequest.userRecordName,
+                cloudKitData: .init(user: nil, zones: [], error: nil),
+                message: "Authentication successful! Token received."
+            )
+            
+            let jsonData = try JSONEncoder().encode(response)
+            
+            // Signal completion after a brief delay
+            Task {
+                try await Task.sleep(nanoseconds: 200_000_000)
+                await responseCompleteChannel.send(())
+            }
+            
+            return Response(
+                status: .ok,
+                headers: [.contentType: "application/json"],
+                body: ResponseBody { writer in
+                    try await writer.write(ByteBuffer(bytes: jsonData))
+                    try await writer.finish(nil)
+                }
+            )
+        }
+        
+        // Start the HTTP server
+        let app = Application(
+            router: router,
+            configuration: .init(
+                address: .hostname(config.host, port: config.port)
+            )
+        )
+        
+        let serverTask = Task {
+            try await app.runService()
+        }
+        
+        // Open browser unless disabled
+        if !config.noBrowser {
+            Task {
+                try await Task.sleep(nanoseconds: 1_000_000_000) // Wait 1 second
+                print("🌐 Opening browser...")
+                BrowserOpener.openBrowser(url: "http://\(config.host):\(config.port)")
+            }
+        } else {
+            print("ℹ️  Browser opening disabled. Navigate to http://\(config.host):\(config.port) manually")
+        }
+        
+        print("⏳ Waiting for authentication...")
+        print("   Timeout: 5 minutes")
+        print("   Press Ctrl+C to cancel")
+
+        let token: String
+        do {
+            token = try await withTimeoutAndSignals(seconds: 300) {
+                await tokenChannel.receive()
+            }
+        } catch let error as AsyncTimeoutError {
+            serverTask.cancel()
+            throw AuthTokenError.timeout(error.localizedDescription)
+        } catch {
+            serverTask.cancel()
+            throw error
+        }
+        
+        print("✅ Authentication successful! Received token.")
+        
+        // Wait for response completion
+        await responseCompleteChannel.receive()
+        
+        // Shutdown server
+        serverTask.cancel()
+        try await Task.sleep(nanoseconds: 500_000_000)
+        
+        // Output token to stdout (this is the main output of the command)
+        print(token)
+    }
+    
+    /// Find the resources directory containing index.html
+    private func findResourcesPath() throws -> String {
+        let possiblePaths = [
+            Bundle.main.resourcePath ?? "",
+            Bundle.main.bundlePath + "/Contents/Resources",
+            "./Sources/MistDemo/Resources",
+            "./Examples/MistDemo/Sources/MistDemo/Resources",
+            URL(fileURLWithPath: #file).deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Resources").path
+        ]
+        
+        for path in possiblePaths {
+            if !path.isEmpty && FileManager.default.fileExists(atPath: path + "/index.html") {
+                return path
+            }
+        }
+        
+        throw AuthTokenError.missingResource("index.html not found in any expected location")
+    }
+}
+
+/// Authentication-related errors for auth-token command
+public enum AuthTokenError: Error, LocalizedError {
+    case timeout(String)
+    case missingResource(String)
+    case serverError(String)
+    
+    public var errorDescription: String? {
+        switch self {
+        case .timeout(let message):
+            return "Authentication timeout: \(message)"
+        case .missingResource(let resource):
+            return "Missing resource: \(resource)"
+        case .serverError(let message):
+            return "Server error: \(message)"
+        }
+    }
+}

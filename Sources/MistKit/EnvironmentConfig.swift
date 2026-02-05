@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -35,6 +35,9 @@ public enum EnvironmentConfig {
   public enum Keys {
     /// CloudKit API token environment variable key
     public static let cloudKitAPIToken = "CLOUDKIT_API_TOKEN"
+
+    /// CloudKit Web Auth token environment variable key
+    public static let cloudKitWebAuthToken = "CLOUDKIT_WEB_AUTH_TOKEN"
   }
 
   /// CloudKit-specific environment utilities
@@ -47,6 +50,7 @@ public enum EnvironmentConfig {
       // Check for CloudKit-related environment variables
       let cloudKitKeys = [
         "CLOUDKIT_API_TOKEN",
+        "CLOUDKIT_WEB_AUTH_TOKEN",
         "CLOUDKIT_CONTAINER_ID",
         "CLOUDKIT_ENVIRONMENT",
         "CLOUDKIT_DATABASE",

@@ -57,7 +57,7 @@ Add MistKit to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.1")
+    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.4")
 ]
 ```
 
@@ -276,9 +276,9 @@ try await adaptiveManager.upgradeToWebAuth(webAuthToken: webToken)
 
 Check out the `Examples/` directory for complete working examples:
 
-- **Command Line Tool**: Basic CloudKit operations from the command line
-- **Server Application**: Using MistKit in a server-side Swift application
-- **Cross-Platform App**: Shared CloudKit logic across multiple platforms
+- **[MistDemo](Examples/MistDemo/)**: Web-based CloudKit authentication demo with automatic token capture
+- **[BushelCloud](Examples/BushelCloud/)**: Server-to-Server auth demo syncing macOS restore images, Xcode, and Swift versions
+- **[CelestraCloud](Examples/CelestraCloud/)**: RSS reader demonstrating CloudKit query filtering, sorting, and web etiquette patterns
 
 ## Documentation
 
@@ -321,10 +321,18 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 ### v1.0.0-alpha.3
 
 - [ ] [Name Component Types](https://github.com/brightdigit/MistKit/issues/26)
-- [ ] [Uploading Assets (assets/upload)](https://github.com/brightdigit/MistKit/issues/30)
+- [x] [Uploading Assets (assets/upload)](https://github.com/brightdigit/MistKit/issues/30) ✅
 - [ ] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/44)
 - [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46)
-- [ ] [Add Support for swiftlang/swift-source-compat-suite](https://github.com/brightdigit/MistKit/issues/185)
+- [x] [Add Support for swiftlang/swift-source-compat-suite](https://github.com/brightdigit/MistKit/issues/185) ✅
+
+### v1.0.0-alpha.4
+
+- [x] [Uploading Assets (assets/upload)](https://github.com/brightdigit/MistKit/issues/30) ✅
+- [x] [Add Support for swiftlang/swift-source-compat-suite](https://github.com/brightdigit/MistKit/issues/185) ✅
+- [x] [MistDemo - Web Authentication Demo](https://github.com/brightdigit/MistKit/pull/227) ✅
+- [x] [WASM Platform Support](https://github.com/brightdigit/MistKit/pull/206) ✅
+- [x] [Android Platform Support](https://github.com/brightdigit/MistKit/pull/189) ✅
 
 ### v1.0.0-alpha.X
 

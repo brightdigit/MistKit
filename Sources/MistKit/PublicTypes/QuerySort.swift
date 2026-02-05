@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -32,12 +32,6 @@ import Foundation
 /// Public wrapper for CloudKit query sort descriptors
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct QuerySort {
-  // MARK: - Lifecycle
-
-  private init(_ sort: Components.Schemas.Sort) {
-    self.sort = sort
-  }
-
   // MARK: - Public
 
   /// Creates an ascending sort descriptor
@@ -61,6 +55,12 @@ public struct QuerySort {
   /// - Returns: A configured QuerySort
   public static func sort(_ field: String, ascending: Bool = true) -> QuerySort {
     QuerySort(SortDescriptor.sort(field, ascending: ascending))
+  }
+
+  // MARK: - Lifecycle
+
+  private init(_ sort: Components.Schemas.Sort) {
+    self.sort = sort
   }
 
   // MARK: - Internal

@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -81,7 +81,10 @@ extension AdaptiveTokenManager {
       } catch {
         // Don't fail silently - log the storage error but continue with the upgrade
         // This ensures the authentication upgrade succeeds even if storage fails
-        print("Warning: Failed to store credentials after upgrade: \(error.localizedDescription)")
+        MistKitLogger.logWarning(
+          "Failed to store credentials after upgrade: \(error.localizedDescription)",
+          logger: MistKitLogger.auth
+        )
         // Could also throw here if storage failure should be fatal:
         // throw TokenManagerError.internalError(
         //   reason: "Failed to store credentials: \(error.localizedDescription)"

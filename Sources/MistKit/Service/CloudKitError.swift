@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -29,6 +29,10 @@
 
 public import Foundation
 import OpenAPIRuntime
+
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
 
 /// Represents errors that can occur when interacting with CloudKit Web Services
 public enum CloudKitError: LocalizedError, Sendable {

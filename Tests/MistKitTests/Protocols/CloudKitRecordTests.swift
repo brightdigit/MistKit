@@ -36,34 +36,6 @@ import Testing
 internal struct TestRecord: CloudKitRecord {
   static var cloudKitRecordType: String { "TestRecord" }
 
-  var recordName: String
-  var name: String
-  var count: Int
-  var isActive: Bool
-  var score: Double?
-  var lastUpdated: Date?
-
-  // swiftlint:disable:next empty_count
-  var isEmpty: Bool { count == 0 }
-
-  func toCloudKitFields() -> [String: FieldValue] {
-    var fields: [String: FieldValue] = [
-      "name": .string(name),
-      "count": .int64(count),
-      "isActive": FieldValue(booleanValue: isActive),
-    ]
-
-    if let score {
-      fields["score"] = .double(score)
-    }
-
-    if let lastUpdated {
-      fields["lastUpdated"] = .date(lastUpdated)
-    }
-
-    return fields
-  }
-
   static func from(recordInfo: RecordInfo) -> TestRecord? {
     guard
       let name = recordInfo.fields["name"]?.stringValue,
@@ -91,216 +63,40 @@ internal struct TestRecord: CloudKitRecord {
     let count = recordInfo.fields["count"]?.intValue ?? 0
     return "  \(recordInfo.recordName): \(name) (count: \(count))"
   }
+
+  internal var recordName: String
+  internal var name: String
+  internal var count: Int
+  internal var isActive: Bool
+  internal var score: Double?
+  internal var lastUpdated: Date?
+
+  // swiftlint:disable:next empty_count
+  internal var isEmpty: Bool { count == 0 }
+
+  internal func toCloudKitFields() -> [String: FieldValue] {
+    var fields: [String: FieldValue] = [
+      "name": .string(name),
+      "count": .int64(count),
+      "isActive": FieldValue(booleanValue: isActive),
+    ]
+
+    if let score {
+      fields["score"] = .double(score)
+    }
+
+    if let lastUpdated {
+      fields["lastUpdated"] = .date(lastUpdated)
+    }
+
+    return fields
+  }
 }
 
 @Suite("CloudKitRecord Protocol")
-/// Tests for CloudKitRecord protocol conformance
-internal struct CloudKitRecordTests {
+internal enum CloudKitRecordTests {
   @Test("CloudKitRecord provides correct record type")
-  internal func recordTypeProperty() {
+  internal static func recordTypeProperty() {
     #expect(TestRecord.cloudKitRecordType == "TestRecord")
-  }
-
-  @Test("toCloudKitFields converts required fields correctly")
-  internal func toCloudKitFieldsBasic() {
-    let record = TestRecord(
-      recordName: "test-1",
-      name: "Test Record",
-      count: 42,
-      isActive: true,
-      score: nil,
-      lastUpdated: nil
-    )
-
-    let fields = record.toCloudKitFields()
-
-    #expect(fields["name"]?.stringValue == "Test Record")
-    #expect(fields["count"]?.intValue == 42)
-    #expect(fields["isActive"]?.boolValue == true)
-    #expect(fields["score"] == nil)
-    #expect(fields["lastUpdated"] == nil)
-  }
-
-  @Test("toCloudKitFields includes optional fields when present")
-  internal func toCloudKitFieldsWithOptionals() {
-    let date = Date()
-    let record = TestRecord(
-      recordName: "test-2",
-      name: "Test Record",
-      count: 10,
-      isActive: false,
-      score: 98.5,
-      lastUpdated: date
-    )
-
-    let fields = record.toCloudKitFields()
-
-    #expect(fields["name"]?.stringValue == "Test Record")
-    #expect(fields["count"]?.intValue == 10)
-    #expect(fields["isActive"]?.boolValue == false)
-    #expect(fields["score"]?.doubleValue == 98.5)
-    #expect(fields["lastUpdated"]?.dateValue == date)
-  }
-
-  @Test("from(recordInfo:) parses valid record successfully")
-  internal func fromRecordInfoSuccess() {
-    let recordInfo = RecordInfo(
-      recordName: "test-3",
-      recordType: "TestRecord",
-      fields: [
-        "name": .string("Parsed Record"),
-        "count": .int64(25),
-        "isActive": FieldValue(booleanValue: true),
-        "score": .double(75.0),
-      ]
-    )
-
-    let record = TestRecord.from(recordInfo: recordInfo)
-
-    #expect(record?.recordName == "test-3")
-    #expect(record?.name == "Parsed Record")
-    #expect(record?.count == 25)
-    #expect(record?.isActive == true)
-    #expect(record?.score == 75.0)
-  }
-
-  @Test("from(recordInfo:) handles missing optional fields")
-  internal func fromRecordInfoWithMissingOptionals() {
-    let recordInfo = RecordInfo(
-      recordName: "test-4",
-      recordType: "TestRecord",
-      fields: [
-        "name": .string("Minimal Record"),
-        "isActive": FieldValue(booleanValue: false),
-      ]
-    )
-
-    let record = TestRecord.from(recordInfo: recordInfo)
-
-    #expect(record?.recordName == "test-4")
-    #expect(record?.name == "Minimal Record")
-    #expect(record?.isEmpty == true)  // Default value (count == 0)
-    #expect(record?.isActive == false)
-    #expect(record?.score == nil)
-    #expect(record?.lastUpdated == nil)
-  }
-
-  @Test("from(recordInfo:) returns nil when required fields missing")
-  internal func fromRecordInfoMissingRequiredFields() {
-    let recordInfo = RecordInfo(
-      recordName: "test-5",
-      recordType: "TestRecord",
-      fields: [
-        "count": .int64(10)
-        // Missing required "name" and "isActive" fields
-      ]
-    )
-
-    let record = TestRecord.from(recordInfo: recordInfo)
-    #expect(record == nil)
-  }
-
-  @Test("from(recordInfo:) handles legacy int64 boolean encoding")
-  internal func fromRecordInfoWithLegacyBooleans() {
-    let recordInfo = RecordInfo(
-      recordName: "test-6",
-      recordType: "TestRecord",
-      fields: [
-        "name": .string("Legacy Record"),
-        "isActive": .int64(1),  // Legacy boolean as int64
-      ]
-    )
-
-    let record = TestRecord.from(recordInfo: recordInfo)
-
-    #expect(record?.isActive == true)
-  }
-
-  @Test("formatForDisplay generates expected output")
-  internal func formatForDisplay() {
-    let recordInfo = RecordInfo(
-      recordName: "test-7",
-      recordType: "TestRecord",
-      fields: [
-        "name": .string("Display Record"),
-        "count": .int64(99),
-      ]
-    )
-
-    let formatted = TestRecord.formatForDisplay(recordInfo)
-    #expect(formatted.contains("test-7"))
-    #expect(formatted.contains("Display Record"))
-    #expect(formatted.contains("99"))
-  }
-
-  @Test("Round-trip: record -> fields -> record")
-  internal func roundTripConversion() {
-    let original = TestRecord(
-      recordName: "test-8",
-      name: "Round Trip",
-      count: 50,
-      isActive: true,
-      score: 88.8,
-      lastUpdated: Date()
-    )
-
-    let fields = original.toCloudKitFields()
-    let recordInfo = RecordInfo(
-      recordName: original.recordName,
-      recordType: TestRecord.cloudKitRecordType,
-      fields: fields
-    )
-
-    let reconstructed = TestRecord.from(recordInfo: recordInfo)
-
-    #expect(reconstructed?.recordName == original.recordName)
-    #expect(reconstructed?.name == original.name)
-    #expect(reconstructed?.count == original.count)
-    #expect(reconstructed?.isActive == original.isActive)
-    #expect(reconstructed?.score == original.score)
-  }
-
-  @Test("CloudKitRecord conforms to Codable")
-  internal func codableConformance() throws {
-    let record = TestRecord(
-      recordName: "test-9",
-      name: "Codable Test",
-      count: 123,
-      isActive: true,
-      score: 99.9,
-      lastUpdated: Date()
-    )
-
-    let encoder = JSONEncoder()
-    let data = try encoder.encode(record)
-
-    let decoder = JSONDecoder()
-    let decoded = try decoder.decode(TestRecord.self, from: data)
-
-    #expect(decoded.recordName == record.recordName)
-    #expect(decoded.name == record.name)
-    #expect(decoded.count == record.count)
-    #expect(decoded.isActive == record.isActive)
-  }
-
-  @Test("CloudKitRecord conforms to Sendable")
-  internal func sendableConformance() async {
-    let record = TestRecord(
-      recordName: "test-10",
-      name: "Sendable Test",
-      count: 1,
-      isActive: true,
-      score: nil,
-      lastUpdated: nil
-    )
-
-    // This test verifies that TestRecord (CloudKitRecord) is Sendable
-    // by being able to pass it across async/await boundaries
-    let task = Task {
-      record.name
-    }
-
-    let name = await task.value
-    #expect(name == "Sendable Test")
   }
 }

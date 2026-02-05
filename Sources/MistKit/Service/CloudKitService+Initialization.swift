@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -29,7 +29,12 @@
 
 import Foundation
 public import OpenAPIRuntime
-public import OpenAPIURLSession
+
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
+
+// MARK: - Generic Initializers (All Platforms)
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
@@ -39,7 +44,7 @@ extension CloudKitService {
     containerIdentifier: String,
     apiToken: String,
     webAuthToken: String,
-    transport: any ClientTransport = URLSessionTransport()
+    transport: any ClientTransport
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
@@ -53,7 +58,10 @@ extension CloudKitService {
       apiToken: apiToken,
       webAuthToken: webAuthToken
     )
-    self.mistKitClient = try MistKitClient(configuration: config, transport: transport)
+    self.mistKitClient = try MistKitClient(
+      configuration: config,
+      transport: transport
+    )
   }
 
   /// Initialize CloudKit service with API-only authentication
@@ -61,7 +69,7 @@ extension CloudKitService {
   public init(
     containerIdentifier: String,
     apiToken: String,
-    transport: any ClientTransport = URLSessionTransport()
+    transport: any ClientTransport
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
@@ -77,7 +85,10 @@ extension CloudKitService {
       keyID: nil,
       privateKeyData: nil
     )
-    self.mistKitClient = try MistKitClient(configuration: config, transport: transport)
+    self.mistKitClient = try MistKitClient(
+      configuration: config,
+      transport: transport
+    )
   }
 
   /// Initialize CloudKit service with a custom TokenManager
@@ -87,7 +98,7 @@ extension CloudKitService {
     tokenManager: any TokenManager,
     environment: Environment = .development,
     database: Database = .private,
-    transport: any ClientTransport = URLSessionTransport()
+    transport: any ClientTransport
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = ""  // Not used when providing TokenManager directly
@@ -103,3 +114,63 @@ extension CloudKitService {
     )
   }
 }
+
+// MARK: - URLSession Convenience Initializers (Non-WASI Platforms)
+
+#if !os(WASI)
+  import OpenAPIURLSession
+
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  extension CloudKitService {
+    /// Initialize CloudKit service with web authentication using default URLSessionTransport
+    ///
+    /// This convenience initializer is only available on platforms that support URLSession.
+    /// For WASI builds, use the generic initializer that accepts a transport parameter.
+    public init(
+      containerIdentifier: String,
+      apiToken: String,
+      webAuthToken: String
+    ) throws {
+      try self.init(
+        containerIdentifier: containerIdentifier,
+        apiToken: apiToken,
+        webAuthToken: webAuthToken,
+        transport: URLSessionTransport()
+      )
+    }
+
+    /// Initialize CloudKit service with API-only authentication using default URLSessionTransport
+    ///
+    /// This convenience initializer is only available on platforms that support URLSession.
+    /// For WASI builds, use the generic initializer that accepts a transport parameter.
+    public init(
+      containerIdentifier: String,
+      apiToken: String
+    ) throws {
+      try self.init(
+        containerIdentifier: containerIdentifier,
+        apiToken: apiToken,
+        transport: URLSessionTransport()
+      )
+    }
+
+    /// Initialize CloudKit service with a custom TokenManager using default URLSessionTransport
+    ///
+    /// This convenience initializer is only available on platforms that support URLSession.
+    /// For WASI builds, use the generic initializer that accepts a transport parameter.
+    public init(
+      containerIdentifier: String,
+      tokenManager: any TokenManager,
+      environment: Environment = .development,
+      database: Database = .private
+    ) throws {
+      try self.init(
+        containerIdentifier: containerIdentifier,
+        tokenManager: tokenManager,
+        environment: environment,
+        database: database,
+        transport: URLSessionTransport()
+      )
+    }
+  }
+#endif

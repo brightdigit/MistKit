@@ -1,0 +1,13 @@
+name: CelestraCloud
+settings:
+  LINT_MODE: ${LINT_MODE}
+packages:
+  CelestraCloud:
+    path: .
+aggregateTargets:
+  Lint:
+    buildScripts:
+      - path: Scripts/lint.sh
+        name: Lint
+        basedOnDependencyAnalysis: false
+    schemes: {}

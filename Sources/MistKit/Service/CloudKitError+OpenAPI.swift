@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -205,13 +205,22 @@ extension CloudKitError {
 
     // Handle undocumented error
     if let statusCode = response.undocumentedStatusCode {
-      assertionFailure("Unhandled response status code: \(statusCode)")
+      // Log warning but don't crash - undocumented status codes can occur
+      MistKitLogger.logWarning(
+        "Unhandled response status code: \(statusCode) - treating as generic HTTP error",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
       self = .httpError(statusCode: statusCode)
       return
     }
 
-    // Should never reach here
-    assertionFailure("Unhandled response case: \(response)")
+    // Should never reach here - log and return generic error
+    MistKitLogger.logWarning(
+      "Unhandled response case: \(response) - treating as invalid response",
+      logger: MistKitLogger.api,
+      shouldRedact: false
+    )
     self = .invalidResponse
   }
 }

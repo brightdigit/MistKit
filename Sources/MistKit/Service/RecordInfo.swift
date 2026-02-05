@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -62,7 +62,7 @@ public struct RecordInfo: Encodable, Sendable {
     recordType == "Unknown"
   }
 
-  internal init(from record: Components.Schemas.Record) {
+  internal init(from record: Components.Schemas.RecordResponse) {
     self.recordName = record.recordName ?? "Unknown"
     self.recordType = record.recordType ?? "Unknown"
     self.recordChangeTag = record.recordChangeTag

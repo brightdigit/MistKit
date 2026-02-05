@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -30,8 +30,15 @@
 import Crypto
 import Foundation
 import HTTPTypes
-public import OpenAPIRuntime
-import OpenAPIURLSession
+import OpenAPIRuntime
+
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
+
+#if !os(WASI)
+  import OpenAPIURLSession
+#endif
 
 /// A client for interacting with CloudKit Web Services
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -46,7 +53,10 @@ internal struct MistKitClient {
   ///   - transport: Custom transport for network requests
   /// - Throws: ClientError if initialization fails
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal init(configuration: MistKitConfiguration, transport: any ClientTransport) throws {
+  internal init(
+    configuration: MistKitConfiguration,
+    transport: any ClientTransport
+  ) throws {
     // Create appropriate TokenManager from configuration
     let tokenManager = try configuration.createTokenManager()
 
@@ -127,42 +137,54 @@ internal struct MistKitClient {
       privateKeyData: privateKeyData
     )
 
-    try self.init(configuration: configuration, tokenManager: tokenManager, transport: transport)
+    try self.init(
+      configuration: configuration,
+      tokenManager: tokenManager,
+      transport: transport
+    )
   }
 
   // MARK: - Convenience Initializers
 
-  /// Initialize a new MistKit client with default URLSessionTransport
-  /// - Parameter configuration: The CloudKit configuration including container,
-  ///   environment, and authentication
-  /// - Throws: ClientError if initialization fails
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal init(configuration: MistKitConfiguration) throws {
-    try self.init(configuration: configuration, transport: URLSessionTransport())
-  }
+  #if !os(WASI)
+    /// Initialize a new MistKit client with default URLSessionTransport
+    /// - Parameters:
+    ///   - configuration: The CloudKit configuration including container,
+    ///     environment, and authentication
+    /// - Throws: ClientError if initialization fails
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    internal init(
+      configuration: MistKitConfiguration
+    ) throws {
+      try self.init(
+        configuration: configuration,
+        transport: URLSessionTransport()
+      )
+    }
 
-  /// Initialize a new MistKit client with a custom TokenManager and individual parameters
-  /// using default URLSessionTransport
-  /// - Parameters:
-  ///   - container: CloudKit container identifier
-  ///   - environment: CloudKit environment (development/production)
-  ///   - database: CloudKit database (public/private/shared)
-  ///   - tokenManager: Custom token manager for authentication
-  /// - Throws: ClientError if initialization fails
-  internal init(
-    container: String,
-    environment: Environment,
-    database: Database,
-    tokenManager: any TokenManager
-  ) throws {
-    try self.init(
-      container: container,
-      environment: environment,
-      database: database,
-      tokenManager: tokenManager,
-      transport: URLSessionTransport()
-    )
-  }
+    /// Initialize a new MistKit client with a custom TokenManager and individual parameters
+    /// using default URLSessionTransport
+    /// - Parameters:
+    ///   - container: CloudKit container identifier
+    ///   - environment: CloudKit environment (development/production)
+    ///   - database: CloudKit database (public/private/shared)
+    ///   - tokenManager: Custom token manager for authentication
+    /// - Throws: ClientError if initialization fails
+    internal init(
+      container: String,
+      environment: Environment,
+      database: Database,
+      tokenManager: any TokenManager
+    ) throws {
+      try self.init(
+        container: container,
+        environment: environment,
+        database: database,
+        tokenManager: tokenManager,
+        transport: URLSessionTransport()
+      )
+    }
+  #endif
 
   // MARK: - Server-to-Server Validation
 

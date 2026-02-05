@@ -642,8 +642,13 @@ paths:
 
   /database/{version}/{container}/{environment}/{database}/assets/upload:
     post:
-      summary: Upload Assets
-      description: Upload binary assets to CloudKit
+      summary: Request Asset Upload URLs
+      description: |
+        Request upload URLs for asset fields. This is the first step in a two-step process:
+        1. Request upload URLs by specifying the record type and field name
+        2. Upload the actual binary data to the returned URL (separate HTTP request)
+
+        Upload URLs are valid for 15 minutes. Maximum file size is 15 MB.
       operationId: uploadAssets
       tags:
         - Assets
@@ -655,16 +660,36 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
-                file:
-                  type: string
-                  format: binary
+                zoneID:
+                  $ref: '#/components/schemas/ZoneID'
+                  description: Optional zone ID. Defaults to default zone if not specified.
+                tokens:
+                  type: array
+                  description: Array of asset fields to request upload URLs for
+                  items:
+                    type: object
+                    required:
+                      - recordType
+                      - fieldName
+                    properties:
+                      recordName:
+                        type: string
+                        description: Unique name to identify the record. Defaults to random UUID if not specified.
+                      recordType:
+                        type: string
+                        description: Name of the record type
+                      fieldName:
+                        type: string
+                        description: Name of the Asset or Asset list field
+              required:
+                - tokens
       responses:
         '200':
-          description: Asset uploaded successfully
+          description: Upload URLs returned successfully
           content:
             application/json:
               schema:
@@ -802,7 +827,7 @@ components:
         fieldName:
           type: string
         fieldValue:
-          $ref: '#/components/schemas/FieldValue'
+          $ref: '#/components/schemas/FieldValueRequest'
 
     Sort:
       type: object
@@ -819,10 +844,11 @@ components:
           type: string
           enum: [create, update, forceUpdate, replace, forceReplace, delete, forceDelete]
         record:
-          $ref: '#/components/schemas/Record'
+          $ref: '#/components/schemas/RecordRequest'
 
-    Record:
+    RecordRequest:
       type: object
+      description: Record schema for API requests (fields use FieldValueRequest)
       properties:
         recordName:
           type: string
@@ -835,13 +861,54 @@ components:
           description: Change tag for optimistic concurrency control
         fields:
           type: object
-          description: Record fields with their values and types
+          description: Record fields with their values (no type metadata)
           additionalProperties:
-            $ref: '#/components/schemas/FieldValue'
+            $ref: '#/components/schemas/FieldValueRequest'
 
-    FieldValue:
+    RecordResponse:
       type: object
-      description: A CloudKit field value with its type information
+      description: Record schema for API responses (fields use FieldValueResponse)
+      properties:
+        recordName:
+          type: string
+          description: The unique identifier for the record
+        recordType:
+          type: string
+          description: The record type (schema name)
+        recordChangeTag:
+          type: string
+          description: Change tag for optimistic concurrency control
+        fields:
+          type: object
+          description: Record fields with their values and optional type information
+          additionalProperties:
+            $ref: '#/components/schemas/FieldValueResponse'
+
+    FieldValueRequest:
+      type: object
+      description: |
+        A CloudKit field value for API requests.
+        The type field is omitted as CloudKit infers types from the value structure.
+      properties:
+        value:
+          oneOf:
+            - $ref: '#/components/schemas/StringValue'
+            - $ref: '#/components/schemas/Int64Value'
+            - $ref: '#/components/schemas/DoubleValue'
+            - $ref: '#/components/schemas/BytesValue'
+            - $ref: '#/components/schemas/DateValue'
+            - $ref: '#/components/schemas/LocationValue'
+            - $ref: '#/components/schemas/ReferenceValue'
+            - $ref: '#/components/schemas/AssetValue'
+            - $ref: '#/components/schemas/ListValue'
+      required:
+        - value
+
+    FieldValueResponse:
+      type: object
+      description: |
+        A CloudKit field value from API responses.
+        May include optional type field for explicit type information.
       properties:
         value:
           oneOf:
@@ -857,7 +924,9 @@ components:
         type:
           type: string
           enum: [STRING, INT64, DOUBLE, BYTES, REFERENCE, ASSET, ASSETID, LOCATION, TIMESTAMP, LIST]
-          description: The CloudKit field type
+          description: The CloudKit field type (optional, may be inferred from value)
+      required:
+        - value
 
     StringValue:
       type: string
@@ -1016,7 +1085,7 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/Record'
+            $ref: '#/components/schemas/RecordResponse'
         continuationMarker:
           type: string
 
@@ -1026,7 +1095,7 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/Record'
+            $ref: '#/components/schemas/RecordResponse'
 
     LookupResponse:
       type: object
@@ -1034,7 +1103,7 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/Record'
+            $ref: '#/components/schemas/RecordResponse'
 
     ChangesResponse:
       type: object
@@ -1042,7 +1111,7 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/Record'
+            $ref: '#/components/schemas/RecordResponse'
         syncToken:
           type: string
         moreComing:

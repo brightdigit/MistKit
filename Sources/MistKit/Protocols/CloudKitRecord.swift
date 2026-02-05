@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -70,30 +70,6 @@ public protocol CloudKitRecord: Codable, Sendable {
   /// For example: "RestoreImage", "XcodeVersion", "SwiftVersion"
   static var cloudKitRecordType: String { get }
 
-  /// The unique CloudKit record name for this instance
-  ///
-  /// This is typically computed from the model's primary key or unique identifier.
-  /// For example: "RestoreImage-23C71" or "XcodeVersion-15.2"
-  var recordName: String { get }
-
-  /// Convert this model to CloudKit field values
-  ///
-  /// Map each property to its corresponding `FieldValue` enum case:
-  /// - String properties → `.string(value)`
-  /// - Int properties → `.int64(Int64(value))`
-  /// - Double properties → `.double(value)`
-  /// - Bool properties → `.from(value)` or `.int64(value ? 1 : 0)`
-  /// - Date properties → `.date(value)`
-  /// - References → `.reference(recordName: "OtherRecord-ID")`
-  ///
-  /// Handle optional properties with conditional field assignment:
-  /// ```swift
-  /// if let optionalValue { fields["optional"] = .string(optionalValue) }
-  /// ```
-  ///
-  /// - Returns: Dictionary mapping CloudKit field names to their values
-  func toCloudKitFields() -> [String: FieldValue]
-
   /// Parse a CloudKit record into a model instance
   ///
   /// Extract required fields using `FieldValue` convenience properties:
@@ -117,4 +93,28 @@ public protocol CloudKitRecord: Codable, Sendable {
   /// - Parameter recordInfo: The CloudKit record to format
   /// - Returns: A formatted string (typically 1-3 lines with indentation)
   static func formatForDisplay(_ recordInfo: RecordInfo) -> String
+
+  /// The unique CloudKit record name for this instance
+  ///
+  /// This is typically computed from the model's primary key or unique identifier.
+  /// For example: "RestoreImage-23C71" or "XcodeVersion-15.2"
+  var recordName: String { get }
+
+  /// Convert this model to CloudKit field values
+  ///
+  /// Map each property to its corresponding `FieldValue` enum case:
+  /// - String properties → `.string(value)`
+  /// - Int properties → `.int64(Int64(value))`
+  /// - Double properties → `.double(value)`
+  /// - Bool properties → `.from(value)` or `.int64(value ? 1 : 0)`
+  /// - Date properties → `.date(value)`
+  /// - References → `.reference(recordName: "OtherRecord-ID")`
+  ///
+  /// Handle optional properties with conditional field assignment:
+  /// ```swift
+  /// if let optionalValue { fields["optional"] = .string(optionalValue) }
+  /// ```
+  ///
+  /// - Returns: Dictionary mapping CloudKit field names to their values
+  func toCloudKitFields() -> [String: FieldValue]
 }

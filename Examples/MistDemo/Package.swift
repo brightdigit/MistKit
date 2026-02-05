@@ -79,7 +79,7 @@ let swiftSettings: [SwiftSetting] = [
 let package = Package(
     name: "MistDemo",
     platforms: [
-        .macOS(.v14)
+        .macOS(.v15)
     ],
     products: [
         .executable(name: "mistdemo", targets: ["MistDemo"])
@@ -87,18 +87,39 @@ let package = Package(
     dependencies: [
         .package(path: "../.."),  // MistKit
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0")
+        .package(
+            url: "https://github.com/apple/swift-configuration",
+            from: "1.0.0",
+            traits: ["CommandLineArguments"]
+        ),
+        .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.0.0")
     ],
     targets: [
+        .target(
+            name: "ConfigKeyKit",
+            dependencies: [],
+            swiftSettings: swiftSettings
+        ),
         .executableTarget(
             name: "MistDemo",
             dependencies: [
+                "ConfigKeyKit",
                 .product(name: "MistKit", package: "MistKit"),
                 .product(name: "Hummingbird", package: "hummingbird"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser")
+                .product(name: "Configuration", package: "swift-configuration"),
+                .product(name: "UnixSignals", package: "swift-service-lifecycle")
             ],
             resources: [
                 .copy("Resources")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "MistDemoTests",
+            dependencies: [
+                "MistDemo",
+                "ConfigKeyKit",
+                .product(name: "MistKit", package: "MistKit")
             ],
             swiftSettings: swiftSettings
         )

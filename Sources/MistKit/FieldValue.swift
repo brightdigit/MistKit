@@ -3,7 +3,7 @@
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -31,8 +31,6 @@ public import Foundation
 
 /// Represents a CloudKit field value as defined in the CloudKit Web Services API
 public enum FieldValue: Codable, Equatable, Sendable {
-  /// Conversion factor from seconds to milliseconds for CloudKit timestamps
-  private static let millisecondsPerSecond: Double = 1_000
   case string(String)
   case int64(Int)
   case double(Double)
@@ -42,6 +40,9 @@ public enum FieldValue: Codable, Equatable, Sendable {
   case reference(Reference)
   case asset(Asset)
   case list([FieldValue])
+
+  /// Conversion factor from seconds to milliseconds for CloudKit timestamps
+  private static let millisecondsPerSecond: Double = 1_000
 
   /// Location dictionary as defined in CloudKit Web Services
   public struct Location: Codable, Equatable, Sendable {

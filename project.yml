@@ -4,10 +4,12 @@ settings:
 packages:
   MistKit:
     path: .
+  MistDemo:
+    path: .
   Bushel:
-    path: Examples/Bushel
+    path: Examples/MistDemo
   Celestra:
-    path: Examples/Celestra
+    path: Examples/CelestraCloud
 aggregateTargets:
   Lint:
     buildScripts:
