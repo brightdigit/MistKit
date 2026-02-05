@@ -36,22 +36,23 @@ import Testing
 extension CloudKitServiceUploadTests {
   /// Create service for successful upload operations
   /// Test API token in 64-character hexadecimal format as required by MistKit validation
-  private static let testAPIToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+  private static let testAPIToken =
+    "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
 
   /// Create a mock asset uploader that returns a successful upload response
   internal static func makeMockAssetUploader() -> AssetUploader {
     { data, _ in
       let response = """
-      {
-        "singleFile": {
-          "wrappingKey": "test-wrapping-key-abc123",
-          "fileChecksum": "test-checksum-def456",
-          "receipt": "test-receipt-token-xyz",
-          "referenceChecksum": "test-ref-checksum-789",
-          "size": \(data.count)
+        {
+          "singleFile": {
+            "wrappingKey": "test-wrapping-key-abc123",
+            "fileChecksum": "test-checksum-def456",
+            "receipt": "test-receipt-token-xyz",
+            "referenceChecksum": "test-ref-checksum-789",
+            "size": \(data.count)
+          }
         }
-      }
-      """
+        """
       return (200, Data(response.utf8))
     }
   }
@@ -100,7 +101,9 @@ extension CloudKitServiceUploadTests {
 
   /// Create service for asset data upload testing
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal static func makeAssetDataUploadService(tokenCount: Int = 1) async throws -> CloudKitService {
+  internal static func makeAssetDataUploadService(tokenCount: Int = 1) async throws
+    -> CloudKitService
+  {
     let responseProvider = ResponseProvider.successfulUpload(tokenCount: tokenCount)
 
     let transport = MockTransport(responseProvider: responseProvider)
@@ -127,7 +130,8 @@ extension ResponseProvider {
   }
 
   /// Response provider for upload validation errors
-  internal static func uploadValidationError(_ type: UploadValidationErrorType) -> ResponseProvider {
+  internal static func uploadValidationError(_ type: UploadValidationErrorType) -> ResponseProvider
+  {
     ResponseProvider(defaultResponse: .uploadValidationError(type))
   }
 }
@@ -143,7 +147,7 @@ extension ResponseConfig {
       tokens.append([
         "url": "https://cvws.icloud-content.com/test-token-\(index)",
         "recordName": "test-record-\(index)",
-        "fieldName": "file"
+        "fieldName": "file",
       ])
     }
 

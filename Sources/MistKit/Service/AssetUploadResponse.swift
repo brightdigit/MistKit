@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -39,40 +39,40 @@ public import Foundation
 ///
 /// Response format: `{ "singleFile": { "wrappingKey": ..., "fileChecksum": ..., "receipt": ..., etc. } }`
 public struct AssetUploadResponse: Codable, Sendable {
-    /// The uploaded asset data containing checksums and receipt
-    public let singleFile: AssetData
+  /// The uploaded asset data containing checksums and receipt
+  public let singleFile: AssetData
 
-    /// Asset metadata returned from CloudKit CDN
-    public struct AssetData: Codable, Sendable {
-        /// Wrapping key for encrypted assets
-        public let wrappingKey: String?
-        /// SHA256 checksum of the uploaded file
-        public let fileChecksum: String?
-        /// Receipt token proving successful upload
-        public let receipt: String?
-        /// Reference checksum for asset verification
-        public let referenceChecksum: String?
-        /// Size of the uploaded asset in bytes
-        public let size: Int64?
+  /// Asset metadata returned from CloudKit CDN
+  public struct AssetData: Codable, Sendable {
+    /// Wrapping key for encrypted assets
+    public let wrappingKey: String?
+    /// SHA256 checksum of the uploaded file
+    public let fileChecksum: String?
+    /// Receipt token proving successful upload
+    public let receipt: String?
+    /// Reference checksum for asset verification
+    public let referenceChecksum: String?
+    /// Size of the uploaded asset in bytes
+    public let size: Int64?
 
-        /// Initialize asset data
-        public init(
-            wrappingKey: String?,
-            fileChecksum: String?,
-            receipt: String?,
-            referenceChecksum: String?,
-            size: Int64?
-        ) {
-            self.wrappingKey = wrappingKey
-            self.fileChecksum = fileChecksum
-            self.receipt = receipt
-            self.referenceChecksum = referenceChecksum
-            self.size = size
-        }
+    /// Initialize asset data
+    public init(
+      wrappingKey: String?,
+      fileChecksum: String?,
+      receipt: String?,
+      referenceChecksum: String?,
+      size: Int64?
+    ) {
+      self.wrappingKey = wrappingKey
+      self.fileChecksum = fileChecksum
+      self.receipt = receipt
+      self.referenceChecksum = referenceChecksum
+      self.size = size
     }
+  }
 
-    /// Initialize asset upload response
-    public init(singleFile: AssetData) {
-        self.singleFile = singleFile
-    }
+  /// Initialize asset upload response
+  public init(singleFile: AssetData) {
+    self.singleFile = singleFile
+  }
 }

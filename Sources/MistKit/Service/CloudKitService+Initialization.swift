@@ -28,10 +28,11 @@
 //
 
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 public import OpenAPIRuntime
+
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
 
 // MARK: - Generic Initializers (All Platforms)
 

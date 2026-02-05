@@ -28,11 +28,12 @@
 //
 
 public import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 import HTTPTypes
 import OpenAPIRuntime
+
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
 
 #if !os(WASI)
   import OpenAPIURLSession
@@ -209,7 +210,7 @@ extension CloudKitService {
     using uploader: AssetUploader? = nil
   ) async throws(CloudKitError) -> AssetUploadReceipt {
     // Validate data size (CloudKit limit is 15 MB)
-    let maxSize: Int = 15 * 1_024 * 1_024 // 15 MB
+    let maxSize: Int = 15 * 1_024 * 1_024  // 15 MB
     guard data.count <= maxSize else {
       throw CloudKitError.httpErrorWithRawResponse(
         statusCode: 413,
@@ -346,16 +347,17 @@ extension CloudKitService {
   ) async throws(CloudKitError) -> FieldValue.Asset {
     do {
       // Use provided uploader or default to URLSession.shared
-      let uploadHandler = uploader ?? { data, url in
-        #if os(WASI)
-          throw CloudKitError.httpErrorWithRawResponse(
-            statusCode: 501,
-            rawResponse: "Asset uploads not supported on WASI"
-          )
-        #else
-          return try await URLSession.shared.upload(data, to: url)
-        #endif
-      }
+      let uploadHandler =
+        uploader ?? { data, url in
+          #if os(WASI)
+            throw CloudKitError.httpErrorWithRawResponse(
+              statusCode: 501,
+              rawResponse: "Asset uploads not supported on WASI"
+            )
+          #else
+            return try await URLSession.shared.upload(data, to: url)
+          #endif
+        }
 
       // Perform the upload
       let (statusCode, responseData) = try await uploadHandler(data, url)
