@@ -28,8 +28,9 @@
 //
 
 import Foundation
-@testable import MistKit
 import Testing
+
+@testable import MistKit
 
 @Suite("MistKitClient Tests")
 struct MistKitClientTests {
@@ -121,12 +122,12 @@ struct MistKitClientTests {
     }
 
     let privateKeyPEM = """
-    -----BEGIN PRIVATE KEY-----
-    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
-    OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
-    1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
-    -----END PRIVATE KEY-----
-    """
+      -----BEGIN PRIVATE KEY-----
+      MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
+      OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
+      1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
+      -----END PRIVATE KEY-----
+      """
 
     let tokenManager = try ServerToServerAuthManager(
       keyID: String(repeating: "e", count: 64),
@@ -155,12 +156,12 @@ struct MistKitClientTests {
     }
 
     let privateKeyPEM = """
-    -----BEGIN PRIVATE KEY-----
-    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
-    OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
-    1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
-    -----END PRIVATE KEY-----
-    """
+      -----BEGIN PRIVATE KEY-----
+      MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
+      OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
+      1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
+      -----END PRIVATE KEY-----
+      """
 
     let tokenManager = try ServerToServerAuthManager(
       keyID: String(repeating: "f", count: 64),
@@ -199,12 +200,12 @@ struct MistKitClientTests {
     }
 
     let privateKeyPEM = """
-    -----BEGIN PRIVATE KEY-----
-    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
-    OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
-    1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
-    -----END PRIVATE KEY-----
-    """
+      -----BEGIN PRIVATE KEY-----
+      MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
+      OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
+      1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
+      -----END PRIVATE KEY-----
+      """
 
     let tokenManager = try ServerToServerAuthManager(
       keyID: String(repeating: "0", count: 64),
@@ -238,10 +239,12 @@ struct MistKitClientTests {
 
   // MARK: - Environment and Database Tests
 
-  @Test("MistKitClient supports all environments", arguments: [
-    Environment.development,
-    Environment.production
-  ])
+  @Test(
+    "MistKitClient supports all environments",
+    arguments: [
+      Environment.development,
+      Environment.production,
+    ])
   func supportsAllEnvironments(environment: Environment) throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       return
@@ -258,11 +261,13 @@ struct MistKitClientTests {
     _ = try MistKitClient(configuration: config, transport: transport)
   }
 
-  @Test("MistKitClient supports all databases with API token", arguments: [
-    Database.public,
-    Database.private,
-    Database.shared
-  ])
+  @Test(
+    "MistKitClient supports all databases with API token",
+    arguments: [
+      Database.public,
+      Database.private,
+      Database.shared,
+    ])
   func supportsAllDatabases(database: Database) throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       return
@@ -290,7 +295,7 @@ struct MistKitClientTests {
     let containers = [
       "iCloud.com.example.app",
       "iCloud.com.example.MyApp",
-      "iCloud.com.company.product"
+      "iCloud.com.company.product",
     ]
 
     for container in containers {

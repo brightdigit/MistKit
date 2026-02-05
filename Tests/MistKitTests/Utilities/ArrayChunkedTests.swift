@@ -28,8 +28,9 @@
 //
 
 import Foundation
-@testable import MistKit
 import Testing
+
+@testable import MistKit
 
 @Suite("Array Chunked Tests")
 struct ArrayChunkedTests {
@@ -144,7 +145,7 @@ struct ArrayChunkedTests {
       TestItem(id: 1, name: "a"),
       TestItem(id: 2, name: "b"),
       TestItem(id: 3, name: "c"),
-      TestItem(id: 4, name: "d")
+      TestItem(id: 4, name: "d"),
     ]
 
     let chunks = items.chunked(into: 2)
@@ -181,10 +182,8 @@ struct ArrayChunkedTests {
     #expect(totalElements == 1_000)
 
     // Verify all chunks except last are full
-    for (index, chunk) in chunks.enumerated() {
-      if index < chunks.count - 1 {
-        #expect(chunk.count == batchSize)
-      }
+    for (index, chunk) in chunks.enumerated() where index < chunks.count - 1 {
+      #expect(chunk.count == batchSize)
     }
   }
 }
