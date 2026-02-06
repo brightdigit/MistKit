@@ -38,6 +38,31 @@ import ConfigKeyKit
 import AppKit
 #endif
 
+// MARK: - CloudKit Command Protocol
+
+/// Protocol for commands that interact with CloudKit
+protocol CloudKitCommand {
+    var containerIdentifier: String { get }
+    var apiToken: String { get }
+    var environment: String { get }
+}
+
+extension CloudKitCommand {
+    /// Resolve API token from option or environment variable
+    func resolvedApiToken() -> String {
+        apiToken.isEmpty ?
+            EnvironmentConfig.getOptional(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" :
+            apiToken
+    }
+
+    /// Convert environment string to MistKit Environment
+    func cloudKitEnvironment() -> MistKit.Environment {
+        environment == "production" ? .production : .development
+    }
+}
+
+// MARK: - Main Command Group
+
 @main
 struct MistDemo {
   @MainActor
@@ -64,6 +89,13 @@ struct MistDemo {
       }
       return
     }
+
+    router.middlewares.add(
+        FileMiddleware(
+            resourcesPath,
+            searchForIndexHtml: true
+        )
+    )
     
     // Check if a command was specified
     if let commandName = parser.parseCommandName() {

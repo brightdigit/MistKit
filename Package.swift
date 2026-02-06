@@ -62,12 +62,12 @@ let swiftSettings: [SwiftSetting] = [
   .enableExperimentalFeature("WarnUnsafeReflection"),
 
   // Enhanced compiler checking
-  // .unsafeFlags([
-  //   // Warn about functions with >100 lines
-  //   "-Xfrontend", "-warn-long-function-bodies=100",
-  //   // Warn about slow type checking expressions
-  //   "-Xfrontend", "-warn-long-expression-type-checking=100"
-  // ])
+  .unsafeFlags([
+    // Warn about functions with >100 lines
+    "-Xfrontend", "-warn-long-function-bodies=100",
+    // Warn about slow type checking expressions
+    "-Xfrontend", "-warn-long-expression-type-checking=100"
+  ])
 ]
 
 let package = Package(
