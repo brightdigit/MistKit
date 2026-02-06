@@ -5,6 +5,35 @@
 
 set -eo pipefail
 
+# Parse command line arguments
+DRY_RUN=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: $0 [OPTIONS]"
+      echo ""
+      echo "Options:"
+      echo "  --dry-run    Validate schema without importing"
+      echo "  --help, -h   Show this help message"
+      echo ""
+      echo "Environment variables:"
+      echo "  CLOUDKIT_CONTAINER_ID   CloudKit container ID (default: iCloud.com.brightdigit.Bushel)"
+      echo "  CLOUDKIT_TEAM_ID        Apple Developer Team ID (10-character)"
+      echo "  CLOUDKIT_ENVIRONMENT    Environment (development or production, default: development)"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use --help for usage information"
+      exit 1
+      ;;
+  esac
+done
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -14,6 +43,9 @@ NC='\033[0m' # No Color
 echo "========================================"
 echo "CloudKit Schema Setup for Celestra"
 echo "========================================"
+if [ "$DRY_RUN" = true ]; then
+  echo "(DRY RUN MODE - No changes will be made)"
+fi
 echo ""
 
 # Check if cktool is available
@@ -108,6 +140,15 @@ fi
 
 echo ""
 
+# Skip import if dry-run
+if [ "$DRY_RUN" = true ]; then
+    echo ""
+    echo -e "${GREEN}✓✓✓ Dry run complete! ✓✓✓${NC}"
+    echo ""
+    echo "Schema validation passed. Run without --dry-run to import."
+    exit 0
+fi
+
 # Confirm before import
 echo -e "${YELLOW}Warning: This will import the schema into your CloudKit container.${NC}"
 echo "This operation will create/modify record types in the $ENVIRONMENT environment."
@@ -140,6 +181,7 @@ if xcrun cktool import-schema \
     echo "     a. Go to: https://icloud.developer.apple.com/dashboard/"
     echo "     b. Navigate to: API Access → Server-to-Server Keys"
     echo "     c. Create a new key and download the private key .pem file"
+    echo "     d. Store it securely (e.g., ~/.cloudkit/bushel-private-key.pem)"
     echo ""
     echo "  2. Configure your .env file with CloudKit credentials"
     echo "  3. Run 'swift run celestra add-feed <url>' to add an RSS feed"

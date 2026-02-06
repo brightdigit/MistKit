@@ -190,6 +190,9 @@ export CLOUDKIT_PRIVATE_KEY_PATH="./path/to/private-key.pem"
 # Optional: Enable VirtualBuddy TSS signing status
 export VIRTUALBUDDY_API_KEY="YOUR_VIRTUALBUDDY_API_KEY"
 
+# Optional: Enable VirtualBuddy TSS signing status
+export VIRTUALBUDDY_API_KEY="YOUR_VIRTUALBUDDY_API_KEY"
+
 # Sync with verbose logging to learn how MistKit works
 .build/debug/bushel-cloud sync --verbose
 
@@ -486,6 +489,9 @@ bushel-cloud sync \
 # Add to your ~/.zshrc or ~/.bashrc
 export CLOUDKIT_KEY_ID="YOUR_KEY_ID"
 export CLOUDKIT_PRIVATE_KEY_PATH="$HOME/.cloudkit/bushel-private-key.pem"
+
+# Optional: VirtualBuddy TSS signing status (get from https://tss.virtualbuddy.app/)
+export VIRTUALBUDDY_API_KEY="YOUR_VIRTUALBUDDY_API_KEY"
 
 # Optional: VirtualBuddy TSS signing status (get from https://tss.virtualbuddy.app/)
 export VIRTUALBUDDY_API_KEY="YOUR_VIRTUALBUDDY_API_KEY"
