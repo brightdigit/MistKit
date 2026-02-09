@@ -88,7 +88,7 @@ Create a **CloudKit Track** by pairing Danijela's accepted client-side talk with
 **Real Backend Deployments**:
 - **BushelCloud**: Podcast aggregation backend (hundreds of feeds)
 - **CelestraCloud**: RSS reader sync service (thousands of articles)
-- **Production Patterns**: Server-to-server auth, retry logic, conflict resolution
+- **Production Patterns**: Server-to-server auth, retry logic, conflict resolution in command-line tools
 
 **Technical Achievements**:
 - Solved CloudKit's dynamic types in Swift's static system

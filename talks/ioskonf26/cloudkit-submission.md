@@ -24,17 +24,17 @@ Learn the whys and hows of using CloudKit on the backend and how it helps your a
 
 ## Description
 
-CloudKit has excellent documentation for iOS and macOS client development. But backend services—podcast aggregation, RSS readers, data processing— APIs that Apple barely documents.
+CloudKit has excellent documentation for iOS development and other platforms. But backend services that use the Web Services APIs aren't not as well known.
 
 I rebuilt MistKit, a CloudKit library, using AI-generated OpenAPI specifications. 
 The result: type-safe Swift code supporting three authentication methods (server-to-server, web authentication token, and API token), typed error handling for 9 HTTP status codes, and production deployments in podcast aggregation and RSS reader backends.
 
-This talk fills the gaps in Apple's documentation with real production patterns:
+This talk fills the gaps with real production patterns:
 
 **Three Authentication Methods**:
-- Server-to-Server: Key generation, request signing, token format (barely documented)
-- Web Authentication Token: User authentication for backend services (completely undocumented)
-- API Token: Direct user token usage from CloudKit Dashboard (minimal documentation)
+- Server-to-Server: Key generation, request signing, token format
+- Web Authentication Token: User authentication for backend services
+- API Token: Direct user token usage from CloudKit Dashboard
 - ClientMiddleware separation for testable authentication across all methods
 - Handling auth failures, key rotation, and token refresh
 

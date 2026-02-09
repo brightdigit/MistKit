@@ -19,7 +19,7 @@ The pairing creates a CloudKit Track:
 - Leo: How backends authenticate and interact with CloudKit
 - Together: Complete ecosystem coverage
 
-My credentials: Rebuilt MistKit (10,476 lines), production deployments (BushelCloud podcast backend, CelestraCloud RSS sync), fills critical documentation gaps Apple leaves.
+My credentials: Rebuilt MistKit (10,476 lines), production command-line tools (BushelCloud for syncing macOS/Swift/Xcode versions to CloudKit, CelestraCloud for syncing RSS feeds to CloudKit), fills critical documentation gaps Apple leaves.
 
 This creates unique conference differentiation—complete CloudKit knowledge from both client and server perspectives. Want to make this happen?"
 
@@ -37,7 +37,7 @@ Here's why this pairing works:
 
 Zero overlap. She covers CloudKit from iOS app perspective using native frameworks. I cover CloudKit from backend perspective using REST API. Different audiences, different use cases, complete coverage.
 
-My production experience: Rebuilt MistKit using AI-generated OpenAPI specs—10,476 lines of type-safe Swift supporting three authentication methods. Real deployments: BushelCloud (podcast aggregation backend) and CelestraCloud (RSS reader sync service).
+My production experience: Rebuilt MistKit using AI-generated OpenAPI specs—10,476 lines of type-safe Swift supporting three authentication methods. Real command-line tools: BushelCloud (syncing macOS/Swift/Xcode versions to CloudKit for the Bushel VM app) and CelestraCloud (syncing RSS feeds to CloudKit for the Celestra RSS reader).
 
 The content fills Apple's documentation gaps:
 - Server-to-server authentication (Apple barely documents this)
@@ -55,7 +55,7 @@ Sound interesting?"
 
 ## Server-to-Server Authentication Pitch (30 seconds)
 
-"CloudKit's great for iOS apps. But backend services? Apple's docs say 'use server-to-server auth' with zero details. I rebuilt MistKit—10,476 lines of production CloudKit code—and learned the patterns Apple doesn't document. Authentication, type safety, error handling. Real deployments in BushelCloud and CelestraCloud. Pairs perfectly with Danijela's client-side talk."
+"CloudKit's great for iOS apps. But backend tools? Apple's docs say 'use server-to-server auth' with zero details. I rebuilt MistKit—10,476 lines of production CloudKit code—and learned the patterns Apple doesn't document. Authentication, type safety, error handling. Real command-line tools: BushelCloud and CelestraCloud. Pairs perfectly with Danijela's client-side talk."
 
 ---
 
@@ -65,7 +65,7 @@ Sound interesting?"
 
 Yeah, that's the gap. CloudKit has excellent iOS documentation but server-side? Apple's docs are sparse. Server-to-server auth is mentioned but not explained. Error handling examples don't exist. Type system challenges are ignored.
 
-I rebuilt MistKit using AI-generated OpenAPI specs. 10,476 lines of type-safe Swift supporting three authentication methods, polymorphic type handling, and production error patterns. Real deployments: BushelCloud (podcast aggregator) and CelestraCloud (RSS reader backend).
+I rebuilt MistKit using AI-generated OpenAPI specs. 10,476 lines of type-safe Swift supporting three authentication methods, polymorphic type handling, and production error patterns. Real command-line tools: BushelCloud (syncing macOS/Swift/Xcode versions to CloudKit for the Bushel VM app) and CelestraCloud (syncing RSS feeds to CloudKit for the Celestra RSS reader).
 
 My talk fills the gaps: server-to-server auth implementation, solving CloudKit's dynamic types in Swift's static system, handling 9 HTTP status codes with retry logic, and building ergonomic APIs on verbose OpenAPI code.
 
@@ -75,18 +75,18 @@ Pairs perfectly with Danijela's client-side CloudKit talk for complete ecosystem
 
 ## Production Focus Pitch (90 seconds)
 
-"Here's a problem: You build an iOS app using CloudKit. Users love it. Now you need a backend service—podcast aggregation, RSS syncing, data processing.
+"Here's a problem: You build an iOS app using CloudKit. Users love it. Now you need a command-line tool or GitHub Action—version data syncing, RSS syncing, data processing.
 
-CloudKit Public Database makes sense. Your data's already there. But how do you authenticate from a backend? Apple's docs say 'use server-to-server auth' with virtually no implementation details.
+CloudKit Public Database makes sense. Your data's already there. But how do you authenticate from a backend tool? Apple's docs say 'use server-to-server auth' with virtually no implementation details.
 
-I faced this building BushelCloud, a podcast aggregator. Spent days figuring out key pairs, request signing, token format—information Apple doesn't provide.
+I faced this building BushelCloud, a command-line tool for syncing macOS/Swift/Xcode versions to CloudKit for the Bushel VM app. Spent days figuring out key pairs, request signing, token format—information Apple doesn't provide.
 
 So I rebuilt MistKit from scratch. Used AI to generate OpenAPI specifications from Apple's 2016 CloudKit documentation. Generated 10,476 lines of type-safe Swift code with swift-openapi-generator. Built production abstractions on top.
 
 The result: Complete patterns for three authentication methods (API Token, Web Auth, Server-to-Server), type-safe handling of CloudKit's dynamic fields in Swift's static system, production error handling for 9 HTTP status codes with retry logic and conflict resolution, and ergonomic APIs that hide OpenAPI verbosity.
 
-Real production deployments: BushelCloud aggregates podcasts, CelestraCloud syncs RSS feeds—both using these patterns.
+Real production command-line tools: BushelCloud syncs macOS/Swift/Xcode versions to CloudKit for the Bushel VM app, CelestraCloud syncs RSS feeds to CloudKit for the Celestra RSS reader—both using these patterns.
 
-My talk covers what Apple's documentation doesn't: authentication implementation, type system challenges, error handling strategies, and API design patterns. Whether you're building podcast backends, RSS aggregators, or data sync services, you'll leave with production patterns that work.
+My talk covers what Apple's documentation doesn't: authentication implementation, type system challenges, error handling strategies, and API design patterns. Whether you're building command-line tools, GitHub Actions, or data sync services, you'll leave with production patterns that work.
 
 Perfect pairing with Danijela's client-side CloudKit talk—she covers iOS app perspective, I cover backend perspective. Together: complete CloudKit ecosystem."
