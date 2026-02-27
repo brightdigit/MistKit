@@ -41,7 +41,7 @@ Last Updated: 2026-02-02
 
 CloudKit is powerful for client-side development. But when you need backend services—podcast aggregation, RSS readers, data processing—you hit Apple's worst-documented feature: server-to-server authentication.
 
-I rebuilt MistKit, our CloudKit library, using AI-generated OpenAPI specifications. The result: 10,476 lines of type-safe Swift code supporting three authentication methods, nine HTTP status codes with typed error handling, and production deployments in BushelCloud (podcast aggregator) and CelestraCloud (RSS reader backend).
+I rebuilt MistKit, our CloudKit library, using AI-generated OpenAPI specifications. The result: 10,476 lines of type-safe Swift code supporting three authentication methods, nine HTTP status codes with typed error handling, and production use in BushelCloud (a command-line tool for syncing macOS/Swift/Xcode version data to CloudKit for the Bushel VM app) and CelestraCloud (a command-line tool for syncing RSS feeds to CloudKit for the Celestra RSS reader).
 
 This talk fills the gaps in Apple's documentation with real production patterns:
 
@@ -77,7 +77,7 @@ Pairs perfectly with Danijela's client-side CloudKit talk for complete ecosystem
 
 CloudKit has excellent documentation for iOS, macOS, and client-side development. But server-to-server authentication? Apple's docs are sparse, outdated, and missing critical production patterns.
 
-When you need backend services—aggregating podcasts, syncing RSS feeds, processing data, building CLI tools—you're on your own. I learned this building BushelCloud (podcast aggregator) and CelestraCloud (RSS reader backend).
+When you need backend services—syncing RSS feeds, processing data, building CLI tools, managing version data—you're on your own. I learned this building BushelCloud (a GitHub Action command-line tool for syncing macOS/Swift/Xcode versions to CloudKit for the Bushel VM app) and CelestraCloud (a GitHub Action command-line tool for syncing RSS feeds to CloudKit for the Celestra RSS reader).
 
 ### The Solution: Rebuilding MistKit
 
@@ -93,7 +93,7 @@ I rebuilt it from scratch using AI-generated OpenAPI specifications:
 - 10,476 lines of type-safe Swift code
 - Three authentication methods working seamlessly
 - 161 tests across 47 test files
-- Production deployments in BushelCloud and CelestraCloud
+- Production use in BushelCloud and CelestraCloud (command-line tools for CloudKit syncing)
 - What would take 6-12 months solo took 3 months with AI assistance
 
 ### Challenge 1: Server-to-Server Authentication
@@ -109,7 +109,7 @@ Apple's documentation says "use server-to-server auth" but provides minimal impl
 
 **Real Example - BushelCloud:**
 ```swift
-// Server-to-server auth for podcast aggregation backend
+// Server-to-server auth for syncing macOS/Swift/Xcode versions
 let auth = ServerToServerAuth(
     keyID: Environment.cloudKitKeyID,
     privateKey: Environment.cloudKitPrivateKey,
@@ -145,7 +145,7 @@ CloudKit fields are dynamically typed. OpenAPI (and Swift) are statically typed.
 
 **Real Example - CelestraCloud:**
 ```swift
-// Type-safe record creation for RSS feed items
+// Type-safe record creation for RSS feed sync
 let record = CKRecord(
     recordType: "Article",
     fields: [
@@ -264,7 +264,7 @@ This talk is designed for:
 
 Unlike typical CloudKit talks:
 - **Server-side focus**: Most talks cover client-side iOS/macOS usage
-- **Production patterns**: Real deployments (BushelCloud, CelestraCloud), not tutorials
+- **Production patterns**: Real command-line tools (BushelCloud, CelestraCloud), not tutorials
 - **Documentation gaps**: Covers what Apple's docs don't explain
 - **Complete authentication**: All three methods with real examples
 - **Error handling depth**: Production-grade patterns, not just happy path
@@ -277,7 +277,7 @@ Every attendee leaves with:
 2. Type-safe record creation patterns
 3. Production error handling strategies
 4. Three-layer architecture for API ergonomics
-5. Real code examples from BushelCloud and CelestraCloud
+5. Real code examples from BushelCloud and CelestraCloud command-line tools
 6. Understanding when to use CloudKit vs. other backends
 
 **The Value Proposition**: Build production CloudKit backend services with confidence, not trial-and-error.
@@ -322,7 +322,7 @@ Attendees will learn:
    - Recognize CloudKit limitations (iOS/macOS focused, REST API constraints)
    - Compare CloudKit vs. Firebase vs. Vapor vs. other backends
    - Make informed decisions for specific use cases
-   - Real examples: podcast aggregation (BushelCloud), RSS readers (CelestraCloud)
+   - Real examples: version data syncing (BushelCloud for Bushel VM), RSS feed syncing (CelestraCloud for Celestra reader)
 
 6. **Leverage AI for library development (minor theme)**
    - Generate OpenAPI specs from documentation using AI
@@ -375,7 +375,7 @@ Attendees will learn:
 - Type system challenges are unaddressed
 
 **Real Problem - BushelCloud**:
-- Need: Aggregate podcast feeds using CloudKit storage
+- Need: Sync macOS/Swift/Xcode version data to CloudKit for Bushel VM app
 - Challenge: How do I authenticate without a user?
 - Apple's docs: "Use server-to-server auth" (no details)
 - Hours lost: Figuring out key pairs, signing, token format
@@ -449,7 +449,7 @@ struct ServerToServerAuth {
 
 **Real Example - BushelCloud**:
 ```swift
-// Production pattern for podcast backend
+// Production pattern for version data sync
 let auth = ServerToServerAuth(
     keyID: Environment.cloudKitKeyID,
     privateKey: Environment.cloudKitPrivateKey,
@@ -530,7 +530,7 @@ CKRecordFieldValue:
 
 **Type-Safe Building**:
 ```swift
-// CelestraCloud example - RSS article
+// CelestraCloud example - RSS feed sync
 let article = CKRecord(
     recordType: "Article",
     fields: [
@@ -613,7 +613,7 @@ func saveWithRetry(_ record: CKRecord, maxAttempts: Int = 3) async throws {
 ```
 
 **Real Example - CelestraCloud RSS Sync**:
-- Fetch RSS feeds every 15 minutes
+- Sync RSS feeds to CloudKit every 15 minutes
 - Concurrent updates possible (multiple devices)
 - Rate limiting from CloudKit (429 errors)
 - Network failures (503 errors)
@@ -705,8 +705,8 @@ try await database.save(record)
 Massive improvement in developer experience.
 
 **Real Examples**:
-- **BushelCloud**: Podcast aggregation with hundreds of feeds
-- **CelestraCloud**: RSS reader syncing thousands of articles
+- **BushelCloud**: Command-line tool syncing macOS/Swift/Xcode version data to CloudKit for Bushel VM app
+- **CelestraCloud**: Command-line tool syncing RSS feeds to CloudKit for Celestra RSS reader
 
 Both use same MistKit patterns, clean user-facing APIs.
 
@@ -729,8 +729,8 @@ Both use same MistKit patterns, clean user-facing APIs.
 - ❌ Documentation gaps (especially server-side)
 
 **When to Use CloudKit**:
-- Backend for iOS/macOS apps (BushelCloud, CelestraCloud)
-- Podcast aggregation, RSS readers, note sync
+- Backend for iOS/macOS apps (like Bushel VM and Celestra RSS reader)
+- Data syncing, RSS readers, note sync
 - Indie projects leveraging free tier
 - Teams already invested in Apple ecosystem
 
@@ -746,7 +746,7 @@ Both use same MistKit patterns, clean user-facing APIs.
 **Resources**:
 - MistKit: github.com/brightdigit/MistKit
 - OpenAPI specs: Available in repo
-- Production examples: BushelCloud, CelestraCloud (open source)
+- Production command-line tools: BushelCloud, CelestraCloud (open source)
 - Blog series: brightdigit.com/tutorials
 
 **Pairs With**: Danijela's client-side CloudKit talk for complete ecosystem coverage
@@ -759,7 +759,7 @@ Both use same MistKit patterns, clean user-facing APIs.
 
 **Leo Dion** is the founder of BrightDigit, creator of MistKit (210 GitHub stars)—a modern Swift library for CloudKit's REST API. He rebuilt MistKit using AI-generated OpenAPI specifications, producing 10,476 lines of type-safe code supporting server-to-server authentication, polymorphic type handling, and production error patterns.
 
-MistKit powers backend services including BushelCloud (podcast aggregation) and CelestraCloud (RSS reader), demonstrating production CloudKit usage beyond typical iOS app scenarios.
+MistKit powers backend tools including BushelCloud (command-line tool for syncing macOS/Swift/Xcode versions to CloudKit for the Bushel VM app) and CelestraCloud (command-line tool for syncing RSS feeds to CloudKit for the Celestra RSS reader), demonstrating production CloudKit usage beyond typical iOS app scenarios.
 
 Leo manages 128+ Swift repositories including DataThespian (46 stars), PackageDSL (103 stars), and infrastructure tools like swift-build. He hosts the EmpowerApps Podcast (203+ episodes) featuring Apple platform developers.
 
@@ -801,7 +801,7 @@ His work spans AI-assisted development (generating 10,476 lines in 3 months), sy
 ### Demo Requirements
 
 **Option 1 (Preferred)**: Live code walkthrough
-- Show BushelCloud or CelestraCloud authentication setup
+- Show BushelCloud or CelestraCloud command-line tool authentication setup
 - Demonstrate type-safe record creation
 - Show error handling patterns in action
 - Requires: Internet, Xcode, projector
@@ -833,7 +833,7 @@ His work spans AI-assisted development (generating 10,476 lines in 3 months), sy
 - Add extended Q&A (15 minutes)
 - Deeper dive into OpenAPI generation with AI
 - Live coding session: Build simple CloudKit backend
-- More production examples from BushelCloud/CelestraCloud
+- More production examples from BushelCloud/CelestraCloud command-line tools
 
 **Workshop version** (2-3 hours):
 - Hands-on: Attendees build CloudKit backend service
@@ -848,7 +848,7 @@ Creating dedicated resources:
 - GitHub repository: `mistkit-server-guide`
 - Complete authentication setup guide
 - Production error handling patterns
-- BushelCloud and CelestraCloud as reference implementations
+- BushelCloud and CelestraCloud command-line tools as reference implementations
 - OpenAPI specs for CloudKit REST API
 - Links to blog series and video tutorials
 
@@ -884,7 +884,7 @@ This talk aligns with broader content strategy:
 - Attendees can attend both for full ecosystem understanding
 
 ### Production Focus
-- Not just tutorials: Real deployments (BushelCloud, CelestraCloud)
+- Not just tutorials: Real command-line tools in production (BushelCloud, CelestraCloud)
 - Not just theory: 10,476 lines of production code
 - Not just basics: Advanced patterns Apple doesn't document
 
@@ -918,7 +918,7 @@ This talk aligns with broader content strategy:
 | **Pairing** | Standalone | Standalone | With Danijela's talk |
 | **Differentiation** | Very strong | Strong | Extremely strong (niche) |
 | **Broad Appeal** | High | Medium-High | Medium (specialized) |
-| **Production Examples** | 128+ repos | SyntaxKit, MistKit | BushelCloud, CelestraCloud |
+| **Production Examples** | 128+ repos | SyntaxKit, MistKit | BushelCloud & CelestraCloud tools |
 
 **Recommendation Strategy**:
 
@@ -956,7 +956,7 @@ Before finalizing submission:
 
 ### 30-Second Pitch
 
-"CloudKit's great for iOS apps. But backend services? Apple's docs say 'use server-to-server auth' with zero details. I rebuilt MistKit—10,476 lines of production CloudKit code—and learned the patterns Apple doesn't document. Authentication, type safety, error handling. Real deployments in BushelCloud and CelestraCloud. Pairs perfectly with Danijela's client-side talk."
+"CloudKit's great for iOS apps. But backend services? Apple's docs say 'use server-to-server auth' with zero details. I rebuilt MistKit—10,476 lines of production CloudKit code—and learned the patterns Apple doesn't document. Authentication, type safety, error handling. Real command-line tools: BushelCloud (syncs versions for Bushel VM) and CelestraCloud (syncs RSS for Celestra reader). Pairs perfectly with Danijela's client-side talk."
 
 ### 60-Second Pitch
 
@@ -964,7 +964,7 @@ Before finalizing submission:
 
 Yeah, that's the gap. CloudKit has excellent iOS documentation but server-side? Apple's docs are sparse. Server-to-server auth is mentioned but not explained. Error handling examples don't exist. Type system challenges are ignored.
 
-I rebuilt MistKit using AI-generated OpenAPI specs. 10,476 lines of type-safe Swift supporting three authentication methods, polymorphic type handling, and production error patterns. Real deployments: BushelCloud (podcast aggregator) and CelestraCloud (RSS reader backend).
+I rebuilt MistKit using AI-generated OpenAPI specs. 10,476 lines of type-safe Swift supporting three authentication methods, polymorphic type handling, and production error patterns. Real command-line tools: BushelCloud (syncs macOS/Swift/Xcode versions for Bushel VM app) and CelestraCloud (syncs RSS feeds for Celestra RSS reader).
 
 My talk fills the gaps: server-to-server auth implementation, solving CloudKit's dynamic types in Swift's static system, handling 9 HTTP status codes with retry logic, and building ergonomic APIs on verbose OpenAPI code.
 
@@ -976,15 +976,15 @@ Pairs perfectly with Danijela's client-side CloudKit talk for complete ecosystem
 
 CloudKit Public Database makes sense. Your data's already there. But how do you authenticate from a backend? Apple's docs say 'use server-to-server auth' with virtually no implementation details.
 
-I faced this building BushelCloud, a podcast aggregator. Spent days figuring out key pairs, request signing, token format—information Apple doesn't provide.
+I faced this building BushelCloud, a command-line tool for syncing macOS/Swift/Xcode version data to CloudKit. Spent days figuring out key pairs, request signing, token format—information Apple doesn't provide.
 
 So I rebuilt MistKit from scratch. Used AI to generate OpenAPI specifications from Apple's 2016 CloudKit documentation. Generated 10,476 lines of type-safe Swift code with swift-openapi-generator. Built production abstractions on top.
 
 The result: Complete patterns for three authentication methods (API Token, Web Auth, Server-to-Server), type-safe handling of CloudKit's dynamic fields in Swift's static system, production error handling for 9 HTTP status codes with retry logic and conflict resolution, and ergonomic APIs that hide OpenAPI verbosity.
 
-Real production deployments: BushelCloud aggregates podcasts, CelestraCloud syncs RSS feeds—both using these patterns.
+Real production command-line tools: BushelCloud syncs macOS/Swift/Xcode versions (for Bushel VM app), CelestraCloud syncs RSS feeds (for Celestra reader)—both using these patterns.
 
-My talk covers what Apple's documentation doesn't: authentication implementation, type system challenges, error handling strategies, and API design patterns. Whether you're building podcast backends, RSS readers, or sync services, you'll leave with production patterns that work.
+My talk covers what Apple's documentation doesn't: authentication implementation, type system challenges, error handling strategies, and API design patterns. Whether you're building data sync tools, RSS readers, or backend services, you'll leave with production patterns that work.
 
 Perfect pairing with Danijela's client-side CloudKit talk—she covers iOS app perspective, I cover backend perspective. Together: complete CloudKit ecosystem."
 

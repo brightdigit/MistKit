@@ -30,8 +30,8 @@ What you'll learn:
 **Tweet 4/5**:
 This comes from real production experience:
 - MistKit: 10,476 lines of type-safe Swift
-- BushelCloud: Podcast aggregation backend
-- CelestraCloud: RSS reader sync service
+- BushelCloud: Command-line tool syncing macOS/Swift/Xcode versions to CloudKit for the Bushel VM app
+- CelestraCloud: Command-line tool syncing RSS feeds to CloudKit for the Celestra RSS reader
 
 Not tutorials. Production systems. Battle-tested patterns.
 
@@ -39,8 +39,8 @@ Not tutorials. Production systems. Battle-tested patterns.
 See you in Denver! 🏔️
 
 If you're building:
-- Podcast backends
-- RSS aggregators
+- Command-line tools that sync to CloudKit
+- GitHub Actions using CloudKit
 - Data sync services
 - Any CloudKit backend
 
@@ -55,9 +55,9 @@ Blog series coming Q1 2026 → [brightdigit.com/articles]
 **Title**: I Was Wrong About CloudKit Server-Side (And What That Taught Me)
 
 **Body**:
-CloudKit has excellent documentation for iOS and macOS apps. But when you need backend services—podcast aggregation, RSS readers, data processing—you hit Apple's worst-documented feature: server-to-server authentication.
+CloudKit has excellent documentation for iOS and macOS apps. But when you need backend tools—command-line utilities, GitHub Actions, data processing—you hit Apple's worst-documented feature: server-to-server authentication.
 
-I learned this the hard way building BushelCloud (podcast backend) and CelestraCloud (RSS sync). Apple's docs say "use server-to-server auth" with virtually no implementation details.
+I learned this the hard way building BushelCloud (command-line tool for syncing macOS/Swift/Xcode versions to CloudKit for the Bushel VM app) and CelestraCloud (command-line tool for syncing RSS feeds to CloudKit for the Celestra RSS reader). Apple's docs say "use server-to-server auth" with virtually no implementation details.
 
 So I rebuilt MistKit—our CloudKit library—from scratch using AI-generated OpenAPI specifications.
 
@@ -65,7 +65,7 @@ So I rebuilt MistKit—our CloudKit library—from scratch using AI-generated Op
 - 10,476 lines of type-safe Swift code
 - Three authentication methods working seamlessly
 - 161 tests across 47 test files
-- Production deployments in real backend services
+- Production command-line tools in real use
 
 **What I Learned (That Apple Doesn't Document):**
 
@@ -98,7 +98,7 @@ I built a three-layer architecture:
 **Perfect Timing:**
 I'm presenting this at Swift Rockies 2026, paired with Danijela Vrzan's client-side CloudKit talk. Together: complete CloudKit ecosystem coverage from both perspectives.
 
-Whether you're building podcast backends, RSS aggregators, or sync services—you'll leave with production patterns Apple's documentation doesn't cover.
+Whether you're building command-line tools, GitHub Actions, or sync services—you'll leave with production patterns Apple's documentation doesn't cover.
 
 MistKit: github.com/brightdigit/MistKit
 Talk details: Coming soon
