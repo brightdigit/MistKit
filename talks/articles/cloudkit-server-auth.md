@@ -5,7 +5,7 @@
 **Tier:** 1 (high SEO value)
 **Word count target:** 2,000-3,000 words
 
-> Source: [planning/content-strategy-2026.md](../../../planning/content-strategy-2026.md) — Tier 1 CloudKit section
+> Source: content-strategy-2026.md (Tier 1 CloudKit section)
 
 ---
 

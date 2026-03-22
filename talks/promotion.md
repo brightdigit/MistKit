@@ -29,13 +29,13 @@
 - [ ] Mastodon: technical deep-dive angle, open-source focus
 - [ ] Link to existing MistKit rebuild articles (Parts 1 & 2) as context
 
-> **See also:** [social-posts/cloudkit-server-auth.md](../../social-posts/cloudkit-server-auth.md) for existing topic post content
+> **See also:** [cloudkit-server-auth.md](./cloudkit-server-auth.md) for existing topic post content
 
 ---
 
 ## Post-Talk Recaps
 
-### After Swift Craft (May 18-19)
+### After Swift Craft (May 18-20)
 - [ ] Key takeaways thread (3-5 main points)
 - [ ] Share slides/resources link
 - [ ] Thank organizers and attendees

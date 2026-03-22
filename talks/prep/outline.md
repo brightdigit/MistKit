@@ -1,5 +1,5 @@
 # CloudKit as Your Backend: From iOS to Server-Side Swift
-## Presentation Outline — 60 Minutes (Swift Craft, May 18-19)
+## Presentation Outline — 60 Minutes (Swift Craft, May 18-20)
 
 > Based on [swift-craft-2026/cloudkit-talk-submission.md](../swift-craft-2026/cloudkit-talk-submission.md)
 > Adaptable to 45-min (Swift Rockies, iOSDevUK) by trimming Acts 4-5 and Q&A
