@@ -36,7 +36,7 @@ This comes from real production experience:
 Not tutorials. Production systems. Battle-tested patterns.
 
 **Tweet 5/5**:
-See you in Denver! 🏔️
+See you in Calgary! 🏔️
 
 If you're building:
 - Command-line tools that sync to CloudKit

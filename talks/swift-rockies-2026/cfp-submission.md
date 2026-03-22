@@ -2,7 +2,7 @@
 
 Last Updated: 2026-02-02
 
-**Conference**: Swift Rockies 2026 (July 2026, Denver, CO)
+**Conference**: Swift Rockies 2026 (July 2026, Calgary, AB, Canada)
 **Submission Date**: TBD
 **Speaker**: Leo Dion
 **Talk Duration**: 45 minutes (adaptable to 30 or 60 minutes)
