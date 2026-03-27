@@ -1,5 +1,19 @@
 # Server-Side CloudKit — Social
 
+## Topics to Test
+
+- CloudKit server-to-server auth gotchas
+- Conflict resolution strategies (exponential backoff)
+- Multi-source data orchestration patterns (BushelCloud)
+
+## Article Promotion
+
+**CloudKit Server Auth Article**
+- [ ] Twitter thread: 5-7 tweets highlighting key auth patterns
+- [ ] LinkedIn post: professional angle on Apple documentation gaps
+- [ ] Mastodon: technical deep-dive angle, open-source focus
+- [ ] Link to existing MistKit rebuild articles (Parts 1 & 2) as context
+
 ## Conference Announcements
 
 **Pre-Swift Craft** (late April, 2–4 weeks before May 18)
