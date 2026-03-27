@@ -1,30 +1,6 @@
-# Server-Side CloudKit — Marketing Plan
+# Server-Side CloudKit — Social
 
----
-
-## Content Strategy
-
-### Tutorial Roadmap
-
-- [ ] "Building Celestra: Full-Stack Swift RSS Reader" (March)
-- [ ] "Why I Chose Vapor for Celestra's Backend" (July)
-- [ ] "Beyond the MistKit Tutorials: Authenticating CloudKit from Backend Services" (before Swift Craft, May)
-
-### Social Testing Topics
-
-- CloudKit server-to-server auth gotchas
-- Conflict resolution strategies (exponential backoff)
-- Multi-source data orchestration patterns (BushelCloud)
-
-### Quarterly Alignment
-
-- **Q2:** Swift Craft talk support, CloudKit auth article fills major Apple documentation gap, portfolio building
-
----
-
-## Promotion Plan
-
-### Conference Announcements
+## Conference Announcements
 
 **Pre-Swift Craft** (late April, 2–4 weeks before May 18)
 - [ ] "Speaking at Swift Craft" announcement (Twitter, LinkedIn, Mastodon)
@@ -40,14 +16,6 @@
 - [ ] "Speaking at iOSDevUK" announcement
 - [ ] Emphasize first-time speaker angle at iOSDevUK
 - [ ] Share refined talk narrative (incorporating feedback from 2 prior deliveries)
-
-### Article Publication
-
-**CloudKit Server Auth Article**
-- [ ] Twitter thread: 5-7 tweets highlighting key auth patterns
-- [ ] LinkedIn post: professional angle on Apple documentation gaps
-- [ ] Mastodon: technical deep-dive angle, open-source focus
-- [ ] Link to existing MistKit rebuild articles (Parts 1 & 2) as context
 
 ### Post-Talk Recaps
 
