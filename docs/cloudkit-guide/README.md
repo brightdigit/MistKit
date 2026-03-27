@@ -360,7 +360,7 @@ Execute a working query: request signed → response decoded → type-safe field
 ## In This Directory
 
 ```
-docs/
+docs/cloudkit-guide/
 └── articles/    # Blog posts and written content in progress
 ```
 
