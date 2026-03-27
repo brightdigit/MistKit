@@ -361,10 +361,9 @@ Execute a working query: request signed → response decoded → type-safe field
 
 ```
 docs/
-├── articles/    # Blog posts and written content in progress
-└── marketing/   # Promotion plan, social media content, consulting
+└── articles/    # Blog posts and written content in progress
 ```
 
-- [MistKit source code](../Sources/MistKit/)
-- [MistDemo example app](../Examples/MistDemo/)
-- [OpenAPI specification](../openapi.yaml)
+- [MistKit source code](../../Sources/MistKit/)
+- [MistDemo example app](../../Examples/MistDemo/)
+- [OpenAPI specification](../../openapi.yaml)

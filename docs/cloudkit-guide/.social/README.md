@@ -59,7 +59,7 @@ Pre-written posts for CloudKit server-to-server authentication. Adapt per platfo
 **Problem/Pain Point**
 > Apple's CloudKit server-to-server auth docs are... let's call them "minimalist."
 >
-> After shipping 2 production backends with it (podcast aggregator + RSS reader), I learned what the docs don't cover:
+> After shipping 2 production backends with it (macOS/Swift version sync tool + RSS reader), I learned what the docs don't cover:
 > • Key rotation strategies
 > • Environment switching gotchas
 > • Error handling that works at scale
@@ -118,7 +118,7 @@ Pre-written posts for CloudKit server-to-server authentication. Adapt per platfo
 **Technical Deep-Dive Teaser**
 > CloudKit Server-to-Server Authentication: Beyond the Documentation Gap
 >
-> After implementing CloudKit's server-to-server authentication for two production applications (a podcast aggregator and an RSS reader), I've documented patterns that Apple's official documentation doesn't address.
+> After implementing CloudKit's server-to-server authentication for two production applications (a macOS/Swift version sync tool and an RSS reader), I've documented patterns that Apple's official documentation doesn't address.
 >
 > Real-world challenges that aren't in the docs:
 > • Key pair lifecycle management in production environments
@@ -136,7 +136,7 @@ Pre-written posts for CloudKit server-to-server authentication. Adapt per platfo
 **Problem Solver**
 > Solving CloudKit's Server-to-Server Authentication Challenge
 >
-> Apple's CloudKit server-to-server authentication is powerful but under-documented. After building BushelCloud (podcast aggregation) and CelestraCloud (RSS reader) in production, I've mapped the journey from basic examples to scalable implementations.
+> Apple's CloudKit server-to-server authentication is powerful but under-documented. After building BushelCloud (macOS/Swift version sync) and CelestraCloud (RSS reader) in production, I've mapped the journey from basic examples to scalable implementations.
 >
 > What the documentation covers:
 > ✓ Key pair generation
@@ -160,7 +160,7 @@ Pre-written posts for CloudKit server-to-server authentication. Adapt per platfo
 > • Incredibly powerful for iOS/Mac backends
 > • Incredibly under-documented by Apple
 >
-> Just shipped my second production app using it (CelestraCloud, an RSS reader). First was BushelCloud (podcast aggregator).
+> Just shipped my second production app using it (CelestraCloud, an RSS reader). First was BushelCloud (macOS/Swift version sync tool).
 >
 > Both times I had to figure out key rotation, environment switching, and error handling from scratch.
 >
