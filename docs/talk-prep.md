@@ -1,10 +1,10 @@
-# Server-Side CloudKit: Content Reference
+# CloudKit as Your Backend: Talk Prep
 
-Key points, narrative, and technical content for creating talks, workshops, blog posts, videos, and social media posts about MistKit and server-side CloudKit.
+Key points, structure, and demo guide for talks, workshops, blog posts, videos, and social media about MistKit and server-side CloudKit.
 
 ---
 
-## 1. Core Narrative & Hook
+## Core Narrative & Hook
 
 **Opening hook** (works for talks, videos, threads):
 > "Raise your hand if you've used CloudKit from an iOS app. Keep it up if you've used CloudKit from a backend service. Yeah, that's the problem."
@@ -17,7 +17,9 @@ Key points, narrative, and technical content for creating talks, workshops, blog
 
 ---
 
-## 2. Three Authentication Methods
+## Key Technical Topics
+
+### 1. Three Authentication Methods
 
 | Method | Use Case | Status |
 |---|---|---|
@@ -25,9 +27,7 @@ Key points, narrative, and technical content for creating talks, workshops, blog
 | **Web Auth Token** | User-specific backend ops, token passed from iOS app | Completely undocumented by Apple |
 | **Server-to-Server** | Autonomous services, cron jobs, CLIs | Primary focus |
 
-### Server-to-Server (Primary Focus)
-
-**What Apple's docs cover**: Key pair generation, basic signing concept.
+**Server-to-Server — what Apple's docs cover**: Key pair generation, basic signing concept.
 
 **What they don't cover**:
 - Exactly what to sign: ISO8601 timestamp + request path + body hash (SHA-256)
@@ -41,7 +41,7 @@ Key points, narrative, and technical content for creating talks, workshops, blog
 
 ---
 
-## 3. Type System Polymorphism
+### 2. Type System Polymorphism
 
 **The problem**: CloudKit fields are runtime-dynamic JSON. Swift is statically typed. Mismatch.
 
@@ -75,7 +75,7 @@ Custom type overrides in `openapi-generator-config.yaml` improve ergonomics. Com
 
 ---
 
-## 4. Production Error Handling
+### 3. Production Error Handling
 
 CloudKit returns 9 HTTP status codes, each requiring specific handling:
 
@@ -107,7 +107,7 @@ Each error carries nested JSON: `ckErrorCode`, `serverRecord` (on 409), `reason`
 
 ---
 
-## 5. API Ergonomics: Three-Layer Architecture
+### 4. API Ergonomics: Three-Layer Architecture
 
 **Problem**: OpenAPI-generated code is verbose and low-level.
 
@@ -134,7 +134,7 @@ try await database.save(record)  // 5 lines, type-safe, production-ready
 
 ---
 
-## 6. Production Examples
+## Production Examples
 
 | App | Purpose | Auth | Real Challenges |
 |---|---|---|---|
@@ -149,7 +149,7 @@ try await database.save(record)  // 5 lines, type-safe, production-ready
 
 ---
 
-## 7. Learning Outcomes
+## Learning Outcomes
 
 Audience leaves able to:
 1. Implement server-to-server CloudKit auth — key pairs, request signing, environment switching
@@ -160,27 +160,7 @@ Audience leaves able to:
 
 ---
 
-## 8. Format Adaptations
-
-| Format | Focus | Length |
-|---|---|---|
-| Social media post | Hook + one insight (auth gap, type safety, one error code) | Short |
-| Blog post | One section deep-dive with real code | 2,000–3,000 words |
-| 30-min talk | Auth + type system + error handling (skip rebuild story) | ~25 min content |
-| 45-min talk | All 5 acts, moderate detail | ~38 min content |
-| 60-min talk | All 5 acts, full examples + live demo | ~50 min content |
-| Workshop | Attendees build a CloudKit backend service hands-on | 2–3 hours |
-
-**Talk act structure** (scale up or down):
-1. **Documentation Gap** — hook, show of hands, establish the problem
-2. **The Rebuild Story** — MistKit + AI + OpenAPI (skip for short formats)
-3. **Server-to-Server Auth** — the deep dive, live demo here
-4. **Type System + Error Handling** — two sub-acts, combinable
-5. **API Ergonomics** — before/after, three-layer payoff
-
----
-
-## 9. When to Use CloudKit
+## When to Use CloudKit
 
 **Use CloudKit when**:
 - Building backend for an iOS/macOS app
@@ -198,7 +178,7 @@ Audience leaves able to:
 
 ---
 
-## 10. Memorable Phrases
+## Memorable Phrases
 
 - *"Apple's worst-documented feature"* — server-to-server authentication
 - *"The patterns Apple's documentation doesn't cover"*
@@ -208,10 +188,160 @@ Audience leaves able to:
 
 ---
 
+## Talk Structure
+
+Five acts, scalable to any length.
+
+### Act 1: The Documentation Gap
+
+**Goal**: Establish the problem — Apple's CloudKit server-to-server docs are insufficient for production use.
+
+| Slide | Content | Duration |
+|---|---|---|
+| 1 | Title slide + intro | 1 min |
+| 2 | "What CloudKit promises" — iCloud sync, zero backend, Apple handles infrastructure | 1.5 min |
+| 3 | "What happens when you need a server" — the documentation gap | 1.5 min |
+| 4 | Two production examples: BushelCloud + CelestraCloud — what we needed vs. what Apple provided | 2 min |
+
+**Key message**: Apple documents the happy path. Production needs the rest.
+
+---
+
+### Act 2: The Rebuild — OpenAPI + AI
+
+**Goal**: Show how MistKit was rebuilt using OpenAPI spec generation and AI assistance. *(Skip for 30-min format.)*
+
+| Slide | Content | Duration |
+|---|---|---|
+| 5 | MistKit history: original library → why a rebuild was needed | 2 min |
+| 6 | OpenAPI approach: spec-driven development with swift-openapi-generator | 2 min |
+| 7 | AI-assisted rebuild: how Claude Code helped generate 10,476 lines of type-safe code | 2 min |
+| 8 | The result: 161 tests, full type safety, production-ready | 2 min |
+
+**Key message**: Modern tooling (OpenAPI + AI) can make CloudKit's complexity manageable.
+
+---
+
+### Act 3: Server-to-Server Authentication
+
+**Goal**: Walk through the authentication implementation that Apple barely documents.
+
+| Slide | Content | Duration |
+|---|---|---|
+| 9 | Authentication overview: what Apple tells you vs. what you need | 2 min |
+| 10 | Key pair generation — step by step | 2 min |
+| 11 | **Live code**: Request signing implementation | 3 min |
+| 12 | Environment switching (development → production) | 1.5 min |
+| 13 | Common pitfalls and debugging auth failures | 1.5 min |
+
+**Transition to demo**: "Let me show you this working..."
+
+#### Demo (5–7 min)
+
+**Prerequisites**: Xcode with MistKit package, Apple Developer account, CloudKit container configured, server-to-server key pair from CloudKit Dashboard.
+
+**Step 1 — Key pair generation (1 min)**
+Show the CloudKit Dashboard flow: container → Server-to-Server Keys → generate → download `.pem` → note key ID.
+> *"Apple gives you a `.pem` file and a key ID. What they don't tell you is how to actually use these to sign requests."*
+
+**Step 2 — Request signing (2 min)**
+Walk through the MistKit signing code: load private key → create payload (date + body + path) → sign with ECDSA → attach headers (`X-Apple-CloudKit-Request-KeyID`, `X-Apple-CloudKit-Request-ISO8601Date`, `X-Apple-CloudKit-Request-SignedMessage`).
+> *"This is the part where most developers give up. The signing format isn't documented clearly, and getting any part wrong gives you a generic 401."*
+
+**Step 3 — Environment switching (1 min)**
+Show dev vs. production container config and how MistKit handles the switch.
+> *"In development you get helpful error messages. In production, you get less help. Test everything in development first."*
+
+**Step 4 — Error handling (1.5 min)**
+Trigger and handle 401 (invalid key), 404 (wrong record type), 409 (concurrent modification). Show typed error handling and retry logic.
+> *"9 different HTTP status codes, each with its own recovery strategy. MistKit gives you typed errors instead of raw status codes."*
+
+**Step 5 — Live query (1.5 min)**
+Execute a working query: request signed → response decoded → type-safe field access shown.
+> *"From zero documentation to type-safe queries in 10,476 lines of Swift. That's what production-ready CloudKit looks like."*
+
+**Fallback plan**: Pre-recorded video of the same demo. Terminal output screenshots as static slides. Key code snippets already in slide deck.
+
+**Demo environment checklist**:
+- [ ] MistKit demo project builds and runs
+- [ ] CloudKit container has test data
+- [ ] Private key file accessible
+- [ ] Internet connection verified
+- [ ] Pre-recorded backup video ready
+- [ ] Terminal font size increased for projector visibility
+
+---
+
+### Act 4: Type Polymorphism & Error Handling
+
+**Goal**: Deep dive into making CloudKit's dynamic type system safe in Swift.
+
+| Slide | Content | Duration |
+|---|---|---|
+| 14 | The problem: CloudKit fields are dynamically typed | 2 min |
+| 15 | OpenAPI discriminated unions for type safety | 2 min |
+| 16 | **Code demo**: Type-safe record field access | 3 min |
+| 17 | Error handling overview: 9 HTTP status codes | 2 min |
+| 18 | **Code demo**: Typed error responses with retry logic | 3 min |
+| 19 | Conflict resolution with exponential backoff (CelestraCloud patterns) | 2 min |
+| 20 | Production error handling: lessons from real deployments | 1 min |
+
+**Key message**: Type safety isn't optional when your backend talks to CloudKit.
+
+---
+
+### Act 5: API Ergonomics
+
+**Goal**: Show the three-layer architecture that makes OpenAPI-generated code feel Swift-native.
+
+| Slide | Content | Duration |
+|---|---|---|
+| 21 | The three-layer architecture: Generated → Abstraction → User API | 2 min |
+| 22 | Layer 1: Raw OpenAPI-generated code (what you get) | 1.5 min |
+| 23 | Layer 2: Abstraction layer (Swift idioms, error mapping) | 1.5 min |
+| 24 | Layer 3: User-facing API (what developers actually call) | 2 min |
+
+**Key message**: Good API design bridges the gap between generated code and developer experience.
+
+---
+
+### Closing + Q&A
+
+| Slide | Content | Duration |
+|---|---|---|
+| 25 | When to use CloudKit as your backend (decision framework) | 2 min |
+| 26 | Resources: MistKit repo, blog articles, related talks | 2 min |
+| 27 | Q&A | 5–10 min |
+
+---
+
+## Format Adaptations
+
+| Format | Adjust | Total content |
+|---|---|---|
+| **30-min talk** | Skip Act 2, condense Act 4 code demos to pre-recorded | ~25 min |
+| **45-min talk** | Compress Acts 1–2 to 10 min combined, reduce Q&A to 5 min | ~38 min |
+| **60-min talk** | All acts, full examples + live demo | ~50 min |
+| **Workshop** | Attendees build a CloudKit backend service hands-on | 2–3 hours |
+| **Blog post** | One act = one post, with real code | 2,000–3,000 words |
+| **Social media** | Hook + one insight (auth gap, one error code, type safety) | Short |
+
+**iOSDevUK note**: More beginner-friendly framing on authentication concepts. First-time speaker emphasis.
+
+---
+
 ## Accepted Talks (2026)
 
 - **Swift Craft 2026** — June 2026 (60 min)
 - **Swift Rockies 2026** — Calgary, AB, July 2026 (45 min)
 - **iOSDevUK 2026** — Aberystwyth, Wales, Sept 7–10, 2026 (30 min)
 
-Prep materials (outline, demo script): [prep/](prep/)
+---
+
+## Materials Checklist
+
+- [ ] Slide deck (Keynote or Deckset)
+- [ ] MistKit demo project (clean, working state)
+- [ ] Pre-recorded demo backup video
+- [ ] Production screenshots from BushelCloud & CelestraCloud (anonymized if needed)
+- [ ] Code snippets for slides (syntax highlighted)

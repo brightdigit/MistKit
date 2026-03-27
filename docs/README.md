@@ -10,7 +10,7 @@ This content series covers the patterns that two production backends (BushelClou
 
 ## Start Here
 
-**[content-reference.md](content-reference.md)** — Distilled key points, narrative, technical topics, and production examples. Use this when creating any derived content: talks, workshops, blog posts, videos, or social media posts.
+**[talk-prep.md](talk-prep.md)** — Key points, narrative, technical topics, talk structure, and demo guide. Use this when creating any derived content: talks, workshops, blog posts, videos, or social media posts.
 
 ## Core Themes
 
@@ -31,10 +31,9 @@ This content series covers the patterns that two production backends (BushelClou
 
 ```
 docs/
-├── content-reference.md  # Key points and narrative for all content creation
-├── articles/             # Blog posts and written content in progress
-├── prep/                 # Talk outline and demo script
-└── marketing/            # Promotion, content strategy, consulting
+├── talk-prep.md   # Key points, narrative, talk structure, and demo guide
+├── articles/      # Blog posts and written content in progress
+└── marketing/     # Promotion, content strategy, consulting
 ```
 
 ## Related
