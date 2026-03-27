@@ -151,10 +151,9 @@ try await database.save(record)  // 5 lines, type-safe, production-ready
 | CelestraCloud | Syncs RSS feeds for Celestra RSS reader | Server-to-server | 15-min polling, aggressive rate limiting, conflict resolution |
 
 **Stats for credibility**:
-- **MistKit**: 10,476 lines of type-safe Swift, 210 GitHub stars, 161 tests, 47 test files
-- Built in 3 months using AI-assisted OpenAPI generation (vs. 6-12 months estimated manual work)
-- **BushelCloud**: 179 files changed, 33,032 additions, 137 passing tests (Jan 8, 2026)
-- **CelestraCloud**: 105 files changed, 23,534 additions (Jan 6, 2026)
+- **MistKit**: actively maintained open-source library — see the [repo](../../) for current stats
+- Built using AI-assisted OpenAPI generation — significantly faster than manual implementation
+- **BushelCloud** and **CelestraCloud** are production deployments, each requiring substantial schema migrations
 
 ---
 
@@ -224,8 +223,8 @@ Five acts, scalable to any length.
 |---|---|---|
 | 5 | MistKit history: original library → why a rebuild was needed | 2 min |
 | 6 | OpenAPI approach: spec-driven development with swift-openapi-generator | 2 min |
-| 7 | AI-assisted rebuild: how Claude Code helped generate 10,476 lines of type-safe code | 2 min |
-| 8 | The result: 161 tests, full type safety, production-ready | 2 min |
+| 7 | AI-assisted rebuild: how Claude Code helped generate type-safe code from the OpenAPI spec | 2 min |
+| 8 | The result: comprehensive test coverage, full type safety, production-ready | 2 min |
 
 **Key message**: Modern tooling (OpenAPI + AI) can make CloudKit's complexity manageable.
 
@@ -267,7 +266,7 @@ Trigger and handle 401 (invalid key), 404 (wrong record type), 409 (concurrent m
 
 **Step 5 — Live query (1.5 min)**
 Execute a working query: request signed → response decoded → type-safe field access shown.
-> *"From zero documentation to type-safe queries in 10,476 lines of Swift. That's what production-ready CloudKit looks like."*
+> *"From zero documentation to type-safe queries. That's what production-ready CloudKit looks like."*
 
 **Fallback plan**: Pre-recorded video of the same demo. Terminal output screenshots as static slides. Key code snippets already in slide deck.
 

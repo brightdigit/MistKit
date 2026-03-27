@@ -77,10 +77,10 @@ Pre-written posts for CloudKit server-to-server authentication. Adapt per platfo
 > CloudKit server-to-server auth reality check:
 >
 > Official docs: 3 pages
-> Stack Overflow questions: 847 unanswered
-> Production gotchas I hit: 23
-> Hours debugging environment switching: 8
-> Working examples from Apple: 0
+> Stack Overflow questions: hundreds unanswered
+> Production gotchas I hit: too many to count
+> Hours debugging environment switching: most of a day
+> Working examples from Apple: 0 (that I could find)
 >
 > Working examples I built: 2 (BushelCloud, CelestraCloud)
 
