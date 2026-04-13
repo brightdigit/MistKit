@@ -341,7 +341,6 @@ Execute a working query: request signed → response decoded → type-safe field
 ## Accepted Talks (2026)
 
 - **Swift Craft 2026** — June 2026 (60 min)
-- **Swift Rockies 2026** — Calgary, AB, July 2026 (45 min)
 - **iOSDevUK 2026** — Aberystwyth, Wales, Sept 7–10, 2026 (30 min)
 
 ---
