@@ -31,17 +31,6 @@ on:
   # Manual trigger for testing
   workflow_dispatch:
 
-  # Automatic trigger after binary build completes
-  # Why use workflow_run?
-  # - Waits for build to complete before syncing
-  # - Prevents race condition: sync starting before binary is ready
-  # - Only runs on success, skips on build failures
-  # - Branch filter: Only for testing on 8-scheduled-job
-  workflow_run:
-    workflows: ["Build bushel-cloud Binary"]
-    types: [completed]
-    branches:
-      - 8-scheduled-job
 
 # Why cancel-in-progress for dev environment?
 # - Syncs are idempotent (safe to retry)
@@ -57,16 +46,6 @@ jobs:
     name: Sync to CloudKit (Development)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
-    # Condition explanation:
-    # - Always run for: schedule triggers (cron) or manual triggers (workflow_dispatch)
-    # - Conditionally run for: workflow_run ONLY if the build succeeded
-    #
-    # Why this condition?
-    # - Prevents sync from running when build fails
-    # - Allows manual testing without waiting for schedule
-    # - Supports feature branch testing on 8-scheduled-job
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
 
     permissions:
       contents: read  # Read repository code
