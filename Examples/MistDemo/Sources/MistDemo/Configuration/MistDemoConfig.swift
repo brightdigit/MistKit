@@ -131,7 +131,7 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
         )
 
         self.privateKeyFile = config.string(
-            forKey: "private.key.file"
+            forKey: "private.key.path"
         )
 
         // Server

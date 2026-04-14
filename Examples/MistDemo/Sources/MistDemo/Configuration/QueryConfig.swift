@@ -85,9 +85,11 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
         let zone = configReader.string(forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone) ?? MistDemoConstants.Defaults.zone
         let recordType = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordType, default: MistDemoConstants.Defaults.recordType) ?? MistDemoConstants.Defaults.recordType
         
-        // Parse filters (can be multiple)
+        // Parse filters — multiple filters are separated by "|" so that commas
+        // remain available as value separators in IN/NOT_IN filter expressions.
+        // e.g. --filter "index:in:1,2,3|title:eq:Hello"
         let filtersString = configReader.string(forKey: MistDemoConstants.ConfigKeys.filter)
-        let filters = filtersString?.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) } ?? []
+        let filters = filtersString?.split(separator: "|").map { String($0).trimmingCharacters(in: .whitespaces) } ?? []
         
         // Parse sort option
         let sortString = configReader.string(forKey: MistDemoConstants.ConfigKeys.sort)

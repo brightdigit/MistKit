@@ -34,8 +34,7 @@ All subcommands accept these global options:
 
 | Option | Short | Environment Variable | Description |
 |--------|-------|---------------------|-------------|
-| `--container-id` | `-c` | `CLOUDKIT_CONTAINER_ID` | CloudKit container identifier |
-| `--api-token` | `-a` | `CLOUDKIT_API_TOKEN` | CloudKit API token |
+| `--container-id` | `-c` | `CLOUDKIT_CONTAINER_IDENTIFIER` | CloudKit container identifier |
 
 ### Database & Environment
 
@@ -50,11 +49,20 @@ Valid values:
 
 ### Authentication Options
 
+**Public database** — server-to-server signing:
+
 | Option | Environment Variable | Description |
 |--------|---------------------|-------------|
-| `--web-auth-token` | `CLOUDKIT_WEBAUTH_TOKEN` | Web authentication token (required for private/shared databases) |
-| `--key-id` | `CLOUDKIT_KEY_ID` | Server-to-server key ID |
-| `--private-key-file` | `CLOUDKIT_PRIVATE_KEY_FILE` | Path to server-to-server private key |
+| `--key-id` | `CLOUDKIT_KEY_ID` | Server-to-server key ID (required for public database) |
+| `--private-key-file` | `CLOUDKIT_PRIVATE_KEY_PATH` | Path to ECDSA private key PEM file |
+| `--private-key` | `CLOUDKIT_PRIVATE_KEY` | ECDSA private key as inline string |
+
+**Private/shared database** — web authentication:
+
+| Option | Environment Variable | Description |
+|--------|---------------------|-------------|
+| `--api-token` | `CLOUDKIT_API_TOKEN` | CloudKit API token (required for private/shared database) |
+| `--web-auth-token` | `CLOUDKIT_WEB_AUTH_TOKEN` | Web authentication token (from `mistdemo auth-token`) |
 
 ### Output Options
 
@@ -81,22 +89,26 @@ Valid output formats: `json`, `table`, `csv`, `yaml`
 
 ## Authentication Overview
 
-MistDemo supports two authentication methods:
+MistDemo uses different credentials depending on the target database:
 
-### 1. Web Auth Token (User Authentication)
-Required for accessing private or shared databases.
-
+### Public Database — Server-to-Server Key
 ```bash
-# Obtain token
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token --api-token YOUR_API_TOKEN)
+export CLOUDKIT_KEY_ID="your-key-id"
+export CLOUDKIT_PRIVATE_KEY_PATH="/path/to/eckey.pem"
+mistdemo query
+mistdemo demo-in-filter
+```
 
-# Use token in commands
-mistdemo query --database private
+### Private/Shared Database — Web Authentication
+```bash
+export CLOUDKIT_API_TOKEN="your-api-token"
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token)
+mistdemo current-user
 ```
 
 See [Authentication Operations](operations-auth.md) for details.
 
-### 2. Server-to-Server Key (Server Authentication)
+### Legacy: Server-to-Server Key (Private Database)
 For server-side applications using key-based authentication.
 
 ```bash

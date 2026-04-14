@@ -39,8 +39,8 @@ public struct MistDemoConfiguration: Sendable {
       // 1. Command line arguments (highest priority)
       CommandLineArgumentsProvider(),
 
-      // 2. Environment variables
-      EnvironmentVariablesProvider(),
+      // 2. Environment variables (CLOUDKIT_ prefix: e.g. api.token → CLOUDKIT_API_TOKEN)
+      EnvironmentVariablesProvider().prefixKeys(with: "cloudkit"),
 
       // 3. In-memory defaults (lowest priority)
       InMemoryProvider(values: [

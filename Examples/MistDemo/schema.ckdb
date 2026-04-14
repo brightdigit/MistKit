@@ -10,5 +10,5 @@ RECORD TYPE Note (
 
     GRANT READ, CREATE, WRITE TO "_creator",
     GRANT READ, CREATE, WRITE TO "_icloud",
-    GRANT READ TO "_world"
+    GRANT READ, CREATE, WRITE TO "_world"
 );
