@@ -4,7 +4,7 @@ description: Replaces the local MistKit path dependency with a remote branch ref
 inputs:
   branch:
     description: MistKit branch to use (leave empty to keep the local path dependency)
-    default: ''
+    default: 192-query-filter-in
 
 runs:
   using: composite

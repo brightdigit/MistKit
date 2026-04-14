@@ -72,8 +72,6 @@ jobs:
 
     - name: Setup MistKit
       uses: ./.github/actions/setup-mistkit
-      with:
-        branch: 192-query-filter-in
 
     # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
     # If this step fails, then you should remove it and run the build manually (see below)

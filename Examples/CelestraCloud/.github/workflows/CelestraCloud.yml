@@ -24,8 +24,6 @@ jobs:
 
       - name: Setup MistKit
         uses: ./.github/actions/setup-mistkit
-        with:
-          branch: 192-query-filter-in
 
       - uses: brightdigit/swift-build@v1.4.2
         with:
@@ -56,8 +54,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup MistKit
         uses: ./.github/actions/setup-mistkit
-        with:
-          branch: 192-query-filter-in
       - uses: brightdigit/swift-build@v1.4.2
         with:
           windows-swift-version: ${{ matrix.swift.version }}
@@ -129,8 +125,6 @@ jobs:
 
       - name: Setup MistKit
         uses: ./.github/actions/setup-mistkit
-        with:
-          branch: 192-query-filter-in
 
       - name: Build and Test
         uses: brightdigit/swift-build@v1.4.2
