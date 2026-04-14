@@ -91,6 +91,16 @@ public struct DemoInFilterCommand: MistDemoCommand {
             print("  Created \(record.recordName)  (index=\(idx))")
         }
 
+        // Diagnostic: query without filter to verify records are immediately visible
+        print("\nVerifying records are queryable (no filter)…")
+        let allRecords = try await client.queryRecords(recordType: recordType, limit: 200)
+        let allDemoRecords = allRecords.filter { createdNames.contains($0.recordName) }
+        print("  Total Note records: \(allRecords.count), demo records visible: \(allDemoRecords.count)")
+        if allDemoRecords.count < 3 {
+            print("  Waiting 2s for CloudKit indexing…")
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+        }
+
         // Step 2 — query back records where index IN [10, 30]
         print("\nQuerying with IN filter for index values [10, 30]…")
         let results = try await client.queryRecords(
@@ -100,6 +110,9 @@ public struct DemoInFilterCommand: MistDemoCommand {
         )
 
         let matching = results.filter { createdNames.contains($0.recordName) }
+        // The record with index=20 should NOT be in the results (filter should exclude it)
+        let index20Name = createdNames.count == 3 ? createdNames[1] : nil
+        let falsePositive = index20Name.map { n in results.contains { $0.recordName == n } } ?? false
         print("Total results returned: \(results.count)")
         print("Matching demo records:  \(matching.count) (expected 2)")
         for record in matching {
@@ -107,16 +120,23 @@ public struct DemoInFilterCommand: MistDemoCommand {
             print("  \(record.recordName)  index=\(idx.map(String.init) ?? "?")")
         }
 
-        if matching.count == 2 {
+        if matching.count == 2 && !falsePositive {
             print("\n✓ IN filter works correctly — issue #192 fix confirmed")
+        } else if falsePositive {
+            print("\n✗ Filter not working — index=20 record appeared in results (filter ignored)")
         } else {
             print("\n✗ Unexpected result count — check CloudKit for details")
         }
 
-        // Step 3 — clean up
+        // Step 3 — clean up (use forceDelete — delete requires recordChangeTag which we don't store)
         print("\nDeleting demo records…")
         for name in createdNames {
-            try await client.deleteRecord(recordType: recordType, recordName: name)
+            let op = RecordOperation(
+                operationType: .forceDelete,
+                recordType: recordType,
+                recordName: name
+            )
+            _ = try await client.modifyRecords([op])
             print("  Deleted \(name)")
         }
         print("Done.")

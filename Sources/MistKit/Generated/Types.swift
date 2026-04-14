@@ -830,15 +830,24 @@ internal enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/FieldValueRequest/value`.
             internal var value: Components.Schemas.FieldValueRequest.valuePayload
+            /// Optional CloudKit field type — required for IN/NOT_IN list filters (e.g. "INT64_LIST").
+            /// Not generated from the OpenAPI spec; added to support typed list filters.
+            internal var _listType: String?
             /// Creates a new `FieldValueRequest`.
             ///
             /// - Parameters:
             ///   - value:
-            internal init(value: Components.Schemas.FieldValueRequest.valuePayload) {
+            ///   - listType: Optional CloudKit list type string (e.g. "INT64_LIST") for IN/NOT_IN filters
+            internal init(
+                value: Components.Schemas.FieldValueRequest.valuePayload,
+                listType: String? = nil
+            ) {
                 self.value = value
+                self._listType = listType
             }
             internal enum CodingKeys: String, CodingKey {
                 case value
+                case _listType = "type"
             }
         }
         /// A CloudKit field value from API responses.

@@ -185,7 +185,8 @@ internal struct FilterBuilder {
       comparator: .IN,
       fieldName: field,
       fieldValue: .init(
-        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) })
+        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) }),
+        listType: cloudKitListType(for: values)
       )
     )
   }
@@ -200,9 +201,27 @@ internal struct FilterBuilder {
       comparator: .NOT_IN,
       fieldName: field,
       fieldValue: .init(
-        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) })
+        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) }),
+        listType: cloudKitListType(for: values)
       )
     )
+  }
+
+  /// Infers the CloudKit list type string required by the IN/NOT_IN filter API
+  /// (e.g. [.int64] → "INT64_LIST", [.string] → "STRING_LIST").
+  private static func cloudKitListType(for values: [FieldValue]) -> String? {
+    guard let first = values.first else { return nil }
+    switch first {
+    case .string:    return "STRING_LIST"
+    case .int64:     return "INT64_LIST"
+    case .double:    return "DOUBLE_LIST"
+    case .bytes:     return "BYTES_LIST"
+    case .date:      return "TIMESTAMP_LIST"
+    case .reference: return "REFERENCE_LIST"
+    case .location:  return "LOCATION_LIST"
+    case .asset:     return "ASSET_LIST"
+    case .list:      return "LIST"
+    }
   }
 
   // MARK: List Member Filters
