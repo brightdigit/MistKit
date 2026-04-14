@@ -145,6 +145,10 @@ runs:
         path: ./binary
         branch: ${{ github.ref_name }}
 
+    - name: Setup MistKit
+      if: steps.download-binary.outcome != 'success'
+      uses: ./.github/actions/setup-mistkit
+
     - name: Build binary (fallback if artifact unavailable)
       if: steps.download-binary.outcome != 'success'
       shell: bash
