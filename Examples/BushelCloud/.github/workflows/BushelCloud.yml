@@ -25,7 +25,7 @@ jobs:
       - name: Setup MistKit
         uses: ./.github/actions/setup-mistkit
         with:
-          branch: main
+          branch: 192-query-filter-in
 
       - uses: brightdigit/swift-build@v1.4.2
         with:
@@ -126,7 +126,7 @@ jobs:
       - name: Setup MistKit
         uses: ./.github/actions/setup-mistkit
         with:
-          branch: main
+          branch: 192-query-filter-in
 
       - name: Build and Test
         uses: brightdigit/swift-build@v1.4.2

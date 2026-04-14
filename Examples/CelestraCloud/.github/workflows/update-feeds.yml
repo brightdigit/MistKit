@@ -151,7 +151,7 @@ jobs:
         if: steps.cache-binary.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-mistkit
         with:
-          branch: main
+          branch: 192-query-filter-in
 
       - name: Build CelestraCloud
         if: steps.cache-binary.outputs.cache-hit != 'true'
