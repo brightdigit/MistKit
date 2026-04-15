@@ -9,5 +9,6 @@ RECORD TYPE Note (
     "modified"               INT64 QUERYABLE,
 
     GRANT READ, CREATE, WRITE TO "_creator",
-    GRANT READ, CREATE, WRITE TO "_icloud"
+    GRANT READ, CREATE, WRITE TO "_icloud",
+    GRANT READ TO "_world"
 );
