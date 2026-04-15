@@ -62,7 +62,7 @@ Valid values:
 | Option | Environment Variable | Description |
 |--------|---------------------|-------------|
 | `--api-token` | `CLOUDKIT_API_TOKEN` | CloudKit API token (required for private/shared database) |
-| `--web-auth-token` | `CLOUDKIT_WEB_AUTH_TOKEN` | Web authentication token (from `mistdemo auth-token`) |
+| `--web-auth-token` | `CLOUDKIT_WEBAUTH_TOKEN` | Web authentication token (from `mistdemo auth-token`) |
 
 ### Output Options
 
@@ -102,7 +102,7 @@ mistdemo demo-in-filter
 ### Private/Shared Database — Web Authentication
 ```bash
 export CLOUDKIT_API_TOKEN="your-api-token"
-export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token)
+export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token)
 mistdemo current-user
 ```
 
@@ -227,7 +227,7 @@ mistdemo create \
 ### Authenticated Operations
 ```bash
 # Get auth token first
-export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
+export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
 
 # Use private database
 mistdemo query --database private

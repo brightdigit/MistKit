@@ -444,7 +444,7 @@ query_with_auth_retry() {
 
   if [ "$code" = "AUTHENTICATION_FAILED" ]; then
     echo "Token expired, re-authenticating..." >&2
-    export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
+    export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
 
     # Retry
     mistdemo query --database private
@@ -469,7 +469,7 @@ Error: Invalid or expired web authentication token
 **Solution:**
 ```bash
 # Get new token
-export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
+export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
 
 # Retry operation
 mistdemo query --database private

@@ -8,7 +8,7 @@ Authentication operations handle obtaining and validating CloudKit authenticatio
 
 #### 1. Web Authentication Token — Private/Shared Database
 - **Use Case**: Private and shared database operations
-- **Credentials**: `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN`
+- **Credentials**: `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEBAUTH_TOKEN`
 - **Flow**: OAuth-style browser-based sign-in (`mistdemo auth-token`)
 - **Duration**: Temporary (expires periodically)
 
@@ -23,8 +23,8 @@ Authentication operations handle obtaining and validating CloudKit authenticatio
 | Database | Required Credentials | Auth Method |
 |----------|---------------------|-------------|
 | **Public** | `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]` | Server-to-server signing |
-| **Private** | `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` | Web authentication |
-| **Shared** | `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` | Web authentication |
+| **Private** | `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEBAUTH_TOKEN` | Web authentication |
+| **Shared** | `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEBAUTH_TOKEN` | Web authentication |
 
 ## auth-token
 
@@ -67,7 +67,7 @@ mistdemo auth-token --api-token YOUR_API_TOKEN
 
 **Save to environment variable:**
 ```bash
-export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token --api-token YOUR_API_TOKEN)
+export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token --api-token YOUR_API_TOKEN)
 ```
 
 **Save to file:**
@@ -141,7 +141,7 @@ Waiting for authentication callback...
 
 # Check if token exists and is valid
 if [ -f ~/.mistdemo/token.txt ]; then
-  export CLOUDKIT_WEB_AUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
+  export CLOUDKIT_WEBAUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
   if mistdemo validate > /dev/null 2>&1; then
     echo "Using existing token"
     exit 0
@@ -152,7 +152,7 @@ fi
 echo "Obtaining new authentication token..."
 mistdemo auth-token --api-token "$CLOUDKIT_API_TOKEN" > ~/.mistdemo/token.txt
 chmod 600 ~/.mistdemo/token.txt
-export CLOUDKIT_WEB_AUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
+export CLOUDKIT_WEBAUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
 echo "Authentication complete"
 ```
 
@@ -169,7 +169,7 @@ mistdemo query --database private
 **Interactive session:**
 ```bash
 # One-time setup per session
-export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
+export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
 
 # Use for all subsequent commands
 mistdemo query --database private
@@ -266,7 +266,7 @@ fi
 
 mistdemo validate --test-query || {
   echo "Error: Invalid authentication. Please re-authenticate."
-  export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
+  export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
 }
 
 # Proceed with operations
@@ -315,7 +315,7 @@ export CLOUDKIT_CONTAINER_IDENTIFIER="iCloud.com.example.MyApp"
 export CLOUDKIT_API_TOKEN="your-api-token"
 
 # 3. Get web auth token (browser sign-in)
-export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token)
+export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token)
 
 # 4. Verify private access
 mistdemo current-user
@@ -341,7 +341,7 @@ mistdemo demo-in-filter
 ```bash
 # Error: AUTHENTICATION_FAILED
 # Solution: Get new token
-export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
+export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
 ```
 
 ### Port Already in Use

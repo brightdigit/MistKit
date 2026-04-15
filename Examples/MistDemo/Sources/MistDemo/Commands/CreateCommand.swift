@@ -100,7 +100,7 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
         NOTES:
           • Record name is auto-generated if not provided
           • JSON files auto-detect field types from values
-          • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN
+          • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEBAUTH_TOKEN
             to avoid repeating tokens
         """
     
