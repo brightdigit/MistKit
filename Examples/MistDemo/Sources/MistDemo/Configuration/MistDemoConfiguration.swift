@@ -111,4 +111,12 @@ public struct MistDemoConfiguration: Sendable {
     configReader.bool(forKey: Configuration.ConfigKey(key), default: defaultValue)
   }
 
+  /// Read a pipe-separated list of strings from configuration.
+  /// Splits on "|" and trims whitespace from each element.
+  public func filterStrings(forKey key: String) -> [String] {
+    string(forKey: key)?
+      .split(separator: "|")
+      .map { String($0).trimmingCharacters(in: .whitespaces) } ?? []
+  }
+
 }

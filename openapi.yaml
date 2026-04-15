@@ -888,7 +888,7 @@ components:
       type: object
       description: |
         A CloudKit field value for API requests.
-        The type field is omitted as CloudKit infers types from the value structure.
+        The type field is optional and used for IN/NOT_IN list filters to specify the list element type.
       properties:
         value:
           oneOf:
@@ -901,6 +901,10 @@ components:
             - $ref: '#/components/schemas/ReferenceValue'
             - $ref: '#/components/schemas/AssetValue'
             - $ref: '#/components/schemas/ListValue'
+        type:
+          type: string
+          enum: [STRING_LIST, INT64_LIST, DOUBLE_LIST, BYTES_LIST, TIMESTAMP_LIST, REFERENCE_LIST, LOCATION_LIST, ASSET_LIST, LIST]
+          description: Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
       required:
         - value
 

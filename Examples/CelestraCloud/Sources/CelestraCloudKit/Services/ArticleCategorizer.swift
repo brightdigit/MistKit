@@ -28,7 +28,7 @@
 //
 
 public import CelestraKit
-import Foundation
+internal import Foundation
 
 /// Pure function type for categorizing feed items into new vs modified articles
 @available(macOS 13.0, *)

@@ -264,6 +264,8 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 
 The Swift package uses Apple's swift-openapi-generator to create type-safe client code from the OpenAPI specification. Generated code is placed in `Sources/MistKit/Generated/` and should not be committed to version control.
 
+> **IMPORTANT: Never manually edit files in `Sources/MistKit/Generated/`.** These files are auto-generated from `openapi.yaml`. Any manual edits will be lost when code is regenerated. Instead, modify `openapi.yaml` and regenerate using `./Scripts/generate-openapi.sh`.
+
 The `openapi.yaml` file serves as the source of truth for:
 - All available endpoints and their HTTP methods
 - Request/response schemas and models

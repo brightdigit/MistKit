@@ -227,7 +227,7 @@ mistdemo create \
 ### Authenticated Operations
 ```bash
 # Get auth token first
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
 
 # Use private database
 mistdemo query --database private

@@ -67,7 +67,7 @@ mistdemo auth-token --api-token YOUR_API_TOKEN
 
 **Save to environment variable:**
 ```bash
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token --api-token YOUR_API_TOKEN)
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token --api-token YOUR_API_TOKEN)
 ```
 
 **Save to file:**
@@ -141,7 +141,7 @@ Waiting for authentication callback...
 
 # Check if token exists and is valid
 if [ -f ~/.mistdemo/token.txt ]; then
-  export CLOUDKIT_WEBAUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
+  export CLOUDKIT_WEB_AUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
   if mistdemo validate > /dev/null 2>&1; then
     echo "Using existing token"
     exit 0
@@ -152,7 +152,7 @@ fi
 echo "Obtaining new authentication token..."
 mistdemo auth-token --api-token "$CLOUDKIT_API_TOKEN" > ~/.mistdemo/token.txt
 chmod 600 ~/.mistdemo/token.txt
-export CLOUDKIT_WEBAUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
+export CLOUDKIT_WEB_AUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
 echo "Authentication complete"
 ```
 
@@ -169,7 +169,7 @@ mistdemo query --database private
 **Interactive session:**
 ```bash
 # One-time setup per session
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
 
 # Use for all subsequent commands
 mistdemo query --database private
@@ -266,7 +266,7 @@ fi
 
 mistdemo validate --test-query || {
   echo "Error: Invalid authentication. Please re-authenticate."
-  export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
+  export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
 }
 
 # Proceed with operations
@@ -341,7 +341,7 @@ mistdemo demo-in-filter
 ```bash
 # Error: AUTHENTICATION_FAILED
 # Solution: Get new token
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
 ```
 
 ### Port Already in Use
