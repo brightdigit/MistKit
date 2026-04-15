@@ -191,7 +191,7 @@ public enum MistDemoConstants {
     /// Environment variable names
     public enum EnvironmentVars {
         public static let cloudKitAPIToken = "CLOUDKIT_API_TOKEN"
-        public static let cloudKitWebAuthToken = "CLOUDKIT_WEBAUTH_TOKEN"
+        public static let cloudKitWebAuthToken = "CLOUDKIT_WEB_AUTH_TOKEN"
         public static let cloudKitContainerID = "CLOUDKIT_CONTAINER_ID"
         public static let cloudKitEnvironment = "CLOUDKIT_ENVIRONMENT"
         public static let cloudKitDatabase = "CLOUDKIT_DATABASE"

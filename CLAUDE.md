@@ -225,7 +225,7 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 - Base URL: `https://api.apple-cloudkit.com`
 - Authentication:
   - **Public database**: `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY` or `CLOUDKIT_PRIVATE_KEY_PATH` → server-to-server signing
-  - **Private database**: `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEBAUTH_TOKEN` → web authentication
+  - **Private database**: `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` → web authentication
 - All operations should reference the OpenAPI spec in `cloudkit-api-openapi.yaml`
 - URL Pattern: `/database/{version}/{container}/{environment}/{database}/{operation}`
 - Supported databases: `public`, `private`, `shared`

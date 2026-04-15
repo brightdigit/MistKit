@@ -12,7 +12,7 @@ This document describes the environment variables used by MistKit for secure con
 
 ## Optional Variables
 
-### CLOUDKIT_WEBAUTH_TOKEN
+### CLOUDKIT_WEB_AUTH_TOKEN
 - **Description**: Web authentication token for user-specific operations
 - **Format**: Base64-encoded string (obtained through web auth flow)
 - **Example**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`

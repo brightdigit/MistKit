@@ -35,7 +35,7 @@ public struct MistKitClientFactory: Sendable {
     
     /// Create a CloudKitService for private database operations.
     ///
-    /// Requires `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEBAUTH_TOKEN` (web authentication).
+    /// Requires `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` (web authentication).
     /// - Parameter config: The base MistDemo configuration
     /// - Returns: A configured CloudKitService instance for the private database
     /// - Throws: ConfigurationError if required credentials are missing
@@ -49,7 +49,7 @@ public struct MistKitClientFactory: Sendable {
         let webAuthToken = config.webAuthToken.flatMap { AuthenticationHelper.resolveWebAuthToken($0) }
         guard let webAuthToken else {
             throw ConfigurationError.missingRequired("web.auth.token",
-                suggestion: "Provide via CLOUDKIT_WEBAUTH_TOKEN or run `mistdemo auth-token`")
+                suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`")
         }
 
         let tokenManager = WebAuthTokenManager(apiToken: apiToken, webAuthToken: webAuthToken)

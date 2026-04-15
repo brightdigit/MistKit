@@ -104,7 +104,7 @@ public struct UpdateCommand: MistDemoCommand, OutputFormatting {
           • Record name is REQUIRED for updates
           • Only specified fields will be updated, others remain unchanged
           • Use record-change-tag for safe concurrent updates
-          • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEBAUTH_TOKEN
+          • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN
             to avoid repeating tokens
         """
 
