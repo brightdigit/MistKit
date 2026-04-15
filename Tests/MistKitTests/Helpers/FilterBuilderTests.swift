@@ -123,6 +123,7 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.in("status", values)
     #expect(filter.comparator == .IN)
     #expect(filter.fieldName == "status")
+    #expect(filter.fieldValue?._type == .STRING_LIST)
   }
 
   @Test("FilterBuilder creates NOT_IN filter")
@@ -135,6 +136,7 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.notIn("status", values)
     #expect(filter.comparator == .NOT_IN)
     #expect(filter.fieldName == "status")
+    #expect(filter.fieldValue?._type == .STRING_LIST)
   }
 
   @Test("FilterBuilder creates IN filter with numbers")
@@ -147,6 +149,7 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.in("categoryId", values)
     #expect(filter.comparator == .IN)
     #expect(filter.fieldName == "categoryId")
+    #expect(filter.fieldValue?._type == .INT64_LIST)
   }
 
   // MARK: - List Member Filters

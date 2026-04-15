@@ -72,14 +72,11 @@ public struct ArticleSyncService: Sendable {
     feedRecordName: String
   ) async throws(CloudKitError) -> ArticleSyncResult {
     // 1. Query existing articles by GUID
-    // TEMPORARY: Skip GUID query due to CloudKit Web Services .in() operator issue
-    // TODO: Fix query or implement alternative deduplication strategy
-    let existingArticles: [Article] = []
-    // let guids = items.map(\.guid)
-    // let existingArticles = try await articleService.queryArticlesByGUIDs(
-    //   guids,
-    //   feedRecordName: feedRecordName
-    // )
+    let guids = items.map(\.guid)
+    let existingArticles = try await articleService.queryArticlesByGUIDs(
+      guids,
+      feedRecordName: feedRecordName
+    )
 
     // 2. Categorize into new vs modified (pure function)
     let categorization = categorizer.categorize(

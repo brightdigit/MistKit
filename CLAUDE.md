@@ -223,7 +223,9 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 
 ### CloudKit Web Services Integration
 - Base URL: `https://api.apple-cloudkit.com`
-- Authentication: API Token + Web Auth Token or Server-to-Server Key Authentication
+- Authentication:
+  - **Public database**: `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY` or `CLOUDKIT_PRIVATE_KEY_PATH` → server-to-server signing
+  - **Private database**: `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` → web authentication
 - All operations should reference the OpenAPI spec in `cloudkit-api-openapi.yaml`
 - URL Pattern: `/database/{version}/{container}/{environment}/{database}/{operation}`
 - Supported databases: `public`, `private`, `shared`
@@ -261,6 +263,8 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 ## OpenAPI-Driven Development
 
 The Swift package uses Apple's swift-openapi-generator to create type-safe client code from the OpenAPI specification. Generated code is placed in `Sources/MistKit/Generated/` and should not be committed to version control.
+
+> **IMPORTANT: Never manually edit files in `Sources/MistKit/Generated/`.** These files are auto-generated from `openapi.yaml`. Any manual edits will be lost when code is regenerated. Instead, modify `openapi.yaml` and regenerate using `./Scripts/generate-openapi.sh`.
 
 The `openapi.yaml` file serves as the source of truth for:
 - All available endpoints and their HTTP methods

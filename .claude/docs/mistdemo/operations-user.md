@@ -46,7 +46,7 @@ mistdemo current-user --fields "userRecordName,firstName,lastName"
 **With authentication:**
 ```bash
 # Get web auth token first
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
 
 # Query current user
 mistdemo current-user --database private
@@ -294,7 +294,7 @@ mistdemo lookup-contacts \
 ### Verify Authentication and Get User Info
 ```bash
 # Set up authentication
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
 
 # Get current user
 mistdemo current-user --database private -o table

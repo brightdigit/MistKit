@@ -718,7 +718,7 @@ internal enum Components {
             }
         }
         /// A CloudKit field value for API requests.
-        /// The type field is omitted as CloudKit infers types from the value structure.
+        /// The type field is optional and used for IN/NOT_IN list filters to specify the list element type.
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/FieldValueRequest`.
@@ -830,15 +830,39 @@ internal enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/FieldValueRequest/value`.
             internal var value: Components.Schemas.FieldValueRequest.valuePayload
+            /// Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
+            ///
+            /// - Remark: Generated from `#/components/schemas/FieldValueRequest/type`.
+            internal enum _typePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case STRING_LIST = "STRING_LIST"
+                case INT64_LIST = "INT64_LIST"
+                case DOUBLE_LIST = "DOUBLE_LIST"
+                case BYTES_LIST = "BYTES_LIST"
+                case TIMESTAMP_LIST = "TIMESTAMP_LIST"
+                case REFERENCE_LIST = "REFERENCE_LIST"
+                case LOCATION_LIST = "LOCATION_LIST"
+                case ASSET_LIST = "ASSET_LIST"
+                case LIST = "LIST"
+            }
+            /// Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
+            ///
+            /// - Remark: Generated from `#/components/schemas/FieldValueRequest/type`.
+            internal var _type: Components.Schemas.FieldValueRequest._typePayload?
             /// Creates a new `FieldValueRequest`.
             ///
             /// - Parameters:
             ///   - value:
-            internal init(value: Components.Schemas.FieldValueRequest.valuePayload) {
+            ///   - _type: Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
+            internal init(
+                value: Components.Schemas.FieldValueRequest.valuePayload,
+                _type: Components.Schemas.FieldValueRequest._typePayload? = nil
+            ) {
                 self.value = value
+                self._type = _type
             }
             internal enum CodingKeys: String, CodingKey {
                 case value
+                case _type = "type"
             }
         }
         /// A CloudKit field value from API responses.

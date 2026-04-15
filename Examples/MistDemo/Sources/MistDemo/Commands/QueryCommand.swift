@@ -44,7 +44,7 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
         OPTIONS:
             --record-type <type>       Record type to query (default: Note)
             --zone <zone>              Zone name (default: _defaultZone)
-            --filter <filter>          Filter expression (field:operator:value)
+            --filter <filter>          Filter expression(s) (field:operator:value, use | to separate multiple)
             --sort <field:order>       Sort by field (order: asc/desc)
             --limit <count>            Maximum records to return (1-200)
             --fields <fields>          Comma-separated fields to include
@@ -60,102 +60,89 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
     public func execute() async throws {
         do {
             // Create CloudKit client
-            let client = try MistKitClientFactory.create(from: config.base)
-            
-            // Build query parameters
-            var queryParams: [String: Any] = [:]
-            
-            // Add filters
-            if !config.filters.isEmpty {
-                let filterQueries = try parseFilters(config.filters)
-                queryParams["filters"] = filterQueries
-            }
-            
-            // Add sort
-            if let sort = config.sort {
-                queryParams["sort"] = [["fieldName": sort.field, "order": sort.order.rawValue]]
-            }
-            
-            // Execute query
+            let client = try MistKitClientFactory.createForPublicDatabase(from: config.base)
+
+            // Build filters
             // NOTE: Zone, offset, and continuation marker support require
             // enhancements to CloudKitService.queryRecords method (GitHub issues #145, #146)
-            let recordInfos = try await client.queryRecords(
-                recordType: config.recordType,
-                filters: nil, // TODO: Pass parsed filters once supported
-                sortBy: nil, // TODO: Pass parsed sort once supported
-                limit: config.limit
-            )
-            
-            // Note: Field filtering is applied during output formatting
-            // to work around RecordInfo's immutable structure
-            let filteredRecords = recordInfos
-            
+            let recordInfos: [RecordInfo]
+            if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+                let filters: [QueryFilter]? = config.filters.isEmpty
+                    ? nil
+                    : try config.filters.map { try parseFilter($0) }
+                recordInfos = try await client.queryRecords(
+                    recordType: config.recordType,
+                    filters: filters,
+                    sortBy: nil,
+                    limit: config.limit
+                )
+            } else {
+                recordInfos = try await client.queryRecords(
+                    recordType: config.recordType,
+                    filters: nil,
+                    sortBy: nil,
+                    limit: config.limit
+                )
+            }
+
             // Format and output results
-            try await outputResults(filteredRecords, format: config.output)
-            
+            try await outputResults(recordInfos, format: config.output)
+
         } catch {
             throw QueryError.operationFailed(error.localizedDescription)
         }
     }
-    
-    /// Parse filter expressions
-    private func parseFilters(_ filters: [String]) throws -> [[String: Any]] {
-        return try filters.map { filterString in
-            try parseFilter(filterString)
-        }
-    }
-    
-    /// Parse a single filter expression "field:operator:value"
-    private func parseFilter(_ filterString: String) throws -> [String: Any] {
+
+    /// Parse a single filter expression "field:operator:value" into a QueryFilter
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+    private func parseFilter(_ filterString: String) throws -> QueryFilter {
         let components = filterString.split(separator: ":", maxSplits: 2, omittingEmptySubsequences: false)
-        
+
         guard components.count == 3 else {
             throw QueryError.invalidFilter(filterString, expected: "field:operator:value")
         }
-        
+
         let field = String(components[0]).trimmingCharacters(in: .whitespaces)
         let operatorString = String(components[1]).trimmingCharacters(in: .whitespaces)
-        let value = String(components[2]) // Don't trim value as it may contain meaningful whitespace
-        
+        let value = String(components[2])
+
         guard !field.isEmpty else {
             throw QueryError.emptyFieldName(filterString)
         }
-        
-        let cloudKitOperator = try mapToCloudKitOperator(operatorString)
-        
-        return [
-            "fieldName": field,
-            "comparator": cloudKitOperator,
-            "fieldValue": ["value": value]
-        ]
-    }
-    
-    /// Map string operators to CloudKit operators
-    private func mapToCloudKitOperator(_ operator: String) throws -> String {
-        switch `operator`.lowercased() {
+
+        switch operatorString.lowercased() {
         case "eq", "equals", "==", "=":
-            return "EQUALS"
+            return .equals(field, inferFieldValue(value))
         case "ne", "not_equals", "!=":
-            return "NOT_EQUALS"
+            return .notEquals(field, inferFieldValue(value))
         case "gt", ">":
-            return "GREATER_THAN"
+            return .greaterThan(field, inferFieldValue(value))
         case "gte", ">=":
-            return "GREATER_THAN_OR_EQUALS"
+            return .greaterThanOrEquals(field, inferFieldValue(value))
         case "lt", "<":
-            return "LESS_THAN"
+            return .lessThan(field, inferFieldValue(value))
         case "lte", "<=":
-            return "LESS_THAN_OR_EQUALS"
+            return .lessThanOrEquals(field, inferFieldValue(value))
         case "contains", "like":
-            return "CONTAINS"
+            return .containsAllTokens(field, value)
         case "begins_with", "starts_with":
-            return "BEGINS_WITH"
+            return .beginsWith(field, value)
         case "in":
-            return "IN"
+            let values = value.split(separator: ",").map { inferFieldValue(String($0)) }
+            return .in(field, values)
         case "not_in":
-            return "NOT_IN"
+            let values = value.split(separator: ",").map { inferFieldValue(String($0)) }
+            return .notIn(field, values)
         default:
-            throw QueryError.unsupportedOperator(`operator`)
+            throw QueryError.unsupportedOperator(operatorString)
         }
+    }
+
+    /// Infer a FieldValue from a string, preferring Int64, then Double, then String
+    private func inferFieldValue(_ string: String) -> FieldValue {
+        if let i = Int64(string) { return .int64(Int(i)) }
+        if let d = Double(string) { return .double(d) }
+        return .string(string)
     }
     
     /// Check if a field should be included based on field filter

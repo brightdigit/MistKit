@@ -33,64 +33,59 @@ public import MistKit
 /// Factory for creating MistKit CloudKitService instances from MistDemo configuration
 public struct MistKitClientFactory: Sendable {
     
-    /// Create a CloudKitService from MistDemo configuration
+    /// Create a CloudKitService for private database operations.
+    ///
+    /// Requires `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` (web authentication).
     /// - Parameter config: The base MistDemo configuration
-    /// - Returns: A configured CloudKitService instance
-    /// - Throws: ConfigurationError if required values are missing or invalid
+    /// - Returns: A configured CloudKitService instance for the private database
+    /// - Throws: ConfigurationError if required credentials are missing
     public static func create(from config: MistDemoConfig) throws -> CloudKitService {
-        // Resolve API token
         let apiToken = AuthenticationHelper.resolveAPIToken(config.apiToken)
         guard !apiToken.isEmpty else {
             throw ConfigurationError.missingRequired("api.token",
-                suggestion: "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable")
+                suggestion: "Provide via CLOUDKIT_API_TOKEN environment variable")
         }
 
-        // Determine the best token manager based on available credentials
-        let tokenManager: any TokenManager
-
-        let webAuthToken = config.webAuthToken.map { AuthenticationHelper.resolveWebAuthToken($0) } ?? nil
-        if let webAuthToken = webAuthToken, !webAuthToken.isEmpty {
-            // Use web authentication if available
-            tokenManager = WebAuthTokenManager(apiToken: apiToken, webAuthToken: webAuthToken)
-        } else if let keyID = config.keyID, 
-                  let privateKey = config.privateKey ?? loadPrivateKeyFromFile(config.privateKeyFile),
-                  !keyID.isEmpty, !privateKey.isEmpty {
-            // Use server-to-server authentication if available
-            if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
-                tokenManager = try ServerToServerAuthManager(keyID: keyID, pemString: privateKey)
-            } else {
-                throw ConfigurationError.unsupportedPlatform(
-                    "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
-                )
-            }
-        } else {
-            // Fall back to API-only authentication
-            tokenManager = APITokenManager(apiToken: apiToken)
+        let webAuthToken = config.webAuthToken.flatMap { AuthenticationHelper.resolveWebAuthToken($0) }
+        guard let webAuthToken else {
+            throw ConfigurationError.missingRequired("web.auth.token",
+                suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`")
         }
-        
-        // Create the CloudKitService
+
+        let tokenManager = WebAuthTokenManager(apiToken: apiToken, webAuthToken: webAuthToken)
+
         return try CloudKitService(
             containerIdentifier: config.containerIdentifier,
             tokenManager: tokenManager,
             environment: config.environment,
-            database: .private // Default to private database for most operations
+            database: .private
         )
     }
-    
-    /// Create a CloudKitService for public database operations
+
+    /// Create a CloudKitService for public database operations.
+    ///
+    /// Requires `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]` (server-to-server authentication).
     /// - Parameter config: The base MistDemo configuration
-    /// - Returns: A configured CloudKitService instance for public database
-    /// - Throws: ConfigurationError if required values are missing or invalid
+    /// - Returns: A configured CloudKitService instance for the public database
+    /// - Throws: ConfigurationError if required credentials are missing
     public static func createForPublicDatabase(from config: MistDemoConfig) throws -> CloudKitService {
-        let apiToken = AuthenticationHelper.resolveAPIToken(config.apiToken)
-        guard !apiToken.isEmpty else {
-            throw ConfigurationError.missingRequired("api.token",
-                suggestion: "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable")
+        guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+            throw ConfigurationError.unsupportedPlatform(
+                "Public database access requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
+            )
         }
-        
-        // For public database, use API-only authentication
-        let tokenManager = APITokenManager(apiToken: apiToken)
-        
+        guard let keyID = config.keyID, !keyID.isEmpty else {
+            throw ConfigurationError.missingRequired("key.id",
+                suggestion: "Provide via CLOUDKIT_KEY_ID environment variable")
+        }
+        guard let rawKey = config.privateKey ?? loadPrivateKeyFromFile(config.privateKeyFile),
+              !rawKey.isEmpty else {
+            throw ConfigurationError.missingRequired("private.key",
+                suggestion: "Provide via CLOUDKIT_PRIVATE_KEY or CLOUDKIT_PRIVATE_KEY_PATH")
+        }
+        let privateKey = rawKey.replacingOccurrences(of: "\\n", with: "\n")
+        let tokenManager = try ServerToServerAuthManager(keyID: keyID, pemString: privateKey)
+
         return try CloudKitService(
             containerIdentifier: config.containerIdentifier,
             tokenManager: tokenManager,

@@ -28,7 +28,7 @@
 //
 
 public import CelestraKit
-public import Foundation
+internal import Foundation
 
 /// Pure function type for categorizing feed items into new vs modified articles
 @available(macOS 13.0, *)
@@ -66,8 +66,10 @@ public struct ArticleCategorizer: Sendable {
     feedRecordName: String
   ) -> Result {
     // Build lookup map for efficient GUID matching
+    // Use uniquingKeysWith to handle duplicate GUIDs in CloudKit data gracefully
     let existingMap = Dictionary(
-      uniqueKeysWithValues: existingArticles.map { ($0.guid, $0) }
+      existingArticles.map { ($0.guid, $0) },
+      uniquingKeysWith: { first, _ in first }
     )
 
     var newArticles: [Article] = []

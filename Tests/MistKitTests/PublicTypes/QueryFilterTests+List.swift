@@ -17,6 +17,7 @@ extension QueryFilterTests {
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .IN)
       #expect(components.fieldName == "state")
+      #expect(components.fieldValue?._type == .STRING_LIST)
     }
 
     @Test("QueryFilter creates notIn filter with numbers")
@@ -30,6 +31,7 @@ extension QueryFilterTests {
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .NOT_IN)
       #expect(components.fieldName == "errorCode")
+      #expect(components.fieldValue?._type == .INT64_LIST)
     }
 
     @Test("QueryFilter creates in filter with empty array")
@@ -43,6 +45,7 @@ extension QueryFilterTests {
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .IN)
       #expect(components.fieldName == "tags")
+      #expect(components.fieldValue?._type == nil)
     }
   }
 }
