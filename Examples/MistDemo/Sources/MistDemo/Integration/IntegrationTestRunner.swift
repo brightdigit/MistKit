@@ -182,7 +182,7 @@ struct IntegrationTestRunner {
 
     // MARK: - Phase 2: Asset Upload
 
-    private func phase2UploadAsset(service: CloudKitService) async throws -> AssetUploadToken {
+    private func phase2UploadAsset(service: CloudKitService) async throws -> AssetUploadReceipt {
         print("\n📤 Phase 2: Upload test assets")
 
         let testData = IntegrationTestData.generateTestImage(sizeKB: assetSizeKB)
@@ -192,26 +192,27 @@ struct IntegrationTestRunner {
             print("   Uploading \(testData.count) bytes (\(String(format: "%.2f", sizeInMB)) MB)...")
         }
 
-        let uploadResult = try await service.uploadAssets(data: testData)
-
-        guard let token = uploadResult.tokens.first else {
-            throw IntegrationTestError.uploadFailed("No tokens returned")
-        }
+        let receipt = try await service.uploadAssets(
+            data: testData,
+            recordType: IntegrationTestData.recordType,
+            fieldName: "image"
+        )
 
         print("✅ Uploaded asset: \(testData.count) bytes")
 
-        if verbose, let url = token.url {
-            print("   Token URL: \(url.prefix(60))...")
+        if verbose {
+            print("   Record: \(receipt.recordName)")
+            print("   Field: \(receipt.fieldName)")
         }
 
-        return token
+        return receipt
     }
 
     // MARK: - Phase 3: Create Records
 
     private func phase3CreateRecords(
         service: CloudKitService,
-        assetToken: AssetUploadToken
+        assetToken: AssetUploadReceipt
     ) async throws -> [String] {
         print("\n📝 Phase 3: Create records with assets")
 
@@ -222,21 +223,12 @@ struct IntegrationTestRunner {
         var createdRecordNames: [String] = []
 
         for i in 1...recordCount {
-            let asset = FieldValue.Asset(
-                fileChecksum: nil,
-                size: Int64(assetSizeKB * 1024),
-                referenceChecksum: nil,
-                wrappingKey: nil,
-                receipt: nil,
-                downloadURL: assetToken.url
-            )
-
             let record = try await service.createRecord(
                 recordType: IntegrationTestData.recordType,
                 fields: [
                     "title": .string("Test Record \(i)"),
                     "index": .int64(i),
-                    "image": .asset(asset),
+                    "image": .asset(assetToken.asset),
                     "createdAt": .date(Date())
                 ]
             )

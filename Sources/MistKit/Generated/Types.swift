@@ -692,6 +692,14 @@ internal enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/RecordResponse/fields`.
             internal var fields: Components.Schemas.RecordResponse.fieldsPayload?
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/created`.
+            internal var created: Components.Schemas.RecordTimestamp?
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/modified`.
+            internal var modified: Components.Schemas.RecordTimestamp?
+            /// Whether the record was deleted
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/deleted`.
+            internal var deleted: Swift.Bool?
             /// Creates a new `RecordResponse`.
             ///
             /// - Parameters:
@@ -699,22 +707,34 @@ internal enum Components {
             ///   - recordType: The record type (schema name)
             ///   - recordChangeTag: Change tag for optimistic concurrency control
             ///   - fields: Record fields with their values and optional type information
+            ///   - created:
+            ///   - modified:
+            ///   - deleted: Whether the record was deleted
             internal init(
                 recordName: Swift.String? = nil,
                 recordType: Swift.String? = nil,
                 recordChangeTag: Swift.String? = nil,
-                fields: Components.Schemas.RecordResponse.fieldsPayload? = nil
+                fields: Components.Schemas.RecordResponse.fieldsPayload? = nil,
+                created: Components.Schemas.RecordTimestamp? = nil,
+                modified: Components.Schemas.RecordTimestamp? = nil,
+                deleted: Swift.Bool? = nil
             ) {
                 self.recordName = recordName
                 self.recordType = recordType
                 self.recordChangeTag = recordChangeTag
                 self.fields = fields
+                self.created = created
+                self.modified = modified
+                self.deleted = deleted
             }
             internal enum CodingKeys: String, CodingKey {
                 case recordName
                 case recordType
                 case recordChangeTag
                 case fields
+                case created
+                case modified
+                case deleted
             }
         }
         /// A CloudKit field value for API requests.
@@ -1706,6 +1726,64 @@ internal enum Components {
                 case subscriptions
             }
         }
+        /// Timestamp information for record creation or modification
+        ///
+        /// - Remark: Generated from `#/components/schemas/RecordTimestamp`.
+        internal struct RecordTimestamp: Codable, Hashable, Sendable {
+            /// Unix timestamp in milliseconds
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordTimestamp/timestamp`.
+            internal var timestamp: Swift.Double?
+            /// Record name of the user who performed the action
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordTimestamp/userRecordName`.
+            internal var userRecordName: Swift.String?
+            /// Creates a new `RecordTimestamp`.
+            ///
+            /// - Parameters:
+            ///   - timestamp: Unix timestamp in milliseconds
+            ///   - userRecordName: Record name of the user who performed the action
+            internal init(
+                timestamp: Swift.Double? = nil,
+                userRecordName: Swift.String? = nil
+            ) {
+                self.timestamp = timestamp
+                self.userRecordName = userRecordName
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case timestamp
+                case userRecordName
+            }
+        }
+        /// The parts of a user's name
+        ///
+        /// - Remark: Generated from `#/components/schemas/NameComponents`.
+        internal struct NameComponents: Codable, Hashable, Sendable {
+            /// The user's first name
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/givenName`.
+            internal var givenName: Swift.String?
+            /// The user's last name
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/familyName`.
+            internal var familyName: Swift.String?
+            /// Creates a new `NameComponents`.
+            ///
+            /// - Parameters:
+            ///   - givenName: The user's first name
+            ///   - familyName: The user's last name
+            internal init(
+                givenName: Swift.String? = nil,
+                familyName: Swift.String? = nil
+            ) {
+                self.givenName = givenName
+                self.familyName = familyName
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case givenName
+                case familyName
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/UserResponse`.
         internal struct UserResponse: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/UserResponse/userRecordName`.
@@ -1716,6 +1794,8 @@ internal enum Components {
             internal var lastName: Swift.String?
             /// - Remark: Generated from `#/components/schemas/UserResponse/emailAddress`.
             internal var emailAddress: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/UserResponse/nameComponents`.
+            internal var nameComponents: Components.Schemas.NameComponents?
             /// Creates a new `UserResponse`.
             ///
             /// - Parameters:
@@ -1723,22 +1803,26 @@ internal enum Components {
             ///   - firstName:
             ///   - lastName:
             ///   - emailAddress:
+            ///   - nameComponents:
             internal init(
                 userRecordName: Swift.String? = nil,
                 firstName: Swift.String? = nil,
                 lastName: Swift.String? = nil,
-                emailAddress: Swift.String? = nil
+                emailAddress: Swift.String? = nil,
+                nameComponents: Components.Schemas.NameComponents? = nil
             ) {
                 self.userRecordName = userRecordName
                 self.firstName = firstName
                 self.lastName = lastName
                 self.emailAddress = emailAddress
+                self.nameComponents = nameComponents
             }
             internal enum CodingKeys: String, CodingKey {
                 case userRecordName
                 case firstName
                 case lastName
                 case emailAddress
+                case nameComponents
             }
         }
         /// - Remark: Generated from `#/components/schemas/DiscoverResponse`.
@@ -1753,6 +1837,8 @@ internal enum Components {
                 internal var lastName: Swift.String?
                 /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/emailAddress`.
                 internal var emailAddress: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/nameComponents`.
+                internal var nameComponents: Components.Schemas.NameComponents?
                 /// Creates a new `usersPayloadPayload`.
                 ///
                 /// - Parameters:
@@ -1760,22 +1846,26 @@ internal enum Components {
                 ///   - firstName:
                 ///   - lastName:
                 ///   - emailAddress:
+                ///   - nameComponents:
                 internal init(
                     userRecordName: Swift.String? = nil,
                     firstName: Swift.String? = nil,
                     lastName: Swift.String? = nil,
-                    emailAddress: Swift.String? = nil
+                    emailAddress: Swift.String? = nil,
+                    nameComponents: Components.Schemas.NameComponents? = nil
                 ) {
                     self.userRecordName = userRecordName
                     self.firstName = firstName
                     self.lastName = lastName
                     self.emailAddress = emailAddress
+                    self.nameComponents = nameComponents
                 }
                 internal enum CodingKeys: String, CodingKey {
                     case userRecordName
                     case firstName
                     case lastName
                     case emailAddress
+                    case nameComponents
                 }
             }
             /// - Remark: Generated from `#/components/schemas/DiscoverResponse/users`.

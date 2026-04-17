@@ -883,6 +883,13 @@ components:
           description: Record fields with their values and optional type information
           additionalProperties:
             $ref: '#/components/schemas/FieldValueResponse'
+        created:
+          $ref: '#/components/schemas/RecordTimestamp'
+        modified:
+          $ref: '#/components/schemas/RecordTimestamp'
+        deleted:
+          type: boolean
+          description: Whether the record was deleted
 
     FieldValueRequest:
       type: object
@@ -1191,6 +1198,28 @@ components:
           items:
             $ref: '#/components/schemas/Subscription'
 
+    RecordTimestamp:
+      type: object
+      description: Timestamp information for record creation or modification
+      properties:
+        timestamp:
+          type: number
+          description: Unix timestamp in milliseconds
+        userRecordName:
+          type: string
+          description: Record name of the user who performed the action
+
+    NameComponents:
+      type: object
+      description: The parts of a user's name
+      properties:
+        givenName:
+          type: string
+          description: The user's first name
+        familyName:
+          type: string
+          description: The user's last name
+
     UserResponse:
       type: object
       properties:
@@ -1202,6 +1231,8 @@ components:
           type: string
         emailAddress:
           type: string
+        nameComponents:
+          $ref: '#/components/schemas/NameComponents'
 
     DiscoverResponse:
       type: object
@@ -1219,6 +1250,8 @@ components:
                 type: string
               emailAddress:
                 type: string
+              nameComponents:
+                $ref: '#/components/schemas/NameComponents'
 
     ContactsResponse:
       type: object

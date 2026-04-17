@@ -28,38 +28,8 @@
 //
 
 import Foundation
-import Hummingbird
-import Logging
 import MistKit
-import UnixSignals
 import ConfigKeyKit
-
-#if canImport(AppKit)
-import AppKit
-#endif
-
-// MARK: - CloudKit Command Protocol
-
-/// Protocol for commands that interact with CloudKit
-protocol CloudKitCommand {
-    var containerIdentifier: String { get }
-    var apiToken: String { get }
-    var environment: String { get }
-}
-
-extension CloudKitCommand {
-    /// Resolve API token from option or environment variable
-    func resolvedApiToken() -> String {
-        apiToken.isEmpty ?
-            EnvironmentConfig.getOptional(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" :
-            apiToken
-    }
-
-    /// Convert environment string to MistKit Environment
-    func cloudKitEnvironment() -> MistKit.Environment {
-        environment == "production" ? .production : .development
-    }
-}
 
 // MARK: - Main Command Group
 
@@ -68,7 +38,7 @@ struct MistDemo {
   @MainActor
   static func main() async throws {
     let registry = CommandRegistry.shared
-    
+
     // Register available commands
     await registry.register(AuthTokenCommand.self)
     await registry.register(CurrentUserCommand.self)
@@ -77,10 +47,13 @@ struct MistDemo {
     await registry.register(UpdateCommand.self)
     await registry.register(UploadAssetCommand.self)
     await registry.register(DemoInFilterCommand.self)
-    
+    await registry.register(LookupZonesCommand.self)
+    await registry.register(FetchChangesCommand.self)
+    await registry.register(TestIntegrationCommand.self)
+
     // Parse command line arguments
     let parser = CommandLineParser()
-    
+
     // Check for help
     if parser.isHelpRequested() {
       if let commandName = parser.parseCommandName() {
@@ -91,13 +64,6 @@ struct MistDemo {
       return
     }
 
-    router.middlewares.add(
-        FileMiddleware(
-            resourcesPath,
-            searchForIndexHtml: true
-        )
-    )
-    
     // Check if a command was specified
     if let commandName = parser.parseCommandName() {
       // Execute specific command

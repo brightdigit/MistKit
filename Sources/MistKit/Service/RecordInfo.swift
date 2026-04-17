@@ -52,6 +52,12 @@ public struct RecordInfo: Encodable, Sendable {
   public let recordChangeTag: String?
   /// The record fields
   public let fields: [String: FieldValue]
+  /// Information about when the record was created
+  public let created: RecordTimestamp?
+  /// Information about when the record was last modified
+  public let modified: RecordTimestamp?
+  /// Whether the record was deleted
+  public let deleted: Bool
 
   /// Indicates whether this RecordInfo represents an error response
   ///
@@ -66,6 +72,9 @@ public struct RecordInfo: Encodable, Sendable {
     self.recordName = record.recordName ?? "Unknown"
     self.recordType = record.recordType ?? "Unknown"
     self.recordChangeTag = record.recordChangeTag
+    self.created = record.created.map(RecordTimestamp.init(from:))
+    self.modified = record.modified.map(RecordTimestamp.init(from:))
+    self.deleted = record.deleted ?? false
 
     // Convert fields to FieldValue representation
     var convertedFields: [String: FieldValue] = [:]
@@ -95,11 +104,17 @@ public struct RecordInfo: Encodable, Sendable {
     recordName: String,
     recordType: String,
     recordChangeTag: String? = nil,
-    fields: [String: FieldValue]
+    fields: [String: FieldValue],
+    created: RecordTimestamp? = nil,
+    modified: RecordTimestamp? = nil,
+    deleted: Bool = false
   ) {
     self.recordName = recordName
     self.recordType = recordType
     self.recordChangeTag = recordChangeTag
     self.fields = fields
+    self.created = created
+    self.modified = modified
+    self.deleted = deleted
   }
 }

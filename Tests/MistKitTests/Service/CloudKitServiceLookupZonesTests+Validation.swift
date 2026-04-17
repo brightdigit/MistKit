@@ -1,5 +1,5 @@
 //
-//  UserInfo.swift
+//  CloudKitServiceLookupZonesTests+Validation.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -27,24 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// User information from CloudKit
-public struct UserInfo: Encodable, Sendable {
-  /// The user's record name
-  public let userRecordName: String
-  /// The user's first name
-  public let firstName: String?
-  /// The user's last name
-  public let lastName: String?
-  /// The user's email address
-  public let emailAddress: String?
-  /// The user's name components (from user discovery)
-  public let nameComponents: NameComponents?
+import Foundation
+import Testing
 
-  internal init(from cloudKitUser: Components.Schemas.UserResponse) {
-    self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
-    self.firstName = cloudKitUser.firstName
-    self.lastName = cloudKitUser.lastName
-    self.emailAddress = cloudKitUser.emailAddress
-    self.nameComponents = cloudKitUser.nameComponents.map(NameComponents.init(from:))
+@testable import MistKit
+
+extension CloudKitServiceLookupZonesTests {
+  @Suite("Validation")
+  internal struct Validation {
+    @Test("lookupZones() throws for empty zoneIDs array")
+    internal func lookupZonesThrowsForEmptyZoneIDs() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceLookupZonesTests.makeSuccessfulService()
+
+      await #expect(throws: CloudKitError.self) {
+        try await service.lookupZones(zoneIDs: [])
+      }
+    }
   }
 }
