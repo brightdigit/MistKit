@@ -1,5 +1,5 @@
 //
-//  UserInfo.swift
+//  UserIdentityLookupInfo.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -27,17 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// User information from CloudKit (User Dictionary — returned by users/current and users/lookup/*)
-public struct UserInfo: Encodable, Sendable {
-  public let userRecordName: String
-  public let firstName: String?
-  public let lastName: String?
+/// Information used to look up a user identity from CloudKit
+public struct UserIdentityLookupInfo: Codable, Sendable {
   public let emailAddress: String?
+  public let phoneNumber: String?
+  public let userRecordName: String?
 
-  internal init(from cloudKitUser: Components.Schemas.UserResponse) {
-    self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
-    self.firstName = cloudKitUser.firstName
-    self.lastName = cloudKitUser.lastName
-    self.emailAddress = cloudKitUser.emailAddress
+  internal init(from schema: Components.Schemas.UserIdentityLookupInfo) {
+    self.emailAddress = schema.emailAddress
+    self.phoneNumber = schema.phoneNumber
+    self.userRecordName = schema.userRecordName
+  }
+
+  public init(
+    emailAddress: String? = nil,
+    phoneNumber: String? = nil,
+    userRecordName: String? = nil
+  ) {
+    self.emailAddress = emailAddress
+    self.phoneNumber = phoneNumber
+    self.userRecordName = userRecordName
   }
 }

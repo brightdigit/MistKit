@@ -1213,15 +1213,57 @@ components:
       type: object
       description: The parts of a user's name
       properties:
+        namePrefix:
+          type: string
+          description: The user's name prefix
         givenName:
           type: string
           description: The user's first name
+        middleName:
+          type: string
+          description: The user's middle name
         familyName:
           type: string
           description: The user's last name
+        nameSuffix:
+          type: string
+          description: The user's name suffix
+        nickname:
+          type: string
+          description: The user's nickname
+        phoneticRepresentation:
+          $ref: '#/components/schemas/NameComponents'
+          description: A phonetic representation of the user's name
+
+    UserIdentityLookupInfo:
+      type: object
+      description: Information used to look up a user identity
+      properties:
+        emailAddress:
+          type: string
+          description: The user's email address
+        phoneNumber:
+          type: string
+          description: The user's phone number
+        userRecordName:
+          type: string
+          description: The record name of the user
+
+    UserIdentity:
+      type: object
+      description: A user identity returned by discover endpoints
+      properties:
+        userRecordName:
+          type: string
+          description: The record name of the user
+        nameComponents:
+          $ref: '#/components/schemas/NameComponents'
+        lookupInfo:
+          $ref: '#/components/schemas/UserIdentityLookupInfo'
 
     UserResponse:
       type: object
+      description: A user returned by current/lookup endpoints (User Dictionary)
       properties:
         userRecordName:
           type: string
@@ -1231,8 +1273,6 @@ components:
           type: string
         emailAddress:
           type: string
-        nameComponents:
-          $ref: '#/components/schemas/NameComponents'
 
     DiscoverResponse:
       type: object
@@ -1240,18 +1280,7 @@ components:
         users:
           type: array
           items:
-            type: object
-            properties:
-              userRecordName:
-                type: string
-              firstName:
-                type: string
-              lastName:
-                type: string
-              emailAddress:
-                type: string
-              nameComponents:
-                $ref: '#/components/schemas/NameComponents'
+            $ref: '#/components/schemas/UserIdentity'
 
     ContactsResponse:
       type: object

@@ -1759,31 +1759,246 @@ internal enum Components {
         ///
         /// - Remark: Generated from `#/components/schemas/NameComponents`.
         internal struct NameComponents: Codable, Hashable, Sendable {
+            /// The user's name prefix
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/namePrefix`.
+            internal var namePrefix: Swift.String? {
+                get  {
+                    self.storage.value.namePrefix
+                }
+                _modify {
+                    yield &self.storage.value.namePrefix
+                }
+            }
             /// The user's first name
             ///
             /// - Remark: Generated from `#/components/schemas/NameComponents/givenName`.
-            internal var givenName: Swift.String?
+            internal var givenName: Swift.String? {
+                get  {
+                    self.storage.value.givenName
+                }
+                _modify {
+                    yield &self.storage.value.givenName
+                }
+            }
+            /// The user's middle name
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/middleName`.
+            internal var middleName: Swift.String? {
+                get  {
+                    self.storage.value.middleName
+                }
+                _modify {
+                    yield &self.storage.value.middleName
+                }
+            }
             /// The user's last name
             ///
             /// - Remark: Generated from `#/components/schemas/NameComponents/familyName`.
-            internal var familyName: Swift.String?
+            internal var familyName: Swift.String? {
+                get  {
+                    self.storage.value.familyName
+                }
+                _modify {
+                    yield &self.storage.value.familyName
+                }
+            }
+            /// The user's name suffix
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/nameSuffix`.
+            internal var nameSuffix: Swift.String? {
+                get  {
+                    self.storage.value.nameSuffix
+                }
+                _modify {
+                    yield &self.storage.value.nameSuffix
+                }
+            }
+            /// The user's nickname
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/nickname`.
+            internal var nickname: Swift.String? {
+                get  {
+                    self.storage.value.nickname
+                }
+                _modify {
+                    yield &self.storage.value.nickname
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/NameComponents/phoneticRepresentation`.
+            internal var phoneticRepresentation: Components.Schemas.NameComponents? {
+                get  {
+                    self.storage.value.phoneticRepresentation
+                }
+                _modify {
+                    yield &self.storage.value.phoneticRepresentation
+                }
+            }
             /// Creates a new `NameComponents`.
             ///
             /// - Parameters:
+            ///   - namePrefix: The user's name prefix
             ///   - givenName: The user's first name
+            ///   - middleName: The user's middle name
             ///   - familyName: The user's last name
+            ///   - nameSuffix: The user's name suffix
+            ///   - nickname: The user's nickname
+            ///   - phoneticRepresentation:
             internal init(
+                namePrefix: Swift.String? = nil,
                 givenName: Swift.String? = nil,
-                familyName: Swift.String? = nil
+                middleName: Swift.String? = nil,
+                familyName: Swift.String? = nil,
+                nameSuffix: Swift.String? = nil,
+                nickname: Swift.String? = nil,
+                phoneticRepresentation: Components.Schemas.NameComponents? = nil
             ) {
-                self.givenName = givenName
-                self.familyName = familyName
+                self.storage = .init(value: .init(
+                    namePrefix: namePrefix,
+                    givenName: givenName,
+                    middleName: middleName,
+                    familyName: familyName,
+                    nameSuffix: nameSuffix,
+                    nickname: nickname,
+                    phoneticRepresentation: phoneticRepresentation
+                ))
             }
             internal enum CodingKeys: String, CodingKey {
+                case namePrefix
                 case givenName
+                case middleName
                 case familyName
+                case nameSuffix
+                case nickname
+                case phoneticRepresentation
+            }
+            internal init(from decoder: any Decoder) throws {
+                self.storage = try .init(from: decoder)
+            }
+            internal func encode(to encoder: any Encoder) throws {
+                try self.storage.encode(to: encoder)
+            }
+            /// Internal reference storage to allow type recursion.
+            private var storage: OpenAPIRuntime.CopyOnWriteBox<Storage>
+            private struct Storage: Codable, Hashable, Sendable {
+                /// The user's name prefix
+                ///
+                /// - Remark: Generated from `#/components/schemas/NameComponents/namePrefix`.
+                var namePrefix: Swift.String?
+                /// The user's first name
+                ///
+                /// - Remark: Generated from `#/components/schemas/NameComponents/givenName`.
+                var givenName: Swift.String?
+                /// The user's middle name
+                ///
+                /// - Remark: Generated from `#/components/schemas/NameComponents/middleName`.
+                var middleName: Swift.String?
+                /// The user's last name
+                ///
+                /// - Remark: Generated from `#/components/schemas/NameComponents/familyName`.
+                var familyName: Swift.String?
+                /// The user's name suffix
+                ///
+                /// - Remark: Generated from `#/components/schemas/NameComponents/nameSuffix`.
+                var nameSuffix: Swift.String?
+                /// The user's nickname
+                ///
+                /// - Remark: Generated from `#/components/schemas/NameComponents/nickname`.
+                var nickname: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/NameComponents/phoneticRepresentation`.
+                var phoneticRepresentation: Components.Schemas.NameComponents?
+                init(
+                    namePrefix: Swift.String? = nil,
+                    givenName: Swift.String? = nil,
+                    middleName: Swift.String? = nil,
+                    familyName: Swift.String? = nil,
+                    nameSuffix: Swift.String? = nil,
+                    nickname: Swift.String? = nil,
+                    phoneticRepresentation: Components.Schemas.NameComponents? = nil
+                ) {
+                    self.namePrefix = namePrefix
+                    self.givenName = givenName
+                    self.middleName = middleName
+                    self.familyName = familyName
+                    self.nameSuffix = nameSuffix
+                    self.nickname = nickname
+                    self.phoneticRepresentation = phoneticRepresentation
+                }
+                typealias CodingKeys = Components.Schemas.NameComponents.CodingKeys
             }
         }
+        /// Information used to look up a user identity
+        ///
+        /// - Remark: Generated from `#/components/schemas/UserIdentityLookupInfo`.
+        internal struct UserIdentityLookupInfo: Codable, Hashable, Sendable {
+            /// The user's email address
+            ///
+            /// - Remark: Generated from `#/components/schemas/UserIdentityLookupInfo/emailAddress`.
+            internal var emailAddress: Swift.String?
+            /// The user's phone number
+            ///
+            /// - Remark: Generated from `#/components/schemas/UserIdentityLookupInfo/phoneNumber`.
+            internal var phoneNumber: Swift.String?
+            /// The record name of the user
+            ///
+            /// - Remark: Generated from `#/components/schemas/UserIdentityLookupInfo/userRecordName`.
+            internal var userRecordName: Swift.String?
+            /// Creates a new `UserIdentityLookupInfo`.
+            ///
+            /// - Parameters:
+            ///   - emailAddress: The user's email address
+            ///   - phoneNumber: The user's phone number
+            ///   - userRecordName: The record name of the user
+            internal init(
+                emailAddress: Swift.String? = nil,
+                phoneNumber: Swift.String? = nil,
+                userRecordName: Swift.String? = nil
+            ) {
+                self.emailAddress = emailAddress
+                self.phoneNumber = phoneNumber
+                self.userRecordName = userRecordName
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case emailAddress
+                case phoneNumber
+                case userRecordName
+            }
+        }
+        /// A user identity returned by discover endpoints
+        ///
+        /// - Remark: Generated from `#/components/schemas/UserIdentity`.
+        internal struct UserIdentity: Codable, Hashable, Sendable {
+            /// The record name of the user
+            ///
+            /// - Remark: Generated from `#/components/schemas/UserIdentity/userRecordName`.
+            internal var userRecordName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/UserIdentity/nameComponents`.
+            internal var nameComponents: Components.Schemas.NameComponents?
+            /// - Remark: Generated from `#/components/schemas/UserIdentity/lookupInfo`.
+            internal var lookupInfo: Components.Schemas.UserIdentityLookupInfo?
+            /// Creates a new `UserIdentity`.
+            ///
+            /// - Parameters:
+            ///   - userRecordName: The record name of the user
+            ///   - nameComponents:
+            ///   - lookupInfo:
+            internal init(
+                userRecordName: Swift.String? = nil,
+                nameComponents: Components.Schemas.NameComponents? = nil,
+                lookupInfo: Components.Schemas.UserIdentityLookupInfo? = nil
+            ) {
+                self.userRecordName = userRecordName
+                self.nameComponents = nameComponents
+                self.lookupInfo = lookupInfo
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case userRecordName
+                case nameComponents
+                case lookupInfo
+            }
+        }
+        /// A user returned by current/lookup endpoints (User Dictionary)
+        ///
         /// - Remark: Generated from `#/components/schemas/UserResponse`.
         internal struct UserResponse: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/UserResponse/userRecordName`.
@@ -1794,8 +2009,6 @@ internal enum Components {
             internal var lastName: Swift.String?
             /// - Remark: Generated from `#/components/schemas/UserResponse/emailAddress`.
             internal var emailAddress: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/UserResponse/nameComponents`.
-            internal var nameComponents: Components.Schemas.NameComponents?
             /// Creates a new `UserResponse`.
             ///
             /// - Parameters:
@@ -1803,80 +2016,33 @@ internal enum Components {
             ///   - firstName:
             ///   - lastName:
             ///   - emailAddress:
-            ///   - nameComponents:
             internal init(
                 userRecordName: Swift.String? = nil,
                 firstName: Swift.String? = nil,
                 lastName: Swift.String? = nil,
-                emailAddress: Swift.String? = nil,
-                nameComponents: Components.Schemas.NameComponents? = nil
+                emailAddress: Swift.String? = nil
             ) {
                 self.userRecordName = userRecordName
                 self.firstName = firstName
                 self.lastName = lastName
                 self.emailAddress = emailAddress
-                self.nameComponents = nameComponents
             }
             internal enum CodingKeys: String, CodingKey {
                 case userRecordName
                 case firstName
                 case lastName
                 case emailAddress
-                case nameComponents
             }
         }
         /// - Remark: Generated from `#/components/schemas/DiscoverResponse`.
         internal struct DiscoverResponse: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload`.
-            internal struct usersPayloadPayload: Codable, Hashable, Sendable {
-                /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/userRecordName`.
-                internal var userRecordName: Swift.String?
-                /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/firstName`.
-                internal var firstName: Swift.String?
-                /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/lastName`.
-                internal var lastName: Swift.String?
-                /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/emailAddress`.
-                internal var emailAddress: Swift.String?
-                /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/nameComponents`.
-                internal var nameComponents: Components.Schemas.NameComponents?
-                /// Creates a new `usersPayloadPayload`.
-                ///
-                /// - Parameters:
-                ///   - userRecordName:
-                ///   - firstName:
-                ///   - lastName:
-                ///   - emailAddress:
-                ///   - nameComponents:
-                internal init(
-                    userRecordName: Swift.String? = nil,
-                    firstName: Swift.String? = nil,
-                    lastName: Swift.String? = nil,
-                    emailAddress: Swift.String? = nil,
-                    nameComponents: Components.Schemas.NameComponents? = nil
-                ) {
-                    self.userRecordName = userRecordName
-                    self.firstName = firstName
-                    self.lastName = lastName
-                    self.emailAddress = emailAddress
-                    self.nameComponents = nameComponents
-                }
-                internal enum CodingKeys: String, CodingKey {
-                    case userRecordName
-                    case firstName
-                    case lastName
-                    case emailAddress
-                    case nameComponents
-                }
-            }
             /// - Remark: Generated from `#/components/schemas/DiscoverResponse/users`.
-            internal typealias usersPayload = [Components.Schemas.DiscoverResponse.usersPayloadPayload]
-            /// - Remark: Generated from `#/components/schemas/DiscoverResponse/users`.
-            internal var users: Components.Schemas.DiscoverResponse.usersPayload?
+            internal var users: [Components.Schemas.UserIdentity]?
             /// Creates a new `DiscoverResponse`.
             ///
             /// - Parameters:
             ///   - users:
-            internal init(users: Components.Schemas.DiscoverResponse.usersPayload? = nil) {
+            internal init(users: [Components.Schemas.UserIdentity]? = nil) {
                 self.users = users
             }
             internal enum CodingKeys: String, CodingKey {

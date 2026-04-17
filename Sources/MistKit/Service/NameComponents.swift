@@ -28,24 +28,40 @@
 //
 
 /// The parts of a user's name from CloudKit user discovery
-public struct NameComponents: Codable, Sendable {
-  /// The user's first name
+public final class NameComponents: Codable, Sendable {
+  public let namePrefix: String?
   public let givenName: String?
-  /// The user's last name
+  public let middleName: String?
   public let familyName: String?
+  public let nameSuffix: String?
+  public let nickname: String?
+  public let phoneticRepresentation: NameComponents?
 
   internal init(from schema: Components.Schemas.NameComponents) {
+    self.namePrefix = schema.namePrefix
     self.givenName = schema.givenName
+    self.middleName = schema.middleName
     self.familyName = schema.familyName
+    self.nameSuffix = schema.nameSuffix
+    self.nickname = schema.nickname
+    self.phoneticRepresentation = schema.phoneticRepresentation.map(NameComponents.init(from:))
   }
 
-  /// Public initializer for creating NameComponents instances
-  ///
-  /// - Parameters:
-  ///   - givenName: The user's first name
-  ///   - familyName: The user's last name
-  public init(givenName: String? = nil, familyName: String? = nil) {
+  public init(
+    namePrefix: String? = nil,
+    givenName: String? = nil,
+    middleName: String? = nil,
+    familyName: String? = nil,
+    nameSuffix: String? = nil,
+    nickname: String? = nil,
+    phoneticRepresentation: NameComponents? = nil
+  ) {
+    self.namePrefix = namePrefix
     self.givenName = givenName
+    self.middleName = middleName
     self.familyName = familyName
+    self.nameSuffix = nameSuffix
+    self.nickname = nickname
+    self.phoneticRepresentation = phoneticRepresentation
   }
 }

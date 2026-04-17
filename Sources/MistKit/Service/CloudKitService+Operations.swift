@@ -555,6 +555,53 @@ extension CloudKitService {
     return (allRecords, currentToken)
   }
 
+  /// Discover user identities by email addresses or record names
+  public func discoverUserIdentities(
+    lookupInfos: [UserIdentityLookupInfo]
+  ) async throws(CloudKitError) -> [UserIdentity] {
+    do {
+      let response = try await client.discoverUserIdentities(
+        .init(
+          path: createDiscoverUserIdentitiesPath(containerIdentifier: containerIdentifier),
+          body: .json(
+            .init(
+              users: lookupInfos.map {
+                .init(emailAddress: $0.emailAddress, userRecordName: $0.userRecordName)
+              }
+            )
+          )
+        )
+      )
+
+      let discoverData: Components.Schemas.DiscoverResponse =
+        try await responseProcessor.processDiscoverUserIdentitiesResponse(response)
+      return discoverData.users?.map(UserIdentity.init(from:)) ?? []
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "JSON decoding failed in discoverUserIdentities: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error in discoverUserIdentities: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
+      MistKitLogger.logError(
+        "Unexpected error in discoverUserIdentities: \(error)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.underlyingError(error)
+    }
+  }
+
   /// Modify (create, update, delete) records
   @available(
     *, deprecated,

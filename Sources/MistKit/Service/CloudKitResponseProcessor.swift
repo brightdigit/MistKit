@@ -226,6 +226,25 @@ internal struct CloudKitResponseProcessor {
     }
   }
 
+  /// Process discoverUserIdentities response
+  internal func processDiscoverUserIdentitiesResponse(
+    _ response: Operations.discoverUserIdentities.Output
+  ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
+    if let error = CloudKitError(response) {
+      throw error
+    }
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let discoverData):
+        return discoverData
+      }
+    default:
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
+  }
+
   /// Process uploadAssets response
   /// - Parameter response: The response to process
   /// - Returns: The extracted asset upload response data
