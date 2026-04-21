@@ -1,5 +1,5 @@
 //
-//  TestIntegrationConfig.swift
+//  TestPrivateConfig.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,13 +30,12 @@
 public import ConfigKeyKit
 public import MistKit
 
-/// Configuration for test-integration command
-public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
+/// Configuration for test-private command (private database, all API methods)
+public struct TestPrivateConfig: Sendable, ConfigurationParseable {
     public typealias ConfigReader = MistDemoConfiguration
     public typealias BaseConfig = MistDemoConfig
 
     public let base: MistDemoConfig
-    public let database: MistKit.Database
     public let recordCount: Int
     public let assetSizeKB: Int
     public let skipCleanup: Bool
@@ -44,21 +43,18 @@ public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
 
     public init(
         base: MistDemoConfig,
-        database: MistKit.Database = .public,
         recordCount: Int = 10,
         assetSizeKB: Int = 100,
         skipCleanup: Bool = false,
         verbose: Bool = false
     ) {
         self.base = base
-        self.database = database
         self.recordCount = recordCount
         self.assetSizeKB = assetSizeKB
         self.skipCleanup = skipCleanup
         self.verbose = verbose
     }
 
-    /// Parse configuration from command line arguments
     public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
         let baseConfig: MistDemoConfig
         if let base {
@@ -67,8 +63,13 @@ public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
             baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
         }
 
-        let databaseString = configuration.string(forKey: "database", default: "public") ?? "public"
-        let database: MistKit.Database = databaseString == "public" ? .public : .private
+        guard let webAuthToken = baseConfig.webAuthToken, !webAuthToken.isEmpty else {
+            throw ConfigurationError.missingRequired(
+                "web.auth.token",
+                suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`"
+            )
+        }
+
         let recordCount = configuration.int(forKey: "record.count", default: 10) ?? 10
         let assetSizeKB = configuration.int(forKey: "asset.size", default: 100) ?? 100
         let skipCleanup = configuration.bool(forKey: "skip.cleanup", default: false)
@@ -76,7 +77,6 @@ public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
 
         self.init(
             base: baseConfig,
-            database: database,
             recordCount: recordCount,
             assetSizeKB: assetSizeKB,
             skipCleanup: skipCleanup,

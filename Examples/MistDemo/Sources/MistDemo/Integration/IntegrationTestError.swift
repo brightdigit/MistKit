@@ -38,6 +38,7 @@ enum IntegrationTestError: LocalizedError, Sendable {
     case verificationFailed(String)
     case cleanupFailed(String)
     case noRecordsCreated
+    case missingWebAuthToken
 
     var errorDescription: String? {
         switch self {
@@ -55,6 +56,8 @@ enum IntegrationTestError: LocalizedError, Sendable {
             return "Cleanup failed: \(reason)"
         case .noRecordsCreated:
             return "No records were successfully created"
+        case .missingWebAuthToken:
+            return "Web auth token is required for private database tests. Run 'mistdemo auth-token' first."
         }
     }
 }

@@ -50,6 +50,7 @@ struct MistDemo {
     await registry.register(LookupZonesCommand.self)
     await registry.register(FetchChangesCommand.self)
     await registry.register(TestIntegrationCommand.self)
+    await registry.register(TestPrivateCommand.self)
 
     // Parse command line arguments
     let parser = CommandLineParser()
