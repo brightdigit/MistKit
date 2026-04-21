@@ -34,6 +34,19 @@
 
 ---
 
+Educational content, reference material, and talk prep for an ongoing series about [MistKit](../README.md) and server-side CloudKit — covering what Apple's documentation leaves out.
+
+CloudKit Web Services is a REST API that works on any platform: server-side Swift, Linux, Android, Windows — not just Apple devices. Most developers don't know this, and Apple's documentation for server-to-server authentication is famously incomplete. This series covers the patterns that two production backends (BushelCloud and CelestraCloud) required to get right.
+
+| Theme | What It Covers |
+|---|---|
+| **Server-to-Server Auth** | Key pair generation, ECDSA request signing, credential lifecycle, what Apple's docs omit |
+| **Type Safety** | CloudKit's dynamic fields vs. Swift's static types — discriminated unions, OpenAPI `oneOf` |
+| **Error Handling** | 9 HTTP status codes, retry logic, exponential backoff, conflict resolution |
+| **API Ergonomics** | Three-layer architecture: generated OpenAPI → abstraction → user-facing Swift API |
+
+---
+
 ## Outline
 
 ### Why CloudKit
@@ -78,6 +91,13 @@ Consider alternatives when:
 ---
 
 ##### Understanding CloudKit
+
+| Theme | What It Covers |
+|---|---|
+| **Server-to-Server Auth** | Key pair generation, ECDSA request signing, credential lifecycle, what Apple's docs omit |
+| **Type Safety** | CloudKit's dynamic fields vs. Swift's static types — discriminated unions, OpenAPI `oneOf` |
+| **Error Handling** | 9 HTTP status codes, retry logic, exponential backoff, conflict resolution |
+| **API Ergonomics** | Three-layer architecture: generated OpenAPI → abstraction → user-facing Swift API *(see Integrating MistKit)* |
 
 ###### Authentication
 
