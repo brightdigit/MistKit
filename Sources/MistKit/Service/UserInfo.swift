@@ -29,9 +29,13 @@
 
 /// User information from CloudKit (User Dictionary — returned by users/current and users/lookup/*)
 public struct UserInfo: Encodable, Sendable {
+  /// The user's record name
   public let userRecordName: String
+  /// The user's first name
   public let firstName: String?
+  /// The user's last name
   public let lastName: String?
+  /// The user's email address
   public let emailAddress: String?
 
   internal init(from cloudKitUser: Components.Schemas.UserResponse) {

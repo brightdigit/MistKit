@@ -152,6 +152,12 @@ extension CloudKitService {
         rawResponse: "zoneIDs cannot be empty"
       )
     }
+    guard zoneIDs.allSatisfy({ !$0.zoneName.isEmpty }) else {
+      throw CloudKitError.httpErrorWithRawResponse(
+        statusCode: 400,
+        rawResponse: "zoneIDs contains a zone with an empty zoneName"
+      )
+    }
 
     do {
       let response = try await client.lookupZones(

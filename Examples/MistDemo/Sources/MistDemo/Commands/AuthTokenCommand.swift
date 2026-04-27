@@ -51,7 +51,12 @@ public struct AuthTokenCommand: MistDemoCommand {
         """
     
     private let config: AuthTokenConfig
-    
+
+    private struct CloudKitClientConfig: Encodable {
+        let apiToken: String
+        let containerIdentifier: String
+    }
+
     public init(config: AuthTokenConfig) {
         self.config = config
     }
@@ -86,11 +91,6 @@ public struct AuthTokenCommand: MistDemoCommand {
         
         // API endpoint for authentication callback
         let api = router.group("api")
-
-        struct CloudKitClientConfig: Encodable {
-            let apiToken: String
-            let containerIdentifier: String
-        }
 
         api.get("config") { _, _ -> Response in
             let payload = CloudKitClientConfig(

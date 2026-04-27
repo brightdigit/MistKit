@@ -27,7 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// The parts of a user's name from CloudKit user discovery
+/// The parts of a user's name from CloudKit user discovery.
+/// Must be a class rather than a struct because `phoneticRepresentation`
+/// is a recursive reference to the same type, which requires reference semantics.
 public final class NameComponents: Codable, Sendable {
   public let namePrefix: String?
   public let givenName: String?

@@ -33,6 +33,23 @@ public import MistKit
 /// Factory for creating MistKit CloudKitService instances from MistDemo configuration
 public struct MistKitClientFactory: Sendable {
     
+    /// Create a CloudKitService for the given database, choosing auth method automatically.
+    ///
+    /// - `.public`: requires `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]`
+    /// - `.private` / `.shared`: requires `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN`
+    /// - Parameters:
+    ///   - database: Target database
+    ///   - config: The base MistDemo configuration
+    /// - Throws: ConfigurationError if required credentials are missing
+    public static func create(_ database: MistKit.Database, from config: MistDemoConfig) throws -> CloudKitService {
+        switch database {
+        case .public:
+            return try createForPublicDatabase(from: config)
+        case .private, .shared:
+            return try createForPrivateDatabase(from: config, database: database)
+        }
+    }
+
     /// Create a CloudKitService for private database operations.
     ///
     /// Requires `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` (web authentication).
@@ -40,6 +57,13 @@ public struct MistKitClientFactory: Sendable {
     /// - Returns: A configured CloudKitService instance for the private database
     /// - Throws: ConfigurationError if required credentials are missing
     public static func create(from config: MistDemoConfig) throws -> CloudKitService {
+        try createForPrivateDatabase(from: config, database: .private)
+    }
+
+    private static func createForPrivateDatabase(
+        from config: MistDemoConfig,
+        database: MistKit.Database
+    ) throws -> CloudKitService {
         let apiToken = AuthenticationHelper.resolveAPIToken(config.apiToken)
         guard !apiToken.isEmpty else {
             throw ConfigurationError.missingRequired("api.token",
@@ -58,7 +82,7 @@ public struct MistKitClientFactory: Sendable {
             containerIdentifier: config.containerIdentifier,
             tokenManager: tokenManager,
             environment: config.environment,
-            database: .private
+            database: database
         )
     }
 

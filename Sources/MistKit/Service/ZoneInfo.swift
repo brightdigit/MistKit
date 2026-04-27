@@ -33,7 +33,8 @@ public struct ZoneInfo: Encodable, Sendable {
   public let zoneName: String
   /// The owner record name
   public let ownerRecordName: String?
-  /// The zone capabilities
+  /// The zone capabilities.
+  /// Note: always empty — CloudKit Web Services zone responses do not include capabilities in the current OpenAPI schema.
   public let capabilities: [String]
 
   /// Initialize zone information

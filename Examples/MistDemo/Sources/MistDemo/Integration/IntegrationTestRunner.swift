@@ -89,13 +89,6 @@ struct IntegrationTestRunner {
             } else {
                 printSkippedCleanup(recordNames: createdRecordNames)
             }
-        } catch let error as CloudKitError {
-            print("\n❌ CloudKit Error: \(error)")
-            if !createdRecordNames.isEmpty && !skipCleanup {
-                print("\n⚠️  Attempting cleanup of \(createdRecordNames.count) test records...")
-                try? await phase8Cleanup(service: service, createdRecordNames: createdRecordNames)
-            }
-            throw error
         } catch {
             print("\n❌ Error: \(error)")
             if !createdRecordNames.isEmpty && !skipCleanup {

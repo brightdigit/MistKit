@@ -84,10 +84,13 @@ public struct TestIntegrationCommand: MistDemoCommand {
 
     public func execute() async throws {
         let service: CloudKitService
-        if config.database == .public {
-            service = try MistKitClientFactory.createForPublicDatabase(from: config.base)
-        } else {
-            service = try MistKitClientFactory.create(from: config.base)
+        switch config.database {
+        case .public:
+            service = try MistKitClientFactory.create(.public, from: config.base)
+        case .private:
+            service = try MistKitClientFactory.create(.private, from: config.base)
+        case .shared:
+            service = try MistKitClientFactory.create(.shared, from: config.base)
         }
 
         let runner = IntegrationTestRunner(
