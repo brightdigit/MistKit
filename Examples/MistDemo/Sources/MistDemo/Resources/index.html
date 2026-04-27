@@ -137,33 +137,10 @@
     </div>
 
     <script>
-        // Configure CloudKit
-        // ⚠️ IMPORTANT: Replace these values with your own:
-        // 1. Get your container identifier from CloudKit Console
-        // 2. Generate a valid API token from CloudKit Console > API Access
-        // TODO: This API token must match CLOUDKIT_API_TOKEN in .env, otherwise
-        // the web auth token obtained here will be rejected when used by MistDemo.
-        // Currently, tokens obtained via `mistdemo auth-token` return 422
-        // AUTHENTICATION_REQUIRED — investigate whether the issue is token
-        // extraction, encoding, or a session/cookie mismatch.
-        try {
-            CloudKit.configure({
-                containers: [{
-                    containerIdentifier: 'iCloud.com.brightdigit.MistDemo', // ← Replace with your container ID
-                    apiTokenAuth: {
-                        apiToken: 'dbc855f4034e6f4ff0c71bd4b59f251f0f21b4aff213a446f8c76ee70b670193', // ← Replace with your API token
-                        persist: true,
-                        signInButton: {
-                            id: 'signin-button',
-                            theme: 'black'
-                        }
-                    },
-                    environment: 'development'
-                }]
-            });
-            console.log('CloudKit configured successfully');
-        } catch (error) {
-            console.error('CloudKit configuration error:', error);
+        async function loadServerConfig() {
+            const response = await fetch('/api/config');
+            if (!response.ok) throw new Error('Failed to load server config: ' + response.status);
+            return response.json();
         }
 
         // Intercept fetch/XHR to capture web auth tokens from CloudKit API responses
@@ -232,7 +209,7 @@
             console.log('Network interception enabled');
         })();
 
-        const container = CloudKit.getDefaultContainer();
+        let container = null;
         const statusDiv = document.getElementById('status');
         const userInfoDiv = document.getElementById('user-info');
         const signinButton = document.getElementById('signin-button');
@@ -530,13 +507,31 @@
         // Initialize CloudKit authentication
         async function initializeCloudKit() {
             try {
-                console.log('Initializing CloudKit with container:', 'iCloud.com.brightdigit.MistDemo');
-                
                 // Check if CloudKit is properly loaded
                 if (typeof CloudKit === 'undefined') {
                     throw new Error('CloudKit.js failed to load');
                 }
-                
+
+                const serverConfig = await loadServerConfig();
+                console.log('Initializing CloudKit with container:', serverConfig.containerIdentifier);
+
+                CloudKit.configure({
+                    containers: [{
+                        containerIdentifier: serverConfig.containerIdentifier,
+                        apiTokenAuth: {
+                            apiToken: serverConfig.apiToken,
+                            persist: true,
+                            signInButton: {
+                                id: 'signin-button',
+                                theme: 'black'
+                            }
+                        },
+                        environment: 'development'
+                    }]
+                });
+                console.log('CloudKit configured successfully');
+                container = CloudKit.getDefaultContainer();
+
                 // Debug: Check authentication state before setUpAuth
                 console.log('Container auth state before setup:', container._auth);
                 

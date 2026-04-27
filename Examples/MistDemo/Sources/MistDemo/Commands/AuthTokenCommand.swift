@@ -86,6 +86,28 @@ public struct AuthTokenCommand: MistDemoCommand {
         
         // API endpoint for authentication callback
         let api = router.group("api")
+
+        struct CloudKitClientConfig: Encodable {
+            let apiToken: String
+            let containerIdentifier: String
+        }
+
+        api.get("config") { _, _ -> Response in
+            let payload = CloudKitClientConfig(
+                apiToken: config.apiToken,
+                containerIdentifier: config.containerIdentifier
+            )
+            let jsonData = try JSONEncoder().encode(payload)
+            return Response(
+                status: .ok,
+                headers: [.contentType: "application/json"],
+                body: ResponseBody { writer in
+                    try await writer.write(ByteBuffer(bytes: jsonData))
+                    try await writer.finish(nil)
+                }
+            )
+        }
+
         api.post("authenticate") { request, context -> Response in
             let authRequest = try await request.decode(as: AuthRequest.self, context: context)
             await tokenChannel.send(authRequest.sessionToken)
