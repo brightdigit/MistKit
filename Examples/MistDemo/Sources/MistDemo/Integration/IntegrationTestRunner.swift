@@ -69,6 +69,9 @@ struct IntegrationTestRunner {
                 try await phaseListZones(service: service)
             }
             try await phaseLookupZone(service: service)
+            if database == .private {
+                try await phaseFetchZoneChanges(service: service)
+            }
             let assetToken = try await phase2UploadAsset(service: service)
             createdRecordNames = try await phase3CreateRecords(service: service, assetToken: assetToken)
             try await phaseQueryRecords(service: service, createdRecordNames: createdRecordNames)
@@ -143,6 +146,25 @@ struct IntegrationTestRunner {
             }
             if !zone.capabilities.isEmpty {
                 print("   Capabilities: \(zone.capabilities.joined(separator: ", "))")
+            }
+        }
+    }
+
+    // MARK: - Phase 2b: Fetch Zone Changes
+
+    private func phaseFetchZoneChanges(service: CloudKitService) async throws {
+        print("\n🔄 Phase 2b: Fetch zone changes")
+
+        let result = try await service.fetchZoneChanges()
+
+        print("✅ Fetched \(result.zones.count) zone(s)")
+
+        if verbose {
+            for zone in result.zones {
+                print("   - \(zone.zoneName)")
+            }
+            if let token = result.syncToken {
+                print("   Sync token: \(token.prefix(30))...")
             }
         }
     }
@@ -480,6 +502,11 @@ struct IntegrationTestRunner {
             print("  ⏭️  Phase  1: List all zones          (listZones — private db only)")
         }
         print("  ✅ Phase  2: Lookup default zone     (lookupZones)")
+        if database == .private {
+            print("  ✅ Phase 2b: Fetch zone changes      (fetchZoneChanges)")
+        } else {
+            print("  ⏭️  Phase 2b: Fetch zone changes      (fetchZoneChanges — private db only)")
+        }
         print("  ✅ Phase  3: Upload test asset       (uploadAssets)")
         print("  ✅ Phase  4: Create records          (createRecord)")
         print("  ✅ Phase  5: Query records by type   (queryRecords)")

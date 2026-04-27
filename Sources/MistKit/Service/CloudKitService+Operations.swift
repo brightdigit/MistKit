@@ -409,6 +409,73 @@ extension CloudKitService {
     }
   }
 
+  /// Fetch zone changes since a sync token
+  ///
+  /// Retrieves all zones that have changed since the provided sync token.
+  /// Use this for efficient incremental sync at the zone level.
+  ///
+  /// - Parameter syncToken: Optional token from previous fetch (nil = initial fetch)
+  /// - Returns: ZoneChangesResult containing changed zones and new sync token
+  /// - Throws: CloudKitError if the fetch fails
+  ///
+  /// Example - Initial Sync:
+  /// ```swift
+  /// let result = try await service.fetchZoneChanges()
+  /// // Store result.syncToken for next fetch
+  /// processZones(result.zones)
+  /// ```
+  ///
+  /// Example - Incremental Sync:
+  /// ```swift
+  /// let result = try await service.fetchZoneChanges(
+  ///   syncToken: previousToken
+  /// )
+  /// ```
+  public func fetchZoneChanges(
+    syncToken: String? = nil
+  ) async throws(CloudKitError) -> ZoneChangesResult {
+    do {
+      let response = try await client.fetchZoneChanges(
+        .init(
+          path: createFetchZoneChangesPath(containerIdentifier: containerIdentifier),
+          body: .json(
+            .init(
+              syncToken: syncToken
+            )
+          )
+        )
+      )
+
+      let changesData: Components.Schemas.ZoneChangesResponse =
+        try await responseProcessor.processFetchZoneChangesResponse(response)
+
+      return ZoneChangesResult(from: changesData)
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch let decodingError as DecodingError {
+      MistKitLogger.logError(
+        "JSON decoding failed in fetchZoneChanges: \(decodingError)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.decodingError(decodingError)
+    } catch let urlError as URLError {
+      MistKitLogger.logError(
+        "Network error in fetchZoneChanges: \(urlError)",
+        logger: MistKitLogger.network,
+        shouldRedact: false
+      )
+      throw CloudKitError.networkError(urlError)
+    } catch {
+      MistKitLogger.logError(
+        "Unexpected error in fetchZoneChanges: \(error)",
+        logger: MistKitLogger.api,
+        shouldRedact: false
+      )
+      throw CloudKitError.underlyingError(error)
+    }
+  }
+
   /// Fetch record changes since a sync token
   ///
   /// Retrieves all records that have changed (created, updated, or deleted)

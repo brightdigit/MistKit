@@ -28,7 +28,7 @@
 //
 
 /// Zone information from CloudKit
-public struct ZoneInfo: Encodable {
+public struct ZoneInfo: Encodable, Sendable {
   /// The zone name
   public let zoneName: String
   /// The owner record name

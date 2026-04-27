@@ -270,4 +270,23 @@ internal struct CloudKitResponseProcessor {
       throw CloudKitError.invalidResponse
     }
   }
+
+  /// Process fetchZoneChanges response
+  internal func processFetchZoneChangesResponse(_ response: Operations.fetchZoneChanges.Output)
+    async throws(CloudKitError) -> Components.Schemas.ZoneChangesResponse
+  {
+    if let error = CloudKitError(response) {
+      throw error
+    }
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let changesData):
+        return changesData
+      }
+    default:
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
+  }
 }
