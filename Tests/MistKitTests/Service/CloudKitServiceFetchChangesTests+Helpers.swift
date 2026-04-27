@@ -43,7 +43,7 @@ extension CloudKitServiceFetchChangesTests {
     moreComing: Bool = false,
     syncToken: String = "test-sync-token-abc"
   ) async throws -> CloudKitService {
-    let responseProvider = ResponseProvider.successfulFetchChanges(
+    let responseProvider = try ResponseProvider.successfulFetchChanges(
       recordCount: recordCount,
       moreComing: moreComing,
       syncToken: syncToken
@@ -75,9 +75,9 @@ extension ResponseProvider {
     recordCount: Int = 2,
     moreComing: Bool = false,
     syncToken: String = "test-sync-token-abc"
-  ) -> ResponseProvider {
+  ) throws -> ResponseProvider {
     ResponseProvider(
-      defaultResponse: .successfulFetchChangesResponse(
+      defaultResponse: try .successfulFetchChangesResponse(
         recordCount: recordCount,
         moreComing: moreComing,
         syncToken: syncToken
@@ -91,7 +91,7 @@ extension ResponseConfig {
     recordCount: Int = 2,
     moreComing: Bool = false,
     syncToken: String = "test-sync-token-abc"
-  ) -> ResponseConfig {
+  ) throws -> ResponseConfig {
     var records: [[String: Any]] = []
     for index in 0..<recordCount {
       records.append([
@@ -102,8 +102,8 @@ extension ResponseConfig {
       ])
     }
 
-    let recordsJSON = try! JSONSerialization.data(withJSONObject: records)
-    let recordsString = String(data: recordsJSON, encoding: .utf8)!
+    let recordsJSON = try JSONSerialization.data(withJSONObject: records)
+    let recordsString = String(decoding: recordsJSON, as: UTF8.self)
 
     let responseJSON = """
       {
