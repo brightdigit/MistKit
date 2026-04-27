@@ -141,6 +141,11 @@
         // ⚠️ IMPORTANT: Replace these values with your own:
         // 1. Get your container identifier from CloudKit Console
         // 2. Generate a valid API token from CloudKit Console > API Access
+        // TODO: This API token must match CLOUDKIT_API_TOKEN in .env, otherwise
+        // the web auth token obtained here will be rejected when used by MistDemo.
+        // Currently, tokens obtained via `mistdemo auth-token` return 422
+        // AUTHENTICATION_REQUIRED — investigate whether the issue is token
+        // extraction, encoding, or a session/cookie mismatch.
         try {
             CloudKit.configure({
                 containers: [{

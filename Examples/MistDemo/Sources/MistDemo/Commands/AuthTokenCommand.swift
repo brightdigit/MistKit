@@ -56,6 +56,12 @@ public struct AuthTokenCommand: MistDemoCommand {
         self.config = config
     }
     
+    // TODO: Web auth tokens obtained via this flow are rejected by CloudKit API
+    // with 422 AUTHENTICATION_REQUIRED. The API token in index.html must match
+    // CLOUDKIT_API_TOKEN in .env. Investigate whether the issue is:
+    // - Token extraction from CloudKit JS (sessionToken vs ckWebAuthToken)
+    // - URL encoding of the token when passed as ckWebAuthToken query param
+    // - Session/cookie mismatch between browser auth and server-to-server usage
     public func execute() async throws {
         print("🚀 Starting CloudKit Authentication Server")
         print("📍 Server URL: http://\(config.host):\(config.port)")
