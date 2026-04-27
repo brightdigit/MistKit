@@ -583,12 +583,14 @@ paths:
             schema:
               type: object
               properties:
-                users:
+                lookupInfos:
                   type: array
                   items:
                     type: object
                     properties:
                       emailAddress:
+                        type: string
+                      phoneNumber:
                         type: string
                       userRecordName:
                         type: string

@@ -632,8 +632,8 @@ extension CloudKitService {
           path: createDiscoverUserIdentitiesPath(containerIdentifier: containerIdentifier),
           body: .json(
             .init(
-              users: lookupInfos.map {
-                .init(emailAddress: $0.emailAddress, userRecordName: $0.userRecordName)
+              lookupInfos: lookupInfos.map {
+                .init(emailAddress: $0.emailAddress, phoneNumber: $0.phoneNumber, userRecordName: $0.userRecordName)
               }
             )
           )

@@ -6711,42 +6711,48 @@ internal enum Operations {
             internal enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json`.
                 internal struct jsonPayload: Codable, Hashable, Sendable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/usersPayload`.
-                    internal struct usersPayloadPayload: Codable, Hashable, Sendable {
-                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/usersPayload/emailAddress`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfosPayload`.
+                    internal struct lookupInfosPayloadPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfosPayload/emailAddress`.
                         internal var emailAddress: Swift.String?
-                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/usersPayload/userRecordName`.
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfosPayload/phoneNumber`.
+                        internal var phoneNumber: Swift.String?
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfosPayload/userRecordName`.
                         internal var userRecordName: Swift.String?
-                        /// Creates a new `usersPayloadPayload`.
+                        /// Creates a new `lookupInfosPayloadPayload`.
                         ///
                         /// - Parameters:
                         ///   - emailAddress:
+                        ///   - phoneNumber:
                         ///   - userRecordName:
                         internal init(
                             emailAddress: Swift.String? = nil,
+                            phoneNumber: Swift.String? = nil,
                             userRecordName: Swift.String? = nil
                         ) {
                             self.emailAddress = emailAddress
+                            self.phoneNumber = phoneNumber
                             self.userRecordName = userRecordName
                         }
                         internal enum CodingKeys: String, CodingKey {
                             case emailAddress
+                            case phoneNumber
                             case userRecordName
                         }
                     }
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/users`.
-                    internal typealias usersPayload = [Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayloadPayload]
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/users`.
-                    internal var users: Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayload?
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfos`.
+                    internal typealias lookupInfosPayload = [Operations.discoverUserIdentities.Input.Body.jsonPayload.lookupInfosPayloadPayload]
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfos`.
+                    internal var lookupInfos: Operations.discoverUserIdentities.Input.Body.jsonPayload.lookupInfosPayload?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
-                    ///   - users:
-                    internal init(users: Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayload? = nil) {
-                        self.users = users
+                    ///   - lookupInfos:
+                    internal init(lookupInfos: Operations.discoverUserIdentities.Input.Body.jsonPayload.lookupInfosPayload? = nil) {
+                        self.lookupInfos = lookupInfos
                     }
                     internal enum CodingKeys: String, CodingKey {
-                        case users
+                        case lookupInfos
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/content/application\/json`.
