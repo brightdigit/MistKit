@@ -1762,78 +1762,31 @@ internal enum Components {
             /// The user's name prefix
             ///
             /// - Remark: Generated from `#/components/schemas/NameComponents/namePrefix`.
-            internal var namePrefix: Swift.String? {
-                get  {
-                    self.storage.value.namePrefix
-                }
-                _modify {
-                    yield &self.storage.value.namePrefix
-                }
-            }
+            internal var namePrefix: Swift.String?
             /// The user's first name
             ///
             /// - Remark: Generated from `#/components/schemas/NameComponents/givenName`.
-            internal var givenName: Swift.String? {
-                get  {
-                    self.storage.value.givenName
-                }
-                _modify {
-                    yield &self.storage.value.givenName
-                }
-            }
+            internal var givenName: Swift.String?
             /// The user's middle name
             ///
             /// - Remark: Generated from `#/components/schemas/NameComponents/middleName`.
-            internal var middleName: Swift.String? {
-                get  {
-                    self.storage.value.middleName
-                }
-                _modify {
-                    yield &self.storage.value.middleName
-                }
-            }
+            internal var middleName: Swift.String?
             /// The user's last name
             ///
             /// - Remark: Generated from `#/components/schemas/NameComponents/familyName`.
-            internal var familyName: Swift.String? {
-                get  {
-                    self.storage.value.familyName
-                }
-                _modify {
-                    yield &self.storage.value.familyName
-                }
-            }
+            internal var familyName: Swift.String?
             /// The user's name suffix
             ///
             /// - Remark: Generated from `#/components/schemas/NameComponents/nameSuffix`.
-            internal var nameSuffix: Swift.String? {
-                get  {
-                    self.storage.value.nameSuffix
-                }
-                _modify {
-                    yield &self.storage.value.nameSuffix
-                }
-            }
+            internal var nameSuffix: Swift.String?
             /// The user's nickname
             ///
             /// - Remark: Generated from `#/components/schemas/NameComponents/nickname`.
-            internal var nickname: Swift.String? {
-                get  {
-                    self.storage.value.nickname
-                }
-                _modify {
-                    yield &self.storage.value.nickname
-                }
-            }
+            internal var nickname: Swift.String?
+            /// A phonetic representation of the user's name
+            ///
             /// - Remark: Generated from `#/components/schemas/NameComponents/phoneticRepresentation`.
-            internal var phoneticRepresentation: Components.Schemas.NameComponents? {
-                get  {
-                    self.storage.value.phoneticRepresentation
-                }
-                _modify {
-                    yield &self.storage.value.phoneticRepresentation
-                }
-            }
+            internal var phoneticRepresentation: Swift.String?
             /// Creates a new `NameComponents`.
             ///
             /// - Parameters:
@@ -1843,7 +1796,7 @@ internal enum Components {
             ///   - familyName: The user's last name
             ///   - nameSuffix: The user's name suffix
             ///   - nickname: The user's nickname
-            ///   - phoneticRepresentation:
+            ///   - phoneticRepresentation: A phonetic representation of the user's name
             internal init(
                 namePrefix: Swift.String? = nil,
                 givenName: Swift.String? = nil,
@@ -1851,17 +1804,15 @@ internal enum Components {
                 familyName: Swift.String? = nil,
                 nameSuffix: Swift.String? = nil,
                 nickname: Swift.String? = nil,
-                phoneticRepresentation: Components.Schemas.NameComponents? = nil
+                phoneticRepresentation: Swift.String? = nil
             ) {
-                self.storage = .init(value: .init(
-                    namePrefix: namePrefix,
-                    givenName: givenName,
-                    middleName: middleName,
-                    familyName: familyName,
-                    nameSuffix: nameSuffix,
-                    nickname: nickname,
-                    phoneticRepresentation: phoneticRepresentation
-                ))
+                self.namePrefix = namePrefix
+                self.givenName = givenName
+                self.middleName = middleName
+                self.familyName = familyName
+                self.nameSuffix = nameSuffix
+                self.nickname = nickname
+                self.phoneticRepresentation = phoneticRepresentation
             }
             internal enum CodingKeys: String, CodingKey {
                 case namePrefix
@@ -1871,60 +1822,6 @@ internal enum Components {
                 case nameSuffix
                 case nickname
                 case phoneticRepresentation
-            }
-            internal init(from decoder: any Decoder) throws {
-                self.storage = try .init(from: decoder)
-            }
-            internal func encode(to encoder: any Encoder) throws {
-                try self.storage.encode(to: encoder)
-            }
-            /// Internal reference storage to allow type recursion.
-            private var storage: OpenAPIRuntime.CopyOnWriteBox<Storage>
-            private struct Storage: Codable, Hashable, Sendable {
-                /// The user's name prefix
-                ///
-                /// - Remark: Generated from `#/components/schemas/NameComponents/namePrefix`.
-                var namePrefix: Swift.String?
-                /// The user's first name
-                ///
-                /// - Remark: Generated from `#/components/schemas/NameComponents/givenName`.
-                var givenName: Swift.String?
-                /// The user's middle name
-                ///
-                /// - Remark: Generated from `#/components/schemas/NameComponents/middleName`.
-                var middleName: Swift.String?
-                /// The user's last name
-                ///
-                /// - Remark: Generated from `#/components/schemas/NameComponents/familyName`.
-                var familyName: Swift.String?
-                /// The user's name suffix
-                ///
-                /// - Remark: Generated from `#/components/schemas/NameComponents/nameSuffix`.
-                var nameSuffix: Swift.String?
-                /// The user's nickname
-                ///
-                /// - Remark: Generated from `#/components/schemas/NameComponents/nickname`.
-                var nickname: Swift.String?
-                /// - Remark: Generated from `#/components/schemas/NameComponents/phoneticRepresentation`.
-                var phoneticRepresentation: Components.Schemas.NameComponents?
-                init(
-                    namePrefix: Swift.String? = nil,
-                    givenName: Swift.String? = nil,
-                    middleName: Swift.String? = nil,
-                    familyName: Swift.String? = nil,
-                    nameSuffix: Swift.String? = nil,
-                    nickname: Swift.String? = nil,
-                    phoneticRepresentation: Components.Schemas.NameComponents? = nil
-                ) {
-                    self.namePrefix = namePrefix
-                    self.givenName = givenName
-                    self.middleName = middleName
-                    self.familyName = familyName
-                    self.nameSuffix = nameSuffix
-                    self.nickname = nickname
-                    self.phoneticRepresentation = phoneticRepresentation
-                }
-                typealias CodingKeys = Components.Schemas.NameComponents.CodingKeys
             }
         }
         /// Information used to look up a user identity

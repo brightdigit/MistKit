@@ -28,16 +28,14 @@
 //
 
 /// The parts of a user's name from CloudKit user discovery.
-/// Must be a class rather than a struct because `phoneticRepresentation`
-/// is a recursive reference to the same type, which requires reference semantics.
-public final class NameComponents: Codable, Sendable {
+public struct NameComponents: Codable, Sendable {
   public let namePrefix: String?
   public let givenName: String?
   public let middleName: String?
   public let familyName: String?
   public let nameSuffix: String?
   public let nickname: String?
-  public let phoneticRepresentation: NameComponents?
+  public let phoneticRepresentation: String?
 
   internal init(from schema: Components.Schemas.NameComponents) {
     self.namePrefix = schema.namePrefix
@@ -46,7 +44,7 @@ public final class NameComponents: Codable, Sendable {
     self.familyName = schema.familyName
     self.nameSuffix = schema.nameSuffix
     self.nickname = schema.nickname
-    self.phoneticRepresentation = schema.phoneticRepresentation.map(NameComponents.init(from:))
+    self.phoneticRepresentation = schema.phoneticRepresentation
   }
 
   public init(
@@ -56,7 +54,7 @@ public final class NameComponents: Codable, Sendable {
     familyName: String? = nil,
     nameSuffix: String? = nil,
     nickname: String? = nil,
-    phoneticRepresentation: NameComponents? = nil
+    phoneticRepresentation: String? = nil
   ) {
     self.namePrefix = namePrefix
     self.givenName = givenName

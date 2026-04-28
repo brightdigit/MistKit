@@ -1234,7 +1234,7 @@ components:
           type: string
           description: The user's nickname
         phoneticRepresentation:
-          $ref: '#/components/schemas/NameComponents'
+          type: string
           description: A phonetic representation of the user's name
 
     UserIdentityLookupInfo:
