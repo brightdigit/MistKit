@@ -56,7 +56,8 @@ public struct RecordInfo: Encodable, Sendable {
   public let created: RecordTimestamp?
   /// Information about when the record was last modified
   public let modified: RecordTimestamp?
-  /// Whether the record was deleted
+  /// When `true`, this is a tombstone entry from `fetchRecordChanges()` —
+  /// the record was deleted and should be removed from local storage.
   public let deleted: Bool
 
   /// Indicates whether this RecordInfo represents an error response

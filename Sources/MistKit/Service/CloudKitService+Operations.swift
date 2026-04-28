@@ -604,6 +604,8 @@ extension CloudKitService {
   /// - Warning: For zones with many changes, this may make multiple requests
   ///           and return a large array. Consider using fetchRecordChanges()
   ///           with manual pagination for better memory control.
+  /// - Note: Makes sequential requests with no backoff or cooperative cancellation
+  ///         between pages. For fine-grained control, use `fetchRecordChanges(syncToken:)` directly.
   public func fetchAllRecordChanges(
     zoneID: ZoneID? = nil,
     syncToken: String? = nil,

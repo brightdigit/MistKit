@@ -41,7 +41,7 @@ extension CloudKitServiceLookupZonesTests {
   internal static func makeSuccessfulService(
     zoneCount: Int = 1
   ) async throws -> CloudKitService {
-    let responseProvider = ResponseProvider.successfulLookupZones(zoneCount: zoneCount)
+    let responseProvider = try ResponseProvider.successfulLookupZones(zoneCount: zoneCount)
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: "iCloud.com.example.test",
@@ -65,13 +65,13 @@ extension CloudKitServiceLookupZonesTests {
 // MARK: - LookupZones Response Builders
 
 extension ResponseProvider {
-  internal static func successfulLookupZones(zoneCount: Int = 1) -> ResponseProvider {
-    ResponseProvider(defaultResponse: .successfulLookupZonesResponse(zoneCount: zoneCount))
+  internal static func successfulLookupZones(zoneCount: Int = 1) throws -> ResponseProvider {
+    ResponseProvider(defaultResponse: try .successfulLookupZonesResponse(zoneCount: zoneCount))
   }
 }
 
 extension ResponseConfig {
-  internal static func successfulLookupZonesResponse(zoneCount: Int = 1) -> ResponseConfig {
+  internal static func successfulLookupZonesResponse(zoneCount: Int = 1) throws -> ResponseConfig {
     var zones: [[String: Any]] = []
     for index in 0..<zoneCount {
       zones.append([
@@ -82,8 +82,8 @@ extension ResponseConfig {
       ])
     }
 
-    let zonesJSON = try! JSONSerialization.data(withJSONObject: zones)
-    let zonesString = String(data: zonesJSON, encoding: .utf8)!
+    let zonesJSON = try JSONSerialization.data(withJSONObject: zones)
+    let zonesString = String(decoding: zonesJSON, as: UTF8.self)
 
     let responseJSON = """
       {

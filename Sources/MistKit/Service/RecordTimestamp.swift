@@ -38,7 +38,14 @@ public struct RecordTimestamp: Encodable, Sendable {
 
   internal init(from schema: Components.Schemas.RecordTimestamp) {
     self.timestamp = schema.timestamp.flatMap { millis in
-      guard millis >= 0 else { return nil }
+      guard millis >= 0 else {
+        MistKitLogger.logWarning(
+          "Invalid negative timestamp (\(millis) ms) — returning nil",
+          logger: MistKitLogger.api,
+          shouldRedact: false
+        )
+        return nil
+      }
       return Date(timeIntervalSince1970: millis / 1000.0)
     }
     self.userRecordName = schema.userRecordName

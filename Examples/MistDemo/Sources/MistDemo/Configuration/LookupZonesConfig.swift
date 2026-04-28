@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import Foundation
 public import ConfigKeyKit
 
 /// Configuration for lookup-zones command
@@ -61,7 +62,7 @@ public struct LookupZonesConfig: Sendable, ConfigurationParseable {
             forKey: "zone.names",
             default: "_defaultZone"
         ) ?? "_defaultZone"
-        let zoneNames = zoneNamesString.split(separator: ",").map(String.init)
+        let zoneNames = zoneNamesString.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
 
         let outputString = configuration.string(forKey: "output.format", default: "table") ?? "table"
         let output = OutputFormat(rawValue: outputString) ?? .table
