@@ -79,7 +79,7 @@ struct MistKitClientFactoryTests {
     func createWithAPITokenOnly() throws {
         let config = try makeConfig(apiToken: "api-token-123")
 
-        let client = try MistKitClientFactory.create(from: config)
+        let client = try MistKitClientFactory.create(.private, from: config)
 
         #expect(client != nil)
     }
@@ -89,7 +89,7 @@ struct MistKitClientFactoryTests {
         let config = try! makeConfig(apiToken: "")
 
         #expect(throws: ConfigurationError.self) {
-            try MistKitClientFactory.create(from: config)
+            try MistKitClientFactory.create(.private, from: config)
         }
     }
 
@@ -102,7 +102,7 @@ struct MistKitClientFactoryTests {
             webAuthToken: "web-auth-token"
         )
 
-        let client = try MistKitClientFactory.create(from: config)
+        let client = try MistKitClientFactory.create(.private, from: config)
 
         #expect(client != nil)
     }
@@ -116,7 +116,7 @@ struct MistKitClientFactoryTests {
             privateKey: validPrivateKey
         )
 
-        let client = try MistKitClientFactory.create(from: config)
+        let client = try MistKitClientFactory.create(.private, from: config)
 
         #expect(client != nil)
     }
@@ -131,7 +131,7 @@ struct MistKitClientFactoryTests {
             privateKey: validPrivateKey
         )
 
-        let client = try MistKitClientFactory.create(from: config)
+        let client = try MistKitClientFactory.create(.private, from: config)
 
         #expect(client != nil)
     }
@@ -145,17 +145,17 @@ struct MistKitClientFactoryTests {
         )
 
         // Should fall back to API-only auth
-        let client = try? MistKitClientFactory.create(from: config)
+        let client = try? MistKitClientFactory.create(.private, from: config)
         #expect(client != nil)
     }
 
     // MARK: - Public Database Tests
 
     @Test("Create client for public database")
-    func createForPublicDatabase() throws {
+    func createForPublicDatabaseTest() throws {
         let config = try makeConfig(apiToken: "api-token")
 
-        let client = try MistKitClientFactory.createForPublicDatabase(from: config)
+        let client = try MistKitClientFactory.create(.public, from: config)
 
         #expect(client != nil)
     }
@@ -165,7 +165,7 @@ struct MistKitClientFactoryTests {
         let config = try! makeConfig(apiToken: "")
 
         #expect(throws: ConfigurationError.self) {
-            try MistKitClientFactory.createForPublicDatabase(from: config)
+            try MistKitClientFactory.create(.public, from: config)
         }
     }
 
@@ -208,7 +208,7 @@ struct MistKitClientFactoryTests {
             environment: .development
         )
 
-        let client = try MistKitClientFactory.create(from: config)
+        let client = try MistKitClientFactory.create(.private, from: config)
 
         #expect(client != nil)
     }
@@ -220,7 +220,7 @@ struct MistKitClientFactoryTests {
             environment: .production
         )
 
-        let client = try MistKitClientFactory.create(from: config)
+        let client = try MistKitClientFactory.create(.private, from: config)
 
         #expect(client != nil)
     }
@@ -234,7 +234,7 @@ struct MistKitClientFactoryTests {
             apiToken: "api-token"
         )
 
-        let client = try MistKitClientFactory.create(from: config)
+        let client = try MistKitClientFactory.create(.private, from: config)
 
         #expect(client != nil)
     }
@@ -252,7 +252,7 @@ struct MistKitClientFactoryTests {
         )
 
         // Should fall back to API-only auth when file can't be read
-        let client = try? MistKitClientFactory.create(from: config)
+        let client = try? MistKitClientFactory.create(.private, from: config)
         #expect(client != nil)
     }
 
@@ -263,7 +263,7 @@ struct MistKitClientFactoryTests {
         let config = try! makeConfig(apiToken: "")
 
         do {
-            _ = try MistKitClientFactory.create(from: config)
+            _ = try MistKitClientFactory.create(.private, from: config)
             Issue.record("Should have thrown ConfigurationError")
         } catch let error as ConfigurationError {
             if case .missingRequired(let key, _) = error {
@@ -283,7 +283,7 @@ struct MistKitClientFactoryTests {
             webAuthToken: ""
         )
 
-        let client = try MistKitClientFactory.create(from: config)
+        let client = try MistKitClientFactory.create(.private, from: config)
 
         #expect(client != nil)
     }
@@ -296,7 +296,7 @@ struct MistKitClientFactoryTests {
             privateKey: validPrivateKey
         )
 
-        let client = try MistKitClientFactory.create(from: config)
+        let client = try MistKitClientFactory.create(.private, from: config)
 
         #expect(client != nil)
     }
@@ -309,7 +309,7 @@ struct MistKitClientFactoryTests {
             privateKey: ""
         )
 
-        let client = try MistKitClientFactory.create(from: config)
+        let client = try MistKitClientFactory.create(.private, from: config)
 
         #expect(client != nil)
     }

@@ -74,7 +74,7 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
         print("🔄 Fetch Record Changes")
         print(String(repeating: "=", count: 60))
 
-        let service = try MistKitClientFactory.create(from: config.base)
+        let service = try MistKitClientFactory.create(.private, from: config.base)
         let zoneID = ZoneID(zoneName: config.zone, ownerName: nil)
 
         if config.fetchAll {

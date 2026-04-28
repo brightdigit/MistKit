@@ -71,7 +71,7 @@ public struct DemoInFilterCommand: MistDemoCommand {
             return
         }
 
-        let client = try MistKitClientFactory.createForPublicDatabase(from: config)
+        let client = try MistKitClientFactory.create(.public, from: config)
         let tag = Int(Date().timeIntervalSince1970)
         let recordType = "Note"
 

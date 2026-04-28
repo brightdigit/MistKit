@@ -42,42 +42,18 @@ public struct MistKitClientFactory: Sendable {
     ///   - config: The base MistDemo configuration
     /// - Throws: ConfigurationError if required credentials are missing
     public static func create(_ database: MistKit.Database, from config: MistDemoConfig) throws -> CloudKitService {
+        let tokenManager: any TokenManager
         switch database {
         case .public:
-            return try createForPublicDatabase(from: config)
+            guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+                throw ConfigurationError.unsupportedPlatform(
+                    "Public database access requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
+                )
+            }
+            tokenManager = try ServerToServerAuthManager(from: config)
         case .private, .shared:
-            return try createForPrivateDatabase(from: config, database: database)
+            tokenManager = try WebAuthTokenManager(from: config)
         }
-    }
-
-    /// Create a CloudKitService for private database operations.
-    ///
-    /// Requires `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` (web authentication).
-    /// - Parameter config: The base MistDemo configuration
-    /// - Returns: A configured CloudKitService instance for the private database
-    /// - Throws: ConfigurationError if required credentials are missing
-    public static func create(from config: MistDemoConfig) throws -> CloudKitService {
-        try createForPrivateDatabase(from: config, database: .private)
-    }
-
-    private static func createForPrivateDatabase(
-        from config: MistDemoConfig,
-        database: MistKit.Database
-    ) throws -> CloudKitService {
-        let apiToken = AuthenticationHelper.resolveAPIToken(config.apiToken)
-        guard !apiToken.isEmpty else {
-            throw ConfigurationError.missingRequired("api.token",
-                suggestion: "Provide via CLOUDKIT_API_TOKEN environment variable")
-        }
-
-        let webAuthToken = config.webAuthToken.flatMap { AuthenticationHelper.resolveWebAuthToken($0) }
-        guard let webAuthToken else {
-            throw ConfigurationError.missingRequired("web.auth.token",
-                suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`")
-        }
-
-        let tokenManager = WebAuthTokenManager(apiToken: apiToken, webAuthToken: webAuthToken)
-
         return try CloudKitService(
             containerIdentifier: config.containerIdentifier,
             tokenManager: tokenManager,
@@ -86,45 +62,6 @@ public struct MistKitClientFactory: Sendable {
         )
     }
 
-    /// Create a CloudKitService for public database operations.
-    ///
-    /// Requires `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]` (server-to-server authentication).
-    /// - Parameter config: The base MistDemo configuration
-    /// - Returns: A configured CloudKitService instance for the public database
-    /// - Throws: ConfigurationError if required credentials are missing
-    public static func createForPublicDatabase(from config: MistDemoConfig) throws -> CloudKitService {
-        guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-            throw ConfigurationError.unsupportedPlatform(
-                "Public database access requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
-            )
-        }
-        guard let keyID = config.keyID, !keyID.isEmpty else {
-            throw ConfigurationError.missingRequired("key.id",
-                suggestion: "Provide via CLOUDKIT_KEY_ID environment variable")
-        }
-        guard let rawKey = config.privateKey ?? loadPrivateKeyFromFile(config.privateKeyFile),
-              !rawKey.isEmpty else {
-            throw ConfigurationError.missingRequired("private.key",
-                suggestion: "Provide via CLOUDKIT_PRIVATE_KEY or CLOUDKIT_PRIVATE_KEY_PATH")
-        }
-        let privateKey = rawKey.replacingOccurrences(of: "\\n", with: "\n")
-        let tokenManager = try ServerToServerAuthManager(keyID: keyID, pemString: privateKey)
-
-        return try CloudKitService(
-            containerIdentifier: config.containerIdentifier,
-            tokenManager: tokenManager,
-            environment: config.environment,
-            database: .public
-        )
-    }
-    
-    /// Create a CloudKitService with specific authentication method
-    /// - Parameters:
-    ///   - config: The base MistDemo configuration
-    ///   - tokenManager: Specific token manager to use
-    ///   - database: Target database (default: private)
-    /// - Returns: A configured CloudKitService instance
-    /// - Throws: CloudKitService initialization errors
     public static func create(
         from config: MistDemoConfig,
         tokenManager: any TokenManager,
@@ -137,18 +74,41 @@ public struct MistKitClientFactory: Sendable {
             database: database
         )
     }
-    
-    /// Load private key content from file path
-    /// - Parameter filePath: Optional path to private key file
-    /// - Returns: Private key content or nil if file doesn't exist/can't be read
-    private static func loadPrivateKeyFromFile(_ filePath: String?) -> String? {
-        guard let filePath = filePath, !filePath.isEmpty else { return nil }
-        
-        do {
-            return try String(contentsOfFile: filePath, encoding: .utf8)
-        } catch {
-            // Return nil instead of throwing to allow fallback to other auth methods
-            return nil
+}
+
+extension WebAuthTokenManager {
+    fileprivate convenience init(from config: MistDemoConfig) throws {
+        let apiToken = AuthenticationHelper.resolveAPIToken(config.apiToken)
+        guard !apiToken.isEmpty else {
+            throw ConfigurationError.missingRequired("api.token",
+                suggestion: "Provide via CLOUDKIT_API_TOKEN environment variable")
         }
+        let webAuthToken = config.webAuthToken.flatMap { AuthenticationHelper.resolveWebAuthToken($0) }
+        guard let webAuthToken else {
+            throw ConfigurationError.missingRequired("web.auth.token",
+                suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`")
+        }
+        self.init(apiToken: apiToken, webAuthToken: webAuthToken)
+    }
+}
+
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+extension ServerToServerAuthManager {
+    fileprivate convenience init(from config: MistDemoConfig) throws {
+        guard let keyID = config.keyID, !keyID.isEmpty else {
+            throw ConfigurationError.missingRequired("key.id",
+                suggestion: "Provide via CLOUDKIT_KEY_ID environment variable")
+        }
+        guard let rawKey = config.privateKey ?? Self.loadPrivateKeyFromFile(config.privateKeyFile),
+              !rawKey.isEmpty else {
+            throw ConfigurationError.missingRequired("private.key",
+                suggestion: "Provide via CLOUDKIT_PRIVATE_KEY or CLOUDKIT_PRIVATE_KEY_PATH")
+        }
+        try self.init(keyID: keyID, pemString: rawKey.replacingOccurrences(of: "\\n", with: "\n"))
+    }
+
+    private static func loadPrivateKeyFromFile(_ filePath: String?) -> String? {
+        guard let filePath, !filePath.isEmpty else { return nil }
+        return try? String(contentsOfFile: filePath, encoding: .utf8)
     }
 }
