@@ -596,54 +596,56 @@
         // Initialize CloudKit when page loads
         initializeCloudKit();
 
-        // Expose debugging helpers globally
-        window.mistKitDebug = {
-            container: () => CloudKit.getDefaultContainer(),
-            token: () => window.cloudKitWebAuthToken || webAuthToken,
-            setToken: (token) => {
-                window.cloudKitWebAuthToken = token;
-                webAuthToken = token;
-                console.log('Token manually set');
-            },
-            sendToServer: () => {
-                const container = CloudKit.getDefaultContainer();
-                if (container && container.userIdentity) {
-                    handleAuthenticationWithToken(container.userIdentity, window.cloudKitWebAuthToken || webAuthToken);
-                } else {
-                    console.error('Not signed in');
-                }
-            },
-            inspectContainer: () => {
-                const container = CloudKit.getDefaultContainer();
-                console.log('Container:', container);
-                console.log('Container properties:', Object.keys(container));
-                console.log('User identity:', container.userIdentity);
+        // Expose debugging helpers on localhost only
+        if (['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+            window.mistKitDebug = {
+                container: () => CloudKit.getDefaultContainer(),
+                token: () => window.cloudKitWebAuthToken || webAuthToken,
+                setToken: (token) => {
+                    window.cloudKitWebAuthToken = token;
+                    webAuthToken = token;
+                    console.log('Token manually set');
+                },
+                sendToServer: () => {
+                    const container = CloudKit.getDefaultContainer();
+                    if (container && container.userIdentity) {
+                        handleAuthenticationWithToken(container.userIdentity, window.cloudKitWebAuthToken || webAuthToken);
+                    } else {
+                        console.error('Not signed in');
+                    }
+                },
+                inspectContainer: () => {
+                    const container = CloudKit.getDefaultContainer();
+                    console.log('Container:', container);
+                    console.log('Container properties:', Object.keys(container));
+                    console.log('User identity:', container.userIdentity);
 
-                // Try to find token in various places
-                const locations = {
-                    'session.webAuthToken': container.session?.webAuthToken,
-                    '_auth.webAuthToken': container._auth?.webAuthToken,
-                    '_auth._ckSession': container._auth?._ckSession,
-                    'window.cloudKitWebAuthToken': window.cloudKitWebAuthToken,
-                    'webAuthToken variable': webAuthToken
-                };
+                    // Try to find token in various places
+                    const locations = {
+                        'session.webAuthToken': container.session?.webAuthToken,
+                        '_auth.webAuthToken': container._auth?.webAuthToken,
+                        '_auth._ckSession': container._auth?._ckSession,
+                        'window.cloudKitWebAuthToken': window.cloudKitWebAuthToken,
+                        'webAuthToken variable': webAuthToken
+                    };
 
-                console.log('Checked token locations:', locations);
+                    console.log('Checked token locations:', locations);
 
-                for (const [path, value] of Object.entries(locations)) {
-                    if (value) {
-                        console.log(`✅ Found at ${path}:`, value);
+                    for (const [path, value] of Object.entries(locations)) {
+                        if (value) {
+                            console.log(`✅ Found at ${path}:`, value);
+                        }
                     }
                 }
-            }
-        };
+            };
 
-        console.log('MistKit Debug helpers available:');
-        console.log('  mistKitDebug.container()     - Get CloudKit container');
-        console.log('  mistKitDebug.token()         - Get current token');
-        console.log('  mistKitDebug.setToken(tok)   - Manually set token');
-        console.log('  mistKitDebug.sendToServer()  - Send token to server');
-        console.log('  mistKitDebug.inspectContainer() - Inspect container for token');
+            console.log('MistKit Debug helpers available:');
+            console.log('  mistKitDebug.container()     - Get CloudKit container');
+            console.log('  mistKitDebug.token()         - Get current token');
+            console.log('  mistKitDebug.setToken(tok)   - Manually set token');
+            console.log('  mistKitDebug.sendToServer()  - Send token to server');
+            console.log('  mistKitDebug.inspectContainer() - Inspect container for token');
+        }
     </script>
 </body>
 </html>
