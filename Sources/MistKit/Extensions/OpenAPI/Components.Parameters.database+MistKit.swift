@@ -1,5 +1,5 @@
 //
-//  Components+Filter.swift
+//  Components.Parameters.database+MistKit.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,11 +29,18 @@
 
 internal import Foundation
 
-/// Extension to convert MistKit QueryFilter to OpenAPI Components.Schemas.Filter
+/// Extension to convert MistKit Database to OpenAPI Components.Parameters.database
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension Components.Schemas.Filter {
-  /// Initialize from MistKit QueryFilter
-  internal init(from queryFilter: QueryFilter) {
-    self = queryFilter.filter
+extension Components.Parameters.database {
+  /// Initialize from MistKit Database
+  internal init(from database: Database) {
+    switch database {
+    case .public:
+      self = ._public
+    case .private:
+      self = ._private
+    case .shared:
+      self = .shared
+    }
   }
 }

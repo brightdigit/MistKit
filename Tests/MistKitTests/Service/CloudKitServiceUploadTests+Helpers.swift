@@ -151,8 +151,8 @@ extension ResponseConfig {
       ])
     }
 
-    let tokensJSON = try! JSONSerialization.data(withJSONObject: tokens)
-    let tokensString = String(data: tokensJSON, encoding: .utf8)!
+    let tokensJSON = (try? JSONSerialization.data(withJSONObject: tokens)) ?? Data()
+    let tokensString = String(data: tokensJSON, encoding: .utf8) ?? "[]"
 
     let responseJSON = """
       {

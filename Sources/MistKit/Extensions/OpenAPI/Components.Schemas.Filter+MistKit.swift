@@ -1,5 +1,5 @@
 //
-//  Components+Sort.swift
+//  Components.Schemas.Filter+MistKit.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,11 +29,11 @@
 
 internal import Foundation
 
-/// Extension to convert MistKit QuerySort to OpenAPI Components.Schemas.Sort
+/// Extension to convert MistKit QueryFilter to OpenAPI Components.Schemas.Filter
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension Components.Schemas.Sort {
-  /// Initialize from MistKit QuerySort
-  internal init(from querySort: QuerySort) {
-    self = querySort.sort
+extension Components.Schemas.Filter {
+  /// Initialize from MistKit QueryFilter
+  internal init(from queryFilter: QueryFilter) {
+    self = queryFilter.filter
   }
 }

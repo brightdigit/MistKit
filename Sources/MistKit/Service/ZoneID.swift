@@ -34,6 +34,9 @@ public import Foundation
 /// Zone IDs uniquely identify a record zone within a database.
 /// The _defaultZone is automatically available in all databases.
 public struct ZoneID: Sendable, Equatable, Hashable {
+  /// The default zone present in all databases
+  public static let defaultZone = ZoneID(zoneName: "_defaultZone", ownerName: nil)
+
   /// The zone name (e.g., "_defaultZone", "Articles")
   public let zoneName: String
   /// The owner's record name (optional, nil for current user)
@@ -47,9 +50,6 @@ public struct ZoneID: Sendable, Equatable, Hashable {
     self.zoneName = zoneName
     self.ownerName = ownerName
   }
-
-  /// The default zone present in all databases
-  public static let defaultZone = ZoneID(zoneName: "_defaultZone", ownerName: nil)
 }
 
 // MARK: - Internal Conversion

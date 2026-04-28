@@ -33,11 +33,11 @@ import Testing
 @testable import MistKit
 
 @Suite("NSRegularExpression CommonPatterns Tests")
-struct RegexPatternsTests {
+internal struct RegexPatternsTests {
   // MARK: - API Token Validation Tests
 
   @Test("API token regex validates correct 64-character hex strings")
-  func apiTokenValidHex() {
+  internal func apiTokenValidHex() {
     let validTokens = [
       "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
       "ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789",
@@ -52,7 +52,7 @@ struct RegexPatternsTests {
   }
 
   @Test("API token regex rejects invalid formats")
-  func apiTokenInvalidFormats() {
+  internal func apiTokenInvalidFormats() {
     let invalidTokens = [
       "abc",  // Too short
       "abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345678",  // 63 chars
@@ -71,7 +71,7 @@ struct RegexPatternsTests {
   // MARK: - Web Auth Token Validation Tests
 
   @Test("Web auth token regex validates base64-like strings")
-  func webAuthTokenValidBase64() {
+  internal func webAuthTokenValidBase64() {
     let validTokens = [
       String(repeating: "A", count: 100),
       String(repeating: "a", count: 150),
@@ -88,7 +88,7 @@ struct RegexPatternsTests {
   }
 
   @Test("Web auth token regex rejects invalid formats")
-  func webAuthTokenInvalidFormats() {
+  internal func webAuthTokenInvalidFormats() {
     let invalidTokens = [
       String(repeating: "A", count: 99),  // Too short
       "invalid chars !@#$%",
@@ -106,7 +106,7 @@ struct RegexPatternsTests {
   // MARK: - Key ID Validation Tests
 
   @Test("Key ID regex validates 64-character hex strings")
-  func keyIDValidHex() {
+  internal func keyIDValidHex() {
     let validKeyIDs = [
       "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       "FEDCBA0987654321FEDCBA0987654321FEDCBA0987654321FEDCBA0987654321",
@@ -120,7 +120,7 @@ struct RegexPatternsTests {
   }
 
   @Test("Key ID regex rejects invalid formats")
-  func keyIDInvalidFormats() {
+  internal func keyIDInvalidFormats() {
     let invalidKeyIDs = [
       String(repeating: "a", count: 63),  // Too short
       String(repeating: "a", count: 65),  // Too long
@@ -138,7 +138,7 @@ struct RegexPatternsTests {
   // MARK: - Masking Pattern Tests
 
   @Test("Mask API token regex finds tokens in text")
-  func maskAPITokenFindsTokens() {
+  internal func maskAPITokenFindsTokens() {
     let text = "API token: abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789 found"
     let matches = NSRegularExpression.maskApiTokenRegex.matches(in: text)
 
@@ -151,7 +151,7 @@ struct RegexPatternsTests {
   }
 
   @Test("Mask web auth token regex finds tokens in text")
-  func maskWebAuthTokenFindsTokens() {
+  internal func maskWebAuthTokenFindsTokens() {
     let token = String(repeating: "A", count: 100)
     let text = "Web auth: \(token)== in message"
     let matches = NSRegularExpression.maskWebAuthTokenRegex.matches(in: text)
@@ -160,7 +160,7 @@ struct RegexPatternsTests {
   }
 
   @Test("Mask key ID regex finds key IDs in text")
-  func maskKeyIDFindsKeys() {
+  internal func maskKeyIDFindsKeys() {
     let keyID = String(repeating: "a", count: 40)
     let text = "Key ID is \(keyID) here"
     let matches = NSRegularExpression.maskKeyIdRegex.matches(in: text)
@@ -169,7 +169,7 @@ struct RegexPatternsTests {
   }
 
   @Test("Mask generic token regex finds token patterns")
-  func maskGenericTokenFindsPatterns() {
+  internal func maskGenericTokenFindsPatterns() {
     let testCases = [
       "token=abc123def456",
       "token: xyz789",
@@ -184,7 +184,7 @@ struct RegexPatternsTests {
   }
 
   @Test("Mask generic key regex finds key patterns")
-  func maskGenericKeyFindsPatterns() {
+  internal func maskGenericKeyFindsPatterns() {
     let testCases = [
       "key=secretvalue123",
       "key: privatekey456",
@@ -199,7 +199,7 @@ struct RegexPatternsTests {
   }
 
   @Test("Mask generic secret regex finds secret patterns")
-  func maskGenericSecretFindsPatterns() {
+  internal func maskGenericSecretFindsPatterns() {
     let testCases = [
       "secret=mysecret123",
       "secret: topsecret456",
@@ -216,7 +216,7 @@ struct RegexPatternsTests {
   // MARK: - Convenience Method Tests
 
   @Test("matches(in:) convenience method works correctly")
-  func convenienceMatchesMethod() {
+  internal func convenienceMatchesMethod() {
     let token = "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
     let matches = NSRegularExpression.apiTokenRegex.matches(in: token)
 
@@ -225,13 +225,13 @@ struct RegexPatternsTests {
   }
 
   @Test("matches(in:) handles empty string")
-  func convenienceMatchesEmptyString() {
+  internal func convenienceMatchesEmptyString() {
     let matches = NSRegularExpression.apiTokenRegex.matches(in: "")
     #expect(matches.isEmpty)
   }
 
   @Test("matches(in:) handles unicode strings")
-  func convenienceMatchesUnicode() {
+  internal func convenienceMatchesUnicode() {
     let text = "Hello 🌍 token=abc123"
     let matches = NSRegularExpression.maskGenericTokenRegex.matches(in: text)
     #expect(matches.count >= 1)
@@ -240,7 +240,7 @@ struct RegexPatternsTests {
   // MARK: - Edge Cases
 
   @Test("Multiple tokens in same string")
-  func multipleTokensInString() {
+  internal func multipleTokensInString() {
     let token1 = String(repeating: "a", count: 64)
     let token2 = String(repeating: "b", count: 64)
     let text = "First: \(token1) Second: \(token2)"
@@ -250,7 +250,7 @@ struct RegexPatternsTests {
   }
 
   @Test("Overlapping patterns don't double-match")
-  func overlappingPatterns() {
+  internal func overlappingPatterns() {
     let text = "keytoken=value123"
     let keyMatches = NSRegularExpression.maskGenericKeyRegex.matches(in: text)
     let tokenMatches = NSRegularExpression.maskGenericTokenRegex.matches(in: text)
@@ -260,7 +260,7 @@ struct RegexPatternsTests {
   }
 
   @Test("Case sensitivity for hex patterns")
-  func caseSensitivityHex() {
+  internal func caseSensitivityHex() {
     let lowerCase = String(repeating: "a", count: 64)
     let upperCase = String(repeating: "A", count: 64)
     let mixed = (String(repeating: "a", count: 32) + String(repeating: "A", count: 32))

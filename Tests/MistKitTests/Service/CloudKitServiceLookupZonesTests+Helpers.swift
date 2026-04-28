@@ -77,7 +77,7 @@ extension ResponseConfig {
       zones.append([
         "zoneID": [
           "zoneName": "test-zone-\(index)",
-          "ownerName": "_defaultOwner"
+          "ownerName": "_defaultOwner",
         ]
       ])
     }

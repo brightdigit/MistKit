@@ -86,8 +86,8 @@ extension ResponseConfig {
         "userRecordName": "_user-\(index)",
         "nameComponents": [
           "givenName": "User",
-          "familyName": "\(index)"
-        ]
+          "familyName": "\(index)",
+        ],
       ])
     }
 

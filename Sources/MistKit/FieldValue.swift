@@ -41,9 +41,6 @@ public enum FieldValue: Codable, Equatable, Sendable {
   case asset(Asset)
   case list([FieldValue])
 
-  /// Conversion factor from seconds to milliseconds for CloudKit timestamps
-  private static let millisecondsPerSecond: Double = 1_000
-
   /// Location dictionary as defined in CloudKit Web Services
   public struct Location: Codable, Equatable, Sendable {
     /// The latitude coordinate
@@ -137,6 +134,9 @@ public enum FieldValue: Codable, Equatable, Sendable {
       self.downloadURL = downloadURL
     }
   }
+
+  /// Conversion factor from seconds to milliseconds for CloudKit timestamps
+  private static let millisecondsPerSecond: Double = 1_000
 
   // MARK: - Codable
   /// Initialize field value from decoder

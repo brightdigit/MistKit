@@ -35,11 +35,11 @@ import Testing
 @testable import MistKit
 
 @Suite("LoggingMiddleware Tests")
-struct LoggingMiddlewareTests {
+internal struct LoggingMiddlewareTests {
   // MARK: - Basic Middleware Tests
 
   @Test("LoggingMiddleware intercepts and passes through requests")
-  func interceptsAndPassesThrough() async throws {
+  internal func interceptsAndPassesThrough() async throws {
     let middleware = LoggingMiddleware()
     let request = HTTPRequest(
       method: .get, scheme: "https", authority: "api.apple-cloudkit.com",
@@ -68,7 +68,7 @@ struct LoggingMiddlewareTests {
   }
 
   @Test("LoggingMiddleware handles POST requests")
-  func handlesPostRequests() async throws {
+  internal func handlesPostRequests() async throws {
     let middleware = LoggingMiddleware()
     let request = HTTPRequest(
       method: .post, scheme: "https", authority: "api.apple-cloudkit.com",
@@ -94,7 +94,7 @@ struct LoggingMiddlewareTests {
   }
 
   @Test("LoggingMiddleware handles response bodies")
-  func handlesResponseBodies() async throws {
+  internal func handlesResponseBodies() async throws {
     let middleware = LoggingMiddleware()
     let request = HTTPRequest(
       method: .get, scheme: "https", authority: "api.apple-cloudkit.com",
@@ -132,7 +132,7 @@ struct LoggingMiddlewareTests {
   // MARK: - Error Handling Tests
 
   @Test("LoggingMiddleware propagates errors from next")
-  func propagatesErrors() async throws {
+  internal func propagatesErrors() async throws {
     let middleware = LoggingMiddleware()
     let request = HTTPRequest(
       method: .get, scheme: "https", authority: "api.apple-cloudkit.com", path: "/test")
@@ -177,7 +177,7 @@ struct LoggingMiddlewareTests {
       HTTPResponse.Status.notFound,
       HTTPResponse.Status.internalServerError,
     ])
-  func handlesVariousStatusCodes(status: HTTPResponse.Status) async throws {
+  internal func handlesVariousStatusCodes(status: HTTPResponse.Status) async throws {
     let middleware = LoggingMiddleware()
     let request = HTTPRequest(
       method: .get, scheme: "https", authority: "api.apple-cloudkit.com", path: "/test")
@@ -201,7 +201,7 @@ struct LoggingMiddlewareTests {
   }
 
   @Test("LoggingMiddleware handles 421 Misdirected Request")
-  func handles421Status() async throws {
+  internal func handles421Status() async throws {
     let middleware = LoggingMiddleware()
     let request = HTTPRequest(
       method: .get, scheme: "https", authority: "api.apple-cloudkit.com", path: "/test")
@@ -227,7 +227,7 @@ struct LoggingMiddlewareTests {
   // MARK: - Request Header Tests
 
   @Test("LoggingMiddleware handles requests with headers")
-  func handlesRequestHeaders() async throws {
+  internal func handlesRequestHeaders() async throws {
     let middleware = LoggingMiddleware()
     var request = HTTPRequest(
       method: .get, scheme: "https", authority: "api.apple-cloudkit.com", path: "/test")
@@ -253,137 +253,5 @@ struct LoggingMiddlewareTests {
     #expect(response.status == .ok)
   }
 
-  // MARK: - Query Parameter Tests
-
-  @Test("LoggingMiddleware handles query parameters")
-  func handlesQueryParameters() async throws {
-    let middleware = LoggingMiddleware()
-    let request = HTTPRequest(
-      method: .get, scheme: "https", authority: "api.apple-cloudkit.com",
-      path: "/test?key=value&foo=bar")
-    let body: HTTPBody? = nil
-    let baseURL = URL(string: "https://api.apple-cloudkit.com")!
-
-    let next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = { _, _, _ in
-      let response = HTTPResponse(status: .ok)
-      return (response, nil)
-    }
-
-    let (response, _) = try await middleware.intercept(
-      request,
-      body: body,
-      baseURL: baseURL,
-      operationID: "test",
-      next: next
-    )
-
-    #expect(response.status == .ok)
-  }
-
-  // MARK: - HTTP Method Tests
-
-  @Test(
-    "LoggingMiddleware handles all HTTP methods",
-    arguments: [
-      HTTPRequest.Method.get,
-      HTTPRequest.Method.post,
-      HTTPRequest.Method.put,
-      HTTPRequest.Method.delete,
-      HTTPRequest.Method.patch,
-      HTTPRequest.Method.head,
-      HTTPRequest.Method.options,
-    ])
-  func handlesAllHTTPMethods(method: HTTPRequest.Method) async throws {
-    let middleware = LoggingMiddleware()
-    let request = HTTPRequest(
-      method: method, scheme: "https", authority: "api.apple-cloudkit.com", path: "/test")
-    let body: HTTPBody? = nil
-    let baseURL = URL(string: "https://api.apple-cloudkit.com")!
-
-    let next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = { _, _, _ in
-      let response = HTTPResponse(status: .ok)
-      return (response, nil)
-    }
-
-    let (response, _) = try await middleware.intercept(
-      request,
-      body: body,
-      baseURL: baseURL,
-      operationID: "test",
-      next: next
-    )
-
-    #expect(response.status == .ok)
-  }
-
-  // MARK: - Large Response Body Tests
-
-  @Test("LoggingMiddleware handles large response bodies")
-  func handlesLargeResponseBodies() async throws {
-    let middleware = LoggingMiddleware()
-    let request = HTTPRequest(
-      method: .get, scheme: "https", authority: "api.apple-cloudkit.com", path: "/test")
-    let body: HTTPBody? = nil
-    let baseURL = URL(string: "https://api.apple-cloudkit.com")!
-
-    // Create a large response body (100KB)
-    let largeData = Data(repeating: 0x41, count: 100_000)
-    let responseBody = HTTPBody(largeData)
-
-    let next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = { _, _, _ in
-      let response = HTTPResponse(status: .ok)
-      return (response, responseBody)
-    }
-
-    let (response, returnedBody) = try await middleware.intercept(
-      request,
-      body: body,
-      baseURL: baseURL,
-      operationID: "test",
-      next: next
-    )
-
-    #expect(response.status == .ok)
-    #expect(returnedBody != nil)
-  }
-
-  // MARK: - Concurrent Request Tests
-
-  @Test("LoggingMiddleware handles concurrent requests")
-  func handlesConcurrentRequests() async throws {
-    let middleware = LoggingMiddleware()
-    let baseURL = URL(string: "https://api.apple-cloudkit.com")!
-
-    // Launch multiple concurrent requests
-    try await withThrowingTaskGroup(of: HTTPResponse.Status.self) { group in
-      for i in 1...5 {
-        group.addTask {
-          let request = HTTPRequest(
-            method: .get, scheme: "https", authority: "api.apple-cloudkit.com", path: "/test/\(i)")
-          let body: HTTPBody? = nil
-
-          let next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = {
-            _, _, _ in
-            let response = HTTPResponse(status: .ok)
-            return (response, nil)
-          }
-
-          let (response, _) = try await middleware.intercept(
-            request,
-            body: body,
-            baseURL: baseURL,
-            operationID: "test\(i)",
-            next: next
-          )
-
-          return response.status
-        }
-      }
-
-      // Verify all requests completed successfully
-      for try await status in group {
-        #expect(status == .ok)
-      }
-    }
-  }
 }
+

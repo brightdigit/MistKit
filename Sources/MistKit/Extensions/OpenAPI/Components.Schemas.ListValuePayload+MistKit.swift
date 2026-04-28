@@ -1,5 +1,5 @@
 //
-//  Components+ListValuePayload.swift
+//  Components.Schemas.ListValuePayload+MistKit.swift
 //  MistKit
 //
 //  Created by Leo Dion.

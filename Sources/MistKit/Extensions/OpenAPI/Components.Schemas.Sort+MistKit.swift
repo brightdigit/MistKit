@@ -1,5 +1,5 @@
 //
-//  Components+Database.swift
+//  Components.Schemas.Sort+MistKit.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,18 +29,11 @@
 
 internal import Foundation
 
-/// Extension to convert MistKit Database to OpenAPI Components.Parameters.database
+/// Extension to convert MistKit QuerySort to OpenAPI Components.Schemas.Sort
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension Components.Parameters.database {
-  /// Initialize from MistKit Database
-  internal init(from database: Database) {
-    switch database {
-    case .public:
-      self = ._public
-    case .private:
-      self = ._private
-    case .shared:
-      self = .shared
-    }
+extension Components.Schemas.Sort {
+  /// Initialize from MistKit QuerySort
+  internal init(from querySort: QuerySort) {
+    self = querySort.sort
   }
 }

@@ -32,5 +32,6 @@ import Testing
 
 @testable import MistKit
 
-@Suite("CloudKitService DiscoverUserIdentities Operations", .enabled(if: Platform.isCryptoAvailable))
+@Suite(
+  "CloudKitService DiscoverUserIdentities Operations", .enabled(if: Platform.isCryptoAvailable))
 internal enum CloudKitServiceDiscoverUserIdentitiesTests {}

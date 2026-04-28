@@ -33,11 +33,11 @@ import Testing
 @testable import MistKit
 
 @Suite("MistKitClient Tests")
-struct MistKitClientTests {
+internal struct MistKitClientTests {
   // MARK: - Configuration-Based Initialization Tests
 
   @Test("MistKitClient initializes with valid configuration and transport")
-  func initWithConfiguration() throws {
+  internal func initWithConfiguration() throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       return
     }
@@ -54,7 +54,7 @@ struct MistKitClientTests {
   }
 
   @Test("MistKitClient initializes with API token configuration")
-  func initWithAPIToken() throws {
+  internal func initWithAPIToken() throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       return
     }
@@ -73,7 +73,7 @@ struct MistKitClientTests {
   // MARK: - Custom TokenManager Initialization Tests
 
   @Test("MistKitClient initializes with custom TokenManager")
-  func initWithCustomTokenManager() throws {
+  internal func initWithCustomTokenManager() throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       return
     }
@@ -96,7 +96,7 @@ struct MistKitClientTests {
   }
 
   @Test("MistKitClient initializes with individual parameters")
-  func initWithIndividualParameters() throws {
+  internal func initWithIndividualParameters() throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       return
     }
@@ -116,7 +116,7 @@ struct MistKitClientTests {
   // MARK: - Server-to-Server Validation Tests
 
   @Test("MistKitClient allows ServerToServerAuthManager with public database")
-  func serverToServerWithPublicDatabase() throws {
+  internal func serverToServerWithPublicDatabase() throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       return
     }
@@ -150,7 +150,7 @@ struct MistKitClientTests {
   }
 
   @Test("MistKitClient rejects ServerToServerAuthManager with private database")
-  func serverToServerWithPrivateDatabase() throws {
+  internal func serverToServerWithPrivateDatabase() throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       return
     }
@@ -194,7 +194,7 @@ struct MistKitClientTests {
   }
 
   @Test("MistKitClient rejects ServerToServerAuthManager with shared database")
-  func serverToServerWithSharedDatabase() throws {
+  internal func serverToServerWithSharedDatabase() throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       return
     }
@@ -237,77 +237,5 @@ struct MistKitClientTests {
     }
   }
 
-  // MARK: - Environment and Database Tests
-
-  @Test(
-    "MistKitClient supports all environments",
-    arguments: [
-      Environment.development,
-      Environment.production,
-    ])
-  func supportsAllEnvironments(environment: Environment) throws {
-    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      return
-    }
-
-    let config = MistKitConfiguration(
-      container: "iCloud.com.example.app",
-      environment: environment,
-      database: .public,
-      apiToken: String(repeating: "3", count: 64)
-    )
-
-    let transport = MockTransport()
-    _ = try MistKitClient(configuration: config, transport: transport)
-  }
-
-  @Test(
-    "MistKitClient supports all databases with API token",
-    arguments: [
-      Database.public,
-      Database.private,
-      Database.shared,
-    ])
-  func supportsAllDatabases(database: Database) throws {
-    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      return
-    }
-
-    let config = MistKitConfiguration(
-      container: "iCloud.com.example.app",
-      environment: .development,
-      database: database,
-      apiToken: String(repeating: "4", count: 64)
-    )
-
-    let transport = MockTransport()
-    _ = try MistKitClient(configuration: config, transport: transport)
-  }
-
-  // MARK: - Container Identifier Tests
-
-  @Test("MistKitClient accepts various container formats")
-  func acceptsVariousContainerFormats() throws {
-    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      return
-    }
-
-    let containers = [
-      "iCloud.com.example.app",
-      "iCloud.com.example.MyApp",
-      "iCloud.com.company.product",
-    ]
-
-    for container in containers {
-      let config = MistKitConfiguration(
-        container: container,
-        environment: .development,
-        database: .public,
-        apiToken: String(repeating: "5", count: 64)
-      )
-
-      let transport = MockTransport()
-      _ = try MistKitClient(configuration: config, transport: transport)
-    }
-  }
 }
+

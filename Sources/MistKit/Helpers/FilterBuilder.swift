@@ -214,15 +214,15 @@ internal struct FilterBuilder {
   ) -> Components.Schemas.FieldValueRequest._typePayload? {
     guard let first = values.first else { return nil }
     switch first {
-    case .string:    return .STRING_LIST
-    case .int64:     return .INT64_LIST
-    case .double:    return .DOUBLE_LIST
-    case .bytes:     return .BYTES_LIST
-    case .date:      return .TIMESTAMP_LIST
+    case .string: return .STRING_LIST
+    case .int64: return .INT64_LIST
+    case .double: return .DOUBLE_LIST
+    case .bytes: return .BYTES_LIST
+    case .date: return .TIMESTAMP_LIST
     case .reference: return .REFERENCE_LIST
-    case .location:  return .LOCATION_LIST
-    case .asset:     return .ASSET_LIST
-    case .list:      return .LIST
+    case .location: return .LOCATION_LIST
+    case .asset: return .ASSET_LIST
+    case .list: return .LIST
     }
   }
 

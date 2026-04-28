@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -29,8 +29,11 @@
 
 /// A user identity returned by CloudKit discover endpoints (users/discover, users/caller)
 public struct UserIdentity: Codable, Sendable {
+  /// The record name of the user in the Users zone
   public let userRecordName: String?
+  /// The user's name components (given name, family name, etc.)
   public let nameComponents: NameComponents?
+  /// Lookup information used to discover this identity
   public let lookupInfo: UserIdentityLookupInfo?
 
   internal init(from schema: Components.Schemas.UserIdentity) {
@@ -39,6 +42,11 @@ public struct UserIdentity: Codable, Sendable {
     self.lookupInfo = schema.lookupInfo.map(UserIdentityLookupInfo.init(from:))
   }
 
+  /// Initialize a user identity
+  /// - Parameters:
+  ///   - userRecordName: The record name of the user
+  ///   - nameComponents: The user's name components
+  ///   - lookupInfo: Lookup information for this identity
   public init(
     userRecordName: String? = nil,
     nameComponents: NameComponents? = nil,
