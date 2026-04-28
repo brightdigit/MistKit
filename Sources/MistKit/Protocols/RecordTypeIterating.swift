@@ -1,5 +1,5 @@
 //
-//  ZoneInfo.swift
+//  RecordTypeIterating.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,14 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Zone information from CloudKit
-public struct ZoneInfo: Encodable, Sendable {
-  /// The zone name
-  public let zoneName: String
-  /// The owner record name
-  public let ownerRecordName: String?
-  /// The zone capabilities.
-  /// Note: always empty — CloudKit Web Services zone responses do not include
-  /// capabilities in the current OpenAPI schema.
-  public let capabilities: [String]
-
-  /// Initialize zone information
-  public init(zoneName: String, ownerRecordName: String?, capabilities: [String]) {
-    self.zoneName = zoneName
-    self.ownerRecordName = ownerRecordName
-    self.capabilities = capabilities
-  }
+/// Protocol for types that provide iteration over CloudKit record types
+///
+/// Conforming types provide a `forEach` method for iterating through
+/// a collection of CloudKit record types.
+public protocol RecordTypeIterating {
+  /// Iterate through all record types
+  ///
+  /// - Parameter action: Closure called for each record type
+  /// - Throws: Rethrows any errors thrown by the action closure
+  func forEach(_ action: (any CloudKitRecord.Type) async throws -> Void) async rethrows
 }

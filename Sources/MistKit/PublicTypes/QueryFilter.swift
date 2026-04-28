@@ -126,5 +126,4 @@ public struct QueryFilter {
   public static func notListMemberBeginsWith(_ field: String, _ prefix: String) -> QueryFilter {
     QueryFilter(FilterBuilder.notListMemberBeginsWith(field, prefix))
   }
-
 }

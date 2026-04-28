@@ -36,26 +36,10 @@ extension Components.Schemas.FieldValueRequest {
   ///
   /// CloudKit infers field types from the value structure, so no type field is sent.
   internal init(from fieldValue: FieldValue) {
-    switch fieldValue {
-    case .string(let value):
-      self.init(value: .StringValue(value))
-    case .int64(let value):
-      self.init(value: .Int64Value(Int64(value)))
-    case .double(let value):
-      self.init(value: .DoubleValue(value))
-    case .bytes(let value):
-      self.init(value: .BytesValue(value))
-    case .date(let value):
-      let milliseconds = value.timeIntervalSince1970 * 1_000
-      self.init(value: .DateValue(milliseconds))
-    case .location(let location):
-      self.init(location: location)
-    case .reference(let reference):
-      self.init(reference: reference)
-    case .asset(let asset):
-      self.init(asset: asset)
-    case .list(let list):
-      self.init(list: list)
+    if let scalar = Self.makeScalarRequest(from: fieldValue) {
+      self = scalar
+    } else {
+      self = Self.makeComplexRequest(from: fieldValue)
     }
   }
 
@@ -109,5 +93,39 @@ extension Components.Schemas.FieldValueRequest {
   private init(list: [FieldValue]) {
     let listValues = list.map { Components.Schemas.ListValuePayload(from: $0) }
     self.init(value: .ListValue(listValues))
+  }
+
+  private static func makeScalarRequest(from fieldValue: FieldValue) -> Self? {
+    if case .string(let value) = fieldValue {
+      return Self(value: .StringValue(value))
+    }
+    if case .int64(let value) = fieldValue {
+      return Self(value: .Int64Value(Int64(value)))
+    }
+    if case .double(let value) = fieldValue {
+      return Self(value: .DoubleValue(value))
+    }
+    if case .bytes(let value) = fieldValue {
+      return Self(value: .BytesValue(value))
+    }
+    if case .date(let value) = fieldValue {
+      return Self(value: .DateValue(value.timeIntervalSince1970 * 1_000))
+    }
+    return nil
+  }
+
+  private static func makeComplexRequest(from fieldValue: FieldValue) -> Self {
+    switch fieldValue {
+    case .location(let location):
+      return Self(location: location)
+    case .reference(let reference):
+      return Self(reference: reference)
+    case .asset(let asset):
+      return Self(asset: asset)
+    case .list(let list):
+      return Self(list: list)
+    default:
+      return Self(value: .ListValue([]))
+    }
   }
 }

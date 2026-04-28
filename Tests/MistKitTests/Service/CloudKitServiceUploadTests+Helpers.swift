@@ -33,6 +33,12 @@ import Testing
 
 @testable import MistKit
 
+/// Types of upload validation errors that can occur
+internal enum UploadValidationErrorType: Sendable {
+  case emptyData
+  case oversizedAsset(Int)
+}
+
 extension CloudKitServiceUploadTests {
   /// Create service for successful upload operations
   /// Test API token in 64-character hexadecimal format as required by MistKit validation
@@ -113,12 +119,6 @@ extension CloudKitServiceUploadTests {
       transport: transport
     )
   }
-}
-
-/// Types of upload validation errors that can occur
-internal enum UploadValidationErrorType: Sendable {
-  case emptyData
-  case oversizedAsset(Int)
 }
 
 // MARK: - Upload Response Builders

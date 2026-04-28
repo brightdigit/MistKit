@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceDiscoverUserIdentitiesTests.swift
+//  CloudKitDiscoverUserIdentitiesTests+Validation.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -32,6 +32,22 @@ import Testing
 
 @testable import MistKit
 
-@Suite(
-  "CloudKitService DiscoverUserIdentities Operations", .enabled(if: Platform.isCryptoAvailable))
-internal enum CloudKitServiceDiscoverUserIdentitiesTests {}
+extension CloudKitDiscoverUserIdentitiesTests {
+  @Suite("Validation")
+  internal struct Validation {
+    @Test("discoverUserIdentities() throws on authentication error")
+    internal func discoverUserIdentitiesThrowsOnAuthError() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitDiscoverUserIdentitiesTests.makeAuthErrorService()
+
+      await #expect(throws: CloudKitError.self) {
+        try await service.discoverUserIdentities(
+          lookupInfos: [UserIdentityLookupInfo(userRecordName: "_user-0")]
+        )
+      }
+    }
+  }
+}

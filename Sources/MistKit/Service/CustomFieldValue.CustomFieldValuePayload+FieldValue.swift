@@ -33,25 +33,10 @@ internal import Foundation
 extension CustomFieldValue.CustomFieldValuePayload {
   /// Initialize from MistKit FieldValue (for list nesting)
   internal init(_ fieldValue: FieldValue) {
-    switch fieldValue {
-    case .string(let value):
-      self = .stringValue(value)
-    case .int64(let value):
-      self = .int64Value(value)
-    case .double(let value):
-      self = .doubleValue(value)
-    case .bytes(let value):
-      self = .bytesValue(value)
-    case .date(let value):
-      self = .dateValue(value.timeIntervalSince1970 * 1_000)
-    case .location(let location):
-      self.init(location: location)
-    case .reference(let reference):
-      self.init(reference: reference)
-    case .asset(let asset):
-      self.init(asset: asset)
-    case .list(let nestedList):
-      self = .listValue(nestedList.map { Self(basicFieldValue: $0) })
+    if let scalar = Self.makeScalarPayload(from: fieldValue) {
+      self = scalar
+    } else {
+      self = Self.makeComplexPayload(from: fieldValue)
     }
   }
 
@@ -119,6 +104,40 @@ extension CustomFieldValue.CustomFieldValuePayload {
       self = .dateValue(dateValue.timeIntervalSince1970 * 1_000)
     default:
       self = .stringValue("unsupported")
+    }
+  }
+
+  private static func makeScalarPayload(from fieldValue: FieldValue) -> Self? {
+    if case .string(let value) = fieldValue {
+      return .stringValue(value)
+    }
+    if case .int64(let value) = fieldValue {
+      return .int64Value(value)
+    }
+    if case .double(let value) = fieldValue {
+      return .doubleValue(value)
+    }
+    if case .bytes(let value) = fieldValue {
+      return .bytesValue(value)
+    }
+    if case .date(let value) = fieldValue {
+      return .dateValue(value.timeIntervalSince1970 * 1_000)
+    }
+    return nil
+  }
+
+  private static func makeComplexPayload(from fieldValue: FieldValue) -> Self {
+    switch fieldValue {
+    case .location(let location):
+      return Self(location: location)
+    case .reference(let reference):
+      return Self(reference: reference)
+    case .asset(let asset):
+      return Self(asset: asset)
+    case .list(let nestedList):
+      return .listValue(nestedList.map { Self(basicFieldValue: $0) })
+    default:
+      return .stringValue("")
     }
   }
 }

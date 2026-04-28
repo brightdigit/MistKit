@@ -49,11 +49,12 @@ extension LoggingMiddlewareTests {
     let body: HTTPBody? = nil
     let baseURL = try #require(URL(string: "https://api.apple-cloudkit.com"))
 
-    let next: (HTTPRequest, HTTPBody?, URL) async throws
-      -> (HTTPResponse, HTTPBody?) = { _, _, _ in
-        let response = HTTPResponse(status: .ok)
-        return (response, nil)
-      }
+    let next:
+      (HTTPRequest, HTTPBody?, URL) async throws
+        -> (HTTPResponse, HTTPBody?) = { _, _, _ in
+          let response = HTTPResponse(status: .ok)
+          return (response, nil)
+        }
 
     let (response, _) = try await middleware.intercept(
       request,
@@ -93,11 +94,12 @@ extension LoggingMiddlewareTests {
     let body: HTTPBody? = nil
     let baseURL = try #require(URL(string: "https://api.apple-cloudkit.com"))
 
-    let next: (HTTPRequest, HTTPBody?, URL) async throws
-      -> (HTTPResponse, HTTPBody?) = { _, _, _ in
-        let response = HTTPResponse(status: .ok)
-        return (response, nil)
-      }
+    let next:
+      (HTTPRequest, HTTPBody?, URL) async throws
+        -> (HTTPResponse, HTTPBody?) = { _, _, _ in
+          let response = HTTPResponse(status: .ok)
+          return (response, nil)
+        }
 
     let (response, _) = try await middleware.intercept(
       request,
@@ -127,11 +129,12 @@ extension LoggingMiddlewareTests {
     let largeData = Data(repeating: 0x41, count: 100_000)
     let responseBody = HTTPBody(largeData)
 
-    let next: (HTTPRequest, HTTPBody?, URL) async throws
-      -> (HTTPResponse, HTTPBody?) = { _, _, _ in
-        let response = HTTPResponse(status: .ok)
-        return (response, responseBody)
-      }
+    let next:
+      (HTTPRequest, HTTPBody?, URL) async throws
+        -> (HTTPResponse, HTTPBody?) = { _, _, _ in
+          let response = HTTPResponse(status: .ok)
+          return (response, responseBody)
+        }
 
     let (response, returnedBody) = try await middleware.intercept(
       request,
@@ -163,11 +166,12 @@ extension LoggingMiddlewareTests {
           )
           let body: HTTPBody? = nil
 
-          let next: (HTTPRequest, HTTPBody?, URL) async throws
-            -> (HTTPResponse, HTTPBody?) = { _, _, _ in
-              let response = HTTPResponse(status: .ok)
-              return (response, nil)
-            }
+          let next:
+            (HTTPRequest, HTTPBody?, URL) async throws
+              -> (HTTPResponse, HTTPBody?) = { _, _, _ in
+                let response = HTTPResponse(status: .ok)
+                return (response, nil)
+              }
 
           let (response, _) = try await middleware.intercept(
             request,

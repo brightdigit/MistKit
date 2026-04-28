@@ -106,7 +106,8 @@ extension FieldValueConversionTests {
         return
       }
       let reference = FieldValue.Reference(
-        recordName: "test-record-789", action: FieldValue.Reference.Action.none)
+        recordName: "test-record-789", action: FieldValue.Reference.Action.none
+      )
       let fieldValue = FieldValue.reference(reference)
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 

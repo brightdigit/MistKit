@@ -1,5 +1,5 @@
 //
-//  LoggingMiddlewareTests.swift
+//  LoggingMiddlewareTests+StatusTests.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -34,30 +34,40 @@ import Testing
 
 @testable import MistKit
 
-@Suite("LoggingMiddleware Tests")
-internal struct LoggingMiddlewareTests {
-  // MARK: - Basic Middleware Tests
+extension LoggingMiddlewareTests {
+  // MARK: - HTTP Status Code Tests
 
-  @Test("LoggingMiddleware intercepts and passes through requests")
-  internal func interceptsAndPassesThrough() async throws {
+  @Test(
+    "LoggingMiddleware handles various HTTP status codes",
+    arguments: [
+      HTTPResponse.Status.ok,
+      HTTPResponse.Status.created,
+      HTTPResponse.Status.accepted,
+      HTTPResponse.Status.noContent,
+      HTTPResponse.Status.badRequest,
+      HTTPResponse.Status.unauthorized,
+      HTTPResponse.Status.forbidden,
+      HTTPResponse.Status.notFound,
+      HTTPResponse.Status.internalServerError,
+    ]
+  )
+  internal func handlesVariousStatusCodes(status: HTTPResponse.Status) async throws {
     let middleware = LoggingMiddleware()
     let request = HTTPRequest(
       method: .get,
       scheme: "https",
       authority: "api.apple-cloudkit.com",
-      path: "/database/1/test/development/public/records/query"
+      path: "/test"
     )
     let body: HTTPBody? = nil
     let baseURL = try #require(URL(string: "https://api.apple-cloudkit.com"))
 
-    var nextCalled = false
     let next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = { _, _, _ in
-      nextCalled = true
-      let response = HTTPResponse(status: .ok)
+      let response = HTTPResponse(status: status)
       return (response, nil)
     }
 
-    let (response, responseBody) = try await middleware.intercept(
+    let (response, _) = try await middleware.intercept(
       request,
       body: body,
       baseURL: baseURL,
@@ -65,22 +75,52 @@ internal struct LoggingMiddlewareTests {
       next: next
     )
 
-    #expect(nextCalled == true)
-    #expect(response.status == .ok)
-    #expect(responseBody == nil)
+    #expect(response.status == status)
   }
 
-  @Test("LoggingMiddleware handles POST requests")
-  internal func handlesPostRequests() async throws {
+  @Test("LoggingMiddleware handles 421 Misdirected Request")
+  internal func handles421Status() async throws {
     let middleware = LoggingMiddleware()
     let request = HTTPRequest(
-      method: .post,
+      method: .get,
       scheme: "https",
       authority: "api.apple-cloudkit.com",
-      path: "/database/1/test/development/public/records/modify"
+      path: "/test"
     )
-    let bodyData = Data("{\"records\":[]}".utf8)
-    let body = HTTPBody(bodyData)
+    let body: HTTPBody? = nil
+    let baseURL = try #require(URL(string: "https://api.apple-cloudkit.com"))
+
+    let next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = { _, _, _ in
+      let response = HTTPResponse(status: .init(code: 421, reasonPhrase: "Misdirected Request"))
+      return (response, nil)
+    }
+
+    let (response, _) = try await middleware.intercept(
+      request,
+      body: body,
+      baseURL: baseURL,
+      operationID: "test",
+      next: next
+    )
+
+    #expect(response.status.code == 421)
+  }
+
+  // MARK: - Request Header Tests
+
+  @Test("LoggingMiddleware handles requests with headers")
+  internal func handlesRequestHeaders() async throws {
+    let middleware = LoggingMiddleware()
+    var request = HTTPRequest(
+      method: .get,
+      scheme: "https",
+      authority: "api.apple-cloudkit.com",
+      path: "/test"
+    )
+    request.headerFields[.authorization] = "Bearer token"
+    request.headerFields[.contentType] = "application/json"
+
+    let body: HTTPBody? = nil
     let baseURL = try #require(URL(string: "https://api.apple-cloudkit.com"))
 
     let next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = { _, _, _ in
@@ -92,86 +132,10 @@ internal struct LoggingMiddlewareTests {
       request,
       body: body,
       baseURL: baseURL,
-      operationID: "modify",
+      operationID: "test",
       next: next
     )
 
     #expect(response.status == .ok)
-  }
-
-  @Test("LoggingMiddleware handles response bodies")
-  internal func handlesResponseBodies() async throws {
-    let middleware = LoggingMiddleware()
-    let request = HTTPRequest(
-      method: .get,
-      scheme: "https",
-      authority: "api.apple-cloudkit.com",
-      path: "/database/1/test/development/public/records/query"
-    )
-    let body: HTTPBody? = nil
-    let baseURL = try #require(URL(string: "https://api.apple-cloudkit.com"))
-
-    let responseBodyData = Data("{\"records\":[]}".utf8)
-    let responseBody = HTTPBody(responseBodyData)
-
-    let next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = { _, _, _ in
-      let response = HTTPResponse(status: .ok)
-      return (response, responseBody)
-    }
-
-    let (response, returnedBody) = try await middleware.intercept(
-      request,
-      body: body,
-      baseURL: baseURL,
-      operationID: "query",
-      next: next
-    )
-
-    #expect(response.status == .ok)
-
-    #if DEBUG
-      // In DEBUG builds, body should be recreated
-      #expect(returnedBody != nil)
-    #else
-      // In RELEASE builds, body should pass through as-is
-      #expect(returnedBody != nil)
-    #endif
-  }
-
-  // MARK: - Error Handling Tests
-
-  @Test("LoggingMiddleware propagates errors from next")
-  internal func propagatesErrors() async throws {
-    let middleware = LoggingMiddleware()
-    let request = HTTPRequest(
-      method: .get,
-      scheme: "https",
-      authority: "api.apple-cloudkit.com",
-      path: "/test"
-    )
-    let body: HTTPBody? = nil
-    let baseURL = try #require(URL(string: "https://api.apple-cloudkit.com"))
-
-    enum TestError: Error {
-      case simulatedFailure
-    }
-
-    let next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = { _, _, _ in
-      throw TestError.simulatedFailure
-    }
-
-    do {
-      _ = try await middleware.intercept(
-        request,
-        body: body,
-        baseURL: baseURL,
-        operationID: "test",
-        next: next
-      )
-      Issue.record("Expected error to be propagated")
-    } catch {
-      // Expected - error should propagate through middleware
-      #expect(error is TestError)
-    }
   }
 }

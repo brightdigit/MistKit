@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceDiscoverUserIdentitiesTests+Helpers.swift
+//  CloudKitDiscoverUserIdentitiesTests+Helpers.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -33,7 +33,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceDiscoverUserIdentitiesTests {
+extension CloudKitDiscoverUserIdentitiesTests {
   private static let testAPIToken =
     "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
 

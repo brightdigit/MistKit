@@ -1,5 +1,5 @@
 //
-//  CloudKitRecordTests.swift
+//  MockRecordManagingService.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,14 +27,40 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Testing
+import Foundation
 
 @testable import MistKit
 
-@Suite("CloudKitRecord Protocol")
-internal enum CloudKitRecordTests {
-  @Test("CloudKitRecord provides correct record type")
-  internal static func recordTypeProperty() {
-    #expect(TestRecord.cloudKitRecordType == "TestRecord")
+/// Mock implementation of RecordManaging for testing
+internal actor MockRecordManagingService: RecordManaging {
+  internal var queryCallCount = 0
+  internal var executeCallCount = 0
+  internal var lastExecutedOperations: [RecordOperation] = []
+  internal var batchSizes: [Int] = []
+  internal var recordsToReturn: [RecordInfo] = []
+
+  internal func queryRecords(recordType: String) async throws -> [RecordInfo] {
+    queryCallCount += 1
+    return recordsToReturn
+  }
+
+  internal func executeBatchOperations(_ operations: [RecordOperation], recordType: String)
+    async throws
+  {
+    executeCallCount += 1
+    batchSizes.append(operations.count)
+    lastExecutedOperations.append(contentsOf: operations)
+  }
+
+  internal func reset() {
+    queryCallCount = 0
+    executeCallCount = 0
+    lastExecutedOperations = []
+    batchSizes = []
+    recordsToReturn = []
+  }
+
+  internal func setRecordsToReturn(_ records: [RecordInfo]) {
+    recordsToReturn = records
   }
 }

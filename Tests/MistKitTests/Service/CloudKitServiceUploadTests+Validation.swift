@@ -42,7 +42,8 @@ extension CloudKitServiceUploadTests {
         return
       }
       let service = try await CloudKitServiceUploadTests.makeUploadValidationErrorService(
-        .emptyData)
+        .emptyData
+      )
 
       do {
         _ = try await service.uploadAssets(

@@ -1,9 +1,9 @@
 //
-//  CloudKitServiceDiscoverUserIdentitiesTests+Validation.swift
+//  ValidationErrorType.swift
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2026 BrightDigit.
+//  Copyright © 2025 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,27 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
-
-@testable import MistKit
-
-extension CloudKitServiceDiscoverUserIdentitiesTests {
-  @Suite("Validation")
-  internal struct Validation {
-    @Test("discoverUserIdentities() throws on authentication error")
-    internal func discoverUserIdentitiesThrowsOnAuthError() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let service = try await CloudKitServiceDiscoverUserIdentitiesTests.makeAuthErrorService()
-
-      await #expect(throws: CloudKitError.self) {
-        try await service.discoverUserIdentities(
-          lookupInfos: [UserIdentityLookupInfo(userRecordName: "_user-0")]
-        )
-      }
-    }
-  }
+/// Types of validation errors that can occur
+internal enum ValidationErrorType: Sendable {
+  case emptyRecordType
+  case limitTooSmall(Int)
+  case limitTooLarge(Int)
 }
