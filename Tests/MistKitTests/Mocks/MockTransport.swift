@@ -87,6 +87,7 @@ internal actor ResponseProvider {
 
   private var responses: [String: ResponseConfig]
   private var defaultResponse: ResponseConfig
+  private var responseQueues: [String: [ResponseConfig]] = [:]
 
   internal func configure(operationID: String, response: ResponseConfig) {
     responses[operationID] = response
@@ -96,11 +97,20 @@ internal actor ResponseProvider {
     defaultResponse = response
   }
 
+  internal func enqueue(_ response: ResponseConfig, for operationID: String) {
+    responseQueues[operationID, default: []].append(response)
+  }
+
   internal func response(
     for operationID: String,
     request: HTTPRequest
   ) throws -> (HTTPResponse, HTTPBody?) {
-    let config = responses[operationID] ?? defaultResponse
+    let config: ResponseConfig
+    if responseQueues[operationID]?.isEmpty == false {
+      config = responseQueues[operationID]!.removeFirst()
+    } else {
+      config = responses[operationID] ?? defaultResponse
+    }
 
     if let error = config.error {
       throw error

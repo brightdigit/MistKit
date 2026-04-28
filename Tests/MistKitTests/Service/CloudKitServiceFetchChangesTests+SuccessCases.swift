@@ -116,5 +116,55 @@ extension CloudKitServiceFetchChangesTests {
       #expect(records.count == 3)
       #expect(token == "final-token")
     }
+
+    @Test("fetchAllRecordChanges() accumulates records across two pages")
+    internal func fetchAllRecordChangesMultiPage() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceFetchChangesTests.makePaginatedService(pages: [
+        (recordCount: 3, syncToken: "token-1"),
+        (recordCount: 2, syncToken: "token-2"),
+      ])
+
+      let (records, token) = try await service.fetchAllRecordChanges()
+
+      #expect(records.count == 5)
+      #expect(token == "token-2")
+    }
+
+    @Test("fetchAllRecordChanges() uses final syncToken when moreComing transitions to false")
+    internal func fetchAllRecordChangesFinalSyncToken() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceFetchChangesTests.makePaginatedService(pages: [
+        (recordCount: 1, syncToken: "interim-token"),
+        (recordCount: 1, syncToken: "final-token"),
+      ])
+
+      let (_, token) = try await service.fetchAllRecordChanges()
+
+      #expect(token == "final-token")
+    }
+
+    @Test("fetchAllRecordChanges() handles moreComing=true with empty first page")
+    internal func fetchAllRecordChangesEmptyFirstPage() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceFetchChangesTests.makePaginatedService(pages: [
+        (recordCount: 0, syncToken: "token-1"),
+        (recordCount: 3, syncToken: "token-2"),
+      ])
+
+      let (records, token) = try await service.fetchAllRecordChanges()
+
+      #expect(records.count == 3)
+      #expect(token == "token-2")
+    }
   }
 }

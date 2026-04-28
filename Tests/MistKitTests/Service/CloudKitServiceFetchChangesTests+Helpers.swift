@@ -57,6 +57,32 @@ extension CloudKitServiceFetchChangesTests {
   }
 
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  internal static func makePaginatedService(
+    pages: [(recordCount: Int, syncToken: String)]
+  ) async throws -> CloudKitService {
+    let provider = ResponseProvider(
+      defaultResponse: try .successfulFetchChangesResponse(moreComing: false)
+    )
+    for (index, page) in pages.enumerated() {
+      let moreComing = index < pages.count - 1
+      await provider.enqueue(
+        try .successfulFetchChangesResponse(
+          recordCount: page.recordCount,
+          moreComing: moreComing,
+          syncToken: page.syncToken
+        ),
+        for: "fetchRecordChanges"
+      )
+    }
+    let transport = MockTransport(responseProvider: provider)
+    return try CloudKitService(
+      containerIdentifier: "iCloud.com.example.test",
+      apiToken: testAPIToken,
+      transport: transport
+    )
+  }
+
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeAuthErrorService() async throws -> CloudKitService {
     let responseProvider = ResponseProvider.authenticationError()
     let transport = MockTransport(responseProvider: responseProvider)
