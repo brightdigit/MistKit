@@ -83,7 +83,7 @@ extension CloudKitService {
         MistKitLogger.logDebug(
           "Asset upload response: \(responseString)",
           logger: MistKitLogger.api,
-          shouldRedact: false
+          shouldRedact: true
         )
       }
 

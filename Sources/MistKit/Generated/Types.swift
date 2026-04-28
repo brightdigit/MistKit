@@ -1664,21 +1664,27 @@ internal enum Components {
             internal var zones: Components.Schemas.ZoneChangesResponse.zonesPayload?
             /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/syncToken`.
             internal var syncToken: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/moreComing`.
+            internal var moreComing: Swift.Bool?
             /// Creates a new `ZoneChangesResponse`.
             ///
             /// - Parameters:
             ///   - zones:
             ///   - syncToken:
+            ///   - moreComing:
             internal init(
                 zones: Components.Schemas.ZoneChangesResponse.zonesPayload? = nil,
-                syncToken: Swift.String? = nil
+                syncToken: Swift.String? = nil,
+                moreComing: Swift.Bool? = nil
             ) {
                 self.zones = zones
                 self.syncToken = syncToken
+                self.moreComing = moreComing
             }
             internal enum CodingKeys: String, CodingKey {
                 case zones
                 case syncToken
+                case moreComing
             }
         }
         /// - Remark: Generated from `#/components/schemas/SubscriptionsListResponse`.

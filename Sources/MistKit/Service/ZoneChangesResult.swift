@@ -36,14 +36,18 @@ public struct ZoneChangesResult: Codable, Sendable {
   public let zones: [ZoneInfo]
   /// Token to use for next fetch to get incremental changes
   public let syncToken: String?
+  /// Whether more changes are available (for large zone change sets)
+  public let moreComing: Bool
 
   /// Initialize a zone changes result
   public init(
     zones: [ZoneInfo],
-    syncToken: String?
+    syncToken: String?,
+    moreComing: Bool = false
   ) {
     self.zones = zones
     self.syncToken = syncToken
+    self.moreComing = moreComing
   }
 
   internal init(from response: Components.Schemas.ZoneChangesResponse) {
@@ -59,5 +63,6 @@ public struct ZoneChangesResult: Codable, Sendable {
         )
       } ?? []
     self.syncToken = response.syncToken
+    self.moreComing = response.moreComing ?? false
   }
 }

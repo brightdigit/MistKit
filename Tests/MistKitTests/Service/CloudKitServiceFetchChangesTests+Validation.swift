@@ -35,7 +35,7 @@ import Testing
 extension CloudKitServiceFetchChangesTests {
   @Suite("Validation")
   internal struct Validation {
-    @Test("fetchRecordChanges() throws for limit of 0")
+    @Test("fetchRecordChanges() throws 400 for limit of 0")
     internal func fetchRecordChangesThrowsForZeroLimit() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
@@ -43,12 +43,17 @@ extension CloudKitServiceFetchChangesTests {
       }
       let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService()
 
-      await #expect(throws: CloudKitError.self) {
+      await #expect {
         try await service.fetchRecordChanges(resultsLimit: 0)
+      } throws: { error in
+        guard let ckError = error as? CloudKitError,
+          case .httpErrorWithRawResponse(let status, _) = ckError
+        else { return false }
+        return status == 400
       }
     }
 
-    @Test("fetchRecordChanges() throws for limit over 200")
+    @Test("fetchRecordChanges() throws 400 for limit over 200")
     internal func fetchRecordChangesThrowsForLimitOver200() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
@@ -56,8 +61,13 @@ extension CloudKitServiceFetchChangesTests {
       }
       let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService()
 
-      await #expect(throws: CloudKitError.self) {
+      await #expect {
         try await service.fetchRecordChanges(resultsLimit: 201)
+      } throws: { error in
+        guard let ckError = error as? CloudKitError,
+          case .httpErrorWithRawResponse(let status, _) = ckError
+        else { return false }
+        return status == 400
       }
     }
 
@@ -76,6 +86,27 @@ extension CloudKitServiceFetchChangesTests {
       // Maximum valid limit
       let result200 = try await service.fetchRecordChanges(resultsLimit: 200)
       #expect(result200.records.isEmpty == false || result200.syncToken != nil)
+    }
+
+    @Test("fetchAllRecordChanges() throws invalidResponse for moreComing:true with nil syncToken")
+    internal func fetchAllRecordChangesThrowsForNilSyncTokenWithMoreComing() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let responseProvider = ResponseProvider(
+        defaultResponse: .fetchChangesResponseMoreComingNilToken(recordCount: 2)
+      )
+      let transport = MockTransport(responseProvider: responseProvider)
+      let service = try CloudKitService(
+        containerIdentifier: "iCloud.com.example.test",
+        apiToken: "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234",
+        transport: transport
+      )
+
+      await #expect(throws: CloudKitError.self) {
+        _ = try await service.fetchAllRecordChanges()
+      }
     }
 
     @Test("fetchAllRecordChanges() breaks out when server returns stuck token with no records")

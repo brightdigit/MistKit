@@ -99,9 +99,7 @@ extension CloudKitService {
         recordName: recordName
       )
 
-      guard let uploadURLString = urlToken.url,
-        let uploadURL = URL(string: uploadURLString)
-      else {
+      guard let uploadURL = urlToken.url else {
         throw CloudKitError.invalidResponse
       }
 
@@ -109,9 +107,12 @@ extension CloudKitService {
         data, to: uploadURL, using: uploader
       )
 
+      guard let recordName = urlToken.recordName else {
+        throw CloudKitError.invalidResponse
+      }
       return AssetUploadReceipt(
         asset: asset,
-        recordName: urlToken.recordName ?? "unknown",
+        recordName: recordName,
         fieldName: urlToken.fieldName ?? fieldName
       )
     } catch {

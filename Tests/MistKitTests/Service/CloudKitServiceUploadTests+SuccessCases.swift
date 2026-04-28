@@ -111,7 +111,7 @@ extension CloudKitServiceUploadTests {
         fieldName: "image"
       )
 
-      #expect(token.url?.isEmpty == false)
+      #expect(token.url != nil)
       #expect(token.recordName == "test-record-0")
       #expect(token.fieldName == "file")
     }

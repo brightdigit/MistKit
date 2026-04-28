@@ -104,21 +104,6 @@ extension CloudKitServiceUploadTests {
       transport: transport
     )
   }
-
-  /// Create service for asset data upload testing
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal static func makeAssetDataUploadService(tokenCount: Int = 1) async throws
-    -> CloudKitService
-  {
-    let responseProvider = ResponseProvider.successfulUpload(tokenCount: tokenCount)
-
-    let transport = MockTransport(responseProvider: responseProvider)
-    return try CloudKitService(
-      containerIdentifier: "iCloud.com.example.test",
-      apiToken: testAPIToken,
-      transport: transport
-    )
-  }
 }
 
 // MARK: - Upload Response Builders
@@ -171,6 +156,30 @@ extension ResponseConfig {
     )
   }
 
+  /// Creates an upload response where the token has no recordName field
+  internal static func uploadResponseWithNilRecordName() -> ResponseConfig {
+    let responseJSON = """
+      {
+        "tokens": [
+          {
+            "url": "https://cvws.icloud-content.com/test-upload-url",
+            "fieldName": "file"
+          }
+        ]
+      }
+      """
+
+    var headers = HTTPFields()
+    headers[.contentType] = "application/json"
+
+    return ResponseConfig(
+      statusCode: 200,
+      headers: headers,
+      body: responseJSON.data(using: .utf8),
+      error: nil
+    )
+  }
+
   /// Creates an upload validation error response (400 Bad Request)
   ///
   /// - Parameter type: The type of upload validation error
@@ -188,33 +197,6 @@ extension ResponseConfig {
       statusCode: 400,
       serverErrorCode: "BAD_REQUEST",
       reason: reason
-    )
-  }
-
-  /// Creates a successful asset data upload response (binary upload to CDN)
-  ///
-  /// - Returns: ResponseConfig with CloudKit asset upload response
-  internal static func successfulAssetDataUpload() -> ResponseConfig {
-    let responseJSON = """
-      {
-        "singleFile": {
-          "wrappingKey": "test-wrapping-key-abc123",
-          "fileChecksum": "test-checksum-def456",
-          "receipt": "test-receipt-token-xyz",
-          "referenceChecksum": "test-ref-checksum-789",
-          "size": 1024
-        }
-      }
-      """
-
-    var headers = HTTPFields()
-    headers[.contentType] = "application/json"
-
-    return ResponseConfig(
-      statusCode: 200,
-      headers: headers,
-      body: responseJSON.data(using: .utf8),
-      error: nil
     )
   }
 }

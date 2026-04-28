@@ -150,6 +150,41 @@ extension ResponseConfig {
     )
   }
 
+  internal static func fetchChangesResponseMoreComingNilToken(recordCount: Int = 2)
+    -> ResponseConfig
+  {
+    var records: [[String: Any]] = []
+    for index in 0..<recordCount {
+      records.append([
+        "recordName": "record-\(index)",
+        "recordType": "Note",
+        "recordChangeTag": "tag-\(index)",
+        "fields": [String: Any](),
+      ])
+    }
+
+    let recordsString =
+      (try? JSONSerialization.data(withJSONObject: records))
+      .flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+
+    let responseJSON = """
+      {
+        "records": \(recordsString),
+        "moreComing": true
+      }
+      """
+
+    var headers = HTTPFields()
+    headers[.contentType] = "application/json"
+
+    return ResponseConfig(
+      statusCode: 200,
+      headers: headers,
+      body: responseJSON.data(using: .utf8),
+      error: nil
+    )
+  }
+
   internal static func fetchChangesResponseWithDeletedRecord() -> ResponseConfig {
     let responseJSON = """
       {

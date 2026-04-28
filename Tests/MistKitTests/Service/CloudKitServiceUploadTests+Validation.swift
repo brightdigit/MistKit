@@ -129,5 +129,31 @@ extension CloudKitServiceUploadTests {
         }
       }
     }
+
+    @Test("uploadAssets() throws invalidResponse when CloudKit returns token with no recordName")
+    internal func uploadAssetsThrowsWhenRecordNameIsNil() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let responseProvider = ResponseProvider(
+        defaultResponse: .uploadResponseWithNilRecordName()
+      )
+      let transport = MockTransport(responseProvider: responseProvider)
+      let service = try CloudKitService(
+        containerIdentifier: "iCloud.com.example.test",
+        apiToken: "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234",
+        transport: transport
+      )
+
+      await #expect(throws: CloudKitError.self) {
+        _ = try await service.uploadAssets(
+          data: Data(count: 1_024),
+          recordType: "Note",
+          fieldName: "image",
+          using: CloudKitServiceUploadTests.makeMockAssetUploader()
+        )
+      }
+    }
   }
 }

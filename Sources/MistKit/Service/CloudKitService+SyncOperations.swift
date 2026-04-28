@@ -169,6 +169,12 @@ extension CloudKitService {
         throw CloudKitError.invalidResponse
       }
 
+      do {
+        try Task.checkCancellation()
+      } catch {
+        throw mapToCloudKitError(error, context: "fetchAllRecordChanges")
+      }
+
       let result = try await fetchRecordChanges(
         zoneID: zoneID,
         syncToken: currentToken,
@@ -177,6 +183,10 @@ extension CloudKitService {
 
       if result.records.isEmpty && result.moreComing && result.syncToken == currentToken {
         break
+      }
+
+      if result.moreComing && result.syncToken == nil {
+        throw CloudKitError.invalidResponse
       }
 
       allRecords.append(contentsOf: result.records)
