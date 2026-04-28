@@ -37,10 +37,9 @@ public struct RecordTimestamp: Encodable, Sendable {
   public let userRecordName: String?
 
   internal init(from schema: Components.Schemas.RecordTimestamp) {
-    if let millis = schema.timestamp {
-      self.timestamp = Date(timeIntervalSince1970: millis / 1000.0)
-    } else {
-      self.timestamp = nil
+    self.timestamp = schema.timestamp.flatMap { millis in
+      guard millis >= 0 else { return nil }
+      return Date(timeIntervalSince1970: millis / 1000.0)
     }
     self.userRecordName = schema.userRecordName
   }
