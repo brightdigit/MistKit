@@ -28,6 +28,7 @@
 //
 
 import HTTPTypes
+import OpenAPIRuntime
 
 /// Thread-safe provider for configuring mock responses
 internal actor ResponseProvider {
