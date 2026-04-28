@@ -34,22 +34,22 @@ public import Foundation
 /// After uploading binary data, CloudKit returns tokens that must be
 /// associated with record fields using a subsequent modifyRecords operation.
 public struct AssetUploadToken: Sendable, Equatable {
-  /// The upload URL (may be used for download reference)
-  public let url: String?
+  /// The upload URL for the CDN endpoint
+  public let url: URL?
   /// The record name this token is associated with
   public let recordName: String?
   /// The field name this token should be assigned to
   public let fieldName: String?
 
   /// Initialize an asset upload token
-  public init(url: String?, recordName: String?, fieldName: String?) {
+  public init(url: URL?, recordName: String?, fieldName: String?) {
     self.url = url
     self.recordName = recordName
     self.fieldName = fieldName
   }
 
   internal init(from token: Components.Schemas.AssetUploadResponse.tokensPayloadPayload) {
-    self.url = token.url
+    self.url = token.url.flatMap { URL(string: $0) }
     self.recordName = token.recordName
     self.fieldName = token.fieldName
   }

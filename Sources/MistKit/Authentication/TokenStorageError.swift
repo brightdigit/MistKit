@@ -1,5 +1,5 @@
 //
-//  Components+Environment.swift
+//  TokenStorageError.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,18 +27,37 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+public import Foundation
 
-/// Extension to convert MistKit Environment to OpenAPI Components.Parameters.environment
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension Components.Parameters.environment {
-  /// Initialize from MistKit Environment
-  internal init(from environment: Environment) {
-    switch environment {
-    case .development:
-      self = .development
-    case .production:
-      self = .production
+/// Errors that can occur during token storage operations
+public enum TokenStorageError: Error, LocalizedError, Sendable {
+  /// Storage operation failed
+  case storageFailed(reason: String)
+
+  /// Credentials not found
+  case notFound(identifier: String?)
+
+  /// Access denied to storage
+  case accessDenied
+
+  /// Storage corrupted or invalid format
+  case corruptedStorage
+
+  /// A localized message describing what error occurred
+  public var errorDescription: String? {
+    switch self {
+    case .storageFailed(let reason):
+      return "Token storage failed: \(reason)"
+    case .notFound(let identifier):
+      if let identifier = identifier {
+        return "Credentials not found for identifier: \(identifier)"
+      } else {
+        return "No credentials found"
+      }
+    case .accessDenied:
+      return "Access denied to token storage"
+    case .corruptedStorage:
+      return "Token storage is corrupted or in invalid format"
     }
   }
 }

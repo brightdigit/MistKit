@@ -28,6 +28,7 @@
 //
 
 public import Foundation
+import HTTPTypes
 import Hummingbird
 import Logging
 import MistKit
@@ -51,7 +52,12 @@ public struct AuthTokenCommand: MistDemoCommand {
         """
     
     private let config: AuthTokenConfig
-    
+
+    private struct CloudKitClientConfig: Encodable {
+        let apiToken: String
+        let containerIdentifier: String
+    }
+
     public init(config: AuthTokenConfig) {
         self.config = config
     }
@@ -80,6 +86,32 @@ public struct AuthTokenCommand: MistDemoCommand {
         
         // API endpoint for authentication callback
         let api = router.group("api")
+
+        let configPayload = CloudKitClientConfig(
+            apiToken: config.apiToken,
+            containerIdentifier: config.containerIdentifier
+        )
+        let configData = try JSONEncoder().encode(configPayload)
+
+        api.get("config") { request, _ -> Response in
+            // Restrict to loopback destinations. The Host header reflects the request's
+            // destination host (not the origin), so this prevents requests to non-loopback
+            // addresses but does not block cross-origin browser requests. For full CORS
+            // protection, check the Origin header (set by browsers and not JS-spoofable).
+            let host = request.headers[HTTPField.Name("Host")!] ?? ""
+            guard host.hasPrefix("localhost") || host.hasPrefix("127.0.0.1") else {
+                return Response(status: .forbidden)
+            }
+            return Response(
+                status: .ok,
+                headers: [.contentType: "application/json"],
+                body: ResponseBody { writer in
+                    try await writer.write(ByteBuffer(bytes: configData))
+                    try await writer.finish(nil)
+                }
+            )
+        }
+
         api.post("authenticate") { request, context -> Response in
             let authRequest = try await request.decode(as: AuthRequest.self, context: context)
             await tokenChannel.send(authRequest.sessionToken)

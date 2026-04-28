@@ -93,10 +93,68 @@ extension CloudKitServiceUploadTests {
         using: CloudKitServiceUploadTests.makeMockAssetUploader()
       )
 
-      // Verify result has the expected fields
       #expect(result.recordName == "test-record-0")
       #expect(result.fieldName == "file")
       #expect(result.asset.receipt != nil)
+    }
+
+    @Test("requestAssetUploadURL() returns token with url, recordName, and fieldName")
+    internal func requestAssetUploadURLReturnsToken() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
+
+      let token = try await service.requestAssetUploadURL(
+        recordType: "Note",
+        fieldName: "image"
+      )
+
+      #expect(token.url != nil)
+      #expect(token.recordName == "test-record-0")
+      #expect(token.fieldName == "file")
+    }
+
+    @Test("uploadAssets() invokes injected AssetUploader closure, not URLSession.shared")
+    internal func uploadAssetsInvokesInjectedUploader() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
+
+      actor CallTracker {
+        private(set) var callCount = 0
+        func record() { callCount += 1 }
+      }
+      let tracker = CallTracker()
+
+      let trackingUploader: AssetUploader = { data, _ in
+        await tracker.record()
+        let response = """
+          {
+            "singleFile": {
+              "wrappingKey": "key",
+              "fileChecksum": "cs",
+              "receipt": "rcpt",
+              "referenceChecksum": "rcs",
+              "size": \(data.count)
+            }
+          }
+          """
+        return (200, Data(response.utf8))
+      }
+
+      _ = try await service.uploadAssets(
+        data: Data(count: 1_024),
+        recordType: "Note",
+        fieldName: "image",
+        using: trackingUploader
+      )
+
+      let count = await tracker.callCount
+      #expect(count == 1, "Custom uploader should have been called exactly once")
     }
   }
 }

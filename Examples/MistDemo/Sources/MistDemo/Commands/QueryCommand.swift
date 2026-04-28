@@ -60,7 +60,7 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
     public func execute() async throws {
         do {
             // Create CloudKit client
-            let client = try MistKitClientFactory.createForPublicDatabase(from: config.base)
+            let client = try MistKitClientFactory.create(.public, from: config.base)
 
             // Build filters
             // NOTE: Zone, offset, and continuation marker support require

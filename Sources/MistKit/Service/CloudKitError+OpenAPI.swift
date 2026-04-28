@@ -215,7 +215,6 @@ extension CloudKitError {
       return
     }
 
-    // Should never reach here - log and return generic error
     MistKitLogger.logWarning(
       "Unhandled response case: \(response) - treating as invalid response",
       logger: MistKitLogger.api,

@@ -175,4 +175,32 @@ extension CloudKitService {
       database: .init(from: database)
     )
   }
+
+  /// Create a standard path for discoverUserIdentities requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createDiscoverUserIdentitiesPath(
+    containerIdentifier: String
+  ) -> Operations.discoverUserIdentities.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for fetchZoneChanges requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createFetchZoneChangesPath(
+    containerIdentifier: String
+  ) -> Operations.fetchZoneChanges.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
 }

@@ -57,7 +57,7 @@ public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
     public func execute() async throws {
         do {
             // Create CloudKit client
-            let client = try MistKitClientFactory.create(from: config.base)
+            let client = try MistKitClientFactory.create(.private, from: config.base)
             
             // Fetch current user information
             let userInfo = try await client.fetchCurrentUser()

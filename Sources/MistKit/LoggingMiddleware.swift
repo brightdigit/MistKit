@@ -111,7 +111,8 @@ internal struct LoggingMiddleware: ClientMiddleware {
 
       if response.status.code == 421 {
         logger.warning(
-          "⚠️  421 Misdirected Request - The server cannot produce a response for this request")
+          "⚠️  421 Misdirected Request - The server cannot produce a response for this request"
+        )
       }
 
       #if !os(WASI)

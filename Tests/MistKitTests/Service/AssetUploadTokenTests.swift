@@ -37,12 +37,12 @@ internal struct AssetUploadTokenTests {
   @Test("AssetUploadToken initializes with all fields")
   internal func assetUploadTokenInitializesWithAllFields() {
     let token = AssetUploadToken(
-      url: "https://cvws.icloud-content.com/test-url",
+      url: URL(string: "https://cvws.icloud-content.com/test-url"),
       recordName: "test-record",
       fieldName: "testField"
     )
 
-    #expect(token.url == "https://cvws.icloud-content.com/test-url")
+    #expect(token.url == URL(string: "https://cvws.icloud-content.com/test-url"))
     #expect(token.recordName == "test-record")
     #expect(token.fieldName == "testField")
   }
@@ -63,19 +63,19 @@ internal struct AssetUploadTokenTests {
   @Test("AssetUploadToken supports equality comparison")
   internal func assetUploadTokenSupportsEqualityComparison() {
     let token1 = AssetUploadToken(
-      url: "https://example.com/test",
+      url: URL(string: "https://example.com/test"),
       recordName: "record1",
       fieldName: "field1"
     )
 
     let token2 = AssetUploadToken(
-      url: "https://example.com/test",
+      url: URL(string: "https://example.com/test"),
       recordName: "record1",
       fieldName: "field1"
     )
 
     let token3 = AssetUploadToken(
-      url: "https://example.com/different",
+      url: URL(string: "https://example.com/different"),
       recordName: "record1",
       fieldName: "field1"
     )

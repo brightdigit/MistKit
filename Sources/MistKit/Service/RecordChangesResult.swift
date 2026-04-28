@@ -27,13 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
-
 /// Result from fetching record changes
 ///
 /// Contains records that have changed since the provided sync token,
 /// along with a new sync token for subsequent fetches.
-public struct RecordChangesResult: Sendable {
+public struct RecordChangesResult: Codable, Sendable {
   /// Records that have changed (created, updated, or deleted)
   public let records: [RecordInfo]
   /// Token to use for next fetch to get incremental changes

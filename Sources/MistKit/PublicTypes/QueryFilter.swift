@@ -32,6 +32,10 @@ import Foundation
 /// Public wrapper for CloudKit query filters
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct QueryFilter {
+  // MARK: - Internal
+
+  internal let filter: Components.Schemas.Filter
+
   // MARK: - Lifecycle
 
   private init(_ filter: Components.Schemas.Filter) {
@@ -122,8 +126,4 @@ public struct QueryFilter {
   public static func notListMemberBeginsWith(_ field: String, _ prefix: String) -> QueryFilter {
     QueryFilter(FilterBuilder.notListMemberBeginsWith(field, prefix))
   }
-
-  // MARK: - Internal
-
-  internal let filter: Components.Schemas.Filter
 }

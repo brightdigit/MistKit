@@ -27,41 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
-
-/// Errors that can occur during token storage operations
-public enum TokenStorageError: Error, LocalizedError, Sendable {
-  /// Storage operation failed
-  case storageFailed(reason: String)
-
-  /// Credentials not found
-  case notFound(identifier: String?)
-
-  /// Access denied to storage
-  case accessDenied
-
-  /// Storage corrupted or invalid format
-  case corruptedStorage
-
-  /// A localized message describing what error occurred
-  public var errorDescription: String? {
-    switch self {
-    case .storageFailed(let reason):
-      return "Token storage failed: \(reason)"
-    case .notFound(let identifier):
-      if let identifier = identifier {
-        return "Credentials not found for identifier: \(identifier)"
-      } else {
-        return "No credentials found"
-      }
-    case .accessDenied:
-      return "Access denied to token storage"
-    case .corruptedStorage:
-      return "Token storage is corrupted or in invalid format"
-    }
-  }
-}
-
 /// Protocol for persisting and retrieving authentication tokens/keys
 public protocol TokenStorage: Sendable {
   /// Stores token credentials with an optional identifier

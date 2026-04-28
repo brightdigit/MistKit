@@ -33,9 +33,9 @@ import Testing
 @testable import MistKit
 
 @Suite("Array Chunked Tests")
-struct ArrayChunkedTests {
+internal struct ArrayChunkedTests {
   @Test("chunked splits array into correct chunks")
-  func chunkedSplitsCorrectly() {
+  internal func chunkedSplitsCorrectly() {
     let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     let chunks = array.chunked(into: 3)
 
@@ -47,7 +47,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked handles exact multiple of chunk size")
-  func chunkedExactMultiple() {
+  internal func chunkedExactMultiple() {
     let array = [1, 2, 3, 4, 5, 6]
     let chunks = array.chunked(into: 2)
 
@@ -58,7 +58,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked handles remainder elements")
-  func chunkedWithRemainder() {
+  internal func chunkedWithRemainder() {
     let array = [1, 2, 3, 4, 5]
     let chunks = array.chunked(into: 2)
 
@@ -69,7 +69,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked handles empty array")
-  func chunkedEmptyArray() {
+  internal func chunkedEmptyArray() {
     let array: [Int] = []
     let chunks = array.chunked(into: 5)
 
@@ -77,7 +77,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked handles single element")
-  func chunkedSingleElement() {
+  internal func chunkedSingleElement() {
     let array = [42]
     let chunks = array.chunked(into: 5)
 
@@ -86,7 +86,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked handles chunk size larger than array")
-  func chunkedLargerChunkSize() {
+  internal func chunkedLargerChunkSize() {
     let array = [1, 2, 3]
     let chunks = array.chunked(into: 10)
 
@@ -95,7 +95,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked respects CloudKit 200-item limit", arguments: [200, 199, 201, 400, 600])
-  func chunkedCloudKitLimit(totalItems: Int) {
+  internal func chunkedCloudKitLimit(totalItems: Int) {
     let array = Array(1...totalItems)
     let chunks = array.chunked(into: 200)
 
@@ -115,7 +115,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked with chunk size 1")
-  func chunkedSizeOne() {
+  internal func chunkedSizeOne() {
     let array = [1, 2, 3, 4, 5]
     let chunks = array.chunked(into: 1)
 
@@ -126,7 +126,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked preserves element order")
-  func chunkedPreservesOrder() {
+  internal func chunkedPreservesOrder() {
     let array = ["a", "b", "c", "d", "e", "f", "g"]
     let chunks = array.chunked(into: 3)
 
@@ -135,7 +135,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked with different element types")
-  func chunkedDifferentTypes() {
+  internal func chunkedDifferentTypes() {
     struct TestItem: Equatable {
       let id: Int
       let name: String
@@ -158,7 +158,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked large array performance")
-  func chunkedLargeArray() {
+  internal func chunkedLargeArray() {
     let array = Array(1...10_000)
     let chunks = array.chunked(into: 200)
 
@@ -170,7 +170,7 @@ struct ArrayChunkedTests {
   }
 
   @Test("chunked with various CloudKit batch sizes", arguments: [50, 100, 150, 200, 250])
-  func chunkedVariousBatchSizes(batchSize: Int) {
+  internal func chunkedVariousBatchSizes(batchSize: Int) {
     let array = Array(1...1_000)
     let chunks = array.chunked(into: batchSize)
 

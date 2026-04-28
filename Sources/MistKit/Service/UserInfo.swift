@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// User information from CloudKit
-public struct UserInfo: Encodable {
+/// User information from CloudKit (User Dictionary — returned by users/current and users/lookup/*)
+public struct UserInfo: Encodable, Sendable {
   /// The user's record name
   public let userRecordName: String
   /// The user's first name

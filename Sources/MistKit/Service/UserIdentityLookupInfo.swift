@@ -1,5 +1,5 @@
 //
-//  Components+Database.swift
+//  UserIdentityLookupInfo.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,20 +27,33 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+/// Information used to look up a user identity from CloudKit
+public struct UserIdentityLookupInfo: Codable, Sendable {
+  /// The email address to look up
+  public let emailAddress: String?
+  /// The phone number to look up
+  public let phoneNumber: String?
+  /// The user record name to look up
+  public let userRecordName: String?
 
-/// Extension to convert MistKit Database to OpenAPI Components.Parameters.database
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension Components.Parameters.database {
-  /// Initialize from MistKit Database
-  internal init(from database: Database) {
-    switch database {
-    case .public:
-      self = ._public
-    case .private:
-      self = ._private
-    case .shared:
-      self = .shared
-    }
+  internal init(from schema: Components.Schemas.UserIdentityLookupInfo) {
+    self.emailAddress = schema.emailAddress
+    self.phoneNumber = schema.phoneNumber
+    self.userRecordName = schema.userRecordName
+  }
+
+  /// Initialize lookup info with optional identifiers
+  /// - Parameters:
+  ///   - emailAddress: The email address to look up
+  ///   - phoneNumber: The phone number to look up
+  ///   - userRecordName: The user record name to look up
+  public init(
+    emailAddress: String? = nil,
+    phoneNumber: String? = nil,
+    userRecordName: String? = nil
+  ) {
+    self.emailAddress = emailAddress
+    self.phoneNumber = phoneNumber
+    self.userRecordName = userRecordName
   }
 }

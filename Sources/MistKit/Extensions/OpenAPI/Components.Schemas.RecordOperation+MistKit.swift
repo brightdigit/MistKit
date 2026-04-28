@@ -1,5 +1,5 @@
 //
-//  Components+RecordOperation.swift
+//  Components.Schemas.RecordOperation+MistKit.swift
 //  MistKit
 //
 //  Created by Leo Dion.

@@ -71,7 +71,8 @@ extension CloudKitServiceUploadTests {
         return
       }
       let service = try await CloudKitServiceUploadTests.makeUploadValidationErrorService(
-        .emptyData)
+        .emptyData
+      )
       let testData = Data()  // Empty data triggers 400
 
       do {
