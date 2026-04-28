@@ -57,7 +57,7 @@ Add MistKit to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.4")
+    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.5")
 ]
 ```
 
@@ -320,10 +320,7 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 
 ### v1.0.0-alpha.3
 
-- [ ] [Name Component Types](https://github.com/brightdigit/MistKit/issues/26)
 - [x] [Uploading Assets (assets/upload)](https://github.com/brightdigit/MistKit/issues/30) ✅
-- [ ] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/44)
-- [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46)
 - [x] [Add Support for swiftlang/swift-source-compat-suite](https://github.com/brightdigit/MistKit/issues/185) ✅
 
 ### v1.0.0-alpha.4
@@ -334,20 +331,28 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [WASM Platform Support](https://github.com/brightdigit/MistKit/pull/206) ✅
 - [x] [Android Platform Support](https://github.com/brightdigit/MistKit/pull/189) ✅
 
+### v1.0.0-alpha.5
+
+- [x] [Name Component Types](https://github.com/brightdigit/MistKit/issues/26) ✅
+- [x] [Discovering User Identities (POST users/discover)](https://github.com/brightdigit/MistKit/issues/27) ✅
+- [x] [Fetching Record Changes (records/changes)](https://github.com/brightdigit/MistKit/issues/40) ✅
+- [x] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/44) ✅
+- [x] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/48) ✅
+- [x] Fix QueryFilter IN/NOT_IN serialization ✅
+- [x] MistDemo integration test runner and new commands (`fetch-changes`, `lookup-zones`, `test-integration`, `test-private`, `demo-in-filter`) ✅
+
 ### v1.0.0-alpha.X
 
-- [ ] [Discovering User Identities (POST users/discover)](https://github.com/brightdigit/MistKit/issues/27)
 - [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/28)
 - [ ] [Referencing Existing Assets (assets/rereference)](https://github.com/brightdigit/MistKit/issues/31)
 - [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/33)
 - [ ] [Fetching Users by Email (users/lookup/email)](https://github.com/brightdigit/MistKit/issues/34)
 - [ ] [Fetching Users by Record Name (users/lookup/id)](https://github.com/brightdigit/MistKit/issues/35)
-- [ ] [Fetching Record Changes (records/changes)](https://github.com/brightdigit/MistKit/issues/40)
 - [ ] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/41)
 - [ ] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/42)
+- [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46)
 - [ ] [Modifying Zones (zones/modify)](https://github.com/brightdigit/MistKit/issues/45)
 - [ ] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/47)
-- [ ] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/48)
 - [ ] [Fetching Subscriptions (subscriptions/list)](https://github.com/brightdigit/MistKit/issues/49)
 - [ ] [Fetching Subscriptions by Identifier (subscriptions/lookup)](https://github.com/brightdigit/MistKit/issues/50)
 - [ ] [Modifying Subscriptions (subscriptions/modify)](https://github.com/brightdigit/MistKit/issues/51)

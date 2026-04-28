@@ -90,6 +90,13 @@ swift run mistdemo auth-token
 swift run mistdemo current-user
 swift run mistdemo query
 swift run mistdemo create
+swift run mistdemo update
+swift run mistdemo upload-asset
+swift run mistdemo lookup-zones
+swift run mistdemo fetch-changes
+swift run mistdemo demo-in-filter
+swift run mistdemo test-integration
+swift run mistdemo test-private
 
 # Run with specific configuration
 swift run mistdemo --config-file ~/.mistdemo/config.json query
@@ -144,6 +151,36 @@ MistKit/
 ├── openapi.yaml           # CloudKit Web Services OpenAPI specification
 └── openapi-generator-config.yaml # Configuration for code generation
 ```
+
+### CloudKitService Operations
+
+`CloudKitService` operations are split across focused extension files:
+
+| File | Operations |
+|------|-----------|
+| `CloudKitService+Operations.swift` | `queryRecords`, `lookupRecords`, `modifyRecords` |
+| `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
+| `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
+| `CloudKitService+UserOperations.swift` | `fetchCurrentUser()`, `discoverUserIdentities(lookupInfos:)` |
+| `CloudKitService+AssetOperations.swift` | `uploadAssets` |
+| `CloudKitService+WriteOperations.swift` | `requestAssetUploadURL`, `uploadAssetData` |
+
+**Sync/Change Operations:**
+- `fetchRecordChanges(recordType:syncToken:)` → `/records/changes` — returns `RecordChangesResult` with `records`, `syncToken`, `moreComing`
+- `fetchAllRecordChanges(recordType:syncToken:)` — convenience wrapper that auto-paginates using `moreComing`
+- `fetchZoneChanges(syncToken:)` → `/zones/changes` — returns `ZoneChangesResult`
+- `lookupZones(zoneIDs:)` → `/zones/lookup` — returns `[ZoneInfo]`
+- `discoverUserIdentities(lookupInfos:)` → `/users/discover` — takes `[UserIdentityLookupInfo]`, returns `[UserIdentity]`
+
+**Result Types (Sources/MistKit/Service/):**
+- `RecordChangesResult` — `records: [RecordInfo]`, `syncToken: String?`, `moreComing: Bool`
+- `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`
+- `UserIdentity` — `userRecordName: String?`, `nameComponents: NameComponents?`
+- `UserIdentityLookupInfo` — `emailAddress: String?`, `phoneNumber: String?`
+- `NameComponents` — full personal name parts (givenName, familyName, nickname, etc.)
+
+**Protocols:**
+- `RecordTypeIterating` (`Sources/MistKit/Protocols/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; used by `fetchAllRecordChanges`
 
 ### Key Design Principles
 1. **Protocol-Oriented**: Define protocols for all major components (TokenManager, NetworkClient, etc.)
@@ -221,6 +258,16 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 - Provide platform-specific implementations (URLSession, custom transports)
 - Maintain the same testability via dependency injection
 
+### FilterBuilder Extensions
+
+`FilterBuilder` is split across extension files for maintainability:
+
+- `Sources/MistKit/Helpers/FilterBuilder.swift` — core comparators (EQUALS, NOT_EQUALS, LESS_THAN, etc.) and IN/NOT_IN
+- `Sources/MistKit/Helpers/FilterBuilder+StringFilters.swift` — string-specific: `beginsWith`, `notBeginsWith`, `containsAllTokens`
+- `Sources/MistKit/Helpers/FilterBuilder+ListMemberFilters.swift` — list-specific: `listContains`, etc.
+
+**IN/NOT_IN serialization:** Uses `ListValuePayload` (`Components.Schemas.ListValuePayload`) to wrap array values. The fix in v1.0.0-alpha.5 ensures the correct `value` key structure is used when serializing list comparators.
+
 ### CloudKit Web Services Integration
 - Base URL: `https://api.apple-cloudkit.com`
 - Authentication:
@@ -251,6 +298,16 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 **Test Files:**
 - `Tests/MistKitTests/Service/CloudKitServiceUploadTests+*.swift`
 - `Tests/MistKitTests/Service/AssetUploadTokenTests.swift`
+
+### MistDemo Integration Test Runner
+
+`Examples/MistDemo/Sources/MistDemo/Integration/` provides a live end-to-end test suite that runs against a real CloudKit container:
+
+- `IntegrationTestRunner.swift` — orchestrates all operations (query, create, update, lookup, upload, fetchChanges, lookupZones, discoverUserIdentities)
+- `IntegrationTestData.swift` — seed data for integration tests
+- `IntegrationTestError.swift` — typed errors for test failures
+
+Run via `swift run mistdemo test-integration` or `swift run mistdemo test-private` (private database variant). Both commands require valid CloudKit credentials in the config file.
 
 ## Important Implementation Notes
 
