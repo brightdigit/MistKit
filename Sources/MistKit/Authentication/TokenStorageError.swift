@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
 /// Errors that can occur during token storage operations
 public enum TokenStorageError: Error, LocalizedError, Sendable {
