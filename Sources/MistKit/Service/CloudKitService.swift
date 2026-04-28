@@ -182,12 +182,11 @@ extension CloudKitService {
   internal func createDiscoverUserIdentitiesPath(
     containerIdentifier: String
   ) -> Operations.discoverUserIdentities.Input.Path {
-    // CloudKit requires public database for the /users/discover endpoint
     .init(
       version: "1",
       container: containerIdentifier,
       environment: .init(from: environment),
-      database: ._public
+      database: .init(from: database)
     )
   }
 

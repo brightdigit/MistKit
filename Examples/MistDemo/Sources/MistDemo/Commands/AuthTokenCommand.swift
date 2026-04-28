@@ -28,6 +28,7 @@
 //
 
 public import Foundation
+import HTTPTypes
 import Hummingbird
 import Logging
 import MistKit
@@ -92,7 +93,13 @@ public struct AuthTokenCommand: MistDemoCommand {
         )
         let configData = try JSONEncoder().encode(configPayload)
 
-        api.get("config") { _, _ -> Response in
+        api.get("config") { request, _ -> Response in
+            // Serve this credential only to loopback requests (the page we host ourselves).
+            // Without this check, any browser page could call this endpoint and read the token.
+            let host = request.headers[HTTPField.Name("Host")!] ?? ""
+            guard host.hasPrefix("localhost") || host.hasPrefix("127.0.0.1") else {
+                return Response(status: .forbidden)
+            }
             return Response(
                 status: .ok,
                 headers: [.contentType: "application/json"],

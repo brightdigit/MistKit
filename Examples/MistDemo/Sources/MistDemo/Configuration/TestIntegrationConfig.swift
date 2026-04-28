@@ -68,7 +68,9 @@ public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
         }
 
         let databaseString = configuration.string(forKey: "database", default: "public") ?? "public"
-        let database: MistKit.Database = databaseString == "public" ? .public : .private
+        guard let database = MistKit.Database(rawValue: databaseString) else {
+            throw ConfigurationError.invalidDatabase(databaseString)
+        }
         let recordCount = configuration.int(forKey: "record.count", default: 10) ?? 10
         let assetSizeKB = configuration.int(forKey: "asset.size", default: 100) ?? 100
         let skipCleanup = configuration.bool(forKey: "skip.cleanup", default: false)

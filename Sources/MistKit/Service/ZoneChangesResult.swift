@@ -54,7 +54,7 @@ public struct ZoneChangesResult: Sendable {
       return ZoneInfo(
         zoneName: zoneID.zoneName ?? "Unknown",
         ownerRecordName: zoneID.ownerName,
-        capabilities: []
+        capabilities: []  // CloudKit Web Services zone-changes responses omit capabilities
       )
     } ?? []
     self.syncToken = response.syncToken

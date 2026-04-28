@@ -166,5 +166,23 @@ extension CloudKitServiceFetchChangesTests {
       #expect(records.count == 3)
       #expect(token == "token-2")
     }
+
+    @Test("fetchAllRecordChanges() accumulates records across three pages")
+    internal func fetchAllRecordChangesThreePage() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceFetchChangesTests.makePaginatedService(pages: [
+        (recordCount: 2, syncToken: "token-1"),
+        (recordCount: 3, syncToken: "token-2"),
+        (recordCount: 2, syncToken: "token-3"),
+      ])
+
+      let (records, token) = try await service.fetchAllRecordChanges()
+
+      #expect(records.count == 7)
+      #expect(token == "token-3")
+    }
   }
 }

@@ -75,6 +75,7 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
         print(String(repeating: "=", count: 60))
 
         let service = try MistKitClientFactory.create(from: config.base)
+        let zoneID = ZoneID(zoneName: config.zone, ownerName: nil)
 
         if config.fetchAll {
             print("\n📦 Fetching all changes (automatic pagination)...")
@@ -85,6 +86,7 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
             }
 
             let (records, newToken) = try await service.fetchAllRecordChanges(
+                zoneID: zoneID,
                 syncToken: config.syncToken
             )
             print("\n✅ Fetched \(records.count) record(s)")
@@ -103,6 +105,7 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
             }
 
             let result = try await service.fetchRecordChanges(
+                zoneID: zoneID,
                 syncToken: config.syncToken,
                 resultsLimit: config.limit ?? 10
             )

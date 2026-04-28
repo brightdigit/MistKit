@@ -44,6 +44,7 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
 
     public init(
         apiToken: String,
+        // Demo default — override via --container-identifier or config key "container.identifier"
         containerIdentifier: String = "iCloud.com.brightdigit.MistDemo",
         port: Int = 8080,
         host: String = "127.0.0.1",
@@ -67,6 +68,7 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
                 suggestion: "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable")
         }
 
+        // Demo default — override via --container-identifier or config key "container.identifier"
         let containerIdentifier = configReader.string(
             forKey: "container.identifier",
             default: "iCloud.com.brightdigit.MistDemo"

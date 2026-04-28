@@ -47,5 +47,18 @@ extension CloudKitServiceLookupZonesTests {
         try await service.lookupZones(zoneIDs: [])
       }
     }
+
+    @Test("lookupZones() throws for zone with empty zoneName")
+    internal func lookupZonesThrowsForEmptyZoneName() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceLookupZonesTests.makeSuccessfulService()
+
+      await #expect(throws: CloudKitError.self) {
+        try await service.lookupZones(zoneIDs: [ZoneID(zoneName: "", ownerName: nil)])
+      }
+    }
   }
 }

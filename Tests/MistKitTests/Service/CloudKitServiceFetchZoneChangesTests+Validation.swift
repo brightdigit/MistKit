@@ -1,6 +1,6 @@
 //
-//  ConfigurationError.swift
-//  MistDemo
+//  CloudKitServiceFetchZoneChangesTests+Validation.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,29 +28,24 @@
 //
 
 import Foundation
+import Testing
 
-/// Configuration errors
-enum ConfigurationError: LocalizedError {
-  case missingAPIToken
-  case invalidEnvironment(String)
-  case invalidDatabase(String)
-  case missingRequired(String, suggestion: String)
-  case unsupportedPlatform(String)
+@testable import MistKit
 
-  // MARK: Internal
+extension CloudKitServiceFetchZoneChangesTests {
+  @Suite("Validation")
+  internal struct Validation {
+    @Test("fetchZoneChanges() throws on authentication error")
+    internal func fetchZoneChangesThrowsOnAuthError() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceFetchZoneChangesTests.makeAuthErrorService()
 
-  var errorDescription: String? {
-    switch self {
-    case .missingAPIToken:
-      "CloudKit API token is required. Set CLOUDKIT_API_TOKEN environment variable or use --api-token"
-    case let .invalidEnvironment(env):
-      "Invalid environment '\(env)'. Must be 'development' or 'production'"
-    case let .invalidDatabase(db):
-      "Invalid database '\(db)'. Must be 'public', 'private', or 'shared'"
-    case let .missingRequired(field, suggestion):
-      "Missing required configuration: \(field). \(suggestion)"
-    case let .unsupportedPlatform(message):
-      "Unsupported platform: \(message)"
+      await #expect(throws: CloudKitError.self) {
+        try await service.fetchZoneChanges()
+      }
     }
   }
 }

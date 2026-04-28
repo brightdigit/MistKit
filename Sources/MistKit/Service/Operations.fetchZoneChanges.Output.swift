@@ -28,30 +28,30 @@
 //
 
 extension Operations.fetchZoneChanges.Output: CloudKitResponseType {
-  var badRequestResponse: Components.Responses.BadRequest? {
+  internal var badRequestResponse: Components.Responses.BadRequest? {
     if case .badRequest(let response) = self { return response } else { return nil }
   }
 
-  var unauthorizedResponse: Components.Responses.Unauthorized? {
+  internal var unauthorizedResponse: Components.Responses.Unauthorized? {
     if case .unauthorized(let response) = self { return response } else { return nil }
   }
 
-  var isOk: Bool {
+  internal var isOk: Bool {
     if case .ok = self { return true } else { return false }
   }
 
-  var undocumentedStatusCode: Int? {
+  internal var undocumentedStatusCode: Int? {
     if case .undocumented(let statusCode, _) = self { return statusCode } else { return nil }
   }
 
   // fetchZoneChanges only defines 200, 400, 401 responses
-  var forbiddenResponse: Components.Responses.Forbidden? { nil }
-  var notFoundResponse: Components.Responses.NotFound? { nil }
-  var conflictResponse: Components.Responses.Conflict? { nil }
-  var preconditionFailedResponse: Components.Responses.PreconditionFailed? { nil }
-  var contentTooLargeResponse: Components.Responses.RequestEntityTooLarge? { nil }
-  var misdirectedRequestResponse: Components.Responses.UnprocessableEntity? { nil }
-  var tooManyRequestsResponse: Components.Responses.TooManyRequests? { nil }
-  var internalServerErrorResponse: Components.Responses.InternalServerError? { nil }
-  var serviceUnavailableResponse: Components.Responses.ServiceUnavailable? { nil }
+  internal var forbiddenResponse: Components.Responses.Forbidden? { nil }
+  internal var notFoundResponse: Components.Responses.NotFound? { nil }
+  internal var conflictResponse: Components.Responses.Conflict? { nil }
+  internal var preconditionFailedResponse: Components.Responses.PreconditionFailed? { nil }
+  internal var contentTooLargeResponse: Components.Responses.RequestEntityTooLarge? { nil }
+  internal var misdirectedRequestResponse: Components.Responses.UnprocessableEntity? { nil }
+  internal var tooManyRequestsResponse: Components.Responses.TooManyRequests? { nil }
+  internal var internalServerErrorResponse: Components.Responses.InternalServerError? { nil }
+  internal var serviceUnavailableResponse: Components.Responses.ServiceUnavailable? { nil }
 }

@@ -72,20 +72,20 @@ struct IntegrationTestRunner {
             if database == .private {
                 try await phaseFetchZoneChanges(service: service)
             }
-            let assetToken = try await phase2UploadAsset(service: service)
-            createdRecordNames = try await phase3CreateRecords(service: service, assetToken: assetToken)
+            let assetToken = try await phase3UploadAsset(service: service)
+            createdRecordNames = try await phase4CreateRecords(service: service, assetToken: assetToken)
             try await phaseQueryRecords(service: service, createdRecordNames: createdRecordNames)
             try await phaseLookupRecords(service: service, recordNames: createdRecordNames)
             if database == .private {
-                syncToken = try await phase4InitialSync(service: service, createdRecordNames: createdRecordNames)
+                syncToken = try await phase7InitialSync(service: service, createdRecordNames: createdRecordNames)
             }
-            try await phase5ModifyRecords(service: service, createdRecordNames: createdRecordNames)
+            try await phase8ModifyRecords(service: service, createdRecordNames: createdRecordNames)
             if database == .private {
-                try await phase6IncrementalSync(service: service, syncToken: syncToken, createdRecordNames: createdRecordNames)
+                try await phase9IncrementalSync(service: service, syncToken: syncToken, createdRecordNames: createdRecordNames)
             }
-            try await phase7FinalVerification(service: service)
+            try await phase10FinalVerification(service: service)
             if !skipCleanup {
-                try await phase8Cleanup(service: service, createdRecordNames: createdRecordNames)
+                try await phase11Cleanup(service: service, createdRecordNames: createdRecordNames)
             } else {
                 printSkippedCleanup(recordNames: createdRecordNames)
             }
@@ -93,7 +93,7 @@ struct IntegrationTestRunner {
             print("\n❌ Error: \(error)")
             if !createdRecordNames.isEmpty && !skipCleanup {
                 print("\n⚠️  Attempting cleanup of \(createdRecordNames.count) test records...")
-                try? await phase8Cleanup(service: service, createdRecordNames: createdRecordNames)
+                try? await phase11Cleanup(service: service, createdRecordNames: createdRecordNames)
             }
             throw error
         }
@@ -166,7 +166,7 @@ struct IntegrationTestRunner {
 
     // MARK: - Phase 3: Asset Upload
 
-    private func phase2UploadAsset(service: CloudKitService) async throws -> AssetUploadReceipt {
+    private func phase3UploadAsset(service: CloudKitService) async throws -> AssetUploadReceipt {
         print("\n📤 Phase 3: Upload test asset")
 
         let testData = IntegrationTestData.generateTestImage(sizeKB: assetSizeKB)
@@ -194,7 +194,7 @@ struct IntegrationTestRunner {
 
     // MARK: - Phase 4: Create Records
 
-    private func phase3CreateRecords(
+    private func phase4CreateRecords(
         service: CloudKitService,
         assetToken: AssetUploadReceipt
     ) async throws -> [String] {
@@ -277,7 +277,7 @@ struct IntegrationTestRunner {
 
     // MARK: - Phase 7: Initial Sync
 
-    private func phase4InitialSync(
+    private func phase7InitialSync(
         service: CloudKitService,
         createdRecordNames: [String]
     ) async throws -> String? {
@@ -312,7 +312,7 @@ struct IntegrationTestRunner {
 
     // MARK: - Phase 8: Modify Records
 
-    private func phase5ModifyRecords(
+    private func phase8ModifyRecords(
         service: CloudKitService,
         createdRecordNames: [String]
     ) async throws {
@@ -345,7 +345,7 @@ struct IntegrationTestRunner {
 
     // MARK: - Phase 9: Incremental Sync
 
-    private func phase6IncrementalSync(
+    private func phase9IncrementalSync(
         service: CloudKitService,
         syncToken: String?,
         createdRecordNames: [String]
@@ -386,7 +386,7 @@ struct IntegrationTestRunner {
 
     // MARK: - Phase 10: Final Zone Verification
 
-    private func phase7FinalVerification(service: CloudKitService) async throws {
+    private func phase10FinalVerification(service: CloudKitService) async throws {
         print("\n🔍 Phase 10: Final zone verification")
 
         let finalZones = try await service.lookupZones(zoneIDs: [.defaultZone])
@@ -400,7 +400,7 @@ struct IntegrationTestRunner {
 
     // MARK: - Phase 11: Cleanup
 
-    private func phase8Cleanup(
+    private func phase11Cleanup(
         service: CloudKitService,
         createdRecordNames: [String]
     ) async throws {
