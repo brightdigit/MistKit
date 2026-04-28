@@ -149,4 +149,39 @@ extension ResponseConfig {
       error: nil
     )
   }
+
+  internal static func fetchChangesResponseWithDeletedRecord() -> ResponseConfig {
+    let responseJSON = """
+      {
+        "records": [
+          {
+            "recordName": "deleted-record-0",
+            "recordType": "Note",
+            "recordChangeTag": "tag-0",
+            "deleted": true,
+            "fields": {}
+          },
+          {
+            "recordName": "live-record-1",
+            "recordType": "Note",
+            "recordChangeTag": "tag-1",
+            "deleted": false,
+            "fields": {}
+          }
+        ],
+        "syncToken": "post-deletion-token",
+        "moreComing": false
+      }
+      """
+
+    var headers = HTTPFields()
+    headers[.contentType] = "application/json"
+
+    return ResponseConfig(
+      statusCode: 200,
+      headers: headers,
+      body: responseJSON.data(using: .utf8),
+      error: nil
+    )
+  }
 }

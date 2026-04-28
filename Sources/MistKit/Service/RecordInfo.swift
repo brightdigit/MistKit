@@ -43,7 +43,7 @@ internal import Foundation
 /// let successfulRecords = results.filter { !$0.isError }
 /// let failedRecords = results.filter { $0.isError }
 /// ```
-public struct RecordInfo: Encodable, Sendable {
+public struct RecordInfo: Codable, Sendable {
   /// The record name
   public let recordName: String
   /// The record type

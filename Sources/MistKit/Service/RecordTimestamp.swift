@@ -30,7 +30,7 @@
 public import Foundation
 
 /// Timestamp information for record creation or modification
-public struct RecordTimestamp: Encodable, Sendable {
+public struct RecordTimestamp: Codable, Sendable {
   /// The date when the action occurred
   public let timestamp: Date?
   /// The record name of the user who performed the action

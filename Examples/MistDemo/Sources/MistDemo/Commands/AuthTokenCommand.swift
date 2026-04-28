@@ -94,8 +94,10 @@ public struct AuthTokenCommand: MistDemoCommand {
         let configData = try JSONEncoder().encode(configPayload)
 
         api.get("config") { request, _ -> Response in
-            // Serve this credential only to loopback requests (the page we host ourselves).
-            // Without this check, any browser page could call this endpoint and read the token.
+            // Restrict to loopback destinations. The Host header reflects the request's
+            // destination host (not the origin), so this prevents requests to non-loopback
+            // addresses but does not block cross-origin browser requests. For full CORS
+            // protection, check the Origin header (set by browsers and not JS-spoofable).
             let host = request.headers[HTTPField.Name("Host")!] ?? ""
             guard host.hasPrefix("localhost") || host.hasPrefix("127.0.0.1") else {
                 return Response(status: .forbidden)

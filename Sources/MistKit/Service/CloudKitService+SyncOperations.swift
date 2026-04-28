@@ -147,6 +147,9 @@ extension CloudKitService {
   /// - Warning: For zones with many changes, this may make multiple requests
   ///           and return a large array. Consider using fetchRecordChanges()
   ///           with manual pagination for better memory control.
+  /// - Warning: This method will stop early if the server repeatedly returns
+  ///           `moreComing: true` with no records and the same sync token
+  ///           (stuck-token scenario), or if the page count exceeds 1000.
   /// - Note: Makes sequential requests with no backoff or cooperative
   ///         cancellation between pages. For fine-grained control,
   ///         use `fetchRecordChanges(syncToken:)` directly.
@@ -158,17 +161,28 @@ extension CloudKitService {
     var allRecords: [RecordInfo] = []
     var currentToken = syncToken
     var moreComing = true
+    var pageCount = 0
+    let maxPages = 1_000
 
     while moreComing {
+      guard pageCount < maxPages else {
+        throw CloudKitError.invalidResponse
+      }
+
       let result = try await fetchRecordChanges(
         zoneID: zoneID,
         syncToken: currentToken,
         resultsLimit: resultsLimit
       )
 
+      if result.records.isEmpty && result.moreComing && result.syncToken == currentToken {
+        break
+      }
+
       allRecords.append(contentsOf: result.records)
       currentToken = result.syncToken
       moreComing = result.moreComing
+      pageCount += 1
     }
 
     return (allRecords, currentToken)

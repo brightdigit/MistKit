@@ -31,7 +31,7 @@
 ///
 /// Contains zones that have changed since the provided sync token,
 /// along with a new sync token for subsequent fetches.
-public struct ZoneChangesResult: Sendable {
+public struct ZoneChangesResult: Codable, Sendable {
   /// Zones that have changed
   public let zones: [ZoneInfo]
   /// Token to use for next fetch to get incremental changes

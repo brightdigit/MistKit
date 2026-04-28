@@ -77,5 +77,23 @@ extension CloudKitServiceFetchChangesTests {
       let result200 = try await service.fetchRecordChanges(resultsLimit: 200)
       #expect(result200.records.isEmpty == false || result200.syncToken != nil)
     }
+
+    @Test("fetchAllRecordChanges() breaks out when server returns stuck token with no records")
+    internal func fetchAllRecordChangesEscapesStuckToken() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService(
+        recordCount: 0,
+        moreComing: true,
+        syncToken: "stuck-token"
+      )
+
+      let (records, token) = try await service.fetchAllRecordChanges()
+
+      #expect(records.isEmpty)
+      #expect(token == "stuck-token")
+    }
   }
 }

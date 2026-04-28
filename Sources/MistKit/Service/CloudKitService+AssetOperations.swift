@@ -165,10 +165,8 @@ extension CloudKitService {
       }
 
       return AssetUploadToken(from: token)
-    } catch let cloudKitError as CloudKitError {
-      throw cloudKitError
     } catch {
-      throw CloudKitError.underlyingError(error)
+      throw mapToCloudKitError(error, context: "requestAssetUploadURL")
     }
   }
 }

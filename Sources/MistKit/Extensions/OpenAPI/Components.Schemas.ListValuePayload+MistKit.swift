@@ -69,6 +69,7 @@ extension Components.Schemas.ListValuePayload {
     case .list(let nestedList):
       return .ListValue(nestedList.map { Self(from: $0) })
     default:
+      assertionFailure("Unexpected FieldValue case in makeComplexPayload: \(fieldValue)")
       return .ListValue([])
     }
   }

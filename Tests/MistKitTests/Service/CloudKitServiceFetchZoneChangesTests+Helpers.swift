@@ -117,4 +117,31 @@ extension ResponseConfig {
       error: nil
     )
   }
+
+  internal static func zoneChangesResponseWithNilZoneID() -> ResponseConfig {
+    let responseJSON = """
+      {
+        "zones": [
+          {
+            "zoneID": {
+              "zoneName": "valid-zone",
+              "ownerName": "_defaultOwner"
+            }
+          },
+          {}
+        ],
+        "syncToken": "token-with-nil-zone"
+      }
+      """
+
+    var headers = HTTPFields()
+    headers[.contentType] = "application/json"
+
+    return ResponseConfig(
+      statusCode: 200,
+      headers: headers,
+      body: responseJSON.data(using: .utf8),
+      error: nil
+    )
+  }
 }

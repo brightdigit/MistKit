@@ -184,5 +184,30 @@ extension CloudKitServiceFetchChangesTests {
       #expect(records.count == 7)
       #expect(token == "token-3")
     }
+
+    @Test("fetchRecordChanges() surfaces deleted records with deleted flag set")
+    internal func fetchRecordChangesSurfacesDeletedRecords() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let responseProvider = ResponseProvider(
+        defaultResponse: .fetchChangesResponseWithDeletedRecord()
+      )
+      let transport = MockTransport(responseProvider: responseProvider)
+      let service = try CloudKitService(
+        containerIdentifier: "iCloud.com.example.test",
+        apiToken: "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234",
+        transport: transport
+      )
+
+      let result = try await service.fetchRecordChanges()
+
+      #expect(result.records.count == 2)
+      let deletedRecord = try #require(result.records.first { $0.recordName == "deleted-record-0" })
+      #expect(deletedRecord.deleted == true)
+      let liveRecord = try #require(result.records.first { $0.recordName == "live-record-1" })
+      #expect(liveRecord.deleted == false)
+    }
   }
 }

@@ -99,5 +99,27 @@ extension CloudKitServiceFetchZoneChangesTests {
       #expect(result.zones.count == 1)
       #expect(result.syncToken == "new-token")
     }
+
+    @Test("fetchZoneChanges() filters out zones with nil zoneID from server response")
+    internal func fetchZoneChangesFiltersNilZoneID() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let responseProvider = ResponseProvider(
+        defaultResponse: .zoneChangesResponseWithNilZoneID()
+      )
+      let transport = MockTransport(responseProvider: responseProvider)
+      let service = try CloudKitService(
+        containerIdentifier: "iCloud.com.example.test",
+        apiToken: "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234",
+        transport: transport
+      )
+
+      let result = try await service.fetchZoneChanges()
+
+      #expect(result.zones.count == 1, "Zone with nil zoneID should be filtered out")
+      #expect(result.zones.first?.zoneName == "valid-zone")
+    }
   }
 }

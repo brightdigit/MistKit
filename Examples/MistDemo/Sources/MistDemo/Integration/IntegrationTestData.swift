@@ -34,9 +34,13 @@ struct IntegrationTestData {
     /// CloudKit record type for integration tests
     static let recordType = "MistKitIntegrationTest"
 
-    /// Generate minimal valid PNG image data
+    /// Generate minimal PNG-like binary data for upload testing.
+    ///
+    /// Produces data with a valid PNG signature, IHDR, IDAT, and IEND structure,
+    /// but padding chunks use zeroed CRC32 values (invalid). Not standards-compliant
+    /// and will be rejected by PNG decoders; suitable only as raw binary test payloads.
     /// - Parameter sizeKB: Desired size in kilobytes (default: 10)
-    /// - Returns: PNG image data
+    /// - Returns: PNG-like binary data
     static func generateTestImage(sizeKB: Int = 10) -> Data {
         // Minimal valid 1x1 pixel PNG
         // PNG signature
@@ -89,7 +93,7 @@ struct IntegrationTestData {
             }
 
             // Chunk length (4 bytes)
-            var lengthBytes: [UInt8] = [
+            let lengthBytes: [UInt8] = [
                 UInt8((chunkSize >> 24) & 0xFF),
                 UInt8((chunkSize >> 16) & 0xFF),
                 UInt8((chunkSize >> 8) & 0xFF),
