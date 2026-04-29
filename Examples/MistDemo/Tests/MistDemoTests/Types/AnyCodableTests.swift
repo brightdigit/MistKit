@@ -185,12 +185,11 @@ struct AnyCodableTests {
         }
     }
 
-    @Test("Encode unsupported type throws error")
-    func encodeUnsupportedType() throws {
+    @Test("Encode unsupported type throws error at init")
+    func encodeUnsupportedType() {
         struct CustomType {}
-        let anyCodable = try AnyCodable(value: CustomType())
-        #expect(throws: EncodingError.self) {
-            try JSONEncoder().encode(anyCodable)
+        #expect(throws: DecodingError.self) {
+            try AnyCodable(value: CustomType())
         }
     }
 

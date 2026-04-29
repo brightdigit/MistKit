@@ -63,16 +63,23 @@ public struct YAMLEscaper: OutputEscaper {
             return true
         }
 
-        // Check for YAML special characters and patterns
-        let specialChars: Set<Character> = [
+        // Characters that are special only as the first char of a plain scalar
+        let firstCharSpecials: Set<Character> = [
             ":", "#", "@", "`", "|", ">", "'", "\"",
             "[", "]", "{", "}", ",", "&", "*", "!",
             "%", "\\", "?", "-", "<", "=", "~"
         ]
 
+        // Characters that are special anywhere in a plain scalar
+        let anyCharSpecials: Set<Character> = [
+            ":", "#", "`", "|", ">", "\"",
+            "[", "]", "{", "}", ",", "&", "*", "!",
+            "%", "\\"
+        ]
+
         // Check first character for special cases
         if let first = string.first {
-            if specialChars.contains(first) || first.isWhitespace {
+            if firstCharSpecials.contains(first) || first.isWhitespace {
                 return true
             }
         }
@@ -101,7 +108,7 @@ public struct YAMLEscaper: OutputEscaper {
 
         // Check for special characters in the string
         for char in string {
-            if specialChars.contains(char) || char == "\n" || char == "\r" || char == "\t" {
+            if anyCharSpecials.contains(char) || char == "\n" || char == "\r" || char == "\t" {
                 return true
             }
         }

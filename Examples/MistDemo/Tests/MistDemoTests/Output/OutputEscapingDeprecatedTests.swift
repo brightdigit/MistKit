@@ -100,7 +100,7 @@ struct OutputEscapingDeprecatedTests {
     let once = OutputEscaping.csvEscape(input)
     let twice = OutputEscaping.csvEscape(once)
     #expect(once == input)
-    #expect(twice == "\"simple text\"")  // Now needs escaping because of quotes
+    #expect(twice == once)  // Truly idempotent: no special chars, no quoting on second pass
   }
 
   // MARK: - YAML Escaping Tests

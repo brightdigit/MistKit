@@ -238,11 +238,11 @@ struct FieldTypeTests {
 
     // MARK: - Unsupported Type Tests
 
-    @Test("Convert asset type throws unsupported error")
-    func convertAssetThrowsUnsupported() {
-        #expect(throws: FieldParsingError.self) {
-            try FieldType.asset.convertValue("anything")
-        }
+    @Test("Convert asset type returns URL string")
+    func convertAssetThrowsUnsupported() throws {
+        let value = try FieldType.asset.convertValue("https://example.com/asset")
+
+        #expect(value as? String == "https://example.com/asset")
     }
 
     @Test("Convert location type throws unsupported error")

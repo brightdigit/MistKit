@@ -215,10 +215,10 @@ struct FieldParsingErrorTests {
         #expect(description?.contains("location") == true)
     }
 
-    @Test("unsupportedFieldType error is thrown for asset type")
+    @Test("unsupportedFieldType error is thrown for location type")
     func unsupportedFieldTypeAssetErrorThrown() {
         do {
-            _ = try FieldType.asset.convertValue("anything")
+            _ = try FieldType.location.convertValue("anything")
             Issue.record("Expected unsupportedFieldType error to be thrown")
         } catch let error as FieldParsingError {
             if case .unsupportedFieldType = error {

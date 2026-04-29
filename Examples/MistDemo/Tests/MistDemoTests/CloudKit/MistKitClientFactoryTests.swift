@@ -41,7 +41,7 @@ struct MistKitClientFactoryTests {
         containerIdentifier: String = "iCloud.com.test.App",
         apiToken: String = "test-api-token",
         environment: MistKit.Environment = .development,
-        webAuthToken: String? = nil,
+        webAuthToken: String? = "test-web-auth-token",
         keyID: String? = nil,
         privateKey: String? = nil,
         privateKeyFile: String? = nil,
@@ -154,8 +154,13 @@ struct MistKitClientFactoryTests {
     @Test("Create client for public database")
     func createForPublicDatabaseTest() async throws {
         let config = try await makeConfig(apiToken: "api-token")
+        let tokenManager = APITokenManager(apiToken: "api-token")
 
-        let client = try MistKitClientFactory.create(.public, from: config)
+        let client = try MistKitClientFactory.create(
+            from: config,
+            tokenManager: tokenManager,
+            database: .public
+        )
 
         #expect(client != nil)
     }
@@ -276,16 +281,16 @@ struct MistKitClientFactoryTests {
         }
     }
 
-    @Test("Empty web auth token falls back to other auth")
-    func emptyWebAuthTokenFallback() async throws {
-        let config = try await makeConfig(
+    @Test("Empty web auth token throws ConfigurationError")
+    func emptyWebAuthTokenFallback() async {
+        let config = try! await makeConfig(
             apiToken: "api-token",
             webAuthToken: ""
         )
 
-        let client = try MistKitClientFactory.create(.private, from: config)
-
-        #expect(client != nil)
+        #expect(throws: ConfigurationError.self) {
+            try MistKitClientFactory.create(.private, from: config)
+        }
     }
 
     @Test("Empty keyID falls back to API-only auth")

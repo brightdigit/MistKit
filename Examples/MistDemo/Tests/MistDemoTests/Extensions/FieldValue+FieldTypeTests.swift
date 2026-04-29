@@ -279,11 +279,16 @@ struct FieldValueFieldTypeTests {
 
     // MARK: - Unsupported Type Tests
 
-    @Test("Asset type returns nil")
+    @Test("Asset type returns asset FieldValue")
     func assetTypeReturnsNil() {
         let fieldValue = FieldValue(value: "anything" as String, fieldType: .asset)
 
-        #expect(fieldValue == nil)
+        #expect(fieldValue != nil)
+        if case .asset(let asset) = fieldValue {
+            #expect(asset.downloadURL == "anything")
+        } else {
+            Issue.record("Expected .asset case")
+        }
     }
 
     @Test("Location type returns nil")
