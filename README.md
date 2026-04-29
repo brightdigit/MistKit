@@ -338,8 +338,7 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [Fetching Record Changes (records/changes)](https://github.com/brightdigit/MistKit/issues/40) ✅
 - [x] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/44) ✅
 - [x] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/48) ✅
-- [x] Fix QueryFilter IN/NOT_IN serialization ✅
-- [x] MistDemo integration test runner and new commands (`fetch-changes`, `lookup-zones`, `test-integration`, `test-private`, `demo-in-filter`) ✅
+- [x] [Fix QueryFilter IN/NOT_IN serialization](https://github.com/brightdigit/MistKit/issues/192)  ✅
 
 ### v1.0.0-alpha.X
 

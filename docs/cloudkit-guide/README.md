@@ -1,15 +1,23 @@
-# MistKit Content & Talks
+# CloudKit as Your Backend: From iOS to Server-Side Swift
 
-Educational content, reference material, and talk prep for an ongoing series about [MistKit](../README.md) and server-side CloudKit — covering what Apple's documentation leaves out.
+## Presentation Description from Swift Craft 2026
 
-CloudKit Web Services is a REST API that works on any platform: server-side Swift, Linux, Android, Windows — not just Apple devices. Most developers don't know this, and Apple's documentation for server-to-server authentication is famously incomplete. This series covers the patterns that two production backends (BushelCloud and CelestraCloud) required to get right.
+> CloudKit is great for iOS apps. How about backend services? I rebuilt a production CloudKit library and learned the patterns Apple doesn't document: three auth methods, type safety, error handling. Real deployments. Learn the whys and hows of using CloudKit on the backend.
+> CloudKit has excellent documentation for iOS and macOS client development. But backend services—podcast aggregation, RSS readers, data processing—face APIs that Apple barely documents. I rebuilt a comprehensive CloudKit library using AI-generated OpenAPI specifications. The result: type-safe Swift code supporting three authentication methods (server-to-server, web authentication token, and API token), typed error handling for 9 HTTP status codes, and production deployments.
 
-| Theme | What It Covers |
-|---|---|
-| **Server-to-Server Auth** | Key pair generation, ECDSA request signing, credential lifecycle, what Apple's docs omit |
-| **Type Safety** | CloudKit's dynamic fields vs. Swift's static types — discriminated unions, OpenAPI `oneOf` |
-| **Error Handling** | 9 HTTP status codes, retry logic, exponential backoff, conflict resolution |
-| **API Ergonomics** | Three-layer architecture: generated OpenAPI → abstraction → user-facing Swift API |
+> This talk fills the gaps with real production patterns:
+
+> Three Authentication Methods: - Server-to-Server: Autonomous services (podcast aggregation, cron jobs) - Web Authentication Token: User operations from backend (on behalf of signed-in users) - API Token: Development and debugging (CloudKit Dashboard)
+
+> Each method includes key generation, request signing, token handling, and failure recovery that Apple's documentation glosses over. You'll learn when to use each method and how to implement them with a unified ClientMiddleware pattern.
+
+> Type System Challenges: Solving CloudKit's dynamically-typed fields in Swift's statically-typed system with discriminated unions and type-safe record builders.
+
+> Production Error Handling: CloudKit returns 9+ HTTP status codes. Implementing typed error hierarchies, retry logic for transient failures, conflict resolution for concurrent modifications.
+
+> When to Use CloudKit: Decision framework comparing CloudKit vs. Firebase vs. custom backends with real production examples.
+
+> Drawing from production deployments (podcast backend, RSS sync service), attendees at all experience levels learn authentication patterns, type safety, error handling, and informed backend decisions. No prior CloudKit server-side experience required.
 
 ---
 
@@ -26,9 +34,74 @@ CloudKit Web Services is a REST API that works on any platform: server-side Swif
 
 ---
 
-## Key Technical Topics
+Educational content, reference material, and talk prep for an ongoing series about [MistKit](../README.md) and server-side CloudKit — covering what Apple's documentation leaves out.
 
-### 1. Three Authentication Methods
+CloudKit Web Services is a REST API that works on any platform: server-side Swift, Linux, Android, Windows — not just Apple devices. Most developers don't know this, and Apple's documentation for server-to-server authentication is famously incomplete. This series covers the patterns that two production backends (BushelCloud and CelestraCloud) required to get right.
+
+| Theme | What It Covers |
+|---|---|
+| **Server-to-Server Auth** | Key pair generation, ECDSA request signing, credential lifecycle, what Apple's docs omit |
+| **Type Safety** | CloudKit's dynamic fields vs. Swift's static types — discriminated unions, OpenAPI `oneOf` |
+| **Error Handling** | 9 HTTP status codes, retry logic, exponential backoff, conflict resolution |
+| **API Ergonomics** | Three-layer architecture: generated OpenAPI → abstraction → user-facing Swift API |
+
+---
+
+## Outline
+
+### Why CloudKit
+
+#### iOS App 101
+
+#### CloudKit on the Server
+
+##### Why CloudKit on the Server
+
+* Web Application
+* Background Job
+
+**Production Examples**:
+
+| App | Purpose | Auth | Real Challenges |
+|---|---|---|---|
+| BushelCloud | Syncs macOS/Swift/Xcode version data for Bushel VM | Server-to-server | Concurrent updates from multiple version sources |
+| CelestraCloud | Syncs RSS feeds for Celestra RSS reader | Server-to-server | 15-min polling, aggressive rate limiting, conflict resolution |
+
+**Stats for credibility**:
+- **MistKit**: actively maintained open-source library — see the [repo](../../) for current stats
+- Built using AI-assisted OpenAPI generation — significantly faster than manual implementation
+- **BushelCloud** and **CelestraCloud** are production deployments, each requiring substantial schema migrations
+
+**When to Use CloudKit**:
+
+Use CloudKit when:
+- Building backend for an iOS/macOS app
+- Data sync for indie/small team
+- Zero server management preferred
+- Already in the Apple ecosystem
+
+Consider alternatives when:
+- Android support needed → Firebase
+- Complex relational queries → PostgreSQL/Supabase
+- Real-time updates → Firebase
+- Full backend control → Vapor/Hummingbird
+
+**Reality check**: CloudKit's "free" tier has limits. Rate limiting (429) is real at scale. Factor in discovery time for undocumented auth patterns.
+
+---
+
+##### Understanding CloudKit
+
+| Theme | What It Covers |
+|---|---|
+| **Server-to-Server Auth** | Key pair generation, ECDSA request signing, credential lifecycle, what Apple's docs omit |
+| **Type Safety** | CloudKit's dynamic fields vs. Swift's static types — discriminated unions, OpenAPI `oneOf` |
+| **Error Handling** | 9 HTTP status codes, retry logic, exponential backoff, conflict resolution |
+| **API Ergonomics** | Three-layer architecture: generated OpenAPI → abstraction → user-facing Swift API *(see Integrating MistKit)* |
+
+###### Authentication
+
+**Three Authentication Methods**:
 
 | Method | Use Case | Status |
 |---|---|---|
@@ -50,7 +123,7 @@ CloudKit Web Services is a REST API that works on any platform: server-side Swif
 
 ---
 
-### 2. Type System Polymorphism
+###### Data Types
 
 **The problem**: CloudKit fields are runtime-dynamic JSON. Swift is statically typed. Mismatch.
 
@@ -84,7 +157,7 @@ Custom type overrides in `openapi-generator-config.yaml` improve ergonomics. Com
 
 ---
 
-### 3. Production Error Handling
+###### Error Codes
 
 CloudKit returns 9 HTTP status codes, each requiring specific handling:
 
@@ -116,7 +189,13 @@ Each error carries nested JSON: `ckErrorCode`, `serverRecord` (on 409), `reason`
 
 ---
 
-### 4. API Ergonomics: Three-Layer Architecture
+##### Integrating MistKit
+
+###### Web Application
+
+###### Background Job
+
+**Three-Layer Architecture**:
 
 **Problem**: OpenAPI-generated code is verbose and low-level.
 
@@ -128,71 +207,16 @@ let request = Operations.SaveRecordsRequest(
 )
 ```
 
-**Three layers**:
-
 | Layer | Responsibility |
 |---|---|
 | **Generated client** (Layer 1) | Auto-generated from OpenAPI spec. Never edit. Low-level REST. |
 | **MistKit abstraction** (Layer 2) | Auth middleware, retry logic, error handling, response unwrapping, domain type conversion |
 | **User-facing API** (Layer 3) | Swift-native, intuitive, feels like native CloudKit framework |
 
-**After all three layers**:
+After all three layers:
 ```swift
 try await database.save(record)  // 5 lines, type-safe, production-ready
 ```
-
----
-
-## Production Examples
-
-| App | Purpose | Auth | Real Challenges |
-|---|---|---|---|
-| BushelCloud | Syncs macOS/Swift/Xcode version data for Bushel VM | Server-to-server | Concurrent updates from multiple version sources |
-| CelestraCloud | Syncs RSS feeds for Celestra RSS reader | Server-to-server | 15-min polling, aggressive rate limiting, conflict resolution |
-
-**Stats for credibility**:
-- **MistKit**: actively maintained open-source library — see the [repo](../../) for current stats
-- Built using AI-assisted OpenAPI generation — significantly faster than manual implementation
-- **BushelCloud** and **CelestraCloud** are production deployments, each requiring substantial schema migrations
-
----
-
-## Learning Outcomes
-
-Audience leaves able to:
-1. Implement server-to-server CloudKit auth — key pairs, request signing, environment switching
-2. Design type-safe APIs for CloudKit's dynamic fields using OpenAPI discriminated unions
-3. Handle all 9 CloudKit HTTP status codes with appropriate retry logic
-4. Build the three-layer architecture to make generated code feel Swift-native
-5. Decide when CloudKit is the right backend vs. Vapor, Firebase, or Supabase
-
----
-
-## When to Use CloudKit
-
-**Use CloudKit when**:
-- Building backend for an iOS/macOS app
-- Data sync for indie/small team
-- Zero server management preferred
-- Already in the Apple ecosystem
-
-**Consider alternatives when**:
-- Android support needed → Firebase
-- Complex relational queries → PostgreSQL/Supabase
-- Real-time updates → Firebase
-- Full backend control → Vapor/Hummingbird
-
-**Reality check**: CloudKit's "free" tier has limits. Rate limiting (429) is real at scale. Factor in discovery time for undocumented auth patterns.
-
----
-
-## Memorable Phrases
-
-- *"Apple's worst-documented feature"* — server-to-server authentication
-- *"The patterns Apple's documentation doesn't cover"*
-- *"AI excels at docs→spec translation; humans needed for architecture"*
-- *"Compiler catches type errors, not runtime surprises"*
-- *"Zero overlap, complete coverage"* — useful when pairing with a client-side CloudKit talk
 
 ---
 
@@ -353,6 +377,27 @@ Execute a working query: request signed → response decoded → type-safe field
 - [ ] Pre-recorded demo backup video
 - [ ] Production screenshots from BushelCloud & CelestraCloud (anonymized if needed)
 - [ ] Code snippets for slides (syntax highlighted)
+
+---
+
+## Memorable Phrases
+
+- *"Apple's worst-documented feature"* — server-to-server authentication
+- *"The patterns Apple's documentation doesn't cover"*
+- *"AI excels at docs→spec translation; humans needed for architecture"*
+- *"Compiler catches type errors, not runtime surprises"*
+- *"Zero overlap, complete coverage"* — useful when pairing with a client-side CloudKit talk
+
+---
+
+## Learning Outcomes
+
+Audience leaves able to:
+1. Implement server-to-server CloudKit auth — key pairs, request signing, environment switching
+2. Design type-safe APIs for CloudKit's dynamic fields using OpenAPI discriminated unions
+3. Handle all 9 CloudKit HTTP status codes with appropriate retry logic
+4. Build the three-layer architecture to make generated code feel Swift-native
+5. Decide when CloudKit is the right backend vs. Vapor, Firebase, or Supabase
 
 ---
 
