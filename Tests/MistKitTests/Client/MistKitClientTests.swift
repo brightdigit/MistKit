@@ -193,4 +193,3 @@ internal struct MistKitClientTests {
     }
   }
 }
-
