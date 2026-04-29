@@ -113,7 +113,7 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
     public func execute() async throws {
         do {
             // Create CloudKit client
-            let client = try MistKitClientFactory.create(from: config.base)
+            let client = try MistKitClientFactory.create(.private, from: config.base)
             
             // Generate record name if not provided
             let recordName = config.recordName ?? generateRecordName()

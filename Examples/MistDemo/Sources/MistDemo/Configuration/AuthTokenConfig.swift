@@ -37,12 +37,21 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     public typealias BaseConfig = Never
 
     public let apiToken: String
+    public let containerIdentifier: String
     public let port: Int
     public let host: String
     public let noBrowser: Bool
 
-    public init(apiToken: String, port: Int = 8080, host: String = "127.0.0.1", noBrowser: Bool = false) {
+    public init(
+        apiToken: String,
+        // Demo default — override via --container-identifier or config key "container.identifier"
+        containerIdentifier: String = "iCloud.com.brightdigit.MistDemo",
+        port: Int = 8080,
+        host: String = "127.0.0.1",
+        noBrowser: Bool = false
+    ) {
         self.apiToken = apiToken
+        self.containerIdentifier = containerIdentifier
         self.port = port
         self.host = host
         self.noBrowser = noBrowser
@@ -51,20 +60,26 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     /// Parse configuration from command line arguments
     public init(configuration: MistDemoConfiguration, base: Never? = nil) async throws {
         let configReader = configuration
-        
+
         // Parse command-specific options
         let apiToken = configReader.string(forKey: "api.token", isSecret: true) ?? ""
         guard !apiToken.isEmpty else {
-            throw ConfigurationError.missingRequired("api.token", 
+            throw ConfigurationError.missingRequired("api.token",
                 suggestion: "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable")
         }
-        
+
+        // Demo default — override via --container-identifier or config key "container.identifier"
+        let containerIdentifier = configReader.string(
+            forKey: "container.identifier",
+            default: "iCloud.com.brightdigit.MistDemo"
+        ) ?? "iCloud.com.brightdigit.MistDemo"
         let port = configReader.int(forKey: "port", default: 8080) ?? 8080
         let host = configReader.string(forKey: "host", default: "127.0.0.1") ?? "127.0.0.1"
         let noBrowser = configReader.bool(forKey: "no.browser", default: false)
-        
+
         self.init(
             apiToken: apiToken,
+            containerIdentifier: containerIdentifier,
             port: port,
             host: host,
             noBrowser: noBrowser

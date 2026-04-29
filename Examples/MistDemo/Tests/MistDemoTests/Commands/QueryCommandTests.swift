@@ -38,8 +38,8 @@ struct QueryCommandTests {
     // MARK: - Configuration Tests
     
     @Test("QueryConfig initializes with default values")
-    func queryConfigInitializesWithDefaults() throws {
-        let baseConfig = try MistDemoConfig()
+    func queryConfigInitializesWithDefaults() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig)
         
         #expect(config.zone == "_defaultZone")
@@ -54,8 +54,8 @@ struct QueryCommandTests {
     }
     
     @Test("QueryConfig accepts custom values")
-    func queryConfigAcceptsCustomValues() throws {
-        let baseConfig = try MistDemoConfig()
+    func queryConfigAcceptsCustomValues() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             zone: "customZone",
@@ -90,8 +90,8 @@ struct QueryCommandTests {
     }
     
     @Test("Command initializes with config")
-    func commandInitializesWithConfig() throws {
-        let baseConfig = try MistDemoConfig()
+    func commandInitializesWithConfig() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig)
         let _ = QueryCommand(config: config)
 
@@ -187,16 +187,16 @@ struct QueryCommandTests {
     // MARK: - Field Selection Tests
     
     @Test("Field selection with nil returns all fields")
-    func fieldSelectionNilReturnsAll() throws {
-        let baseConfig = try MistDemoConfig()
+    func fieldSelectionNilReturnsAll() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig, fields: nil)
         
         #expect(config.fields == nil)
     }
     
     @Test("Field selection with specific fields")
-    func fieldSelectionWithSpecificFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func fieldSelectionWithSpecificFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let fields = ["title", "content", "createdAt"]
         let config = QueryConfig(base: baseConfig, fields: fields)
         
@@ -209,8 +209,8 @@ struct QueryCommandTests {
     // MARK: - Continuation Marker Tests
     
     @Test("Continuation marker for pagination")
-    func continuationMarkerForPagination() throws {
-        let baseConfig = try MistDemoConfig()
+    func continuationMarkerForPagination() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             continuationMarker: "next-page-marker"
@@ -220,8 +220,8 @@ struct QueryCommandTests {
     }
     
     @Test("No continuation marker for first page")
-    func noContinuationMarkerForFirstPage() throws {
-        let baseConfig = try MistDemoConfig()
+    func noContinuationMarkerForFirstPage() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig)
         
         #expect(config.continuationMarker == nil)
@@ -230,8 +230,8 @@ struct QueryCommandTests {
     // MARK: - Multiple Filters Tests
     
     @Test("Multiple filters are preserved")
-    func multipleFiltersPreserved() throws {
-        let baseConfig = try MistDemoConfig()
+    func multipleFiltersPreserved() async throws {
+        let baseConfig = try await MistDemoConfig()
         let filters = [
             "title:contains:Test",
             "priority:gt:5",
@@ -248,16 +248,16 @@ struct QueryCommandTests {
     // MARK: - Zone Configuration Tests
     
     @Test("Default zone is _defaultZone")
-    func defaultZoneIsDefaultZone() throws {
-        let baseConfig = try MistDemoConfig()
+    func defaultZoneIsDefaultZone() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig)
         
         #expect(config.zone == "_defaultZone")
     }
     
     @Test("Custom zone is preserved")
-    func customZoneIsPreserved() throws {
-        let baseConfig = try MistDemoConfig()
+    func customZoneIsPreserved() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig, zone: "customZone")
         
         #expect(config.zone == "customZone")
@@ -266,16 +266,16 @@ struct QueryCommandTests {
     // MARK: - Record Type Tests
     
     @Test("Default record type is Note")
-    func defaultRecordTypeIsNote() throws {
-        let baseConfig = try MistDemoConfig()
+    func defaultRecordTypeIsNote() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig)
         
         #expect(config.recordType == "Note")
     }
     
     @Test("Custom record type is preserved")
-    func customRecordTypeIsPreserved() throws {
-        let baseConfig = try MistDemoConfig()
+    func customRecordTypeIsPreserved() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig, recordType: "CustomRecord")
         
         #expect(config.recordType == "CustomRecord")

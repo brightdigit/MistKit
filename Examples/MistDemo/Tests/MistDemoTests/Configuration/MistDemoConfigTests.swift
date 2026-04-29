@@ -38,8 +38,8 @@ struct MistDemoConfigTests {
   // MARK: - Default Values Tests
 
   @Test("Config initializes with default values")
-  func configInitializesWithDefaults() throws {
-    let config = try MistDemoConfig()
+  func configInitializesWithDefaults() async throws {
+    let config = try await MistDemoConfig()
 
     #expect(config.containerIdentifier == "iCloud.com.brightdigit.MistDemo")
     #expect(config.environment == .development)
@@ -55,8 +55,8 @@ struct MistDemoConfigTests {
   // MARK: - Public API Tests
 
   @Test("Config properties are accessible")
-  func configPropertiesAccessible() throws {
-    let config = try MistDemoConfig()
+  func configPropertiesAccessible() async throws {
+    let config = try await MistDemoConfig()
 
     // Verify all properties can be read
     _ = config.containerIdentifier
@@ -79,30 +79,30 @@ struct MistDemoConfigTests {
   // MARK: - Environment Tests
 
   @Test("Development environment is default")
-  func developmentEnvironmentIsDefault() throws {
-    let config = try MistDemoConfig()
+  func developmentEnvironmentIsDefault() async throws {
+    let config = try await MistDemoConfig()
     #expect(config.environment == .development)
   }
 
   // MARK: - Server Configuration Tests
 
   @Test("Default host is localhost")
-  func defaultHostIsLocalhost() throws {
-    let config = try MistDemoConfig()
+  func defaultHostIsLocalhost() async throws {
+    let config = try await MistDemoConfig()
     #expect(config.host == "127.0.0.1")
   }
 
   @Test("Default port is 8080")
-  func defaultPortIs8080() throws {
-    let config = try MistDemoConfig()
+  func defaultPortIs8080() async throws {
+    let config = try await MistDemoConfig()
     #expect(config.port == 8080)
   }
 
   // MARK: - Test Flags Tests
 
   @Test("All test flags default to false")
-  func allTestFlagsDefaultToFalse() throws {
-    let config = try MistDemoConfig()
+  func allTestFlagsDefaultToFalse() async throws {
+    let config = try await MistDemoConfig()
 
     #expect(config.skipAuth == false)
     #expect(config.testAllAuth == false)

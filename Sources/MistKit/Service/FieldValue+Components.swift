@@ -41,32 +41,12 @@ extension FieldValue {
     valuePayload: Components.Schemas.FieldValueResponse.valuePayload,
     typePayload: Components.Schemas.FieldValueResponse._typePayload?
   ) {
-    let value = valuePayload
-    let fieldType = typePayload
-    switch value {
-    case .StringValue(let stringValue):
-      self = .string(stringValue)
-    case .Int64Value(let intValue):
-      self = .int64(Int(intValue))
-    case .DoubleValue(let doubleValue):
-      if fieldType == .TIMESTAMP {
-        self = .date(Date(timeIntervalSince1970: doubleValue / 1_000))
-      } else {
-        self = .double(doubleValue)
-      }
-    case .BytesValue(let bytesValue):
-      self = .bytes(bytesValue)
-    case .DateValue(let dateValue):
-      self = .date(Date(timeIntervalSince1970: dateValue / 1_000))
-    case .LocationValue(let locationValue):
-      guard let location = Self(locationValue: locationValue) else { return nil }
-      self = location
-    case .ReferenceValue(let referenceValue):
-      self.init(referenceValue: referenceValue)
-    case .AssetValue(let assetValue):
-      self.init(assetValue: assetValue)
-    case .ListValue(let listValue):
-      self.init(listValue: listValue)
+    if let simpleValue = Self.makeSimpleFieldValue(from: valuePayload, type: typePayload) {
+      self = simpleValue
+    } else if let complexValue = Self.makeComplexFieldValue(from: valuePayload) {
+      self = complexValue
+    } else {
+      return nil
     }
   }
 
@@ -130,26 +110,12 @@ extension FieldValue {
 
   /// Initialize from individual list item
   private init?(listItem: Components.Schemas.ListValuePayload) {
-    switch listItem {
-    case .StringValue(let stringValue):
-      self = .string(stringValue)
-    case .Int64Value(let intValue):
-      self = .int64(Int(intValue))
-    case .DoubleValue(let doubleValue):
-      self = .double(doubleValue)
-    case .BytesValue(let bytesValue):
-      self = .bytes(bytesValue)
-    case .DateValue(let dateValue):
-      self = .date(Date(timeIntervalSince1970: dateValue / 1_000))
-    case .LocationValue(let locationValue):
-      guard let location = Self(locationValue: locationValue) else { return nil }
-      self = location
-    case .ReferenceValue(let referenceValue):
-      self.init(referenceValue: referenceValue)
-    case .AssetValue(let assetValue):
-      self.init(assetValue: assetValue)
-    case .ListValue(let nestedList):
-      self.init(nestedListValue: nestedList)
+    if let simpleValue = Self.makeSimpleListItem(from: listItem) {
+      self = simpleValue
+    } else if let complexValue = Self.makeComplexListItem(from: listItem) {
+      self = complexValue
+    } else {
+      return nil
     }
   }
 
@@ -173,5 +139,86 @@ extension FieldValue {
     default:
       return nil
     }
+  }
+
+  private static func makeSimpleFieldValue(
+    from value: Components.Schemas.FieldValueResponse.valuePayload,
+    type fieldType: Components.Schemas.FieldValueResponse._typePayload?
+  ) -> FieldValue? {
+    if case .StringValue(let strVal) = value {
+      return .string(strVal)
+    }
+    if case .Int64Value(let intVal) = value {
+      return .int64(Int(intVal))
+    }
+    if case .DoubleValue(let dblVal) = value {
+      return fieldType == .TIMESTAMP
+        ? .date(Date(timeIntervalSince1970: dblVal / 1_000))
+        : .double(dblVal)
+    }
+    if case .BytesValue(let bytesVal) = value {
+      return .bytes(bytesVal)
+    }
+    if case .DateValue(let dateVal) = value {
+      return .date(Date(timeIntervalSince1970: dateVal / 1_000))
+    }
+    return nil
+  }
+
+  private static func makeComplexFieldValue(
+    from value: Components.Schemas.FieldValueResponse.valuePayload
+  ) -> FieldValue? {
+    if case .LocationValue(let locationValue) = value {
+      return Self(locationValue: locationValue)
+    }
+    if case .ReferenceValue(let referenceValue) = value {
+      return Self(referenceValue: referenceValue)
+    }
+    if case .AssetValue(let assetValue) = value {
+      return Self(assetValue: assetValue)
+    }
+    if case .ListValue(let listValue) = value {
+      return Self(listValue: listValue)
+    }
+    return nil
+  }
+
+  private static func makeSimpleListItem(
+    from listItem: Components.Schemas.ListValuePayload
+  ) -> FieldValue? {
+    if case .StringValue(let strVal) = listItem {
+      return .string(strVal)
+    }
+    if case .Int64Value(let intVal) = listItem {
+      return .int64(Int(intVal))
+    }
+    if case .DoubleValue(let dblVal) = listItem {
+      return .double(dblVal)
+    }
+    if case .BytesValue(let bytesVal) = listItem {
+      return .bytes(bytesVal)
+    }
+    if case .DateValue(let dateVal) = listItem {
+      return .date(Date(timeIntervalSince1970: dateVal / 1_000))
+    }
+    return nil
+  }
+
+  private static func makeComplexListItem(
+    from listItem: Components.Schemas.ListValuePayload
+  ) -> FieldValue? {
+    if case .LocationValue(let locationValue) = listItem {
+      return Self(locationValue: locationValue)
+    }
+    if case .ReferenceValue(let referenceValue) = listItem {
+      return Self(referenceValue: referenceValue)
+    }
+    if case .AssetValue(let assetValue) = listItem {
+      return Self(assetValue: assetValue)
+    }
+    if case .ListValue(let nestedList) = listItem {
+      return Self(nestedListValue: nestedList)
+    }
+    return nil
   }
 }

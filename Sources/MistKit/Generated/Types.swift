@@ -692,6 +692,14 @@ internal enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/RecordResponse/fields`.
             internal var fields: Components.Schemas.RecordResponse.fieldsPayload?
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/created`.
+            internal var created: Components.Schemas.RecordTimestamp?
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/modified`.
+            internal var modified: Components.Schemas.RecordTimestamp?
+            /// Whether the record was deleted
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/deleted`.
+            internal var deleted: Swift.Bool?
             /// Creates a new `RecordResponse`.
             ///
             /// - Parameters:
@@ -699,26 +707,38 @@ internal enum Components {
             ///   - recordType: The record type (schema name)
             ///   - recordChangeTag: Change tag for optimistic concurrency control
             ///   - fields: Record fields with their values and optional type information
+            ///   - created:
+            ///   - modified:
+            ///   - deleted: Whether the record was deleted
             internal init(
                 recordName: Swift.String? = nil,
                 recordType: Swift.String? = nil,
                 recordChangeTag: Swift.String? = nil,
-                fields: Components.Schemas.RecordResponse.fieldsPayload? = nil
+                fields: Components.Schemas.RecordResponse.fieldsPayload? = nil,
+                created: Components.Schemas.RecordTimestamp? = nil,
+                modified: Components.Schemas.RecordTimestamp? = nil,
+                deleted: Swift.Bool? = nil
             ) {
                 self.recordName = recordName
                 self.recordType = recordType
                 self.recordChangeTag = recordChangeTag
                 self.fields = fields
+                self.created = created
+                self.modified = modified
+                self.deleted = deleted
             }
             internal enum CodingKeys: String, CodingKey {
                 case recordName
                 case recordType
                 case recordChangeTag
                 case fields
+                case created
+                case modified
+                case deleted
             }
         }
         /// A CloudKit field value for API requests.
-        /// The type field is omitted as CloudKit infers types from the value structure.
+        /// The type field is optional and used for IN/NOT_IN list filters to specify the list element type.
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/FieldValueRequest`.
@@ -830,15 +850,39 @@ internal enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/FieldValueRequest/value`.
             internal var value: Components.Schemas.FieldValueRequest.valuePayload
+            /// Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
+            ///
+            /// - Remark: Generated from `#/components/schemas/FieldValueRequest/type`.
+            internal enum _typePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case STRING_LIST = "STRING_LIST"
+                case INT64_LIST = "INT64_LIST"
+                case DOUBLE_LIST = "DOUBLE_LIST"
+                case BYTES_LIST = "BYTES_LIST"
+                case TIMESTAMP_LIST = "TIMESTAMP_LIST"
+                case REFERENCE_LIST = "REFERENCE_LIST"
+                case LOCATION_LIST = "LOCATION_LIST"
+                case ASSET_LIST = "ASSET_LIST"
+                case LIST = "LIST"
+            }
+            /// Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
+            ///
+            /// - Remark: Generated from `#/components/schemas/FieldValueRequest/type`.
+            internal var _type: Components.Schemas.FieldValueRequest._typePayload?
             /// Creates a new `FieldValueRequest`.
             ///
             /// - Parameters:
             ///   - value:
-            internal init(value: Components.Schemas.FieldValueRequest.valuePayload) {
+            ///   - _type: Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
+            internal init(
+                value: Components.Schemas.FieldValueRequest.valuePayload,
+                _type: Components.Schemas.FieldValueRequest._typePayload? = nil
+            ) {
                 self.value = value
+                self._type = _type
             }
             internal enum CodingKeys: String, CodingKey {
                 case value
+                case _type = "type"
             }
         }
         /// A CloudKit field value from API responses.
@@ -1620,21 +1664,27 @@ internal enum Components {
             internal var zones: Components.Schemas.ZoneChangesResponse.zonesPayload?
             /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/syncToken`.
             internal var syncToken: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/moreComing`.
+            internal var moreComing: Swift.Bool?
             /// Creates a new `ZoneChangesResponse`.
             ///
             /// - Parameters:
             ///   - zones:
             ///   - syncToken:
+            ///   - moreComing:
             internal init(
                 zones: Components.Schemas.ZoneChangesResponse.zonesPayload? = nil,
-                syncToken: Swift.String? = nil
+                syncToken: Swift.String? = nil,
+                moreComing: Swift.Bool? = nil
             ) {
                 self.zones = zones
                 self.syncToken = syncToken
+                self.moreComing = moreComing
             }
             internal enum CodingKeys: String, CodingKey {
                 case zones
                 case syncToken
+                case moreComing
             }
         }
         /// - Remark: Generated from `#/components/schemas/SubscriptionsListResponse`.
@@ -1682,6 +1732,176 @@ internal enum Components {
                 case subscriptions
             }
         }
+        /// Timestamp information for record creation or modification
+        ///
+        /// - Remark: Generated from `#/components/schemas/RecordTimestamp`.
+        internal struct RecordTimestamp: Codable, Hashable, Sendable {
+            /// Unix timestamp in milliseconds
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordTimestamp/timestamp`.
+            internal var timestamp: Swift.Double?
+            /// Record name of the user who performed the action
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordTimestamp/userRecordName`.
+            internal var userRecordName: Swift.String?
+            /// Creates a new `RecordTimestamp`.
+            ///
+            /// - Parameters:
+            ///   - timestamp: Unix timestamp in milliseconds
+            ///   - userRecordName: Record name of the user who performed the action
+            internal init(
+                timestamp: Swift.Double? = nil,
+                userRecordName: Swift.String? = nil
+            ) {
+                self.timestamp = timestamp
+                self.userRecordName = userRecordName
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case timestamp
+                case userRecordName
+            }
+        }
+        /// The parts of a user's name
+        ///
+        /// - Remark: Generated from `#/components/schemas/NameComponents`.
+        internal struct NameComponents: Codable, Hashable, Sendable {
+            /// The user's name prefix
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/namePrefix`.
+            internal var namePrefix: Swift.String?
+            /// The user's first name
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/givenName`.
+            internal var givenName: Swift.String?
+            /// The user's middle name
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/middleName`.
+            internal var middleName: Swift.String?
+            /// The user's last name
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/familyName`.
+            internal var familyName: Swift.String?
+            /// The user's name suffix
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/nameSuffix`.
+            internal var nameSuffix: Swift.String?
+            /// The user's nickname
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/nickname`.
+            internal var nickname: Swift.String?
+            /// A phonetic representation of the user's name
+            ///
+            /// - Remark: Generated from `#/components/schemas/NameComponents/phoneticRepresentation`.
+            internal var phoneticRepresentation: Swift.String?
+            /// Creates a new `NameComponents`.
+            ///
+            /// - Parameters:
+            ///   - namePrefix: The user's name prefix
+            ///   - givenName: The user's first name
+            ///   - middleName: The user's middle name
+            ///   - familyName: The user's last name
+            ///   - nameSuffix: The user's name suffix
+            ///   - nickname: The user's nickname
+            ///   - phoneticRepresentation: A phonetic representation of the user's name
+            internal init(
+                namePrefix: Swift.String? = nil,
+                givenName: Swift.String? = nil,
+                middleName: Swift.String? = nil,
+                familyName: Swift.String? = nil,
+                nameSuffix: Swift.String? = nil,
+                nickname: Swift.String? = nil,
+                phoneticRepresentation: Swift.String? = nil
+            ) {
+                self.namePrefix = namePrefix
+                self.givenName = givenName
+                self.middleName = middleName
+                self.familyName = familyName
+                self.nameSuffix = nameSuffix
+                self.nickname = nickname
+                self.phoneticRepresentation = phoneticRepresentation
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case namePrefix
+                case givenName
+                case middleName
+                case familyName
+                case nameSuffix
+                case nickname
+                case phoneticRepresentation
+            }
+        }
+        /// Information used to look up a user identity
+        ///
+        /// - Remark: Generated from `#/components/schemas/UserIdentityLookupInfo`.
+        internal struct UserIdentityLookupInfo: Codable, Hashable, Sendable {
+            /// The user's email address
+            ///
+            /// - Remark: Generated from `#/components/schemas/UserIdentityLookupInfo/emailAddress`.
+            internal var emailAddress: Swift.String?
+            /// The user's phone number
+            ///
+            /// - Remark: Generated from `#/components/schemas/UserIdentityLookupInfo/phoneNumber`.
+            internal var phoneNumber: Swift.String?
+            /// The record name of the user
+            ///
+            /// - Remark: Generated from `#/components/schemas/UserIdentityLookupInfo/userRecordName`.
+            internal var userRecordName: Swift.String?
+            /// Creates a new `UserIdentityLookupInfo`.
+            ///
+            /// - Parameters:
+            ///   - emailAddress: The user's email address
+            ///   - phoneNumber: The user's phone number
+            ///   - userRecordName: The record name of the user
+            internal init(
+                emailAddress: Swift.String? = nil,
+                phoneNumber: Swift.String? = nil,
+                userRecordName: Swift.String? = nil
+            ) {
+                self.emailAddress = emailAddress
+                self.phoneNumber = phoneNumber
+                self.userRecordName = userRecordName
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case emailAddress
+                case phoneNumber
+                case userRecordName
+            }
+        }
+        /// A user identity returned by discover endpoints
+        ///
+        /// - Remark: Generated from `#/components/schemas/UserIdentity`.
+        internal struct UserIdentity: Codable, Hashable, Sendable {
+            /// The record name of the user
+            ///
+            /// - Remark: Generated from `#/components/schemas/UserIdentity/userRecordName`.
+            internal var userRecordName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/UserIdentity/nameComponents`.
+            internal var nameComponents: Components.Schemas.NameComponents?
+            /// - Remark: Generated from `#/components/schemas/UserIdentity/lookupInfo`.
+            internal var lookupInfo: Components.Schemas.UserIdentityLookupInfo?
+            /// Creates a new `UserIdentity`.
+            ///
+            /// - Parameters:
+            ///   - userRecordName: The record name of the user
+            ///   - nameComponents:
+            ///   - lookupInfo:
+            internal init(
+                userRecordName: Swift.String? = nil,
+                nameComponents: Components.Schemas.NameComponents? = nil,
+                lookupInfo: Components.Schemas.UserIdentityLookupInfo? = nil
+            ) {
+                self.userRecordName = userRecordName
+                self.nameComponents = nameComponents
+                self.lookupInfo = lookupInfo
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case userRecordName
+                case nameComponents
+                case lookupInfo
+            }
+        }
+        /// A user returned by current/lookup endpoints (User Dictionary)
+        ///
         /// - Remark: Generated from `#/components/schemas/UserResponse`.
         internal struct UserResponse: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/UserResponse/userRecordName`.
@@ -1719,50 +1939,13 @@ internal enum Components {
         }
         /// - Remark: Generated from `#/components/schemas/DiscoverResponse`.
         internal struct DiscoverResponse: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload`.
-            internal struct usersPayloadPayload: Codable, Hashable, Sendable {
-                /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/userRecordName`.
-                internal var userRecordName: Swift.String?
-                /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/firstName`.
-                internal var firstName: Swift.String?
-                /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/lastName`.
-                internal var lastName: Swift.String?
-                /// - Remark: Generated from `#/components/schemas/DiscoverResponse/usersPayload/emailAddress`.
-                internal var emailAddress: Swift.String?
-                /// Creates a new `usersPayloadPayload`.
-                ///
-                /// - Parameters:
-                ///   - userRecordName:
-                ///   - firstName:
-                ///   - lastName:
-                ///   - emailAddress:
-                internal init(
-                    userRecordName: Swift.String? = nil,
-                    firstName: Swift.String? = nil,
-                    lastName: Swift.String? = nil,
-                    emailAddress: Swift.String? = nil
-                ) {
-                    self.userRecordName = userRecordName
-                    self.firstName = firstName
-                    self.lastName = lastName
-                    self.emailAddress = emailAddress
-                }
-                internal enum CodingKeys: String, CodingKey {
-                    case userRecordName
-                    case firstName
-                    case lastName
-                    case emailAddress
-                }
-            }
             /// - Remark: Generated from `#/components/schemas/DiscoverResponse/users`.
-            internal typealias usersPayload = [Components.Schemas.DiscoverResponse.usersPayloadPayload]
-            /// - Remark: Generated from `#/components/schemas/DiscoverResponse/users`.
-            internal var users: Components.Schemas.DiscoverResponse.usersPayload?
+            internal var users: [Components.Schemas.UserIdentity]?
             /// Creates a new `DiscoverResponse`.
             ///
             /// - Parameters:
             ///   - users:
-            internal init(users: Components.Schemas.DiscoverResponse.usersPayload? = nil) {
+            internal init(users: [Components.Schemas.UserIdentity]? = nil) {
                 self.users = users
             }
             internal enum CodingKeys: String, CodingKey {
@@ -6431,42 +6614,48 @@ internal enum Operations {
             internal enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json`.
                 internal struct jsonPayload: Codable, Hashable, Sendable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/usersPayload`.
-                    internal struct usersPayloadPayload: Codable, Hashable, Sendable {
-                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/usersPayload/emailAddress`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfosPayload`.
+                    internal struct lookupInfosPayloadPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfosPayload/emailAddress`.
                         internal var emailAddress: Swift.String?
-                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/usersPayload/userRecordName`.
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfosPayload/phoneNumber`.
+                        internal var phoneNumber: Swift.String?
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfosPayload/userRecordName`.
                         internal var userRecordName: Swift.String?
-                        /// Creates a new `usersPayloadPayload`.
+                        /// Creates a new `lookupInfosPayloadPayload`.
                         ///
                         /// - Parameters:
                         ///   - emailAddress:
+                        ///   - phoneNumber:
                         ///   - userRecordName:
                         internal init(
                             emailAddress: Swift.String? = nil,
+                            phoneNumber: Swift.String? = nil,
                             userRecordName: Swift.String? = nil
                         ) {
                             self.emailAddress = emailAddress
+                            self.phoneNumber = phoneNumber
                             self.userRecordName = userRecordName
                         }
                         internal enum CodingKeys: String, CodingKey {
                             case emailAddress
+                            case phoneNumber
                             case userRecordName
                         }
                     }
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/users`.
-                    internal typealias usersPayload = [Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayloadPayload]
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/users`.
-                    internal var users: Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayload?
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfos`.
+                    internal typealias lookupInfosPayload = [Operations.discoverUserIdentities.Input.Body.jsonPayload.lookupInfosPayloadPayload]
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/json/lookupInfos`.
+                    internal var lookupInfos: Operations.discoverUserIdentities.Input.Body.jsonPayload.lookupInfosPayload?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
-                    ///   - users:
-                    internal init(users: Operations.discoverUserIdentities.Input.Body.jsonPayload.usersPayload? = nil) {
-                        self.users = users
+                    ///   - lookupInfos:
+                    internal init(lookupInfos: Operations.discoverUserIdentities.Input.Body.jsonPayload.lookupInfosPayload? = nil) {
+                        self.lookupInfos = lookupInfos
                     }
                     internal enum CodingKeys: String, CodingKey {
-                        case users
+                        case lookupInfos
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/POST/requestBody/content/application\/json`.

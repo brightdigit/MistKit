@@ -39,9 +39,6 @@ public import Foundation
 ///
 /// Response format: `{ "singleFile": { "wrappingKey": ..., "fileChecksum": ..., "receipt": ..., etc. } }`
 public struct AssetUploadResponse: Codable, Sendable {
-  /// The uploaded asset data containing checksums and receipt
-  public let singleFile: AssetData
-
   /// Asset metadata returned from CloudKit CDN
   public struct AssetData: Codable, Sendable {
     /// Wrapping key for encrypted assets
@@ -70,6 +67,9 @@ public struct AssetUploadResponse: Codable, Sendable {
       self.size = size
     }
   }
+
+  /// The uploaded asset data containing checksums and receipt
+  public let singleFile: AssetData
 
   /// Initialize asset upload response
   public init(singleFile: AssetData) {

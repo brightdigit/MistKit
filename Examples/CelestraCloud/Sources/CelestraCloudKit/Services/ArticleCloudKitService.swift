@@ -110,16 +110,14 @@ public struct ArticleCloudKitService: Sendable {
     _ guids: [String],
     feedRecordName: String?
   ) async throws(CloudKitError) -> [Article] {
-    // CloudKit Web Services has issues with combining .in() with other filters.
-    // Current approach: Use .in() ONLY for GUID filtering (single filter, no combinations).
-    // Feed filtering is done in-memory (line 135-136) to avoid the .in() + filter issue.
-    //
-    // Known limitation: Cannot efficiently query by both GUID and feedRecordName in one query.
-    // This is acceptable because GUID queries are typically small batches (<150 items).
-    //
-    // Alternative considered: Multiple single-GUID queries would be significantly slower
-    // and hit rate limits faster. The in-memory filter is the pragmatic solution.
-    let filters: [QueryFilter] = [.in("guid", guids.map { FieldValue.string($0) })]
+    // Query articles by GUID using the IN filter.
+    // Now that issue #192 is fixed, we can combine .in() with other filters.
+    // If feedRecordName is specified, we filter at query time for efficiency.
+    var filters: [QueryFilter] = [.in("guid", guids.map { FieldValue.string($0) })]
+    if let feedName = feedRecordName {
+      filters.append(.equals("feedRecordName", FieldValue.string(feedName)))
+    }
+
     let records = try await recordOperator.queryRecords(
       recordType: "Article",
       filters: filters,
@@ -127,7 +125,7 @@ public struct ArticleCloudKitService: Sendable {
       limit: 200,
       desiredKeys: nil
     )
-    let articles = records.compactMap { record in
+    return records.compactMap { record in
       do {
         return try Article(from: record)
       } catch {
@@ -137,12 +135,6 @@ public struct ArticleCloudKitService: Sendable {
         return nil
       }
     }
-
-    // Filter by feedRecordName in-memory if specified
-    if let feedName = feedRecordName {
-      return articles.filter { $0.feedRecordName == feedName }
-    }
-    return articles
   }
 
   // MARK: - Create Operations

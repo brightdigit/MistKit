@@ -32,6 +32,16 @@ import Foundation
 /// Public wrapper for CloudKit query sort descriptors
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct QuerySort {
+  // MARK: - Internal
+
+  internal let sort: Components.Schemas.Sort
+
+  // MARK: - Lifecycle
+
+  private init(_ sort: Components.Schemas.Sort) {
+    self.sort = sort
+  }
+
   // MARK: - Public
 
   /// Creates an ascending sort descriptor
@@ -56,14 +66,4 @@ public struct QuerySort {
   public static func sort(_ field: String, ascending: Bool = true) -> QuerySort {
     QuerySort(SortDescriptor.sort(field, ascending: ascending))
   }
-
-  // MARK: - Lifecycle
-
-  private init(_ sort: Components.Schemas.Sort) {
-    self.sort = sort
-  }
-
-  // MARK: - Internal
-
-  internal let sort: Components.Schemas.Sort
 }

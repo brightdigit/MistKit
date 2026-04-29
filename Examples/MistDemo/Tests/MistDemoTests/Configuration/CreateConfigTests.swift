@@ -38,8 +38,8 @@ struct CreateConfigTests {
     // MARK: - Basic Initialization Tests
 
     @Test("CreateConfig initializes with default values")
-    func initializeWithDefaults() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithDefaults() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(base: baseConfig)
 
         #expect(config.zone == "_defaultZone")
@@ -50,8 +50,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with custom zone")
-    func initializeWithCustomZone() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithCustomZone() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             zone: "customZone"
@@ -62,8 +62,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with custom record type")
-    func initializeWithCustomRecordType() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithCustomRecordType() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             recordType: "Article"
@@ -74,8 +74,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with custom record name")
-    func initializeWithCustomRecordName() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithCustomRecordName() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             recordName: "myRecord123"
@@ -85,8 +85,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with nil record name")
-    func initializeWithNilRecordName() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithNilRecordName() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             recordName: nil
@@ -98,8 +98,8 @@ struct CreateConfigTests {
     // MARK: - Field Initialization Tests
 
     @Test("CreateConfig initializes with empty fields")
-    func initializeWithEmptyFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithEmptyFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             fields: []
@@ -109,8 +109,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with single field")
-    func initializeWithSingleField() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithSingleField() async throws {
+        let baseConfig = try await MistDemoConfig()
         let field = Field(name: "title", type: .string, value: "Hello World")
         let config = CreateConfig(
             base: baseConfig,
@@ -124,8 +124,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with multiple fields")
-    func initializeWithMultipleFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithMultipleFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let fields = [
             Field(name: "title", type: .string, value: "Test Title"),
             Field(name: "count", type: .int64, value: "42"),
@@ -143,8 +143,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with different field types")
-    func initializeWithDifferentFieldTypes() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithDifferentFieldTypes() async throws {
+        let baseConfig = try await MistDemoConfig()
         let fields = [
             Field(name: "stringField", type: .string, value: "text"),
             Field(name: "intField", type: .int64, value: "100"),
@@ -168,8 +168,8 @@ struct CreateConfigTests {
     // MARK: - Output Format Tests
 
     @Test("CreateConfig initializes with JSON output format")
-    func initializeWithJSONOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithJSONOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             output: .json
@@ -179,8 +179,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with CSV output format")
-    func initializeWithCSVOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithCSVOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             output: .csv
@@ -190,8 +190,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with table output format")
-    func initializeWithTableOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithTableOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             output: .table
@@ -201,8 +201,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with YAML output format")
-    func initializeWithYAMLOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithYAMLOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             output: .yaml
@@ -214,8 +214,8 @@ struct CreateConfigTests {
     // MARK: - Complex Initialization Tests
 
     @Test("CreateConfig initializes with all custom values")
-    func initializeWithAllCustomValues() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithAllCustomValues() async throws {
+        let baseConfig = try await MistDemoConfig()
         let fields = [
             Field(name: "name", type: .string, value: "John Doe"),
             Field(name: "age", type: .int64, value: "30")
@@ -239,8 +239,8 @@ struct CreateConfigTests {
     // MARK: - Edge Cases
 
     @Test("CreateConfig handles special characters in zone name")
-    func handleSpecialCharactersInZone() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleSpecialCharactersInZone() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             zone: "zone_with-special.chars"
@@ -250,8 +250,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig handles special characters in record type")
-    func handleSpecialCharactersInRecordType() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleSpecialCharactersInRecordType() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             recordType: "Record_Type-123"
@@ -261,8 +261,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig handles special characters in record name")
-    func handleSpecialCharactersInRecordName() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleSpecialCharactersInRecordName() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             recordName: "record-name_with.special@chars"
@@ -272,8 +272,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig handles field with empty string value")
-    func handleFieldWithEmptyValue() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleFieldWithEmptyValue() async throws {
+        let baseConfig = try await MistDemoConfig()
         let field = Field(name: "emptyField", type: .string, value: "")
         let config = CreateConfig(
             base: baseConfig,
@@ -285,8 +285,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig handles field with whitespace value")
-    func handleFieldWithWhitespaceValue() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleFieldWithWhitespaceValue() async throws {
+        let baseConfig = try await MistDemoConfig()
         let field = Field(name: "whitespaceField", type: .string, value: "   ")
         let config = CreateConfig(
             base: baseConfig,
@@ -298,8 +298,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig handles very long field value")
-    func handleVeryLongFieldValue() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleVeryLongFieldValue() async throws {
+        let baseConfig = try await MistDemoConfig()
         let longValue = String(repeating: "a", count: 1000)
         let field = Field(name: "longField", type: .string, value: longValue)
         let config = CreateConfig(
@@ -312,8 +312,8 @@ struct CreateConfigTests {
     }
 
     @Test("CreateConfig handles many fields")
-    func handleManyFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleManyFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let fields = (0..<20).map { index in
             Field(name: "field\(index)", type: .string, value: "value\(index)")
         }

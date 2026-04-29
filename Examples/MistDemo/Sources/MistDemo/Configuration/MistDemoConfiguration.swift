@@ -39,8 +39,8 @@ public struct MistDemoConfiguration: Sendable {
       // 1. Command line arguments (highest priority)
       CommandLineArgumentsProvider(),
 
-      // 2. Environment variables
-      EnvironmentVariablesProvider(),
+      // 2. Environment variables (CLOUDKIT_ prefix: e.g. api.token → CLOUDKIT_API_TOKEN)
+      EnvironmentVariablesProvider().prefixKeys(with: "cloudkit"),
 
       // 3. In-memory defaults (lowest priority)
       InMemoryProvider(values: [
@@ -109,6 +109,14 @@ public struct MistDemoConfiguration: Sendable {
     default defaultValue: Bool = false
   ) -> Bool {
     configReader.bool(forKey: Configuration.ConfigKey(key), default: defaultValue)
+  }
+
+  /// Read a pipe-separated list of strings from configuration.
+  /// Splits on "|" and trims whitespace from each element.
+  public func filterStrings(forKey key: String) -> [String] {
+    string(forKey: key)?
+      .split(separator: "|")
+      .map { String($0).trimmingCharacters(in: .whitespaces) } ?? []
   }
 
 }

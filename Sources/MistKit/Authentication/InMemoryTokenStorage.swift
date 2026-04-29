@@ -49,7 +49,7 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
       let key = identifier ?? "default"
 
       // Check if token has expired
-      if let expirationTime = expirationTimes[key], expirationTime < Date() {
+      if let expirationTime = expirationTimes[key], expirationTime <= Date() {
         // Token has expired, remove it
         credentials.removeValue(forKey: key)
         expirationTimes.removeValue(forKey: key)
@@ -78,7 +78,7 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
     func cleanupExpiredTokens() {
       let now = Date()
       let expiredKeys = expirationTimes.compactMap { key, expirationTime in
-        expirationTime < now ? key : nil
+        expirationTime <= now ? key : nil
       }
 
       for key in expiredKeys {

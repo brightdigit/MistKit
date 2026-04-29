@@ -67,7 +67,7 @@ public struct CSVFormatter: OutputFormatter {
 
         // Custom fields
         for (fieldName, fieldValue) in record.fields.sorted(by: { $0.key < $1.key }) {
-            let valueString = String(describing: fieldValue)
+            let valueString = FieldValueFormatter.displayString(fieldValue)
             output += "\(escaper.escape(fieldName)),\(escaper.escape(valueString))\n"
         }
 

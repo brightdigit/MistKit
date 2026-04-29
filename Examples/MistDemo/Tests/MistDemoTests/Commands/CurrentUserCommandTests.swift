@@ -38,8 +38,8 @@ struct CurrentUserCommandTests {
     // MARK: - Configuration Tests
     
     @Test("CurrentUserConfig initializes with default values")
-    func currentUserConfigInitializesWithDefaults() throws {
-        let baseConfig = try MistDemoConfig()
+    func currentUserConfigInitializesWithDefaults() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(base: baseConfig)
         
         #expect(config.fields == nil)
@@ -47,8 +47,8 @@ struct CurrentUserCommandTests {
     }
     
     @Test("CurrentUserConfig accepts custom values")
-    func currentUserConfigAcceptsCustomValues() throws {
-        let baseConfig = try MistDemoConfig()
+    func currentUserConfigAcceptsCustomValues() async throws {
+        let baseConfig = try await MistDemoConfig()
         let fields = ["userRecordName", "emailAddress"]
         let config = CurrentUserConfig(
             base: baseConfig,
@@ -69,8 +69,8 @@ struct CurrentUserCommandTests {
     }
     
     @Test("Command initializes with config")
-    func commandInitializesWithConfig() throws {
-        let baseConfig = try MistDemoConfig()
+    func commandInitializesWithConfig() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(base: baseConfig)
         let _ = CurrentUserCommand(config: config)
 
@@ -105,8 +105,8 @@ struct CurrentUserCommandTests {
     // MARK: - Field Filtering Tests
     
     @Test("Field filtering with nil fields returns all")
-    func fieldFilteringWithNilFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func fieldFilteringWithNilFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(base: baseConfig, fields: nil)
         
         // When fields is nil, all fields should be included
@@ -114,8 +114,8 @@ struct CurrentUserCommandTests {
     }
     
     @Test("Field filtering with specific fields")
-    func fieldFilteringWithSpecificFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func fieldFilteringWithSpecificFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let fields = ["userRecordName", "emailAddress", "firstName"]
         let config = CurrentUserConfig(base: baseConfig, fields: fields)
         
@@ -148,7 +148,7 @@ struct CurrentUserCommandTests {
     // MARK: - Error Handling Tests
     
     @Test("Command handles authentication error gracefully")
-    func commandHandlesAuthError() throws {
+    func commandHandlesAuthError() async throws {
         // Test that authentication errors are properly handled
         let error = MistDemoError.authenticationFailed(
             description: "Invalid credentials",
@@ -161,7 +161,7 @@ struct CurrentUserCommandTests {
     }
     
     @Test("Command handles missing API token")
-    func commandHandlesMissingAPIToken() throws {
+    func commandHandlesMissingAPIToken() async throws {
         // Test configuration error for missing API token
         let error = ConfigurationError.missingRequired(
             "api.token",
@@ -174,8 +174,8 @@ struct CurrentUserCommandTests {
     // MARK: - Database Selection Tests
     
     @Test("Database defaults to private for authenticated user")
-    func databaseDefaultsToPrivate() throws {
-        let baseConfig = try MistDemoConfig()
+    func databaseDefaultsToPrivate() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(base: baseConfig)
         
         // With web auth token, database should be private
@@ -186,8 +186,8 @@ struct CurrentUserCommandTests {
     // MARK: - Integration with MistKitClientFactory
     
     @Test("MistKitClientFactory configuration")
-    func mistKitClientFactoryConfig() throws {
-        let config = try MistDemoConfig()
+    func mistKitClientFactoryConfig() async throws {
+        let config = try await MistDemoConfig()
 
         // Verify config has necessary properties for client creation
         #expect(config.containerIdentifier == "iCloud.com.brightdigit.MistDemo")

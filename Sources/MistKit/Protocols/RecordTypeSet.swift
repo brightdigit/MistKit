@@ -27,20 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
-
-/// Protocol for types that provide iteration over CloudKit record types
-///
-/// Conforming types provide a `forEach` method for iterating through
-/// a collection of CloudKit record types.
-public protocol RecordTypeIterating {
-  /// Iterate through all record types
-  ///
-  /// - Parameter action: Closure called for each record type
-  /// - Throws: Rethrows any errors thrown by the action closure
-  func forEach(_ action: (any CloudKitRecord.Type) async throws -> Void) async rethrows
-}
-
 /// Lightweight container for CloudKit record types using Swift variadic generics
 ///
 /// This struct captures a parameter pack of `CloudKitRecord` types and provides

@@ -38,8 +38,8 @@ struct QueryConfigTests {
     // MARK: - Basic Initialization Tests
 
     @Test("QueryConfig initializes with default values")
-    func initializeWithDefaults() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithDefaults() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig)
 
         #expect(config.zone == "_defaultZone")
@@ -54,8 +54,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with custom zone")
-    func initializeWithCustomZone() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithCustomZone() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             zone: "customZone"
@@ -66,8 +66,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with custom record type")
-    func initializeWithCustomRecordType() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithCustomRecordType() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             recordType: "Article"
@@ -80,8 +80,8 @@ struct QueryConfigTests {
     // MARK: - Filter Tests
 
     @Test("QueryConfig initializes with empty filters")
-    func initializeWithEmptyFilters() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithEmptyFilters() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             filters: []
@@ -91,8 +91,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with single filter")
-    func initializeWithSingleFilter() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithSingleFilter() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             filters: ["status=active"]
@@ -103,8 +103,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with multiple filters")
-    func initializeWithMultipleFilters() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithMultipleFilters() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             filters: ["status=active", "priority>5", "category=urgent"]
@@ -119,8 +119,8 @@ struct QueryConfigTests {
     // MARK: - Sort Option Tests
 
     @Test("QueryConfig initializes with nil sort")
-    func initializeWithNilSort() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithNilSort() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             sort: nil
@@ -130,8 +130,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with ascending sort")
-    func initializeWithAscendingSort() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithAscendingSort() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             sort: (field: "createdAt", order: .ascending)
@@ -142,8 +142,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with descending sort")
-    func initializeWithDescendingSort() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithDescendingSort() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             sort: (field: "updatedAt", order: .descending)
@@ -154,8 +154,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig handles sort on different field names")
-    func handleSortOnDifferentFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleSortOnDifferentFields() async throws {
+        let baseConfig = try await MistDemoConfig()
 
         let config1 = QueryConfig(base: baseConfig, sort: (field: "title", order: .ascending))
         #expect(config1.sort?.field == "title")
@@ -170,16 +170,16 @@ struct QueryConfigTests {
     // MARK: - Limit Tests
 
     @Test("QueryConfig initializes with default limit")
-    func initializeWithDefaultLimit() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithDefaultLimit() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig)
 
         #expect(config.limit == 20)
     }
 
     @Test("QueryConfig initializes with custom limit")
-    func initializeWithCustomLimit() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithCustomLimit() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             limit: 50
@@ -189,8 +189,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig handles minimum limit")
-    func handleMinimumLimit() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleMinimumLimit() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             limit: 1
@@ -200,8 +200,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig handles maximum limit")
-    func handleMaximumLimit() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleMaximumLimit() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             limit: 200
@@ -213,16 +213,16 @@ struct QueryConfigTests {
     // MARK: - Offset Tests
 
     @Test("QueryConfig initializes with default offset")
-    func initializeWithDefaultOffset() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithDefaultOffset() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(base: baseConfig)
 
         #expect(config.offset == 0)
     }
 
     @Test("QueryConfig initializes with custom offset")
-    func initializeWithCustomOffset() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithCustomOffset() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             offset: 10
@@ -232,8 +232,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig handles large offset")
-    func handleLargeOffset() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleLargeOffset() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             offset: 1000
@@ -245,8 +245,8 @@ struct QueryConfigTests {
     // MARK: - Fields Filter Tests
 
     @Test("QueryConfig initializes with nil fields")
-    func initializeWithNilFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithNilFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             fields: nil
@@ -256,8 +256,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with empty fields array")
-    func initializeWithEmptyFieldsArray() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithEmptyFieldsArray() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             fields: []
@@ -268,8 +268,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with single field")
-    func initializeWithSingleField() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithSingleField() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             fields: ["title"]
@@ -280,8 +280,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with multiple fields")
-    func initializeWithMultipleFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithMultipleFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             fields: ["title", "content", "createdAt", "status"]
@@ -295,8 +295,8 @@ struct QueryConfigTests {
     // MARK: - Continuation Marker Tests
 
     @Test("QueryConfig initializes with nil continuation marker")
-    func initializeWithNilContinuationMarker() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithNilContinuationMarker() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             continuationMarker: nil
@@ -306,8 +306,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with continuation marker")
-    func initializeWithContinuationMarker() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithContinuationMarker() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             continuationMarker: "marker-abc123"
@@ -319,8 +319,8 @@ struct QueryConfigTests {
     // MARK: - Output Format Tests
 
     @Test("QueryConfig initializes with JSON output format")
-    func initializeWithJSONOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithJSONOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             output: .json
@@ -330,8 +330,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with CSV output format")
-    func initializeWithCSVOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithCSVOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             output: .csv
@@ -341,8 +341,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with table output format")
-    func initializeWithTableOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithTableOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             output: .table
@@ -352,8 +352,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with YAML output format")
-    func initializeWithYAMLOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithYAMLOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             output: .yaml
@@ -365,8 +365,8 @@ struct QueryConfigTests {
     // MARK: - Complex Initialization Tests
 
     @Test("QueryConfig initializes with all custom values")
-    func initializeWithAllCustomValues() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithAllCustomValues() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             zone: "customZone",
@@ -393,8 +393,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig handles pagination scenario")
-    func handlePaginationScenario() throws {
-        let baseConfig = try MistDemoConfig()
+    func handlePaginationScenario() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             limit: 10,
@@ -410,8 +410,8 @@ struct QueryConfigTests {
     // MARK: - Edge Cases
 
     @Test("QueryConfig handles special characters in filters")
-    func handleSpecialCharactersInFilters() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleSpecialCharactersInFilters() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             filters: ["name='O'Brien'", "email~='@example.com'"]
@@ -422,8 +422,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig handles zero limit")
-    func handleZeroLimit() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleZeroLimit() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             limit: 0
@@ -433,8 +433,8 @@ struct QueryConfigTests {
     }
 
     @Test("QueryConfig handles fields with special characters")
-    func handleFieldsWithSpecialCharacters() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleFieldsWithSpecialCharacters() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = QueryConfig(
             base: baseConfig,
             fields: ["field_name", "field-with-dash", "field.with.dot"]

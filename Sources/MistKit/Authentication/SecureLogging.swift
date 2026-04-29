@@ -49,10 +49,16 @@ internal enum SecureLogging {
     }
 
     let prefix = String(token.prefix(prefixLength))
-    let suffix = String(token.suffix(suffixLength))
     let maskCount = token.count - prefixLength - suffixLength
-    let mask = String(repeating: maskCharacter, count: maskCount)
 
+    guard maskCount > suffixLength else {
+      // Mask is too short to meaningfully separate from suffix — hide all chars after prefix
+      let remaining = String(repeating: maskCharacter, count: token.count - prefixLength)
+      return "\(prefix)\(remaining)"
+    }
+
+    let suffix = String(token.suffix(suffixLength))
+    let mask = String(repeating: maskCharacter, count: maskCount)
     return "\(prefix)\(mask)\(suffix)"
   }
 
@@ -60,7 +66,7 @@ internal enum SecureLogging {
   /// - Parameter apiToken: The API token to mask
   /// - Returns: A masked version of the API token
   internal static func maskAPIToken(_ apiToken: String) -> String {
-    maskToken(apiToken, prefixLength: 8, suffixLength: 4)
+    maskToken(apiToken, prefixLength: 2, suffixLength: 2)
   }
 
   /// Creates a safe logging string that masks sensitive information

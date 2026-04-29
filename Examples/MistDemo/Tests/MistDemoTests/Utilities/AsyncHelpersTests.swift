@@ -188,11 +188,12 @@ struct AsyncHelpersTests {
 
     // MARK: - Edge Cases
 
-    @Test("withTimeout with zero timeout")
+    @Test("withTimeout with short timeout throws")
     func zeroTimeout() async {
         await #expect(throws: AsyncTimeoutError.self) {
-            try await withTimeout(seconds: 0) {
-                return "instant"
+            try await withTimeout(seconds: 0.001) {
+                try await Task.sleep(nanoseconds: 1_000_000_000) // 1s
+                return "should not return"
             }
         }
     }

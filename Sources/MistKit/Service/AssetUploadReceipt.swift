@@ -27,14 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
-
 /// Receipt from uploading an asset to CloudKit
 ///
 /// After uploading binary data to CloudKit, you receive an asset dictionary containing
 /// the receipt, checksums, and other metadata needed to associate the asset with a record.
 /// This type contains that complete asset information along with the target record and field.
-public struct AssetUploadReceipt: Sendable {
+public struct AssetUploadReceipt: Codable, Sendable {
   /// The complete asset data including receipt and checksums
   /// Use this when creating or updating records
   public let asset: FieldValue.Asset

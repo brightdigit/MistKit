@@ -130,51 +130,6 @@ internal struct FilterBuilder {
     )
   }
 
-  // MARK: String Filters
-
-  /// Creates a BEGINS_WITH filter for string fields
-  /// - Parameters:
-  ///   - field: The field name to filter on
-  ///   - value: The prefix value to match
-  /// - Returns: A configured Filter
-  internal static func beginsWith(_ field: String, _ value: String) -> Components.Schemas.Filter {
-    .init(
-      comparator: .BEGINS_WITH,
-      fieldName: field,
-      fieldValue: .init(value: .StringValue(value))
-    )
-  }
-
-  /// Creates a NOT_BEGINS_WITH filter for string fields
-  /// - Parameters:
-  ///   - field: The field name to filter on
-  ///   - value: The prefix value to not match
-  /// - Returns: A configured Filter
-  internal static func notBeginsWith(_ field: String, _ value: String) -> Components.Schemas.Filter
-  {
-    .init(
-      comparator: .NOT_BEGINS_WITH,
-      fieldName: field,
-      fieldValue: .init(value: .StringValue(value))
-    )
-  }
-
-  /// Creates a CONTAINS_ALL_TOKENS filter for string fields
-  /// - Parameters:
-  ///   - field: The field name to filter on
-  ///   - tokens: The string containing all tokens that must be present
-  /// - Returns: A configured Filter
-  internal static func containsAllTokens(
-    _ field: String,
-    _ tokens: String
-  ) -> Components.Schemas.Filter {
-    .init(
-      comparator: .CONTAINS_ALL_TOKENS,
-      fieldName: field,
-      fieldValue: .init(value: .StringValue(tokens))
-    )
-  }
-
   /// Creates an IN filter to check if field value is in a list
   /// - Parameters:
   ///   - field: The field name to filter on
@@ -185,7 +140,8 @@ internal struct FilterBuilder {
       comparator: .IN,
       fieldName: field,
       fieldValue: .init(
-        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) })
+        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) }),
+        _type: cloudKitListType(for: values)
       )
     )
   }
@@ -200,74 +156,55 @@ internal struct FilterBuilder {
       comparator: .NOT_IN,
       fieldName: field,
       fieldValue: .init(
-        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) })
+        value: .ListValue(values.map { Components.Schemas.ListValuePayload(from: $0) }),
+        _type: cloudKitListType(for: values)
       )
     )
   }
 
-  // MARK: List Member Filters
-
-  /// Creates a LIST_CONTAINS filter
-  /// - Parameters:
-  ///   - field: The list field name to filter on
-  ///   - value: The value that should be in the list
-  /// - Returns: A configured Filter
-  internal static func listContains(
-    _ field: String,
-    _ value: FieldValue
-  ) -> Components.Schemas.Filter {
-    .init(
-      comparator: .LIST_CONTAINS,
-      fieldName: field,
-      fieldValue: .init(from: value)
-    )
+  /// Infers the CloudKit list type required by the IN/NOT_IN filter API
+  /// (e.g. [.int64] → .INT64_LIST, [.string] → .STRING_LIST).
+  private static func cloudKitListType(
+    for values: [FieldValue]
+  ) -> Components.Schemas.FieldValueRequest._typePayload? {
+    guard let first = values.first
+    else { return nil }
+    return cloudKitListType(for: first)
   }
 
-  /// Creates a NOT_LIST_CONTAINS filter
-  /// - Parameters:
-  ///   - field: The list field name to filter on
-  ///   - value: The value that should not be in the list
-  /// - Returns: A configured Filter
-  internal static func notListContains(
-    _ field: String,
-    _ value: FieldValue
-  ) -> Components.Schemas.Filter {
-    .init(
-      comparator: .NOT_LIST_CONTAINS,
-      fieldName: field,
-      fieldValue: .init(from: value)
-    )
+  private static func cloudKitListType(
+    for first: FieldValue
+  ) -> Components.Schemas.FieldValueRequest._typePayload? {
+    if case .string = first {
+      return .STRING_LIST
+    }
+    if case .int64 = first {
+      return .INT64_LIST
+    }
+    if case .double = first {
+      return .DOUBLE_LIST
+    }
+    if case .bytes = first {
+      return .BYTES_LIST
+    }
+    if case .date = first {
+      return .TIMESTAMP_LIST
+    }
+    return cloudKitComplexListType(for: first)
   }
 
-  /// Creates a LIST_MEMBER_BEGINS_WITH filter
-  /// - Parameters:
-  ///   - field: The list field name to filter on
-  ///   - prefix: The prefix that list members should begin with
-  /// - Returns: A configured Filter
-  internal static func listMemberBeginsWith(
-    _ field: String,
-    _ prefix: String
-  ) -> Components.Schemas.Filter {
-    .init(
-      comparator: .LIST_MEMBER_BEGINS_WITH,
-      fieldName: field,
-      fieldValue: .init(value: .StringValue(prefix))
-    )
-  }
-
-  /// Creates a NOT_LIST_MEMBER_BEGINS_WITH filter
-  /// - Parameters:
-  ///   - field: The list field name to filter on
-  ///   - prefix: The prefix that list members should not begin with
-  /// - Returns: A configured Filter
-  internal static func notListMemberBeginsWith(
-    _ field: String,
-    _ prefix: String
-  ) -> Components.Schemas.Filter {
-    .init(
-      comparator: .NOT_LIST_MEMBER_BEGINS_WITH,
-      fieldName: field,
-      fieldValue: .init(value: .StringValue(prefix))
-    )
+  private static func cloudKitComplexListType(
+    for first: FieldValue
+  ) -> Components.Schemas.FieldValueRequest._typePayload? {
+    if case .reference = first {
+      return .REFERENCE_LIST
+    }
+    if case .location = first {
+      return .LOCATION_LIST
+    }
+    if case .asset = first {
+      return .ASSET_LIST
+    }
+    return .LIST
   }
 }

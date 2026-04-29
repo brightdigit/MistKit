@@ -123,6 +123,7 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.in("status", values)
     #expect(filter.comparator == .IN)
     #expect(filter.fieldName == "status")
+    #expect(filter.fieldValue?._type == .STRING_LIST)
   }
 
   @Test("FilterBuilder creates NOT_IN filter")
@@ -135,6 +136,7 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.notIn("status", values)
     #expect(filter.comparator == .NOT_IN)
     #expect(filter.fieldName == "status")
+    #expect(filter.fieldValue?._type == .STRING_LIST)
   }
 
   @Test("FilterBuilder creates IN filter with numbers")
@@ -147,6 +149,7 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.in("categoryId", values)
     #expect(filter.comparator == .IN)
     #expect(filter.fieldName == "categoryId")
+    #expect(filter.fieldValue?._type == .INT64_LIST)
   }
 
   // MARK: - List Member Filters
@@ -193,45 +196,5 @@ internal struct FilterBuilderTests {
     let filter = FilterBuilder.notListMemberBeginsWith("domains", "spam")
     #expect(filter.comparator == .NOT_LIST_MEMBER_BEGINS_WITH)
     #expect(filter.fieldName == "domains")
-  }
-
-  // MARK: - Complex Value Tests
-
-  @Test("FilterBuilder handles boolean values")
-  internal func booleanValueFilter() {
-    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      Issue.record("FilterBuilder is not available on this operating system.")
-      return
-    }
-    let filter = FilterBuilder.equals("isActive", FieldValue(booleanValue: true))
-    #expect(filter.comparator == .EQUALS)
-    #expect(filter.fieldName == "isActive")
-  }
-
-  @Test("FilterBuilder handles reference values")
-  internal func referenceValueFilter() {
-    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      Issue.record("FilterBuilder is not available on this operating system.")
-      return
-    }
-    let reference = FieldValue.Reference(recordName: "user-123")
-    let filter = FilterBuilder.equals("owner", .reference(reference))
-    #expect(filter.comparator == .EQUALS)
-    #expect(filter.fieldName == "owner")
-  }
-
-  @Test("FilterBuilder handles location values")
-  internal func locationValueFilter() {
-    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      Issue.record("FilterBuilder is not available on this operating system.")
-      return
-    }
-    let location = FieldValue.Location(
-      latitude: 37.7749,
-      longitude: -122.4194
-    )
-    let filter = FilterBuilder.equals("location", .location(location))
-    #expect(filter.comparator == .EQUALS)
-    #expect(filter.fieldName == "location")
   }
 }

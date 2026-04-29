@@ -230,7 +230,7 @@ All configuration keys can be set via environment variables.
 | `api_token` | `CLOUDKIT_API_TOKEN` |
 | `environment` | `CLOUDKIT_ENVIRONMENT` |
 | `database` | `CLOUDKIT_DATABASE` |
-| `web_auth_token` | `CLOUDKIT_WEBAUTH_TOKEN` |
+| `web_auth_token` | `CLOUDKIT_WEB_AUTH_TOKEN` |
 | `key_id` | `CLOUDKIT_KEY_ID` |
 | `private_key_file` | `CLOUDKIT_PRIVATE_KEY_FILE` |
 | `output` | `MISTDEMO_OUTPUT` |

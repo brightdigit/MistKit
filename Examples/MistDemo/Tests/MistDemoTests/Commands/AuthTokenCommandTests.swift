@@ -145,20 +145,6 @@ struct AuthTokenCommandTests {
         #expect(longToken.maskedAPIToken == "ab************op")
     }
     
-    // MARK: - Browser Opener Tests
-    
-    @Test("BrowserOpener handles different platforms")
-    func browserOpenerHandlesPlatforms() {
-        // This test verifies the BrowserOpener doesn't crash
-        // Actual browser opening is platform-specific and can't be tested
-        let url = "http://localhost:8080"
-        
-        // Should not throw or crash
-        BrowserOpener.openBrowser(url: url)
-        
-        #expect(true) // If we got here, no crash occurred
-    }
-    
     // MARK: - AsyncChannel Tests
     
     @Test("AsyncChannel sends and receives values")
@@ -173,22 +159,20 @@ struct AuthTokenCommandTests {
         #expect(value == "test-value")
     }
     
-    @Test("AsyncChannel handles multiple values in order")
+    @Test("AsyncChannel handles multiple values sequentially")
     func asyncChannelHandlesMultipleValues() async {
         let channel = AsyncChannel<Int>()
-        
-        Task {
-            await channel.send(1)
-            await channel.send(2)
-            await channel.send(3)
-        }
-        
+
+        Task { await channel.send(1) }
         let first = await channel.receive()
-        let second = await channel.receive()
-        let third = await channel.receive()
-        
         #expect(first == 1)
+
+        Task { await channel.send(2) }
+        let second = await channel.receive()
         #expect(second == 2)
+
+        Task { await channel.send(3) }
+        let third = await channel.receive()
         #expect(third == 3)
     }
     

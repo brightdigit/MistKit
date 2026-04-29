@@ -479,7 +479,7 @@ struct CSVFormatterTests {
     // Verify RFC 4180 compliance
     #expect(output.contains("standard,normal"))
     #expect(output.contains("\"a,b\""))
-    #expect(output.contains("\"a\"\"b\"\""))
+    #expect(output.contains("\"a\"\"b\""))
     #expect(output.contains("\"a\nb\""))
     #expect(output.contains("\"a\r\nb\""))
   }

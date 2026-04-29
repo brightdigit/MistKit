@@ -35,8 +35,9 @@ public struct CSVEscaper: OutputEscaper {
 
     public func escape(_ string: String) -> String {
         // Check if escaping is needed
-        let needsEscaping = string.contains { character in
-            switch character {
+        // Use unicodeScalars to avoid Swift treating \r\n as a single grapheme cluster
+        let needsEscaping = string.unicodeScalars.contains { scalar in
+            switch scalar {
             case ",", "\"", "\n", "\r", "\t":
                 return true
             default:

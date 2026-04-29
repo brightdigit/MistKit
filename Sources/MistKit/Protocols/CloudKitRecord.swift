@@ -70,6 +70,12 @@ public protocol CloudKitRecord: Codable, Sendable {
   /// For example: "RestoreImage", "XcodeVersion", "SwiftVersion"
   static var cloudKitRecordType: String { get }
 
+  /// The unique CloudKit record name for this instance
+  ///
+  /// This is typically computed from the model's primary key or unique identifier.
+  /// For example: "RestoreImage-23C71" or "XcodeVersion-15.2"
+  var recordName: String { get }
+
   /// Parse a CloudKit record into a model instance
   ///
   /// Extract required fields using `FieldValue` convenience properties:
@@ -93,12 +99,6 @@ public protocol CloudKitRecord: Codable, Sendable {
   /// - Parameter recordInfo: The CloudKit record to format
   /// - Returns: A formatted string (typically 1-3 lines with indentation)
   static func formatForDisplay(_ recordInfo: RecordInfo) -> String
-
-  /// The unique CloudKit record name for this instance
-  ///
-  /// This is typically computed from the model's primary key or unique identifier.
-  /// For example: "RestoreImage-23C71" or "XcodeVersion-15.2"
-  var recordName: String { get }
 
   /// Convert this model to CloudKit field values
   ///

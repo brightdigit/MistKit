@@ -6,29 +6,25 @@ Authentication operations handle obtaining and validating CloudKit authenticatio
 
 ### Authentication Methods
 
-CloudKit Web Services supports two authentication methods:
-
-#### 1. Web Authentication Token (User Authentication)
-- **Use Case**: User-specific operations in private/shared databases
-- **Flow**: OAuth-style browser-based authentication
-- **Token Type**: Web auth token (user-scoped)
+#### 1. Web Authentication Token — Private/Shared Database
+- **Use Case**: Private and shared database operations
+- **Credentials**: `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN`
+- **Flow**: OAuth-style browser-based sign-in (`mistdemo auth-token`)
 - **Duration**: Temporary (expires periodically)
-- **Required For**: Private and shared database access
 
-#### 2. Server-to-Server Key (Server Authentication)
-- **Use Case**: Server-side applications, automation
-- **Flow**: ECDSA key-based signing
-- **Token Type**: None (signs requests directly)
+#### 2. Server-to-Server Key — Public Database
+- **Use Case**: Public database operations
+- **Credentials**: `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY` or `CLOUDKIT_PRIVATE_KEY_PATH`
+- **Flow**: ECDSA request signing (no browser required)
 - **Duration**: Permanent (until key is revoked)
-- **Required For**: Server automation, background jobs
 
 ### Database Access Requirements
 
-| Database | Public Operations | Authenticated Operations |
-|----------|------------------|--------------------------|
-| **Public** | API token only | API token only |
-| **Private** | Not allowed | Web auth token or server key |
-| **Shared** | Not allowed | Web auth token or server key |
+| Database | Required Credentials | Auth Method |
+|----------|---------------------|-------------|
+| **Public** | `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]` | Server-to-server signing |
+| **Private** | `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` | Web authentication |
+| **Shared** | `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` | Web authentication |
 
 ## auth-token
 
@@ -71,7 +67,7 @@ mistdemo auth-token --api-token YOUR_API_TOKEN
 
 **Save to environment variable:**
 ```bash
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token --api-token YOUR_API_TOKEN)
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token --api-token YOUR_API_TOKEN)
 ```
 
 **Save to file:**
@@ -145,7 +141,7 @@ Waiting for authentication callback...
 
 # Check if token exists and is valid
 if [ -f ~/.mistdemo/token.txt ]; then
-  export CLOUDKIT_WEBAUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
+  export CLOUDKIT_WEB_AUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
   if mistdemo validate > /dev/null 2>&1; then
     echo "Using existing token"
     exit 0
@@ -156,7 +152,7 @@ fi
 echo "Obtaining new authentication token..."
 mistdemo auth-token --api-token "$CLOUDKIT_API_TOKEN" > ~/.mistdemo/token.txt
 chmod 600 ~/.mistdemo/token.txt
-export CLOUDKIT_WEBAUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
+export CLOUDKIT_WEB_AUTH_TOKEN=$(cat ~/.mistdemo/token.txt)
 echo "Authentication complete"
 ```
 
@@ -164,7 +160,7 @@ echo "Authentication complete"
 ```bash
 # For server-to-server authentication
 export CLOUDKIT_KEY_ID="your-key-id"
-export CLOUDKIT_PRIVATE_KEY_FILE="/path/to/private-key.pem"
+export CLOUDKIT_PRIVATE_KEY_PATH="/path/to/private-key.pem"
 
 # No web auth token needed
 mistdemo query --database private
@@ -173,7 +169,7 @@ mistdemo query --database private
 **Interactive session:**
 ```bash
 # One-time setup per session
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a YOUR_API_TOKEN)
 
 # Use for all subsequent commands
 mistdemo query --database private
@@ -270,7 +266,7 @@ fi
 
 mistdemo validate --test-query || {
   echo "Error: Invalid authentication. Please re-authenticate."
-  export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
+  export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
 }
 
 # Proceed with operations
@@ -295,56 +291,48 @@ done
 
 ## Authentication Workflows
 
-### First-Time Setup
+### First-Time Setup — Public Database
 
 ```bash
-# 1. Set API token (from CloudKit Dashboard)
-export CLOUDKIT_API_TOKEN="your-api-token-here"
+# 1. Set container ID
+export CLOUDKIT_CONTAINER_IDENTIFIER="iCloud.com.example.MyApp"
 
-# 2. Set container ID
-export CLOUDKIT_CONTAINER_ID="iCloud.com.example.MyApp"
+# 2. Set server-to-server credentials (from CloudKit Dashboard)
+export CLOUDKIT_KEY_ID="your-key-id"
+export CLOUDKIT_PRIVATE_KEY_PATH="/path/to/eckey.pem"
 
 # 3. Test public database access
-mistdemo query --database public
-
-# 4. Get web auth token for private access
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
-
-# 5. Verify private access
-mistdemo current-user --database private
+mistdemo query
 ```
 
-### Development Environment
+### First-Time Setup — Private Database
 
 ```bash
-# .env file (never commit this)
-CLOUDKIT_CONTAINER_ID=iCloud.com.example.MyApp
-CLOUDKIT_API_TOKEN=your-api-token
-CLOUDKIT_ENVIRONMENT=development
-CLOUDKIT_DATABASE=private
+# 1. Set container ID
+export CLOUDKIT_CONTAINER_IDENTIFIER="iCloud.com.example.MyApp"
 
-# Load environment
-source .env
+# 2. Set API token (from CloudKit Dashboard)
+export CLOUDKIT_API_TOKEN="your-api-token"
 
-# Get token for session
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
+# 3. Get web auth token (browser sign-in)
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token)
+
+# 4. Verify private access
+mistdemo current-user
 ```
 
-### Production Environment (Server-to-Server)
+### Automated / CI Environment (Public Database)
 
 ```bash
-# Generate key pair (one time)
-# See CloudKit documentation for key generation
-
 # Set environment variables
-export CLOUDKIT_CONTAINER_ID=iCloud.com.example.MyApp
-export CLOUDKIT_API_TOKEN=your-api-token
+export CLOUDKIT_CONTAINER_IDENTIFIER=iCloud.com.example.MyApp
 export CLOUDKIT_ENVIRONMENT=production
 export CLOUDKIT_KEY_ID=your-key-id
-export CLOUDKIT_PRIVATE_KEY_FILE=/secure/path/to/key.pem
+export CLOUDKIT_PRIVATE_KEY_PATH=/secure/path/to/key.pem
 
-# No web auth needed
-mistdemo query --database private
+# Run public database operations — no browser required
+mistdemo query
+mistdemo demo-in-filter
 ```
 
 ## Troubleshooting
@@ -353,7 +341,7 @@ mistdemo query --database private
 ```bash
 # Error: AUTHENTICATION_FAILED
 # Solution: Get new token
-export CLOUDKIT_WEBAUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
+export CLOUDKIT_WEB_AUTH_TOKEN=$(mistdemo auth-token -a "$CLOUDKIT_API_TOKEN")
 ```
 
 ### Port Already in Use

@@ -583,12 +583,14 @@ paths:
             schema:
               type: object
               properties:
-                users:
+                lookupInfos:
                   type: array
                   items:
                     type: object
                     properties:
                       emailAddress:
+                        type: string
+                      phoneNumber:
                         type: string
                       userRecordName:
                         type: string
@@ -883,12 +885,19 @@ components:
           description: Record fields with their values and optional type information
           additionalProperties:
             $ref: '#/components/schemas/FieldValueResponse'
+        created:
+          $ref: '#/components/schemas/RecordTimestamp'
+        modified:
+          $ref: '#/components/schemas/RecordTimestamp'
+        deleted:
+          type: boolean
+          description: Whether the record was deleted
 
     FieldValueRequest:
       type: object
       description: |
         A CloudKit field value for API requests.
-        The type field is omitted as CloudKit infers types from the value structure.
+        The type field is optional and used for IN/NOT_IN list filters to specify the list element type.
       properties:
         value:
           oneOf:
@@ -901,6 +910,10 @@ components:
             - $ref: '#/components/schemas/ReferenceValue'
             - $ref: '#/components/schemas/AssetValue'
             - $ref: '#/components/schemas/ListValue'
+        type:
+          type: string
+          enum: [STRING_LIST, INT64_LIST, DOUBLE_LIST, BYTES_LIST, TIMESTAMP_LIST, REFERENCE_LIST, LOCATION_LIST, ASSET_LIST, LIST]
+          description: Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
       required:
         - value
 
@@ -1162,6 +1175,8 @@ components:
                 $ref: '#/components/schemas/ZoneID'
         syncToken:
           type: string
+        moreComing:
+          type: boolean
 
     SubscriptionsListResponse:
       type: object
@@ -1187,8 +1202,72 @@ components:
           items:
             $ref: '#/components/schemas/Subscription'
 
+    RecordTimestamp:
+      type: object
+      description: Timestamp information for record creation or modification
+      properties:
+        timestamp:
+          type: number
+          description: Unix timestamp in milliseconds
+        userRecordName:
+          type: string
+          description: Record name of the user who performed the action
+
+    NameComponents:
+      type: object
+      description: The parts of a user's name
+      properties:
+        namePrefix:
+          type: string
+          description: The user's name prefix
+        givenName:
+          type: string
+          description: The user's first name
+        middleName:
+          type: string
+          description: The user's middle name
+        familyName:
+          type: string
+          description: The user's last name
+        nameSuffix:
+          type: string
+          description: The user's name suffix
+        nickname:
+          type: string
+          description: The user's nickname
+        phoneticRepresentation:
+          type: string
+          description: A phonetic representation of the user's name
+
+    UserIdentityLookupInfo:
+      type: object
+      description: Information used to look up a user identity
+      properties:
+        emailAddress:
+          type: string
+          description: The user's email address
+        phoneNumber:
+          type: string
+          description: The user's phone number
+        userRecordName:
+          type: string
+          description: The record name of the user
+
+    UserIdentity:
+      type: object
+      description: A user identity returned by discover endpoints
+      properties:
+        userRecordName:
+          type: string
+          description: The record name of the user
+        nameComponents:
+          $ref: '#/components/schemas/NameComponents'
+        lookupInfo:
+          $ref: '#/components/schemas/UserIdentityLookupInfo'
+
     UserResponse:
       type: object
+      description: A user returned by current/lookup endpoints (User Dictionary)
       properties:
         userRecordName:
           type: string
@@ -1205,16 +1284,7 @@ components:
         users:
           type: array
           items:
-            type: object
-            properties:
-              userRecordName:
-                type: string
-              firstName:
-                type: string
-              lastName:
-                type: string
-              emailAddress:
-                type: string
+            $ref: '#/components/schemas/UserIdentity'
 
     ContactsResponse:
       type: object

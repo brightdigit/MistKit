@@ -1,0 +1,26 @@
+name: Setup MistKit
+description: Replaces the local MistKit path dependency with a remote branch reference
+
+inputs:
+  branch:
+    description: MistKit branch to use (leave empty to keep the local path dependency)
+
+runs:
+  using: composite
+  steps:
+    - name: Update Package.swift (Unix)
+      if: inputs.branch != '' && runner.os != 'Windows'
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" = "macOS" ]; then
+          sed -i '' 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "'"${{ inputs.branch }}"'")|g' Package.swift
+        else
+          sed -i 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "'"${{ inputs.branch }}"'")|g' Package.swift
+        fi
+        rm -f Package.resolved
+    - name: Update Package.swift (Windows)
+      if: inputs.branch != '' && runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        (Get-Content Package.swift) -replace '\.package\(name: "MistKit", path: "\.\./\.\."\)', ".package(url: `"https://github.com/brightdigit/MistKit.git`", branch: `"${{ inputs.branch }}`")" | Set-Content Package.swift
+        Remove-Item -Path Package.resolved -Force -ErrorAction SilentlyContinue

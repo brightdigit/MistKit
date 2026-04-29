@@ -38,8 +38,8 @@ struct CreateCommandTests {
     // MARK: - Configuration Tests
     
     @Test("CreateConfig initializes with default values")
-    func createConfigInitializesWithDefaults() throws {
-        let baseConfig = try MistDemoConfig()
+    func createConfigInitializesWithDefaults() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             zone: "_defaultZone",
@@ -53,8 +53,8 @@ struct CreateCommandTests {
     }
     
     @Test("CreateConfig accepts custom values")
-    func createConfigAcceptsCustomValues() throws {
-        let baseConfig = try MistDemoConfig()
+    func createConfigAcceptsCustomValues() async throws {
+        let baseConfig = try await MistDemoConfig()
         let fields = [
             Field(name: "title", type: .string, value: "Test Note"),
             Field(name: "priority", type: .int64, value: "5")
@@ -80,8 +80,8 @@ struct CreateCommandTests {
     }
     
     @Test("Command initializes with config")
-    func commandInitializesWithConfig() throws {
-        let baseConfig = try MistDemoConfig()
+    func commandInitializesWithConfig() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             zone: "_defaultZone",
@@ -109,7 +109,7 @@ struct CreateCommandTests {
     // MARK: - Field Parsing Tests
     
     @Test("Parse string field")
-    func parseStringField() throws {
+    func parseStringField() async throws {
         let field = try Field(parsing:"title:string:My Note")
         
         #expect(field.name == "title")
@@ -118,7 +118,7 @@ struct CreateCommandTests {
     }
     
     @Test("Parse int64 field")
-    func parseInt64Field() throws {
+    func parseInt64Field() async throws {
         let field = try Field(parsing:"priority:int64:5")
         
         #expect(field.name == "priority")
@@ -127,7 +127,7 @@ struct CreateCommandTests {
     }
     
     @Test("Parse double field")
-    func parseDoubleField() throws {
+    func parseDoubleField() async throws {
         let field = try Field(parsing:"progress:double:0.75")
         
         #expect(field.name == "progress")
@@ -136,7 +136,7 @@ struct CreateCommandTests {
     }
     
     @Test("Parse timestamp field")
-    func parseTimestampField() throws {
+    func parseTimestampField() async throws {
         let field = try Field(parsing:"dueDate:timestamp:2026-02-01T09:00:00Z")
         
         #expect(field.name == "dueDate")
@@ -145,7 +145,7 @@ struct CreateCommandTests {
     }
     
     @Test("Parse field with colon in value")
-    func parseFieldWithColonInValue() throws {
+    func parseFieldWithColonInValue() async throws {
         let field = try Field(parsing:"url:string:https://example.com:8080")
         
         #expect(field.name == "url")
@@ -154,7 +154,7 @@ struct CreateCommandTests {
     }
     
     @Test("Parse field with spaces in value")
-    func parseFieldWithSpacesInValue() throws {
+    func parseFieldWithSpacesInValue() async throws {
         let field = try Field(parsing:"description:string:This is a long description with spaces")
         
         #expect(field.name == "description")
@@ -165,7 +165,7 @@ struct CreateCommandTests {
     // MARK: - Field Validation Tests
     
     @Test("Field parsing throws on invalid format")
-    func fieldParsingThrowsOnInvalidFormat() throws {
+    func fieldParsingThrowsOnInvalidFormat() async throws {
         #expect(throws: Error.self) {
             _ = try Field(parsing:"invalid-format")
         }
@@ -180,14 +180,14 @@ struct CreateCommandTests {
     }
     
     @Test("Field parsing validates field name")
-    func fieldParsingValidatesFieldName() throws {
+    func fieldParsingValidatesFieldName() async throws {
         #expect(throws: Error.self) {
             _ = try Field(parsing:":string:value")
         }
     }
     
     @Test("Field parsing validates type")
-    func fieldParsingValidatesType() throws {
+    func fieldParsingValidatesType() async throws {
         #expect(throws: Error.self) {
             _ = try Field(parsing:"field:invalidtype:value")
         }
@@ -196,7 +196,7 @@ struct CreateCommandTests {
     // MARK: - Multiple Field Parsing Tests
     
     @Test("Parse multiple fields from comma-separated string")
-    func parseMultipleFieldsFromString() throws {
+    func parseMultipleFieldsFromString() async throws {
         let fieldsString = "title:string:Test Note, priority:int64:5, progress:double:0.5"
         let fields = try fieldsString.split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespaces) }
@@ -211,7 +211,7 @@ struct CreateCommandTests {
     // MARK: - JSON Field Loading Tests
     
     @Test("Load fields from JSON dictionary")
-    func loadFieldsFromJSONDictionary() throws {
+    func loadFieldsFromJSONDictionary() async throws {
         let json = """
         {
             "title": "Test Note",
@@ -280,8 +280,8 @@ struct CreateCommandTests {
     }
     
     @Test("Use provided record name")
-    func useProvidedRecordName() throws {
-        let baseConfig = try MistDemoConfig()
+    func useProvidedRecordName() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CreateConfig(
             base: baseConfig,
             zone: "_defaultZone",
@@ -295,7 +295,7 @@ struct CreateCommandTests {
     // MARK: - Field Type Conversion Tests
     
     @Test("Convert string field to CloudKit value")
-    func convertStringFieldToCloudKitValue() throws {
+    func convertStringFieldToCloudKitValue() async throws {
         let field = Field(name: "title", type: .string, value: "Test Note")
         
         #expect(field.name == "title")

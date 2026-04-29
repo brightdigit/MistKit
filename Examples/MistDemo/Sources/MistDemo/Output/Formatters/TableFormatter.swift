@@ -64,7 +64,7 @@ public struct TableFormatter: OutputFormatter {
         if !record.fields.isEmpty {
             output += "Fields:\n"
             for (fieldName, fieldValue) in record.fields.sorted(by: { $0.key < $1.key }) {
-                let valueString = escaper.escape(String(describing: fieldValue))
+                let valueString = escaper.escape(FieldValueFormatter.displayString(fieldValue))
                 output += "  \(fieldName): \(valueString)\n"
             }
         }
