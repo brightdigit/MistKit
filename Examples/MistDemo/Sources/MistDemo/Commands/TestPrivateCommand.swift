@@ -86,9 +86,6 @@ public struct TestPrivateCommand: MistDemoCommand {
     }
 
     public func execute() async throws {
-        // Disable stdout buffering so phase output appears before any crash
-        _ = setvbuf(stdout, nil, _IONBF, 0)
-
         let service = try MistKitClientFactory.create(.private, from: config.base)
 
         let runner = IntegrationTestRunner(

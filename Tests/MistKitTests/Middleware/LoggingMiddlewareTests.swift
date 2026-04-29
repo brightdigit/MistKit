@@ -175,3 +175,4 @@ internal struct LoggingMiddlewareTests {
     }
   }
 }
+

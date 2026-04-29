@@ -115,7 +115,7 @@ extension MistDemoConfig {
     /// Helper to run async code synchronously in tests
     fileprivate static func _runBlocking<T: Sendable>(_ operation: @Sendable @escaping () async throws -> T) throws -> T {
         let semaphore = DispatchSemaphore(value: 0)
-        var result: Result<T, any Error>?
+        nonisolated(unsafe) var result: Result<T, any Error>?
 
         let task = Task.detached {
             do {

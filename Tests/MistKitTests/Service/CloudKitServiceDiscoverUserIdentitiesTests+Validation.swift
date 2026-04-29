@@ -1,6 +1,6 @@
 //
-//  CSVEscaper.swift
-//  MistDemo
+//  CloudKitServiceDiscoverUserIdentitiesTests+Validation.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,30 +28,26 @@
 //
 
 import Foundation
+import Testing
 
-/// CSV escaper conforming to RFC 4180
-public struct CSVEscaper: OutputEscaper {
-    public init() {}
+@testable import MistKit
 
-    public func escape(_ string: String) -> String {
-        // Check if escaping is needed
-        // Use unicodeScalars to avoid Swift treating \r\n as a single grapheme cluster
-        let needsEscaping = string.unicodeScalars.contains { scalar in
-            switch scalar {
-            case ",", "\"", "\n", "\r", "\t":
-                return true
-            default:
-                return false
-            }
-        }
+extension CloudKitServiceDiscoverUserIdentitiesTests {
+  @Suite("Validation")
+  internal struct Validation {
+    @Test("discoverUserIdentities() throws on authentication error")
+    internal func discoverUserIdentitiesThrowsOnAuthError() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceDiscoverUserIdentitiesTests.makeAuthErrorService()
 
-        // If no special characters, return as-is
-        guard needsEscaping else {
-            return string
-        }
-
-        // Escape quotes by doubling them and wrap in quotes
-        let escaped = string.replacingOccurrences(of: "\"", with: "\"\"")
-        return "\"\(escaped)\""
+      await #expect(throws: CloudKitError.self) {
+        try await service.discoverUserIdentities(
+          lookupInfos: [UserIdentityLookupInfo(userRecordName: "_user-0")]
+        )
+      }
     }
+  }
 }

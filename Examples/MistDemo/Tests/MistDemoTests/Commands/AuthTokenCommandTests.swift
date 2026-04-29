@@ -145,20 +145,6 @@ struct AuthTokenCommandTests {
         #expect(longToken.maskedAPIToken == "ab************op")
     }
     
-    // MARK: - Browser Opener Tests
-    
-    @Test("BrowserOpener handles different platforms")
-    func browserOpenerHandlesPlatforms() {
-        // This test verifies the BrowserOpener doesn't crash
-        // Actual browser opening is platform-specific and can't be tested
-        let url = "http://localhost:8080"
-        
-        // Should not throw or crash
-        BrowserOpener.openBrowser(url: url)
-        
-        #expect(true) // If we got here, no crash occurred
-    }
-    
     // MARK: - AsyncChannel Tests
     
     @Test("AsyncChannel sends and receives values")

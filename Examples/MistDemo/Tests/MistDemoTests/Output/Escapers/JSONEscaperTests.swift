@@ -247,10 +247,8 @@ struct JSONEscaperTests {
     func normalCharactersNotEscaped() {
         let input = "!@#$%^&*()_+-=[]{}|;':,.<>?/"
         let output = escaper.escape(input)
-        // Only quote should be escaped
-        #expect(output.contains("\\\""))
-        // Other characters should remain
-        #expect(output.contains("!@#$%^&*"))
+        // These characters should pass through unchanged
+        #expect(output == input)
     }
 
     @Test("Escape sequence at start")
