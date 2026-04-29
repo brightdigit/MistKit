@@ -37,8 +37,8 @@ import MistKit
 struct CommandIntegrationTests {
     // MARK: - Test Configuration
     
-    private func createTestConfig() throws -> MistDemoConfig {
-        return try MistDemoConfig()
+    private func createTestConfig() async throws -> MistDemoConfig {
+        return try await MistDemoConfig()
     }
     
     private func createMockAuthResult() throws -> AuthenticationResult {
@@ -53,7 +53,7 @@ struct CommandIntegrationTests {
     // MARK: - AuthTokenCommand Integration Tests
     
     @Test("AuthTokenCommand configuration validation")
-    func authTokenCommandConfigValidation() throws {
+    func authTokenCommandConfigValidation() async throws {
         let config = AuthTokenConfig(
             apiToken: "test-api-token-123",
             port: 8080,
@@ -69,7 +69,7 @@ struct CommandIntegrationTests {
     }
     
     @Test("AuthTokenCommand resource path validation")
-    func authTokenCommandResourcePathValidation() throws {
+    func authTokenCommandResourcePathValidation() async throws {
         let config = AuthTokenConfig(apiToken: "test-token")
         let _ = AuthTokenCommand(config: config)
 
@@ -81,8 +81,8 @@ struct CommandIntegrationTests {
     // MARK: - CurrentUserCommand Integration Tests
     
     @Test("CurrentUserCommand end-to-end flow")
-    func currentUserCommandEndToEndFlow() throws {
-        let baseConfig = try createTestConfig()
+    func currentUserCommandEndToEndFlow() async throws {
+        let baseConfig = try await createTestConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: ["userRecordName", "emailAddress"],
@@ -100,8 +100,8 @@ struct CommandIntegrationTests {
     }
     
     @Test("CurrentUserCommand with field filtering")
-    func currentUserCommandWithFieldFiltering() throws {
-        let baseConfig = try createTestConfig()
+    func currentUserCommandWithFieldFiltering() async throws {
+        let baseConfig = try await createTestConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: ["userRecordName", "firstName", "lastName"],
@@ -120,8 +120,8 @@ struct CommandIntegrationTests {
     // MARK: - QueryCommand Integration Tests
     
     @Test("QueryCommand with filters and sorting")
-    func queryCommandWithFiltersAndSorting() throws {
-        let baseConfig = try createTestConfig()
+    func queryCommandWithFiltersAndSorting() async throws {
+        let baseConfig = try await createTestConfig()
         let config = QueryConfig(
             base: baseConfig,
             zone: "_defaultZone",
@@ -143,8 +143,8 @@ struct CommandIntegrationTests {
     }
     
     @Test("QueryCommand pagination setup")
-    func queryCommandPaginationSetup() throws {
-        let baseConfig = try createTestConfig()
+    func queryCommandPaginationSetup() async throws {
+        let baseConfig = try await createTestConfig()
         let config = QueryConfig(
             base: baseConfig,
             limit: 10,
@@ -163,8 +163,8 @@ struct CommandIntegrationTests {
     // MARK: - CreateCommand Integration Tests
     
     @Test("CreateCommand with parsed fields")
-    func createCommandWithParsedFields() throws {
-        let baseConfig = try createTestConfig()
+    func createCommandWithParsedFields() async throws {
+        let baseConfig = try await createTestConfig()
         let fields = [
             try Field(parsing: "title:string:Integration Test Note"),
             try Field(parsing: "priority:int64:8"),
@@ -192,8 +192,8 @@ struct CommandIntegrationTests {
     }
     
     @Test("CreateCommand field type validation")
-    func createCommandFieldTypeValidation() throws {
-        let baseConfig = try createTestConfig()
+    func createCommandFieldTypeValidation() async throws {
+        let baseConfig = try await createTestConfig()
 
         // Test different field types
         let stringField = try Field(parsing: "description:string:This is a test description")
@@ -223,8 +223,8 @@ struct CommandIntegrationTests {
     // MARK: - Cross-Command Integration Tests
     
     @Test("Configuration consistency across commands")
-    func configurationConsistencyAcrossCommands() throws {
-        let baseConfig = try createTestConfig()
+    func configurationConsistencyAcrossCommands() async throws {
+        let baseConfig = try await createTestConfig()
         
         // Create configs for all commands
         let _ = AuthTokenConfig(apiToken: "test-token")
@@ -244,8 +244,8 @@ struct CommandIntegrationTests {
     }
     
     @Test("Output format consistency")
-    func outputFormatConsistency() throws {
-        let baseConfig = try createTestConfig()
+    func outputFormatConsistency() async throws {
+        let baseConfig = try await createTestConfig()
         
         let userConfig = CurrentUserConfig(base: baseConfig, output: .json)
         let queryConfig = QueryConfig(base: baseConfig, output: .json)
@@ -264,7 +264,7 @@ struct CommandIntegrationTests {
     // MARK: - Error Handling Integration Tests
     
     @Test("Authentication error propagation")
-    func authenticationErrorPropagation() throws {
+    func authenticationErrorPropagation() async throws {
         let authError = MistDemoError.authenticationFailed(
             description: "Invalid token",
             context: "integration-test"
@@ -276,7 +276,7 @@ struct CommandIntegrationTests {
     }
     
     @Test("Configuration error handling")
-    func configurationErrorHandling() throws {
+    func configurationErrorHandling() async throws {
         let configError = ConfigurationError.missingRequired(
             "api.token",
             suggestion: "Provide token via --api-token"
@@ -289,7 +289,7 @@ struct CommandIntegrationTests {
     // MARK: - Real-world Usage Simulation
     
     @Test("Simulate complete workflow")
-    func simulateCompleteWorkflow() throws {
+    func simulateCompleteWorkflow() async throws {
         // 1. Auth token configuration
         let authConfig = AuthTokenConfig(
             apiToken: "mock-api-token-for-test",
@@ -298,7 +298,7 @@ struct CommandIntegrationTests {
         let _ = AuthTokenCommand(config: authConfig)
 
         // 2. Current user check
-        let baseConfig = try createTestConfig()
+        let baseConfig = try await createTestConfig()
         let userConfig = CurrentUserConfig(base: baseConfig)
         let _ = CurrentUserCommand(config: userConfig)
 

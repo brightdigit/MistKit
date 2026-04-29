@@ -34,20 +34,12 @@ import MistKit
 
 extension MistDemoConfig {
     /// Create a test configuration with default values
-    /// This is a synchronous wrapper for tests that don't need async initialization
-    init() throws {
+    init() async throws {
         let configuration = try MistDemoConfiguration()
-
-        // Use a detached task to avoid sendability issues
-        let config = try Self._runBlocking {
-            try await MistDemoConfig(configuration: configuration)
-        }
-
-        self = config
+        self = try await MistDemoConfig(configuration: configuration)
     }
 
     /// Create a test configuration with custom values
-    /// This is a memberwise-style initializer for tests
     init(
         containerIdentifier: String = "iCloud.com.test.App",
         apiToken: String = "test-api-token",
@@ -64,18 +56,13 @@ extension MistDemoConfig {
         testApiOnly: Bool = false,
         testAdaptive: Bool = false,
         testServerToServer: Bool = false
-    ) throws {
-        // Build InMemoryProvider with test values
-        // Note: We cannot use dictionary literals with variables, so we construct
-        // the provider programmatically using the base initializer
+    ) async throws {
         let envString = environment == .production ? "production" : "development"
 
-        // Helper to create AbsoluteConfigKey
         func key(_ path: String) -> AbsoluteConfigKey {
             AbsoluteConfigKey(path.split(separator: ".").map(String.init), context: [:])
         }
 
-        // Build the base dictionary
         var values: [AbsoluteConfigKey: ConfigValue] = [
             key("container.identifier"): .init(stringLiteral: containerIdentifier),
             key("api.token"): .init(stringLiteral: apiToken),
@@ -90,52 +77,21 @@ extension MistDemoConfig {
             key("test.server.to.server"): .init(booleanLiteral: testServerToServer)
         ]
 
-        // Add optional values
-        if let webAuthToken = webAuthToken {
+        if let webAuthToken {
             values[key("web.auth.token")] = .init(stringLiteral: webAuthToken)
         }
-        if let keyID = keyID {
+        if let keyID {
             values[key("key.id")] = .init(stringLiteral: keyID)
         }
-        if let privateKey = privateKey {
+        if let privateKey {
             values[key("private.key")] = .init(stringLiteral: privateKey)
         }
-        if let privateKeyFile = privateKeyFile {
+        if let privateKeyFile {
             values[key("private.key.file")] = .init(stringLiteral: privateKeyFile)
         }
 
         let testProvider = InMemoryProvider(values: values)
         let configuration = MistDemoConfiguration(testProvider: testProvider)
-        let config = try Self._runBlocking {
-            try await MistDemoConfig(configuration: configuration)
-        }
-        self = config
-    }
-
-    /// Helper to run async code synchronously in tests
-    fileprivate static func _runBlocking<T: Sendable>(_ operation: @Sendable @escaping () async throws -> T) throws -> T {
-        let semaphore = DispatchSemaphore(value: 0)
-        nonisolated(unsafe) var result: Result<T, any Error>?
-
-        let task = Task.detached {
-            do {
-                let value = try await operation()
-                result = .success(value)
-            } catch {
-                result = .failure(error)
-            }
-            semaphore.signal()
-        }
-
-        semaphore.wait()
-
-        guard let finalResult = result else {
-            throw NSError(domain: "MistDemoTests", code: -1, userInfo: [NSLocalizedDescriptionKey: "Task did not complete"])
-        }
-
-        // Keep task reference to avoid being deallocated
-        _ = task
-
-        return try finalResult.get()
+        self = try await MistDemoConfig(configuration: configuration)
     }
 }

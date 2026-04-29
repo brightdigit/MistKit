@@ -38,8 +38,8 @@ struct CurrentUserConfigTests {
     // MARK: - Basic Initialization Tests
 
     @Test("CurrentUserConfig initializes with default values")
-    func initializeWithDefaults() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithDefaults() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(base: baseConfig)
 
         #expect(config.fields == nil)
@@ -47,8 +47,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with nil fields")
-    func initializeWithNilFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithNilFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: nil
@@ -58,8 +58,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with empty fields array")
-    func initializeWithEmptyFieldsArray() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithEmptyFieldsArray() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: []
@@ -72,8 +72,8 @@ struct CurrentUserConfigTests {
     // MARK: - Fields Tests
 
     @Test("CurrentUserConfig initializes with single field")
-    func initializeWithSingleField() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithSingleField() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: ["userRecordName"]
@@ -84,8 +84,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with multiple fields")
-    func initializeWithMultipleFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithMultipleFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: ["userRecordName", "firstName", "lastName"]
@@ -98,8 +98,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles standard user fields")
-    func handleStandardUserFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleStandardUserFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: [
@@ -119,8 +119,8 @@ struct CurrentUserConfigTests {
     // MARK: - Output Format Tests
 
     @Test("CurrentUserConfig initializes with JSON output format")
-    func initializeWithJSONOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithJSONOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             output: .json
@@ -130,8 +130,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with CSV output format")
-    func initializeWithCSVOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithCSVOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             output: .csv
@@ -141,8 +141,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with table output format")
-    func initializeWithTableOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithTableOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             output: .table
@@ -152,8 +152,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with YAML output format")
-    func initializeWithYAMLOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithYAMLOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             output: .yaml
@@ -165,8 +165,8 @@ struct CurrentUserConfigTests {
     // MARK: - Complex Initialization Tests
 
     @Test("CurrentUserConfig initializes with all custom values")
-    func initializeWithAllCustomValues() throws {
-        let baseConfig = try MistDemoConfig()
+    func initializeWithAllCustomValues() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: ["userRecordName", "firstName", "lastName"],
@@ -178,8 +178,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles fields and JSON output")
-    func handleFieldsWithJSONOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleFieldsWithJSONOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: ["userRecordName", "emailAddress"],
@@ -191,8 +191,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles fields and CSV output")
-    func handleFieldsWithCSVOutput() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleFieldsWithCSVOutput() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: ["firstName", "lastName"],
@@ -206,8 +206,8 @@ struct CurrentUserConfigTests {
     // MARK: - Edge Cases
 
     @Test("CurrentUserConfig handles single character field name")
-    func handleSingleCharacterFieldName() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleSingleCharacterFieldName() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: ["x"]
@@ -218,8 +218,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles fields with special characters")
-    func handleFieldsWithSpecialCharacters() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleFieldsWithSpecialCharacters() async throws {
+        let baseConfig = try await MistDemoConfig()
         let config = CurrentUserConfig(
             base: baseConfig,
             fields: ["field_name", "field-with-dash", "field.with.dot"]
@@ -232,8 +232,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles very long field name")
-    func handleVeryLongFieldName() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleVeryLongFieldName() async throws {
+        let baseConfig = try await MistDemoConfig()
         let longFieldName = String(repeating: "a", count: 100)
         let config = CurrentUserConfig(
             base: baseConfig,
@@ -245,8 +245,8 @@ struct CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles many fields")
-    func handleManyFields() throws {
-        let baseConfig = try MistDemoConfig()
+    func handleManyFields() async throws {
+        let baseConfig = try await MistDemoConfig()
         let fields = (0..<20).map { "field\($0)" }
         let config = CurrentUserConfig(
             base: baseConfig,
