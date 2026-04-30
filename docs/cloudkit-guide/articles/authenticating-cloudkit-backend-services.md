@@ -1,6 +1,6 @@
 ---
 title: Beyond the MistKit Tutorials: Authenticating CloudKit from Backend Services
-date: 2026-00-00 00:00
+date: 2026-01-01 00:00
 description: [FILL IN: 1-2 sentence description covering the three auth methods and who this is for]
 featuredImage: /media/tutorials/[FILL IN: path to hero image]
 subscriptionCTA: [FILL IN: CTA tied to article topic]
@@ -23,7 +23,8 @@ subscriptionCTA: [FILL IN: CTA tied to article topic]
 - [Why CloudKit Auth is Different on the Backend](#why-cloudkit-auth-is-different)
 - [Method 1: API Token](#method-1-api-token)
 - [Method 2: Web Auth Token](#method-2-web-auth-token)
-  - [Getting the Web Auth Token from an iOS App](#getting-web-auth-token-from-ios)
+  - [Via Browser Redirect (Web Apps)](#getting-web-auth-token-browser)
+  - [Via iOS App (CKFetchWebAuthTokenOperation)](#getting-web-auth-token-from-ios)
 - [Method 3: Server-to-Server (ECDSA)](#method-3-server-to-server)
 - [Choosing the Right Method](#choosing-the-right-method)
 - [Configuring MistKit](#configuring-mistkit)
@@ -40,7 +41,7 @@ CloudKit's REST API offers three distinct authentication methods:
 
 | Method | Database | Use Case |
 |--------|----------|----------|
-| API Token | — | Prerequisite for Web Auth Token; minimal standalone access |
+| API Token | Public (limited) | Prerequisite for Web Auth Token; limited standalone access to public data |
 | Web Auth Token | Private | Access a specific user's private database (paired with API Token) |
 | Server-to-Server | Public | Backend services, daemons, and CLI tools writing to the public database |
 
@@ -68,7 +69,10 @@ An API Token alone cannot access the private database. To read or write a user's
 
 [QUESTION: Is Web Auth Token actually applicable to your backend CLI use case, or is it primarily for web apps with a browser? If the latter, note that clearly upfront so readers don't waste time on it.]
 
-### The Auth Flow
+<a id="getting-web-auth-token-browser"></a>
+### Via Browser Redirect (Web Apps)
+
+#### The Auth Flow
 
 [FILL IN: Walk through the redirect-based sign-in flow:
 1. App/web page requests sign-in URL from CloudKit
@@ -76,7 +80,7 @@ An API Token alone cannot access the private database. To read or write a user's
 3. Apple redirects back with a ckWebAuthToken
 4. App stores the token for subsequent API calls]
 
-### The `AUTHENTICATION_REQUIRED` Response
+#### The `AUTHENTICATION_REQUIRED` Response
 
 [FILL IN: Explain the `redirectURL` field in error responses — when CloudKit returns 401 with `AUTHENTICATION_REQUIRED`, the `redirectURL` is where you send the user. This is the main integration point.]
 
@@ -84,12 +88,12 @@ An API Token alone cannot access the private database. To read or write a user's
 // FILL IN: Show what the error response looks like and how MistKit surfaces it
 ```
 
-### Pairing with the API Token
+#### Pairing with the API Token
 
 [FILL IN: Clarify that both `ckAPIToken` and `ckWebAuthToken` are required together — the API token identifies the container, the web auth token identifies the user]
 
 <a id="getting-web-auth-token-from-ios"></a>
-### Getting the Web Auth Token from an iOS App
+### Via iOS App (CKFetchWebAuthTokenOperation)
 
 <!-- NOTE: This is the key bridge between on-device and server-side. On iOS, the user is already authenticated via iCloud — CKFetchWebAuthTokenOperation lets you extract a short-lived token that your server can use to act on that user's behalf. This is the pattern for "user logs into your iOS app, your backend then reads/writes their private CloudKit data." -->
 
@@ -203,19 +207,19 @@ Authorization: [FILL IN: exact header format]
 <a id="production-considerations"></a>
 ## Production Considerations
 
-### Key Rotation
+### Key Rotation _(Server-to-Server)_
 
 [FILL IN: How/when to rotate server-to-server keys. Is there a key expiry? What's the process in the Dashboard?]
 
 [QUESTION: Have you dealt with key rotation in Celestra or Bushel? Any gotchas?]
 
-### Securing Credentials in CI/CD
+### Securing Credentials in CI/CD _(Server-to-Server)_
 
 [FILL IN: Brief guidance on not committing keys, using secret managers, passing as env vars to cloud functions / GitHub Actions / etc.]
 
 ### Local Development vs Production
 
-[FILL IN: How to use the `development` environment with your credentials during development, switch to `production` for release]
+[FILL IN: How to use the `development` environment with your credentials during development, switch to `production` for release. This applies to all three authentication methods.]
 
 [QUESTION: Do development and production use the same set of keys, or do you need separate credentials per environment?]
 
