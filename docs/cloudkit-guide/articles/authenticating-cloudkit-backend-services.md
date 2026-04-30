@@ -40,16 +40,16 @@ CloudKit's REST API offers three distinct authentication methods:
 
 | Method | Database | Use Case |
 |--------|----------|----------|
-| API Token | Public | [FILL IN] |
-| Web Auth Token | Private | [FILL IN] |
-| Server-to-Server | Public | [FILL IN] |
+| API Token | — | Prerequisite for Web Auth Token; minimal standalone access |
+| Web Auth Token | Private | Access a specific user's private database (paired with API Token) |
+| Server-to-Server | Public | Backend services, daemons, and CLI tools writing to the public database |
 
 <a id="method-1-api-token"></a>
 ## Method 1: API Token
 
-<!-- NOTE: This is the simplest method but also the least powerful — it's the entry point and a prerequisite for Web Auth Token. Good to explain that first. -->
+<!-- NOTE: The API Token has minimal standalone access — its main role is identifying the container and serving as a prerequisite for the Web Auth Token flow. -->
 
-An API Token grants container-level access to the public database. It's the simplest method and a prerequisite for the Web Auth Token flow.
+An API Token identifies your CloudKit container but grants limited access on its own. Its primary role in backend auth is as a required companion to the Web Auth Token — without an API Token, you can't initiate the web auth flow at all.
 
 ### Creating an API Token in CloudKit Dashboard
 
@@ -59,7 +59,7 @@ An API Token grants container-level access to the public database. It's the simp
 
 ### Limitations
 
-[FILL IN: What this token can and cannot access — specifically that it cannot access the private database and why]
+An API Token alone cannot access the private database. To read or write a user's private data from a backend service, you must pair it with a Web Auth Token obtained from the user's iCloud session.
 
 <a id="method-2-web-auth-token"></a>
 ## Method 2: Web Auth Token
