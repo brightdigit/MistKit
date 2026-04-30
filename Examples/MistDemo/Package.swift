@@ -79,10 +79,12 @@ let swiftSettings: [SwiftSetting] = [
 let package = Package(
     name: "MistDemo",
     platforms: [
-        .macOS(.v15)
+        .macOS(.v15),
+        .iOS(.v17)
     ],
     products: [
-        .executable(name: "mistdemo", targets: ["MistDemo"])
+        .executable(name: "mistdemo", targets: ["MistDemo"]),
+        .library(name: "MistDemoApp", targets: ["MistDemoApp"])
     ],
     dependencies: [
         .package(path: "../.."),  // MistKit
@@ -100,8 +102,13 @@ let package = Package(
             dependencies: [],
             swiftSettings: swiftSettings
         ),
-        .executableTarget(
-            name: "MistDemo",
+        .target(
+            name: "MistDemoApp",
+            dependencies: [],
+            swiftSettings: swiftSettings
+        ),
+        .target(
+            name: "MistDemoKit",
             dependencies: [
                 "ConfigKeyKit",
                 .product(name: "MistKit", package: "MistKit"),
@@ -114,10 +121,19 @@ let package = Package(
             ],
             swiftSettings: swiftSettings
         ),
+        .executableTarget(
+            name: "MistDemo",
+            dependencies: [
+                "MistDemoKit",
+                "ConfigKeyKit",
+                .product(name: "MistKit", package: "MistKit")
+            ],
+            swiftSettings: swiftSettings
+        ),
         .testTarget(
             name: "MistDemoTests",
             dependencies: [
-                "MistDemo",
+                "MistDemoKit",
                 "ConfigKeyKit",
                 .product(name: "MistKit", package: "MistKit")
             ],

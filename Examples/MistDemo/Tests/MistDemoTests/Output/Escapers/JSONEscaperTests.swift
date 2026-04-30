@@ -30,7 +30,7 @@
 import Foundation
 import Testing
 
-@testable import MistDemo
+@testable import MistDemoKit
 
 @Suite("JSONEscaper Tests - JSON String Escaping")
 struct JSONEscaperTests {

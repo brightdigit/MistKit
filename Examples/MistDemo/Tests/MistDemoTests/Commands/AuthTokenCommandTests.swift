@@ -33,7 +33,7 @@ import Hummingbird
 import HTTPTypes
 import MistKit
 
-@testable import MistDemo
+@testable import MistDemoKit
 
 @Suite("AuthTokenCommand Tests")
 struct AuthTokenCommandTests {
@@ -145,6 +145,44 @@ struct AuthTokenCommandTests {
         #expect(longToken.maskedAPIToken == "ab************op")
     }
     
+    // MARK: - Loopback Authority Validation Tests
+
+    @Test(
+        "isLoopbackAuthority accepts loopback hosts",
+        arguments: [
+            "localhost",
+            "localhost:8080",
+            "127.0.0.1",
+            "127.0.0.1:3000",
+            "[::1]",
+            "[::1]:8080",
+        ]
+    )
+    func isLoopbackAuthorityAcceptsLoopback(authority: String) {
+        #expect(AuthTokenCommand.isLoopbackAuthority(authority))
+    }
+
+    @Test(
+        "isLoopbackAuthority rejects non-loopback and bypass attempts",
+        arguments: [
+            "",
+            "evil.com",
+            "evil.com:8080",
+            "localhost.evil.com",
+            "localhost.evil.com:8080",
+            "127.0.0.1.evil.com",
+            "127.0.0.1.evil.com:8080",
+            "127.0.0.2",
+            "0.0.0.0",
+            "[::2]",
+            "[::1].evil.com",
+            "api.apple-cloudkit.com",
+        ]
+    )
+    func isLoopbackAuthorityRejectsBypassAttempts(authority: String) {
+        #expect(!AuthTokenCommand.isLoopbackAuthority(authority))
+    }
+
     // MARK: - AsyncChannel Tests
     
     @Test("AsyncChannel sends and receives values")

@@ -30,7 +30,7 @@
 import Foundation
 import Testing
 import MistKit
-@testable import MistDemo
+@testable import MistDemoKit
 
 @Suite("FieldValue+FieldType Initialization Tests")
 struct FieldValueFieldTypeTests {
