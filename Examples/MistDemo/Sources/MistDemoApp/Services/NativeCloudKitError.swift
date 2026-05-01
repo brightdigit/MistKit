@@ -1,5 +1,5 @@
 //
-//  RootView.swift
+//  NativeCloudKitError.swift
 //  MistDemoApp
 //
 //  Created by Leo Dion.
@@ -27,28 +27,18 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import SwiftUI
+import Foundation
 
-public struct RootView: View {
-    @EnvironmentObject private var service: NativeCloudKitService
-    @State private var selection: SidebarItem? = .account
+enum NativeCloudKitError: Error, LocalizedError {
+    case unexpectedSaveResult
+    case webAuthTokenUnavailable
 
-    public init() {}
-
-    public var body: some View {
-        NavigationSplitView {
-            SidebarView(selection: $selection)
-        } detail: {
-            // The detail column needs its own NavigationStack so views like
-            // QueryView can push to RecordDetailView via NavigationLink(value:).
-            // Without this, NavigationLinks inside the detail column have no
-            // "next column" to target.
-            NavigationStack {
-                DetailColumnRoot(selection: selection)
-            }
-        }
-        .task {
-            await service.refreshAccountStatus()
+    var errorDescription: String? {
+        switch self {
+        case .unexpectedSaveResult:
+            return "CloudKit returned a record that couldn't be parsed as a Note."
+        case .webAuthTokenUnavailable:
+            return "CloudKit returned no web auth token and no error."
         }
     }
 }

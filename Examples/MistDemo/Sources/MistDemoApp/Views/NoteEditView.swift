@@ -51,6 +51,12 @@ struct NoteEditView: View {
     @State private var saveError: String?
     @State private var showFileImporter = false
 
+    // Tracks the URL whose security-scoped access we currently hold so we can
+    // balance the start/stop calls across the view's lifetime — picking a
+    // different file, tapping Remove, or dismissing the sheet must all
+    // release the previous scope.
+    @State private var scopedURL: URL?
+
     var body: some View {
         NavigationStack {
             Form {
@@ -70,6 +76,7 @@ struct NoteEditView: View {
                                 .truncationMode(.middle)
                         }
                         Button("Remove", role: .destructive) {
+                            releaseScopedURL()
                             self.imageURL = nil
                         }
                     }
@@ -106,8 +113,13 @@ struct NoteEditView: View {
                 switch result {
                 case .success(let urls):
                     if let url = urls.first {
-                        // Persist security scope for the duration of the save.
-                        _ = url.startAccessingSecurityScopedResource()
+                        guard url.startAccessingSecurityScopedResource() else {
+                            saveError = "Couldn't access \(url.lastPathComponent) — file permissions denied."
+                            return
+                        }
+                        // Release the previously-scoped URL before adopting the new one.
+                        releaseScopedURL()
+                        scopedURL = url
                         imageURL = url
                     }
                 case .failure(let error):
@@ -116,7 +128,13 @@ struct NoteEditView: View {
             }
         }
         .onAppear { populateInitialState() }
+        .onDisappear { releaseScopedURL() }
         .frame(minWidth: 420, minHeight: 360)
+    }
+
+    private func releaseScopedURL() {
+        scopedURL?.stopAccessingSecurityScopedResource()
+        scopedURL = nil
     }
 
     private var navigationTitle: String {
@@ -148,10 +166,6 @@ struct NoteEditView: View {
             return
         }
         let trimmedTitle = title.trimmingCharacters(in: .whitespaces)
-
-        // If the user picked a security-scoped file, ensure access while saving.
-        let scopedURL = imageURL
-        defer { scopedURL?.stopAccessingSecurityScopedResource() }
 
         do {
             let note: Note

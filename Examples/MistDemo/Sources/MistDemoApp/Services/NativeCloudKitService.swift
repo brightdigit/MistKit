@@ -164,17 +164,3 @@ public final class NativeCloudKitService: ObservableObject {
         record[Note.Fields.modified] = NSNumber(value: Int64(Date().timeIntervalSince1970 * 1000))
     }
 }
-
-enum NativeCloudKitError: Error, LocalizedError {
-    case unexpectedSaveResult
-    case webAuthTokenUnavailable
-
-    var errorDescription: String? {
-        switch self {
-        case .unexpectedSaveResult:
-            return "CloudKit returned a record that couldn't be parsed as a Note."
-        case .webAuthTokenUnavailable:
-            return "CloudKit returned no web auth token and no error."
-        }
-    }
-}

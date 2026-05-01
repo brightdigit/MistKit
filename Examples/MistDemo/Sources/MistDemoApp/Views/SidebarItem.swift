@@ -1,5 +1,5 @@
 //
-//  RootView.swift
+//  SidebarItem.swift
 //  MistDemoApp
 //
 //  Created by Leo Dion.
@@ -27,28 +27,24 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import SwiftUI
+enum SidebarItem: Hashable, CaseIterable {
+    case account
+    case zones
+    case query
 
-public struct RootView: View {
-    @EnvironmentObject private var service: NativeCloudKitService
-    @State private var selection: SidebarItem? = .account
-
-    public init() {}
-
-    public var body: some View {
-        NavigationSplitView {
-            SidebarView(selection: $selection)
-        } detail: {
-            // The detail column needs its own NavigationStack so views like
-            // QueryView can push to RecordDetailView via NavigationLink(value:).
-            // Without this, NavigationLinks inside the detail column have no
-            // "next column" to target.
-            NavigationStack {
-                DetailColumnRoot(selection: selection)
-            }
+    var label: String {
+        switch self {
+        case .account: return "iCloud Account"
+        case .zones: return "Zones"
+        case .query: return "Query Records"
         }
-        .task {
-            await service.refreshAccountStatus()
+    }
+
+    var systemImage: String {
+        switch self {
+        case .account: return "person.crop.circle"
+        case .zones: return "tray.full"
+        case .query: return "magnifyingglass"
         }
     }
 }

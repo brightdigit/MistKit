@@ -1,5 +1,5 @@
 //
-//  RootView.swift
+//  SidebarView.swift
 //  MistDemoApp
 //
 //  Created by Leo Dion.
@@ -27,28 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import SwiftUI
+import SwiftUI
 
-public struct RootView: View {
-    @EnvironmentObject private var service: NativeCloudKitService
-    @State private var selection: SidebarItem? = .account
+struct SidebarView: View {
+    @Binding var selection: SidebarItem?
 
-    public init() {}
-
-    public var body: some View {
-        NavigationSplitView {
-            SidebarView(selection: $selection)
-        } detail: {
-            // The detail column needs its own NavigationStack so views like
-            // QueryView can push to RecordDetailView via NavigationLink(value:).
-            // Without this, NavigationLinks inside the detail column have no
-            // "next column" to target.
-            NavigationStack {
-                DetailColumnRoot(selection: selection)
-            }
+    var body: some View {
+        List(SidebarItem.allCases, id: \.self, selection: $selection) { item in
+            Label(item.label, systemImage: item.systemImage)
+                .tag(item)
         }
-        .task {
-            await service.refreshAccountStatus()
-        }
+        .navigationTitle("MistDemo (Native)")
     }
 }

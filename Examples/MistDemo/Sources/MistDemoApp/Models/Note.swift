@@ -1,5 +1,5 @@
 //
-//  CloudKitModels.swift
+//  Note.swift
 //  MistDemoApp
 //
 //  Created by Leo Dion.
@@ -29,19 +29,6 @@
 
 import CloudKit
 import Foundation
-
-/// Display-friendly snapshot of a CKRecordZone for the SwiftUI list.
-struct ZoneRow: Identifiable, Hashable {
-    let id: String
-    let zoneName: String
-    let ownerName: String
-
-    init(_ zone: CKRecordZone) {
-        self.id = "\(zone.zoneID.zoneName)|\(zone.zoneID.ownerName)"
-        self.zoneName = zone.zoneID.zoneName
-        self.ownerName = zone.zoneID.ownerName
-    }
-}
 
 /// Note record, mirroring the `Note` type defined in `schema.ckdb`:
 ///
@@ -88,6 +75,9 @@ struct Note: Identifiable, Hashable {
         self.recordChangeTag = record.recordChangeTag
     }
 
+    // Identity-based equality: two Notes with the same recordID are equal
+    // regardless of field state. Lets SwiftUI selection bindings track a
+    // record across edits without losing focus when fields change.
     static func == (lhs: Note, rhs: Note) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }

@@ -1,5 +1,5 @@
 //
-//  RootView.swift
+//  ZoneRow.swift
 //  MistDemoApp
 //
 //  Created by Leo Dion.
@@ -27,28 +27,18 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import SwiftUI
+import CloudKit
+import Foundation
 
-public struct RootView: View {
-    @EnvironmentObject private var service: NativeCloudKitService
-    @State private var selection: SidebarItem? = .account
+/// Display-friendly snapshot of a CKRecordZone for the SwiftUI list.
+struct ZoneRow: Identifiable, Hashable {
+    let id: String
+    let zoneName: String
+    let ownerName: String
 
-    public init() {}
-
-    public var body: some View {
-        NavigationSplitView {
-            SidebarView(selection: $selection)
-        } detail: {
-            // The detail column needs its own NavigationStack so views like
-            // QueryView can push to RecordDetailView via NavigationLink(value:).
-            // Without this, NavigationLinks inside the detail column have no
-            // "next column" to target.
-            NavigationStack {
-                DetailColumnRoot(selection: selection)
-            }
-        }
-        .task {
-            await service.refreshAccountStatus()
-        }
+    init(_ zone: CKRecordZone) {
+        self.id = "\(zone.zoneID.zoneName)|\(zone.zoneID.ownerName)"
+        self.zoneName = zone.zoneID.zoneName
+        self.ownerName = zone.zoneID.ownerName
     }
 }
