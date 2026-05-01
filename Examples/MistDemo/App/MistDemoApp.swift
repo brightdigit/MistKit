@@ -27,11 +27,14 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import MistDemoApp
 import SwiftUI
 
 @main
 struct MistDemoAppMain: App {
-    @StateObject private var service = NativeCloudKitService(containerIdentifier: NativeCloudKitService.demoContainerIdentifier)
+    @StateObject private var service = NativeCloudKitService(
+        containerIdentifier: NativeCloudKitService.demoContainerIdentifier
+    )
 
     var body: some Scene {
         WindowGroup("MistDemo (Native CloudKit)") {

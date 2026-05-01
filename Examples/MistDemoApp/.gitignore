@@ -1,3 +1,0 @@
-# User-local secrets sourced into the shell before running `make generate`.
-# Never commit a populated .env — see .env.example for the variable list.
-.env
