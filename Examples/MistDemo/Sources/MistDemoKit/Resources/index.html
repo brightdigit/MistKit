@@ -133,6 +133,25 @@
         
         <div id="loading" class="loading">Authenticating...</div>
         <div id="status"></div>
+
+        <!--
+            Manual fallback: shown when automatic token capture times out.
+            Cross-origin iframes (icloud.com / apple-cloudkit.com) prevent the
+            parent window from observing CloudKit's auth network calls or its
+            cookies, so the network/postMessage interception below is best-effort.
+            This form lets the user copy the token from devtools and paste it in.
+        -->
+        <div id="manual-token-form" style="display: none; margin-top: 16px; padding: 12px; border: 1px solid #d0d7de; border-radius: 6px; background: #f6f8fa;">
+            <h3 style="margin-top: 0;">Paste Web Auth Token Manually</h3>
+            <p style="font-size: 13px; color: #57606a;">
+                Automatic capture failed (CloudKit's auth iframe is sandboxed).
+                Open DevTools &rarr; Application &rarr; Cookies &rarr; <code>icloud.com</code>,
+                find a cookie value starting with <code>158__</code>, and paste it below.
+            </p>
+            <input id="manual-token-input" type="text" placeholder="158__..." style="width: 100%; padding: 8px; box-sizing: border-box; font-family: monospace;">
+            <button id="manual-token-submit" type="button" style="margin-top: 8px; padding: 8px 16px;">Submit Token</button>
+        </div>
+
         <div id="user-info"></div>
     </div>
 
@@ -141,6 +160,21 @@
             const response = await fetch('/api/config');
             if (!response.ok) throw new Error('Failed to load server config: ' + response.status);
             return response.json();
+        }
+
+        // Validate a URL by parsing it and confirming the hostname is on apple-cloudkit.com.
+        // Substring checks (.includes) are unsafe because attacker-controlled URLs like
+        // http://evil.com/?q=apple-cloudkit.com would otherwise match.
+        function isCloudKitUrl(url) {
+            if (!url) return false;
+            try {
+                // Resolve relative URLs against the current origin so URL() doesn't throw.
+                const parsed = new URL(url, window.location.href);
+                const host = parsed.hostname;
+                return host === 'apple-cloudkit.com' || host.endsWith('.apple-cloudkit.com');
+            } catch {
+                return false;
+            }
         }
 
         // Intercept fetch/XHR to capture web auth tokens from CloudKit API responses
@@ -153,7 +187,7 @@
 
                 return originalFetch.apply(this, args).then(async response => {
                     // Check if this is a CloudKit API response
-                    if (url && url.includes('apple-cloudkit.com')) {
+                    if (isCloudKitUrl(url)) {
                         const clonedResponse = response.clone();
                         try {
                             const data = await clonedResponse.json();
@@ -187,7 +221,7 @@
 
             XMLHttpRequest.prototype.send = function(...args) {
                 this.addEventListener('load', function() {
-                    if (this._url && this._url.includes('apple-cloudkit.com')) {
+                    if (isCloudKitUrl(this._url)) {
                         try {
                             const data = JSON.parse(this.responseText);
                             if (data && data.ckWebAuthToken) {
@@ -319,35 +353,87 @@
                 return;
             }
 
-            // Create a promise that will be resolved when the token is received
+            // Race three sources for the web auth token:
+            //   1. postMessage from CloudKit's auth iframe (set up in the listener above)
+            //   2. fetch/XHR override — usually defeated by cross-origin sandboxing
+            //   3. Polling container._auth._ckSession — populated by CloudKit JS itself,
+            //      and the most reliable mechanism in practice.
             const tokenPromise = new Promise((resolve, reject) => {
                 tokenPromiseResolve = resolve;
                 tokenPromiseReject = reject;
 
-                // Timeout after 10 seconds instead of 5
+                // Poll the CloudKit JS auth object for its session token; this works
+                // even when the iframe blocks every other capture path.
+                const pollIntervalMs = 250;
+                const pollDeadlineMs = 10_000;
+                const pollStart = Date.now();
+                const pollHandle = setInterval(() => {
+                    const sessionToken = container?._auth?._ckSession;
+                    if (sessionToken) {
+                        clearInterval(pollHandle);
+                        console.log('✅ Token captured from container._auth._ckSession (poll)');
+                        webAuthToken = sessionToken;
+                        window.cloudKitWebAuthToken = sessionToken;
+                        if (tokenPromiseResolve) {
+                            tokenPromiseResolve(sessionToken);
+                            tokenPromiseResolve = null;
+                            tokenPromiseReject = null;
+                        }
+                        return;
+                    }
+                    if (Date.now() - pollStart >= pollDeadlineMs) {
+                        clearInterval(pollHandle);
+                    }
+                }, pollIntervalMs);
+
                 setTimeout(() => {
+                    clearInterval(pollHandle);
                     reject(new Error('Timeout waiting for web auth token after 10 seconds'));
-                }, 10000);
+                }, pollDeadlineMs);
             });
 
-            // The token should arrive via postMessage or network interception
-            // Wait up to 10 seconds for token
             try {
                 const token = await tokenPromise;
                 console.log('✅ Token received, sending to server...');
                 await handleAuthenticationWithToken(userIdentity, token);
             } catch (error) {
                 console.error('Token wait timeout or error:', error);
-                showStatus('Token capture failed. Check browser console for details.', true);
-
-                // Provide manual extraction instructions
-                console.log('=== MANUAL TOKEN EXTRACTION ===');
-                console.log('1. Open browser DevTools > Application > Cookies');
-                console.log('2. Look for cookies from apple-cloudkit.com or icloud.com');
-                console.log('3. Find a cookie starting with 158__54__');
-                console.log('4. Copy the value and set: window.cloudKitWebAuthToken = "your-token"');
-                console.log('5. Then call: handleAuthenticationWithToken(container.userIdentity, window.cloudKitWebAuthToken)');
+                showStatus('Automatic token capture failed. Paste the token manually below.', true);
+                showManualTokenForm(userIdentity);
             }
+        }
+
+        // Surface the manual-paste form when automatic capture has failed.
+        function showManualTokenForm(userIdentity) {
+            const form = document.getElementById('manual-token-form');
+            const input = document.getElementById('manual-token-input');
+            const submit = document.getElementById('manual-token-submit');
+            if (!form || !input || !submit) return;
+
+            form.style.display = 'block';
+            input.value = '';
+            input.focus();
+
+            const handler = async () => {
+                const token = input.value.trim();
+                if (!token) {
+                    showStatus('Please paste a token first.', true);
+                    return;
+                }
+                form.style.display = 'none';
+                webAuthToken = token;
+                window.cloudKitWebAuthToken = token;
+                authenticationInProgress = true;
+                await handleAuthenticationWithToken(userIdentity, token);
+            };
+
+            // Replace any prior listeners by cloning the button (idempotent across timeouts)
+            const cloned = submit.cloneNode(true);
+            submit.parentNode.replaceChild(cloned, submit);
+            cloned.addEventListener('click', handler);
+            input.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') handler();
+            });
         }
 
         function updateSignInState(isSignedIn) {
