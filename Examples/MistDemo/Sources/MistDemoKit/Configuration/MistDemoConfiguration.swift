@@ -29,20 +29,29 @@
 
 import Configuration
 import Foundation
+import SystemPackage
 
 /// Swift Configuration-based setup for MistDemo
 public struct MistDemoConfiguration: Sendable {
   // MARK: Lifecycle
 
-  public init() throws {
+  public init() async throws {
+    let envProvider = try await EnvironmentVariablesProvider(
+      environmentFilePath: FilePath(".env"),
+      allowMissing: true
+    )
+
     self.configReader = ConfigReader(providers: [
       // 1. Command line arguments (highest priority)
       CommandLineArgumentsProvider(),
 
-      // 2. Environment variables (CLOUDKIT_ prefix: e.g. api.token → CLOUDKIT_API_TOKEN)
+      // 2. Process environment variables (CLOUDKIT_ prefix)
       EnvironmentVariablesProvider().prefixKeys(with: "cloudkit"),
 
-      // 3. In-memory defaults (lowest priority)
+      // 3. .env file variables (CLOUDKIT_ prefix)
+      envProvider.prefixKeys(with: "cloudkit"),
+
+      // 4. In-memory defaults (lowest priority)
       InMemoryProvider(values: [
         "port": 8080,
         "skip.auth": false,

@@ -98,8 +98,8 @@ public struct AuthTokenCommand: MistDemoCommand {
             // destination host (not the origin), so this prevents requests to non-loopback
             // addresses but does not block cross-origin browser requests. For full CORS
             // protection, check the Origin header (set by browsers and not JS-spoofable).
-            let host = request.headers[HTTPField.Name("Host")!] ?? ""
-            guard host.hasPrefix("localhost") || host.hasPrefix("127.0.0.1") else {
+            let authority = request.head.authority ?? ""
+            guard authority.hasPrefix("localhost") || authority.hasPrefix("127.0.0.1") else {
                 return Response(status: .forbidden)
             }
             return Response(
@@ -196,21 +196,10 @@ public struct AuthTokenCommand: MistDemoCommand {
     
     /// Find the resources directory containing index.html
     private func findResourcesPath() throws -> String {
-        let possiblePaths = [
-            Bundle.main.resourcePath ?? "",
-            Bundle.main.bundlePath + "/Contents/Resources",
-            "./Sources/MistDemo/Resources",
-            "./Examples/MistDemo/Sources/MistDemo/Resources",
-            URL(fileURLWithPath: #file).deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Resources").path
-        ]
-        
-        for path in possiblePaths {
-            if !path.isEmpty && FileManager.default.fileExists(atPath: path + "/index.html") {
-                return path
-            }
+        guard let resourceURL = Bundle.module.url(forResource: "index", withExtension: "html", subdirectory: "Resources") else {
+            throw AuthTokenError.missingResource("index.html not found in any expected location")
         }
-        
-        throw AuthTokenError.missingResource("index.html not found in any expected location")
+        return resourceURL.deletingLastPathComponent().path
     }
 }
 

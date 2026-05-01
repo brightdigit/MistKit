@@ -35,7 +35,7 @@ import MistKit
 extension MistDemoConfig {
     /// Create a test configuration with default values
     init() async throws {
-        let configuration = try MistDemoConfiguration()
+        let configuration = try await MistDemoConfiguration()
         self = try await MistDemoConfig(configuration: configuration)
     }
 
