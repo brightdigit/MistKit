@@ -33,7 +33,7 @@ import Hummingbird
 import HTTPTypes
 import MistKit
 
-@testable import MistDemo
+@testable import MistDemoKit
 
 @Suite("AuthTokenCommand Tests")
 struct AuthTokenCommandTests {

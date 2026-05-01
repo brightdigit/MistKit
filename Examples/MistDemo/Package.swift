@@ -100,8 +100,8 @@ let package = Package(
             dependencies: [],
             swiftSettings: swiftSettings
         ),
-        .executableTarget(
-            name: "MistDemo",
+        .target(
+            name: "MistDemoKit",
             dependencies: [
                 "ConfigKeyKit",
                 .product(name: "MistKit", package: "MistKit"),
@@ -114,10 +114,19 @@ let package = Package(
             ],
             swiftSettings: swiftSettings
         ),
+        .executableTarget(
+            name: "MistDemo",
+            dependencies: [
+                "MistDemoKit",
+                "ConfigKeyKit",
+                .product(name: "MistKit", package: "MistKit")
+            ],
+            swiftSettings: swiftSettings
+        ),
         .testTarget(
             name: "MistDemoTests",
             dependencies: [
-                "MistDemo",
+                "MistDemoKit",
                 "ConfigKeyKit",
                 .product(name: "MistKit", package: "MistKit")
             ],

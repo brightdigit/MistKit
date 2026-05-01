@@ -30,7 +30,7 @@
 import Configuration
 import Foundation
 import MistKit
-@testable import MistDemo
+@testable import MistDemoKit
 
 extension MistDemoConfig {
     /// Create a test configuration with default values

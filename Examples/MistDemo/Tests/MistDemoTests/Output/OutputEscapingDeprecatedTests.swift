@@ -29,7 +29,7 @@
 
 import Foundation
 import Testing
-@testable import MistDemo
+@testable import MistDemoKit
 
 /// Tests for deprecated OutputEscaping APIs
 /// These tests ensure backward compatibility during deprecation period

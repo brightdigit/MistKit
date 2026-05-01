@@ -30,6 +30,7 @@
 import Foundation
 import MistKit
 import ConfigKeyKit
+import MistDemoKit
 
 // MARK: - Main Command Group
 
