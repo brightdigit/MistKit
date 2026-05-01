@@ -41,11 +41,14 @@ import OpenAPIRuntime
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
   /// Modify (create, update, or delete) CloudKit records
-  /// - Parameter operations: Array of record operations to perform
+  /// - Parameters:
+  ///   - operations: Array of record operations to perform
+  ///   - atomic: When true, the entire batch fails if any single operation fails (default: false)
   /// - Returns: Array of RecordInfo for the modified records
   /// - Throws: CloudKitError if the operation fails
   public func modifyRecords(
-    _ operations: [RecordOperation]
+    _ operations: [RecordOperation],
+    atomic: Bool = false
   ) async throws(CloudKitError) -> [RecordInfo] {
     do {
       let apiOperations = operations.map {
@@ -63,7 +66,7 @@ extension CloudKitService {
           body: .json(
             .init(
               operations: apiOperations,
-              atomic: false
+              atomic: atomic
             )
           )
         )

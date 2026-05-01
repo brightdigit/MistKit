@@ -73,6 +73,7 @@ struct MistDemo {
     await registry.register(UpdateCommand.self)
     await registry.register(DeleteCommand.self)
     await registry.register(LookupCommand.self)
+    await registry.register(ModifyCommand.self)
     await registry.register(UploadAssetCommand.self)
     await registry.register(DemoInFilterCommand.self)
     await registry.register(LookupZonesCommand.self)

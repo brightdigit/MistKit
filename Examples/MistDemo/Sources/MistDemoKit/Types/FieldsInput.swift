@@ -30,7 +30,7 @@
 public import Foundation
 
 /// Type-safe representation of field input from JSON
-public struct FieldsInput: Codable {
+public struct FieldsInput: Codable, Sendable {
     private let storage: [String: FieldInputValue]
     
     public init(from decoder: Decoder) throws {

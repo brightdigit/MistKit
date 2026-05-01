@@ -30,7 +30,7 @@
 public import Foundation
 
 /// Enum representing different types of field input values
-public enum FieldInputValue {
+public enum FieldInputValue: Sendable {
     case string(String)
     case int(Int)
     case double(Double)
