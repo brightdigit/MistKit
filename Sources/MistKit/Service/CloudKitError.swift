@@ -44,6 +44,18 @@ public enum CloudKitError: LocalizedError, Sendable {
   case decodingError(DecodingError)
   case networkError(URLError)
 
+  /// HTTP status code if this error originated from an HTTP response, otherwise nil.
+  public var httpStatusCode: Int? {
+    switch self {
+    case .httpError(let statusCode),
+         .httpErrorWithDetails(let statusCode, _, _),
+         .httpErrorWithRawResponse(let statusCode, _):
+      return statusCode
+    case .invalidResponse, .underlyingError, .decodingError, .networkError:
+      return nil
+    }
+  }
+
   /// A localized message describing what error occurred
   public var errorDescription: String? {
     switch self {

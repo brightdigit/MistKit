@@ -30,7 +30,7 @@
 import Foundation
 import Testing
 
-@testable import MistDemo
+@testable import MistDemoKit
 
 @Suite("YAMLEscaper Tests - YAML String Formatting")
 struct YAMLEscaperTests {

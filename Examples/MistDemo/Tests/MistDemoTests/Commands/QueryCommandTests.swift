@@ -31,7 +31,7 @@ import Foundation
 import Testing
 import MistKit
 
-@testable import MistDemo
+@testable import MistDemoKit
 
 @Suite("QueryCommand Tests")
 struct QueryCommandTests {

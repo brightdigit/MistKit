@@ -31,7 +31,7 @@ import Foundation
 import MistKit
 import Testing
 
-@testable import MistDemo
+@testable import MistDemoKit
 
 @Suite("TableFormatter Tests")
 struct TableFormatterTests {

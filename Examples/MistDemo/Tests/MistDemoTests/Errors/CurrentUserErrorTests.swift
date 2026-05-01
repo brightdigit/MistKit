@@ -29,7 +29,7 @@
 
 import Foundation
 import Testing
-@testable import MistDemo
+@testable import MistDemoKit
 
 @Suite("CurrentUserError Tests")
 struct CurrentUserErrorTests {

@@ -30,7 +30,7 @@
 import Foundation
 import Testing
 
-@testable import MistDemo
+@testable import MistDemoKit
 
 @Suite("CSVEscaper Tests - RFC 4180 Compliance")
 struct CSVEscaperTests {
