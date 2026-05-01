@@ -15,32 +15,35 @@ Goal: deliver these in an order that unblocks subsequent work, so the presentati
 
 ## Phase 1 — Unblock the test target (Issue #260)
 
-**Why first:** Phase 2 needs to add many new tests; running them requires `@testable import MistDemo` to actually link.
+**Why first:** Phase 2 needs to add many new tests; running them requires `@testable import` of the library module to actually link.
+
+**Naming choice:** keep the executable target named `MistDemo` so `swift run mistdemo` and the product stay unchanged. Move all the reusable code into a new library target named `MistDemoKit`. Tests `@testable import MistDemoKit`.
 
 ### Target restructure in `Examples/MistDemo/Package.swift`
 
-- Convert current `.executableTarget(name: "MistDemo", ...)` into `.target(name: "MistDemo", ...)` (library).
-- Add new `.executableTarget(name: "MistDemoEntry", dependencies: ["MistDemo"])` containing only the `@main` entry point.
-- Update product: `.executable(name: "mistdemo", targets: ["MistDemoEntry"])`.
-- `MistDemoTests` continues to depend on `MistDemo` — no test-file changes needed.
+- Add new `.target(name: "MistDemoKit", ...)` library — contains all current `Sources/MistDemo/` code except the `@main` entry point. Keeps `resources: [.copy("Resources")]` so `index.html` ships with the library.
+- Keep `.executableTarget(name: "MistDemo", dependencies: ["MistDemoKit"])` — contains only the `@main` entry-point file.
+- Product `.executable(name: "mistdemo", targets: ["MistDemo"])` is unchanged.
+- `MistDemoTests` depends on `MistDemoKit` (was `MistDemo`); test files change `@testable import MistDemo` → `@testable import MistDemoKit` (39 files, mechanical replace).
 
 ### File moves
 
-- Move `Examples/MistDemo/Sources/MistDemo/MistDemo.swift` (the `@main` struct) → `Examples/MistDemo/Sources/MistDemoEntry/MistDemoEntry.swift`.
-- Keep all other 13 subdirs (`Commands/`, `Configuration/`, `CloudKit/`, `Models/`, `Protocols/`, `Types/`, `Utilities/`, `Output/`, `Extensions/`, `Integration/`, `Errors/`, `Constants/`, `Resources/`) under `Sources/MistDemo/` as the library.
-- The `resources: [.copy("Resources")]` declaration stays on the `MistDemo` library target so `index.html` ships with the library.
+- Source layout becomes:
+  - `Sources/MistDemoKit/` — all 13 current subdirs (`Commands/`, `Configuration/`, `CloudKit/`, `Models/`, `Protocols/`, `Types/`, `Utilities/`, `Output/`, `Extensions/`, `Integration/`, `Errors/`, `Constants/`, `Resources/`).
+  - `Sources/MistDemo/MistDemo.swift` — the `@main` struct only; calls into `MistDemoKit` for the command registry.
+- Anything in the moved files that was `internal` and consumed only inside the same target may need to become `public` for the executable to call across targets. Audit the entry-point's call sites (mainly the command registry) and widen ACLs minimally — project uses explicit ACLs per CLAUDE.md.
 
 ### Verification
 
 - `cd Examples/MistDemo && swift build` — confirms split compiles.
-- `cd Examples/MistDemo && swift test` — confirms 39 tests now resolve `MistDemo` as a module.
-- `cd Examples/MistDemo && swift run mistdemo --help` — confirms executable wiring.
+- `cd Examples/MistDemo && swift test` — confirms 39 tests now resolve `MistDemoKit` as a module.
+- `cd Examples/MistDemo && swift run mistdemo --help` — confirms executable wiring (name unchanged).
 
 ---
 
 ## Phase 2 — Complete Phase 3 CRUD commands (Issue #214)
 
-Follow the existing `CreateCommand` / `UpdateCommand` patterns. Each new command needs four artifacts: `Commands/<X>Command.swift`, `Configuration/<X>Config.swift`, `Errors/<X>Error.swift`, registry entry in `MistDemoEntry.swift` (post-Phase 1) or `MistDemo.swift`, and `Tests/MistDemoTests/...` files.
+Follow the existing `CreateCommand` / `UpdateCommand` patterns. Each new command needs four artifacts: `Commands/<X>Command.swift`, `Configuration/<X>Config.swift`, `Errors/<X>Error.swift` (all under `Sources/MistDemoKit/` post-Phase 1), registry entry referenced from the `MistDemo` executable's `@main`, and `Tests/MistDemoTests/...` files.
 
 ### 2a — Fill UpdateCommand gaps
 
@@ -157,18 +160,20 @@ Leave create/update/delete out of the first cut; the goal is parity with the rea
 
 **Phase 1**
 - `Examples/MistDemo/Package.swift`
-- `Examples/MistDemo/Sources/MistDemoEntry/MistDemoEntry.swift` (new; moved from `MistDemo.swift`)
+- Move `Examples/MistDemo/Sources/MistDemo/**` (everything except `MistDemo.swift`) → `Examples/MistDemo/Sources/MistDemoKit/**`
+- `Examples/MistDemo/Sources/MistDemo/MistDemo.swift` stays put as the executable's only file
+- All 39 `Tests/MistDemoTests/**` files: `@testable import MistDemo` → `@testable import MistDemoKit`
 
 **Phase 2**
-- `Examples/MistDemo/Sources/MistDemo/Commands/{Update,Delete,Lookup,Modify}Command.swift`
-- `Examples/MistDemo/Sources/MistDemo/Configuration/{Update,Delete,Lookup,Modify}Config.swift`
-- `Examples/MistDemo/Sources/MistDemo/Errors/{Update,Delete,Lookup,Modify}Error.swift`
+- `Examples/MistDemo/Sources/MistDemoKit/Commands/{Update,Delete,Lookup,Modify}Command.swift`
+- `Examples/MistDemo/Sources/MistDemoKit/Configuration/{Update,Delete,Lookup,Modify}Config.swift`
+- `Examples/MistDemo/Sources/MistDemoKit/Errors/{Update,Delete,Lookup,Modify}Error.swift`
 - `Examples/MistDemo/Tests/MistDemoTests/Configuration/{Update,Delete,Lookup,Modify}ConfigTests.swift`
 - Reuse: `CloudKitService.{deleteRecord,lookupRecords,modifyRecords,updateRecord}` and `RecordOperation` (Sources/MistKit/Service/)
 
 **Phase 3**
-- `Examples/MistDemo/Sources/MistDemo/Resources/index.html`
-- Possibly `Examples/MistDemo/Sources/MistDemo/Commands/AuthTokenCommand.swift`
+- `Examples/MistDemo/Sources/MistDemoKit/Resources/index.html`
+- Possibly `Examples/MistDemo/Sources/MistDemoKit/Commands/AuthTokenCommand.swift`
 
 **Phase 4**
 - New tree under `Examples/MistDemoApp/` (Xcode project + SwiftUI sources + entitlements)
