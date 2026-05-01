@@ -30,15 +30,43 @@
 import CloudKit
 import SwiftUI
 
+enum SidebarItem: Hashable, CaseIterable {
+    case account
+    case zones
+    case query
+
+    var label: String {
+        switch self {
+        case .account: return "iCloud Account"
+        case .zones: return "Zones"
+        case .query: return "Query Records"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .account: return "person.crop.circle"
+        case .zones: return "tray.full"
+        case .query: return "magnifyingglass"
+        }
+    }
+}
+
 struct RootView: View {
     @EnvironmentObject private var service: NativeCloudKitService
+    @State private var selection: SidebarItem? = .account
 
     var body: some View {
         NavigationSplitView {
-            SidebarView()
+            SidebarView(selection: $selection)
         } detail: {
-            Text("Pick a section from the sidebar.")
-                .foregroundStyle(.secondary)
+            // The detail column needs its own NavigationStack so views like
+            // QueryView can push to RecordDetailView via NavigationLink(value:).
+            // Without this, NavigationLinks inside the detail column have no
+            // "next column" to target.
+            NavigationStack {
+                DetailColumnRoot(selection: selection)
+            }
         }
         .task {
             await service.refreshAccountStatus()
@@ -47,37 +75,34 @@ struct RootView: View {
 }
 
 struct SidebarView: View {
-    @EnvironmentObject private var service: NativeCloudKitService
-    @State private var selection: SidebarItem? = .account
+    @Binding var selection: SidebarItem?
 
     var body: some View {
-        List(selection: $selection) {
-            NavigationLink(value: SidebarItem.account) {
-                Label("iCloud Account", systemImage: "person.crop.circle")
-            }
-            NavigationLink(value: SidebarItem.zones) {
-                Label("Zones", systemImage: "tray.full")
-            }
-            NavigationLink(value: SidebarItem.query) {
-                Label("Query Records", systemImage: "magnifyingglass")
-            }
-        }
-        .navigationDestination(for: SidebarItem.self) { item in
-            switch item {
-            case .account:
-                AccountView()
-            case .zones:
-                ZoneListView()
-            case .query:
-                QueryView()
-            }
+        List(SidebarItem.allCases, id: \.self, selection: $selection) { item in
+            Label(item.label, systemImage: item.systemImage)
+                .tag(item)
         }
         .navigationTitle("MistDemo (Native)")
     }
 }
 
-enum SidebarItem: Hashable {
-    case account
-    case zones
-    case query
+struct DetailColumnRoot: View {
+    let selection: SidebarItem?
+
+    var body: some View {
+        switch selection {
+        case .account:
+            AccountView()
+        case .zones:
+            ZoneListView()
+        case .query:
+            QueryView()
+        case nil:
+            ContentUnavailableView(
+                "Pick a section from the sidebar",
+                systemImage: "sidebar.left",
+                description: Text("Account, Zones, or Query Records")
+            )
+        }
+    }
 }
