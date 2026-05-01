@@ -31,12 +31,11 @@ import SwiftUI
 
 struct QueryView: View {
     @EnvironmentObject private var service: NativeCloudKitService
-    @State private var recordType: String = "Note"
     @State private var limit: Int = 50
-    @State private var records: [RecordRow] = []
+    @State private var notes: [Note] = []
     @State private var loading = false
     @State private var loadError: String?
-    @State private var selectedRecord: RecordRow?
+    @State private var selectedNote: Note?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -47,34 +46,45 @@ struct QueryView: View {
 
             if loading {
                 Spacer()
-                ProgressView("Querying…")
+                ProgressView("Querying \(Note.recordType)…")
                 Spacer()
             } else if let loadError {
                 ContentUnavailableView("Query failed", systemImage: "exclamationmark.triangle", description: Text(loadError))
-            } else if records.isEmpty {
-                ContentUnavailableView("No results", systemImage: "tray", description: Text("Run a query to see records."))
+            } else if notes.isEmpty {
+                ContentUnavailableView("No notes", systemImage: "tray", description: Text("Run a query, or create a Note via `mistdemo create` first."))
             } else {
-                List(records, selection: $selectedRecord) { record in
-                    NavigationLink(value: record) {
-                        VStack(alignment: .leading) {
-                            Text(record.recordName).font(.body)
-                            Text(record.recordType).font(.caption).foregroundStyle(.secondary)
+                List(notes, selection: $selectedNote) { note in
+                    NavigationLink(value: note) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(note.title ?? note.id).font(.body)
+                            HStack(spacing: 12) {
+                                if let index = note.index {
+                                    Label("\(index)", systemImage: "number")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                if let createdAt = note.createdAt {
+                                    Label(createdAt.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-        .navigationDestination(for: RecordRow.self) { row in
-            RecordDetailView(record: row)
+        .navigationDestination(for: Note.self) { note in
+            RecordDetailView(note: note)
         }
-        .navigationTitle("Query")
+        .navigationTitle("Notes")
     }
 
     private var controls: some View {
         HStack(spacing: 12) {
-            TextField("Record Type", text: $recordType)
-                .textFieldStyle(.roundedBorder)
-                .frame(maxWidth: 240)
+            Text("Type: \(Note.recordType)")
+                .font(.body.monospaced())
+                .foregroundStyle(.secondary)
 
             Stepper(value: $limit, in: 1...200, step: 10) {
                 Text("Limit: \(limit)")
@@ -83,7 +93,6 @@ struct QueryView: View {
 
             Button("Run Query") { Task { await runQuery() } }
                 .buttonStyle(.borderedProminent)
-                .disabled(recordType.isEmpty)
         }
     }
 
@@ -92,7 +101,7 @@ struct QueryView: View {
         loadError = nil
         defer { loading = false }
         do {
-            records = try await service.queryRecords(recordType: recordType, limit: limit)
+            notes = try await service.queryNotes(limit: limit)
         } catch {
             loadError = error.localizedDescription
         }

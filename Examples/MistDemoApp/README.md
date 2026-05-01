@@ -11,50 +11,81 @@ The two demos are intended to be shown side-by-side in presentations:
 | `MistDemo` CLI / web (`mistdemo`) | MistKit (CloudKit Web Services REST) | Server, Linux, command line, web |
 | `MistDemoApp` (this directory) | Apple CloudKit framework | Native macOS / iOS apps |
 
-Both target the container `iCloud.com.brightdigit.MistDemo`.
+Both target the container `iCloud.com.brightdigit.MistDemo` and the same
+`Note` record schema (see `../MistDemo/schema.ckdb`).
 
 ## What's included (read-side parity with MistDemo CLI)
 
 - **iCloud Account view** — `CKContainer.accountStatus()`
 - **Zones list** — `CKDatabase.allRecordZones()` (parity with `mistdemo lookup-zones`)
-- **Record query** — `CKDatabase.records(matching:)` (parity with `mistdemo query`)
-- **Record detail** — displays each `CKRecord` field
+- **Notes query** — `CKDatabase.records(matching:)` for `Note` records, sorted by `index`
+- **Note detail** — typed view of `title`, `index`, `image`, `createdAt`, `modified`
 
-Write operations (create / update / delete) are intentionally not included
-in the first cut — the focus is read-side parity for the presentation.
+The `Note` model in `Sources/MistDemoApp/Models/CloudKitModels.swift`
+mirrors the `Note` record type in `Examples/MistDemo/schema.ckdb`. Write
+operations (create / update / delete) are intentionally not included in
+the first cut — the focus is read-side parity for the presentation.
 
-## Running on macOS (SPM)
+## Recommended path: open in Xcode
+
+CloudKit requires an `.app` bundle with the iCloud + CloudKit
+entitlement. The Xcode project is generated from `project.yml` via
+[XcodeGen](https://github.com/yonaskolb/XcodeGen):
+
+```bash
+brew install xcodegen           # one-time
+cd Examples/MistDemoApp
+xcodegen generate                # produces MistDemoApp.xcodeproj
+open MistDemoApp.xcodeproj
+```
+
+Two schemes ship in the project:
+
+- `MistDemoApp-macOS` — runs as a native macOS app
+- `MistDemoApp-iOS` — runs on iOS / iPadOS (simulator or device)
+
+Before running, in **Signing & Capabilities** for each target, sign in
+to your Apple Developer account so Xcode can request the `iCloud +
+CloudKit` entitlement against the
+`iCloud.com.brightdigit.MistDemo` container.
+
+The entitlements file (`MistDemoApp.entitlements`) is checked in and
+already lists the container; you'll likely need to change the bundle
+identifier prefix from `com.brightdigit` to your own team if you don't
+have access to the BrightDigit signing identity.
+
+## SPM-only path (read-only, no entitlements)
+
+For a quick smoke test you can also build via Swift Package Manager:
 
 ```bash
 cd Examples/MistDemoApp
 swift run MistDemoApp
 ```
 
-This works because Swift Package Manager can produce a runnable macOS
-executable. You'll need the host Mac to be signed in to iCloud for the
-account-status check to succeed.
+This works on macOS, but the resulting binary has no iCloud
+entitlement, so CloudKit rejects every call with:
 
-> CloudKit access from a `swift run`-launched binary works for the demo's
-> read-only operations, but the binary is **not codesigned with an iCloud
-> entitlement**, so writes to the private database will be rejected. For
-> the full presentation experience (or any iOS use), wrap this code in an
-> Xcode app target as described below.
+> Significant issue at CKContainer.m: In order to use CloudKit, your
+> process must have a `com.apple.developer.icloud-services` entitlement.
 
-## Running on iOS / signed macOS app (Xcode)
+Use this path only to check that the SwiftUI views compile. For an
+actual end-to-end demo, use the Xcode path above.
 
-iOS apps require an `.app` bundle and an iCloud + CloudKit entitlement,
-which Swift Package Manager cannot produce on its own. To run on iOS or
-ship a signed macOS app:
+## Source layout
 
-1. In Xcode, create a new **Multiplatform App** target.
-2. Drag `Sources/MistDemoApp/` into the target. The same SwiftUI files
-   work on iOS and macOS unchanged — only `MistDemoAppMain.swift`'s
-   `defaultSize(...)` is gated to macOS.
-3. In **Signing & Capabilities**, add the **iCloud** capability and check
-   **CloudKit**. Add the container ID
-   `iCloud.com.brightdigit.MistDemo` to the container list.
-4. Build and run.
+```
+Sources/MistDemoApp/
+├── MistDemoApp.swift              # @main App + WindowGroup
+├── Models/CloudKitModels.swift    # ZoneRow, Note (matches schema.ckdb)
+├── Services/NativeCloudKitService.swift  # Thin CKContainer wrapper
+└── Views/
+    ├── RootView.swift             # NavigationSplitView shell
+    ├── AccountView.swift          # iCloud account status
+    ├── ZoneListView.swift         # Zones list
+    ├── QueryView.swift            # Notes query
+    └── RecordDetailView.swift     # Typed Note detail
+```
 
-The CloudKit container, schema, and data are shared with the MistDemo CLI
-demos — anything you create with `mistdemo create ...` shows up here, and
-vice versa.
+The same source files compile for both macOS and iOS — only
+`MistDemoApp.swift`'s `defaultSize(...)` is gated to macOS.

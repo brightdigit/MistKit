@@ -43,45 +43,52 @@ struct ZoneRow: Identifiable, Hashable {
     }
 }
 
-/// Display-friendly snapshot of a CKRecord for the SwiftUI list and detail views.
-struct RecordRow: Identifiable, Hashable {
+/// Note record, mirroring the `Note` type defined in
+/// `Examples/MistDemo/schema.ckdb`:
+///
+///     RECORD TYPE Note (
+///         "title"     STRING    QUERYABLE SORTABLE SEARCHABLE,
+///         "index"     INT64     QUERYABLE SORTABLE,
+///         "image"     ASSET,
+///         "createdAt" TIMESTAMP QUERYABLE SORTABLE,
+///         "modified"  INT64     QUERYABLE
+///     );
+struct Note: Identifiable, Hashable {
+    static let recordType = "Note"
+
+    enum Fields {
+        static let title = "title"
+        static let index = "index"
+        static let image = "image"
+        static let createdAt = "createdAt"
+        static let modified = "modified"
+    }
+
     let id: String
-    let recordType: String
-    let recordName: String
+    let title: String?
+    let index: Int64?
+    let imageAssetURL: URL?
+    let createdAt: Date?
+    let modified: Int64?
+
+    /// CloudKit-managed metadata
     let modificationDate: Date?
-    let fields: [(key: String, valueDescription: String)]
+    let creationDate: Date?
+    let recordChangeTag: String?
 
-    init(_ record: CKRecord) {
+    init?(_ record: CKRecord) {
+        guard record.recordType == Self.recordType else { return nil }
         self.id = record.recordID.recordName
-        self.recordType = record.recordType
-        self.recordName = record.recordID.recordName
+        self.title = record[Fields.title] as? String
+        self.index = (record[Fields.index] as? NSNumber)?.int64Value
+        self.imageAssetURL = (record[Fields.image] as? CKAsset)?.fileURL
+        self.createdAt = record[Fields.createdAt] as? Date
+        self.modified = (record[Fields.modified] as? NSNumber)?.int64Value
         self.modificationDate = record.modificationDate
-        self.fields = record.allKeys()
-            .sorted()
-            .map { key in
-                let value = record[key]
-                return (key: key, valueDescription: Self.describe(value))
-            }
+        self.creationDate = record.creationDate
+        self.recordChangeTag = record.recordChangeTag
     }
 
-    private static func describe(_ value: CKRecordValue?) -> String {
-        guard let value else { return "nil" }
-        switch value {
-        case let string as String:
-            return string
-        case let number as NSNumber:
-            return number.stringValue
-        case let date as Date:
-            return ISO8601DateFormatter().string(from: date)
-        case let asset as CKAsset:
-            return asset.fileURL?.lastPathComponent ?? "<asset>"
-        case let reference as CKRecord.Reference:
-            return "→ \(reference.recordID.recordName)"
-        default:
-            return String(describing: value)
-        }
-    }
-
-    static func == (lhs: RecordRow, rhs: RecordRow) -> Bool { lhs.id == rhs.id }
+    static func == (lhs: Note, rhs: Note) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }

@@ -30,28 +30,44 @@
 import SwiftUI
 
 struct RecordDetailView: View {
-    let record: RecordRow
+    let note: Note
 
     var body: some View {
         Form {
             Section("Identity") {
-                LabeledContent("Record Name", value: record.recordName)
-                LabeledContent("Record Type", value: record.recordType)
-                if let modificationDate = record.modificationDate {
+                LabeledContent("Record Name", value: note.id)
+                LabeledContent("Record Type", value: Note.recordType)
+                if let recordChangeTag = note.recordChangeTag {
+                    LabeledContent("Change Tag", value: recordChangeTag)
+                }
+                if let creationDate = note.creationDate {
+                    LabeledContent("Created", value: creationDate.formatted(date: .abbreviated, time: .standard))
+                }
+                if let modificationDate = note.modificationDate {
                     LabeledContent("Modified", value: modificationDate.formatted(date: .abbreviated, time: .standard))
                 }
             }
-            Section("Fields") {
-                if record.fields.isEmpty {
-                    Text("No fields").foregroundStyle(.secondary)
-                } else {
-                    ForEach(record.fields, id: \.key) { field in
-                        LabeledContent(field.key, value: field.valueDescription)
+
+            Section("Note Fields") {
+                LabeledContent("title", value: note.title ?? "—")
+                LabeledContent("index", value: note.index.map(String.init) ?? "—")
+                LabeledContent("createdAt", value: note.createdAt?.formatted(date: .abbreviated, time: .standard) ?? "—")
+                LabeledContent("modified", value: note.modified.map(String.init) ?? "—")
+                LabeledContent("image", value: note.imageAssetURL?.lastPathComponent ?? "—")
+            }
+
+            if let url = note.imageAssetURL {
+                Section("Asset") {
+                    AsyncImage(url: url) { image in
+                        image.resizable().aspectRatio(contentMode: .fit)
+                    } placeholder: {
+                        ProgressView()
                     }
+                    .frame(maxHeight: 240)
                 }
             }
         }
         .formStyle(.grouped)
-        .navigationTitle(record.recordName)
+        .navigationTitle(note.title ?? note.id)
     }
 }

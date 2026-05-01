@@ -70,11 +70,13 @@ final class NativeCloudKitService: ObservableObject {
         return zones.map(ZoneRow.init).sorted { $0.zoneName < $1.zoneName }
     }
 
-    /// Run a `TRUEPREDICATE` query against the given record type
-    /// (parity with `mistdemo query --record-type ...`).
-    func queryRecords(recordType: String, limit: Int = 50) async throws -> [RecordRow] {
+    /// Query `Note` records from the demo container's private database, sorted
+    /// by `index` (parity with `mistdemo query --record-type Note --sort index`).
+    /// Note's schema is defined in `Examples/MistDemo/schema.ckdb`.
+    func queryNotes(limit: Int = 50) async throws -> [Note] {
         let predicate = NSPredicate(value: true)
-        let query = CKQuery(recordType: recordType, predicate: predicate)
+        let query = CKQuery(recordType: Note.recordType, predicate: predicate)
+        query.sortDescriptors = [NSSortDescriptor(key: Note.Fields.index, ascending: true)]
 
         let (matchResults, _) = try await database.records(
             matching: query,
@@ -83,10 +85,10 @@ final class NativeCloudKitService: ObservableObject {
             resultsLimit: limit
         )
 
-        return matchResults.compactMap { _, recordResult -> RecordRow? in
+        return matchResults.compactMap { _, recordResult -> Note? in
             switch recordResult {
             case .success(let record):
-                return RecordRow(record)
+                return Note(record)
             case .failure:
                 return nil
             }
