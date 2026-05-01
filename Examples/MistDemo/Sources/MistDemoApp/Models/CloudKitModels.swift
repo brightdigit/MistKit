@@ -43,8 +43,7 @@ struct ZoneRow: Identifiable, Hashable {
     }
 }
 
-/// Note record, mirroring the `Note` type defined in
-/// `Examples/MistDemo/schema.ckdb`:
+/// Note record, mirroring the `Note` type defined in `schema.ckdb`:
 ///
 ///     RECORD TYPE Note (
 ///         "title"     STRING    QUERYABLE SORTABLE SEARCHABLE,

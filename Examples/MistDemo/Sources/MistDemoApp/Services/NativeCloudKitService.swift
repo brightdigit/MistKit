@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import Combine
 import CloudKit
 import Foundation
 
@@ -35,9 +36,9 @@ import Foundation
 /// same CloudKit container, so a presentation can flip between them and show
 /// identical data accessed through different stacks.
 @MainActor
-final class NativeCloudKitService: ObservableObject {
+public final class NativeCloudKitService: ObservableObject {
     /// The shared demo container identifier — must match `MistDemoConfig.containerIdentifier`.
-    static let demoContainerIdentifier = "iCloud.com.brightdigit.MistDemo"
+    public static let demoContainerIdentifier = "iCloud.com.brightdigit.MistDemo"
 
     @Published var accountStatus: CKAccountStatus = .couldNotDetermine
     @Published var lastError: String?
@@ -45,7 +46,7 @@ final class NativeCloudKitService: ObservableObject {
     let containerIdentifier: String
     private let container: CKContainer
 
-    init(containerIdentifier: String) {
+    public init(containerIdentifier: String) {
         self.containerIdentifier = containerIdentifier
         self.container = CKContainer(identifier: containerIdentifier)
     }
@@ -72,7 +73,7 @@ final class NativeCloudKitService: ObservableObject {
 
     /// Query `Note` records from the demo container's private database, sorted
     /// by `index` (parity with `mistdemo query --record-type Note --sort index`).
-    /// Note's schema is defined in `Examples/MistDemo/schema.ckdb`.
+    /// Note's schema is defined in `schema.ckdb`.
     func queryNotes(limit: Int = 50) async throws -> [Note] {
         let predicate = NSPredicate(value: true)
         let query = CKQuery(recordType: Note.recordType, predicate: predicate)

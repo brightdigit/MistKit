@@ -28,7 +28,7 @@
 //
 
 import CloudKit
-import SwiftUI
+public import SwiftUI
 
 enum SidebarItem: Hashable, CaseIterable {
     case account
@@ -52,11 +52,13 @@ enum SidebarItem: Hashable, CaseIterable {
     }
 }
 
-struct RootView: View {
+public struct RootView: View {
     @EnvironmentObject private var service: NativeCloudKitService
     @State private var selection: SidebarItem? = .account
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         NavigationSplitView {
             SidebarView(selection: $selection)
         } detail: {
