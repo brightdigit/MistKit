@@ -128,6 +128,31 @@ final class NativeCloudKitService: ObservableObject {
         _ = try await database.deleteRecord(withID: recordID)
     }
 
+    // MARK: - Web auth token (parity with `mistdemo auth-token`)
+
+    /// Fetch a CloudKit web auth token (the `158__...` value that MistKit /
+    /// the MistDemo CLI consume). Demonstrates that a native app and a
+    /// REST-based MistKit consumer can share the same auth surface.
+    ///
+    /// `apiToken` is the public CloudKit API token from CloudKit Dashboard,
+    /// not the user's iCloud password. It must match the configured container.
+    func fetchWebAuthToken(apiToken: String) async throws -> String {
+        try await withCheckedThrowingContinuation { continuation in
+            let operation = CKFetchWebAuthTokenOperation(apiToken: apiToken)
+            operation.qualityOfService = .userInitiated
+            operation.fetchWebAuthTokenCompletionBlock = { token, error in
+                if let token {
+                    continuation.resume(returning: token)
+                } else {
+                    continuation.resume(throwing: error ?? NativeCloudKitError.webAuthTokenUnavailable)
+                }
+            }
+            // CKFetchWebAuthTokenOperation is a CKDatabaseOperation; running
+            // it against the private database picks up the demo container.
+            database.add(operation)
+        }
+    }
+
     /// Apply the editable fields onto a CKRecord. Always refreshes `modified`.
     private static func apply(title: String, index: Int64, imageURL: URL?, to record: CKRecord) {
         record[Note.Fields.title] = title as NSString
@@ -141,11 +166,14 @@ final class NativeCloudKitService: ObservableObject {
 
 enum NativeCloudKitError: Error, LocalizedError {
     case unexpectedSaveResult
+    case webAuthTokenUnavailable
 
     var errorDescription: String? {
         switch self {
         case .unexpectedSaveResult:
             return "CloudKit returned a record that couldn't be parsed as a Note."
+        case .webAuthTokenUnavailable:
+            return "CloudKit returned no web auth token and no error."
         }
     }
 }

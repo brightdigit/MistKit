@@ -30,17 +30,94 @@
 import CloudKit
 import SwiftUI
 
+#if canImport(AppKit)
+import AppKit
+#elseif canImport(UIKit)
+import UIKit
+#endif
+
 struct AccountView: View {
     @EnvironmentObject private var service: NativeCloudKitService
 
+    /// The CloudKit API token (the public token from CloudKit Dashboard).
+    /// Persisted across launches because re-pasting it during a presentation
+    /// is annoying. This is the same value the MistDemo CLI calls
+    /// `--api-token` / `CLOUDKIT_API_TOKEN`.
+    @AppStorage("MistDemoApp.cloudKitApiToken") private var apiToken: String = ""
+
+    @State private var webAuthToken: String?
+    @State private var fetchingWebAuthToken = false
+    @State private var webAuthTokenError: String?
+
     var body: some View {
         Form {
-            LabeledContent("Container", value: service.containerIdentifier)
-            LabeledContent("Database", value: "Private")
-            LabeledContent("iCloud Status", value: statusLabel)
+            Section("Container") {
+                LabeledContent("Container", value: service.containerIdentifier)
+                LabeledContent("Database", value: "Private")
+                LabeledContent("iCloud Status", value: statusLabel)
+            }
+
+            Section {
+                TextField("CloudKit API Token", text: $apiToken, prompt: Text("Paste from CloudKit Dashboard"))
+                    .textFieldStyle(.roundedBorder)
+                    .font(.body.monospaced())
+                    #if os(iOS)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    #endif
+
+                HStack {
+                    Button {
+                        Task { await fetchToken() }
+                    } label: {
+                        if fetchingWebAuthToken {
+                            HStack(spacing: 6) {
+                                ProgressView().controlSize(.small)
+                                Text("Fetching…")
+                            }
+                        } else {
+                            Text("Fetch Web Auth Token")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(apiToken.isEmpty || fetchingWebAuthToken)
+
+                    if webAuthToken != nil {
+                        Button("Clear", role: .destructive) {
+                            webAuthToken = nil
+                            webAuthTokenError = nil
+                        }
+                    }
+                }
+
+                if let webAuthToken {
+                    LabeledContent("Web Auth Token") {
+                        VStack(alignment: .trailing, spacing: 6) {
+                            Text(webAuthToken)
+                                .font(.callout.monospaced())
+                                .lineLimit(3)
+                                .truncationMode(.middle)
+                                .textSelection(.enabled)
+                            Button("Copy") { copy(webAuthToken) }
+                                .buttonStyle(.bordered)
+                                .controlSize(.small)
+                        }
+                    }
+                }
+
+                if let webAuthTokenError {
+                    Text(webAuthTokenError).font(.callout).foregroundStyle(.red)
+                }
+            } header: {
+                Text("Web Auth Token")
+            } footer: {
+                Text("Issues the same `158__…` token that MistKit / `mistdemo auth-token` consume — useful for handing off to a server-side or CLI process. Uses CKFetchWebAuthTokenOperation.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
 
             if let error = service.lastError {
-                Section("Last Error") {
+                Section("Last Service Error") {
                     Text(error).font(.callout).foregroundStyle(.red)
                 }
             }
@@ -65,5 +142,29 @@ struct AccountView: View {
         case .temporarilyUnavailable: return "Temporarily Unavailable"
         @unknown default: return "Unknown"
         }
+    }
+
+    private func fetchToken() async {
+        fetchingWebAuthToken = true
+        webAuthTokenError = nil
+        webAuthToken = nil
+        defer { fetchingWebAuthToken = false }
+        do {
+            let token = try await service.fetchWebAuthToken(
+                apiToken: apiToken.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            webAuthToken = token
+        } catch {
+            webAuthTokenError = error.localizedDescription
+        }
+    }
+
+    private func copy(_ value: String) {
+        #if canImport(AppKit)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(value, forType: .string)
+        #elseif canImport(UIKit)
+        UIPasteboard.general.string = value
+        #endif
     }
 }
