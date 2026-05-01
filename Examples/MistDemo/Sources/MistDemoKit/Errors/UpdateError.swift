@@ -38,6 +38,7 @@ public enum UpdateError: Error, LocalizedError {
     case emptyStdin
     case stdinError(String)
     case operationFailed(String)
+    case conflict(reason: String?)
 
     public var errorDescription: String? {
         switch self {
@@ -55,6 +56,11 @@ public enum UpdateError: Error, LocalizedError {
             return "Failed to read from stdin: \(reason)"
         case .operationFailed(let reason):
             return "Update operation failed: \(reason)"
+        case .conflict(let reason):
+            if let reason {
+                return "Update conflict: the record was modified on the server (\(reason))"
+            }
+            return "Update conflict: the record was modified on the server"
         }
     }
 
@@ -70,6 +76,8 @@ public enum UpdateError: Error, LocalizedError {
             return "Ensure the JSON file exists and contains valid JSON"
         case .emptyStdin:
             return "Pipe JSON data to stdin: echo '{\"title\":\"Updated\"}' | mistdemo update --record-name my-record --stdin"
+        case .conflict:
+            return "Re-run with --force to overwrite the server record, or fetch the current --record-change-tag and retry."
         case .stdinError, .operationFailed:
             return nil
         }

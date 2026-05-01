@@ -41,6 +41,7 @@ public struct UpdateConfig: Sendable, ConfigurationParseable {
     public let recordType: String
     public let recordName: String
     public let recordChangeTag: String?
+    public let force: Bool
     public let fields: [Field]
     public let output: OutputFormat
 
@@ -50,6 +51,7 @@ public struct UpdateConfig: Sendable, ConfigurationParseable {
         recordType: String = "Note",
         recordName: String,
         recordChangeTag: String? = nil,
+        force: Bool = false,
         fields: [Field] = [],
         output: OutputFormat = .json
     ) {
@@ -58,6 +60,7 @@ public struct UpdateConfig: Sendable, ConfigurationParseable {
         self.recordType = recordType
         self.recordName = recordName
         self.recordChangeTag = recordChangeTag
+        self.force = force
         self.fields = fields
         self.output = output
     }
@@ -82,6 +85,7 @@ public struct UpdateConfig: Sendable, ConfigurationParseable {
         }
 
         let recordChangeTag = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordChangeTag)
+        let force = configReader.bool(forKey: MistDemoConstants.ConfigKeys.force, default: false)
 
         // Parse fields from various sources
         let fields = try Self.parseFieldsFromSources(configReader)
@@ -96,6 +100,7 @@ public struct UpdateConfig: Sendable, ConfigurationParseable {
             recordType: recordType,
             recordName: recordName,
             recordChangeTag: recordChangeTag,
+            force: force,
             fields: fields,
             output: output
         )

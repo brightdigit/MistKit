@@ -50,6 +50,7 @@ public struct UpdateCommand: MistDemoCommand, OutputFormatting {
             --record-type <type>           Record type (default: Note)
             --zone <zone>                  Zone name (default: _defaultZone)
             --record-change-tag <tag>      Change tag for optimistic locking
+            --force                        Overwrite server record, ignoring change tag conflicts
             --output-format <format>       Output format: json, table, csv, yaml
 
         FIELD DEFINITION (choose one method):
@@ -122,19 +123,42 @@ public struct UpdateCommand: MistDemoCommand, OutputFormatting {
             // Convert fields to CloudKit format
             let cloudKitFields = try config.fields.toCloudKitFields()
 
+            // --force omits the change tag so the server overwrites without optimistic locking
+            let effectiveChangeTag = config.force ? nil : config.recordChangeTag
+
             // Update the record
             let recordInfo = try await client.updateRecord(
                 recordType: config.recordType,
                 recordName: config.recordName,
                 fields: cloudKitFields,
-                recordChangeTag: config.recordChangeTag
+                recordChangeTag: effectiveChangeTag
             )
 
             // Format and output result
             try await outputResult(recordInfo, format: config.output)
 
+        } catch let error as UpdateError {
+            throw error
+        } catch let error as CloudKitError {
+            if let mapped = Self.mapConflict(error) {
+                throw mapped
+            }
+            throw UpdateError.operationFailed(error.localizedDescription)
         } catch {
             throw UpdateError.operationFailed(error.localizedDescription)
+        }
+    }
+
+    private static func mapConflict(_ error: CloudKitError) -> UpdateError? {
+        switch error {
+        case .httpError(let statusCode) where statusCode == 409:
+            return .conflict(reason: nil)
+        case .httpErrorWithDetails(let statusCode, _, let reason) where statusCode == 409:
+            return .conflict(reason: reason)
+        case .httpErrorWithRawResponse(let statusCode, _) where statusCode == 409:
+            return .conflict(reason: nil)
+        default:
+            return nil
         }
     }
 }

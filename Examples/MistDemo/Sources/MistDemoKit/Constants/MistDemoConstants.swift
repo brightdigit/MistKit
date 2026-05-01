@@ -50,6 +50,10 @@ public enum MistDemoConstants {
         public static let jsonFile = "json.file"
         public static let stdin = "stdin"
         public static let recordChangeTag = "record.change.tag"
+        public static let force = "force"
+        public static let recordNames = "record.names"
+        public static let operationsFile = "operations.file"
+        public static let atomic = "atomic"
     }
     
     // MARK: - Default Values
