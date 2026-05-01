@@ -35,7 +35,8 @@ entitlement. The Xcode project is generated from `project.yml` via
 ```bash
 brew install xcodegen           # one-time
 cd Examples/MistDemoApp
-xcodegen generate                # produces MistDemoApp.xcodeproj
+cp .env.example .env            # one-time — fill in CLOUDKIT_API_TOKEN
+make generate                   # sources .env, runs xcodegen
 open MistDemoApp.xcodeproj
 ```
 
@@ -53,6 +54,41 @@ The entitlements file (`MistDemoApp.entitlements`) is checked in and
 already lists the container; you'll likely need to change the bundle
 identifier prefix from `com.brightdigit` to your own team if you don't
 have access to the BrightDigit signing identity.
+
+## Setting the CloudKit API token
+
+The app's iCloud Account view exchanges your **public CloudKit API
+token** (from CloudKit Dashboard) for a web auth token via
+`CKFetchWebAuthTokenOperation`. The token is the same value the
+MistDemo CLI reads from `$CLOUDKIT_API_TOKEN`, so one source covers
+both halves of the demo.
+
+There are three ways to provide it, ranked by ergonomics:
+
+1. **`.env` → `make generate` (recommended).** Copy `.env.example` to
+   `.env` (gitignored) and fill in `CLOUDKIT_API_TOKEN`. Then run
+   `make generate` from `Examples/MistDemoApp`. The Makefile sources
+   `.env`; XcodeGen substitutes `${CLOUDKIT_API_TOKEN}` into the
+   generated scheme's `environmentVariables`, so when you run the app
+   from Xcode the value reaches it through
+   `ProcessInfo.processInfo.environment`. The whole `.xcodeproj` is
+   gitignored repo-wide, so the substituted value never lands in git.
+   Survives Xcode debug runs and iOS Simulator runs.
+
+2. **Ad-hoc terminal env var.** Useful for `swift run`:
+   `CLOUDKIT_API_TOKEN=<token> swift run MistDemoApp`. The app reads
+   `ProcessInfo.processInfo.environment` on launch. (Note: SPM-launched
+   binaries have no iCloud entitlement, so the actual fetch will fail —
+   but you can verify the seeding shows a "Loaded from CLOUDKIT_API_TOKEN"
+   caption beneath the field.)
+
+3. **Manual paste in the app.** The TextField in iCloud Account still
+   accepts ad-hoc values; they persist via `@AppStorage`
+   (`UserDefaults`) until cleared.
+
+The `.env` file is gitignored, the `.xcodeproj` is gitignored repo-wide,
+and `.env.example` only names the variable — so the secret never lands
+in the repo at any stage of the pipeline.
 
 ## SPM-only path (read-only, no entitlements)
 

@@ -59,6 +59,14 @@ schemes:
         MistDemoApp-macOS: all
     run:
       config: Debug
+      # Baked from $CLOUDKIT_API_TOKEN at xcodegen-generate time. The .env
+      # file at Examples/MistDemoApp/.env (gitignored) is sourced by the
+      # `make generate` target. The whole *.xcodeproj is gitignored
+      # repo-wide, so the substituted value never lands in git. Empty
+      # string when the env var isn't set — AccountView falls back to the
+      # in-app TextField.
+      environmentVariables:
+        CLOUDKIT_API_TOKEN: ${CLOUDKIT_API_TOKEN}
     test:
       config: Debug
     archive:
@@ -70,6 +78,8 @@ schemes:
         MistDemoApp-iOS: all
     run:
       config: Debug
+      environmentVariables:
+        CLOUDKIT_API_TOKEN: ${CLOUDKIT_API_TOKEN}
     test:
       config: Debug
     archive:

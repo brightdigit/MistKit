@@ -48,6 +48,28 @@ struct AccountView: View {
     @State private var webAuthToken: String?
     @State private var fetchingWebAuthToken = false
     @State private var webAuthTokenError: String?
+    @State private var tokenSource: TokenSource = .manual
+
+    /// Where the current `apiToken` value came from on this launch — used
+    /// for the small caption beneath the TextField so the provenance is
+    /// obvious during the presentation.
+    private enum TokenSource {
+        case manual
+        case environment
+    }
+
+    /// Env var name the MistDemo CLI also reads (defined in
+    /// MistDemoConstants.EnvironmentVars.cloudKitAPIToken). Hard-coded here
+    /// because MistDemoApp deliberately has no MistKit dependency.
+    ///
+    /// At launch the value reaches `ProcessInfo` through one of:
+    ///   * `make generate` substitutes `${CLOUDKIT_API_TOKEN}` from the
+    ///     repo-local `.env` (gitignored) into the scheme's
+    ///     `environmentVariables` (the whole .xcodeproj is gitignored
+    ///     repo-wide, so the substituted value never lands in git).
+    ///   * Or the app is launched from a shell that already exports it
+    ///     (e.g. `CLOUDKIT_API_TOKEN=… swift run MistDemoApp`).
+    private static let envVarName = "CLOUDKIT_API_TOKEN"
 
     var body: some View {
         Form {
@@ -61,10 +83,21 @@ struct AccountView: View {
                 TextField("CloudKit API Token", text: $apiToken, prompt: Text("Paste from CloudKit Dashboard"))
                     .textFieldStyle(.roundedBorder)
                     .font(.body.monospaced())
+                    .onChange(of: apiToken) { _, _ in
+                        // If the user edits the field, anything they type
+                        // is "manual" — drop the seeded-from-env caption.
+                        tokenSource = .manual
+                    }
                     #if os(iOS)
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
                     #endif
+
+                if let caption = sourceCaption {
+                    Text(caption)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
 
                 HStack {
                     Button {
@@ -130,6 +163,32 @@ struct AccountView: View {
                     Task { await service.refreshAccountStatus() }
                 }
             }
+        }
+        .onAppear { seedTokenIfNeeded() }
+    }
+
+    /// Seed `apiToken` from the environment on first appear, but never
+    /// overwrite a value the user has already pasted.
+    private func seedTokenIfNeeded() {
+        guard apiToken.isEmpty else { return }
+
+        if let envValue = ProcessInfo.processInfo.environment[Self.envVarName],
+           !envValue.isEmpty,
+           // When `.env` wasn't sourced before `make generate`, xcodegen
+           // leaves the literal placeholder string in the scheme. Treat
+           // that as unset so the TextField stays empty.
+           !envValue.hasPrefix("${") {
+            apiToken = envValue
+            tokenSource = .environment
+        }
+    }
+
+    private var sourceCaption: String? {
+        switch tokenSource {
+        case .manual:
+            return nil
+        case .environment:
+            return "Loaded from $\(Self.envVarName) (xcodegen baked it into the scheme from .env)."
         }
     }
 
