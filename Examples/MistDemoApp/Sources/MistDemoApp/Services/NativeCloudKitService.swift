@@ -94,4 +94,58 @@ final class NativeCloudKitService: ObservableObject {
             }
         }
     }
+
+    // MARK: - Write operations (parity with `mistdemo create / update / delete`)
+
+    /// Create a new Note in the private database.
+    func createNote(title: String, index: Int64, imageURL: URL?) async throws -> Note {
+        let record = CKRecord(recordType: Note.recordType)
+        Self.apply(title: title, index: index, imageURL: imageURL, to: record)
+        record[Note.Fields.createdAt] = Date() as NSDate
+        let saved = try await database.save(record)
+        guard let note = Note(saved) else {
+            throw NativeCloudKitError.unexpectedSaveResult
+        }
+        return note
+    }
+
+    /// Update an existing Note. Fetches the current record (so the change tag
+    /// is fresh), mutates the fields, and saves.
+    func updateNote(_ existing: Note, title: String, index: Int64, imageURL: URL?) async throws -> Note {
+        let recordID = CKRecord.ID(recordName: existing.id)
+        let record = try await database.record(for: recordID)
+        Self.apply(title: title, index: index, imageURL: imageURL, to: record)
+        let saved = try await database.save(record)
+        guard let note = Note(saved) else {
+            throw NativeCloudKitError.unexpectedSaveResult
+        }
+        return note
+    }
+
+    /// Delete a Note by record name.
+    func deleteNote(_ note: Note) async throws {
+        let recordID = CKRecord.ID(recordName: note.id)
+        _ = try await database.deleteRecord(withID: recordID)
+    }
+
+    /// Apply the editable fields onto a CKRecord. Always refreshes `modified`.
+    private static func apply(title: String, index: Int64, imageURL: URL?, to record: CKRecord) {
+        record[Note.Fields.title] = title as NSString
+        record[Note.Fields.index] = NSNumber(value: index)
+        if let imageURL {
+            record[Note.Fields.image] = CKAsset(fileURL: imageURL)
+        }
+        record[Note.Fields.modified] = NSNumber(value: Int64(Date().timeIntervalSince1970 * 1000))
+    }
+}
+
+enum NativeCloudKitError: Error, LocalizedError {
+    case unexpectedSaveResult
+
+    var errorDescription: String? {
+        switch self {
+        case .unexpectedSaveResult:
+            return "CloudKit returned a record that couldn't be parsed as a Note."
+        }
+    }
 }

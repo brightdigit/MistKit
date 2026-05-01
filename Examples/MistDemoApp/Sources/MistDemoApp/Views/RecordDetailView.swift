@@ -30,7 +30,16 @@
 import SwiftUI
 
 struct RecordDetailView: View {
-    let note: Note
+    @State var note: Note
+    let onChange: () -> Void
+
+    @EnvironmentObject private var service: NativeCloudKitService
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var showEditSheet = false
+    @State private var showDeleteConfirmation = false
+    @State private var deleting = false
+    @State private var actionError: String?
 
     var body: some View {
         Form {
@@ -66,8 +75,63 @@ struct RecordDetailView: View {
                     .frame(maxHeight: 240)
                 }
             }
+
+            if let actionError {
+                Section("Error") {
+                    Text(actionError).foregroundStyle(.red).font(.callout)
+                }
+            }
         }
         .formStyle(.grouped)
         .navigationTitle(note.title ?? note.id)
+        .toolbar {
+            ToolbarItem {
+                Button {
+                    showEditSheet = true
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
+            }
+            ToolbarItem {
+                Button(role: .destructive) {
+                    showDeleteConfirmation = true
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+                .disabled(deleting)
+            }
+        }
+        .sheet(isPresented: $showEditSheet) {
+            NoteEditView(mode: .edit(note)) { updated in
+                note = updated
+                onChange()
+            }
+            .environmentObject(service)
+        }
+        .confirmationDialog(
+            "Delete \(note.title ?? note.id)?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                Task { await delete() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This permanently removes the record from CloudKit.")
+        }
+    }
+
+    private func delete() async {
+        deleting = true
+        actionError = nil
+        defer { deleting = false }
+        do {
+            try await service.deleteNote(note)
+            onChange()
+            dismiss()
+        } catch {
+            actionError = error.localizedDescription
+        }
     }
 }

@@ -36,6 +36,7 @@ struct QueryView: View {
     @State private var loading = false
     @State private var loadError: String?
     @State private var selectedNote: Note?
+    @State private var showCreateSheet = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -51,7 +52,11 @@ struct QueryView: View {
             } else if let loadError {
                 ContentUnavailableView("Query failed", systemImage: "exclamationmark.triangle", description: Text(loadError))
             } else if notes.isEmpty {
-                ContentUnavailableView("No notes", systemImage: "tray", description: Text("Run a query, or create a Note via `mistdemo create` first."))
+                ContentUnavailableView(
+                    "No notes",
+                    systemImage: "tray",
+                    description: Text("Tap + to create the first one, or run `mistdemo create` from the CLI.")
+                )
             } else {
                 List(notes, selection: $selectedNote) { note in
                     NavigationLink(value: note) {
@@ -71,13 +76,33 @@ struct QueryView: View {
                             }
                         }
                     }
+                    .swipeActions(edge: .trailing) {
+                        Button("Delete", role: .destructive) {
+                            Task { await delete(note) }
+                        }
+                    }
                 }
             }
         }
         .navigationDestination(for: Note.self) { note in
-            RecordDetailView(note: note)
+            RecordDetailView(note: note, onChange: { Task { await runQuery() } })
         }
         .navigationTitle("Notes")
+        .toolbar {
+            ToolbarItem {
+                Button {
+                    showCreateSheet = true
+                } label: {
+                    Label("New Note", systemImage: "plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showCreateSheet) {
+            NoteEditView(mode: .create) { _ in
+                Task { await runQuery() }
+            }
+            .environmentObject(service)
+        }
     }
 
     private var controls: some View {
@@ -102,6 +127,15 @@ struct QueryView: View {
         defer { loading = false }
         do {
             notes = try await service.queryNotes(limit: limit)
+        } catch {
+            loadError = error.localizedDescription
+        }
+    }
+
+    private func delete(_ note: Note) async {
+        do {
+            try await service.deleteNote(note)
+            notes.removeAll { $0.id == note.id }
         } catch {
             loadError = error.localizedDescription
         }
