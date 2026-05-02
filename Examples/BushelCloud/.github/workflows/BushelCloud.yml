@@ -5,39 +5,39 @@ on:
       - '*WIP'
 env:
   PACKAGE_NAME: BushelCloud
+  MISTKIT_BRANCH: main
 jobs:
   build-ubuntu:
     name: Build on Ubuntu
     runs-on: ubuntu-latest
-    container: ${{ matrix.swift.nightly && format('swiftlang/swift:nightly-{0}-{1}', matrix.swift.version, matrix.os) || format('swift:{0}-{1}', matrix.swift.version, matrix.os) }}
+    container: swift:${{ matrix.swift }}-${{ matrix.os }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       matrix:
         os: [noble, jammy]
-        swift:
-          - version: "6.2"
-          - version: "6.3"
-            nightly: true
+        swift: ["6.1", "6.2", "6.3"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup MistKit
-        uses: ./.github/actions/setup-mistkit
+        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
+        with:
+          branch: ${{ env.MISTKIT_BRANCH }}
 
-      - uses: brightdigit/swift-build@v1.4.2
+      - uses: brightdigit/swift-build@v1
         with:
           skip-package-resolved: true
-      - uses: sersoft-gmbh/swift-coverage-action@v4
+      - uses: sersoft-gmbh/swift-coverage-action@v5
         id: coverage-files
         with:
           fail-on-empty-output: true
           minimum-coverage: 70
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         with:
           fail_ci_if_error: true
-          flags: swift-${{ matrix.swift.version }}-${{ matrix.os }}${{ matrix.swift.nightly && '-nightly' || '' }}
+          flags: swift-${{ matrix.swift }}-${{ matrix.os }}
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
@@ -50,16 +50,20 @@ jobs:
   #     matrix:
   #       runs-on: [windows-2022, windows-2025]
   #       swift:
-  #         - version: swift-6.2-release
-  #           build: 6.2-RELEASE
+  #         - version: swift-6.3-release
+  #           build: 6.3-RELEASE
   #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: brightdigit/swift-build@v1.4.2
+  #     - uses: actions/checkout@v6
+  #     - name: Setup MistKit
+  #       uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
+  #       with:
+  #         branch: ${{ env.MISTKIT_BRANCH }}
+  #     - uses: brightdigit/swift-build@v1
   #       with:
   #         windows-swift-version: ${{ matrix.swift.version }}
   #         windows-swift-build: ${{ matrix.swift.build }}
   #     - name: Upload coverage to Codecov
-  #       uses: codecov/codecov-action@v5
+  #       uses: codecov/codecov-action@v6
   #       with:
   #         fail_ci_if_error: true
   #         flags: swift-${{ matrix.swift.version }},windows
@@ -79,53 +83,55 @@ jobs:
         include:
           # SPM Build Matrix
           - runs-on: macos-26
-            xcode: "/Applications/Xcode_26.2.app"
+            xcode: "/Applications/Xcode_26.4.app"
 
           # macOS Build Matrix
           - type: macos
             runs-on: macos-26
-            xcode: "/Applications/Xcode_26.2.app"
-                      
+            xcode: "/Applications/Xcode_26.4.app"
+
           # iOS Build Matrix
           - type: ios
             runs-on: macos-26
-            xcode: "/Applications/Xcode_26.2.app"
+            xcode: "/Applications/Xcode_26.4.app"
             deviceName: "iPhone 17 Pro"
-            osVersion: "26.0.1"
+            osVersion: "26.4"
             download-platform: true
-  
+
           # watchOS Build Matrix
           - type: watchos
             runs-on: macos-26
-            xcode: "/Applications/Xcode_26.2.app"
+            xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "26.0"
+            osVersion: "26.4"
             download-platform: true
 
           # tvOS Build Matrix
           - type: tvos
             runs-on: macos-26
-            xcode: "/Applications/Xcode_26.2.app"
+            xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple TV"
-            osVersion: "26.0"
+            osVersion: "26.4"
             download-platform: true
 
-          # visionOS Build Matrix              
+          # visionOS Build Matrix
           - type: visionos
             runs-on: macos-26
-            xcode: "/Applications/Xcode_26.2.app"
+            xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.0"
+            osVersion: "26.4"
             download-platform: true
-  
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup MistKit
-        uses: ./.github/actions/setup-mistkit
+        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
+        with:
+          branch: ${{ env.MISTKIT_BRANCH }}
 
       - name: Build and Test
-        uses: brightdigit/swift-build@v1.4.2
+        uses: brightdigit/swift-build@v1
         with:
           scheme: ${{ env.PACKAGE_NAME }}-Package
           type: ${{ matrix.type }}
@@ -134,15 +140,15 @@ jobs:
           osVersion: ${{ matrix.osVersion }}
           download-platform: ${{ matrix.download-platform }}
           skip-package-resolved: true
-          
+
       # Coverage Steps
       - name: Process Coverage
-        uses: sersoft-gmbh/swift-coverage-action@v4
+        uses: sersoft-gmbh/swift-coverage-action@v5
         with:
           minimum-coverage: 70
 
       - name: Upload Coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.type && format('{0}{1}', matrix.type, matrix.osVersion) || 'spm' }}
@@ -156,10 +162,10 @@ jobs:
       MINT_PATH: .mint/lib
       MINT_LINK_PATH: .mint/bin
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Cache mint
         id: cache-mint
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache
         with:
