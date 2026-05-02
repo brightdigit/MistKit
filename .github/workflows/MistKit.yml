@@ -269,11 +269,13 @@ jobs:
             download-platform: true
 
           # visionOS
+          # osVersion intentionally omitted: visionOS 26.4 simulator is not
+          # pre-installed on macos-26 runners as of this writing. Letting
+          # xcodebuild pick the latest installed visionOS keeps this stable.
           - type: visionos
             runs-on: macos-26
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.4"
             download-platform: true
     steps:
       - uses: actions/checkout@v6

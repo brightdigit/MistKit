@@ -13,9 +13,12 @@ jobs:
     container: swift:${{ matrix.swift }}-${{ matrix.os }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
+      fail-fast: false
       matrix:
         os: [noble, jammy]
-        swift: ["6.1", "6.2", "6.3"]
+        # BushelCloud's Package.swift declares swift-tools-version: 6.2,
+        # so Swift 6.1 is not supported here.
+        swift: ["6.2", "6.3"]
 
     steps:
       - uses: actions/checkout@v6
@@ -115,11 +118,14 @@ jobs:
             download-platform: true
 
           # visionOS Build Matrix
+          # osVersion intentionally omitted: visionOS 26.4 simulator is not
+          # pre-installed on macos-26 runners as of this writing. Letting
+          # xcodebuild pick the latest installed visionOS makes the job stable
+          # across runner image refreshes.
           - type: visionos
             runs-on: macos-26
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.4"
             download-platform: true
 
     steps:
