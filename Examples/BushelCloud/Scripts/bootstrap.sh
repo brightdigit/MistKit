@@ -36,53 +36,50 @@ fi
 
 echo ""
 
-# Check if Mint is installed
-echo "Checking for Mint (Swift package manager for executables)..."
-if ! command -v mint &> /dev/null; then
-    echo -e "${YELLOW}Mint is not installed.${NC}"
+# Check if mise is installed
+echo "Checking for mise (polyglot tool version manager)..."
+if ! command -v mise &> /dev/null; then
+    echo -e "${YELLOW}mise is not installed.${NC}"
     echo ""
-    read -p "Would you like to install Mint? (y/n) " -n 1 -r
+    read -p "Would you like to install mise? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "Installing Mint..."
+        echo "Installing mise..."
         if command -v brew &> /dev/null; then
-            brew install mint
-            echo -e "${GREEN}✓${NC} Mint installed via Homebrew"
+            brew install mise
+            echo -e "${GREEN}✓${NC} mise installed via Homebrew"
         else
-            echo -e "${YELLOW}Homebrew not found. Installing Mint from source...${NC}"
-            git clone https://github.com/yonaskolb/Mint.git /tmp/Mint
-            cd /tmp/Mint
-            swift run mint install yonaskolb/mint
-            cd -
-            rm -rf /tmp/Mint
-            echo -e "${GREEN}✓${NC} Mint installed from source"
+            echo -e "${YELLOW}Homebrew not found. Installing mise via official installer...${NC}"
+            curl https://mise.run | sh
+            echo -e "${GREEN}✓${NC} mise installed"
+            echo -e "${YELLOW}Add ~/.local/bin to your PATH and run \`mise activate\` per the mise docs.${NC}"
         fi
     else
-        echo -e "${YELLOW}Skipping Mint installation. Some tools may not be available.${NC}"
+        echo -e "${YELLOW}Skipping mise installation. Some tools may not be available.${NC}"
     fi
 else
-    echo -e "${GREEN}✓${NC} Mint is installed"
+    echo -e "${GREEN}✓${NC} mise is installed"
 fi
 
 echo ""
 
-# Install development tools via Mint
-if command -v mint &> /dev/null && [ -f "Mintfile" ]; then
-    echo "Installing development tools from Mintfile..."
+# Install development tools via mise
+if command -v mise &> /dev/null && [ -f "mise.toml" ]; then
+    echo "Installing development tools from mise.toml..."
     echo "This may take a few minutes on first run..."
     echo ""
 
-    if mint bootstrap; then
+    if mise install; then
         echo -e "${GREEN}✓${NC} Development tools installed"
         echo "  - SwiftLint (code linting)"
         echo "  - swift-format (code formatting)"
         echo "  - periphery (unused code detection)"
     else
         echo -e "${YELLOW}WARNING: Failed to install some development tools.${NC}"
-        echo "You can install them manually later with: mint bootstrap"
+        echo "You can install them manually later with: mise install"
     fi
 else
-    echo -e "${YELLOW}Skipping development tools installation (Mint not available or Mintfile not found)${NC}"
+    echo -e "${YELLOW}Skipping development tools installation (mise not available or mise.toml not found)${NC}"
 fi
 
 echo ""

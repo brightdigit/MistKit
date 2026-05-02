@@ -149,7 +149,9 @@ jobs:
 
       - name: Setup MistKit
         if: steps.cache-binary.outputs.cache-hit != 'true'
-        uses: ./.github/actions/setup-mistkit
+        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
+        with:
+          branch: main
 
       - name: Build CelestraCloud
         if: steps.cache-binary.outputs.cache-hit != 'true'

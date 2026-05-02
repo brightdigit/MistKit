@@ -205,7 +205,7 @@ jobs:
           - type: ios
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "iPhone 17 Pro"
-            osVersion: "26.4"
+            osVersion: "26.4.1"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -279,7 +279,7 @@ jobs:
             runs-on: macos-26
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.4"
+            osVersion: "26.4.1"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -308,29 +308,11 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
     needs: [build-ubuntu, build-macos, build-macos-platforms, build-windows, build-android]
-    env:
-      MINT_PATH: .mint/lib
-      MINT_LINK_PATH: .mint/bin
     steps:
       - uses: actions/checkout@v6
-      - name: Cache mint
-        id: cache-mint
-        uses: actions/cache@v5
-        env:
-          cache-name: cache
+      - uses: jdx/mise-action@v4
         with:
-          path: |
-            .mint
-            Mint
-          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
-          restore-keys: |
-            ${{ runner.os }}-mint-
-      - name: Install mint
-        if: steps.cache-mint.outputs.cache-hit == ''
-        run: |
-          git clone https://github.com/yonaskolb/Mint.git
-          cd Mint
-          swift run mint install yonaskolb/mint
+          cache: true
       - name: Lint
         run: |
           set -e

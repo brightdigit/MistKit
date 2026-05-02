@@ -3,22 +3,83 @@ on:
   push:
     branches-ignore:
       - '*WIP'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   PACKAGE_NAME: BushelCloud
   MISTKIT_BRANCH: main
+
 jobs:
+  configure:
+    name: Configure Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      full-matrix: ${{ steps.check.outputs.full }}
+      ubuntu-os: ${{ steps.matrix.outputs.ubuntu-os }}
+      ubuntu-swift: ${{ steps.matrix.outputs.ubuntu-swift }}
+    steps:
+      - id: check
+        name: Determine matrix scope
+        run: |
+          FULL=false
+          REF="${{ github.ref }}"
+          EVENT="${{ github.event_name }}"
+          BASE_REF="${{ github.base_ref }}"
+
+          # Full matrix on main
+          if [[ "$REF" == "refs/heads/main" ]]; then
+            FULL=true
+          # Full matrix on semver branches (v1.0.0, 1.2.3-alpha.1, etc.)
+          elif [[ "$REF" =~ ^refs/heads/v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            FULL=true
+          # Full matrix on PRs targeting main or semver branches
+          elif [[ "$EVENT" == "pull_request" ]]; then
+            if [[ "$BASE_REF" == "main" || "$BASE_REF" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+              FULL=true
+            fi
+          fi
+
+          echo "full=$FULL" >> "$GITHUB_OUTPUT"
+          echo "Full matrix: $FULL (ref=$REF, event=$EVENT, base_ref=$BASE_REF)"
+
+      - id: matrix
+        name: Build matrix values
+        run: |
+          # BushelCloud's Package.swift declares swift-tools-version: 6.2,
+          # so Swift 6.1 is not supported.
+          if [[ "${{ steps.check.outputs.full }}" == "true" ]]; then
+            echo 'ubuntu-os=["noble","jammy"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-swift=["6.2","6.3"]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ubuntu-os=["noble"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-swift=["6.3"]' >> "$GITHUB_OUTPUT"
+          fi
+
   build-ubuntu:
     name: Build on Ubuntu
+    needs: configure
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}-${{ matrix.os }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
-        os: [noble, jammy]
-        # BushelCloud's Package.swift declares swift-tools-version: 6.2,
-        # so Swift 6.1 is not supported here.
-        swift: ["6.2", "6.3"]
+        os: ${{ fromJSON(needs.configure.outputs.ubuntu-os) }}
+        swift: ${{ fromJSON(needs.configure.outputs.ubuntu-swift) }}
 
     steps:
       - uses: actions/checkout@v6
@@ -53,15 +114,19 @@ jobs:
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
+
   # build-windows:
   #   name: Build on Windows
+  #   needs: configure
   #   runs-on: ${{ matrix.runs-on }}
-  #   if: "!contains(github.event.head_commit.message, 'ci skip')"
+  #   if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
   #   strategy:
   #     fail-fast: false
   #     matrix:
   #       runs-on: [windows-2022, windows-2025]
   #       swift:
+  #         - version: swift-6.2-release
+  #           build: 6.2-RELEASE
   #         - version: swift-6.3-release
   #           build: 6.3-RELEASE
   #   steps:
@@ -71,10 +136,13 @@ jobs:
   #       with:
   #         branch: ${{ env.MISTKIT_BRANCH }}
   #     - uses: brightdigit/swift-build@v1
+  #       id: build
   #       with:
   #         windows-swift-version: ${{ matrix.swift.version }}
   #         windows-swift-build: ${{ matrix.swift.build }}
+  #         skip-package-resolved: true
   #     - name: Upload coverage to Codecov
+  #       if: steps.build.outputs.contains-code-coverage == 'true'
   #       uses: codecov/codecov-action@v6
   #       with:
   #         fail_ci_if_error: true
@@ -83,57 +151,25 @@ jobs:
   #         token: ${{ secrets.CODECOV_TOKEN }}
   #         os: windows
   #         swift_project: BushelCloud-Package
+
+  # Minimal macOS builds — always runs (SPM + iOS)
   build-macos:
     name: Build on macOS
-    env:
-      PACKAGE_NAME: BushelCloud
-    runs-on: ${{ matrix.runs-on }}
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    runs-on: macos-26
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          # SPM Build Matrix
-          - runs-on: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
+          # SPM build
+          - xcode: "/Applications/Xcode_26.4.app"
 
-          # macOS Build Matrix
-          - type: macos
-            runs-on: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
-
-          # iOS Build Matrix
+          # iOS build
           - type: ios
-            runs-on: macos-26
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "iPhone 17 Pro"
-            osVersion: "26.4"
+            osVersion: "26.4.1"
             download-platform: true
-
-          # watchOS Build Matrix
-          - type: watchos
-            runs-on: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
-            deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "26.4"
-            download-platform: true
-
-          # tvOS Build Matrix
-          - type: tvos
-            runs-on: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
-            deviceName: "Apple TV"
-            osVersion: "26.4"
-            download-platform: true
-
-          # visionOS Build Matrix
-          - type: visionos
-            runs-on: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
-            deviceName: "Apple Vision Pro"
-            osVersion: "26.4"
-            download-platform: true
-
     steps:
       - uses: actions/checkout@v6
 
@@ -143,6 +179,7 @@ jobs:
           branch: ${{ env.MISTKIT_BRANCH }}
 
       - name: Build and Test
+        id: build
         uses: brightdigit/swift-build@v1
         with:
           scheme: ${{ env.PACKAGE_NAME }}-Package
@@ -152,14 +189,78 @@ jobs:
           osVersion: ${{ matrix.osVersion }}
           download-platform: ${{ matrix.download-platform }}
           skip-package-resolved: true
-
-      # Coverage Steps
       - name: Process Coverage
+        if: steps.build.outputs.contains-code-coverage == 'true'
         uses: sersoft-gmbh/swift-coverage-action@v5
         with:
           minimum-coverage: 70
-
       - name: Upload Coverage
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.type && format('{0}{1}', matrix.type, matrix.osVersion) || 'spm' }}
+
+  # Full macOS platform builds — only on main, semver branches, and PRs targeting them
+  build-macos-platforms:
+    name: Build on macOS (Platforms)
+    needs: configure
+    runs-on: macos-26
+    if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macOS
+          - type: macos
+            xcode: "/Applications/Xcode_26.4.app"
+
+          # watchOS
+          - type: watchos
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "Apple Watch Ultra 3 (49mm)"
+            osVersion: "26.4"
+            download-platform: true
+
+          # tvOS
+          - type: tvos
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "Apple TV"
+            osVersion: "26.4"
+            download-platform: true
+
+          # visionOS
+          - type: visionos
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "Apple Vision Pro"
+            osVersion: "26.4.1"
+            download-platform: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup MistKit
+        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
+        with:
+          branch: ${{ env.MISTKIT_BRANCH }}
+
+      - name: Build and Test
+        id: build
+        uses: brightdigit/swift-build@v1
+        with:
+          scheme: ${{ env.PACKAGE_NAME }}-Package
+          type: ${{ matrix.type }}
+          xcode: ${{ matrix.xcode }}
+          deviceName: ${{ matrix.deviceName }}
+          osVersion: ${{ matrix.osVersion }}
+          download-platform: ${{ matrix.download-platform }}
+          skip-package-resolved: true
+      - name: Process Coverage
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: sersoft-gmbh/swift-coverage-action@v5
+        with:
+          minimum-coverage: 70
+      - name: Upload Coverage
+        if: steps.build.outputs.contains-code-coverage == 'true'
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -167,32 +268,14 @@ jobs:
 
   lint:
     name: Linting
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
     runs-on: ubuntu-latest
-    needs: [build-ubuntu, build-macos] # , build-windows]
-    env:
-      MINT_PATH: .mint/lib
-      MINT_LINK_PATH: .mint/bin
+    if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
+    needs: [build-ubuntu, build-macos, build-macos-platforms]
     steps:
       - uses: actions/checkout@v6
-      - name: Cache mint
-        id: cache-mint
-        uses: actions/cache@v5
-        env:
-          cache-name: cache
+      - uses: jdx/mise-action@v4
         with:
-          path: |
-            .mint
-            Mint
-          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
-          restore-keys: |
-            ${{ runner.os }}-mint-
-      - name: Install mint
-        if: steps.cache-mint.outputs.cache-hit == ''
-        run: |
-          git clone https://github.com/yonaskolb/Mint.git
-          cd Mint
-          swift run mint install yonaskolb/mint
+          cache: true
       - name: Lint
         run: |
           set -e
