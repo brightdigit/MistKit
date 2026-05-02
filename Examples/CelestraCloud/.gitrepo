@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:brightdigit/CelestraCloud.git
 	branch = mistkit
-	commit = 47beae9f768abb4db90359434dc35df78f721225
-	parent = 73c5043c26f71e06b2840c006750a3a8f2cdefaa
+	commit = 0de629a7c07bbab0b33da924db0429361fc53852
+	parent = 92e0293c5f7ee8aaf5e2f64af472b7ddff3da636
 	method = merge
 	cmdver = 0.4.9
