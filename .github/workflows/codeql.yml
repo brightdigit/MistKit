@@ -24,8 +24,11 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
+    # CodeQL Swift analysis requires macOS runners — Linux is not supported
+    # ("Swift analysis is only supported on macOS runner images"). Other languages
+    # can run on Linux, hence the conditional.
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-15') || 'ubuntu-latest' }}
+    timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
     permissions:
       actions: read
       contents: read
@@ -44,7 +47,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v6
 
+    - name: Setup Xcode
+      if: matrix.language == 'swift'
+      run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+
     - name: Verify Swift Version
+      if: matrix.language == 'swift'
       run: |
         swift --version
         swift package --version
