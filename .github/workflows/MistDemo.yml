@@ -36,6 +36,11 @@ jobs:
         swift: ["6.2", "6.3"]
     steps:
       - uses: actions/checkout@v6
+      - name: Install curl (required by Codecov uploader)
+        run: |
+          if command -v apt-get >/dev/null 2>&1; then
+            apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+          fi
       - uses: brightdigit/swift-build@v1
         id: build
         with:
