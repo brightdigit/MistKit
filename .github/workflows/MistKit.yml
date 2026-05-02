@@ -89,11 +89,6 @@ jobs:
             type: "wasm-embedded"
     steps:
       - uses: actions/checkout@v6
-      - name: Install curl (required by Codecov uploader)
-        run: |
-          if command -v apt-get >/dev/null 2>&1; then
-            apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
-          fi
       - uses: brightdigit/swift-build@v1
         id: build
         with:
@@ -104,6 +99,12 @@ jobs:
             -Xcc -D_WASI_EMULATED_MMAN
             -Xlinker -lwasi-emulated-signal
             -Xlinker -lwasi-emulated-mman
+      - name: Install curl (required by Codecov uploader)
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        run: |
+          if command -v apt-get >/dev/null 2>&1; then
+            apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+          fi
       - uses: sersoft-gmbh/swift-coverage-action@v5
         if: steps.build.outputs.contains-code-coverage == 'true'
         id: coverage-files

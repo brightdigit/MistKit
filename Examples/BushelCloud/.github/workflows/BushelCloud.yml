@@ -23,26 +23,29 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install curl (required by Codecov uploader)
-        run: |
-          if command -v apt-get >/dev/null 2>&1; then
-            apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
-          fi
-
       - name: Setup MistKit
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
         with:
           branch: ${{ env.MISTKIT_BRANCH }}
 
       - uses: brightdigit/swift-build@v1
+        id: build
         with:
           skip-package-resolved: true
+      - name: Install curl (required by Codecov uploader)
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        run: |
+          if command -v apt-get >/dev/null 2>&1; then
+            apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+          fi
       - uses: sersoft-gmbh/swift-coverage-action@v5
+        if: steps.build.outputs.contains-code-coverage == 'true'
         id: coverage-files
         with:
           fail-on-empty-output: true
           minimum-coverage: 70
       - name: Upload coverage to Codecov
+        if: steps.build.outputs.contains-code-coverage == 'true'
         uses: codecov/codecov-action@v6
         with:
           fail_ci_if_error: true
