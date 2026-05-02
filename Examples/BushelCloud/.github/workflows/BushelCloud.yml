@@ -21,7 +21,7 @@ jobs:
         swift: ["6.2", "6.3"]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup MistKit
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
@@ -56,7 +56,7 @@ jobs:
   #         - version: swift-6.3-release
   #           build: 6.3-RELEASE
   #   steps:
-  #     - uses: actions/checkout@v6
+  #     - uses: actions/checkout@v4
   #     - name: Setup MistKit
   #       uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
   #       with:
@@ -118,18 +118,21 @@ jobs:
             download-platform: true
 
           # visionOS Build Matrix
-          # osVersion intentionally omitted: visionOS 26.4 simulator is not
-          # pre-installed on macos-26 runners as of this writing. Letting
-          # xcodebuild pick the latest installed visionOS makes the job stable
-          # across runner image refreshes.
-          - type: visionos
-            runs-on: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
-            deviceName: "Apple Vision Pro"
-            download-platform: true
+          # TEMPORARILY DISABLED: visionOS 26.4 simulator is not pre-installed
+          # on macos-26 runners (only iOS, watchOS, tvOS 26.x ship), and
+          # `-downloadPlatform visionOS` does not reliably populate it.
+          # swift-build requires a non-empty osVersion for the destination
+          # string, so dropping the pin doesn't fix it. Re-enable when the
+          # macos-26 runner image ships visionOS 26.x by default.
+          # - type: visionos
+          #   runs-on: macos-26
+          #   xcode: "/Applications/Xcode_26.4.app"
+          #   deviceName: "Apple Vision Pro"
+          #   osVersion: "26.4"
+          #   download-platform: true
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup MistKit
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
@@ -168,7 +171,7 @@ jobs:
       MINT_PATH: .mint/lib
       MINT_LINK_PATH: .mint/bin
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Cache mint
         id: cache-mint
         uses: actions/cache@v5

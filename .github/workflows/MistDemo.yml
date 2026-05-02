@@ -35,7 +35,7 @@ jobs:
         os: [noble]
         swift: ["6.2", "6.3"]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - uses: brightdigit/swift-build@v1
         id: build
         with:
@@ -61,7 +61,7 @@ jobs:
     runs-on: macos-26
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Build and Test
         id: build
         uses: brightdigit/swift-build@v1

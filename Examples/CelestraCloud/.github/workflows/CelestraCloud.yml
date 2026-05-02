@@ -21,7 +21,7 @@ jobs:
         swift: ["6.2", "6.3"]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup MistKit
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
@@ -54,7 +54,7 @@ jobs:
           - version: swift-6.3-release
             build: 6.3-RELEASE
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Setup MistKit
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
         with:
@@ -118,16 +118,17 @@ jobs:
             download-platform: true
 
           # visionOS Build
-          # osVersion intentionally omitted: visionOS 26.4 simulator is not
-          # pre-installed on macos-26 runners as of this writing.
-          - type: visionos
-            runs-on: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
-            deviceName: "Apple Vision Pro"
-            download-platform: true
+          # TEMPORARILY DISABLED: visionOS 26.4 simulator is not pre-installed
+          # on macos-26 runners. Re-enable when the runner image ships it.
+          # - type: visionos
+          #   runs-on: macos-26
+          #   xcode: "/Applications/Xcode_26.4.app"
+          #   deviceName: "Apple Vision Pro"
+          #   osVersion: "26.4"
+          #   download-platform: true
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup MistKit
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
@@ -164,7 +165,7 @@ jobs:
       MINT_PATH: .mint/lib
       MINT_LINK_PATH: .mint/bin
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Cache mint
         id: cache-mint
         uses: actions/cache@v5
