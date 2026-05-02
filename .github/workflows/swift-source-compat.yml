@@ -11,7 +11,6 @@ jobs:
     name: Test Swift ${{ matrix.container }} For Source Compatibility Suite
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
-    continue-on-error: ${{ contains(matrix.container, 'nightly') }}
 
     strategy:
       fail-fast: false
@@ -19,13 +18,13 @@ jobs:
         container:
           - swift:6.1
           - swift:6.2
-          - swiftlang/swift:nightly-6.3-noble
+          - swift:6.3
 
     container: ${{ matrix.container }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Test Swift 6.x For Source Compatibility
         run: swift build --disable-sandbox --verbose --configuration release

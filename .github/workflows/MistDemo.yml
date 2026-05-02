@@ -1,0 +1,82 @@
+name: MistDemo
+on:
+  push:
+    branches-ignore:
+      - '*WIP'
+    paths:
+      - 'Examples/MistDemo/**'
+      - 'Sources/MistKit/**'
+      - 'Package.swift'
+      - '.github/workflows/MistDemo.yml'
+  pull_request:
+    paths:
+      - 'Examples/MistDemo/**'
+      - 'Sources/MistKit/**'
+      - 'Package.swift'
+      - '.github/workflows/MistDemo.yml'
+
+concurrency:
+  group: mistdemo-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PACKAGE_NAME: MistDemo
+  WORKING_DIR: Examples/MistDemo
+
+jobs:
+  build-ubuntu:
+    name: Build on Ubuntu
+    runs-on: ubuntu-latest
+    container: swift:${{ matrix.swift }}-${{ matrix.os }}
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [noble]
+        swift: ["6.2", "6.3"]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: brightdigit/swift-build@v1
+        id: build
+        with:
+          working-directory: ${{ env.WORKING_DIR }}
+      - uses: sersoft-gmbh/swift-coverage-action@v5
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        id: coverage-files
+        with:
+          fail-on-empty-output: true
+          search-paths: ${{ env.WORKING_DIR }}/.build
+      - name: Upload coverage to Codecov
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: codecov/codecov-action@v6
+        with:
+          fail_ci_if_error: true
+          flags: mistdemo-swift-${{ matrix.swift }}-${{ matrix.os }}
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
+
+  build-macos:
+    name: Build on macOS
+    runs-on: macos-26
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build and Test
+        id: build
+        uses: brightdigit/swift-build@v1
+        with:
+          scheme: ${{ env.PACKAGE_NAME }}
+          xcode: "/Applications/Xcode_26.4.app"
+          working-directory: ${{ env.WORKING_DIR }}
+      - name: Process Coverage
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: sersoft-gmbh/swift-coverage-action@v5
+        with:
+          search-paths: ${{ env.WORKING_DIR }}/.build
+      - name: Upload Coverage
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: mistdemo-spm-macos
