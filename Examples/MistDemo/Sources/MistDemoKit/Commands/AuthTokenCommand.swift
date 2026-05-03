@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(Hummingbird)
 public import Foundation
 import HTTPTypes
 import Hummingbird
@@ -253,3 +254,4 @@ public enum AuthTokenError: Error, LocalizedError {
     }
   }
 }
+#endif

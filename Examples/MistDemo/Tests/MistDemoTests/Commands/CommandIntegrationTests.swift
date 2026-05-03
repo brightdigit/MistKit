@@ -53,31 +53,33 @@ struct CommandIntegrationTests {
 
   // MARK: - AuthTokenCommand Integration Tests
 
-  @Test("AuthTokenCommand configuration validation")
-  func authTokenCommandConfigValidation() async throws {
-    let config = AuthTokenConfig(
-      apiToken: "test-api-token-123",
-      port: 8_080,
-      host: "127.0.0.1",
-      noBrowser: true
-    )
+  #if canImport(Hummingbird)
+    @Test("AuthTokenCommand configuration validation")
+    func authTokenCommandConfigValidation() async throws {
+      let config = AuthTokenConfig(
+        apiToken: "test-api-token-123",
+        port: 8_080,
+        host: "127.0.0.1",
+        noBrowser: true
+      )
 
-    _ = AuthTokenCommand(config: config)
+      _ = AuthTokenCommand(config: config)
 
-    // Verify command is properly configured
-    #expect(AuthTokenCommand.commandName == "auth-token")
-    #expect(AuthTokenCommand.abstract.contains("authentication token"))
-  }
+      // Verify command is properly configured
+      #expect(AuthTokenCommand.commandName == "auth-token")
+      #expect(AuthTokenCommand.abstract.contains("authentication token"))
+    }
 
-  @Test("AuthTokenCommand resource path validation")
-  func authTokenCommandResourcePathValidation() async throws {
-    let config = AuthTokenConfig(apiToken: "test-token")
-    _ = AuthTokenCommand(config: config)
+    @Test("AuthTokenCommand resource path validation")
+    func authTokenCommandResourcePathValidation() async throws {
+      let config = AuthTokenConfig(apiToken: "test-token")
+      _ = AuthTokenCommand(config: config)
 
-    // Test that resource finding logic doesn't crash
-    // This tests the findResourcesPath method indirectly
-    #expect(AuthTokenCommand.commandName == "auth-token")
-  }
+      // Test that resource finding logic doesn't crash
+      // This tests the findResourcesPath method indirectly
+      #expect(AuthTokenCommand.commandName == "auth-token")
+    }
+  #endif
 
   // MARK: - CurrentUserCommand Integration Tests
 
@@ -293,11 +295,13 @@ struct CommandIntegrationTests {
   @Test("Simulate complete workflow")
   func simulateCompleteWorkflow() async throws {
     // 1. Auth token configuration
-    let authConfig = AuthTokenConfig(
-      apiToken: "mock-api-token-for-test",
-      noBrowser: true
-    )
-    _ = AuthTokenCommand(config: authConfig)
+    #if canImport(Hummingbird)
+      let authConfig = AuthTokenConfig(
+        apiToken: "mock-api-token-for-test",
+        noBrowser: true
+      )
+      _ = AuthTokenCommand(config: authConfig)
+    #endif
 
     // 2. Current user check
     let baseConfig = try await createTestConfig()
@@ -323,7 +327,9 @@ struct CommandIntegrationTests {
     _ = CreateCommand(config: createConfig)
 
     // Verify all commands are properly configured
-    #expect(AuthTokenCommand.commandName == "auth-token")
+    #if canImport(Hummingbird)
+      #expect(AuthTokenCommand.commandName == "auth-token")
+    #endif
     #expect(CurrentUserCommand.commandName == "current-user")
     #expect(QueryCommand.commandName == "query")
     #expect(CreateCommand.commandName == "create")

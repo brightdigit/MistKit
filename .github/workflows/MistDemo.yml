@@ -31,6 +31,7 @@ jobs:
       full-matrix: ${{ steps.check.outputs.full }}
       ubuntu-os: ${{ steps.matrix.outputs.ubuntu-os }}
       ubuntu-swift: ${{ steps.matrix.outputs.ubuntu-swift }}
+      ubuntu-type: ${{ steps.matrix.outputs.ubuntu-type }}
     steps:
       - id: check
         name: Determine matrix scope
@@ -64,9 +65,11 @@ jobs:
           if [[ "${{ steps.check.outputs.full }}" == "true" ]]; then
             echo 'ubuntu-os=["noble","jammy"]' >> "$GITHUB_OUTPUT"
             echo 'ubuntu-swift=["6.2","6.3"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-type=["","wasm","wasm-embedded"]' >> "$GITHUB_OUTPUT"
           else
             echo 'ubuntu-os=["noble"]' >> "$GITHUB_OUTPUT"
             echo 'ubuntu-swift=["6.3"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-type=[""]' >> "$GITHUB_OUTPUT"
           fi
 
   build-ubuntu:
@@ -80,11 +83,19 @@ jobs:
       matrix:
         os: ${{ fromJSON(needs.configure.outputs.ubuntu-os) }}
         swift: ${{ fromJSON(needs.configure.outputs.ubuntu-swift) }}
+        type: ${{ fromJSON(needs.configure.outputs.ubuntu-type) }}
     steps:
       - uses: actions/checkout@v6
       - uses: brightdigit/swift-build@v1
         id: build
         with:
+          type: ${{ matrix.type }}
+          wasmtime-version: "40.0.2"
+          wasm-swift-flags: >-
+            -Xcc -D_WASI_EMULATED_SIGNAL
+            -Xcc -D_WASI_EMULATED_MMAN
+            -Xlinker -lwasi-emulated-signal
+            -Xlinker -lwasi-emulated-mman
           working-directory: ${{ env.WORKING_DIR }}
       - name: Install curl (required by Codecov uploader)
         if: steps.build.outputs.contains-code-coverage == 'true'
@@ -107,6 +118,78 @@ jobs:
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
+
+  build-windows:
+    name: Build on Windows
+    needs: configure
+    runs-on: ${{ matrix.runs-on }}
+    if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [windows-2022, windows-2025]
+        # MistDemo's Package.swift declares swift-tools-version: 6.2,
+        # so Swift 6.1 is not supported.
+        swift:
+          - version: swift-6.2-release
+            build: 6.2-RELEASE
+          - version: swift-6.3-release
+            build: 6.3-RELEASE
+    steps:
+      - uses: actions/checkout@v6
+      - uses: brightdigit/swift-build@v1
+        id: build
+        with:
+          windows-swift-version: ${{ matrix.swift.version }}
+          windows-swift-build: ${{ matrix.swift.build }}
+          working-directory: ${{ env.WORKING_DIR }}
+      - name: Upload coverage to Codecov
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: codecov/codecov-action@v6
+        with:
+          fail_ci_if_error: true
+          flags: mistdemo-swift-${{ matrix.swift.version }},windows
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          os: windows
+          swift_project: MistDemo
+
+  build-android:
+    name: Build on Android
+    needs: configure
+    runs-on: ubuntu-latest
+    if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # MistDemo's Package.swift declares swift-tools-version: 6.2,
+        # so Swift 6.1 is not supported.
+        swift:
+          - version: "6.2"
+          - version: "6.3"
+        android-api-level: [33, 34]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+      - uses: brightdigit/swift-build@v1
+        with:
+          scheme: ${{ env.PACKAGE_NAME }}
+          type: android
+          android-swift-version: ${{ matrix.swift.version }}
+          android-api-level: ${{ matrix.android-api-level }}
+          android-run-tests: true
+          working-directory: ${{ env.WORKING_DIR }}
+      # Note: Code coverage is not supported on Android builds
+      # The Swift Android SDK does not include LLVM coverage tools (llvm-profdata, llvm-cov)
 
   # Minimal macOS builds — always runs (SPM + iOS)
   build-macos:
@@ -214,7 +297,7 @@ jobs:
     name: Linting
     runs-on: ubuntu-latest
     if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
-    needs: [build-ubuntu, build-macos, build-macos-platforms]
+    needs: [build-ubuntu, build-macos, build-macos-platforms, build-windows, build-android]
     steps:
       - uses: actions/checkout@v6
       - uses: jdx/mise-action@v4

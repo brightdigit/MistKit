@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(CloudKit)
+#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import Foundation
 
   enum NativeCloudKitError: Error, LocalizedError {

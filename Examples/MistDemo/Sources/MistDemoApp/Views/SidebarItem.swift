@@ -27,24 +27,26 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-enum SidebarItem: Hashable, CaseIterable {
-  case account
-  case zones
-  case query
+#if !os(tvOS) && !os(watchOS)
+  enum SidebarItem: Hashable, CaseIterable {
+    case account
+    case zones
+    case query
 
-  var label: String {
-    switch self {
-    case .account: return "iCloud Account"
-    case .zones: return "Zones"
-    case .query: return "Query Records"
+    var label: String {
+      switch self {
+      case .account: return "iCloud Account"
+      case .zones: return "Zones"
+      case .query: return "Query Records"
+      }
+    }
+
+    var systemImage: String {
+      switch self {
+      case .account: return "person.crop.circle"
+      case .zones: return "tray.full"
+      case .query: return "magnifyingglass"
+      }
     }
   }
-
-  var systemImage: String {
-    switch self {
-    case .account: return "person.crop.circle"
-    case .zones: return "tray.full"
-    case .query: return "magnifyingglass"
-    }
-  }
-}
+#endif

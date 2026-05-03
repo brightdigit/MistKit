@@ -39,7 +39,9 @@ public enum MistDemoRunner {
     let registry = CommandRegistry.shared
 
     // Register available commands
-    await registry.register(AuthTokenCommand.self)
+    #if canImport(Hummingbird)
+      await registry.register(AuthTokenCommand.self)
+    #endif
     await registry.register(CurrentUserCommand.self)
     await registry.register(QueryCommand.self)
     await registry.register(CreateCommand.self)

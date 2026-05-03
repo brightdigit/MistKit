@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(Hummingbird)
 import Foundation
 import HTTPTypes
 import Hummingbird
@@ -246,3 +247,4 @@ struct AuthTokenCommandTests {
 
 // Tests for AuthTokenCommand HTTP functionality would require more complex mocking
 // These tests focus on the configuration and error handling aspects
+#endif

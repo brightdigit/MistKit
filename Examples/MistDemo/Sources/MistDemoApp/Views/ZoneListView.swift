@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI) && canImport(CloudKit)
+#if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import SwiftUI
 
   struct ZoneListView: View {
