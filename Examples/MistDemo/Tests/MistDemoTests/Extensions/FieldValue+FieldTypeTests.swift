@@ -119,7 +119,13 @@ struct FieldValueFieldTypeTests {
     }
   }
 
-  @Test("Initialize FieldValue.int64 from Int64.max")
+  @Test(
+    "Initialize FieldValue.int64 from Int64.max",
+    .enabled(
+      if: Int.bitWidth >= 64,
+      "FieldValue.int64 stores Int; Int64.max overflows native Int on 32-bit platforms (wasm32)"
+    )
+  )
   func initializeInt64FromMaxValue() {
     let fieldValue = FieldValue(value: Int64.max, fieldType: .int64)
 
