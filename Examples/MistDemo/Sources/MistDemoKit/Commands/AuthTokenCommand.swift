@@ -137,16 +137,19 @@ public struct AuthTokenCommand: MistDemoCommand {
     let router = Router(context: BasicRequestContext.self)
     router.middlewares.add(LogRequestsMiddleware(.info))
 
-    // Find and serve static resources (index.html)
-    let resourcesPath = try findResourcesPath()
-    print("📁 Serving static files from: \(resourcesPath)")
-
-    router.middlewares.add(
-      FileMiddleware(
-        resourcesPath,
-        searchForIndexHtml: true
+    let indexBytes = ByteBuffer(string: AuthTokenIndexHTML.content)
+    let indexResponseBuilder: @Sendable () -> Response = {
+      Response(
+        status: .ok,
+        headers: [.contentType: "text/html; charset=utf-8"],
+        body: ResponseBody { writer in
+          try await writer.write(indexBytes)
+          try await writer.finish(nil)
+        }
       )
-    )
+    }
+    router.get("/") { _, _ -> Response in indexResponseBuilder() }
+    router.get("/index.html") { _, _ -> Response in indexResponseBuilder() }
 
     // API endpoint for authentication callback
     let api = router.group("api")
@@ -205,17 +208,6 @@ public struct AuthTokenCommand: MistDemoCommand {
     }
 
     return router
-  }
-
-  /// Find the resources directory containing index.html
-  private func findResourcesPath() throws -> String {
-    guard
-      let resourceURL = Bundle.module.url(
-        forResource: "index", withExtension: "html", subdirectory: "Resources")
-    else {
-      throw AuthTokenError.missingResource("index.html not found in any expected location")
-    }
-    return resourceURL.deletingLastPathComponent().path
   }
 
   // Exact-match host validation against an allowlist after stripping any port.

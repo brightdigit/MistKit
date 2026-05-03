@@ -125,9 +125,6 @@ let package = Package(
                 .product(name: "Configuration", package: "swift-configuration"),
                 .product(name: "UnixSignals", package: "swift-service-lifecycle")
             ],
-            resources: [
-                .copy("Resources")
-            ],
             swiftSettings: swiftSettings
         ),
         .executableTarget(

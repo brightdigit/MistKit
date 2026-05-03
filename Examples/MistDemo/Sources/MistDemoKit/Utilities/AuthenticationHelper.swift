@@ -181,17 +181,30 @@ enum AuthenticationHelper {
     return manager
   }
 
+  /// A function that maps an environment-variable name to its value.
+  /// Tests inject a fake reader instead of mutating process-global state.
+  typealias EnvironmentReader = @Sendable (String) -> String?
+
+  /// Default reader backed by `ProcessInfo` via `EnvironmentConfig`.
+  static let processEnvironmentReader: EnvironmentReader = { EnvironmentConfig.getOptional($0) }
+
   /// Resolves API token from option or environment variable
-  static func resolveAPIToken(_ apiToken: String) -> String {
+  static func resolveAPIToken(
+    _ apiToken: String,
+    environment: EnvironmentReader = processEnvironmentReader
+  ) -> String {
     apiToken.isEmpty
-      ? EnvironmentConfig.getOptional(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" : apiToken
+      ? environment(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" : apiToken
   }
 
   /// Resolves web auth token from option or environment variable
-  static func resolveWebAuthToken(_ webAuthToken: String) -> String? {
+  static func resolveWebAuthToken(
+    _ webAuthToken: String,
+    environment: EnvironmentReader = processEnvironmentReader
+  ) -> String? {
     let token =
       webAuthToken.isEmpty
-      ? EnvironmentConfig.getOptional(MistDemoConstants.EnvironmentVars.cloudKitWebAuthToken) ?? ""
+      ? environment(MistDemoConstants.EnvironmentVars.cloudKitWebAuthToken) ?? ""
       : webAuthToken
     return token.isEmpty ? nil : token
   }

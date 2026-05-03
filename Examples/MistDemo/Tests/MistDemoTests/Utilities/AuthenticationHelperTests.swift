@@ -299,44 +299,42 @@ struct AuthenticationHelperTests {
 
   // MARK: - Token Resolution Tests
 
-  @Test("resolveAPIToken returns provided token when not empty")
+  @Test("resolveAPIToken returns provided token when not empty", .mockEnvironment([:]))
   func resolveAPITokenReturnsProvidedToken() {
     let token = "my-api-token"
-    let resolved = AuthenticationHelper.resolveAPIToken(token)
+    let resolved = AuthenticationHelper.resolveAPIToken(token, environment: MockEnvironment.reader)
     #expect(resolved == token)
   }
 
-  @Test("resolveAPIToken checks environment when empty")
+  @Test(
+    "resolveAPIToken checks environment when empty",
+    .mockEnvironment(["CLOUDKIT_API_TOKEN": "env-api-token"])
+  )
   func resolveAPITokenChecksEnvironment() {
-    let resolved = AuthenticationHelper.resolveAPIToken("")
-    // Should return environment value or empty string (it's a String, not optional)
-    // This test just verifies the function executes without error
-    _ = resolved
+    let resolved = AuthenticationHelper.resolveAPIToken("", environment: MockEnvironment.reader)
+    #expect(resolved == "env-api-token")
   }
 
-  @Test("resolveWebAuthToken returns provided token when not empty")
+  @Test("resolveWebAuthToken returns provided token when not empty", .mockEnvironment([:]))
   func resolveWebAuthTokenReturnsProvidedToken() {
     let token = "my-web-auth-token"
-    let resolved = AuthenticationHelper.resolveWebAuthToken(token)
+    let resolved = AuthenticationHelper.resolveWebAuthToken(
+      token, environment: MockEnvironment.reader)
     #expect(resolved == token)
   }
 
-  @Test("resolveWebAuthToken returns nil for empty string")
+  @Test("resolveWebAuthToken returns nil for empty string", .mockEnvironment([:]))
   func resolveWebAuthTokenReturnsNilForEmpty() {
-    let resolved = AuthenticationHelper.resolveWebAuthToken("")
-    // Should return nil if environment variable not set
-    if ProcessInfo.processInfo.environment["CLOUDKIT_WEB_AUTH_TOKEN"] == nil {
-      #expect(resolved == nil)
-    }
+    let resolved = AuthenticationHelper.resolveWebAuthToken("", environment: MockEnvironment.reader)
+    #expect(resolved == nil)
   }
 
-  @Test("resolveWebAuthToken checks environment variable")
+  @Test(
+    "resolveWebAuthToken checks environment variable",
+    .mockEnvironment(["CLOUDKIT_WEB_AUTH_TOKEN": "env-token"])
+  )
   func resolveWebAuthTokenChecksEnvironment() {
-    // Set environment variable temporarily
-    setenv("CLOUDKIT_WEB_AUTH_TOKEN", "env-token", 1)
-    defer { unsetenv("CLOUDKIT_WEB_AUTH_TOKEN") }
-
-    let resolved = AuthenticationHelper.resolveWebAuthToken("")
+    let resolved = AuthenticationHelper.resolveWebAuthToken("", environment: MockEnvironment.reader)
     #expect(resolved == "env-token")
   }
 

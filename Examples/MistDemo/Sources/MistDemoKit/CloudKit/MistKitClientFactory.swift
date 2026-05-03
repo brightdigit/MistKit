@@ -43,24 +43,30 @@ public struct MistKitClientFactory: Sendable {
   public static func create(_ database: MistKit.Database, from config: MistDemoConfig) throws
     -> CloudKitService
   {
-    let tokenManager: any TokenManager
-    switch database {
-    case .public:
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        throw ConfigurationError.unsupportedPlatform(
-          "Public database access requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
-        )
+    #if os(WASI)
+      throw ConfigurationError.unsupportedPlatform(
+        "MistDemo CLI requires URLSession; WASI builds must inject a transport explicitly"
+      )
+    #else
+      let tokenManager: any TokenManager
+      switch database {
+      case .public:
+        guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+          throw ConfigurationError.unsupportedPlatform(
+            "Public database access requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
+          )
+        }
+        tokenManager = try ServerToServerAuthManager(from: config)
+      case .private, .shared:
+        tokenManager = try WebAuthTokenManager(from: config)
       }
-      tokenManager = try ServerToServerAuthManager(from: config)
-    case .private, .shared:
-      tokenManager = try WebAuthTokenManager(from: config)
-    }
-    return try CloudKitService(
-      containerIdentifier: config.containerIdentifier,
-      tokenManager: tokenManager,
-      environment: config.environment,
-      database: database
-    )
+      return try CloudKitService(
+        containerIdentifier: config.containerIdentifier,
+        tokenManager: tokenManager,
+        environment: config.environment,
+        database: database
+      )
+    #endif
   }
 
   public static func create(
@@ -68,12 +74,18 @@ public struct MistKitClientFactory: Sendable {
     tokenManager: any TokenManager,
     database: MistKit.Database = .private
   ) throws -> CloudKitService {
-    try CloudKitService(
-      containerIdentifier: config.containerIdentifier,
-      tokenManager: tokenManager,
-      environment: config.environment,
-      database: database
-    )
+    #if os(WASI)
+      throw ConfigurationError.unsupportedPlatform(
+        "MistDemo CLI requires URLSession; WASI builds must inject a transport explicitly"
+      )
+    #else
+      return try CloudKitService(
+        containerIdentifier: config.containerIdentifier,
+        tokenManager: tokenManager,
+        environment: config.environment,
+        database: database
+      )
+    #endif
   }
 }
 
