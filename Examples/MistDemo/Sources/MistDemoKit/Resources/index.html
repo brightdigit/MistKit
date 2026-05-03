@@ -15,7 +15,6 @@
             background-color: #f5f5f7;
         }
         .container {
-            {# text-align: center; #}
             background: white;
             padding: 40px;
             border-radius: 12px;
@@ -135,10 +134,7 @@
         <div id="status"></div>
 
         <!--
-            Manual fallback: shown when automatic token capture times out.
-            Cross-origin iframes (icloud.com / apple-cloudkit.com) prevent the
-            parent window from observing CloudKit's auth network calls or its
-            cookies, so the network/postMessage interception below is best-effort.
+            Manual fallback: shown when polling container._auth._ckSession times out.
             This form lets the user copy the token from devtools and paste it in.
         -->
         <div id="manual-token-form" style="display: none; margin-top: 16px; padding: 12px; border: 1px solid #d0d7de; border-radius: 6px; background: #f6f8fa;">
@@ -162,87 +158,6 @@
             return response.json();
         }
 
-        // Validate a URL by parsing it and confirming the hostname is on apple-cloudkit.com.
-        // Substring checks (.includes) are unsafe because attacker-controlled URLs like
-        // http://evil.com/?q=apple-cloudkit.com would otherwise match.
-        function isCloudKitUrl(url) {
-            if (!url) return false;
-            try {
-                // Resolve relative URLs against the current origin so URL() doesn't throw.
-                const parsed = new URL(url, window.location.href);
-                const host = parsed.hostname;
-                return host === 'apple-cloudkit.com' || host.endsWith('.apple-cloudkit.com');
-            } catch {
-                return false;
-            }
-        }
-
-        // Intercept fetch/XHR to capture web auth tokens from CloudKit API responses
-        (function setupNetworkInterception() {
-            // Intercept fetch
-            const originalFetch = window.fetch;
-            window.fetch = function(...args) {
-                const url = args[0];
-                console.log('Fetch request to:', url);
-
-                return originalFetch.apply(this, args).then(async response => {
-                    // Check if this is a CloudKit API response
-                    if (isCloudKitUrl(url)) {
-                        const clonedResponse = response.clone();
-                        try {
-                            const data = await clonedResponse.json();
-                            console.log('CloudKit API response:', data);
-
-                            // Check for token in response
-                            if (data && data.ckWebAuthToken) {
-                                console.log('✅ Token captured from fetch response!');
-                                webAuthToken = data.ckWebAuthToken;
-                                window.cloudKitWebAuthToken = data.ckWebAuthToken;
-                                if (tokenPromiseResolve) {
-                                    tokenPromiseResolve(data.ckWebAuthToken);
-                                }
-                            }
-                        } catch (e) {
-                            // Not JSON or parsing error - ignore
-                        }
-                    }
-                    return response;
-                });
-            };
-
-            // Intercept XMLHttpRequest
-            const originalOpen = XMLHttpRequest.prototype.open;
-            const originalSend = XMLHttpRequest.prototype.send;
-
-            XMLHttpRequest.prototype.open = function(method, url, ...rest) {
-                this._url = url;
-                return originalOpen.apply(this, [method, url, ...rest]);
-            };
-
-            XMLHttpRequest.prototype.send = function(...args) {
-                this.addEventListener('load', function() {
-                    if (isCloudKitUrl(this._url)) {
-                        try {
-                            const data = JSON.parse(this.responseText);
-                            if (data && data.ckWebAuthToken) {
-                                console.log('✅ Token captured from XHR response!');
-                                webAuthToken = data.ckWebAuthToken;
-                                window.cloudKitWebAuthToken = data.ckWebAuthToken;
-                                if (tokenPromiseResolve) {
-                                    tokenPromiseResolve(data.ckWebAuthToken);
-                                }
-                            }
-                        } catch (e) {
-                            // Not JSON - ignore
-                        }
-                    }
-                });
-                return originalSend.apply(this, args);
-            };
-
-            console.log('Network interception enabled');
-        })();
-
         let container = null;
         const statusDiv = document.getElementById('status');
         const userInfoDiv = document.getElementById('user-info');
@@ -259,71 +174,6 @@
         // Track if authentication is already in progress
         let authenticationInProgress = false;
 
-        // Listen for web auth token from CloudKit
-        window.addEventListener('message', function(event) {
-            console.log('=== postMessage Received ===');
-            console.log('Origin:', event.origin);
-            console.log('Data type:', typeof event.data);
-            console.log('Data:', event.data);
-
-            // CloudKit auth typically comes from icloud.com
-            const validOrigins = [
-                'https://www.icloud.com',
-                'https://setup.icloud.com',
-                'https://api.apple-cloudkit.com',
-                window.location.origin  // Allow same-origin messages
-            ];
-
-            if (!validOrigins.includes(event.origin)) {
-                console.log('Ignoring message from unknown origin:', event.origin);
-                return;
-            }
-
-            let token = null;
-
-            // Strategy 1: Plain string token (format: 158__54__...)
-            if (typeof event.data === 'string' && event.data.match(/^158__\d+__/)) {
-                token = event.data;
-                console.log('Token format: plain string');
-            }
-            // Strategy 2: Object with ckWebAuthToken property (official format)
-            else if (event.data && typeof event.data === 'object') {
-                token = event.data.ckWebAuthToken ||
-                        event.data.ckSession ||
-                        event.data.webAuthToken ||
-                        event.data.token;
-                console.log('Token format: object property');
-            }
-
-            if (token) {
-                console.log('✅ Web Auth Token captured!');
-                console.log('Token preview:', token.substring(0, 30) + '...');
-                webAuthToken = token;
-                window.cloudKitWebAuthToken = token;  // Store globally
-
-                if (tokenPromiseResolve) {
-                    tokenPromiseResolve(token);
-                    tokenPromiseResolve = null;
-                    tokenPromiseReject = null;
-                }
-
-                // Debug the condition check
-                console.log('PostMessage check - currentUserIdentity:', currentUserIdentity);
-                console.log('PostMessage check - authenticationInProgress:', authenticationInProgress);
-
-                // If we have user identity and token, and auth not already in progress
-                if (currentUserIdentity && webAuthToken && !authenticationInProgress) {
-                    console.log('All conditions met, starting authentication...');
-                    authenticationInProgress = true;
-                    handleAuthenticationWithToken(currentUserIdentity, webAuthToken);
-                } else {
-                    console.log('Conditions not met, waiting...');
-                }
-            } else {
-                console.log('No token found in postMessage data');
-            }
-        });
-
         function showStatus(message, isError = false) {
             statusDiv.className = 'status ' + (isError ? 'error' : 'success');
             statusDiv.textContent = message;
@@ -332,7 +182,6 @@
 
         function showLoading(show) {
             loadingDiv.style.display = show ? 'block' : 'none';
-            //signinButton.disabled = show;
         }
 
         async function handleAuthentication(userIdentity) {
@@ -345,25 +194,12 @@
             showStatus('Signed in successfully! Waiting for web auth token...', false);
             updateSignInState(true);
 
-            // Check if we already have a token from postMessage
-            if (webAuthToken && !authenticationInProgress) {
-                console.log('Token already available, sending to server...');
-                authenticationInProgress = true;
-                await handleAuthenticationWithToken(userIdentity, webAuthToken);
-                return;
-            }
-
-            // Race three sources for the web auth token:
-            //   1. postMessage from CloudKit's auth iframe (set up in the listener above)
-            //   2. fetch/XHR override — usually defeated by cross-origin sandboxing
-            //   3. Polling container._auth._ckSession — populated by CloudKit JS itself,
-            //      and the most reliable mechanism in practice.
+            // Poll container._auth._ckSession — populated by CloudKit JS itself.
             const tokenPromise = new Promise((resolve, reject) => {
                 tokenPromiseResolve = resolve;
                 tokenPromiseReject = reject;
 
-                // Poll the CloudKit JS auth object for its session token; this works
-                // even when the iframe blocks every other capture path.
+                // Poll the CloudKit JS auth object for its session token.
                 const pollIntervalMs = 250;
                 const pollDeadlineMs = 10_000;
                 const pollStart = Date.now();
@@ -661,7 +497,6 @@
                     showStatus('Signed out successfully.');
                     userInfoDiv.innerHTML = '';
                     signoutButton.style.display = 'none';
-                    //signinButton.textContent = 'Sign In with Apple ID';
                 });
 
             } catch (error) {
