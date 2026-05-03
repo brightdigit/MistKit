@@ -1,8 +1,8 @@
 name: BushelCloud
 on:
   push:
-    branches-ignore:
-      - '*WIP'
+    branches:
+      - main
     paths-ignore:
       - '**.md'
       - 'docs/**'

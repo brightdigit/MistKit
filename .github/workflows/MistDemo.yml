@@ -1,8 +1,8 @@
 name: MistDemo
 on:
   push:
-    branches-ignore:
-      - '*WIP'
+    branches:
+      - main
     paths:
       - 'Examples/MistDemo/**'
       - 'Sources/MistKit/**'
