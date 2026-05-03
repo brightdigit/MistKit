@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(SwiftUI) && canImport(CloudKit)
 import SwiftUI
 
 struct QueryView: View {
@@ -141,3 +142,4 @@ struct QueryView: View {
         }
     }
 }
+#endif

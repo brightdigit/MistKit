@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(SwiftUI) && canImport(CloudKit)
 import CloudKit
 import SwiftUI
 
@@ -227,3 +228,4 @@ struct AccountView: View {
         #endif
     }
 }
+#endif

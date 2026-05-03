@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(SwiftUI) && canImport(CloudKit)
 public import SwiftUI
 
 public struct RootView: View {
@@ -52,3 +53,4 @@ public struct RootView: View {
         }
     }
 }
+#endif

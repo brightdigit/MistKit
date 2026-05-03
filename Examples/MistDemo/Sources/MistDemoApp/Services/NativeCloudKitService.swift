@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(CloudKit)
 public import Combine
 import CloudKit
 import Foundation
@@ -179,3 +180,4 @@ public final class NativeCloudKitService: ObservableObject {
         record[Note.Fields.modified] = NSNumber(value: Int64(Date().timeIntervalSince1970 * 1000))
     }
 }
+#endif

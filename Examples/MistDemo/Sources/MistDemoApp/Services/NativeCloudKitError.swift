@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(CloudKit)
 import Foundation
 
 enum NativeCloudKitError: Error, LocalizedError {
@@ -42,3 +43,4 @@ enum NativeCloudKitError: Error, LocalizedError {
         }
     }
 }
+#endif

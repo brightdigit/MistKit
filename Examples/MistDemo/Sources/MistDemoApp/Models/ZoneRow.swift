@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(CloudKit)
 import CloudKit
 import Foundation
 
@@ -42,3 +43,4 @@ struct ZoneRow: Identifiable, Hashable {
         self.ownerName = zone.zoneID.ownerName
     }
 }
+#endif

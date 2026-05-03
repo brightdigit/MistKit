@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(SwiftUI) && canImport(CloudKit)
 import SwiftUI
 
 struct DetailColumnRoot: View {
@@ -49,3 +50,4 @@ struct DetailColumnRoot: View {
         }
     }
 }
+#endif

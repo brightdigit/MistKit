@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(CloudKit)
 import CloudKit
 import Foundation
 
@@ -81,3 +82,4 @@ struct Note: Identifiable, Hashable {
     static func == (lhs: Note, rhs: Note) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
+#endif

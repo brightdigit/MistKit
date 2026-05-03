@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(SwiftUI) && canImport(CloudKit)
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -191,3 +192,4 @@ struct NoteEditView: View {
         }
     }
 }
+#endif
