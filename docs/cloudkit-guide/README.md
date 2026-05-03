@@ -123,6 +123,53 @@ Consider alternatives when:
 
 ---
 
+###### Database Scopes (Public vs Private vs Shared)
+
+All three databases use the same URL structure — swap the `{database}` path segment:
+
+```
+/database/1/{container}/{environment}/{public|private|shared}/{operation}
+```
+
+**Authentication per database**:
+
+| | Public | Private | Shared |
+|---|---|---|---|
+| **Server-to-Server Key** | Yes | No | No |
+| **API Token (no user auth)** | Read only | No | No |
+| **API Token + Web Auth Token** | Full access | Full access | Full access |
+
+**Operations availability**:
+
+| Operation | Public | Private | Shared |
+|---|---|---|---|
+| Query records | Yes | Yes | Yes |
+| Lookup records | Yes | Yes | Yes |
+| Modify records | Yes (requires auth) | Yes | Yes (if write permission) |
+| Fetch record changes | No | Yes (custom zones only) | Yes |
+| Custom zones | Not supported | Yes | Yes (owned by sharing user) |
+| Create/modify zones | No | Yes | No |
+| Zone changes | No | Yes | Yes |
+| Zone-based subscriptions | No | Yes | Yes |
+| Query-based subscriptions | Yes | Yes | No |
+| Asset upload | Yes (requires auth) | Yes | Yes (if write access) |
+
+**Storage & access model**:
+
+| | Public | Private | Shared |
+|---|---|---|---|
+| **Storage** | App's iCloud allotment | User's iCloud account | Sharing owner's account |
+| **Access model** | Security roles (world, authenticated, creator) | Owner only | Share participants |
+| **Read without auth** | Yes (if role = world) | No | No |
+
+**Implications for server-to-server (MistKit backend services)**:
+- Server-to-server keys are limited to **public database only**
+- No change tracking — must poll with queries
+- No custom zones — no atomic batch operations
+- Security roles control read/write access
+
+---
+
 ###### Data Types
 
 **The problem**: CloudKit fields are runtime-dynamic JSON. Swift is statically typed. Mismatch.
