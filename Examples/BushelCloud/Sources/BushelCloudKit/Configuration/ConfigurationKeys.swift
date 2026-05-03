@@ -108,7 +108,8 @@ internal enum ConfigurationKeys {
     internal static let force = ConfigKey<Bool>(bushelPrefixed: "sync.force")
     internal static let minInterval = OptionalConfigKey<Int>(bushelPrefixed: "sync.min_interval")
     internal static let source = OptionalConfigKey<String>(bushelPrefixed: "sync.source")
-    internal static let jsonOutputFile = OptionalConfigKey<String>(bushelPrefixed: "sync.json_output_file")
+    internal static let jsonOutputFile = OptionalConfigKey<String>(
+      bushelPrefixed: "sync.json_output_file")
   }
 
   // MARK: - Export Command Configuration

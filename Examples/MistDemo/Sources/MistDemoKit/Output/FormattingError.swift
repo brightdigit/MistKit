@@ -41,9 +41,9 @@ enum FormattingError: LocalizedError, Sendable {
     switch self {
     case .encodingFailed:
       "Failed to encode data to UTF-8 string"
-    case let .invalidStructure(message):
+    case .invalidStructure(let message):
       "Invalid data structure: \(message)"
-    case let .unsupportedFormat(format):
+    case .unsupportedFormat(let format):
       "\(format.rawValue) format is not yet implemented. Use 'json' format instead."
     }
   }

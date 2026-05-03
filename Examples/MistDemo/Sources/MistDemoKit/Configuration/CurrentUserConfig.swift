@@ -27,47 +27,49 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import ConfigKeyKit
 import Foundation
 public import MistKit
-public import ConfigKeyKit
 
 /// Configuration for current-user command
 public struct CurrentUserConfig: Sendable, ConfigurationParseable {
-    public typealias ConfigReader = MistDemoConfiguration
-    public typealias BaseConfig = MistDemoConfig
+  public typealias ConfigReader = MistDemoConfiguration
+  public typealias BaseConfig = MistDemoConfig
 
-    public let base: MistDemoConfig
-    public let fields: [String]?
-    public let output: OutputFormat
+  public let base: MistDemoConfig
+  public let fields: [String]?
+  public let output: OutputFormat
 
-    public init(base: MistDemoConfig, fields: [String]? = nil, output: OutputFormat = .json) {
-        self.base = base
-        self.fields = fields
-        self.output = output
+  public init(base: MistDemoConfig, fields: [String]? = nil, output: OutputFormat = .json) {
+    self.base = base
+    self.fields = fields
+    self.output = output
+  }
+
+  /// Parse configuration from command line arguments
+  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+    let configReader = configuration
+    let baseConfig: MistDemoConfig
+    if let base = base {
+      baseConfig = base
+    } else {
+      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
     }
 
-    /// Parse configuration from command line arguments
-    public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
-        let configReader = configuration
-        let baseConfig: MistDemoConfig
-        if let base = base {
-            baseConfig = base
-        } else {
-            baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
-        }
-        
-        // Parse fields filter
-        let fieldsString = configReader.string(forKey: "fields")
-        let fields = fieldsString?.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-        
-        // Parse output format
-        let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
-        let output = OutputFormat(rawValue: outputString) ?? .json
-        
-        self.init(
-            base: baseConfig,
-            fields: fields,
-            output: output
-        )
+    // Parse fields filter
+    let fieldsString = configReader.string(forKey: "fields")
+    let fields = fieldsString?.split(separator: ",").map {
+      String($0).trimmingCharacters(in: .whitespaces)
     }
+
+    // Parse output format
+    let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
+    let output = OutputFormat(rawValue: outputString) ?? .json
+
+    self.init(
+      base: baseConfig,
+      fields: fields,
+      output: output
+    )
+  }
 }

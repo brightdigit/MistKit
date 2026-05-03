@@ -31,57 +31,56 @@ import Foundation
 
 /// Type-safe representation of field input from JSON
 public struct FieldsInput: Codable, Sendable {
-    private let storage: [String: FieldInputValue]
-    
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: DynamicKey.self)
-        var fields: [String: FieldInputValue] = [:]
-        
-        for key in container.allKeys {
-            if let stringValue = try? container.decode(String.self, forKey: key) {
-                fields[key.stringValue] = .string(stringValue)
-            } else if let intValue = try? container.decode(Int.self, forKey: key) {
-                fields[key.stringValue] = .int(intValue)
-            } else if let doubleValue = try? container.decode(Double.self, forKey: key) {
-                fields[key.stringValue] = .double(doubleValue)
-            } else if let boolValue = try? container.decode(Bool.self, forKey: key) {
-                fields[key.stringValue] = .bool(boolValue)
-            } else {
-                // Try to decode as a generic JSON value and convert to string
-                let jsonValue = try container.decode(AnyCodable.self, forKey: key)
-                fields[key.stringValue] = .string(String(describing: jsonValue.value))
-            }
-        }
-        
-        self.storage = fields
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: DynamicKey.self)
-        
-        for (key, value) in storage {
-            let dynamicKey = DynamicKey(stringValue: key)!
-            switch value {
-            case .string(let stringValue):
-                try container.encode(stringValue, forKey: dynamicKey)
-            case .int(let intValue):
-                try container.encode(intValue, forKey: dynamicKey)
-            case .double(let doubleValue):
-                try container.encode(doubleValue, forKey: dynamicKey)
-            case .bool(let boolValue):
-                try container.encode(boolValue, forKey: dynamicKey)
-            case .asset(let url):
-                try container.encode(url, forKey: dynamicKey)
-            }
-        }
-    }
-    
-    /// Convert to Field array for CloudKit processing
-    public func toFields() throws -> [Field] {
-        return try storage.map { (name, value) in
-            let (fieldType, stringValue) = try value.toFieldComponents()
-            return Field(name: name, type: fieldType, value: stringValue)
-        }
-    }
-}
+  private let storage: [String: FieldInputValue]
 
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: DynamicKey.self)
+    var fields: [String: FieldInputValue] = [:]
+
+    for key in container.allKeys {
+      if let stringValue = try? container.decode(String.self, forKey: key) {
+        fields[key.stringValue] = .string(stringValue)
+      } else if let intValue = try? container.decode(Int.self, forKey: key) {
+        fields[key.stringValue] = .int(intValue)
+      } else if let doubleValue = try? container.decode(Double.self, forKey: key) {
+        fields[key.stringValue] = .double(doubleValue)
+      } else if let boolValue = try? container.decode(Bool.self, forKey: key) {
+        fields[key.stringValue] = .bool(boolValue)
+      } else {
+        // Try to decode as a generic JSON value and convert to string
+        let jsonValue = try container.decode(AnyCodable.self, forKey: key)
+        fields[key.stringValue] = .string(String(describing: jsonValue.value))
+      }
+    }
+
+    self.storage = fields
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: DynamicKey.self)
+
+    for (key, value) in storage {
+      let dynamicKey = DynamicKey(stringValue: key)!
+      switch value {
+      case .string(let stringValue):
+        try container.encode(stringValue, forKey: dynamicKey)
+      case .int(let intValue):
+        try container.encode(intValue, forKey: dynamicKey)
+      case .double(let doubleValue):
+        try container.encode(doubleValue, forKey: dynamicKey)
+      case .bool(let boolValue):
+        try container.encode(boolValue, forKey: dynamicKey)
+      case .asset(let url):
+        try container.encode(url, forKey: dynamicKey)
+      }
+    }
+  }
+
+  /// Convert to Field array for CloudKit processing
+  public func toFields() throws -> [Field] {
+    try storage.map { name, value in
+      let (fieldType, stringValue) = try value.toFieldComponents()
+      return Field(name: name, type: fieldType, value: stringValue)
+    }
+  }
+}

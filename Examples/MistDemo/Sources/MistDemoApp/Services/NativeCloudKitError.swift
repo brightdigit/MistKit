@@ -1,6 +1,6 @@
 //
 //  NativeCloudKitError.swift
-//  MistDemoApp
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,19 +28,19 @@
 //
 
 #if canImport(CloudKit)
-import Foundation
+  import Foundation
 
-enum NativeCloudKitError: Error, LocalizedError {
+  enum NativeCloudKitError: Error, LocalizedError {
     case unexpectedSaveResult
     case webAuthTokenUnavailable
 
     var errorDescription: String? {
-        switch self {
-        case .unexpectedSaveResult:
-            return "CloudKit returned a record that couldn't be parsed as a Note."
-        case .webAuthTokenUnavailable:
-            return "CloudKit returned no web auth token and no error."
-        }
+      switch self {
+      case .unexpectedSaveResult:
+        return "CloudKit returned a record that couldn't be parsed as a Note."
+      case .webAuthTokenUnavailable:
+        return "CloudKit returned no web auth token and no error."
+      }
     }
-}
+  }
 #endif

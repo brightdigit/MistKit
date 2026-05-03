@@ -31,68 +31,83 @@ import Foundation
 public import MistKit
 
 extension FieldValue {
-    /// Initialize FieldValue from a parsed value and field type
-    ///
-    /// This convenience initializer simplifies converting MistDemo's parsed field values
-    /// into MistKit's FieldValue enum cases. It handles type conversion and validation.
-    ///
-    /// - Parameters:
-    ///   - value: The parsed value (from FieldType.convertValue)
-    ///   - fieldType: The MistDemo FieldType that specifies what type this value should be
-    /// - Returns: A FieldValue if the conversion is successful, nil otherwise
-    ///
-    /// ## Example
-    /// ```swift
-    /// let field = try Field(parsing: "title:string:Hello")
-    /// let convertedValue = try field.type.convertValue(field.value)
-    /// if let fieldValue = FieldValue(value: convertedValue, fieldType: field.type) {
-    ///     // Use fieldValue in CloudKit operations
-    /// }
-    /// ```
-    public init?(value: Any, fieldType: FieldType) {
-        switch fieldType {
-        case .string:
-            guard let stringValue = value as? String else { return nil }
-            self = .string(stringValue)
-
-        case .int64:
-            if let intValue = value as? Int64 {
-                self = .int64(Int(intValue))
-            } else if let intValue = value as? Int {
-                self = .int64(intValue)
-            } else {
-                return nil
-            }
-
-        case .double:
-            guard let doubleValue = value as? Double else { return nil }
-            self = .double(doubleValue)
-
-        case .timestamp:
-            guard let dateValue = value as? Date else { return nil }
-            self = .date(dateValue)
-
-        case .bytes:
-            guard let stringValue = value as? String else { return nil }
-            self = .bytes(stringValue)
-
-        case .asset:
-            // Value should be the URL from upload token
-            guard let urlString = value as? String else { return nil }
-            let asset = FieldValue.Asset(
-                fileChecksum: nil,
-                size: nil,
-                referenceChecksum: nil,
-                wrappingKey: nil,
-                receipt: nil,
-                downloadURL: urlString
-            )
-            self = .asset(asset)
-
-        case .location, .reference:
-            // These complex types require specialized handling
-            // For now, return nil to indicate they're not supported via simple conversion
-            return nil
-        }
+  /// Initialize FieldValue from a parsed value and field type
+  ///
+  /// This convenience initializer simplifies converting MistDemo's parsed field values
+  /// into MistKit's FieldValue enum cases. It handles type conversion and validation.
+  ///
+  /// - Parameters:
+  ///   - value: The parsed value (from FieldType.convertValue)
+  ///   - fieldType: The MistDemo FieldType that specifies what type this value should be
+  /// - Returns: A FieldValue if the conversion is successful, nil otherwise
+  ///
+  /// ## Example
+  /// ```swift
+  /// let field = try Field(parsing: "title:string:Hello")
+  /// let convertedValue = try field.type.convertValue(field.value)
+  /// if let fieldValue = FieldValue(value: convertedValue, fieldType: field.type) {
+  ///     // Use fieldValue in CloudKit operations
+  /// }
+  /// ```
+  public init?(value: Any, fieldType: FieldType) {
+    guard let converted = FieldValue.convert(value: value, fieldType: fieldType) else {
+      return nil
     }
+    self = converted
+  }
+
+  // swiftlint:disable:next cyclomatic_complexity
+  private static func convert(value: Any, fieldType: FieldType) -> FieldValue? {
+    switch fieldType {
+    case .string:
+      guard let stringValue = value as? String else { return nil }
+      return .string(stringValue)
+
+    case .int64:
+      return convertInt64(value: value)
+
+    case .double:
+      guard let doubleValue = value as? Double else { return nil }
+      return .double(doubleValue)
+
+    case .timestamp:
+      guard let dateValue = value as? Date else { return nil }
+      return .date(dateValue)
+
+    case .bytes:
+      guard let stringValue = value as? String else { return nil }
+      return .bytes(stringValue)
+
+    case .asset:
+      return convertAsset(value: value)
+
+    case .location, .reference:
+      // These complex types require specialized handling
+      // For now, return nil to indicate they're not supported via simple conversion
+      return nil
+    }
+  }
+
+  private static func convertInt64(value: Any) -> FieldValue? {
+    if let intValue = value as? Int64 {
+      return .int64(Int(intValue))
+    } else if let intValue = value as? Int {
+      return .int64(intValue)
+    }
+    return nil
+  }
+
+  private static func convertAsset(value: Any) -> FieldValue? {
+    // Value should be the URL from upload token
+    guard let urlString = value as? String else { return nil }
+    let asset = FieldValue.Asset(
+      fileChecksum: nil,
+      size: nil,
+      referenceChecksum: nil,
+      wrappingKey: nil,
+      receipt: nil,
+      downloadURL: urlString
+    )
+    return .asset(asset)
+  }
 }

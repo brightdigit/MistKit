@@ -6,11 +6,11 @@
 ERRORS=0
 
 run_command() {
-	if [ "$LINT_MODE" = "STRICT" ]; then
-		"$@" || ERRORS=$((ERRORS + 1))
-	else
-		"$@"
-	fi
+		if [ "$LINT_MODE" = "STRICT" ]; then
+				"$@" || ERRORS=$((ERRORS + 1))
+		else
+				"$@"
+		fi
 }
 
 if [ "$LINT_MODE" = "INSTALL" ]; then
@@ -37,15 +37,17 @@ if [ "$LINT_MODE" = "NONE" ]; then
 elif [ "$LINT_MODE" = "STRICT" ]; then
 	SWIFTFORMAT_OPTIONS="--configuration .swift-format"
 	SWIFTLINT_OPTIONS="--strict"
+	STRINGSLINT_OPTIONS="--config .strict.stringslint.yml"
 else
 	SWIFTFORMAT_OPTIONS="--configuration .swift-format"
 	SWIFTLINT_OPTIONS=""
+	STRINGSLINT_OPTIONS="--config .stringslint.yml"
 fi
 
 pushd $PACKAGE_DIR
 
 if [ -z "$CI" ]; then
-	run_command swift-format format $SWIFTFORMAT_OPTIONS --recursive --parallel --in-place Sources Tests
+	run_command swift-format format $SWIFTFORMAT_OPTIONS  --recursive --parallel --in-place Sources Tests
 	run_command swiftlint --fix
 fi
 
@@ -56,7 +58,9 @@ if [ -z "$FORMAT_ONLY" ]; then
 	run_command swift build --build-tests
 fi
 
-$PACKAGE_DIR/Scripts/header.sh -d $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "BushelCloud"
+$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "BushelCloud"
+
+# Generated files now automatically include ignore directives via OpenAPI generator configuration
 
 if [ -z "$CI" ]; then
 	run_command periphery scan $PERIPHERY_OPTIONS --disable-update-check

@@ -33,92 +33,92 @@ import MistKit
 // MARK: - UserInfo Output Formatting
 
 extension OutputFormatting {
-    /// Output UserInfo result in table format
-    func outputUserTable(_ userInfo: UserInfo, fields: [String]? = nil) async throws {
-        print("User Information:")
-        print("├─ User Record Name: \(userInfo.userRecordName)")
-        
-        if shouldIncludeUserField("firstName", fields: fields), let firstName = userInfo.firstName {
-            print("├─ First Name: \(firstName)")
-        }
-        
-        if shouldIncludeUserField("lastName", fields: fields), let lastName = userInfo.lastName {
-            print("├─ Last Name: \(lastName)")
-        }
-        
-        if shouldIncludeUserField("emailAddress", fields: fields), let email = userInfo.emailAddress {
-            print("└─ Email: \(email)")
-        } else {
-            // Adjust the last character if email is not shown
-            print("") // Just end the tree properly
-        }
+  /// Output UserInfo result in table format
+  func outputUserTable(_ userInfo: UserInfo, fields: [String]? = nil) async throws {
+    print("User Information:")
+    print("├─ User Record Name: \(userInfo.userRecordName)")
+
+    if shouldIncludeUserField("firstName", fields: fields), let firstName = userInfo.firstName {
+      print("├─ First Name: \(firstName)")
     }
-    
-    /// Output UserInfo results in CSV format
-    func outputUserCSV(_ users: [UserInfo], fields: [String]? = nil) async throws {
-        // Build header based on available fields
-        var headers: [String] = ["userRecordName"]
-        
-        if shouldIncludeUserField("firstName", fields: fields) {
-            headers.append("firstName")
-        }
-        if shouldIncludeUserField("lastName", fields: fields) {
-            headers.append("lastName")
-        }
-        if shouldIncludeUserField("emailAddress", fields: fields) {
-            headers.append("emailAddress")
-        }
-        
-        print(headers.joined(separator: ","))
-        
-        // Output user data
-        let csvEscaper = CSVEscaper()
-        for user in users {
-            var values: [String] = [csvEscaper.escape(user.userRecordName)]
 
-            if shouldIncludeUserField("firstName", fields: fields) {
-                values.append(csvEscaper.escape(user.firstName ?? ""))
-            }
-            if shouldIncludeUserField("lastName", fields: fields) {
-                values.append(csvEscaper.escape(user.lastName ?? ""))
-            }
-            if shouldIncludeUserField("emailAddress", fields: fields) {
-                values.append(csvEscaper.escape(user.emailAddress ?? ""))
-            }
-
-            print(values.joined(separator: ","))
-        }
+    if shouldIncludeUserField("lastName", fields: fields), let lastName = userInfo.lastName {
+      print("├─ Last Name: \(lastName)")
     }
-    
-    /// Output UserInfo result in YAML format
-    func outputUserYAML(_ userInfo: UserInfo, fields: [String]? = nil) async throws {
-        let yamlEscaper = YAMLEscaper()
-        print("user:")
-        print("  userRecordName: \(yamlEscaper.escape(userInfo.userRecordName))")
 
-        if shouldIncludeUserField("firstName", fields: fields), let firstName = userInfo.firstName {
-            print("  firstName: \(yamlEscaper.escape(firstName))")
-        }
-
-        if shouldIncludeUserField("lastName", fields: fields), let lastName = userInfo.lastName {
-            print("  lastName: \(yamlEscaper.escape(lastName))")
-        }
-
-        if shouldIncludeUserField("emailAddress", fields: fields), let email = userInfo.emailAddress {
-            print("  emailAddress: \(yamlEscaper.escape(email))")
-        }
+    if shouldIncludeUserField("emailAddress", fields: fields), let email = userInfo.emailAddress {
+      print("└─ Email: \(email)")
+    } else {
+      // Adjust the last character if email is not shown
+      print("")  // Just end the tree properly
     }
-    
-    // MARK: - Helper Methods
-    
-    /// Check if a user field should be included based on field filter
-    private func shouldIncludeUserField(_ fieldName: String, fields: [String]?) -> Bool {
-        guard let fields = fields, !fields.isEmpty else {
-            return true // Include all fields if no filter specified
-        }
-        
-        return fields.contains { requestedField in
-            fieldName.lowercased() == requestedField.lowercased()
-        }
+  }
+
+  /// Output UserInfo results in CSV format
+  func outputUserCSV(_ users: [UserInfo], fields: [String]? = nil) async throws {
+    // Build header based on available fields
+    var headers: [String] = ["userRecordName"]
+
+    if shouldIncludeUserField("firstName", fields: fields) {
+      headers.append("firstName")
     }
+    if shouldIncludeUserField("lastName", fields: fields) {
+      headers.append("lastName")
+    }
+    if shouldIncludeUserField("emailAddress", fields: fields) {
+      headers.append("emailAddress")
+    }
+
+    print(headers.joined(separator: ","))
+
+    // Output user data
+    let csvEscaper = CSVEscaper()
+    for user in users {
+      var values: [String] = [csvEscaper.escape(user.userRecordName)]
+
+      if shouldIncludeUserField("firstName", fields: fields) {
+        values.append(csvEscaper.escape(user.firstName ?? ""))
+      }
+      if shouldIncludeUserField("lastName", fields: fields) {
+        values.append(csvEscaper.escape(user.lastName ?? ""))
+      }
+      if shouldIncludeUserField("emailAddress", fields: fields) {
+        values.append(csvEscaper.escape(user.emailAddress ?? ""))
+      }
+
+      print(values.joined(separator: ","))
+    }
+  }
+
+  /// Output UserInfo result in YAML format
+  func outputUserYAML(_ userInfo: UserInfo, fields: [String]? = nil) async throws {
+    let yamlEscaper = YAMLEscaper()
+    print("user:")
+    print("  userRecordName: \(yamlEscaper.escape(userInfo.userRecordName))")
+
+    if shouldIncludeUserField("firstName", fields: fields), let firstName = userInfo.firstName {
+      print("  firstName: \(yamlEscaper.escape(firstName))")
+    }
+
+    if shouldIncludeUserField("lastName", fields: fields), let lastName = userInfo.lastName {
+      print("  lastName: \(yamlEscaper.escape(lastName))")
+    }
+
+    if shouldIncludeUserField("emailAddress", fields: fields), let email = userInfo.emailAddress {
+      print("  emailAddress: \(yamlEscaper.escape(email))")
+    }
+  }
+
+  // MARK: - Helper Methods
+
+  /// Check if a user field should be included based on field filter
+  private func shouldIncludeUserField(_ fieldName: String, fields: [String]?) -> Bool {
+    guard let fields = fields, !fields.isEmpty else {
+      return true  // Include all fields if no filter specified
+    }
+
+    return fields.contains { requestedField in
+      fieldName.lowercased() == requestedField.lowercased()
+    }
+  }
 }

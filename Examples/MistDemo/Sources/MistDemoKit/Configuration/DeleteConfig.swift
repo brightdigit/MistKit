@@ -27,70 +27,80 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
 public import ConfigKeyKit
+import Foundation
 
 /// Configuration for delete command
 public struct DeleteConfig: Sendable, ConfigurationParseable {
-    public typealias ConfigReader = MistDemoConfiguration
-    public typealias BaseConfig = MistDemoConfig
+  public typealias ConfigReader = MistDemoConfiguration
+  public typealias BaseConfig = MistDemoConfig
 
-    public let base: MistDemoConfig
-    public let zone: String
-    public let recordType: String
-    public let recordName: String
-    public let recordChangeTag: String?
-    public let force: Bool
-    public let output: OutputFormat
+  public let base: MistDemoConfig
+  public let zone: String
+  public let recordType: String
+  public let recordName: String
+  public let recordChangeTag: String?
+  public let force: Bool
+  public let output: OutputFormat
 
-    public init(
-        base: MistDemoConfig,
-        zone: String = "_defaultZone",
-        recordType: String = "Note",
-        recordName: String,
-        recordChangeTag: String? = nil,
-        force: Bool = false,
-        output: OutputFormat = .json
-    ) {
-        self.base = base
-        self.zone = zone
-        self.recordType = recordType
-        self.recordName = recordName
-        self.recordChangeTag = recordChangeTag
-        self.force = force
-        self.output = output
+  public init(
+    base: MistDemoConfig,
+    zone: String = "_defaultZone",
+    recordType: String = "Note",
+    recordName: String,
+    recordChangeTag: String? = nil,
+    force: Bool = false,
+    output: OutputFormat = .json
+  ) {
+    self.base = base
+    self.zone = zone
+    self.recordType = recordType
+    self.recordName = recordName
+    self.recordChangeTag = recordChangeTag
+    self.force = force
+    self.output = output
+  }
+
+  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+    let configReader = configuration
+    let baseConfig: MistDemoConfig
+    if let base {
+      baseConfig = base
+    } else {
+      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
     }
 
-    public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
-        let configReader = configuration
-        let baseConfig: MistDemoConfig
-        if let base {
-            baseConfig = base
-        } else {
-            baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
-        }
+    let zone =
+      configReader.string(
+        forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone)
+      ?? MistDemoConstants.Defaults.zone
+    let recordType =
+      configReader.string(
+        forKey: MistDemoConstants.ConfigKeys.recordType,
+        default: MistDemoConstants.Defaults.recordType) ?? MistDemoConstants.Defaults.recordType
 
-        let zone = configReader.string(forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone) ?? MistDemoConstants.Defaults.zone
-        let recordType = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordType, default: MistDemoConstants.Defaults.recordType) ?? MistDemoConstants.Defaults.recordType
-
-        guard let recordName = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordName) else {
-            throw DeleteError.recordNameRequired
-        }
-
-        let recordChangeTag = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordChangeTag)
-        let force = configReader.bool(forKey: MistDemoConstants.ConfigKeys.force, default: false)
-
-        let outputString = configReader.string(forKey: MistDemoConstants.ConfigKeys.outputFormat, default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
-        let output = OutputFormat(rawValue: outputString) ?? .json
-
-        self.init(
-            base: baseConfig,
-            zone: zone,
-            recordType: recordType,
-            recordName: recordName,
-            recordChangeTag: recordChangeTag,
-            force: force,
-            output: output
-        )
+    guard let recordName = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordName)
+    else {
+      throw DeleteError.recordNameRequired
     }
+
+    let recordChangeTag = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordChangeTag)
+    let force = configReader.bool(forKey: MistDemoConstants.ConfigKeys.force, default: false)
+
+    let outputString =
+      configReader.string(
+        forKey: MistDemoConstants.ConfigKeys.outputFormat,
+        default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
+    let output = OutputFormat(rawValue: outputString) ?? .json
+
+    self.init(
+      base: baseConfig,
+      zone: zone,
+      recordType: recordType,
+      recordName: recordName,
+      recordChangeTag: recordChangeTag,
+      force: force,
+      output: output
+    )
+  }
 }

@@ -1,6 +1,6 @@
 //
 //  SidebarView.swift
-//  MistDemoApp
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,17 +28,17 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit)
-import SwiftUI
+  import SwiftUI
 
-struct SidebarView: View {
+  struct SidebarView: View {
     @Binding var selection: SidebarItem?
 
     var body: some View {
-        List(SidebarItem.allCases, id: \.self, selection: $selection) { item in
-            Label(item.label, systemImage: item.systemImage)
-                .tag(item)
-        }
-        .navigationTitle("MistDemo (Native)")
+      List(SidebarItem.allCases, id: \.self, selection: $selection) { item in
+        Label(item.label, systemImage: item.systemImage)
+          .tag(item)
+      }
+      .navigationTitle("MistDemo (Native)")
     }
-}
+  }
 #endif

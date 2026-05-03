@@ -31,45 +31,45 @@ import Foundation
 
 /// Supported field types for CloudKit records
 public enum FieldType: String, CaseIterable, Sendable {
-    case string
-    case int64
-    case double
-    case timestamp
-    case asset
-    case location
-    case reference
-    case bytes
-    
-    /// Convert field value to appropriate CloudKit field value
-    public func convertValue(_ stringValue: String) throws -> Any {
-        switch self {
-        case .string:
-            return stringValue
-        case .int64:
-            guard let intValue = Int64(stringValue) else {
-                throw FieldParsingError.invalidValueForType(stringValue, type: self)
-            }
-            return intValue
-        case .double:
-            guard let doubleValue = Double(stringValue) else {
-                throw FieldParsingError.invalidValueForType(stringValue, type: self)
-            }
-            return doubleValue
-        case .timestamp:
-            // Try parsing as ISO 8601 first, then as timestamp
-            if let date = ISO8601DateFormatter().date(from: stringValue) {
-                return date
-            } else if let timestamp = Double(stringValue) {
-                return Date(timeIntervalSince1970: timestamp)
-            } else {
-                throw FieldParsingError.invalidValueForType(stringValue, type: self)
-            }
-        case .asset:
-            // stringValue should be the URL from the upload token
-            return stringValue // Will be converted to FieldValue.Asset later
-        case .location, .reference, .bytes:
-            // These require more complex parsing - implement later
-            throw FieldParsingError.unsupportedFieldType(self)
-        }
+  case string
+  case int64
+  case double
+  case timestamp
+  case asset
+  case location
+  case reference
+  case bytes
+
+  /// Convert field value to appropriate CloudKit field value
+  public func convertValue(_ stringValue: String) throws -> Any {
+    switch self {
+    case .string:
+      return stringValue
+    case .int64:
+      guard let intValue = Int64(stringValue) else {
+        throw FieldParsingError.invalidValueForType(stringValue, type: self)
+      }
+      return intValue
+    case .double:
+      guard let doubleValue = Double(stringValue) else {
+        throw FieldParsingError.invalidValueForType(stringValue, type: self)
+      }
+      return doubleValue
+    case .timestamp:
+      // Try parsing as ISO 8601 first, then as timestamp
+      if let date = ISO8601DateFormatter().date(from: stringValue) {
+        return date
+      } else if let timestamp = Double(stringValue) {
+        return Date(timeIntervalSince1970: timestamp)
+      } else {
+        throw FieldParsingError.invalidValueForType(stringValue, type: self)
+      }
+    case .asset:
+      // stringValue should be the URL from the upload token
+      return stringValue  // Will be converted to FieldValue.Asset later
+    case .location, .reference, .bytes:
+      // These require more complex parsing - implement later
+      throw FieldParsingError.unsupportedFieldType(self)
     }
+  }
 }

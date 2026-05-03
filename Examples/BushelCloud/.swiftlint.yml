@@ -53,6 +53,7 @@ opt_in_rules:
   - nslocalizedstring_require_bundle
   - number_separator
   - object_literal
+  - one_declaration_per_file
   - operator_usage_whitespace
   - optional_enum_case_matching
   - overridden_super_call
@@ -107,6 +108,11 @@ line_length:
 closure_body_length:
   - 50
   - 60
+type_name:
+  min_length: 3
+  max_length:
+    warning: 50
+    error: 60
 identifier_name:
   excluded:
     - id
@@ -132,3 +138,9 @@ disabled_rules:
     - opening_brace
     - optional_data_string_conversion
     - pattern_matching_keywords
+custom_rules:
+  no_unchecked_sendable:
+    name: "No Unchecked Sendable"
+    regex: '@unchecked\s+Sendable'
+    message: "Use proper Sendable conformance instead of @unchecked Sendable to maintain strict concurrency safety"
+    severity: error

@@ -31,15 +31,16 @@ public import Foundation
 
 /// Errors specific to current-user command
 public enum CurrentUserError: Error, LocalizedError {
-    case operationFailed(String)
-    case authenticationRequired
+  case operationFailed(String)
+  case authenticationRequired
 
-    public var errorDescription: String? {
-        switch self {
-        case .operationFailed(let message):
-            return "Current user operation failed: \(message)"
-        case .authenticationRequired:
-            return "Authentication is required for current-user command. Use auth-token command first or provide --web-auth-token."
-        }
+  public var errorDescription: String? {
+    switch self {
+    case .operationFailed(let message):
+      return "Current user operation failed: \(message)"
+    case .authenticationRequired:
+      return
+        "Authentication is required for current-user command. Use auth-token command first or provide --web-auth-token."
     }
+  }
 }

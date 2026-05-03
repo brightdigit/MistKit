@@ -27,8 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// MARK: - Configuration Key Source
-
 /// Source for configuration keys (CLI arguments or environment variables)
 public enum ConfigKeySource: CaseIterable, Sendable {
   /// Command-line arguments (e.g., --cloudkit-container-id)

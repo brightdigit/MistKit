@@ -27,62 +27,64 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import ConfigKeyKit
 import Foundation
 public import MistKit
-public import ConfigKeyKit
 
 /// Configuration for auth-token command
 public struct AuthTokenConfig: Sendable, ConfigurationParseable {
-    public typealias ConfigReader = MistDemoConfiguration
-    public typealias BaseConfig = Never
+  public typealias ConfigReader = MistDemoConfiguration
+  public typealias BaseConfig = Never
 
-    public let apiToken: String
-    public let containerIdentifier: String
-    public let port: Int
-    public let host: String
-    public let noBrowser: Bool
+  public let apiToken: String
+  public let containerIdentifier: String
+  public let port: Int
+  public let host: String
+  public let noBrowser: Bool
 
-    public init(
-        apiToken: String,
-        // Demo default — override via --container-identifier or config key "container.identifier"
-        containerIdentifier: String = MistDemoConstants.Defaults.containerIdentifier,
-        port: Int = 8080,
-        host: String = "127.0.0.1",
-        noBrowser: Bool = false
-    ) {
-        self.apiToken = apiToken
-        self.containerIdentifier = containerIdentifier
-        self.port = port
-        self.host = host
-        self.noBrowser = noBrowser
+  public init(
+    apiToken: String,
+    // Demo default — override via --container-identifier or config key "container.identifier"
+    containerIdentifier: String = MistDemoConstants.Defaults.containerIdentifier,
+    port: Int = 8_080,
+    host: String = "127.0.0.1",
+    noBrowser: Bool = false
+  ) {
+    self.apiToken = apiToken
+    self.containerIdentifier = containerIdentifier
+    self.port = port
+    self.host = host
+    self.noBrowser = noBrowser
+  }
+
+  /// Parse configuration from command line arguments
+  public init(configuration: MistDemoConfiguration, base: Never? = nil) async throws {
+    let configReader = configuration
+
+    // Parse command-specific options
+    let apiToken = configReader.string(forKey: "api.token", isSecret: true) ?? ""
+    guard !apiToken.isEmpty else {
+      throw ConfigurationError.missingRequired(
+        "api.token",
+        suggestion: "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable")
     }
 
-    /// Parse configuration from command line arguments
-    public init(configuration: MistDemoConfiguration, base: Never? = nil) async throws {
-        let configReader = configuration
+    // Demo default — override via --container-identifier or config key "container.identifier"
+    let containerIdentifier =
+      configReader.string(
+        forKey: "container.identifier",
+        default: MistDemoConstants.Defaults.containerIdentifier
+      ) ?? MistDemoConstants.Defaults.containerIdentifier
+    let port = configReader.int(forKey: "port", default: 8_080) ?? 8_080
+    let host = configReader.string(forKey: "host", default: "127.0.0.1") ?? "127.0.0.1"
+    let noBrowser = configReader.bool(forKey: "no.browser", default: false)
 
-        // Parse command-specific options
-        let apiToken = configReader.string(forKey: "api.token", isSecret: true) ?? ""
-        guard !apiToken.isEmpty else {
-            throw ConfigurationError.missingRequired("api.token",
-                suggestion: "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable")
-        }
-
-        // Demo default — override via --container-identifier or config key "container.identifier"
-        let containerIdentifier = configReader.string(
-            forKey: "container.identifier",
-            default: MistDemoConstants.Defaults.containerIdentifier
-        ) ?? MistDemoConstants.Defaults.containerIdentifier
-        let port = configReader.int(forKey: "port", default: 8080) ?? 8080
-        let host = configReader.string(forKey: "host", default: "127.0.0.1") ?? "127.0.0.1"
-        let noBrowser = configReader.bool(forKey: "no.browser", default: false)
-
-        self.init(
-            apiToken: apiToken,
-            containerIdentifier: containerIdentifier,
-            port: port,
-            host: host,
-            noBrowser: noBrowser
-        )
-    }
+    self.init(
+      apiToken: apiToken,
+      containerIdentifier: containerIdentifier,
+      port: port,
+      host: host,
+      noBrowser: noBrowser
+    )
+  }
 }

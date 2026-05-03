@@ -1,6 +1,6 @@
 //
 //  AccountView.swift
-//  MistDemoApp
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,16 +28,16 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit)
-import CloudKit
-import SwiftUI
+  import CloudKit
+  import SwiftUI
 
-#if canImport(AppKit)
-import AppKit
-#elseif canImport(UIKit)
-import UIKit
-#endif
+  #if canImport(AppKit)
+    import AppKit
+  #elseif canImport(UIKit)
+    import UIKit
+  #endif
 
-struct AccountView: View {
+  struct AccountView: View {
     @EnvironmentObject private var service: NativeCloudKitService
 
     /// The CloudKit API token (the public token from CloudKit Dashboard).
@@ -55,8 +55,8 @@ struct AccountView: View {
     /// for the small caption beneath the TextField so the provenance is
     /// obvious during the presentation.
     private enum TokenSource {
-        case manual
-        case environment
+      case manual
+      case environment
     }
 
     /// Env var name the MistDemo CLI also reads (defined in
@@ -73,159 +73,165 @@ struct AccountView: View {
     private static let envVarName = "CLOUDKIT_API_TOKEN"
 
     var body: some View {
-        Form {
-            Section("Container") {
-                LabeledContent("Container", value: service.containerIdentifier)
-                LabeledContent("Database", value: "Private")
-                LabeledContent("iCloud Status", value: statusLabel)
-            }
-
-            Section {
-                TextField("CloudKit API Token", text: $apiToken, prompt: Text("Paste from CloudKit Dashboard"))
-                    .textFieldStyle(.roundedBorder)
-                    .font(.body.monospaced())
-                    .onChange(of: apiToken) { _, _ in
-                        // If the user edits the field, anything they type
-                        // is "manual" — drop the seeded-from-env caption.
-                        tokenSource = .manual
-                    }
-                    #if os(iOS)
-                    .autocorrectionDisabled(true)
-                    .textInputAutocapitalization(.never)
-                    #endif
-
-                if let caption = sourceCaption {
-                    Text(caption)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack {
-                    Button {
-                        Task { await fetchToken() }
-                    } label: {
-                        if fetchingWebAuthToken {
-                            HStack(spacing: 6) {
-                                ProgressView().controlSize(.small)
-                                Text("Fetching…")
-                            }
-                        } else {
-                            Text("Fetch Web Auth Token")
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(apiToken.isEmpty || fetchingWebAuthToken)
-
-                    if webAuthToken != nil {
-                        Button("Clear", role: .destructive) {
-                            webAuthToken = nil
-                            webAuthTokenError = nil
-                        }
-                    }
-                }
-
-                if let webAuthToken {
-                    LabeledContent("Web Auth Token") {
-                        VStack(alignment: .trailing, spacing: 6) {
-                            Text(webAuthToken)
-                                .font(.callout.monospaced())
-                                .lineLimit(3)
-                                .truncationMode(.middle)
-                                .textSelection(.enabled)
-                            Button("Copy") { copy(webAuthToken) }
-                                .buttonStyle(.bordered)
-                                .controlSize(.small)
-                        }
-                    }
-                }
-
-                if let webAuthTokenError {
-                    Text(webAuthTokenError).font(.callout).foregroundStyle(.red)
-                }
-            } header: {
-                Text("Web Auth Token")
-            } footer: {
-                Text("Issues the same `158__…` token that MistKit / `mistdemo auth-token` consume — useful for handing off to a server-side or CLI process. Uses CKFetchWebAuthTokenOperation.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            if let error = service.lastError {
-                Section("Last Service Error") {
-                    Text(error).font(.callout).foregroundStyle(.red)
-                }
-            }
+      // swiftlint:disable:next closure_body_length
+      Form {
+        Section("Container") {
+          LabeledContent("Container", value: service.containerIdentifier)
+          LabeledContent("Database", value: "Private")
+          LabeledContent("iCloud Status", value: statusLabel)
         }
-        .formStyle(.grouped)
-        .navigationTitle("iCloud Account")
-        .toolbar {
-            ToolbarItem {
-                Button("Refresh") {
-                    Task { await service.refreshAccountStatus() }
+
+        Section {
+          TextField(
+            "CloudKit API Token", text: $apiToken, prompt: Text("Paste from CloudKit Dashboard")
+          )
+          .textFieldStyle(.roundedBorder)
+          .font(.body.monospaced())
+          .onChange(of: apiToken) { _, _ in
+            // If the user edits the field, anything they type
+            // is "manual" — drop the seeded-from-env caption.
+            tokenSource = .manual
+          }
+          #if os(iOS)
+            .autocorrectionDisabled(true)
+            .textInputAutocapitalization(.never)
+          #endif
+
+          if let caption = sourceCaption {
+            Text(caption)
+              .font(.caption)
+              .foregroundStyle(.secondary)
+          }
+
+          HStack {
+            Button {
+              Task { await fetchToken() }
+            } label: {
+              if fetchingWebAuthToken {
+                HStack(spacing: 6) {
+                  ProgressView().controlSize(.small)
+                  Text("Fetching…")
                 }
+              } else {
+                Text("Fetch Web Auth Token")
+              }
             }
+            .buttonStyle(.borderedProminent)
+            .disabled(apiToken.isEmpty || fetchingWebAuthToken)
+
+            if webAuthToken != nil {
+              Button("Clear", role: .destructive) {
+                webAuthToken = nil
+                webAuthTokenError = nil
+              }
+            }
+          }
+
+          if let webAuthToken {
+            LabeledContent("Web Auth Token") {
+              VStack(alignment: .trailing, spacing: 6) {
+                Text(webAuthToken)
+                  .font(.callout.monospaced())
+                  .lineLimit(3)
+                  .truncationMode(.middle)
+                  .textSelection(.enabled)
+                Button("Copy") { copy(webAuthToken) }
+                  .buttonStyle(.bordered)
+                  .controlSize(.small)
+              }
+            }
+          }
+
+          if let webAuthTokenError {
+            Text(webAuthTokenError).font(.callout).foregroundStyle(.red)
+          }
+        } header: {
+          Text("Web Auth Token")
+        } footer: {
+          Text(
+            "Issues the same `158__…` token that MistKit / `mistdemo auth-token` consume — useful for handing off to a server-side or CLI process. Uses CKFetchWebAuthTokenOperation."
+          )
+          .font(.caption)
+          .foregroundStyle(.secondary)
         }
-        .onAppear { seedTokenIfNeeded() }
+
+        if let error = service.lastError {
+          Section("Last Service Error") {
+            Text(error).font(.callout).foregroundStyle(.red)
+          }
+        }
+      }
+      .formStyle(.grouped)
+      .navigationTitle("iCloud Account")
+      .toolbar {
+        ToolbarItem {
+          Button("Refresh") {
+            Task { await service.refreshAccountStatus() }
+          }
+        }
+      }
+      .onAppear { seedTokenIfNeeded() }
     }
 
     /// Seed `apiToken` from the environment on first appear, but never
     /// overwrite a value the user has already pasted.
     private func seedTokenIfNeeded() {
-        guard apiToken.isEmpty else { return }
+      guard apiToken.isEmpty else { return }
 
-        if let envValue = ProcessInfo.processInfo.environment[Self.envVarName],
-           !envValue.isEmpty,
-           // When `.env` wasn't sourced before `make generate`, xcodegen
-           // leaves the literal placeholder string in the scheme. Treat
-           // that as unset so the TextField stays empty.
-           !envValue.hasPrefix("${") {
-            apiToken = envValue
-            tokenSource = .environment
-        }
+      if let envValue = ProcessInfo.processInfo.environment[Self.envVarName],
+        !envValue.isEmpty,
+        // When `.env` wasn't sourced before `make generate`, xcodegen
+        // leaves the literal placeholder string in the scheme. Treat
+        // that as unset so the TextField stays empty.
+        !envValue.hasPrefix("${")
+      {
+        apiToken = envValue
+        tokenSource = .environment
+      }
     }
 
     private var sourceCaption: String? {
-        switch tokenSource {
-        case .manual:
-            return nil
-        case .environment:
-            return "Loaded from $\(Self.envVarName) (xcodegen baked it into the scheme from .env)."
-        }
+      switch tokenSource {
+      case .manual:
+        return nil
+      case .environment:
+        return "Loaded from $\(Self.envVarName) (xcodegen baked it into the scheme from .env)."
+      }
     }
 
     private var statusLabel: String {
-        switch service.accountStatus {
-        case .available: return "Available"
-        case .noAccount: return "No iCloud Account"
-        case .restricted: return "Restricted"
-        case .couldNotDetermine: return "Could Not Determine"
-        case .temporarilyUnavailable: return "Temporarily Unavailable"
-        @unknown default: return "Unknown"
-        }
+      switch service.accountStatus {
+      case .available: return "Available"
+      case .noAccount: return "No iCloud Account"
+      case .restricted: return "Restricted"
+      case .couldNotDetermine: return "Could Not Determine"
+      case .temporarilyUnavailable: return "Temporarily Unavailable"
+      @unknown default: return "Unknown"
+      }
     }
 
     private func fetchToken() async {
-        fetchingWebAuthToken = true
-        webAuthTokenError = nil
-        webAuthToken = nil
-        defer { fetchingWebAuthToken = false }
-        do {
-            let token = try await service.fetchWebAuthToken(
-                apiToken: apiToken.trimmingCharacters(in: .whitespacesAndNewlines)
-            )
-            webAuthToken = token
-        } catch {
-            webAuthTokenError = error.localizedDescription
-        }
+      fetchingWebAuthToken = true
+      webAuthTokenError = nil
+      webAuthToken = nil
+      defer { fetchingWebAuthToken = false }
+      do {
+        let token = try await service.fetchWebAuthToken(
+          apiToken: apiToken.trimmingCharacters(in: .whitespacesAndNewlines)
+        )
+        webAuthToken = token
+      } catch {
+        webAuthTokenError = error.localizedDescription
+      }
     }
 
     private func copy(_ value: String) {
-        #if canImport(AppKit)
+      #if canImport(AppKit)
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(value, forType: .string)
-        #elseif canImport(UIKit)
+      #elseif canImport(UIKit)
         UIPasteboard.general.string = value
-        #endif
+      #endif
     }
-}
+  }
 #endif

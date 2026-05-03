@@ -31,21 +31,21 @@ import Foundation
 
 /// Factory for creating output formatters based on output format
 public enum OutputFormatterFactory {
-    /// Create an appropriate formatter for the given output format
-    /// - Parameters:
-    ///   - format: The output format
-    ///   - pretty: Whether to use pretty printing (applies to JSON)
-    /// - Returns: A formatter configured for the specified format
-    public static func formatter(for format: OutputFormat, pretty: Bool = false) -> OutputFormatter {
-        switch format {
-        case .json:
-            return JSONFormatter(pretty: pretty)
-        case .table:
-            return TableFormatter()
-        case .csv:
-            return CSVFormatter()
-        case .yaml:
-            return YAMLFormatter()
-        }
+  /// Create an appropriate formatter for the given output format
+  /// - Parameters:
+  ///   - format: The output format
+  ///   - pretty: Whether to use pretty printing (applies to JSON)
+  /// - Returns: A formatter configured for the specified format
+  public static func formatter(for format: OutputFormat, pretty: Bool = false) -> OutputFormatter {
+    switch format {
+    case .json:
+      return JSONFormatter(pretty: pretty)
+    case .table:
+      return TableFormatter()
+    case .csv:
+      return CSVFormatter()
+    case .yaml:
+      return YAMLFormatter()
     }
+  }
 }

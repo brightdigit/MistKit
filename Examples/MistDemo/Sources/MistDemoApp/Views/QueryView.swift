@@ -1,6 +1,6 @@
 //
 //  QueryView.swift
-//  MistDemoApp
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,9 +28,9 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit)
-import SwiftUI
+  import SwiftUI
 
-struct QueryView: View {
+  struct QueryView: View {
     @EnvironmentObject private var service: NativeCloudKitService
     @State private var limit: Int = 50
     @State private var notes: [Note] = []
@@ -40,106 +40,111 @@ struct QueryView: View {
     @State private var showCreateSheet = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            controls
-                .padding()
+      VStack(spacing: 0) {
+        controls
+          .padding()
 
-            Divider()
+        Divider()
 
-            if loading {
-                Spacer()
-                ProgressView("Querying \(Note.recordType)…")
-                Spacer()
-            } else if let loadError {
-                ContentUnavailableView("Query failed", systemImage: "exclamationmark.triangle", description: Text(loadError))
-            } else if notes.isEmpty {
-                ContentUnavailableView(
-                    "No notes",
-                    systemImage: "tray",
-                    description: Text("Tap + to create the first one, or run `mistdemo create` from the CLI.")
-                )
-            } else {
-                List(notes, selection: $selectedNote) { note in
-                    NavigationLink(value: note) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(note.title ?? note.id).font(.body)
-                            HStack(spacing: 12) {
-                                if let index = note.index {
-                                    Label("\(index)", systemImage: "number")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                if let createdAt = note.createdAt {
-                                    Label(createdAt.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button("Delete", role: .destructive) {
-                            Task { await delete(note) }
-                        }
-                    }
+        if loading {
+          Spacer()
+          ProgressView("Querying \(Note.recordType)…")
+          Spacer()
+        } else if let loadError {
+          ContentUnavailableView(
+            "Query failed", systemImage: "exclamationmark.triangle", description: Text(loadError))
+        } else if notes.isEmpty {
+          ContentUnavailableView(
+            "No notes",
+            systemImage: "tray",
+            description: Text(
+              "Tap + to create the first one, or run `mistdemo create` from the CLI.")
+          )
+        } else {
+          List(notes, selection: $selectedNote) { note in
+            NavigationLink(value: note) {
+              VStack(alignment: .leading, spacing: 2) {
+                Text(note.title ?? note.id).font(.body)
+                HStack(spacing: 12) {
+                  if let index = note.index {
+                    Label("\(index)", systemImage: "number")
+                      .font(.caption)
+                      .foregroundStyle(.secondary)
+                  }
+                  if let createdAt = note.createdAt {
+                    Label(
+                      createdAt.formatted(date: .abbreviated, time: .omitted),
+                      systemImage: "calendar"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                  }
                 }
+              }
             }
-        }
-        .navigationDestination(for: Note.self) { note in
-            RecordDetailView(note: note, onChange: { Task { await runQuery() } })
-        }
-        .navigationTitle("Notes")
-        .toolbar {
-            ToolbarItem {
-                Button {
-                    showCreateSheet = true
-                } label: {
-                    Label("New Note", systemImage: "plus")
-                }
+            .swipeActions(edge: .trailing) {
+              Button("Delete", role: .destructive) {
+                Task { await delete(note) }
+              }
             }
+          }
         }
-        .sheet(isPresented: $showCreateSheet) {
-            NoteEditView(mode: .create) { _ in
-                Task { await runQuery() }
-            }
-            .environmentObject(service)
+      }
+      .navigationDestination(for: Note.self) { note in
+        RecordDetailView(note: note, onChange: { Task { await runQuery() } })
+      }
+      .navigationTitle("Notes")
+      .toolbar {
+        ToolbarItem {
+          Button {
+            showCreateSheet = true
+          } label: {
+            Label("New Note", systemImage: "plus")
+          }
         }
+      }
+      .sheet(isPresented: $showCreateSheet) {
+        NoteEditView(mode: .create) { _ in
+          Task { await runQuery() }
+        }
+        .environmentObject(service)
+      }
     }
 
     private var controls: some View {
-        HStack(spacing: 12) {
-            Text("Type: \(Note.recordType)")
-                .font(.body.monospaced())
-                .foregroundStyle(.secondary)
+      HStack(spacing: 12) {
+        Text("Type: \(Note.recordType)")
+          .font(.body.monospaced())
+          .foregroundStyle(.secondary)
 
-            Stepper(value: $limit, in: 1...200, step: 10) {
-                Text("Limit: \(limit)")
-            }
-            .frame(maxWidth: 200)
-
-            Button("Run Query") { Task { await runQuery() } }
-                .buttonStyle(.borderedProminent)
+        Stepper(value: $limit, in: 1...200, step: 10) {
+          Text("Limit: \(limit)")
         }
+        .frame(maxWidth: 200)
+
+        Button("Run Query") { Task { await runQuery() } }
+          .buttonStyle(.borderedProminent)
+      }
     }
 
     private func runQuery() async {
-        loading = true
-        loadError = nil
-        defer { loading = false }
-        do {
-            notes = try await service.queryNotes(limit: limit)
-        } catch {
-            loadError = error.localizedDescription
-        }
+      loading = true
+      loadError = nil
+      defer { loading = false }
+      do {
+        notes = try await service.queryNotes(limit: limit)
+      } catch {
+        loadError = error.localizedDescription
+      }
     }
 
     private func delete(_ note: Note) async {
-        do {
-            try await service.deleteNote(note)
-            notes.removeAll { $0.id == note.id }
-        } catch {
-            loadError = error.localizedDescription
-        }
+      do {
+        try await service.deleteNote(note)
+        notes.removeAll { $0.id == note.id }
+      } catch {
+        loadError = error.localizedDescription
+      }
     }
-}
+  }
 #endif

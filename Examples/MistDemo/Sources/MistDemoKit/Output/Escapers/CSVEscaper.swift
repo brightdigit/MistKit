@@ -31,27 +31,27 @@ import Foundation
 
 /// CSV escaper conforming to RFC 4180
 public struct CSVEscaper: OutputEscaper {
-    public init() {}
+  public init() {}
 
-    public func escape(_ string: String) -> String {
-        // Check if escaping is needed
-        // Use unicodeScalars to avoid Swift treating \r\n as a single grapheme cluster
-        let needsEscaping = string.unicodeScalars.contains { scalar in
-            switch scalar {
-            case ",", "\"", "\n", "\r", "\t":
-                return true
-            default:
-                return false
-            }
-        }
-
-        // If no special characters, return as-is
-        guard needsEscaping else {
-            return string
-        }
-
-        // Escape quotes by doubling them and wrap in quotes
-        let escaped = string.replacingOccurrences(of: "\"", with: "\"\"")
-        return "\"\(escaped)\""
+  public func escape(_ string: String) -> String {
+    // Check if escaping is needed
+    // Use unicodeScalars to avoid Swift treating \r\n as a single grapheme cluster
+    let needsEscaping = string.unicodeScalars.contains { scalar in
+      switch scalar {
+      case ",", "\"", "\n", "\r", "\t":
+        return true
+      default:
+        return false
+      }
     }
+
+    // If no special characters, return as-is
+    guard needsEscaping else {
+      return string
+    }
+
+    // Escape quotes by doubling them and wrap in quotes
+    let escaped = string.replacingOccurrences(of: "\"", with: "\"\"")
+    return "\"\(escaped)\""
+  }
 }

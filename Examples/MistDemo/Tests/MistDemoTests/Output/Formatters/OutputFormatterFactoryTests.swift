@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 //
 //  OutputFormatterFactoryTests.swift
 //  MistDemoTests
@@ -119,7 +120,7 @@ struct OutputFormatterFactoryTests {
 
     // Should be parseable as JSON
     let data = Data(output.utf8)
-    let _ = try JSONSerialization.jsonObject(with: data)
+    _ = try JSONSerialization.jsonObject(with: data)
   }
 
   @Test("CSV formatter produces CSV with headers")
@@ -230,7 +231,7 @@ struct OutputFormatterFactoryTests {
       recordType: "Integration",
       fields: [
         "string": .string("test"),
-        "number": .int64(42)
+        "number": .int64(42),
       ]
     )
 
@@ -330,7 +331,7 @@ struct OutputFormatterFactoryTests {
       fields: [
         "quotes": .string("He said \"hello\""),
         "newlines": .string("Line1\nLine2"),
-        "commas": .string("a,b,c")
+        "commas": .string("a,b,c"),
       ]
     )
 
@@ -351,7 +352,7 @@ struct OutputFormatterFactoryTests {
       fields: [
         "reference": .reference(.init(recordName: "ref-001")),
         "location": .location(.init(latitude: 37.7749, longitude: -122.4194)),
-        "list": .list([.string("item1"), .string("item2")])
+        "list": .list([.string("item1"), .string("item2")]),
       ]
     )
 
@@ -417,7 +418,7 @@ struct OutputFormatterFactoryTests {
         "emoji": .string("😀🎉✨"),
         "chinese": .string("你好世界"),
         "arabic": .string("مرحبا"),
-        "accents": .string("café résumé")
+        "accents": .string("café résumé"),
       ]
     )
 
@@ -431,7 +432,7 @@ struct OutputFormatterFactoryTests {
 
   @Test("Formatters handle very long strings")
   func formattersHandleVeryLongStrings() throws {
-    let longString = String(repeating: "a", count: 10000)
+    let longString = String(repeating: "a", count: 10_000)
     let record = RecordInfo(
       recordName: "long-001",
       recordType: "Long",
@@ -450,8 +451,8 @@ struct OutputFormatterFactoryTests {
   @Test("Formatters handle many fields")
   func formattersHandleManyFields() throws {
     var fields: [String: FieldValue] = [:]
-    for i in 0..<100 {
-      fields["field\(i)"] = .string("value\(i)")
+    for index in 0..<100 {
+      fields["field\(index)"] = .string("value\(index)")
     }
 
     let record = RecordInfo(

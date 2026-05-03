@@ -32,90 +32,90 @@ import UnixSignals
 
 /// Timeout error for async operations
 public enum AsyncTimeoutError: Error, LocalizedError {
-    case timeout(String)
-    case cancelled(String)
+  case timeout(String)
+  case cancelled(String)
 
-    public var errorDescription: String? {
-        switch self {
-        case .timeout(let message):
-            return "Operation timed out: \(message)"
-        case .cancelled(let message):
-            return "Operation cancelled: \(message)"
-        }
+  public var errorDescription: String? {
+    switch self {
+    case .timeout(let message):
+      return "Operation timed out: \(message)"
+    case .cancelled(let message):
+      return "Operation cancelled: \(message)"
     }
+  }
 }
 
 /// Execute an async operation with a timeout
 public func withTimeout<T: Sendable>(
-    seconds: Double,
-    operation: @escaping @Sendable () async throws -> T
+  seconds: Double,
+  operation: @escaping @Sendable () async throws -> T
 ) async throws -> T {
-    try await withThrowingTaskGroup(of: T.self) { group in
-        group.addTask {
-            return try await operation()
-        }
-
-        group.addTask {
-            try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-            throw AsyncTimeoutError.timeout("Operation timed out after \(seconds) seconds")
-        }
-
-        guard let result = try await group.next() else {
-            throw AsyncTimeoutError.timeout("Timeout task failed")
-        }
-
-        group.cancelAll()
-        return result
+  try await withThrowingTaskGroup(of: T.self) { group in
+    group.addTask {
+      try await operation()
     }
+
+    group.addTask {
+      try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+      throw AsyncTimeoutError.timeout("Operation timed out after \(seconds) seconds")
+    }
+
+    guard let result = try await group.next() else {
+      throw AsyncTimeoutError.timeout("Timeout task failed")
+    }
+
+    group.cancelAll()
+    return result
+  }
 }
 
 /// Execute an async operation with signal handling (Ctrl+C, SIGTERM)
 public func withSignalHandling<T: Sendable>(
-    operation: @escaping @Sendable () async throws -> T
+  operation: @escaping @Sendable () async throws -> T
 ) async throws -> T {
-    #if os(Linux) || os(macOS)
+  #if os(Linux) || os(macOS)
     return try await withThrowingTaskGroup(of: T.self) { group in
-        group.addTask {
-            return try await operation()
-        }
+      group.addTask {
+        try await operation()
+      }
 
-        group.addTask {
-            let signals = await UnixSignalsSequence(trapping: [.sigint, .sigterm])
-            for try await signal in signals {
-                print("\n⚠️  Received signal: \(signal)")
-                throw AsyncTimeoutError.cancelled("Operation cancelled by signal")
-            }
-            throw AsyncTimeoutError.cancelled("Signal handler completed unexpectedly")
+      group.addTask {
+        let signals = await UnixSignalsSequence(trapping: [.sigint, .sigterm])
+        for try await signal in signals {
+          print("\n⚠️  Received signal: \(signal)")
+          throw AsyncTimeoutError.cancelled("Operation cancelled by signal")
         }
+        throw AsyncTimeoutError.cancelled("Signal handler completed unexpectedly")
+      }
 
-        guard let result = try await group.next() else {
-            throw AsyncTimeoutError.cancelled("Task group completed without result")
-        }
+      guard let result = try await group.next() else {
+        throw AsyncTimeoutError.cancelled("Task group completed without result")
+      }
 
-        group.cancelAll()
-        return result
+      group.cancelAll()
+      return result
     }
-    #else
+  #else
     return try await operation()
-    #endif
+  #endif
 }
 
 /// Execute an async operation with both timeout and signal handling
 public func withTimeoutAndSignals<T: Sendable>(
-    seconds: Double,
-    operation: @escaping @Sendable () async throws -> T
+  seconds: Double,
+  operation: @escaping @Sendable () async throws -> T
 ) async throws -> T {
-    try await withSignalHandling {
-        try await withTimeout(seconds: seconds, operation: operation)
-    }
+  try await withSignalHandling {
+    try await withTimeout(seconds: seconds, operation: operation)
+  }
 }
 
 /// Format a timeout duration for user display
 public func formatTimeout(_ seconds: Double) -> String {
-    if seconds < 60 {
-        return "\(Int(seconds)) seconds"
-    } else {
-        let minutes = Int(seconds / 60)
-        return "\(minutes) minute\(minutes == 1 ? "" : "s")"
-    }
+  if seconds < 60 {
+    return "\(Int(seconds)) seconds"
+  } else {
+    let minutes = Int(seconds / 60)
+    return "\(minutes) minute\(minutes == 1 ? "" : "s")"
+  }
 }

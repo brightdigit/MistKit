@@ -32,64 +32,64 @@ import MistKit
 
 /// Command to look up specific CloudKit zones by name
 public struct LookupZonesCommand: MistDemoCommand, OutputFormatting {
-    public typealias Config = LookupZonesConfig
-    public static let commandName = "lookup-zones"
-    public static let abstract = "Look up specific CloudKit zones by name"
-    public static let helpText = """
-        LOOKUP-ZONES - Look up specific CloudKit zones by name
+  public typealias Config = LookupZonesConfig
+  public static let commandName = "lookup-zones"
+  public static let abstract = "Look up specific CloudKit zones by name"
+  public static let helpText = """
+    LOOKUP-ZONES - Look up specific CloudKit zones by name
 
-        USAGE:
-            mistdemo lookup-zones [options]
+    USAGE:
+        mistdemo lookup-zones [options]
 
-        OPTIONS:
-            --zone-names <names>       Comma-separated zone names (default: "_defaultZone")
-            --output-format <format>   Output format: json, table, csv, yaml
+    OPTIONS:
+        --zone-names <names>       Comma-separated zone names (default: "_defaultZone")
+        --output-format <format>   Output format: json, table, csv, yaml
 
-        EXAMPLES:
-            # Look up the default zone
-            mistdemo lookup-zones
+    EXAMPLES:
+        # Look up the default zone
+        mistdemo lookup-zones
 
-            # Look up specific zones
-            mistdemo lookup-zones --zone-names "Articles,Photos"
+        # Look up specific zones
+        mistdemo lookup-zones --zone-names "Articles,Photos"
 
-        NOTES:
-            - Uses web authentication (private database) by default
-            - Zone names are case-sensitive
-        """
+    NOTES:
+        - Uses web authentication (private database) by default
+        - Zone names are case-sensitive
+    """
 
-    private let config: LookupZonesConfig
+  private let config: LookupZonesConfig
 
-    public init(config: LookupZonesConfig) {
-        self.config = config
+  public init(config: LookupZonesConfig) {
+    self.config = config
+  }
+
+  public func execute() async throws {
+    print("\n" + String(repeating: "=", count: 60))
+    print("🔍 Lookup CloudKit Zones")
+    print(String(repeating: "=", count: 60))
+
+    let service = try MistKitClientFactory.create(.private, from: config.base)
+    let zoneIDs = config.zoneNames.map { ZoneID(zoneName: $0, ownerName: nil) }
+
+    print("\n📋 Looking up \(zoneIDs.count) zone(s):")
+    for name in config.zoneNames {
+      print("   - \(name)")
     }
 
-    public func execute() async throws {
-        print("\n" + String(repeating: "=", count: 60))
-        print("🔍 Lookup CloudKit Zones")
-        print(String(repeating: "=", count: 60))
-
-        let service = try MistKitClientFactory.create(.private, from: config.base)
-        let zoneIDs = config.zoneNames.map { ZoneID(zoneName: $0, ownerName: nil) }
-
-        print("\n📋 Looking up \(zoneIDs.count) zone(s):")
-        for name in config.zoneNames {
-            print("   - \(name)")
-        }
-
-        let zones = try await service.lookupZones(zoneIDs: zoneIDs)
-        print("\n✅ Found \(zones.count) zone(s):")
-        for zone in zones {
-            print("   - \(zone.zoneName)")
-            if let owner = zone.ownerRecordName {
-                print("     Owner: \(owner)")
-            }
-            if !zone.capabilities.isEmpty {
-                print("     Capabilities: \(zone.capabilities.joined(separator: ", "))")
-            }
-        }
-
-        print("\n" + String(repeating: "=", count: 60))
-        print("✅ Lookup completed!")
-        print(String(repeating: "=", count: 60))
+    let zones = try await service.lookupZones(zoneIDs: zoneIDs)
+    print("\n✅ Found \(zones.count) zone(s):")
+    for zone in zones {
+      print("   - \(zone.zoneName)")
+      if let owner = zone.ownerRecordName {
+        print("     Owner: \(owner)")
+      }
+      if !zone.capabilities.isEmpty {
+        print("     Capabilities: \(zone.capabilities.joined(separator: ", "))")
+      }
     }
+
+    print("\n" + String(repeating: "=", count: 60))
+    print("✅ Lookup completed!")
+    print(String(repeating: "=", count: 60))
+  }
 }

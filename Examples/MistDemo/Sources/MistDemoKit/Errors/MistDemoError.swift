@@ -52,7 +52,7 @@ enum MistDemoError: LocalizedError, Sendable {
 
   /// Invalid format
   case invalidFormat(String)
-  
+
   /// Unknown command
   case unknownCommand(String)
 
@@ -60,21 +60,21 @@ enum MistDemoError: LocalizedError, Sendable {
 
   var errorDescription: String? {
     switch self {
-    case let .authenticationFailed(_, context):
+    case .authenticationFailed(_, let context):
       "Authentication failed: \(context)"
-    case let .configurationError(message, _):
+    case .configurationError(let message, _):
       "Configuration error: \(message)"
-    case let .cloudKitError(error, operation):
+    case .cloudKitError(let error, let operation):
       "CloudKit error during \(operation): \(error.localizedDescription)"
-    case let .invalidInput(field, value, reason):
+    case .invalidInput(let field, let value, let reason):
       "Invalid input for \(field) '\(value)': \(reason)"
     case .outputFormattingFailed:
       "Failed to format output"
-    case let .fileNotFound(path):
+    case .fileNotFound(let path):
       "File not found: \(path)"
-    case let .invalidFormat(message):
+    case .invalidFormat(let message):
       "Invalid format: \(message)"
-    case let .unknownCommand(command):
+    case .unknownCommand(let command):
       "Unknown command: \(command)"
     }
   }
@@ -83,11 +83,11 @@ enum MistDemoError: LocalizedError, Sendable {
     switch self {
     case .authenticationFailed:
       "Token may be expired. Run 'mistdemo auth' to sign in again."
-    case let .configurationError(_, suggestion):
+    case .configurationError(_, let suggestion):
       suggestion
     case .cloudKitError:
       "Check your CloudKit configuration and try again."
-    case let .invalidInput(field, _, _):
+    case .invalidInput(let field, _, _):
       "Provide a valid value for \(field)."
     case .outputFormattingFailed:
       "Try a different output format (--output json|table|csv|yaml)."
@@ -125,21 +125,21 @@ enum MistDemoError: LocalizedError, Sendable {
   /// Get error details for structured output
   var errorDetails: [String: String] {
     switch self {
-    case let .authenticationFailed(_, context):
+    case .authenticationFailed(_, let context):
       ["context": context]
     case .configurationError:
       [:]
-    case let .cloudKitError(_, operation):
+    case .cloudKitError(_, let operation):
       ["operation": operation]
-    case let .invalidInput(field, value, reason):
+    case .invalidInput(let field, let value, let reason):
       ["field": field, "value": value, "reason": reason]
     case .outputFormattingFailed:
       [:]
-    case let .fileNotFound(path):
+    case .fileNotFound(let path):
       ["path": path]
-    case let .invalidFormat(message):
+    case .invalidFormat(let message):
       ["message": message]
-    case let .unknownCommand(command):
+    case .unknownCommand(let command):
       ["command": command]
     }
   }

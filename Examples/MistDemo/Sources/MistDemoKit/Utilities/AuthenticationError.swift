@@ -47,7 +47,7 @@ enum AuthenticationError: LocalizedError, Sendable {
     switch self {
     case .serverToServerRequiresPublicDatabase:
       "Server-to-server authentication only supports public database access"
-    case let .failedToReadPrivateKeyFile(path, errorDescription):
+    case .failedToReadPrivateKeyFile(let path, let errorDescription):
       "Failed to read private key file at \(path): \(errorDescription)"
     case .missingPrivateKey:
       "Server-to-server authentication requires a private key (use --private-key or --private-key-file)"

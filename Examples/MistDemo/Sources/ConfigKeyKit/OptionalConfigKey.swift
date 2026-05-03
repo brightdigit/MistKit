@@ -100,4 +100,3 @@ public struct OptionalConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     return style.transform(base)
   }
 }
-

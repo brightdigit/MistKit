@@ -29,6 +29,6 @@
 
 /// Sort order for query operations
 public enum SortOrder: String, CaseIterable, Sendable {
-    case ascending = "asc"
-    case descending = "desc"
+  case ascending = "asc"
+  case descending = "desc"
 }

@@ -1,6 +1,6 @@
 //
 //  Command.swift
-//  ConfigKeyKit
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -31,31 +31,31 @@ import Foundation
 
 /// Generic protocol for CLI commands using Swift Configuration
 public protocol Command: Sendable {
-    /// Associated configuration type for this command
-    associatedtype Config: ConfigurationParseable
-    
-    /// Command name for CLI parsing
-    static var commandName: String { get }
-    
-    /// Abstract description of the command
-    static var abstract: String { get }
-    
-    /// Detailed help text for the command
-    static var helpText: String { get }
-    
-    /// Initialize command with configuration
-    init(config: Config)
+  /// Associated configuration type for this command
+  associatedtype Config: ConfigurationParseable
 
-    /// Execute the command asynchronously
-    func execute() async throws
+  /// Command name for CLI parsing
+  static var commandName: String { get }
 
-    /// Create a command instance with configuration
-    static func createInstance() async throws -> Self
+  /// Abstract description of the command
+  static var abstract: String { get }
+
+  /// Detailed help text for the command
+  static var helpText: String { get }
+
+  /// Initialize command with configuration
+  init(config: Config)
+
+  /// Execute the command asynchronously
+  func execute() async throws
+
+  /// Create a command instance with configuration
+  static func createInstance() async throws -> Self
 }
 
-public extension Command {
-    /// Print help information for this command
-    static func printHelp() {
-        print(helpText)
-    }
+extension Command {
+  /// Print help information for this command
+  public static func printHelp() {
+    print(helpText)
+  }
 }

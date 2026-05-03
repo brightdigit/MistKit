@@ -31,25 +31,25 @@ import Foundation
 
 /// Enum representing different types of field input values
 public enum FieldInputValue: Sendable {
-    case string(String)
-    case int(Int)
-    case double(Double)
-    case bool(Bool)
-    case asset(String) // Asset URL from upload token
+  case string(String)
+  case int(Int)
+  case double(Double)
+  case bool(Bool)
+  case asset(String)  // Asset URL from upload token
 
-    /// Convert to FieldType and string value for Field creation
-    func toFieldComponents() throws -> (FieldType, String) {
-        switch self {
-        case .string(let value):
-            return (.string, value)
-        case .int(let value):
-            return (.int64, String(value))
-        case .double(let value):
-            return (.double, String(value))
-        case .bool(let value):
-            return (.string, value ? "true" : "false")
-        case .asset(let url):
-            return (.asset, url)
-        }
+  /// Convert to FieldType and string value for Field creation
+  func toFieldComponents() throws -> (FieldType, String) {
+    switch self {
+    case .string(let value):
+      return (.string, value)
+    case .int(let value):
+      return (.int64, String(value))
+    case .double(let value):
+      return (.double, String(value))
+    case .bool(let value):
+      return (.string, value ? "true" : "false")
+    case .asset(let url):
+      return (.asset, url)
     }
+  }
 }

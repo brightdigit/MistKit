@@ -1,6 +1,6 @@
 //
 //  SidebarItem.swift
-//  MistDemoApp
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,23 +28,23 @@
 //
 
 enum SidebarItem: Hashable, CaseIterable {
-    case account
-    case zones
-    case query
+  case account
+  case zones
+  case query
 
-    var label: String {
-        switch self {
-        case .account: return "iCloud Account"
-        case .zones: return "Zones"
-        case .query: return "Query Records"
-        }
+  var label: String {
+    switch self {
+    case .account: return "iCloud Account"
+    case .zones: return "Zones"
+    case .query: return "Query Records"
     }
+  }
 
-    var systemImage: String {
-        switch self {
-        case .account: return "person.crop.circle"
-        case .zones: return "tray.full"
-        case .query: return "magnifyingglass"
-        }
+  var systemImage: String {
+    switch self {
+    case .account: return "person.crop.circle"
+    case .zones: return "tray.full"
+    case .query: return "magnifyingglass"
     }
+  }
 }

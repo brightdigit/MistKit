@@ -1,6 +1,6 @@
 //
 //  RootView.swift
-//  MistDemoApp
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,29 +28,29 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit)
-public import SwiftUI
+  public import SwiftUI
 
-public struct RootView: View {
+  public struct RootView: View {
     @EnvironmentObject private var service: NativeCloudKitService
     @State private var selection: SidebarItem? = .account
 
     public init() {}
 
     public var body: some View {
-        NavigationSplitView {
-            SidebarView(selection: $selection)
-        } detail: {
-            // The detail column needs its own NavigationStack so views like
-            // QueryView can push to RecordDetailView via NavigationLink(value:).
-            // Without this, NavigationLinks inside the detail column have no
-            // "next column" to target.
-            NavigationStack {
-                DetailColumnRoot(selection: selection)
-            }
+      NavigationSplitView {
+        SidebarView(selection: $selection)
+      } detail: {
+        // The detail column needs its own NavigationStack so views like
+        // QueryView can push to RecordDetailView via NavigationLink(value:).
+        // Without this, NavigationLinks inside the detail column have no
+        // "next column" to target.
+        NavigationStack {
+          DetailColumnRoot(selection: selection)
         }
-        .task {
-            await service.refreshAccountStatus()
-        }
+      }
+      .task {
+        await service.refreshAccountStatus()
+      }
     }
-}
+  }
 #endif

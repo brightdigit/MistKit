@@ -31,15 +31,15 @@ public import Foundation
 
 /// Errors that can occur during output formatting
 public enum OutputFormattingError: Error, LocalizedError {
-    case encodingFailure(String)
-    case unsupportedType(String)
-    
-    public var errorDescription: String? {
-        switch self {
-        case .encodingFailure(let message):
-            return "Output encoding failed: \(message)"
-        case .unsupportedType(let type):
-            return "Output formatting not supported for type: \(type)"
-        }
+  case encodingFailure(String)
+  case unsupportedType(String)
+
+  public var errorDescription: String? {
+    switch self {
+    case .encodingFailure(let message):
+      return "Output encoding failed: \(message)"
+    case .unsupportedType(let type):
+      return "Output formatting not supported for type: \(type)"
     }
+  }
 }

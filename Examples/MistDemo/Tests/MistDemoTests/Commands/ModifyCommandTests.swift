@@ -34,91 +34,93 @@ import Testing
 
 @Suite("ModifyCommand Tests")
 struct ModifyCommandTests {
-    @Test("Command has correct static properties")
-    func staticProperties() {
-        #expect(ModifyCommand.commandName == "modify")
-        #expect(ModifyCommand.abstract == "Run a batch of create/update/delete record operations")
-        #expect(ModifyCommand.helpText.contains("MODIFY"))
-    }
+  @Test("Command has correct static properties")
+  func staticProperties() {
+    #expect(ModifyCommand.commandName == "modify")
+    #expect(ModifyCommand.abstract == "Run a batch of create/update/delete record operations")
+    #expect(ModifyCommand.helpText.contains("MODIFY"))
+  }
 
-    @Test("Command initializes with config")
-    func initializesWithConfig() async throws {
-        let baseConfig = try await MistDemoConfig()
-        let config = ModifyConfig(base: baseConfig, operations: [])
-        let _ = ModifyCommand(config: config)
-    }
+  @Test("Command initializes with config")
+  func initializesWithConfig() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = ModifyConfig(base: baseConfig, operations: [])
+    _ = ModifyCommand(config: config)
+  }
 }
 
 @Suite("ModifyResultRow Tests")
 struct ModifyResultRowTests {
-    @Test("ModifyResultRow encodes all fields")
-    func encodesFields() throws {
-        let row = ModifyResultRow(
-            op: "applied",
-            recordType: "Note",
-            recordName: "note-1",
-            recordChangeTag: "tag-xyz"
-        )
-        let data = try JSONEncoder().encode(row)
-        let json = try #require(String(data: data, encoding: .utf8))
+  @Test("ModifyResultRow encodes all fields")
+  func encodesFields() throws {
+    let row = ModifyResultRow(
+      op: "applied",
+      recordType: "Note",
+      recordName: "note-1",
+      recordChangeTag: "tag-xyz"
+    )
+    let data = try JSONEncoder().encode(row)
+    let json = try #require(String(data: data, encoding: .utf8))
 
-        #expect(json.contains("\"op\":\"applied\""))
-        #expect(json.contains("\"recordType\":\"Note\""))
-        #expect(json.contains("\"recordName\":\"note-1\""))
-        #expect(json.contains("\"recordChangeTag\":\"tag-xyz\""))
-    }
+    #expect(json.contains("\"op\":\"applied\""))
+    #expect(json.contains("\"recordType\":\"Note\""))
+    #expect(json.contains("\"recordName\":\"note-1\""))
+    #expect(json.contains("\"recordChangeTag\":\"tag-xyz\""))
+  }
 }
 
 @Suite("ModifyOutput Tests")
 struct ModifyOutputTests {
-    @Test("ModifyOutput JSON envelope carries partialFailure metadata")
-    func envelopeIncludesMetadata() throws {
-        let row = ModifyResultRow(op: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1")
-        let envelope = ModifyOutput(
-            results: [row],
-            attempted: 3,
-            succeeded: 1,
-            partialFailure: true
-        )
-        let data = try JSONEncoder().encode(envelope)
-        let json = try #require(String(data: data, encoding: .utf8))
+  @Test("ModifyOutput JSON envelope carries partialFailure metadata")
+  func envelopeIncludesMetadata() throws {
+    let row = ModifyResultRow(
+      op: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1")
+    let envelope = ModifyOutput(
+      results: [row],
+      attempted: 3,
+      succeeded: 1,
+      partialFailure: true
+    )
+    let data = try JSONEncoder().encode(envelope)
+    let json = try #require(String(data: data, encoding: .utf8))
 
-        #expect(json.contains("\"attempted\":3"))
-        #expect(json.contains("\"succeeded\":1"))
-        #expect(json.contains("\"partialFailure\":true"))
-        #expect(json.contains("\"results\":["))
-    }
+    #expect(json.contains("\"attempted\":3"))
+    #expect(json.contains("\"succeeded\":1"))
+    #expect(json.contains("\"partialFailure\":true"))
+    #expect(json.contains("\"results\":["))
+  }
 
-    @Test("ModifyOutput partialFailure=false when all ops succeed")
-    func noPartialFailureWhenAllSucceed() throws {
-        let row = ModifyResultRow(op: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1")
-        let envelope = ModifyOutput(
-            results: [row],
-            attempted: 1,
-            succeeded: 1,
-            partialFailure: false
-        )
-        let data = try JSONEncoder().encode(envelope)
-        let json = try #require(String(data: data, encoding: .utf8))
+  @Test("ModifyOutput partialFailure=false when all ops succeed")
+  func noPartialFailureWhenAllSucceed() throws {
+    let row = ModifyResultRow(
+      op: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1")
+    let envelope = ModifyOutput(
+      results: [row],
+      attempted: 1,
+      succeeded: 1,
+      partialFailure: false
+    )
+    let data = try JSONEncoder().encode(envelope)
+    let json = try #require(String(data: data, encoding: .utf8))
 
-        #expect(json.contains("\"partialFailure\":false"))
-    }
+    #expect(json.contains("\"partialFailure\":false"))
+  }
 
-    @Test("ModifyOutput with delete-only batch and zero record results is not a partial failure")
-    func deleteOnlyBatchNotPartialFailure() throws {
-        // Delete operations succeed without returning a record. A delete-only
-        // batch where the response has zero records is a complete success,
-        // not a partial failure — the envelope reflects that.
-        let envelope = ModifyOutput(
-            results: [],
-            attempted: 3,
-            succeeded: 0,
-            partialFailure: false
-        )
-        let data = try JSONEncoder().encode(envelope)
-        let json = try #require(String(data: data, encoding: .utf8))
+  @Test("ModifyOutput with delete-only batch and zero record results is not a partial failure")
+  func deleteOnlyBatchNotPartialFailure() throws {
+    // Delete operations succeed without returning a record. A delete-only
+    // batch where the response has zero records is a complete success,
+    // not a partial failure — the envelope reflects that.
+    let envelope = ModifyOutput(
+      results: [],
+      attempted: 3,
+      succeeded: 0,
+      partialFailure: false
+    )
+    let data = try JSONEncoder().encode(envelope)
+    let json = try #require(String(data: data, encoding: .utf8))
 
-        #expect(json.contains("\"partialFailure\":false"))
-        #expect(json.contains("\"attempted\":3"))
-    }
+    #expect(json.contains("\"partialFailure\":false"))
+    #expect(json.contains("\"attempted\":3"))
+  }
 }

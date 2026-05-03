@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 //
 //  OutputEscapingDeprecatedTests.swift
 //  MistDemo
@@ -29,13 +30,13 @@
 
 import Foundation
 import Testing
+
 @testable import MistDemoKit
 
 /// Tests for deprecated OutputEscaping APIs
 /// These tests ensure backward compatibility during deprecation period
 @Suite("OutputEscaping Deprecated API Tests")
 struct OutputEscapingDeprecatedTests {
-
   // MARK: - CSV Escaping Tests
 
   @Test("CSV escape handles simple strings without special characters")
@@ -126,7 +127,7 @@ struct OutputEscapingDeprecatedTests {
       ("#comment", "\"#comment\""),
       ("@value", "\"@value\""),
       ("[array]", "\"[array]\""),
-      ("{object}", "\"{object}\"")
+      ("{object}", "\"{object}\""),
     ]
 
     for (input, expected) in testCases {
@@ -309,7 +310,7 @@ struct OutputEscapingDeprecatedTests {
 
   @Test("All escapers handle very long strings")
   func escapeVeryLongStrings() {
-    let input = String(repeating: "a", count: 10000)
+    let input = String(repeating: "a", count: 10_000)
 
     let csv = OutputEscaping.csvEscape(input)
     #expect(csv == input)
