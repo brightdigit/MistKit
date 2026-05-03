@@ -38,7 +38,13 @@ import Testing
 struct AuthenticationHelperTests {
   // MARK: - Server-to-Server Authentication Tests
 
-  @Test("Server-to-server auth with keyID creates ServerToServerAuthManager")
+  @Test(
+    "Server-to-server auth with keyID creates ServerToServerAuthManager",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "FileManager.temporaryDirectory write isn't supported under WASI sandbox"
+    )
+  )
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   func serverToServerAuthWithKeyID() async throws {
     // Create a temporary private key file

@@ -34,7 +34,13 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("MistKitClientFactory Tests")
+@Suite(
+  "MistKitClientFactory Tests",
+  .disabled(
+    if: TestPlatform.isWasm32,
+    "MistKitClientFactory throws .unsupportedPlatform on WASI by design (no URLSession)"
+  )
+)
 struct MistKitClientFactoryTests {
   // MARK: - Test Config Helpers
 

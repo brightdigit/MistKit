@@ -91,7 +91,13 @@ struct AsyncChannelTests {
     #expect(third == 3)
   }
 
-  @Test("Sequential receive operations")
+  @Test(
+    "Sequential receive operations",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't guarantee Task.sleep wakeup ordering across tasks"
+    )
+  )
   func sequentialReceives() async {
     let channel = AsyncChannel<String>()
 

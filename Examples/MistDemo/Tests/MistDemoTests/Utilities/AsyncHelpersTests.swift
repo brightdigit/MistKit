@@ -76,7 +76,13 @@ struct AsyncHelpersTests {
     }
   }
 
-  @Test("withTimeout with very short timeout")
+  @Test(
+    "withTimeout with very short timeout",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't time-slice the timeout race like Darwin/Linux dispatch"
+    )
+  )
   func veryShortTimeout() async {
     await #expect(throws: AsyncTimeoutError.self) {
       try await withTimeout(seconds: 0.001) {
