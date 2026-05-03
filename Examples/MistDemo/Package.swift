@@ -119,7 +119,7 @@ let package = Package(
                     name: "Hummingbird",
                     package: "hummingbird",
                     condition: .when(platforms: [
-                        .macOS, .iOS, .tvOS, .watchOS, .visionOS, .macCatalyst, .linux
+                        .macOS, .iOS, .tvOS, .visionOS, .macCatalyst, .linux
                     ])
                 ),
                 .product(name: "Configuration", package: "swift-configuration"),

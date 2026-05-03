@@ -273,7 +273,13 @@ struct AsyncChannelTests {
 
   // MARK: - Performance Tests
 
-  @Test("Channel handles rapid send/receive")
+  @Test(
+    "Channel handles rapid send/receive",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "wasm32 stack overflows on the deep async recursion of 100 tight send/receive cycles"
+    )
+  )
   func rapidSendReceive() async {
     let channel = AsyncChannel<Int>()
 
