@@ -97,7 +97,8 @@ let package = Package(
             from: "1.0.0",
             traits: ["CommandLineArguments"]
         ),
-        .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.0.0")
+        .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-async-algorithms.git", from: "1.0.0")
     ],
     targets: [
         .target(
@@ -123,7 +124,8 @@ let package = Package(
                     ])
                 ),
                 .product(name: "Configuration", package: "swift-configuration"),
-                .product(name: "UnixSignals", package: "swift-service-lifecycle")
+                .product(name: "UnixSignals", package: "swift-service-lifecycle"),
+                .product(name: "AsyncAlgorithms", package: "swift-async-algorithms")
             ],
             swiftSettings: swiftSettings
         ),
@@ -141,7 +143,8 @@ let package = Package(
             dependencies: [
                 "MistDemoKit",
                 "ConfigKeyKit",
-                .product(name: "MistKit", package: "MistKit")
+                .product(name: "MistKit", package: "MistKit"),
+                .product(name: "AsyncAlgorithms", package: "swift-async-algorithms")
             ],
             swiftSettings: swiftSettings
         )

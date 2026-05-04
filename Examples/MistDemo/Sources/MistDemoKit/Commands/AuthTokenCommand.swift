@@ -29,6 +29,7 @@
 
 #if canImport(Hummingbird)
 public import Foundation
+import AsyncAlgorithms
 import HTTPTypes
 import Hummingbird
 import Logging
@@ -107,7 +108,11 @@ public struct AuthTokenCommand: MistDemoCommand {
     let token: String
     do {
       token = try await withTimeoutAndSignals(seconds: 300) {
-        await tokenChannel.receive()
+        var iterator = tokenChannel.makeAsyncIterator()
+        guard let value = await iterator.next() else {
+          throw AuthTokenError.serverError("Token channel closed before producing a value")
+        }
+        return value
       }
     } catch let error as AsyncTimeoutError {
       serverTask.cancel()
@@ -120,7 +125,8 @@ public struct AuthTokenCommand: MistDemoCommand {
     print("✅ Authentication successful! Received token.")
 
     // Wait for response completion
-    await responseCompleteChannel.receive()
+    var responseIterator = responseCompleteChannel.makeAsyncIterator()
+    _ = await responseIterator.next()
 
     // Shutdown server
     serverTask.cancel()
