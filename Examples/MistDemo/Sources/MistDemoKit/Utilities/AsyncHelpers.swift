@@ -56,6 +56,7 @@ public func withTimeout<T: Sendable>(
     }
 
     group.addTask {
+      await Task.yield()
       try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
       throw AsyncTimeoutError.timeout("Operation timed out after \(seconds) seconds")
     }

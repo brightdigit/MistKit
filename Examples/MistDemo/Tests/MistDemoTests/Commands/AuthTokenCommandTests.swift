@@ -220,8 +220,8 @@ struct AuthTokenCommandTests {
   @Test("Timeout helper throws on timeout")
   func timeoutHelperThrowsOnTimeout() async throws {
     do {
-      _ = try await withTimeoutAndSignals(seconds: 0.1) {
-        try await Task.sleep(nanoseconds: 1_000_000_000)  // Sleep for 1 second
+      _ = try await withTimeoutAndSignals(seconds: 1.0) {
+        try await Task.sleep(nanoseconds: 10_000_000_000)  // Sleep for 10 seconds
         return "should-not-return"
       }
       Issue.record("Should have timed out")

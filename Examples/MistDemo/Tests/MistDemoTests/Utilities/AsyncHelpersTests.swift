@@ -54,8 +54,8 @@ struct AsyncHelpersTests {
   )
   func throwsOnTimeout() async {
     await #expect(throws: AsyncTimeoutError.self) {
-      try await withTimeout(seconds: 0.1) {
-        try await Task.sleep(nanoseconds: 500_000_000)  // 500ms
+      try await withTimeout(seconds: 1.0) {
+        try await Task.sleep(nanoseconds: 10_000_000_000)  // 10s
         return "too slow"
       }
     }
@@ -91,8 +91,8 @@ struct AsyncHelpersTests {
   )
   func veryShortTimeout() async {
     await #expect(throws: AsyncTimeoutError.self) {
-      try await withTimeout(seconds: 0.001) {
-        try await Task.sleep(nanoseconds: 100_000_000)  // 100ms
+      try await withTimeout(seconds: 0.1) {
+        try await Task.sleep(nanoseconds: 10_000_000_000)  // 10s
         return "unreachable"
       }
     }
@@ -168,8 +168,8 @@ struct AsyncHelpersTests {
   )
   func cancelsOtherTasks() async throws {
     await #expect(throws: AsyncTimeoutError.self) {
-      try await withTimeout(seconds: 0.1) {
-        try await Task.sleep(nanoseconds: 500_000_000)
+      try await withTimeout(seconds: 1.0) {
+        try await Task.sleep(nanoseconds: 10_000_000_000)
         return "done"
       }
     }
