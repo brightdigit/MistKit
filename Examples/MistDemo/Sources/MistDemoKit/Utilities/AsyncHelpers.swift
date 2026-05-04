@@ -56,8 +56,11 @@ public func withTimeout<T: Sendable>(
     }
 
     group.addTask {
-      await Task.yield()
-      try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+      let deadline = ContinuousClock.now.advanced(by: .milliseconds(Int(seconds * 1_000)))
+      while ContinuousClock.now < deadline {
+        try Task.checkCancellation()
+        await Task.yield()
+      }
       throw AsyncTimeoutError.timeout("Operation timed out after \(seconds) seconds")
     }
 
