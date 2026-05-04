@@ -28,7 +28,9 @@
 //
 
 public import Foundation
+#if os(Linux) || os(macOS) || swift(>=6.3)
 import UnixSignals
+#endif
 
 /// Timeout error for async operations
 public enum AsyncTimeoutError: Error, LocalizedError {
