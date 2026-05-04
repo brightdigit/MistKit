@@ -94,8 +94,10 @@ jobs:
           wasm-swift-flags: >-
             -Xcc -D_WASI_EMULATED_SIGNAL
             -Xcc -D_WASI_EMULATED_MMAN
+            -Xcc -D_WASI_EMULATED_PTHREAD
             -Xlinker -lwasi-emulated-signal
             -Xlinker -lwasi-emulated-mman
+            -Xlinker -lwasi-emulated-pthread
           working-directory: ${{ env.WORKING_DIR }}
       - name: Install curl (required by Codecov uploader)
         if: steps.build.outputs.contains-code-coverage == 'true'
