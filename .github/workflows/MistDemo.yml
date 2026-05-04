@@ -130,9 +130,11 @@ jobs:
         runs-on: [windows-2022, windows-2025]
         # MistDemo's Package.swift declares swift-tools-version: 6.2,
         # so Swift 6.1 is not supported.
+        # TODO: re-add swift-6.2-release once the swift-testing 6.2 +
+        # Windows parallel-runner crash is resolved (test process exits
+        # 1 with no diagnostic output after fanning out parallel tests;
+        # 6.3 is unaffected).
         swift:
-          - version: swift-6.2-release
-            build: 6.2-RELEASE
           - version: swift-6.3-release
             build: 6.3-RELEASE
     steps:

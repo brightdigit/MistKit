@@ -32,19 +32,6 @@ import Testing
 
 @testable import MistDemoKit
 
-/// An async operation that never returns naturally. Used as the "slow" body
-/// in `withTimeout` tests so the outcome depends only on the outer timeout
-/// firing, not on a wall-clock race between two `Task.sleep` durations.
-///
-/// Implemented via `Task.sleep` of an unreachable duration. We do not depend
-/// on that duration's precision — only on cooperative cancellation aborting
-/// the sleep when the enclosing task group calls `cancelAll()`, which is a
-/// mandatory contract of `Task.sleep`. Any normal return is a bug.
-private func neverReturning<T: Sendable>(_ type: T.Type = T.self) async throws -> T {
-  try await Task.sleep(nanoseconds: 3_600 * 1_000_000_000)  // 1 hour
-  fatalError("neverReturning must be cancelled before its sleep completes")
-}
-
 @Suite("AsyncHelpers Tests")
 struct AsyncHelpersTests {
   // MARK: - Timeout Tests
@@ -61,14 +48,15 @@ struct AsyncHelpersTests {
   @Test(
     "withTimeout throws on timeout",
     .enabled(
-      if: !TestPlatform.lacksPreemptiveTimerRace,
-      "executor can't reliably wake withTimeout's outer Task.sleep timer arm"
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't fire the timeout race against an inner Task.sleep"
     )
   )
   func throwsOnTimeout() async {
     await #expect(throws: AsyncTimeoutError.self) {
       try await withTimeout(seconds: 0.1) {
-        try await neverReturning(String.self)
+        try await Task.sleep(nanoseconds: 500_000_000)  // 500ms
+        return "too slow"
       }
     }
   }
@@ -97,14 +85,15 @@ struct AsyncHelpersTests {
   @Test(
     "withTimeout with very short timeout",
     .enabled(
-      if: !TestPlatform.lacksPreemptiveTimerRace,
-      "executor can't reliably wake withTimeout's outer Task.sleep timer arm"
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't time-slice the timeout race like Darwin/Linux dispatch"
     )
   )
   func veryShortTimeout() async {
     await #expect(throws: AsyncTimeoutError.self) {
-      try await withTimeout(seconds: 0.5) {
-        try await neverReturning(String.self)
+      try await withTimeout(seconds: 0.001) {
+        try await Task.sleep(nanoseconds: 100_000_000)  // 100ms
+        return "unreachable"
       }
     }
   }
@@ -173,14 +162,15 @@ struct AsyncHelpersTests {
   @Test(
     "withTimeout cancels other tasks in group",
     .enabled(
-      if: !TestPlatform.lacksPreemptiveTimerRace,
-      "executor can't reliably wake withTimeout's outer Task.sleep timer arm"
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't fire the timeout race against an inner Task.sleep"
     )
   )
   func cancelsOtherTasks() async throws {
     await #expect(throws: AsyncTimeoutError.self) {
       try await withTimeout(seconds: 0.1) {
-        try await neverReturning(String.self)
+        try await Task.sleep(nanoseconds: 500_000_000)
+        return "done"
       }
     }
   }
@@ -188,8 +178,8 @@ struct AsyncHelpersTests {
   @Test(
     "Multiple concurrent withTimeout operations",
     .enabled(
-      if: !TestPlatform.lacksPreemptiveTimerRace,
-      "executor can't reliably wake withTimeout's outer Task.sleep timer arm"
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't fire the timeout race against an inner Task.sleep"
     )
   )
   func multipleConcurrentTimeouts() async throws {
@@ -206,8 +196,9 @@ struct AsyncHelpersTests {
 
       group.addTask {
         do {
-          _ = try await withTimeout(seconds: 0.1) {
-            try await neverReturning(String.self)
+          _ = try await withTimeout(seconds: 0.05) {
+            try await Task.sleep(nanoseconds: 200_000_000)
+            return "slow"
           }
           Issue.record("Slow operation should timeout")
         } catch is AsyncTimeoutError {
@@ -224,14 +215,15 @@ struct AsyncHelpersTests {
   @Test(
     "withTimeout with short timeout throws",
     .enabled(
-      if: !TestPlatform.lacksPreemptiveTimerRace,
-      "executor can't reliably wake withTimeout's outer Task.sleep timer arm"
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't fire the timeout race against an inner Task.sleep"
     )
   )
   func zeroTimeout() async {
     await #expect(throws: AsyncTimeoutError.self) {
-      try await withTimeout(seconds: 0.5) {
-        try await neverReturning(String.self)
+      try await withTimeout(seconds: 0.001) {
+        try await Task.sleep(nanoseconds: 1_000_000_000)  // 1s
+        return "should not return"
       }
     }
   }

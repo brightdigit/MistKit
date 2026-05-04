@@ -41,23 +41,4 @@ internal enum TestPlatform {
       return false
     #endif
   }()
-
-  /// True when the current runtime's task executor cannot fairly schedule a
-  /// `withTimeout`'s outer timer arm while another task is suspended. Even with
-  /// the inner operation parked indefinitely, the outer `Task.sleep` still has
-  /// to be woken — and on these runtimes it isn't, reliably:
-  ///
-  ///   - wasm32: single-threaded `CooperativeExecutor` with explicit yield
-  ///     points; the timeout task's wakeup is not interleaved.
-  ///   - watchOS / visionOS: cooperative scheduler under simulator CI load
-  ///     delays the timeout task's wakeup past test budgets.
-  ///
-  /// Tests that exercise the timeout race itself must be gated on this.
-  internal static let lacksPreemptiveTimerRace: Bool = {
-    #if arch(wasm32) || os(watchOS) || os(visionOS)
-      return true
-    #else
-      return false
-    #endif
-  }()
 }
