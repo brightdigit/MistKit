@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 //
 //  AuthenticationHelperTests.swift
 //  MistDemo
@@ -29,15 +30,21 @@
 
 import Foundation
 import Testing
+
 @testable import MistDemoKit
 @testable import MistKit
 
 @Suite("AuthenticationHelper Tests")
 struct AuthenticationHelperTests {
-
   // MARK: - Server-to-Server Authentication Tests
 
-  @Test("Server-to-server auth with keyID creates ServerToServerAuthManager")
+  @Test(
+    "Server-to-server auth with keyID creates ServerToServerAuthManager",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "FileManager.temporaryDirectory write isn't supported under WASI sandbox"
+    )
+  )
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   func serverToServerAuthWithKeyID() async throws {
     // Create a temporary private key file
@@ -46,12 +53,12 @@ struct AuthenticationHelperTests {
 
     // Use a test private key (this is a dummy key for testing only)
     let privateKeyPEM = """
-    -----BEGIN PRIVATE KEY-----
-    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
-    OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
-    1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
-    -----END PRIVATE KEY-----
-    """
+      -----BEGIN PRIVATE KEY-----
+      MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
+      OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
+      1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
+      -----END PRIVATE KEY-----
+      """
 
     try privateKeyPEM.write(to: keyFile, atomically: true, encoding: .utf8)
 
@@ -83,12 +90,12 @@ struct AuthenticationHelperTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   func serverToServerAuthWithInlineKey() async throws {
     let privateKeyPEM = """
-    -----BEGIN PRIVATE KEY-----
-    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
-    OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
-    1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
-    -----END PRIVATE KEY-----
-    """
+      -----BEGIN PRIVATE KEY-----
+      MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
+      OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
+      1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
+      -----END PRIVATE KEY-----
+      """
 
     do {
       let result = try await AuthenticationHelper.setupAuthentication(
@@ -111,12 +118,12 @@ struct AuthenticationHelperTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   func serverToServerEnforcesPublicDatabase() async throws {
     let privateKeyPEM = """
-    -----BEGIN PRIVATE KEY-----
-    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
-    OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
-    1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
-    -----END PRIVATE KEY-----
-    """
+      -----BEGIN PRIVATE KEY-----
+      MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
+      OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
+      1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
+      -----END PRIVATE KEY-----
+      """
 
     // Attempt to override with private database should fail
     do {
@@ -298,44 +305,42 @@ struct AuthenticationHelperTests {
 
   // MARK: - Token Resolution Tests
 
-  @Test("resolveAPIToken returns provided token when not empty")
+  @Test("resolveAPIToken returns provided token when not empty", .mockEnvironment([:]))
   func resolveAPITokenReturnsProvidedToken() {
     let token = "my-api-token"
-    let resolved = AuthenticationHelper.resolveAPIToken(token)
+    let resolved = AuthenticationHelper.resolveAPIToken(token, environment: MockEnvironment.reader)
     #expect(resolved == token)
   }
 
-  @Test("resolveAPIToken checks environment when empty")
+  @Test(
+    "resolveAPIToken checks environment when empty",
+    .mockEnvironment(["CLOUDKIT_API_TOKEN": "env-api-token"])
+  )
   func resolveAPITokenChecksEnvironment() {
-    let resolved = AuthenticationHelper.resolveAPIToken("")
-    // Should return environment value or empty string (it's a String, not optional)
-    // This test just verifies the function executes without error
-    _ = resolved
+    let resolved = AuthenticationHelper.resolveAPIToken("", environment: MockEnvironment.reader)
+    #expect(resolved == "env-api-token")
   }
 
-  @Test("resolveWebAuthToken returns provided token when not empty")
+  @Test("resolveWebAuthToken returns provided token when not empty", .mockEnvironment([:]))
   func resolveWebAuthTokenReturnsProvidedToken() {
     let token = "my-web-auth-token"
-    let resolved = AuthenticationHelper.resolveWebAuthToken(token)
+    let resolved = AuthenticationHelper.resolveWebAuthToken(
+      token, environment: MockEnvironment.reader)
     #expect(resolved == token)
   }
 
-  @Test("resolveWebAuthToken returns nil for empty string")
+  @Test("resolveWebAuthToken returns nil for empty string", .mockEnvironment([:]))
   func resolveWebAuthTokenReturnsNilForEmpty() {
-    let resolved = AuthenticationHelper.resolveWebAuthToken("")
-    // Should return nil if environment variable not set
-    if ProcessInfo.processInfo.environment["CLOUDKIT_WEB_AUTH_TOKEN"] == nil {
-      #expect(resolved == nil)
-    }
+    let resolved = AuthenticationHelper.resolveWebAuthToken("", environment: MockEnvironment.reader)
+    #expect(resolved == nil)
   }
 
-  @Test("resolveWebAuthToken checks environment variable")
+  @Test(
+    "resolveWebAuthToken checks environment variable",
+    .mockEnvironment(["CLOUDKIT_WEB_AUTH_TOKEN": "env-token"])
+  )
   func resolveWebAuthTokenChecksEnvironment() {
-    // Set environment variable temporarily
-    setenv("CLOUDKIT_WEB_AUTH_TOKEN", "env-token", 1)
-    defer { unsetenv("CLOUDKIT_WEB_AUTH_TOKEN") }
-
-    let resolved = AuthenticationHelper.resolveWebAuthToken("")
+    let resolved = AuthenticationHelper.resolveWebAuthToken("", environment: MockEnvironment.reader)
     #expect(resolved == "env-token")
   }
 
@@ -345,12 +350,12 @@ struct AuthenticationHelperTests {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   func serverToServerTakesPrecedence() async throws {
     let privateKeyPEM = """
-    -----BEGIN PRIVATE KEY-----
-    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
-    OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
-    1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
-    -----END PRIVATE KEY-----
-    """
+      -----BEGIN PRIVATE KEY-----
+      MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgevZzL1gdAFr88hb2
+      OF/2NxApJCzGCEDdfSp6VQO30hyhRANCAAQRWz+jn65BtOMvdyHKcvjBeBSDZH2r
+      1RTwjmYSi9R/zpBnuQ4EiMnCqfMPWiZqB4QdbAd0E7oH50VpuZ1P087G
+      -----END PRIVATE KEY-----
+      """
 
     do {
       let result = try await AuthenticationHelper.setupAuthentication(

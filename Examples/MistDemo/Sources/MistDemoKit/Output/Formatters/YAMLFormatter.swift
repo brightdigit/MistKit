@@ -32,61 +32,61 @@ import MistKit
 
 /// Formatter for YAML output
 public struct YAMLFormatter: OutputFormatter {
-    // MARK: Lifecycle
+  // MARK: Lifecycle
 
-    public init() {}
+  public init() {}
 
-    // MARK: Public
+  // MARK: Public
 
-    public func format<T: Encodable>(_ value: T) throws -> String {
-        let escaper = YAMLEscaper()
+  public func format<T: Encodable>(_ value: T) throws -> String {
+    let escaper = YAMLEscaper()
 
-        // For YAML format, we need to handle specific types
-        if let recordInfo = value as? RecordInfo {
-            return formatRecord(recordInfo, escaper: escaper)
-        } else if let userInfo = value as? UserInfo {
-            return formatUser(userInfo, escaper: escaper)
-        } else {
-            // Fall back to JSON for unknown types
-            let jsonFormatter = JSONFormatter(pretty: true)
-            return try jsonFormatter.format(value)
-        }
+    // For YAML format, we need to handle specific types
+    if let recordInfo = value as? RecordInfo {
+      return formatRecord(recordInfo, escaper: escaper)
+    } else if let userInfo = value as? UserInfo {
+      return formatUser(userInfo, escaper: escaper)
+    } else {
+      // Fall back to JSON for unknown types
+      let jsonFormatter = JSONFormatter(pretty: true)
+      return try jsonFormatter.format(value)
+    }
+  }
+
+  // MARK: Private
+
+  private func formatRecord(_ record: RecordInfo, escaper: YAMLEscaper) -> String {
+    var output = ""
+
+    output += "recordName: \(escaper.escape(record.recordName))\n"
+    output += "recordType: \(escaper.escape(record.recordType))\n"
+
+    if !record.fields.isEmpty {
+      output += "fields:\n"
+      for (fieldName, fieldValue) in record.fields.sorted(by: { $0.key < $1.key }) {
+        let valueString = FieldValueFormatter.displayString(fieldValue)
+        output += "  \(escaper.escape(fieldName)): \(escaper.escape(valueString))\n"
+      }
     }
 
-    // MARK: Private
+    return output
+  }
 
-    private func formatRecord(_ record: RecordInfo, escaper: YAMLEscaper) -> String {
-        var output = ""
+  private func formatUser(_ user: UserInfo, escaper: YAMLEscaper) -> String {
+    var output = ""
 
-        output += "recordName: \(escaper.escape(record.recordName))\n"
-        output += "recordType: \(escaper.escape(record.recordType))\n"
+    output += "userRecordName: \(escaper.escape(user.userRecordName))\n"
 
-        if !record.fields.isEmpty {
-            output += "fields:\n"
-            for (fieldName, fieldValue) in record.fields.sorted(by: { $0.key < $1.key }) {
-                let valueString = FieldValueFormatter.displayString(fieldValue)
-                output += "  \(escaper.escape(fieldName)): \(escaper.escape(valueString))\n"
-            }
-        }
-
-        return output
+    if let firstName = user.firstName {
+      output += "firstName: \(escaper.escape(firstName))\n"
+    }
+    if let lastName = user.lastName {
+      output += "lastName: \(escaper.escape(lastName))\n"
+    }
+    if let emailAddress = user.emailAddress {
+      output += "emailAddress: \(escaper.escape(emailAddress))\n"
     }
 
-    private func formatUser(_ user: UserInfo, escaper: YAMLEscaper) -> String {
-        var output = ""
-
-        output += "userRecordName: \(escaper.escape(user.userRecordName))\n"
-
-        if let firstName = user.firstName {
-            output += "firstName: \(escaper.escape(firstName))\n"
-        }
-        if let lastName = user.lastName {
-            output += "lastName: \(escaper.escape(lastName))\n"
-        }
-        if let emailAddress = user.emailAddress {
-            output += "emailAddress: \(escaper.escape(emailAddress))\n"
-        }
-
-        return output
-    }
+    return output
+  }
 }

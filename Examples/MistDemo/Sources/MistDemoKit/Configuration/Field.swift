@@ -31,60 +31,64 @@ import Foundation
 
 /// Field definition for create operations
 public struct Field: Sendable {
-    public let name: String
-    public let type: FieldType
-    public let value: String
-    
-    public init(name: String, type: FieldType, value: String) {
-        self.name = name
-        self.type = type
-        self.value = value
+  public let name: String
+  public let type: FieldType
+  public let value: String
+
+  public init(name: String, type: FieldType, value: String) {
+    self.name = name
+    self.type = type
+    self.value = value
+  }
+
+  /// Parse a field from string format "name:type:value"
+  /// - Parameter input: String in format "name:type:value" (e.g., "title:string:Hello World")
+  /// - Throws: FieldParsingError if the format is invalid
+  public init(parsing input: String) throws {
+    let components = input.split(separator: ":", maxSplits: 2, omittingEmptySubsequences: false)
+
+    guard components.count == 3 else {
+      throw FieldParsingError.invalidFormat(input, expected: "name:type:value")
     }
 
-    /// Parse a field from string format "name:type:value"
-    /// - Parameter input: String in format "name:type:value" (e.g., "title:string:Hello World")
-    /// - Throws: FieldParsingError if the format is invalid
-    public init(parsing input: String) throws {
-        let components = input.split(separator: ":", maxSplits: 2, omittingEmptySubsequences: false)
+    let name = String(components[0]).trimmingCharacters(in: .whitespaces)
+    let typeString = String(components[1]).trimmingCharacters(in: .whitespaces)
+    let value = String(components[2])  // Don't trim value as it may contain meaningful whitespace
 
-        guard components.count == 3 else {
-            throw FieldParsingError.invalidFormat(input, expected: "name:type:value")
-        }
-
-        let name = String(components[0]).trimmingCharacters(in: .whitespaces)
-        let typeString = String(components[1]).trimmingCharacters(in: .whitespaces)
-        let value = String(components[2]) // Don't trim value as it may contain meaningful whitespace
-
-        guard !name.isEmpty else {
-            throw FieldParsingError.emptyFieldName(input)
-        }
-
-        guard let type = FieldType(rawValue: typeString.lowercased()) else {
-            throw FieldParsingError.unknownFieldType(typeString, available: FieldType.allCases.map(\.rawValue))
-        }
-
-        self.init(name: name, type: type, value: value)
+    guard !name.isEmpty else {
+      throw FieldParsingError.emptyFieldName(input)
     }
 
-    /// Parse multiple fields from an array of strings
-    /// - Parameter inputs: Array of strings in format "name:type:value"
-    /// - Returns: Array of parsed Field instances
-    /// - Throws: FieldParsingError if any field has an invalid format
-    public static func parseMultiple(_ inputs: [String]) throws -> [Field] {
-        return try inputs.map { try Field(parsing: $0) }
+    guard let type = FieldType(rawValue: typeString.lowercased()) else {
+      throw FieldParsingError.unknownFieldType(
+        typeString, available: FieldType.allCases.map(\.rawValue))
     }
 
-    /// Legacy parse method - delegates to init(parsing:)
-    /// - Deprecated: Use `init(parsing:)` instead
-    @available(*, deprecated, renamed: "init(parsing:)", message: "Use Field(parsing:) instead of Field.parse()")
-    public static func parse(_ input: String) throws -> Field {
-        return try Field(parsing: input)
-    }
+    self.init(name: name, type: type, value: value)
+  }
 
-    /// Legacy parseFields method - delegates to parseMultiple
-    /// - Deprecated: Use `parseMultiple(_:)` instead
-    @available(*, deprecated, renamed: "parseMultiple", message: "Use Field.parseMultiple() instead")
-    public static func parseFields(_ inputs: [String]) throws -> [Field] {
-        return try parseMultiple(inputs)
-    }
+  /// Parse multiple fields from an array of strings
+  /// - Parameter inputs: Array of strings in format "name:type:value"
+  /// - Returns: Array of parsed Field instances
+  /// - Throws: FieldParsingError if any field has an invalid format
+  public static func parseMultiple(_ inputs: [String]) throws -> [Field] {
+    try inputs.map { try Field(parsing: $0) }
+  }
+
+  /// Legacy parse method - delegates to init(parsing:)
+  /// - Deprecated: Use `init(parsing:)` instead
+  @available(
+    *, deprecated, renamed: "init(parsing:)",
+    message: "Use Field(parsing:) instead of Field.parse()"
+  )
+  public static func parse(_ input: String) throws -> Field {
+    try Field(parsing: input)
+  }
+
+  /// Legacy parseFields method - delegates to parseMultiple
+  /// - Deprecated: Use `parseMultiple(_:)` instead
+  @available(*, deprecated, renamed: "parseMultiple", message: "Use Field.parseMultiple() instead")
+  public static func parseFields(_ inputs: [String]) throws -> [Field] {
+    try parseMultiple(inputs)
+  }
 }

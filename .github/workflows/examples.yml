@@ -11,7 +11,7 @@ jobs:
   test-examples:
     name: Test ${{ matrix.example }} on Ubuntu
     runs-on: ubuntu-latest
-    container: swift:6.2
+    container: swift:6.3
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Build and Test ${{ matrix.example }}
         uses: brightdigit/swift-build@v1

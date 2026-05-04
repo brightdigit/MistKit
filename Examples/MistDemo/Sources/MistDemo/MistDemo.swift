@@ -31,8 +31,8 @@ import MistDemoKit
 
 @main
 struct MistDemo {
-    @MainActor
-    static func main() async throws {
-        try await MistDemoRunner.run()
-    }
+  @MainActor
+  static func main() async throws {
+    try await MistDemoRunner.run()
+  }
 }

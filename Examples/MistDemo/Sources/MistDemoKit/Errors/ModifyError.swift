@@ -31,49 +31,50 @@ public import Foundation
 
 /// Errors that can occur during modify command execution
 public enum ModifyError: Error, LocalizedError {
-    case operationsRequired
-    case operationsFileError(String, String)
-    case emptyStdin
-    case stdinError(String)
-    case invalidOperationType(String)
-    case missingRecordName(opIndex: Int, op: String)
-    case operationFailed(String)
+  case operationsRequired
+  case operationsFileError(String, String)
+  case emptyStdin
+  case stdinError(String)
+  case invalidOperationType(String)
+  case missingRecordName(opIndex: Int, op: String)
+  case operationFailed(String)
 
-    public var errorDescription: String? {
-        switch self {
-        case .operationsRequired:
-            return "No operations provided. Use --operations-file <path> or pipe JSON to stdin."
-        case .operationsFileError(let path, let reason):
-            return "Failed to read operations file '\(path)': \(reason)"
-        case .emptyStdin:
-            return "Empty stdin. Provide a JSON array of operations."
-        case .stdinError(let reason):
-            return "Failed to parse operations from stdin: \(reason)"
-        case .invalidOperationType(let op):
-            return "Unknown operation type '\(op)'. Use one of: create, update, delete."
-        case .missingRecordName(let index, let op):
-            return "Operation #\(index) (\(op)) is missing required 'recordName'."
-        case .operationFailed(let reason):
-            return "Modify operation failed: \(reason)"
-        }
+  public var errorDescription: String? {
+    switch self {
+    case .operationsRequired:
+      return "No operations provided. Use --operations-file <path> or pipe JSON to stdin."
+    case .operationsFileError(let path, let reason):
+      return "Failed to read operations file '\(path)': \(reason)"
+    case .emptyStdin:
+      return "Empty stdin. Provide a JSON array of operations."
+    case .stdinError(let reason):
+      return "Failed to parse operations from stdin: \(reason)"
+    case .invalidOperationType(let op):
+      return "Unknown operation type '\(op)'. Use one of: create, update, delete."
+    case .missingRecordName(let index, let op):
+      return "Operation #\(index) (\(op)) is missing required 'recordName'."
+    case .operationFailed(let reason):
+      return "Modify operation failed: \(reason)"
     }
+  }
 
-    public var recoverySuggestion: String? {
-        switch self {
-        case .operationsRequired:
-            return "Provide a JSON array: --operations-file ops.json or echo '[...]' | mistdemo modify"
-        case .operationsFileError:
-            return "Ensure the file exists and contains a JSON array of operations."
-        case .emptyStdin:
-            return "Pipe JSON: echo '[{\"op\":\"create\",\"recordType\":\"Note\",\"fields\":{\"title\":\"x\"}}]' | mistdemo modify"
-        case .stdinError:
-            return "Check the JSON syntax of the piped input."
-        case .invalidOperationType:
-            return "Set 'op' to 'create', 'update', or 'delete'."
-        case .missingRecordName:
-            return "Update and delete operations require a 'recordName'. Create may omit it."
-        case .operationFailed:
-            return nil
-        }
+  public var recoverySuggestion: String? {
+    switch self {
+    case .operationsRequired:
+      return "Provide a JSON array: --operations-file ops.json or echo '[...]' | mistdemo modify"
+    case .operationsFileError:
+      return "Ensure the file exists and contains a JSON array of operations."
+    case .emptyStdin:
+      return
+        "Pipe JSON: echo '[{\"op\":\"create\",\"recordType\":\"Note\",\"fields\":{\"title\":\"x\"}}]' | mistdemo modify"
+    case .stdinError:
+      return "Check the JSON syntax of the piped input."
+    case .invalidOperationType:
+      return "Set 'op' to 'create', 'update', or 'delete'."
+    case .missingRecordName:
+      return "Update and delete operations require a 'recordName'. Create may omit it."
+    case .operationFailed:
+      return nil
     }
+  }
 }

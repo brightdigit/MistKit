@@ -1,6 +1,6 @@
 //
 //  DetailColumnRoot.swift
-//  MistDemoApp
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,25 +27,27 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftUI
+#if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+  import SwiftUI
 
-struct DetailColumnRoot: View {
+  struct DetailColumnRoot: View {
     let selection: SidebarItem?
 
     var body: some View {
-        switch selection {
-        case .account:
-            AccountView()
-        case .zones:
-            ZoneListView()
-        case .query:
-            QueryView()
-        case nil:
-            ContentUnavailableView(
-                "Pick a section from the sidebar",
-                systemImage: "sidebar.left",
-                description: Text("Account, Zones, or Query Records")
-            )
-        }
+      switch selection {
+      case .account:
+        AccountView()
+      case .zones:
+        ZoneListView()
+      case .query:
+        QueryView()
+      case nil:
+        ContentUnavailableView(
+          "Pick a section from the sidebar",
+          systemImage: "sidebar.left",
+          description: Text("Account, Zones, or Query Records")
+        )
+      }
     }
-}
+  }
+#endif

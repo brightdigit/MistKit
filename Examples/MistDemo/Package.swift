@@ -80,7 +80,10 @@ let package = Package(
     name: "MistDemo",
     platforms: [
         .macOS(.v15),
-        .iOS(.v17)
+        .iOS(.v18),
+        .tvOS(.v18),
+        .watchOS(.v11),
+        .visionOS(.v2)
     ],
     products: [
         .executable(name: "mistdemo", targets: ["MistDemo"]),
@@ -112,12 +115,15 @@ let package = Package(
             dependencies: [
                 "ConfigKeyKit",
                 .product(name: "MistKit", package: "MistKit"),
-                .product(name: "Hummingbird", package: "hummingbird"),
+                .product(
+                    name: "Hummingbird",
+                    package: "hummingbird",
+                    condition: .when(platforms: [
+                        .macOS, .iOS, .tvOS, .visionOS, .macCatalyst, .linux
+                    ])
+                ),
                 .product(name: "Configuration", package: "swift-configuration"),
                 .product(name: "UnixSignals", package: "swift-service-lifecycle")
-            ],
-            resources: [
-                .copy("Resources")
             ],
             swiftSettings: swiftSettings
         ),

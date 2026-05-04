@@ -1,6 +1,6 @@
 //
 //  MistDemoConfiguration.swift
-//  ConfigKeyKit
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -53,13 +53,13 @@ public struct MistDemoConfiguration: Sendable {
 
       // 4. In-memory defaults (lowest priority)
       InMemoryProvider(values: [
-        "port": 8080,
+        "port": 8_080,
         "skip.auth": false,
         "test.all.auth": false,
         "test.api.only": false,
         "test.adaptive": false,
-        "test.server.to.server": false
-      ])
+        "test.server.to.server": false,
+      ]),
     ])
   }
 
@@ -81,7 +81,8 @@ public struct MistDemoConfiguration: Sendable {
     isSecret: Bool = false
   ) -> String? {
     if let defaultValue = defaultValue {
-      return configReader.string(forKey: Configuration.ConfigKey(key), isSecret: isSecret, default: defaultValue)
+      return configReader.string(
+        forKey: Configuration.ConfigKey(key), isSecret: isSecret, default: defaultValue)
     } else {
       return configReader.string(forKey: Configuration.ConfigKey(key), isSecret: isSecret)
     }
@@ -127,5 +128,4 @@ public struct MistDemoConfiguration: Sendable {
       .split(separator: "|")
       .map { String($0).trimmingCharacters(in: .whitespaces) } ?? []
   }
-
 }

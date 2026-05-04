@@ -31,19 +31,19 @@ import Foundation
 
 /// Factory for creating output escapers based on output format
 public enum OutputEscaperFactory {
-    /// Create an appropriate escaper for the given output format
-    /// - Parameter format: The output format
-    /// - Returns: An escaper configured for the specified format
-    public static func escaper(for format: OutputFormat) -> OutputEscaper {
-        switch format {
-        case .csv:
-            return CSVEscaper()
-        case .yaml:
-            return YAMLEscaper()
-        case .json:
-            return JSONEscaper()
-        case .table:
-            return TableEscaper()
-        }
+  /// Create an appropriate escaper for the given output format
+  /// - Parameter format: The output format
+  /// - Returns: An escaper configured for the specified format
+  public static func escaper(for format: OutputFormat) -> OutputEscaper {
+    switch format {
+    case .csv:
+      return CSVEscaper()
+    case .yaml:
+      return YAMLEscaper()
+    case .json:
+      return JSONEscaper()
+    case .table:
+      return TableEscaper()
     }
+  }
 }

@@ -31,55 +31,60 @@ public import Foundation
 
 /// Errors that can occur during update command execution
 public enum UpdateError: Error, LocalizedError {
-    case recordNameRequired
-    case noFieldsProvided
-    case fieldConversionError(String, FieldType, String, String)
-    case jsonFileError(String, String)
-    case emptyStdin
-    case stdinError(String)
-    case operationFailed(String)
-    case conflict(reason: String?)
+  case recordNameRequired
+  case noFieldsProvided
+  case fieldConversionError(String, FieldType, String, String)
+  case jsonFileError(String, String)
+  case emptyStdin
+  case stdinError(String)
+  case operationFailed(String)
+  case conflict(reason: String?)
 
-    public var errorDescription: String? {
-        switch self {
-        case .recordNameRequired:
-            return "Record name is required for update operations. Use --record-name <name>"
-        case .noFieldsProvided:
-            return "No fields provided. Use --field, --json-file, or --stdin to specify fields to update"
-        case .fieldConversionError(let fieldName, let fieldType, let value, let reason):
-            return "Failed to convert field '\(fieldName)' of type '\(fieldType.rawValue)' with value '\(value)': \(reason)"
-        case .jsonFileError(let filename, let reason):
-            return "Failed to read JSON file '\(filename)': \(reason)"
-        case .emptyStdin:
-            return "Empty stdin. Provide JSON data when using --stdin"
-        case .stdinError(let reason):
-            return "Failed to read from stdin: \(reason)"
-        case .operationFailed(let reason):
-            return "Update operation failed: \(reason)"
-        case .conflict(let reason):
-            if let reason {
-                return "Update conflict: the record was modified on the server (\(reason))"
-            }
-            return "Update conflict: the record was modified on the server"
-        }
+  public var errorDescription: String? {
+    switch self {
+    case .recordNameRequired:
+      return "Record name is required for update operations. Use --record-name <name>"
+    case .noFieldsProvided:
+      return "No fields provided. Use --field, --json-file, or --stdin to specify fields to update"
+    case .fieldConversionError(let fieldName, let fieldType, let value, let reason):
+      return
+        "Failed to convert field '\(fieldName)' of type '\(fieldType.rawValue)' with value '\(value)': \(reason)"
+    case .jsonFileError(let filename, let reason):
+      return "Failed to read JSON file '\(filename)': \(reason)"
+    case .emptyStdin:
+      return "Empty stdin. Provide JSON data when using --stdin"
+    case .stdinError(let reason):
+      return "Failed to read from stdin: \(reason)"
+    case .operationFailed(let reason):
+      return "Update operation failed: \(reason)"
+    case .conflict(let reason):
+      if let reason {
+        return "Update conflict: the record was modified on the server (\(reason))"
+      }
+      return "Update conflict: the record was modified on the server"
     }
+  }
 
-    public var recoverySuggestion: String? {
-        switch self {
-        case .recordNameRequired:
-            return "Specify a record name: mistdemo update --record-name my-record-123 --field \"title:string:Updated\""
-        case .noFieldsProvided:
-            return "Provide at least one field to update using --field, --json-file, or --stdin"
-        case .fieldConversionError:
-            return "Check that the field value matches the expected type. Use --help for field type information"
-        case .jsonFileError:
-            return "Ensure the JSON file exists and contains valid JSON"
-        case .emptyStdin:
-            return "Pipe JSON data to stdin: echo '{\"title\":\"Updated\"}' | mistdemo update --record-name my-record --stdin"
-        case .conflict:
-            return "Re-run with --force to overwrite the server record, or fetch the current --record-change-tag and retry."
-        case .stdinError, .operationFailed:
-            return nil
-        }
+  public var recoverySuggestion: String? {
+    switch self {
+    case .recordNameRequired:
+      return
+        "Specify a record name: mistdemo update --record-name my-record-123 --field \"title:string:Updated\""
+    case .noFieldsProvided:
+      return "Provide at least one field to update using --field, --json-file, or --stdin"
+    case .fieldConversionError:
+      return
+        "Check that the field value matches the expected type. Use --help for field type information"
+    case .jsonFileError:
+      return "Ensure the JSON file exists and contains valid JSON"
+    case .emptyStdin:
+      return
+        "Pipe JSON data to stdin: echo '{\"title\":\"Updated\"}' | mistdemo update --record-name my-record --stdin"
+    case .conflict:
+      return
+        "Re-run with --force to overwrite the server record, or fetch the current --record-change-tag and retry."
+    case .stdinError, .operationFailed:
+      return nil
     }
+  }
 }

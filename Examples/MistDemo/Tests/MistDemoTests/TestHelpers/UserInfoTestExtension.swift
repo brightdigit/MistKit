@@ -1,3 +1,4 @@
+// swiftlint:disable file_name
 //
 //  UserInfoTestExtension.swift
 //  MistDemoTests

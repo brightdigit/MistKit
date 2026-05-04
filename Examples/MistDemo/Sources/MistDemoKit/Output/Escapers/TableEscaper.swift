@@ -31,15 +31,15 @@ import Foundation
 
 /// Table escaper for plain text table output
 public struct TableEscaper: OutputEscaper {
-    public init() {}
+  public init() {}
 
-    public func escape(_ string: String) -> String {
-        // For table output, replace newlines with spaces and trim
-        // This ensures single-line values in table cells
-        string
-            .replacingOccurrences(of: "\n", with: " ")
-            .replacingOccurrences(of: "\r", with: " ")
-            .replacingOccurrences(of: "\t", with: " ")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+  public func escape(_ string: String) -> String {
+    // For table output, replace newlines with spaces and trim
+    // This ensures single-line values in table cells
+    string
+      .replacingOccurrences(of: "\n", with: " ")
+      .replacingOccurrences(of: "\r", with: " ")
+      .replacingOccurrences(of: "\t", with: " ")
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+  }
 }

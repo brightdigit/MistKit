@@ -27,46 +27,49 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
 public import ConfigKeyKit
+import Foundation
 
 /// Configuration for lookup-zones command
 public struct LookupZonesConfig: Sendable, ConfigurationParseable {
-    public typealias ConfigReader = MistDemoConfiguration
-    public typealias BaseConfig = MistDemoConfig
+  public typealias ConfigReader = MistDemoConfiguration
+  public typealias BaseConfig = MistDemoConfig
 
-    public let base: MistDemoConfig
-    public let zoneNames: [String]
-    public let output: OutputFormat
+  public let base: MistDemoConfig
+  public let zoneNames: [String]
+  public let output: OutputFormat
 
-    public init(
-        base: MistDemoConfig,
-        zoneNames: [String],
-        output: OutputFormat = .table
-    ) {
-        self.base = base
-        self.zoneNames = zoneNames
-        self.output = output
+  public init(
+    base: MistDemoConfig,
+    zoneNames: [String],
+    output: OutputFormat = .table
+  ) {
+    self.base = base
+    self.zoneNames = zoneNames
+    self.output = output
+  }
+
+  /// Parse configuration from command line arguments
+  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+    let baseConfig: MistDemoConfig
+    if let base {
+      baseConfig = base
+    } else {
+      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
     }
 
-    /// Parse configuration from command line arguments
-    public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
-        let baseConfig: MistDemoConfig
-        if let base {
-            baseConfig = base
-        } else {
-            baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
-        }
-
-        let zoneNamesString = configuration.string(
-            forKey: "zone.names",
-            default: "_defaultZone"
-        ) ?? "_defaultZone"
-        let zoneNames = zoneNamesString.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-
-        let outputString = configuration.string(forKey: "output.format", default: "table") ?? "table"
-        let output = OutputFormat(rawValue: outputString) ?? .table
-
-        self.init(base: baseConfig, zoneNames: zoneNames, output: output)
+    let zoneNamesString =
+      configuration.string(
+        forKey: "zone.names",
+        default: "_defaultZone"
+      ) ?? "_defaultZone"
+    let zoneNames = zoneNamesString.split(separator: ",").map {
+      $0.trimmingCharacters(in: .whitespaces)
     }
+
+    let outputString = configuration.string(forKey: "output.format", default: "table") ?? "table"
+    let output = OutputFormat(rawValue: outputString) ?? .table
+
+    self.init(base: baseConfig, zoneNames: zoneNames, output: output)
+  }
 }

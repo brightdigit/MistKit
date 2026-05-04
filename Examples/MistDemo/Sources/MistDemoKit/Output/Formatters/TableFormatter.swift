@@ -32,62 +32,62 @@ import MistKit
 
 /// Formatter for table output
 public struct TableFormatter: OutputFormatter {
-    // MARK: Lifecycle
+  // MARK: Lifecycle
 
-    public init() {}
+  public init() {}
 
-    // MARK: Public
+  // MARK: Public
 
-    public func format<T: Encodable>(_ value: T) throws -> String {
-        // For table format, we need to handle specific types
-        // since table formatting is inherently structure-dependent
-        if let recordInfo = value as? RecordInfo {
-            return try formatRecord(recordInfo)
-        } else if let userInfo = value as? UserInfo {
-            return try formatUser(userInfo)
-        } else {
-            // Fall back to JSON for unknown types
-            let jsonFormatter = JSONFormatter(pretty: true)
-            return try jsonFormatter.format(value)
-        }
+  public func format<T: Encodable>(_ value: T) throws -> String {
+    // For table format, we need to handle specific types
+    // since table formatting is inherently structure-dependent
+    if let recordInfo = value as? RecordInfo {
+      return try formatRecord(recordInfo)
+    } else if let userInfo = value as? UserInfo {
+      return try formatUser(userInfo)
+    } else {
+      // Fall back to JSON for unknown types
+      let jsonFormatter = JSONFormatter(pretty: true)
+      return try jsonFormatter.format(value)
+    }
+  }
+
+  // MARK: Private
+
+  private func formatRecord(_ record: RecordInfo) throws -> String {
+    let escaper = TableEscaper()
+    var output = ""
+
+    output += "Record Name: \(escaper.escape(record.recordName))\n"
+    output += "Record Type: \(escaper.escape(record.recordType))\n"
+
+    if !record.fields.isEmpty {
+      output += "Fields:\n"
+      for (fieldName, fieldValue) in record.fields.sorted(by: { $0.key < $1.key }) {
+        let valueString = escaper.escape(FieldValueFormatter.displayString(fieldValue))
+        output += "  \(fieldName): \(valueString)\n"
+      }
     }
 
-    // MARK: Private
+    return output
+  }
 
-    private func formatRecord(_ record: RecordInfo) throws -> String {
-        let escaper = TableEscaper()
-        var output = ""
+  private func formatUser(_ user: UserInfo) throws -> String {
+    let escaper = TableEscaper()
+    var output = ""
 
-        output += "Record Name: \(escaper.escape(record.recordName))\n"
-        output += "Record Type: \(escaper.escape(record.recordType))\n"
+    output += "User Record Name: \(escaper.escape(user.userRecordName))\n"
 
-        if !record.fields.isEmpty {
-            output += "Fields:\n"
-            for (fieldName, fieldValue) in record.fields.sorted(by: { $0.key < $1.key }) {
-                let valueString = escaper.escape(FieldValueFormatter.displayString(fieldValue))
-                output += "  \(fieldName): \(valueString)\n"
-            }
-        }
-
-        return output
+    if let firstName = user.firstName {
+      output += "First Name: \(escaper.escape(firstName))\n"
+    }
+    if let lastName = user.lastName {
+      output += "Last Name: \(escaper.escape(lastName))\n"
+    }
+    if let emailAddress = user.emailAddress {
+      output += "Email: \(escaper.escape(emailAddress))\n"
     }
 
-    private func formatUser(_ user: UserInfo) throws -> String {
-        let escaper = TableEscaper()
-        var output = ""
-
-        output += "User Record Name: \(escaper.escape(user.userRecordName))\n"
-
-        if let firstName = user.firstName {
-            output += "First Name: \(escaper.escape(firstName))\n"
-        }
-        if let lastName = user.lastName {
-            output += "Last Name: \(escaper.escape(lastName))\n"
-        }
-        if let emailAddress = user.emailAddress {
-            output += "Email: \(escaper.escape(emailAddress))\n"
-        }
-
-        return output
-    }
+    return output
+  }
 }

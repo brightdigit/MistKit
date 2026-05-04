@@ -29,181 +29,211 @@
 
 import Foundation
 import Testing
+
 @testable import MistDemoKit
 
 @Suite("AsyncHelpers Tests")
 struct AsyncHelpersTests {
+  // MARK: - Timeout Tests
 
-    // MARK: - Timeout Tests
+  @Test("withTimeout completes before timeout")
+  func completesBeforeTimeout() async throws {
+    let result = try await withTimeout(seconds: 1.0) {
+      "success"
+    }
 
-    @Test("withTimeout completes before timeout")
-    func completesBeforeTimeout() async throws {
-        let result = try await withTimeout(seconds: 1.0) {
-            return "success"
+    #expect(result == "success")
+  }
+
+  @Test(
+    "withTimeout throws on timeout",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't fire the timeout race against an inner Task.sleep"
+    )
+  )
+  func throwsOnTimeout() async {
+    await #expect(throws: AsyncTimeoutError.self) {
+      try await withTimeout(seconds: 0.1) {
+        try await Task.sleep(nanoseconds: 500_000_000)  // 500ms
+        return "too slow"
+      }
+    }
+  }
+
+  @Test("withTimeout returns value from async operation")
+  func returnsAsyncValue() async throws {
+    let result = try await withTimeout(seconds: 1.0) {
+      try await Task.sleep(nanoseconds: 50_000_000)  // 50ms
+      return 42
+    }
+
+    #expect(result == 42)
+  }
+
+  @Test("withTimeout propagates operation errors")
+  func propagatesErrors() async {
+    struct TestError: Error {}
+
+    await #expect(throws: TestError.self) {
+      try await withTimeout(seconds: 1.0) {
+        throw TestError()
+      }
+    }
+  }
+
+  @Test(
+    "withTimeout with very short timeout",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't time-slice the timeout race like Darwin/Linux dispatch"
+    )
+  )
+  func veryShortTimeout() async {
+    await #expect(throws: AsyncTimeoutError.self) {
+      try await withTimeout(seconds: 0.001) {
+        try await Task.sleep(nanoseconds: 100_000_000)  // 100ms
+        return "unreachable"
+      }
+    }
+  }
+
+  // MARK: - Format Timeout Tests
+
+  @Test("formatTimeout with seconds")
+  func formatSecondsTimeout() {
+    #expect(formatTimeout(30) == "30 seconds")
+    #expect(formatTimeout(45) == "45 seconds")
+  }
+
+  @Test("formatTimeout with single minute")
+  func formatSingleMinute() {
+    #expect(formatTimeout(60) == "1 minute")
+  }
+
+  @Test("formatTimeout with multiple minutes")
+  func formatMultipleMinutes() {
+    #expect(formatTimeout(120) == "2 minutes")
+    #expect(formatTimeout(300) == "5 minutes")
+  }
+
+  @Test("formatTimeout with fractional seconds under 60")
+  func formatFractionalSeconds() {
+    #expect(formatTimeout(15.5) == "15 seconds")
+    #expect(formatTimeout(59.9) == "59 seconds")
+  }
+
+  @Test("formatTimeout with fractional minutes")
+  func formatFractionalMinutes() {
+    #expect(formatTimeout(90) == "1 minute")
+    #expect(formatTimeout(150) == "2 minutes")
+  }
+
+  // MARK: - AsyncTimeoutError Tests
+
+  @Test("AsyncTimeoutError timeout case has description")
+  func timeoutErrorDescription() {
+    let error = AsyncTimeoutError.timeout("Operation took too long")
+    let description = error.errorDescription
+
+    #expect(description != nil)
+    #expect(description?.contains("Operation timed out") == true)
+    #expect(description?.contains("Operation took too long") == true)
+  }
+
+  @Test("AsyncTimeoutError cancelled case has description")
+  func cancelledErrorDescription() {
+    let error = AsyncTimeoutError.cancelled("User interrupted")
+    let description = error.errorDescription
+
+    #expect(description != nil)
+    #expect(description?.contains("Operation cancelled") == true)
+    #expect(description?.contains("User interrupted") == true)
+  }
+
+  @Test("AsyncTimeoutError conforms to LocalizedError")
+  func timeoutErrorIsLocalizedError() {
+    let error: any Error = AsyncTimeoutError.timeout("test")
+    #expect(error is LocalizedError)
+  }
+
+  // MARK: - Concurrent Timeout Tests
+
+  @Test(
+    "withTimeout cancels other tasks in group",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't fire the timeout race against an inner Task.sleep"
+    )
+  )
+  func cancelsOtherTasks() async throws {
+    await #expect(throws: AsyncTimeoutError.self) {
+      try await withTimeout(seconds: 0.1) {
+        try await Task.sleep(nanoseconds: 500_000_000)
+        return "done"
+      }
+    }
+  }
+
+  @Test(
+    "Multiple concurrent withTimeout operations",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't fire the timeout race against an inner Task.sleep"
+    )
+  )
+  func multipleConcurrentTimeouts() async throws {
+    await withTaskGroup(of: Void.self) { group in
+      group.addTask {
+        do {
+          _ = try await withTimeout(seconds: 1.0) {
+            "fast"
+          }
+        } catch {
+          Issue.record("Fast operation should not timeout")
         }
+      }
 
-        #expect(result == "success")
-    }
-
-    @Test("withTimeout throws on timeout")
-    func throwsOnTimeout() async {
-        await #expect(throws: AsyncTimeoutError.self) {
-            try await withTimeout(seconds: 0.1) {
-                try await Task.sleep(nanoseconds: 500_000_000) // 500ms
-                return "too slow"
-            }
+      group.addTask {
+        do {
+          _ = try await withTimeout(seconds: 0.05) {
+            try await Task.sleep(nanoseconds: 200_000_000)
+            return "slow"
+          }
+          Issue.record("Slow operation should timeout")
+        } catch is AsyncTimeoutError {
+          // Expected
+        } catch {
+          Issue.record("Unexpected error type")
         }
+      }
+    }
+  }
+
+  // MARK: - Edge Cases
+
+  @Test(
+    "withTimeout with short timeout throws",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor doesn't fire the timeout race against an inner Task.sleep"
+    )
+  )
+  func zeroTimeout() async {
+    await #expect(throws: AsyncTimeoutError.self) {
+      try await withTimeout(seconds: 0.001) {
+        try await Task.sleep(nanoseconds: 1_000_000_000)  // 1s
+        return "should not return"
+      }
+    }
+  }
+
+  @Test("withTimeout with immediate return")
+  func immediateReturn() async throws {
+    let result = try await withTimeout(seconds: 0.1) {
+      "immediate"
     }
 
-    @Test("withTimeout returns value from async operation")
-    func returnsAsyncValue() async throws {
-        let result = try await withTimeout(seconds: 1.0) {
-            try await Task.sleep(nanoseconds: 50_000_000) // 50ms
-            return 42
-        }
-
-        #expect(result == 42)
-    }
-
-    @Test("withTimeout propagates operation errors")
-    func propagatesErrors() async {
-        struct TestError: Error {}
-
-        await #expect(throws: TestError.self) {
-            try await withTimeout(seconds: 1.0) {
-                throw TestError()
-            }
-        }
-    }
-
-    @Test("withTimeout with very short timeout")
-    func veryShortTimeout() async {
-        await #expect(throws: AsyncTimeoutError.self) {
-            try await withTimeout(seconds: 0.001) {
-                try await Task.sleep(nanoseconds: 100_000_000) // 100ms
-                return "unreachable"
-            }
-        }
-    }
-
-    // MARK: - Format Timeout Tests
-
-    @Test("formatTimeout with seconds")
-    func formatSecondsTimeout() {
-        #expect(formatTimeout(30) == "30 seconds")
-        #expect(formatTimeout(45) == "45 seconds")
-    }
-
-    @Test("formatTimeout with single minute")
-    func formatSingleMinute() {
-        #expect(formatTimeout(60) == "1 minute")
-    }
-
-    @Test("formatTimeout with multiple minutes")
-    func formatMultipleMinutes() {
-        #expect(formatTimeout(120) == "2 minutes")
-        #expect(formatTimeout(300) == "5 minutes")
-    }
-
-    @Test("formatTimeout with fractional seconds under 60")
-    func formatFractionalSeconds() {
-        #expect(formatTimeout(15.5) == "15 seconds")
-        #expect(formatTimeout(59.9) == "59 seconds")
-    }
-
-    @Test("formatTimeout with fractional minutes")
-    func formatFractionalMinutes() {
-        #expect(formatTimeout(90) == "1 minute")
-        #expect(formatTimeout(150) == "2 minutes")
-    }
-
-    // MARK: - AsyncTimeoutError Tests
-
-    @Test("AsyncTimeoutError timeout case has description")
-    func timeoutErrorDescription() {
-        let error = AsyncTimeoutError.timeout("Operation took too long")
-        let description = error.errorDescription
-
-        #expect(description != nil)
-        #expect(description?.contains("Operation timed out") == true)
-        #expect(description?.contains("Operation took too long") == true)
-    }
-
-    @Test("AsyncTimeoutError cancelled case has description")
-    func cancelledErrorDescription() {
-        let error = AsyncTimeoutError.cancelled("User interrupted")
-        let description = error.errorDescription
-
-        #expect(description != nil)
-        #expect(description?.contains("Operation cancelled") == true)
-        #expect(description?.contains("User interrupted") == true)
-    }
-
-    @Test("AsyncTimeoutError conforms to LocalizedError")
-    func timeoutErrorIsLocalizedError() {
-        let error: any Error = AsyncTimeoutError.timeout("test")
-        #expect(error is LocalizedError)
-    }
-
-    // MARK: - Concurrent Timeout Tests
-
-    @Test("withTimeout cancels other tasks in group")
-    func cancelsOtherTasks() async throws {
-        await #expect(throws: AsyncTimeoutError.self) {
-            try await withTimeout(seconds: 0.1) {
-                try await Task.sleep(nanoseconds: 500_000_000)
-                return "done"
-            }
-        }
-    }
-
-    @Test("Multiple concurrent withTimeout operations")
-    func multipleConcurrentTimeouts() async throws {
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask {
-                do {
-                    _ = try await withTimeout(seconds: 1.0) {
-                        return "fast"
-                    }
-                } catch {
-                    Issue.record("Fast operation should not timeout")
-                }
-            }
-
-            group.addTask {
-                do {
-                    _ = try await withTimeout(seconds: 0.05) {
-                        try await Task.sleep(nanoseconds: 200_000_000)
-                        return "slow"
-                    }
-                    Issue.record("Slow operation should timeout")
-                } catch is AsyncTimeoutError {
-                    // Expected
-                } catch {
-                    Issue.record("Unexpected error type")
-                }
-            }
-        }
-    }
-
-    // MARK: - Edge Cases
-
-    @Test("withTimeout with short timeout throws")
-    func zeroTimeout() async {
-        await #expect(throws: AsyncTimeoutError.self) {
-            try await withTimeout(seconds: 0.001) {
-                try await Task.sleep(nanoseconds: 1_000_000_000) // 1s
-                return "should not return"
-            }
-        }
-    }
-
-    @Test("withTimeout with immediate return")
-    func immediateReturn() async throws {
-        let result = try await withTimeout(seconds: 0.1) {
-            return "immediate"
-        }
-
-        #expect(result == "immediate")
-    }
+    #expect(result == "immediate")
+  }
 }

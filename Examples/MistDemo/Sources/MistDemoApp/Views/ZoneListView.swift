@@ -1,6 +1,6 @@
 //
 //  ZoneListView.swift
-//  MistDemoApp
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,49 +27,55 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftUI
+#if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+  import SwiftUI
 
-struct ZoneListView: View {
+  struct ZoneListView: View {
     @EnvironmentObject private var service: NativeCloudKitService
     @State private var zones: [ZoneRow] = []
     @State private var loading = false
     @State private var loadError: String?
 
     var body: some View {
-        Group {
-            if loading {
-                ProgressView("Loading zones…")
-            } else if let loadError {
-                ContentUnavailableView("Couldn't load zones", systemImage: "exclamationmark.triangle", description: Text(loadError))
-            } else if zones.isEmpty {
-                ContentUnavailableView("No zones yet", systemImage: "tray", description: Text("Click Refresh to fetch zones from CloudKit."))
-            } else {
-                List(zones) { zone in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(zone.zoneName).font(.headline)
-                        Text("Owner: \(zone.ownerName)").font(.caption).foregroundStyle(.secondary)
-                    }
-                    .padding(.vertical, 2)
-                }
+      Group {
+        if loading {
+          ProgressView("Loading zones…")
+        } else if let loadError {
+          ContentUnavailableView(
+            "Couldn't load zones", systemImage: "exclamationmark.triangle",
+            description: Text(loadError))
+        } else if zones.isEmpty {
+          ContentUnavailableView(
+            "No zones yet", systemImage: "tray",
+            description: Text("Click Refresh to fetch zones from CloudKit."))
+        } else {
+          List(zones) { zone in
+            VStack(alignment: .leading, spacing: 4) {
+              Text(zone.zoneName).font(.headline)
+              Text("Owner: \(zone.ownerName)").font(.caption).foregroundStyle(.secondary)
             }
+            .padding(.vertical, 2)
+          }
         }
-        .navigationTitle("Zones")
-        .toolbar {
-            ToolbarItem {
-                Button("Refresh") { Task { await refresh() } }
-            }
+      }
+      .navigationTitle("Zones")
+      .toolbar {
+        ToolbarItem {
+          Button("Refresh") { Task { await refresh() } }
         }
-        .task { await refresh() }
+      }
+      .task { await refresh() }
     }
 
     private func refresh() async {
-        loading = true
-        loadError = nil
-        defer { loading = false }
-        do {
-            zones = try await service.loadZones()
-        } catch {
-            loadError = error.localizedDescription
-        }
+      loading = true
+      loadError = nil
+      defer { loading = false }
+      do {
+        zones = try await service.loadZones()
+      } catch {
+        loadError = error.localizedDescription
+      }
     }
-}
+  }
+#endif

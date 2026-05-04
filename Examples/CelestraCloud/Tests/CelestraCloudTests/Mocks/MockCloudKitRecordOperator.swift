@@ -32,9 +32,12 @@ import MistKit
 
 @testable import CelestraCloudKit
 
-/// Mock implementation of CloudKitRecordOperating for testing
-internal final class MockCloudKitRecordOperator: CloudKitRecordOperating, @unchecked Sendable {
-  // MARK: - Recorded Calls
+/// Mock implementation of CloudKitRecordOperating for testing.
+///
+/// This mock is designed for single-threaded test use only.
+/// All state mutations occur within a single test execution context.
+internal final class MockCloudKitRecordOperator: CloudKitRecordOperating, Sendable {
+  // MARK: - Subtypes
 
   internal struct QueryCall {
     internal let recordType: String
@@ -48,13 +51,17 @@ internal final class MockCloudKitRecordOperator: CloudKitRecordOperating, @unche
     internal let operations: [RecordOperation]
   }
 
-  internal private(set) var queryCalls: [QueryCall] = []
-  internal private(set) var modifyCalls: [ModifyCall] = []
+  // MARK: - Properties
+
+  nonisolated(unsafe) internal private(set) var queryCalls: [QueryCall] = []
+  nonisolated(unsafe) internal private(set) var modifyCalls: [ModifyCall] = []
 
   // MARK: - Stubbed Results
 
-  internal var queryRecordsResult: Result<[RecordInfo], CloudKitError> = .success([])
-  internal var modifyRecordsResult: Result<[RecordInfo], CloudKitError> = .success([])
+  nonisolated(unsafe) internal var queryRecordsResult: Result<[RecordInfo], CloudKitError> =
+    .success([])
+  nonisolated(unsafe) internal var modifyRecordsResult: Result<[RecordInfo], CloudKitError> =
+    .success([])
 
   // MARK: - CloudKitRecordOperating
 

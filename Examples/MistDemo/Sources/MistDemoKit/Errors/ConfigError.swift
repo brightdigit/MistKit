@@ -43,13 +43,13 @@ enum ConfigError: LocalizedError, Sendable {
     switch self {
     case .missingAPIToken:
       "CloudKit API token is required"
-    case let .invalidEnvironment(env):
+    case .invalidEnvironment(let env):
       "Invalid environment: \(env)"
-    case let .fileNotFound(path):
+    case .fileNotFound(let path):
       "Configuration file not found: \(path)"
-    case let .invalidFormat(format, details):
+    case .invalidFormat(let format, let details):
       "Invalid \(format) format: \(details)"
-    case let .profileNotFound(profile):
+    case .profileNotFound(let profile):
       "Profile not found: \(profile)"
     }
   }
@@ -58,13 +58,13 @@ enum ConfigError: LocalizedError, Sendable {
     switch self {
     case .missingAPIToken:
       "Set CLOUDKIT_API_TOKEN environment variable or use --api-token flag"
-    case let .invalidEnvironment(env):
+    case .invalidEnvironment(let env):
       "Use 'development' or 'production' instead of '\(env)'"
-    case let .fileNotFound(path):
+    case .fileNotFound(let path):
       "Create a configuration file at \(path)"
-    case let .invalidFormat(format, _):
+    case .invalidFormat(let format, _):
       "Check your \(format) configuration file syntax"
-    case let .profileNotFound(profile):
+    case .profileNotFound(let profile):
       "Check available profiles or create '\(profile)' profile"
     }
   }

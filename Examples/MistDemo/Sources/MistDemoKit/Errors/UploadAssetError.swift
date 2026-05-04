@@ -31,32 +31,34 @@ public import Foundation
 
 /// Errors that can occur during asset upload operations
 public enum UploadAssetError: Error, LocalizedError {
-    case filePathRequired
-    case recordTypeRequired
-    case fieldNameRequired
-    case fileNotFound(String)
-    case fileTooLarge(Int64, maximum: Int64)
-    case invalidRecordType(String)
-    case operationFailed(String)
+  case filePathRequired
+  case recordTypeRequired
+  case fieldNameRequired
+  case fileNotFound(String)
+  case fileTooLarge(Int64, maximum: Int64)
+  case invalidRecordType(String)
+  case operationFailed(String)
 
-    public var errorDescription: String? {
-        switch self {
-        case .filePathRequired:
-            return "File path is required. Usage: mistdemo upload-asset --file <path> --record-type <type> --field-name <field>"
-        case .recordTypeRequired:
-            return "Record type is required. Specify with --record-type <type>"
-        case .fieldNameRequired:
-            return "Field name is required. Specify with --field-name <field>"
-        case .fileNotFound(let path):
-            return "File not found at path: \(path)"
-        case .fileTooLarge(let size, let maximum):
-            let sizeMB = Double(size) / 1024 / 1024
-            let maxMB = Double(maximum) / 1024 / 1024
-            return "File size (\(String(format: "%.2f", sizeMB)) MB) exceeds maximum (\(String(format: "%.2f", maxMB)) MB)"
-        case .invalidRecordType(let type):
-            return "Invalid record type: \(type)"
-        case .operationFailed(let message):
-            return "Upload operation failed: \(message)"
-        }
+  public var errorDescription: String? {
+    switch self {
+    case .filePathRequired:
+      return
+        "File path is required. Usage: mistdemo upload-asset --file <path> --record-type <type> --field-name <field>"
+    case .recordTypeRequired:
+      return "Record type is required. Specify with --record-type <type>"
+    case .fieldNameRequired:
+      return "Field name is required. Specify with --field-name <field>"
+    case .fileNotFound(let path):
+      return "File not found at path: \(path)"
+    case .fileTooLarge(let size, let maximum):
+      let sizeMB = Double(size) / 1_024 / 1_024
+      let maxMB = Double(maximum) / 1_024 / 1_024
+      return
+        "File size (\(String(format: "%.2f", sizeMB)) MB) exceeds maximum (\(String(format: "%.2f", maxMB)) MB)"
+    case .invalidRecordType(let type):
+      return "Invalid record type: \(type)"
+    case .operationFailed(let message):
+      return "Upload operation failed: \(message)"
     }
+  }
 }

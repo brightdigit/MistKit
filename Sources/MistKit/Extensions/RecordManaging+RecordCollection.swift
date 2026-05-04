@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -97,6 +97,7 @@ extension RecordManaging where Self: CloudKitRecordCollection {
     var recordTypesList: [any CloudKitRecord.Type] = []
 
     // Use RecordTypeSet to iterate through types without reflection
+    // swift-format-ignore: ReplaceForEachWithForLoop
     try await Self.recordTypes.forEach { recordType in
       recordTypesList.append(recordType)
       let typeName = recordType.cloudKitRecordType
@@ -144,6 +145,7 @@ extension RecordManaging where Self: CloudKitRecordCollection {
     print("\n🗑️  Deleting all records across all types...")
 
     // Use RecordTypeSet to iterate through types without reflection
+    // swift-format-ignore: ReplaceForEachWithForLoop
     try await Self.recordTypes.forEach { recordType in
       let typeName = recordType.cloudKitRecordType
       let records = try await queryRecords(recordType: typeName)

@@ -1,6 +1,6 @@
 //
 //  RecordDetailView.swift
-//  MistDemoApp
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,9 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftUI
+#if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+  import SwiftUI
 
-struct RecordDetailView: View {
+  struct RecordDetailView: View {
     @State var note: Note
     let onChange: () -> Void
 
@@ -42,96 +43,101 @@ struct RecordDetailView: View {
     @State private var actionError: String?
 
     var body: some View {
-        Form {
-            Section("Identity") {
-                LabeledContent("Record Name", value: note.id)
-                LabeledContent("Record Type", value: Note.recordType)
-                if let recordChangeTag = note.recordChangeTag {
-                    LabeledContent("Change Tag", value: recordChangeTag)
-                }
-                if let creationDate = note.creationDate {
-                    LabeledContent("Created", value: creationDate.formatted(date: .abbreviated, time: .standard))
-                }
-                if let modificationDate = note.modificationDate {
-                    LabeledContent("Modified", value: modificationDate.formatted(date: .abbreviated, time: .standard))
-                }
-            }
+      Form {
+        Section("Identity") {
+          LabeledContent("Record Name", value: note.id)
+          LabeledContent("Record Type", value: Note.recordType)
+          if let recordChangeTag = note.recordChangeTag {
+            LabeledContent("Change Tag", value: recordChangeTag)
+          }
+          if let creationDate = note.creationDate {
+            LabeledContent(
+              "Created", value: creationDate.formatted(date: .abbreviated, time: .standard))
+          }
+          if let modificationDate = note.modificationDate {
+            LabeledContent(
+              "Modified", value: modificationDate.formatted(date: .abbreviated, time: .standard))
+          }
+        }
 
-            Section("Note Fields") {
-                LabeledContent("title", value: note.title ?? "—")
-                LabeledContent("index", value: note.index.map(String.init) ?? "—")
-                LabeledContent("createdAt", value: note.createdAt?.formatted(date: .abbreviated, time: .standard) ?? "—")
-                LabeledContent("modified", value: note.modified.map(String.init) ?? "—")
-                LabeledContent("image", value: note.imageAssetURL?.lastPathComponent ?? "—")
-            }
+        Section("Note Fields") {
+          LabeledContent("title", value: note.title ?? "—")
+          LabeledContent("index", value: note.index.map(String.init) ?? "—")
+          LabeledContent(
+            "createdAt",
+            value: note.createdAt?.formatted(date: .abbreviated, time: .standard) ?? "—")
+          LabeledContent("modified", value: note.modified.map(String.init) ?? "—")
+          LabeledContent("image", value: note.imageAssetURL?.lastPathComponent ?? "—")
+        }
 
-            if let url = note.imageAssetURL {
-                Section("Asset") {
-                    AsyncImage(url: url) { image in
-                        image.resizable().aspectRatio(contentMode: .fit)
-                    } placeholder: {
-                        ProgressView()
-                    }
-                    .frame(maxHeight: 240)
-                }
+        if let url = note.imageAssetURL {
+          Section("Asset") {
+            AsyncImage(url: url) { image in
+              image.resizable().aspectRatio(contentMode: .fit)
+            } placeholder: {
+              ProgressView()
             }
+            .frame(maxHeight: 240)
+          }
+        }
 
-            if let actionError {
-                Section("Error") {
-                    Text(actionError).foregroundStyle(.red).font(.callout)
-                }
-            }
+        if let actionError {
+          Section("Error") {
+            Text(actionError).foregroundStyle(.red).font(.callout)
+          }
         }
-        .formStyle(.grouped)
-        .navigationTitle(note.title ?? note.id)
-        .toolbar {
-            ToolbarItem {
-                Button {
-                    showEditSheet = true
-                } label: {
-                    Label("Edit", systemImage: "pencil")
-                }
-            }
-            ToolbarItem {
-                Button(role: .destructive) {
-                    showDeleteConfirmation = true
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                }
-                .disabled(deleting)
-            }
+      }
+      .formStyle(.grouped)
+      .navigationTitle(note.title ?? note.id)
+      .toolbar {
+        ToolbarItem {
+          Button {
+            showEditSheet = true
+          } label: {
+            Label("Edit", systemImage: "pencil")
+          }
         }
-        .sheet(isPresented: $showEditSheet) {
-            NoteEditView(mode: .edit(note)) { updated in
-                note = updated
-                onChange()
-            }
-            .environmentObject(service)
+        ToolbarItem {
+          Button(role: .destructive) {
+            showDeleteConfirmation = true
+          } label: {
+            Label("Delete", systemImage: "trash")
+          }
+          .disabled(deleting)
         }
-        .confirmationDialog(
-            "Delete \(note.title ?? note.id)?",
-            isPresented: $showDeleteConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button("Delete", role: .destructive) {
-                Task { await delete() }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This permanently removes the record from CloudKit.")
+      }
+      .sheet(isPresented: $showEditSheet) {
+        NoteEditView(mode: .edit(note)) { updated in
+          note = updated
+          onChange()
         }
+        .environmentObject(service)
+      }
+      .confirmationDialog(
+        "Delete \(note.title ?? note.id)?",
+        isPresented: $showDeleteConfirmation,
+        titleVisibility: .visible
+      ) {
+        Button("Delete", role: .destructive) {
+          Task { await delete() }
+        }
+        Button("Cancel", role: .cancel) {}
+      } message: {
+        Text("This permanently removes the record from CloudKit.")
+      }
     }
 
     private func delete() async {
-        deleting = true
-        actionError = nil
-        defer { deleting = false }
-        do {
-            try await service.deleteNote(note)
-            onChange()
-            dismiss()
-        } catch {
-            actionError = error.localizedDescription
-        }
+      deleting = true
+      actionError = nil
+      defer { deleting = false }
+      do {
+        try await service.deleteNote(note)
+        onChange()
+        dismiss()
+      } catch {
+        actionError = error.localizedDescription
+      }
     }
-}
+  }
+#endif

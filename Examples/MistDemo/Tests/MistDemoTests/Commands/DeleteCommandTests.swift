@@ -28,74 +28,75 @@
 //
 
 import Foundation
-import Testing
 import MistKit
+import Testing
 
 @testable import MistDemoKit
 
 @Suite("DeleteCommand Tests")
 struct DeleteCommandTests {
-    @Test("Command has correct static properties")
-    func staticProperties() {
-        #expect(DeleteCommand.commandName == "delete")
-        #expect(DeleteCommand.abstract == "Delete an existing record from CloudKit")
-        #expect(DeleteCommand.helpText.contains("DELETE"))
-    }
+  @Test("Command has correct static properties")
+  func staticProperties() {
+    #expect(DeleteCommand.commandName == "delete")
+    #expect(DeleteCommand.abstract == "Delete an existing record from CloudKit")
+    #expect(DeleteCommand.helpText.contains("DELETE"))
+  }
 
-    @Test("Command initializes with config")
-    func initializesWithConfig() async throws {
-        let baseConfig = try await MistDemoConfig()
-        let config = DeleteConfig(base: baseConfig, recordName: "rec-1")
-        let _ = DeleteCommand(config: config)
-    }
+  @Test("Command initializes with config")
+  func initializesWithConfig() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = DeleteConfig(base: baseConfig, recordName: "rec-1")
+    _ = DeleteCommand(config: config)
+  }
 }
 
 @Suite("DeleteCommand.mapConflict Tests")
 struct DeleteCommandMapConflictTests {
-    @Test("Maps httpError 409 to .conflict with nil reason")
-    func httpError409() {
-        let result = DeleteCommand.mapConflict(.httpError(statusCode: 409))
-        guard case .conflict(let reason) = result else {
-            Issue.record("Expected .conflict, got \(String(describing: result))")
-            return
-        }
-        #expect(reason == nil)
+  @Test("Maps httpError 409 to .conflict with nil reason")
+  func httpError409() {
+    let result = DeleteCommand.mapConflict(.httpError(statusCode: 409))
+    guard case .conflict(let reason) = result else {
+      Issue.record("Expected .conflict, got \(String(describing: result))")
+      return
     }
+    #expect(reason == nil)
+  }
 
-    @Test("Maps httpErrorWithDetails 409 to .conflict including the reason")
-    func httpErrorWithDetails409() {
-        let result = DeleteCommand.mapConflict(
-            .httpErrorWithDetails(statusCode: 409, serverErrorCode: "ATOMIC_ERROR", reason: "Change tag mismatch")
-        )
-        guard case .conflict(let reason) = result else {
-            Issue.record("Expected .conflict, got \(String(describing: result))")
-            return
-        }
-        #expect(reason == "Change tag mismatch")
-    }
-
-    @Test("Maps httpErrorWithRawResponse 409 to .conflict with nil reason")
-    func httpErrorWithRawResponse409() {
-        let result = DeleteCommand.mapConflict(
-            .httpErrorWithRawResponse(statusCode: 409, rawResponse: "...")
-        )
-        guard case .conflict(let reason) = result else {
-            Issue.record("Expected .conflict, got \(String(describing: result))")
-            return
-        }
-        #expect(reason == nil)
-    }
-
-    @Test(
-        "Non-409 HTTP errors do not map to .conflict",
-        arguments: [400, 401, 403, 404, 500, 503]
+  @Test("Maps httpErrorWithDetails 409 to .conflict including the reason")
+  func httpErrorWithDetails409() {
+    let result = DeleteCommand.mapConflict(
+      .httpErrorWithDetails(
+        statusCode: 409, serverErrorCode: "ATOMIC_ERROR", reason: "Change tag mismatch")
     )
-    func nonConflictHTTPCodes(statusCode: Int) {
-        #expect(DeleteCommand.mapConflict(.httpError(statusCode: statusCode)) == nil)
+    guard case .conflict(let reason) = result else {
+      Issue.record("Expected .conflict, got \(String(describing: result))")
+      return
     }
+    #expect(reason == "Change tag mismatch")
+  }
 
-    @Test("Non-HTTP CloudKitErrors do not map to .conflict")
-    func nonHTTPErrors() {
-        #expect(DeleteCommand.mapConflict(.invalidResponse) == nil)
+  @Test("Maps httpErrorWithRawResponse 409 to .conflict with nil reason")
+  func httpErrorWithRawResponse409() {
+    let result = DeleteCommand.mapConflict(
+      .httpErrorWithRawResponse(statusCode: 409, rawResponse: "...")
+    )
+    guard case .conflict(let reason) = result else {
+      Issue.record("Expected .conflict, got \(String(describing: result))")
+      return
     }
+    #expect(reason == nil)
+  }
+
+  @Test(
+    "Non-409 HTTP errors do not map to .conflict",
+    arguments: [400, 401, 403, 404, 500, 503]
+  )
+  func nonConflictHTTPCodes(statusCode: Int) {
+    #expect(DeleteCommand.mapConflict(.httpError(statusCode: statusCode)) == nil)
+  }
+
+  @Test("Non-HTTP CloudKitErrors do not map to .conflict")
+  func nonHTTPErrors() {
+    #expect(DeleteCommand.mapConflict(.invalidResponse) == nil)
+  }
 }

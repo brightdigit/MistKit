@@ -31,32 +31,32 @@ public import Foundation
 
 /// Errors that can occur during delete command execution
 public enum DeleteError: Error, LocalizedError {
-    case recordNameRequired
-    case operationFailed(String)
-    case conflict(reason: String?)
+  case recordNameRequired
+  case operationFailed(String)
+  case conflict(reason: String?)
 
-    public var errorDescription: String? {
-        switch self {
-        case .recordNameRequired:
-            return "Record name is required for delete operations. Use --record-name <name>"
-        case .operationFailed(let reason):
-            return "Delete operation failed: \(reason)"
-        case .conflict(let reason):
-            if let reason {
-                return "Delete conflict: the record was modified on the server (\(reason))"
-            }
-            return "Delete conflict: the record was modified on the server"
-        }
+  public var errorDescription: String? {
+    switch self {
+    case .recordNameRequired:
+      return "Record name is required for delete operations. Use --record-name <name>"
+    case .operationFailed(let reason):
+      return "Delete operation failed: \(reason)"
+    case .conflict(let reason):
+      if let reason {
+        return "Delete conflict: the record was modified on the server (\(reason))"
+      }
+      return "Delete conflict: the record was modified on the server"
     }
+  }
 
-    public var recoverySuggestion: String? {
-        switch self {
-        case .recordNameRequired:
-            return "Specify a record name: mistdemo delete --record-name my-record-123"
-        case .conflict:
-            return "Re-run with --force to delete despite the change-tag mismatch."
-        case .operationFailed:
-            return nil
-        }
+  public var recoverySuggestion: String? {
+    switch self {
+    case .recordNameRequired:
+      return "Specify a record name: mistdemo delete --record-name my-record-123"
+    case .conflict:
+      return "Re-run with --force to delete despite the change-tag mismatch."
+    case .operationFailed:
+      return nil
     }
+  }
 }

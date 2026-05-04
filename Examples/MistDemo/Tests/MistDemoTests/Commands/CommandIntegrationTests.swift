@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 //
 //  CommandIntegrationTests.swift
 //  MistDemoTests
@@ -28,318 +29,325 @@
 //
 
 import Foundation
-import Testing
 import MistKit
+import Testing
 
 @testable import MistDemoKit
 
 @Suite("Command Integration Tests")
 struct CommandIntegrationTests {
-    // MARK: - Test Configuration
-    
-    private func createTestConfig() async throws -> MistDemoConfig {
-        return try await MistDemoConfig()
-    }
-    
-    private func createMockAuthResult() throws -> AuthenticationResult {
-        let mockTokenManager = MockCommandTokenManager()
-        return AuthenticationResult(
-            tokenManager: mockTokenManager,
-            database: .private,
-            authMethod: "mock-auth"
-        )
-    }
-    
-    // MARK: - AuthTokenCommand Integration Tests
-    
+  // MARK: - Test Configuration
+
+  private func createTestConfig() async throws -> MistDemoConfig {
+    try await MistDemoConfig()
+  }
+
+  private func createMockAuthResult() throws -> AuthenticationResult {
+    let mockTokenManager = MockCommandTokenManager()
+    return AuthenticationResult(
+      tokenManager: mockTokenManager,
+      database: .private,
+      authMethod: "mock-auth"
+    )
+  }
+
+  // MARK: - AuthTokenCommand Integration Tests
+
+  #if canImport(Hummingbird)
     @Test("AuthTokenCommand configuration validation")
     func authTokenCommandConfigValidation() async throws {
-        let config = AuthTokenConfig(
-            apiToken: "test-api-token-123",
-            port: 8080,
-            host: "127.0.0.1",
-            noBrowser: true
-        )
+      let config = AuthTokenConfig(
+        apiToken: "test-api-token-123",
+        port: 8_080,
+        host: "127.0.0.1",
+        noBrowser: true
+      )
 
-        let _ = AuthTokenCommand(config: config)
+      _ = AuthTokenCommand(config: config)
 
-        // Verify command is properly configured
-        #expect(AuthTokenCommand.commandName == "auth-token")
-        #expect(AuthTokenCommand.abstract.contains("authentication token"))
+      // Verify command is properly configured
+      #expect(AuthTokenCommand.commandName == "auth-token")
+      #expect(AuthTokenCommand.abstract.contains("authentication token"))
     }
-    
+
     @Test("AuthTokenCommand resource path validation")
     func authTokenCommandResourcePathValidation() async throws {
-        let config = AuthTokenConfig(apiToken: "test-token")
-        let _ = AuthTokenCommand(config: config)
+      let config = AuthTokenConfig(apiToken: "test-token")
+      _ = AuthTokenCommand(config: config)
 
-        // Test that resource finding logic doesn't crash
-        // This tests the findResourcesPath method indirectly
-        #expect(AuthTokenCommand.commandName == "auth-token")
+      // Test that resource finding logic doesn't crash
+      // This tests the findResourcesPath method indirectly
+      #expect(AuthTokenCommand.commandName == "auth-token")
     }
-    
-    // MARK: - CurrentUserCommand Integration Tests
-    
-    @Test("CurrentUserCommand end-to-end flow")
-    func currentUserCommandEndToEndFlow() async throws {
-        let baseConfig = try await createTestConfig()
-        let config = CurrentUserConfig(
-            base: baseConfig,
-            fields: ["userRecordName", "emailAddress"],
-            output: .json
-        )
+  #endif
 
-        let _ = CurrentUserCommand(config: config)
+  // MARK: - CurrentUserCommand Integration Tests
 
-        // Verify command configuration
-        #expect(CurrentUserCommand.commandName == "current-user")
+  @Test("CurrentUserCommand end-to-end flow")
+  func currentUserCommandEndToEndFlow() async throws {
+    let baseConfig = try await createTestConfig()
+    let config = CurrentUserConfig(
+      base: baseConfig,
+      fields: ["userRecordName", "emailAddress"],
+      output: .json
+    )
 
-        // Verify config properties
-        #expect(config.fields?.count == 2)
-        #expect(config.output == .json)
-    }
-    
-    @Test("CurrentUserCommand with field filtering")
-    func currentUserCommandWithFieldFiltering() async throws {
-        let baseConfig = try await createTestConfig()
-        let config = CurrentUserConfig(
-            base: baseConfig,
-            fields: ["userRecordName", "firstName", "lastName"],
-            output: .table
-        )
+    _ = CurrentUserCommand(config: config)
 
-        let _ = CurrentUserCommand(config: config)
+    // Verify command configuration
+    #expect(CurrentUserCommand.commandName == "current-user")
 
-        // Verify field filtering setup
-        #expect(config.fields?.contains("userRecordName") == true)
-        #expect(config.fields?.contains("firstName") == true)
-        #expect(config.fields?.contains("lastName") == true)
-        #expect(config.output == .table)
-    }
-    
-    // MARK: - QueryCommand Integration Tests
-    
-    @Test("QueryCommand with filters and sorting")
-    func queryCommandWithFiltersAndSorting() async throws {
-        let baseConfig = try await createTestConfig()
-        let config = QueryConfig(
-            base: baseConfig,
-            zone: "_defaultZone",
-            recordType: "Note",
-            filters: ["title:contains:Test", "priority:gt:3"],
-            sort: (field: "createdAt", order: .descending),
-            limit: 50,
-            fields: ["title", "content", "createdAt"]
-        )
+    // Verify config properties
+    #expect(config.fields?.count == 2)
+    #expect(config.output == .json)
+  }
 
-        let _ = QueryCommand(config: config)
+  @Test("CurrentUserCommand with field filtering")
+  func currentUserCommandWithFieldFiltering() async throws {
+    let baseConfig = try await createTestConfig()
+    let config = CurrentUserConfig(
+      base: baseConfig,
+      fields: ["userRecordName", "firstName", "lastName"],
+      output: .table
+    )
 
-        // Verify query configuration
-        #expect(QueryCommand.commandName == "query")
-        #expect(config.filters.count == 2)
-        #expect(config.sort?.field == "createdAt")
-        #expect(config.sort?.order == .descending)
-        #expect(config.limit == 50)
-    }
-    
-    @Test("QueryCommand pagination setup")
-    func queryCommandPaginationSetup() async throws {
-        let baseConfig = try await createTestConfig()
-        let config = QueryConfig(
-            base: baseConfig,
-            limit: 10,
-            offset: 20,
-            continuationMarker: "next-page-token"
-        )
+    _ = CurrentUserCommand(config: config)
 
-        let _ = QueryCommand(config: config)
+    // Verify field filtering setup
+    #expect(config.fields?.contains("userRecordName") == true)
+    #expect(config.fields?.contains("firstName") == true)
+    #expect(config.fields?.contains("lastName") == true)
+    #expect(config.output == .table)
+  }
 
-        // Verify pagination configuration
-        #expect(config.limit == 10)
-        #expect(config.offset == 20)
-        #expect(config.continuationMarker == "next-page-token")
-    }
-    
-    // MARK: - CreateCommand Integration Tests
-    
-    @Test("CreateCommand with parsed fields")
-    func createCommandWithParsedFields() async throws {
-        let baseConfig = try await createTestConfig()
-        let fields = [
-            try Field(parsing: "title:string:Integration Test Note"),
-            try Field(parsing: "priority:int64:8"),
-            try Field(parsing: "progress:double:0.85")
-        ]
+  // MARK: - QueryCommand Integration Tests
 
-        let config = CreateConfig(
-            base: baseConfig,
-            zone: "_defaultZone",
-            recordName: "test-record-123",
-            fields: fields
-        )
+  @Test("QueryCommand with filters and sorting")
+  func queryCommandWithFiltersAndSorting() async throws {
+    let baseConfig = try await createTestConfig()
+    let config = QueryConfig(
+      base: baseConfig,
+      zone: "_defaultZone",
+      recordType: "Note",
+      filters: ["title:contains:Test", "priority:gt:3"],
+      sort: (field: "createdAt", order: .descending),
+      limit: 50,
+      fields: ["title", "content", "createdAt"]
+    )
 
-        let _ = CreateCommand(config: config)
+    _ = QueryCommand(config: config)
 
-        // Verify create configuration
-        #expect(CreateCommand.commandName == "create")
-        #expect(config.fields.count == 3)
-        #expect(config.recordName == "test-record-123")
+    // Verify query configuration
+    #expect(QueryCommand.commandName == "query")
+    #expect(config.filters.count == 2)
+    #expect(config.sort?.field == "createdAt")
+    #expect(config.sort?.order == .descending)
+    #expect(config.limit == 50)
+  }
 
-        // Verify field parsing
-        let titleField = config.fields.first { $0.name == "title" }
-        #expect(titleField?.type == .string)
-        #expect(titleField?.value == "Integration Test Note")
-    }
-    
-    @Test("CreateCommand field type validation")
-    func createCommandFieldTypeValidation() async throws {
-        let baseConfig = try await createTestConfig()
+  @Test("QueryCommand pagination setup")
+  func queryCommandPaginationSetup() async throws {
+    let baseConfig = try await createTestConfig()
+    let config = QueryConfig(
+      base: baseConfig,
+      limit: 10,
+      offset: 20,
+      continuationMarker: "next-page-token"
+    )
 
-        // Test different field types
-        let stringField = try Field(parsing: "description:string:This is a test description")
-        let intField = try Field(parsing: "count:int64:42")
-        let doubleField = try Field(parsing: "rating:double:4.5")
-        let timestampField = try Field(parsing: "deadline:timestamp:2026-12-31T23:59:59Z")
+    _ = QueryCommand(config: config)
 
-        let config = CreateConfig(
-            base: baseConfig,
-            zone: "_defaultZone",
-            recordName: nil,
-            fields: [stringField, intField, doubleField, timestampField]
-        )
+    // Verify pagination configuration
+    #expect(config.limit == 10)
+    #expect(config.offset == 20)
+    #expect(config.continuationMarker == "next-page-token")
+  }
 
-        let _ = CreateCommand(config: config)
+  // MARK: - CreateCommand Integration Tests
 
-        #expect(config.fields.count == 4)
+  @Test("CreateCommand with parsed fields")
+  func createCommandWithParsedFields() async throws {
+    let baseConfig = try await createTestConfig()
+    let fields = [
+      try Field(parsing: "title:string:Integration Test Note"),
+      try Field(parsing: "priority:int64:8"),
+      try Field(parsing: "progress:double:0.85"),
+    ]
 
-        // Verify each field type
-        let fieldTypes = config.fields.map(\.type)
-        #expect(fieldTypes.contains(.string))
-        #expect(fieldTypes.contains(.int64))
-        #expect(fieldTypes.contains(.double))
-        #expect(fieldTypes.contains(.timestamp))
-    }
-    
-    // MARK: - Cross-Command Integration Tests
-    
-    @Test("Configuration consistency across commands")
-    func configurationConsistencyAcrossCommands() async throws {
-        let baseConfig = try await createTestConfig()
-        
-        // Create configs for all commands
-        let _ = AuthTokenConfig(apiToken: "test-token")
-        let userConfig = CurrentUserConfig(base: baseConfig)
-        let queryConfig = QueryConfig(base: baseConfig)
-        let createConfig = CreateConfig(base: baseConfig, zone: "_defaultZone", recordName: nil, fields: [])
-        
-        // Verify all use same base container
-        #expect(userConfig.base.containerIdentifier == baseConfig.containerIdentifier)
-        #expect(queryConfig.base.containerIdentifier == baseConfig.containerIdentifier)
-        #expect(createConfig.base.containerIdentifier == baseConfig.containerIdentifier)
-        
-        // Verify environment consistency
-        #expect(userConfig.base.environment == .development)
-        #expect(queryConfig.base.environment == .development)
-        #expect(createConfig.base.environment == .development)
-    }
-    
-    @Test("Output format consistency")
-    func outputFormatConsistency() async throws {
-        let baseConfig = try await createTestConfig()
-        
-        let userConfig = CurrentUserConfig(base: baseConfig, output: .json)
-        let queryConfig = QueryConfig(base: baseConfig, output: .json)
-        
-        #expect(userConfig.output == .json)
-        #expect(queryConfig.output == .json)
-        
-        // Test other formats
-        let csvUserConfig = CurrentUserConfig(base: baseConfig, output: .csv)
-        let csvQueryConfig = QueryConfig(base: baseConfig, output: .csv)
-        
-        #expect(csvUserConfig.output == .csv)
-        #expect(csvQueryConfig.output == .csv)
-    }
-    
-    // MARK: - Error Handling Integration Tests
-    
-    @Test("Authentication error propagation")
-    func authenticationErrorPropagation() async throws {
-        let authError = MistDemoError.authenticationFailed(
-            description: "Invalid token",
-            context: "integration-test"
-        )
+    let config = CreateConfig(
+      base: baseConfig,
+      zone: "_defaultZone",
+      recordName: "test-record-123",
+      fields: fields
+    )
 
-        #expect(authError.errorCode == "AUTHENTICATION_FAILED")
-        #expect(authError.errorDescription?.contains("integration-test") == true)
-        #expect(authError.recoverySuggestion != nil)
-    }
-    
-    @Test("Configuration error handling")
-    func configurationErrorHandling() async throws {
-        let configError = ConfigurationError.missingRequired(
-            "api.token",
-            suggestion: "Provide token via --api-token"
-        )
+    _ = CreateCommand(config: config)
 
-        #expect(configError.errorDescription?.contains("api.token") == true)
-        #expect(configError.errorDescription?.contains("Provide token via --api-token") == true)
-    }
-    
-    // MARK: - Real-world Usage Simulation
-    
-    @Test("Simulate complete workflow")
-    func simulateCompleteWorkflow() async throws {
-        // 1. Auth token configuration
-        let authConfig = AuthTokenConfig(
-            apiToken: "mock-api-token-for-test",
-            noBrowser: true
-        )
-        let _ = AuthTokenCommand(config: authConfig)
+    // Verify create configuration
+    #expect(CreateCommand.commandName == "create")
+    #expect(config.fields.count == 3)
+    #expect(config.recordName == "test-record-123")
 
-        // 2. Current user check
-        let baseConfig = try await createTestConfig()
-        let userConfig = CurrentUserConfig(base: baseConfig)
-        let _ = CurrentUserCommand(config: userConfig)
+    // Verify field parsing
+    let titleField = config.fields.first { $0.name == "title" }
+    #expect(titleField?.type == .string)
+    #expect(titleField?.value == "Integration Test Note")
+  }
 
-        // 3. Query existing records
-        let queryConfig = QueryConfig(
-            base: baseConfig,
-            filters: ["title:contains:test"],
-            limit: 10
-        )
-        let _ = QueryCommand(config: queryConfig)
-        
-        // 4. Create new record
-        let fields = [try Field(parsing: "title:string:Workflow Test")]
-        let createConfig = CreateConfig(
-            base: baseConfig,
-            zone: "_defaultZone",
-            recordName: nil,
-            fields: fields
-        )
-        let _ = CreateCommand(config: createConfig)
-        
-        // Verify all commands are properly configured
-        #expect(AuthTokenCommand.commandName == "auth-token")
-        #expect(CurrentUserCommand.commandName == "current-user")
-        #expect(QueryCommand.commandName == "query")
-        #expect(CreateCommand.commandName == "create")
-    }
+  @Test("CreateCommand field type validation")
+  func createCommandFieldTypeValidation() async throws {
+    let baseConfig = try await createTestConfig()
+
+    // Test different field types
+    let stringField = try Field(parsing: "description:string:This is a test description")
+    let intField = try Field(parsing: "count:int64:42")
+    let doubleField = try Field(parsing: "rating:double:4.5")
+    let timestampField = try Field(parsing: "deadline:timestamp:2026-12-31T23:59:59Z")
+
+    let config = CreateConfig(
+      base: baseConfig,
+      zone: "_defaultZone",
+      recordName: nil,
+      fields: [stringField, intField, doubleField, timestampField]
+    )
+
+    _ = CreateCommand(config: config)
+
+    #expect(config.fields.count == 4)
+
+    // Verify each field type
+    let fieldTypes = config.fields.map(\.type)
+    #expect(fieldTypes.contains(.string))
+    #expect(fieldTypes.contains(.int64))
+    #expect(fieldTypes.contains(.double))
+    #expect(fieldTypes.contains(.timestamp))
+  }
+
+  // MARK: - Cross-Command Integration Tests
+
+  @Test("Configuration consistency across commands")
+  func configurationConsistencyAcrossCommands() async throws {
+    let baseConfig = try await createTestConfig()
+
+    // Create configs for all commands
+    _ = AuthTokenConfig(apiToken: "test-token")
+    let userConfig = CurrentUserConfig(base: baseConfig)
+    let queryConfig = QueryConfig(base: baseConfig)
+    let createConfig = CreateConfig(
+      base: baseConfig, zone: "_defaultZone", recordName: nil, fields: [])
+
+    // Verify all use same base container
+    #expect(userConfig.base.containerIdentifier == baseConfig.containerIdentifier)
+    #expect(queryConfig.base.containerIdentifier == baseConfig.containerIdentifier)
+    #expect(createConfig.base.containerIdentifier == baseConfig.containerIdentifier)
+
+    // Verify environment consistency
+    #expect(userConfig.base.environment == .development)
+    #expect(queryConfig.base.environment == .development)
+    #expect(createConfig.base.environment == .development)
+  }
+
+  @Test("Output format consistency")
+  func outputFormatConsistency() async throws {
+    let baseConfig = try await createTestConfig()
+
+    let userConfig = CurrentUserConfig(base: baseConfig, output: .json)
+    let queryConfig = QueryConfig(base: baseConfig, output: .json)
+
+    #expect(userConfig.output == .json)
+    #expect(queryConfig.output == .json)
+
+    // Test other formats
+    let csvUserConfig = CurrentUserConfig(base: baseConfig, output: .csv)
+    let csvQueryConfig = QueryConfig(base: baseConfig, output: .csv)
+
+    #expect(csvUserConfig.output == .csv)
+    #expect(csvQueryConfig.output == .csv)
+  }
+
+  // MARK: - Error Handling Integration Tests
+
+  @Test("Authentication error propagation")
+  func authenticationErrorPropagation() async throws {
+    let authError = MistDemoError.authenticationFailed(
+      description: "Invalid token",
+      context: "integration-test"
+    )
+
+    #expect(authError.errorCode == "AUTHENTICATION_FAILED")
+    #expect(authError.errorDescription?.contains("integration-test") == true)
+    #expect(authError.recoverySuggestion != nil)
+  }
+
+  @Test("Configuration error handling")
+  func configurationErrorHandling() async throws {
+    let configError = ConfigurationError.missingRequired(
+      "api.token",
+      suggestion: "Provide token via --api-token"
+    )
+
+    #expect(configError.errorDescription?.contains("api.token") == true)
+    #expect(configError.errorDescription?.contains("Provide token via --api-token") == true)
+  }
+
+  // MARK: - Real-world Usage Simulation
+
+  @Test("Simulate complete workflow")
+  func simulateCompleteWorkflow() async throws {
+    // 1. Auth token configuration
+    #if canImport(Hummingbird)
+      let authConfig = AuthTokenConfig(
+        apiToken: "mock-api-token-for-test",
+        noBrowser: true
+      )
+      _ = AuthTokenCommand(config: authConfig)
+    #endif
+
+    // 2. Current user check
+    let baseConfig = try await createTestConfig()
+    let userConfig = CurrentUserConfig(base: baseConfig)
+    _ = CurrentUserCommand(config: userConfig)
+
+    // 3. Query existing records
+    let queryConfig = QueryConfig(
+      base: baseConfig,
+      filters: ["title:contains:test"],
+      limit: 10
+    )
+    _ = QueryCommand(config: queryConfig)
+
+    // 4. Create new record
+    let fields = [try Field(parsing: "title:string:Workflow Test")]
+    let createConfig = CreateConfig(
+      base: baseConfig,
+      zone: "_defaultZone",
+      recordName: nil,
+      fields: fields
+    )
+    _ = CreateCommand(config: createConfig)
+
+    // Verify all commands are properly configured
+    #if canImport(Hummingbird)
+      #expect(AuthTokenCommand.commandName == "auth-token")
+    #endif
+    #expect(CurrentUserCommand.commandName == "current-user")
+    #expect(QueryCommand.commandName == "query")
+    #expect(CreateCommand.commandName == "create")
+  }
 }
 
 // MARK: - Mock Token Manager for Integration Tests
 
 internal final class MockCommandTokenManager: TokenManager {
-    var hasCredentials: Bool {
-        get async { true }
-    }
-    
-    func validateCredentials() async throws(TokenManagerError) -> Bool {
-        return true
-    }
-    
-    func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
-        return .webAuthToken(apiToken: "mock-api", webToken: "mock-web-auth")
-    }
+  var hasCredentials: Bool {
+    get async { true }
+  }
+
+  func validateCredentials() async throws(TokenManagerError) -> Bool {
+    true
+  }
+
+  func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+    .webAuthToken(apiToken: "mock-api", webToken: "mock-web-auth")
+  }
 }

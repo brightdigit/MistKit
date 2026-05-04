@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 //
 //  CSVFormatterTests.swift
 //  MistDemoTests
@@ -61,7 +62,7 @@ struct CSVFormatterTests {
       recordType: "Task",
       fields: [
         "title": .string("Buy groceries"),
-        "status": .string("pending")
+        "status": .string("pending"),
       ]
     )
     let formatter = CSVFormatter()
@@ -80,7 +81,7 @@ struct CSVFormatterTests {
       recordType: "Product",
       fields: [
         "price": .double(19.99),
-        "quantity": .int64(42)
+        "quantity": .int64(42),
       ]
     )
     let formatter = CSVFormatter()
@@ -99,7 +100,7 @@ struct CSVFormatterTests {
       fields: [
         "zebra": .string("last"),
         "apple": .string("first"),
-        "middle": .string("between")
+        "middle": .string("between"),
       ]
     )
     let formatter = CSVFormatter()
@@ -121,8 +122,9 @@ struct CSVFormatterTests {
 
     // Verify order
     if let appleIndex = fieldNames.firstIndex(of: "apple"),
-       let middleIndex = fieldNames.firstIndex(of: "middle"),
-       let zebraIndex = fieldNames.firstIndex(of: "zebra") {
+      let middleIndex = fieldNames.firstIndex(of: "middle"),
+      let zebraIndex = fieldNames.firstIndex(of: "zebra")
+    {
       #expect(appleIndex < middleIndex)
       #expect(middleIndex < zebraIndex)
     }
@@ -377,7 +379,7 @@ struct CSVFormatterTests {
       recordType: "Complex",
       fields: [
         "reference": .reference(.init(recordName: "ref-001")),
-        "location": .location(.init(latitude: 37.7749, longitude: -122.4194))
+        "location": .location(.init(latitude: 37.7749, longitude: -122.4194)),
       ]
     )
     let formatter = CSVFormatter()
@@ -396,7 +398,7 @@ struct CSVFormatterTests {
       recordType: "Verify",
       fields: [
         "field1": .string("value1"),
-        "field2": .string("value2")
+        "field2": .string("value2"),
       ]
     )
     let formatter = CSVFormatter()
@@ -469,7 +471,7 @@ struct CSVFormatterTests {
         "quote": .string("a\"b"),
         "newline": .string("a\nb"),
         "crlf": .string("a\r\nb"),
-        "complex": .string("a,\"b\"\nc")
+        "complex": .string("a,\"b\"\nc"),
       ]
     )
     let formatter = CSVFormatter()
