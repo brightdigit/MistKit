@@ -49,6 +49,7 @@ env:
   CLOUDKIT_KEY_ID: ${{ secrets.CLOUDKIT_KEY_ID }}
   CLOUDKIT_ENVIRONMENT: ${{ (github.event_name == 'pull_request' || github.event_name == 'push') && 'development' || github.event.inputs.environment || 'production' }}
   CLOUDKIT_PRIVATE_KEY_PATH: /tmp/cloudkit_key.pem
+  MISTKIT_BRANCH: v1.0.0-beta.1
 
 jobs:
   # Determine which tier to run based on schedule or manual input
@@ -151,7 +152,7 @@ jobs:
         if: steps.cache-binary.outputs.cache-hit != 'true'
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
         with:
-          branch: main
+          branch: ${{ env.MISTKIT_BRANCH }}
 
       - name: Build CelestraCloud
         if: steps.cache-binary.outputs.cache-hit != 'true'
