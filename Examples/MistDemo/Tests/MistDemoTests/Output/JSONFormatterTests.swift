@@ -83,7 +83,7 @@ struct JSONFormatterTests {
   func formatArrayOfObjects() throws {
     let users = [
       TestUser(name: "Charlie", age: 35, email: "charlie@example.com"),
-      TestUser(name: "Diana", age: 28, email: "diana@example.com")
+      TestUser(name: "Diana", age: 28, email: "diana@example.com"),
     ]
     let formatter = JSONFormatter(pretty: true)
 
@@ -129,7 +129,7 @@ struct JSONFormatterTests {
       recordType: "TodoItem",
       fields: [
         "title": "Buy groceries",
-        "status": "pending"
+        "status": "pending",
       ]
     )
     let formatter = JSONFormatter(pretty: true)

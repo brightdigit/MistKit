@@ -31,8 +31,8 @@ import Foundation
 
 /// Protocol for escaping strings for specific output formats
 public protocol OutputEscaper: Sendable {
-    /// Escape a string for the specific output format
-    /// - Parameter string: The string to escape
-    /// - Returns: The escaped string suitable for the output format
-    func escape(_ string: String) -> String
+  /// Escape a string for the specific output format
+  /// - Parameter string: The string to escape
+  /// - Returns: The escaped string suitable for the output format
+  func escape(_ string: String) -> String
 }

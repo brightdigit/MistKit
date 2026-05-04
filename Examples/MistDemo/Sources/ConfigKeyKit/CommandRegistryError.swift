@@ -1,6 +1,6 @@
 //
 //  CommandRegistryError.swift
-//  ConfigKeyKit
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -31,12 +31,12 @@ public import Foundation
 
 /// Errors that can occur in command registry operations
 public enum CommandRegistryError: Error, LocalizedError {
-    case unknownCommand(String)
-    
-    public var errorDescription: String? {
-        switch self {
-        case .unknownCommand(let name):
-            return "Unknown command: \(name)"
-        }
+  case unknownCommand(String)
+
+  public var errorDescription: String? {
+    switch self {
+    case .unknownCommand(let name):
+      return "Unknown command: \(name)"
     }
+  }
 }

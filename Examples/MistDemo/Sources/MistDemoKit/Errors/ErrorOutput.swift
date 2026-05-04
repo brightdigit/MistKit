@@ -33,7 +33,9 @@ import Foundation
 public struct ErrorOutput: Sendable, Codable {
   // MARK: Lifecycle
 
-  public init(code: String, message: String, details: [String: String]? = nil, suggestion: String? = nil) {
+  public init(
+    code: String, message: String, details: [String: String]? = nil, suggestion: String? = nil
+  ) {
     self.error = ErrorDetail(code: code, message: message, details: details, suggestion: suggestion)
   }
 
@@ -48,7 +50,9 @@ public struct ErrorOutput: Sendable, Codable {
   public struct ErrorDetail: Sendable, Codable {
     // MARK: Lifecycle
 
-    public init(code: String, message: String, details: [String: String]? = nil, suggestion: String? = nil) {
+    public init(
+      code: String, message: String, details: [String: String]? = nil, suggestion: String? = nil
+    ) {
       self.code = code
       self.message = message
       self.details = details
@@ -70,4 +74,3 @@ public struct ErrorOutput: Sendable, Codable {
     public let suggestion: String?
   }
 }
-

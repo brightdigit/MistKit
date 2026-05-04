@@ -27,222 +27,224 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if canImport(Hummingbird)
 import Foundation
-import Testing
-import Hummingbird
 import HTTPTypes
+import Hummingbird
 import MistKit
+import Testing
 
 @testable import MistDemoKit
 
 @Suite("AuthTokenCommand Tests")
 struct AuthTokenCommandTests {
-    // MARK: - Configuration Tests
-    
-    @Test("AuthTokenConfig initializes with default values")
-    func authTokenConfigInitializesWithDefaults() {
-        let config = AuthTokenConfig(apiToken: "test-token")
-        
-        #expect(config.apiToken == "test-token")
-        #expect(config.port == 8080)
-        #expect(config.host == "127.0.0.1")
-        #expect(config.noBrowser == false)
-    }
-    
-    @Test("AuthTokenConfig accepts custom values")
-    func authTokenConfigAcceptsCustomValues() {
-        let config = AuthTokenConfig(
-            apiToken: "custom-token",
-            port: 3000,
-            host: "localhost",
-            noBrowser: true
-        )
-        
-        #expect(config.apiToken == "custom-token")
-        #expect(config.port == 3000)
-        #expect(config.host == "localhost")
-        #expect(config.noBrowser == true)
-    }
-    
-    // MARK: - Error Tests
-    
-    @Test("AuthTokenError timeout has correct description")
-    func authTokenErrorTimeoutDescription() {
-        let error = AuthTokenError.timeout("Operation timed out after 5 minutes")
-        
-        #expect(error.errorDescription == "Authentication timeout: Operation timed out after 5 minutes")
-    }
-    
-    @Test("AuthTokenError missing resource has correct description")
-    func authTokenErrorMissingResourceDescription() {
-        let error = AuthTokenError.missingResource("index.html not found")
-        
-        #expect(error.errorDescription == "Missing resource: index.html not found")
-    }
-    
-    @Test("AuthTokenError server error has correct description")
-    func authTokenErrorServerErrorDescription() {
-        let error = AuthTokenError.serverError("Failed to bind to port")
-        
-        #expect(error.errorDescription == "Server error: Failed to bind to port")
-    }
-    
-    // MARK: - Mock Server Tests
-    
-    @Test("AuthRequest decodes correctly")
-    func authRequestDecodesCorrectly() throws {
-        let json = """
-        {
-            "sessionToken": "mock-session-token",
-            "userRecordName": "user123"
-        }
-        """
-        
-        let data = Data(json.utf8)
-        let request = try JSONDecoder().decode(AuthRequest.self, from: data)
-        
-        #expect(request.sessionToken == "mock-session-token")
-        #expect(request.userRecordName == "user123")
-    }
-    
-    @Test("AuthResponse encodes correctly")
-    func authResponseEncodesCorrectly() throws {
-        let response = AuthResponse(
-            userRecordName: "user123",
-            cloudKitData: CloudKitData(user: nil, zones: [], error: nil),
-            message: "Success"
-        )
+  // MARK: - Configuration Tests
 
-        let data = try JSONEncoder().encode(response)
+  @Test("AuthTokenConfig initializes with default values")
+  func authTokenConfigInitializesWithDefaults() {
+    let config = AuthTokenConfig(apiToken: "test-token")
 
-        // Verify the encoded data is not empty
-        #expect(!data.isEmpty)
-    }
-    
-    // MARK: - Command Initialization Tests
-    
-    @Test("Command initializes with config")
-    func commandInitializesWithConfig() {
-        let config = AuthTokenConfig(apiToken: "test-api-token")
-        let _ = AuthTokenCommand(config: config)
+    #expect(config.apiToken == "test-token")
+    #expect(config.port == 8_080)
+    #expect(config.host == "127.0.0.1")
+    #expect(config.noBrowser == false)
+  }
 
-        // Command should be created successfully
-        #expect(AuthTokenCommand.commandName == "auth-token")
-        #expect(AuthTokenCommand.abstract == "Obtain a web authentication token via browser flow")
-    }
-    
-    // MARK: - API Token Masking Tests
-    
-    @Test("API token masking works correctly")
-    func apiTokenMaskingWorks() {
-        let shortToken = "abc"
-        #expect(shortToken.maskedAPIToken == "***")
-        
-        let mediumToken = "abcdef"
-        #expect(mediumToken.maskedAPIToken == "ab****")
-        
-        let longToken = "abcdefghijklmnop"
-        #expect(longToken.maskedAPIToken == "ab************op")
-    }
-    
-    // MARK: - Loopback Authority Validation Tests
-
-    @Test(
-        "isLoopbackAuthority accepts loopback hosts",
-        arguments: [
-            "localhost",
-            "localhost:8080",
-            "127.0.0.1",
-            "127.0.0.1:3000",
-            "[::1]",
-            "[::1]:8080",
-        ]
+  @Test("AuthTokenConfig accepts custom values")
+  func authTokenConfigAcceptsCustomValues() {
+    let config = AuthTokenConfig(
+      apiToken: "custom-token",
+      port: 3_000,
+      host: "localhost",
+      noBrowser: true
     )
-    func isLoopbackAuthorityAcceptsLoopback(authority: String) {
-        #expect(AuthTokenCommand.isLoopbackAuthority(authority))
-    }
 
-    @Test(
-        "isLoopbackAuthority rejects non-loopback and bypass attempts",
-        arguments: [
-            "",
-            "evil.com",
-            "evil.com:8080",
-            "localhost.evil.com",
-            "localhost.evil.com:8080",
-            "127.0.0.1.evil.com",
-            "127.0.0.1.evil.com:8080",
-            "127.0.0.2",
-            "0.0.0.0",
-            "[::2]",
-            "[::1].evil.com",
-            "api.apple-cloudkit.com",
-        ]
+    #expect(config.apiToken == "custom-token")
+    #expect(config.port == 3_000)
+    #expect(config.host == "localhost")
+    #expect(config.noBrowser == true)
+  }
+
+  // MARK: - Error Tests
+
+  @Test("AuthTokenError timeout has correct description")
+  func authTokenErrorTimeoutDescription() {
+    let error = AuthTokenError.timeout("Operation timed out after 5 minutes")
+
+    #expect(error.errorDescription == "Authentication timeout: Operation timed out after 5 minutes")
+  }
+
+  @Test("AuthTokenError missing resource has correct description")
+  func authTokenErrorMissingResourceDescription() {
+    let error = AuthTokenError.missingResource("index.html not found")
+
+    #expect(error.errorDescription == "Missing resource: index.html not found")
+  }
+
+  @Test("AuthTokenError server error has correct description")
+  func authTokenErrorServerErrorDescription() {
+    let error = AuthTokenError.serverError("Failed to bind to port")
+
+    #expect(error.errorDescription == "Server error: Failed to bind to port")
+  }
+
+  // MARK: - Mock Server Tests
+
+  @Test("AuthRequest decodes correctly")
+  func authRequestDecodesCorrectly() throws {
+    let json = """
+      {
+          "sessionToken": "mock-session-token",
+          "userRecordName": "user123"
+      }
+      """
+
+    let data = Data(json.utf8)
+    let request = try JSONDecoder().decode(AuthRequest.self, from: data)
+
+    #expect(request.sessionToken == "mock-session-token")
+    #expect(request.userRecordName == "user123")
+  }
+
+  @Test("AuthResponse encodes correctly")
+  func authResponseEncodesCorrectly() throws {
+    let response = AuthResponse(
+      userRecordName: "user123",
+      cloudKitData: CloudKitData(user: nil, zones: [], error: nil),
+      message: "Success"
     )
-    func isLoopbackAuthorityRejectsBypassAttempts(authority: String) {
-        #expect(!AuthTokenCommand.isLoopbackAuthority(authority))
+
+    let data = try JSONEncoder().encode(response)
+
+    // Verify the encoded data is not empty
+    #expect(!data.isEmpty)
+  }
+
+  // MARK: - Command Initialization Tests
+
+  @Test("Command initializes with config")
+  func commandInitializesWithConfig() {
+    let config = AuthTokenConfig(apiToken: "test-api-token")
+    _ = AuthTokenCommand(config: config)
+
+    // Command should be created successfully
+    #expect(AuthTokenCommand.commandName == "auth-token")
+    #expect(AuthTokenCommand.abstract == "Obtain a web authentication token via browser flow")
+  }
+
+  // MARK: - API Token Masking Tests
+
+  @Test("API token masking works correctly")
+  func apiTokenMaskingWorks() {
+    let shortToken = "abc"
+    #expect(shortToken.maskedAPIToken == "***")
+
+    let mediumToken = "abcdef"
+    #expect(mediumToken.maskedAPIToken == "ab****")
+
+    let longToken = "abcdefghijklmnop"
+    #expect(longToken.maskedAPIToken == "ab************op")
+  }
+
+  // MARK: - Loopback Authority Validation Tests
+
+  @Test(
+    "isLoopbackAuthority accepts loopback hosts",
+    arguments: [
+      "localhost",
+      "localhost:8080",
+      "127.0.0.1",
+      "127.0.0.1:3000",
+      "[::1]",
+      "[::1]:8080",
+    ]
+  )
+  func isLoopbackAuthorityAcceptsLoopback(authority: String) {
+    #expect(AuthTokenCommand.isLoopbackAuthority(authority))
+  }
+
+  @Test(
+    "isLoopbackAuthority rejects non-loopback and bypass attempts",
+    arguments: [
+      "",
+      "evil.com",
+      "evil.com:8080",
+      "localhost.evil.com",
+      "localhost.evil.com:8080",
+      "127.0.0.1.evil.com",
+      "127.0.0.1.evil.com:8080",
+      "127.0.0.2",
+      "0.0.0.0",
+      "[::2]",
+      "[::1].evil.com",
+      "api.apple-cloudkit.com",
+    ]
+  )
+  func isLoopbackAuthorityRejectsBypassAttempts(authority: String) {
+    #expect(!AuthTokenCommand.isLoopbackAuthority(authority))
+  }
+
+  // MARK: - AsyncChannel Tests
+
+  @Test("AsyncChannel sends and receives values")
+  func asyncChannelSendsAndReceives() async {
+    let channel = AsyncChannel<String>()
+
+    Task {
+      await channel.send("test-value")
     }
 
-    // MARK: - AsyncChannel Tests
-    
-    @Test("AsyncChannel sends and receives values")
-    func asyncChannelSendsAndReceives() async {
-        let channel = AsyncChannel<String>()
-        
-        Task {
-            await channel.send("test-value")
-        }
-        
-        let value = await channel.receive()
-        #expect(value == "test-value")
-    }
-    
-    @Test("AsyncChannel handles multiple values sequentially")
-    func asyncChannelHandlesMultipleValues() async {
-        let channel = AsyncChannel<Int>()
+    let value = await channel.receive()
+    #expect(value == "test-value")
+  }
 
-        Task { await channel.send(1) }
-        let first = await channel.receive()
-        #expect(first == 1)
+  @Test("AsyncChannel handles multiple values sequentially")
+  func asyncChannelHandlesMultipleValues() async {
+    let channel = AsyncChannel<Int>()
 
-        Task { await channel.send(2) }
-        let second = await channel.receive()
-        #expect(second == 2)
+    Task { await channel.send(1) }
+    let first = await channel.receive()
+    #expect(first == 1)
 
-        Task { await channel.send(3) }
-        let third = await channel.receive()
-        #expect(third == 3)
+    Task { await channel.send(2) }
+    let second = await channel.receive()
+    #expect(second == 2)
+
+    Task { await channel.send(3) }
+    let third = await channel.receive()
+    #expect(third == 3)
+  }
+
+  // MARK: - Timeout Tests
+
+  @Test("Timeout helper throws on timeout")
+  func timeoutHelperThrowsOnTimeout() async throws {
+    do {
+      _ = try await withTimeoutAndSignals(seconds: 0.1) {
+        try await Task.sleep(nanoseconds: 1_000_000_000)  // Sleep for 1 second
+        return "should-not-return"
+      }
+      Issue.record("Should have timed out")
+    } catch is AsyncTimeoutError {
+      // Expected timeout error
+      #expect(Bool(true))
+    } catch {
+      Issue.record("Unexpected error: \(error)")
     }
-    
-    // MARK: - Timeout Tests
-    
-    @Test("Timeout helper throws on timeout")
-    func timeoutHelperThrowsOnTimeout() async throws {
-        do {
-            _ = try await withTimeoutAndSignals(seconds: 0.1) {
-                try await Task.sleep(nanoseconds: 1_000_000_000) // Sleep for 1 second
-                return "should-not-return"
-            }
-            Issue.record("Should have timed out")
-        } catch is AsyncTimeoutError {
-            // Expected timeout error
-            #expect(Bool(true))
-        } catch {
-            Issue.record("Unexpected error: \(error)")
-        }
+  }
+
+  @Test("Timeout helper returns value before timeout")
+  func timeoutHelperReturnsValue() async throws {
+    let result = try await withTimeoutAndSignals(seconds: 1.0) {
+      "success"
     }
-    
-    @Test("Timeout helper returns value before timeout")
-    func timeoutHelperReturnsValue() async throws {
-        let result = try await withTimeoutAndSignals(seconds: 1.0) {
-            return "success"
-        }
-        
-        #expect(result == "success")
-    }
+
+    #expect(result == "success")
+  }
 }
 
 // MARK: - Mock HTTP Context for Testing
 
 // Tests for AuthTokenCommand HTTP functionality would require more complex mocking
 // These tests focus on the configuration and error handling aspects
+#endif

@@ -32,9 +32,9 @@ import Foundation
 
 /// Default implementation of createInstance for all MistDemo commands
 extension Command where Config.ConfigReader == MistDemoConfiguration {
-    public static func createInstance() async throws -> Self {
-        let configuration = try await MistDemoConfiguration()
-        let config = try await Config(configuration: configuration, base: nil)
-        return Self(config: config)
-    }
+  public static func createInstance() async throws -> Self {
+    let configuration = try await MistDemoConfiguration()
+    let config = try await Config(configuration: configuration, base: nil)
+    return Self(config: config)
+  }
 }

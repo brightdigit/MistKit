@@ -53,6 +53,7 @@ opt_in_rules:
   - nslocalizedstring_require_bundle
   - number_separator
   - object_literal
+  - one_declaration_per_file
   - operator_usage_whitespace
   - optional_enum_case_matching
   - overridden_super_call
@@ -107,6 +108,11 @@ line_length:
 closure_body_length:
   - 50
   - 60
+type_name:
+  min_length: 3
+  max_length:
+    warning: 50
+    error: 60
 identifier_name:
   excluded:
     - id

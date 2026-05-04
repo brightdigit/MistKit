@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 //
 //  TableFormatterTests.swift
 //  MistDemoTests
@@ -60,7 +61,7 @@ struct TableFormatterTests {
       recordType: "Task",
       fields: [
         "title": .string("Buy groceries"),
-        "status": .string("pending")
+        "status": .string("pending"),
       ]
     )
     let formatter = TableFormatter()
@@ -81,7 +82,7 @@ struct TableFormatterTests {
       recordType: "Product",
       fields: [
         "price": .double(19.99),
-        "quantity": .int64(42)
+        "quantity": .int64(42),
       ]
     )
     let formatter = TableFormatter()
@@ -100,7 +101,7 @@ struct TableFormatterTests {
       fields: [
         "zebra": .string("last"),
         "apple": .string("first"),
-        "middle": .string("between")
+        "middle": .string("between"),
       ]
     )
     let formatter = TableFormatter()
@@ -122,8 +123,9 @@ struct TableFormatterTests {
 
     // Verify alphabetical order
     if let appleIndex = fieldNames.firstIndex(of: "apple"),
-       let middleIndex = fieldNames.firstIndex(of: "middle"),
-       let zebraIndex = fieldNames.firstIndex(of: "zebra") {
+      let middleIndex = fieldNames.firstIndex(of: "middle"),
+      let zebraIndex = fieldNames.firstIndex(of: "zebra")
+    {
       #expect(appleIndex < middleIndex)
       #expect(middleIndex < zebraIndex)
     }
@@ -376,7 +378,7 @@ struct TableFormatterTests {
       recordType: "Complex",
       fields: [
         "reference": .reference(.init(recordName: "ref-001")),
-        "location": .location(.init(latitude: 37.7749, longitude: -122.4194))
+        "location": .location(.init(latitude: 37.7749, longitude: -122.4194)),
       ]
     )
     let formatter = TableFormatter()
@@ -395,7 +397,7 @@ struct TableFormatterTests {
       recordType: "Verify",
       fields: [
         "field1": .string("value1"),
-        "field2": .string("value2")
+        "field2": .string("value2"),
       ]
     )
     let formatter = TableFormatter()
@@ -452,7 +454,7 @@ struct TableFormatterTests {
       fields: [
         "text1": .string("   leading"),
         "text2": .string("trailing   "),
-        "text3": .string("   both   ")
+        "text3": .string("   both   "),
       ]
     )
     let formatter = TableFormatter()
@@ -490,7 +492,7 @@ struct TableFormatterTests {
       fields: [
         "spaces": .string("     "),
         "tabs": .string("\t\t\t"),
-        "newlines": .string("\n\n\n")
+        "newlines": .string("\n\n\n"),
       ]
     )
     let formatter = TableFormatter()

@@ -29,7 +29,7 @@
     "BeginDocumentationCommentWithOneLineSummary" : false,
     "DoNotUseSemicolons" : true,
     "DontRepeatTypeInStaticProperties" : true,
-    "FileScopedDeclarationPrivacy" : true,
+    "FileScopedDeclarationPrivacy" : false,
     "FullyIndirectEnum" : true,
     "GroupNumericLiterals" : true,
     "IdentifiersMustBeASCII" : true,

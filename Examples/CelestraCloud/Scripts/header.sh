@@ -34,8 +34,9 @@ if [ -z "$directory" ] || [ -z "$creator" ] || [ -z "$company" ] || [ -z "$packa
   usage
 fi
 
-# Define the header template
-header_template="//
+# Define the header template using a heredoc
+read -r -d '' header_template <<'EOF'
+//
 //  %s
 //  %s
 //
@@ -44,7 +45,7 @@ header_template="//
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -54,7 +55,7 @@ header_template="//
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -62,7 +63,8 @@ header_template="//
 //  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 //  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //  OTHER DEALINGS IN THE SOFTWARE.
-//"
+//
+EOF
 
 # Loop through each Swift file in the specified directory and subdirectories
 find "$directory" -type f -name "*.swift" | while read -r file; do
@@ -71,7 +73,7 @@ find "$directory" -type f -name "*.swift" | while read -r file; do
     echo "Skipping $file (generated file)"
     continue
   fi
-  
+
   # Check if the first line is the swift-format-ignore indicator
   first_line=$(head -n 1 "$file")
   if [[ "$first_line" == "// swift-format-ignore-file" ]]; then
@@ -80,8 +82,14 @@ find "$directory" -type f -name "*.swift" | while read -r file; do
   fi
 
   # Create the header with the current filename
-  filename=$(basename "$file")
-  header=$(printf "$header_template" "$filename" "$package" "$creator" "$year" "$company")
+  # Escape % characters in user-provided values to prevent format specifier injection
+  filename=$(basename "$file" | sed 's/%/%%/g')
+  package_safe=$(printf '%s' "$package" | sed 's/%/%%/g')
+  creator_safe=$(printf '%s' "$creator" | sed 's/%/%%/g')
+  year_safe=$(printf '%s' "$year" | sed 's/%/%%/g')
+  company_safe=$(printf '%s' "$company" | sed 's/%/%%/g')
+
+  header=$(printf "$header_template" "$filename" "$package_safe" "$creator_safe" "$year_safe" "$company_safe")
 
   # Remove all consecutive lines at the beginning which start with "// ", contain only whitespace, or only "//"
   awk '
@@ -96,7 +104,7 @@ find "$directory" -type f -name "*.swift" | while read -r file; do
 
   # Add the header to the cleaned file
   (echo "$header"; echo; cat temp_file) > "$file"
-  
+
   # Remove the temporary file
   rm temp_file
 done

@@ -31,18 +31,19 @@ import Foundation
 
 /// JSON escaper (usually handled by JSONEncoder, but useful for manual JSON building)
 public struct JSONEscaper: OutputEscaper {
-    public init() {}
+  public init() {}
 
-    public func escape(_ string: String) -> String {
-        let escaped = string
-            .replacingOccurrences(of: "\\", with: "\\\\")
-            .replacingOccurrences(of: "\"", with: "\\\"")
-            .replacingOccurrences(of: "\n", with: "\\n")
-            .replacingOccurrences(of: "\r", with: "\\r")
-            .replacingOccurrences(of: "\t", with: "\\t")
-            .replacingOccurrences(of: "\u{000C}", with: "\\f")
-            .replacingOccurrences(of: "\u{0008}", with: "\\b")
+  public func escape(_ string: String) -> String {
+    let escaped =
+      string
+      .replacingOccurrences(of: "\\", with: "\\\\")
+      .replacingOccurrences(of: "\"", with: "\\\"")
+      .replacingOccurrences(of: "\n", with: "\\n")
+      .replacingOccurrences(of: "\r", with: "\\r")
+      .replacingOccurrences(of: "\t", with: "\\t")
+      .replacingOccurrences(of: "\u{000C}", with: "\\f")
+      .replacingOccurrences(of: "\u{0008}", with: "\\b")
 
-        return escaped
-    }
+    return escaped
+  }
 }

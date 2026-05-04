@@ -1,3 +1,4 @@
+// swiftlint:disable file_length type_body_length
 //
 //  YAMLFormatterTests.swift
 //  MistDemoTests
@@ -60,7 +61,7 @@ struct YAMLFormatterTests {
       recordType: "Task",
       fields: [
         "title": .string("Buy groceries"),
-        "status": .string("pending")
+        "status": .string("pending"),
       ]
     )
     let formatter = YAMLFormatter()
@@ -81,7 +82,7 @@ struct YAMLFormatterTests {
       recordType: "Product",
       fields: [
         "price": .double(19.99),
-        "quantity": .int64(42)
+        "quantity": .int64(42),
       ]
     )
     let formatter = YAMLFormatter()
@@ -100,7 +101,7 @@ struct YAMLFormatterTests {
       fields: [
         "zebra": .string("last"),
         "apple": .string("first"),
-        "middle": .string("between")
+        "middle": .string("between"),
       ]
     )
     let formatter = YAMLFormatter()
@@ -122,8 +123,9 @@ struct YAMLFormatterTests {
 
     // Verify alphabetical order
     if let appleIndex = fieldNames.firstIndex(of: "apple"),
-       let middleIndex = fieldNames.firstIndex(of: "middle"),
-       let zebraIndex = fieldNames.firstIndex(of: "zebra") {
+      let middleIndex = fieldNames.firstIndex(of: "middle"),
+      let zebraIndex = fieldNames.firstIndex(of: "zebra")
+    {
       #expect(appleIndex < middleIndex)
       #expect(middleIndex < zebraIndex)
     }
@@ -259,7 +261,7 @@ struct YAMLFormatterTests {
         "yes_field": .string("yes"),
         "no_field": .string("no"),
         "true_field": .string("true"),
-        "false_field": .string("false")
+        "false_field": .string("false"),
       ]
     )
     let formatter = YAMLFormatter()
@@ -280,7 +282,7 @@ struct YAMLFormatterTests {
       recordType: "Numeric",
       fields: [
         "code": .string("12345"),
-        "decimal": .string("3.14")
+        "decimal": .string("3.14"),
       ]
     )
     let formatter = YAMLFormatter()
@@ -352,7 +354,7 @@ struct YAMLFormatterTests {
         "brackets": .string("[array]"),
         "braces": .string("{object}"),
         "ampersand": .string("&reference"),
-        "asterisk": .string("*alias")
+        "asterisk": .string("*alias"),
       ]
     )
     let formatter = YAMLFormatter()
@@ -407,7 +409,7 @@ struct YAMLFormatterTests {
       recordType: "Null",
       fields: [
         "value": .string("null"),
-        "tilde": .string("~")
+        "tilde": .string("~"),
       ]
     )
     let formatter = YAMLFormatter()
@@ -561,7 +563,7 @@ struct YAMLFormatterTests {
       recordType: "Complex",
       fields: [
         "reference": .reference(.init(recordName: "ref-001")),
-        "location": .location(.init(latitude: 37.7749, longitude: -122.4194))
+        "location": .location(.init(latitude: 37.7749, longitude: -122.4194)),
       ]
     )
     let formatter = YAMLFormatter()
@@ -580,7 +582,7 @@ struct YAMLFormatterTests {
       recordType: "Verify",
       fields: [
         "field1": .string("value1"),
-        "field2": .string("value2")
+        "field2": .string("value2"),
       ]
     )
     let formatter = YAMLFormatter()
@@ -635,7 +637,7 @@ struct YAMLFormatterTests {
       recordType: "Simple",
       fields: [
         "title": .string("SimpleTitle"),
-        "status": .string("active")
+        "status": .string("active"),
       ]
     )
     let formatter = YAMLFormatter()
@@ -660,7 +662,7 @@ struct YAMLFormatterTests {
         "field3": .string("True"),
         "field4": .string("False"),
         "field5": .string("ON"),
-        "field6": .string("OFF")
+        "field6": .string("OFF"),
       ]
     )
     let formatter = YAMLFormatter()

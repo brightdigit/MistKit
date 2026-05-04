@@ -32,31 +32,30 @@ import MistKit
 
 /// Protocol for formatting command output in different formats
 public protocol OutputFormatting {
-    /// Output a single result in the specified format
-    func outputResult<T: Encodable>(_ result: T, format: OutputFormat) async throws
-    
-    /// Output multiple results in the specified format
-    func outputResults<T: Encodable>(_ results: [T], format: OutputFormat) async throws
+  /// Output a single result in the specified format
+  func outputResult<T: Encodable>(_ result: T, format: OutputFormat) async throws
+
+  /// Output multiple results in the specified format
+  func outputResults<T: Encodable>(_ results: [T], format: OutputFormat) async throws
 }
 
-public extension OutputFormatting {
-    /// Default implementation for outputting a single result
-    func outputResult<T: Encodable>(_ result: T, format: OutputFormat) async throws {
-        try await outputResults([result], format: format)
-    }
-    
-    /// Default implementation for outputting multiple results
-    func outputResults<T: Encodable>(_ results: [T], format: OutputFormat) async throws {
-        switch format {
-        case .json:
-            try await outputJSON(results)
-        case .table:
-            try await outputTable(results)
-        case .csv:
-            try await outputCSV(results)
-        case .yaml:
-            try await outputYAML(results)
-        }
-    }
-}
+extension OutputFormatting {
+  /// Default implementation for outputting a single result
+  public func outputResult<T: Encodable>(_ result: T, format: OutputFormat) async throws {
+    try await outputResults([result], format: format)
+  }
 
+  /// Default implementation for outputting multiple results
+  public func outputResults<T: Encodable>(_ results: [T], format: OutputFormat) async throws {
+    switch format {
+    case .json:
+      try await outputJSON(results)
+    case .table:
+      try await outputTable(results)
+    case .csv:
+      try await outputCSV(results)
+    case .yaml:
+      try await outputYAML(results)
+    }
+  }
+}

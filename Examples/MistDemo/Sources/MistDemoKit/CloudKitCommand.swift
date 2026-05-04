@@ -31,21 +31,20 @@ public import MistKit
 
 /// Protocol for commands that interact with CloudKit
 public protocol CloudKitCommand {
-    var containerIdentifier: String { get }
-    var apiToken: String { get }
-    var environment: String { get }
+  var containerIdentifier: String { get }
+  var apiToken: String { get }
+  var environment: String { get }
 }
 
 extension CloudKitCommand {
-    /// Resolve API token from option or environment variable
-    public func resolvedApiToken() -> String {
-        apiToken.isEmpty ?
-            EnvironmentConfig.getOptional(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" :
-            apiToken
-    }
+  /// Resolve API token from option or environment variable
+  public func resolvedApiToken() -> String {
+    apiToken.isEmpty
+      ? EnvironmentConfig.getOptional(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" : apiToken
+  }
 
-    /// Convert environment string to MistKit Environment
-    public func cloudKitEnvironment() -> MistKit.Environment {
-        environment == "production" ? .production : .development
-    }
+  /// Convert environment string to MistKit Environment
+  public func cloudKitEnvironment() -> MistKit.Environment {
+    environment == "production" ? .production : .development
+  }
 }

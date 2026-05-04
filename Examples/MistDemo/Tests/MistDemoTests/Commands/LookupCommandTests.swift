@@ -34,22 +34,22 @@ import Testing
 
 @Suite("LookupCommand Tests")
 struct LookupCommandTests {
-    @Test("Command has correct static properties")
-    func staticProperties() {
-        #expect(LookupCommand.commandName == "lookup")
-        #expect(LookupCommand.abstract == "Look up records by name from CloudKit")
-        #expect(LookupCommand.helpText.contains("LOOKUP"))
-    }
+  @Test("Command has correct static properties")
+  func staticProperties() {
+    #expect(LookupCommand.commandName == "lookup")
+    #expect(LookupCommand.abstract == "Look up records by name from CloudKit")
+    #expect(LookupCommand.helpText.contains("LOOKUP"))
+  }
 
-    @Test("Command initializes with config")
-    func initializesWithConfig() async throws {
-        let baseConfig = try await MistDemoConfig()
-        let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"])
-        let _ = LookupCommand(config: config)
-    }
+  @Test("Command initializes with config")
+  func initializesWithConfig() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"])
+    _ = LookupCommand(config: config)
+  }
 
-    @Test("Command help text documents that missing records go to stderr")
-    func helpTextMentionsStderr() {
-        #expect(LookupCommand.helpText.contains("stderr"))
-    }
+  @Test("Command help text documents that missing records go to stderr")
+  func helpTextMentionsStderr() {
+    #expect(LookupCommand.helpText.contains("stderr"))
+  }
 }

@@ -3,7 +3,7 @@
 //  CelestraCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -32,13 +32,13 @@ import Foundation
 /// Errors specific to feed update operations
 internal struct UpdateCommandError: LocalizedError {
   /// Number of feeds that encountered errors during update
-  let errorCount: Int
+  internal let errorCount: Int
 
-  var errorDescription: String? {
+  internal var errorDescription: String? {
     "\(errorCount) feed(s) encountered errors during update"
   }
 
-  var recoverySuggestion: String? {
+  internal var recoverySuggestion: String? {
     "Review error messages above for details and check CloudKit connectivity"
   }
 }

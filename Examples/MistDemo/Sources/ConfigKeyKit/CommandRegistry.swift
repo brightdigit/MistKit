@@ -1,6 +1,6 @@
 //
 //  CommandRegistry.swift
-//  ConfigKeyKit
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -31,58 +31,58 @@ import Foundation
 
 /// Actor-based registry for managing available commands
 public actor CommandRegistry {
-    private var registeredCommands: [String: any Command.Type] = [:]
-    private var commandMetadata: [String: CommandMetadata] = [:]
+  private var registeredCommands: [String: any Command.Type] = [:]
+  private var commandMetadata: [String: CommandMetadata] = [:]
 
-    /// Metadata about a command
-    public struct CommandMetadata: Sendable {
-        public let commandName: String
-        public let abstract: String
-        public let helpText: String
+  /// Metadata about a command
+  public struct CommandMetadata: Sendable {
+    public let commandName: String
+    public let abstract: String
+    public let helpText: String
+  }
+
+  /// Shared instance
+  public static let shared = CommandRegistry()
+
+  // Internal initializer for testability - allows tests to create isolated instances
+  internal init() {}
+
+  /// Register a command type with the registry
+  public func register<T: Command>(_ commandType: T.Type) {
+    registeredCommands[T.commandName] = commandType
+    commandMetadata[T.commandName] = CommandMetadata(
+      commandName: T.commandName,
+      abstract: T.abstract,
+      helpText: T.helpText
+    )
+  }
+
+  /// Get all registered command names
+  public var availableCommands: [String] {
+    Array(registeredCommands.keys).sorted()
+  }
+
+  /// Get command metadata
+  public func metadata(for name: String) -> CommandMetadata? {
+    commandMetadata[name]
+  }
+
+  /// Get command type for the given name
+  public func commandType(named name: String) -> (any Command.Type)? {
+    registeredCommands[name]
+  }
+
+  /// Create a command instance dynamically with automatic config parsing
+  public func createCommand(named name: String) async throws -> any Command {
+    guard let commandType = registeredCommands[name] else {
+      throw CommandRegistryError.unknownCommand(name)
     }
 
-    /// Shared instance
-    public static let shared = CommandRegistry()
+    return try await commandType.createInstance()
+  }
 
-    // Internal initializer for testability - allows tests to create isolated instances
-    internal init() {}
-
-    /// Register a command type with the registry
-    public func register<T: Command>(_ commandType: T.Type) {
-        registeredCommands[T.commandName] = commandType
-        commandMetadata[T.commandName] = CommandMetadata(
-            commandName: T.commandName,
-            abstract: T.abstract,
-            helpText: T.helpText
-        )
-    }
-
-    /// Get all registered command names
-    public var availableCommands: [String] {
-        Array(registeredCommands.keys).sorted()
-    }
-
-    /// Get command metadata
-    public func metadata(for name: String) -> CommandMetadata? {
-        commandMetadata[name]
-    }
-
-    /// Get command type for the given name
-    public func commandType(named name: String) -> (any Command.Type)? {
-        return registeredCommands[name]
-    }
-
-    /// Create a command instance dynamically with automatic config parsing
-    public func createCommand(named name: String) async throws -> any Command {
-        guard let commandType = registeredCommands[name] else {
-            throw CommandRegistryError.unknownCommand(name)
-        }
-
-        return try await commandType.createInstance()
-    }
-
-    /// Check if a command is registered
-    public func isRegistered(_ name: String) -> Bool {
-        return registeredCommands[name] != nil
-    }
+  /// Check if a command is registered
+  public func isRegistered(_ name: String) -> Bool {
+    registeredCommands[name] != nil
+  }
 }

@@ -203,7 +203,8 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     let batchSize = 200
     let batches = operations.chunked(into: batchSize)
 
-    ConsoleOutput.print("Syncing \(operations.count) \(recordType) record(s) in \(batches.count) batch(es)...")
+    ConsoleOutput.print(
+      "Syncing \(operations.count) \(recordType) record(s) in \(batches.count) batch(es)...")
     Self.logger.debug(
       """
       CloudKit batch limit: 200 operations/request. \

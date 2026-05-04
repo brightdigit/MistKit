@@ -44,7 +44,7 @@ struct MistDemoConfigTests {
     #expect(config.containerIdentifier == "iCloud.com.brightdigit.MistDemo")
     #expect(config.environment == .development)
     #expect(config.host == "127.0.0.1")
-    #expect(config.port == 8080)
+    #expect(config.port == 8_080)
     #expect(config.skipAuth == false)
     #expect(config.testAllAuth == false)
     #expect(config.testApiOnly == false)
@@ -75,7 +75,6 @@ struct MistDemoConfigTests {
     _ = config.testServerToServer
   }
 
-
   // MARK: - Environment Tests
 
   @Test("Development environment is default")
@@ -95,7 +94,7 @@ struct MistDemoConfigTests {
   @Test("Default port is 8080")
   func defaultPortIs8080() async throws {
     let config = try await MistDemoConfig()
-    #expect(config.port == 8080)
+    #expect(config.port == 8_080)
   }
 
   // MARK: - Test Flags Tests

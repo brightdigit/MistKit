@@ -31,24 +31,24 @@ public import Foundation
 
 /// Errors that can occur during lookup command execution
 public enum LookupError: Error, LocalizedError {
-    case recordNamesRequired
-    case operationFailed(String)
+  case recordNamesRequired
+  case operationFailed(String)
 
-    public var errorDescription: String? {
-        switch self {
-        case .recordNamesRequired:
-            return "At least one record name is required. Use --record-names <name1,name2,...>"
-        case .operationFailed(let reason):
-            return "Lookup operation failed: \(reason)"
-        }
+  public var errorDescription: String? {
+    switch self {
+    case .recordNamesRequired:
+      return "At least one record name is required. Use --record-names <name1,name2,...>"
+    case .operationFailed(let reason):
+      return "Lookup operation failed: \(reason)"
     }
+  }
 
-    public var recoverySuggestion: String? {
-        switch self {
-        case .recordNamesRequired:
-            return "Specify one or more record names: mistdemo lookup --record-names rec-1,rec-2"
-        case .operationFailed:
-            return nil
-        }
+  public var recoverySuggestion: String? {
+    switch self {
+    case .recordNamesRequired:
+      return "Specify one or more record names: mistdemo lookup --record-names rec-1,rec-2"
+    case .operationFailed:
+      return nil
     }
+  }
 }

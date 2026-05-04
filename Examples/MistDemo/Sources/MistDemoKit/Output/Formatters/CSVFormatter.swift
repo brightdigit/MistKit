@@ -32,67 +32,67 @@ import MistKit
 
 /// Formatter for CSV output
 public struct CSVFormatter: OutputFormatter {
-    // MARK: Lifecycle
+  // MARK: Lifecycle
 
-    public init() {}
+  public init() {}
 
-    // MARK: Public
+  // MARK: Public
 
-    public func format<T: Encodable>(_ value: T) throws -> String {
-        let escaper = CSVEscaper()
+  public func format<T: Encodable>(_ value: T) throws -> String {
+    let escaper = CSVEscaper()
 
-        // For CSV format, we need to handle specific types
-        if let recordInfo = value as? RecordInfo {
-            return formatRecord(recordInfo, escaper: escaper)
-        } else if let userInfo = value as? UserInfo {
-            return formatUser(userInfo, escaper: escaper)
-        } else {
-            // Fall back to JSON for unknown types
-            let jsonFormatter = JSONFormatter(pretty: false)
-            return try jsonFormatter.format(value)
-        }
+    // For CSV format, we need to handle specific types
+    if let recordInfo = value as? RecordInfo {
+      return formatRecord(recordInfo, escaper: escaper)
+    } else if let userInfo = value as? UserInfo {
+      return formatUser(userInfo, escaper: escaper)
+    } else {
+      // Fall back to JSON for unknown types
+      let jsonFormatter = JSONFormatter(pretty: false)
+      return try jsonFormatter.format(value)
+    }
+  }
+
+  // MARK: Private
+
+  private func formatRecord(_ record: RecordInfo, escaper: CSVEscaper) -> String {
+    var output = ""
+
+    // Header
+    output += "Field,Value\n"
+
+    // Basic fields
+    output += "recordName,\(escaper.escape(record.recordName))\n"
+    output += "recordType,\(escaper.escape(record.recordType))\n"
+
+    // Custom fields
+    for (fieldName, fieldValue) in record.fields.sorted(by: { $0.key < $1.key }) {
+      let valueString = FieldValueFormatter.displayString(fieldValue)
+      output += "\(escaper.escape(fieldName)),\(escaper.escape(valueString))\n"
     }
 
-    // MARK: Private
+    return output
+  }
 
-    private func formatRecord(_ record: RecordInfo, escaper: CSVEscaper) -> String {
-        var output = ""
+  private func formatUser(_ user: UserInfo, escaper: CSVEscaper) -> String {
+    var output = ""
 
-        // Header
-        output += "Field,Value\n"
+    // Header
+    output += "Field,Value\n"
 
-        // Basic fields
-        output += "recordName,\(escaper.escape(record.recordName))\n"
-        output += "recordType,\(escaper.escape(record.recordType))\n"
+    // User fields
+    output += "userRecordName,\(escaper.escape(user.userRecordName))\n"
 
-        // Custom fields
-        for (fieldName, fieldValue) in record.fields.sorted(by: { $0.key < $1.key }) {
-            let valueString = FieldValueFormatter.displayString(fieldValue)
-            output += "\(escaper.escape(fieldName)),\(escaper.escape(valueString))\n"
-        }
-
-        return output
+    if let firstName = user.firstName {
+      output += "firstName,\(escaper.escape(firstName))\n"
+    }
+    if let lastName = user.lastName {
+      output += "lastName,\(escaper.escape(lastName))\n"
+    }
+    if let emailAddress = user.emailAddress {
+      output += "emailAddress,\(escaper.escape(emailAddress))\n"
     }
 
-    private func formatUser(_ user: UserInfo, escaper: CSVEscaper) -> String {
-        var output = ""
-
-        // Header
-        output += "Field,Value\n"
-
-        // User fields
-        output += "userRecordName,\(escaper.escape(user.userRecordName))\n"
-
-        if let firstName = user.firstName {
-            output += "firstName,\(escaper.escape(firstName))\n"
-        }
-        if let lastName = user.lastName {
-            output += "lastName,\(escaper.escape(lastName))\n"
-        }
-        if let emailAddress = user.emailAddress {
-            output += "emailAddress,\(escaper.escape(emailAddress))\n"
-        }
-
-        return output
-    }
+    return output
+  }
 }

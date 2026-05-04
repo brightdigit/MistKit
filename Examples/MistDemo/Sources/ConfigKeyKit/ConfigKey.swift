@@ -110,4 +110,3 @@ public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     return style.transform(base)
   }
 }
-

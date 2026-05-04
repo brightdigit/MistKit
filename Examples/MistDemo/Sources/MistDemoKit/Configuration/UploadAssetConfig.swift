@@ -27,73 +27,73 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import ConfigKeyKit
 import Foundation
 public import MistKit
-public import ConfigKeyKit
 
 /// Configuration for upload-asset command
 public struct UploadAssetConfig: Sendable, ConfigurationParseable {
-    public typealias ConfigReader = MistDemoConfiguration
-    public typealias BaseConfig = MistDemoConfig
+  public typealias ConfigReader = MistDemoConfiguration
+  public typealias BaseConfig = MistDemoConfig
 
-    public let base: MistDemoConfig
-    public let file: String
-    public let recordType: String
-    public let fieldName: String
-    public let recordName: String?
-    public let output: OutputFormat
+  public let base: MistDemoConfig
+  public let file: String
+  public let recordType: String
+  public let fieldName: String
+  public let recordName: String?
+  public let output: OutputFormat
 
-    public init(
-        base: MistDemoConfig,
-        file: String,
-        recordType: String,
-        fieldName: String,
-        recordName: String? = nil,
-        output: OutputFormat = .json
-    ) {
-        self.base = base
-        self.file = file
-        self.recordType = recordType
-        self.fieldName = fieldName
-        self.recordName = recordName
-        self.output = output
+  public init(
+    base: MistDemoConfig,
+    file: String,
+    recordType: String,
+    fieldName: String,
+    recordName: String? = nil,
+    output: OutputFormat = .json
+  ) {
+    self.base = base
+    self.file = file
+    self.recordType = recordType
+    self.fieldName = fieldName
+    self.recordName = recordName
+    self.output = output
+  }
+
+  /// Parse configuration from command line arguments
+  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+    let configReader = configuration
+    let baseConfig: MistDemoConfig
+    if let base = base {
+      baseConfig = base
+    } else {
+      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
     }
 
-    /// Parse configuration from command line arguments
-    public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
-        let configReader = configuration
-        let baseConfig: MistDemoConfig
-        if let base = base {
-            baseConfig = base
-        } else {
-            baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
-        }
-
-        // Get file path from configuration
-        guard let filePath = configReader.string(forKey: "file") else {
-            throw UploadAssetError.filePathRequired
-        }
-
-        // Get record type (defaults to "Note")
-        let recordType = configReader.string(forKey: "record-type") ?? "Note"
-
-        // Get field name (defaults to "image")
-        let fieldName = configReader.string(forKey: "field-name") ?? "image"
-
-        // Parse optional record name
-        let recordName = configReader.string(forKey: "record-name")
-
-        // Parse output format
-        let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
-        let output = OutputFormat(rawValue: outputString) ?? .json
-
-        self.init(
-            base: baseConfig,
-            file: filePath,
-            recordType: recordType,
-            fieldName: fieldName,
-            recordName: recordName,
-            output: output
-        )
+    // Get file path from configuration
+    guard let filePath = configReader.string(forKey: "file") else {
+      throw UploadAssetError.filePathRequired
     }
+
+    // Get record type (defaults to "Note")
+    let recordType = configReader.string(forKey: "record-type") ?? "Note"
+
+    // Get field name (defaults to "image")
+    let fieldName = configReader.string(forKey: "field-name") ?? "image"
+
+    // Parse optional record name
+    let recordName = configReader.string(forKey: "record-name")
+
+    // Parse output format
+    let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
+    let output = OutputFormat(rawValue: outputString) ?? .json
+
+    self.init(
+      base: baseConfig,
+      file: filePath,
+      recordType: recordType,
+      fieldName: fieldName,
+      recordName: recordName,
+      output: output
+    )
+  }
 }

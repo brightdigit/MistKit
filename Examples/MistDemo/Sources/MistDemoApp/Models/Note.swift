@@ -1,6 +1,6 @@
 //
 //  Note.swift
-//  MistDemoApp
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,27 +27,28 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import CloudKit
-import Foundation
+#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+  import CloudKit
+  import Foundation
 
-/// Note record, mirroring the `Note` type defined in `schema.ckdb`:
-///
-///     RECORD TYPE Note (
-///         "title"     STRING    QUERYABLE SORTABLE SEARCHABLE,
-///         "index"     INT64     QUERYABLE SORTABLE,
-///         "image"     ASSET,
-///         "createdAt" TIMESTAMP QUERYABLE SORTABLE,
-///         "modified"  INT64     QUERYABLE
-///     );
-struct Note: Identifiable, Hashable {
+  /// Note record, mirroring the `Note` type defined in `schema.ckdb`:
+  ///
+  ///     RECORD TYPE Note (
+  ///         "title"     STRING    QUERYABLE SORTABLE SEARCHABLE,
+  ///         "index"     INT64     QUERYABLE SORTABLE,
+  ///         "image"     ASSET,
+  ///         "createdAt" TIMESTAMP QUERYABLE SORTABLE,
+  ///         "modified"  INT64     QUERYABLE
+  ///     );
+  struct Note: Identifiable, Hashable {
     static let recordType = "Note"
 
     enum Fields {
-        static let title = "title"
-        static let index = "index"
-        static let image = "image"
-        static let createdAt = "createdAt"
-        static let modified = "modified"
+      static let title = "title"
+      static let index = "index"
+      static let image = "image"
+      static let createdAt = "createdAt"
+      static let modified = "modified"
     }
 
     let id: String
@@ -63,16 +64,16 @@ struct Note: Identifiable, Hashable {
     let recordChangeTag: String?
 
     init?(_ record: CKRecord) {
-        guard record.recordType == Self.recordType else { return nil }
-        self.id = record.recordID.recordName
-        self.title = record[Fields.title] as? String
-        self.index = (record[Fields.index] as? NSNumber)?.int64Value
-        self.imageAssetURL = (record[Fields.image] as? CKAsset)?.fileURL
-        self.createdAt = record[Fields.createdAt] as? Date
-        self.modified = (record[Fields.modified] as? NSNumber)?.int64Value
-        self.modificationDate = record.modificationDate
-        self.creationDate = record.creationDate
-        self.recordChangeTag = record.recordChangeTag
+      guard record.recordType == Self.recordType else { return nil }
+      self.id = record.recordID.recordName
+      self.title = record[Fields.title] as? String
+      self.index = (record[Fields.index] as? NSNumber)?.int64Value
+      self.imageAssetURL = (record[Fields.image] as? CKAsset)?.fileURL
+      self.createdAt = record[Fields.createdAt] as? Date
+      self.modified = (record[Fields.modified] as? NSNumber)?.int64Value
+      self.modificationDate = record.modificationDate
+      self.creationDate = record.creationDate
+      self.recordChangeTag = record.recordChangeTag
     }
 
     // Identity-based equality: two Notes with the same recordID are equal
@@ -80,4 +81,5 @@ struct Note: Identifiable, Hashable {
     // record across edits without losing focus when fields change.
     static func == (lhs: Note, rhs: Note) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
-}
+  }
+#endif

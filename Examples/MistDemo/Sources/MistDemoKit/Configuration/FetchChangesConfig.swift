@@ -31,55 +31,55 @@ public import ConfigKeyKit
 
 /// Configuration for fetch-changes command
 public struct FetchChangesConfig: Sendable, ConfigurationParseable {
-    public typealias ConfigReader = MistDemoConfiguration
-    public typealias BaseConfig = MistDemoConfig
+  public typealias ConfigReader = MistDemoConfiguration
+  public typealias BaseConfig = MistDemoConfig
 
-    public let base: MistDemoConfig
-    public let syncToken: String?
-    public let zone: String
-    public let fetchAll: Bool
-    public let limit: Int?
-    public let output: OutputFormat
+  public let base: MistDemoConfig
+  public let syncToken: String?
+  public let zone: String
+  public let fetchAll: Bool
+  public let limit: Int?
+  public let output: OutputFormat
 
-    public init(
-        base: MistDemoConfig,
-        syncToken: String? = nil,
-        zone: String = "_defaultZone",
-        fetchAll: Bool = false,
-        limit: Int? = nil,
-        output: OutputFormat = .table
-    ) {
-        self.base = base
-        self.syncToken = syncToken
-        self.zone = zone
-        self.fetchAll = fetchAll
-        self.limit = limit
-        self.output = output
+  public init(
+    base: MistDemoConfig,
+    syncToken: String? = nil,
+    zone: String = "_defaultZone",
+    fetchAll: Bool = false,
+    limit: Int? = nil,
+    output: OutputFormat = .table
+  ) {
+    self.base = base
+    self.syncToken = syncToken
+    self.zone = zone
+    self.fetchAll = fetchAll
+    self.limit = limit
+    self.output = output
+  }
+
+  /// Parse configuration from command line arguments
+  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+    let baseConfig: MistDemoConfig
+    if let base {
+      baseConfig = base
+    } else {
+      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
     }
 
-    /// Parse configuration from command line arguments
-    public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
-        let baseConfig: MistDemoConfig
-        if let base {
-            baseConfig = base
-        } else {
-            baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
-        }
+    let syncToken = configuration.string(forKey: "sync.token")
+    let zone = configuration.string(forKey: "zone", default: "_defaultZone") ?? "_defaultZone"
+    let fetchAll = configuration.bool(forKey: "fetch.all", default: false)
+    let limit = configuration.int(forKey: "limit")
+    let outputString = configuration.string(forKey: "output.format", default: "table") ?? "table"
+    let output = OutputFormat(rawValue: outputString) ?? .table
 
-        let syncToken = configuration.string(forKey: "sync.token")
-        let zone = configuration.string(forKey: "zone", default: "_defaultZone") ?? "_defaultZone"
-        let fetchAll = configuration.bool(forKey: "fetch.all", default: false)
-        let limit = configuration.int(forKey: "limit")
-        let outputString = configuration.string(forKey: "output.format", default: "table") ?? "table"
-        let output = OutputFormat(rawValue: outputString) ?? .table
-
-        self.init(
-            base: baseConfig,
-            syncToken: syncToken,
-            zone: zone,
-            fetchAll: fetchAll,
-            limit: limit,
-            output: output
-        )
-    }
+    self.init(
+      base: baseConfig,
+      syncToken: syncToken,
+      zone: zone,
+      fetchAll: fetchAll,
+      limit: limit,
+      output: output
+    )
+  }
 }

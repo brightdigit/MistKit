@@ -34,89 +34,90 @@ import Testing
 
 @Suite("LookupConfig Tests")
 struct LookupConfigTests {
-    @Test("LookupConfig initializes with a single record name")
-    func singleRecordName() async throws {
-        let baseConfig = try await MistDemoConfig()
-        let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"])
+  @Test("LookupConfig initializes with a single record name")
+  func singleRecordName() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"])
 
-        #expect(config.recordNames == ["rec-1"])
-        #expect(config.fields == nil)
-        #expect(config.output == .json)
-    }
+    #expect(config.recordNames == ["rec-1"])
+    #expect(config.fields == nil)
+    #expect(config.output == .json)
+  }
 
-    @Test("LookupConfig initializes with multiple record names")
-    func multipleRecordNames() async throws {
-        let baseConfig = try await MistDemoConfig()
-        let config = LookupConfig(base: baseConfig, recordNames: ["a", "b", "c"])
+  @Test("LookupConfig initializes with multiple record names")
+  func multipleRecordNames() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = LookupConfig(base: baseConfig, recordNames: ["a", "b", "c"])
 
-        #expect(config.recordNames == ["a", "b", "c"])
-    }
+    #expect(config.recordNames == ["a", "b", "c"])
+  }
 
-    @Test("LookupConfig initializes with explicit fields filter")
-    func explicitFields() async throws {
-        let baseConfig = try await MistDemoConfig()
-        let config = LookupConfig(
-            base: baseConfig,
-            recordNames: ["rec-1"],
-            fields: ["title", "priority"]
-        )
+  @Test("LookupConfig initializes with explicit fields filter")
+  func explicitFields() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = LookupConfig(
+      base: baseConfig,
+      recordNames: ["rec-1"],
+      fields: ["title", "priority"]
+    )
 
-        #expect(config.fields == ["title", "priority"])
-    }
+    #expect(config.fields == ["title", "priority"])
+  }
 
-    @Test("LookupConfig fields is nil when not provided")
-    func fieldsDefaultNil() async throws {
-        let baseConfig = try await MistDemoConfig()
-        let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"])
+  @Test("LookupConfig fields is nil when not provided")
+  func fieldsDefaultNil() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"])
 
-        #expect(config.fields == nil)
-    }
+    #expect(config.fields == nil)
+  }
 
-    @Test("LookupConfig output formats round-trip", arguments: [OutputFormat.json, .table, .csv, .yaml])
-    func outputFormats(format: OutputFormat) async throws {
-        let baseConfig = try await MistDemoConfig()
-        let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"], output: format)
+  @Test(
+    "LookupConfig output formats round-trip", arguments: [OutputFormat.json, .table, .csv, .yaml])
+  func outputFormats(format: OutputFormat) async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"], output: format)
 
-        #expect(config.output == format)
-    }
+    #expect(config.output == format)
+  }
 
-    @Test("LookupConfig preserves order of record names")
-    func preservesOrder() async throws {
-        let baseConfig = try await MistDemoConfig()
-        let config = LookupConfig(base: baseConfig, recordNames: ["z", "a", "m"])
+  @Test("LookupConfig preserves order of record names")
+  func preservesOrder() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = LookupConfig(base: baseConfig, recordNames: ["z", "a", "m"])
 
-        #expect(config.recordNames == ["z", "a", "m"])
-    }
+    #expect(config.recordNames == ["z", "a", "m"])
+  }
 
-    @Test("LookupConfig handles many record names")
-    func manyRecordNames() async throws {
-        let baseConfig = try await MistDemoConfig()
-        let names = (0..<50).map { "rec-\($0)" }
-        let config = LookupConfig(base: baseConfig, recordNames: names)
+  @Test("LookupConfig handles many record names")
+  func manyRecordNames() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let names = (0..<50).map { "rec-\($0)" }
+    let config = LookupConfig(base: baseConfig, recordNames: names)
 
-        #expect(config.recordNames.count == 50)
-        #expect(config.recordNames.first == "rec-0")
-        #expect(config.recordNames.last == "rec-49")
-    }
+    #expect(config.recordNames.count == 50)
+    #expect(config.recordNames.first == "rec-0")
+    #expect(config.recordNames.last == "rec-49")
+  }
 }
 
 @Suite("LookupError Tests")
 struct LookupErrorTests {
-    @Test("recordNamesRequired has a description")
-    func recordNamesRequiredDescription() {
-        let error = LookupError.recordNamesRequired
-        #expect(error.errorDescription != nil)
-    }
+  @Test("recordNamesRequired has a description")
+  func recordNamesRequiredDescription() {
+    let error = LookupError.recordNamesRequired
+    #expect(error.errorDescription != nil)
+  }
 
-    @Test("recordNamesRequired suggests using --record-names")
-    func recordNamesRequiredSuggestion() {
-        let error = LookupError.recordNamesRequired
-        #expect(error.recoverySuggestion?.contains("record-names") == true)
-    }
+  @Test("recordNamesRequired suggests using --record-names")
+  func recordNamesRequiredSuggestion() {
+    let error = LookupError.recordNamesRequired
+    #expect(error.recoverySuggestion?.contains("record-names") == true)
+  }
 
-    @Test("operationFailed wraps the underlying reason")
-    func operationFailedWrapsReason() {
-        let error = LookupError.operationFailed("some failure")
-        #expect(error.errorDescription?.contains("some failure") == true)
-    }
+  @Test("operationFailed wraps the underlying reason")
+  func operationFailedWrapsReason() {
+    let error = LookupError.operationFailed("some failure")
+    #expect(error.errorDescription?.contains("some failure") == true)
+  }
 }

@@ -43,13 +43,13 @@ enum ConfigurationError: LocalizedError {
     switch self {
     case .missingAPIToken:
       "CloudKit API token is required. Set CLOUDKIT_API_TOKEN environment variable or use --api-token"
-    case let .invalidEnvironment(env):
+    case .invalidEnvironment(let env):
       "Invalid environment '\(env)'. Must be 'development' or 'production'"
-    case let .invalidDatabase(db):
+    case .invalidDatabase(let db):
       "Invalid database '\(db)'. Must be 'public', 'private', or 'shared'"
-    case let .missingRequired(field, suggestion):
+    case .missingRequired(let field, let suggestion):
       "Missing required configuration: \(field). \(suggestion)"
-    case let .unsupportedPlatform(message):
+    case .unsupportedPlatform(let message):
       "Unsupported platform: \(message)"
     }
   }

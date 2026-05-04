@@ -32,133 +32,132 @@ import MistKit
 
 /// Command to update an existing record in CloudKit
 public struct UpdateCommand: MistDemoCommand, OutputFormatting {
-    public typealias Config = UpdateConfig
-    public static let commandName = "update"
-    public static let abstract = "Update an existing record in CloudKit"
-    public static let helpText = """
-        UPDATE - Update an existing record in CloudKit
+  public typealias Config = UpdateConfig
+  public static let commandName = "update"
+  public static let abstract = "Update an existing record in CloudKit"
+  public static let helpText = """
+    UPDATE - Update an existing record in CloudKit
 
-        USAGE:
-            mistdemo update --record-name <name> [options]
+    USAGE:
+        mistdemo update --record-name <name> [options]
 
-        REQUIRED:
-            --api-token <token>            CloudKit API token
-            --web-auth-token <token>       Web authentication token
-            --record-name <name>           Record name to update (REQUIRED)
+    REQUIRED:
+        --api-token <token>            CloudKit API token
+        --web-auth-token <token>       Web authentication token
+        --record-name <name>           Record name to update (REQUIRED)
 
-        OPTIONS:
-            --record-type <type>           Record type (default: Note)
-            --zone <zone>                  Zone name (default: _defaultZone)
-            --record-change-tag <tag>      Change tag for optimistic locking
-            --force                        Overwrite server record, ignoring change tag conflicts
-            --output-format <format>       Output format: json, table, csv, yaml
+    OPTIONS:
+        --record-type <type>           Record type (default: Note)
+        --zone <zone>                  Zone name (default: _defaultZone)
+        --record-change-tag <tag>      Change tag for optimistic locking
+        --force                        Overwrite server record, ignoring change tag conflicts
+        --output-format <format>       Output format: json, table, csv, yaml
 
-        FIELD DEFINITION (choose one method):
-            --field <name:type:value>      Inline field definition
-            --json-file <file>             Load fields from JSON file
-            --stdin                        Read fields from stdin as JSON
+    FIELD DEFINITION (choose one method):
+        --field <name:type:value>      Inline field definition
+        --json-file <file>             Load fields from JSON file
+        --stdin                        Read fields from stdin as JSON
 
-        FIELD FORMAT:
-            Format: name:type:value
-            Multiple fields: separate with commas
+    FIELD FORMAT:
+        Format: name:type:value
+        Multiple fields: separate with commas
 
-        FIELD TYPES:
-            string      Text values
-            int64       Integer numbers
-            double      Decimal numbers
-            timestamp   Dates (ISO 8601 or Unix timestamp)
-            asset       Asset URL (from upload-asset command)
+    FIELD TYPES:
+        string      Text values
+        int64       Integer numbers
+        double      Decimal numbers
+        timestamp   Dates (ISO 8601 or Unix timestamp)
+        asset       Asset URL (from upload-asset command)
 
-        EXAMPLES:
+    EXAMPLES:
 
-          1. Update single field:
-             mistdemo update --record-name my-note-123 --field "title:string:Updated Title"
+      1. Update single field:
+         mistdemo update --record-name my-note-123 --field "title:string:Updated Title"
 
-          2. Update multiple fields (comma-separated):
-             mistdemo update --record-name my-note-123 --field "title:string:New Title, priority:int64:8"
+      2. Update multiple fields (comma-separated):
+         mistdemo update --record-name my-note-123 --field "title:string:New Title, priority:int64:8"
 
-          3. With optimistic locking:
-             mistdemo update --record-name my-note-123 \\
-               --record-change-tag abc123 --field "title:string:Safe Update"
+      3. With optimistic locking:
+         mistdemo update --record-name my-note-123 \\
+           --record-change-tag abc123 --field "title:string:Safe Update"
 
-          4. From JSON file:
-             mistdemo update --record-name my-note-123 --json-file updates.json
+      4. From JSON file:
+         mistdemo update --record-name my-note-123 --json-file updates.json
 
-             Example updates.json:
-             {
-               "title": "Updated Project Plan",
-               "priority": 9,
-               "progress": 0.75
-             }
+         Example updates.json:
+         {
+           "title": "Updated Project Plan",
+           "priority": 9,
+           "progress": 0.75
+         }
 
-          5. From stdin:
-             echo '{"title":"Quick Update"}' | mistdemo update --record-name my-note-123 --stdin
+      5. From stdin:
+         echo '{"title":"Quick Update"}' | mistdemo update --record-name my-note-123 --stdin
 
-          6. Table output format:
-             mistdemo update --record-name my-note-123 --field "title:string:Test" --output-format table
+      6. Table output format:
+         mistdemo update --record-name my-note-123 --field "title:string:Test" --output-format table
 
-          7. Update asset field (after upload-asset):
-             mistdemo update --record-name my-note-123 \\
-               --field "image:asset:https://cws.icloud-content.com:443/..."
+      7. Update asset field (after upload-asset):
+         mistdemo update --record-name my-note-123 \\
+           --field "image:asset:https://cws.icloud-content.com:443/..."
 
-        NOTES:
-          • Record name is REQUIRED for updates
-          • Only specified fields will be updated, others remain unchanged
-          • Use record-change-tag for safe concurrent updates
-          • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN
-            to avoid repeating tokens
-        """
+    NOTES:
+      • Record name is REQUIRED for updates
+      • Only specified fields will be updated, others remain unchanged
+      • Use record-change-tag for safe concurrent updates
+      • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN
+        to avoid repeating tokens
+    """
 
-    private let config: UpdateConfig
+  private let config: UpdateConfig
 
-    public init(config: UpdateConfig) {
-        self.config = config
+  public init(config: UpdateConfig) {
+    self.config = config
+  }
+
+  public func execute() async throws {
+    do {
+      // Create CloudKit client
+      let client = try MistKitClientFactory.create(.private, from: config.base)
+
+      // Convert fields to CloudKit format
+      let cloudKitFields = try config.fields.toCloudKitFields()
+
+      // --force omits the change tag so the server overwrites without optimistic locking
+      let effectiveChangeTag = config.force ? nil : config.recordChangeTag
+
+      // Update the record
+      let recordInfo = try await client.updateRecord(
+        recordType: config.recordType,
+        recordName: config.recordName,
+        fields: cloudKitFields,
+        recordChangeTag: effectiveChangeTag
+      )
+
+      // Format and output result
+      try await outputResult(recordInfo, format: config.output)
+    } catch let error as UpdateError {
+      throw error
+    } catch let error as CloudKitError {
+      if let mapped = Self.mapConflict(error) {
+        throw mapped
+      }
+      throw UpdateError.operationFailed(error.localizedDescription)
+    } catch {
+      throw UpdateError.operationFailed(error.localizedDescription)
     }
+  }
 
-    public func execute() async throws {
-        do {
-            // Create CloudKit client
-            let client = try MistKitClientFactory.create(.private, from: config.base)
-
-            // Convert fields to CloudKit format
-            let cloudKitFields = try config.fields.toCloudKitFields()
-
-            // --force omits the change tag so the server overwrites without optimistic locking
-            let effectiveChangeTag = config.force ? nil : config.recordChangeTag
-
-            // Update the record
-            let recordInfo = try await client.updateRecord(
-                recordType: config.recordType,
-                recordName: config.recordName,
-                fields: cloudKitFields,
-                recordChangeTag: effectiveChangeTag
-            )
-
-            // Format and output result
-            try await outputResult(recordInfo, format: config.output)
-
-        } catch let error as UpdateError {
-            throw error
-        } catch let error as CloudKitError {
-            if let mapped = Self.mapConflict(error) {
-                throw mapped
-            }
-            throw UpdateError.operationFailed(error.localizedDescription)
-        } catch {
-            throw UpdateError.operationFailed(error.localizedDescription)
-        }
+  private static func mapConflict(_ error: CloudKitError) -> UpdateError? {
+    switch error {
+    case .httpError(let statusCode) where statusCode == 409:
+      return .conflict(reason: nil)
+    case .httpErrorWithDetails(let statusCode, _, let reason) where statusCode == 409:
+      return .conflict(reason: reason)
+    case .httpErrorWithRawResponse(let statusCode, _) where statusCode == 409:
+      return .conflict(reason: nil)
+    default:
+      return nil
     }
-
-    private static func mapConflict(_ error: CloudKitError) -> UpdateError? {
-        switch error {
-        case .httpError(let statusCode) where statusCode == 409:
-            return .conflict(reason: nil)
-        case .httpErrorWithDetails(let statusCode, _, let reason) where statusCode == 409:
-            return .conflict(reason: reason)
-        case .httpErrorWithRawResponse(let statusCode, _) where statusCode == 409:
-            return .conflict(reason: nil)
-        default:
-            return nil
-        }
-    }
+  }
 }

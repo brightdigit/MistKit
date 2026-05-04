@@ -35,146 +35,151 @@ public import MistKit
 /// Centralized configuration for MistDemo
 /// Implements hierarchical configuration using Swift Configuration (CLI → ENV → defaults)
 public struct MistDemoConfig: Sendable, ConfigurationParseable {
-    public typealias ConfigReader = MistDemoConfiguration
-    public typealias BaseConfig = Never
-    // MARK: - CloudKit Core Configuration
+  public typealias ConfigReader = MistDemoConfiguration
+  public typealias BaseConfig = Never
+  // MARK: - CloudKit Core Configuration
 
-    /// CloudKit container identifier
-    let containerIdentifier: String
+  /// CloudKit container identifier
+  let containerIdentifier: String
 
-    /// CloudKit API token (secret)
-    let apiToken: String
+  /// CloudKit API token (secret)
+  let apiToken: String
 
-    /// CloudKit environment (development or production)
-    let environment: MistKit.Environment
+  /// CloudKit environment (development or production)
+  let environment: MistKit.Environment
 
-    // MARK: - Authentication Configuration
+  // MARK: - Authentication Configuration
 
-    /// Web authentication token (secret)
-    let webAuthToken: String?
+  /// Web authentication token (secret)
+  let webAuthToken: String?
 
-    /// Server-to-server key ID
-    let keyID: String?
+  /// Server-to-server key ID
+  let keyID: String?
 
-    /// Server-to-server private key (secret)
-    let privateKey: String?
+  /// Server-to-server private key (secret)
+  let privateKey: String?
 
-    /// Path to server-to-server private key file
-    let privateKeyFile: String?
+  /// Path to server-to-server private key file
+  let privateKeyFile: String?
 
-    // MARK: - Server Configuration
+  // MARK: - Server Configuration
 
-    /// Server host for authentication
-    let host: String
+  /// Server host for authentication
+  let host: String
 
-    /// Server port for authentication
-    let port: Int
+  /// Server port for authentication
+  let port: Int
 
-    /// Authentication timeout in seconds (default: 300 = 5 minutes)
-    let authTimeout: Double
+  /// Authentication timeout in seconds (default: 300 = 5 minutes)
+  let authTimeout: Double
 
-    // MARK: - Test Flags
+  // MARK: - Test Flags
 
-    /// Skip authentication and use provided token directly
-    /// @deprecated: Automatic detection based on web-auth-token presence. This flag is ignored.
-    let skipAuth: Bool
+  /// Skip authentication and use provided token directly
+  /// @deprecated: Automatic detection based on web-auth-token presence. This flag is ignored.
+  let skipAuth: Bool
 
-    /// Test all authentication methods
-    let testAllAuth: Bool
+  /// Test all authentication methods
+  let testAllAuth: Bool
 
-    /// Test API-only authentication
-    let testApiOnly: Bool
+  /// Test API-only authentication
+  let testApiOnly: Bool
 
-    /// Test AdaptiveTokenManager transitions
-    let testAdaptive: Bool
+  /// Test AdaptiveTokenManager transitions
+  let testAdaptive: Bool
 
-    /// Test server-to-server authentication
-    let testServerToServer: Bool
+  /// Test server-to-server authentication
+  let testServerToServer: Bool
 
-    // MARK: - Initialization
+  // MARK: - Initialization
 
-    /// Initialize with Swift Configuration's hierarchical provider setup
-    public init(configuration: MistDemoConfiguration, base: Never? = nil) async throws {
-        let config = configuration
+  /// Initialize with Swift Configuration's hierarchical provider setup
+  public init(configuration: MistDemoConfiguration, base: Never? = nil) async throws {
+    let config = configuration
 
-        // CloudKit Core
-        self.containerIdentifier = config.string(
-            forKey: "container.identifier",
-            default: MistDemoConstants.Defaults.containerIdentifier
-        ) ?? MistDemoConstants.Defaults.containerIdentifier
+    // CloudKit Core
+    self.containerIdentifier =
+      config.string(
+        forKey: "container.identifier",
+        default: MistDemoConstants.Defaults.containerIdentifier
+      ) ?? MistDemoConstants.Defaults.containerIdentifier
 
-        self.apiToken = config.string(
-            forKey: "api.token",
-            default: "",
-            isSecret: true
-        ) ?? ""
+    self.apiToken =
+      config.string(
+        forKey: "api.token",
+        default: "",
+        isSecret: true
+      ) ?? ""
 
-        let envString = config.string(
-            forKey: "environment",
-            default: "development"
-        ) ?? "development"
-        self.environment = envString == "production" ? .production : .development
+    let envString =
+      config.string(
+        forKey: "environment",
+        default: "development"
+      ) ?? "development"
+    self.environment = envString == "production" ? .production : .development
 
-        // Authentication
-        self.webAuthToken = config.string(
-            forKey: "web.auth.token",
-            isSecret: true
-        )
+    // Authentication
+    self.webAuthToken = config.string(
+      forKey: "web.auth.token",
+      isSecret: true
+    )
 
-        self.keyID = config.string(
-            forKey: "key.id"
-        )
+    self.keyID = config.string(
+      forKey: "key.id"
+    )
 
-        self.privateKey = config.string(
-            forKey: "private.key",
-            isSecret: true
-        )
+    self.privateKey = config.string(
+      forKey: "private.key",
+      isSecret: true
+    )
 
-        self.privateKeyFile = config.string(
-            forKey: "private.key.path"
-        )
+    self.privateKeyFile = config.string(
+      forKey: "private.key.path"
+    )
 
-        // Server
-        self.host = config.string(
-            forKey: "host",
-            default: "127.0.0.1"
-        ) ?? "127.0.0.1"
+    // Server
+    self.host =
+      config.string(
+        forKey: "host",
+        default: "127.0.0.1"
+      ) ?? "127.0.0.1"
 
-        self.port = config.int(
-            forKey: "port",
-            default: 8080
-        ) ?? 8080
+    self.port =
+      config.int(
+        forKey: "port",
+        default: 8_080
+      ) ?? 8_080
 
-        self.authTimeout = Double(config.int(
-            forKey: "auth.timeout",
-            default: 300
-        ) ?? 300)
+    self.authTimeout = Double(
+      config.int(
+        forKey: "auth.timeout",
+        default: 300
+      ) ?? 300)
 
-        // Test flags
-        self.skipAuth = config.bool(
-            forKey: "skip.auth",
-            default: false
-        )
+    // Test flags
+    self.skipAuth = config.bool(
+      forKey: "skip.auth",
+      default: false
+    )
 
-        self.testAllAuth = config.bool(
-            forKey: "test.all.auth",
-            default: false
-        )
+    self.testAllAuth = config.bool(
+      forKey: "test.all.auth",
+      default: false
+    )
 
-        self.testApiOnly = config.bool(
-            forKey: "test.api.only",
-            default: false
-        )
+    self.testApiOnly = config.bool(
+      forKey: "test.api.only",
+      default: false
+    )
 
-        self.testAdaptive = config.bool(
-            forKey: "test.adaptive",
-            default: false
-        )
+    self.testAdaptive = config.bool(
+      forKey: "test.adaptive",
+      default: false
+    )
 
-        self.testServerToServer = config.bool(
-            forKey: "test.server.to.server",
-            default: false
-        )
-    }
+    self.testServerToServer = config.bool(
+      forKey: "test.server.to.server",
+      default: false
+    )
+  }
 }
-

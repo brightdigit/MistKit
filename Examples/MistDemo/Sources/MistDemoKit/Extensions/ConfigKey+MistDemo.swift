@@ -33,29 +33,29 @@ import Foundation
 // MARK: - MistDemo-Specific Config Key Helpers
 
 extension ConfigKey {
-    /// Convenience initializer for keys with MISTDEMO prefix
-    /// - Parameters:
-    ///   - base: Base key string (e.g., "cloudkit.container.id")
-    ///   - defaultVal: Required default value
-    public init(mistDemoPrefixed base: String, default defaultVal: Value) {
-        self.init(base, envPrefix: "MISTDEMO", default: defaultVal)
-    }
+  /// Convenience initializer for keys with MISTDEMO prefix
+  /// - Parameters:
+  ///   - base: Base key string (e.g., "cloudkit.container.id")
+  ///   - defaultVal: Required default value
+  public init(mistDemoPrefixed base: String, default defaultVal: Value) {
+    self.init(base, envPrefix: "MISTDEMO", default: defaultVal)
+  }
 }
 
 extension OptionalConfigKey {
-    /// Convenience initializer for keys with MISTDEMO prefix
-    /// - Parameter base: Base key string (e.g., "api.token")
-    public init(mistDemoPrefixed base: String) {
-        self.init(base, envPrefix: "MISTDEMO")
-    }
+  /// Convenience initializer for keys with MISTDEMO prefix
+  /// - Parameter base: Base key string (e.g., "api.token")
+  public init(mistDemoPrefixed base: String) {
+    self.init(base, envPrefix: "MISTDEMO")
+  }
 }
 
 extension ConfigKey where Value == Bool {
-    /// Convenience initializer for boolean keys with MISTDEMO prefix
-    /// - Parameters:
-    ///   - base: Base key string (e.g., "debug.enabled")
-    ///   - defaultVal: Default value (defaults to false)
-    public init(mistDemoPrefixed base: String, default defaultVal: Bool = false) {
-        self.init(base, envPrefix: "MISTDEMO", default: defaultVal)
-    }
+  /// Convenience initializer for boolean keys with MISTDEMO prefix
+  /// - Parameters:
+  ///   - base: Base key string (e.g., "debug.enabled")
+  ///   - defaultVal: Default value (defaults to false)
+  public init(mistDemoPrefixed base: String, default defaultVal: Bool = false) {
+    self.init(base, envPrefix: "MISTDEMO", default: defaultVal)
+  }
 }

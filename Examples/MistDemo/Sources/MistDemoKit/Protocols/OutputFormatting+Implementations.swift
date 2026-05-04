@@ -33,63 +33,63 @@ import MistKit
 // MARK: - Format-specific implementations
 
 extension OutputFormatting {
-    /// Output results in JSON format
-    func outputJSON<T: Encodable>(_ results: [T]) async throws {
-        let jsonData: Data
-        if results.count == 1 {
-            jsonData = try JSONEncoder().encode(results[0])
-        } else {
-            jsonData = try JSONEncoder().encode(results)
-        }
-        
-        guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-            throw OutputFormattingError.encodingFailure("Failed to encode JSON")
-        }
-        
-        print(jsonString)
+  /// Output results in JSON format
+  func outputJSON<T: Encodable>(_ results: [T]) async throws {
+    let jsonData: Data
+    if results.count == 1 {
+      jsonData = try JSONEncoder().encode(results[0])
+    } else {
+      jsonData = try JSONEncoder().encode(results)
     }
-    
-    /// Output results in table format
-    func outputTable<T: Encodable>(_ results: [T]) async throws {
-        if results.isEmpty {
-            print(MistDemoConstants.Messages.noRecordsFound)
-            return
-        }
-        
-        // Table output is type-specific, so we need to handle known types
-        if let records = results as? [RecordInfo] {
-            try await outputRecordTable(records)
-        } else if let userInfo = results.first as? UserInfo, results.count == 1 {
-            try await outputUserTable(userInfo)
-        } else {
-            // Fall back to JSON for unknown types
-            try await outputJSON(results)
-        }
+
+    guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+      throw OutputFormattingError.encodingFailure("Failed to encode JSON")
     }
-    
-    /// Output results in CSV format
-    func outputCSV<T: Encodable>(_ results: [T]) async throws {
-        // CSV output is type-specific, so we need to handle known types
-        if let records = results as? [RecordInfo] {
-            try await outputRecordCSV(records)
-        } else if let userInfo = results.first as? UserInfo, results.count == 1 {
-            try await outputUserCSV([userInfo])
-        } else {
-            // Fall back to JSON for unknown types
-            try await outputJSON(results)
-        }
+
+    print(jsonString)
+  }
+
+  /// Output results in table format
+  func outputTable<T: Encodable>(_ results: [T]) async throws {
+    if results.isEmpty {
+      print(MistDemoConstants.Messages.noRecordsFound)
+      return
     }
-    
-    /// Output results in YAML format
-    func outputYAML<T: Encodable>(_ results: [T]) async throws {
-        // YAML output is type-specific, so we need to handle known types
-        if let records = results as? [RecordInfo] {
-            try await outputRecordYAML(records)
-        } else if let userInfo = results.first as? UserInfo, results.count == 1 {
-            try await outputUserYAML(userInfo)
-        } else {
-            // Fall back to JSON for unknown types
-            try await outputJSON(results)
-        }
+
+    // Table output is type-specific, so we need to handle known types
+    if let records = results as? [RecordInfo] {
+      try await outputRecordTable(records)
+    } else if let userInfo = results.first as? UserInfo, results.count == 1 {
+      try await outputUserTable(userInfo)
+    } else {
+      // Fall back to JSON for unknown types
+      try await outputJSON(results)
     }
+  }
+
+  /// Output results in CSV format
+  func outputCSV<T: Encodable>(_ results: [T]) async throws {
+    // CSV output is type-specific, so we need to handle known types
+    if let records = results as? [RecordInfo] {
+      try await outputRecordCSV(records)
+    } else if let userInfo = results.first as? UserInfo, results.count == 1 {
+      try await outputUserCSV([userInfo])
+    } else {
+      // Fall back to JSON for unknown types
+      try await outputJSON(results)
+    }
+  }
+
+  /// Output results in YAML format
+  func outputYAML<T: Encodable>(_ results: [T]) async throws {
+    // YAML output is type-specific, so we need to handle known types
+    if let records = results as? [RecordInfo] {
+      try await outputRecordYAML(records)
+    } else if let userInfo = results.first as? UserInfo, results.count == 1 {
+      try await outputUserYAML(userInfo)
+    } else {
+      // Fall back to JSON for unknown types
+      try await outputJSON(results)
+    }
+  }
 }
