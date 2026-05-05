@@ -61,7 +61,13 @@ struct AsyncHelpersTests {
     }
   }
 
-  @Test("withTimeout returns value from async operation")
+  @Test(
+    "withTimeout returns value from async operation",
+    .enabled(
+      if: !TestPlatform.isWasm32,
+      "wasm32 CooperativeExecutor's Task.sleep is unreliable; operation's inner sleep can be starved"
+    )
+  )
   func returnsAsyncValue() async throws {
     let result = try await withTimeout(seconds: 1.0) {
       try await Task.sleep(nanoseconds: 50_000_000)  // 50ms
