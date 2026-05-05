@@ -4,6 +4,34 @@
 
 import PackageDescription
 
+// MARK: - AsyncAlgorithms wasi gating
+//
+// AsyncAlgorithms 1.0.x's Locking.swift references pthread_mutex_*. The Swift 6.2
+// wasm32-unknown-wasip1 SDK doesn't ship libwasi-emulated-pthread.a, so linking
+// fails. Swift 6.3+ wasi SDKs link cleanly. Gate the wasi exclusion to 6.2 only;
+// the `#else` self-deletes when the floor moves to 6.3.
+
+extension Platform {
+  static let all: [Platform] = [
+    .macOS, .iOS, .tvOS, .watchOS, .visionOS, .macCatalyst,
+    .linux, .windows, .android, .driverKit, .wasi
+  ]
+
+  static func without(_ platform: Platform) -> [Platform] {
+    var result = all
+    result.removeAll { $0 == platform }
+    return result
+  }
+}
+
+#if compiler(>=6.3)
+let asyncAlgorithmsCondition: TargetDependencyCondition? = nil
+#else
+let asyncAlgorithmsCondition: TargetDependencyCondition? = .when(
+  platforms: Platform.without(.wasi)
+)
+#endif
+
 // MARK: - Swift Settings Configuration
 
 let swiftSettings: [SwiftSetting] = [
@@ -97,7 +125,8 @@ let package = Package(
             from: "1.0.0",
             traits: ["CommandLineArguments"]
         ),
-        .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.0.0")
+        .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-async-algorithms.git", from: "1.0.0")
     ],
     targets: [
         .target(
@@ -123,7 +152,12 @@ let package = Package(
                     ])
                 ),
                 .product(name: "Configuration", package: "swift-configuration"),
-                .product(name: "UnixSignals", package: "swift-service-lifecycle")
+                .product(name: "UnixSignals", package: "swift-service-lifecycle"),
+                .product(
+                    name: "AsyncAlgorithms",
+                    package: "swift-async-algorithms",
+                    condition: asyncAlgorithmsCondition
+                )
             ],
             swiftSettings: swiftSettings
         ),
@@ -141,7 +175,12 @@ let package = Package(
             dependencies: [
                 "MistDemoKit",
                 "ConfigKeyKit",
-                .product(name: "MistKit", package: "MistKit")
+                .product(name: "MistKit", package: "MistKit"),
+                .product(
+                    name: "AsyncAlgorithms",
+                    package: "swift-async-algorithms",
+                    condition: asyncAlgorithmsCondition
+                )
             ],
             swiftSettings: swiftSettings
         )

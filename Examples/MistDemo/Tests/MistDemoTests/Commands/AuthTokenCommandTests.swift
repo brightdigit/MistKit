@@ -28,6 +28,7 @@
 //
 
 #if canImport(Hummingbird)
+import AsyncAlgorithms
 import Foundation
 import HTTPTypes
 import Hummingbird
@@ -194,25 +195,24 @@ struct AuthTokenCommandTests {
       await channel.send("test-value")
     }
 
-    let value = await channel.receive()
+    var iterator = channel.makeAsyncIterator()
+    let value = await iterator.next()
     #expect(value == "test-value")
   }
 
   @Test("AsyncChannel handles multiple values sequentially")
   func asyncChannelHandlesMultipleValues() async {
     let channel = AsyncChannel<Int>()
+    var iterator = channel.makeAsyncIterator()
 
     Task { await channel.send(1) }
-    let first = await channel.receive()
-    #expect(first == 1)
+    #expect(await iterator.next() == 1)
 
     Task { await channel.send(2) }
-    let second = await channel.receive()
-    #expect(second == 2)
+    #expect(await iterator.next() == 2)
 
     Task { await channel.send(3) }
-    let third = await channel.receive()
-    #expect(third == 3)
+    #expect(await iterator.next() == 3)
   }
 
   // MARK: - Timeout Tests
