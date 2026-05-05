@@ -36,6 +36,7 @@ enum ConfigurationError: LocalizedError {
   case invalidDatabase(String)
   case missingRequired(String, suggestion: String)
   case unsupportedPlatform(String)
+  case badCredentialsNotSupportedOnPublicDatabase
 
   // MARK: Internal
 
@@ -51,6 +52,9 @@ enum ConfigurationError: LocalizedError {
       "Missing required configuration: \(field). \(suggestion)"
     case .unsupportedPlatform(let message):
       "Unsupported platform: \(message)"
+    case .badCredentialsNotSupportedOnPublicDatabase:
+      "The bad-credentials error demo is only supported on the private and shared "
+        + "databases (it uses web auth). Re-run with `--database private`."
     }
   }
 }

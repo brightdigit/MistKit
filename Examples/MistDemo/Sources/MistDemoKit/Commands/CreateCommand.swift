@@ -49,6 +49,7 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
         --record-type <type>           Record type to create (default: Note)
         --zone <zone>                  Zone name (default: _defaultZone)
         --record-name <name>           Custom record name (auto-generated if omitted)
+        --database <type>              Database to target: public, private, shared (default: public)
         --output-format <format>       Output format: json, table, csv, yaml
 
     FIELD DEFINITION (choose one method):

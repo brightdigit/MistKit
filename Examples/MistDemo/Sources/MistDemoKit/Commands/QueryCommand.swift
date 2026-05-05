@@ -48,6 +48,7 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
         --sort <field:order>       Sort by field (order: asc/desc)
         --limit <count>            Maximum records to return (1-200)
         --fields <fields>          Comma-separated fields to include
+        --database <type>          Database to target: public, private, shared (default: public)
         --output-format <format>   Output format: json, table, csv, yaml
     """
 

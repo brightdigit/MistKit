@@ -37,12 +37,16 @@ public struct MistKitClientFactory: Sendable {
   /// - `.public`: requires `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]`
   /// - `.private` / `.shared`: requires `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN`
   ///
-  /// Honors `config.badCredentials` by swapping the configured tokens with
-  /// deliberate placeholders so the next call returns a typed 401 (used by the
-  /// talk's error demo).
+  /// When `config.badCredentials == true`, this short-circuits database-based auth
+  /// selection and returns a service backed by a deliberately invalid web-auth
+  /// `TokenManager` so the next CloudKit call yields a typed HTTP 401. Because
+  /// that path always uses web auth, it is **not** supported on `.public` (which
+  /// requires server-to-server signing) and will throw
+  /// `ConfigurationError.badCredentialsNotSupportedOnPublicDatabase`.
   ///
   /// - Parameter config: The base MistDemo configuration
-  /// - Throws: ConfigurationError if required credentials are missing
+  /// - Throws: `ConfigurationError` if required credentials are missing, or if
+  ///   `badCredentials` is requested with a `.public` database.
   public static func create(for config: MistDemoConfig) throws -> CloudKitService {
     #if os(WASI)
       throw ConfigurationError.unsupportedPlatform(
@@ -50,11 +54,10 @@ public struct MistKitClientFactory: Sendable {
       )
     #else
       if config.badCredentials {
-        let badTokenManager = WebAuthTokenManager(
-          apiToken: "invalid_demo_token",
-          webAuthToken: "invalid_demo_token"
-        )
-        return try create(from: config, tokenManager: badTokenManager)
+        guard config.database != .public else {
+          throw ConfigurationError.badCredentialsNotSupportedOnPublicDatabase
+        }
+        return try create(from: config, tokenManager: makeBadCredentialsTokenManager())
       }
       let tokenManager: any TokenManager
       switch config.database {
@@ -75,6 +78,20 @@ public struct MistKitClientFactory: Sendable {
         database: config.database
       )
     #endif
+  }
+
+  /// Build a `WebAuthTokenManager` whose tokens pass `validateCredentials()`'s
+  /// local format check (64-char hex API token, ≥10-char web-auth token) but are
+  /// guaranteed to be rejected by Apple's servers, producing a real HTTP 401.
+  ///
+  /// Used by both the factory's `badCredentials` short-circuit and by
+  /// `DemoErrorsRunner.runUnauthorized` so the same definition feeds every
+  /// 401-demo path.
+  internal static func makeBadCredentialsTokenManager() -> WebAuthTokenManager {
+    WebAuthTokenManager(
+      apiToken: String(repeating: "0", count: 64),
+      webAuthToken: String(repeating: "a", count: 100)
+    )
   }
 
   /// Create a CloudKitService with a caller-supplied TokenManager, targeting

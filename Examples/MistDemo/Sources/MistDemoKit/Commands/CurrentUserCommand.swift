@@ -43,9 +43,15 @@ public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
 
     OPTIONS:
         --api-token <token>        CloudKit API token
-        --web-auth-token <token>   Web authentication token
+        --web-auth-token <token>   Web authentication token (private/shared databases)
+        --database <type>          Database to target: public, private, shared (default: public)
         --fields <fields>          Comma-separated list of fields to include
         --output-format <format>   Output format: json, table, csv, yaml
+
+    NOTES:
+        - With --database public, this requires server-to-server credentials
+          (CLOUDKIT_KEY_ID + CLOUDKIT_PRIVATE_KEY[_PATH]); --web-auth-token is ignored.
+        - With --database private or shared, --web-auth-token is required.
     """
 
   private let config: CurrentUserConfig

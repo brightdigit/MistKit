@@ -49,6 +49,7 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
         --field-name <field>       Asset field name (default: "image")
         --record-name <name>       Unique record name (optional, auto-generated if omitted)
         --api-token <token>        CloudKit API token
+        --database <type>          Database to target: public, private, shared (default: public)
         --output-format <format>   Output format: json, table, csv, yaml
 
     EXAMPLES:
@@ -76,8 +77,9 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
     NOTES:
         - Maximum file size: 15 MB
         - Upload URLs valid for 15 minutes
-        - With web authentication: uploads to private database
-        - With API-only authentication: uploads to public database
+        - Target database is selected by --database (default: public).
+          Auth method follows: server-to-server for public,
+          web auth for private/shared.
         - Returns asset metadata (receipt, checksums) needed for record operations
         - Defaults match MistDemo schema: Note record type, image field
     """

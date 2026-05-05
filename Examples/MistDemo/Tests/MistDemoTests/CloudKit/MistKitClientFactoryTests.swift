@@ -60,7 +60,8 @@ struct MistKitClientFactoryTests {
     testAllAuth: Bool = false,
     testApiOnly: Bool = false,
     testAdaptive: Bool = false,
-    testServerToServer: Bool = false
+    testServerToServer: Bool = false,
+    badCredentials: Bool = false
   ) async throws -> MistDemoConfig {
     try await MistDemoConfig(
       containerIdentifier: containerIdentifier,
@@ -78,7 +79,8 @@ struct MistKitClientFactoryTests {
       testAllAuth: testAllAuth,
       testApiOnly: testApiOnly,
       testAdaptive: testAdaptive,
-      testServerToServer: testServerToServer
+      testServerToServer: testServerToServer,
+      badCredentials: badCredentials
     )
   }
 
@@ -324,6 +326,77 @@ struct MistKitClientFactoryTests {
     let client = try MistKitClientFactory.create(for: config)
 
     #expect(client != nil)
+  }
+
+  // MARK: - badCredentials Tests
+
+  @Test("badCredentials short-circuits to web-auth on private database")
+  func badCredentialsOnPrivateDatabase() async throws {
+    let config = try await makeConfig(
+      apiToken: "real-config-token",
+      database: .private,
+      webAuthToken: "real-config-web-auth-token",
+      badCredentials: true
+    )
+
+    // Must not throw, even though the configured tokens are unrelated to a real
+    // CloudKit account — the factory swaps in placeholder tokens for the demo.
+    _ = try MistKitClientFactory.create(for: config)
+  }
+
+  @Test("badCredentials short-circuits to web-auth on shared database")
+  func badCredentialsOnSharedDatabase() async throws {
+    let config = try await makeConfig(
+      apiToken: "real-config-token",
+      database: .shared,
+      webAuthToken: "real-config-web-auth-token",
+      badCredentials: true
+    )
+
+    _ = try MistKitClientFactory.create(for: config)
+  }
+
+  @Test("badCredentials throws on public database")
+  func badCredentialsOnPublicDatabaseThrows() async throws {
+    let config = try await makeConfig(
+      apiToken: "real-config-token",
+      database: .public,
+      keyID: "real-key-id",
+      privateKey: validPrivateKey,
+      badCredentials: true
+    )
+
+    do {
+      _ = try MistKitClientFactory.create(for: config)
+      Issue.record(
+        "Should have thrown ConfigurationError.badCredentialsNotSupportedOnPublicDatabase")
+    } catch ConfigurationError.badCredentialsNotSupportedOnPublicDatabase {
+      // expected
+    } catch {
+      Issue.record("Wrong error: \(error)")
+    }
+  }
+
+  @Test("badCredentials = false leaves normal auth selection intact")
+  func badCredentialsFalseRegression() async throws {
+    let config = try await makeConfig(
+      apiToken: "api-token",
+      database: .private,
+      webAuthToken: "web-auth-token",
+      badCredentials: false
+    )
+
+    _ = try MistKitClientFactory.create(for: config)
+  }
+
+  @Test("makeBadCredentialsTokenManager produces format-valid tokens")
+  func badCredentialsTokenManagerFormatPassesLocalValidation() async throws {
+    // The 401 demo only works if the tokens pass WebAuthTokenManager's local
+    // format check (64-char hex API token + ≥10-char web-auth token) — otherwise
+    // the request never reaches Apple and httpStatusCode comes back nil.
+    let manager = MistKitClientFactory.makeBadCredentialsTokenManager()
+    let validated = try await manager.validateCredentials()
+    #expect(validated)
   }
 
   // MARK: - Helper Functions

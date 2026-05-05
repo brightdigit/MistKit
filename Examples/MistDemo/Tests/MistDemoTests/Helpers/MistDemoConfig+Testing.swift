@@ -57,7 +57,8 @@ extension MistDemoConfig {
     testAllAuth: Bool = false,
     testApiOnly: Bool = false,
     testAdaptive: Bool = false,
-    testServerToServer: Bool = false
+    testServerToServer: Bool = false,
+    badCredentials: Bool = false
   ) async throws {
     let envString = environment == .production ? "production" : "development"
 
@@ -78,6 +79,7 @@ extension MistDemoConfig {
       key("test.api.only"): .init(booleanLiteral: testApiOnly),
       key("test.adaptive"): .init(booleanLiteral: testAdaptive),
       key("test.server.to.server"): .init(booleanLiteral: testServerToServer),
+      key("bad.credentials"): .init(booleanLiteral: badCredentials),
     ]
 
     if let webAuthToken {

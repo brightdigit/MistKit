@@ -66,14 +66,10 @@ internal struct DemoErrorsRunner {
   /// credential failure.
   internal func runUnauthorized() async {
     printSectionHeader("401 — Unauthorized (invalid credentials)")
-    let badTokenManager = WebAuthTokenManager(
-      apiToken: "invalid_demo_token",
-      webAuthToken: "invalid_demo_token"
-    )
     do {
       let service = try MistKitClientFactory.create(
         from: config.with(database: .private),
-        tokenManager: badTokenManager
+        tokenManager: MistKitClientFactory.makeBadCredentialsTokenManager()
       )
       _ = try await service.fetchCurrentUser()
       print("⚠️  Expected 401 but call succeeded — credentials may not be validated server-side.")
@@ -121,7 +117,9 @@ internal struct DemoErrorsRunner {
 
     let recordName = "demo-errors-conflict-\(Int(Date().timeIntervalSince1970))"
     var createdRecordName: String?
+    var staleTag: String?
 
+    // Step 1 (setup): create the base record.
     do {
       print("\n1️⃣  Creating record \(recordName)…")
       let created = try await service.createRecord(
@@ -130,9 +128,15 @@ internal struct DemoErrorsRunner {
         fields: ["title": .string("original")]
       )
       createdRecordName = created.recordName
-      let staleTag = created.recordChangeTag
+      staleTag = created.recordChangeTag
       print("   ✅ Created. Initial recordChangeTag = \(describe(staleTag))")
+    } catch {
+      print("❌ Setup failed during create — cannot run 409 demo: \(error)")
+      return
+    }
 
+    // Step 2 (setup): first update advances the changeTag server-side.
+    do {
       print("\n2️⃣  Updating once (advances recordChangeTag server-side)…")
       let updated = try await service.updateRecord(
         recordType: Self.conflictRecordType,
@@ -141,7 +145,14 @@ internal struct DemoErrorsRunner {
         recordChangeTag: staleTag
       )
       print("   ✅ Update accepted. New recordChangeTag = \(describe(updated.recordChangeTag))")
+    } catch {
+      print("❌ Setup failed during first update — cannot run 409 demo: \(error)")
+      await cleanupConflictRecord(service: service, createdRecordName: createdRecordName)
+      return
+    }
 
+    // Step 3 (the demo): re-use the now-stale changeTag.
+    do {
       print("\n3️⃣  Re-using the original (now stale) recordChangeTag — expect 409…")
       _ = try await service.updateRecord(
         recordType: Self.conflictRecordType,
@@ -152,22 +163,31 @@ internal struct DemoErrorsRunner {
       print("⚠️  Expected 409 but the stale-tag update was accepted.")
     } catch {
       printCloudKitError(error, expectedStatus: 409)
-      print(
-        "💡 Recovery: read the `serverRecord` from the response, merge fields, and retry"
-          + " with the fresh recordChangeTag.")
+      if error.httpStatusCode == 409 {
+        print(
+          "💡 Recovery: read the `serverRecord` from the response, merge fields, and retry"
+            + " with the fresh recordChangeTag.")
+      }
     }
 
-    if let createdRecordName {
-      print("\n🧹 Cleaning up demo record \(createdRecordName)…")
-      do {
-        try await service.deleteRecord(
-          recordType: Self.conflictRecordType,
-          recordName: createdRecordName
-        )
-        print("   ✅ Deleted.")
-      } catch {
-        print("   ⚠️  Cleanup failed (non-fatal): \(error)")
-      }
+    await cleanupConflictRecord(service: service, createdRecordName: createdRecordName)
+  }
+
+  /// Best-effort delete of the record created during the 409 demo.
+  private func cleanupConflictRecord(
+    service: CloudKitService,
+    createdRecordName: String?
+  ) async {
+    guard let createdRecordName else { return }
+    print("\n🧹 Cleaning up demo record \(createdRecordName)…")
+    do {
+      try await service.deleteRecord(
+        recordType: Self.conflictRecordType,
+        recordName: createdRecordName
+      )
+      print("   ✅ Deleted.")
+    } catch {
+      print("   ⚠️  Cleanup failed (non-fatal): \(error)")
     }
   }
 
