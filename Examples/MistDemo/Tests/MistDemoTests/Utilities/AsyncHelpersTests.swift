@@ -69,7 +69,11 @@ struct AsyncHelpersTests {
     )
   )
   func returnsAsyncValue() async throws {
-    let result = try await withTimeout(seconds: 5.0) {
+    // The 30 s budget (vs. the operation's 50 ms inner sleep) is intentionally
+    // generous: under iOS-simulator CI load the operation task's single long
+    // Task.sleep can be scheduled behind the polling timeout task's many short
+    // sleeps, so a tighter budget produced flaky timeouts (#283).
+    let result = try await withTimeout(seconds: 30.0) {
       try await Task.sleep(nanoseconds: 50_000_000)  // 50ms
       return 42
     }
