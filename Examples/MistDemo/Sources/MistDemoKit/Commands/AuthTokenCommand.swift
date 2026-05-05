@@ -28,228 +28,228 @@
 //
 
 #if canImport(Hummingbird)
-public import Foundation
-import AsyncAlgorithms
-import HTTPTypes
-import Hummingbird
-import Logging
-import MistKit
+  import AsyncAlgorithms
+  public import Foundation
+  import HTTPTypes
+  import Hummingbird
+  import Logging
+  import MistKit
 
-/// Command to obtain web authentication token via browser flow
-public struct AuthTokenCommand: MistDemoCommand {
-  public typealias Config = AuthTokenConfig
-  public static let commandName = "auth-token"
-  public static let abstract = "Obtain a web authentication token via browser flow"
-  public static let helpText = """
-    AUTH-TOKEN - Obtain web authentication token
+  /// Command to obtain web authentication token via browser flow
+  public struct AuthTokenCommand: MistDemoCommand {
+    public typealias Config = AuthTokenConfig
+    public static let commandName = "auth-token"
+    public static let abstract = "Obtain a web authentication token via browser flow"
+    public static let helpText = """
+      AUTH-TOKEN - Obtain web authentication token
 
-    USAGE:
-        mistdemo auth-token [options]
+      USAGE:
+          mistdemo auth-token [options]
 
-    OPTIONS:
-        --api-token <token>     CloudKit API token (or CLOUDKIT_API_TOKEN env)
-        --port <port>           Server port (default: 8080)
-        --host <host>           Server host (default: 127.0.0.1)
-        --no-browser           Don't open browser automatically
-    """
+      OPTIONS:
+          --api-token <token>     CloudKit API token (or CLOUDKIT_API_TOKEN env)
+          --port <port>           Server port (default: 8080)
+          --host <host>           Server host (default: 127.0.0.1)
+          --no-browser           Don't open browser automatically
+      """
 
-  private let config: AuthTokenConfig
+    private let config: AuthTokenConfig
 
-  private struct CloudKitClientConfig: Encodable {
-    let apiToken: String
-    let containerIdentifier: String
-  }
+    private struct CloudKitClientConfig: Encodable {
+      let apiToken: String
+      let containerIdentifier: String
+    }
 
-  public init(config: AuthTokenConfig) {
-    self.config = config
-  }
+    public init(config: AuthTokenConfig) {
+      self.config = config
+    }
 
-  public func execute() async throws {
-    print("🚀 Starting CloudKit Authentication Server")
-    print("📍 Server URL: http://\(config.host):\(config.port)")
-    print("🔑 API Token: \(config.apiToken.maskedAPIToken)")
+    public func execute() async throws {
+      print("🚀 Starting CloudKit Authentication Server")
+      print("📍 Server URL: http://\(config.host):\(config.port)")
+      print("🔑 API Token: \(config.apiToken.maskedAPIToken)")
 
-    let tokenChannel = AsyncChannel<String>()
-    let responseCompleteChannel = AsyncChannel<Void>()
+      let tokenChannel = AsyncChannel<String>()
+      let responseCompleteChannel = AsyncChannel<Void>()
 
-    let router = try buildRouter(
-      tokenChannel: tokenChannel,
-      responseCompleteChannel: responseCompleteChannel
-    )
-
-    // Start the HTTP server
-    let app = Application(
-      router: router,
-      configuration: .init(
-        address: .hostname(config.host, port: config.port)
+      let router = try buildRouter(
+        tokenChannel: tokenChannel,
+        responseCompleteChannel: responseCompleteChannel
       )
-    )
 
-    let serverTask = Task {
-      try await app.runService()
-    }
+      // Start the HTTP server
+      let app = Application(
+        router: router,
+        configuration: .init(
+          address: .hostname(config.host, port: config.port)
+        )
+      )
 
-    // Open browser unless disabled
-    if !config.noBrowser {
-      Task {
-        try await Task.sleep(nanoseconds: 1_000_000_000)  // Wait 1 second
-        print("🌐 Opening browser...")
-        BrowserOpener.openBrowser(url: "http://\(config.host):\(config.port)")
+      let serverTask = Task {
+        try await app.runService()
       }
-    } else {
-      print(
-        "ℹ️  Browser opening disabled. Navigate to http://\(config.host):\(config.port) manually")
-    }
 
-    print("⏳ Waiting for authentication...")
-    print("   Timeout: 5 minutes")
-    print("   Press Ctrl+C to cancel")
-
-    let token: String
-    do {
-      token = try await withTimeoutAndSignals(seconds: 300) {
-        var iterator = tokenChannel.makeAsyncIterator()
-        guard let value = await iterator.next() else {
-          throw AuthTokenError.serverError("Token channel closed before producing a value")
+      // Open browser unless disabled
+      if !config.noBrowser {
+        Task {
+          try await Task.sleep(nanoseconds: 1_000_000_000)  // Wait 1 second
+          print("🌐 Opening browser...")
+          BrowserOpener.openBrowser(url: "http://\(config.host):\(config.port)")
         }
-        return value
+      } else {
+        print(
+          "ℹ️  Browser opening disabled. Navigate to http://\(config.host):\(config.port) manually")
       }
-    } catch let error as AsyncTimeoutError {
+
+      print("⏳ Waiting for authentication...")
+      print("   Timeout: 5 minutes")
+      print("   Press Ctrl+C to cancel")
+
+      let token: String
+      do {
+        token = try await withTimeoutAndSignals(seconds: 300) {
+          var iterator = tokenChannel.makeAsyncIterator()
+          guard let value = await iterator.next() else {
+            throw AuthTokenError.serverError("Token channel closed before producing a value")
+          }
+          return value
+        }
+      } catch let error as AsyncTimeoutError {
+        serverTask.cancel()
+        throw AuthTokenError.timeout(error.localizedDescription)
+      } catch {
+        serverTask.cancel()
+        throw error
+      }
+
+      print("✅ Authentication successful! Received token.")
+
+      // Wait for response completion
+      var responseIterator = responseCompleteChannel.makeAsyncIterator()
+      _ = await responseIterator.next()
+
+      // Shutdown server
       serverTask.cancel()
-      throw AuthTokenError.timeout(error.localizedDescription)
-    } catch {
-      serverTask.cancel()
-      throw error
+      try await Task.sleep(nanoseconds: 500_000_000)
+
+      // Output token to stdout (this is the main output of the command)
+      print(token)
     }
 
-    print("✅ Authentication successful! Received token.")
+    private func buildRouter(
+      tokenChannel: AsyncChannel<String>,
+      responseCompleteChannel: AsyncChannel<Void>
+    ) throws -> Router<BasicRequestContext> {
+      let router = Router(context: BasicRequestContext.self)
+      router.middlewares.add(LogRequestsMiddleware(.info))
 
-    // Wait for response completion
-    var responseIterator = responseCompleteChannel.makeAsyncIterator()
-    _ = await responseIterator.next()
-
-    // Shutdown server
-    serverTask.cancel()
-    try await Task.sleep(nanoseconds: 500_000_000)
-
-    // Output token to stdout (this is the main output of the command)
-    print(token)
-  }
-
-  private func buildRouter(
-    tokenChannel: AsyncChannel<String>,
-    responseCompleteChannel: AsyncChannel<Void>
-  ) throws -> Router<BasicRequestContext> {
-    let router = Router(context: BasicRequestContext.self)
-    router.middlewares.add(LogRequestsMiddleware(.info))
-
-    let indexBytes = ByteBuffer(string: AuthTokenIndexHTML.content)
-    let indexResponseBuilder: @Sendable () -> Response = {
-      Response(
-        status: .ok,
-        headers: [.contentType: "text/html; charset=utf-8"],
-        body: ResponseBody { writer in
-          try await writer.write(indexBytes)
-          try await writer.finish(nil)
-        }
-      )
-    }
-    router.get("/") { _, _ -> Response in indexResponseBuilder() }
-    router.get("/index.html") { _, _ -> Response in indexResponseBuilder() }
-
-    // API endpoint for authentication callback
-    let api = router.group("api")
-
-    let configPayload = CloudKitClientConfig(
-      apiToken: config.apiToken,
-      containerIdentifier: config.containerIdentifier
-    )
-    let configData = try JSONEncoder().encode(configPayload)
-
-    api.get("config") { request, _ -> Response in
-      // Restrict to loopback destinations. The Host header reflects the request's
-      // destination host (not the origin), so this prevents requests to non-loopback
-      // addresses but does not block cross-origin browser requests. For full CORS
-      // protection, check the Origin header (set by browsers and not JS-spoofable).
-      guard Self.isLoopbackAuthority(request.head.authority ?? "") else {
-        return Response(status: .forbidden)
+      let indexBytes = ByteBuffer(string: AuthTokenIndexHTML.content)
+      let indexResponseBuilder: @Sendable () -> Response = {
+        Response(
+          status: .ok,
+          headers: [.contentType: "text/html; charset=utf-8"],
+          body: ResponseBody { writer in
+            try await writer.write(indexBytes)
+            try await writer.finish(nil)
+          }
+        )
       }
-      return Response(
-        status: .ok,
-        headers: [.contentType: "application/json"],
-        body: ResponseBody { writer in
-          try await writer.write(ByteBuffer(bytes: configData))
-          try await writer.finish(nil)
+      router.get("/") { _, _ -> Response in indexResponseBuilder() }
+      router.get("/index.html") { _, _ -> Response in indexResponseBuilder() }
+
+      // API endpoint for authentication callback
+      let api = router.group("api")
+
+      let configPayload = CloudKitClientConfig(
+        apiToken: config.apiToken,
+        containerIdentifier: config.containerIdentifier
+      )
+      let configData = try JSONEncoder().encode(configPayload)
+
+      api.get("config") { request, _ -> Response in
+        // Restrict to loopback destinations. The Host header reflects the request's
+        // destination host (not the origin), so this prevents requests to non-loopback
+        // addresses but does not block cross-origin browser requests. For full CORS
+        // protection, check the Origin header (set by browsers and not JS-spoofable).
+        guard Self.isLoopbackAuthority(request.head.authority ?? "") else {
+          return Response(status: .forbidden)
         }
-      )
-    }
-
-    api.post("authenticate") { request, context -> Response in
-      let authRequest = try await request.decode(as: AuthRequest.self, context: context)
-      await tokenChannel.send(authRequest.sessionToken)
-
-      // Validate the received token quickly
-      let response = AuthResponse(
-        userRecordName: authRequest.userRecordName,
-        cloudKitData: .init(user: nil, zones: [], error: nil),
-        message: "Authentication successful! Token received."
-      )
-
-      let jsonData = try JSONEncoder().encode(response)
-
-      // Signal completion after a brief delay
-      Task {
-        try await Task.sleep(nanoseconds: 200_000_000)
-        await responseCompleteChannel.send(())
+        return Response(
+          status: .ok,
+          headers: [.contentType: "application/json"],
+          body: ResponseBody { writer in
+            try await writer.write(ByteBuffer(bytes: configData))
+            try await writer.finish(nil)
+          }
+        )
       }
 
-      return Response(
-        status: .ok,
-        headers: [.contentType: "application/json"],
-        body: ResponseBody { writer in
-          try await writer.write(ByteBuffer(bytes: jsonData))
-          try await writer.finish(nil)
+      api.post("authenticate") { request, context -> Response in
+        let authRequest = try await request.decode(as: AuthRequest.self, context: context)
+        await tokenChannel.send(authRequest.sessionToken)
+
+        // Validate the received token quickly
+        let response = AuthResponse(
+          userRecordName: authRequest.userRecordName,
+          cloudKitData: .init(user: nil, zones: [], error: nil),
+          message: "Authentication successful! Token received."
+        )
+
+        let jsonData = try JSONEncoder().encode(response)
+
+        // Signal completion after a brief delay
+        Task {
+          try await Task.sleep(nanoseconds: 200_000_000)
+          await responseCompleteChannel.send(())
         }
-      )
-    }
 
-    return router
-  }
-
-  // Exact-match host validation against an allowlist after stripping any port.
-  // Prefix matching alone is bypassable (e.g. "localhost.evil.com").
-  // IPv6 bracketed form ([::1]) is supported in addition to IPv4 loopback.
-  internal static func isLoopbackAuthority(_ authority: String) -> Bool {
-    let host: String
-    if authority.hasPrefix("["), let endBracket = authority.firstIndex(of: "]") {
-      host = String(authority[authority.startIndex...endBracket])
-      // Reject anything after `]` that isn't a port — blocks "[::1].evil.com".
-      let afterBracket = authority[authority.index(after: endBracket)...]
-      if !afterBracket.isEmpty, !afterBracket.hasPrefix(":") {
-        return false
+        return Response(
+          status: .ok,
+          headers: [.contentType: "application/json"],
+          body: ResponseBody { writer in
+            try await writer.write(ByteBuffer(bytes: jsonData))
+            try await writer.finish(nil)
+          }
+        )
       }
-    } else {
-      host = String(authority.split(separator: ":").first ?? Substring(authority))
-    }
-    return ["localhost", "127.0.0.1", "[::1]"].contains(host)
-  }
-}
 
-/// Authentication-related errors for auth-token command
-public enum AuthTokenError: Error, LocalizedError {
-  case timeout(String)
-  case missingResource(String)
-  case serverError(String)
+      return router
+    }
 
-  public var errorDescription: String? {
-    switch self {
-    case .timeout(let message):
-      return "Authentication timeout: \(message)"
-    case .missingResource(let resource):
-      return "Missing resource: \(resource)"
-    case .serverError(let message):
-      return "Server error: \(message)"
+    // Exact-match host validation against an allowlist after stripping any port.
+    // Prefix matching alone is bypassable (e.g. "localhost.evil.com").
+    // IPv6 bracketed form ([::1]) is supported in addition to IPv4 loopback.
+    internal static func isLoopbackAuthority(_ authority: String) -> Bool {
+      let host: String
+      if authority.hasPrefix("["), let endBracket = authority.firstIndex(of: "]") {
+        host = String(authority[authority.startIndex...endBracket])
+        // Reject anything after `]` that isn't a port — blocks "[::1].evil.com".
+        let afterBracket = authority[authority.index(after: endBracket)...]
+        if !afterBracket.isEmpty, !afterBracket.hasPrefix(":") {
+          return false
+        }
+      } else {
+        host = String(authority.split(separator: ":").first ?? Substring(authority))
+      }
+      return ["localhost", "127.0.0.1", "[::1]"].contains(host)
     }
   }
-}
+
+  /// Authentication-related errors for auth-token command
+  public enum AuthTokenError: Error, LocalizedError {
+    case timeout(String)
+    case missingResource(String)
+    case serverError(String)
+
+    public var errorDescription: String? {
+      switch self {
+      case .timeout(let message):
+        return "Authentication timeout: \(message)"
+      case .missingResource(let resource):
+        return "Missing resource: \(resource)"
+      case .serverError(let message):
+        return "Server error: \(message)"
+      }
+    }
+  }
 #endif
