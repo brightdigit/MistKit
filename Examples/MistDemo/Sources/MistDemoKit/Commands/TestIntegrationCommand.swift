@@ -52,17 +52,14 @@ public struct TestIntegrationCommand: MistDemoCommand {
         --verbose                  Run in verbose mode
 
     PHASES:
-        1.  List all zones          (listZones)
-        2.  Lookup default zone     (lookupZones)
-        3.  Upload test asset       (uploadAssets)
-        4.  Create records          (createRecord)
-        5.  Query records by type   (queryRecords)
-        6.  Lookup records by name  (lookupRecords)
-        7.  Initial sync            (fetchRecordChanges)
-        8.  Modify records          (updateRecord)
-        9.  Incremental sync        (fetchRecordChanges with token)
-        10. Final zone check        (lookupZones)
-        11. Cleanup                 (deleteRecord)
+        1.  Lookup default zone     (lookupZones)
+        2.  Upload test asset       (uploadAssets)
+        3.  Create records          (createRecord)
+        4.  Query records by type   (queryRecords)
+        5.  Lookup records by name  (lookupRecords)
+        6.  Modify records          (updateRecord)
+        7.  Final zone check        (lookupZones)
+        8.  Cleanup                 (deleteRecord)
 
     EXAMPLES:
         # Run with server-to-server auth (public database)

@@ -39,8 +39,12 @@ struct LookupRecordsPhase: IntegrationPhase {
   static let apiName = "lookupRecords"
 
   func run(input: CreatedRecordNames, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
+
     let lookupNames = Array(input.names.prefix(min(3, input.names.count)))
-    print("\n\(Self.emoji) Lookup \(lookupNames.count) record(s) by name")
+    if context.verbose {
+      print("   Looking up \(lookupNames.count) of \(input.names.count) record(s) by name")
+    }
 
     let records = try await context.service.lookupRecords(recordNames: lookupNames)
 

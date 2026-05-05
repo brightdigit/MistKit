@@ -57,6 +57,7 @@ struct IncrementalSyncPhase: IntegrationPhase {
 
       print("✅ Fetched \(incrementalResult.records.count) changed records")
 
+      // New token intentionally not persisted: no later phase chains off it.
       if context.verbose, let newToken = incrementalResult.syncToken {
         print("   New sync token: \(newToken.prefix(30))...")
       }

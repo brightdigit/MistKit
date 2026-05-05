@@ -32,6 +32,9 @@ import MistKit
 
 struct CleanupPhase: IntegrationPhase, CleanupPhaseMarker {
   typealias Input = CreatedRecordNames
+  /// Returns an empty `CreatedRecordNames` so the runner clears
+  /// `state.createdRecordNames` after a successful cleanup, preventing
+  /// `PhasedIntegrationTest.run`'s on-failure cleanup from re-running.
   typealias Output = CreatedRecordNames
 
   static let title = "Cleanup test records"

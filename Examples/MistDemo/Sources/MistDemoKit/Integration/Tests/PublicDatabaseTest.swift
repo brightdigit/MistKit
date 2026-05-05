@@ -35,6 +35,10 @@ struct PublicDatabaseTest: PhasedIntegrationTest {
   let database: MistKit.Database
 
   init(database: MistKit.Database = .public) {
+    precondition(
+      database == .public,
+      "PublicDatabaseTest only supports the public database"
+    )
     self.database = database
   }
 

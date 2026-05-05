@@ -50,9 +50,7 @@ struct QueryRecordsPhase: IntegrationPhase {
         let ours = records.filter { input.names.contains($0.recordName) }
         print("   Found \(ours.count) of our \(input.names.count) test records")
       }
-    } catch CloudKitError.httpErrorWithDetails(statusCode: 404, serverErrorCode: _, reason: _)
-      where true
-    {
+    } catch CloudKitError.httpErrorWithDetails(statusCode: 404, serverErrorCode: _, reason: _) {
       // Schema propagation in development can lag behind the first write.
       // LookupRecordsPhase already verifies the records exist by name.
       print("⚠️  queryRecords returned NOT_FOUND — schema may not be indexed yet (non-fatal)")

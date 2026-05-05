@@ -34,7 +34,7 @@ import MistKit
 ///
 /// Modeled after `Decodable`: each phase's `Input` type owns its own
 /// rules for reading the slice of `PhaseState` it needs.
-protocol PhaseStateDecodable {
+protocol PhaseStateDecodable: Sendable {
   init(from state: PhaseState) throws
 }
 
@@ -42,7 +42,7 @@ protocol PhaseStateDecodable {
 ///
 /// Modeled after `Encodable`: each phase's `Output` type owns its own
 /// rules for writing back into `PhaseState`.
-protocol PhaseStateEncodable {
+protocol PhaseStateEncodable: Sendable {
   func encode(to state: inout PhaseState)
 }
 

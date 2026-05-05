@@ -32,9 +32,12 @@ import MistKit
 
 /// Mutable state that flows between phases as the test progresses.
 ///
-/// Each phase reads the fields it needs via `IntegrationPhase.extractInput`
-/// and writes its results back via `IntegrationPhase.apply`.
-struct PhaseState {
+/// Each phase reads the slice it needs by initializing its `Input` type
+/// via `PhaseStateDecodable.init(from:)` and writes its results back
+/// through `PhaseStateEncodable.encode(to:)`. The runner threads a single
+/// `PhaseState` value through the pipeline via
+/// `IntegrationPhase.runErased(context:state:)`.
+struct PhaseState: Sendable {
   var assetReceipt: AssetUploadReceipt?
   var createdRecordNames: [String] = []
   var syncToken: String?

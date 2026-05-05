@@ -32,14 +32,14 @@ import MistKit
 
 /// Sentinel used as `Input` or `Output` when a phase consumes or produces
 /// no `PhaseState`. Stands in for `Void`, which can't conform to protocols.
-struct NoState: PhaseStateDecodable, PhaseStateEncodable {
+struct NoState: PhaseStateDecodable, PhaseStateEncodable, Sendable {
   init() {}
   init(from state: PhaseState) throws {}
   func encode(to state: inout PhaseState) {}
 }
 
 /// Wraps the `createdRecordNames` slot of `PhaseState`.
-struct CreatedRecordNames: PhaseStateDecodable, PhaseStateEncodable {
+struct CreatedRecordNames: PhaseStateDecodable, PhaseStateEncodable, Sendable {
   let names: [String]
 
   init(_ names: [String]) {
@@ -56,7 +56,7 @@ struct CreatedRecordNames: PhaseStateDecodable, PhaseStateEncodable {
 }
 
 /// Wraps the `syncToken` slot of `PhaseState`.
-struct SyncTokenSlot: PhaseStateDecodable, PhaseStateEncodable {
+struct SyncTokenSlot: PhaseStateDecodable, PhaseStateEncodable, Sendable {
   let value: String?
 
   init(_ value: String?) {
@@ -73,7 +73,7 @@ struct SyncTokenSlot: PhaseStateDecodable, PhaseStateEncodable {
 }
 
 /// Composite input read by `IncrementalSyncPhase`.
-struct IncrementalSyncInput: PhaseStateDecodable {
+struct IncrementalSyncInput: PhaseStateDecodable, Sendable {
   let syncToken: String?
   let recordNames: [String]
 

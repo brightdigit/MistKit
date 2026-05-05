@@ -31,7 +31,7 @@ import Foundation
 import MistKit
 
 /// Shared dependencies and configuration available to every phase.
-struct PhaseContext {
+struct PhaseContext: Sendable {
   let service: CloudKitService
   let containerIdentifier: String
   let database: MistKit.Database
