@@ -116,7 +116,7 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
         throw UploadAssetError.fileTooLarge(Int64(data.count), maximum: maxSize)
       }
 
-      let service = try MistKitClientFactory.create(.private, from: config.base)
+      let service = try MistKitClientFactory.create(for: config.base)
 
       // Upload asset
       print("\n⬆️  Uploading...")

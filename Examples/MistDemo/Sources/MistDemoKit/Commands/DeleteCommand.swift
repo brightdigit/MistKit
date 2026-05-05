@@ -92,7 +92,7 @@ public struct DeleteCommand: MistDemoCommand, OutputFormatting {
 
   public func execute() async throws {
     do {
-      let client = try MistKitClientFactory.create(.private, from: config.base)
+      let client = try MistKitClientFactory.create(for: config.base)
 
       // --force omits the change tag so the server deletes without optimistic locking
       let effectiveChangeTag = config.force ? nil : config.recordChangeTag

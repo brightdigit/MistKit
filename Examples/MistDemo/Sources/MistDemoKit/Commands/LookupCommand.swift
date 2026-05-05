@@ -75,7 +75,7 @@ public struct LookupCommand: MistDemoCommand, OutputFormatting {
 
   public func execute() async throws {
     do {
-      let client = try MistKitClientFactory.create(.private, from: config.base)
+      let client = try MistKitClientFactory.create(for: config.base)
 
       let records = try await client.lookupRecords(
         recordNames: config.recordNames,

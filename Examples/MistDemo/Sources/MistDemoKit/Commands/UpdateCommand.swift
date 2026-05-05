@@ -118,7 +118,7 @@ public struct UpdateCommand: MistDemoCommand, OutputFormatting {
   public func execute() async throws {
     do {
       // Create CloudKit client
-      let client = try MistKitClientFactory.create(.private, from: config.base)
+      let client = try MistKitClientFactory.create(for: config.base)
 
       // Convert fields to CloudKit format
       let cloudKitFields = try config.fields.toCloudKitFields()

@@ -32,24 +32,32 @@ public import MistKit
 
 /// Factory for creating MistKit CloudKitService instances from MistDemo configuration
 public struct MistKitClientFactory: Sendable {
-  /// Create a CloudKitService for the given database, choosing auth method automatically.
+  /// Create a CloudKitService for `config.database`, choosing auth method automatically.
   ///
   /// - `.public`: requires `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]`
   /// - `.private` / `.shared`: requires `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN`
-  /// - Parameters:
-  ///   - database: Target database
-  ///   - config: The base MistDemo configuration
+  ///
+  /// Honors `config.badCredentials` by swapping the configured tokens with
+  /// deliberate placeholders so the next call returns a typed 401 (used by the
+  /// talk's error demo).
+  ///
+  /// - Parameter config: The base MistDemo configuration
   /// - Throws: ConfigurationError if required credentials are missing
-  public static func create(_ database: MistKit.Database, from config: MistDemoConfig) throws
-    -> CloudKitService
-  {
+  public static func create(for config: MistDemoConfig) throws -> CloudKitService {
     #if os(WASI)
       throw ConfigurationError.unsupportedPlatform(
         "MistDemo CLI requires URLSession; WASI builds must inject a transport explicitly"
       )
     #else
+      if config.badCredentials {
+        let badTokenManager = WebAuthTokenManager(
+          apiToken: "invalid_demo_token",
+          webAuthToken: "invalid_demo_token"
+        )
+        return try create(from: config, tokenManager: badTokenManager)
+      }
       let tokenManager: any TokenManager
-      switch database {
+      switch config.database {
       case .public:
         guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
           throw ConfigurationError.unsupportedPlatform(
@@ -64,15 +72,16 @@ public struct MistKitClientFactory: Sendable {
         containerIdentifier: config.containerIdentifier,
         tokenManager: tokenManager,
         environment: config.environment,
-        database: database
+        database: config.database
       )
     #endif
   }
 
+  /// Create a CloudKitService with a caller-supplied TokenManager, targeting
+  /// `config.database`.
   public static func create(
     from config: MistDemoConfig,
-    tokenManager: any TokenManager,
-    database: MistKit.Database = .private
+    tokenManager: any TokenManager
   ) throws -> CloudKitService {
     #if os(WASI)
       throw ConfigurationError.unsupportedPlatform(
@@ -83,7 +92,7 @@ public struct MistKitClientFactory: Sendable {
         containerIdentifier: config.containerIdentifier,
         tokenManager: tokenManager,
         environment: config.environment,
-        database: database
+        database: config.database
       )
     #endif
   }
