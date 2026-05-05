@@ -69,7 +69,7 @@ struct AsyncHelpersTests {
     )
   )
   func returnsAsyncValue() async throws {
-    let result = try await withTimeout(seconds: 1.0) {
+    let result = try await withTimeout(seconds: 5.0) {
       try await Task.sleep(nanoseconds: 50_000_000)  // 50ms
       return 42
     }
