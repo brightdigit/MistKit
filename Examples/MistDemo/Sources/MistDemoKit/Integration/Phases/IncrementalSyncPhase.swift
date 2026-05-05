@@ -31,28 +31,21 @@ import Foundation
 import MistKit
 
 struct IncrementalSyncPhase: IntegrationPhase {
-  struct Input {
-    let syncToken: String?
-    let recordNames: [String]
-  }
-  typealias Output = Void
+  typealias Input = IncrementalSyncInput
+  typealias Output = NoState
 
-  let title = "Incremental sync (fetch only changes)"
-  let emoji = "🔄"
-  let apiName = "fetchRecordChanges"
+  static let title = "Incremental sync (fetch only changes)"
+  static let emoji = "🔄"
+  static let apiName = "fetchRecordChanges"
 
-  func extractInput(from state: PhaseState) throws -> Input {
-    Input(syncToken: state.syncToken, recordNames: state.createdRecordNames)
-  }
-
-  func run(input: Input, context: PhaseContext) async throws {
-    print("\n\(emoji) \(title)")
+  func run(input: IncrementalSyncInput, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
 
     guard let token = input.syncToken else {
       print(
         "⚠️  No sync token available — skipping incremental sync (change tracking requires custom zones)"
       )
-      return
+      return NoState()
     }
 
     if context.verbose {
@@ -82,5 +75,7 @@ struct IncrementalSyncPhase: IntegrationPhase {
     } catch {
       print("⚠️  fetchRecordChanges (incremental) failed (non-fatal): \(error)")
     }
+
+    return NoState()
   }
 }

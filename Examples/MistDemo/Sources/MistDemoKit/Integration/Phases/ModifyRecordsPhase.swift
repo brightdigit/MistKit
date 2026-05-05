@@ -31,21 +31,17 @@ import Foundation
 import MistKit
 
 struct ModifyRecordsPhase: IntegrationPhase {
-  typealias Input = [String]
-  typealias Output = Void
+  typealias Input = CreatedRecordNames
+  typealias Output = NoState
 
-  let title = "Modify some records"
-  let emoji = "✏️ "
-  let apiName = "updateRecord"
+  static let title = "Modify some records"
+  static let emoji = "✏️ "
+  static let apiName = "updateRecord"
 
-  func extractInput(from state: PhaseState) throws -> [String] {
-    state.createdRecordNames
-  }
+  func run(input: CreatedRecordNames, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
 
-  func run(input: [String], context: PhaseContext) async throws {
-    print("\n\(emoji) \(title)")
-
-    let recordsToUpdate = Array(input.prefix(min(3, input.count)))
+    let recordsToUpdate = Array(input.names.prefix(min(3, input.names.count)))
 
     let operations = recordsToUpdate.enumerated().map { offset, recordName in
       RecordOperation(
@@ -68,5 +64,7 @@ struct ModifyRecordsPhase: IntegrationPhase {
     }
 
     print("✅ Updated \(recordsToUpdate.count) records")
+
+    return NoState()
   }
 }

@@ -31,23 +31,15 @@ import Foundation
 import MistKit
 
 struct InitialSyncPhase: IntegrationPhase {
-  typealias Input = [String]
-  typealias Output = String?
+  typealias Input = CreatedRecordNames
+  typealias Output = SyncTokenSlot
 
-  let title = "Initial sync (fetch all changes)"
-  let emoji = "🔄"
-  let apiName = "fetchRecordChanges"
+  static let title = "Initial sync (fetch all changes)"
+  static let emoji = "🔄"
+  static let apiName = "fetchRecordChanges"
 
-  func extractInput(from state: PhaseState) throws -> [String] {
-    state.createdRecordNames
-  }
-
-  func apply(output: String?, to state: inout PhaseState) {
-    state.syncToken = output
-  }
-
-  func run(input: [String], context: PhaseContext) async throws -> String? {
-    print("\n\(emoji) \(title)")
+  func run(input: CreatedRecordNames, context: PhaseContext) async throws -> SyncTokenSlot {
+    print("\n\(Self.emoji) \(Self.title)")
 
     do {
       let initialResult = try await context.service.fetchRecordChanges()
@@ -61,20 +53,20 @@ struct InitialSyncPhase: IntegrationPhase {
         print("   More coming: \(initialResult.moreComing)")
       }
 
-      let ourRecords = initialResult.records.filter { input.contains($0.recordName) }
+      let ourRecords = initialResult.records.filter { input.names.contains($0.recordName) }
       print("   Found \(ourRecords.count) of our test records")
 
-      if ourRecords.count != input.count && context.verbose {
-        print("   ⚠️  Expected \(input.count), found \(ourRecords.count)")
+      if ourRecords.count != input.names.count && context.verbose {
+        print("   ⚠️  Expected \(input.names.count), found \(ourRecords.count)")
         print("   (Records may not be immediately available)")
       }
 
-      return initialResult.syncToken
+      return SyncTokenSlot(initialResult.syncToken)
     } catch {
       print(
         "⚠️  fetchRecordChanges failed (non-fatal, change tracking requires custom zones): \(error)"
       )
-      return nil
+      return SyncTokenSlot(nil)
     }
   }
 }

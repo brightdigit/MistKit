@@ -30,22 +30,36 @@
 import Foundation
 import MistKit
 
+/// A type that can be initialized from `PhaseState`.
+///
+/// Modeled after `Decodable`: each phase's `Input` type owns its own
+/// rules for reading the slice of `PhaseState` it needs.
+protocol PhaseStateDecodable {
+  init(from state: PhaseState) throws
+}
+
+/// A type that can write itself into `PhaseState`.
+///
+/// Modeled after `Encodable`: each phase's `Output` type owns its own
+/// rules for writing back into `PhaseState`.
+protocol PhaseStateEncodable {
+  func encode(to state: inout PhaseState)
+}
+
 /// A single step in an integration test.
 ///
-/// Phases are typed in their inputs and outputs; the runner adapts heterogeneous
-/// phases into a single `[any IntegrationPhase]` array via `runErased`, which
-/// pulls each phase's input out of `PhaseState`, runs it, and writes the
-/// output back.
+/// `Input` and `Output` describe the slices of `PhaseState` the phase reads
+/// and writes; the phase itself only carries metadata and run logic. The
+/// runner adapts heterogeneous phases via `runErased`, which decodes the
+/// input from state, runs the phase, and encodes the output back.
 protocol IntegrationPhase<Input, Output> {
-  associatedtype Input
-  associatedtype Output
+  associatedtype Input: PhaseStateDecodable
+  associatedtype Output: PhaseStateEncodable
 
-  var title: String { get }
-  var emoji: String { get }
-  var apiName: String { get }
+  static var title: String { get }
+  static var emoji: String { get }
+  static var apiName: String { get }
 
-  func extractInput(from state: PhaseState) throws -> Input
-  func apply(output: Output, to state: inout PhaseState)
   func run(input: Input, context: PhaseContext) async throws -> Output
 
   /// Type-erased entry point used by the runner to drive a `[any IntegrationPhase]`.
@@ -54,18 +68,10 @@ protocol IntegrationPhase<Input, Output> {
 
 extension IntegrationPhase {
   func runErased(context: PhaseContext, state: inout PhaseState) async throws {
-    let input = try extractInput(from: state)
+    let input = try Input(from: state)
     let output = try await run(input: input, context: context)
-    apply(output: output, to: &state)
+    output.encode(to: &state)
   }
-}
-
-extension IntegrationPhase where Input == Void {
-  func extractInput(from state: PhaseState) throws -> Void { () }
-}
-
-extension IntegrationPhase where Output == Void {
-  func apply(output: Void, to state: inout PhaseState) {}
 }
 
 /// Marker protocol identifying the cleanup phase so the runner can skip it

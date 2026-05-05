@@ -32,25 +32,17 @@ import MistKit
 
 struct CreateRecordsPhase: IntegrationPhase {
   typealias Input = AssetUploadReceipt
-  typealias Output = [String]
+  typealias Output = CreatedRecordNames
 
-  let title = "Create records with assets"
-  let emoji = "📝"
-  let apiName = "createRecord"
+  static let title = "Create records with assets"
+  static let emoji = "📝"
+  static let apiName = "createRecord"
 
-  func extractInput(from state: PhaseState) throws -> AssetUploadReceipt {
-    guard let receipt = state.assetReceipt else {
-      throw IntegrationTestError.missingPhaseState("assetReceipt")
-    }
-    return receipt
-  }
-
-  func apply(output: [String], to state: inout PhaseState) {
-    state.createdRecordNames = output
-  }
-
-  func run(input: AssetUploadReceipt, context: PhaseContext) async throws -> [String] {
-    print("\n\(emoji) \(title)")
+  func run(
+    input: AssetUploadReceipt,
+    context: PhaseContext
+  ) async throws -> CreatedRecordNames {
+    print("\n\(Self.emoji) \(Self.title)")
 
     if context.verbose {
       print("   Creating \(context.recordCount) records...")
@@ -82,6 +74,6 @@ struct CreateRecordsPhase: IntegrationPhase {
 
     print("✅ Created \(createdRecordNames.count) records")
 
-    return createdRecordNames
+    return CreatedRecordNames(createdRecordNames)
   }
 }

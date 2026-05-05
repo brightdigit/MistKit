@@ -31,19 +31,15 @@ import Foundation
 import MistKit
 
 struct QueryRecordsPhase: IntegrationPhase {
-  typealias Input = [String]
-  typealias Output = Void
+  typealias Input = CreatedRecordNames
+  typealias Output = NoState
 
-  let title = "Query records by type"
-  let emoji = "🔍"
-  let apiName = "queryRecords"
+  static let title = "Query records by type"
+  static let emoji = "🔍"
+  static let apiName = "queryRecords"
 
-  func extractInput(from state: PhaseState) throws -> [String] {
-    state.createdRecordNames
-  }
-
-  func run(input: [String], context: PhaseContext) async throws {
-    print("\n\(emoji) \(title)")
+  func run(input: CreatedRecordNames, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
 
     do {
       let records = try await context.service.queryRecords(
@@ -51,8 +47,8 @@ struct QueryRecordsPhase: IntegrationPhase {
       )
       print("✅ Queried \(records.count) record(s) of type '\(IntegrationTestData.recordType)'")
       if context.verbose {
-        let ours = records.filter { input.contains($0.recordName) }
-        print("   Found \(ours.count) of our \(input.count) test records")
+        let ours = records.filter { input.names.contains($0.recordName) }
+        print("   Found \(ours.count) of our \(input.names.count) test records")
       }
     } catch CloudKitError.httpErrorWithDetails(statusCode: 404, serverErrorCode: _, reason: _)
       where true
@@ -61,5 +57,7 @@ struct QueryRecordsPhase: IntegrationPhase {
       // LookupRecordsPhase already verifies the records exist by name.
       print("⚠️  queryRecords returned NOT_FOUND — schema may not be indexed yet (non-fatal)")
     }
+
+    return NoState()
   }
 }

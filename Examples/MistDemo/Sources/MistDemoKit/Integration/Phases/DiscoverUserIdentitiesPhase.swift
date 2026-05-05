@@ -31,24 +31,17 @@ import Foundation
 import MistKit
 
 struct DiscoverUserIdentitiesPhase: IntegrationPhase {
-  typealias Input = String
-  typealias Output = Void
+  typealias Input = UserInfo
+  typealias Output = NoState
 
-  let title = "Discover user identities"
-  let emoji = "👥"
-  let apiName = "discoverUserIdentities"
+  static let title = "Discover user identities"
+  static let emoji = "👥"
+  static let apiName = "discoverUserIdentities"
 
-  func extractInput(from state: PhaseState) throws -> String {
-    guard let user = state.currentUser else {
-      throw IntegrationTestError.missingPhaseState("currentUser")
-    }
-    return user.userRecordName
-  }
+  func run(input: UserInfo, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
 
-  func run(input: String, context: PhaseContext) async throws {
-    print("\n\(emoji) \(title)")
-
-    let lookupInfos = [UserIdentityLookupInfo(userRecordName: input)]
+    let lookupInfos = [UserIdentityLookupInfo(userRecordName: input.userRecordName)]
     let identities = try await context.service.discoverUserIdentities(lookupInfos: lookupInfos)
 
     print("✅ Discovered \(identities.count) user identit\(identities.count == 1 ? "y" : "ies")")
@@ -58,5 +51,7 @@ struct DiscoverUserIdentitiesPhase: IntegrationPhase {
         if let name = identity.userRecordName { print("   - \(name)") }
       }
     }
+
+    return NoState()
   }
 }

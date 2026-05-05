@@ -31,20 +31,16 @@ import Foundation
 import MistKit
 
 struct LookupRecordsPhase: IntegrationPhase {
-  typealias Input = [String]
-  typealias Output = Void
+  typealias Input = CreatedRecordNames
+  typealias Output = NoState
 
-  let title = "Lookup records by name"
-  let emoji = "🔍"
-  let apiName = "lookupRecords"
+  static let title = "Lookup records by name"
+  static let emoji = "🔍"
+  static let apiName = "lookupRecords"
 
-  func extractInput(from state: PhaseState) throws -> [String] {
-    state.createdRecordNames
-  }
-
-  func run(input: [String], context: PhaseContext) async throws {
-    let lookupNames = Array(input.prefix(min(3, input.count)))
-    print("\n\(emoji) Lookup \(lookupNames.count) record(s) by name")
+  func run(input: CreatedRecordNames, context: PhaseContext) async throws -> NoState {
+    let lookupNames = Array(input.names.prefix(min(3, input.names.count)))
+    print("\n\(Self.emoji) Lookup \(lookupNames.count) record(s) by name")
 
     let records = try await context.service.lookupRecords(recordNames: lookupNames)
 
@@ -55,5 +51,7 @@ struct LookupRecordsPhase: IntegrationPhase {
         print("   - \(record.recordName)")
       }
     }
+
+    return NoState()
   }
 }

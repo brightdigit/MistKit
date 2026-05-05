@@ -57,7 +57,7 @@ extension PhasedIntegrationTest {
 
     do {
       for (index, phase) in phases.enumerated() {
-        if context.skipCleanup, phase is CleanupPhaseMarker {
+        if context.skipCleanup, phase is any CleanupPhaseMarker {
           skipped.append(index)
           continue
         }
@@ -67,7 +67,7 @@ extension PhasedIntegrationTest {
     } catch {
       print("\n❌ Error: \(error)")
       let cleanupAlreadyRan = phases.enumerated().contains { index, phase in
-        phase is CleanupPhaseMarker && completed.contains(index)
+        phase is any CleanupPhaseMarker && completed.contains(index)
       }
       if !state.createdRecordNames.isEmpty, !context.skipCleanup, !cleanupAlreadyRan {
         print("\n⚠️  Attempting cleanup of \(state.createdRecordNames.count) test records...")
@@ -118,7 +118,9 @@ extension PhasedIntegrationTest {
 
     for (index, phase) in phases.enumerated() {
       let number = String(index + 1).leftPadded(toWidth: numberWidth)
-      let label = "Phase \(number): \(phase.title.rightPadded(toWidth: 28))(\(phase.apiName))"
+      let phaseType = type(of: phase)
+      let label =
+        "Phase \(number): \(phaseType.title.rightPadded(toWidth: 28))(\(phaseType.apiName))"
       let marker: String
       if completed.contains(index) {
         marker = "✅"

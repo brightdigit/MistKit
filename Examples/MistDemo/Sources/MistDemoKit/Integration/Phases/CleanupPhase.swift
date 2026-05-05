@@ -31,28 +31,23 @@ import Foundation
 import MistKit
 
 struct CleanupPhase: IntegrationPhase, CleanupPhaseMarker {
-  typealias Input = [String]
-  typealias Output = Void
+  typealias Input = CreatedRecordNames
+  typealias Output = CreatedRecordNames
 
-  let title = "Cleanup test records"
-  let emoji = "🧹"
-  let apiName = "deleteRecord"
+  static let title = "Cleanup test records"
+  static let emoji = "🧹"
+  static let apiName = "deleteRecord"
 
-  func extractInput(from state: PhaseState) throws -> [String] {
-    state.createdRecordNames
-  }
-
-  func apply(output: Void, to state: inout PhaseState) {
-    state.createdRecordNames = []
-  }
-
-  func run(input: [String], context: PhaseContext) async throws {
-    print("\n\(emoji) \(title)")
+  func run(
+    input: CreatedRecordNames,
+    context: PhaseContext
+  ) async throws -> CreatedRecordNames {
+    print("\n\(Self.emoji) \(Self.title)")
 
     var deletedCount = 0
 
     // Use forceDelete so no recordChangeTag is required.
-    let deleteOps = input.map { recordName in
+    let deleteOps = input.names.map { recordName in
       RecordOperation(
         operationType: .forceDelete,
         recordType: IntegrationTestData.recordType,
@@ -62,9 +57,9 @@ struct CleanupPhase: IntegrationPhase, CleanupPhaseMarker {
 
     do {
       _ = try await context.service.modifyRecords(deleteOps)
-      deletedCount = input.count
+      deletedCount = input.names.count
       if context.verbose {
-        for name in input { print("   ✅ Deleted: \(name)") }
+        for name in input.names { print("   ✅ Deleted: \(name)") }
       }
     } catch {
       if context.verbose { print("   ⚠️  Batch delete failed: \(error)") }
@@ -72,8 +67,10 @@ struct CleanupPhase: IntegrationPhase, CleanupPhaseMarker {
 
     print("✅ Deleted \(deletedCount) test records")
 
-    if deletedCount < input.count {
-      print("   ⚠️  Failed to delete \(input.count - deletedCount) records")
+    if deletedCount < input.names.count {
+      print("   ⚠️  Failed to delete \(input.names.count - deletedCount) records")
     }
+
+    return CreatedRecordNames([])
   }
 }
