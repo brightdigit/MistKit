@@ -1,5 +1,5 @@
 //
-//  IntegrationTestRunner.swift
+//  LookupRecordsPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,36 +30,30 @@
 import Foundation
 import MistKit
 
-/// Thin façade that builds a `PhaseContext` from CLI configuration and
-/// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
+struct LookupRecordsPhase: IntegrationPhase {
+  typealias Input = [String]
+  typealias Output = Void
 
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
-    try await PublicDatabaseTest(database: database).run(context: makeContext())
+  let title = "Lookup records by name"
+  let emoji = "🔍"
+  let apiName = "lookupRecords"
+
+  func extractInput(from state: PhaseState) throws -> [String] {
+    state.createdRecordNames
   }
 
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
-    try await PrivateDatabaseTest().run(context: makeContext())
-  }
+  func run(input: [String], context: PhaseContext) async throws {
+    let lookupNames = Array(input.prefix(min(3, input.count)))
+    print("\n\(emoji) Lookup \(lookupNames.count) record(s) by name")
 
-  private func makeContext() -> PhaseContext {
-    PhaseContext(
-      service: service,
-      containerIdentifier: containerIdentifier,
-      database: database,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
-    )
+    let records = try await context.service.lookupRecords(recordNames: lookupNames)
+
+    print("✅ Looked up \(records.count) record(s)")
+
+    if context.verbose {
+      for record in records {
+        print("   - \(record.recordName)")
+      }
+    }
   }
 }

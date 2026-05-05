@@ -1,5 +1,5 @@
 //
-//  IntegrationTestRunner.swift
+//  UploadAssetPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,36 +30,41 @@
 import Foundation
 import MistKit
 
-/// Thin façade that builds a `PhaseContext` from CLI configuration and
-/// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
+struct UploadAssetPhase: IntegrationPhase {
+  typealias Input = Void
+  typealias Output = AssetUploadReceipt
 
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
-    try await PublicDatabaseTest(database: database).run(context: makeContext())
+  let title = "Upload test asset"
+  let emoji = "📤"
+  let apiName = "uploadAssets"
+
+  func apply(output: AssetUploadReceipt, to state: inout PhaseState) {
+    state.assetReceipt = output
   }
 
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
-    try await PrivateDatabaseTest().run(context: makeContext())
-  }
+  func run(input: Void, context: PhaseContext) async throws -> AssetUploadReceipt {
+    print("\n\(emoji) \(title)")
 
-  private func makeContext() -> PhaseContext {
-    PhaseContext(
-      service: service,
-      containerIdentifier: containerIdentifier,
-      database: database,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
+    let testData = IntegrationTestData.generateTestImage(sizeKB: context.assetSizeKB)
+    let sizeInMB = Double(testData.count) / 1_024 / 1_024
+
+    if context.verbose {
+      print("   Uploading \(testData.count) bytes (\(String(format: "%.2f", sizeInMB)) MB)...")
+    }
+
+    let receipt = try await context.service.uploadAssets(
+      data: testData,
+      recordType: IntegrationTestData.recordType,
+      fieldName: "image"
     )
+
+    print("✅ Uploaded asset: \(testData.count) bytes")
+
+    if context.verbose {
+      print("   Record: \(receipt.recordName)")
+      print("   Field: \(receipt.fieldName)")
+    }
+
+    return receipt
   }
 }

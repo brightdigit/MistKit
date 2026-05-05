@@ -1,5 +1,5 @@
 //
-//  IntegrationTestRunner.swift
+//  FinalVerificationPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,36 +30,23 @@
 import Foundation
 import MistKit
 
-/// Thin façade that builds a `PhaseContext` from CLI configuration and
-/// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
+struct FinalVerificationPhase: IntegrationPhase {
+  typealias Input = Void
+  typealias Output = Void
 
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
-    try await PublicDatabaseTest(database: database).run(context: makeContext())
-  }
+  let title = "Final zone verification"
+  let emoji = "🔍"
+  let apiName = "lookupZones"
 
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
-    try await PrivateDatabaseTest().run(context: makeContext())
-  }
+  func run(input: Void, context: PhaseContext) async throws {
+    print("\n\(emoji) \(title)")
 
-  private func makeContext() -> PhaseContext {
-    PhaseContext(
-      service: service,
-      containerIdentifier: containerIdentifier,
-      database: database,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
-    )
+    let finalZones = try await context.service.lookupZones(zoneIDs: [.defaultZone])
+
+    guard !finalZones.isEmpty else {
+      throw IntegrationTestError.verificationFailed("Zone not found after operations")
+    }
+
+    print("✅ Zone verification complete")
   }
 }

@@ -1,5 +1,5 @@
 //
-//  IntegrationTestRunner.swift
+//  ModifyRecordsPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,36 +30,43 @@
 import Foundation
 import MistKit
 
-/// Thin façade that builds a `PhaseContext` from CLI configuration and
-/// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
+struct ModifyRecordsPhase: IntegrationPhase {
+  typealias Input = [String]
+  typealias Output = Void
 
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
-    try await PublicDatabaseTest(database: database).run(context: makeContext())
+  let title = "Modify some records"
+  let emoji = "✏️ "
+  let apiName = "updateRecord"
+
+  func extractInput(from state: PhaseState) throws -> [String] {
+    state.createdRecordNames
   }
 
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
-    try await PrivateDatabaseTest().run(context: makeContext())
-  }
+  func run(input: [String], context: PhaseContext) async throws {
+    print("\n\(emoji) \(title)")
 
-  private func makeContext() -> PhaseContext {
-    PhaseContext(
-      service: service,
-      containerIdentifier: containerIdentifier,
-      database: database,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
-    )
+    let recordsToUpdate = Array(input.prefix(min(3, input.count)))
+
+    let operations = recordsToUpdate.enumerated().map { offset, recordName in
+      RecordOperation(
+        operationType: .forceReplace,
+        recordType: IntegrationTestData.recordType,
+        recordName: recordName,
+        fields: [
+          "title": .string("Updated Record \(offset + 1)"),
+          "modified": .int64(1),
+        ]
+      )
+    }
+
+    _ = try await context.service.modifyRecords(operations)
+
+    if context.verbose {
+      for recordName in recordsToUpdate {
+        print("   ✅ Updated: \(recordName)")
+      }
+    }
+
+    print("✅ Updated \(recordsToUpdate.count) records")
   }
 }

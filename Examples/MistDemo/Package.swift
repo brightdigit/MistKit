@@ -118,7 +118,7 @@ let package = Package(
         .library(name: "MistDemoApp", targets: ["MistDemoApp"])
     ],
     dependencies: [
-        .package(path: "../.."),  // MistKit
+        .package(name: "MistKit", path: "../.."),
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
         .package(
             url: "https://github.com/apple/swift-configuration",
