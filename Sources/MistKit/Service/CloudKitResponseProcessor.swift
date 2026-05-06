@@ -49,8 +49,7 @@ internal struct CloudKitResponseProcessor {
     case .ok(let okResponse):
       return try extractUserData(from: okResponse)
     default:
-      // Should never reach here since all errors are handled above
-      throw CloudKitError.invalidResponse
+      preconditionFailure("response was not .ok after CloudKitError(response) returned nil")
     }
   }
 
@@ -84,9 +83,7 @@ internal struct CloudKitResponseProcessor {
         return lookupData
       }
     default:
-      // Should never reach here since all errors are handled above
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+      preconditionFailure("response was not .ok after CloudKitError(response) returned nil")
     }
   }
 
@@ -111,9 +108,7 @@ internal struct CloudKitResponseProcessor {
         return zonesData
       }
     default:
-      // Should never reach here since all errors are handled above
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+      preconditionFailure("response was not .ok after CloudKitError(response) returned nil")
     }
   }
 
@@ -143,9 +138,7 @@ internal struct CloudKitResponseProcessor {
         return recordsData
       }
     default:
-      // Should never reach here since all errors are handled above
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+      preconditionFailure("response was not .ok after CloudKitError(response) returned nil")
     }
   }
 
@@ -169,8 +162,7 @@ internal struct CloudKitResponseProcessor {
         return modifyData
       }
     default:
-      // Should never reach here since all errors are handled above
-      throw CloudKitError.invalidResponse
+      preconditionFailure("response was not .ok after CloudKitError(response) returned nil")
     }
   }
 
@@ -194,9 +186,7 @@ internal struct CloudKitResponseProcessor {
         return zonesData
       }
     default:
-      // Should never reach here since all errors are handled above
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+      preconditionFailure("response was not .ok after CloudKitError(response) returned nil")
     }
   }
 }

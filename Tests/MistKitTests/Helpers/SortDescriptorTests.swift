@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("SortDescriptor Tests", .enabled(if: Platform.isCryptoAvailable))
+@Suite("SortDescriptor", .enabled(if: Platform.isCryptoAvailable))
 internal struct SortDescriptorTests {
   @Test("SortDescriptor creates ascending sort")
   internal func ascendingSort() {

@@ -33,7 +33,7 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("MistDemoConfig Tests")
+@Suite("MistDemoConfig")
 struct MistDemoConfigTests {
   // MARK: - Default Values Tests
 

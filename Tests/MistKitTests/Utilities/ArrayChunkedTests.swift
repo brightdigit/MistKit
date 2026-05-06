@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("Array Chunked Tests")
+@Suite("Array Chunked")
 internal struct ArrayChunkedTests {
   @Test("chunked splits array into correct chunks")
   internal func chunkedSplitsCorrectly() {

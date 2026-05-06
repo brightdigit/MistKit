@@ -5,7 +5,7 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Edge cases tests for WebAuthTokenManager
-  @Suite("Edge Cases Tests")
+  @Suite("Edge Cases")
   internal struct EdgeCasesTests {
     // MARK: - Test Data Setup
 

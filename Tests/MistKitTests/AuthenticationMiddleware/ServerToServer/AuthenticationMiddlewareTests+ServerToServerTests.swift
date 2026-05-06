@@ -10,7 +10,7 @@ internal enum AuthenticationMiddlewareTests {
 }
 extension AuthenticationMiddlewareTests {
   /// Server-to-server authentication tests for AuthenticationMiddleware
-  @Suite("Server-to-Server Tests", .enabled(if: Platform.isCryptoAvailable))
+  @Suite("Server-to-Server", .enabled(if: Platform.isCryptoAvailable))
   internal struct ServerToServerTests {
     // MARK: - Test Data Setup
 

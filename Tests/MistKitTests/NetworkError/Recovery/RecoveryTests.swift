@@ -11,7 +11,7 @@ internal enum NetworkErrorTests {}
 
 extension NetworkErrorTests {
   /// Network error recovery and retry mechanism tests
-  @Suite("Recovery Tests", .enabled(if: Platform.isCryptoAvailable))
+  @Suite("Recovery", .enabled(if: Platform.isCryptoAvailable))
   internal struct RecoveryTests {
     // MARK: - Error Recovery Tests
 

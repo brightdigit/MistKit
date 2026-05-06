@@ -32,8 +32,8 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("ErrorOutput Tests")
-struct ErrorOutputTests {
+@Suite("ErrorOutput")
+internal struct ErrorOutputTests {
   // MARK: - Basic Structure Tests
 
   @Test("Create error output with all fields")

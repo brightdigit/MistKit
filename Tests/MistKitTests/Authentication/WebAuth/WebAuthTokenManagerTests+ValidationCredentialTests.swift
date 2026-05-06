@@ -5,7 +5,7 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Credential validation tests for WebAuthTokenManager
-  @Suite("Validation Credential Tests")
+  @Suite("Validation Credential")
   internal struct Validation {
     // MARK: - Test Data Setup
 

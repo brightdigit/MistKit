@@ -8,7 +8,7 @@ internal enum APITokenManagerMetadataTests {}
 
 extension APITokenManagerMetadataTests {
   /// Metadata and sendable compliance tests for APITokenManager
-  @Suite("Metadata Tests")
+  @Suite("Metadata")
   internal struct MetadataTests {
     // MARK: - Metadata Tests
 

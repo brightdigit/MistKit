@@ -48,8 +48,7 @@ extension CloudKitResponseProcessor {
         return changesData
       }
     default:
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+      preconditionFailure("response was not .ok after CloudKitError(response) returned nil")
     }
   }
 
@@ -67,8 +66,7 @@ extension CloudKitResponseProcessor {
         return discoverData
       }
     default:
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+      preconditionFailure("response was not .ok after CloudKitError(response) returned nil")
     }
   }
 
@@ -89,8 +87,7 @@ extension CloudKitResponseProcessor {
         return uploadData
       }
     default:
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+      preconditionFailure("response was not .ok after CloudKitError(response) returned nil")
     }
   }
 
@@ -108,8 +105,7 @@ extension CloudKitResponseProcessor {
         return changesData
       }
     default:
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+      preconditionFailure("response was not .ok after CloudKitError(response) returned nil")
     }
   }
 }

@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("QueryError Tests")
+@Suite("QueryError")
 struct QueryErrorTests {
   // MARK: - Error Description Tests
 

@@ -33,81 +33,80 @@ import Testing
 @testable import MistKit
 
 extension MistKitClientTests {
-  // MARK: - Environment and Database Tests
-
-  @Test(
-    "MistKitClient supports all environments",
-    arguments: [
-      Environment.development,
-      Environment.production,
-    ]
-  )
-  internal func supportsAllEnvironments(
-    environment: Environment
-  ) throws {
-    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      return
-    }
-
-    let config = MistKitConfiguration(
-      container: "iCloud.com.example.app",
-      environment: environment,
-      database: .public,
-      apiToken: String(repeating: "3", count: 64)
+  @Suite("Configuration")
+  internal struct Configuration {
+    @Test(
+      "MistKitClient supports all environments",
+      arguments: [
+        Environment.development,
+        Environment.production,
+      ]
     )
+    internal func supportsAllEnvironments(
+      environment: Environment
+    ) throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        return
+      }
 
-    let transport = MockTransport()
-    _ = try MistKitClient(configuration: config, transport: transport)
-  }
-
-  @Test(
-    "MistKitClient supports all databases with API token",
-    arguments: [
-      Database.public,
-      Database.private,
-      Database.shared,
-    ]
-  )
-  internal func supportsAllDatabases(database: Database) throws {
-    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      return
-    }
-
-    let config = MistKitConfiguration(
-      container: "iCloud.com.example.app",
-      environment: .development,
-      database: database,
-      apiToken: String(repeating: "4", count: 64)
-    )
-
-    let transport = MockTransport()
-    _ = try MistKitClient(configuration: config, transport: transport)
-  }
-
-  // MARK: - Container Identifier Tests
-
-  @Test("MistKitClient accepts various container formats")
-  internal func acceptsVariousContainerFormats() throws {
-    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-      return
-    }
-
-    let containers = [
-      "iCloud.com.example.app",
-      "iCloud.com.example.MyApp",
-      "iCloud.com.company.product",
-    ]
-
-    for container in containers {
       let config = MistKitConfiguration(
-        container: container,
-        environment: .development,
+        container: "iCloud.com.example.app",
+        environment: environment,
         database: .public,
-        apiToken: String(repeating: "5", count: 64)
+        apiToken: String(repeating: "3", count: 64)
       )
 
       let transport = MockTransport()
       _ = try MistKitClient(configuration: config, transport: transport)
+    }
+
+    @Test(
+      "MistKitClient supports all databases with API token",
+      arguments: [
+        Database.public,
+        Database.private,
+        Database.shared,
+      ]
+    )
+    internal func supportsAllDatabases(database: Database) throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        return
+      }
+
+      let config = MistKitConfiguration(
+        container: "iCloud.com.example.app",
+        environment: .development,
+        database: database,
+        apiToken: String(repeating: "4", count: 64)
+      )
+
+      let transport = MockTransport()
+      _ = try MistKitClient(configuration: config, transport: transport)
+    }
+
+    @Test("MistKitClient accepts various container formats")
+    internal func acceptsVariousContainerFormats() throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        return
+      }
+
+      let containers = [
+        "iCloud.com.example.app",
+        "iCloud.com.example.MyApp",
+        "iCloud.com.company.product",
+      ]
+
+      for container in containers {
+        let config = MistKitConfiguration(
+          container: container,
+          environment: .development,
+          database: .public,
+          apiToken: String(repeating: "5", count: 64)
+        )
+
+        let transport = MockTransport()
+        _ = try MistKitClient(configuration: config, transport: transport)
+      }
     }
   }
 }

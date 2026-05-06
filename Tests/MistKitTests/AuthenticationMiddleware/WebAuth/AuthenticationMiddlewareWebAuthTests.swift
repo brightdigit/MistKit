@@ -12,7 +12,7 @@ internal enum AuthenticationMiddlewareWebAuthTests {}
 
 extension AuthenticationMiddlewareWebAuthTests {
   /// Web Auth Token authentication tests
-  @Suite("Web Auth Token Tests")
+  @Suite("Web Auth Token")
   internal struct WebAuthTokenTests {
     // MARK: - Test Data Setup
 

@@ -32,8 +32,8 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("ModifyCommand Tests")
-struct ModifyCommandTests {
+@Suite("ModifyCommand")
+internal struct ModifyCommandTests {
   @Test("Command has correct static properties")
   func staticProperties() {
     #expect(ModifyCommand.commandName == "modify")
@@ -49,8 +49,8 @@ struct ModifyCommandTests {
   }
 }
 
-@Suite("ModifyResultRow Tests")
-struct ModifyResultRowTests {
+@Suite("ModifyResultRow")
+internal struct ModifyResultRowTests {
   @Test("ModifyResultRow encodes all fields")
   func encodesFields() throws {
     let row = ModifyResultRow(
@@ -69,8 +69,8 @@ struct ModifyResultRowTests {
   }
 }
 
-@Suite("ModifyOutput Tests")
-struct ModifyOutputTests {
+@Suite("ModifyOutput")
+internal struct ModifyOutputTests {
   @Test("ModifyOutput JSON envelope carries partialFailure metadata")
   func envelopeIncludesMetadata() throws {
     let row = ModifyResultRow(

@@ -8,7 +8,7 @@ internal enum WebAuthTokenManagerTests {}
 
 extension WebAuthTokenManagerTests {
   /// Basic functionality tests for WebAuthTokenManager
-  @Suite("Basic Tests")
+  @Suite("Basic")
   internal struct BasicTests {
     // MARK: - Test Data Setup
 

@@ -12,7 +12,7 @@ internal enum AuthenticationMiddlewareAPITokenTests {}
 
 extension AuthenticationMiddlewareAPITokenTests {
   /// API Token authentication tests
-  @Suite("API Token Tests", .enabled(if: Platform.isCryptoAvailable))
+  @Suite("API Token", .enabled(if: Platform.isCryptoAvailable))
   internal struct APITokenTests {
     // MARK: - Test Data Setup
 

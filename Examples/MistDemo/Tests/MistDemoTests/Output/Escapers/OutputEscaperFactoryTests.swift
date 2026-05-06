@@ -32,8 +32,8 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("OutputEscaperFactory Tests")
-struct OutputEscaperFactoryTests {
+@Suite("OutputEscaperFactory")
+internal struct OutputEscaperFactoryTests {
   // MARK: - Factory Method Tests
 
   @Test("Factory returns CSVEscaper for CSV format")

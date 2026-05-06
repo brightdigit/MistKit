@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("DeleteConfig Tests")
+@Suite("DeleteConfig")
 struct DeleteConfigTests {
   @Test("DeleteConfig initializes with defaults")
   func initializeWithDefaults() async throws {
@@ -128,7 +128,7 @@ struct DeleteConfigTests {
   }
 }
 
-@Suite("DeleteError Tests")
+@Suite("DeleteError")
 struct DeleteErrorTests {
   @Test("recordNameRequired has a description")
   func recordNameRequiredDescription() {
@@ -155,7 +155,7 @@ struct DeleteErrorTests {
   }
 }
 
-@Suite("DeleteResult Tests")
+@Suite("DeleteResult")
 struct DeleteResultTests {
   @Test("DeleteResult encodes deleted=true by default")
   func defaultsToDeletedTrue() throws {

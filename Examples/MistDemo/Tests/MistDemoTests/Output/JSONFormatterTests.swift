@@ -32,8 +32,8 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("JSONFormatter Tests")
-struct JSONFormatterTests {
+@Suite("JSONFormatter")
+internal struct JSONFormatterTests {
   // MARK: - Test Data
 
   struct TestUser: Codable {
