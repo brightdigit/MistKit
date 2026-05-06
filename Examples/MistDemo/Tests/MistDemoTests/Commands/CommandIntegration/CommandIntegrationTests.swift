@@ -27,29 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import MistKit
 import Testing
 
 @testable import MistDemoKit
 
-// swiftlint:disable file_types_order one_declaration_per_file
 @Suite("Command Integration")
 internal enum CommandIntegrationTests {}
-
-// MARK: - Mock Token Manager for Integration Tests
-
-internal final class MockCommandTokenManager: TokenManager {
-  internal var hasCredentials: Bool {
-    get async { true }
-  }
-
-  internal func validateCredentials() async throws(TokenManagerError) -> Bool {
-    true
-  }
-
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
-    .webAuthToken(apiToken: "mock-api", webToken: "mock-web-auth")
-  }
-}
-
-// swiftlint:enable file_types_order one_declaration_per_file

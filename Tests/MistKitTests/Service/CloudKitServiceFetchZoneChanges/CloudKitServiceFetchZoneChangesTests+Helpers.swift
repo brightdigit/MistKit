@@ -33,7 +33,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceFetchZoneChangesTests {
+extension CloudKitServiceTests.FetchZoneChanges {
   private static let testAPIToken =
     TestConstants.apiToken
 

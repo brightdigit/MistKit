@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceLookupZonesTests {
+extension CloudKitServiceTests.LookupZones {
   @Suite("Success Cases")
   internal struct SuccessCases {
     @Test("lookupZones() returns single zone")
@@ -41,7 +41,7 @@ extension CloudKitServiceLookupZonesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceLookupZonesTests.makeSuccessfulService(zoneCount: 1)
+      let service = try await CloudKitServiceTests.LookupZones.makeSuccessfulService(zoneCount: 1)
 
       let zones = try await service.lookupZones(
         zoneIDs: [ZoneID(zoneName: "_defaultZone", ownerName: nil)]
@@ -57,7 +57,7 @@ extension CloudKitServiceLookupZonesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceLookupZonesTests.makeSuccessfulService(zoneCount: 3)
+      let service = try await CloudKitServiceTests.LookupZones.makeSuccessfulService(zoneCount: 3)
 
       let zones = try await service.lookupZones(
         zoneIDs: [
@@ -79,7 +79,7 @@ extension CloudKitServiceLookupZonesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceLookupZonesTests.makeSuccessfulService(zoneCount: 0)
+      let service = try await CloudKitServiceTests.LookupZones.makeSuccessfulService(zoneCount: 0)
 
       let zones = try await service.lookupZones(
         zoneIDs: [ZoneID(zoneName: "nonexistent", ownerName: nil)]

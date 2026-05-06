@@ -33,7 +33,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceLookupZonesTests {
+extension CloudKitServiceTests.LookupZones {
   private static let testAPIToken =
     TestConstants.apiToken
 

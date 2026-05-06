@@ -32,7 +32,6 @@ import Testing
 
 @testable import MistDemoKit
 
-// swiftlint:disable file_types_order one_declaration_per_file
 @Suite("DeleteConfig Tests")
 internal struct DeleteConfigTests {
   @Test("DeleteConfig initializes with defaults")
@@ -128,46 +127,3 @@ internal struct DeleteConfigTests {
     #expect(config.recordName == "rec-name_with.special@chars")
   }
 }
-
-@Suite("DeleteError Tests")
-internal struct DeleteErrorTests {
-  @Test("recordNameRequired has a description")
-  internal func recordNameRequiredDescription() {
-    let error = DeleteError.recordNameRequired
-    #expect(error.errorDescription != nil)
-  }
-
-  @Test("conflict description includes the reason when present")
-  internal func conflictWithReason() {
-    let error = DeleteError.conflict(reason: "ATOMIC_ERROR")
-    #expect(error.errorDescription?.contains("ATOMIC_ERROR") == true)
-  }
-
-  @Test("conflict description is generic when reason is nil")
-  internal func conflictNoReason() {
-    let error = DeleteError.conflict(reason: nil)
-    #expect(error.errorDescription?.contains("conflict") == true)
-  }
-
-  @Test("conflict suggests --force as a remedy")
-  internal func conflictRecoveryMentionsForce() {
-    let error = DeleteError.conflict(reason: nil)
-    #expect(error.recoverySuggestion?.contains("--force") == true)
-  }
-}
-
-@Suite("DeleteResult Tests")
-internal struct DeleteResultTests {
-  @Test("DeleteResult encodes deleted=true by default")
-  internal func defaultsToDeletedTrue() throws {
-    let result = DeleteResult(recordName: "rec-1", recordType: "Note")
-    let data = try JSONEncoder().encode(result)
-    let json = try #require(String(data: data, encoding: .utf8))
-
-    #expect(json.contains("\"deleted\":true"))
-    #expect(json.contains("\"recordName\":\"rec-1\""))
-    #expect(json.contains("\"recordType\":\"Note\""))
-  }
-}
-
-// swiftlint:enable file_types_order one_declaration_per_file

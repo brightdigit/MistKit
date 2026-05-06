@@ -1,6 +1,6 @@
 //
-//  OutputEscapingDeprecatedTests+EdgeCases.swift
-//  MistDemo
+//  DeleteResultTests.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -32,35 +32,16 @@ import Testing
 
 @testable import MistDemoKit
 
-extension OutputEscapingDeprecatedTests {
-  @Suite("Edge Cases")
-  internal struct EdgeCases {
-    @Test("CSV escape handles unicode")
-    internal func csvEscapeUnicode() {
-      let input = "Hello 🌍 World"
-      let result = OutputEscaping.csvEscape(input)
-      #expect(result == "Hello 🌍 World")
-    }
+@Suite("DeleteResult Tests")
+internal struct DeleteResultTests {
+  @Test("DeleteResult encodes deleted=true by default")
+  internal func defaultsToDeletedTrue() throws {
+    let result = DeleteResult(recordName: "rec-1", recordType: "Note")
+    let data = try JSONEncoder().encode(result)
+    let json = try #require(String(data: data, encoding: .utf8))
 
-    @Test("YAML escape handles unicode")
-    internal func yamlEscapeUnicode() {
-      let input = "Hello 🌍 World"
-      let result = OutputEscaping.yamlEscape(input)
-      #expect(result == "Hello 🌍 World")
-    }
-
-    @Test("All escapers handle very long strings")
-    internal func escapeVeryLongStrings() {
-      let input = String(repeating: "a", count: 10_000)
-
-      let csv = OutputEscaping.csvEscape(input)
-      #expect(csv == input)
-
-      let yaml = OutputEscaping.yamlEscape(input)
-      #expect(yaml == input)
-
-      let json = OutputEscaping.jsonEscape(input)
-      #expect(json == input)
-    }
+    #expect(json.contains("\"deleted\":true"))
+    #expect(json.contains("\"recordName\":\"rec-1\""))
+    #expect(json.contains("\"recordType\":\"Note\""))
   }
 }

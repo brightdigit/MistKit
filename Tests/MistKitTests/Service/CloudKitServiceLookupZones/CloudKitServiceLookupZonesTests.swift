@@ -32,5 +32,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("CloudKitService LookupZones Operations", .enabled(if: Platform.isCryptoAvailable))
-internal enum CloudKitServiceLookupZonesTests {}
+extension CloudKitServiceTests {
+  @Suite("CloudKitService LookupZones Operations", .enabled(if: Platform.isCryptoAvailable))
+  internal enum LookupZones {}
+}

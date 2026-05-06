@@ -1,6 +1,6 @@
 //
-//  CloudKitServiceDiscoverUserIdentitiesTests.swift
-//  MistKit
+//  ModifyOperationInputTests.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,15 +27,37 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+import MistKit
 import Testing
 
-@testable import MistKit
+@testable import MistDemoKit
 
-extension CloudKitServiceTests {
-  @Suite(
-    "CloudKitService DiscoverUserIdentities Operations",
-    .enabled(if: Platform.isCryptoAvailable)
-  )
-  internal enum DiscoverUserIdentities {}
+@Suite("ModifyOperationInput Validation Tests")
+internal struct ModifyOperationInputTests {
+  @Test("update requires a recordName")
+  internal func updateRequiresRecordName() throws {
+    let input = ModifyOperationInput(operation: .update, recordType: "Note", recordName: nil)
+
+    #expect(throws: ModifyError.self) {
+      _ = try input.toRecordOperation(index: 0)
+    }
+  }
+
+  @Test("delete requires a recordName")
+  internal func deleteRequiresRecordName() throws {
+    let input = ModifyOperationInput(operation: .delete, recordType: "Note", recordName: nil)
+
+    #expect(throws: ModifyError.self) {
+      _ = try input.toRecordOperation(index: 0)
+    }
+  }
+
+  @Test("create succeeds without a recordName")
+  internal func createWithoutRecordName() throws {
+    let input = ModifyOperationInput(operation: .create, recordType: "Note", recordName: nil)
+    let operation = try input.toRecordOperation(index: 0)
+
+    #expect(operation.recordName == nil)
+    #expect(operation.recordType == "Note")
+  }
 }

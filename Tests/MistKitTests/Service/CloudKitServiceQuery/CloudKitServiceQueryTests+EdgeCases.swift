@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceQueryTests {
+extension CloudKitServiceTests.Query {
   @Suite("Edge Cases")
   internal struct EdgeCases {
     @Test("queryRecords() handles nil limit parameter")
@@ -41,7 +41,7 @@ extension CloudKitServiceQueryTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceQueryTests.makeSuccessfulService()
+      let service = try CloudKitServiceTests.Query.makeSuccessfulService()
 
       // With nil limit, should use defaultQueryLimit (100)
       // This test verifies the parameter handling - actual call will fail without auth
@@ -61,7 +61,7 @@ extension CloudKitServiceQueryTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceQueryTests.makeSuccessfulService()
+      let service = try CloudKitServiceTests.Query.makeSuccessfulService()
 
       do {
         _ = try await service.queryRecords(
@@ -83,7 +83,7 @@ extension CloudKitServiceQueryTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceQueryTests.makeSuccessfulService()
+      let service = try CloudKitServiceTests.Query.makeSuccessfulService()
 
       do {
         _ = try await service.queryRecords(

@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceQueryTests {
+extension CloudKitServiceTests.Query {
   @Suite("Configuration")
   internal struct Configuration {
     @Test("queryRecords() uses default limit from configuration")
@@ -43,7 +43,7 @@ extension CloudKitServiceQueryTests {
       }
       // This test verifies that the default limit configuration is respected
       // Using MockTransport to avoid actual network calls
-      let service = try CloudKitServiceQueryTests.makeSuccessfulService()
+      let service = try CloudKitServiceTests.Query.makeSuccessfulService()
 
       // Verify service was created successfully
       #expect(service.containerIdentifier == TestConstants.serviceContainerIdentifier)

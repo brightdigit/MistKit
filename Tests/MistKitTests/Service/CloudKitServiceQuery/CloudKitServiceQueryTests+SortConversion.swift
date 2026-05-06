@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceQueryTests {
+extension CloudKitServiceTests.Query {
   @Suite("Sort Conversion")
   internal struct SortConversion {
     @Test("QuerySort converts to Components.Schemas format correctly")

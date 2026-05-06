@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceDiscoverUserIdentitiesTests.swift
+//  CloudKitServiceTests.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,15 +27,4 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
-
-@testable import MistKit
-
-extension CloudKitServiceTests {
-  @Suite(
-    "CloudKitService DiscoverUserIdentities Operations",
-    .enabled(if: Platform.isCryptoAvailable)
-  )
-  internal enum DiscoverUserIdentities {}
-}
+internal enum CloudKitServiceTests {}

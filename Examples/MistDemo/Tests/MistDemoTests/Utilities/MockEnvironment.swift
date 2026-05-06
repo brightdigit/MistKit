@@ -1,6 +1,6 @@
 //
-//  CloudKitServiceDiscoverUserIdentitiesTests.swift
-//  MistKit
+//  MockEnvironment.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,15 +27,18 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+/// Task-local environment dictionary that participating tests read instead of
+/// `ProcessInfo`. Carrying the env in task-local storage keeps tests parallel-safe
+/// (no mutation of process-global state) and works on every platform — including
+/// Windows, where POSIX `setenv`/`unsetenv` aren't in scope.
+internal enum MockEnvironment {
+  @TaskLocal internal static var values: [String: String] = [:]
 
-@testable import MistKit
-
-extension CloudKitServiceTests {
-  @Suite(
-    "CloudKitService DiscoverUserIdentities Operations",
-    .enabled(if: Platform.isCryptoAvailable)
-  )
-  internal enum DiscoverUserIdentities {}
+  /// An environment reader closure bound to whatever `MockEnvironment.values`
+  /// is set to in the current task. Pass this into APIs that accept an injected
+  /// environment reader.
+  internal static var reader: @Sendable (String) -> String? {
+    let snapshot = values
+    return { snapshot[$0] }
+  }
 }

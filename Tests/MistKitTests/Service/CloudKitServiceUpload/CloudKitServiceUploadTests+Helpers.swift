@@ -39,7 +39,7 @@ internal enum UploadValidationErrorType: Sendable {
   case oversizedAsset(Int)
 }
 
-extension CloudKitServiceUploadTests {
+extension CloudKitServiceTests.Upload {
   /// Create service for successful upload operations
   /// Test API token in 64-character hexadecimal format as required by MistKit validation
   private static let testAPIToken =

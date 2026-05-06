@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceLookupZonesTests {
+extension CloudKitServiceTests.LookupZones {
   @Suite("Error Handling")
   internal struct ErrorHandling {
     private static let testAPIToken =

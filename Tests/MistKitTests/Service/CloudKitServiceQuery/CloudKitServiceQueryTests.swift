@@ -32,5 +32,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("CloudKitService Query Operations", .enabled(if: Platform.isCryptoAvailable))
-internal enum CloudKitServiceQueryTests {}
+extension CloudKitServiceTests {
+  @Suite("CloudKitService Query Operations", .enabled(if: Platform.isCryptoAvailable))
+  internal enum Query {}
+}

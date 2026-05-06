@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceFetchZoneChangesTests {
+extension CloudKitServiceTests.FetchZoneChanges {
   @Suite("Validation")
   internal struct Validation {
     @Test("fetchZoneChanges() throws on authentication error")
@@ -41,7 +41,7 @@ extension CloudKitServiceFetchZoneChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchZoneChangesTests.makeAuthErrorService()
+      let service = try await CloudKitServiceTests.FetchZoneChanges.makeAuthErrorService()
 
       await #expect(throws: CloudKitError.self) {
         try await service.fetchZoneChanges()

@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceFetchChangesTests {
+extension CloudKitServiceTests.FetchChanges {
   @Suite("Validation")
   internal struct Validation {
     @Test("fetchRecordChanges() throws 400 for limit of 0")
@@ -41,7 +41,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService()
+      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService()
 
       await #expect {
         try await service.fetchRecordChanges(resultsLimit: 0)
@@ -59,7 +59,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService()
+      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService()
 
       await #expect {
         try await service.fetchRecordChanges(resultsLimit: 201)
@@ -77,7 +77,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService()
+      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService()
 
       // Minimum valid limit
       let result1 = try await service.fetchRecordChanges(resultsLimit: 1)
@@ -115,7 +115,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService(
         recordCount: 0,
         moreComing: true,
         syncToken: "stuck-token"

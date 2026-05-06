@@ -33,7 +33,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceDiscoverUserIdentitiesTests {
+extension CloudKitServiceTests.DiscoverUserIdentities {
   private static let testAPIToken =
     TestConstants.apiToken
 

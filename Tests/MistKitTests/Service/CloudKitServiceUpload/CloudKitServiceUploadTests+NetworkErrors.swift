@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceUploadTests {
+extension CloudKitServiceTests.Upload {
   @Suite("Network Errors")
   internal struct NetworkErrors {
     private static let testAPIToken =

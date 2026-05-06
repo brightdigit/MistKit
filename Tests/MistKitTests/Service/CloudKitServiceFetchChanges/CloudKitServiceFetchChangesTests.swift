@@ -32,5 +32,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("CloudKitService FetchChanges Operations", .enabled(if: Platform.isCryptoAvailable))
-internal enum CloudKitServiceFetchChangesTests {}
+extension CloudKitServiceTests {
+  @Suite("CloudKitService FetchChanges Operations", .enabled(if: Platform.isCryptoAvailable))
+  internal enum FetchChanges {}
+}

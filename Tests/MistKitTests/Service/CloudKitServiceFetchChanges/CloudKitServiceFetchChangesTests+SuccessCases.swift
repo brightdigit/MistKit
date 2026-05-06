@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceFetchChangesTests {
+extension CloudKitServiceTests.FetchChanges {
   @Suite("Success Cases")
   internal struct SuccessCases {
     @Test("fetchRecordChanges() returns records and sync token")
@@ -41,7 +41,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService(
         recordCount: 3,
         syncToken: "new-token-123"
       )
@@ -59,7 +59,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService(
         recordCount: 2,
         moreComing: true
       )
@@ -76,7 +76,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService()
+      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService()
 
       let result = try await service.fetchRecordChanges(syncToken: nil)
 
@@ -90,7 +90,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService(recordCount: 2)
+      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService(recordCount: 2)
 
       let result = try await service.fetchRecordChanges()
 
@@ -105,7 +105,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService(
         recordCount: 3,
         moreComing: false,
         syncToken: "final-token"
@@ -123,7 +123,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makePaginatedService(pages: [
+      let service = try await CloudKitServiceTests.FetchChanges.makePaginatedService(pages: [
         (recordCount: 3, syncToken: "token-1"),
         (recordCount: 2, syncToken: "token-2"),
       ])
@@ -140,7 +140,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makePaginatedService(pages: [
+      let service = try await CloudKitServiceTests.FetchChanges.makePaginatedService(pages: [
         (recordCount: 1, syncToken: "interim-token"),
         (recordCount: 1, syncToken: "final-token"),
       ])
@@ -156,7 +156,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makePaginatedService(pages: [
+      let service = try await CloudKitServiceTests.FetchChanges.makePaginatedService(pages: [
         (recordCount: 0, syncToken: "token-1"),
         (recordCount: 3, syncToken: "token-2"),
       ])
@@ -173,7 +173,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makePaginatedService(pages: [
+      let service = try await CloudKitServiceTests.FetchChanges.makePaginatedService(pages: [
         (recordCount: 2, syncToken: "token-1"),
         (recordCount: 3, syncToken: "token-2"),
         (recordCount: 2, syncToken: "token-3"),

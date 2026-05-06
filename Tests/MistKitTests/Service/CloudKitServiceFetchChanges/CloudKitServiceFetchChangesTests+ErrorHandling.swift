@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceFetchChangesTests {
+extension CloudKitServiceTests.FetchChanges {
   @Suite("Error Handling")
   internal struct ErrorHandling {
     private static let testAPIToken =

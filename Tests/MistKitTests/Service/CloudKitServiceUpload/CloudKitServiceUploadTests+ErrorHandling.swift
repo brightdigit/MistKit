@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceUploadTests {
+extension CloudKitServiceTests.Upload {
   @Suite("Error Handling")
   internal struct ErrorHandling {
     @Test("uploadAssets() handles unauthorized error (401)")
@@ -41,7 +41,7 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceUploadTests.makeAuthErrorService()
+      let service = try await CloudKitServiceTests.Upload.makeAuthErrorService()
       let testData = Data(count: 1_024)
 
       do {
@@ -70,7 +70,7 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceUploadTests.makeUploadValidationErrorService(
+      let service = try await CloudKitServiceTests.Upload.makeUploadValidationErrorService(
         .emptyData
       )
       let testData = Data()  // Empty data triggers 400

@@ -129,6 +129,10 @@ file_name:
       - Package.swift
       - AsyncHelpers.swift
       - UserInfoTestExtension.swift
+      - TableFormatterTests+EdgeCases+FieldTypes.swift
+      - TableFormatterTests+EdgeCases+Whitespace.swift
+      - YAMLFormatterTests+YAMLEscaping+ReservedStrings.swift
+      - YAMLFormatterTests+YAMLEscaping+SpecialChars.swift
       - ConfigKey+MistDemoTests.swift
       - ConfigKey+MistDemoTests+BooleanConfigKeyWithPrefix.swift
       - ConfigKey+MistDemoTests+ConfigKeyWithPrefix.swift

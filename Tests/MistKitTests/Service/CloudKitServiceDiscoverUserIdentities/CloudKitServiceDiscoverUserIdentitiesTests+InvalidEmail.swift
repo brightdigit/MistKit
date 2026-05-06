@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceDiscoverUserIdentitiesTests {
+extension CloudKitServiceTests.DiscoverUserIdentities {
   @Suite("Invalid Email")
   internal struct InvalidEmail {
     private static let testAPIToken =

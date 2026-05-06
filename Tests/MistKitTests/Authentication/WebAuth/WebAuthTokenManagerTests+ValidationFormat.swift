@@ -6,7 +6,7 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Token format validation tests for WebAuthTokenManager
   @Suite("Validation Format")
-  internal struct ValidationFormatTests {
+  internal struct ValidationFormat {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =

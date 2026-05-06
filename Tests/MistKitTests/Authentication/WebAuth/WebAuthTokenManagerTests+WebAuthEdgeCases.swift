@@ -6,7 +6,7 @@ import Testing
 extension WebAuthTokenManagerTests {
   /// Edge cases tests for WebAuthTokenManager
   @Suite("Edge Cases")
-  internal struct EdgeCasesTests {
+  internal struct WebAuthEdgeCases {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =

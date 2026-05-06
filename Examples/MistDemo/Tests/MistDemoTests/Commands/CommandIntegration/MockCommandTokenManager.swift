@@ -1,6 +1,6 @@
 //
-//  CloudKitServiceDiscoverUserIdentitiesTests.swift
-//  MistKit
+//  MockCommandTokenManager.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,15 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+import MistKit
 
-@testable import MistKit
+@testable import MistDemoKit
 
-extension CloudKitServiceTests {
-  @Suite(
-    "CloudKitService DiscoverUserIdentities Operations",
-    .enabled(if: Platform.isCryptoAvailable)
-  )
-  internal enum DiscoverUserIdentities {}
+internal final class MockCommandTokenManager: TokenManager {
+  internal var hasCredentials: Bool {
+    get async { true }
+  }
+
+  internal func validateCredentials() async throws(TokenManagerError) -> Bool {
+    true
+  }
+
+  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+    .webAuthToken(apiToken: "mock-api", webToken: "mock-web-auth")
+  }
 }

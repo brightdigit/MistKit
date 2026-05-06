@@ -5,8 +5,8 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Integration validation tests for WebAuthTokenManager
-  @Suite("Validation")
-  internal struct ValidationTests {
+  @Suite("Validation Workflow")
+  internal struct ValidationWorkflow {
     // MARK: - Integration Tests
 
     /// Tests comprehensive validation workflow

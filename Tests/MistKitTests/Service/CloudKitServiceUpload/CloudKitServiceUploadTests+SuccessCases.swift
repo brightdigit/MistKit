@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceUploadTests {
+extension CloudKitServiceTests.Upload {
   @Suite("Success Cases")
   internal struct SuccessCases {
     @Test("uploadAssets() successfully uploads valid asset")
@@ -41,14 +41,14 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
+      let service = try await CloudKitServiceTests.Upload.makeSuccessfulUploadService(tokenCount: 1)
       let testData = Data(count: 1_024)  // 1 KB of test data
 
       let result = try await service.uploadAssets(
         data: testData,
         recordType: "Note",
         fieldName: "image",
-        using: CloudKitServiceUploadTests.makeMockAssetUploader()
+        using: CloudKitServiceTests.Upload.makeMockAssetUploader()
       )
 
       #expect(result.recordName.isEmpty == false, "Result should have a record name")
@@ -62,14 +62,14 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
+      let service = try await CloudKitServiceTests.Upload.makeSuccessfulUploadService(tokenCount: 1)
       let testData = Data(count: 2_048)
 
       let result = try await service.uploadAssets(
         data: testData,
         recordType: "Note",
         fieldName: "image",
-        using: CloudKitServiceUploadTests.makeMockAssetUploader()
+        using: CloudKitServiceTests.Upload.makeMockAssetUploader()
       )
 
       #expect(result.recordName == "test-record-0")
@@ -83,14 +83,14 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
+      let service = try await CloudKitServiceTests.Upload.makeSuccessfulUploadService(tokenCount: 1)
       let testData = Data(count: 4_096)
 
       let result = try await service.uploadAssets(
         data: testData,
         recordType: "Note",
         fieldName: "image",
-        using: CloudKitServiceUploadTests.makeMockAssetUploader()
+        using: CloudKitServiceTests.Upload.makeMockAssetUploader()
       )
 
       #expect(result.recordName == "test-record-0")
@@ -104,7 +104,7 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
+      let service = try await CloudKitServiceTests.Upload.makeSuccessfulUploadService(tokenCount: 1)
 
       let token = try await service.requestAssetUploadURL(
         recordType: "Note",
@@ -122,7 +122,7 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService(tokenCount: 1)
+      let service = try await CloudKitServiceTests.Upload.makeSuccessfulUploadService(tokenCount: 1)
 
       actor CallTracker {
         private(set) var callCount = 0

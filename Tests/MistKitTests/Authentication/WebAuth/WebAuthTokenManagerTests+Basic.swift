@@ -9,7 +9,7 @@ internal enum WebAuthTokenManagerTests {}
 extension WebAuthTokenManagerTests {
   /// Basic functionality tests for WebAuthTokenManager
   @Suite("Basic")
-  internal struct BasicTests {
+  internal struct Basic {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =

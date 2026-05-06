@@ -32,5 +32,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("CloudKitService Upload Operations", .enabled(if: Platform.isCryptoAvailable))
-internal enum CloudKitServiceUploadTests {}
+extension CloudKitServiceTests {
+  @Suite("CloudKitService Upload Operations", .enabled(if: Platform.isCryptoAvailable))
+  internal enum Upload {}
+}

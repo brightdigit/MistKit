@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceDiscoverUserIdentitiesTests {
+extension CloudKitServiceTests.DiscoverUserIdentities {
   @Suite("Validation")
   internal struct Validation {
     @Test("discoverUserIdentities() throws on authentication error")
@@ -41,7 +41,7 @@ extension CloudKitServiceDiscoverUserIdentitiesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceDiscoverUserIdentitiesTests.makeAuthErrorService()
+      let service = try await CloudKitServiceTests.DiscoverUserIdentities.makeAuthErrorService()
 
       await #expect(throws: CloudKitError.self) {
         try await service.discoverUserIdentities(

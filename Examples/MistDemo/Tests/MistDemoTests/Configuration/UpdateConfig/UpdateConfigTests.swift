@@ -27,52 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
 import Testing
 
 @testable import MistDemoKit
 
-// swiftlint:disable file_types_order one_declaration_per_file
 @Suite("UpdateConfig")
 internal enum UpdateConfigTests {}
-
-@Suite("UpdateError")
-internal struct UpdateErrorTests {
-  @Test("conflict with nil reason produces a generic conflict description")
-  internal func conflictNilReason() {
-    let error = UpdateError.conflict(reason: nil)
-    let description = error.errorDescription ?? ""
-
-    #expect(description.contains("conflict"))
-  }
-
-  @Test("conflict with reason includes the reason in the description")
-  internal func conflictWithReason() {
-    let error = UpdateError.conflict(reason: "ATOMIC_ERROR")
-    let description = error.errorDescription ?? ""
-
-    #expect(description.contains("ATOMIC_ERROR"))
-  }
-
-  @Test("conflict suggests --force as a remedy")
-  internal func conflictRecoveryMentionsForce() {
-    let error = UpdateError.conflict(reason: nil)
-    let suggestion = error.recoverySuggestion ?? ""
-
-    #expect(suggestion.contains("--force"))
-  }
-
-  @Test("recordNameRequired has a description")
-  internal func recordNameRequiredDescription() {
-    let error = UpdateError.recordNameRequired
-    #expect(error.errorDescription != nil)
-  }
-
-  @Test("noFieldsProvided has a description")
-  internal func noFieldsProvidedDescription() {
-    let error = UpdateError.noFieldsProvided
-    #expect(error.errorDescription != nil)
-  }
-}
-
-// swiftlint:enable file_types_order one_declaration_per_file

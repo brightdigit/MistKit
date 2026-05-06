@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceFetchChangesTests {
+extension CloudKitServiceTests.FetchChanges {
   @Suite("Concurrent")
   internal struct Concurrent {
     @Test("fetchAllRecordChanges() is safe under concurrent calls from N tasks")
@@ -41,7 +41,7 @@ extension CloudKitServiceFetchChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchChangesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService(
         recordCount: 3,
         moreComing: false,
         syncToken: "concurrent-token"

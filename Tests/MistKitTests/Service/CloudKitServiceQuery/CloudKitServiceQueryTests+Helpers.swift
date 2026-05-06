@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceQueryTests {
+extension CloudKitServiceTests.Query {
   /// Create service for validation error testing
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeValidationErrorService(

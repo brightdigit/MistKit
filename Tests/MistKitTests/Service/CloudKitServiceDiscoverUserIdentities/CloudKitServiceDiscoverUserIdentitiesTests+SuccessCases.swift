@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceDiscoverUserIdentitiesTests {
+extension CloudKitServiceTests.DiscoverUserIdentities {
   @Suite("Success Cases")
   internal struct SuccessCases {
     @Test("discoverUserIdentities() returns a single identity")
@@ -41,7 +41,7 @@ extension CloudKitServiceDiscoverUserIdentitiesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceDiscoverUserIdentitiesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.DiscoverUserIdentities.makeSuccessfulService(
         identityCount: 1
       )
 
@@ -59,7 +59,7 @@ extension CloudKitServiceDiscoverUserIdentitiesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceDiscoverUserIdentitiesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.DiscoverUserIdentities.makeSuccessfulService(
         identityCount: 3
       )
 
@@ -83,7 +83,7 @@ extension CloudKitServiceDiscoverUserIdentitiesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceDiscoverUserIdentitiesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.DiscoverUserIdentities.makeSuccessfulService(
         identityCount: 0
       )
 

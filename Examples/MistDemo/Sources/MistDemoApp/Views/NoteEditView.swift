@@ -73,80 +73,93 @@
     }
 
     internal var body: some View {
-      // swiftlint:disable:next closure_body_length
       NavigationStack {
-        Form {
-          Section("Note") {
-            TextField("Title", text: $title)
-            TextField("Index", text: $indexText)
-              #if os(iOS)
-                .keyboardType(.numberPad)
-              #endif
+        formContent
+          .formStyle(.grouped)
+          .navigationTitle(navigationTitle)
+          .toolbar { toolbarContent }
+          .fileImporter(
+            isPresented: $showFileImporter,
+            allowedContentTypes: [.image],
+            allowsMultipleSelection: false
+          ) { result in
+            handleFileImport(result)
           }
-
-          Section("Image (optional)") {
-            if let imageURL {
-              LabeledContent("File") {
-                Text(imageURL.lastPathComponent)
-                  .lineLimit(1)
-                  .truncationMode(.middle)
-              }
-              Button("Remove", role: .destructive) {
-                releaseScopedURL()
-                self.imageURL = nil
-              }
-            }
-            Button("Choose image…") { showFileImporter = true }
-          }
-
-          if let saveError {
-            Section("Error") {
-              Text(saveError).foregroundStyle(.red).font(.callout)
-            }
-          }
-        }
-        .formStyle(.grouped)
-        .navigationTitle(navigationTitle)
-        .toolbar {
-          ToolbarItem(placement: .cancellationAction) {
-            Button("Cancel") { dismiss() }
-              .disabled(saving)
-          }
-          ToolbarItem(placement: .confirmationAction) {
-            if saving {
-              ProgressView().controlSize(.small)
-            } else {
-              Button("Save") { Task { await save() } }
-                .disabled(!isValid)
-            }
-          }
-        }
-        .fileImporter(
-          isPresented: $showFileImporter,
-          allowedContentTypes: [.image],
-          allowsMultipleSelection: false
-        ) { result in
-          switch result {
-          case .success(let urls):
-            if let url = urls.first {
-              guard url.startAccessingSecurityScopedResource() else {
-                saveError =
-                  "Couldn't access \(url.lastPathComponent) — file permissions denied."
-                return
-              }
-              // Release the previously-scoped URL before adopting the new one.
-              releaseScopedURL()
-              scopedURL = url
-              imageURL = url
-            }
-          case .failure(let error):
-            saveError = "Couldn't pick file: \(error.localizedDescription)"
-          }
-        }
       }
       .onAppear { populateInitialState() }
       .onDisappear { releaseScopedURL() }
       .frame(minWidth: 420, minHeight: 360)
+    }
+
+    @ViewBuilder private var formContent: some View {
+      Form {
+        Section("Note") {
+          TextField("Title", text: $title)
+          TextField("Index", text: $indexText)
+            #if os(iOS)
+              .keyboardType(.numberPad)
+            #endif
+        }
+
+        imageSection
+
+        if let saveError {
+          Section("Error") {
+            Text(saveError).foregroundStyle(.red).font(.callout)
+          }
+        }
+      }
+    }
+
+    @ViewBuilder private var imageSection: some View {
+      Section("Image (optional)") {
+        if let imageURL {
+          LabeledContent("File") {
+            Text(imageURL.lastPathComponent)
+              .lineLimit(1)
+              .truncationMode(.middle)
+          }
+          Button("Remove", role: .destructive) {
+            releaseScopedURL()
+            self.imageURL = nil
+          }
+        }
+        Button("Choose image…") { showFileImporter = true }
+      }
+    }
+
+    @ToolbarContentBuilder private var toolbarContent: some ToolbarContent {
+      ToolbarItem(placement: .cancellationAction) {
+        Button("Cancel") { dismiss() }
+          .disabled(saving)
+      }
+      ToolbarItem(placement: .confirmationAction) {
+        if saving {
+          ProgressView().controlSize(.small)
+        } else {
+          Button("Save") { Task { await save() } }
+            .disabled(!isValid)
+        }
+      }
+    }
+
+    private func handleFileImport(_ result: Result<[URL], any Error>) {
+      switch result {
+      case .success(let urls):
+        if let url = urls.first {
+          guard url.startAccessingSecurityScopedResource() else {
+            saveError =
+              "Couldn't access \(url.lastPathComponent) — file permissions denied."
+            return
+          }
+          // Release the previously-scoped URL before adopting the new one.
+          releaseScopedURL()
+          scopedURL = url
+          imageURL = url
+        }
+      case .failure(let error):
+        saveError = "Couldn't pick file: \(error.localizedDescription)"
+      }
     }
 
     private func releaseScopedURL() {

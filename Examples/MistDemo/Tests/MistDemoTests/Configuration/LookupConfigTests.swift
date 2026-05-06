@@ -32,7 +32,6 @@ import Testing
 
 @testable import MistDemoKit
 
-// swiftlint:disable file_types_order one_declaration_per_file
 @Suite("LookupConfig Tests")
 internal struct LookupConfigTests {
   @Test("LookupConfig initializes with a single record name")
@@ -101,26 +100,3 @@ internal struct LookupConfigTests {
     #expect(config.recordNames.last == "rec-49")
   }
 }
-
-@Suite("LookupError Tests")
-internal struct LookupErrorTests {
-  @Test("recordNamesRequired has a description")
-  internal func recordNamesRequiredDescription() {
-    let error = LookupError.recordNamesRequired
-    #expect(error.errorDescription != nil)
-  }
-
-  @Test("recordNamesRequired suggests using --record-names")
-  internal func recordNamesRequiredSuggestion() {
-    let error = LookupError.recordNamesRequired
-    #expect(error.recoverySuggestion?.contains("record-names") == true)
-  }
-
-  @Test("operationFailed wraps the underlying reason")
-  internal func operationFailedWrapsReason() {
-    let error = LookupError.operationFailed("some failure")
-    #expect(error.errorDescription?.contains("some failure") == true)
-  }
-}
-
-// swiftlint:enable file_types_order one_declaration_per_file

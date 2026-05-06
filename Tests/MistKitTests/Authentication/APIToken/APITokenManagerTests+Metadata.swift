@@ -3,13 +3,10 @@ import Testing
 
 @testable import MistKit
 
-@Suite("API Token Manager Metadata")
-internal enum APITokenManagerMetadataTests {}
-
-extension APITokenManagerMetadataTests {
+extension APITokenManagerTests {
   /// Metadata and sendable compliance tests for APITokenManager
-  @Suite("Metadata")
-  internal struct MetadataTests {
+  @Suite("API Token Manager Metadata")
+  internal struct Metadata {
     // MARK: - Metadata Tests
 
     /// Tests credentialsWithMetadata method

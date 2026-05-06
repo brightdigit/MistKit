@@ -29,24 +29,6 @@
 
 import Testing
 
-// swiftlint:disable file_types_order one_declaration_per_file
-
-/// Task-local environment dictionary that participating tests read instead of
-/// `ProcessInfo`. Carrying the env in task-local storage keeps tests parallel-safe
-/// (no mutation of process-global state) and works on every platform — including
-/// Windows, where POSIX `setenv`/`unsetenv` aren't in scope.
-internal enum MockEnvironment {
-  @TaskLocal internal static var values: [String: String] = [:]
-
-  /// An environment reader closure bound to whatever `MockEnvironment.values`
-  /// is set to in the current task. Pass this into APIs that accept an injected
-  /// environment reader.
-  internal static var reader: @Sendable (String) -> String? {
-    let snapshot = values
-    return { snapshot[$0] }
-  }
-}
-
 /// A `TestTrait` / `SuiteTrait` that scopes a fake environment for the test.
 /// Apply with `.mockEnvironment(["KEY": "value"])` to declare the environment
 /// the test expects, then read it via `MockEnvironment.reader`.
@@ -72,5 +54,3 @@ extension Trait where Self == MockEnvironmentTrait {
     .init(values: values)
   }
 }
-
-// swiftlint:enable file_types_order one_declaration_per_file

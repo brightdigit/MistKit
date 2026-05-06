@@ -1,6 +1,6 @@
 //
-//  CloudKitServiceDiscoverUserIdentitiesTests.swift
-//  MistKit
+//  LookupErrorTests.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,15 +27,27 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
 import Testing
 
-@testable import MistKit
+@testable import MistDemoKit
 
-extension CloudKitServiceTests {
-  @Suite(
-    "CloudKitService DiscoverUserIdentities Operations",
-    .enabled(if: Platform.isCryptoAvailable)
-  )
-  internal enum DiscoverUserIdentities {}
+@Suite("LookupError Tests")
+internal struct LookupErrorTests {
+  @Test("recordNamesRequired has a description")
+  internal func recordNamesRequiredDescription() {
+    let error = LookupError.recordNamesRequired
+    #expect(error.errorDescription != nil)
+  }
+
+  @Test("recordNamesRequired suggests using --record-names")
+  internal func recordNamesRequiredSuggestion() {
+    let error = LookupError.recordNamesRequired
+    #expect(error.recoverySuggestion?.contains("record-names") == true)
+  }
+
+  @Test("operationFailed wraps the underlying reason")
+  internal func operationFailedWrapsReason() {
+    let error = LookupError.operationFailed("some failure")
+    #expect(error.errorDescription?.contains("some failure") == true)
+  }
 }

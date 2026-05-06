@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceUploadTests {
+extension CloudKitServiceTests.Upload {
   @Suite("Validation")
   internal struct Validation {
     @Test("uploadAssets() validates empty data")
@@ -41,7 +41,7 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceUploadTests.makeUploadValidationErrorService(
+      let service = try await CloudKitServiceTests.Upload.makeUploadValidationErrorService(
         .emptyData
       )
 
@@ -73,7 +73,7 @@ extension CloudKitServiceUploadTests {
       }
       // Create data just over 15 MB (15 * 1024 * 1024 + 1 bytes)
       let oversizedData = Data(count: 15_728_641)
-      let service = try await CloudKitServiceUploadTests.makeUploadValidationErrorService(
+      let service = try await CloudKitServiceTests.Upload.makeUploadValidationErrorService(
         .oversizedAsset(oversizedData.count)
       )
 
@@ -103,7 +103,7 @@ extension CloudKitServiceUploadTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceUploadTests.makeSuccessfulUploadService()
+      let service = try await CloudKitServiceTests.Upload.makeSuccessfulUploadService()
 
       // Test various valid sizes (CloudKit limit is 15 MB)
       let validSizes = [
@@ -121,7 +121,7 @@ extension CloudKitServiceUploadTests {
             data: data,
             recordType: "Note",
             fieldName: "image",
-            using: CloudKitServiceUploadTests.makeMockAssetUploader()
+            using: CloudKitServiceTests.Upload.makeMockAssetUploader()
           )
           #expect(result.asset.receipt != nil, "Should receive asset with receipt")
         } catch {
@@ -151,7 +151,7 @@ extension CloudKitServiceUploadTests {
           data: Data(count: 1_024),
           recordType: "Note",
           fieldName: "image",
-          using: CloudKitServiceUploadTests.makeMockAssetUploader()
+          using: CloudKitServiceTests.Upload.makeMockAssetUploader()
         )
       }
     }

@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceQueryTests {
+extension CloudKitServiceTests.Query {
   @Suite("Validation")
   internal struct Validation {
     @Test("queryRecords() validates empty recordType")
@@ -41,7 +41,7 @@ extension CloudKitServiceQueryTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceQueryTests.makeValidationErrorService(.emptyRecordType)
+      let service = try CloudKitServiceTests.Query.makeValidationErrorService(.emptyRecordType)
 
       do {
         _ = try await service.queryRecords(recordType: "")
@@ -65,7 +65,7 @@ extension CloudKitServiceQueryTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceQueryTests.makeValidationErrorService(.limitTooSmall(limit))
+      let service = try CloudKitServiceTests.Query.makeValidationErrorService(.limitTooSmall(limit))
 
       do {
         _ = try await service.queryRecords(recordType: "Article", limit: limit)
@@ -86,7 +86,7 @@ extension CloudKitServiceQueryTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceQueryTests.makeValidationErrorService(.limitTooLarge(limit))
+      let service = try CloudKitServiceTests.Query.makeValidationErrorService(.limitTooLarge(limit))
 
       do {
         _ = try await service.queryRecords(recordType: "Article", limit: limit)
@@ -107,7 +107,7 @@ extension CloudKitServiceQueryTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceQueryTests.makeSuccessfulService()
+      let service = try CloudKitServiceTests.Query.makeSuccessfulService()
 
       // This test verifies validation passes - actual API call will fail without real credentials
       // but we're testing that validation doesn't throw

@@ -1,6 +1,6 @@
 //
-//  CloudKitServiceDiscoverUserIdentitiesTests.swift
-//  MistKit
+//  DeleteErrorTests.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,15 +27,33 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
 import Testing
 
-@testable import MistKit
+@testable import MistDemoKit
 
-extension CloudKitServiceTests {
-  @Suite(
-    "CloudKitService DiscoverUserIdentities Operations",
-    .enabled(if: Platform.isCryptoAvailable)
-  )
-  internal enum DiscoverUserIdentities {}
+@Suite("DeleteError Tests")
+internal struct DeleteErrorTests {
+  @Test("recordNameRequired has a description")
+  internal func recordNameRequiredDescription() {
+    let error = DeleteError.recordNameRequired
+    #expect(error.errorDescription != nil)
+  }
+
+  @Test("conflict description includes the reason when present")
+  internal func conflictWithReason() {
+    let error = DeleteError.conflict(reason: "ATOMIC_ERROR")
+    #expect(error.errorDescription?.contains("ATOMIC_ERROR") == true)
+  }
+
+  @Test("conflict description is generic when reason is nil")
+  internal func conflictNoReason() {
+    let error = DeleteError.conflict(reason: nil)
+    #expect(error.errorDescription?.contains("conflict") == true)
+  }
+
+  @Test("conflict suggests --force as a remedy")
+  internal func conflictRecoveryMentionsForce() {
+    let error = DeleteError.conflict(reason: nil)
+    #expect(error.recoverySuggestion?.contains("--force") == true)
+  }
 }

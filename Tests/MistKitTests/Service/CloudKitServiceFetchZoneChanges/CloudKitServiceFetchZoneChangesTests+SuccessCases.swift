@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceFetchZoneChangesTests {
+extension CloudKitServiceTests.FetchZoneChanges {
   @Suite("Success Cases")
   internal struct SuccessCases {
     @Test("fetchZoneChanges() returns zones and sync token")
@@ -41,7 +41,7 @@ extension CloudKitServiceFetchZoneChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchZoneChangesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.FetchZoneChanges.makeSuccessfulService(
         zoneCount: 2,
         syncToken: "zone-token-xyz"
       )
@@ -58,7 +58,7 @@ extension CloudKitServiceFetchZoneChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchZoneChangesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.FetchZoneChanges.makeSuccessfulService(
         zoneCount: 1
       )
 
@@ -73,7 +73,7 @@ extension CloudKitServiceFetchZoneChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchZoneChangesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.FetchZoneChanges.makeSuccessfulService(
         zoneCount: 0
       )
 
@@ -89,7 +89,7 @@ extension CloudKitServiceFetchZoneChangesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceFetchZoneChangesTests.makeSuccessfulService(
+      let service = try await CloudKitServiceTests.FetchZoneChanges.makeSuccessfulService(
         zoneCount: 1,
         syncToken: "new-token"
       )

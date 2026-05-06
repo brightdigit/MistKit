@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceLookupZonesTests {
+extension CloudKitServiceTests.LookupZones {
   @Suite("Validation")
   internal struct Validation {
     @Test("lookupZones() throws 400 for empty zoneIDs array")
@@ -41,7 +41,7 @@ extension CloudKitServiceLookupZonesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceLookupZonesTests.makeSuccessfulService()
+      let service = try await CloudKitServiceTests.LookupZones.makeSuccessfulService()
 
       await #expect {
         try await service.lookupZones(zoneIDs: [])
@@ -59,7 +59,7 @@ extension CloudKitServiceLookupZonesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceLookupZonesTests.makeSuccessfulService()
+      let service = try await CloudKitServiceTests.LookupZones.makeSuccessfulService()
 
       await #expect {
         try await service.lookupZones(zoneIDs: [ZoneID(zoneName: "", ownerName: nil)])
@@ -77,7 +77,7 @@ extension CloudKitServiceLookupZonesTests {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceLookupZonesTests.makeSuccessfulService()
+      let service = try await CloudKitServiceTests.LookupZones.makeSuccessfulService()
       let zoneIDs = [
         ZoneID(zoneName: "_defaultZone", ownerName: nil),
         ZoneID(zoneName: "", ownerName: nil),
