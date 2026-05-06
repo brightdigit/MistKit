@@ -1,5 +1,5 @@
 //
-//  IntegrationTestRunner.swift
+//  FetchZoneChangesPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,36 +30,32 @@
 import Foundation
 import MistKit
 
-/// Thin façade that builds a `PhaseContext` from CLI configuration and
-/// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
+struct FetchZoneChangesPhase: IntegrationPhase {
+  typealias Input = NoState
+  typealias Output = NoState
 
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
-    try await PublicDatabaseTest(database: database).run(context: makeContext())
-  }
+  static let title = "Fetch zone changes"
+  static let emoji = "🔄"
+  static let apiName = "fetchZoneChanges"
 
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
-    try await PrivateDatabaseTest().run(context: makeContext())
-  }
+  func run(input: NoState, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
 
-  private func makeContext() -> PhaseContext {
-    PhaseContext(
-      service: service,
-      containerIdentifier: containerIdentifier,
-      database: database,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
-    )
+    do {
+      let result = try await context.service.fetchZoneChanges()
+      print("✅ Fetched \(result.zones.count) zone(s)")
+      if context.verbose {
+        for zone in result.zones {
+          print("   - \(zone.zoneName)")
+        }
+        if let token = result.syncToken {
+          print("   Sync token: \(token.prefix(30))...")
+        }
+      }
+    } catch {
+      print("⚠️  fetchZoneChanges failed (non-fatal): \(error)")
+    }
+
+    return NoState()
   }
 }

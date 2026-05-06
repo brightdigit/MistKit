@@ -1,5 +1,5 @@
 //
-//  IntegrationTestRunner.swift
+//  PhaseContext.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,9 +30,8 @@
 import Foundation
 import MistKit
 
-/// Thin façade that builds a `PhaseContext` from CLI configuration and
-/// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
+/// Shared dependencies and configuration available to every phase.
+struct PhaseContext: Sendable {
   let service: CloudKitService
   let containerIdentifier: String
   let database: MistKit.Database
@@ -40,26 +39,4 @@ struct IntegrationTestRunner {
   let assetSizeKB: Int
   let skipCleanup: Bool
   let verbose: Bool
-
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
-    try await PublicDatabaseTest(database: database).run(context: makeContext())
-  }
-
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
-    try await PrivateDatabaseTest().run(context: makeContext())
-  }
-
-  private func makeContext() -> PhaseContext {
-    PhaseContext(
-      service: service,
-      containerIdentifier: containerIdentifier,
-      database: database,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
-    )
-  }
 }

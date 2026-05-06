@@ -39,6 +39,7 @@ enum IntegrationTestError: LocalizedError, Sendable {
   case cleanupFailed(String)
   case noRecordsCreated
   case missingWebAuthToken
+  case missingPhaseState(String)
 
   var errorDescription: String? {
     switch self {
@@ -59,6 +60,8 @@ enum IntegrationTestError: LocalizedError, Sendable {
     case .missingWebAuthToken:
       return
         "Web auth token is required for private database tests. Run 'mistdemo auth-token' first."
+    case .missingPhaseState(let key):
+      return "Required phase state '\(key)' is missing — preceding phase did not run"
     }
   }
 }

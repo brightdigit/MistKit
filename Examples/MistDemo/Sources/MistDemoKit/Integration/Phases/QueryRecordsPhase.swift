@@ -1,5 +1,5 @@
 //
-//  IntegrationTestRunner.swift
+//  QueryRecordsPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,36 +30,32 @@
 import Foundation
 import MistKit
 
-/// Thin façade that builds a `PhaseContext` from CLI configuration and
-/// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
+struct QueryRecordsPhase: IntegrationPhase {
+  typealias Input = CreatedRecordNames
+  typealias Output = NoState
 
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
-    try await PublicDatabaseTest(database: database).run(context: makeContext())
-  }
+  static let title = "Query records by type"
+  static let emoji = "🔍"
+  static let apiName = "queryRecords"
 
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
-    try await PrivateDatabaseTest().run(context: makeContext())
-  }
+  func run(input: CreatedRecordNames, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
 
-  private func makeContext() -> PhaseContext {
-    PhaseContext(
-      service: service,
-      containerIdentifier: containerIdentifier,
-      database: database,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
-    )
+    do {
+      let records = try await context.service.queryRecords(
+        recordType: IntegrationTestData.recordType
+      )
+      print("✅ Queried \(records.count) record(s) of type '\(IntegrationTestData.recordType)'")
+      if context.verbose {
+        let ours = records.filter { input.names.contains($0.recordName) }
+        print("   Found \(ours.count) of our \(input.names.count) test records")
+      }
+    } catch CloudKitError.httpErrorWithDetails(statusCode: 404, serverErrorCode: _, reason: _) {
+      // Schema propagation in development can lag behind the first write.
+      // LookupRecordsPhase already verifies the records exist by name.
+      print("⚠️  queryRecords returned NOT_FOUND — schema may not be indexed yet (non-fatal)")
+    }
+
+    return NoState()
   }
 }

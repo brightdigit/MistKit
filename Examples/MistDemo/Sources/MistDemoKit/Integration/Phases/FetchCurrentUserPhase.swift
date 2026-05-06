@@ -1,5 +1,5 @@
 //
-//  IntegrationTestRunner.swift
+//  FetchCurrentUserPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,36 +30,26 @@
 import Foundation
 import MistKit
 
-/// Thin façade that builds a `PhaseContext` from CLI configuration and
-/// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
+struct FetchCurrentUserPhase: IntegrationPhase {
+  typealias Input = NoState
+  typealias Output = UserInfo
 
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
-    try await PublicDatabaseTest(database: database).run(context: makeContext())
-  }
+  static let title = "Fetch current user"
+  static let emoji = "👤"
+  static let apiName = "fetchCurrentUser"
 
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
-    try await PrivateDatabaseTest().run(context: makeContext())
-  }
+  func run(input: NoState, context: PhaseContext) async throws -> UserInfo {
+    print("\n\(Self.emoji) \(Self.title)")
 
-  private func makeContext() -> PhaseContext {
-    PhaseContext(
-      service: service,
-      containerIdentifier: containerIdentifier,
-      database: database,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
-    )
+    let userInfo = try await context.service.fetchCurrentUser()
+
+    print("✅ Current user: \(userInfo.userRecordName)")
+
+    if context.verbose {
+      if let firstName = userInfo.firstName { print("   First name: \(firstName)") }
+      if let lastName = userInfo.lastName { print("   Last name: \(lastName)") }
+    }
+
+    return userInfo
   }
 }
