@@ -35,26 +35,13 @@ import Testing
 extension CloudKitServiceTests.FetchChanges {
   @Suite("Error Handling")
   internal struct ErrorHandling {
-    private static let testAPIToken =
-      TestConstants.apiToken
-
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    private static func makeService(provider: ResponseProvider) throws -> CloudKitService {
-      let transport = MockTransport(responseProvider: provider)
-      return try CloudKitService(
-        containerIdentifier: TestConstants.serviceContainerIdentifier,
-        apiToken: testAPIToken,
-        transport: transport
-      )
-    }
-
     @Test("fetchRecordChanges() surfaces network connection failure as networkError")
     internal func fetchRecordChangesPropagatesConnectionLost() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try Self.makeService(provider: ResponseProvider.connectionLost())
+      let service = try CloudKitServiceTests.makeService(provider: ResponseProvider.connectionLost())
 
       await #expect {
         _ = try await service.fetchRecordChanges()
@@ -72,7 +59,7 @@ extension CloudKitServiceTests.FetchChanges {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try Self.makeService(provider: ResponseProvider.timeout())
+      let service = try CloudKitServiceTests.makeService(provider: ResponseProvider.timeout())
 
       await #expect {
         _ = try await service.fetchRecordChanges()
@@ -106,7 +93,7 @@ extension CloudKitServiceTests.FetchChanges {
         ResponseConfig.timeout(),
         for: "fetchRecordChanges"
       )
-      let service = try Self.makeService(provider: provider)
+      let service = try CloudKitServiceTests.makeService(provider: provider)
 
       await #expect {
         _ = try await service.fetchAllRecordChanges()

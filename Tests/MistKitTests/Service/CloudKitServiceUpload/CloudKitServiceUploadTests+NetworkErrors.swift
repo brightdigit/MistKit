@@ -35,26 +35,13 @@ import Testing
 extension CloudKitServiceTests.Upload {
   @Suite("Network Errors")
   internal struct NetworkErrors {
-    private static let testAPIToken =
-      TestConstants.apiToken
-
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    private static func makeService(provider: ResponseProvider) throws -> CloudKitService {
-      let transport = MockTransport(responseProvider: provider)
-      return try CloudKitService(
-        containerIdentifier: TestConstants.serviceContainerIdentifier,
-        apiToken: testAPIToken,
-        transport: transport
-      )
-    }
-
     @Test("uploadAssets() surfaces a CloudKit-API timeout as networkError(.timedOut)")
     internal func uploadAssetsPropagatesAPITimeout() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try Self.makeService(provider: ResponseProvider.timeout())
+      let service = try CloudKitServiceTests.makeService(provider: ResponseProvider.timeout())
       let testData = Data(count: 1_024)
 
       await #expect {
@@ -79,7 +66,7 @@ extension CloudKitServiceTests.Upload {
       }
       // CloudKit API returns a valid upload token, but the CDN upload throws.
       let provider = ResponseProvider.successfulUpload()
-      let service = try Self.makeService(provider: provider)
+      let service = try CloudKitServiceTests.makeService(provider: provider)
       let testData = Data(count: 1_024)
       let throwingUploader: AssetUploader = { _, _ in
         throw URLError(.networkConnectionLost)
@@ -107,7 +94,7 @@ extension CloudKitServiceTests.Upload {
         return
       }
       let provider = ResponseProvider.successfulUpload()
-      let service = try Self.makeService(provider: provider)
+      let service = try CloudKitServiceTests.makeService(provider: provider)
       let testData = Data(count: 1_024)
       let misdirectedUploader: AssetUploader = { _, _ in
         (statusCode: 421, data: Data("misdirected".utf8))

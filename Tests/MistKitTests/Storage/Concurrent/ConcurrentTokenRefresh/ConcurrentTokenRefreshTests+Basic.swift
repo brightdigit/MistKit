@@ -9,61 +9,6 @@ extension ConcurrentTokenRefreshTests {
   /// Test suite for basic concurrent token refresh functionality
   @Suite("Basic")
   internal struct Basic {
-    // MARK: - Helper Methods
-
-    /// Creates a standard test request for concurrent token refresh tests
-    private func createTestRequest() -> HTTPRequest {
-      HTTPRequest(
-        method: .get,
-        scheme: "https",
-        authority: "api.apple-cloudkit.com",
-        path: "/database/1/iCloud.com.example.app/private/records/query"
-      )
-    }
-
-    /// Creates a standard next handler that returns success
-    private func createSuccessNextHandler()
-      -> @Sendable (HTTPRequest, HTTPBody?, URL) async throws
-      -> (HTTPResponse, HTTPBody?)
-    {
-      { _, _, _ in (HTTPResponse(status: .ok), nil) }
-    }
-
-    /// Executes concurrent middleware calls and returns results
-    private func executeConcurrentMiddlewareCalls(
-      middleware: AuthenticationMiddleware,
-      request: HTTPRequest,
-      baseURL: URL,
-      next:
-        @escaping @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (
-          HTTPResponse, HTTPBody?
-        ),
-      count: Int
-    ) async -> [Bool] {
-      let tasks = (1...count).map { _ in
-        Task {
-          await middleware.interceptWithMiddleware(
-            request: request,
-            baseURL: baseURL,
-            operationID: TestConstants.operationID,
-            next: next
-          )
-        }
-      }
-
-      return await withTaskGroup(of: Bool.self) { group in
-        for task in tasks {
-          group.addTask { await task.value }
-        }
-
-        var results: [Bool] = []
-        for await result in group {
-          results.append(result)
-        }
-        return results
-      }
-    }
-
     // MARK: - Basic Concurrent Token Refresh Tests
 
     /// Tests concurrent token refresh with multiple requests
@@ -72,12 +17,12 @@ extension ConcurrentTokenRefreshTests {
       let mockTokenManager = MockTokenManagerWithRefresh()
       let middleware = AuthenticationMiddleware(tokenManager: mockTokenManager)
 
-      let request = createTestRequest()
-      let next = createSuccessNextHandler()
+      let request = ConcurrentTokenRefreshTests.makeRequest()
+      let next = ConcurrentTokenRefreshTests.successNextHandler()
       let baseURL = URL.MistKit.cloudKitAPI
 
       // Test concurrent access patterns
-      let results = await executeConcurrentMiddlewareCalls(
+      let results = await ConcurrentTokenRefreshTests.runConcurrent(
         middleware: middleware,
         request: request,
         baseURL: baseURL,
@@ -105,8 +50,8 @@ extension ConcurrentTokenRefreshTests {
 
       let middlewares = tokenManagers.map { AuthenticationMiddleware(tokenManager: $0) }
 
-      let request = createTestRequest()
-      let next = createSuccessNextHandler()
+      let request = ConcurrentTokenRefreshTests.makeRequest()
+      let next = ConcurrentTokenRefreshTests.successNextHandler()
       let baseURL = URL.MistKit.cloudKitAPI
 
       // Test concurrent access with different middlewares

@@ -37,7 +37,13 @@ internal enum TestConstants {
     "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
 
   /// Sample web-auth token used by middleware and client tests.
-  internal static let webAuthToken = "user123_web_auth_token_abcdef"
+  ///
+  /// Length and character set satisfy `webAuthTokenRegex`
+  /// (`^[A-Za-z0-9+/=_]{100,}$`) so tests remain valid if regex-based
+  /// validation is later added to `WebAuthTokenManager.validateCredentials()`.
+  internal static let webAuthToken =
+    "user123webauthtokenabcdef0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    + "abcdefghijklmnopqrstuvwxyz0123456789AB=="
 
   /// Container identifier used by `CloudKitService` integration-style tests.
   internal static let serviceContainerIdentifier = "iCloud.com.example.test"

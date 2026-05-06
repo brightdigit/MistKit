@@ -35,19 +35,6 @@ import Testing
 extension CloudKitServiceTests.FetchZoneChanges {
   @Suite("Error Handling")
   internal struct ErrorHandling {
-    private static let testAPIToken =
-      TestConstants.apiToken
-
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    private static func makeService(provider: ResponseProvider) throws -> CloudKitService {
-      let transport = MockTransport(responseProvider: provider)
-      return try CloudKitService(
-        containerIdentifier: TestConstants.serviceContainerIdentifier,
-        apiToken: testAPIToken,
-        transport: transport
-      )
-    }
-
     @Test("fetchZoneChanges() rejects an invalid sync token with BAD_REQUEST")
     internal func fetchZoneChangesRejectsInvalidSyncToken() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
@@ -61,7 +48,7 @@ extension CloudKitServiceTests.FetchZoneChanges {
           reason: "Invalid syncToken format"
         )
       )
-      let service = try Self.makeService(provider: provider)
+      let service = try CloudKitServiceTests.makeService(provider: provider)
 
       await #expect {
         _ = try await service.fetchZoneChanges(syncToken: "garbage-token")
@@ -90,7 +77,7 @@ extension CloudKitServiceTests.FetchZoneChanges {
           reason: "syncToken has expired and the zone must be re-fetched from the beginning"
         )
       )
-      let service = try Self.makeService(provider: provider)
+      let service = try CloudKitServiceTests.makeService(provider: provider)
 
       await #expect {
         _ = try await service.fetchZoneChanges(syncToken: "expired-token")
@@ -110,7 +97,7 @@ extension CloudKitServiceTests.FetchZoneChanges {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try Self.makeService(provider: ResponseProvider.connectionLost())
+      let service = try CloudKitServiceTests.makeService(provider: ResponseProvider.connectionLost())
 
       await #expect {
         _ = try await service.fetchZoneChanges()

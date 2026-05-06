@@ -35,19 +35,6 @@ import Testing
 extension CloudKitServiceTests.DiscoverUserIdentities {
   @Suite("Invalid Email")
   internal struct InvalidEmail {
-    private static let testAPIToken =
-      TestConstants.apiToken
-
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-    private static func makeService(provider: ResponseProvider) throws -> CloudKitService {
-      let transport = MockTransport(responseProvider: provider)
-      return try CloudKitService(
-        containerIdentifier: TestConstants.serviceContainerIdentifier,
-        apiToken: testAPIToken,
-        transport: transport
-      )
-    }
-
     @Test("discoverUserIdentities() surfaces server BAD_REQUEST for malformed email")
     internal func discoverUserIdentitiesRejectsMalformedEmail() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
@@ -61,7 +48,7 @@ extension CloudKitServiceTests.DiscoverUserIdentities {
           reason: "Invalid email address format: not-an-email"
         )
       )
-      let service = try Self.makeService(provider: provider)
+      let service = try CloudKitServiceTests.makeService(provider: provider)
       let lookup = UserIdentityLookupInfo(emailAddress: "not-an-email")
 
       await #expect {
