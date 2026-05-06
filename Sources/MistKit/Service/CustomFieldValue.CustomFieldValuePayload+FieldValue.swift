@@ -103,7 +103,8 @@ extension CustomFieldValue.CustomFieldValuePayload {
     case .date(let dateValue):
       self = .dateValue(dateValue.timeIntervalSince1970 * 1_000)
     default:
-      preconditionFailure("Unhandled FieldValue case in basicFieldValue init: \(basicFieldValue)")
+      assertionFailure("Unexpected FieldValue case in basicFieldValue init: \(basicFieldValue)")
+      self = .stringValue("unsupported")
     }
   }
 
@@ -137,7 +138,8 @@ extension CustomFieldValue.CustomFieldValuePayload {
     case .list(let nestedList):
       return .listValue(nestedList.map { Self(basicFieldValue: $0) })
     default:
-      preconditionFailure("Unhandled FieldValue case in makeComplexPayload: \(fieldValue)")
+      assertionFailure("Unexpected FieldValue case in makeComplexPayload: \(fieldValue)")
+      return .stringValue("")
     }
   }
 }

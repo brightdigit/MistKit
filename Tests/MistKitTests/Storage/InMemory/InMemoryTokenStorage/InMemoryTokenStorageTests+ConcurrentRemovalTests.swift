@@ -10,7 +10,7 @@ extension InMemoryTokenStorageTests {
     // MARK: - Test Data Setup
 
     private static let testAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      TestConstants.apiToken
 
     // MARK: - Concurrent Removal Tests
 

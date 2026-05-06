@@ -10,8 +10,8 @@ extension WebAuthTokenManagerTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
-    private static let validWebAuthToken = "user123_web_auth_token_abcdef"
+      TestConstants.apiToken
+    private static let validWebAuthToken = TestConstants.webAuthToken
     private static let invalidAPIToken = "invalid_token_format"
     private static let shortWebAuthToken = "short"
     private static let emptyAPIToken = ""

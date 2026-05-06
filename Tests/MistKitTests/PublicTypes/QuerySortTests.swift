@@ -3,7 +3,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("QuerySort", .enabled(if: Platform.isCryptoAvailable))
+@Suite("QuerySort Tests", .enabled(if: Platform.isCryptoAvailable))
 internal struct QuerySortTests {
   @Test("QuerySort creates ascending sort")
   internal func ascendingSort() {

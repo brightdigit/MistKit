@@ -13,8 +13,8 @@ extension AdaptiveTokenManagerTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
-    // private static let validWebAuthToken = "user123_web_auth_token_abcdef"
+      TestConstants.apiToken
+    // private static let validWebAuthToken = TestConstants.webAuthToken
 
     // MARK: - Basic Integration Tests
 

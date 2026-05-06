@@ -13,8 +13,8 @@ extension WebAuthTokenManagerTests {
     @Test("Comprehensive validation workflow")
     internal func comprehensiveValidationWorkflow() async throws {
       let validAPIToken =
-        "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
-      let validWebAuthToken = "user123_web_auth_token_abcdef"
+        TestConstants.apiToken
+      let validWebAuthToken = TestConstants.webAuthToken
 
       let manager = WebAuthTokenManager(
         apiToken: validAPIToken,

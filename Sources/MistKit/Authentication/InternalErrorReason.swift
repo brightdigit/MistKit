@@ -34,6 +34,7 @@ public enum InternalErrorReason: Sendable {
   case noCredentialsAvailable
   case failedCredentialRetrievalAfterUpgrade
   case failedCredentialRetrievalAfterDowngrade
+  case serverToServerRequiresSpecificManager
   case serverToServerRequiresPlatformSupport
   case tokenRefreshFailed(any Error)
 
@@ -46,6 +47,8 @@ public enum InternalErrorReason: Sendable {
       return "Failed to get credentials after upgrade"
     case .failedCredentialRetrievalAfterDowngrade:
       return "Failed to get credentials after downgrade"
+    case .serverToServerRequiresSpecificManager:
+      return "Server-to-server credentials require ServerToServerAuthManager"
     case .serverToServerRequiresPlatformSupport:
       return
         "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"

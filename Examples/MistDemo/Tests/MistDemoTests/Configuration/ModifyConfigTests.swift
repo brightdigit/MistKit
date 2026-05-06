@@ -33,7 +33,7 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("ModifyConfig")
+@Suite("ModifyConfig Tests")
 struct ModifyConfigTests {
   @Test("ModifyConfig initializes with empty operations")
   func emptyOperations() async throws {
@@ -71,7 +71,7 @@ struct ModifyConfigTests {
   }
 }
 
-@Suite("ModifyConfig JSON Parsing")
+@Suite("ModifyConfig JSON Parsing Tests")
 struct ModifyConfigParsingTests {
   @Test("Parses a single create operation")
   func parseCreate() throws {
@@ -170,7 +170,7 @@ struct ModifyConfigParsingTests {
   }
 }
 
-@Suite("ModifyOperationInput Validation")
+@Suite("ModifyOperationInput Validation Tests")
 struct ModifyOperationInputTests {
   @Test("update requires a recordName")
   func updateRequiresRecordName() throws {
@@ -200,7 +200,7 @@ struct ModifyOperationInputTests {
   }
 }
 
-@Suite("ModifyError")
+@Suite("ModifyError Tests")
 struct ModifyErrorTests {
   @Test("operationsRequired has a description")
   func operationsRequiredDescription() {

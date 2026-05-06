@@ -39,7 +39,7 @@ extension NetworkErrorTests {
           originalRequest,
           body: nil,
           baseURL: URL.MistKit.cloudKitAPI,
-          operationID: "test-operation",
+          operationID: TestConstants.operationID,
           next: next
         )
         Issue.record("Should have thrown TokenManagerError.networkError")
@@ -56,7 +56,7 @@ extension NetworkErrorTests {
         originalRequest,
         body: nil,
         baseURL: URL.MistKit.cloudKitAPI,
-        operationID: "test-operation",
+        operationID: TestConstants.operationID,
         next: next
       )
 
@@ -90,7 +90,7 @@ extension NetworkErrorTests {
             originalRequest,
             body: nil,
             baseURL: URL.MistKit.cloudKitAPI,
-            operationID: "test-operation",
+            operationID: TestConstants.operationID,
             next: next
           )
           #expect(response.0.status == .ok)
@@ -134,7 +134,7 @@ extension NetworkErrorTests {
           originalRequest,
           body: nil,
           baseURL: URL.MistKit.cloudKitAPI,
-          operationID: "test-operation",
+          operationID: TestConstants.operationID,
           next: next
         )
         Issue.record("Should have thrown TokenManagerError.networkError")

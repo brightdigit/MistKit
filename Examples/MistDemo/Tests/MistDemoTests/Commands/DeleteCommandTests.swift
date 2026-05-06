@@ -33,8 +33,8 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("DeleteCommand")
-internal struct DeleteCommandTests {
+@Suite("DeleteCommand Tests")
+struct DeleteCommandTests {
   @Test("Command has correct static properties")
   func staticProperties() {
     #expect(DeleteCommand.commandName == "delete")
@@ -50,8 +50,8 @@ internal struct DeleteCommandTests {
   }
 }
 
-@Suite("DeleteCommand.mapConflict")
-internal struct DeleteCommandMapConflictTests {
+@Suite("DeleteCommand.mapConflict Tests")
+struct DeleteCommandMapConflictTests {
   @Test("Maps httpError 409 to .conflict with nil reason")
   func httpError409() {
     let result = DeleteCommand.mapConflict(.httpError(statusCode: 409))

@@ -15,7 +15,7 @@ extension APITokenManagerMetadataTests {
     /// Tests credentialsWithMetadata method
     @Test("credentialsWithMetadata method")
     internal func credentialsWithMetadata() {
-      let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      let validToken = TestConstants.apiToken
       let manager = APITokenManager(apiToken: validToken)
 
       let metadata = ["created": "2025-01-01", "environment": "test"]
@@ -34,7 +34,7 @@ extension APITokenManagerMetadataTests {
     /// Tests credentialsWithMetadata with empty metadata
     @Test("credentialsWithMetadata with empty metadata")
     internal func credentialsWithEmptyMetadata() {
-      let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      let validToken = TestConstants.apiToken
       let manager = APITokenManager(apiToken: validToken)
 
       let credentials = manager.credentialsWithMetadata([:])
@@ -53,7 +53,7 @@ extension APITokenManagerMetadataTests {
     /// Tests that APITokenManager can be used across async boundaries
     @Test("APITokenManager sendable compliance")
     internal func sendableCompliance() async {
-      let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      let validToken = TestConstants.apiToken
       let manager = APITokenManager(apiToken: validToken)
 
       // Test concurrent access patterns

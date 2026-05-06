@@ -11,7 +11,7 @@ internal struct APITokenManagerTests {
   /// Tests APITokenManager initialization with valid API token
   @Test("APITokenManager initialization with valid API token")
   internal func initializationValidToken() {
-    let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+    let validToken = TestConstants.apiToken
     let manager = APITokenManager(apiToken: validToken)
 
     #expect(manager.token == validToken)
@@ -35,7 +35,7 @@ internal struct APITokenManagerTests {
 
     // This should crash due to precondition - we can't easily test this with Swift Testing
     // Instead, we'll test that a valid token works
-    let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+    let validToken = TestConstants.apiToken
     let manager = APITokenManager(apiToken: validToken)
     #expect(manager.token == validToken)
   }
@@ -45,7 +45,7 @@ internal struct APITokenManagerTests {
   /// Tests hasCredentials property
   @Test("hasCredentials property")
   internal func hasCredentials() async {
-    let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+    let validToken = TestConstants.apiToken
     let manager = APITokenManager(apiToken: validToken)
 
     let hasCredentials = await manager.hasCredentials
@@ -55,7 +55,7 @@ internal struct APITokenManagerTests {
   /// Tests validateCredentials with valid token
   @Test("validateCredentials with valid token")
   internal func validateCredentialsValidToken() async throws {
-    let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+    let validToken = TestConstants.apiToken
     let manager = APITokenManager(apiToken: validToken)
 
     let isValid = try await manager.validateCredentials()
@@ -157,7 +157,7 @@ internal struct APITokenManagerTests {
   /// Tests getCurrentCredentials with valid token
   @Test("getCurrentCredentials with valid token")
   internal func getCurrentCredentialsValidToken() async throws {
-    let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+    let validToken = TestConstants.apiToken
     let manager = APITokenManager(apiToken: validToken)
 
     let credentials = try await manager.getCurrentCredentials()
@@ -200,7 +200,7 @@ internal struct APITokenManagerTests {
   /// Tests isValidFormat property with valid token
   @Test("isValidFormat property with valid token")
   internal func isValidFormatValidToken() {
-    let validToken = "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+    let validToken = TestConstants.apiToken
     let manager = APITokenManager(apiToken: validToken)
 
     #expect(manager.isValidFormat == true)

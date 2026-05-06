@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistKit
 
-@Suite("AssetUploadToken Model")
+@Suite("AssetUploadToken Model Tests")
 internal struct AssetUploadTokenTests {
   @Test("AssetUploadToken initializes with all fields")
   internal func assetUploadTokenInitializesWithAllFields() {

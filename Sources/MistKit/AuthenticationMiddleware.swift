@@ -125,7 +125,10 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
     }
 
     guard let serverAuthManager = tokenManager as? ServerToServerAuthManager else {
-      preconditionFailure("server-to-server auth requires ServerToServerAuthManager")
+      assertionFailure(
+        "server-to-server auth configured but tokenManager is not ServerToServerAuthManager"
+      )
+      throw TokenManagerError.internalError(.serverToServerRequiresSpecificManager)
     }
 
     // Extract body data for signing

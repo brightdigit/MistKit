@@ -32,8 +32,8 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("LookupCommand")
-internal struct LookupCommandTests {
+@Suite("LookupCommand Tests")
+struct LookupCommandTests {
   @Test("Command has correct static properties")
   func staticProperties() {
     #expect(LookupCommand.commandName == "lookup")

@@ -10,7 +10,7 @@ internal struct MistKitConfigurationTests {
   @Test("MistKitConfiguration initialization with required parameters")
   internal func configurationInitialization() {
     // Given
-    let container = "iCloud.com.example.app"
+    let container = TestConstants.appContainerIdentifier
     let apiToken = "test-token"
 
     // When

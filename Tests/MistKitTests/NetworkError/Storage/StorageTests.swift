@@ -13,7 +13,7 @@ extension NetworkErrorTests {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      TestConstants.apiToken
 
     // MARK: - Token Storage Tests
 

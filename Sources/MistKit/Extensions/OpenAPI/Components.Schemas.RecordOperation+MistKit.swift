@@ -29,39 +29,37 @@
 
 internal import Foundation
 
-/// Maps MistKit `RecordOperation.OperationType` to the OpenAPI generated payload.
-///
-/// Defined at file scope as a `private` free function so SwiftLint's
-/// `type_contents_order` rule (which forbids type methods between initializers)
-/// is satisfied without restructuring the extension.
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-// swiftlint:disable:next cyclomatic_complexity
-private func apiOperationType(
-  for operationType: RecordOperation.OperationType
-) -> Components.Schemas.RecordOperation.operationTypePayload {
-  switch operationType {
-  case .create: return .create
-  case .update: return .update
-  case .forceUpdate: return .forceUpdate
-  case .replace: return .replace
-  case .forceReplace: return .forceReplace
-  case .delete: return .delete
-  case .forceDelete: return .forceDelete
-  }
-}
-
 /// Extension to convert MistKit RecordOperation to OpenAPI Components.Schemas.RecordOperation
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension Components.Schemas.RecordOperation {
+  /// Mapping from RecordOperation.OperationType to OpenAPI operationTypePayload
+  private static let operationTypeMapping:
+    [RecordOperation.OperationType: Components.Schemas.RecordOperation.operationTypePayload] = [
+      .create: .create,
+      .update: .update,
+      .forceUpdate: .forceUpdate,
+      .replace: .replace,
+      .forceReplace: .forceReplace,
+      .delete: .delete,
+      .forceDelete: .forceDelete,
+    ]
+
   /// Initialize from MistKit RecordOperation
   internal init(from recordOperation: RecordOperation) {
+    // Convert operation type using dictionary lookup
+    guard let apiOperationType = Self.operationTypeMapping[recordOperation.operationType] else {
+      fatalError("Unknown operation type: \(recordOperation.operationType)")
+    }
+
+    // Convert fields to OpenAPI FieldValueRequest format (for requests)
     let apiFields = recordOperation.fields.mapValues {
       fieldValue -> Components.Schemas.FieldValueRequest in
       Components.Schemas.FieldValueRequest(from: fieldValue)
     }
 
+    // Build the OpenAPI record operation
     self.init(
-      operationType: apiOperationType(for: recordOperation.operationType),
+      operationType: apiOperationType,
       record: .init(
         recordName: recordOperation.recordName,
         recordType: recordOperation.recordType,

@@ -32,8 +32,8 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("CurrentUserError")
-internal struct CurrentUserErrorTests {
+@Suite("CurrentUserError Tests")
+struct CurrentUserErrorTests {
   // MARK: - Error Description Tests
 
   @Test("operationFailed error description")

@@ -32,7 +32,7 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("LookupConfig")
+@Suite("LookupConfig Tests")
 struct LookupConfigTests {
   @Test("LookupConfig initializes with a single record name")
   func singleRecordName() async throws {
@@ -101,7 +101,7 @@ struct LookupConfigTests {
   }
 }
 
-@Suite("LookupError")
+@Suite("LookupError Tests")
 struct LookupErrorTests {
   @Test("recordNamesRequired has a description")
   func recordNamesRequiredDescription() {

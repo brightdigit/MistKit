@@ -9,7 +9,7 @@ internal struct InMemoryTokenStorageRetrievalTests {
   // MARK: - Test Data Setup
 
   private static let testAPIToken =
-    "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+    TestConstants.apiToken
 
   // MARK: - Token Retrieval Tests
 
