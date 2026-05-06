@@ -130,7 +130,7 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
 
   public func execute() async throws {
     do {
-      let client = try MistKitClientFactory.create(.private, from: config.base)
+      let client = try MistKitClientFactory.create(for: config.base)
 
       // Build [RecordOperation] from the JSON ops, validating each
       let operations = try config.operations.enumerated().map { index, input in

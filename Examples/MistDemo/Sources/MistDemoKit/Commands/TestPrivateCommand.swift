@@ -88,7 +88,7 @@ public struct TestPrivateCommand: MistDemoCommand {
   }
 
   public func execute() async throws {
-    let service = try MistKitClientFactory.create(.private, from: config.base)
+    let service = try MistKitClientFactory.create(for: config.base)
 
     let runner = IntegrationTestRunner(
       service: service,

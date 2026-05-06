@@ -55,6 +55,7 @@ public enum MistDemoRunner {
     await registry.register(FetchChangesCommand.self)
     await registry.register(TestIntegrationCommand.self)
     await registry.register(TestPrivateCommand.self)
+    await registry.register(DemoErrorsCommand.self)
 
     // Parse command line arguments
     let parser = CommandLineParser()

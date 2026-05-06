@@ -48,6 +48,7 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
         --sort <field:order>       Sort by field (order: asc/desc)
         --limit <count>            Maximum records to return (1-200)
         --fields <fields>          Comma-separated fields to include
+        --database <type>          Database to target: public, private, shared (default: public)
         --output-format <format>   Output format: json, table, csv, yaml
     """
 
@@ -60,7 +61,7 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
   public func execute() async throws {
     do {
       // Create CloudKit client
-      let client = try MistKitClientFactory.create(.public, from: config.base)
+      let client = try MistKitClientFactory.create(for: config.base)
 
       // Build filters
       // NOTE: Zone, offset, and continuation marker support require

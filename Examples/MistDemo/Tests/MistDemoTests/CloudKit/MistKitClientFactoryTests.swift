@@ -48,6 +48,7 @@ struct MistKitClientFactoryTests {
     containerIdentifier: String = "iCloud.com.test.App",
     apiToken: String = "test-api-token",
     environment: MistKit.Environment = .development,
+    database: MistKit.Database = .private,
     webAuthToken: String? = "test-web-auth-token",
     keyID: String? = nil,
     privateKey: String? = nil,
@@ -59,12 +60,14 @@ struct MistKitClientFactoryTests {
     testAllAuth: Bool = false,
     testApiOnly: Bool = false,
     testAdaptive: Bool = false,
-    testServerToServer: Bool = false
+    testServerToServer: Bool = false,
+    badCredentials: Bool = false
   ) async throws -> MistDemoConfig {
     try await MistDemoConfig(
       containerIdentifier: containerIdentifier,
       apiToken: apiToken,
       environment: environment,
+      database: database,
       webAuthToken: webAuthToken,
       keyID: keyID,
       privateKey: privateKey,
@@ -76,7 +79,8 @@ struct MistKitClientFactoryTests {
       testAllAuth: testAllAuth,
       testApiOnly: testApiOnly,
       testAdaptive: testAdaptive,
-      testServerToServer: testServerToServer
+      testServerToServer: testServerToServer,
+      badCredentials: badCredentials
     )
   }
 
@@ -86,7 +90,7 @@ struct MistKitClientFactoryTests {
   func createWithAPITokenOnly() async throws {
     let config = try await makeConfig(apiToken: "api-token-123")
 
-    let client = try MistKitClientFactory.create(.private, from: config)
+    let client = try MistKitClientFactory.create(for: config)
 
     #expect(client != nil)
   }
@@ -96,7 +100,7 @@ struct MistKitClientFactoryTests {
     let config = try await makeConfig(apiToken: "")
 
     #expect(throws: ConfigurationError.self) {
-      try MistKitClientFactory.create(.private, from: config)
+      try MistKitClientFactory.create(for: config)
     }
   }
 
@@ -109,7 +113,7 @@ struct MistKitClientFactoryTests {
       webAuthToken: "web-auth-token"
     )
 
-    let client = try MistKitClientFactory.create(.private, from: config)
+    let client = try MistKitClientFactory.create(for: config)
 
     #expect(client != nil)
   }
@@ -123,7 +127,7 @@ struct MistKitClientFactoryTests {
       privateKey: validPrivateKey
     )
 
-    let client = try MistKitClientFactory.create(.private, from: config)
+    let client = try MistKitClientFactory.create(for: config)
 
     #expect(client != nil)
   }
@@ -138,7 +142,7 @@ struct MistKitClientFactoryTests {
       privateKey: validPrivateKey
     )
 
-    let client = try MistKitClientFactory.create(.private, from: config)
+    let client = try MistKitClientFactory.create(for: config)
 
     #expect(client != nil)
   }
@@ -153,7 +157,7 @@ struct MistKitClientFactoryTests {
     )
 
     // Should fall back to API-only auth
-    let client = try? MistKitClientFactory.create(.private, from: config)
+    let client = try? MistKitClientFactory.create(for: config)
     #expect(client != nil)
   }
 
@@ -161,13 +165,12 @@ struct MistKitClientFactoryTests {
 
   @Test("Create client for public database")
   func createForPublicDatabaseTest() async throws {
-    let config = try await makeConfig(apiToken: "api-token")
+    let config = try await makeConfig(apiToken: "api-token", database: .public)
     let tokenManager = APITokenManager(apiToken: "api-token")
 
     let client = try MistKitClientFactory.create(
       from: config,
-      tokenManager: tokenManager,
-      database: .public
+      tokenManager: tokenManager
     )
 
     #expect(client != nil)
@@ -175,10 +178,10 @@ struct MistKitClientFactoryTests {
 
   @Test("Public database creation requires API token")
   func publicDatabaseRequiresAPIToken() async throws {
-    let config = try await makeConfig(apiToken: "")
+    let config = try await makeConfig(apiToken: "", database: .public)
 
     #expect(throws: ConfigurationError.self) {
-      try MistKitClientFactory.create(.public, from: config)
+      try MistKitClientFactory.create(for: config)
     }
   }
 
@@ -191,8 +194,7 @@ struct MistKitClientFactoryTests {
 
     let client = try MistKitClientFactory.create(
       from: config,
-      tokenManager: tokenManager,
-      database: .private
+      tokenManager: tokenManager
     )
 
     #expect(client != nil)
@@ -200,13 +202,12 @@ struct MistKitClientFactoryTests {
 
   @Test("Create client with custom token manager for public database")
   func createWithCustomTokenManagerPublicDB() async throws {
-    let config = try await makeConfig(apiToken: "api-token")
+    let config = try await makeConfig(apiToken: "api-token", database: .public)
     let tokenManager = APITokenManager(apiToken: "custom-token")
 
     let client = try MistKitClientFactory.create(
       from: config,
-      tokenManager: tokenManager,
-      database: .public
+      tokenManager: tokenManager
     )
 
     #expect(client != nil)
@@ -221,7 +222,7 @@ struct MistKitClientFactoryTests {
       environment: .development
     )
 
-    let client = try MistKitClientFactory.create(.private, from: config)
+    let client = try MistKitClientFactory.create(for: config)
 
     #expect(client != nil)
   }
@@ -233,7 +234,7 @@ struct MistKitClientFactoryTests {
       environment: .production
     )
 
-    let client = try MistKitClientFactory.create(.private, from: config)
+    let client = try MistKitClientFactory.create(for: config)
 
     #expect(client != nil)
   }
@@ -247,7 +248,7 @@ struct MistKitClientFactoryTests {
       apiToken: "api-token"
     )
 
-    let client = try MistKitClientFactory.create(.private, from: config)
+    let client = try MistKitClientFactory.create(for: config)
 
     #expect(client != nil)
   }
@@ -265,7 +266,7 @@ struct MistKitClientFactoryTests {
     )
 
     // Should fall back to API-only auth when file can't be read
-    let client = try? MistKitClientFactory.create(.private, from: config)
+    let client = try? MistKitClientFactory.create(for: config)
     #expect(client != nil)
   }
 
@@ -276,7 +277,7 @@ struct MistKitClientFactoryTests {
     let config = try await makeConfig(apiToken: "")
 
     do {
-      _ = try MistKitClientFactory.create(.private, from: config)
+      _ = try MistKitClientFactory.create(for: config)
       Issue.record("Should have thrown ConfigurationError")
     } catch let error as ConfigurationError {
       if case .missingRequired(let key, _) = error {
@@ -297,7 +298,7 @@ struct MistKitClientFactoryTests {
     )
 
     #expect(throws: ConfigurationError.self) {
-      try MistKitClientFactory.create(.private, from: config)
+      try MistKitClientFactory.create(for: config)
     }
   }
 
@@ -309,7 +310,7 @@ struct MistKitClientFactoryTests {
       privateKey: validPrivateKey
     )
 
-    let client = try MistKitClientFactory.create(.private, from: config)
+    let client = try MistKitClientFactory.create(for: config)
 
     #expect(client != nil)
   }
@@ -322,9 +323,80 @@ struct MistKitClientFactoryTests {
       privateKey: ""
     )
 
-    let client = try MistKitClientFactory.create(.private, from: config)
+    let client = try MistKitClientFactory.create(for: config)
 
     #expect(client != nil)
+  }
+
+  // MARK: - badCredentials Tests
+
+  @Test("badCredentials short-circuits to web-auth on private database")
+  func badCredentialsOnPrivateDatabase() async throws {
+    let config = try await makeConfig(
+      apiToken: "real-config-token",
+      database: .private,
+      webAuthToken: "real-config-web-auth-token",
+      badCredentials: true
+    )
+
+    // Must not throw, even though the configured tokens are unrelated to a real
+    // CloudKit account — the factory swaps in placeholder tokens for the demo.
+    _ = try MistKitClientFactory.create(for: config)
+  }
+
+  @Test("badCredentials short-circuits to web-auth on shared database")
+  func badCredentialsOnSharedDatabase() async throws {
+    let config = try await makeConfig(
+      apiToken: "real-config-token",
+      database: .shared,
+      webAuthToken: "real-config-web-auth-token",
+      badCredentials: true
+    )
+
+    _ = try MistKitClientFactory.create(for: config)
+  }
+
+  @Test("badCredentials throws on public database")
+  func badCredentialsOnPublicDatabaseThrows() async throws {
+    let config = try await makeConfig(
+      apiToken: "real-config-token",
+      database: .public,
+      keyID: "real-key-id",
+      privateKey: validPrivateKey,
+      badCredentials: true
+    )
+
+    do {
+      _ = try MistKitClientFactory.create(for: config)
+      Issue.record(
+        "Should have thrown ConfigurationError.badCredentialsNotSupportedOnPublicDatabase")
+    } catch ConfigurationError.badCredentialsNotSupportedOnPublicDatabase {
+      // expected
+    } catch {
+      Issue.record("Wrong error: \(error)")
+    }
+  }
+
+  @Test("badCredentials = false leaves normal auth selection intact")
+  func badCredentialsFalseRegression() async throws {
+    let config = try await makeConfig(
+      apiToken: "api-token",
+      database: .private,
+      webAuthToken: "web-auth-token",
+      badCredentials: false
+    )
+
+    _ = try MistKitClientFactory.create(for: config)
+  }
+
+  @Test("makeBadCredentialsTokenManager produces format-valid tokens")
+  func badCredentialsTokenManagerFormatPassesLocalValidation() async throws {
+    // The 401 demo only works if the tokens pass WebAuthTokenManager's local
+    // format check (64-char hex API token + ≥10-char web-auth token) — otherwise
+    // the request never reaches Apple and httpStatusCode comes back nil.
+    let manager = MistKitClientFactory.makeBadCredentialsTokenManager()
+    let validated = try await manager.validateCredentials()
+    #expect(validated)
   }
 
   // MARK: - Helper Functions

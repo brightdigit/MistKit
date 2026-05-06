@@ -49,6 +49,7 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
         --record-type <type>           Record type to create (default: Note)
         --zone <zone>                  Zone name (default: _defaultZone)
         --record-name <name>           Custom record name (auto-generated if omitted)
+        --database <type>              Database to target: public, private, shared (default: public)
         --output-format <format>       Output format: json, table, csv, yaml
 
     FIELD DEFINITION (choose one method):
@@ -113,7 +114,7 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
   public func execute() async throws {
     do {
       // Create CloudKit client
-      let client = try MistKitClientFactory.create(.private, from: config.base)
+      let client = try MistKitClientFactory.create(for: config.base)
 
       // Generate record name if not provided
       let recordName = config.recordName ?? generateRecordName()

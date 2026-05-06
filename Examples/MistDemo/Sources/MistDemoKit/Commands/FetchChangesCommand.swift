@@ -46,6 +46,7 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
         --zone <name>              Zone name (default: "_defaultZone")
         --fetch-all                Fetch all changes with automatic pagination
         --limit <count>            Maximum results per page (1-200)
+        --database <type>          Database to target: public, private, shared (default: public)
         --output-format <format>   Output format: json, table, csv, yaml
 
     EXAMPLES:
@@ -74,7 +75,7 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
     print("🔄 Fetch Record Changes")
     print(String(repeating: "=", count: 60))
 
-    let service = try MistKitClientFactory.create(.private, from: config.base)
+    let service = try MistKitClientFactory.create(for: config.base)
     let zoneID = ZoneID(zoneName: config.zone, ownerName: nil)
 
     if config.fetchAll {

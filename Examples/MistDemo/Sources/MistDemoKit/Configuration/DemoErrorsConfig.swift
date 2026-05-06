@@ -1,5 +1,5 @@
 //
-//  TestIntegrationConfig.swift
+//  DemoErrorsConfig.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,30 +28,27 @@
 //
 
 public import ConfigKeyKit
+import Foundation
 
-/// Configuration for test-integration command
-public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
+/// Which error scenario(s) the `demo-errors` command should run.
+public enum ErrorScenario: String, Sendable, CaseIterable {
+  case all
+  case unauthorized = "401"
+  case notFound = "404"
+  case conflict = "409"
+}
+
+/// Configuration for demo-errors command
+public struct DemoErrorsConfig: Sendable, ConfigurationParseable {
   public typealias ConfigReader = MistDemoConfiguration
   public typealias BaseConfig = MistDemoConfig
 
   public let base: MistDemoConfig
-  public let recordCount: Int
-  public let assetSizeKB: Int
-  public let skipCleanup: Bool
-  public let verbose: Bool
+  public let scenario: ErrorScenario
 
-  public init(
-    base: MistDemoConfig,
-    recordCount: Int = 10,
-    assetSizeKB: Int = 100,
-    skipCleanup: Bool = false,
-    verbose: Bool = false
-  ) {
+  public init(base: MistDemoConfig, scenario: ErrorScenario = .all) {
     self.base = base
-    self.recordCount = recordCount
-    self.assetSizeKB = assetSizeKB
-    self.skipCleanup = skipCleanup
-    self.verbose = verbose
+    self.scenario = scenario
   }
 
   /// Parse configuration from command line arguments
@@ -63,17 +60,25 @@ public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
       baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
     }
 
-    let recordCount = configuration.int(forKey: "record.count", default: 10) ?? 10
-    let assetSizeKB = configuration.int(forKey: "asset.size", default: 100) ?? 100
-    let skipCleanup = configuration.bool(forKey: "skip.cleanup", default: false)
-    let verbose = configuration.bool(forKey: "verbose", default: false)
+    let scenarioString = configuration.string(forKey: "scenario", default: "all") ?? "all"
+    guard let scenario = ErrorScenario(rawValue: scenarioString) else {
+      throw DemoErrorsError.invalidScenario(scenarioString)
+    }
 
-    self.init(
-      base: baseConfig,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
-    )
+    self.init(base: baseConfig, scenario: scenario)
+  }
+}
+
+/// Errors specific to the demo-errors command's configuration parsing.
+internal enum DemoErrorsError: LocalizedError {
+  case invalidScenario(String)
+
+  internal var errorDescription: String? {
+    switch self {
+    case .invalidScenario(let value):
+      return
+        "Invalid --scenario '\(value)'. Must be one of: "
+        + ErrorScenario.allCases.map(\.rawValue).joined(separator: ", ")
+    }
   }
 }

@@ -80,20 +80,12 @@ public struct TestIntegrationCommand: MistDemoCommand {
   }
 
   public func execute() async throws {
-    let service: CloudKitService
-    switch config.database {
-    case .public:
-      service = try MistKitClientFactory.create(.public, from: config.base)
-    case .private:
-      service = try MistKitClientFactory.create(.private, from: config.base)
-    case .shared:
-      service = try MistKitClientFactory.create(.shared, from: config.base)
-    }
+    let service = try MistKitClientFactory.create(for: config.base)
 
     let runner = IntegrationTestRunner(
       service: service,
       containerIdentifier: config.base.containerIdentifier,
-      database: config.database,
+      database: config.base.database,
       recordCount: config.recordCount,
       assetSizeKB: config.assetSizeKB,
       skipCleanup: config.skipCleanup,
