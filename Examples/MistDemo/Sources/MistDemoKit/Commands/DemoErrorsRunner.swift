@@ -1,4 +1,3 @@
-// swiftlint:disable file_length
 //
 //  DemoErrorsRunner.swift
 //  MistDemo
@@ -205,47 +204,5 @@ internal struct DemoErrorsRunner {
     } catch {
       print("   ⚠️  Cleanup failed (non-fatal): \(error)")
     }
-  }
-
-  // MARK: - Output helpers
-
-  private func printRunnerHeader() {
-    print("\n" + String(repeating: "=", count: 80))
-    print("🛑 CloudKit Error Demo — typed CloudKitError handling")
-    print(String(repeating: "=", count: 80))
-    print("Container: \(config.containerIdentifier)")
-    print("Database:  \(config.database.rawValue)")
-    print(String(repeating: "=", count: 80))
-  }
-
-  private func printRunnerFooter() {
-    print("\n" + String(repeating: "=", count: 80))
-    print("✅ Error demo complete")
-    print(String(repeating: "=", count: 80))
-  }
-
-  private func printSectionHeader(_ title: String) {
-    print("\n" + String(repeating: "-", count: 80))
-    print("▶ \(title)")
-    print(String(repeating: "-", count: 80))
-  }
-
-  private func printCloudKitError(_ error: CloudKitError, expectedStatus: Int) {
-    let status = error.httpStatusCode.map(String.init) ?? "n/a"
-    let prefix = error.httpStatusCode == expectedStatus ? "✅" : "❌"
-    print("\(prefix) Caught CloudKitError — status: \(status)")
-    if case .httpErrorWithDetails(_, let serverErrorCode, let reason) = error {
-      print("   serverErrorCode: \(serverErrorCode ?? "<none>")")
-      print("   reason:          \(reason ?? "<none>")")
-    } else {
-      print("   detail: \(error.localizedDescription)")
-    }
-  }
-
-  private func describe(_ tag: String?) -> String {
-    guard let tag, !tag.isEmpty else {
-      return "<none>"
-    }
-    return tag
   }
 }

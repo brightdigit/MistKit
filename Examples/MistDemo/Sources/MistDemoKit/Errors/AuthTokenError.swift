@@ -1,5 +1,5 @@
 //
-//  OutputFormatter.swift
+//  AuthTokenError.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,27 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+#if canImport(Hummingbird)
+  public import Foundation
 
-/// Supported output formats
-public enum OutputFormat: String, Sendable, CaseIterable {
-  case json
-  case table
-  case csv
-  case yaml
+  /// Authentication-related errors for auth-token command.
+  public enum AuthTokenError: Error, LocalizedError {
+    case timeout(String)
+    case missingResource(String)
+    case serverError(String)
 
-  // MARK: Public
-
-  /// Create the appropriate formatter for this format
-  /// - Parameter pretty: Whether to use pretty printing (applies to JSON)
-  /// - Returns: A formatter configured for this format
-  public func createFormatter(pretty: Bool = false) -> any OutputFormatter {
-    OutputFormatterFactory.formatter(for: self, pretty: pretty)
+    /// A localized description of the error.
+    public var errorDescription: String? {
+      switch self {
+      case .timeout(let message):
+        return "Authentication timeout: \(message)"
+      case .missingResource(let resource):
+        return "Missing resource: \(resource)"
+      case .serverError(let message):
+        return "Server error: \(message)"
+      }
+    }
   }
-}
-
-/// Protocol for formatting output in different formats
-public protocol OutputFormatter: Sendable {  // swiftlint:disable:this one_declaration_per_file
-  /// Format an encodable value to a string
-  func format<T: Encodable>(_ value: T) throws -> String
-}
+#endif

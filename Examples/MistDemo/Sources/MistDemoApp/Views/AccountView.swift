@@ -1,4 +1,3 @@
-// swiftlint:disable file_length
 //
 //  AccountView.swift
 //  MistDemo
@@ -41,20 +40,20 @@
   /// View for managing the iCloud account and web auth token.
   internal struct AccountView: View {
     /// Where the current `apiToken` value came from on this launch.
-    private enum TokenSource {
+    internal enum TokenSource {
       case manual
       case environment
     }
 
     /// Env var name the MistDemo CLI also reads.
-    private static let envVarName = "CLOUDKIT_API_TOKEN"
+    internal static let envVarName = "CLOUDKIT_API_TOKEN"
 
-    @EnvironmentObject private var service: NativeCloudKitService
-    @AppStorage("MistDemoApp.cloudKitApiToken") private var apiToken: String = ""
-    @State private var webAuthToken: String?
-    @State private var fetchingWebAuthToken = false
-    @State private var webAuthTokenError: String?
-    @State private var tokenSource: TokenSource = .manual
+    @EnvironmentObject internal var service: NativeCloudKitService
+    @AppStorage("MistDemoApp.cloudKitApiToken") internal var apiToken: String = ""
+    @State internal var webAuthToken: String?
+    @State internal var fetchingWebAuthToken = false
+    @State internal var webAuthTokenError: String?
+    @State internal var tokenSource: TokenSource = .manual
 
     internal var body: some View {
       Form {
@@ -189,43 +188,6 @@
       if let webAuthTokenError {
         Text(webAuthTokenError).font(.callout).foregroundStyle(.red)
       }
-    }
-
-    private func seedTokenIfNeeded() {
-      guard apiToken.isEmpty else {
-        return
-      }
-      if let envValue = ProcessInfo.processInfo.environment[Self.envVarName],
-        !envValue.isEmpty,
-        !envValue.hasPrefix("${")
-      {
-        apiToken = envValue
-        tokenSource = .environment
-      }
-    }
-
-    private func fetchToken() async {
-      fetchingWebAuthToken = true
-      webAuthTokenError = nil
-      webAuthToken = nil
-      defer { fetchingWebAuthToken = false }
-      do {
-        let token = try await service.fetchWebAuthToken(
-          apiToken: apiToken.trimmingCharacters(in: .whitespacesAndNewlines)
-        )
-        webAuthToken = token
-      } catch {
-        webAuthTokenError = error.localizedDescription
-      }
-    }
-
-    private func copy(_ value: String) {
-      #if canImport(AppKit)
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(value, forType: .string)
-      #elseif canImport(UIKit)
-        UIPasteboard.general.string = value
-      #endif
     }
   }
 #endif

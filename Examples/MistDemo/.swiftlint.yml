@@ -126,6 +126,7 @@ indentation_width:
 file_name:
     severity: error
     excluded:
+      - Package.swift
       - AsyncHelpers.swift
       - UserInfoTestExtension.swift
       - ConfigKey+MistDemoTests.swift

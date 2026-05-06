@@ -48,7 +48,7 @@ extension CommandRegistryTests {
     @Test("CommandRegistryError conforms to LocalizedError")
     internal func errorConformsToLocalizedError() {
       let error: any Error = CommandRegistryError.unknownCommand("test")
-      #expect(error is LocalizedError)
+      #expect(error is any LocalizedError)
     }
   }
 }

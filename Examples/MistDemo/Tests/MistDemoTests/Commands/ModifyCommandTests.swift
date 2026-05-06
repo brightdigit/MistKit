@@ -55,7 +55,7 @@ internal struct ModifyResultRowTests {
   @Test("ModifyResultRow encodes all fields")
   internal func encodesFields() throws {
     let row = ModifyResultRow(
-      op: "applied",
+      operation: "applied",
       recordType: "Note",
       recordName: "note-1",
       recordChangeTag: "tag-xyz"
@@ -75,7 +75,7 @@ internal struct ModifyOutputTests {
   @Test("ModifyOutput JSON envelope carries partialFailure metadata")
   internal func envelopeIncludesMetadata() throws {
     let row = ModifyResultRow(
-      op: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1"
+      operation: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1"
     )
     let envelope = ModifyOutput(
       results: [row],
@@ -95,7 +95,7 @@ internal struct ModifyOutputTests {
   @Test("ModifyOutput partialFailure=false when all ops succeed")
   internal func noPartialFailureWhenAllSucceed() throws {
     let row = ModifyResultRow(
-      op: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1"
+      operation: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1"
     )
     let envelope = ModifyOutput(
       results: [row],

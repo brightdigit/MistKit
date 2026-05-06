@@ -1,6 +1,6 @@
 // swift-tools-version: 6.2
 
-// swiftlint:disable file_name explicit_acl explicit_top_level_acl
+// swiftlint:disable explicit_acl explicit_top_level_acl
 
 import PackageDescription
 
@@ -199,4 +199,4 @@ extension Platform {
   }
 }
 
-// swiftlint:enable file_name explicit_acl explicit_top_level_acl
+// swiftlint:enable explicit_acl explicit_top_level_acl

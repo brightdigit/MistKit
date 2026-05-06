@@ -30,8 +30,17 @@
 import Foundation
 import MistKit
 
+// swiftlint:disable one_declaration_per_file
+
 /// One row in the modify command's output.
 public struct ModifyResultRow: Encodable, Sendable {
+  private enum CodingKeys: String, CodingKey {
+    case operation = "op"
+    case recordType
+    case recordName
+    case recordChangeTag
+  }
+
   /// The operation type applied.
   public let operation: String
   /// The record type.
@@ -56,7 +65,7 @@ public struct ModifyResultRow: Encodable, Sendable {
 }
 
 /// JSON envelope for modify output.
-public struct ModifyOutput: Encodable, Sendable { // swiftlint:disable:this one_declaration_per_file
+public struct ModifyOutput: Encodable, Sendable {
   /// The result rows.
   public let results: [ModifyResultRow]
   /// The number of operations attempted.
@@ -81,7 +90,7 @@ public struct ModifyOutput: Encodable, Sendable { // swiftlint:disable:this one_
 }
 
 /// Command to perform batch create/update/delete operations.
-public struct ModifyCommand: MistDemoCommand, OutputFormatting { // swiftlint:disable:this one_declaration_per_file
+public struct ModifyCommand: MistDemoCommand, OutputFormatting {
   /// The configuration type.
   public typealias Config = ModifyConfig
   /// The command name.
@@ -173,3 +182,5 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting { // swiftlint:di
     }
   }
 }
+
+// swiftlint:enable one_declaration_per_file

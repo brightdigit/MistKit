@@ -1,4 +1,3 @@
-// swiftlint:disable file_length
 //
 //  AuthTokenCommand.swift
 //  MistDemo
@@ -30,40 +29,16 @@
 
 #if canImport(Hummingbird)
   import AsyncAlgorithms
-  public import Foundation
+  import Foundation
   import HTTPTypes
   import Hummingbird
   import Logging
   import MistKit
 
-  /// Authentication-related errors for auth-token command.
-  public enum AuthTokenError: Error, LocalizedError {
-    case timeout(String)
-    case missingResource(String)
-    case serverError(String)
-
-    /// A localized description of the error.
-    public var errorDescription: String? {
-      switch self {
-      case .timeout(let message):
-        return "Authentication timeout: \(message)"
-      case .missingResource(let resource):
-        return "Missing resource: \(resource)"
-      case .serverError(let message):
-        return "Server error: \(message)"
-      }
-    }
-  }
-
   /// Command to obtain web authentication token via browser flow.
-  public struct AuthTokenCommand: MistDemoCommand { // swiftlint:disable:this one_declaration_per_file
+  public struct AuthTokenCommand: MistDemoCommand {
     /// The configuration type.
     public typealias Config = AuthTokenConfig
-
-    private struct CloudKitClientConfig: Encodable {
-      let apiToken: String
-      let containerIdentifier: String
-    }
 
     /// The command name.
     public static let commandName = "auth-token"
@@ -84,7 +59,7 @@
         --no-browser          Don't open browser automatically
       """
 
-    private let config: AuthTokenConfig
+    internal let config: AuthTokenConfig
 
     /// Creates a new instance.
     public init(config: AuthTokenConfig) {
@@ -170,7 +145,7 @@
 
     private func waitForToken(
       channel: AsyncChannel<String>,
-      serverTask: Task<Void, Error>
+      serverTask: Task<Void, any Error>
     ) async throws -> String {
       do {
         return try await withTimeoutAndSignals(
@@ -192,119 +167,6 @@
       } catch {
         serverTask.cancel()
         throw error
-      }
-    }
-
-    private func buildRouter(
-      tokenChannel: AsyncChannel<String>,
-      responseCompleteChannel: AsyncChannel<Void>
-    ) throws -> Router<BasicRequestContext> {
-      let router = Router(context: BasicRequestContext.self)
-      router.middlewares.add(LogRequestsMiddleware(.info))
-
-      let indexBytes = ByteBuffer(
-        string: AuthTokenIndexHTML.content
-      )
-      let indexResponseBuilder: @Sendable () -> Response = {
-        Response(
-          status: .ok,
-          headers: [
-            .contentType: "text/html; charset=utf-8"
-          ],
-          body: ResponseBody { writer in
-            try await writer.write(indexBytes)
-            try await writer.finish(nil)
-          }
-        )
-      }
-      router.get("/") { _, _ -> Response in
-        indexResponseBuilder()
-      }
-      router.get("/index.html") { _, _ -> Response in
-        indexResponseBuilder()
-      }
-
-      let api = router.group("api")
-
-      let configPayload = CloudKitClientConfig(
-        apiToken: config.apiToken,
-        containerIdentifier: config.containerIdentifier
-      )
-      let configData = try JSONEncoder().encode(
-        configPayload
-      )
-
-      addConfigEndpoint(
-        api: api, configData: configData
-      )
-      addAuthEndpoint(
-        api: api,
-        tokenChannel: tokenChannel,
-        responseCompleteChannel: responseCompleteChannel
-      )
-
-      return router
-    }
-
-    private func addConfigEndpoint(
-      api: RouterGroup<BasicRequestContext>,
-      configData: Data
-    ) {
-      api.get("config") { request, _ -> Response in
-        let authority = request.head.authority ?? ""
-        guard Self.isLoopbackAuthority(authority) else {
-          return Response(status: .forbidden)
-        }
-        return Response(
-          status: .ok,
-          headers: [.contentType: "application/json"],
-          body: ResponseBody { writer in
-            try await writer.write(
-              ByteBuffer(bytes: configData)
-            )
-            try await writer.finish(nil)
-          }
-        )
-      }
-    }
-
-    private func addAuthEndpoint(
-      api: RouterGroup<BasicRequestContext>,
-      tokenChannel: AsyncChannel<String>,
-      responseCompleteChannel: AsyncChannel<Void>
-    ) {
-      api.post("authenticate") {
-        request, context -> Response in
-        let authRequest = try await request.decode(
-          as: AuthRequest.self, context: context
-        )
-        await tokenChannel.send(authRequest.sessionToken)
-
-        let response = AuthResponse(
-          userRecordName: authRequest.userRecordName,
-          cloudKitData: .init(
-            user: nil, zones: [], error: nil
-          ),
-          message: "Authentication successful!"
-        )
-
-        let jsonData = try JSONEncoder().encode(response)
-
-        Task {
-          try await Task.sleep(nanoseconds: 200_000_000)
-          await responseCompleteChannel.send(())
-        }
-
-        return Response(
-          status: .ok,
-          headers: [.contentType: "application/json"],
-          body: ResponseBody { writer in
-            try await writer.write(
-              ByteBuffer(bytes: jsonData)
-            )
-            try await writer.finish(nil)
-          }
-        )
       }
     }
   }
