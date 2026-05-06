@@ -1,5 +1,5 @@
 //
-//  ModifyCommandTests.swift
+//  ModifyResultRowTests.swift
 //  MistDemoTests
 //
 //  Created by Leo Dion.
@@ -32,19 +32,22 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("ModifyCommand Tests")
-internal struct ModifyCommandTests {
-  @Test("Command has correct static properties")
-  internal func staticProperties() {
-    #expect(ModifyCommand.commandName == "modify")
-    #expect(ModifyCommand.abstract == "Run a batch of create/update/delete operations")
-    #expect(ModifyCommand.helpText.contains("MODIFY"))
-  }
+@Suite("ModifyResultRow Tests")
+internal struct ModifyResultRowTests {
+  @Test("ModifyResultRow encodes all fields")
+  internal func encodesFields() throws {
+    let row = ModifyResultRow(
+      operation: "applied",
+      recordType: "Note",
+      recordName: "note-1",
+      recordChangeTag: "tag-xyz"
+    )
+    let data = try JSONEncoder().encode(row)
+    let json = try #require(String(data: data, encoding: .utf8))
 
-  @Test("Command initializes with config")
-  internal func initializesWithConfig() async throws {
-    let baseConfig = try await MistDemoConfig()
-    let config = ModifyConfig(base: baseConfig, operations: [])
-    _ = ModifyCommand(config: config)
+    #expect(json.contains("\"op\":\"applied\""))
+    #expect(json.contains("\"recordType\":\"Note\""))
+    #expect(json.contains("\"recordName\":\"note-1\""))
+    #expect(json.contains("\"recordChangeTag\":\"tag-xyz\""))
   }
 }

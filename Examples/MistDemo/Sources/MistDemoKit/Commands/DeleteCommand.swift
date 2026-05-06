@@ -30,29 +30,6 @@
 import Foundation
 import MistKit
 
-// swiftlint:disable one_declaration_per_file
-
-/// Result of a successful delete, formatted as command output.
-public struct DeleteResult: Encodable, Sendable {
-  /// The deleted record name.
-  public let recordName: String
-  /// The deleted record type.
-  public let recordType: String
-  /// Whether the record was deleted.
-  public let deleted: Bool
-
-  /// Creates a new instance.
-  public init(
-    recordName: String,
-    recordType: String,
-    deleted: Bool = true
-  ) {
-    self.recordName = recordName
-    self.recordType = recordType
-    self.deleted = deleted
-  }
-}
-
 /// Command to delete an existing record from CloudKit
 public struct DeleteCommand: MistDemoCommand, OutputFormatting {
   /// The configuration type.
@@ -137,5 +114,3 @@ public struct DeleteCommand: MistDemoCommand, OutputFormatting {
     }
   }
 }
-
-// swiftlint:enable one_declaration_per_file

@@ -1,6 +1,6 @@
 //
-//  ModifyCommandTests.swift
-//  MistDemoTests
+//  ModifyResultRow.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,23 +28,35 @@
 //
 
 import Foundation
-import Testing
 
-@testable import MistDemoKit
-
-@Suite("ModifyCommand Tests")
-internal struct ModifyCommandTests {
-  @Test("Command has correct static properties")
-  internal func staticProperties() {
-    #expect(ModifyCommand.commandName == "modify")
-    #expect(ModifyCommand.abstract == "Run a batch of create/update/delete operations")
-    #expect(ModifyCommand.helpText.contains("MODIFY"))
+/// One row in the modify command's output.
+public struct ModifyResultRow: Encodable, Sendable {
+  private enum CodingKeys: String, CodingKey {
+    case operation = "op"
+    case recordType
+    case recordName
+    case recordChangeTag
   }
 
-  @Test("Command initializes with config")
-  internal func initializesWithConfig() async throws {
-    let baseConfig = try await MistDemoConfig()
-    let config = ModifyConfig(base: baseConfig, operations: [])
-    _ = ModifyCommand(config: config)
+  /// The operation type applied.
+  public let operation: String
+  /// The record type.
+  public let recordType: String
+  /// The record name.
+  public let recordName: String?
+  /// The record change tag.
+  public let recordChangeTag: String?
+
+  /// Creates a new instance.
+  public init(
+    operation: String,
+    recordType: String,
+    recordName: String?,
+    recordChangeTag: String?
+  ) {
+    self.operation = operation
+    self.recordType = recordType
+    self.recordName = recordName
+    self.recordChangeTag = recordChangeTag
   }
 }

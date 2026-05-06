@@ -30,65 +30,6 @@
 import Foundation
 import MistKit
 
-// swiftlint:disable one_declaration_per_file
-
-/// One row in the modify command's output.
-public struct ModifyResultRow: Encodable, Sendable {
-  private enum CodingKeys: String, CodingKey {
-    case operation = "op"
-    case recordType
-    case recordName
-    case recordChangeTag
-  }
-
-  /// The operation type applied.
-  public let operation: String
-  /// The record type.
-  public let recordType: String
-  /// The record name.
-  public let recordName: String?
-  /// The record change tag.
-  public let recordChangeTag: String?
-
-  /// Creates a new instance.
-  public init(
-    operation: String,
-    recordType: String,
-    recordName: String?,
-    recordChangeTag: String?
-  ) {
-    self.operation = operation
-    self.recordType = recordType
-    self.recordName = recordName
-    self.recordChangeTag = recordChangeTag
-  }
-}
-
-/// JSON envelope for modify output.
-public struct ModifyOutput: Encodable, Sendable {
-  /// The result rows.
-  public let results: [ModifyResultRow]
-  /// The number of operations attempted.
-  public let attempted: Int
-  /// The number of operations that succeeded.
-  public let succeeded: Int
-  /// Whether the batch was a partial failure.
-  public let partialFailure: Bool
-
-  /// Creates a new instance.
-  public init(
-    results: [ModifyResultRow],
-    attempted: Int,
-    succeeded: Int,
-    partialFailure: Bool
-  ) {
-    self.results = results
-    self.attempted = attempted
-    self.succeeded = succeeded
-    self.partialFailure = partialFailure
-  }
-}
-
 /// Command to perform batch create/update/delete operations.
 public struct ModifyCommand: MistDemoCommand, OutputFormatting {
   /// The configuration type.
@@ -182,5 +123,3 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
     }
   }
 }
-
-// swiftlint:enable one_declaration_per_file

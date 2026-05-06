@@ -1,6 +1,6 @@
 //
-//  ModifyCommandTests.swift
-//  MistDemoTests
+//  ModifyOutput.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,23 +28,28 @@
 //
 
 import Foundation
-import Testing
 
-@testable import MistDemoKit
+/// JSON envelope for modify output.
+public struct ModifyOutput: Encodable, Sendable {
+  /// The result rows.
+  public let results: [ModifyResultRow]
+  /// The number of operations attempted.
+  public let attempted: Int
+  /// The number of operations that succeeded.
+  public let succeeded: Int
+  /// Whether the batch was a partial failure.
+  public let partialFailure: Bool
 
-@Suite("ModifyCommand Tests")
-internal struct ModifyCommandTests {
-  @Test("Command has correct static properties")
-  internal func staticProperties() {
-    #expect(ModifyCommand.commandName == "modify")
-    #expect(ModifyCommand.abstract == "Run a batch of create/update/delete operations")
-    #expect(ModifyCommand.helpText.contains("MODIFY"))
-  }
-
-  @Test("Command initializes with config")
-  internal func initializesWithConfig() async throws {
-    let baseConfig = try await MistDemoConfig()
-    let config = ModifyConfig(base: baseConfig, operations: [])
-    _ = ModifyCommand(config: config)
+  /// Creates a new instance.
+  public init(
+    results: [ModifyResultRow],
+    attempted: Int,
+    succeeded: Int,
+    partialFailure: Bool
+  ) {
+    self.results = results
+    self.attempted = attempted
+    self.succeeded = succeeded
+    self.partialFailure = partialFailure
   }
 }
