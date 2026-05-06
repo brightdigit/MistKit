@@ -32,12 +32,12 @@
   import Foundation
 
   /// Display-friendly snapshot of a CKRecordZone for the SwiftUI list.
-  struct ZoneRow: Identifiable, Hashable {
-    let id: String
-    let zoneName: String
-    let ownerName: String
+  internal struct ZoneRow: Identifiable, Hashable {
+    internal let id: String
+    internal let zoneName: String
+    internal let ownerName: String
 
-    init(_ zone: CKRecordZone) {
+    internal init(_ zone: CKRecordZone) {
       self.id = "\(zone.zoneID.zoneName)|\(zone.zoneID.ownerName)"
       self.zoneName = zone.zoneID.zoneName
       self.ownerName = zone.zoneID.ownerName

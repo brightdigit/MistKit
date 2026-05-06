@@ -39,7 +39,7 @@ extension FieldsInputTests {
     internal func decodeTrueBoolField() throws {
       let json = """
         {
-            "isActive": true
+          "isActive": true
         }
         """
       let data = Data(json.utf8)
@@ -56,7 +56,7 @@ extension FieldsInputTests {
     internal func decodeFalseBoolField() throws {
       let json = """
         {
-            "isEnabled": false
+          "isEnabled": false
         }
         """
       let data = Data(json.utf8)

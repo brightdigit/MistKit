@@ -40,8 +40,8 @@
       internal func authRequestDecodesCorrectly() throws {
         let json = """
           {
-              "sessionToken": "mock-session-token",
-              "userRecordName": "user123"
+            "sessionToken": "mock-session-token",
+            "userRecordName": "user123"
           }
           """
 

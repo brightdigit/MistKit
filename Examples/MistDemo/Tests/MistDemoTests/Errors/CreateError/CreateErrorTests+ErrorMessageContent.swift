@@ -36,14 +36,14 @@ extension CreateErrorTests {
   @Suite("Error Message Content")
   internal struct ErrorMessageContent {
     @Test("fieldConversionError includes all components")
-    internal func fieldConversionErrorComponents() {
+    internal func fieldConversionErrorComponents() throws {
       let fieldName = "temperature"
       let fieldType = FieldType.double
       let value = "not_a_number"
       let reason = "Invalid format"
 
       let error = CreateError.fieldConversionError(fieldName, fieldType, value, reason)
-      let description = error.errorDescription!
+      let description = try #require(error.errorDescription)
 
       #expect(description.contains(fieldName))
       #expect(description.contains(fieldType.rawValue))

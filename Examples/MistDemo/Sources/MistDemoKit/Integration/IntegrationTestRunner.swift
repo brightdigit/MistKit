@@ -32,22 +32,22 @@ import MistKit
 
 /// Thin façade that builds a `PhaseContext` from CLI configuration and
 /// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
+internal struct IntegrationTestRunner {
+  internal let service: CloudKitService
+  internal let containerIdentifier: String
+  internal let database: MistKit.Database
+  internal let recordCount: Int
+  internal let assetSizeKB: Int
+  internal let skipCleanup: Bool
+  internal let verbose: Bool
 
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
+  /// Run the public-database workflow.
+  internal func runBasicWorkflow() async throws {
     try await PublicDatabaseTest(database: database).run(context: makeContext())
   }
 
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
+  /// Run the private-database workflow.
+  internal func runPrivateWorkflow() async throws {
     try await PrivateDatabaseTest().run(context: makeContext())
   }
 

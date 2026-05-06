@@ -49,7 +49,7 @@ extension TableEscaperTests {
     internal func allWhitespaceTypesMixed() {
       let input = " \n\t\r "
       let output = escaper.escape(input)
-      #expect(output == "")
+      #expect(output.isEmpty)
     }
 
     @Test("Preserves special characters except whitespace")

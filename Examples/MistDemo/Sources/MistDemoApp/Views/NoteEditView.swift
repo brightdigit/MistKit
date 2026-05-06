@@ -33,14 +33,14 @@
 
   /// Sheet form for creating or editing a Note. The same view backs both flows;
   /// the `mode` value drives the title and which service method is called on save.
-  struct NoteEditView: View {
-    enum Mode {
+  internal struct NoteEditView: View {
+    internal enum Mode {
       case create
       case edit(Note)
     }
 
-    let mode: Mode
-    let onSaved: (Note) -> Void
+    internal let mode: Mode
+    internal let onSaved: (Note) -> Void
 
     @EnvironmentObject private var service: NativeCloudKitService
     @Environment(\.dismiss) private var dismiss
@@ -58,7 +58,21 @@
     // release the previous scope.
     @State private var scopedURL: URL?
 
-    var body: some View {
+    private var navigationTitle: String {
+      switch mode {
+      case .create:
+        return "New Note"
+      case .edit:
+        return "Edit Note"
+      }
+    }
+
+    private var isValid: Bool {
+      !title.trimmingCharacters(in: .whitespaces).isEmpty
+        && Int64(indexText) != nil
+    }
+
+    internal var body: some View {
       // swiftlint:disable:next closure_body_length
       NavigationStack {
         Form {
@@ -116,7 +130,8 @@
           case .success(let urls):
             if let url = urls.first {
               guard url.startAccessingSecurityScopedResource() else {
-                saveError = "Couldn't access \(url.lastPathComponent) — file permissions denied."
+                saveError =
+                  "Couldn't access \(url.lastPathComponent) — file permissions denied."
                 return
               }
               // Release the previously-scoped URL before adopting the new one.
@@ -139,20 +154,10 @@
       scopedURL = nil
     }
 
-    private var navigationTitle: String {
-      switch mode {
-      case .create: return "New Note"
-      case .edit: return "Edit Note"
-      }
-    }
-
-    private var isValid: Bool {
-      !title.trimmingCharacters(in: .whitespaces).isEmpty
-        && Int64(indexText) != nil
-    }
-
     private func populateInitialState() {
-      guard case .edit(let note) = mode else { return }
+      guard case .edit(let note) = mode else {
+        return
+      }
       title = note.title ?? ""
       indexText = note.index.map(String.init) ?? "0"
       imageURL = note.imageAssetURL

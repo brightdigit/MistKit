@@ -37,7 +37,7 @@ extension CurrentUserConfigTests {
   @Suite("Edge Cases")
   internal struct EdgeCases {
     @Test("CurrentUserConfig handles single character field name")
-    func handleSingleCharacterFieldName() async throws {
+    internal func handleSingleCharacterFieldName() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,
@@ -49,7 +49,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles fields with special characters")
-    func handleFieldsWithSpecialCharacters() async throws {
+    internal func handleFieldsWithSpecialCharacters() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,
@@ -63,7 +63,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles very long field name")
-    func handleVeryLongFieldName() async throws {
+    internal func handleVeryLongFieldName() async throws {
       let baseConfig = try await MistDemoConfig()
       let longFieldName = String(repeating: "a", count: 100)
       let config = CurrentUserConfig(
@@ -76,7 +76,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles many fields")
-    func handleManyFields() async throws {
+    internal func handleManyFields() async throws {
       let baseConfig = try await MistDemoConfig()
       let fields = (0..<20).map { "field\($0)" }
       let config = CurrentUserConfig(

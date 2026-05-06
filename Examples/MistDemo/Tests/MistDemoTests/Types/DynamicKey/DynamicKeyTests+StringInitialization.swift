@@ -47,7 +47,7 @@ extension DynamicKeyTests {
     internal func initWithEmptyString() {
       let key = DynamicKey(stringValue: "")
       #expect(key != nil)
-      #expect(key?.stringValue == "")
+      #expect(key?.stringValue.isEmpty == true)
       #expect(key?.intValue == nil)
     }
 

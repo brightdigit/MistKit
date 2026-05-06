@@ -39,6 +39,7 @@ public enum CreateError: Error, LocalizedError {
   case fieldConversionError(String, FieldType, String, String)
   case operationFailed(String)
 
+  /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .noFieldsProvided:

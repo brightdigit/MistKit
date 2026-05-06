@@ -29,10 +29,13 @@
 
 public import MistKit
 
-/// Protocol for commands that interact with CloudKit
+/// Protocol for commands that interact with CloudKit.
 public protocol CloudKitCommand {
+  /// The CloudKit container identifier.
   var containerIdentifier: String { get }
+  /// The CloudKit API token.
   var apiToken: String { get }
+  /// The CloudKit environment (development or production).
   var environment: String { get }
 }
 

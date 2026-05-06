@@ -37,7 +37,7 @@ extension QueryConfigTests {
   @Suite("Edge Cases")
   internal struct EdgeCases {
     @Test("QueryConfig handles special characters in filters")
-    func handleSpecialCharactersInFilters() async throws {
+    internal func handleSpecialCharactersInFilters() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -49,7 +49,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig handles zero limit")
-    func handleZeroLimit() async throws {
+    internal func handleZeroLimit() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -60,7 +60,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig handles fields with special characters")
-    func handleFieldsWithSpecialCharacters() async throws {
+    internal func handleFieldsWithSpecialCharacters() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,

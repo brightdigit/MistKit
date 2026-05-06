@@ -1,4 +1,3 @@
-// swiftlint:disable file_name
 //
 //  UserInfoTestExtension.swift
 //  MistDemoTests
@@ -45,7 +44,7 @@ extension UserInfo {
   ///   - lastName: The user's last name
   ///   - emailAddress: The user's email address
   /// - Returns: A UserInfo instance for testing
-  static func test(
+  internal static func test(
     userRecordName: String,
     firstName: String? = nil,
     lastName: String? = nil,

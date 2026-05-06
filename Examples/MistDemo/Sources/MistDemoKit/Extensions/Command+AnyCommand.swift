@@ -30,8 +30,9 @@
 public import ConfigKeyKit
 import Foundation
 
-/// Default implementation of createInstance for all MistDemo commands
+/// Default implementation of createInstance for all MistDemo commands.
 extension Command where Config.ConfigReader == MistDemoConfiguration {
+  /// Create a new instance from the default configuration.
   public static func createInstance() async throws -> Self {
     let configuration = try await MistDemoConfiguration()
     let config = try await Config(configuration: configuration, base: nil)

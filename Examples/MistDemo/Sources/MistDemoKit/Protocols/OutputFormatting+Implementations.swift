@@ -34,7 +34,7 @@ import MistKit
 
 extension OutputFormatting {
   /// Output results in JSON format
-  func outputJSON<T: Encodable>(_ results: [T]) async throws {
+  internal func outputJSON<T: Encodable>(_ results: [T]) async throws {
     let jsonData: Data
     if results.count == 1 {
       jsonData = try JSONEncoder().encode(results[0])
@@ -50,7 +50,7 @@ extension OutputFormatting {
   }
 
   /// Output results in table format
-  func outputTable<T: Encodable>(_ results: [T]) async throws {
+  internal func outputTable<T: Encodable>(_ results: [T]) async throws {
     if results.isEmpty {
       print(MistDemoConstants.Messages.noRecordsFound)
       return
@@ -68,7 +68,7 @@ extension OutputFormatting {
   }
 
   /// Output results in CSV format
-  func outputCSV<T: Encodable>(_ results: [T]) async throws {
+  internal func outputCSV<T: Encodable>(_ results: [T]) async throws {
     // CSV output is type-specific, so we need to handle known types
     if let records = results as? [RecordInfo] {
       try await outputRecordCSV(records)
@@ -81,7 +81,7 @@ extension OutputFormatting {
   }
 
   /// Output results in YAML format
-  func outputYAML<T: Encodable>(_ results: [T]) async throws {
+  internal func outputYAML<T: Encodable>(_ results: [T]) async throws {
     // YAML output is type-specific, so we need to handle known types
     if let records = results as? [RecordInfo] {
       try await outputRecordYAML(records)

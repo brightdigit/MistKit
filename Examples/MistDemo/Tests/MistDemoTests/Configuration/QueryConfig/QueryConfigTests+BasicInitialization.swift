@@ -37,7 +37,7 @@ extension QueryConfigTests {
   @Suite("Basic Initialization")
   internal struct BasicInitialization {
     @Test("QueryConfig initializes with default values")
-    func initializeWithDefaults() async throws {
+    internal func initializeWithDefaults() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(base: baseConfig)
 
@@ -53,7 +53,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with custom zone")
-    func initializeWithCustomZone() async throws {
+    internal func initializeWithCustomZone() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -65,7 +65,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with custom record type")
-    func initializeWithCustomRecordType() async throws {
+    internal func initializeWithCustomRecordType() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,

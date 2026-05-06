@@ -30,14 +30,14 @@
 import Foundation
 
 /// Formatting errors
-enum FormattingError: LocalizedError, Sendable {
+internal enum FormattingError: LocalizedError, Sendable {
   case encodingFailed
   case invalidStructure(String)
   case unsupportedFormat(OutputFormat)
 
   // MARK: Internal
 
-  var errorDescription: String? {
+  internal var errorDescription: String? {
     switch self {
     case .encodingFailed:
       "Failed to encode data to UTF-8 string"

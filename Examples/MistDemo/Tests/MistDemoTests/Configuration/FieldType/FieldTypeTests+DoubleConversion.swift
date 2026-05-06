@@ -36,56 +36,56 @@ extension FieldTypeTests {
   @Suite("Double Conversion")
   internal struct DoubleConversion {
     @Test("Convert valid positive double")
-    func convertValidPositiveDouble() throws {
+    internal func convertValidPositiveDouble() throws {
       let value = try FieldType.double.convertValue("19.99")
 
       #expect(value as? Double == 19.99)
     }
 
     @Test("Convert valid negative double")
-    func convertValidNegativeDouble() throws {
+    internal func convertValidNegativeDouble() throws {
       let value = try FieldType.double.convertValue("-3.14")
 
       #expect(value as? Double == -3.14)
     }
 
     @Test("Convert double zero")
-    func convertDoubleZero() throws {
+    internal func convertDoubleZero() throws {
       let value = try FieldType.double.convertValue("0.0")
 
       #expect(value as? Double == 0.0)
     }
 
     @Test("Convert double integer value")
-    func convertDoubleIntegerValue() throws {
+    internal func convertDoubleIntegerValue() throws {
       let value = try FieldType.double.convertValue("42")
 
       #expect(value as? Double == 42.0)
     }
 
     @Test("Convert double scientific notation")
-    func convertDoubleScientificNotation() throws {
+    internal func convertDoubleScientificNotation() throws {
       let value = try FieldType.double.convertValue("1.5e10")
 
       #expect(value as? Double == 1.5e10)
     }
 
     @Test("Convert double negative scientific notation")
-    func convertDoubleNegativeScientificNotation() throws {
+    internal func convertDoubleNegativeScientificNotation() throws {
       let value = try FieldType.double.convertValue("3.14e-5")
 
       #expect(value as? Double == 3.14e-5)
     }
 
     @Test("Convert invalid double (non-numeric) throws error")
-    func convertInvalidDoubleNonNumeric() {
+    internal func convertInvalidDoubleNonNumeric() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.double.convertValue("not a number")
       }
     }
 
     @Test("Convert invalid double (empty) throws error")
-    func convertInvalidDoubleEmpty() {
+    internal func convertInvalidDoubleEmpty() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.double.convertValue("")
       }

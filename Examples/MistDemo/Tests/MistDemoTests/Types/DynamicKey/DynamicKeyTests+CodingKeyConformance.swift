@@ -39,8 +39,8 @@ extension DynamicKeyTests {
     internal func useInDecodingContainer() throws {
       let json = """
         {
-            "dynamicField": "value",
-            "anotherField": 123
+          "dynamicField": "value",
+          "anotherField": 123
         }
         """
       let data = Data(json.utf8)
@@ -48,7 +48,7 @@ extension DynamicKeyTests {
       struct TestWrapper: Decodable {
         let fields: [String: String]
 
-        init(from decoder: Decoder) throws {
+        init(from decoder: any Decoder) throws {
           let container = try decoder.container(keyedBy: DynamicKey.self)
           var fields: [String: String] = [:]
 
@@ -74,11 +74,11 @@ extension DynamicKeyTests {
       struct TestWrapper: Encodable {
         let fields: [String: String]
 
-        func encode(to encoder: Encoder) throws {
+        func encode(to encoder: any Encoder) throws {
           var container = encoder.container(keyedBy: DynamicKey.self)
 
           for (key, value) in fields {
-            let dynamicKey = DynamicKey(stringValue: key)!
+            guard let dynamicKey = DynamicKey(stringValue: key) else { continue }
             try container.encode(value, forKey: dynamicKey)
           }
         }

@@ -37,7 +37,7 @@ extension CreateConfigTests {
   @Suite("Edge Cases")
   internal struct EdgeCases {
     @Test("CreateConfig handles special characters in zone name")
-    func handleSpecialCharactersInZone() async throws {
+    internal func handleSpecialCharactersInZone() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CreateConfig(
         base: baseConfig,
@@ -48,7 +48,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig handles special characters in record type")
-    func handleSpecialCharactersInRecordType() async throws {
+    internal func handleSpecialCharactersInRecordType() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CreateConfig(
         base: baseConfig,
@@ -59,7 +59,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig handles special characters in record name")
-    func handleSpecialCharactersInRecordName() async throws {
+    internal func handleSpecialCharactersInRecordName() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CreateConfig(
         base: baseConfig,
@@ -70,7 +70,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig handles field with empty string value")
-    func handleFieldWithEmptyValue() async throws {
+    internal func handleFieldWithEmptyValue() async throws {
       let baseConfig = try await MistDemoConfig()
       let field = Field(name: "emptyField", type: .string, value: "")
       let config = CreateConfig(
@@ -79,11 +79,11 @@ extension CreateConfigTests {
       )
 
       #expect(config.fields.count == 1)
-      #expect(config.fields[0].value == "")
+      #expect(config.fields[0].value.isEmpty)
     }
 
     @Test("CreateConfig handles field with whitespace value")
-    func handleFieldWithWhitespaceValue() async throws {
+    internal func handleFieldWithWhitespaceValue() async throws {
       let baseConfig = try await MistDemoConfig()
       let field = Field(name: "whitespaceField", type: .string, value: "   ")
       let config = CreateConfig(
@@ -96,7 +96,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig handles very long field value")
-    func handleVeryLongFieldValue() async throws {
+    internal func handleVeryLongFieldValue() async throws {
       let baseConfig = try await MistDemoConfig()
       let longValue = String(repeating: "a", count: 1_000)
       let field = Field(name: "longField", type: .string, value: longValue)
@@ -110,7 +110,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig handles many fields")
-    func handleManyFields() async throws {
+    internal func handleManyFields() async throws {
       let baseConfig = try await MistDemoConfig()
       let fields = (0..<20).map { index in
         Field(name: "field\(index)", type: .string, value: "value\(index)")

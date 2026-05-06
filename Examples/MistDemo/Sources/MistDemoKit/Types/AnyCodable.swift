@@ -29,11 +29,11 @@
 
 import Foundation
 
-/// Helper for decoding arbitrary JSON values
-struct AnyCodable: Codable {
-  let value: Any
+/// Helper for decoding arbitrary JSON values.
+internal struct AnyCodable: Codable {
+  internal let value: Any
 
-  init(from decoder: Decoder) throws {
+  internal init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
 
     if let stringValue = try? container.decode(String.self) {
@@ -56,7 +56,7 @@ struct AnyCodable: Codable {
     }
   }
 
-  func encode(to encoder: Encoder) throws {
+  internal func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
 
     switch value {

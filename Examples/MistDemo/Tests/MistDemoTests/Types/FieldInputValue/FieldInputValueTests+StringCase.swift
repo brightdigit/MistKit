@@ -50,7 +50,7 @@ extension FieldInputValueTests {
       let (type, value) = try input.toFieldComponents()
 
       #expect(type == .string)
-      #expect(value == "")
+      #expect(value.isEmpty)
     }
 
     @Test("String case with special characters")

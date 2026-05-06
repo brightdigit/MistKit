@@ -30,10 +30,11 @@
 #if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import SwiftUI
 
-  struct SidebarView: View {
-    @Binding var selection: SidebarItem?
+  /// Sidebar list of navigation items.
+  internal struct SidebarView: View {
+    @Binding internal var selection: SidebarItem?
 
-    var body: some View {
+    internal var body: some View {
       List(SidebarItem.allCases, id: \.self, selection: $selection) { item in
         Label(item.label, systemImage: item.systemImage)
           .tag(item)

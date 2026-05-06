@@ -35,13 +35,13 @@ import MistKit
 
 extension MistDemoConfig {
   /// Create a test configuration with default values
-  init() async throws {
+  internal init() async throws {
     let configuration = try await MistDemoConfiguration()
     self = try await MistDemoConfig(configuration: configuration)
   }
 
   /// Create a test configuration with custom values
-  init(
+  internal init(
     containerIdentifier: String = "iCloud.com.test.App",
     apiToken: String = "test-api-token",
     environment: MistKit.Environment = .development,

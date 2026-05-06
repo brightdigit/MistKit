@@ -40,31 +40,35 @@
   ///         "createdAt" TIMESTAMP QUERYABLE SORTABLE,
   ///         "modified"  INT64     QUERYABLE
   ///     );
-  struct Note: Identifiable, Hashable {
-    static let recordType = "Note"
-
-    enum Fields {
-      static let title = "title"
-      static let index = "index"
-      static let image = "image"
-      static let createdAt = "createdAt"
-      static let modified = "modified"
+  internal struct Note: Identifiable, Hashable {
+    /// Known field name constants for `Note` records.
+    internal enum Fields {
+      internal static let title = "title"
+      internal static let index = "index"
+      internal static let image = "image"
+      internal static let createdAt = "createdAt"
+      internal static let modified = "modified"
     }
 
-    let id: String
-    let title: String?
-    let index: Int64?
-    let imageAssetURL: URL?
-    let createdAt: Date?
-    let modified: Int64?
+    /// CloudKit record type identifier.
+    internal static let recordType = "Note"
+
+    internal let id: String
+    internal let title: String?
+    internal let index: Int64?
+    internal let imageAssetURL: URL?
+    internal let createdAt: Date?
+    internal let modified: Int64?
 
     /// CloudKit-managed metadata
-    let modificationDate: Date?
-    let creationDate: Date?
-    let recordChangeTag: String?
+    internal let modificationDate: Date?
+    internal let creationDate: Date?
+    internal let recordChangeTag: String?
 
-    init?(_ record: CKRecord) {
-      guard record.recordType == Self.recordType else { return nil }
+    internal init?(_ record: CKRecord) {
+      guard record.recordType == Self.recordType else {
+        return nil
+      }
       self.id = record.recordID.recordName
       self.title = record[Fields.title] as? String
       self.index = (record[Fields.index] as? NSNumber)?.int64Value
@@ -79,7 +83,7 @@
     // Identity-based equality: two Notes with the same recordID are equal
     // regardless of field state. Lets SwiftUI selection bindings track a
     // record across edits without losing focus when fields change.
-    static func == (lhs: Note, rhs: Note) -> Bool { lhs.id == rhs.id }
-    func hash(into hasher: inout Hasher) { hasher.combine(id) }
+    internal static func == (lhs: Note, rhs: Note) -> Bool { lhs.id == rhs.id }
+    internal func hash(into hasher: inout Hasher) { hasher.combine(id) }
   }
 #endif

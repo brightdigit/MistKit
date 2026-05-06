@@ -37,7 +37,7 @@ extension UpdateConfigTests {
   @Suite("Basic Initialization")
   internal struct BasicInitialization {
     @Test("UpdateConfig initializes with defaults")
-    func initializeWithDefaults() async throws {
+    internal func initializeWithDefaults() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, recordName: "rec1")
 
@@ -51,7 +51,7 @@ extension UpdateConfigTests {
     }
 
     @Test("UpdateConfig initializes with custom zone")
-    func initializeWithCustomZone() async throws {
+    internal func initializeWithCustomZone() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, zone: "customZone", recordName: "rec1")
 
@@ -59,7 +59,7 @@ extension UpdateConfigTests {
     }
 
     @Test("UpdateConfig initializes with custom record type")
-    func initializeWithCustomRecordType() async throws {
+    internal func initializeWithCustomRecordType() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, recordType: "Article", recordName: "rec1")
 
@@ -67,7 +67,7 @@ extension UpdateConfigTests {
     }
 
     @Test("UpdateConfig initializes with record change tag")
-    func initializeWithRecordChangeTag() async throws {
+    internal func initializeWithRecordChangeTag() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(
         base: baseConfig,
@@ -79,7 +79,7 @@ extension UpdateConfigTests {
     }
 
     @Test("UpdateConfig initializes without record change tag")
-    func initializeWithoutRecordChangeTag() async throws {
+    internal func initializeWithoutRecordChangeTag() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, recordName: "rec1", recordChangeTag: nil)
 

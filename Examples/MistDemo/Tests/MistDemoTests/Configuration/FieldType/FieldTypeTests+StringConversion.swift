@@ -36,21 +36,21 @@ extension FieldTypeTests {
   @Suite("String Conversion")
   internal struct StringConversion {
     @Test("Convert string value (always succeeds)")
-    func convertStringValue() throws {
+    internal func convertStringValue() throws {
       let value = try FieldType.string.convertValue("Hello World")
 
       #expect(value as? String == "Hello World")
     }
 
     @Test("Convert empty string value")
-    func convertEmptyStringValue() throws {
+    internal func convertEmptyStringValue() throws {
       let value = try FieldType.string.convertValue("")
 
-      #expect(value as? String == "")
+      #expect((value as? String)?.isEmpty == true)
     }
 
     @Test("Convert string with special characters")
-    func convertStringWithSpecialCharacters() throws {
+    internal func convertStringWithSpecialCharacters() throws {
       let value = try FieldType.string.convertValue("!@#$%^&*()")
 
       #expect(value as? String == "!@#$%^&*()")

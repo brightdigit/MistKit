@@ -49,7 +49,8 @@ extension CommandIntegrationTests {
       let userConfig = CurrentUserConfig(base: baseConfig)
       let queryConfig = QueryConfig(base: baseConfig)
       let createConfig = CreateConfig(
-        base: baseConfig, zone: "_defaultZone", recordName: nil, fields: [])
+        base: baseConfig, zone: "_defaultZone", recordName: nil, fields: []
+      )
 
       // Verify all use same base container
       #expect(userConfig.base.containerIdentifier == baseConfig.containerIdentifier)

@@ -36,7 +36,7 @@ extension FieldTests {
   @Suite("parseMultiple")
   internal struct ParseMultiple {
     @Test("Parse multiple valid fields")
-    func parseMultipleValidFields() throws {
+    internal func parseMultipleValidFields() throws {
       let inputs = [
         "title:string:Hello",
         "count:int64:42",
@@ -52,14 +52,14 @@ extension FieldTests {
     }
 
     @Test("Parse multiple fields with empty array")
-    func parseMultipleFieldsWithEmptyArray() throws {
+    internal func parseMultipleFieldsWithEmptyArray() throws {
       let fields = try Field.parseMultiple([])
 
       #expect(fields.isEmpty)
     }
 
     @Test("Parse multiple fields throws on first invalid")
-    func parseMultipleFieldsThrowsOnInvalid() {
+    internal func parseMultipleFieldsThrowsOnInvalid() {
       let inputs = [
         "title:string:Hello",
         "invalid",

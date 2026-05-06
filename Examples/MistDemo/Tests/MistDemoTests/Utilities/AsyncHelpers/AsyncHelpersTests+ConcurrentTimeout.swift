@@ -72,8 +72,8 @@ extension AsyncHelpersTests {
 
         group.addTask {
           do {
-            _ = try await withTimeout(seconds: 0.05) {
-              try await Task.sleep(nanoseconds: 200_000_000)
+            _ = try await withTimeout(seconds: 0.2) {
+              try await Task.sleep(nanoseconds: 2_000_000_000)
               return "slow"
             }
             Issue.record("Slow operation should timeout")

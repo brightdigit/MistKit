@@ -39,7 +39,7 @@ extension FieldsInputTests {
     internal func decodeStringField() throws {
       let json = """
         {
-            "title": "Hello World"
+          "title": "Hello World"
         }
         """
       let data = Data(json.utf8)
@@ -56,7 +56,7 @@ extension FieldsInputTests {
     internal func decodeEmptyStringField() throws {
       let json = """
         {
-            "description": ""
+          "description": ""
         }
         """
       let data = Data(json.utf8)
@@ -66,7 +66,7 @@ extension FieldsInputTests {
       #expect(fields.count == 1)
       #expect(fields[0].name == "description")
       #expect(fields[0].type == .string)
-      #expect(fields[0].value == "")
+      #expect(fields[0].value.isEmpty)
     }
   }
 }

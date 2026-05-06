@@ -56,7 +56,7 @@ extension AnyCodable {
     } else if let boolValue = value as? Bool {
       jsonData = try JSONEncoder().encode(boolValue)
     } else if value is NSNull {
-      jsonData = "null".data(using: .utf8)!
+      jsonData = Data("null".utf8)
     } else {
       // For other types, fail gracefully
       throw DecodingError.dataCorrupted(

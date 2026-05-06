@@ -31,8 +31,10 @@ import Foundation
 
 /// CSV escaper conforming to RFC 4180
 public struct CSVEscaper: OutputEscaper {
+  /// Creates a new instance.
   public init() {}
 
+  /// Escapes the string for CSV output.
   public func escape(_ string: String) -> String {
     // Check if escaping is needed
     // Use unicodeScalars to avoid Swift treating \r\n as a single grapheme cluster

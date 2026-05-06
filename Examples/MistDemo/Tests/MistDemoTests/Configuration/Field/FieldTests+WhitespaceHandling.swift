@@ -36,7 +36,7 @@ extension FieldTests {
   @Suite("Whitespace Handling")
   internal struct WhitespaceHandling {
     @Test("Parse field with leading/trailing whitespace in name")
-    func parseFieldWithWhitespaceInName() throws {
+    internal func parseFieldWithWhitespaceInName() throws {
       let field = try Field(parsing: "  title  :string:value")
 
       #expect(field.name == "title")
@@ -45,7 +45,7 @@ extension FieldTests {
     }
 
     @Test("Parse field with leading/trailing whitespace in type")
-    func parseFieldWithWhitespaceInType() throws {
+    internal func parseFieldWithWhitespaceInType() throws {
       let field = try Field(parsing: "title:  string  :value")
 
       #expect(field.name == "title")
@@ -54,7 +54,7 @@ extension FieldTests {
     }
 
     @Test("Parse field preserving whitespace in value")
-    func parseFieldPreservingWhitespaceInValue() throws {
+    internal func parseFieldPreservingWhitespaceInValue() throws {
       let field = try Field(parsing: "title:string:  Hello World  ")
 
       #expect(field.name == "title")
@@ -63,7 +63,7 @@ extension FieldTests {
     }
 
     @Test("Parse field with only whitespace in value")
-    func parseFieldWithOnlyWhitespaceInValue() throws {
+    internal func parseFieldWithOnlyWhitespaceInValue() throws {
       let field = try Field(parsing: "title:string:   ")
 
       #expect(field.name == "title")

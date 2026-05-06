@@ -39,10 +39,10 @@ extension FieldsInputTests {
     internal func decodeMultipleFields() throws {
       let json = """
         {
-            "title": "Test Item",
-            "count": 5,
-            "price": 9.99,
-            "active": true
+          "title": "Test Item",
+          "count": 5,
+          "price": 9.99,
+          "active": true
         }
         """
       let data = Data(json.utf8)

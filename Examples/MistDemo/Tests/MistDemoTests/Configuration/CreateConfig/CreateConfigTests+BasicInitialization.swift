@@ -37,7 +37,7 @@ extension CreateConfigTests {
   @Suite("Basic Initialization")
   internal struct BasicInitialization {
     @Test("CreateConfig initializes with default values")
-    func initializeWithDefaults() async throws {
+    internal func initializeWithDefaults() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CreateConfig(base: baseConfig)
 
@@ -49,7 +49,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with custom zone")
-    func initializeWithCustomZone() async throws {
+    internal func initializeWithCustomZone() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CreateConfig(
         base: baseConfig,
@@ -61,7 +61,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with custom record type")
-    func initializeWithCustomRecordType() async throws {
+    internal func initializeWithCustomRecordType() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CreateConfig(
         base: baseConfig,
@@ -73,7 +73,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with custom record name")
-    func initializeWithCustomRecordName() async throws {
+    internal func initializeWithCustomRecordName() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CreateConfig(
         base: baseConfig,
@@ -84,7 +84,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with nil record name")
-    func initializeWithNilRecordName() async throws {
+    internal func initializeWithNilRecordName() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CreateConfig(
         base: baseConfig,

@@ -36,42 +36,42 @@ extension FieldTests {
   @Suite("Error Cases")
   internal struct ErrorCases {
     @Test("Parse field with empty name throws error")
-    func parseFieldWithEmptyName() {
+    internal func parseFieldWithEmptyName() {
       #expect(throws: FieldParsingError.self) {
         try Field(parsing: ":string:value")
       }
     }
 
     @Test("Parse field with whitespace-only name throws error")
-    func parseFieldWithWhitespaceOnlyName() {
+    internal func parseFieldWithWhitespaceOnlyName() {
       #expect(throws: FieldParsingError.self) {
         try Field(parsing: "   :string:value")
       }
     }
 
     @Test("Parse field with unknown type throws error")
-    func parseFieldWithUnknownType() {
+    internal func parseFieldWithUnknownType() {
       #expect(throws: FieldParsingError.self) {
         try Field(parsing: "title:unknown:value")
       }
     }
 
     @Test("Parse field with invalid format (too few parts)")
-    func parseFieldWithTooFewParts() {
+    internal func parseFieldWithTooFewParts() {
       #expect(throws: FieldParsingError.self) {
         try Field(parsing: "title:string")
       }
     }
 
     @Test("Parse field with invalid format (one part)")
-    func parseFieldWithOnePart() {
+    internal func parseFieldWithOnePart() {
       #expect(throws: FieldParsingError.self) {
         try Field(parsing: "title")
       }
     }
 
     @Test("Parse field with invalid format (empty string)")
-    func parseFieldWithEmptyString() {
+    internal func parseFieldWithEmptyString() {
       #expect(throws: FieldParsingError.self) {
         try Field(parsing: "")
       }

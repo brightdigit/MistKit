@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 //
 //  ModifyConfigTests.swift
 //  MistDemoTests
@@ -33,10 +34,11 @@ import Testing
 
 @testable import MistDemoKit
 
+// swiftlint:disable file_types_order one_declaration_per_file
 @Suite("ModifyConfig Tests")
-struct ModifyConfigTests {
+internal struct ModifyConfigTests {
   @Test("ModifyConfig initializes with empty operations")
-  func emptyOperations() async throws {
+  internal func emptyOperations() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = ModifyConfig(base: baseConfig, operations: [])
 
@@ -46,7 +48,7 @@ struct ModifyConfigTests {
   }
 
   @Test("ModifyConfig defaults atomic to false")
-  func atomicDefaultsFalse() async throws {
+  internal func atomicDefaultsFalse() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = ModifyConfig(base: baseConfig, operations: [])
 
@@ -54,7 +56,7 @@ struct ModifyConfigTests {
   }
 
   @Test("ModifyConfig accepts atomic=true")
-  func atomicCanBeTrue() async throws {
+  internal func atomicCanBeTrue() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = ModifyConfig(base: baseConfig, operations: [], atomic: true)
 
@@ -63,7 +65,7 @@ struct ModifyConfigTests {
 
   @Test(
     "ModifyConfig output formats round-trip", arguments: [OutputFormat.json, .table, .csv, .yaml])
-  func outputFormats(format: OutputFormat) async throws {
+  internal func outputFormats(format: OutputFormat) async throws {
     let baseConfig = try await MistDemoConfig()
     let config = ModifyConfig(base: baseConfig, operations: [], output: format)
 
@@ -72,9 +74,9 @@ struct ModifyConfigTests {
 }
 
 @Suite("ModifyConfig JSON Parsing Tests")
-struct ModifyConfigParsingTests {
+internal struct ModifyConfigParsingTests {
   @Test("Parses a single create operation")
-  func parseCreate() throws {
+  internal func parseCreate() throws {
     let json = """
       [
         {"op":"create","recordType":"Note","fields":{"title":"Hello","priority":5}}
@@ -84,14 +86,14 @@ struct ModifyConfigParsingTests {
     let ops = try ModifyConfig.parseOperations(from: data)
 
     #expect(ops.count == 1)
-    #expect(ops[0].op == .create)
+    #expect(ops[0].operation == .create)
     #expect(ops[0].recordType == "Note")
     #expect(ops[0].recordName == nil)
     #expect(ops[0].fields != nil)
   }
 
   @Test("Parses an update operation with change tag")
-  func parseUpdate() throws {
+  internal func parseUpdate() throws {
     let json = """
       [
         {
@@ -107,13 +109,13 @@ struct ModifyConfigParsingTests {
     let ops = try ModifyConfig.parseOperations(from: data)
 
     #expect(ops.count == 1)
-    #expect(ops[0].op == .update)
+    #expect(ops[0].operation == .update)
     #expect(ops[0].recordName == "note-1")
     #expect(ops[0].recordChangeTag == "abc")
   }
 
   @Test("Parses a delete operation")
-  func parseDelete() throws {
+  internal func parseDelete() throws {
     let json = """
       [
         {"op":"delete","recordType":"Note","recordName":"note-1"}
@@ -123,12 +125,12 @@ struct ModifyConfigParsingTests {
     let ops = try ModifyConfig.parseOperations(from: data)
 
     #expect(ops.count == 1)
-    #expect(ops[0].op == .delete)
+    #expect(ops[0].operation == .delete)
     #expect(ops[0].recordName == "note-1")
   }
 
   @Test("Parses a mixed batch")
-  func parseMixedBatch() throws {
+  internal func parseMixedBatch() throws {
     let json = """
       [
         {"op":"create","recordType":"Note","fields":{"title":"A"}},
@@ -140,13 +142,13 @@ struct ModifyConfigParsingTests {
     let ops = try ModifyConfig.parseOperations(from: data)
 
     #expect(ops.count == 3)
-    #expect(ops[0].op == .create)
-    #expect(ops[1].op == .update)
-    #expect(ops[2].op == .delete)
+    #expect(ops[0].operation == .create)
+    #expect(ops[1].operation == .update)
+    #expect(ops[2].operation == .delete)
   }
 
   @Test("Rejects an unknown op")
-  func rejectsUnknownOp() throws {
+  internal func rejectsUnknownOp() throws {
     let json = """
       [
         {"op":"frobnicate","recordType":"Note"}
@@ -160,7 +162,7 @@ struct ModifyConfigParsingTests {
   }
 
   @Test("Rejects malformed JSON")
-  func rejectsMalformedJSON() throws {
+  internal func rejectsMalformedJSON() throws {
     let json = "not even json"
     let data = Data(json.utf8)
 
@@ -171,10 +173,10 @@ struct ModifyConfigParsingTests {
 }
 
 @Suite("ModifyOperationInput Validation Tests")
-struct ModifyOperationInputTests {
+internal struct ModifyOperationInputTests {
   @Test("update requires a recordName")
-  func updateRequiresRecordName() throws {
-    let input = ModifyOperationInput(op: .update, recordType: "Note", recordName: nil)
+  internal func updateRequiresRecordName() throws {
+    let input = ModifyOperationInput(operation: .update, recordType: "Note", recordName: nil)
 
     #expect(throws: ModifyError.self) {
       _ = try input.toRecordOperation(index: 0)
@@ -182,8 +184,8 @@ struct ModifyOperationInputTests {
   }
 
   @Test("delete requires a recordName")
-  func deleteRequiresRecordName() throws {
-    let input = ModifyOperationInput(op: .delete, recordType: "Note", recordName: nil)
+  internal func deleteRequiresRecordName() throws {
+    let input = ModifyOperationInput(operation: .delete, recordType: "Note", recordName: nil)
 
     #expect(throws: ModifyError.self) {
       _ = try input.toRecordOperation(index: 0)
@@ -191,25 +193,25 @@ struct ModifyOperationInputTests {
   }
 
   @Test("create succeeds without a recordName")
-  func createWithoutRecordName() throws {
-    let input = ModifyOperationInput(op: .create, recordType: "Note", recordName: nil)
-    let op = try input.toRecordOperation(index: 0)
+  internal func createWithoutRecordName() throws {
+    let input = ModifyOperationInput(operation: .create, recordType: "Note", recordName: nil)
+    let operation = try input.toRecordOperation(index: 0)
 
-    #expect(op.recordName == nil)
-    #expect(op.recordType == "Note")
+    #expect(operation.recordName == nil)
+    #expect(operation.recordType == "Note")
   }
 }
 
 @Suite("ModifyError Tests")
-struct ModifyErrorTests {
+internal struct ModifyErrorTests {
   @Test("operationsRequired has a description")
-  func operationsRequiredDescription() {
+  internal func operationsRequiredDescription() {
     #expect(ModifyError.operationsRequired.errorDescription != nil)
   }
 
   @Test("missingRecordName description includes index and op")
-  func missingRecordNameDescription() {
-    let error = ModifyError.missingRecordName(opIndex: 2, op: "update")
+  internal func missingRecordNameDescription() {
+    let error = ModifyError.missingRecordName(opIndex: 2, operation: "update")
     let description = error.errorDescription ?? ""
 
     #expect(description.contains("2"))
@@ -217,8 +219,10 @@ struct ModifyErrorTests {
   }
 
   @Test("invalidOperationType description includes the op")
-  func invalidOperationTypeDescription() {
+  internal func invalidOperationTypeDescription() {
     let error = ModifyError.invalidOperationType("frobnicate")
     #expect(error.errorDescription?.contains("frobnicate") == true)
   }
 }
+
+// swiftlint:enable file_types_order one_declaration_per_file

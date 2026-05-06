@@ -36,16 +36,16 @@ extension FieldTests {
   @Suite("Edge Cases")
   internal struct EdgeCases {
     @Test("Parse field with empty value")
-    func parseFieldWithEmptyValue() throws {
+    internal func parseFieldWithEmptyValue() throws {
       let field = try Field(parsing: "title:string:")
 
       #expect(field.name == "title")
       #expect(field.type == .string)
-      #expect(field.value == "")
+      #expect(field.value.isEmpty)
     }
 
     @Test("Parse field with Unicode in value")
-    func parseFieldWithUnicode() throws {
+    internal func parseFieldWithUnicode() throws {
       let field = try Field(parsing: "message:string:こんにちは世界")
 
       #expect(field.name == "message")
@@ -54,7 +54,7 @@ extension FieldTests {
     }
 
     @Test("Parse field with emoji in value")
-    func parseFieldWithEmoji() throws {
+    internal func parseFieldWithEmoji() throws {
       let field = try Field(parsing: "reaction:string:👍🎉🚀")
 
       #expect(field.name == "reaction")
@@ -63,7 +63,7 @@ extension FieldTests {
     }
 
     @Test("Parse field with special characters in value")
-    func parseFieldWithSpecialCharacters() throws {
+    internal func parseFieldWithSpecialCharacters() throws {
       let field = try Field(parsing: "data:string:!@#$%^&*()_+-=[]{}|;'\"<>,.?/~`")
 
       #expect(field.name == "data")
@@ -72,7 +72,7 @@ extension FieldTests {
     }
 
     @Test("Parse field with newline in value")
-    func parseFieldWithNewlineInValue() throws {
+    internal func parseFieldWithNewlineInValue() throws {
       let field = try Field(parsing: "text:string:line1\nline2")
 
       #expect(field.name == "text")
@@ -81,7 +81,7 @@ extension FieldTests {
     }
 
     @Test("Parse field with tab in value")
-    func parseFieldWithTabInValue() throws {
+    internal func parseFieldWithTabInValue() throws {
       let field = try Field(parsing: "text:string:col1\tcol2")
 
       #expect(field.name == "text")

@@ -37,7 +37,7 @@ extension QueryConfigTests {
   @Suite("Output Format")
   internal struct OutputFormatTests {
     @Test("QueryConfig initializes with JSON output format")
-    func initializeWithJSONOutput() async throws {
+    internal func initializeWithJSONOutput() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -48,7 +48,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with CSV output format")
-    func initializeWithCSVOutput() async throws {
+    internal func initializeWithCSVOutput() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -59,7 +59,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with table output format")
-    func initializeWithTableOutput() async throws {
+    internal func initializeWithTableOutput() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -70,7 +70,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with YAML output format")
-    func initializeWithYAMLOutput() async throws {
+    internal func initializeWithYAMLOutput() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,

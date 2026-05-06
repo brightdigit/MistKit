@@ -37,7 +37,7 @@ extension UpdateConfigTests {
   @Suite("Force Flag")
   internal struct ForceFlag {
     @Test("UpdateConfig defaults force to false")
-    func forceDefaultsFalse() async throws {
+    internal func forceDefaultsFalse() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, recordName: "rec1")
 
@@ -45,7 +45,7 @@ extension UpdateConfigTests {
     }
 
     @Test("UpdateConfig accepts force=true")
-    func forceCanBeTrue() async throws {
+    internal func forceCanBeTrue() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, recordName: "rec1", force: true)
 
@@ -53,7 +53,7 @@ extension UpdateConfigTests {
     }
 
     @Test("UpdateConfig preserves recordChangeTag when force is set (caller decides effect)")
-    func forceWithChangeTagBothPreserved() async throws {
+    internal func forceWithChangeTagBothPreserved() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(
         base: baseConfig,

@@ -30,17 +30,25 @@
 public import ConfigKeyKit
 import MistKit
 
-/// Configuration for test-private command (private database, all API methods)
+/// Configuration for test-private command (private database).
 public struct TestPrivateConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = MistDemoConfig
 
+  /// The base MistDemo configuration.
   public let base: MistDemoConfig
+  /// The number of records to create during testing.
   public let recordCount: Int
+  /// The asset size in kilobytes for upload testing.
   public let assetSizeKB: Int
+  /// Whether to skip cleanup after testing.
   public let skipCleanup: Bool
+  /// Whether to enable verbose output.
   public let verbose: Bool
 
+  /// Creates a new instance.
   public init(
     base: MistDemoConfig,
     recordCount: Int = 10,
@@ -55,28 +63,43 @@ public struct TestPrivateConfig: Sendable, ConfigurationParseable {
     self.verbose = verbose
   }
 
-  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: MistDemoConfig?
+  ) async throws {
     let parsedBase: MistDemoConfig
     if let base {
       parsedBase = base
     } else {
-      parsedBase = try await MistDemoConfig(configuration: configuration, base: nil)
+      parsedBase = try await MistDemoConfig(
+        configuration: configuration,
+        base: nil
+      )
     }
-    // test-private's identity is "private database test" — pin the database
-    // regardless of any --database flag the user supplied.
+    // test-private's identity is "private database test" — pin
+    // the database regardless of any --database flag the user supplied.
     let baseConfig = parsedBase.with(database: .private)
 
-    guard let webAuthToken = baseConfig.webAuthToken, !webAuthToken.isEmpty else {
+    guard
+      let webAuthToken = baseConfig.webAuthToken,
+      !webAuthToken.isEmpty
+    else {
       throw ConfigurationError.missingRequired(
         "web.auth.token",
-        suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`"
+        suggestion:
+          "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`"
       )
     }
 
-    let recordCount = configuration.int(forKey: "record.count", default: 10) ?? 10
-    let assetSizeKB = configuration.int(forKey: "asset.size", default: 100) ?? 100
-    let skipCleanup = configuration.bool(forKey: "skip.cleanup", default: false)
-    let verbose = configuration.bool(forKey: "verbose", default: false)
+    let recordCount =
+      configuration.int(forKey: "record.count", default: 10) ?? 10
+    let assetSizeKB =
+      configuration.int(forKey: "asset.size", default: 100) ?? 100
+    let skipCleanup =
+      configuration.bool(forKey: "skip.cleanup", default: false)
+    let verbose =
+      configuration.bool(forKey: "verbose", default: false)
 
     self.init(
       base: baseConfig,

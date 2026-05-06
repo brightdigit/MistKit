@@ -102,7 +102,7 @@ extension OutputEscapingDeprecatedTests {
     internal func jsonEscapeEmpty() {
       let input = ""
       let result = OutputEscaping.jsonEscape(input)
-      #expect(result == "")
+      #expect(result.isEmpty)
     }
 
     @Test("JSON escape handles unicode")

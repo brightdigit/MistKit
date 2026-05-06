@@ -39,7 +39,7 @@ extension FieldsInputTests {
     internal func decodeFieldWithUnderscore() throws {
       let json = """
         {
-            "field_name": "value"
+          "field_name": "value"
         }
         """
       let data = Data(json.utf8)
@@ -54,7 +54,7 @@ extension FieldsInputTests {
     internal func decodeFieldWithCamelCase() throws {
       let json = """
         {
-            "firstName": "John"
+          "firstName": "John"
         }
         """
       let data = Data(json.utf8)

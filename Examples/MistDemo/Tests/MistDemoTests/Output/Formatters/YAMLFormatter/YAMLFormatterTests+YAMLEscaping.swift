@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 //
 //  YAMLFormatterTests+YAMLEscaping.swift
 //  MistDemoTests
@@ -34,7 +35,6 @@ import Testing
 @testable import MistDemoKit
 
 extension YAMLFormatterTests {
-  // swiftlint:disable type_body_length
   @Suite("YAML Escaping")
   internal struct YAMLEscaping {
     @Test("Format RecordInfo with colon in value")
@@ -291,5 +291,4 @@ extension YAMLFormatterTests {
       #expect(output.contains("\"~\""))
     }
   }
-  // swiftlint:enable type_body_length
 }

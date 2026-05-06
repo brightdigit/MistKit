@@ -29,12 +29,6 @@
 
 import Foundation
 
-/// Protocol for formatting output in different formats
-public protocol OutputFormatter: Sendable {
-  /// Format an encodable value to a string
-  func format<T: Encodable>(_ value: T) throws -> String
-}
-
 /// Supported output formats
 public enum OutputFormat: String, Sendable, CaseIterable {
   case json
@@ -50,4 +44,10 @@ public enum OutputFormat: String, Sendable, CaseIterable {
   public func createFormatter(pretty: Bool = false) -> any OutputFormatter {
     OutputFormatterFactory.formatter(for: self, pretty: pretty)
   }
+}
+
+/// Protocol for formatting output in different formats
+public protocol OutputFormatter: Sendable { // swiftlint:disable:this one_declaration_per_file
+  /// Format an encodable value to a string
+  func format<T: Encodable>(_ value: T) throws -> String
 }

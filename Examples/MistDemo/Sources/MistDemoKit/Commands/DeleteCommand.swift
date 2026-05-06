@@ -32,11 +32,19 @@ import MistKit
 
 /// Result of a successful delete, formatted as command output.
 public struct DeleteResult: Encodable, Sendable {
+  /// The deleted record name.
   public let recordName: String
+  /// The deleted record type.
   public let recordType: String
+  /// Whether the record was deleted.
   public let deleted: Bool
 
-  public init(recordName: String, recordType: String, deleted: Bool = true) {
+  /// Creates a new instance.
+  public init(
+    recordName: String,
+    recordType: String,
+    deleted: Bool = true
+  ) {
     self.recordName = recordName
     self.recordType = recordType
     self.deleted = deleted
@@ -44,58 +52,61 @@ public struct DeleteResult: Encodable, Sendable {
 }
 
 /// Command to delete an existing record from CloudKit
-public struct DeleteCommand: MistDemoCommand, OutputFormatting {
+public struct DeleteCommand: MistDemoCommand, OutputFormatting { // swiftlint:disable:this one_declaration_per_file
+  /// The configuration type.
   public typealias Config = DeleteConfig
+  /// The command name.
   public static let commandName = "delete"
+  /// The command abstract.
   public static let abstract = "Delete an existing record from CloudKit"
+  /// The command help text.
   public static let helpText = """
     DELETE - Delete an existing record from CloudKit
 
     USAGE:
-        mistdemo delete --record-name <name> [options]
+      mistdemo delete --record-name <name> [options]
 
     REQUIRED:
-        --api-token <token>            CloudKit API token
-        --web-auth-token <token>       Web authentication token
-        --record-name <name>           Record name to delete (REQUIRED)
+      --record-name <name>         Record name to delete
 
     OPTIONS:
-        --record-type <type>           Record type (default: Note)
-        --zone <zone>                  Zone name (default: _defaultZone)
-        --record-change-tag <tag>      Change tag for optimistic locking
-        --force                        Delete record despite change-tag mismatch
-        --output-format <format>       Output format: json, table, csv, yaml
+      --record-type <type>         Record type (default: Note)
+      --record-change-tag <tag>    Optimistic locking tag
+      --force                      Ignore change-tag mismatch
+      --output-format <format>     Output format
 
     EXAMPLES:
-
-      1. Delete a record:
-         mistdemo delete --record-name my-note-123
-
-      2. Delete with optimistic locking:
-         mistdemo delete --record-name my-note-123 --record-change-tag abc123
-
-      3. Force delete (ignore change tag):
-         mistdemo delete --record-name my-note-123 --force
-
-    NOTES:
-      • Record name is REQUIRED
-      • Without --force, the server's change-tag check will fail if the
-        record was modified after the tag was issued. Use --force to
-        overwrite that check.
+      mistdemo delete --record-name my-note-123
+      mistdemo delete --record-name my-note-123 --force
     """
 
   private let config: DeleteConfig
 
+  /// Creates a new instance.
   public init(config: DeleteConfig) {
     self.config = config
   }
 
+  internal static func mapConflict(
+    _ error: CloudKitError
+  ) -> DeleteError? {
+    guard error.httpStatusCode == 409 else {
+      return nil
+    }
+    if case .httpErrorWithDetails(_, _, let reason) = error {
+      return .conflict(reason: reason)
+    }
+    return .conflict(reason: nil)
+  }
+
+  /// Executes the command.
   public func execute() async throws {
     do {
-      let client = try MistKitClientFactory.create(for: config.base)
-
-      // --force omits the change tag so the server deletes without optimistic locking
-      let effectiveChangeTag = config.force ? nil : config.recordChangeTag
+      let client = try MistKitClientFactory.create(
+        for: config.base
+      )
+      let effectiveChangeTag =
+        config.force ? nil : config.recordChangeTag
 
       try await client.deleteRecord(
         recordType: config.recordType,
@@ -114,17 +125,13 @@ public struct DeleteCommand: MistDemoCommand, OutputFormatting {
       if let mapped = Self.mapConflict(error) {
         throw mapped
       }
-      throw DeleteError.operationFailed(error.localizedDescription)
+      throw DeleteError.operationFailed(
+        error.localizedDescription
+      )
     } catch {
-      throw DeleteError.operationFailed(error.localizedDescription)
+      throw DeleteError.operationFailed(
+        error.localizedDescription
+      )
     }
-  }
-
-  internal static func mapConflict(_ error: CloudKitError) -> DeleteError? {
-    guard error.httpStatusCode == 409 else { return nil }
-    if case .httpErrorWithDetails(_, _, let reason) = error {
-      return .conflict(reason: reason)
-    }
-    return .conflict(reason: nil)
   }
 }

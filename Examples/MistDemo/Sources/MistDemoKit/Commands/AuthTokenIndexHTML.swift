@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 //
 //  AuthTokenIndexHTML.swift
 //  MistDemo
@@ -28,6 +29,7 @@
 //
 
 #if canImport(Hummingbird)
+  // swiftlint:disable type_body_length line_length indentation_width
   /// Inlined CloudKit auth-flow page served by `AuthTokenCommand`.
   ///
   /// Held here as a Swift raw string so MistDemoKit doesn't need a SwiftPM resource
@@ -609,4 +611,5 @@
       </html>
       """#
   }
+  // swiftlint:enable type_body_length line_length indentation_width
 #endif

@@ -37,7 +37,7 @@ extension QueryConfigTests {
   @Suite("Limit")
   internal struct Limit {
     @Test("QueryConfig initializes with default limit")
-    func initializeWithDefaultLimit() async throws {
+    internal func initializeWithDefaultLimit() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(base: baseConfig)
 
@@ -45,7 +45,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with custom limit")
-    func initializeWithCustomLimit() async throws {
+    internal func initializeWithCustomLimit() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -56,7 +56,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig handles minimum limit")
-    func handleMinimumLimit() async throws {
+    internal func handleMinimumLimit() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -67,7 +67,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig handles maximum limit")
-    func handleMaximumLimit() async throws {
+    internal func handleMaximumLimit() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,

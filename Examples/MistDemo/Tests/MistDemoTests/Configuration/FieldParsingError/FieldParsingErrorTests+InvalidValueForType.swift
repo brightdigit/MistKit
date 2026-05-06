@@ -36,7 +36,7 @@ extension FieldParsingErrorTests {
   @Suite("invalidValueForType Error")
   internal struct InvalidValueForType {
     @Test("invalidValueForType error has correct description for int64")
-    func invalidValueForTypeInt64ErrorDescription() {
+    internal func invalidValueForTypeInt64ErrorDescription() {
       let error = FieldParsingError.invalidValueForType("not-a-number", type: .int64)
       let description = error.errorDescription
 
@@ -47,7 +47,7 @@ extension FieldParsingErrorTests {
     }
 
     @Test("invalidValueForType error has correct description for double")
-    func invalidValueForTypeDoubleErrorDescription() {
+    internal func invalidValueForTypeDoubleErrorDescription() {
       let error = FieldParsingError.invalidValueForType("not-a-number", type: .double)
       let description = error.errorDescription
 
@@ -58,7 +58,7 @@ extension FieldParsingErrorTests {
     }
 
     @Test("invalidValueForType error is thrown for invalid int64")
-    func invalidValueForTypeInt64ErrorThrown() {
+    internal func invalidValueForTypeInt64ErrorThrown() {
       do {
         _ = try FieldType.int64.convertValue("not-a-number")
         Issue.record("Expected invalidValueForType error to be thrown")
@@ -74,7 +74,7 @@ extension FieldParsingErrorTests {
     }
 
     @Test("invalidValueForType error is thrown for invalid double")
-    func invalidValueForTypeDoubleErrorThrown() {
+    internal func invalidValueForTypeDoubleErrorThrown() {
       do {
         _ = try FieldType.double.convertValue("not-a-number")
         Issue.record("Expected invalidValueForType error to be thrown")

@@ -40,7 +40,8 @@ extension AuthenticationHelperTests {
     internal func resolveAPITokenReturnsProvidedToken() {
       let token = "my-api-token"
       let resolved = AuthenticationHelper.resolveAPIToken(
-        token, environment: MockEnvironment.reader)
+        token, environment: MockEnvironment.reader
+      )
       #expect(resolved == token)
     }
 
@@ -49,7 +50,9 @@ extension AuthenticationHelperTests {
       .mockEnvironment(["CLOUDKIT_API_TOKEN": "env-api-token"])
     )
     internal func resolveAPITokenChecksEnvironment() {
-      let resolved = AuthenticationHelper.resolveAPIToken("", environment: MockEnvironment.reader)
+      let resolved = AuthenticationHelper.resolveAPIToken(
+        "", environment: MockEnvironment.reader
+      )
       #expect(resolved == "env-api-token")
     }
 
@@ -57,14 +60,16 @@ extension AuthenticationHelperTests {
     internal func resolveWebAuthTokenReturnsProvidedToken() {
       let token = "my-web-auth-token"
       let resolved = AuthenticationHelper.resolveWebAuthToken(
-        token, environment: MockEnvironment.reader)
+        token, environment: MockEnvironment.reader
+      )
       #expect(resolved == token)
     }
 
     @Test("resolveWebAuthToken returns nil for empty string", .mockEnvironment([:]))
     internal func resolveWebAuthTokenReturnsNilForEmpty() {
       let resolved = AuthenticationHelper.resolveWebAuthToken(
-        "", environment: MockEnvironment.reader)
+        "", environment: MockEnvironment.reader
+      )
       #expect(resolved == nil)
     }
 
@@ -74,7 +79,8 @@ extension AuthenticationHelperTests {
     )
     internal func resolveWebAuthTokenChecksEnvironment() {
       let resolved = AuthenticationHelper.resolveWebAuthToken(
-        "", environment: MockEnvironment.reader)
+        "", environment: MockEnvironment.reader
+      )
       #expect(resolved == "env-token")
     }
   }

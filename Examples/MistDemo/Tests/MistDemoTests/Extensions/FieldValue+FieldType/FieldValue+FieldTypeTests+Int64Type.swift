@@ -1,4 +1,3 @@
-// swiftlint:disable file_name
 //
 //  FieldValue+FieldTypeTests+Int64Type.swift
 //  MistDemo

@@ -41,12 +41,12 @@ extension CommandRegistryTests {
 
     internal let config: TestConfig
 
-    internal func execute() async throws {
-      // No-op for testing
-    }
-
     internal static func createInstance() async throws -> TestCommand {
       TestCommand(config: TestConfig())
+    }
+
+    internal func execute() async throws {
+      // No-op for testing
     }
   }
 
@@ -59,12 +59,12 @@ extension CommandRegistryTests {
 
     internal let config: TestConfig
 
-    internal func execute() async throws {
-      // No-op for testing
-    }
-
     internal static func createInstance() async throws -> AnotherCommand {
       AnotherCommand(config: TestConfig())
+    }
+
+    internal func execute() async throws {
+      // No-op for testing
     }
   }
 

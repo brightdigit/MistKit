@@ -38,9 +38,9 @@ import Foundation
 ///
 /// - Note: Used in AuthTokenCommand.swift line 84 for decoding Hummingbird route requests
 internal struct AuthRequest: Decodable {
-  /// The session token provided by CloudKit after successful authentication
-  let sessionToken: String
+  /// The session token provided by CloudKit after successful authentication.
+  internal let sessionToken: String
 
-  /// The user's CloudKit record name identifier
-  let userRecordName: String
+  /// The user's CloudKit record name identifier.
+  internal let userRecordName: String
 }

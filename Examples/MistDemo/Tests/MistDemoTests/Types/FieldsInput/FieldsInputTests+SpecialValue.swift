@@ -39,7 +39,7 @@ extension FieldsInputTests {
     internal func decodeFieldWithWhitespace() throws {
       let json = """
         {
-            "description": "  spaced text  "
+          "description": "  spaced text  "
         }
         """
       let data = Data(json.utf8)
@@ -54,7 +54,7 @@ extension FieldsInputTests {
     internal func decodeFieldWithUnicode() throws {
       let json = """
         {
-            "emoji": "🎉"
+          "emoji": "🎉"
         }
         """
       let data = Data(json.utf8)

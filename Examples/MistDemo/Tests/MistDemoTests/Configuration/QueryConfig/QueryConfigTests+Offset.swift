@@ -37,7 +37,7 @@ extension QueryConfigTests {
   @Suite("Offset")
   internal struct Offset {
     @Test("QueryConfig initializes with default offset")
-    func initializeWithDefaultOffset() async throws {
+    internal func initializeWithDefaultOffset() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(base: baseConfig)
 
@@ -45,7 +45,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with custom offset")
-    func initializeWithCustomOffset() async throws {
+    internal func initializeWithCustomOffset() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -56,7 +56,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig handles large offset")
-    func handleLargeOffset() async throws {
+    internal func handleLargeOffset() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,

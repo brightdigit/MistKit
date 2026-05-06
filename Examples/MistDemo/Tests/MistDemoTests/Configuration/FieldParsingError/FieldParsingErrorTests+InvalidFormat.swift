@@ -36,7 +36,7 @@ extension FieldParsingErrorTests {
   @Suite("invalidFormat Error")
   internal struct InvalidFormat {
     @Test("invalidFormat error has correct description")
-    func invalidFormatErrorDescription() {
+    internal func invalidFormatErrorDescription() {
       let error = FieldParsingError.invalidFormat("title:string", expected: "name:type:value")
       let description = error.errorDescription
 
@@ -47,7 +47,7 @@ extension FieldParsingErrorTests {
     }
 
     @Test("invalidFormat error is thrown for missing parts")
-    func invalidFormatErrorThrown() {
+    internal func invalidFormatErrorThrown() {
       do {
         _ = try Field(parsing: "incomplete")
         Issue.record("Expected invalidFormat error to be thrown")

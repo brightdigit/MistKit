@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 //
 //  AuthenticationHelper.swift
 //  MistDemo
@@ -30,19 +31,21 @@
 import Foundation
 import MistKit
 
-/// Helper utilities for managing CloudKit authentication
-enum AuthenticationHelper {
-  /// Creates appropriate TokenManager and determines database based on credentials
-  /// - Parameters:
-  ///   - apiToken: CloudKit API token (always required)
-  ///   - webAuthToken: Web authentication token from Sign in with Apple
-  ///   - keyID: Server-to-server key identifier
-  ///   - privateKey: Server-to-server private key as string
-  ///   - privateKeyFile: Path to server-to-server private key file
-  ///   - databaseOverride: Optional database override ("public" or "private")
-  /// - Returns: Authentication result with TokenManager and selected database
-  /// - Throws: Error if credentials are invalid or missing
-  static func setupAuthentication(
+/// Helper utilities for managing CloudKit authentication.
+internal enum AuthenticationHelper {
+  /// A function that maps an environment-variable name to its value.
+  internal typealias EnvironmentReader =
+    @Sendable (String) -> String?
+
+  /// Default reader backed by `ProcessInfo` via `EnvironmentConfig`.
+  internal static let processEnvironmentReader: EnvironmentReader = {
+    EnvironmentConfig.getOptional($0)
+  }
+
+  // MARK: - Public API
+
+  /// Creates appropriate TokenManager and determines database.
+  internal static func setupAuthentication(
     apiToken: String,
     webAuthToken: String?,
     keyID: String?,
@@ -50,86 +53,147 @@ enum AuthenticationHelper {
     privateKeyFile: String?,
     databaseOverride: String? = nil
   ) async throws -> AuthenticationResult {
-    // Check for server-to-server authentication
-    if let keyID = keyID {
-      // Server-to-server always uses public database
-      let database = MistKit.Database.public
-
-      // Check for invalid override
-      if let override = databaseOverride, override == "private" {
-        throw AuthenticationError.serverToServerRequiresPublicDatabase
-      }
-
-      let manager = try await createServerToServerManager(
+    if let keyID {
+      return try await setupServerToServer(
+        apiToken: apiToken,
         keyID: keyID,
         privateKey: privateKey,
-        privateKeyFile: privateKeyFile
-      )
-
-      return AuthenticationResult(
-        tokenManager: manager,
-        database: database,
-        authMethod: "🔐 Server-to-server authentication (public database only)"
+        privateKeyFile: privateKeyFile,
+        databaseOverride: databaseOverride
       )
     }
 
-    // Web authentication
-    if let webAuthToken = webAuthToken, !webAuthToken.isEmpty {
-      // With web auth token, default to private but allow override
-      let database: MistKit.Database
-      if let override = databaseOverride {
-        database = override == "public" ? .public : .private
-      } else {
-        database = .private  // Default to private when web auth is available
-      }
-
-      let manager = try await createWebAuthManager(
+    if let webAuthToken, !webAuthToken.isEmpty {
+      return try await setupWebAuth(
         apiToken: apiToken,
-        webAuthToken: webAuthToken
-      )
-
-      return AuthenticationResult(
-        tokenManager: manager,
-        database: database,
-        authMethod: "🌐 Web authentication (\(database) database)"
+        webAuthToken: webAuthToken,
+        databaseOverride: databaseOverride
       )
     }
 
-    // API-only authentication (no web token)
-    // Can only use public database
+    return try await setupAPIOnly(
+      apiToken: apiToken,
+      databaseOverride: databaseOverride
+    )
+  }
+
+  /// Resolves API token from option or environment variable.
+  internal static func resolveAPIToken(
+    _ apiToken: String,
+    environment: EnvironmentReader = processEnvironmentReader
+  ) -> String {
+    apiToken.isEmpty
+      ? environment(EnvironmentConfig.Keys.cloudKitAPIToken) ?? ""
+      : apiToken
+  }
+
+  /// Resolves web auth token from option or environment variable.
+  internal static func resolveWebAuthToken(
+    _ webAuthToken: String,
+    environment: EnvironmentReader = processEnvironmentReader
+  ) -> String? {
+    let envKey = MistDemoConstants.EnvironmentVars.cloudKitWebAuthToken
+    let token =
+      webAuthToken.isEmpty
+      ? environment(envKey) ?? ""
+      : webAuthToken
+    return token.isEmpty ? nil : token
+  }
+
+  // MARK: - Private Helpers
+
+  private static func setupServerToServer(
+    apiToken: String,
+    keyID: String,
+    privateKey: String?,
+    privateKeyFile: String?,
+    databaseOverride: String?
+  ) async throws -> AuthenticationResult {
     let database = MistKit.Database.public
 
-    // Check for invalid override
+    if let override = databaseOverride, override == "private" {
+      throw AuthenticationError.serverToServerRequiresPublicDatabase
+    }
+
+    let manager = try await createServerToServerManager(
+      keyID: keyID,
+      privateKey: privateKey,
+      privateKeyFile: privateKeyFile
+    )
+
+    let method =
+      "\u{1F510} Server-to-server authentication"
+      + " (public database only)"
+    return AuthenticationResult(
+      tokenManager: manager,
+      database: database,
+      authMethod: method
+    )
+  }
+
+  private static func setupWebAuth(
+    apiToken: String,
+    webAuthToken: String,
+    databaseOverride: String?
+  ) async throws -> AuthenticationResult {
+    let database: MistKit.Database
+    if let override = databaseOverride {
+      database = override == "public" ? .public : .private
+    } else {
+      database = .private
+    }
+
+    let manager = try await createWebAuthManager(
+      apiToken: apiToken,
+      webAuthToken: webAuthToken
+    )
+
+    let method =
+      "\u{1F310} Web authentication (\(database) database)"
+    return AuthenticationResult(
+      tokenManager: manager,
+      database: database,
+      authMethod: method
+    )
+  }
+
+  private static func setupAPIOnly(
+    apiToken: String,
+    databaseOverride: String?
+  ) async throws -> AuthenticationResult {
+    let database = MistKit.Database.public
+
     if let override = databaseOverride, override == "private" {
       throw AuthenticationError.privateRequiresWebAuth
     }
 
     let manager = APITokenManager(apiToken: apiToken)
 
-    // Validate credentials
     let isValid = try await manager.validateCredentials()
     guard isValid else {
       throw AuthenticationError.invalidAPIToken
     }
 
+    let method =
+      "\u{1F511} API-only authentication (public database only)"
     return AuthenticationResult(
       tokenManager: manager,
       database: database,
-      authMethod: "🔑 API-only authentication (public database only)"
+      authMethod: method
     )
   }
 
-  /// Creates a ServerToServerAuthManager
   private static func createServerToServerManager(
     keyID: String,
     privateKey: String?,
     privateKeyFile: String?
   ) async throws -> any TokenManager {
-    // Get the private key PEM string
     let privateKeyPEM: String
     if let keyFile = privateKeyFile {
       do {
-        privateKeyPEM = try String(contentsOfFile: keyFile, encoding: .utf8)
+        privateKeyPEM = try String(
+          contentsOfFile: keyFile, encoding: .utf8
+        )
       } catch {
         throw AuthenticationError.failedToReadPrivateKeyFile(
           path: keyFile,
@@ -142,18 +206,15 @@ enum AuthenticationHelper {
       throw AuthenticationError.missingPrivateKey
     }
 
-    // Check platform availability
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       throw AuthenticationError.serverToServerNotSupported
     }
 
-    // Create and validate the manager
     let manager = try ServerToServerAuthManager(
       keyID: keyID,
       pemString: privateKeyPEM
     )
 
-    // Validate credentials
     let isValid = try await manager.validateCredentials()
     guard isValid else {
       throw AuthenticationError.invalidServerToServerCredentials
@@ -162,7 +223,6 @@ enum AuthenticationHelper {
     return manager
   }
 
-  /// Creates a WebAuthTokenManager
   private static func createWebAuthManager(
     apiToken: String,
     webAuthToken: String
@@ -172,40 +232,11 @@ enum AuthenticationHelper {
       webAuthToken: webAuthToken
     )
 
-    // Validate credentials
     let isValid = try await manager.validateCredentials()
     guard isValid else {
       throw AuthenticationError.invalidWebAuthCredentials
     }
 
     return manager
-  }
-
-  /// A function that maps an environment-variable name to its value.
-  /// Tests inject a fake reader instead of mutating process-global state.
-  typealias EnvironmentReader = @Sendable (String) -> String?
-
-  /// Default reader backed by `ProcessInfo` via `EnvironmentConfig`.
-  static let processEnvironmentReader: EnvironmentReader = { EnvironmentConfig.getOptional($0) }
-
-  /// Resolves API token from option or environment variable
-  static func resolveAPIToken(
-    _ apiToken: String,
-    environment: EnvironmentReader = processEnvironmentReader
-  ) -> String {
-    apiToken.isEmpty
-      ? environment(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" : apiToken
-  }
-
-  /// Resolves web auth token from option or environment variable
-  static func resolveWebAuthToken(
-    _ webAuthToken: String,
-    environment: EnvironmentReader = processEnvironmentReader
-  ) -> String? {
-    let token =
-      webAuthToken.isEmpty
-      ? environment(MistDemoConstants.EnvironmentVars.cloudKitWebAuthToken) ?? ""
-      : webAuthToken
-    return token.isEmpty ? nil : token
   }
 }

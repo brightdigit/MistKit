@@ -37,7 +37,7 @@ extension QueryConfigTests {
   @Suite("Complex Initialization")
   internal struct ComplexInitialization {
     @Test("QueryConfig initializes with all custom values")
-    func initializeWithAllCustomValues() async throws {
+    internal func initializeWithAllCustomValues() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -65,7 +65,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig handles pagination scenario")
-    func handlePaginationScenario() async throws {
+    internal func handlePaginationScenario() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,

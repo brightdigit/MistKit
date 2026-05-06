@@ -37,7 +37,7 @@ extension QueryConfigTests {
   @Suite("Sort Option")
   internal struct SortOption {
     @Test("QueryConfig initializes with nil sort")
-    func initializeWithNilSort() async throws {
+    internal func initializeWithNilSort() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -48,7 +48,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with ascending sort")
-    func initializeWithAscendingSort() async throws {
+    internal func initializeWithAscendingSort() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -60,7 +60,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with descending sort")
-    func initializeWithDescendingSort() async throws {
+    internal func initializeWithDescendingSort() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -72,7 +72,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig handles sort on different field names")
-    func handleSortOnDifferentFields() async throws {
+    internal func handleSortOnDifferentFields() async throws {
       let baseConfig = try await MistDemoConfig()
 
       let config1 = QueryConfig(base: baseConfig, sort: (field: "title", order: .ascending))

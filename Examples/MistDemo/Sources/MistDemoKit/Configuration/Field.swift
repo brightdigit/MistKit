@@ -29,12 +29,16 @@
 
 import Foundation
 
-/// Field definition for create operations
+/// Field definition for create operations.
 public struct Field: Sendable {
+  /// The field name.
   public let name: String
+  /// The field type.
   public let type: FieldType
+  /// The field value as a string.
   public let value: String
 
+  /// Creates a new instance.
   public init(name: String, type: FieldType, value: String) {
     self.name = name
     self.type = type
@@ -42,18 +46,30 @@ public struct Field: Sendable {
   }
 
   /// Parse a field from string format "name:type:value"
-  /// - Parameter input: String in format "name:type:value" (e.g., "title:string:Hello World")
+  /// - Parameter input: String in format "name:type:value"
   /// - Throws: FieldParsingError if the format is invalid
   public init(parsing input: String) throws {
-    let components = input.split(separator: ":", maxSplits: 2, omittingEmptySubsequences: false)
+    let components = input.split(
+      separator: ":",
+      maxSplits: 2,
+      omittingEmptySubsequences: false
+    )
 
     guard components.count == 3 else {
-      throw FieldParsingError.invalidFormat(input, expected: "name:type:value")
+      throw FieldParsingError.invalidFormat(
+        input,
+        expected: "name:type:value"
+      )
     }
 
-    let name = String(components[0]).trimmingCharacters(in: .whitespaces)
-    let typeString = String(components[1]).trimmingCharacters(in: .whitespaces)
-    let value = String(components[2])  // Don't trim value as it may contain meaningful whitespace
+    let name = String(components[0]).trimmingCharacters(
+      in: .whitespaces
+    )
+    let typeString = String(components[1]).trimmingCharacters(
+      in: .whitespaces
+    )
+    // Don't trim value as it may contain meaningful whitespace
+    let value = String(components[2])
 
     guard !name.isEmpty else {
       throw FieldParsingError.emptyFieldName(input)
@@ -61,13 +77,15 @@ public struct Field: Sendable {
 
     guard let type = FieldType(rawValue: typeString.lowercased()) else {
       throw FieldParsingError.unknownFieldType(
-        typeString, available: FieldType.allCases.map(\.rawValue))
+        typeString,
+        available: FieldType.allCases.map(\.rawValue)
+      )
     }
 
     self.init(name: name, type: type, value: value)
   }
 
-  /// Parse multiple fields from an array of strings
+  /// Parse multiple fields from an array of strings.
   /// - Parameter inputs: Array of strings in format "name:type:value"
   /// - Returns: Array of parsed Field instances
   /// - Throws: FieldParsingError if any field has an invalid format
@@ -85,10 +103,15 @@ public struct Field: Sendable {
     try Field(parsing: input)
   }
 
-  /// Legacy parseFields method - delegates to parseMultiple
+  /// Legacy parseFields method - delegates to parseMultiple.
   /// - Deprecated: Use `parseMultiple(_:)` instead
-  @available(*, deprecated, renamed: "parseMultiple", message: "Use Field.parseMultiple() instead")
-  public static func parseFields(_ inputs: [String]) throws -> [Field] {
+  @available(
+    *, deprecated, renamed: "parseMultiple",
+    message: "Use Field.parseMultiple() instead"
+  )
+  public static func parseFields(
+    _ inputs: [String]
+  ) throws -> [Field] {
     try parseMultiple(inputs)
   }
 }

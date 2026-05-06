@@ -75,8 +75,9 @@ extension MistKitClientFactoryTests {
       do {
         _ = try MistKitClientFactory.create(for: config)
         Issue.record(
-          "Should have thrown ConfigurationError.badCredentialsNotSupportedOnPublicDatabase")
-      } catch ConfigurationError.badCredentialsNotSupportedOnPublicDatabase {
+          "Should have thrown ConfigurationError.badCredentialsOnPublicDB"
+        )
+      } catch ConfigurationError.badCredentialsOnPublicDB {
         // expected
       } catch {
         Issue.record("Wrong error: \(error)")

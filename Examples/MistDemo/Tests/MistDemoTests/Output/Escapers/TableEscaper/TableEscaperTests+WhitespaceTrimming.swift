@@ -62,14 +62,14 @@ extension TableEscaperTests {
     internal func onlyWhitespace() {
       let input = "   "
       let output = escaper.escape(input)
-      #expect(output == "")
+      #expect(output.isEmpty)
     }
 
     @Test("Newline-only string becomes empty")
     internal func onlyNewlines() {
       let input = "\n\n\n"
       let output = escaper.escape(input)
-      #expect(output == "")
+      #expect(output.isEmpty)
     }
   }
 }

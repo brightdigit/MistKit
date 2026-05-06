@@ -52,7 +52,8 @@ extension MistKitClientFactoryTests {
     @Test("Create client with custom token manager for public database")
     internal func createWithCustomTokenManagerPublicDB() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
-        apiToken: "api-token", database: .public)
+        apiToken: "api-token", database: .public
+      )
       let tokenManager = APITokenManager(apiToken: "custom-token")
 
       let client = try MistKitClientFactory.create(

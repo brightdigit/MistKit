@@ -37,7 +37,7 @@ extension QueryConfigTests {
   @Suite("Continuation Marker")
   internal struct ContinuationMarker {
     @Test("QueryConfig initializes with nil continuation marker")
-    func initializeWithNilContinuationMarker() async throws {
+    internal func initializeWithNilContinuationMarker() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -48,7 +48,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with continuation marker")
-    func initializeWithContinuationMarker() async throws {
+    internal func initializeWithContinuationMarker() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,

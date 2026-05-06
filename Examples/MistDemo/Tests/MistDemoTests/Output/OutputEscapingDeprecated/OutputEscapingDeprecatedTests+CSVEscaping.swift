@@ -88,7 +88,7 @@ extension OutputEscapingDeprecatedTests {
     internal func csvEscapeEmpty() {
       let input = ""
       let result = OutputEscaping.csvEscape(input)
-      #expect(result == "")
+      #expect(result.isEmpty)
     }
 
     @Test("CSV escape is idempotent for simple strings")

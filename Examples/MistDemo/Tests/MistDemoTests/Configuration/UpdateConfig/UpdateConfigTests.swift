@@ -32,13 +32,14 @@ import Testing
 
 @testable import MistDemoKit
 
+// swiftlint:disable file_types_order one_declaration_per_file
 @Suite("UpdateConfig")
 internal enum UpdateConfigTests {}
 
 @Suite("UpdateError")
-struct UpdateErrorTests {
+internal struct UpdateErrorTests {
   @Test("conflict with nil reason produces a generic conflict description")
-  func conflictNilReason() {
+  internal func conflictNilReason() {
     let error = UpdateError.conflict(reason: nil)
     let description = error.errorDescription ?? ""
 
@@ -46,7 +47,7 @@ struct UpdateErrorTests {
   }
 
   @Test("conflict with reason includes the reason in the description")
-  func conflictWithReason() {
+  internal func conflictWithReason() {
     let error = UpdateError.conflict(reason: "ATOMIC_ERROR")
     let description = error.errorDescription ?? ""
 
@@ -54,7 +55,7 @@ struct UpdateErrorTests {
   }
 
   @Test("conflict suggests --force as a remedy")
-  func conflictRecoveryMentionsForce() {
+  internal func conflictRecoveryMentionsForce() {
     let error = UpdateError.conflict(reason: nil)
     let suggestion = error.recoverySuggestion ?? ""
 
@@ -62,14 +63,16 @@ struct UpdateErrorTests {
   }
 
   @Test("recordNameRequired has a description")
-  func recordNameRequiredDescription() {
+  internal func recordNameRequiredDescription() {
     let error = UpdateError.recordNameRequired
     #expect(error.errorDescription != nil)
   }
 
   @Test("noFieldsProvided has a description")
-  func noFieldsProvidedDescription() {
+  internal func noFieldsProvidedDescription() {
     let error = UpdateError.noFieldsProvided
     #expect(error.errorDescription != nil)
   }
 }
+
+// swiftlint:enable file_types_order one_declaration_per_file

@@ -35,11 +35,16 @@ public enum FieldConversionError: Error, LocalizedError {
   case conversionFailed(fieldName: String, fieldType: FieldType, value: String, reason: String)
   case invalidFieldValue(fieldType: FieldType, value: String)
 
+  /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
-    case .conversionFailed(let fieldName, let fieldType, let value, let reason):
+    case .conversionFailed(
+      let fieldName, let fieldType, let value, let reason
+    ):
       return
-        "Failed to convert field '\(fieldName)' of type '\(fieldType.rawValue)' with value '\(value)': \(reason)"
+        "Failed to convert field '\(fieldName)'"
+        + " of type '\(fieldType.rawValue)'"
+        + " with value '\(value)': \(reason)"
     case .invalidFieldValue(let fieldType, let value):
       return "Unable to convert value '\(value)' to FieldValue for type '\(fieldType.rawValue)'"
     }

@@ -30,15 +30,17 @@
 import Foundation
 import MistKit
 
-struct ModifyRecordsPhase: IntegrationPhase {
-  typealias Input = CreatedRecordNames
-  typealias Output = NoState
+internal struct ModifyRecordsPhase: IntegrationPhase {
+  internal typealias Input = CreatedRecordNames
+  internal typealias Output = NoState
 
-  static let title = "Modify some records"
-  static let emoji = "✏️ "
-  static let apiName = "updateRecord"
+  internal static let title = "Modify some records"
+  internal static let emoji = "\u{270F}\u{FE0F} "
+  internal static let apiName = "updateRecord"
 
-  func run(input: CreatedRecordNames, context: PhaseContext) async throws -> NoState {
+  internal func run(
+    input: CreatedRecordNames, context: PhaseContext
+  ) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     let recordsToUpdate = Array(input.names.prefix(min(3, input.names.count)))

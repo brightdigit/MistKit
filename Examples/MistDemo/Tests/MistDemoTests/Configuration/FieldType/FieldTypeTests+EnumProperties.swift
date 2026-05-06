@@ -36,7 +36,7 @@ extension FieldTypeTests {
   @Suite("Enum Properties")
   internal struct EnumProperties {
     @Test("FieldType has all expected cases")
-    func fieldTypeAllCases() {
+    internal func fieldTypeAllCases() {
       let allCases = FieldType.allCases
 
       #expect(allCases.contains(.string))
@@ -51,7 +51,7 @@ extension FieldTypeTests {
     }
 
     @Test("FieldType raw values are correct")
-    func fieldTypeRawValues() {
+    internal func fieldTypeRawValues() {
       #expect(FieldType.string.rawValue == "string")
       #expect(FieldType.int64.rawValue == "int64")
       #expect(FieldType.double.rawValue == "double")
@@ -63,7 +63,7 @@ extension FieldTypeTests {
     }
 
     @Test("FieldType can be initialized from raw value")
-    func fieldTypeInitFromRawValue() {
+    internal func fieldTypeInitFromRawValue() {
       #expect(FieldType(rawValue: "string") == .string)
       #expect(FieldType(rawValue: "int64") == .int64)
       #expect(FieldType(rawValue: "double") == .double)
@@ -71,7 +71,7 @@ extension FieldTypeTests {
     }
 
     @Test("FieldType returns nil for invalid raw value")
-    func fieldTypeNilForInvalidRawValue() {
+    internal func fieldTypeNilForInvalidRawValue() {
       #expect(FieldType(rawValue: "invalid") == nil)
       #expect(FieldType(rawValue: "STRING") == nil)  // case-sensitive
       #expect(FieldType(rawValue: "") == nil)

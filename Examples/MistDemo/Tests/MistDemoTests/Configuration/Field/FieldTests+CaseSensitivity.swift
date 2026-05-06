@@ -36,7 +36,7 @@ extension FieldTests {
   @Suite("Case Sensitivity")
   internal struct CaseSensitivity {
     @Test("Parse field with uppercase type (normalized to lowercase)")
-    func parseFieldWithUppercaseType() throws {
+    internal func parseFieldWithUppercaseType() throws {
       let field = try Field(parsing: "title:STRING:value")
 
       #expect(field.name == "title")
@@ -45,7 +45,7 @@ extension FieldTests {
     }
 
     @Test("Parse field with mixed case type")
-    func parseFieldWithMixedCaseType() throws {
+    internal func parseFieldWithMixedCaseType() throws {
       let field = try Field(parsing: "count:InT64:42")
 
       #expect(field.name == "count")

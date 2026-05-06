@@ -30,15 +30,15 @@
 import Foundation
 import MistKit
 
-struct FinalVerificationPhase: IntegrationPhase {
-  typealias Input = NoState
-  typealias Output = NoState
+internal struct FinalVerificationPhase: IntegrationPhase {
+  internal typealias Input = NoState
+  internal typealias Output = NoState
 
-  static let title = "Final zone verification"
-  static let emoji = "🔍"
-  static let apiName = "lookupZones"
+  internal static let title = "Final zone verification"
+  internal static let emoji = "🔍"
+  internal static let apiName = "lookupZones"
 
-  func run(input: NoState, context: PhaseContext) async throws -> NoState {
+  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     let finalZones = try await context.service.lookupZones(zoneIDs: [.defaultZone])

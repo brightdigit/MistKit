@@ -33,25 +33,25 @@ import Testing
 @testable import MistDemoKit
 
 @Suite("JSONFormatter Tests")
-struct JSONFormatterTests {
+internal struct JSONFormatterTests {
   // MARK: - Test Data
 
-  struct TestUser: Codable {
-    let name: String
-    let age: Int
-    let email: String
+  internal struct TestUser: Codable {
+    internal let name: String
+    internal let age: Int
+    internal let email: String
   }
 
-  struct TestRecord: Codable {
-    let recordName: String
-    let recordType: String
-    let fields: [String: String]
+  internal struct TestRecord: Codable {
+    internal let recordName: String
+    internal let recordType: String
+    internal let fields: [String: String]
   }
 
   // MARK: - Basic Formatting Tests
 
   @Test("Format simple object without pretty printing")
-  func formatSimpleObject() throws {
+  internal func formatSimpleObject() throws {
     let user = TestUser(name: "Alice", age: 30, email: "alice@example.com")
     let formatter = JSONFormatter(pretty: false)
 
@@ -66,7 +66,7 @@ struct JSONFormatterTests {
   }
 
   @Test("Format simple object with pretty printing")
-  func formatSimpleObjectPretty() throws {
+  internal func formatSimpleObjectPretty() throws {
     let user = TestUser(name: "Bob", age: 25, email: "bob@example.com")
     let formatter = JSONFormatter(pretty: true)
 
@@ -80,7 +80,7 @@ struct JSONFormatterTests {
   }
 
   @Test("Format array of objects")
-  func formatArrayOfObjects() throws {
+  internal func formatArrayOfObjects() throws {
     let users = [
       TestUser(name: "Charlie", age: 35, email: "charlie@example.com"),
       TestUser(name: "Diana", age: 28, email: "diana@example.com"),
@@ -98,7 +98,7 @@ struct JSONFormatterTests {
   // MARK: - Edge Cases
 
   @Test("Format empty array")
-  func formatEmptyArray() throws {
+  internal func formatEmptyArray() throws {
     let emptyArray: [TestUser] = []
     let formatter = JSONFormatter(pretty: false)
 
@@ -108,7 +108,7 @@ struct JSONFormatterTests {
   }
 
   @Test("Format object with special characters")
-  func formatObjectWithSpecialCharacters() throws {
+  internal func formatObjectWithSpecialCharacters() throws {
     let user = TestUser(
       name: "Test \"User\"",
       age: 42,
@@ -123,7 +123,7 @@ struct JSONFormatterTests {
   }
 
   @Test("Format object with nested structure")
-  func formatNestedObject() throws {
+  internal func formatNestedObject() throws {
     let record = TestRecord(
       recordName: "todo-123",
       recordType: "TodoItem",
@@ -145,7 +145,7 @@ struct JSONFormatterTests {
   // MARK: - Pretty Printing Tests
 
   @Test("Pretty printing produces sorted keys")
-  func prettyPrintingSortsKeys() throws {
+  internal func prettyPrintingSortsKeys() throws {
     let user = TestUser(name: "Zoe", age: 40, email: "zoe@example.com")
     let formatter = JSONFormatter(pretty: true)
 
@@ -167,7 +167,7 @@ struct JSONFormatterTests {
   }
 
   @Test("Non-pretty printing is compact")
-  func nonPrettyPrintingIsCompact() throws {
+  internal func nonPrettyPrintingIsCompact() throws {
     let user = TestUser(name: "Frank", age: 50, email: "frank@example.com")
     let formatter = JSONFormatter(pretty: false)
 

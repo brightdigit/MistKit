@@ -36,7 +36,7 @@ extension FieldTypeTests {
   @Suite("Timestamp Conversion")
   internal struct TimestampConversion {
     @Test("Convert timestamp from ISO 8601 date")
-    func convertTimestampFromISO8601() throws {
+    internal func convertTimestampFromISO8601() throws {
       let value = try FieldType.timestamp.convertValue("2024-01-15T10:30:00Z")
 
       #expect(value is Date)
@@ -45,14 +45,14 @@ extension FieldTypeTests {
     }
 
     @Test("Convert timestamp from ISO 8601 with timezone")
-    func convertTimestampFromISO8601WithTimezone() throws {
+    internal func convertTimestampFromISO8601WithTimezone() throws {
       let value = try FieldType.timestamp.convertValue("2024-01-15T10:30:00+05:00")
 
       #expect(value is Date)
     }
 
     @Test("Convert timestamp from Unix timestamp (integer)")
-    func convertTimestampFromUnixInteger() throws {
+    internal func convertTimestampFromUnixInteger() throws {
       let value = try FieldType.timestamp.convertValue("1705315800")
 
       let date = value as? Date
@@ -60,7 +60,7 @@ extension FieldTypeTests {
     }
 
     @Test("Convert timestamp from Unix timestamp (decimal)")
-    func convertTimestampFromUnixDecimal() throws {
+    internal func convertTimestampFromUnixDecimal() throws {
       let value = try FieldType.timestamp.convertValue("1705315800.5")
 
       let date = value as? Date
@@ -68,7 +68,7 @@ extension FieldTypeTests {
     }
 
     @Test("Convert timestamp from zero (epoch)")
-    func convertTimestampFromZero() throws {
+    internal func convertTimestampFromZero() throws {
       let value = try FieldType.timestamp.convertValue("0")
 
       let date = value as? Date
@@ -76,21 +76,21 @@ extension FieldTypeTests {
     }
 
     @Test("Convert invalid timestamp (non-date string) throws error")
-    func convertInvalidTimestampNonDate() {
+    internal func convertInvalidTimestampNonDate() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.timestamp.convertValue("not a date")
       }
     }
 
     @Test("Convert invalid timestamp (empty) throws error")
-    func convertInvalidTimestampEmpty() {
+    internal func convertInvalidTimestampEmpty() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.timestamp.convertValue("")
       }
     }
 
     @Test("Convert invalid timestamp (invalid ISO format) throws error")
-    func convertInvalidTimestampInvalidISO() {
+    internal func convertInvalidTimestampInvalidISO() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.timestamp.convertValue("2024-13-45T99:99:99Z")
       }

@@ -33,60 +33,47 @@ import MistKit
 /// Command to run comprehensive integration tests against the private database,
 /// covering all CloudKit API methods including user-identity endpoints.
 public struct TestPrivateCommand: MistDemoCommand {
+  /// The configuration type.
   public typealias Config = TestPrivateConfig
+  /// The command name.
   public static let commandName = "test-private"
+  /// The command abstract.
   public static let abstract =
-    "Run comprehensive integration tests for private database (all API methods)"
+    "Run integration tests for private database"
+  /// The command help text.
   public static let helpText = """
-    TEST-PRIVATE - Run comprehensive integration tests (private database)
+    TEST-PRIVATE - Integration tests (private database)
 
-    Tests all CloudKit API methods including user-identity endpoints that
-    require private database access and web authentication.
+    Tests all CloudKit API methods including user-identity
+    endpoints requiring private database access.
 
     USAGE:
-        mistdemo test-private [options]
+      mistdemo test-private [options]
 
     OPTIONS:
-        --record-count <count>     Number of test records to create (default: 10)
-        --asset-size <kb>          Asset size for test in KB (default: 100)
-        --skip-cleanup             Skip cleanup after integration test
-        --verbose                  Run in verbose mode
-
-    PHASES:
-        1.  List all zones                  (listZones)
-        2.  Lookup default zone             (lookupZones)
-        3.  Fetch zone changes              (fetchZoneChanges)
-        4.  Upload test asset               (uploadAssets)
-        5.  Create records                  (createRecord)
-        6.  Query records by type           (queryRecords)
-        7.  Lookup records by name          (lookupRecords)
-        8.  Initial sync                    (fetchRecordChanges)
-        9.  Modify records                  (updateRecord)
-        10. Incremental sync                (fetchRecordChanges with token)
-        11. Final zone check                (lookupZones)
-        12. Cleanup                         (deleteRecord)
-        13. Fetch current user              (fetchCurrentUser)
-        14. Discover user identities        (discoverUserIdentities)
+      --record-count <count>   Test records (default: 10)
+      --asset-size <kb>        Asset size in KB (default: 100)
+      --skip-cleanup           Skip cleanup after test
+      --verbose                Run in verbose mode
 
     EXAMPLES:
-        # Run all private database tests
-        mistdemo test-private --verbose
-
-        # Run without cleanup for debugging
-        mistdemo test-private --skip-cleanup --verbose
+      mistdemo test-private --verbose
+      mistdemo test-private --skip-cleanup --verbose
 
     NOTES:
-        - Requires CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN
-        - Run 'mistdemo auth-token' to obtain a web auth token
-        - For public-database-only tests, use 'mistdemo test-integration'
+      - Requires CLOUDKIT_API_TOKEN and
+        CLOUDKIT_WEB_AUTH_TOKEN
+      - Use 'test-integration' for public-database tests
     """
 
   private let config: TestPrivateConfig
 
+  /// Creates a new instance.
   public init(config: TestPrivateConfig) {
     self.config = config
   }
 
+  /// Executes the command.
   public func execute() async throws {
     let service = try MistKitClientFactory.create(for: config.base)
 

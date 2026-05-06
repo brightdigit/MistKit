@@ -29,7 +29,7 @@
 
 import Foundation
 
-/// Supported field types for CloudKit records
+/// Supported field types for CloudKit records.
 public enum FieldType: String, CaseIterable, Sendable {
   case string
   case int64
@@ -40,36 +40,58 @@ public enum FieldType: String, CaseIterable, Sendable {
   case reference
   case bytes
 
-  /// Convert field value to appropriate CloudKit field value
+  /// Convert field value to appropriate CloudKit field value.
   public func convertValue(_ stringValue: String) throws -> Any {
     switch self {
     case .string:
       return stringValue
     case .int64:
-      guard let intValue = Int64(stringValue) else {
-        throw FieldParsingError.invalidValueForType(stringValue, type: self)
-      }
-      return intValue
+      return try convertInt64(stringValue)
     case .double:
-      guard let doubleValue = Double(stringValue) else {
-        throw FieldParsingError.invalidValueForType(stringValue, type: self)
-      }
-      return doubleValue
+      return try convertDouble(stringValue)
     case .timestamp:
-      // Try parsing as ISO 8601 first, then as timestamp
-      if let date = ISO8601DateFormatter().date(from: stringValue) {
-        return date
-      } else if let timestamp = Double(stringValue) {
-        return Date(timeIntervalSince1970: timestamp)
-      } else {
-        throw FieldParsingError.invalidValueForType(stringValue, type: self)
-      }
+      return try convertTimestamp(stringValue)
     case .asset:
       // stringValue should be the URL from the upload token
-      return stringValue  // Will be converted to FieldValue.Asset later
+      return stringValue
     case .location, .reference, .bytes:
-      // These require more complex parsing - implement later
       throw FieldParsingError.unsupportedFieldType(self)
+    }
+  }
+
+  private func convertInt64(_ stringValue: String) throws -> Int64 {
+    guard let intValue = Int64(stringValue) else {
+      throw FieldParsingError.invalidValueForType(
+        stringValue,
+        type: self
+      )
+    }
+    return intValue
+  }
+
+  private func convertDouble(_ stringValue: String) throws -> Double {
+    guard let doubleValue = Double(stringValue) else {
+      throw FieldParsingError.invalidValueForType(
+        stringValue,
+        type: self
+      )
+    }
+    return doubleValue
+  }
+
+  private func convertTimestamp(
+    _ stringValue: String
+  ) throws -> Date {
+    // Try parsing as ISO 8601 first, then as timestamp
+    if let date = ISO8601DateFormatter().date(from: stringValue) {
+      return date
+    } else if let timestamp = Double(stringValue) {
+      return Date(timeIntervalSince1970: timestamp)
+    } else {
+      throw FieldParsingError.invalidValueForType(
+        stringValue,
+        type: self
+      )
     }
   }
 }

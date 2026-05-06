@@ -39,11 +39,14 @@ public enum UploadAssetError: Error, LocalizedError {
   case invalidRecordType(String)
   case operationFailed(String)
 
+  /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .filePathRequired:
       return
-        "File path is required. Usage: mistdemo upload-asset --file <path> --record-type <type> --field-name <field>"
+        "File path is required. Usage: mistdemo upload-asset"
+        + " --file <path> --record-type <type>"
+        + " --field-name <field>"
     case .recordTypeRequired:
       return "Record type is required. Specify with --record-type <type>"
     case .fieldNameRequired:
@@ -53,8 +56,11 @@ public enum UploadAssetError: Error, LocalizedError {
     case .fileTooLarge(let size, let maximum):
       let sizeMB = Double(size) / 1_024 / 1_024
       let maxMB = Double(maximum) / 1_024 / 1_024
+      let sizeStr = String(format: "%.2f", sizeMB)
+      let maxStr = String(format: "%.2f", maxMB)
       return
-        "File size (\(String(format: "%.2f", sizeMB)) MB) exceeds maximum (\(String(format: "%.2f", maxMB)) MB)"
+        "File size (\(sizeStr) MB)"
+        + " exceeds maximum (\(maxStr) MB)"
     case .invalidRecordType(let type):
       return "Invalid record type: \(type)"
     case .operationFailed(let message):

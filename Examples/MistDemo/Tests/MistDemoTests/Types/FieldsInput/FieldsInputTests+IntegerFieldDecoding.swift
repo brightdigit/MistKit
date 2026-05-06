@@ -39,7 +39,7 @@ extension FieldsInputTests {
     internal func decodeIntField() throws {
       let json = """
         {
-            "count": 42
+          "count": 42
         }
         """
       let data = Data(json.utf8)
@@ -56,7 +56,7 @@ extension FieldsInputTests {
     internal func decodeNegativeIntField() throws {
       let json = """
         {
-            "temperature": -10
+          "temperature": -10
         }
         """
       let data = Data(json.utf8)
@@ -73,7 +73,7 @@ extension FieldsInputTests {
     internal func decodeZeroIntField() throws {
       let json = """
         {
-            "balance": 0
+          "balance": 0
         }
         """
       let data = Data(json.utf8)

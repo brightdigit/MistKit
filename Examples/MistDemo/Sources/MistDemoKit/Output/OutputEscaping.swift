@@ -105,26 +105,33 @@ public enum OutputEscaping {
       return true
     }
 
-    // Check for YAML special characters and patterns
+    if yamlNeedsEscapingByBoundary(string) {
+      return true
+    }
+
+    return yamlNeedsEscapingByContent(string)
+  }
+
+  /// Check boundary characters and reserved YAML patterns.
+  private static func yamlNeedsEscapingByBoundary(
+    _ string: String
+  ) -> Bool {
     let specialChars: Set<Character> = [
       ":", "#", "@", "`", "|", ">", "'", "\"",
       "[", "]", "{", "}", ",", "&", "*", "!",
       "%", "\\", "?", "-", "<", "=", "~",
     ]
 
-    // Check first character for special cases
     if let first = string.first {
       if specialChars.contains(first) || first.isWhitespace {
         return true
       }
     }
 
-    // Check last character for whitespace
     if let last = string.last, last.isWhitespace {
       return true
     }
 
-    // Check for special patterns
     let specialPatterns = [
       "yes", "no", "true", "false", "on", "off",
       "null", "~", "YES", "NO", "TRUE", "FALSE",
@@ -132,18 +139,27 @@ public enum OutputEscaping {
       "False", "On", "Off", "Null",
     ]
 
-    if specialPatterns.contains(string) {
-      return true
-    }
+    return specialPatterns.contains(string)
+  }
 
-    // Check if it looks like a number
+  /// Check interior characters and numeric patterns.
+  private static func yamlNeedsEscapingByContent(
+    _ string: String
+  ) -> Bool {
+    let specialChars: Set<Character> = [
+      ":", "#", "@", "`", "|", ">", "'", "\"",
+      "[", "]", "{", "}", ",", "&", "*", "!",
+      "%", "\\", "?", "-", "<", "=", "~",
+    ]
+
     if Double(string) != nil || Int(string) != nil {
       return true
     }
 
-    // Check for special characters in the string
     for char in string
-    where specialChars.contains(char) || char == "\n" || char == "\r" || char == "\t" {
+    where specialChars.contains(char)
+      || char == "\n" || char == "\r" || char == "\t"
+    {
       return true
     }
 

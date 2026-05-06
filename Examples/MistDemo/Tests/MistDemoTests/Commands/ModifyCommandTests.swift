@@ -32,17 +32,18 @@ import Testing
 
 @testable import MistDemoKit
 
+// swiftlint:disable file_types_order one_declaration_per_file
 @Suite("ModifyCommand Tests")
-struct ModifyCommandTests {
+internal struct ModifyCommandTests {
   @Test("Command has correct static properties")
-  func staticProperties() {
+  internal func staticProperties() {
     #expect(ModifyCommand.commandName == "modify")
-    #expect(ModifyCommand.abstract == "Run a batch of create/update/delete record operations")
+    #expect(ModifyCommand.abstract == "Run a batch of create/update/delete operations")
     #expect(ModifyCommand.helpText.contains("MODIFY"))
   }
 
   @Test("Command initializes with config")
-  func initializesWithConfig() async throws {
+  internal func initializesWithConfig() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = ModifyConfig(base: baseConfig, operations: [])
     _ = ModifyCommand(config: config)
@@ -50,9 +51,9 @@ struct ModifyCommandTests {
 }
 
 @Suite("ModifyResultRow Tests")
-struct ModifyResultRowTests {
+internal struct ModifyResultRowTests {
   @Test("ModifyResultRow encodes all fields")
-  func encodesFields() throws {
+  internal func encodesFields() throws {
     let row = ModifyResultRow(
       op: "applied",
       recordType: "Note",
@@ -70,11 +71,12 @@ struct ModifyResultRowTests {
 }
 
 @Suite("ModifyOutput Tests")
-struct ModifyOutputTests {
+internal struct ModifyOutputTests {
   @Test("ModifyOutput JSON envelope carries partialFailure metadata")
-  func envelopeIncludesMetadata() throws {
+  internal func envelopeIncludesMetadata() throws {
     let row = ModifyResultRow(
-      op: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1")
+      op: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1"
+    )
     let envelope = ModifyOutput(
       results: [row],
       attempted: 3,
@@ -91,9 +93,10 @@ struct ModifyOutputTests {
   }
 
   @Test("ModifyOutput partialFailure=false when all ops succeed")
-  func noPartialFailureWhenAllSucceed() throws {
+  internal func noPartialFailureWhenAllSucceed() throws {
     let row = ModifyResultRow(
-      op: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1")
+      op: "applied", recordType: "Note", recordName: "n-1", recordChangeTag: "t-1"
+    )
     let envelope = ModifyOutput(
       results: [row],
       attempted: 1,
@@ -107,7 +110,7 @@ struct ModifyOutputTests {
   }
 
   @Test("ModifyOutput with delete-only batch and zero record results is not a partial failure")
-  func deleteOnlyBatchNotPartialFailure() throws {
+  internal func deleteOnlyBatchNotPartialFailure() throws {
     // Delete operations succeed without returning a record. A delete-only
     // batch where the response has zero records is a complete success,
     // not a partial failure — the envelope reflects that.
@@ -124,3 +127,5 @@ struct ModifyOutputTests {
     #expect(json.contains("\"attempted\":3"))
   }
 }
+
+// swiftlint:enable file_types_order one_declaration_per_file

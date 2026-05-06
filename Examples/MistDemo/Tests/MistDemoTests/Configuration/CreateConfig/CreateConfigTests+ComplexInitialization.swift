@@ -37,7 +37,7 @@ extension CreateConfigTests {
   @Suite("Complex Initialization")
   internal struct ComplexInitialization {
     @Test("CreateConfig initializes with all custom values")
-    func initializeWithAllCustomValues() async throws {
+    internal func initializeWithAllCustomValues() async throws {
       let baseConfig = try await MistDemoConfig()
       let fields = [
         Field(name: "name", type: .string, value: "John Doe"),

@@ -30,9 +30,10 @@
 #if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import SwiftUI
 
-  struct RecordDetailView: View {
-    @State var note: Note
-    let onChange: () -> Void
+  /// Detail view showing all fields and metadata for a single Note record.
+  internal struct RecordDetailView: View {
+    @State internal var note: Note
+    internal let onChange: () -> Void
 
     @EnvironmentObject private var service: NativeCloudKitService
     @Environment(\.dismiss) private var dismiss
@@ -42,45 +43,11 @@
     @State private var deleting = false
     @State private var actionError: String?
 
-    var body: some View {
+    internal var body: some View {
       Form {
-        Section("Identity") {
-          LabeledContent("Record Name", value: note.id)
-          LabeledContent("Record Type", value: Note.recordType)
-          if let recordChangeTag = note.recordChangeTag {
-            LabeledContent("Change Tag", value: recordChangeTag)
-          }
-          if let creationDate = note.creationDate {
-            LabeledContent(
-              "Created", value: creationDate.formatted(date: .abbreviated, time: .standard))
-          }
-          if let modificationDate = note.modificationDate {
-            LabeledContent(
-              "Modified", value: modificationDate.formatted(date: .abbreviated, time: .standard))
-          }
-        }
-
-        Section("Note Fields") {
-          LabeledContent("title", value: note.title ?? "—")
-          LabeledContent("index", value: note.index.map(String.init) ?? "—")
-          LabeledContent(
-            "createdAt",
-            value: note.createdAt?.formatted(date: .abbreviated, time: .standard) ?? "—")
-          LabeledContent("modified", value: note.modified.map(String.init) ?? "—")
-          LabeledContent("image", value: note.imageAssetURL?.lastPathComponent ?? "—")
-        }
-
-        if let url = note.imageAssetURL {
-          Section("Asset") {
-            AsyncImage(url: url) { image in
-              image.resizable().aspectRatio(contentMode: .fit)
-            } placeholder: {
-              ProgressView()
-            }
-            .frame(maxHeight: 240)
-          }
-        }
-
+        identitySection
+        noteFieldsSection
+        assetSection
         if let actionError {
           Section("Error") {
             Text(actionError).foregroundStyle(.red).font(.callout)
@@ -124,6 +91,64 @@
         Button("Cancel", role: .cancel) {}
       } message: {
         Text("This permanently removes the record from CloudKit.")
+      }
+    }
+
+    private var identitySection: some View {
+      Section("Identity") {
+        LabeledContent("Record Name", value: note.id)
+        LabeledContent("Record Type", value: Note.recordType)
+        if let recordChangeTag = note.recordChangeTag {
+          LabeledContent("Change Tag", value: recordChangeTag)
+        }
+        if let creationDate = note.creationDate {
+          LabeledContent(
+            "Created",
+            value: creationDate.formatted(
+              date: .abbreviated, time: .standard
+            )
+          )
+        }
+        if let modificationDate = note.modificationDate {
+          LabeledContent(
+            "Modified",
+            value: modificationDate.formatted(
+              date: .abbreviated, time: .standard
+            )
+          )
+        }
+      }
+    }
+
+    private var noteFieldsSection: some View {
+      Section("Note Fields") {
+        LabeledContent("title", value: note.title ?? "—")
+        LabeledContent("index", value: note.index.map(String.init) ?? "—")
+        LabeledContent(
+          "createdAt",
+          value: note.createdAt?.formatted(
+            date: .abbreviated, time: .standard
+          ) ?? "—"
+        )
+        LabeledContent("modified", value: note.modified.map(String.init) ?? "—")
+        LabeledContent(
+          "image",
+          value: note.imageAssetURL?.lastPathComponent ?? "—"
+        )
+      }
+    }
+
+    @ViewBuilder
+    private var assetSection: some View {
+      if let url = note.imageAssetURL {
+        Section("Asset") {
+          AsyncImage(url: url) { image in
+            image.resizable().aspectRatio(contentMode: .fit)
+          } placeholder: {
+            ProgressView()
+          }
+          .frame(maxHeight: 240)
+        }
       }
     }
 

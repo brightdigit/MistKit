@@ -29,32 +29,35 @@
 
 import Foundation
 
-/// Configuration errors
-enum ConfigurationError: LocalizedError {
+/// Configuration errors.
+internal enum ConfigurationError: LocalizedError {
   case missingAPIToken
   case invalidEnvironment(String)
   case invalidDatabase(String)
   case missingRequired(String, suggestion: String)
   case unsupportedPlatform(String)
-  case badCredentialsNotSupportedOnPublicDatabase
+  case badCredentialsOnPublicDB
 
   // MARK: Internal
 
-  var errorDescription: String? {
+  internal var errorDescription: String? {
     switch self {
     case .missingAPIToken:
-      "CloudKit API token is required. Set CLOUDKIT_API_TOKEN environment variable or use --api-token"
+      "CloudKit API token is required. "
+        + "Set CLOUDKIT_API_TOKEN environment variable or use --api-token"
     case .invalidEnvironment(let env):
       "Invalid environment '\(env)'. Must be 'development' or 'production'"
-    case .invalidDatabase(let db):
-      "Invalid database '\(db)'. Must be 'public', 'private', or 'shared'"
+    case .invalidDatabase(let database):
+      "Invalid database '\(database)'. "
+        + "Must be 'public', 'private', or 'shared'"
     case .missingRequired(let field, let suggestion):
       "Missing required configuration: \(field). \(suggestion)"
     case .unsupportedPlatform(let message):
       "Unsupported platform: \(message)"
-    case .badCredentialsNotSupportedOnPublicDatabase:
-      "The bad-credentials error demo is only supported on the private and shared "
-        + "databases (it uses web auth). Re-run with `--database private`."
+    case .badCredentialsOnPublicDB:
+      "The bad-credentials error demo is only supported on the "
+        + "private and shared databases (it uses web auth). "
+        + "Re-run with `--database private`."
     }
   }
 }

@@ -30,15 +30,17 @@
 import Foundation
 import MistKit
 
-struct LookupRecordsPhase: IntegrationPhase {
-  typealias Input = CreatedRecordNames
-  typealias Output = NoState
+internal struct LookupRecordsPhase: IntegrationPhase {
+  internal typealias Input = CreatedRecordNames
+  internal typealias Output = NoState
 
-  static let title = "Lookup records by name"
-  static let emoji = "🔍"
-  static let apiName = "lookupRecords"
+  internal static let title = "Lookup records by name"
+  internal static let emoji = "🔍"
+  internal static let apiName = "lookupRecords"
 
-  func run(input: CreatedRecordNames, context: PhaseContext) async throws -> NoState {
+  internal func run(
+    input: CreatedRecordNames, context: PhaseContext
+  ) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     let lookupNames = Array(input.names.prefix(min(3, input.names.count)))

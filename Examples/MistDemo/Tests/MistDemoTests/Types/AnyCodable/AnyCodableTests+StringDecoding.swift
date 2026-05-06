@@ -48,7 +48,7 @@ extension AnyCodableTests {
       let json = "\"\""
       let data = Data(json.utf8)
       let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
-      #expect(decoded.value as? String == "")
+      #expect((decoded.value as? String)?.isEmpty == true)
     }
   }
 }

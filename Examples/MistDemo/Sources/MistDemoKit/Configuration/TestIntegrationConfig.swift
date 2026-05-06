@@ -29,17 +29,25 @@
 
 public import ConfigKeyKit
 
-/// Configuration for test-integration command
+/// Configuration for test-integration command.
 public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = MistDemoConfig
 
+  /// The base MistDemo configuration.
   public let base: MistDemoConfig
+  /// The number of records to create during testing.
   public let recordCount: Int
+  /// The asset size in kilobytes for upload testing.
   public let assetSizeKB: Int
+  /// Whether to skip cleanup after testing.
   public let skipCleanup: Bool
+  /// Whether to enable verbose output.
   public let verbose: Bool
 
+  /// Creates a new instance.
   public init(
     base: MistDemoConfig,
     recordCount: Int = 10,
@@ -54,19 +62,29 @@ public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
     self.verbose = verbose
   }
 
-  /// Parse configuration from command line arguments
-  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: MistDemoConfig?
+  ) async throws {
     let baseConfig: MistDemoConfig
     if let base {
       baseConfig = base
     } else {
-      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+      baseConfig = try await MistDemoConfig(
+        configuration: configuration,
+        base: nil
+      )
     }
 
-    let recordCount = configuration.int(forKey: "record.count", default: 10) ?? 10
-    let assetSizeKB = configuration.int(forKey: "asset.size", default: 100) ?? 100
-    let skipCleanup = configuration.bool(forKey: "skip.cleanup", default: false)
-    let verbose = configuration.bool(forKey: "verbose", default: false)
+    let recordCount =
+      configuration.int(forKey: "record.count", default: 10) ?? 10
+    let assetSizeKB =
+      configuration.int(forKey: "asset.size", default: 100) ?? 100
+    let skipCleanup =
+      configuration.bool(forKey: "skip.cleanup", default: false)
+    let verbose =
+      configuration.bool(forKey: "verbose", default: false)
 
     self.init(
       base: baseConfig,

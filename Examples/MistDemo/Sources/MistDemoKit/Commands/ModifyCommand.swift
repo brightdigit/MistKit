@@ -30,30 +30,49 @@
 import Foundation
 import MistKit
 
-/// One row in the modify command's output: original op, plus the resulting record (if any).
+/// One row in the modify command's output.
 public struct ModifyResultRow: Encodable, Sendable {
-  public let op: String
+  /// The operation type applied.
+  public let operation: String
+  /// The record type.
   public let recordType: String
+  /// The record name.
   public let recordName: String?
+  /// The record change tag.
   public let recordChangeTag: String?
 
-  public init(op: String, recordType: String, recordName: String?, recordChangeTag: String?) {
-    self.op = op
+  /// Creates a new instance.
+  public init(
+    operation: String,
+    recordType: String,
+    recordName: String?,
+    recordChangeTag: String?
+  ) {
+    self.operation = operation
     self.recordType = recordType
     self.recordName = recordName
     self.recordChangeTag = recordChangeTag
   }
 }
 
-/// JSON envelope for modify output. Carries enough metadata for scripts to
-/// detect partial failures without parsing stderr.
-public struct ModifyOutput: Encodable, Sendable {
+/// JSON envelope for modify output.
+public struct ModifyOutput: Encodable, Sendable { // swiftlint:disable:this one_declaration_per_file
+  /// The result rows.
   public let results: [ModifyResultRow]
+  /// The number of operations attempted.
   public let attempted: Int
+  /// The number of operations that succeeded.
   public let succeeded: Int
+  /// Whether the batch was a partial failure.
   public let partialFailure: Bool
 
-  public init(results: [ModifyResultRow], attempted: Int, succeeded: Int, partialFailure: Bool) {
+  /// Creates a new instance.
+  public init(
+    results: [ModifyResultRow],
+    attempted: Int,
+    succeeded: Int,
+    partialFailure: Bool
+  ) {
     self.results = results
     self.attempted = attempted
     self.succeeded = succeeded
@@ -61,103 +80,80 @@ public struct ModifyOutput: Encodable, Sendable {
   }
 }
 
-/// Command to perform a batch of create/update/delete operations against CloudKit.
-public struct ModifyCommand: MistDemoCommand, OutputFormatting {
+/// Command to perform batch create/update/delete operations.
+public struct ModifyCommand: MistDemoCommand, OutputFormatting { // swiftlint:disable:this one_declaration_per_file
+  /// The configuration type.
   public typealias Config = ModifyConfig
+  /// The command name.
   public static let commandName = "modify"
-  public static let abstract = "Run a batch of create/update/delete record operations"
+  /// The command abstract.
+  public static let abstract =
+    "Run a batch of create/update/delete operations"
+  /// The command help text.
   public static let helpText = """
-    MODIFY - Run a batch of create/update/delete record operations
+    MODIFY - Batch create/update/delete operations
 
     USAGE:
-        mistdemo modify --operations-file <path> [options]
-        cat ops.json | mistdemo modify --stdin [options]
-
-    REQUIRED:
-        --api-token <token>            CloudKit API token
-        --web-auth-token <token>       Web authentication token
+      mistdemo modify --operations-file <path> [options]
+      cat ops.json | mistdemo modify --stdin [options]
 
     INPUT (choose one):
-        --operations-file <path>       Path to a JSON array of operations
-        --stdin                        Read JSON array of operations from stdin
+      --operations-file <path>   Path to JSON array of ops
+      --stdin                    Read JSON from stdin
 
     OPTIONS:
-        --atomic                       Reject the entire batch if any op fails
-        --output-format <format>       Output format: json, table, csv, yaml
-
-    OPERATIONS JSON FORMAT:
-
-        [
-          {
-            "op": "create",
-            "recordType": "Note",
-            "fields": { "title": "Hello", "priority": 5 }
-          },
-          {
-            "op": "update",
-            "recordType": "Note",
-            "recordName": "note-123",
-            "recordChangeTag": "abc",
-            "fields": { "title": "Updated" }
-          },
-          {
-            "op": "delete",
-            "recordType": "Note",
-            "recordName": "note-456"
-          }
-        ]
-
-    EXAMPLES:
-
-      1. Run a batch atomically:
-         mistdemo modify --operations-file ops.json --atomic
-
-      2. Stream from stdin:
-         cat ops.json | mistdemo modify --stdin
+      --atomic                   Reject batch if any fails
+      --output-format <format>   Output format
 
     NOTES:
-      • Without --atomic, the server may apply some operations and reject
-        others. The output reflects only the operations that succeeded.
-      • Update and delete operations require a recordName. Create may omit
-        it (the server will generate one).
+      Without --atomic, the server may apply some ops and
+      reject others.
     """
 
   private let config: ModifyConfig
 
+  /// Creates a new instance.
   public init(config: ModifyConfig) {
     self.config = config
   }
 
+  /// Executes the command.
   public func execute() async throws {
     do {
-      let client = try MistKitClientFactory.create(for: config.base)
+      let client = try MistKitClientFactory.create(
+        for: config.base
+      )
 
-      // Build [RecordOperation] from the JSON ops, validating each
-      let operations = try config.operations.enumerated().map { index, input in
-        try input.toRecordOperation(index: index)
-      }
+      let operations = try config.operations.enumerated()
+        .map { index, input in
+          try input.toRecordOperation(index: index)
+        }
 
-      let results = try await client.modifyRecords(operations, atomic: config.atomic)
+      let results = try await client.modifyRecords(
+        operations, atomic: config.atomic
+      )
 
       let rows = results.map { record in
         ModifyResultRow(
-          op: "applied",
+          operation: "applied",
           recordType: record.recordType,
           recordName: record.recordName,
           recordChangeTag: record.recordChangeTag
         )
       }
 
-      // Only create/update operations are expected to return a record.
-      // Delete operations succeed by their absence in the response, so
-      // counting them as "missing" would falsely trip the partial-failure signal.
-      let recordReturningOpsCount = config.operations.filter { $0.op != .delete }.count
-      let partialFailure = !config.atomic && results.count < recordReturningOpsCount
+      let recordReturningOpsCount =
+        config.operations
+        .filter { $0.operation != .delete }.count
+      let partialFailure =
+        !config.atomic
+        && results.count < recordReturningOpsCount
 
       if partialFailure {
         let missing = recordReturningOpsCount - results.count
         let line =
-          "Warning: \(missing) of \(recordReturningOpsCount) create/update operation(s) did not return a record (possibly rejected by the server).\n"
+          "Warning: \(missing) of \(recordReturningOpsCount)"
+          + " create/update op(s) did not return a record.\n"
         FileHandle.standardError.write(Data(line.utf8))
       }
 
@@ -171,7 +167,9 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
     } catch let error as ModifyError {
       throw error
     } catch {
-      throw ModifyError.operationFailed(error.localizedDescription)
+      throw ModifyError.operationFailed(
+        error.localizedDescription
+      )
     }
   }
 }

@@ -30,15 +30,15 @@
 import Foundation
 import MistKit
 
-struct FetchZoneChangesPhase: IntegrationPhase {
-  typealias Input = NoState
-  typealias Output = NoState
+internal struct FetchZoneChangesPhase: IntegrationPhase {
+  internal typealias Input = NoState
+  internal typealias Output = NoState
 
-  static let title = "Fetch zone changes"
-  static let emoji = "🔄"
-  static let apiName = "fetchZoneChanges"
+  internal static let title = "Fetch zone changes"
+  internal static let emoji = "🔄"
+  internal static let apiName = "fetchZoneChanges"
 
-  func run(input: NoState, context: PhaseContext) async throws -> NoState {
+  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     do {

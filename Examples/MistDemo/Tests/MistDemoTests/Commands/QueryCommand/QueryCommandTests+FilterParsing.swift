@@ -61,8 +61,8 @@ extension QueryCommandTests {
     internal func filterOperatorsValid() {
       let validOperators = ["eq", "ne", "lt", "lte", "gt", "gte", "in", "contains", "beginsWith"]
 
-      for op in validOperators {
-        let filter = "field:\(op):value"
+      for operatorName in validOperators {
+        let filter = "field:\(operatorName):value"
         let parts = filter.split(separator: ":").map(String.init)
         #expect(validOperators.contains(parts[1]))
       }

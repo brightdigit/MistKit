@@ -1,4 +1,3 @@
-// swiftlint:disable file_name
 //
 //  ConfigKey+MistDemoTests+EdgeCases.swift
 //  MistDemo
@@ -41,7 +40,7 @@ extension ConfigKeyMistDemoTests {
     internal func configKeyWithEmptyBase() {
       let key = ConfigKey(mistDemoPrefixed: "", default: "value")
 
-      #expect(key.base == "")
+      #expect(key.base?.isEmpty == true)
     }
 
     @Test("ConfigKey with dotted path")

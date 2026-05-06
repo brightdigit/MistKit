@@ -1,4 +1,3 @@
-// swiftlint:disable file_name
 //
 //  FieldValue+FieldTypeTests+StringType.swift
 //  MistDemo
@@ -55,7 +54,7 @@ extension FieldValueFieldTypeTests {
 
       #expect(fieldValue != nil)
       if case .string(let value) = fieldValue {
-        #expect(value == "")
+        #expect(value.isEmpty)
       } else {
         Issue.record("Expected .string case")
       }

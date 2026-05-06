@@ -39,7 +39,7 @@ extension FieldsInputTests {
     internal func encodeDecodeStringField() throws {
       let json = """
         {
-            "name": "Test"
+          "name": "Test"
         }
         """
       let data = Data(json.utf8)
@@ -58,7 +58,7 @@ extension FieldsInputTests {
     internal func encodeDecodeIntField() throws {
       let json = """
         {
-            "count": 100
+          "count": 100
         }
         """
       let data = Data(json.utf8)
@@ -78,9 +78,9 @@ extension FieldsInputTests {
     internal func encodeDecodeMultipleFields() throws {
       let json = """
         {
-            "title": "Item",
-            "quantity": 3,
-            "price": 15.50
+          "title": "Item",
+          "quantity": 3,
+          "price": 15.50
         }
         """
       let data = Data(json.utf8)

@@ -62,7 +62,7 @@ extension CSVEscaperTests {
     internal func emptyStringNoEscaping() {
       let input = ""
       let output = escaper.escape(input)
-      #expect(output == "")
+      #expect(output.isEmpty)
     }
   }
 }

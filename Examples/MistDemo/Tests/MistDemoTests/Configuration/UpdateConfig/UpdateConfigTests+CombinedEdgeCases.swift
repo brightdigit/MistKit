@@ -37,7 +37,7 @@ extension UpdateConfigTests {
   @Suite("Combined / Edge Cases")
   internal struct CombinedEdgeCases {
     @Test("UpdateConfig initializes with all custom values")
-    func initializeWithAllCustomValues() async throws {
+    internal func initializeWithAllCustomValues() async throws {
       let baseConfig = try await MistDemoConfig()
       let fields = [
         Field(name: "title", type: .string, value: "x"),
@@ -64,7 +64,7 @@ extension UpdateConfigTests {
     }
 
     @Test("UpdateConfig handles special characters in record name")
-    func specialCharactersInRecordName() async throws {
+    internal func specialCharactersInRecordName() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, recordName: "rec-name_with.special@chars")
 

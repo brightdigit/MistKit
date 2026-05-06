@@ -29,6 +29,8 @@
 
 import Testing
 
+// swiftlint:disable file_types_order one_declaration_per_file
+
 /// Task-local environment dictionary that participating tests read instead of
 /// `ProcessInfo`. Carrying the env in task-local storage keeps tests parallel-safe
 /// (no mutation of process-global state) and works on every platform — including
@@ -70,3 +72,5 @@ extension Trait where Self == MockEnvironmentTrait {
     .init(values: values)
   }
 }
+
+// swiftlint:enable file_types_order one_declaration_per_file

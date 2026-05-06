@@ -36,28 +36,28 @@ extension FieldTypeTests {
   @Suite("Unsupported Type")
   internal struct UnsupportedType {
     @Test("Convert asset type returns URL string")
-    func convertAssetThrowsUnsupported() throws {
+    internal func convertAssetThrowsUnsupported() throws {
       let value = try FieldType.asset.convertValue("https://example.com/asset")
 
       #expect(value as? String == "https://example.com/asset")
     }
 
     @Test("Convert location type throws unsupported error")
-    func convertLocationThrowsUnsupported() {
+    internal func convertLocationThrowsUnsupported() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.location.convertValue("anything")
       }
     }
 
     @Test("Convert reference type throws unsupported error")
-    func convertReferenceThrowsUnsupported() {
+    internal func convertReferenceThrowsUnsupported() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.reference.convertValue("anything")
       }
     }
 
     @Test("Convert bytes type throws unsupported error")
-    func convertBytesThrowsUnsupported() {
+    internal func convertBytesThrowsUnsupported() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.bytes.convertValue("anything")
       }

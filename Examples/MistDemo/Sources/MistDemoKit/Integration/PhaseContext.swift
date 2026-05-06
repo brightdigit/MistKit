@@ -31,12 +31,12 @@ import Foundation
 import MistKit
 
 /// Shared dependencies and configuration available to every phase.
-struct PhaseContext: Sendable {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
+internal struct PhaseContext: Sendable {
+  internal let service: CloudKitService
+  internal let containerIdentifier: String
+  internal let database: MistKit.Database
+  internal let recordCount: Int
+  internal let assetSizeKB: Int
+  internal let skipCleanup: Bool
+  internal let verbose: Bool
 }

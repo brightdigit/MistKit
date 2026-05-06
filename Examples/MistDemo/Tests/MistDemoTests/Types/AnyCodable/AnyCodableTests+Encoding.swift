@@ -39,7 +39,7 @@ extension AnyCodableTests {
     internal func encodeString() throws {
       let anyCodable = try AnyCodable(value: "test")
       let data = try JSONEncoder().encode(anyCodable)
-      let json = String(data: data, encoding: .utf8)!
+      let json = try #require(String(data: data, encoding: .utf8))
       #expect(json == "\"test\"")
     }
 
@@ -47,7 +47,7 @@ extension AnyCodableTests {
     internal func encodeInteger() throws {
       let anyCodable = try AnyCodable(value: 123)
       let data = try JSONEncoder().encode(anyCodable)
-      let json = String(data: data, encoding: .utf8)!
+      let json = try #require(String(data: data, encoding: .utf8))
       #expect(json == "123")
     }
 
@@ -55,7 +55,7 @@ extension AnyCodableTests {
     internal func encodeDouble() throws {
       let anyCodable = try AnyCodable(value: 3.14)
       let data = try JSONEncoder().encode(anyCodable)
-      let json = String(data: data, encoding: .utf8)!
+      let json = try #require(String(data: data, encoding: .utf8))
       #expect(json.contains("3.14"))
     }
 
@@ -63,7 +63,7 @@ extension AnyCodableTests {
     internal func encodeBoolean() throws {
       let anyCodable = try AnyCodable(value: true)
       let data = try JSONEncoder().encode(anyCodable)
-      let json = String(data: data, encoding: .utf8)!
+      let json = try #require(String(data: data, encoding: .utf8))
       #expect(json == "true")
     }
 
@@ -71,7 +71,7 @@ extension AnyCodableTests {
     internal func encodeNull() throws {
       let anyCodable = try AnyCodable(value: NSNull())
       let data = try JSONEncoder().encode(anyCodable)
-      let json = String(data: data, encoding: .utf8)!
+      let json = try #require(String(data: data, encoding: .utf8))
       #expect(json == "null")
     }
   }

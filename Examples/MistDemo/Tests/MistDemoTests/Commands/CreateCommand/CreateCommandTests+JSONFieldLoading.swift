@@ -39,11 +39,11 @@ extension CreateCommandTests {
     internal func loadFieldsFromJSONDictionary() async throws {
       let json = """
         {
-            "title": "Test Note",
-            "priority": 5,
-            "progress": 0.75,
-            "isComplete": true,
-            "tags": ["work", "important"]
+          "title": "Test Note",
+          "priority": 5,
+          "progress": 0.75,
+          "isComplete": true,
+          "tags": ["work", "important"]
         }
         """
 

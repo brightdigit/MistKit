@@ -29,18 +29,27 @@
 
 public import ConfigKeyKit
 
-/// Configuration for fetch-changes command
+/// Configuration for fetch-changes command.
 public struct FetchChangesConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = MistDemoConfig
 
+  /// The base MistDemo configuration.
   public let base: MistDemoConfig
+  /// The optional sync token for incremental changes.
   public let syncToken: String?
+  /// The CloudKit zone name.
   public let zone: String
+  /// Whether to fetch all changes via auto-pagination.
   public let fetchAll: Bool
+  /// The optional limit on number of changes to fetch.
   public let limit: Int?
+  /// The output format.
   public let output: OutputFormat
 
+  /// Creates a new instance.
   public init(
     base: MistDemoConfig,
     syncToken: String? = nil,
@@ -57,20 +66,31 @@ public struct FetchChangesConfig: Sendable, ConfigurationParseable {
     self.output = output
   }
 
-  /// Parse configuration from command line arguments
-  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: MistDemoConfig?
+  ) async throws {
     let baseConfig: MistDemoConfig
     if let base {
       baseConfig = base
     } else {
-      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+      baseConfig = try await MistDemoConfig(
+        configuration: configuration,
+        base: nil
+      )
     }
 
     let syncToken = configuration.string(forKey: "sync.token")
-    let zone = configuration.string(forKey: "zone", default: "_defaultZone") ?? "_defaultZone"
-    let fetchAll = configuration.bool(forKey: "fetch.all", default: false)
+    let zone =
+      configuration.string(forKey: "zone", default: "_defaultZone")
+      ?? "_defaultZone"
+    let fetchAll =
+      configuration.bool(forKey: "fetch.all", default: false)
     let limit = configuration.int(forKey: "limit")
-    let outputString = configuration.string(forKey: "output.format", default: "table") ?? "table"
+    let outputString =
+      configuration.string(forKey: "output.format", default: "table")
+      ?? "table"
     let output = OutputFormat(rawValue: outputString) ?? .table
 
     self.init(

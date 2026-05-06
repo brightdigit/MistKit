@@ -29,8 +29,8 @@
 
 import Foundation
 
-/// Configuration-specific errors
-enum ConfigError: LocalizedError, Sendable {
+/// Configuration-specific errors.
+internal enum ConfigError: LocalizedError, Sendable {
   case missingAPIToken
   case invalidEnvironment(String)
   case fileNotFound(String)
@@ -39,7 +39,7 @@ enum ConfigError: LocalizedError, Sendable {
 
   // MARK: Internal
 
-  var errorDescription: String? {
+  internal var errorDescription: String? {
     switch self {
     case .missingAPIToken:
       "CloudKit API token is required"
@@ -54,7 +54,7 @@ enum ConfigError: LocalizedError, Sendable {
     }
   }
 
-  var recoverySuggestion: String? {
+  internal var recoverySuggestion: String? {
     switch self {
     case .missingAPIToken:
       "Set CLOUDKIT_API_TOKEN environment variable or use --api-token flag"

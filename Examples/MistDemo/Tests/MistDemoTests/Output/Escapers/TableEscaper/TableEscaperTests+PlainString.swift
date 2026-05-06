@@ -55,7 +55,7 @@ extension TableEscaperTests {
     internal func emptyStringRemains() {
       let input = ""
       let output = escaper.escape(input)
-      #expect(output == "")
+      #expect(output.isEmpty)
     }
   }
 }

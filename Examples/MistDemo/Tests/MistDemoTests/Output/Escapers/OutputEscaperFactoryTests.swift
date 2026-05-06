@@ -33,29 +33,29 @@ import Testing
 @testable import MistDemoKit
 
 @Suite("OutputEscaperFactory Tests")
-struct OutputEscaperFactoryTests {
+internal struct OutputEscaperFactoryTests {
   // MARK: - Factory Method Tests
 
   @Test("Factory returns CSVEscaper for CSV format")
-  func csvFormatReturnsCsvEscaper() {
+  internal func csvFormatReturnsCsvEscaper() {
     let escaper = OutputEscaperFactory.escaper(for: .csv)
     #expect(escaper is CSVEscaper)
   }
 
   @Test("Factory returns YAMLEscaper for YAML format")
-  func yamlFormatReturnsYamlEscaper() {
+  internal func yamlFormatReturnsYamlEscaper() {
     let escaper = OutputEscaperFactory.escaper(for: .yaml)
     #expect(escaper is YAMLEscaper)
   }
 
   @Test("Factory returns JSONEscaper for JSON format")
-  func jsonFormatReturnsJsonEscaper() {
+  internal func jsonFormatReturnsJsonEscaper() {
     let escaper = OutputEscaperFactory.escaper(for: .json)
     #expect(escaper is JSONEscaper)
   }
 
   @Test("Factory returns TableEscaper for table format")
-  func tableFormatReturnsTableEscaper() {
+  internal func tableFormatReturnsTableEscaper() {
     let escaper = OutputEscaperFactory.escaper(for: .table)
     #expect(escaper is TableEscaper)
   }
@@ -63,28 +63,28 @@ struct OutputEscaperFactoryTests {
   // MARK: - Functional Verification Tests
 
   @Test("CSV escaper handles commas correctly")
-  func csvEscaperHandlesCommas() {
+  internal func csvEscaperHandlesCommas() {
     let escaper = OutputEscaperFactory.escaper(for: .csv)
     let result = escaper.escape("a,b,c")
     #expect(result == "\"a,b,c\"")
   }
 
   @Test("YAML escaper handles reserved words correctly")
-  func yamlEscaperHandlesReservedWords() {
+  internal func yamlEscaperHandlesReservedWords() {
     let escaper = OutputEscaperFactory.escaper(for: .yaml)
     let result = escaper.escape("yes")
     #expect(result == "\"yes\"")
   }
 
   @Test("JSON escaper handles quotes correctly")
-  func jsonEscaperHandlesQuotes() {
+  internal func jsonEscaperHandlesQuotes() {
     let escaper = OutputEscaperFactory.escaper(for: .json)
     let result = escaper.escape("test\"value")
     #expect(result.contains("\\\""))
   }
 
   @Test("Table escaper handles newlines correctly")
-  func tableEscaperHandlesNewlines() {
+  internal func tableEscaperHandlesNewlines() {
     let escaper = OutputEscaperFactory.escaper(for: .table)
     let result = escaper.escape("line1\nline2")
     #expect(result == "line1 line2")
@@ -93,7 +93,7 @@ struct OutputEscaperFactoryTests {
   // MARK: - All Format Coverage Tests
 
   @Test("Factory covers all OutputFormat cases")
-  func factoryCoversAllFormats() {
+  internal func factoryCoversAllFormats() {
     let allFormats = OutputFormat.allCases
     #expect(allFormats.count == 4)
 
@@ -106,7 +106,7 @@ struct OutputEscaperFactoryTests {
   }
 
   @Test("Each format produces different escaper instance types")
-  func eachFormatProducesDifferentType() {
+  internal func eachFormatProducesDifferentType() {
     let csvEscaper = OutputEscaperFactory.escaper(for: .csv)
     let yamlEscaper = OutputEscaperFactory.escaper(for: .yaml)
     let jsonEscaper = OutputEscaperFactory.escaper(for: .json)

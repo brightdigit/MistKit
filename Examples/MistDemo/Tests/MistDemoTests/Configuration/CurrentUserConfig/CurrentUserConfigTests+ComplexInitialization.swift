@@ -37,7 +37,7 @@ extension CurrentUserConfigTests {
   @Suite("Complex Initialization")
   internal struct ComplexInitialization {
     @Test("CurrentUserConfig initializes with all custom values")
-    func initializeWithAllCustomValues() async throws {
+    internal func initializeWithAllCustomValues() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,
@@ -50,7 +50,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles fields and JSON output")
-    func handleFieldsWithJSONOutput() async throws {
+    internal func handleFieldsWithJSONOutput() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,
@@ -63,7 +63,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles fields and CSV output")
-    func handleFieldsWithCSVOutput() async throws {
+    internal func handleFieldsWithCSVOutput() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,

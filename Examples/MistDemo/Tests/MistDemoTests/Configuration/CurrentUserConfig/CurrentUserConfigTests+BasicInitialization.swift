@@ -37,7 +37,7 @@ extension CurrentUserConfigTests {
   @Suite("Basic Initialization")
   internal struct BasicInitialization {
     @Test("CurrentUserConfig initializes with default values")
-    func initializeWithDefaults() async throws {
+    internal func initializeWithDefaults() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(base: baseConfig)
 
@@ -46,7 +46,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with nil fields")
-    func initializeWithNilFields() async throws {
+    internal func initializeWithNilFields() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,
@@ -57,7 +57,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with empty fields array")
-    func initializeWithEmptyFieldsArray() async throws {
+    internal func initializeWithEmptyFieldsArray() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,

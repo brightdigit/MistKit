@@ -36,56 +36,56 @@ extension FieldTypeTests {
   @Suite("Int64 Conversion")
   internal struct Int64Conversion {
     @Test("Convert valid positive int64")
-    func convertValidPositiveInt64() throws {
+    internal func convertValidPositiveInt64() throws {
       let value = try FieldType.int64.convertValue("42")
 
       #expect(value as? Int64 == 42)
     }
 
     @Test("Convert valid negative int64")
-    func convertValidNegativeInt64() throws {
+    internal func convertValidNegativeInt64() throws {
       let value = try FieldType.int64.convertValue("-123")
 
       #expect(value as? Int64 == -123)
     }
 
     @Test("Convert int64 zero")
-    func convertInt64Zero() throws {
+    internal func convertInt64Zero() throws {
       let value = try FieldType.int64.convertValue("0")
 
       #expect(value as? Int64 == 0)
     }
 
     @Test("Convert int64 maximum value")
-    func convertInt64MaxValue() throws {
+    internal func convertInt64MaxValue() throws {
       let value = try FieldType.int64.convertValue("9223372036854775807")
 
       #expect(value as? Int64 == Int64.max)
     }
 
     @Test("Convert int64 minimum value")
-    func convertInt64MinValue() throws {
+    internal func convertInt64MinValue() throws {
       let value = try FieldType.int64.convertValue("-9223372036854775808")
 
       #expect(value as? Int64 == Int64.min)
     }
 
     @Test("Convert invalid int64 (non-numeric) throws error")
-    func convertInvalidInt64NonNumeric() {
+    internal func convertInvalidInt64NonNumeric() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.int64.convertValue("not a number")
       }
     }
 
     @Test("Convert invalid int64 (decimal) throws error")
-    func convertInvalidInt64Decimal() {
+    internal func convertInvalidInt64Decimal() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.int64.convertValue("42.5")
       }
     }
 
     @Test("Convert invalid int64 (empty) throws error")
-    func convertInvalidInt64Empty() {
+    internal func convertInvalidInt64Empty() {
       #expect(throws: FieldParsingError.self) {
         try FieldType.int64.convertValue("")
       }

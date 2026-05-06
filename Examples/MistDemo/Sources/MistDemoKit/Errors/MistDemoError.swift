@@ -30,8 +30,8 @@
 import Foundation
 import MistKit
 
-/// Comprehensive error type for MistDemo operations
-enum MistDemoError: LocalizedError, Sendable {
+/// Comprehensive error type for MistDemo operations.
+internal enum MistDemoError: LocalizedError, Sendable {
   /// Authentication failed with underlying error
   case authenticationFailed(description: String, context: String)
 
@@ -58,7 +58,7 @@ enum MistDemoError: LocalizedError, Sendable {
 
   // MARK: Public
 
-  var errorDescription: String? {
+  internal var errorDescription: String? {
     switch self {
     case .authenticationFailed(_, let context):
       "Authentication failed: \(context)"
@@ -79,7 +79,7 @@ enum MistDemoError: LocalizedError, Sendable {
     }
   }
 
-  var recoverySuggestion: String? {
+  internal var recoverySuggestion: String? {
     switch self {
     case .authenticationFailed:
       "Token may be expired. Run 'mistdemo auth' to sign in again."
@@ -100,8 +100,8 @@ enum MistDemoError: LocalizedError, Sendable {
     }
   }
 
-  /// Get the error code for machine-readable output
-  var errorCode: String {
+  /// Get the error code for machine-readable output.
+  internal var errorCode: String {
     switch self {
     case .authenticationFailed:
       "AUTHENTICATION_FAILED"
@@ -122,8 +122,8 @@ enum MistDemoError: LocalizedError, Sendable {
     }
   }
 
-  /// Get error details for structured output
-  var errorDetails: [String: String] {
+  /// Get error details for structured output.
+  internal var errorDetails: [String: String] {
     switch self {
     case .authenticationFailed(_, let context):
       ["context": context]
@@ -144,8 +144,8 @@ enum MistDemoError: LocalizedError, Sendable {
     }
   }
 
-  /// Convert to structured ErrorOutput
-  var errorOutput: ErrorOutput {
+  /// Convert to structured ErrorOutput.
+  internal var errorOutput: ErrorOutput {
     ErrorOutput(
       code: errorCode,
       message: errorDescription ?? "Unknown error",

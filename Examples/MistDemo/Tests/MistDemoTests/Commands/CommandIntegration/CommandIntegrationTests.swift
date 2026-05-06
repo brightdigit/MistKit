@@ -1,4 +1,3 @@
-// swiftlint:disable file_length type_body_length
 //
 //  CommandIntegrationTests.swift
 //  MistDemoTests
@@ -33,21 +32,24 @@ import Testing
 
 @testable import MistDemoKit
 
+// swiftlint:disable file_types_order one_declaration_per_file
 @Suite("Command Integration")
 internal enum CommandIntegrationTests {}
 
 // MARK: - Mock Token Manager for Integration Tests
 
 internal final class MockCommandTokenManager: TokenManager {
-  var hasCredentials: Bool {
+  internal var hasCredentials: Bool {
     get async { true }
   }
 
-  func validateCredentials() async throws(TokenManagerError) -> Bool {
+  internal func validateCredentials() async throws(TokenManagerError) -> Bool {
     true
   }
 
-  func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
     .webAuthToken(apiToken: "mock-api", webToken: "mock-web-auth")
   }
 }
+
+// swiftlint:enable file_types_order one_declaration_per_file

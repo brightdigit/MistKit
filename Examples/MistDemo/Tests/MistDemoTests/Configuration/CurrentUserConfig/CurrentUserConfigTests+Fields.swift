@@ -37,7 +37,7 @@ extension CurrentUserConfigTests {
   @Suite("Fields")
   internal struct Fields {
     @Test("CurrentUserConfig initializes with single field")
-    func initializeWithSingleField() async throws {
+    internal func initializeWithSingleField() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,
@@ -49,7 +49,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with multiple fields")
-    func initializeWithMultipleFields() async throws {
+    internal func initializeWithMultipleFields() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,
@@ -63,7 +63,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig handles standard user fields")
-    func handleStandardUserFields() async throws {
+    internal func handleStandardUserFields() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,

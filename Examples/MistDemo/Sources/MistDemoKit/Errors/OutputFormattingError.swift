@@ -34,6 +34,7 @@ public enum OutputFormattingError: Error, LocalizedError {
   case encodingFailure(String)
   case unsupportedType(String)
 
+  /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .encodingFailure(let message):

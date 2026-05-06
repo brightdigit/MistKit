@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 //
 //  TableFormatterTests+EdgeCases.swift
 //  MistDemoTests

@@ -30,15 +30,17 @@
 import Foundation
 import MistKit
 
-struct UploadAssetPhase: IntegrationPhase {
-  typealias Input = NoState
-  typealias Output = AssetUploadReceipt
+internal struct UploadAssetPhase: IntegrationPhase {
+  internal typealias Input = NoState
+  internal typealias Output = AssetUploadReceipt
 
-  static let title = "Upload test asset"
-  static let emoji = "📤"
-  static let apiName = "uploadAssets"
+  internal static let title = "Upload test asset"
+  internal static let emoji = "📤"
+  internal static let apiName = "uploadAssets"
 
-  func run(input: NoState, context: PhaseContext) async throws -> AssetUploadReceipt {
+  internal func run(
+    input: NoState, context: PhaseContext
+  ) async throws -> AssetUploadReceipt {
     print("\n\(Self.emoji) \(Self.title)")
 
     let testData = IntegrationTestData.generateTestImage(sizeKB: context.assetSizeKB)

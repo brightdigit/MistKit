@@ -37,7 +37,7 @@ extension UpdateConfigTests {
   @Suite("Output Format")
   internal struct OutputFormatTests {
     @Test("UpdateConfig accepts JSON output format")
-    func outputJSON() async throws {
+    internal func outputJSON() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, recordName: "rec1", output: .json)
 
@@ -45,7 +45,7 @@ extension UpdateConfigTests {
     }
 
     @Test("UpdateConfig accepts table output format")
-    func outputTable() async throws {
+    internal func outputTable() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, recordName: "rec1", output: .table)
 
@@ -53,7 +53,7 @@ extension UpdateConfigTests {
     }
 
     @Test("UpdateConfig accepts CSV output format")
-    func outputCSV() async throws {
+    internal func outputCSV() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, recordName: "rec1", output: .csv)
 
@@ -61,7 +61,7 @@ extension UpdateConfigTests {
     }
 
     @Test("UpdateConfig accepts YAML output format")
-    func outputYAML() async throws {
+    internal func outputYAML() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = UpdateConfig(base: baseConfig, recordName: "rec1", output: .yaml)
 

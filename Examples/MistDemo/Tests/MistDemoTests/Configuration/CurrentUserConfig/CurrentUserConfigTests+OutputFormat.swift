@@ -37,7 +37,7 @@ extension CurrentUserConfigTests {
   @Suite("Output Format")
   internal struct OutputFormatTests {
     @Test("CurrentUserConfig initializes with JSON output format")
-    func initializeWithJSONOutput() async throws {
+    internal func initializeWithJSONOutput() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,
@@ -48,7 +48,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with CSV output format")
-    func initializeWithCSVOutput() async throws {
+    internal func initializeWithCSVOutput() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,
@@ -59,7 +59,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with table output format")
-    func initializeWithTableOutput() async throws {
+    internal func initializeWithTableOutput() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,
@@ -70,7 +70,7 @@ extension CurrentUserConfigTests {
     }
 
     @Test("CurrentUserConfig initializes with YAML output format")
-    func initializeWithYAMLOutput() async throws {
+    internal func initializeWithYAMLOutput() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CurrentUserConfig(
         base: baseConfig,

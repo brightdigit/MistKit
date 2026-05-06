@@ -39,7 +39,7 @@ extension FieldsInputTests {
     internal func decodeDoubleField() throws {
       let json = """
         {
-            "price": 19.99
+          "price": 19.99
         }
         """
       let data = Data(json.utf8)
@@ -56,7 +56,7 @@ extension FieldsInputTests {
     internal func decodeNegativeDoubleField() throws {
       let json = """
         {
-            "latitude": -33.8688
+          "latitude": -33.8688
         }
         """
       let data = Data(json.utf8)

@@ -1,4 +1,3 @@
-// swiftlint:disable file_name
 //
 //  ConfigKey+MistDemoTests+BooleanConfigKeyWithPrefix.swift
 //  MistDemo

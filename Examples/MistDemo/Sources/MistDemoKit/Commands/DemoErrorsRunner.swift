@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 //
 //  DemoErrorsRunner.swift
 //  MistDemo
@@ -34,12 +35,13 @@ import MistKit
 /// `CloudKitError` details. Mirrors the section/prefix style of
 /// `IntegrationTestRunner`.
 internal struct DemoErrorsRunner {
-  internal let config: MistDemoConfig
-
   /// Record type used by 404 and 409 demos. The 404 type is unlikely to exist;
   /// the 409 type is the same `Note` schema used by other MistDemo commands.
-  private static let bogusRecordType = "DefinitelyNotARealType_DemoErrorsCommand_xyz"
+  private static let bogusRecordType =
+    "DefinitelyNotARealType_DemoErrorsCommand_xyz"
   private static let conflictRecordType = "Note"
+
+  internal let config: MistDemoConfig
 
   internal func run(scenario: ErrorScenario) async {
     printRunnerHeader()
@@ -67,16 +69,19 @@ internal struct DemoErrorsRunner {
   internal func runUnauthorized() async {
     printSectionHeader("401 — Unauthorized (invalid credentials)")
     do {
+      let badTokenManager =
+        MistKitClientFactory.makeBadCredentialsTokenManager()
       let service = try MistKitClientFactory.create(
         from: config.with(database: .private),
-        tokenManager: MistKitClientFactory.makeBadCredentialsTokenManager()
+        tokenManager: badTokenManager
       )
       _ = try await service.fetchCurrentUser()
       print("⚠️  Expected 401 but call succeeded — credentials may not be validated server-side.")
     } catch let error as CloudKitError {
       printCloudKitError(error, expectedStatus: 401)
       print(
-        "💡 Recovery: refresh CLOUDKIT_WEB_AUTH_TOKEN (or rerun `mistdemo auth-token`) and retry.")
+        "💡 Recovery: refresh CLOUDKIT_WEB_AUTH_TOKEN (or rerun `mistdemo auth-token`) and retry."
+      )
     } catch {
       print("❌ Unexpected non-CloudKit error: \(error)")
     }
@@ -101,9 +106,9 @@ internal struct DemoErrorsRunner {
 
   // MARK: - 409 Conflict
 
-  /// Demonstrates 409 by creating a record, modifying it once (which advances the
-  /// `recordChangeTag`), then attempting a second modify with the original (now
-  /// stale) tag. CloudKit returns 409 with the current `serverRecord`.
+  /// Demonstrates 409 by creating a record, modifying it once
+  /// (which advances the `recordChangeTag`), then attempting a
+  /// second modify with the original (now stale) tag.
   internal func runConflict() async {
     printSectionHeader("409 — Conflict (stale recordChangeTag)")
 
@@ -115,13 +120,29 @@ internal struct DemoErrorsRunner {
       return
     }
 
-    let recordName = "demo-errors-conflict-\(Int(Date().timeIntervalSince1970))"
+    let recordName =
+      "demo-errors-conflict-\(Int(Date().timeIntervalSince1970))"
+
+    let result = await setupAndRunConflict(
+      service: service, recordName: recordName
+    )
+    await cleanupConflictRecord(
+      service: service,
+      createdRecordName: result
+    )
+  }
+
+  /// Creates a record, updates it to advance the change tag,
+  /// then retries with the stale tag to trigger 409.
+  private func setupAndRunConflict(
+    service: CloudKitService,
+    recordName: String
+  ) async -> String? {
     var createdRecordName: String?
     var staleTag: String?
 
-    // Step 1 (setup): create the base record.
+    // Step 1: create the base record.
     do {
-      print("\n1️⃣  Creating record \(recordName)…")
       let created = try await service.createRecord(
         recordType: Self.conflictRecordType,
         recordName: recordName,
@@ -129,48 +150,41 @@ internal struct DemoErrorsRunner {
       )
       createdRecordName = created.recordName
       staleTag = created.recordChangeTag
-      print("   ✅ Created. Initial recordChangeTag = \(describe(staleTag))")
     } catch {
-      print("❌ Setup failed during create — cannot run 409 demo: \(error)")
-      return
+      print("❌ Setup create failed: \(error)")
+      return nil
     }
 
-    // Step 2 (setup): first update advances the changeTag server-side.
+    // Step 2: first update advances the changeTag.
     do {
-      print("\n2️⃣  Updating once (advances recordChangeTag server-side)…")
-      let updated = try await service.updateRecord(
+      _ = try await service.updateRecord(
         recordType: Self.conflictRecordType,
         recordName: recordName,
         fields: ["title": .string("first-update")],
         recordChangeTag: staleTag
       )
-      print("   ✅ Update accepted. New recordChangeTag = \(describe(updated.recordChangeTag))")
     } catch {
-      print("❌ Setup failed during first update — cannot run 409 demo: \(error)")
-      await cleanupConflictRecord(service: service, createdRecordName: createdRecordName)
-      return
+      print("❌ Setup update failed: \(error)")
+      return createdRecordName
     }
 
-    // Step 3 (the demo): re-use the now-stale changeTag.
+    // Step 3: re-use the now-stale changeTag.
     do {
-      print("\n3️⃣  Re-using the original (now stale) recordChangeTag — expect 409…")
       _ = try await service.updateRecord(
         recordType: Self.conflictRecordType,
         recordName: recordName,
         fields: ["title": .string("second-update-stale")],
         recordChangeTag: staleTag
       )
-      print("⚠️  Expected 409 but the stale-tag update was accepted.")
+      print("⚠️  Expected 409 but update was accepted.")
     } catch {
       printCloudKitError(error, expectedStatus: 409)
       if error.httpStatusCode == 409 {
-        print(
-          "💡 Recovery: read the `serverRecord` from the response, merge fields, and retry"
-            + " with the fresh recordChangeTag.")
+        print("💡 Recovery: merge with serverRecord.")
       }
     }
 
-    await cleanupConflictRecord(service: service, createdRecordName: createdRecordName)
+    return createdRecordName
   }
 
   /// Best-effort delete of the record created during the 409 demo.
@@ -178,7 +192,9 @@ internal struct DemoErrorsRunner {
     service: CloudKitService,
     createdRecordName: String?
   ) async {
-    guard let createdRecordName else { return }
+    guard let createdRecordName else {
+      return
+    }
     print("\n🧹 Cleaning up demo record \(createdRecordName)…")
     do {
       try await service.deleteRecord(
@@ -227,7 +243,9 @@ internal struct DemoErrorsRunner {
   }
 
   private func describe(_ tag: String?) -> String {
-    guard let tag, !tag.isEmpty else { return "<none>" }
+    guard let tag, !tag.isEmpty else {
+      return "<none>"
+    }
     return tag
   }
 }

@@ -55,7 +55,7 @@ extension CreateErrorTests {
 
       for error in errors {
         #expect(error.errorDescription != nil)
-        #expect(!error.errorDescription!.isEmpty)
+        #expect(error.errorDescription?.isEmpty == false)
       }
     }
   }

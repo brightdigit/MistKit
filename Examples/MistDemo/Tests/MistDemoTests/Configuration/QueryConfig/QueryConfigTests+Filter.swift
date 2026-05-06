@@ -37,7 +37,7 @@ extension QueryConfigTests {
   @Suite("Filter")
   internal struct Filter {
     @Test("QueryConfig initializes with empty filters")
-    func initializeWithEmptyFilters() async throws {
+    internal func initializeWithEmptyFilters() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -48,7 +48,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with single filter")
-    func initializeWithSingleFilter() async throws {
+    internal func initializeWithSingleFilter() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,
@@ -60,7 +60,7 @@ extension QueryConfigTests {
     }
 
     @Test("QueryConfig initializes with multiple filters")
-    func initializeWithMultipleFilters() async throws {
+    internal func initializeWithMultipleFilters() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = QueryConfig(
         base: baseConfig,

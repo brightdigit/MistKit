@@ -36,7 +36,7 @@ extension FieldTests {
   @Suite("Basic Parsing")
   internal struct BasicParsing {
     @Test("Parse basic string field")
-    func parseBasicStringField() throws {
+    internal func parseBasicStringField() throws {
       let field = try Field(parsing: "title:string:Hello World")
 
       #expect(field.name == "title")
@@ -45,7 +45,7 @@ extension FieldTests {
     }
 
     @Test("Parse int64 field")
-    func parseInt64Field() throws {
+    internal func parseInt64Field() throws {
       let field = try Field(parsing: "count:int64:42")
 
       #expect(field.name == "count")
@@ -54,7 +54,7 @@ extension FieldTests {
     }
 
     @Test("Parse double field")
-    func parseDoubleField() throws {
+    internal func parseDoubleField() throws {
       let field = try Field(parsing: "price:double:19.99")
 
       #expect(field.name == "price")
@@ -63,7 +63,7 @@ extension FieldTests {
     }
 
     @Test("Parse timestamp field")
-    func parseTimestampField() throws {
+    internal func parseTimestampField() throws {
       let field = try Field(parsing: "createdAt:timestamp:2024-01-15T10:30:00Z")
 
       #expect(field.name == "createdAt")

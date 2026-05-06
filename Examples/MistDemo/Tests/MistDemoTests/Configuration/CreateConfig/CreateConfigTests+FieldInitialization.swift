@@ -37,7 +37,7 @@ extension CreateConfigTests {
   @Suite("Field Initialization")
   internal struct FieldInitialization {
     @Test("CreateConfig initializes with empty fields")
-    func initializeWithEmptyFields() async throws {
+    internal func initializeWithEmptyFields() async throws {
       let baseConfig = try await MistDemoConfig()
       let config = CreateConfig(
         base: baseConfig,
@@ -48,7 +48,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with single field")
-    func initializeWithSingleField() async throws {
+    internal func initializeWithSingleField() async throws {
       let baseConfig = try await MistDemoConfig()
       let field = Field(name: "title", type: .string, value: "Hello World")
       let config = CreateConfig(
@@ -63,7 +63,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with multiple fields")
-    func initializeWithMultipleFields() async throws {
+    internal func initializeWithMultipleFields() async throws {
       let baseConfig = try await MistDemoConfig()
       let fields = [
         Field(name: "title", type: .string, value: "Test Title"),
@@ -82,7 +82,7 @@ extension CreateConfigTests {
     }
 
     @Test("CreateConfig initializes with different field types")
-    func initializeWithDifferentFieldTypes() async throws {
+    internal func initializeWithDifferentFieldTypes() async throws {
       let baseConfig = try await MistDemoConfig()
       let fields = [
         Field(name: "stringField", type: .string, value: "text"),

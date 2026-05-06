@@ -37,29 +37,29 @@ extension CreateCommandTests {
   internal struct FieldValidation {
     @Test("Field parsing throws on invalid format")
     internal func fieldParsingThrowsOnInvalidFormat() async throws {
-      #expect(throws: Error.self) {
+      #expect(throws: (any Error).self) {
         _ = try Field(parsing: "invalid-format")
       }
 
-      #expect(throws: Error.self) {
+      #expect(throws: (any Error).self) {
         _ = try Field(parsing: "field:missing-value")
       }
 
-      #expect(throws: Error.self) {
+      #expect(throws: (any Error).self) {
         _ = try Field(parsing: "field:invalid-type:value")
       }
     }
 
     @Test("Field parsing validates field name")
     internal func fieldParsingValidatesFieldName() async throws {
-      #expect(throws: Error.self) {
+      #expect(throws: (any Error).self) {
         _ = try Field(parsing: ":string:value")
       }
     }
 
     @Test("Field parsing validates type")
     internal func fieldParsingValidatesType() async throws {
-      #expect(throws: Error.self) {
+      #expect(throws: (any Error).self) {
         _ = try Field(parsing: "field:invalidtype:value")
       }
     }

@@ -30,7 +30,8 @@
 #if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import SwiftUI
 
-  struct QueryView: View {
+  /// View for querying Note records from CloudKit.
+  internal struct QueryView: View {
     @EnvironmentObject private var service: NativeCloudKitService
     @State private var limit: Int = 50
     @State private var notes: [Note] = []
@@ -39,7 +40,7 @@
     @State private var selectedNote: Note?
     @State private var showCreateSheet = false
 
-    var body: some View {
+    internal var body: some View {
       VStack(spacing: 0) {
         controls
           .padding()
@@ -52,13 +53,17 @@
           Spacer()
         } else if let loadError {
           ContentUnavailableView(
-            "Query failed", systemImage: "exclamationmark.triangle", description: Text(loadError))
+            "Query failed",
+            systemImage: "exclamationmark.triangle",
+            description: Text(loadError)
+          )
         } else if notes.isEmpty {
           ContentUnavailableView(
             "No notes",
             systemImage: "tray",
             description: Text(
-              "Tap + to create the first one, or run `mistdemo create` from the CLI.")
+              "Tap + to create the first one, or run `mistdemo create` from the CLI."
+            )
           )
         } else {
           List(notes, selection: $selectedNote) { note in

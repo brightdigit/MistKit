@@ -34,10 +34,12 @@ import MistKit
 public struct TableFormatter: OutputFormatter {
   // MARK: Lifecycle
 
+  /// Creates a new instance.
   public init() {}
 
   // MARK: Public
 
+  /// Formats the value as a plain text table.
   public func format<T: Encodable>(_ value: T) throws -> String {
     // For table format, we need to handle specific types
     // since table formatting is inherently structure-dependent

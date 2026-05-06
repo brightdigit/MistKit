@@ -36,7 +36,7 @@ extension FieldParsingErrorTests {
   @Suite("unsupportedFieldType Error")
   internal struct UnsupportedFieldType {
     @Test("unsupportedFieldType error has correct description for asset")
-    func unsupportedFieldTypeAssetErrorDescription() {
+    internal func unsupportedFieldTypeAssetErrorDescription() {
       let error = FieldParsingError.unsupportedFieldType(.asset)
       let description = error.errorDescription
 
@@ -46,7 +46,7 @@ extension FieldParsingErrorTests {
     }
 
     @Test("unsupportedFieldType error has correct description for location")
-    func unsupportedFieldTypeLocationErrorDescription() {
+    internal func unsupportedFieldTypeLocationErrorDescription() {
       let error = FieldParsingError.unsupportedFieldType(.location)
       let description = error.errorDescription
 
@@ -56,7 +56,7 @@ extension FieldParsingErrorTests {
     }
 
     @Test("unsupportedFieldType error is thrown for location type")
-    func unsupportedFieldTypeAssetErrorThrown() {
+    internal func unsupportedFieldTypeAssetErrorThrown() {
       do {
         _ = try FieldType.location.convertValue("anything")
         Issue.record("Expected unsupportedFieldType error to be thrown")
@@ -72,7 +72,7 @@ extension FieldParsingErrorTests {
     }
 
     @Test("unsupportedFieldType error is thrown for bytes type")
-    func unsupportedFieldTypeBytesErrorThrown() {
+    internal func unsupportedFieldTypeBytesErrorThrown() {
       do {
         _ = try FieldType.bytes.convertValue("anything")
         Issue.record("Expected unsupportedFieldType error to be thrown")

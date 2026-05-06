@@ -36,7 +36,7 @@ extension FieldParsingErrorTests {
   @Suite("emptyFieldName Error")
   internal struct EmptyFieldName {
     @Test("emptyFieldName error has correct description")
-    func emptyFieldNameErrorDescription() {
+    internal func emptyFieldNameErrorDescription() {
       let error = FieldParsingError.emptyFieldName(":string:value")
       let description = error.errorDescription
 
@@ -46,7 +46,7 @@ extension FieldParsingErrorTests {
     }
 
     @Test("emptyFieldName error is thrown for empty name")
-    func emptyFieldNameErrorThrown() {
+    internal func emptyFieldNameErrorThrown() {
       do {
         _ = try Field(parsing: ":string:value")
         Issue.record("Expected emptyFieldName error to be thrown")
@@ -62,7 +62,7 @@ extension FieldParsingErrorTests {
     }
 
     @Test("emptyFieldName error is thrown for whitespace-only name")
-    func emptyFieldNameErrorThrownForWhitespace() {
+    internal func emptyFieldNameErrorThrownForWhitespace() {
       do {
         _ = try Field(parsing: "   :string:value")
         Issue.record("Expected emptyFieldName error to be thrown")

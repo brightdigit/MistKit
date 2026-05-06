@@ -33,44 +33,41 @@ import MistKit
 /// Walks the audience through CloudKit's typed errors for the talk's
 /// "CloudKit as Your Backend" / Act 3, Step 4 — Error handling segment.
 public struct DemoErrorsCommand: MistDemoCommand {
+  /// The configuration type.
   public typealias Config = DemoErrorsConfig
+  /// The command name.
   public static let commandName = "demo-errors"
-  public static let abstract = "Demonstrate typed CloudKit error handling (401, 404, 409)"
+  /// The command abstract.
+  public static let abstract =
+    "Demonstrate typed CloudKit error handling"
+  /// The command help text.
   public static let helpText = """
-    DEMO-ERRORS - Demonstrate typed CloudKit error handling
+    DEMO-ERRORS - Typed CloudKit error handling
 
-    Triggers and prints typed CloudKitError values for the three status codes
-    most commonly handled in production CloudKit apps:
-
-      401 — Unauthorized            (invalid credentials)
-      404 — Not Found               (unknown record type)
-      409 — Conflict                (stale recordChangeTag, optimistic-locking failure)
-
-    Designed for the "CloudKit as Your Backend" talk's error-handling segment.
+    Triggers typed CloudKitError values for status codes
+    401, 404, and 409.
 
     USAGE:
-        mistdemo demo-errors [--scenario <code>] [--database <db>]
+      mistdemo demo-errors [--scenario <code>]
 
     OPTIONS:
-        --scenario <code>          Which scenario to run: all (default), 401, 404, 409
-        --database <type>          Database to target for 404 + 409: public, private, shared
-                                   (default from MistDemoConfig: public)
+      --scenario <code>    all (default), 401, 404, 409
+      --database <type>    Database for 404/409 demos
 
     NOTES:
-        • The 401 scenario constructs a *separate* service with placeholder tokens —
-          your real CLOUDKIT_API_TOKEN / CLOUDKIT_WEB_AUTH_TOKEN are never modified.
-        • The 409 scenario creates a real record on the target database, mutates it,
-          then retries with a stale recordChangeTag to force the conflict. It cleans
-          up the test record at the end (best effort).
-        • Run 'mistdemo demo-errors --scenario 401' for a single quick demo.
+      The 401 scenario uses placeholder tokens. The 409
+      scenario creates, mutates, then retries with a stale
+      recordChangeTag.
     """
 
   private let config: DemoErrorsConfig
 
+  /// Creates a new instance.
   public init(config: DemoErrorsConfig) {
     self.config = config
   }
 
+  /// Executes the command.
   public func execute() async throws {
     let runner = DemoErrorsRunner(config: config.base)
     await runner.run(scenario: config.scenario)

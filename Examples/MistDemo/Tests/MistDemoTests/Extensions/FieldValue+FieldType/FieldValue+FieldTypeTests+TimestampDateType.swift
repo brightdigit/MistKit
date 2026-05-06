@@ -1,4 +1,3 @@
-// swiftlint:disable file_name
 //
 //  FieldValue+FieldTypeTests+TimestampDateType.swift
 //  MistDemo

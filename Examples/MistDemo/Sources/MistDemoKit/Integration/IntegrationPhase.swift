@@ -30,29 +30,13 @@
 import Foundation
 import MistKit
 
-/// A type that can be initialized from `PhaseState`.
-///
-/// Modeled after `Decodable`: each phase's `Input` type owns its own
-/// rules for reading the slice of `PhaseState` it needs.
-protocol PhaseStateDecodable: Sendable {
-  init(from state: PhaseState) throws
-}
-
-/// A type that can write itself into `PhaseState`.
-///
-/// Modeled after `Encodable`: each phase's `Output` type owns its own
-/// rules for writing back into `PhaseState`.
-protocol PhaseStateEncodable: Sendable {
-  func encode(to state: inout PhaseState)
-}
-
 /// A single step in an integration test.
 ///
 /// `Input` and `Output` describe the slices of `PhaseState` the phase reads
 /// and writes; the phase itself only carries metadata and run logic. The
 /// runner adapts heterogeneous phases via `runErased`, which decodes the
 /// input from state, runs the phase, and encodes the output back.
-protocol IntegrationPhase<Input, Output> {
+internal protocol IntegrationPhase<Input, Output> {
   associatedtype Input: PhaseStateDecodable
   associatedtype Output: PhaseStateEncodable
 
@@ -62,18 +46,19 @@ protocol IntegrationPhase<Input, Output> {
 
   func run(input: Input, context: PhaseContext) async throws -> Output
 
-  /// Type-erased entry point used by the runner to drive a `[any IntegrationPhase]`.
-  func runErased(context: PhaseContext, state: inout PhaseState) async throws
+  /// Type-erased entry point used by the runner
+  /// to drive a `[any IntegrationPhase]`.
+  func runErased(
+    context: PhaseContext, state: inout PhaseState
+  ) async throws
 }
 
 extension IntegrationPhase {
-  func runErased(context: PhaseContext, state: inout PhaseState) async throws {
+  internal func runErased(
+    context: PhaseContext, state: inout PhaseState
+  ) async throws {
     let input = try Input(from: state)
     let output = try await run(input: input, context: context)
     output.encode(to: &state)
   }
 }
-
-/// Marker protocol identifying the cleanup phase so the runner can skip it
-/// when `--skip-cleanup` is set and re-run it on failure.
-protocol CleanupPhaseMarker {}

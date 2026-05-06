@@ -40,7 +40,8 @@ extension CreateCommandTests {
       let parseError = CreateError.invalidJSONFormat("Invalid JSON format")
       let fileError = CreateError.jsonFileError("test.json", "File not found")
       let conversionError = CreateError.fieldConversionError(
-        "field", .string, "value", "Conversion failed")
+        "field", .string, "value", "Conversion failed"
+      )
 
       #expect(parseError.errorDescription?.contains("Invalid JSON format") == true)
       #expect(fileError.errorDescription?.contains("File not found") == true)

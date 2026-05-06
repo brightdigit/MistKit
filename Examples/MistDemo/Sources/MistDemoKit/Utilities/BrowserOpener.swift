@@ -33,11 +33,11 @@ import Foundation
   import AppKit
 #endif
 
-/// Utility for opening URLs in the default browser
-struct BrowserOpener {
-  /// Open a URL in the default browser
-  /// - Parameter url: The URL string to open
-  static func openBrowser(url: String) {
+/// Utility for opening URLs in the default browser.
+internal enum BrowserOpener {
+  /// Open a URL in the default browser.
+  /// - Parameter url: The URL string to open.
+  internal static func openBrowser(url: String) {
     #if canImport(AppKit)
       if let url = URL(string: url) {
         NSWorkspace.shared.open(url)

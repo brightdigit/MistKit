@@ -31,24 +31,14 @@ import Foundation
 public import MistKit
 
 extension FieldValue {
-  /// Initialize FieldValue from a parsed value and field type
+  /// Initialize FieldValue from a parsed value and field type.
   ///
-  /// This convenience initializer simplifies converting MistDemo's parsed field values
-  /// into MistKit's FieldValue enum cases. It handles type conversion and validation.
+  /// This convenience initializer simplifies converting MistDemo's parsed
+  /// field values into MistKit's FieldValue enum cases.
   ///
   /// - Parameters:
   ///   - value: The parsed value (from FieldType.convertValue)
-  ///   - fieldType: The MistDemo FieldType that specifies what type this value should be
-  /// - Returns: A FieldValue if the conversion is successful, nil otherwise
-  ///
-  /// ## Example
-  /// ```swift
-  /// let field = try Field(parsing: "title:string:Hello")
-  /// let convertedValue = try field.type.convertValue(field.value)
-  /// if let fieldValue = FieldValue(value: convertedValue, fieldType: field.type) {
-  ///     // Use fieldValue in CloudKit operations
-  /// }
-  /// ```
+  ///   - fieldType: The MistDemo FieldType for this value
   public init?(value: Any, fieldType: FieldType) {
     guard let converted = FieldValue.convert(value: value, fieldType: fieldType) else {
       return nil
@@ -60,22 +50,30 @@ extension FieldValue {
   private static func convert(value: Any, fieldType: FieldType) -> FieldValue? {
     switch fieldType {
     case .string:
-      guard let stringValue = value as? String else { return nil }
+      guard let stringValue = value as? String else {
+        return nil
+      }
       return .string(stringValue)
 
     case .int64:
       return convertInt64(value: value)
 
     case .double:
-      guard let doubleValue = value as? Double else { return nil }
+      guard let doubleValue = value as? Double else {
+        return nil
+      }
       return .double(doubleValue)
 
     case .timestamp:
-      guard let dateValue = value as? Date else { return nil }
+      guard let dateValue = value as? Date else {
+        return nil
+      }
       return .date(dateValue)
 
     case .bytes:
-      guard let stringValue = value as? String else { return nil }
+      guard let stringValue = value as? String else {
+        return nil
+      }
       return .bytes(stringValue)
 
     case .asset:
@@ -99,7 +97,9 @@ extension FieldValue {
 
   private static func convertAsset(value: Any) -> FieldValue? {
     // Value should be the URL from upload token
-    guard let urlString = value as? String else { return nil }
+    guard let urlString = value as? String else {
+      return nil
+    }
     let asset = FieldValue.Asset(
       fileChecksum: nil,
       size: nil,

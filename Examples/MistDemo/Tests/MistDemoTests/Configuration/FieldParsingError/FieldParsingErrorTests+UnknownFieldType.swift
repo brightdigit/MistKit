@@ -36,7 +36,7 @@ extension FieldParsingErrorTests {
   @Suite("unknownFieldType Error")
   internal struct UnknownFieldType {
     @Test("unknownFieldType error has correct description")
-    func unknownFieldTypeErrorDescription() {
+    internal func unknownFieldTypeErrorDescription() {
       let error = FieldParsingError.unknownFieldType("invalid", available: ["string", "int64"])
       let description = error.errorDescription
 
@@ -48,7 +48,7 @@ extension FieldParsingErrorTests {
     }
 
     @Test("unknownFieldType error is thrown for invalid type")
-    func unknownFieldTypeErrorThrown() {
+    internal func unknownFieldTypeErrorThrown() {
       do {
         _ = try Field(parsing: "name:invalid:value")
         Issue.record("Expected unknownFieldType error to be thrown")

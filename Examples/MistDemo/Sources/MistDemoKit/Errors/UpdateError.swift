@@ -40,15 +40,20 @@ public enum UpdateError: Error, LocalizedError {
   case operationFailed(String)
   case conflict(reason: String?)
 
+  /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .recordNameRequired:
       return "Record name is required for update operations. Use --record-name <name>"
     case .noFieldsProvided:
       return "No fields provided. Use --field, --json-file, or --stdin to specify fields to update"
-    case .fieldConversionError(let fieldName, let fieldType, let value, let reason):
+    case .fieldConversionError(
+      let fieldName, let fieldType, let value, let reason
+    ):
       return
-        "Failed to convert field '\(fieldName)' of type '\(fieldType.rawValue)' with value '\(value)': \(reason)"
+        "Failed to convert field '\(fieldName)'"
+        + " of type '\(fieldType.rawValue)'"
+        + " with value '\(value)': \(reason)"
     case .jsonFileError(let filename, let reason):
       return "Failed to read JSON file '\(filename)': \(reason)"
     case .emptyStdin:
@@ -65,24 +70,34 @@ public enum UpdateError: Error, LocalizedError {
     }
   }
 
+  /// A localized recovery suggestion.
   public var recoverySuggestion: String? {
     switch self {
     case .recordNameRequired:
       return
-        "Specify a record name: mistdemo update --record-name my-record-123 --field \"title:string:Updated\""
+        "Specify a record name: mistdemo update"
+        + " --record-name my-record-123"
+        + " --field \"title:string:Updated\""
     case .noFieldsProvided:
-      return "Provide at least one field to update using --field, --json-file, or --stdin"
+      return
+        "Provide at least one field to update"
+        + " using --field, --json-file, or --stdin"
     case .fieldConversionError:
       return
-        "Check that the field value matches the expected type. Use --help for field type information"
+        "Check that the field value matches the"
+        + " expected type. Use --help for field type information"
     case .jsonFileError:
       return "Ensure the JSON file exists and contains valid JSON"
     case .emptyStdin:
       return
-        "Pipe JSON data to stdin: echo '{\"title\":\"Updated\"}' | mistdemo update --record-name my-record --stdin"
+        "Pipe JSON data to stdin:"
+        + " echo '{\"title\":\"Updated\"}'"
+        + " | mistdemo update --record-name my-record --stdin"
     case .conflict:
       return
-        "Re-run with --force to overwrite the server record, or fetch the current --record-change-tag and retry."
+        "Re-run with --force to overwrite the server"
+        + " record, or fetch the current"
+        + " --record-change-tag and retry."
     case .stdinError, .operationFailed:
       return nil
     }

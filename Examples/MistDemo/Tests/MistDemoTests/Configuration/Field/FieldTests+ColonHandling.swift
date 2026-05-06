@@ -36,7 +36,7 @@ extension FieldTests {
   @Suite("Colon Handling")
   internal struct ColonHandling {
     @Test("Parse field with colons in value (URL)")
-    func parseFieldWithColonsInURL() throws {
+    internal func parseFieldWithColonsInURL() throws {
       let field = try Field(parsing: "url:string:https://example.com:8080/path")
 
       #expect(field.name == "url")
@@ -45,7 +45,7 @@ extension FieldTests {
     }
 
     @Test("Parse field with colons in value (time)")
-    func parseFieldWithColonsInTime() throws {
+    internal func parseFieldWithColonsInTime() throws {
       let field = try Field(parsing: "time:string:10:30:45")
 
       #expect(field.name == "time")
@@ -54,7 +54,7 @@ extension FieldTests {
     }
 
     @Test("Parse field with multiple colons in value")
-    func parseFieldWithMultipleColons() throws {
+    internal func parseFieldWithMultipleColons() throws {
       let field = try Field(parsing: "data:string:a:b:c:d:e")
 
       #expect(field.name == "data")
