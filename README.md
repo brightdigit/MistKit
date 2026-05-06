@@ -13,7 +13,7 @@
 [![Maintainability](https://qlty.sh/badges/55637213-d307-477e-a710-f9dba332d955/maintainability.svg)](https://qlty.sh/gh/brightdigit/projects/MistKit)
 [![Documentation](https://img.shields.io/badge/docc-read_documentation-blue)](https://swiftpackageindex.com/brightdigit/MistKit/documentation)
 
-A Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
+A Swift Package for Server-Side and Command-Line Access to [CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)
 
 ## Table of Contents
 - [Overview](#overview)
@@ -36,7 +36,7 @@ A Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
 
 ## Overview
 
-MistKit provides a modern Swift interface to CloudKit Web Services REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the CloudKit framework isn't available. 
+MistKit provides a modern Swift interface to [CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices) REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the [CloudKit framework](https://developer.apple.com/documentation/cloudkit) isn't available. 
 
 Built with Swift concurrency (async/await) and designed for modern Swift applications, MistKit supports all three CloudKit authentication methods and provides type-safe access to CloudKit operations.
 
@@ -46,7 +46,7 @@ Built with Swift concurrency (async/await) and designed for modern Swift applica
 - **⚡ Modern Swift**: Built with Swift 6 concurrency features and structured error handling
 - **🔐 Multiple Authentication Methods**: API token, web authentication, and server-to-server authentication
 - **🛡️ Type-Safe**: Comprehensive type safety with Swift's type system
-- **📋 OpenAPI-Based**: Generated from CloudKit Web Services OpenAPI specification
+- **📋 OpenAPI-Based**: Generated from CloudKit Web Services [OpenAPI specification](https://www.openapis.org/) using [swift-openapi-generator](https://github.com/apple/swift-openapi-generator)
 - **🔒 Secure**: Built-in security best practices and credential management
 
 ## Getting Started
@@ -167,7 +167,7 @@ do {
 
 #### Web Authentication
 
-Web authentication enables user-specific operations and requires both an API token and a web authentication token obtained through CloudKit JS authentication.
+Web authentication enables user-specific operations and requires both an API token and a web authentication token. The token can be obtained either through [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs) authentication (browser flow) or from an iOS/macOS app via [`CKFetchWebAuthTokenOperation`](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation), which exchanges the user's existing iCloud session for a token your backend can use.
 
 ```swift
 let service = try CloudKitService(
@@ -238,7 +238,7 @@ do {
 
 #### Using AsyncHTTPClient Transport
 
-For server-side applications, MistKit can use [swift-openapi-async-http-client](https://github.com/swift-server/swift-openapi-async-http-client) as the underlying HTTP transport. This is particularly useful for server-side Swift applications that need robust HTTP client capabilities.
+For server-side applications, MistKit can use [swift-openapi-async-http-client](https://github.com/swift-server/swift-openapi-async-http-client) as the underlying HTTP transport, backed by [AsyncHTTPClient](https://github.com/swift-server/async-http-client). This is particularly useful for server-side Swift applications that need robust HTTP client capabilities.
 
 ```swift
 import MistKit
@@ -277,13 +277,26 @@ try await adaptiveManager.upgradeToWebAuthentication(webAuthToken: webToken)
 Check out the `Examples/` directory for complete working examples:
 
 - **[MistDemo](Examples/MistDemo/)**: Web-based CloudKit authentication demo with automatic token capture
-- **[BushelCloud](Examples/BushelCloud/)**: Server-to-Server auth demo syncing macOS restore images, Xcode, and Swift versions
-- **[CelestraCloud](Examples/CelestraCloud/)**: RSS reader demonstrating CloudKit query filtering, sorting, and web etiquette patterns
+- **[BushelCloud](Examples/BushelCloud/)**: Server-to-Server auth demo syncing macOS restore images, Xcode, and Swift versions — backend for the [Bushel app](https://getbushel.app)
+- **[CelestraCloud](Examples/CelestraCloud/)**: RSS reader demonstrating CloudKit query filtering, sorting, and web etiquette patterns — backend for the [Celestra app](https://celestr.app), built with [SyndiKit](https://github.com/brightdigit/SyndiKit)
 
 ## Documentation
 
 - **[API Documentation](https://swiftpackageindex.com/brightdigit/MistKit/~/documentation)**: Complete API reference
-- **[CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)**: Apple's official CloudKit Web Services documentation
+
+### Apple References
+
+- **[CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)**: Official CloudKit Web Services REST API documentation
+- **[CloudKit framework](https://developer.apple.com/documentation/cloudkit)**: On-device CloudKit framework (iOS/macOS)
+- **[CloudKit JS](https://developer.apple.com/documentation/cloudkitjs)**: Browser-based CloudKit access used for web auth token capture
+- **[CKFetchWebAuthTokenOperation](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation)**: iOS/macOS API for exchanging an iCloud session for a web auth token
+
+### Related Swift Packages
+
+- **[swift-openapi-generator](https://github.com/apple/swift-openapi-generator)**: Generates type-safe Swift clients from OpenAPI specs
+- **[swift-openapi-async-http-client](https://github.com/swift-server/swift-openapi-async-http-client)**: AsyncHTTPClient transport for OpenAPI clients
+- **[AsyncHTTPClient](https://github.com/swift-server/async-http-client)**: HTTP client for server-side Swift
+- **[swift-crypto](https://github.com/apple/swift-crypto)**: Cross-platform crypto used for ECDSA P-256 server-to-server signing
 
 ## License
 
