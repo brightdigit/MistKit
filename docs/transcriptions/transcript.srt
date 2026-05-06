@@ -1,0 +1,2708 @@
+1
+00:04:22,980 --> 00:04:25,700
+Hey, Evan, can you hear me all right? Yeah, I can hear you.
+
+2
+00:04:26,420 --> 00:04:28,740
+Awesome. How do I sound? Good.
+
+3
+00:04:30,260 --> 00:04:33,780
+I've used this microphone in ages. It's like all
+
+4
+00:04:34,280 --> 00:04:34,420
+dusty.
+
+5
+00:04:41,140 --> 00:04:44,100
+How you think I should wait like five minutes for people to come in or.
+
+6
+00:04:44,260 --> 00:04:47,530
+Probably. Yeah, that there's if. Yeah,
+
+7
+00:04:48,010 --> 00:04:51,610
+otherwise you can just. You could start, but that'll be
+
+8
+00:04:52,110 --> 00:04:54,250
+interesting. Do you mind if I grab a cup of coffee real quick? No,
+
+9
+00:04:54,750 --> 00:04:58,610
+not at all. Not at all. Okay, cool. I'm not using the AirPods
+
+10
+00:04:59,110 --> 00:05:01,370
+mic, so I can hear you, but you won't be able to hear me.
+
+11
+00:05:01,690 --> 00:05:02,250
+Okay.
+
+12
+00:06:02,440 --> 00:06:27,820
+It's.
+
+13
+00:08:51,699 --> 00:08:55,060
+Thank you for your patience.
+
+14
+00:09:09,010 --> 00:09:12,570
+So is it just you? It looks like it's just me.
+
+15
+00:09:13,070 --> 00:09:16,530
+Josh is trying to get in, but he's trying to get on on his mobile
+
+16
+00:09:17,030 --> 00:09:19,250
+device and I don't think that's possible with Riverside.
+
+17
+00:09:23,250 --> 00:09:26,130
+Surprised? I mean, I know they have an app.
+
+18
+00:09:27,590 --> 00:09:30,070
+Maybe he's using. I'm not sure if he's using. Using the app or not.
+
+19
+00:09:35,190 --> 00:09:38,630
+Should I just go? Sure.
+
+20
+00:09:39,830 --> 00:09:43,830
+Okay. Well, thanks for joining me,
+
+21
+00:09:44,330 --> 00:09:47,790
+Evan. I really appreciate it. I would
+
+22
+00:09:48,290 --> 00:09:49,910
+say no. I mean I do, seriously.
+
+23
+00:09:51,830 --> 00:09:55,070
+So yeah, this is a kind of a dry run. I would say
+
+24
+00:09:55,570 --> 00:09:59,670
+I'm about 60% done with this presentation about
+
+25
+00:10:00,310 --> 00:10:04,470
+CloudKit on the server and
+
+26
+00:10:04,870 --> 00:10:08,310
+we'll probably hop back and forth between Keynote and not Keynote,
+
+27
+00:10:08,870 --> 00:10:12,310
+but yeah. So this is
+
+28
+00:10:12,810 --> 00:10:16,630
+CloudKit as your backend from iOS to server side Swift.
+
+29
+00:10:27,600 --> 00:10:31,200
+So what is CloudKit? CloudKit is a service
+
+30
+00:10:32,240 --> 00:10:36,279
+launched by Apple probably a decade ago to
+
+31
+00:10:36,779 --> 00:10:40,520
+kind of give developers a built
+
+32
+00:10:41,020 --> 00:10:43,680
+in back end for storing data for their apps.
+
+33
+00:10:44,480 --> 00:10:48,250
+One of the biggest benefits is is how cheap it is to
+
+34
+00:10:48,750 --> 00:10:49,970
+use for iOS developers.
+
+35
+00:10:52,450 --> 00:10:55,850
+So if you have built an
+
+36
+00:10:56,350 --> 00:11:01,730
+app, you could just add CloudKit right here within the
+
+37
+00:11:02,209 --> 00:11:05,970
+Xcode project and use the
+
+38
+00:11:06,470 --> 00:11:10,130
+regular CloudKit API in Swift to go ahead and start using it
+
+39
+00:11:10,630 --> 00:11:14,430
+in your app. Here is what
+
+40
+00:11:14,930 --> 00:11:18,270
+it looks like to create a new record type. You can do all this through
+
+41
+00:11:18,430 --> 00:11:20,190
+the CloudKit dashboard.
+
+42
+00:11:24,190 --> 00:11:27,910
+In CloudKit you could also do this using a schema
+
+43
+00:11:28,410 --> 00:11:32,030
+file too. And you can export and import your schema that
+
+44
+00:11:32,530 --> 00:11:36,030
+way. And it's not a SQL based database,
+
+45
+00:11:36,530 --> 00:11:39,910
+it's much more, no sequel ish or an abstract layer
+
+46
+00:11:40,410 --> 00:11:44,120
+above it. But essentially you can create records
+
+47
+00:11:44,520 --> 00:11:48,200
+kind of like a table but not quite in your records.
+
+48
+00:11:49,400 --> 00:11:52,680
+You can create a struct for it.
+
+49
+00:11:53,180 --> 00:11:56,760
+You can just use CloudKit directly to go ahead and
+
+50
+00:11:57,260 --> 00:12:00,520
+then you can then plug it into your app and do fun stuff like this.
+
+51
+00:12:01,560 --> 00:12:05,280
+We can do things like queries and basic
+
+52
+00:12:05,780 --> 00:12:08,040
+database stuff. There's a lot of advantages to it.
+
+53
+00:12:09,280 --> 00:12:12,640
+For one, if you're doing Apple only,
+
+54
+00:12:13,600 --> 00:12:17,040
+then it definitely makes sense to look into, at least look
+
+55
+00:12:17,540 --> 00:12:18,080
+into CloudKit.
+
+56
+00:12:22,320 --> 00:12:25,440
+If you're just going to deploy to Apple Devices.
+
+57
+00:12:26,080 --> 00:12:28,720
+If you don't mind the,
+
+58
+00:12:29,920 --> 00:12:32,640
+the fact that it's not a regular SQL database,
+
+59
+00:12:34,050 --> 00:12:37,050
+that's something too to think about. If you like need a SQL database, this might
+
+60
+00:12:37,550 --> 00:12:41,010
+not be what you want. And then if you don't mind working with
+
+61
+00:12:41,510 --> 00:12:44,610
+a lot of the abstraction layers that CloudKit provides,
+
+62
+00:12:46,930 --> 00:12:50,730
+then this might be good for you to get started or especially
+
+63
+00:12:51,230 --> 00:12:54,930
+if you don't have any database experience. So as far as
+
+64
+00:12:55,430 --> 00:12:58,690
+like server choices, I would say CloudKit might not be your
+
+65
+00:12:59,190 --> 00:13:02,890
+first choice, but it certainly is a decent choice if you're
+
+66
+00:13:03,390 --> 00:13:04,450
+going the Apple only route.
+
+67
+00:13:09,970 --> 00:13:13,730
+But then the question comes in, why would you want Cloud server side CloudKit?
+
+68
+00:13:13,890 --> 00:13:16,610
+Why would you want to do anything with CloudKit on the server?
+
+69
+00:13:17,970 --> 00:13:21,690
+So here's, here's the first case. Well, this is
+
+70
+00:13:22,190 --> 00:13:26,090
+how you can go ahead and do that is they provide actually a REST API
+
+71
+00:13:26,590 --> 00:13:30,350
+for calls to CloudKit using the, if you
+
+72
+00:13:30,850 --> 00:13:35,710
+go to the documentation, I'll provide a link to that CloudKit Web Services which
+
+73
+00:13:36,510 --> 00:13:39,550
+provides a lot of the documentation for what we'll be talking about today.
+
+74
+00:13:40,910 --> 00:13:43,790
+A lot of this is abstracted out in the JavaScript library.
+
+75
+00:13:43,870 --> 00:13:47,150
+So if you want to do stuff on a website, they provide
+
+76
+00:13:47,230 --> 00:13:51,110
+a CloudKit JavaScript library for
+
+77
+00:13:51,610 --> 00:13:53,710
+that. Sorry,
+
+78
+00:13:56,190 --> 00:13:59,230
+just going into do not disturb mode.
+
+79
+00:14:07,950 --> 00:14:11,070
+They even in that web references documentation
+
+80
+00:14:11,570 --> 00:14:15,310
+they provide a composing web service request and all these instructions about how to go
+
+81
+00:14:15,810 --> 00:14:19,110
+ahead and do that. So man, was it like
+
+82
+00:14:19,610 --> 00:14:23,320
+half a decade ago that I built
+
+83
+00:14:23,820 --> 00:14:27,280
+Heart Twitch and at the time I don't think there was
+
+84
+00:14:27,440 --> 00:14:30,560
+anything, there was
+
+85
+00:14:31,060 --> 00:14:35,640
+anything like sign in with Apple even. And like I really didn't
+
+86
+00:14:36,140 --> 00:14:39,520
+want like to explain how harshwitch
+
+87
+00:14:40,020 --> 00:14:43,280
+works is you have like a watch and it will send the heart rate
+
+88
+00:14:43,780 --> 00:14:47,180
+to the server and then the
+
+89
+00:14:47,680 --> 00:14:51,100
+server will then use a web socket to push it out to a web page.
+
+90
+00:14:52,060 --> 00:14:55,100
+And then you would point OBS or some sort
+
+91
+00:14:55,600 --> 00:14:58,740
+of streaming software to the URL or to the browser window and then that way
+
+92
+00:14:59,240 --> 00:15:02,659
+you can stream your heart rate. That's how it works. And what I really didn't
+
+93
+00:15:03,159 --> 00:15:06,820
+want is a difficult way for a user to log in with
+
+94
+00:15:07,320 --> 00:15:10,020
+a username and password on the watch because we all know typing on the watch
+
+95
+00:15:10,520 --> 00:15:13,980
+is hell. So my, my thought was like,
+
+96
+00:15:14,320 --> 00:15:16,560
+and I didn't have sign in with Apple, right?
+
+97
+00:15:17,440 --> 00:15:20,880
+So my thought was why don't we use CloudKit? Because you're already signed
+
+98
+00:15:21,380 --> 00:15:24,080
+in a CloudKit on the Watch with your, your id.
+
+99
+00:15:26,640 --> 00:15:30,359
+And what you do is you log in with
+
+100
+00:15:30,859 --> 00:15:34,560
+a regular like email address and password in Heart Twitch on
+
+101
+00:15:35,060 --> 00:15:38,480
+the website. And then there's a little, there's a site, there's a part of
+
+102
+00:15:38,980 --> 00:15:43,060
+the site where you can sign into CloudKit and then from there
+
+103
+00:15:44,180 --> 00:15:47,980
+you can, because, because of the CloudKit JavaScript
+
+104
+00:15:48,480 --> 00:15:52,580
+library, you can then I can then pull the all
+
+105
+00:15:53,080 --> 00:15:55,740
+the devices because when you first launch the app on the Watch, it adds your
+
+106
+00:15:56,240 --> 00:15:59,740
+watch to the CloudKit database. And then I could pull that in and
+
+107
+00:16:00,240 --> 00:16:03,380
+then add that to my postgres database. So then there is no need for
+
+108
+00:16:03,880 --> 00:16:06,740
+authentication because I already have the CloudKit,
+
+109
+00:16:07,720 --> 00:16:11,120
+the device added in my postgres database. So it's kind of like
+
+110
+00:16:11,620 --> 00:16:15,520
+knows, oh yeah, this is Leo's watch, he doesn't need to authenticate.
+
+111
+00:16:16,020 --> 00:16:19,120
+And that way we can link devices to accounts without having to
+
+112
+00:16:19,620 --> 00:16:22,760
+do any sort of login process. And so this was my use case
+
+113
+00:16:22,919 --> 00:16:25,960
+for doing server side.
+
+114
+00:16:26,040 --> 00:16:29,560
+Essentially CloudKit was I could call the CloudKit web
+
+115
+00:16:30,060 --> 00:16:33,610
+server based
+
+116
+00:16:34,110 --> 00:16:37,490
+on that person's web authentication token, which we'll get
+
+117
+00:16:37,990 --> 00:16:40,370
+all into later. I then pull that information in.
+
+118
+00:16:42,050 --> 00:16:42,450
+So.
+
+119
+00:16:47,250 --> 00:16:47,730
+Cool.
+
+120
+00:16:50,770 --> 00:16:55,050
+Just checking if anybody's having issues. It doesn't look like it. So that's
+
+121
+00:16:55,550 --> 00:16:58,690
+good to know. So that was the private database
+
+122
+00:16:59,190 --> 00:17:02,990
+piece, but I actually think a much more useful case would
+
+123
+00:17:03,490 --> 00:17:07,150
+be the public database because the
+
+124
+00:17:07,650 --> 00:17:10,950
+idea would be is that you'd have some sort of app that
+
+125
+00:17:11,450 --> 00:17:15,790
+would use central repository of data that
+
+126
+00:17:16,290 --> 00:17:19,710
+it can pull information from. And I'm looking at both of these with
+
+127
+00:17:19,950 --> 00:17:23,310
+Bushel and then an RSS reader I'm building called Celestra
+
+128
+00:17:24,190 --> 00:17:27,319
+with Bushel. The. The way it's
+
+129
+00:17:27,819 --> 00:17:31,079
+built right now is I have this concept of hubs and
+
+130
+00:17:31,159 --> 00:17:34,399
+you can plug in a URL and that URL would provide or
+
+131
+00:17:34,899 --> 00:17:38,639
+some sort of service. That service would then provide the
+
+132
+00:17:39,139 --> 00:17:41,959
+Entire List of macOS restore images that are available.
+
+133
+00:17:44,119 --> 00:17:47,719
+But then I realized like really there's only one location for those and
+
+134
+00:17:48,219 --> 00:17:50,839
+each service is just going to be using the same URLs anyway.
+
+135
+00:17:51,970 --> 00:17:55,490
+So if I had one central repository or one central database
+
+136
+00:17:56,850 --> 00:18:00,250
+because they all pull from Apple, I can then parse
+
+137
+00:18:00,750 --> 00:18:04,530
+the web for those restore images and then store them in CloudKit and then
+
+138
+00:18:05,030 --> 00:18:08,770
+that way Bushel can then pull those from one
+
+139
+00:18:09,270 --> 00:18:12,930
+single repository. And all I would have to do, and what I'm doing now is
+
+140
+00:18:13,430 --> 00:18:17,130
+running basically a GitHub action or you could do like a Cron job where it
+
+141
+00:18:17,630 --> 00:18:21,130
+would run on Ubuntu, wouldn't even need a Mac and it would download and scrape
+
+142
+00:18:21,630 --> 00:18:24,430
+the web for restore images and storm in the public database.
+
+143
+00:18:26,350 --> 00:18:29,870
+It's the same idea with Celestra. It's an RSS reader. What if I took
+
+144
+00:18:30,370 --> 00:18:33,670
+those RSS RSS files
+
+145
+00:18:34,170 --> 00:18:37,470
+in the web and just scrape them and then store them in a CloudKit database
+
+146
+00:18:38,110 --> 00:18:41,310
+in a public database and then that way people can pull that
+
+147
+00:18:41,810 --> 00:18:42,910
+up all through CloudKit.
+
+148
+00:18:45,150 --> 00:18:48,550
+So the idea today is we're going to talk about how to
+
+149
+00:18:49,050 --> 00:18:52,380
+set something, how I set something like this up and how
+
+150
+00:18:52,880 --> 00:18:56,340
+you could use use my library to then go ahead and do this yourself for
+
+151
+00:18:56,840 --> 00:18:59,100
+any sort of work that you're going to do that where you want to use
+
+152
+00:18:59,600 --> 00:19:02,180
+either a public or private database in CloudKit.
+
+153
+00:19:03,300 --> 00:19:07,020
+So this is where I introduce myself. So I'm going to talk today about
+
+154
+00:19:07,520 --> 00:19:10,700
+building Miskit, which is my library I built for
+
+155
+00:19:11,200 --> 00:19:14,740
+doing CloudKit stuff on the server or essentially off of,
+
+156
+00:19:15,380 --> 00:19:17,140
+not off of Apple platforms.
+
+157
+00:19:19,770 --> 00:19:23,130
+Evan, do you have any questions before I keep going? No,
+
+158
+00:19:23,370 --> 00:19:24,890
+it's good. Good topic though.
+
+159
+00:19:26,810 --> 00:19:31,090
+So like I said, we have CloudKit Web Services and CloudKit
+
+160
+00:19:31,590 --> 00:19:35,770
+Web Services. We provide a lot of documentation. We talked about CloudKit JS
+
+161
+00:19:35,850 --> 00:19:39,570
+and the instructions on how to compose a web service request
+
+162
+00:19:40,070 --> 00:19:43,610
+which has everything I need to compose one. And back in 2020 I
+
+163
+00:19:44,110 --> 00:19:47,640
+did this all manually. The thing is at this
+
+164
+00:19:48,140 --> 00:19:51,480
+point, if you look at right there, actually if
+
+165
+00:19:51,980 --> 00:19:54,480
+you look at the top, you can see it hasn't been updated in over 10
+
+166
+00:19:54,980 --> 00:19:58,120
+years, which is kind of crazy,
+
+167
+00:19:58,920 --> 00:20:02,440
+but it works. And then we
+
+168
+00:20:02,840 --> 00:20:06,760
+got introduced to something back in WWDC I
+
+169
+00:20:07,260 --> 00:20:10,840
+want to say it was 23. We got
+
+170
+00:20:11,340 --> 00:20:14,600
+introduced to the Open API generator which is really
+
+171
+00:20:15,100 --> 00:20:19,120
+nice because then we have, we can generate the Swift code
+
+172
+00:20:19,620 --> 00:20:23,280
+if we know what the Open API documentation looks like it. And of course
+
+173
+00:20:23,780 --> 00:20:27,280
+Apple doesn't provide one for CloudKit but they did provide a
+
+174
+00:20:27,780 --> 00:20:30,920
+pretty big piece open. If you ever you looked
+
+175
+00:20:31,420 --> 00:20:35,320
+at the Open API generator, it's amazing. Takes the Open API gamble file and
+
+176
+00:20:35,560 --> 00:20:38,880
+generates all the Swift code you need. One of the other issues
+
+177
+00:20:39,380 --> 00:20:43,120
+I had with first developing Miskit in 2020
+
+178
+00:20:43,600 --> 00:20:47,120
+was that there was no way to like there was no abstraction
+
+179
+00:20:47,620 --> 00:20:51,080
+layer which could differentiate between doing something on the server or
+
+180
+00:20:51,580 --> 00:20:55,719
+using regular like URL session which is more targeted towards client
+
+181
+00:20:56,219 --> 00:20:59,880
+side. So I had
+
+182
+00:21:00,380 --> 00:21:02,800
+to build my own abstraction for that. Luckily Open API has,
+
+183
+00:21:04,080 --> 00:21:07,600
+there's open API transport I believe, which provides
+
+184
+00:21:08,100 --> 00:21:12,100
+an abstraction layer where you can then plug in either use Async HTTP
+
+185
+00:21:12,600 --> 00:21:15,660
+client, which is the server way of doing it, or you can plug in a
+
+186
+00:21:16,160 --> 00:21:19,380
+URL session transport, which is of course the client
+
+187
+00:21:19,880 --> 00:21:23,740
+way to do, provides a really great tutorial.
+
+188
+00:21:24,240 --> 00:21:27,740
+I highly recommend checking this out as well as the
+
+189
+00:21:28,240 --> 00:21:30,020
+doxy documentation that they provide.
+
+190
+00:21:31,860 --> 00:21:35,420
+So this is great. But then I'd have to go ahead and I'd have to
+
+191
+00:21:35,920 --> 00:21:39,700
+figure out a way to convert all this documentation into an open
+
+192
+00:21:40,200 --> 00:21:44,260
+API document. I mean, can you guess what
+
+193
+00:21:44,760 --> 00:21:48,260
+helped me to get build an open API document
+
+194
+00:21:48,760 --> 00:21:51,620
+from all this documentation? Some of the tools,
+
+195
+00:21:52,659 --> 00:21:54,980
+some AI tool. Yes.
+
+196
+00:21:56,820 --> 00:22:00,860
+AI came and I'm like, holy crap. Like AI is
+
+197
+00:22:01,360 --> 00:22:04,690
+really good at documenting your code, but it's also pretty darn good at taking
+
+198
+00:22:05,190 --> 00:22:08,450
+documentation and building code. So then I would
+
+199
+00:22:08,950 --> 00:22:12,290
+just plug it. I've been plugging in with Claude and it has a copy of
+
+200
+00:22:12,790 --> 00:22:16,490
+all the documentation in my repo and it can go ahead and edit the
+
+201
+00:22:16,990 --> 00:22:20,850
+open API. It's not perfect by any means, of course, but that's what unit
+
+202
+00:22:21,350 --> 00:22:25,770
+tests are for. And actually having integration tests
+
+203
+00:22:26,250 --> 00:22:31,700
+in order to do stuff so that.
+
+204
+00:22:35,380 --> 00:22:41,100
+Sorry, I just want to make sure nothing
+
+205
+00:22:46,900 --> 00:22:48,020
+I hate teams.
+
+206
+00:22:53,060 --> 00:22:56,420
+Okay, so great. So let's talk about.
+
+207
+00:22:59,700 --> 00:23:05,380
+Sorry, slides are still not done, but let's talk about authentication
+
+208
+00:23:05,880 --> 00:23:09,340
+methods. You can see I have the logos here, but I haven't quite cleaned
+
+209
+00:23:09,840 --> 00:23:14,140
+this up. So there's really two
+
+210
+00:23:14,640 --> 00:23:17,380
+and a half authentication methods when it comes to CloudKit.
+
+211
+00:23:18,420 --> 00:23:21,950
+So here is the miss demo
+
+212
+00:23:22,450 --> 00:23:26,070
+database. You just go in here and you can go to tokens and keys
+
+213
+00:23:26,570 --> 00:23:30,550
+and then that will give you access to set up either the API
+
+214
+00:23:31,050 --> 00:23:34,550
+if you want to do API key or API token if
+
+215
+00:23:35,050 --> 00:23:38,630
+you want to do a private database or a server to server keyset if
+
+216
+00:23:39,130 --> 00:23:41,950
+you want to do a public database. So let's talk about the API token.
+
+217
+00:23:42,510 --> 00:23:45,870
+Pretty simple. You just go into here, click the plus sign,
+
+218
+00:23:46,840 --> 00:23:49,920
+you say a name and you say whether you want to do
+
+219
+00:23:50,420 --> 00:23:53,920
+a post message or URL redirect. We'll get into that in a little bit in
+
+220
+00:23:54,420 --> 00:23:58,280
+the next section. And then whether you want to have user
+
+221
+00:23:58,780 --> 00:24:02,960
+info and you click save and you'll get a nice little API token
+
+222
+00:24:03,460 --> 00:24:06,680
+you could use in your web your web calls essentially.
+
+223
+00:24:09,000 --> 00:24:12,260
+API doesn't really. The API token doesn't really give you a lot of.
+
+224
+00:24:12,570 --> 00:24:15,330
+But what it does give you is it gives you an entry to get a
+
+225
+00:24:15,830 --> 00:24:19,450
+web authentication token for a user. So basically the way that
+
+226
+00:24:19,950 --> 00:24:22,490
+works. So you'll notice here,
+
+227
+00:24:23,050 --> 00:24:24,890
+when we were in this section,
+
+228
+00:24:27,050 --> 00:24:30,650
+we have this piece here called Sign in Callback. So you
+
+229
+00:24:31,150 --> 00:24:34,530
+can have either call a JavaScript, it's called a message
+
+230
+00:24:35,030 --> 00:24:38,730
+event, it will call a Message event and a message event will have the
+
+231
+00:24:39,230 --> 00:24:42,770
+metadata with the web authentication token of that user. Or you could
+
+232
+00:24:43,270 --> 00:24:47,250
+do URL redirect where on authentication the user has
+
+233
+00:24:47,750 --> 00:24:51,090
+a URL and then part of that URL is then having part of
+
+234
+00:24:51,590 --> 00:24:55,250
+one of the query parameters and we'll get into that. We'll then have the web
+
+235
+00:24:55,750 --> 00:24:59,330
+authentication token in the URL. So you
+
+236
+00:24:59,830 --> 00:25:03,770
+put, basically you have your website, you add the JavaScript, you need
+
+237
+00:25:04,330 --> 00:25:08,010
+to add the sign in with Apple. Oh, here's Josh.
+
+238
+00:25:14,310 --> 00:25:15,910
+Oh cool. Josh, you there?
+
+239
+00:25:18,790 --> 00:25:21,590
+I hope so. Good. Okay.
+
+240
+00:25:21,750 --> 00:25:24,429
+Hey, we were just talking about how to set up. I'm going to go back
+
+241
+00:25:24,929 --> 00:25:28,710
+a little bit Evan, but not too far back. Yeah, no worries. That's okay.
+
+242
+00:25:30,470 --> 00:25:33,790
+But we talked about setting up API token and how
+
+243
+00:25:34,290 --> 00:25:37,870
+to do that. So you go in
+
+244
+00:25:38,370 --> 00:25:41,470
+here, you just click plus, you select your sign in callback and you put in
+
+245
+00:25:41,970 --> 00:25:45,550
+a name and it'll give you an API token once you click
+
+246
+00:25:46,050 --> 00:25:46,310
+save. Basically.
+
+247
+00:25:50,549 --> 00:25:51,190
+Come on.
+
+248
+00:25:54,470 --> 00:25:58,830
+The reason you want an API token is this allows you to then have
+
+249
+00:25:59,330 --> 00:26:03,060
+users Sign in to CloudKit either
+
+250
+00:26:03,560 --> 00:26:07,540
+using, using the the web service
+
+251
+00:26:07,620 --> 00:26:11,380
+like Curl or you could also do it through a website using
+
+252
+00:26:11,880 --> 00:26:15,500
+CloudKit js. So web authentication
+
+253
+00:26:16,000 --> 00:26:19,260
+token we talked about how you can either do the post message or you can
+
+254
+00:26:19,760 --> 00:26:23,180
+do the URL redirect. Basically you have the JavaScript on
+
+255
+00:26:23,680 --> 00:26:26,620
+your website and there has a button, click the button,
+
+256
+00:26:27,120 --> 00:26:31,140
+you get this nice little window here sign in and
+
+257
+00:26:31,640 --> 00:26:35,020
+then when you sign in if you had selected post message,
+
+258
+00:26:35,340 --> 00:26:39,260
+you'll get the web authentication token and the data of the event in
+
+259
+00:26:39,760 --> 00:26:43,820
+JavaScript or you will get the web authentication token as a URL
+
+260
+00:26:44,300 --> 00:26:47,820
+in the callback URL here. Does that make sense?
+
+261
+00:26:50,860 --> 00:26:54,660
+Yep. Yeah. In some cases if
+
+262
+00:26:55,160 --> 00:26:58,520
+you scour the Internet so Stack overflow will tell you and this has happened
+
+263
+00:26:59,020 --> 00:27:02,360
+to me sometimes it will not be CK web authentication token,
+
+264
+00:27:02,860 --> 00:27:06,280
+sometimes it'll be CK session because that's what Apple likes
+
+265
+00:27:06,780 --> 00:27:10,120
+to do. But it's the same thing.
+
+266
+00:27:10,200 --> 00:27:14,160
+So you basically want to look for either property or query parameter name
+
+267
+00:27:14,660 --> 00:27:17,800
+and you should be good to go and then you'll have that user as well
+
+268
+00:27:18,300 --> 00:27:22,200
+authentication token you could do. What I, what I've
+
+269
+00:27:22,700 --> 00:27:27,730
+been doing is, is I've been take
+
+270
+00:27:28,230 --> 00:27:31,970
+like making a call to a like local server for instance and then
+
+271
+00:27:32,470 --> 00:27:36,330
+essentially then I could do whatever I want with that web authentication token.
+
+272
+00:27:36,830 --> 00:27:40,010
+As long as you have the web authentication token and the API token you can
+
+273
+00:27:40,510 --> 00:27:43,690
+do anything on a private database that the user has rights
+
+274
+00:27:44,190 --> 00:27:47,610
+to. So you can go, you can go to town with
+
+275
+00:27:48,110 --> 00:27:51,420
+that all this stuff gets Swift in a cookie too.
+
+276
+00:27:51,580 --> 00:27:54,700
+So that way it'll work. When you go back,
+
+277
+00:27:55,200 --> 00:27:57,500
+if you have checked the box for allow,
+
+278
+00:27:58,780 --> 00:28:02,180
+it's either a box or JavaScript method property that will say, hey,
+
+279
+00:28:02,680 --> 00:28:05,460
+I want this to persist. It'll be Swift in a, in a cookie as well.
+
+280
+00:28:05,960 --> 00:28:09,340
+So if you want to spelunk your cookies, you can see the web authentication
+
+281
+00:28:09,840 --> 00:28:13,180
+token there. So that's actually the easier of the
+
+282
+00:28:13,680 --> 00:28:17,300
+two. So that gives you the private database for the public database is where
+
+283
+00:28:17,800 --> 00:28:19,820
+you're going to need a server to server authentication.
+
+284
+00:28:21,340 --> 00:28:24,820
+And so to do that it's really actually not as bad
+
+285
+00:28:25,320 --> 00:28:28,620
+as I thought it was going to be. But you go to the new server
+
+286
+00:28:29,120 --> 00:28:32,500
+to server key, put in a name you want, it'll actually give you the command
+
+287
+00:28:33,000 --> 00:28:35,660
+you need to run and then you just paste in the public key in here.
+
+288
+00:28:36,380 --> 00:28:40,020
+That gives you. That will give you everything you
+
+289
+00:28:40,520 --> 00:28:42,780
+need. So here's how to run it. Basically,
+
+290
+00:28:43,990 --> 00:28:44,630
+sorry about that.
+
+291
+00:28:57,190 --> 00:28:59,510
+We just run that. That gives us the key.
+
+292
+00:29:00,710 --> 00:29:04,670
+We can go ahead and get the public key. We can also pipe
+
+293
+00:29:05,170 --> 00:29:08,510
+it to PB Copy and then all we have to do is paste that in
+
+294
+00:29:09,010 --> 00:29:10,930
+the box over here.
+
+295
+00:29:17,970 --> 00:29:18,690
+There we go.
+
+296
+00:29:25,890 --> 00:29:28,770
+It's pretty complicated to use the server key.
+
+297
+00:29:30,050 --> 00:29:33,450
+We can spell on the miskit code on how to do it because
+
+298
+00:29:33,950 --> 00:29:36,890
+it does a lot of that work for you if you have it. But you
+
+299
+00:29:37,390 --> 00:29:41,170
+will need the, the private key, the key id,
+
+300
+00:29:42,290 --> 00:29:45,490
+I think, I think that's it. And then you should be
+
+301
+00:29:45,990 --> 00:29:50,130
+good with having access now to the public database.
+
+302
+00:29:50,850 --> 00:29:54,210
+So just to go over, there's differences between the public
+
+303
+00:29:54,710 --> 00:29:58,050
+and private database. So this
+
+304
+00:29:58,550 --> 00:30:02,010
+is query. You can see my cursor, right? Query and lookup
+
+305
+00:30:02,510 --> 00:30:06,030
+of records is available on all but file
+
+306
+00:30:06,530 --> 00:30:10,150
+changes or, excuse me, record changes. It's not available on
+
+307
+00:30:10,650 --> 00:30:14,750
+public zones, aren't really available in public zone changes aren't available in
+
+308
+00:30:15,250 --> 00:30:18,870
+public notifications. Zone notifications aren't available in public,
+
+309
+00:30:19,670 --> 00:30:23,350
+but query notifications are. And you can also do
+
+310
+00:30:23,850 --> 00:30:27,310
+any stuff with assets which are basically binary files. You can
+
+311
+00:30:27,810 --> 00:30:32,190
+also do that in all of them. You can't do query
+
+312
+00:30:32,690 --> 00:30:36,110
+notifications on shared. Shared would essentially work like
+
+313
+00:30:36,610 --> 00:30:39,810
+private essentially. So it's just a matter
+
+314
+00:30:40,310 --> 00:30:42,610
+of who. Who's the owner and how is it shared.
+
+315
+00:30:44,690 --> 00:30:48,370
+So one of the big challenges I think we've all faced this when we've
+
+316
+00:30:48,870 --> 00:30:53,370
+dealt with certain web services is field type polymorphism.
+
+317
+00:30:53,870 --> 00:30:56,730
+If you've done JSON where you don't know what type you're getting back or what
+
+318
+00:30:57,230 --> 00:30:59,410
+data you're getting back, this can Be a bit challenging.
+
+319
+00:31:00,530 --> 00:31:03,650
+So if you look at the documentation
+
+320
+00:31:04,290 --> 00:31:08,290
+in Web Services Reference, there is a,
+
+321
+00:31:09,090 --> 00:31:12,610
+there's a page called types and dictionaries and there is
+
+322
+00:31:13,110 --> 00:31:16,890
+types. There's different type values for each field. If you're familiar
+
+323
+00:31:17,390 --> 00:31:20,650
+with CloudKit, you've seen this, right? So you have an asset
+
+324
+00:31:21,150 --> 00:31:25,330
+which is basically a, a binary
+
+325
+00:31:25,830 --> 00:31:29,650
+file. You have bytes which is
+
+326
+00:31:30,150 --> 00:31:33,620
+essentially a 60 byte base 64 encoded string,
+
+327
+00:31:34,740 --> 00:31:38,460
+date type which is returned as a number. Double is
+
+328
+00:31:38,960 --> 00:31:41,620
+returned as a number because These are the JavaScript types.
+
+329
+00:31:42,260 --> 00:31:46,140
+Int is returned as a number and then
+
+330
+00:31:46,640 --> 00:31:49,940
+there's location reference and then
+
+331
+00:31:50,020 --> 00:31:53,420
+string and list. And how would you like,
+
+332
+00:31:53,920 --> 00:31:57,100
+how do you do adjacent object like this? How would you
+
+333
+00:31:57,600 --> 00:31:59,860
+even represent this in Swift? Because you don't know what type you're going to get.
+
+334
+00:32:01,350 --> 00:32:04,510
+So like I said, this is a work in progress.
+
+335
+00:32:05,010 --> 00:32:08,710
+Sorry. So what I do, I don't know how much you can see this.
+
+336
+00:32:09,110 --> 00:32:13,910
+I'm going to actually move over to my documentation
+
+337
+00:32:14,410 --> 00:32:18,590
+here at this point. So how
+
+338
+00:32:19,090 --> 00:32:20,070
+are we doing on time? We good?
+
+339
+00:32:22,550 --> 00:32:25,590
+Yeah, I think, I think we're doing good. Okay, cool.
+
+340
+00:32:26,090 --> 00:32:30,240
+Any, do you want to ask questions? I don't
+
+341
+00:32:30,740 --> 00:32:32,160
+have anything right now.
+
+342
+00:32:33,760 --> 00:32:37,880
+Same nothing right now. But this seems applicable to things I'll
+
+343
+00:32:38,380 --> 00:32:40,480
+be doing coming up. Okay, cool.
+
+344
+00:32:43,200 --> 00:32:46,640
+So we have set up in the
+
+345
+00:32:46,800 --> 00:32:50,400
+open. So we have an open API YAML file that you can
+
+346
+00:32:50,900 --> 00:32:55,370
+pull up in Miskit, which is basically every like the
+
+347
+00:32:55,870 --> 00:32:59,290
+documentation converted to YAML. And so what we
+
+348
+00:32:59,790 --> 00:33:03,410
+do is you can set up in the YAML the
+
+349
+00:33:03,910 --> 00:33:08,330
+field value requests and they have an enum type essentially for,
+
+350
+00:33:12,090 --> 00:33:15,490
+for open API. So and then,
+
+351
+00:33:15,990 --> 00:33:18,810
+so this has, you know, it could be one of either any of these types
+
+352
+00:33:18,860 --> 00:33:22,090
+of. And then there's an enum in
+
+353
+00:33:22,590 --> 00:33:26,210
+case you have a list. So if you have a
+
+354
+00:33:26,710 --> 00:33:30,690
+list value type there is an extra property called
+
+355
+00:33:31,010 --> 00:33:33,810
+type and then that will tell you what type the.
+
+356
+00:33:34,450 --> 00:33:38,450
+The list is. And it's homo homomorphic.
+
+357
+00:33:38,690 --> 00:33:42,210
+It's all the same list type. You can't have lists of different types.
+
+358
+00:33:44,050 --> 00:33:49,230
+And then we have here again
+
+359
+00:33:49,730 --> 00:33:52,750
+field value. Sometimes the type is available,
+
+360
+00:33:52,910 --> 00:33:56,590
+sometimes it's not. But basically we have all the different
+
+361
+00:33:56,750 --> 00:33:59,950
+value types available to us in a CK value.
+
+362
+00:34:01,950 --> 00:34:05,670
+And then this is. Then the Open API
+
+363
+00:34:06,170 --> 00:34:09,150
+generator essentially builds this for me which is.
+
+364
+00:34:09,710 --> 00:34:13,630
+Has an enum and a struck for field field value request
+
+365
+00:34:15,329 --> 00:34:18,569
+and then it does all the decoding for me. Thankfully I didn't have to do
+
+366
+00:34:19,069 --> 00:34:19,169
+any of it.
+
+367
+00:34:23,089 --> 00:34:26,569
+And then yeah, I just wanted to
+
+368
+00:34:27,069 --> 00:34:31,969
+cover that piece where we show how we deal with these kind of like polymorphic
+
+369
+00:34:32,469 --> 00:34:35,969
+types and how those work. The next thing I
+
+370
+00:34:36,469 --> 00:34:39,929
+want to cover is error handling. So if you
+
+371
+00:34:40,429 --> 00:34:43,750
+look at the documentation gives you. If you get
+
+372
+00:34:44,250 --> 00:34:48,350
+an error we get something like this and
+
+373
+00:34:48,850 --> 00:34:52,030
+then that will show you in the. In the table actually shows you what
+
+374
+00:34:52,530 --> 00:34:56,150
+each error means. So again we do
+
+375
+00:34:56,650 --> 00:35:00,430
+like an enum in YAML. It's basically a string and then
+
+376
+00:35:00,930 --> 00:35:05,030
+we have everything else be a string. And then the open API generator will
+
+377
+00:35:05,530 --> 00:35:09,860
+automatically generate this which gives us the server
+
+378
+00:35:10,360 --> 00:35:13,980
+error code and the error response. It'll also do all this stuff
+
+379
+00:35:14,480 --> 00:35:18,540
+here, which is really nice. And then
+
+380
+00:35:18,620 --> 00:35:22,620
+we've then in our. We've abstracted a lot of this in miskit.
+
+381
+00:35:22,940 --> 00:35:27,100
+So that way we also have now a cloud cloud
+
+382
+00:35:27,600 --> 00:35:31,820
+error type which gives us a lot more info regarding that.
+
+383
+00:35:33,900 --> 00:35:37,360
+So that's how we handle errors. And everything I
+
+384
+00:35:37,860 --> 00:35:42,200
+do in the abs, the more abstract higher up stuff is done using
+
+385
+00:35:42,360 --> 00:35:46,360
+type throws like I have type throws and everything. So that's
+
+386
+00:35:46,860 --> 00:35:50,920
+how I handle that. Let me check one
+
+387
+00:35:51,420 --> 00:35:52,200
+last piece I wanted to cover.
+
+388
+00:35:54,920 --> 00:35:58,520
+The last piece I want to cover is really cool. And that is the
+
+389
+00:35:59,020 --> 00:36:03,160
+authentication layer. So Open API provides what's called middleware
+
+390
+00:36:04,440 --> 00:36:08,080
+and that allows you to, when you create a client or a server, you can
+
+391
+00:36:08,580 --> 00:36:11,840
+plug that in and it will handle like let's say you need to make modifications
+
+392
+00:36:12,340 --> 00:36:15,760
+with the request or response. When it comes in, you can intercept it
+
+393
+00:36:16,260 --> 00:36:17,800
+and make whatever modifications you want to make.
+
+394
+00:36:19,239 --> 00:36:22,880
+And in this case what we've done is I've
+
+395
+00:36:23,380 --> 00:36:27,840
+created an authentication middleware which
+
+396
+00:36:28,340 --> 00:36:31,790
+then sees if you have what's called
+
+397
+00:36:32,290 --> 00:36:35,630
+a token manager and an authentic you have
+
+398
+00:36:36,130 --> 00:36:39,910
+that and an authentication method. And the way it works is
+
+399
+00:36:40,410 --> 00:36:43,790
+you pick what type of authentication you want to use. If you already have like
+
+400
+00:36:44,290 --> 00:36:47,710
+a pre existing web token or you already have, or you, you know,
+
+401
+00:36:48,210 --> 00:36:51,190
+have your key ID and your private key already, or you just have the API
+
+402
+00:36:51,690 --> 00:36:54,870
+token. We've created basically a middleware that uses
+
+403
+00:36:55,370 --> 00:36:59,120
+that. So this
+
+404
+00:36:59,620 --> 00:37:03,320
+is how it creates the headers for server to server. So it does
+
+405
+00:37:03,820 --> 00:37:07,760
+all this for us. And then what
+
+406
+00:37:08,260 --> 00:37:11,760
+I added, which I think is really nice, is called the adaptive token manager.
+
+407
+00:37:12,240 --> 00:37:17,360
+And the idea with that is like let's say you're
+
+408
+00:37:17,860 --> 00:37:21,200
+using a client and you have the web authentication token now
+
+409
+00:37:21,440 --> 00:37:25,090
+and then this allows you to upgrade with that web authentication
+
+410
+00:37:25,590 --> 00:37:27,730
+token to the private database and have access to that.
+
+411
+00:37:30,530 --> 00:37:33,970
+So and then all the, all the signing is done
+
+412
+00:37:34,470 --> 00:37:37,650
+before you in miskit for the server to server because stuff that
+
+413
+00:37:38,150 --> 00:37:41,170
+needs to be signed, etc. And it takes care of all that.
+
+414
+00:37:41,570 --> 00:37:45,610
+All stuff that Claude was essentially able to decipher
+
+415
+00:37:46,110 --> 00:37:50,060
+from the documentation.
+
+416
+00:37:52,620 --> 00:37:54,300
+There's one more thing I wanted to show.
+
+417
+00:37:56,380 --> 00:38:00,220
+If you want to hop in with a question while I pull something up,
+
+418
+00:38:00,300 --> 00:38:00,940
+feel free.
+
+419
+00:38:21,190 --> 00:38:24,390
+No questions. Cool.
+
+420
+00:38:24,790 --> 00:38:28,630
+So I'm going to show one last thing and that is how
+
+421
+00:38:28,710 --> 00:38:30,310
+do we actually deploy this?
+
+422
+00:38:33,350 --> 00:38:36,950
+Is this too big, too small? Looks okay.
+
+423
+00:38:37,590 --> 00:38:40,070
+That looks good. Yeah, it looks good. Okay, cool.
+
+424
+00:38:43,850 --> 00:38:47,890
+So essentially what I've done is I'm using GitHub
+
+425
+00:38:48,390 --> 00:38:50,410
+Actions. There's a way you can.
+
+426
+00:38:53,130 --> 00:38:56,689
+This is all public by the way, so I will provide
+
+427
+00:38:57,189 --> 00:39:00,570
+URLs in the Slack or something. Let's do this one.
+
+428
+00:39:02,410 --> 00:39:07,220
+So this is a Swift package for
+
+429
+00:39:07,720 --> 00:39:10,660
+Bushel. It's called Bushel Cloud. It pulls the stuff up from.
+
+430
+00:39:11,220 --> 00:39:14,740
+Uses Miskit to go ahead and
+
+431
+00:39:16,740 --> 00:39:20,340
+pull, get access to CloudKit and
+
+432
+00:39:21,060 --> 00:39:24,860
+let me go back to the workflow. How familiar
+
+433
+00:39:25,360 --> 00:39:26,580
+are you with GitHub workflows?
+
+434
+00:39:29,860 --> 00:39:32,980
+Sadly not had the chance to work too deeply with them yet.
+
+435
+00:39:33,690 --> 00:39:37,490
+Okay. Basically it's like for CI, but you can also set
+
+436
+00:39:37,990 --> 00:39:41,850
+it up on a schedule. So I did that and then
+
+437
+00:39:42,890 --> 00:39:46,490
+it runs the scheduled job and then I just execute.
+
+438
+00:39:50,650 --> 00:39:54,650
+So then this was refactored over here into
+
+439
+00:39:55,150 --> 00:39:58,490
+an action. There we go.
+
+440
+00:39:59,540 --> 00:40:03,460
+And I have all sorts of stuff here for
+
+441
+00:40:05,380 --> 00:40:10,300
+like this is generic essentially, but all
+
+442
+00:40:10,800 --> 00:40:14,220
+these, the environment, etc. These are all passed from
+
+443
+00:40:14,720 --> 00:40:17,980
+that workflow into here. These are basically either API keys
+
+444
+00:40:18,480 --> 00:40:22,100
+or the information that I need for accessing Cloud, the public,
+
+445
+00:40:24,020 --> 00:40:28,120
+public database. Right. And then I
+
+446
+00:40:28,620 --> 00:40:31,880
+already pre built the binary. So we
+
+447
+00:40:32,380 --> 00:40:35,960
+already have that. We're running this on Ubuntu because
+
+448
+00:40:36,460 --> 00:40:40,280
+it's the default. Look at it. If there
+
+449
+00:40:40,780 --> 00:40:43,840
+is no binary, it goes ahead and builds the binary for me.
+
+450
+00:40:44,000 --> 00:40:45,200
+So that's what this is doing.
+
+451
+00:40:47,120 --> 00:40:50,640
+And then we make sure the binary works.
+
+452
+00:40:50,880 --> 00:40:54,450
+We make, we make it executable, we validate, make sure all the
+
+453
+00:40:55,010 --> 00:40:58,690
+API secrets are there. We then go ahead
+
+454
+00:40:58,930 --> 00:41:02,370
+and this validates the pim. But essentially this is the fun part.
+
+455
+00:41:03,410 --> 00:41:06,770
+We go ahead, we have all our inputs for the private key,
+
+456
+00:41:07,270 --> 00:41:09,570
+the key id, environment, container id.
+
+457
+00:41:10,610 --> 00:41:13,410
+And then I use Virtual Buddy for signing verification.
+
+458
+00:41:14,050 --> 00:41:14,450
+And.
+
+459
+00:41:18,460 --> 00:41:21,940
+It then goes in and it runs the
+
+460
+00:41:22,440 --> 00:41:25,660
+sync and then we'll go in.
+
+461
+00:41:25,980 --> 00:41:29,500
+Basically it pulls from several websites information
+
+462
+00:41:29,580 --> 00:41:32,939
+about macrosos, restore images and checks whether they're signed.
+
+463
+00:41:33,340 --> 00:41:37,540
+And then it goes ahead and it adds those to
+
+464
+00:41:38,040 --> 00:41:41,780
+the database. And then what this does is it exports the information in
+
+465
+00:41:42,280 --> 00:41:44,580
+a run. Let's, let's take a look, see if I have one. I can show
+
+466
+00:41:45,080 --> 00:41:47,420
+you. Oh, there's one scheduled.
+
+467
+00:41:50,060 --> 00:41:53,700
+Yeah, here we go. So there's 57
+
+468
+00:41:54,200 --> 00:41:55,580
+new restore images created,
+
+469
+00:41:56,300 --> 00:41:58,300
+177 updated.
+
+470
+00:41:58,780 --> 00:42:02,300
+234 total. No operations
+
+471
+00:42:02,380 --> 00:42:05,900
+failed. I also store Xcode versions and Swift versions.
+
+472
+00:42:06,780 --> 00:42:10,460
+Those get stored as well. Had to rebuild it,
+
+473
+00:42:10,630 --> 00:42:11,830
+but here is the results.
+
+474
+00:42:13,750 --> 00:42:17,750
+I'm not going to pull that up, but it's essentially updated
+
+475
+00:42:18,250 --> 00:42:22,470
+my CloudKit database and
+
+476
+00:42:22,550 --> 00:42:25,870
+that's all in the public database. And then maybe even by
+
+477
+00:42:26,370 --> 00:42:29,910
+the time I present this, I'll have a working example in Bushel with that example
+
+478
+00:42:30,410 --> 00:42:33,750
+working, which would be awesome. Celestra,
+
+479
+00:42:33,990 --> 00:42:37,190
+same idea. So this looks like it was a RSS update.
+
+480
+00:42:38,910 --> 00:42:42,830
+We get the workflow file and.
+
+481
+00:42:43,330 --> 00:42:46,110
+Oh, sorry, I should point out, because you're probably wondering where is all these.
+
+482
+00:42:46,610 --> 00:42:50,150
+The stuff all these secrets stored? Yes, they are stored in
+
+483
+00:42:50,650 --> 00:42:53,910
+Actions secrets right here. So we have
+
+484
+00:42:54,410 --> 00:42:58,190
+our private key ID API key from
+
+485
+00:42:58,690 --> 00:43:01,230
+Virtual Buddy. So that's all stored there.
+
+486
+00:43:01,870 --> 00:43:05,830
+Here is Celestra. It's for updating RSS
+
+487
+00:43:06,330 --> 00:43:09,930
+feeds. So it just basically goes through. You can look at the Swift code
+
+488
+00:43:10,430 --> 00:43:14,490
+it goes through, pulls RSS feeds and updates them into a CloudKit
+
+489
+00:43:15,530 --> 00:43:18,490
+record or what do you call it? Yeah, record type.
+
+490
+00:43:19,850 --> 00:43:22,210
+And I of course try to do it in such a way not to hammer
+
+491
+00:43:22,710 --> 00:43:24,170
+people, but same idea,
+
+492
+00:43:27,050 --> 00:43:30,610
+yeah, it goes ahead and it runs the
+
+493
+00:43:31,110 --> 00:43:35,890
+binary it updates and then I also have like actual parameters
+
+494
+00:43:36,390 --> 00:43:40,170
+that I take to to filter out, like which RSS feeds are high priority
+
+495
+00:43:40,670 --> 00:43:44,330
+and which ones aren't based on the audience and etc. So yeah,
+
+496
+00:43:44,890 --> 00:43:48,410
+so that's deployment. That's how you can get that working.
+
+497
+00:43:48,810 --> 00:43:53,130
+There's weird stuff with cloud with GitHub that
+
+498
+00:43:53,690 --> 00:43:57,210
+I've noticed. If you haven't updated it in a while, it doesn't run these
+
+499
+00:43:57,710 --> 00:43:59,570
+cron jobs. So I need to figure out a how to get around it or
+
+500
+00:44:00,070 --> 00:44:04,030
+find another service to do it. This is all free because
+
+501
+00:44:04,110 --> 00:44:07,870
+it's public and it is running
+
+502
+00:44:08,370 --> 00:44:09,870
+on Ubuntu. So that's really great.
+
+503
+00:44:12,350 --> 00:44:16,070
+And the storage on CloudKit is dirt cheap, which is even
+
+504
+00:44:16,570 --> 00:44:16,830
+more awesome.
+
+505
+00:44:20,030 --> 00:44:23,990
+Sorry, let's see what else. I just
+
+506
+00:44:24,490 --> 00:44:27,150
+want to make sure I covered all my slides. The last thing I'm going to
+
+507
+00:44:27,650 --> 00:44:28,670
+talk about is just what are my plans?
+
+508
+00:44:30,390 --> 00:44:33,390
+Excuse me. So I don't know if you check. Follow me.
+
+509
+00:44:33,890 --> 00:44:34,550
+But I just released.
+
+510
+00:44:41,910 --> 00:44:45,750
+I just released Alpha 5 that has lookup zones,
+
+511
+00:44:46,250 --> 00:44:50,150
+fetch, record changes and upload assets. Upload the assets is pretty awesome.
+
+512
+00:44:50,230 --> 00:44:53,150
+When I saw that work because I was like, cool, I can actually upload a
+
+513
+00:44:53,650 --> 00:44:57,630
+binary to CloudKit, which is awesome. We got
+
+514
+00:44:58,130 --> 00:45:01,790
+query filters to work for in and not in, so you could do that I
+
+515
+00:45:02,290 --> 00:45:05,510
+have plans to continue working on this because I think there's a big future for
+
+516
+00:45:06,010 --> 00:45:09,590
+something like this for a lot of people. Yes,
+
+517
+00:45:10,090 --> 00:45:13,950
+you can technically use this in Android or Windows because the Swift
+
+518
+00:45:14,270 --> 00:45:17,670
+thing does compile in Android and Windows. You can see I already added support for
+
+519
+00:45:18,170 --> 00:45:22,360
+that. This is the support I recently had. And then we're.
+
+520
+00:45:22,860 --> 00:45:25,880
+I'm just kind of like going through each of these because as great as AI
+
+521
+00:45:26,380 --> 00:45:30,120
+is, it's not perfect. So we're just kind of going through these piece
+
+522
+00:45:30,620 --> 00:45:35,720
+by piece with each version and hammering these away and
+
+523
+00:45:36,220 --> 00:45:40,160
+then this is actually done. I don't even know why that's there. But yeah,
+
+524
+00:45:40,660 --> 00:45:43,960
+I think system field integration might already be there and there's
+
+525
+00:45:44,460 --> 00:45:48,120
+a few other things. Eventually I'd like to add support.
+
+526
+00:45:48,200 --> 00:45:52,880
+So there, there's a whole API for CloudKit schema management that
+
+527
+00:45:53,380 --> 00:45:55,720
+I could. That would be awesome if I could figure out how to do that.
+
+528
+00:45:56,220 --> 00:45:58,640
+If I could figure out how to do key path query filtering, that would be
+
+529
+00:45:59,140 --> 00:46:02,760
+fantastic. And yeah,
+
+530
+00:46:03,260 --> 00:46:06,080
+but there's a. I mean the basics is there as far as if you want
+
+531
+00:46:06,580 --> 00:46:09,080
+to do anything with a record, it's pretty much there.
+
+532
+00:46:09,720 --> 00:46:13,160
+One thing with Celestra is I'd love to be able to do like test out
+
+533
+00:46:13,660 --> 00:46:17,840
+subscriptions and see how that works. So yeah,
+
+534
+00:46:18,340 --> 00:46:20,040
+that's really the bulk of my presentation today.
+
+535
+00:46:21,800 --> 00:46:24,880
+Now is. Now it's time to ask me a ton of questions and make me
+
+536
+00:46:25,380 --> 00:46:26,600
+feel dumb. Go for it.
+
+537
+00:46:28,440 --> 00:46:32,160
+No, there's a lot there to. To absorb.
+
+538
+00:46:32,660 --> 00:46:36,000
+But I, I like the concept and I know you've been working on this
+
+539
+00:46:36,500 --> 00:46:39,720
+for a while and I always thought it was a pretty cool, pretty cool
+
+540
+00:46:40,030 --> 00:46:42,190
+idea and implementation of this.
+
+541
+00:46:42,750 --> 00:46:43,470
+Questions?
+
+542
+00:46:48,990 --> 00:46:50,030
+So with something like.
+
+543
+00:46:54,110 --> 00:46:58,110
+Accessing CloudKit through the web, is this setup more
+
+544
+00:46:58,610 --> 00:47:02,270
+ideal for having your server do
+
+545
+00:47:02,670 --> 00:47:06,650
+the authentication to CloudKit with Miskit or is
+
+546
+00:47:07,150 --> 00:47:10,530
+miskit something that you could put into even like a client side,
+
+547
+00:47:12,850 --> 00:47:17,010
+you know, like non Swift application or
+
+548
+00:47:17,510 --> 00:47:20,970
+I guess not non Swift but like non like app application. I'm thinking in
+
+549
+00:47:21,470 --> 00:47:22,049
+the context of like a.
+
+550
+00:47:25,730 --> 00:47:30,290
+I guess if I wanted to create a something
+
+551
+00:47:30,790 --> 00:47:33,410
+accessing CloudKit that is not your typical Mac or iOS app.
+
+552
+00:47:34,880 --> 00:47:36,160
+Can you be more specific?
+
+553
+00:47:37,840 --> 00:47:42,040
+I'm looking into one. One approach would be browser
+
+554
+00:47:42,540 --> 00:47:46,000
+extensions. So for
+
+555
+00:47:46,500 --> 00:47:48,240
+like a non Safari browser. Yes.
+
+556
+00:47:50,400 --> 00:47:54,120
+Yeah, this would be great. So basically the way you'd want
+
+557
+00:47:54,620 --> 00:47:58,240
+that to work, like the sticky part to me would be getting the web authentication
+
+558
+00:47:58,740 --> 00:48:01,090
+token. Other than that, like have at it.
+
+559
+00:48:04,610 --> 00:48:07,810
+So I'm gonna, I'm gonna be devil's advocate. Why not just use
+
+560
+00:48:08,310 --> 00:48:11,490
+the CloudKit JavaScript library. If it's an extension,
+
+561
+00:48:12,450 --> 00:48:14,290
+my brain jumps to Swift first.
+
+562
+00:48:15,730 --> 00:48:18,930
+Right. But it's the reason I'm asking that is like it's a,
+
+563
+00:48:19,410 --> 00:48:23,490
+it's already a web extension. I would assume that is true. That it's
+
+564
+00:48:23,990 --> 00:48:26,290
+90 web based or JavaScript based.
+
+565
+00:48:27,120 --> 00:48:30,560
+So that's where I'm just like, well, you may as well. Like, I would love.
+
+566
+00:48:30,640 --> 00:48:33,600
+I don't want to. Like, I love tooting my own horn. Right. But like,
+
+567
+00:48:34,880 --> 00:48:37,120
+like why not just. Unless you're.
+
+568
+00:48:40,720 --> 00:48:43,840
+Unless you're like building a executable,
+
+569
+00:48:44,160 --> 00:48:45,920
+I guess, or an app. Ish.
+
+570
+00:48:47,760 --> 00:48:52,040
+And I guess another application for this would be doing
+
+571
+00:48:52,540 --> 00:48:56,280
+CloudKit stuff server side and then providing my own API layer
+
+572
+00:48:56,780 --> 00:48:59,860
+over it. Yep, yep. So that's.
+
+573
+00:49:00,360 --> 00:49:03,740
+Yeah. Are we talking private database or public database? Private.
+
+574
+00:49:05,580 --> 00:49:09,140
+So in that case, basically like you'd have to go
+
+575
+00:49:09,640 --> 00:49:13,380
+the Hard Twitch route and you would have to
+
+576
+00:49:13,880 --> 00:49:17,420
+provide a way to get their web authentication
+
+577
+00:49:17,920 --> 00:49:21,260
+token, essentially, if that makes sense. And then store
+
+578
+00:49:21,760 --> 00:49:24,140
+it in Postgres or whatever the hell you want to do. Like that's, that's the
+
+579
+00:49:24,640 --> 00:49:27,520
+way I did it with Hard Twitch. But once you have that, you can do
+
+580
+00:49:28,020 --> 00:49:31,200
+anything you want on the server with their private database,
+
+581
+00:49:31,700 --> 00:49:34,480
+if that makes sense. It does. Yep.
+
+582
+00:49:34,560 --> 00:49:38,240
+Yep. A couple of things I wanted to bring up,
+
+583
+00:49:38,320 --> 00:49:39,520
+so let's take a look.
+
+584
+00:49:44,000 --> 00:49:47,400
+So part of my
+
+585
+00:49:47,900 --> 00:49:51,880
+other presentation is working, talking about cross
+
+586
+00:49:52,380 --> 00:49:56,760
+platform automation type stuff. And the
+
+587
+00:49:57,260 --> 00:50:00,680
+one issue I've run into is. So it basically builds on everything.
+
+588
+00:50:00,920 --> 00:50:01,560
+Right now.
+
+589
+00:50:07,560 --> 00:50:10,520
+I'm going to share something. Hey guys,
+
+590
+00:50:11,000 --> 00:50:14,680
+I got to drop. But it was good presentation, Leo. Thank you.
+
+591
+00:50:14,840 --> 00:50:17,640
+Yeah, yeah. If I have more questions, if you have any feedback, just hit me
+
+592
+00:50:18,140 --> 00:50:21,590
+up on Slack. Sounds good. Cool, thank you. Thank you so much
+
+593
+00:50:22,090 --> 00:50:25,910
+for helping me set this up. Yeah, talk to you later. Thank you. Bye bye.
+
+594
+00:50:28,870 --> 00:50:31,430
+Yeah, so if you had something else to show, I'm happy to look for.
+
+595
+00:50:31,930 --> 00:50:34,390
+I'm here for a few more minutes as well. Yeah, yeah, yeah.
+
+596
+00:50:38,790 --> 00:50:42,070
+So I have the workflow working here and it
+
+597
+00:50:42,570 --> 00:50:46,120
+does Ubuntu, it does Windows, it does Android.
+
+598
+00:50:46,620 --> 00:50:50,920
+So all that stuff is available to you. I would never recommend using Miskit
+
+599
+00:50:51,420 --> 00:50:54,240
+on an Apple platform for obvious reasons, like what's the point?
+
+600
+00:50:55,600 --> 00:50:59,360
+True. Unless there's something special that I provide that CloudKit doesn't like,
+
+601
+00:50:59,440 --> 00:51:03,520
+I don't get it. Right. But we have an
+
+602
+00:51:04,020 --> 00:51:07,640
+issue. So I just started dabbling. I haven't really done anything
+
+603
+00:51:08,140 --> 00:51:11,730
+with wasm, but I did definitely try. Like I added support for
+
+604
+00:51:12,230 --> 00:51:14,890
+WASM in my, in my Swift build action.
+
+605
+00:51:17,210 --> 00:51:21,050
+The thing about WASA is it does not provide. It doesn't have a transport
+
+606
+00:51:21,130 --> 00:51:24,410
+available. So we talked about transports,
+
+607
+00:51:26,010 --> 00:51:30,090
+I think. Did you hear about that part about the Open API generator and transports?
+
+608
+00:51:31,370 --> 00:51:33,690
+I think I was coming in at that point.
+
+609
+00:51:34,410 --> 00:51:36,670
+Okay. When you create a client,
+
+610
+00:51:37,630 --> 00:51:42,630
+so underneath the client you
+
+611
+00:51:43,130 --> 00:51:46,990
+have what's called a client transport. This is so underneath this
+
+612
+00:51:47,490 --> 00:51:51,270
+client, this is an abstraction layer above. So this is not the right
+
+613
+00:51:51,770 --> 00:51:53,390
+one. Where's the public one?
+
+614
+00:52:00,680 --> 00:52:05,440
+But anyway, there is here
+
+615
+00:52:05,940 --> 00:52:06,920
+CloudKit service maybe.
+
+616
+00:52:09,560 --> 00:52:13,640
+Yeah, here we go. So the CloudKit service has
+
+617
+00:52:14,140 --> 00:52:17,960
+a client and part of the client is being able
+
+618
+00:52:19,960 --> 00:52:23,560
+to say what transport you use in Open API.
+
+619
+00:52:24,760 --> 00:52:29,330
+And there's
+
+620
+00:52:29,830 --> 00:52:33,730
+two transports available right now. One is,
+
+621
+00:52:36,850 --> 00:52:40,210
+one is your regular URL session for clients, which.
+
+622
+00:52:40,710 --> 00:52:43,810
+That makes sense. Right. And then there's the Async HTTP
+
+623
+00:52:44,310 --> 00:52:47,970
+client which is typically used like Swift NEO based for servers.
+
+624
+00:52:49,330 --> 00:52:53,170
+The thing is that neither of those are available in wasp.
+
+625
+00:52:54,290 --> 00:52:57,810
+Do you know what WASM is? I have no experience with it, but yes.
+
+626
+00:52:58,850 --> 00:53:02,290
+Okay. It's. It's the web browser. Right. So.
+
+627
+00:53:02,690 --> 00:53:04,850
+So you really can't use Miskit in.
+
+628
+00:53:06,450 --> 00:53:10,210
+In the. In WASM yet because there is no transport. Now having said that,
+
+629
+00:53:10,530 --> 00:53:12,450
+why on earth would you use.
+
+630
+00:53:13,090 --> 00:53:16,970
+Awesome. Why would you use Miskit in the browser? Why not just use CloudKit
+
+631
+00:53:17,470 --> 00:53:20,700
+js? So that's essentially,
+
+632
+00:53:21,580 --> 00:53:22,060
+you know,
+
+633
+00:53:29,260 --> 00:53:30,940
+What other questions do you have?
+
+634
+00:53:35,660 --> 00:53:41,340
+My brain is mushy right now, so because
+
+635
+00:53:41,840 --> 00:53:45,450
+of my presentation or because other things, I got two hours of
+
+636
+00:53:45,950 --> 00:53:50,170
+sleep. Oh, I'm so sorry. So I'm
+
+637
+00:53:50,670 --> 00:53:51,450
+following as best as I can.
+
+638
+00:53:54,330 --> 00:53:57,410
+Snuggling. Yeah,
+
+639
+00:53:57,910 --> 00:54:01,410
+the intro was basically how I originally built it
+
+640
+00:54:01,910 --> 00:54:06,210
+for hard Twitch in 2020 for a private database login for
+
+641
+00:54:06,710 --> 00:54:09,210
+the Apple Watch because I don't want to have a login screen. And so basically
+
+642
+00:54:09,710 --> 00:54:12,490
+there's a way in the web browser to link your Apple Watch to your account
+
+643
+00:54:12,990 --> 00:54:16,280
+and then from there you don't need to authenticate anymore. Nice. I built
+
+644
+00:54:16,780 --> 00:54:20,280
+that all from hand and then in 23 they
+
+645
+00:54:20,780 --> 00:54:24,720
+came out with the Open API generator which was like, oh wait, what if
+
+646
+00:54:24,800 --> 00:54:28,160
+I can create an open API file out of
+
+647
+00:54:28,320 --> 00:54:30,800
+Apple's 10 year old documentation?
+
+648
+00:54:33,120 --> 00:54:36,280
+That'd be a lot of work, but I could do it. And I
+
+649
+00:54:36,780 --> 00:54:40,480
+don't know if you heard, but there was this thing that came out a
+
+650
+00:54:40,980 --> 00:54:45,340
+couple years ago called AI and it's
+
+651
+00:54:45,840 --> 00:54:49,140
+really good at creating documentation for your code, but it's also really good at creating
+
+652
+00:54:49,640 --> 00:54:53,940
+code for your documentation. And so I was like, oh yeah,
+
+653
+00:54:54,440 --> 00:54:57,900
+this is great. Like I can just, I can just Feed it
+
+654
+00:54:58,400 --> 00:55:01,940
+the documentation and go from there.
+
+655
+00:55:02,020 --> 00:55:05,140
+And, like, basically, I've been going step by step through.
+
+656
+00:55:05,940 --> 00:55:09,300
+Like I said, if you looked at the miskit repo,
+
+657
+00:55:09,800 --> 00:55:14,620
+like, I'm going through step by step and adding new APIs based
+
+658
+00:55:15,120 --> 00:55:18,180
+on what's available in the documentation, piece by piece. And I would say at this
+
+659
+00:55:18,680 --> 00:55:22,420
+point, it's like most of the really, like 80% of that people use
+
+660
+00:55:22,920 --> 00:55:26,700
+is there. There's like, stuff like subscriptions and zones that I'm still trying
+
+661
+00:55:27,200 --> 00:55:30,940
+to figure out, but it's. It's pretty close to done at this point.
+
+662
+00:55:31,260 --> 00:55:31,900
+Mm.
+
+663
+00:55:35,110 --> 00:55:38,590
+If you use it. Yeah, it's one of those. Because I. Go ahead.
+
+664
+00:55:39,090 --> 00:55:41,070
+Yeah. I was gonna say it's one of those projects that makes me want to
+
+665
+00:55:41,570 --> 00:55:45,110
+set up a. Like a vapor server or something just to do some Swift on
+
+666
+00:55:45,610 --> 00:55:48,150
+the server. Yeah. Or just like,
+
+667
+00:55:48,870 --> 00:55:52,470
+I wonder if there's like, something you do on a pie, like just
+
+668
+00:55:52,970 --> 00:55:55,350
+hook it up to a CloudKit database. Like, there's a lot you could do here
+
+669
+00:55:55,850 --> 00:55:57,510
+because all you need is decent os.
+
+670
+00:55:58,950 --> 00:56:02,110
+I don't know anything about sharing. I haven't done anything with sharing yet,
+
+671
+00:56:02,610 --> 00:56:05,180
+so I still have to do that and a few other things, but. No,
+
+672
+00:56:05,680 --> 00:56:08,940
+yeah, it's an interesting idea.
+
+673
+00:56:09,900 --> 00:56:12,860
+Thank you. Yeah. Well, thank you for joining,
+
+674
+00:56:13,360 --> 00:56:17,340
+Josh. Yeah. Thanks for hosting this and sharing this info. It's nice.
+
+675
+00:56:18,060 --> 00:56:20,780
+Yeah. If you ever run into anything, let me know.
+
+676
+00:56:21,420 --> 00:56:24,780
+Will do. All right, talk to you later. All right,
+
+677
+00:56:25,280 --> 00:56:26,700
+sounds good. See you. Bye.
+
