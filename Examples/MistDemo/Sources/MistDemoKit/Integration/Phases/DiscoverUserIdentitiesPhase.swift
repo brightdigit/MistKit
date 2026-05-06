@@ -1,5 +1,5 @@
 //
-//  IntegrationTestRunner.swift
+//  DiscoverUserIdentitiesPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,36 +30,28 @@
 import Foundation
 import MistKit
 
-/// Thin façade that builds a `PhaseContext` from CLI configuration and
-/// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
+struct DiscoverUserIdentitiesPhase: IntegrationPhase {
+  typealias Input = UserInfo
+  typealias Output = NoState
 
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
-    try await PublicDatabaseTest(database: database).run(context: makeContext())
-  }
+  static let title = "Discover user identities"
+  static let emoji = "👥"
+  static let apiName = "discoverUserIdentities"
 
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
-    try await PrivateDatabaseTest().run(context: makeContext())
-  }
+  func run(input: UserInfo, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
 
-  private func makeContext() -> PhaseContext {
-    PhaseContext(
-      service: service,
-      containerIdentifier: containerIdentifier,
-      database: database,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
-    )
+    let lookupInfos = [UserIdentityLookupInfo(userRecordName: input.userRecordName)]
+    let identities = try await context.service.discoverUserIdentities(lookupInfos: lookupInfos)
+
+    print("✅ Discovered \(identities.count) user identit\(identities.count == 1 ? "y" : "ies")")
+
+    if context.verbose {
+      for identity in identities {
+        if let name = identity.userRecordName { print("   - \(name)") }
+      }
+    }
+
+    return NoState()
   }
 }

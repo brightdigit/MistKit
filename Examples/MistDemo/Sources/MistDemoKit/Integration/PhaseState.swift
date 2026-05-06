@@ -1,5 +1,5 @@
 //
-//  IntegrationTestRunner.swift
+//  PhaseState.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,36 +30,16 @@
 import Foundation
 import MistKit
 
-/// Thin façade that builds a `PhaseContext` from CLI configuration and
-/// dispatches to the appropriate `PhasedIntegrationTest` implementation.
-struct IntegrationTestRunner {
-  let service: CloudKitService
-  let containerIdentifier: String
-  let database: MistKit.Database
-  let recordCount: Int
-  let assetSizeKB: Int
-  let skipCleanup: Bool
-  let verbose: Bool
-
-  /// Run the public-database workflow covering all non-user-scoped API methods.
-  func runBasicWorkflow() async throws {
-    try await PublicDatabaseTest(database: database).run(context: makeContext())
-  }
-
-  /// Run the private-database workflow covering all API methods including user-identity endpoints.
-  func runPrivateWorkflow() async throws {
-    try await PrivateDatabaseTest().run(context: makeContext())
-  }
-
-  private func makeContext() -> PhaseContext {
-    PhaseContext(
-      service: service,
-      containerIdentifier: containerIdentifier,
-      database: database,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose
-    )
-  }
+/// Mutable state that flows between phases as the test progresses.
+///
+/// Each phase reads the slice it needs by initializing its `Input` type
+/// via `PhaseStateDecodable.init(from:)` and writes its results back
+/// through `PhaseStateEncodable.encode(to:)`. The runner threads a single
+/// `PhaseState` value through the pipeline via
+/// `IntegrationPhase.runErased(context:state:)`.
+struct PhaseState: Sendable {
+  var assetReceipt: AssetUploadReceipt?
+  var createdRecordNames: [String] = []
+  var syncToken: String?
+  var currentUser: UserInfo?
 }
