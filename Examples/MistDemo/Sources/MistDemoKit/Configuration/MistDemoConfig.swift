@@ -48,6 +48,9 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
   /// CloudKit environment (development or production)
   let environment: MistKit.Environment
 
+  /// CloudKit database (public, private, or shared)
+  let database: MistKit.Database
+
   // MARK: - Authentication Configuration
 
   /// Web authentication token (secret)
@@ -91,6 +94,13 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
   /// Test server-to-server authentication
   let testServerToServer: Bool
 
+  // MARK: - Demo Flags
+
+  /// Use deliberately invalid credentials (for the talk's 401 demo).
+  /// When true, the configured tokens are swapped with placeholders before the
+  /// service is constructed, producing a typed 401 from CloudKit on the next call.
+  let badCredentials: Bool
+
   // MARK: - Initialization
 
   /// Initialize with Swift Configuration's hierarchical provider setup
@@ -117,6 +127,12 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
         default: "development"
       ) ?? "development"
     self.environment = envString == "production" ? .production : .development
+
+    let databaseString = config.string(forKey: "database", default: "public") ?? "public"
+    guard let database = MistKit.Database(rawValue: databaseString) else {
+      throw ConfigurationError.invalidDatabase(databaseString)
+    }
+    self.database = database
 
     // Authentication
     self.webAuthToken = config.string(
@@ -180,6 +196,77 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
     self.testServerToServer = config.bool(
       forKey: "test.server.to.server",
       default: false
+    )
+
+    // Demo flags
+    self.badCredentials = config.bool(
+      forKey: "bad.credentials",
+      default: false
+    )
+  }
+
+  /// Memberwise initializer used internally to copy a config with overrides
+  /// (e.g. `with(database:)`). Not part of the public surface.
+  internal init(
+    containerIdentifier: String,
+    apiToken: String,
+    environment: MistKit.Environment,
+    database: MistKit.Database,
+    webAuthToken: String?,
+    keyID: String?,
+    privateKey: String?,
+    privateKeyFile: String?,
+    host: String,
+    port: Int,
+    authTimeout: Double,
+    skipAuth: Bool,
+    testAllAuth: Bool,
+    testApiOnly: Bool,
+    testAdaptive: Bool,
+    testServerToServer: Bool,
+    badCredentials: Bool
+  ) {
+    self.containerIdentifier = containerIdentifier
+    self.apiToken = apiToken
+    self.environment = environment
+    self.database = database
+    self.webAuthToken = webAuthToken
+    self.keyID = keyID
+    self.privateKey = privateKey
+    self.privateKeyFile = privateKeyFile
+    self.host = host
+    self.port = port
+    self.authTimeout = authTimeout
+    self.skipAuth = skipAuth
+    self.testAllAuth = testAllAuth
+    self.testApiOnly = testApiOnly
+    self.testAdaptive = testAdaptive
+    self.testServerToServer = testServerToServer
+    self.badCredentials = badCredentials
+  }
+
+  /// Returns a copy of this config with the given database, leaving all other
+  /// fields unchanged. Used by commands whose identity pins a database
+  /// (e.g. `test-private` always targets `.private`).
+  internal func with(database: MistKit.Database) -> MistDemoConfig {
+    MistDemoConfig(
+      containerIdentifier: containerIdentifier,
+      apiToken: apiToken,
+      environment: environment,
+      database: database,
+      webAuthToken: webAuthToken,
+      keyID: keyID,
+      privateKey: privateKey,
+      privateKeyFile: privateKeyFile,
+      host: host,
+      port: port,
+      authTimeout: authTimeout,
+      skipAuth: skipAuth,
+      testAllAuth: testAllAuth,
+      testApiOnly: testApiOnly,
+      testAdaptive: testAdaptive,
+      testServerToServer: testServerToServer,
+      badCredentials: badCredentials
     )
   }
 }

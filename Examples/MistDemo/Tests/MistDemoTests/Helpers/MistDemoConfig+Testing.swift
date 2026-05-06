@@ -45,6 +45,7 @@ extension MistDemoConfig {
     containerIdentifier: String = "iCloud.com.test.App",
     apiToken: String = "test-api-token",
     environment: MistKit.Environment = .development,
+    database: MistKit.Database = .private,
     webAuthToken: String? = nil,
     keyID: String? = nil,
     privateKey: String? = nil,
@@ -56,7 +57,8 @@ extension MistDemoConfig {
     testAllAuth: Bool = false,
     testApiOnly: Bool = false,
     testAdaptive: Bool = false,
-    testServerToServer: Bool = false
+    testServerToServer: Bool = false,
+    badCredentials: Bool = false
   ) async throws {
     let envString = environment == .production ? "production" : "development"
 
@@ -68,6 +70,7 @@ extension MistDemoConfig {
       key("container.identifier"): .init(stringLiteral: containerIdentifier),
       key("api.token"): .init(stringLiteral: apiToken),
       key("environment"): .init(stringLiteral: envString),
+      key("database"): .init(stringLiteral: database.rawValue),
       key("host"): .init(stringLiteral: host),
       key("port"): .init(integerLiteral: port),
       key("auth.timeout"): .init(integerLiteral: Int(authTimeout)),
@@ -76,6 +79,7 @@ extension MistDemoConfig {
       key("test.api.only"): .init(booleanLiteral: testApiOnly),
       key("test.adaptive"): .init(booleanLiteral: testAdaptive),
       key("test.server.to.server"): .init(booleanLiteral: testServerToServer),
+      key("bad.credentials"): .init(booleanLiteral: badCredentials),
     ]
 
     if let webAuthToken {

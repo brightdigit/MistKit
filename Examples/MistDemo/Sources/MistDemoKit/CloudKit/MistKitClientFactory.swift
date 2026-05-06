@@ -32,24 +32,35 @@ public import MistKit
 
 /// Factory for creating MistKit CloudKitService instances from MistDemo configuration
 public struct MistKitClientFactory: Sendable {
-  /// Create a CloudKitService for the given database, choosing auth method automatically.
+  /// Create a CloudKitService for `config.database`, choosing auth method automatically.
   ///
   /// - `.public`: requires `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]`
   /// - `.private` / `.shared`: requires `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN`
-  /// - Parameters:
-  ///   - database: Target database
-  ///   - config: The base MistDemo configuration
-  /// - Throws: ConfigurationError if required credentials are missing
-  public static func create(_ database: MistKit.Database, from config: MistDemoConfig) throws
-    -> CloudKitService
-  {
+  ///
+  /// When `config.badCredentials == true`, this short-circuits database-based auth
+  /// selection and returns a service backed by a deliberately invalid web-auth
+  /// `TokenManager` so the next CloudKit call yields a typed HTTP 401. Because
+  /// that path always uses web auth, it is **not** supported on `.public` (which
+  /// requires server-to-server signing) and will throw
+  /// `ConfigurationError.badCredentialsNotSupportedOnPublicDatabase`.
+  ///
+  /// - Parameter config: The base MistDemo configuration
+  /// - Throws: `ConfigurationError` if required credentials are missing, or if
+  ///   `badCredentials` is requested with a `.public` database.
+  public static func create(for config: MistDemoConfig) throws -> CloudKitService {
     #if os(WASI)
       throw ConfigurationError.unsupportedPlatform(
         "MistDemo CLI requires URLSession; WASI builds must inject a transport explicitly"
       )
     #else
+      if config.badCredentials {
+        guard config.database != .public else {
+          throw ConfigurationError.badCredentialsNotSupportedOnPublicDatabase
+        }
+        return try create(from: config, tokenManager: makeBadCredentialsTokenManager())
+      }
       let tokenManager: any TokenManager
-      switch database {
+      switch config.database {
       case .public:
         guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
           throw ConfigurationError.unsupportedPlatform(
@@ -64,15 +75,30 @@ public struct MistKitClientFactory: Sendable {
         containerIdentifier: config.containerIdentifier,
         tokenManager: tokenManager,
         environment: config.environment,
-        database: database
+        database: config.database
       )
     #endif
   }
 
+  /// Build a `WebAuthTokenManager` whose tokens pass `validateCredentials()`'s
+  /// local format check (64-char hex API token, ≥10-char web-auth token) but are
+  /// guaranteed to be rejected by Apple's servers, producing a real HTTP 401.
+  ///
+  /// Used by both the factory's `badCredentials` short-circuit and by
+  /// `DemoErrorsRunner.runUnauthorized` so the same definition feeds every
+  /// 401-demo path.
+  internal static func makeBadCredentialsTokenManager() -> WebAuthTokenManager {
+    WebAuthTokenManager(
+      apiToken: String(repeating: "0", count: 64),
+      webAuthToken: String(repeating: "a", count: 100)
+    )
+  }
+
+  /// Create a CloudKitService with a caller-supplied TokenManager, targeting
+  /// `config.database`.
   public static func create(
     from config: MistDemoConfig,
-    tokenManager: any TokenManager,
-    database: MistKit.Database = .private
+    tokenManager: any TokenManager
   ) throws -> CloudKitService {
     #if os(WASI)
       throw ConfigurationError.unsupportedPlatform(
@@ -83,7 +109,7 @@ public struct MistKitClientFactory: Sendable {
         containerIdentifier: config.containerIdentifier,
         tokenManager: tokenManager,
         environment: config.environment,
-        database: database
+        database: config.database
       )
     #endif
   }

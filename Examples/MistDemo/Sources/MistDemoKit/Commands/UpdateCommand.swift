@@ -51,6 +51,7 @@ public struct UpdateCommand: MistDemoCommand, OutputFormatting {
         --zone <zone>                  Zone name (default: _defaultZone)
         --record-change-tag <tag>      Change tag for optimistic locking
         --force                        Overwrite server record, ignoring change tag conflicts
+        --database <type>              Database to target: public, private, shared (default: public)
         --output-format <format>       Output format: json, table, csv, yaml
 
     FIELD DEFINITION (choose one method):
@@ -118,7 +119,7 @@ public struct UpdateCommand: MistDemoCommand, OutputFormatting {
   public func execute() async throws {
     do {
       // Create CloudKit client
-      let client = try MistKitClientFactory.create(.private, from: config.base)
+      let client = try MistKitClientFactory.create(for: config.base)
 
       // Convert fields to CloudKit format
       let cloudKitFields = try config.fields.toCloudKitFields()

@@ -43,17 +43,19 @@ public struct LookupZonesCommand: MistDemoCommand, OutputFormatting {
 
     OPTIONS:
         --zone-names <names>       Comma-separated zone names (default: "_defaultZone")
+        --database <type>          Database to target: public, private, shared (default: public)
         --output-format <format>   Output format: json, table, csv, yaml
 
     EXAMPLES:
-        # Look up the default zone
+        # Look up the default zone (public database)
         mistdemo lookup-zones
 
-        # Look up specific zones
-        mistdemo lookup-zones --zone-names "Articles,Photos"
+        # Look up specific zones in the private database
+        mistdemo lookup-zones --database private --zone-names "Articles,Photos"
 
     NOTES:
-        - Uses web authentication (private database) by default
+        - Auth method follows --database: server-to-server for public,
+          web auth for private/shared.
         - Zone names are case-sensitive
     """
 
@@ -68,7 +70,7 @@ public struct LookupZonesCommand: MistDemoCommand, OutputFormatting {
     print("🔍 Lookup CloudKit Zones")
     print(String(repeating: "=", count: 60))
 
-    let service = try MistKitClientFactory.create(.private, from: config.base)
+    let service = try MistKitClientFactory.create(for: config.base)
     let zoneIDs = config.zoneNames.map { ZoneID(zoneName: $0, ownerName: nil) }
 
     print("\n📋 Looking up \(zoneIDs.count) zone(s):")

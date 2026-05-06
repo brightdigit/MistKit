@@ -28,7 +28,7 @@
 //
 
 public import ConfigKeyKit
-public import MistKit
+import MistKit
 
 /// Configuration for test-private command (private database, all API methods)
 public struct TestPrivateConfig: Sendable, ConfigurationParseable {
@@ -56,12 +56,15 @@ public struct TestPrivateConfig: Sendable, ConfigurationParseable {
   }
 
   public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
-    let baseConfig: MistDemoConfig
+    let parsedBase: MistDemoConfig
     if let base {
-      baseConfig = base
+      parsedBase = base
     } else {
-      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+      parsedBase = try await MistDemoConfig(configuration: configuration, base: nil)
     }
+    // test-private's identity is "private database test" — pin the database
+    // regardless of any --database flag the user supplied.
+    let baseConfig = parsedBase.with(database: .private)
 
     guard let webAuthToken = baseConfig.webAuthToken, !webAuthToken.isEmpty else {
       throw ConfigurationError.missingRequired(
