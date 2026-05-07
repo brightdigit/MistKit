@@ -35,38 +35,24 @@ import Foundation
 /// operations, enabling protocol-oriented patterns for CloudKit operations.
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService: RecordManaging {
-  /// Query records of a specific type from CloudKit
-  ///
-  /// This implementation uses a default limit of 200 records. For more control over
-  /// query parameters (filters, sorting, custom limits), use the full `queryRecords`
-  /// method directly on CloudKitService.
-  ///
-  /// - Parameter recordType: The CloudKit record type to query
-  /// - Returns: Array of record information for matching records (up to 200)
-  /// - Throws: CloudKit errors if the query fails
+  /// Query records of a specific type from CloudKit (deprecated single-page form)
+  @available(
+    *, deprecated,
+    message:
+      "Returns at most one page (silently truncates at the server limit). Use queryAllRecords(recordType:) to fetch all pages, or call queryRecords(...) -> QueryResult to handle pagination explicitly."
+  )
   public func queryRecords(recordType: String) async throws -> [RecordInfo] {
-    try await self.queryRecords(
+    let result: QueryResult = try await self.queryRecords(
       recordType: recordType,
       filters: nil,
       sortBy: nil,
-      limit: 200
+      limit: 200,
+      desiredKeys: nil,
+      continuationMarker: nil
     )
+    return result.records
   }
 
-  /// Execute a batch of record operations
-  ///
-  /// This implementation delegates to CloudKitService's `modifyRecords` method.
-  /// The recordType parameter is provided for logging purposes but is not required
-  /// by the underlying implementation (operation types are embedded in RecordOperation).
-  ///
-  /// Note: The caller is responsible for respecting CloudKit's 200 operations/request
-  /// limit by batching operations. The RecordManaging generic extensions handle this
-  /// automatically.
-  ///
-  /// - Parameters:
-  ///   - operations: Array of record operations to execute
-  ///   - recordType: The record type being operated on (for reference/logging)
-  /// - Throws: CloudKit errors if the batch operations fail
   public func executeBatchOperations(
     _ operations: [RecordOperation],
     recordType: String
@@ -75,19 +61,12 @@ extension CloudKitService: RecordManaging {
   }
 
   /// Query all records of a specific type, automatically paginating
-  ///
-  /// This implementation uses `queryAllRecords` which follows continuation markers
-  /// to fetch all matching records across multiple pages.
-  ///
-  /// - Parameter recordType: The CloudKit record type to query
-  /// - Returns: Array of all matching records
-  /// - Throws: CloudKit errors if any page request fails
   public func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
     try await self.queryAllRecords(
       recordType: recordType,
       filters: nil,
       sortBy: nil,
-      limit: nil
+      pageSize: nil
     )
   }
 }

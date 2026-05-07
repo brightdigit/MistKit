@@ -86,6 +86,11 @@ extension CloudKitService {
   ///
   /// - Note: For large result sets, consider using pagination
   ///   with `continuationMarker` or `queryAllRecords`
+  @available(
+    *, deprecated,
+    message:
+      "Use queryRecords(...) -> QueryResult to handle pagination explicitly, or queryAllRecords(...) to auto-paginate."
+  )
   public func queryRecords(
     recordType: String,
     filters: [QueryFilter]? = nil,
@@ -207,34 +212,30 @@ extension CloudKitService {
   ///   - recordType: The type of records to query (must not be empty)
   ///   - filters: Optional array of filters to apply to the query
   ///   - sortBy: Optional array of sort descriptors
-  ///   - limit: Maximum number of records per page
+  ///   - pageSize: Maximum number of records per page
   ///     (1-200, defaults to `defaultQueryLimit`)
   ///   - desiredKeys: Optional array of field names to fetch
+  ///   - maxPages: Maximum number of pages to fetch before throwing
+  ///     `CloudKitError.invalidResponse` (defaults to 1,000)
   /// - Returns: Array of all matching records across all pages
   /// - Throws: CloudKitError if any page request fails
   ///
-  /// - Warning: For queries with many matching records, this may make
-  ///           multiple requests and return a large array. Consider using
-  ///           `queryRecords` with `continuationMarker` for better
-  ///           memory control.
-  /// - Warning: This method will stop early if the server repeatedly
-  ///           returns a continuation marker with no records and the same
-  ///           marker (stuck-marker scenario), or if the page count
-  ///           exceeds 1,000.
+  /// - Warning: Stops early if the server returns the same continuation
+  ///   marker with no new records (stuck-marker scenario), or if
+  ///   the page count exceeds `maxPages`.
   public func queryAllRecords(
     recordType: String,
     filters: [QueryFilter]? = nil,
     sortBy: [QuerySort]? = nil,
-    limit: Int? = nil,
-    desiredKeys: [String]? = nil
+    pageSize: Int? = nil,
+    desiredKeys: [String]? = nil,
+    maxPages: Int = 1_000
   ) async throws(CloudKitError) -> [RecordInfo] {
     var allRecords: [RecordInfo] = []
     var currentMarker: String? = nil
-    var hasMore = true
     var pageCount = 0
-    let maxPages = 1_000
 
-    while hasMore {
+    repeat {
       guard pageCount < maxPages else {
         throw CloudKitError.invalidResponse
       }
@@ -249,7 +250,7 @@ extension CloudKitService {
         recordType: recordType,
         filters: filters,
         sortBy: sortBy,
-        limit: limit,
+        limit: pageSize,
         desiredKeys: desiredKeys,
         continuationMarker: currentMarker
       )
@@ -263,9 +264,8 @@ extension CloudKitService {
 
       allRecords.append(contentsOf: result.records)
       currentMarker = result.continuationMarker
-      hasMore = currentMarker != nil
       pageCount += 1
-    }
+    } while currentMarker != nil
 
     return allRecords
   }

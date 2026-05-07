@@ -80,8 +80,9 @@ extension RecordManaging {
   ///
   /// - Parameter type: The CloudKitRecord type to list
   /// - Throws: CloudKit errors if the query fails
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public func list<T: CloudKitRecord>(_ type: T.Type) async throws {
-    let records = try await queryRecords(recordType: T.cloudKitRecordType)
+    let records = try await queryAllRecords(recordType: T.cloudKitRecordType)
 
     print("\n\(T.cloudKitRecordType) (\(records.count) total)")
     print(String(repeating: "=", count: 80))
@@ -117,11 +118,12 @@ extension RecordManaging {
   ///   - filter: Optional closure to filter RecordInfo results before parsing
   /// - Returns: Array of parsed model instances (nil records are filtered out)
   /// - Throws: CloudKit errors if the query fails
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public func query<T: CloudKitRecord>(
     _ type: T.Type,
     where filter: (RecordInfo) -> Bool = { _ in true }
   ) async throws -> [T] {
-    let records = try await queryRecords(recordType: T.cloudKitRecordType)
+    let records = try await queryAllRecords(recordType: T.cloudKitRecordType)
     return records.filter(filter).compactMap(T.from)
   }
 }

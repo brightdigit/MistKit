@@ -95,15 +95,16 @@ internal final class MockCloudKitRecordOperator: CloudKitRecordOperating, Sendab
     recordType: String,
     filters: [QueryFilter]?,
     sortBy: [QuerySort]?,
-    limit: Int?,
-    desiredKeys: [String]?
+    pageSize: Int?,
+    desiredKeys: [String]?,
+    maxPages: Int
   ) async throws(CloudKitError) -> [RecordInfo] {
     queryCalls.append(
       QueryCall(
         recordType: recordType,
         filters: filters,
         sortBy: sortBy,
-        limit: limit,
+        limit: pageSize,
         desiredKeys: desiredKeys
       )
     )

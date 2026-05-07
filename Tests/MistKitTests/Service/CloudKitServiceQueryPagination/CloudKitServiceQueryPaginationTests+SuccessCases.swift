@@ -35,7 +35,6 @@ import Testing
 extension CloudKitServiceTests.QueryPagination {
   @Suite("Success Cases")
   internal struct SuccessCases {
-
     // MARK: - queryRecords returning QueryResult
 
     @Test("queryRecords() returns QueryResult with records and nil continuationMarker")

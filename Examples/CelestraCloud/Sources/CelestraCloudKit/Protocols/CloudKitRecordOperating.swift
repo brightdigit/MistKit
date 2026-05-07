@@ -59,16 +59,18 @@ public protocol CloudKitRecordOperating: Sendable {
   ///   - recordType: The type of record to query
   ///   - filters: Optional query filters
   ///   - sortBy: Optional sort descriptors
-  ///   - limit: Maximum number of records per page (optional)
+  ///   - pageSize: Maximum number of records per page (optional)
   ///   - desiredKeys: Optional list of field keys to fetch
+  ///   - maxPages: Maximum number of pages to fetch before throwing
   /// - Returns: Array of all matching record info across all pages
   /// - Throws: CloudKitError if the query fails
   func queryAllRecords(
     recordType: String,
     filters: [QueryFilter]?,
     sortBy: [QuerySort]?,
-    limit: Int?,
-    desiredKeys: [String]?
+    pageSize: Int?,
+    desiredKeys: [String]?,
+    maxPages: Int
   ) async throws(CloudKitError) -> [RecordInfo]
 }
 

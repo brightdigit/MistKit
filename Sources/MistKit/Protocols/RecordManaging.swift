@@ -40,6 +40,11 @@ public protocol RecordManaging {
   /// - Parameter recordType: The CloudKit record type to query
   /// - Returns: Array of record information for all matching records
   /// - Throws: CloudKit errors if the query fails
+  @available(
+    *, deprecated,
+    message:
+      "Returns at most one page (silently truncates at the server limit). Use queryAllRecords(recordType:) to fetch all pages, or call CloudKitService.queryRecords(...) -> QueryResult to handle pagination explicitly."
+  )
   func queryRecords(recordType: String) async throws -> [RecordInfo]
 
   /// Execute a batch of record operations
@@ -62,7 +67,14 @@ public protocol RecordManaging {
 }
 
 extension RecordManaging {
-  /// Default implementation delegates to queryRecords
+  /// Default implementation delegates to the deprecated `queryRecords(recordType:)`,
+  /// which only returns one page. Conformers should override this with a real
+  /// auto-paginating implementation (e.g. `CloudKitService.queryAllRecords`).
+  @available(
+    *, deprecated,
+    message:
+      "Default implementation only returns one page. Override queryAllRecords with a real auto-paginating implementation."
+  )
   public func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
     try await queryRecords(recordType: recordType)
   }
