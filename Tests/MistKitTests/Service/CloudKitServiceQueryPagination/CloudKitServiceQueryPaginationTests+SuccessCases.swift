@@ -161,13 +161,13 @@ extension CloudKitServiceTests.QueryPagination {
       // First page returns records with a marker, second page returns no records
       // but same marker (stuck). The method should break out of the loop.
       let provider = ResponseProvider(
-        defaultResponse: .successfulQueryResponse(
+        defaultResponse: try .successfulQueryResponse(
           recordCount: 0,
           continuationMarker: "stuck-marker"
         )
       )
       await provider.enqueue(
-        .successfulQueryResponse(
+        try .successfulQueryResponse(
           recordCount: 2,
           continuationMarker: "stuck-marker"
         ),

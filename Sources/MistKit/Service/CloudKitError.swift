@@ -44,6 +44,7 @@ public enum CloudKitError: LocalizedError, Sendable {
   case decodingError(DecodingError)
   case networkError(URLError)
   case unsupportedOperationType(String)
+  case paginationLimitExceeded(maxPages: Int, recordsCollected: Int)
 
   /// HTTP status code if this error originated from an HTTP response, otherwise nil.
   public var httpStatusCode: Int? {
@@ -53,7 +54,7 @@ public enum CloudKitError: LocalizedError, Sendable {
       .httpErrorWithRawResponse(let statusCode, _):
       return statusCode
     case .invalidResponse, .underlyingError, .decodingError, .networkError,
-      .unsupportedOperationType:
+      .unsupportedOperationType, .paginationLimitExceeded:
       return nil
     }
   }
@@ -119,6 +120,10 @@ public enum CloudKitError: LocalizedError, Sendable {
       return message
     case .unsupportedOperationType(let type):
       return "Unsupported record operation type: \(type)"
+    case .paginationLimitExceeded(let maxPages, let recordsCollected):
+      return
+        "CloudKit query exceeded pagination limit of \(maxPages) pages "
+        + "(collected \(recordsCollected) records)"
     }
   }
 }

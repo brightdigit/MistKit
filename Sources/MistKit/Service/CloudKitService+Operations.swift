@@ -237,7 +237,10 @@ extension CloudKitService {
 
     repeat {
       guard pageCount < maxPages else {
-        throw CloudKitError.invalidResponse
+        throw CloudKitError.paginationLimitExceeded(
+          maxPages: maxPages,
+          recordsCollected: allRecords.count
+        )
       }
 
       do {

@@ -43,7 +43,7 @@ extension CloudKitServiceTests.QueryPagination {
     continuationMarker: String? = nil
   ) throws -> CloudKitService {
     let responseProvider = ResponseProvider(
-      defaultResponse: .successfulQueryResponse(
+      defaultResponse: try .successfulQueryResponse(
         recordCount: recordCount,
         continuationMarker: continuationMarker
       )
@@ -61,11 +61,11 @@ extension CloudKitServiceTests.QueryPagination {
     pages: [(recordCount: Int, continuationMarker: String?)]
   ) async throws -> CloudKitService {
     let provider = ResponseProvider(
-      defaultResponse: .successfulQueryResponse()
+      defaultResponse: try .successfulQueryResponse()
     )
     for page in pages {
       await provider.enqueue(
-        .successfulQueryResponse(
+        try .successfulQueryResponse(
           recordCount: page.recordCount,
           continuationMarker: page.continuationMarker
         ),
@@ -87,7 +87,7 @@ extension ResponseConfig {
   internal static func successfulQueryResponse(
     recordCount: Int = 0,
     continuationMarker: String? = nil
-  ) -> ResponseConfig {
+  ) throws -> ResponseConfig {
     var records: [[String: Any]] = []
     for index in 0..<recordCount {
       records.append([
@@ -98,17 +98,12 @@ extension ResponseConfig {
       ])
     }
 
-    let recordsString =
-      (try? JSONSerialization.data(withJSONObject: records))
-      .flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
-
-    var jsonParts = [String]()
-    jsonParts.append("\"records\": \(recordsString)")
+    var responseDict: [String: Any] = ["records": records]
     if let marker = continuationMarker {
-      jsonParts.append("\"continuationMarker\": \"\(marker)\"")
+      responseDict["continuationMarker"] = marker
     }
 
-    let responseJSON = "{ \(jsonParts.joined(separator: ", ")) }"
+    let bodyData = try JSONSerialization.data(withJSONObject: responseDict)
 
     var headers = HTTPFields()
     headers[.contentType] = "application/json"
@@ -116,7 +111,7 @@ extension ResponseConfig {
     return ResponseConfig(
       statusCode: 200,
       headers: headers,
-      body: responseJSON.data(using: .utf8),
+      body: bodyData,
       error: nil
     )
   }
