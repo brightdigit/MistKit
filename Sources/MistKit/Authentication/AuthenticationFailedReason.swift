@@ -1,5 +1,5 @@
 //
-//  TokenManagerError.swift
+//  AuthenticationFailedReason.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,38 +27,31 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
-/// Errors that can occur during token management operations
-public enum TokenManagerError: Error, LocalizedError, Sendable {
-  /// Invalid or malformed credentials
-  case invalidCredentials(InvalidCredentialReason)
+/// Specific reasons for authentication failure
+public enum AuthenticationFailedReason: Sendable {
+  /// Server rejected the authentication request
+  case serverRejected(statusCode: Int, message: String?)
 
-  /// Authentication failed with external service
-  case authenticationFailed(AuthenticationFailedReason)
+  /// Token generation failed
+  case tokenGenerationFailed(any Error)
 
-  /// Token has expired and cannot be used
-  case tokenExpired
+  /// Cryptographic signing failed
+  case signingFailed(any Error)
 
-  /// Network or communication error during authentication
-  case networkError(NetworkErrorReason)
-
-  /// Internal error in token management
-  case internalError(InternalErrorReason)
-
-  /// A localized message describing what error occurred
-  public var errorDescription: String? {
+  /// A human-readable description of the authentication failure reason
+  public var description: String {
     switch self {
-    case .invalidCredentials(let reason):
-      return "Invalid credentials: \(reason.description)"
-    case .authenticationFailed(let reason):
-      return "Authentication failed: \(reason.description)"
-    case .tokenExpired:
-      return "Authentication token has expired"
-    case .networkError(let reason):
-      return "Network error during authentication: \(reason.description)"
-    case .internalError(let reason):
-      return "Internal token manager error: \(reason.description)"
+    case .serverRejected(let statusCode, let message):
+      if let message {
+        return "Server rejected authentication with HTTP \(statusCode): \(message)"
+      }
+      return "Server rejected authentication with HTTP \(statusCode)"
+    case .tokenGenerationFailed(let error):
+      return "Token generation failed: \(error.localizedDescription)"
+    case .signingFailed(let error):
+      return "Cryptographic signing failed: \(error.localizedDescription)"
     }
   }
 }

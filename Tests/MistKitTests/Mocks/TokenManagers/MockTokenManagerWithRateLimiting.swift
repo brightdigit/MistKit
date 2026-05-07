@@ -44,7 +44,7 @@ internal final class MockTokenManagerWithRateLimiting: TokenManager {
       do {
         try await Task.sleep(nanoseconds: 50_000_000)  // 0.05 seconds
       } catch {
-        throw TokenManagerError.networkError(underlying: error)
+        throw TokenManagerError.networkError(.other(error))
       }
     }
     return true
@@ -58,7 +58,7 @@ internal final class MockTokenManagerWithRateLimiting: TokenManager {
       do {
         try await Task.sleep(nanoseconds: 50_000_000)  // 0.05 seconds
       } catch {
-        throw TokenManagerError.networkError(underlying: error)
+        throw TokenManagerError.networkError(.other(error))
       }
     }
     return try APITokenAuthenticator(token: TestConstants.apiToken)

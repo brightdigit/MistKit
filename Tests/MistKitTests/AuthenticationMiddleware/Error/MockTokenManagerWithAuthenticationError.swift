@@ -14,10 +14,10 @@ internal final class MockTokenManagerWithAuthenticationError: TokenManager {
   }
 
   internal func validateCredentials() async throws(TokenManagerError) -> Bool {
-    throw TokenManagerError.authenticationFailed(underlying: nil)
+    throw TokenManagerError.authenticationFailed(.serverRejected(statusCode: 401, message: nil))
   }
 
   internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
-    throw TokenManagerError.authenticationFailed(underlying: nil)
+    throw TokenManagerError.authenticationFailed(.serverRejected(statusCode: 401, message: nil))
   }
 }

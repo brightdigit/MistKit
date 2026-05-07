@@ -29,15 +29,7 @@ internal final class MockTokenManagerWithRecovery: TokenManager {
   internal func validateCredentials() async throws(TokenManagerError) -> Bool {
     let count = await counter.increment()
     if count == 1 {
-      throw TokenManagerError.networkError(
-        underlying: NSError(
-          domain: "NetworkError",
-          code: -1_009,
-          userInfo: [
-            NSLocalizedDescriptionKey: "Network error"
-          ]
-        )
-      )
+      throw TokenManagerError.networkError(.notConnectedToInternet)
     }
     return true
   }
@@ -45,15 +37,7 @@ internal final class MockTokenManagerWithRecovery: TokenManager {
   internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     let count = await counter.increment()
     if count == 1 {
-      throw TokenManagerError.networkError(
-        underlying: NSError(
-          domain: "NetworkError",
-          code: -1_009,
-          userInfo: [
-            NSLocalizedDescriptionKey: "Network error"
-          ]
-        )
-      )
+      throw TokenManagerError.networkError(.notConnectedToInternet)
     }
     return try APITokenAuthenticator(token: TestConstants.apiToken)
   }

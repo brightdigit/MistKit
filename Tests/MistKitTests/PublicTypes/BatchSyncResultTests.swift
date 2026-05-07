@@ -100,8 +100,9 @@ internal struct BatchSyncResultTests {
 
     #expect(result.totalCount == 4)
     #expect(result.succeededCount == 3)
-    #expect(result.totalCount == result.createdCount + result.updatedCount
-      + result.failedCount + result.unclassifiedCount)
+    #expect(
+      result.totalCount == result.createdCount + result.updatedCount
+        + result.failedCount + result.unclassifiedCount)
   }
 
   @Test("treats error records as failures regardless of classification")

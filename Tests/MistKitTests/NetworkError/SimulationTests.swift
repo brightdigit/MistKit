@@ -40,8 +40,8 @@ extension NetworkErrorTests {
         )
         Issue.record("Should have thrown TokenManagerError.networkError")
       } catch let error as TokenManagerError {
-        if case .networkError(let underlyingError) = error {
-          #expect(underlyingError.localizedDescription.contains("Timeout"))
+        if case .networkError(let reason) = error {
+          #expect(reason.description.contains("timed out"))
         } else {
           Issue.record("Expected networkError, got: \(error)")
         }
@@ -76,8 +76,8 @@ extension NetworkErrorTests {
         )
         Issue.record("Should have thrown TokenManagerError.networkError")
       } catch let error as TokenManagerError {
-        if case .networkError(let underlyingError) = error {
-          #expect(underlyingError.localizedDescription.contains("Connection"))
+        if case .networkError(let reason) = error {
+          #expect(reason.description.contains("internet"))
         } else {
           Issue.record("Expected networkError, got: \(error)")
         }
