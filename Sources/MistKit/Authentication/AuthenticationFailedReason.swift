@@ -31,9 +31,6 @@ internal import Foundation
 
 /// Specific reasons for authentication failure
 public enum AuthenticationFailedReason: Sendable {
-  /// Unknown authentication failure
-  case unknown
-
   /// Server rejected the authentication request
   case serverRejected(statusCode: Int, message: String?)
 
@@ -46,8 +43,6 @@ public enum AuthenticationFailedReason: Sendable {
   /// A human-readable description of the authentication failure reason
   public var description: String {
     switch self {
-    case .unknown:
-      return "Unknown authentication failure"
     case .serverRejected(let statusCode, let message):
       if let message {
         return "Server rejected authentication with HTTP \(statusCode): \(message)"
