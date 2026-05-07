@@ -1,5 +1,5 @@
 //
-//  TokenManagerError.swift
+//  NetworkErrorReason.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,36 +29,40 @@
 
 public import Foundation
 
-/// Errors that can occur during token management operations
-public enum TokenManagerError: Error, LocalizedError, Sendable {
-  /// Invalid or malformed credentials
-  case invalidCredentials(InvalidCredentialReason)
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
 
-  /// Authentication failed with external service
-  case authenticationFailed(AuthenticationFailedReason)
+/// Specific reasons for network errors during authentication
+public enum NetworkErrorReason: Sendable {
+  /// Request timed out
+  case timeout
 
-  /// Token has expired and cannot be used
-  case tokenExpired
+  /// Network connection was lost
+  case connectionLost
 
-  /// Network or communication error during authentication
-  case networkError(NetworkErrorReason)
+  /// Device is not connected to the internet
+  case notConnectedToInternet
 
-  /// Internal error in token management
-  case internalError(InternalErrorReason)
+  /// A URL-level error occurred
+  case urlError(URLError)
 
-  /// A localized message describing what error occurred
-  public var errorDescription: String? {
+  /// Any other network error
+  case other(any Error)
+
+  /// A human-readable description of the network error reason
+  public var description: String {
     switch self {
-    case .invalidCredentials(let reason):
-      return "Invalid credentials: \(reason.description)"
-    case .authenticationFailed(let reason):
-      return "Authentication failed: \(reason.description)"
-    case .tokenExpired:
-      return "Authentication token has expired"
-    case .networkError(let reason):
-      return "Network error during authentication: \(reason.description)"
-    case .internalError(let reason):
-      return "Internal token manager error: \(reason.description)"
+    case .timeout:
+      return "Request timed out"
+    case .connectionLost:
+      return "Network connection was lost"
+    case .notConnectedToInternet:
+      return "Not connected to the internet"
+    case .urlError(let error):
+      return "URL error: \(error.localizedDescription)"
+    case .other(let error):
+      return error.localizedDescription
     }
   }
 }

@@ -39,7 +39,7 @@ internal final class MockTokenManagerWithRefreshFailure: TokenManager {
     let count = await counter.increment()
     // Fail on odd calls
     if count % 2 == 1 {
-      throw TokenManagerError.authenticationFailed(underlying: nil)
+      throw TokenManagerError.authenticationFailed(.unknown)
     }
     return true
   }
@@ -48,7 +48,7 @@ internal final class MockTokenManagerWithRefreshFailure: TokenManager {
     let count = await counter.increment()
     // Fail on odd calls
     if count % 2 == 1 {
-      throw TokenManagerError.authenticationFailed(underlying: nil)
+      throw TokenManagerError.authenticationFailed(.unknown)
     }
     return try APITokenAuthenticator(token: TestConstants.apiToken)
   }

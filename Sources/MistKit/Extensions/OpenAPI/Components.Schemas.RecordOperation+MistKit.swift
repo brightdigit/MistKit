@@ -45,10 +45,10 @@ extension Components.Schemas.RecordOperation {
     ]
 
   /// Initialize from MistKit RecordOperation
-  internal init(from recordOperation: RecordOperation) {
+  internal init(from recordOperation: RecordOperation) throws(CloudKitError) {
     // Convert operation type using dictionary lookup
     guard let apiOperationType = Self.operationTypeMapping[recordOperation.operationType] else {
-      fatalError("Unknown operation type: \(recordOperation.operationType)")
+      throw CloudKitError.unsupportedOperationType("\(recordOperation.operationType)")
     }
 
     // Convert fields to OpenAPI FieldValueRequest format (for requests)

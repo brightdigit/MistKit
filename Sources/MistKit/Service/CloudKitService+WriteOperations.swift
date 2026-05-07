@@ -51,8 +51,8 @@ extension CloudKitService {
     atomic: Bool = false
   ) async throws(CloudKitError) -> [RecordInfo] {
     do {
-      let apiOperations = operations.map {
-        Components.Schemas.RecordOperation(from: $0)
+      let apiOperations = try operations.map {
+        try Components.Schemas.RecordOperation(from: $0)
       }
 
       let response = try await client.modifyRecords(

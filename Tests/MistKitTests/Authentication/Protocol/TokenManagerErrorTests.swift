@@ -12,10 +12,10 @@ internal struct TokenManagerErrorTests {
   @Test("TokenManagerError cases and localized descriptions")
   internal func tokenManagerError() {
     let invalidError = TokenManagerError.invalidCredentials(.apiTokenInvalidFormat)
-    let authError = TokenManagerError.authenticationFailed(underlying: nil)
+    let authError = TokenManagerError.authenticationFailed(.unknown)
     let expiredError = TokenManagerError.tokenExpired
     let networkError = TokenManagerError.networkError(
-      underlying: NSError(domain: "test", code: 123, userInfo: nil)
+      .other(NSError(domain: "test", code: 123, userInfo: nil))
     )
     let internalError = TokenManagerError.internalError(.noCredentialsAvailable)
 

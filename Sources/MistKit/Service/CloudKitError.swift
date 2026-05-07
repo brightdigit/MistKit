@@ -43,6 +43,7 @@ public enum CloudKitError: LocalizedError, Sendable {
   case underlyingError(any Error)
   case decodingError(DecodingError)
   case networkError(URLError)
+  case unsupportedOperationType(String)
 
   /// HTTP status code if this error originated from an HTTP response, otherwise nil.
   public var httpStatusCode: Int? {
@@ -51,7 +52,7 @@ public enum CloudKitError: LocalizedError, Sendable {
       .httpErrorWithDetails(let statusCode, _, _),
       .httpErrorWithRawResponse(let statusCode, _):
       return statusCode
-    case .invalidResponse, .underlyingError, .decodingError, .networkError:
+    case .invalidResponse, .underlyingError, .decodingError, .networkError, .unsupportedOperationType:
       return nil
     }
   }
@@ -115,6 +116,8 @@ public enum CloudKitError: LocalizedError, Sendable {
       }
       message += "\nDescription: \(error.localizedDescription)"
       return message
+    case .unsupportedOperationType(let type):
+      return "Unsupported record operation type: \(type)"
     }
   }
 }
