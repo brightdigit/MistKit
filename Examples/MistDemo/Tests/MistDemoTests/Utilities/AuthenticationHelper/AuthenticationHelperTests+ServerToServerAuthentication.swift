@@ -113,7 +113,7 @@ extension AuthenticationHelperTests {
           keyID: "test-key-id",
           privateKey: privateKeyPEM,
           privateKeyFile: nil,
-          databaseOverride: "private"
+          databaseOverride: .private
         )
         Issue.record("Expected serverToServerRequiresPublicDatabase error")
       } catch let error as AuthenticationError {

@@ -66,7 +66,7 @@ extension AuthenticationHelperTests {
           keyID: nil,
           privateKey: nil,
           privateKeyFile: nil,
-          databaseOverride: "private"
+          databaseOverride: .private
         )
         Issue.record("Expected privateRequiresWebAuth error")
       } catch let error as AuthenticationError {

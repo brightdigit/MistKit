@@ -83,6 +83,20 @@ internal struct MistDemoConfigTests {
     #expect(config.environment == .development)
   }
 
+  @Test("Invalid environment surfaces as ConfigurationError.invalidEnvironment")
+  internal func invalidEnvironmentThrows() async throws {
+    do {
+      _ = try await MistDemoConfig(rawEnvironment: "staging")
+      Issue.record("Expected ConfigurationError.invalidEnvironment")
+    } catch let error as ConfigurationError {
+      if case .invalidEnvironment(let raw) = error {
+        #expect(raw == "staging")
+      } else {
+        Issue.record("Wrong ConfigurationError case: \(error)")
+      }
+    }
+  }
+
   // MARK: - Server Configuration Tests
 
   @Test("Default host is localhost")

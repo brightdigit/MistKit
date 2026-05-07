@@ -36,11 +36,11 @@ extension AuthenticationHelper {
     keyID: String,
     privateKey: String?,
     privateKeyFile: String?,
-    databaseOverride: String?
+    databaseOverride: MistKit.Database?
   ) async throws -> AuthenticationResult {
     let database = MistKit.Database.public
 
-    if let override = databaseOverride, override == "private" {
+    if databaseOverride == .private {
       throw AuthenticationError.serverToServerRequiresPublicDatabase
     }
 
@@ -63,14 +63,9 @@ extension AuthenticationHelper {
   internal static func setupWebAuth(
     apiToken: String,
     webAuthToken: String,
-    databaseOverride: String?
+    databaseOverride: MistKit.Database?
   ) async throws -> AuthenticationResult {
-    let database: MistKit.Database
-    if let override = databaseOverride {
-      database = override == "public" ? .public : .private
-    } else {
-      database = .private
-    }
+    let database: MistKit.Database = databaseOverride ?? .private
 
     let manager = try await createWebAuthManager(
       apiToken: apiToken,
@@ -88,11 +83,11 @@ extension AuthenticationHelper {
 
   internal static func setupAPIOnly(
     apiToken: String,
-    databaseOverride: String?
+    databaseOverride: MistKit.Database?
   ) async throws -> AuthenticationResult {
     let database = MistKit.Database.public
 
-    if let override = databaseOverride, override == "private" {
+    if databaseOverride == .private {
       throw AuthenticationError.privateRequiresWebAuth
     }
 

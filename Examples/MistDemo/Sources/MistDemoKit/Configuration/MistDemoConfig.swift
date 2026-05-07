@@ -96,7 +96,7 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
     base: Never? = nil
   ) async throws {
     let config = configuration
-    let core = Self.parseCoreConfig(config)
+    let core = try Self.parseCoreConfig(config)
     self.containerIdentifier = core.containerIdentifier
     self.apiToken = core.apiToken
     self.environment = core.environment
