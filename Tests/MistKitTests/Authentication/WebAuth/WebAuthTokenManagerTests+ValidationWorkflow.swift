@@ -29,18 +29,11 @@ extension WebAuthTokenManagerTests {
       let isValid = try await manager.validateCredentials()
       #expect(isValid == true)
 
-      // Test getCurrentCredentials
-      let credentials = try await manager.getCurrentCredentials()
-      #expect(credentials != nil)
-
-      if let credentials = credentials {
-        if case .webAuthToken(let api, let web) = credentials.method {
-          #expect(api == validAPIToken)
-          #expect(web == validWebAuthToken)
-        } else {
-          Issue.record("Expected .webAuthToken method")
-        }
-      }
+      // Test currentAuthenticator
+      let authenticator = try await manager.currentAuthenticator()
+      let web = try #require(authenticator as? WebAuthTokenAuthenticator)
+      #expect(web.apiToken == validAPIToken)
+      #expect(web.webAuthToken == validWebAuthToken)
     }
   }
 }

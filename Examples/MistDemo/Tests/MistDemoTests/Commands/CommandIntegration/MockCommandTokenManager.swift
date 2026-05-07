@@ -40,7 +40,10 @@ internal final class MockCommandTokenManager: TokenManager {
     true
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
-    .webAuthToken(apiToken: "mock-api", webToken: "mock-web-auth")
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
+    try WebAuthTokenAuthenticator(
+      apiToken: "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234",
+      webAuthToken: "mock-web-auth-token"
+    )
   }
 }

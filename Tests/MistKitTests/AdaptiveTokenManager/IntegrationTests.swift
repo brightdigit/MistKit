@@ -66,23 +66,16 @@ extension AdaptiveTokenManagerTests {
       #expect(isValid == true)
     }
 
-    /// Tests AdaptiveTokenManager getCurrentCredentials
-    @Test("getCurrentCredentials with valid token")
-    internal func getCurrentCredentialsWithValidToken() async throws {
+    /// Tests AdaptiveTokenManager currentAuthenticator
+    @Test("currentAuthenticator with valid token")
+    internal func currentAuthenticatorWithValidToken() async throws {
       let tokenManager = AdaptiveTokenManager(
         apiToken: Self.validAPIToken
       )
 
-      let credentials = try await tokenManager.getCurrentCredentials()
-      #expect(credentials != nil)
-
-      if let credentials = credentials {
-        if case .apiToken(let api) = credentials.method {
-          #expect(api == Self.validAPIToken)
-        } else {
-          Issue.record("Expected .apiToken method")
-        }
-      }
+      let authenticator = try await tokenManager.currentAuthenticator()
+      let api = try #require(authenticator as? APITokenAuthenticator)
+      #expect(api.token == Self.validAPIToken)
     }
 
     /// Tests AdaptiveTokenManager with empty API token
@@ -107,7 +100,7 @@ extension AdaptiveTokenManagerTests {
 
       // Test concurrent access patterns
       async let task1 = tokenManager.validateManager()
-      async let task2 = tokenManager.getCredentialsFromManager()
+      async let task2 = tokenManager.authenticatorFromManager()
       async let task3 = tokenManager.checkHasCredentials()
 
       let results = await (task1, task2, task3)

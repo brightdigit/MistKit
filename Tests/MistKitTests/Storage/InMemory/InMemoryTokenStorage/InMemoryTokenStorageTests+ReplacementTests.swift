@@ -19,41 +19,41 @@ extension InMemoryTokenStorageTests {
     @Test("Replace stored token with new token")
     internal func replaceStoredTokenWithNewToken() async throws {
       let storage = InMemoryTokenStorage()
-      let originalCredentials = TokenCredentials.apiToken(Self.testAPIToken)
-      let newCredentials = TokenCredentials.webAuthToken(
+      let original = try APITokenAuthenticator(token: Self.testAPIToken)
+      let replacement = try WebAuthTokenAuthenticator(
         apiToken: Self.testAPIToken,
-        webToken: Self.testWebAuthToken
+        webAuthToken: Self.testWebAuthToken
       )
 
-      try await storage.store(originalCredentials, identifier: nil)
+      try await storage.store(original, identifier: nil)
 
       let retrievedBefore = try await storage.retrieve(identifier: nil)
-      #expect(retrievedBefore != nil)
+      #expect(retrievedBefore is APITokenAuthenticator)
 
-      try await storage.store(newCredentials, identifier: nil)
+      try await storage.store(replacement, identifier: nil)
 
       let retrievedAfter = try await storage.retrieve(identifier: nil)
-      #expect(retrievedAfter != nil)
-      #expect(retrievedAfter == newCredentials)
-      #expect(retrievedAfter != originalCredentials)
+      let web = try #require(retrievedAfter as? WebAuthTokenAuthenticator)
+      #expect(web.apiToken == replacement.apiToken)
+      #expect(web.webAuthToken == replacement.webAuthToken)
     }
 
     /// Tests replacing stored token with same token
     @Test("Replace stored token with same token")
     internal func replaceStoredTokenWithSameToken() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      try await storage.store(credentials, identifier: nil)
+      try await storage.store(authenticator, identifier: nil)
 
       let retrievedBefore = try await storage.retrieve(identifier: nil)
       #expect(retrievedBefore != nil)
 
-      try await storage.store(credentials, identifier: nil)
+      try await storage.store(authenticator, identifier: nil)
 
       let retrievedAfter = try await storage.retrieve(identifier: nil)
-      #expect(retrievedAfter != nil)
-      #expect(retrievedAfter == credentials)
+      let api = try #require(retrievedAfter as? APITokenAuthenticator)
+      #expect(api.token == authenticator.token)
     }
   }
 }

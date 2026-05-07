@@ -1,3 +1,4 @@
+import Crypto
 import Foundation
 import Testing
 
@@ -29,91 +30,53 @@ extension InMemoryTokenStorageTests {
     @Test("Store API token")
     internal func storeAPIToken() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      try await storage.store(credentials, identifier: nil)
+      try await storage.store(authenticator, identifier: nil)
 
       let retrieved = try await storage.retrieve(identifier: nil)
-      #expect(retrieved != nil)
-
-      if let retrieved = retrieved {
-        if case .apiToken(let token) = retrieved.method {
-          #expect(token == Self.testAPIToken)
-        } else {
-          Issue.record("Expected .apiToken method")
-        }
-      }
+      let api = try #require(retrieved as? APITokenAuthenticator)
+      #expect(api.token == Self.testAPIToken)
     }
 
     /// Tests storing web auth token
     @Test("Store web auth token")
     internal func storeWebAuthToken() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.webAuthToken(
+      let authenticator = try WebAuthTokenAuthenticator(
         apiToken: Self.testAPIToken,
-        webToken: Self.testWebAuthToken
+        webAuthToken: Self.testWebAuthToken
       )
 
-      try await storage.store(credentials, identifier: nil)
+      try await storage.store(authenticator, identifier: nil)
 
       let retrieved = try await storage.retrieve(identifier: nil)
-      #expect(retrieved != nil)
-
-      if let retrieved = retrieved {
-        if case .webAuthToken(let api, let web) = retrieved.method {
-          #expect(api == Self.testAPIToken)
-          #expect(web == Self.testWebAuthToken)
-        } else {
-          Issue.record("Expected .webAuthToken method")
-        }
-      }
+      let web = try #require(retrieved as? WebAuthTokenAuthenticator)
+      #expect(web.apiToken == Self.testAPIToken)
+      #expect(web.webAuthToken == Self.testWebAuthToken)
     }
 
     /// Tests storing server-to-server credentials
-    @Test("Store server-to-server credentials")
+    @Test(
+      "Store server-to-server credentials",
+      .enabled(if: Platform.isCryptoAvailable)
+    )
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     internal func storeServerToServerCredentials() async throws {
       let storage = InMemoryTokenStorage()
       let keyID = "test-key-id-12345678"
-      let privateKeyData = Data([1, 2, 3, 4, 5])
-      let credentials = TokenCredentials.serverToServer(
+      let privateKey = P256.Signing.PrivateKey()
+      let authenticator = try ServerToServerAuthenticator(
         keyID: keyID,
-        privateKey: privateKeyData
+        privateKey: privateKey
       )
 
-      try await storage.store(credentials, identifier: nil)
+      try await storage.store(authenticator, identifier: nil)
 
       let retrieved = try await storage.retrieve(identifier: nil)
-      #expect(retrieved != nil)
-
-      if let retrieved = retrieved {
-        if case .serverToServer(let storedKeyID, let storedPrivateKey) = retrieved.method {
-          #expect(storedKeyID == keyID)
-          #expect(storedPrivateKey == privateKeyData)
-        } else {
-          Issue.record("Expected .serverToServer method")
-        }
-      }
-    }
-
-    /// Tests storing credentials with metadata
-    @Test("Store credentials with metadata")
-    internal func storeCredentialsWithMetadata() async throws {
-      let storage = InMemoryTokenStorage()
-      let metadata = ["created": "2025-01-01", "environment": "test"]
-      let credentials = TokenCredentials(
-        method: .apiToken(Self.testAPIToken),
-        metadata: metadata
-      )
-
-      try await storage.store(credentials, identifier: nil)
-
-      let retrieved = try await storage.retrieve(identifier: nil)
-      #expect(retrieved != nil)
-
-      if let retrieved = retrieved {
-        #expect(retrieved.metadata["created"] == "2025-01-01")
-        #expect(retrieved.metadata["environment"] == "test")
-      }
+      let s2s = try #require(retrieved as? ServerToServerAuthenticator)
+      #expect(s2s.keyID == keyID)
+      #expect(s2s.privateKey.rawRepresentation == privateKey.rawRepresentation)
     }
   }
 }

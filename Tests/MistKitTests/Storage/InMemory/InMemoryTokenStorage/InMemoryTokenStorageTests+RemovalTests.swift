@@ -19,9 +19,9 @@ extension InMemoryTokenStorageTests {
     @Test("Remove stored token by identifier")
     internal func removeStoredTokenByIdentifier() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      try await storage.store(credentials, identifier: "test-token")
+      try await storage.store(authenticator, identifier: "test-token")
 
       let retrievedBefore = try await storage.retrieve(identifier: "test-token")
       #expect(retrievedBefore != nil)
@@ -37,7 +37,6 @@ extension InMemoryTokenStorageTests {
     internal func removeNonExistentToken() async throws {
       let storage = InMemoryTokenStorage()
 
-      // Should not throw or crash
       try await storage.remove(identifier: "non-existent")
 
       let retrieved = try await storage.retrieve(identifier: "non-existent")
@@ -48,9 +47,9 @@ extension InMemoryTokenStorageTests {
     @Test("Remove token with nil identifier")
     internal func removeTokenWithNilIdentifier() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      try await storage.store(credentials, identifier: nil)
+      try await storage.store(authenticator, identifier: nil)
 
       let retrievedBefore = try await storage.retrieve(identifier: nil)
       #expect(retrievedBefore != nil)
@@ -68,37 +67,31 @@ extension InMemoryTokenStorageTests {
     internal func removeSpecificTokenFromMultipleStoredTokens() async throws {
       let storage = InMemoryTokenStorage()
 
-      let credentials1 = TokenCredentials.apiToken("token1")
-      let credentials2 = TokenCredentials.webAuthToken(
+      let auth1 = try APITokenAuthenticator(token: Self.testAPIToken)
+      let auth2 = try WebAuthTokenAuthenticator(
         apiToken: Self.testAPIToken,
-        webToken: Self.testWebAuthToken
+        webAuthToken: Self.testWebAuthToken
       )
-      let credentials3 = TokenCredentials.apiToken("token3")
+      let auth3 = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      // Store multiple tokens
-      try await storage.store(credentials1, identifier: "api1")
-      try await storage.store(credentials2, identifier: "web")
-      try await storage.store(credentials3, identifier: "api3")
+      try await storage.store(auth1, identifier: "api1")
+      try await storage.store(auth2, identifier: "web")
+      try await storage.store(auth3, identifier: "api3")
 
-      // Verify all tokens are stored
       let identifiersBefore = try await storage.listIdentifiers()
       #expect(identifiersBefore.count == 3)
 
-      // Remove specific token
       try await storage.remove(identifier: "web")
 
-      // Verify only specific token is removed
       let identifiersAfter = try await storage.listIdentifiers()
       #expect(identifiersAfter.count == 2)
       #expect(identifiersAfter.contains("api1"))
       #expect(identifiersAfter.contains("api3"))
       #expect(!identifiersAfter.contains("web"))
 
-      // Verify removed token is gone
       let retrievedWeb = try await storage.retrieve(identifier: "web")
       #expect(retrievedWeb == nil)
 
-      // Verify other tokens remain
       let retrievedApi1 = try await storage.retrieve(identifier: "api1")
       let retrievedApi3 = try await storage.retrieve(identifier: "api3")
       #expect(retrievedApi1 != nil)
@@ -110,30 +103,25 @@ extension InMemoryTokenStorageTests {
     internal func removeAllTokensByClearingStorage() async throws {
       let storage = InMemoryTokenStorage()
 
-      let credentials1 = TokenCredentials.apiToken("token1")
-      let credentials2 = TokenCredentials.webAuthToken(
+      let auth1 = try APITokenAuthenticator(token: Self.testAPIToken)
+      let auth2 = try WebAuthTokenAuthenticator(
         apiToken: Self.testAPIToken,
-        webToken: Self.testWebAuthToken
+        webAuthToken: Self.testWebAuthToken
       )
-      let credentials3 = TokenCredentials.apiToken("token3")
+      let auth3 = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      // Store multiple tokens
-      try await storage.store(credentials1, identifier: "api1")
-      try await storage.store(credentials2, identifier: "web")
-      try await storage.store(credentials3, identifier: "api3")
+      try await storage.store(auth1, identifier: "api1")
+      try await storage.store(auth2, identifier: "web")
+      try await storage.store(auth3, identifier: "api3")
 
-      // Verify all tokens are stored
       let identifiersBefore = try await storage.listIdentifiers()
       #expect(identifiersBefore.count == 3)
 
-      // Clear all tokens
       await storage.clear()
 
-      // Verify all tokens are removed
       let identifiersAfter = try await storage.listIdentifiers()
       #expect(identifiersAfter.isEmpty)
 
-      // Verify all tokens are gone
       let retrievedApi1 = try await storage.retrieve(identifier: "api1")
       let retrievedWeb = try await storage.retrieve(identifier: "web")
       let retrievedApi3 = try await storage.retrieve(identifier: "api3")
@@ -148,9 +136,9 @@ extension InMemoryTokenStorageTests {
     @Test("Remove token with empty string identifier")
     internal func removeTokenWithEmptyStringIdentifier() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      try await storage.store(credentials, identifier: "")
+      try await storage.store(authenticator, identifier: "")
 
       let retrievedBefore = try await storage.retrieve(identifier: "")
       #expect(retrievedBefore != nil)
@@ -165,10 +153,10 @@ extension InMemoryTokenStorageTests {
     @Test("Remove token with special characters in identifier")
     internal func removeTokenWithSpecialCharactersInIdentifier() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
       let specialIdentifier = "test@#$%^&*()_+-={}[]|\\:;\"'<>?,./"
 
-      try await storage.store(credentials, identifier: specialIdentifier)
+      try await storage.store(authenticator, identifier: specialIdentifier)
 
       let retrievedBefore = try await storage.retrieve(identifier: specialIdentifier)
       #expect(retrievedBefore != nil)
@@ -183,16 +171,18 @@ extension InMemoryTokenStorageTests {
     @Test("Remove expired token")
     internal func removeExpiredToken() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
-      let expirationTime = Date().addingTimeInterval(-3_600)  // 1 hour ago (expired)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
+      let expirationTime = Date().addingTimeInterval(-3_600)
 
-      try await storage.store(credentials, identifier: "expired", expirationTime: expirationTime)
+      try await storage.store(
+        authenticator,
+        identifier: "expired",
+        expirationTime: expirationTime
+      )
 
-      // Token should already be expired and not retrievable
       let retrievedBefore = try await storage.retrieve(identifier: "expired")
       #expect(retrievedBefore == nil)
 
-      // Remove should still work even though token is expired
       try await storage.remove(identifier: "expired")
 
       let retrievedAfter = try await storage.retrieve(identifier: "expired")

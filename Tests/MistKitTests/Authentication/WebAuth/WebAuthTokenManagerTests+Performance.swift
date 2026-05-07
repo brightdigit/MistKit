@@ -69,7 +69,7 @@ extension WebAuthTokenManagerTests {
       }
 
       do {
-        _ = try await manager.getCurrentCredentials()
+        _ = try await manager.currentAuthenticator()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
       } catch {
         switch error {

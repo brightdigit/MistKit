@@ -32,50 +32,23 @@ public import Foundation
 // MARK: - Additional Web Auth Methods
 
 extension WebAuthTokenManager {
-  /// The API token value
+  /// The API token value.
   public var apiTokenValue: String {
     apiToken
   }
 
-  /// The web authentication token value
+  /// The web authentication token value.
   public var webAuthTokenValue: String {
     webAuthToken
   }
 
-  /// Returns the encoded web auth token (using CharacterMapEncoder)
+  /// Returns the encoded web auth token (using `CharacterMapEncoder`).
   public var encodedWebAuthToken: String {
-    tokenEncoder.encode(webAuthToken)
+    CharacterMapEncoder().encode(webAuthToken)
   }
 
-  /// Returns true if both tokens appear to be in valid format
+  /// Returns true if both tokens appear to be in a valid format.
   public var areTokensValidFormat: Bool {
-    do {
-      try Self.validateAPITokenFormat(apiToken)
-      try Self.validateWebAuthTokenFormat(webAuthToken)
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  /// Creates credentials with additional metadata
-  /// - Parameter metadata: Additional metadata to include
-  /// - Returns: TokenCredentials with metadata
-  public func credentialsWithMetadata(_ metadata: [String: String]) -> TokenCredentials {
-    TokenCredentials(
-      method: .webAuthToken(apiToken: apiToken, webToken: webAuthToken),
-      metadata: metadata
-    )
-  }
-
-  /// Creates new credentials with updated web auth token (for token refresh scenarios)
-  /// - Parameter newWebAuthToken: The new web authentication token
-  /// - Returns: New TokenCredentials with updated web token
-  /// - Note: This creates new credentials but doesn't update the manager's internal token
-  public func credentialsWithUpdatedWebAuthToken(_ newWebAuthToken: String) -> TokenCredentials {
-    TokenCredentials.webAuthToken(
-      apiToken: apiToken,
-      webToken: newWebAuthToken
-    )
+    (try? WebAuthTokenAuthenticator(apiToken: apiToken, webAuthToken: webAuthToken)) != nil
   }
 }

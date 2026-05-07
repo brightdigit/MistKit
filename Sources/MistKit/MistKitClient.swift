@@ -121,7 +121,7 @@ internal struct MistKitClient {
 
     if let serverManager = tokenManager as? ServerToServerAuthManager {
       // Extract keyID and privateKeyData from ServerToServerAuthManager
-      keyID = serverManager.keyIdentifier
+      keyID = serverManager.keyID
       privateKeyData = serverManager.privateKeyData
     } else if let apiManager = tokenManager as? APITokenManager {
       // Extract API token from APITokenManager

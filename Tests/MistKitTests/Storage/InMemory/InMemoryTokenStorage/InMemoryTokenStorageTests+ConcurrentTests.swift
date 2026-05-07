@@ -20,21 +20,19 @@ extension InMemoryTokenStorageTests {
     @Test("Concurrent storage operations")
     internal func concurrentStorageOperations() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials1 = TokenCredentials.apiToken("token1")
-      let credentials2 = TokenCredentials.apiToken("token2")
-      let credentials3 = TokenCredentials.apiToken("token3")
+      let auth1 = try APITokenAuthenticator(token: Self.testAPIToken)
+      let auth2 = try APITokenAuthenticator(token: Self.testAPIToken)
+      let auth3 = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      // Test concurrent storage operations
-      async let task1 = storage.storeCredentials(credentials1)
-      async let task2 = storage.storeCredentials(credentials2)
-      async let task3 = storage.storeCredentials(credentials3)
+      async let task1 = storage.storeAuthenticator(auth1)
+      async let task2 = storage.storeAuthenticator(auth2)
+      async let task3 = storage.storeAuthenticator(auth3)
 
       let results = await (task1, task2, task3)
       #expect(results.0 == true)
       #expect(results.1 == true)
       #expect(results.2 == true)
 
-      // Verify that one of the credentials was stored
       let retrieved = try await storage.retrieve(identifier: nil)
       #expect(retrieved != nil)
     }
@@ -43,23 +41,21 @@ extension InMemoryTokenStorageTests {
     @Test("Concurrent retrieval operations")
     internal func concurrentRetrievalOperations() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      try await storage.store(credentials, identifier: nil)
+      try await storage.store(authenticator, identifier: nil)
 
-      // Test concurrent retrieval operations
-      async let task1 = storage.getCredentials()
-      async let task2 = storage.getCredentials()
-      async let task3 = storage.getCredentials()
+      async let task1 = storage.getAuthenticator()
+      async let task2 = storage.getAuthenticator()
+      async let task3 = storage.getAuthenticator()
 
       let results = await (task1, task2, task3)
-      #expect(results.0 != nil)
-      #expect(results.1 != nil)
-      #expect(results.2 != nil)
-
-      // All should return the same credentials
-      #expect(results.0 == results.1)
-      #expect(results.1 == results.2)
+      let api1 = try #require(results.0 as? APITokenAuthenticator)
+      let api2 = try #require(results.1 as? APITokenAuthenticator)
+      let api3 = try #require(results.2 as? APITokenAuthenticator)
+      #expect(api1.token == Self.testAPIToken)
+      #expect(api2.token == api1.token)
+      #expect(api3.token == api1.token)
     }
 
     // MARK: - Sendable Compliance Tests
@@ -68,12 +64,11 @@ extension InMemoryTokenStorageTests {
     @Test("InMemoryTokenStorage sendable compliance")
     internal func sendableCompliance() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      // Test concurrent access patterns
-      async let task1 = storage.storeAndRetrieve(credentials)
-      async let task2 = storage.storeAndRetrieve(credentials)
-      async let task3 = storage.storeAndRetrieve(credentials)
+      async let task1 = storage.storeAndRetrieve(authenticator)
+      async let task2 = storage.storeAndRetrieve(authenticator)
+      async let task3 = storage.storeAndRetrieve(authenticator)
 
       let results = await (task1, task2, task3)
       #expect(results.0 == true)

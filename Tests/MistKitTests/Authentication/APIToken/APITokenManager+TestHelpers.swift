@@ -13,10 +13,10 @@ extension APITokenManager {
     }
   }
 
-  /// Test helper to get credentials and return them or nil
-  internal func getCredentialsFromManager() async -> TokenCredentials? {
+  /// Test helper to get the current authenticator or nil on failure.
+  internal func authenticatorFromManager() async -> (any Authenticator)? {
     do {
-      return try await getCurrentCredentials()
+      return try await currentAuthenticator()
     } catch {
       return nil
     }

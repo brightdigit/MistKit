@@ -27,27 +27,29 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Protocol for persisting and retrieving authentication tokens/keys
+/// Protocol for persisting and retrieving authenticators.
 public protocol TokenStorage: Sendable {
-  /// Stores token credentials with an optional identifier
+  /// Stores an authenticator with an optional identifier.
   /// - Parameters:
-  ///   - credentials: The credentials to store
-  ///   - identifier: Optional identifier for multiple credential storage
-  /// - Throws: TokenStorageError if storage fails
-  func store(_ credentials: TokenCredentials, identifier: String?) async throws(TokenStorageError)
+  ///   - authenticator: The authenticator to persist.
+  ///   - identifier: Optional identifier for storing multiple authenticators.
+  /// - Throws: `TokenStorageError` if storage fails.
+  func store(
+    _ authenticator: any Authenticator,
+    identifier: String?
+  ) async throws(TokenStorageError)
 
-  /// Retrieves stored token credentials
-  /// - Parameter identifier: Optional identifier for specific credentials
-  /// - Returns: Stored credentials or nil if not found
-  /// - Throws: TokenStorageError if retrieval fails
-  func retrieve(identifier: String?) async throws(TokenStorageError) -> TokenCredentials?
+  /// Retrieves a stored authenticator.
+  /// - Parameter identifier: Optional identifier for specific credentials.
+  /// - Returns: The stored authenticator, or `nil` if not found.
+  /// - Throws: `TokenStorageError` if retrieval fails.
+  func retrieve(identifier: String?) async throws(TokenStorageError) -> (any Authenticator)?
 
-  /// Removes stored credentials
-  /// - Parameter identifier: Optional identifier for specific credentials
-  /// - Throws: TokenStorageError if removal fails
+  /// Removes a stored authenticator.
+  /// - Parameter identifier: Optional identifier for specific credentials.
+  /// - Throws: `TokenStorageError` if removal fails.
   func remove(identifier: String?) async throws(TokenStorageError)
 
-  /// Lists all stored credential identifiers
-  /// - Returns: Array of stored identifiers
+  /// Lists all stored authenticator identifiers.
   func listIdentifiers() async throws(TokenStorageError) -> [String]
 }
