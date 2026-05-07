@@ -33,7 +33,7 @@ internal import HTTPTypes
 extension HTTPRequest {
   /// Appends the given query items to this request's path, preserving any
   /// existing query string.
-  internal mutating func appendingQueryItems(_ items: [URLQueryItem]) {
+  internal mutating func appendQueryItems(_ items: [URLQueryItem]) {
     let pathString = path ?? ""
     let parts = pathString.split(separator: "?", maxSplits: 1)
     let cleanPath = String(parts.first ?? "")

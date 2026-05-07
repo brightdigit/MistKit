@@ -44,6 +44,10 @@ public struct WebAuthTokenAuthenticator: Authenticator {
   /// The web authentication token issued by CloudKit JS.
   public let webAuthToken: String
 
+  public var defaultStorageIdentifier: String {
+    "web-\(apiToken.prefix(8))"
+  }
+
   private static let encoder = CharacterMapEncoder()
 
   /// Creates an authenticator from API and web-auth tokens.
@@ -79,7 +83,7 @@ public struct WebAuthTokenAuthenticator: Authenticator {
     body: inout HTTPBody?
   ) async throws {
     let encoded = Self.encoder.encode(webAuthToken)
-    request.appendingQueryItems([
+    request.appendQueryItems([
       URLQueryItem(name: "ckAPIToken", value: apiToken),
       URLQueryItem(name: "ckWebAuthToken", value: encoded),
     ])

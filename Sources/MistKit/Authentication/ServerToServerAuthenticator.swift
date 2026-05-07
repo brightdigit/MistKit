@@ -56,6 +56,10 @@ public struct ServerToServerAuthenticator: Authenticator {
   /// Requests with larger bodies will fail to sign.
   public let bodyBufferLimit: Int
 
+  public var defaultStorageIdentifier: String {
+    "s2s-\(keyID)"
+  }
+
   /// Creates an authenticator from a key ID and private key.
   ///
   /// - Parameters:
@@ -64,7 +68,11 @@ public struct ServerToServerAuthenticator: Authenticator {
   ///   - bodyBufferLimit: Maximum body size to buffer for signing.
   ///     Defaults to 1 MiB.
   /// - Throws: `TokenManagerError.invalidCredentials` if `keyID` is empty
-  ///   or shorter than 8 characters, or if the key fails a test signature.
+  ///   or shorter than 8 characters. The private key itself is not
+  ///   re-validated here — a successfully-constructed `P256.Signing.PrivateKey`
+  ///   is, by definition, capable of signing. The convenience initializers
+  ///   that take raw data or a PEM string surface parse failures via that
+  ///   conversion before reaching this initializer.
   public init(
     keyID: String,
     privateKey: P256.Signing.PrivateKey,
@@ -75,11 +83,6 @@ public struct ServerToServerAuthenticator: Authenticator {
     }
     guard keyID.count >= 8 else {
       throw TokenManagerError.invalidCredentials(.keyIdTooShort)
-    }
-    do {
-      _ = try privateKey.signature(for: Data("test".utf8))
-    } catch {
-      throw TokenManagerError.invalidCredentials(.privateKeyInvalidOrCorrupted(error))
     }
     self.keyID = keyID
     self.privateKey = privateKey
@@ -131,16 +134,14 @@ public struct ServerToServerAuthenticator: Authenticator {
     body: inout HTTPBody?
   ) async throws {
     // Buffer the body so we can both sign it and forward the same bytes.
+    // If buffering fails (oversize body, transport error) we propagate the
+    // error rather than signing over an empty body and mismatching what the
+    // downstream transport actually sends.
     let bodyData: Data?
     if let original = body {
-      do {
-        bodyData = try await Data(collecting: original, upTo: bodyBufferLimit)
-      } catch {
-        bodyData = nil
-      }
-      if let bytes = bodyData {
-        body = HTTPBody(bytes)
-      }
+      let bytes = try await Data(collecting: original, upTo: bodyBufferLimit)
+      body = HTTPBody(bytes)
+      bodyData = bytes
     } else {
       bodyData = nil
     }

@@ -132,4 +132,36 @@ internal struct ServerToServerAuthenticatorTests {
   internal func storageKey() {
     #expect(ServerToServerAuthenticator.storageKey == "server-to-server")
   }
+
+  @Test("defaultStorageIdentifier uses keyID")
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  internal func defaultStorageIdentifier() throws {
+    let authenticator = try ServerToServerAuthenticator(
+      keyID: "test-key-id-12345678",
+      privateKey: P256.Signing.PrivateKey()
+    )
+    #expect(authenticator.defaultStorageIdentifier == "s2s-test-key-id-12345678")
+  }
+
+  @Test("authenticate throws when body exceeds bodyBufferLimit")
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  internal func authenticateThrowsOnOversizeBody() async throws {
+    let authenticator = try ServerToServerAuthenticator(
+      keyID: "test-key-id-12345678",
+      privateKey: P256.Signing.PrivateKey(),
+      bodyBufferLimit: 16
+    )
+    var request = HTTPRequest(
+      method: .post,
+      scheme: "https",
+      authority: "api.apple-cloudkit.com",
+      path: "/foo"
+    )
+    let oversized = Data(repeating: 0x41, count: 1_024)
+    var body: HTTPBody? = HTTPBody(oversized, length: .known(.init(oversized.count)))
+
+    await #expect(throws: (any Error).self) {
+      try await authenticator.authenticate(request: &request, body: &body)
+    }
+  }
 }

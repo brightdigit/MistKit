@@ -128,4 +128,13 @@ internal struct WebAuthTokenAuthenticatorTests {
   internal func storageKey() {
     #expect(WebAuthTokenAuthenticator.storageKey == "web-auth-token")
   }
+
+  @Test("defaultStorageIdentifier uses apiToken prefix")
+  internal func defaultStorageIdentifier() throws {
+    let authenticator = try WebAuthTokenAuthenticator(
+      apiToken: TestConstants.apiToken,
+      webAuthToken: TestConstants.webAuthToken
+    )
+    #expect(authenticator.defaultStorageIdentifier == "web-\(TestConstants.apiToken.prefix(8))")
+  }
 }

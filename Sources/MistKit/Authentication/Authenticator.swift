@@ -50,6 +50,14 @@ public protocol Authenticator: Sendable {
   /// concrete type. Storage stores authenticators as `[storageKey: Data]`.
   static var storageKey: String { get }
 
+  /// Identifier used by storage when the caller doesn't supply one.
+  ///
+  /// Defaults to `Self.storageKey`. Concrete types override to provide a
+  /// richer identifier (e.g. one derived from a token prefix or key ID),
+  /// allowing multiple authenticators of the same type to coexist in
+  /// storage under distinct keys.
+  var defaultStorageIdentifier: String { get }
+
   /// Attaches this credential to the given HTTP request.
   ///
   /// - Parameters:
@@ -65,8 +73,22 @@ public protocol Authenticator: Sendable {
   ) async throws
 
   /// Serializes this authenticator's payload for persistence.
+  ///
+  /// - Warning: The returned data may contain sensitive credential material
+  ///   (API tokens, web auth tokens, raw P-256 private keys). Implementors
+  ///   of `TokenStorage` are responsible for storing it securely —
+  ///   typically encrypted at rest with appropriate ACLs.
+  ///   `InMemoryTokenStorage` is suitable only for development and testing;
+  ///   production deployments should provide a `TokenStorage` backed by
+  ///   Keychain, a KMS, or an equivalent secret store.
   func encoded() throws -> Data
 
   /// Reconstructs the authenticator from previously-encoded data.
   init(decoding data: Data) throws
+}
+
+extension Authenticator {
+  public var defaultStorageIdentifier: String {
+    Self.storageKey
+  }
 }

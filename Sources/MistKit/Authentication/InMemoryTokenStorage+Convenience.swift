@@ -32,13 +32,11 @@ public import Foundation
 // MARK: - Convenience Methods
 
 extension InMemoryTokenStorage {
-  /// Stores an authenticator with an automatic identifier derived from the
-  /// concrete authenticator type.
+  /// Stores an authenticator under its `defaultStorageIdentifier`.
   /// - Parameter authenticator: The authenticator to persist.
   /// - Throws: `TokenStorageError` if the storage operation fails.
   public func store(_ authenticator: any Authenticator) async throws {
-    let identifier = Self.defaultIdentifier(for: authenticator)
-    try await store(authenticator, identifier: identifier)
+    try await store(authenticator, identifier: authenticator.defaultStorageIdentifier)
   }
 
   /// Retrieves the first stored authenticator with the given storage key.
@@ -71,21 +69,5 @@ extension InMemoryTokenStorage {
       }
     }
     return result
-  }
-
-  /// Default identifier scheme used by the no-identifier `store(_:)` overload.
-  private static func defaultIdentifier(for authenticator: any Authenticator) -> String {
-    if let api = authenticator as? APITokenAuthenticator {
-      return "api-\(api.token.prefix(8))"
-    }
-    if let web = authenticator as? WebAuthTokenAuthenticator {
-      return "web-\(web.apiToken.prefix(8))"
-    }
-    if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *),
-      let s2s = authenticator as? ServerToServerAuthenticator
-    {
-      return "s2s-\(s2s.keyID)"
-    }
-    return type(of: authenticator).storageKey
   }
 }

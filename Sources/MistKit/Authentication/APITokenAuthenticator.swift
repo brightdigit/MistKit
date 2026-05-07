@@ -42,6 +42,10 @@ public struct APITokenAuthenticator: Authenticator {
   /// The 64-character hex CloudKit API token from Apple Developer Console.
   public let token: String
 
+  public var defaultStorageIdentifier: String {
+    "api-\(token.prefix(8))"
+  }
+
   /// Creates an authenticator from an API token string.
   /// - Parameter token: The CloudKit API token.
   /// - Throws: `TokenManagerError.invalidCredentials` if the token is empty
@@ -61,7 +65,7 @@ public struct APITokenAuthenticator: Authenticator {
     request: inout HTTPRequest,
     body: inout HTTPBody?
   ) async throws {
-    request.appendingQueryItems([URLQueryItem(name: "ckAPIToken", value: token)])
+    request.appendQueryItems([URLQueryItem(name: "ckAPIToken", value: token)])
   }
 
   public func encoded() throws -> Data {

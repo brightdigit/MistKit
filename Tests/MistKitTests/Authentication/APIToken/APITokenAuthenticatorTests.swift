@@ -102,4 +102,10 @@ internal struct APITokenAuthenticatorTests {
   internal func storageKey() {
     #expect(APITokenAuthenticator.storageKey == "api-token")
   }
+
+  @Test("defaultStorageIdentifier uses token prefix")
+  internal func defaultStorageIdentifier() throws {
+    let authenticator = try APITokenAuthenticator(token: TestConstants.apiToken)
+    #expect(authenticator.defaultStorageIdentifier == "api-\(TestConstants.apiToken.prefix(8))")
+  }
 }
