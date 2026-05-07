@@ -39,7 +39,7 @@ internal final class MockTokenManagerWithRefreshTimeout: TokenManager {
       do {
         try await Task.sleep(nanoseconds: 2_000_000_000)  // 2 seconds
       } catch {
-        throw TokenManagerError.networkError(underlying: error)
+        throw TokenManagerError.networkError(.other(error))
       }
     }
     return true
@@ -52,7 +52,7 @@ internal final class MockTokenManagerWithRefreshTimeout: TokenManager {
       do {
         try await Task.sleep(nanoseconds: 2_000_000_000)  // 2 seconds
       } catch {
-        throw TokenManagerError.networkError(underlying: error)
+        throw TokenManagerError.networkError(.other(error))
       }
     }
     return try APITokenAuthenticator(token: TestConstants.apiToken)

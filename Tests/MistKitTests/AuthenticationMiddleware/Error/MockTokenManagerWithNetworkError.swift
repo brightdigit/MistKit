@@ -16,22 +16,10 @@ internal final class MockTokenManagerWithNetworkError: TokenManager {
   }
 
   internal func validateCredentials() async throws(TokenManagerError) -> Bool {
-    throw TokenManagerError.networkError(
-      underlying: NSError(
-        domain: "NetworkError",
-        code: -1_009,
-        userInfo: [NSLocalizedDescriptionKey: "Network error"]
-      )
-    )
+    throw TokenManagerError.networkError(.notConnectedToInternet)
   }
 
   internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
-    throw TokenManagerError.networkError(
-      underlying: NSError(
-        domain: "NetworkError",
-        code: -1_009,
-        userInfo: [NSLocalizedDescriptionKey: "Network error"]
-      )
-    )
+    throw TokenManagerError.networkError(.notConnectedToInternet)
   }
 }

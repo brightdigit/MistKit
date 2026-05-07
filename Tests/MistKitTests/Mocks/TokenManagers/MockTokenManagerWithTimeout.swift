@@ -17,26 +17,10 @@ internal final class MockTokenManagerWithTimeout: TokenManager {
   }
 
   internal func validateCredentials() async throws(TokenManagerError) -> Bool {
-    throw TokenManagerError.networkError(
-      underlying: NSError(
-        domain: "TimeoutError",
-        code: -1_001,
-        userInfo: [
-          NSLocalizedDescriptionKey: "Timeout"
-        ]
-      )
-    )
+    throw TokenManagerError.networkError(.timeout)
   }
 
   internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
-    throw TokenManagerError.networkError(
-      underlying: NSError(
-        domain: "TimeoutError",
-        code: -1_001,
-        userInfo: [
-          NSLocalizedDescriptionKey: "Timeout"
-        ]
-      )
-    )
+    throw TokenManagerError.networkError(.timeout)
   }
 }
