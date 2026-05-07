@@ -70,25 +70,18 @@ extension WebAuthTokenManagerTests {
       #expect(isValid == true)
     }
 
-    /// Tests getCurrentCredentials with valid tokens
-    @Test("getCurrentCredentials with valid tokens")
-    internal func getCurrentCredentialsWithValidTokens() async throws {
+    /// Tests currentAuthenticator with valid tokens
+    @Test("currentAuthenticator with valid tokens")
+    internal func currentAuthenticatorWithValidTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
       )
 
-      let credentials = try await manager.getCurrentCredentials()
-      #expect(credentials != nil)
-
-      if let credentials = credentials {
-        if case .webAuthToken(let api, let web) = credentials.method {
-          #expect(api == Self.validAPIToken)
-          #expect(web == Self.validWebAuthToken)
-        } else {
-          Issue.record("Expected .webAuthToken method")
-        }
-      }
+      let authenticator = try await manager.currentAuthenticator()
+      let web = try #require(authenticator as? WebAuthTokenAuthenticator)
+      #expect(web.apiToken == Self.validAPIToken)
+      #expect(web.webAuthToken == Self.validWebAuthToken)
     }
 
     // MARK: - Sendable Compliance Tests
@@ -103,7 +96,7 @@ extension WebAuthTokenManagerTests {
 
       // Test concurrent access patterns
       async let task1 = manager.validateManager()
-      async let task2 = manager.getCredentialsFromManager()
+      async let task2 = manager.authenticatorFromManager()
       async let task3 = manager.checkHasCredentials()
 
       let results = await (task1, task2, task3)

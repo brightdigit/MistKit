@@ -97,7 +97,8 @@ extension CloudKitServiceTests.FetchZoneChanges {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceTests.makeService(provider: ResponseProvider.connectionLost())
+      let service = try CloudKitServiceTests.makeService(
+        provider: ResponseProvider.connectionLost())
 
       await #expect {
         _ = try await service.fetchZoneChanges()

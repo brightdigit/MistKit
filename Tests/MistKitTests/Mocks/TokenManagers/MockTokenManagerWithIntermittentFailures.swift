@@ -44,7 +44,7 @@ internal final class MockTokenManagerWithIntermittentFailures: TokenManager {
     return true
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     let count = await counter.increment()
     // Fail on odd attempts
     if count % 2 == 1 {
@@ -58,6 +58,6 @@ internal final class MockTokenManagerWithIntermittentFailures: TokenManager {
         )
       )
     }
-    return TokenCredentials.apiToken("intermittent-token")
+    return try APITokenAuthenticator(token: TestConstants.apiToken)
   }
 }

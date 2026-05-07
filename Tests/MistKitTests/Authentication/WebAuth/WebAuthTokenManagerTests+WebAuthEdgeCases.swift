@@ -25,10 +25,10 @@ extension WebAuthTokenManagerTests {
 
       // Test concurrent access patterns
       async let task1 = manager.validateManager()
-      async let task2 = manager.getCredentialsFromManager()
+      async let task2 = manager.authenticatorFromManager()
       async let task3 = manager.checkHasCredentials()
       async let task4 = manager.validateManager()
-      async let task5 = manager.getCredentialsFromManager()
+      async let task5 = manager.authenticatorFromManager()
 
       let results = await (task1, task2, task3, task4, task5)
       #expect(results.0 == true)
@@ -54,7 +54,7 @@ extension WebAuthTokenManagerTests {
         let isValid = await manager.validateManager()
         #expect(isValid == true)
 
-        let credentials = await manager.getCredentialsFromManager()
+        let credentials = await manager.authenticatorFromManager()
         #expect(credentials != nil)
       }
     }
@@ -93,7 +93,7 @@ extension WebAuthTokenManagerTests {
       )
 
       // Store credentials
-      let credentials = await manager.getCredentialsFromManager()
+      let credentials = await manager.authenticatorFromManager()
       #expect(credentials != nil)
 
       // Manager should still work with its own tokens

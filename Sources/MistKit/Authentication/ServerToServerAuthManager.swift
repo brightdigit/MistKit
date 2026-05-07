@@ -30,125 +30,97 @@
 public import Crypto
 public import Foundation
 
-/// Token manager for server-to-server authentication using ECDSA P-256 signing
-/// Provides enterprise-level authentication for CloudKit Web Services
-/// Available on macOS 11.0+, iOS 14.0+, tvOS 14.0+, watchOS 7.0+, and Linux
+/// Token manager for server-to-server authentication using ECDSA P-256 signing.
+/// Provides enterprise-level authentication for CloudKit Web Services.
+/// Available on macOS 11.0+, iOS 14.0+, tvOS 14.0+, watchOS 7.0+, and Linux.
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public final class ServerToServerAuthManager: TokenManager, Sendable {
   internal let keyID: String
-  internal let privateKeyData: Data
-  internal let credentials: TokenCredentials
+  internal let privateKey: P256.Signing.PrivateKey
+  internal let bodyBufferLimit: Int
 
   // MARK: - TokenManager Protocol
 
-  /// Indicates whether valid credentials are currently available
+  /// Indicates whether valid credentials are currently available.
   public var hasCredentials: Bool {
     get async {
       !keyID.isEmpty
     }
   }
 
-  /// Creates a new server-to-server authentication manager
+  /// The raw representation of the private key (32 bytes for P-256).
+  internal var privateKeyData: Data {
+    privateKey.rawRepresentation
+  }
+
+  /// Creates a new server-to-server authentication manager.
   /// - Parameters:
-  ///   - keyID: The key identifier from Apple Developer Console
-  ///   - privateKeyCallback: A closure that returns the ECDSA P-256 private key
-  /// - Throws: Error if the private key callback fails or the key is invalid
+  ///   - keyID: The key identifier from Apple Developer Console.
+  ///   - privateKeyCallback: A closure that returns the ECDSA P-256 private key.
+  ///   - bodyBufferLimit: Maximum body size to buffer for signing.
+  /// - Throws: If the private key callback fails or the key is invalid.
   public init(
     keyID: String,
-    privateKeyCallback: @autoclosure @escaping @Sendable () throws -> P256.Signing.PrivateKey
+    privateKeyCallback: @autoclosure @escaping @Sendable () throws -> P256.Signing.PrivateKey,
+    bodyBufferLimit: Int = ServerToServerAuthenticator.defaultBodyBufferLimit
   ) throws {
     let privateKey = try privateKeyCallback()
     self.keyID = keyID
-    self.privateKeyData = privateKey.rawRepresentation
-    self.credentials = TokenCredentials.serverToServer(
-      keyID: keyID,
-      privateKey: privateKey.rawRepresentation
-    )
+    self.privateKey = privateKey
+    self.bodyBufferLimit = bodyBufferLimit
   }
 
-  /// Convenience initializer with private key data
-  /// - Parameters:
-  ///   - keyID: The key identifier from Apple Developer Console
-  ///   - privateKeyData: The private key as raw data (32 bytes for P-256)
-  /// - Throws: Error if the private key data is invalid or cannot be parsed
+  /// Convenience initializer with private key data.
   public convenience init(
     keyID: String,
-    privateKeyData: Data
+    privateKeyData: Data,
+    bodyBufferLimit: Int = ServerToServerAuthenticator.defaultBodyBufferLimit
   ) throws {
     try self.init(
       keyID: keyID,
-      privateKeyCallback: try P256.Signing.PrivateKey(rawRepresentation: privateKeyData)
+      privateKeyCallback: try P256.Signing.PrivateKey(rawRepresentation: privateKeyData),
+      bodyBufferLimit: bodyBufferLimit
     )
   }
 
-  /// Convenience initializer with PEM-formatted private key
-  /// - Parameters:
-  ///   - keyID: The key identifier from Apple Developer Console
-  ///   - pemString: The private key in PEM format
-  /// - Throws: TokenManagerError if the PEM string is invalid or cannot be parsed
+  /// Convenience initializer with PEM-formatted private key.
   public convenience init(
     keyID: String,
-    pemString: String
+    pemString: String,
+    bodyBufferLimit: Int = ServerToServerAuthenticator.defaultBodyBufferLimit
   ) throws {
     do {
       try self.init(
         keyID: keyID,
-        privateKeyCallback: try P256.Signing.PrivateKey(pemRepresentation: pemString)
+        privateKeyCallback: try P256.Signing.PrivateKey(pemRepresentation: pemString),
+        bodyBufferLimit: bodyBufferLimit
       )
     } catch {
-      // Provide more specific error handling for PEM parsing failures
-      if error.localizedDescription.contains("PEM") || error.localizedDescription.contains("format")
+      if error.localizedDescription.contains("PEM")
+        || error.localizedDescription.contains("format")
       {
         throw TokenManagerError.invalidCredentials(.invalidPEMFormat(error))
-      } else {
-        throw TokenManagerError.invalidCredentials(.privateKeyParseFailed(error))
       }
+      throw TokenManagerError.invalidCredentials(.privateKeyParseFailed(error))
     }
   }
 
-  // MARK: - Private Key Access
-
-  /// Creates a P256.Signing.PrivateKey from the stored private key data
-  /// This method is thread-safe as it creates a new instance each time
-  internal func createPrivateKey() throws(TokenManagerError) -> P256.Signing.PrivateKey {
-    do {
-      return try P256.Signing.PrivateKey(rawRepresentation: privateKeyData)
-    } catch {
-      throw TokenManagerError.invalidCredentials(.privateKeyInvalidOrCorrupted(error))
-    }
-  }
-
-  /// Validates the stored credentials for format and completeness
-  /// - Returns: true if credentials are valid, false otherwise
-  /// - Throws: TokenManagerError if credentials are invalid
+  /// Validates the stored credentials for format and completeness.
   public func validateCredentials() async throws(TokenManagerError) -> Bool {
-    guard !keyID.isEmpty else {
-      throw TokenManagerError.invalidCredentials(.keyIdEmpty)
-    }
-
-    // Validate key ID format (typically alphanumeric with specific length)
-    guard keyID.count >= 8 else {
-      throw TokenManagerError.invalidCredentials(.keyIdTooShort)
-    }
-
-    // Try to create a test signature to validate the private key
-    do {
-      let testData = Data("test".utf8)
-      let privateKey = try createPrivateKey()
-      _ = try privateKey.signature(for: testData)
-    } catch {
-      throw TokenManagerError.invalidCredentials(.privateKeyInvalidOrCorrupted(error))
-    }
-
+    _ = try ServerToServerAuthenticator(
+      keyID: keyID,
+      privateKey: privateKey,
+      bodyBufferLimit: bodyBufferLimit
+    )
     return true
   }
 
-  /// Retrieves the current credentials for authentication
-  /// - Returns: The current token credentials, or nil if not available
-  /// - Throws: TokenManagerError if credentials are invalid
-  public func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
-    // Validate first
-    _ = try await validateCredentials()
-    return credentials
+  /// Returns the server-to-server authenticator, after validation.
+  public func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
+    try ServerToServerAuthenticator(
+      keyID: keyID,
+      privateKey: privateKey,
+      bodyBufferLimit: bodyBufferLimit
+    )
   }
 }

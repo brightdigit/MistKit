@@ -22,21 +22,14 @@ extension NetworkErrorTests {
     internal func tokenStorageWithNetworkErrors() async throws {
       let storage = InMemoryTokenStorage()
 
-      // Store token
-      let credentials = TokenCredentials.apiToken(Self.validAPIToken)
-      try await storage.store(credentials, identifier: "test-key")
+      // Store authenticator
+      let authenticator = try APITokenAuthenticator(token: Self.validAPIToken)
+      try await storage.store(authenticator, identifier: "test-key")
 
-      // Retrieve token
-      let retrievedCredentials = try await storage.retrieve(identifier: "test-key")
-      #expect(retrievedCredentials != nil)
-
-      if let retrieved = retrievedCredentials {
-        if case .apiToken(let token) = retrieved.method {
-          #expect(token == Self.validAPIToken)
-        } else {
-          Issue.record("Expected .apiToken method")
-        }
-      }
+      // Retrieve authenticator
+      let retrieved = try await storage.retrieve(identifier: "test-key")
+      let api = try #require(retrieved as? APITokenAuthenticator)
+      #expect(api.token == Self.validAPIToken)
     }
 
     /// Tests token storage persistence across network failures
@@ -44,22 +37,12 @@ extension NetworkErrorTests {
     internal func tokenStoragePersistenceAcrossNetworkFailures() async throws {
       let storage = InMemoryTokenStorage()
 
-      // Store token
-      let credentials = TokenCredentials.apiToken(Self.validAPIToken)
-      try await storage.store(credentials, identifier: "persistent-key")
+      let authenticator = try APITokenAuthenticator(token: Self.validAPIToken)
+      try await storage.store(authenticator, identifier: "persistent-key")
 
-      // Simulate network failure during retrieval
-      let retrievedCredentials = try await storage.retrieve(identifier: "persistent-key")
-      #expect(retrievedCredentials != nil)
-
-      // Verify token is still available after simulated network issues
-      if let retrieved = retrievedCredentials {
-        if case .apiToken(let token) = retrieved.method {
-          #expect(token == Self.validAPIToken)
-        } else {
-          Issue.record("Expected .apiToken method")
-        }
-      }
+      let retrieved = try await storage.retrieve(identifier: "persistent-key")
+      let api = try #require(retrieved as? APITokenAuthenticator)
+      #expect(api.token == Self.validAPIToken)
     }
 
     /// Tests token storage cleanup after network errors
@@ -67,18 +50,14 @@ extension NetworkErrorTests {
     internal func tokenStorageCleanupAfterNetworkErrors() async throws {
       let storage = InMemoryTokenStorage()
 
-      // Store token
-      let credentials = TokenCredentials.apiToken(Self.validAPIToken)
-      try await storage.store(credentials, identifier: "cleanup-key")
+      let authenticator = try APITokenAuthenticator(token: Self.validAPIToken)
+      try await storage.store(authenticator, identifier: "cleanup-key")
 
-      // Verify token exists
       let initialRetrieval = try await storage.retrieve(identifier: "cleanup-key")
       #expect(initialRetrieval != nil)
 
-      // Remove token
       try await storage.remove(identifier: "cleanup-key")
 
-      // Verify token is removed
       let finalRetrieval = try await storage.retrieve(identifier: "cleanup-key")
       #expect(finalRetrieval == nil)
     }
@@ -88,16 +67,20 @@ extension NetworkErrorTests {
     internal func concurrentTokenStorageOperations() async throws {
       let storage = InMemoryTokenStorage()
 
-      // Test concurrent storage operations
       try await withThrowingTaskGroup(of: Void.self) { group in
-        group.addTask { try await storage.storeToken(key: "concurrent-1", token: "token-1") }
-        group.addTask { try await storage.storeToken(key: "concurrent-2", token: "token-2") }
-        group.addTask { try await storage.storeToken(key: "concurrent-3", token: "token-3") }
+        group.addTask {
+          try await storage.storeToken(key: "concurrent-1", token: TestConstants.apiToken)
+        }
+        group.addTask {
+          try await storage.storeToken(key: "concurrent-2", token: TestConstants.apiToken)
+        }
+        group.addTask {
+          try await storage.storeToken(key: "concurrent-3", token: TestConstants.apiToken)
+        }
 
         for try await _ in group {}
       }
 
-      // Verify all tokens were stored
       let token1 = try await storage.retrieve(identifier: "concurrent-1")
       let token2 = try await storage.retrieve(identifier: "concurrent-2")
       let token3 = try await storage.retrieve(identifier: "concurrent-3")
@@ -112,16 +95,12 @@ extension NetworkErrorTests {
     internal func tokenStorageWithExpiration() async throws {
       let storage = InMemoryTokenStorage()
 
-      // Store token with short expiration
-      let credentials = TokenCredentials.apiToken(Self.validAPIToken)
-      try await storage.store(credentials, identifier: "expiring-key")
+      let authenticator = try APITokenAuthenticator(token: Self.validAPIToken)
+      try await storage.store(authenticator, identifier: "expiring-key")
 
-      // Verify token exists initially
       let initialRetrieval = try await storage.retrieve(identifier: "expiring-key")
       #expect(initialRetrieval != nil)
 
-      // Note: InMemoryTokenStorage doesn't have built-in expiration,
-      // but we can test the storage mechanism works
       let finalRetrieval = try await storage.retrieve(identifier: "expiring-key")
       #expect(finalRetrieval != nil)
     }

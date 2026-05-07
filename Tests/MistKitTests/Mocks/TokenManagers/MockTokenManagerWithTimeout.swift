@@ -28,7 +28,7 @@ internal final class MockTokenManagerWithTimeout: TokenManager {
     )
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     throw TokenManagerError.networkError(
       underlying: NSError(
         domain: "TimeoutError",

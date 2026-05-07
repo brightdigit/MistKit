@@ -19,16 +19,14 @@ extension InMemoryTokenStorageTests {
     internal func concurrentTokenRemoval() async throws {
       let storage = InMemoryTokenStorage()
 
-      let credentials1 = TokenCredentials.apiToken("token1")
-      let credentials2 = TokenCredentials.apiToken("token2")
-      let credentials3 = TokenCredentials.apiToken("token3")
+      let auth1 = try APITokenAuthenticator(token: Self.testAPIToken)
+      let auth2 = try APITokenAuthenticator(token: Self.testAPIToken)
+      let auth3 = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      // Store multiple tokens
-      try await storage.store(credentials1, identifier: "concurrent1")
-      try await storage.store(credentials2, identifier: "concurrent2")
-      try await storage.store(credentials3, identifier: "concurrent3")
+      try await storage.store(auth1, identifier: "concurrent1")
+      try await storage.store(auth2, identifier: "concurrent2")
+      try await storage.store(auth3, identifier: "concurrent3")
 
-      // Test concurrent removal
       async let task1 = storage.removeToken(identifier: "concurrent1")
       async let task2 = storage.removeToken(identifier: "concurrent2")
       async let task3 = storage.removeToken(identifier: "concurrent3")
@@ -38,7 +36,6 @@ extension InMemoryTokenStorageTests {
       #expect(results.1 == true)
       #expect(results.2 == true)
 
-      // Verify all tokens are removed
       let identifiers = try await storage.listIdentifiers()
       #expect(!identifiers.contains("concurrent1"))
       #expect(!identifiers.contains("concurrent2"))
@@ -49,20 +46,18 @@ extension InMemoryTokenStorageTests {
     @Test("Concurrent removal and retrieval")
     internal func concurrentRemovalAndRetrieval() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      try await storage.store(credentials, identifier: "concurrent-test")
+      try await storage.store(authenticator, identifier: "concurrent-test")
 
-      // Test concurrent removal and retrieval
       async let task1 = storage.removeToken(identifier: "concurrent-test")
       async let task2 = storage.getToken(identifier: "concurrent-test")
       async let task3 = storage.removeToken(identifier: "concurrent-test")
 
       let results = await (task1, task2, task3)
-      // At least removal should succeed
+      _ = results.1
       #expect(results.0 == true || results.2 == true)
 
-      // Token should be removed
       let retrieved = try await storage.retrieve(identifier: "concurrent-test")
       #expect(retrieved == nil)
     }
@@ -74,34 +69,28 @@ extension InMemoryTokenStorageTests {
     internal func storageStateAfterRemoval() async throws {
       let storage = InMemoryTokenStorage()
 
-      let credentials1 = TokenCredentials.apiToken("token1")
-      let credentials2 = TokenCredentials.apiToken("token2")
+      let auth1 = try APITokenAuthenticator(token: Self.testAPIToken)
+      let auth2 = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      // Store tokens
-      try await storage.store(credentials1, identifier: "state1")
-      try await storage.store(credentials2, identifier: "state2")
+      try await storage.store(auth1, identifier: "state1")
+      try await storage.store(auth2, identifier: "state2")
 
-      // Verify storage is not empty
       let isEmptyBefore = await storage.isEmpty
       #expect(isEmptyBefore == false)
 
       let countBefore = await storage.count
       #expect(countBefore == 2)
 
-      // Remove one token
       try await storage.remove(identifier: "state1")
 
-      // Verify storage state
       let isEmptyAfter = await storage.isEmpty
       #expect(isEmptyAfter == false)
 
       let countAfter = await storage.count
       #expect(countAfter == 1)
 
-      // Remove remaining token
       try await storage.remove(identifier: "state2")
 
-      // Verify storage is empty
       let isEmptyFinal = await storage.isEmpty
       #expect(isEmptyFinal == true)
 

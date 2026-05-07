@@ -29,9 +29,12 @@
 
 import Foundation
 
-/// Adaptive token manager that can transition between API-only and Web authentication
-/// Starts with API token and can be upgraded to include web authentication
-/// Supports storage when upgraded to web authentication
+/// Adaptive token manager that can transition between API-only and Web authentication.
+///
+/// Starts with API token only and can be upgraded to include web authentication.
+/// On each request it vends whichever authenticator matches its current state —
+/// `APITokenAuthenticator` while API-only, `WebAuthTokenAuthenticator` after
+/// upgrade.
 public actor AdaptiveTokenManager: TokenManager {
   internal let apiToken: String
   internal var webAuthToken: String?
@@ -40,17 +43,17 @@ public actor AdaptiveTokenManager: TokenManager {
 
   // MARK: - TokenManager Protocol
 
-  /// Indicates whether valid credentials are currently available
+  /// Indicates whether valid credentials are currently available.
   public var hasCredentials: Bool {
     get async {
       !apiToken.isEmpty
     }
   }
 
-  /// Creates an adaptive token manager starting with API token only
+  /// Creates an adaptive token manager starting with API token only.
   /// - Parameters:
-  ///   - apiToken: The CloudKit API token
-  ///   - storage: Optional storage for persistence (default: nil for in-memory only)
+  ///   - apiToken: The CloudKit API token.
+  ///   - storage: Optional storage for persistence (default: nil for in-memory only).
   public init(
     apiToken: String,
     storage: (any TokenStorage)? = nil
@@ -60,31 +63,21 @@ public actor AdaptiveTokenManager: TokenManager {
     self.storage = storage
   }
 
-  /// Validates the stored credentials for format and completeness
-  /// - Returns: true if credentials are valid, false otherwise
-  /// - Throws: TokenManagerError if credentials are invalid
+  /// Validates the stored credentials for format and completeness.
   public func validateCredentials() async throws(TokenManagerError) -> Bool {
-    // Validate API token using common validation
-    try Self.validateAPITokenFormat(apiToken)
-
-    // Validate web token if present
     if let webToken = webAuthToken {
-      try Self.validateWebAuthTokenFormat(webToken)
+      _ = try WebAuthTokenAuthenticator(apiToken: apiToken, webAuthToken: webToken)
+    } else {
+      _ = try APITokenAuthenticator(token: apiToken)
     }
-
     return true
   }
 
-  /// Retrieves the current credentials for authentication
-  /// - Returns: The current token credentials, or nil if not available
-  /// - Throws: TokenManagerError if credentials are invalid
-  public func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
-    _ = try await validateCredentials()
-
+  /// Returns the authenticator matching the current authentication mode.
+  public func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     if let webToken = webAuthToken {
-      return TokenCredentials.webAuthToken(apiToken: apiToken, webToken: webToken)
-    } else {
-      return TokenCredentials.apiToken(apiToken)
+      return try WebAuthTokenAuthenticator(apiToken: apiToken, webAuthToken: webToken)
     }
+    return try APITokenAuthenticator(token: apiToken)
   }
 }

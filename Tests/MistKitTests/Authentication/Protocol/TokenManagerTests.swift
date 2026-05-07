@@ -11,20 +11,13 @@ internal struct TokenManagerTests {
   /// Tests integration between different TokenManager components
   @Test("TokenManager integration test")
   internal func tokenManagerIntegration() async throws {
-    let method = AuthenticationMethod.apiToken("integration-test-token")
-    let credentials = TokenCredentials(method: method)
     let mockManager = MockTokenManager()
 
-    // Test that all components work together
     let isValid = try await mockManager.validateCredentials()
     #expect(isValid == true)
 
-    let retrievedCredentials = try await mockManager.getCurrentCredentials()
-    #expect(retrievedCredentials != nil)
-    #expect(retrievedCredentials?.methodType == "api-token")
-
-    // Test that credentials can be processed
-    let methodType = credentials.methodType
-    #expect(methodType == "api-token")
+    let authenticator = try await mockManager.currentAuthenticator()
+    let api = try #require(authenticator as? APITokenAuthenticator)
+    #expect(type(of: api).storageKey == APITokenAuthenticator.storageKey)
   }
 }

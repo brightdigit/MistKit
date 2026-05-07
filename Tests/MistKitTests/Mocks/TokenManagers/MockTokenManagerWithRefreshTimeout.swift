@@ -45,7 +45,7 @@ internal final class MockTokenManagerWithRefreshTimeout: TokenManager {
     return true
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     let count = await counter.increment()
     // Simulate timeout on first call
     if count == 1 {
@@ -55,6 +55,6 @@ internal final class MockTokenManagerWithRefreshTimeout: TokenManager {
         throw TokenManagerError.networkError(underlying: error)
       }
     }
-    return TokenCredentials.apiToken("refreshed-token")
+    return try APITokenAuthenticator(token: TestConstants.apiToken)
   }
 }

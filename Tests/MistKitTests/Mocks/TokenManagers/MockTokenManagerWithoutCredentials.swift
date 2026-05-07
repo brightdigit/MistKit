@@ -16,7 +16,7 @@ internal final class MockTokenManagerWithoutCredentials: TokenManager {
     false
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     nil
   }
 }

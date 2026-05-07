@@ -18,13 +18,13 @@ extension InMemoryTokenStorageTests {
     @Test("Retrieve stored token")
     internal func retrieveStoredToken() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      try await storage.store(credentials, identifier: nil)
+      try await storage.store(authenticator, identifier: nil)
 
       let retrieved = try await storage.retrieve(identifier: nil)
-      #expect(retrieved != nil)
-      #expect(retrieved == credentials)
+      let api = try #require(retrieved as? APITokenAuthenticator)
+      #expect(api.token == authenticator.token)
     }
 
     /// Tests retrieving non-existent token
@@ -40,9 +40,9 @@ extension InMemoryTokenStorageTests {
     @Test("Retrieve token after clearing storage")
     internal func retrieveTokenAfterClearingStorage() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      try await storage.store(credentials, identifier: nil)
+      try await storage.store(authenticator, identifier: nil)
       await storage.clear()
 
       let retrieved = try await storage.retrieve(identifier: nil)
@@ -55,9 +55,9 @@ extension InMemoryTokenStorageTests {
     @Test("Remove stored token")
     internal func removeStoredToken() async throws {
       let storage = InMemoryTokenStorage()
-      let credentials = TokenCredentials.apiToken(Self.testAPIToken)
+      let authenticator = try APITokenAuthenticator(token: Self.testAPIToken)
 
-      try await storage.store(credentials, identifier: nil)
+      try await storage.store(authenticator, identifier: nil)
 
       let retrievedBefore = try await storage.retrieve(identifier: nil)
       #expect(retrievedBefore != nil)
