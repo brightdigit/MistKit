@@ -52,7 +52,8 @@ public enum CloudKitError: LocalizedError, Sendable {
       .httpErrorWithDetails(let statusCode, _, _),
       .httpErrorWithRawResponse(let statusCode, _):
       return statusCode
-    case .invalidResponse, .underlyingError, .decodingError, .networkError, .unsupportedOperationType:
+    case .invalidResponse, .underlyingError, .decodingError, .networkError,
+      .unsupportedOperationType:
       return nil
     }
   }
