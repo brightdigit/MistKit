@@ -115,8 +115,4 @@ extension Operations.fetchRecordChanges.Output: CloudKitResponseType {
       return nil
     }
   }
-
-  // fetchRecordChanges has most error responses except 500/503
-  internal var internalServerErrorResponse: Components.Responses.InternalServerError? { nil }
-  internal var serviceUnavailableResponse: Components.Responses.ServiceUnavailable? { nil }
 }

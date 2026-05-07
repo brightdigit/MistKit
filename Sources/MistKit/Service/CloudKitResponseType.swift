@@ -68,3 +68,15 @@ internal protocol CloudKitResponseType {
   /// Extract status code from undocumented response if present
   var undocumentedStatusCode: Int? { get }
 }
+
+extension CloudKitResponseType {
+  internal var forbiddenResponse: Components.Responses.Forbidden? { nil }
+  internal var notFoundResponse: Components.Responses.NotFound? { nil }
+  internal var conflictResponse: Components.Responses.Conflict? { nil }
+  internal var preconditionFailedResponse: Components.Responses.PreconditionFailed? { nil }
+  internal var contentTooLargeResponse: Components.Responses.RequestEntityTooLarge? { nil }
+  internal var misdirectedRequestResponse: Components.Responses.UnprocessableEntity? { nil }
+  internal var tooManyRequestsResponse: Components.Responses.TooManyRequests? { nil }
+  internal var internalServerErrorResponse: Components.Responses.InternalServerError? { nil }
+  internal var serviceUnavailableResponse: Components.Responses.ServiceUnavailable? { nil }
+}
