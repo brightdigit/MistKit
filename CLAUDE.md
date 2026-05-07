@@ -158,7 +158,7 @@ MistKit/
 
 | File | Operations |
 |------|-----------|
-| `CloudKitService+Operations.swift` | `queryRecords`, `lookupRecords`, `modifyRecords` |
+| `CloudKitService+Operations.swift` | `queryRecords`, `queryAllRecords`, `lookupRecords`, `modifyRecords` |
 | `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
 | `CloudKitService+UserOperations.swift` | `fetchCurrentUser()`, `discoverUserIdentities(lookupInfos:)` |
@@ -173,6 +173,7 @@ MistKit/
 - `discoverUserIdentities(lookupInfos:)` → `/users/discover` — takes `[UserIdentityLookupInfo]`, returns `[UserIdentity]`
 
 **Result Types (Sources/MistKit/Service/):**
+- `QueryResult` — `records: [RecordInfo]`, `continuationMarker: String?`
 - `RecordChangesResult` — `records: [RecordInfo]`, `syncToken: String?`, `moreComing: Bool`
 - `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`
 - `UserIdentity` — `userRecordName: String?`, `nameComponents: NameComponents?`

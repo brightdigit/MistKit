@@ -90,4 +90,23 @@ internal final class MockCloudKitRecordOperator: CloudKitRecordOperating, Sendab
     modifyCalls.append(ModifyCall(operations: operations))
     return try modifyRecordsResult.get()
   }
+
+  internal func queryAllRecords(
+    recordType: String,
+    filters: [QueryFilter]?,
+    sortBy: [QuerySort]?,
+    limit: Int?,
+    desiredKeys: [String]?
+  ) async throws(CloudKitError) -> [RecordInfo] {
+    queryCalls.append(
+      QueryCall(
+        recordType: recordType,
+        filters: filters,
+        sortBy: sortBy,
+        limit: limit,
+        desiredKeys: desiredKeys
+      )
+    )
+    return try queryRecordsResult.get()
+  }
 }

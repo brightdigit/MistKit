@@ -73,4 +73,21 @@ extension CloudKitService: RecordManaging {
   ) async throws {
     _ = try await self.modifyRecords(operations)
   }
+
+  /// Query all records of a specific type, automatically paginating
+  ///
+  /// This implementation uses `queryAllRecords` which follows continuation markers
+  /// to fetch all matching records across multiple pages.
+  ///
+  /// - Parameter recordType: The CloudKit record type to query
+  /// - Returns: Array of all matching records
+  /// - Throws: CloudKit errors if any page request fails
+  public func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
+    try await self.queryAllRecords(
+      recordType: recordType,
+      filters: nil,
+      sortBy: nil,
+      limit: nil
+    )
+  }
 }

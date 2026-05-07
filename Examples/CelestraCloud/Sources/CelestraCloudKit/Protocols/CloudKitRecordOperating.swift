@@ -53,6 +53,23 @@ public protocol CloudKitRecordOperating: Sendable {
   /// - Returns: Array of modified record info
   /// - Throws: CloudKitError if the modification fails
   func modifyRecords(_ operations: [RecordOperation]) async throws(CloudKitError) -> [RecordInfo]
+
+  /// Query all records of a type, automatically paginating through continuation markers
+  /// - Parameters:
+  ///   - recordType: The type of record to query
+  ///   - filters: Optional query filters
+  ///   - sortBy: Optional sort descriptors
+  ///   - limit: Maximum number of records per page (optional)
+  ///   - desiredKeys: Optional list of field keys to fetch
+  /// - Returns: Array of all matching record info across all pages
+  /// - Throws: CloudKitError if the query fails
+  func queryAllRecords(
+    recordType: String,
+    filters: [QueryFilter]?,
+    sortBy: [QuerySort]?,
+    limit: Int?,
+    desiredKeys: [String]?
+  ) async throws(CloudKitError) -> [RecordInfo]
 }
 
 // MARK: - CloudKitService Conformance

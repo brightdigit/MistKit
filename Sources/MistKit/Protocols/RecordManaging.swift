@@ -52,4 +52,18 @@ public protocol RecordManaging {
   ///   - recordType: The record type being operated on (for logging)
   /// - Throws: CloudKit errors if the batch operations fail
   func executeBatchOperations(_ operations: [RecordOperation], recordType: String) async throws
+
+  /// Query all records of a specific type, automatically paginating
+  ///
+  /// - Parameter recordType: The CloudKit record type to query
+  /// - Returns: Array of all matching records across all pages
+  /// - Throws: CloudKit errors if the query fails
+  func queryAllRecords(recordType: String) async throws -> [RecordInfo]
+}
+
+extension RecordManaging {
+  /// Default implementation delegates to queryRecords
+  public func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
+    try await queryRecords(recordType: recordType)
+  }
 }
