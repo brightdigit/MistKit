@@ -6,11 +6,7 @@
 ERRORS=0
 
 run_command() {
-		if [ "$LINT_MODE" = "STRICT" ]; then
-				"$@" || ERRORS=$((ERRORS + 1))
-		else
-				"$@"
-		fi
+		"$@" || ERRORS=$((ERRORS + 1))
 }
 
 if [ "$LINT_MODE" = "INSTALL" ]; then
