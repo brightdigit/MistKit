@@ -32,47 +32,46 @@ import MistKit
 
 /// Command to look up records by name in CloudKit
 public struct LookupCommand: MistDemoCommand, OutputFormatting {
+  /// The configuration type.
   public typealias Config = LookupConfig
+  /// The command name.
   public static let commandName = "lookup"
+  /// The command abstract.
   public static let abstract = "Look up records by name from CloudKit"
+  /// The command help text.
   public static let helpText = """
-    LOOKUP - Fetch one or more records by name from CloudKit
+    LOOKUP - Fetch records by name from CloudKit
 
     USAGE:
-        mistdemo lookup --record-names <name1,name2,...> [options]
+      mistdemo lookup --record-names <names> [options]
 
     REQUIRED:
-        --api-token <token>            CloudKit API token
-        --web-auth-token <token>       Web authentication token
-        --record-names <names>         Comma-separated record names
-                                       (or use --record-name for one)
+      --api-token <token>          CloudKit API token
+      --web-auth-token <token>     Web authentication token
+      --record-names <names>       Comma-separated record names
 
     OPTIONS:
-        --fields <field1,field2,...>   Restrict the returned fields
-        --output-format <format>       Output format: json, table, csv, yaml
+      --fields <field1,field2,...>  Restrict returned fields
+      --output-format <format>     Output format
 
     EXAMPLES:
-
-      1. Look up a single record:
-         mistdemo lookup --record-name my-note-123
-
-      2. Look up multiple records:
-         mistdemo lookup --record-names note-1,note-2,note-3
-
-      3. Restrict returned fields:
-         mistdemo lookup --record-names note-1,note-2 --fields title,priority
+      mistdemo lookup --record-name my-note-123
+      mistdemo lookup --record-names note-1,note-2
+      mistdemo lookup --record-names note-1 --fields title
 
     NOTES:
-      • Records that aren't found are silently omitted from the response.
-        A warning is printed to stderr listing the missing names.
+      Records not found are omitted from the response.
+      A warning is printed to stderr listing missing names.
     """
 
   private let config: LookupConfig
 
+  /// Creates a new instance.
   public init(config: LookupConfig) {
     self.config = config
   }
 
+  /// Executes the command.
   public func execute() async throws {
     do {
       let client = try MistKitClientFactory.create(for: config.base)

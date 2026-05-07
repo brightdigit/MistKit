@@ -30,10 +30,11 @@
 #if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import SwiftUI
 
-  struct DetailColumnRoot: View {
-    let selection: SidebarItem?
+  /// Routes the sidebar selection to the appropriate detail view.
+  internal struct DetailColumnRoot: View {
+    internal let selection: SidebarItem?
 
-    var body: some View {
+    internal var body: some View {
       switch selection {
       case .account:
         AccountView()

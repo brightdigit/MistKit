@@ -37,8 +37,8 @@ public enum FieldInputValue: Sendable {
   case bool(Bool)
   case asset(String)  // Asset URL from upload token
 
-  /// Convert to FieldType and string value for Field creation
-  func toFieldComponents() throws -> (FieldType, String) {
+  /// Convert to FieldType and string value for Field creation.
+  internal func toFieldComponents() throws -> (FieldType, String) {
     switch self {
     case .string(let value):
       return (.string, value)

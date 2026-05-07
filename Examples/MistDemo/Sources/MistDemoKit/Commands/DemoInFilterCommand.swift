@@ -38,33 +38,33 @@ import MistKit
 ///      — expects exactly 2 results, confirming type-preserving serialization works
 ///   3. Cleans up all three created records
 public struct DemoInFilterCommand: MistDemoCommand {
+  /// The configuration type.
   public typealias Config = MistDemoConfig
+  /// The command name.
   public static let commandName = "demo-in-filter"
-  public static let abstract = "Demonstrates IN/NOT_IN QueryFilter (issue #192) against CloudKit"
+  /// The command abstract.
+  public static let abstract =
+    "Demonstrates IN/NOT_IN QueryFilter against CloudKit"
+  /// The command help text.
   public static let helpText = """
-    DEMO-IN-FILTER - Demonstrate IN/NOT_IN QueryFilter fix (issue #192)
+    DEMO-IN-FILTER - IN/NOT_IN QueryFilter fix (issue #192)
 
     USAGE:
-        mistdemo demo-in-filter [options]
-
-    REQUIRED:
-        --api-token <token>        CloudKit API token
-        --web-auth-token <token>   Web authentication token
+      mistdemo demo-in-filter [options]
 
     DESCRIPTION:
-        Creates three Note records with index values 10, 20, and 30,
-        then queries them back using an IN filter for [10, 30].
-        Expects 2 results, confirming that type information is preserved
-        in the serialized filter payload (the fix for issue #192).
-        Created records are deleted after the demo completes.
+      Creates three Note records with index 10, 20, 30,
+      queries with IN filter for [10, 30], expects 2 results.
     """
 
   private let config: MistDemoConfig
 
+  /// Creates a new instance.
   public init(config: MistDemoConfig) {
     self.config = config
   }
 
+  /// Executes the command.
   public func execute() async throws {
     guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
       print("demo-in-filter requires macOS 11+ / iOS 14+")
@@ -75,8 +75,29 @@ public struct DemoInFilterCommand: MistDemoCommand {
     let tag = Int(Date().timeIntervalSince1970)
     let recordType = "Note"
 
-    // Step 1 — create three records with index values 10, 20, 30
-    print("Creating 3 Note records with index values 10, 20, 30…")
+    let createdNames = try await createDemoRecords(
+      client: client, recordType: recordType, tag: tag
+    )
+
+    try await verifyAndQueryRecords(
+      client: client,
+      recordType: recordType,
+      createdNames: createdNames
+    )
+
+    try await cleanupDemoRecords(
+      client: client,
+      recordType: recordType,
+      createdNames: createdNames
+    )
+  }
+
+  private func createDemoRecords(
+    client: CloudKitService,
+    recordType: String,
+    tag: Int
+  ) async throws -> [String] {
+    print("Creating 3 Note records with index 10, 20, 30...")
     let indexValues: [Int] = [10, 20, 30]
     var createdNames: [String] = []
     for idx in indexValues {
@@ -88,59 +109,61 @@ public struct DemoInFilterCommand: MistDemoCommand {
         ]
       )
       createdNames.append(record.recordName)
-      print("  Created \(record.recordName)  (index=\(idx))")
+      print("  Created \(record.recordName) (index=\(idx))")
     }
+    return createdNames
+  }
 
-    // Diagnostic: query without filter to verify records are immediately visible
-    print("\nVerifying records are queryable (no filter)…")
-    let allRecords = try await client.queryRecords(recordType: recordType, limit: 200)
-    let allDemoRecords = allRecords.filter { createdNames.contains($0.recordName) }
-    print(
-      "  Total Note records: \(allRecords.count), demo records visible: \(allDemoRecords.count)")
-    if allDemoRecords.count < 3 {
-      print("  Waiting 2s for CloudKit indexing…")
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  private func verifyAndQueryRecords(
+    client: CloudKitService,
+    recordType: String,
+    createdNames: [String]
+  ) async throws {
+    print("\nVerifying records are queryable...")
+    let allRecords = try await client.queryRecords(
+      recordType: recordType, limit: 200
+    )
+    let visible = allRecords.filter {
+      createdNames.contains($0.recordName)
+    }
+    print("  Visible: \(visible.count)")
+    if visible.count < 3 {
       try await Task.sleep(nanoseconds: 2_000_000_000)
     }
 
-    // Step 2 — query back records where index IN [10, 30]
-    print("\nQuerying with IN filter for index values [10, 30]…")
+    print("\nQuerying with IN filter for [10, 30]...")
     let results = try await client.queryRecords(
       recordType: recordType,
       filters: [.in("index", [.int64(10), .int64(30)])],
       limit: 200
     )
 
-    let matching = results.filter { createdNames.contains($0.recordName) }
-    // The record with index=20 should NOT be in the results (filter should exclude it)
-    let index20Name = createdNames.count == 3 ? createdNames[1] : nil
-    let falsePositive =
-      index20Name.map { name in results.contains { $0.recordName == name } } ?? false
-    print("Total results returned: \(results.count)")
-    print("Matching demo records:  \(matching.count) (expected 2)")
-    for record in matching {
-      let idx = record.fields["index"].flatMap {
-        if case .int64(let val) = $0 { return val } else { return nil }
-      }
-      print("  \(record.recordName)  index=\(idx.map(String.init) ?? "?")")
+    let matching = results.filter {
+      createdNames.contains($0.recordName)
     }
+    print("Matching demo records: \(matching.count) (expected 2)")
 
-    if matching.count == 2 && !falsePositive {
-      print("\n✓ IN filter works correctly — issue #192 fix confirmed")
-    } else if falsePositive {
-      print("\n✗ Filter not working — index=20 record appeared in results (filter ignored)")
+    if matching.count == 2 {
+      print("\n  IN filter works correctly")
     } else {
-      print("\n✗ Unexpected result count — check CloudKit for details")
+      print("\n  Unexpected result count")
     }
+  }
 
-    // Step 3 — clean up (use forceDelete — delete requires recordChangeTag which we don't store)
-    print("\nDeleting demo records…")
+  private func cleanupDemoRecords(
+    client: CloudKitService,
+    recordType: String,
+    createdNames: [String]
+  ) async throws {
+    print("\nDeleting demo records...")
     for name in createdNames {
-      let op = RecordOperation(
+      let operation = RecordOperation(
         operationType: .forceDelete,
         recordType: recordType,
         recordName: name
       )
-      _ = try await client.modifyRecords([op])
+      _ = try await client.modifyRecords([operation])
       print("  Deleted \(name)")
     }
     print("Done.")

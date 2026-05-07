@@ -30,12 +30,12 @@
 #if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   public import SwiftUI
 
+  /// Root view hosting the navigation split between sidebar and detail.
   public struct RootView: View {
     @EnvironmentObject private var service: NativeCloudKitService
     @State private var selection: SidebarItem? = .account
 
-    public init() {}
-
+    /// The view body.
     public var body: some View {
       NavigationSplitView {
         SidebarView(selection: $selection)
@@ -52,5 +52,8 @@
         await service.refreshAccountStatus()
       }
     }
+
+    /// Creates a new root view.
+    public init() {}
   }
 #endif

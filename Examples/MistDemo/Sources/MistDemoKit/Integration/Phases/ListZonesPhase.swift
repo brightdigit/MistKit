@@ -30,15 +30,15 @@
 import Foundation
 import MistKit
 
-struct ListZonesPhase: IntegrationPhase {
-  typealias Input = NoState
-  typealias Output = NoState
+internal struct ListZonesPhase: IntegrationPhase {
+  internal typealias Input = NoState
+  internal typealias Output = NoState
 
-  static let title = "List all zones"
-  static let emoji = "📋"
-  static let apiName = "listZones"
+  internal static let title = "List all zones"
+  internal static let emoji = "📋"
+  internal static let apiName = "listZones"
 
-  func run(input: NoState, context: PhaseContext) async throws -> NoState {
+  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     let zones = try await context.service.listZones()

@@ -37,6 +37,7 @@ public enum StandardNamingStyle: NamingStyle, Sendable {
   /// Screaming snake case with prefix (e.g., "APP_CLOUDKIT_CONTAINER_ID")
   case screamingSnakeCase(prefix: String?)
 
+  /// Transform the base key string into the appropriate naming style.
   public func transform(_ base: String) -> String {
     switch self {
     case .dotSeparated:

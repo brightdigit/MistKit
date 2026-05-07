@@ -31,17 +31,19 @@ import Foundation
 
 /// Formatter for JSON output
 public struct JSONFormatter: OutputFormatter {
+  /// Whether to use pretty printing
+  public let pretty: Bool
+
   // MARK: Lifecycle
 
+  /// Creates a new instance.
   public init(pretty: Bool = false) {
     self.pretty = pretty
   }
 
   // MARK: Public
 
-  /// Whether to use pretty printing
-  public let pretty: Bool
-
+  /// Formats the value as JSON.
   public func format<T: Encodable>(_ value: T) throws -> String {
     let encoder = JSONEncoder()
     if pretty {

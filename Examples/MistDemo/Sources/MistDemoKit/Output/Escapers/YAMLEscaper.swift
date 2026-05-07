@@ -31,8 +31,10 @@ import Foundation
 
 /// YAML escaper for proper string formatting
 public struct YAMLEscaper: OutputEscaper {
+  /// Creates a new instance.
   public init() {}
 
+  /// Escapes the string for YAML output.
   public func escape(_ string: String) -> String {
     // Check if the string needs escaping
     guard needsEscaping(string) else {
@@ -64,18 +66,24 @@ public struct YAMLEscaper: OutputEscaper {
       return true
     }
 
+    if needsEscapingByBoundary(string) {
+      return true
+    }
+
+    if needsEscapingByContent(string) {
+      return true
+    }
+
+    return false
+  }
+
+  /// Check boundary characters and reserved patterns.
+  private func needsEscapingByBoundary(_ string: String) -> Bool {
     // Characters that are special only as the first char of a plain scalar
     let firstCharSpecials: Set<Character> = [
       ":", "#", "@", "`", "|", ">", "'", "\"",
       "[", "]", "{", "}", ",", "&", "*", "!",
       "%", "\\", "?", "-", "<", "=", "~",
-    ]
-
-    // Characters that are special anywhere in a plain scalar
-    let anyCharSpecials: Set<Character> = [
-      ":", "#", "`", "|", ">", "\"",
-      "[", "]", "{", "}", ",", "&", "*", "!",
-      "%", "\\",
     ]
 
     // Check first character for special cases
@@ -98,9 +106,17 @@ public struct YAMLEscaper: OutputEscaper {
       "False", "On", "Off", "Null",
     ]
 
-    if specialPatterns.contains(string) {
-      return true
-    }
+    return specialPatterns.contains(string)
+  }
+
+  /// Check interior characters and numeric patterns.
+  private func needsEscapingByContent(_ string: String) -> Bool {
+    // Characters that are special anywhere in a plain scalar
+    let anyCharSpecials: Set<Character> = [
+      ":", "#", "`", "|", ">", "\"",
+      "[", "]", "{", "}", ",", "&", "*", "!",
+      "%", "\\",
+    ]
 
     // Check if it looks like a number
     if Double(string) != nil || Int(string) != nil {
@@ -109,7 +125,9 @@ public struct YAMLEscaper: OutputEscaper {
 
     // Check for special characters in the string
     for char in string
-    where anyCharSpecials.contains(char) || char == "\n" || char == "\r" || char == "\t" {
+    where anyCharSpecials.contains(char)
+      || char == "\n" || char == "\r" || char == "\t"
+    {
       return true
     }
 

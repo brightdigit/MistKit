@@ -29,10 +29,10 @@
 
 import Foundation
 
-/// Test data generation utilities for integration tests
-struct IntegrationTestData {
-  /// CloudKit record type for integration tests
-  static let recordType = "MistKitIntegrationTest"
+/// Test data generation utilities for integration tests.
+internal enum IntegrationTestData {
+  /// CloudKit record type for integration tests.
+  internal static let recordType = "MistKitIntegrationTest"
 
   /// Generate minimal PNG-like binary data for upload testing.
   ///
@@ -41,7 +41,7 @@ struct IntegrationTestData {
   /// and will be rejected by PNG decoders; suitable only as raw binary test payloads.
   /// - Parameter sizeKB: Desired size in kilobytes (default: 10)
   /// - Returns: PNG-like binary data
-  static func generateTestImage(sizeKB: Int = 10) -> Data {
+  internal static func generateTestImage(sizeKB: Int = 10) -> Data {
     // Minimal valid 1x1 pixel PNG
     // PNG signature
     var data = Data([

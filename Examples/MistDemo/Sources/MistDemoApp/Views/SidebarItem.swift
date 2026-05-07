@@ -28,12 +28,13 @@
 //
 
 #if !os(tvOS) && !os(watchOS)
-  enum SidebarItem: Hashable, CaseIterable {
+  /// Sidebar navigation items for the MistDemo app.
+  internal enum SidebarItem: Hashable, CaseIterable {
     case account
     case zones
     case query
 
-    var label: String {
+    internal var label: String {
       switch self {
       case .account: return "iCloud Account"
       case .zones: return "Zones"
@@ -41,7 +42,7 @@
       }
     }
 
-    var systemImage: String {
+    internal var systemImage: String {
       switch self {
       case .account: return "person.crop.circle"
       case .zones: return "tray.full"

@@ -29,9 +29,12 @@
 
 /// Command configuration for identifying and routing commands
 public struct CommandConfiguration {
+  /// The name used to invoke this command on the CLI.
   public let commandName: String
+  /// A short description of what the command does.
   public let abstract: String
 
+  /// Initialize with the command name and abstract description.
   public init(commandName: String, abstract: String) {
     self.commandName = commandName
     self.abstract = abstract

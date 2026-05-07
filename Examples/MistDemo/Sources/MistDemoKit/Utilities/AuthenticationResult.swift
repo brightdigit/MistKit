@@ -30,9 +30,10 @@
 import Foundation
 import MistKit
 
-/// Result of authentication setup including token manager and selected database
-struct AuthenticationResult {
-  let tokenManager: any TokenManager
-  let database: MistKit.Database
-  let authMethod: String  // Description for logging
+/// Result of authentication setup including token manager and selected database.
+internal struct AuthenticationResult {
+  internal let tokenManager: any TokenManager
+  internal let database: MistKit.Database
+  /// Description for logging.
+  internal let authMethod: String
 }

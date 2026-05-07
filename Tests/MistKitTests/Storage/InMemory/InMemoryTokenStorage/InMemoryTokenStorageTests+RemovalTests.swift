@@ -5,13 +5,13 @@ import Testing
 
 extension InMemoryTokenStorageTests {
   /// Token removal tests for InMemoryTokenStorage
-  @Suite("Removal Tests")
+  @Suite("Removal")
   internal struct RemovalTests {
     // MARK: - Test Data Setup
 
     private static let testAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
-    private static let testWebAuthToken = "user123_web_auth_token_abcdef"
+      TestConstants.apiToken
+    private static let testWebAuthToken = TestConstants.webAuthToken
 
     // MARK: - Basic Removal Tests
 

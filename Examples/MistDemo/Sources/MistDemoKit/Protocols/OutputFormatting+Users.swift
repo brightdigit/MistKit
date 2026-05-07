@@ -34,7 +34,7 @@ import MistKit
 
 extension OutputFormatting {
   /// Output UserInfo result in table format
-  func outputUserTable(_ userInfo: UserInfo, fields: [String]? = nil) async throws {
+  internal func outputUserTable(_ userInfo: UserInfo, fields: [String]? = nil) async throws {
     print("User Information:")
     print("├─ User Record Name: \(userInfo.userRecordName)")
 
@@ -54,8 +54,9 @@ extension OutputFormatting {
     }
   }
 
-  /// Output UserInfo results in CSV format
-  func outputUserCSV(_ users: [UserInfo], fields: [String]? = nil) async throws {
+  // Output UserInfo results in CSV format.
+  // swiftlint:disable:next cyclomatic_complexity
+  internal func outputUserCSV(_ users: [UserInfo], fields: [String]? = nil) async throws {
     // Build header based on available fields
     var headers: [String] = ["userRecordName"]
 
@@ -91,7 +92,7 @@ extension OutputFormatting {
   }
 
   /// Output UserInfo result in YAML format
-  func outputUserYAML(_ userInfo: UserInfo, fields: [String]? = nil) async throws {
+  internal func outputUserYAML(_ userInfo: UserInfo, fields: [String]? = nil) async throws {
     let yamlEscaper = YAMLEscaper()
     print("user:")
     print("  userRecordName: \(yamlEscaper.escape(userInfo.userRecordName))")

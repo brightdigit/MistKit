@@ -103,6 +103,9 @@ jobs:
           if command -v apt-get >/dev/null 2>&1; then
             apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
           fi
+      - name: Install coverage.py (silences codecov-cli probe warning)
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        run: pip3 install --quiet --user coverage 2>/dev/null || true
       - uses: sersoft-gmbh/swift-coverage-action@v5
         if: steps.build.outputs.contains-code-coverage == 'true'
         id: coverage-files
@@ -224,6 +227,9 @@ jobs:
           osVersion: ${{ matrix.osVersion }}
           download-platform: ${{ matrix.download-platform }}
           working-directory: ${{ env.WORKING_DIR }}
+      - name: Install coverage.py (silences codecov-cli probe warning)
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        run: pip3 install --quiet --user coverage 2>/dev/null || true
       - name: Process Coverage
         if: steps.build.outputs.contains-code-coverage == 'true'
         uses: sersoft-gmbh/swift-coverage-action@v5
@@ -283,6 +289,9 @@ jobs:
           osVersion: ${{ matrix.osVersion }}
           download-platform: ${{ matrix.download-platform }}
           working-directory: ${{ env.WORKING_DIR }}
+      - name: Install coverage.py (silences codecov-cli probe warning)
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        run: pip3 install --quiet --user coverage 2>/dev/null || true
       - name: Process Coverage
         if: steps.build.outputs.contains-code-coverage == 'true'
         uses: sersoft-gmbh/swift-coverage-action@v5

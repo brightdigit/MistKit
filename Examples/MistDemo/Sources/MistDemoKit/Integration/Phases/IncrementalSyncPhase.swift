@@ -30,15 +30,18 @@
 import Foundation
 import MistKit
 
-struct IncrementalSyncPhase: IntegrationPhase {
-  typealias Input = IncrementalSyncInput
-  typealias Output = NoState
+internal struct IncrementalSyncPhase: IntegrationPhase {
+  internal typealias Input = IncrementalSyncInput
+  internal typealias Output = NoState
 
-  static let title = "Incremental sync (fetch only changes)"
-  static let emoji = "🔄"
-  static let apiName = "fetchRecordChanges"
+  internal static let title = "Incremental sync (fetch only changes)"
+  internal static let emoji = "🔄"
+  internal static let apiName = "fetchRecordChanges"
 
-  func run(input: IncrementalSyncInput, context: PhaseContext) async throws -> NoState {
+  internal func run(
+    input: IncrementalSyncInput,
+    context: PhaseContext
+  ) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     guard let token = input.syncToken else {

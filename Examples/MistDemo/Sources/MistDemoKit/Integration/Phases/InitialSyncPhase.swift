@@ -30,15 +30,17 @@
 import Foundation
 import MistKit
 
-struct InitialSyncPhase: IntegrationPhase {
-  typealias Input = CreatedRecordNames
-  typealias Output = SyncTokenSlot
+internal struct InitialSyncPhase: IntegrationPhase {
+  internal typealias Input = CreatedRecordNames
+  internal typealias Output = SyncTokenSlot
 
-  static let title = "Initial sync (fetch all changes)"
-  static let emoji = "🔄"
-  static let apiName = "fetchRecordChanges"
+  internal static let title = "Initial sync (fetch all changes)"
+  internal static let emoji = "🔄"
+  internal static let apiName = "fetchRecordChanges"
 
-  func run(input: CreatedRecordNames, context: PhaseContext) async throws -> SyncTokenSlot {
+  internal func run(
+    input: CreatedRecordNames, context: PhaseContext
+  ) async throws -> SyncTokenSlot {
     print("\n\(Self.emoji) \(Self.title)")
 
     do {

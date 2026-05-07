@@ -33,11 +33,11 @@ import Testing
 @testable import MistDemoKit
 
 @Suite("QueryError Tests")
-struct QueryErrorTests {
+internal struct QueryErrorTests {
   // MARK: - Error Description Tests
 
   @Test("invalidLimit error description")
-  func invalidLimitDescription() {
+  internal func invalidLimitDescription() {
     let error = QueryError.invalidLimit(500)
     let description = error.errorDescription
 
@@ -48,7 +48,7 @@ struct QueryErrorTests {
   }
 
   @Test("invalidFilter error description")
-  func invalidFilterDescription() {
+  internal func invalidFilterDescription() {
     let error = QueryError.invalidFilter("invalid:filter", expected: "field:op:value")
     let description = error.errorDescription
 
@@ -59,7 +59,7 @@ struct QueryErrorTests {
   }
 
   @Test("emptyFieldName error description")
-  func emptyFieldNameDescription() {
+  internal func emptyFieldNameDescription() {
     let error = QueryError.emptyFieldName(":eq:value")
     let description = error.errorDescription
 
@@ -69,7 +69,7 @@ struct QueryErrorTests {
   }
 
   @Test("invalidSortOrder error description")
-  func invalidSortOrderDescription() {
+  internal func invalidSortOrderDescription() {
     let error = QueryError.invalidSortOrder("invalid", available: ["asc", "desc"])
     let description = error.errorDescription
 
@@ -81,7 +81,7 @@ struct QueryErrorTests {
   }
 
   @Test("unsupportedOperator error description")
-  func unsupportedOperatorDescription() {
+  internal func unsupportedOperatorDescription() {
     let error = QueryError.unsupportedOperator("regex")
     let description = error.errorDescription
 
@@ -94,7 +94,7 @@ struct QueryErrorTests {
   }
 
   @Test("operationFailed error description")
-  func operationFailedDescription() {
+  internal func operationFailedDescription() {
     let error = QueryError.operationFailed("network error")
     let description = error.errorDescription
 
@@ -106,13 +106,13 @@ struct QueryErrorTests {
   // MARK: - LocalizedError Conformance Tests
 
   @Test("QueryError conforms to LocalizedError")
-  func conformsToLocalizedError() {
+  internal func conformsToLocalizedError() {
     let error: any Error = QueryError.invalidLimit(0)
     #expect(error is LocalizedError)
   }
 
   @Test("All error cases have non-nil descriptions")
-  func allCasesHaveDescriptions() {
+  internal func allCasesHaveDescriptions() {
     let errors: [QueryError] = [
       .invalidLimit(500),
       .invalidFilter("filter", expected: "expected"),
@@ -124,21 +124,21 @@ struct QueryErrorTests {
 
     for error in errors {
       #expect(error.errorDescription != nil)
-      #expect(!error.errorDescription!.isEmpty)
+      #expect(error.errorDescription?.isEmpty == false)
     }
   }
 
   // MARK: - Error Throwing Tests
 
   @Test("Can throw and catch QueryError")
-  func throwAndCatch() {
+  internal func throwAndCatch() {
     #expect(throws: QueryError.self) {
       throw QueryError.invalidLimit(0)
     }
   }
 
   @Test("Can pattern match on specific error case")
-  func patternMatch() {
+  internal func patternMatch() {
     let error = QueryError.invalidLimit(500)
 
     if case .invalidLimit(let limit) = error {
@@ -151,18 +151,18 @@ struct QueryErrorTests {
   // MARK: - Specific Error Case Tests
 
   @Test("invalidLimit with negative value")
-  func invalidLimitNegative() {
+  internal func invalidLimitNegative() throws {
     let error = QueryError.invalidLimit(-1)
-    let description = error.errorDescription!
+    let description = try #require(error.errorDescription)
 
     #expect(description.contains("-1"))
   }
 
   @Test("invalidSortOrder shows all available options")
-  func invalidSortOrderShowsOptions() {
+  internal func invalidSortOrderShowsOptions() throws {
     let availableOrders = ["asc", "desc", "ascending", "descending"]
     let error = QueryError.invalidSortOrder("bad", available: availableOrders)
-    let description = error.errorDescription!
+    let description = try #require(error.errorDescription)
 
     for order in availableOrders {
       #expect(description.contains(order))
@@ -170,15 +170,15 @@ struct QueryErrorTests {
   }
 
   @Test("unsupportedOperator lists supported operators")
-  func unsupportedOperatorListsSupported() {
+  internal func unsupportedOperatorListsSupported() throws {
     let error = QueryError.unsupportedOperator("unknown")
-    let description = error.errorDescription!
+    let description = try #require(error.errorDescription)
 
     let supportedOps = [
       "eq", "ne", "gt", "gte", "lt", "lte", "contains", "begins_with", "in", "not_in",
     ]
-    for op in supportedOps {
-      #expect(description.contains(op))
+    for supportedOp in supportedOps {
+      #expect(description.contains(supportedOp))
     }
   }
 }

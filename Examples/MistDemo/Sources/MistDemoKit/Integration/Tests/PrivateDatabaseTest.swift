@@ -30,11 +30,11 @@
 import Foundation
 import MistKit
 
-struct PrivateDatabaseTest: PhasedIntegrationTest {
-  let name = "Private Database"
-  let database: MistKit.Database = .private
+internal struct PrivateDatabaseTest: PhasedIntegrationTest {
+  internal let name = "Private Database"
+  internal let database: MistKit.Database = .private
 
-  let phases: [any IntegrationPhase] = [
+  internal let phases: [any IntegrationPhase] = [
     ListZonesPhase(),
     LookupZonePhase(),
     FetchZoneChangesPhase(),

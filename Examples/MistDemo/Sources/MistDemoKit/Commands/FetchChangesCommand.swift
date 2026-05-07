@@ -32,102 +32,112 @@ import MistKit
 
 /// Command to fetch record changes with incremental sync
 public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
+  /// The configuration type.
   public typealias Config = FetchChangesConfig
+  /// The command name.
   public static let commandName = "fetch-changes"
-  public static let abstract = "Fetch record changes with incremental sync"
+  /// The command abstract.
+  public static let abstract =
+    "Fetch record changes with incremental sync"
+  /// The command help text.
   public static let helpText = """
-    FETCH-CHANGES - Fetch record changes with incremental sync
+    FETCH-CHANGES - Fetch record changes
 
     USAGE:
-        mistdemo fetch-changes [options]
+      mistdemo fetch-changes [options]
 
     OPTIONS:
-        --sync-token <token>       Sync token from previous fetch
-        --zone <name>              Zone name (default: "_defaultZone")
-        --fetch-all                Fetch all changes with automatic pagination
-        --limit <count>            Maximum results per page (1-200)
-        --database <type>          Database to target: public, private, shared (default: public)
-        --output-format <format>   Output format: json, table, csv, yaml
+      --sync-token <token>     Sync token from previous fetch
+      --zone <name>            Zone name (default: _defaultZone)
+      --fetch-all              Auto-paginate all changes
+      --limit <count>          Max results per page (1-200)
+      --database <type>        Database to target
+      --output-format <format> Output format
 
     EXAMPLES:
-        # Fetch initial changes
-        mistdemo fetch-changes
-
-        # Fetch with pagination
-        mistdemo fetch-changes --fetch-all
-
-        # Incremental sync with token
-        mistdemo fetch-changes --sync-token "previous-token"
+      mistdemo fetch-changes
+      mistdemo fetch-changes --fetch-all
+      mistdemo fetch-changes --sync-token "token"
 
     NOTES:
-        - Save the returned sync token for incremental fetching
-        - Use --fetch-all to automatically paginate through all changes
+      Save the returned sync token for next fetch.
     """
 
   private let config: FetchChangesConfig
 
+  /// Creates a new instance.
   public init(config: FetchChangesConfig) {
     self.config = config
   }
 
+  /// Executes the command.
   public func execute() async throws {
     print("\n" + String(repeating: "=", count: 60))
     print("🔄 Fetch Record Changes")
     print(String(repeating: "=", count: 60))
 
-    let service = try MistKitClientFactory.create(for: config.base)
+    let service = try MistKitClientFactory.create(
+      for: config.base
+    )
     let zoneID = ZoneID(zoneName: config.zone, ownerName: nil)
 
+    printSyncTokenStatus()
+
     if config.fetchAll {
-      print("\n📦 Fetching all changes (automatic pagination)...")
-      if let token = config.syncToken {
-        print("   Using sync token: \(token.prefix(20))...")
-      } else {
-        print("   Performing initial fetch (no sync token)")
-      }
-
-      let (records, newToken) = try await service.fetchAllRecordChanges(
-        zoneID: zoneID,
-        syncToken: config.syncToken
-      )
-      print("\n✅ Fetched \(records.count) record(s)")
-      displayRecords(records, limit: 5)
-      if let token = newToken {
-        print("\n💾 New sync token: \(token.prefix(20))...")
-        print("   Save this token to fetch only new changes next time:")
-        print("   mistdemo fetch-changes --sync-token '\(token)'")
-      }
+      try await fetchAllChanges(service: service, zoneID: zoneID)
     } else {
-      print("\n📄 Fetching single page...")
-      if let token = config.syncToken {
-        print("   Using sync token: \(token.prefix(20))...")
-      } else {
-        print("   Performing initial fetch (no sync token)")
-      }
-
-      let result = try await service.fetchRecordChanges(
-        zoneID: zoneID,
-        syncToken: config.syncToken,
-        resultsLimit: config.limit ?? 10
-      )
-      print("\n✅ Fetched \(result.records.count) record(s)")
-      displayRecords(result.records, limit: 5)
-
-      if result.moreComing {
-        print("\n⚠️  More changes available! Use --sync-token with:")
-        if let token = result.syncToken {
-          print("   mistdemo fetch-changes --sync-token '\(token)'")
-        }
-      }
-
-      if let token = result.syncToken {
-        print("\n💾 Sync token: \(token.prefix(20))...")
-      }
+      try await fetchSinglePage(service: service, zoneID: zoneID)
     }
 
     print("\n" + String(repeating: "=", count: 60))
     print("✅ Fetch completed!")
     print(String(repeating: "=", count: 60))
+  }
+
+  private func printSyncTokenStatus() {
+    if let token = config.syncToken {
+      print("   Using sync token: \(token.prefix(20))...")
+    } else {
+      print("   Performing initial fetch (no sync token)")
+    }
+  }
+
+  private func fetchAllChanges(
+    service: CloudKitService, zoneID: ZoneID
+  ) async throws {
+    print("\n📦 Fetching all changes (automatic pagination)...")
+    let (records, newToken) = try await service.fetchAllRecordChanges(
+      zoneID: zoneID,
+      syncToken: config.syncToken
+    )
+    print("\n✅ Fetched \(records.count) record(s)")
+    displayRecords(records, limit: 5)
+    if let token = newToken {
+      print("\n💾 New sync token: \(token.prefix(20))...")
+      print("   mistdemo fetch-changes --sync-token '\(token)'")
+    }
+  }
+
+  private func fetchSinglePage(
+    service: CloudKitService, zoneID: ZoneID
+  ) async throws {
+    print("\n📄 Fetching single page...")
+    let result = try await service.fetchRecordChanges(
+      zoneID: zoneID,
+      syncToken: config.syncToken,
+      resultsLimit: config.limit ?? 10
+    )
+    print("\n✅ Fetched \(result.records.count) record(s)")
+    displayRecords(result.records, limit: 5)
+
+    if result.moreComing, let token = result.syncToken {
+      print("\n⚠️  More changes available!")
+      print("   mistdemo fetch-changes --sync-token '\(token)'")
+    }
+
+    if let token = result.syncToken {
+      print("\n💾 Sync token: \(token.prefix(20))...")
+    }
   }
 
   private func displayRecords(_ records: [RecordInfo], limit: Int) {

@@ -31,18 +31,18 @@ import MistDemoApp
 import SwiftUI
 
 @main
-struct MistDemoAppMain: App {
-    @StateObject private var service = NativeCloudKitService(
-        containerIdentifier: NativeCloudKitService.demoContainerIdentifier
-    )
+internal struct MistDemoAppMain: App {
+  @StateObject private var service = NativeCloudKitService(
+    containerIdentifier: NativeCloudKitService.demoContainerIdentifier
+  )
 
-    var body: some Scene {
-        WindowGroup("MistDemo (Native CloudKit)") {
-            RootView()
-                .environmentObject(service)
-        }
-        #if os(macOS)
-        .defaultSize(width: 880, height: 600)
-        #endif
+  internal var body: some Scene {
+    WindowGroup("MistDemo (Native CloudKit)") {
+      RootView()
+        .environmentObject(service)
     }
+    #if os(macOS)
+    .defaultSize(width: 880, height: 600)
+    #endif
+  }
 }

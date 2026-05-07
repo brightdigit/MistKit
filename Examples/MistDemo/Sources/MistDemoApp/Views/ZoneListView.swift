@@ -30,29 +30,38 @@
 #if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import SwiftUI
 
-  struct ZoneListView: View {
+  /// View listing all CloudKit record zones.
+  internal struct ZoneListView: View {
     @EnvironmentObject private var service: NativeCloudKitService
     @State private var zones: [ZoneRow] = []
     @State private var loading = false
     @State private var loadError: String?
 
-    var body: some View {
+    internal var body: some View {
       Group {
         if loading {
           ProgressView("Loading zones…")
         } else if let loadError {
           ContentUnavailableView(
-            "Couldn't load zones", systemImage: "exclamationmark.triangle",
-            description: Text(loadError))
+            "Couldn't load zones",
+            systemImage: "exclamationmark.triangle",
+            description: Text(loadError)
+          )
         } else if zones.isEmpty {
           ContentUnavailableView(
-            "No zones yet", systemImage: "tray",
-            description: Text("Click Refresh to fetch zones from CloudKit."))
+            "No zones yet",
+            systemImage: "tray",
+            description: Text(
+              "Click Refresh to fetch zones from CloudKit."
+            )
+          )
         } else {
           List(zones) { zone in
             VStack(alignment: .leading, spacing: 4) {
               Text(zone.zoneName).font(.headline)
-              Text("Owner: \(zone.ownerName)").font(.caption).foregroundStyle(.secondary)
+              Text("Owner: \(zone.ownerName)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
             .padding(.vertical, 2)
           }

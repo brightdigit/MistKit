@@ -31,29 +31,45 @@ public import ConfigKeyKit
 import Foundation
 public import MistKit
 
-/// Configuration for current-user command
+/// Configuration for current-user command.
 public struct CurrentUserConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = MistDemoConfig
 
+  /// The base MistDemo configuration.
   public let base: MistDemoConfig
+  /// The optional field names to include in the response.
   public let fields: [String]?
+  /// The output format.
   public let output: OutputFormat
 
-  public init(base: MistDemoConfig, fields: [String]? = nil, output: OutputFormat = .json) {
+  /// Creates a new instance.
+  public init(
+    base: MistDemoConfig,
+    fields: [String]? = nil,
+    output: OutputFormat = .json
+  ) {
     self.base = base
     self.fields = fields
     self.output = output
   }
 
-  /// Parse configuration from command line arguments
-  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: MistDemoConfig?
+  ) async throws {
     let configReader = configuration
     let baseConfig: MistDemoConfig
     if let base = base {
       baseConfig = base
     } else {
-      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+      baseConfig = try await MistDemoConfig(
+        configuration: configuration,
+        base: nil
+      )
     }
 
     // Parse fields filter
@@ -63,7 +79,9 @@ public struct CurrentUserConfig: Sendable, ConfigurationParseable {
     }
 
     // Parse output format
-    let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
+    let outputString =
+      configReader.string(forKey: "output.format", default: "json")
+      ?? "json"
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(

@@ -33,23 +33,23 @@ import Testing
 @testable import MistDemoKit
 
 @Suite("LookupCommand Tests")
-struct LookupCommandTests {
+internal struct LookupCommandTests {
   @Test("Command has correct static properties")
-  func staticProperties() {
+  internal func staticProperties() {
     #expect(LookupCommand.commandName == "lookup")
     #expect(LookupCommand.abstract == "Look up records by name from CloudKit")
     #expect(LookupCommand.helpText.contains("LOOKUP"))
   }
 
   @Test("Command initializes with config")
-  func initializesWithConfig() async throws {
+  internal func initializesWithConfig() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"])
     _ = LookupCommand(config: config)
   }
 
   @Test("Command help text documents that missing records go to stderr")
-  func helpTextMentionsStderr() {
+  internal func helpTextMentionsStderr() {
     #expect(LookupCommand.helpText.contains("stderr"))
   }
 }

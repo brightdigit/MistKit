@@ -38,12 +38,12 @@ import Foundation
 ///
 /// - Note: Used in AuthTokenCommand.swift line 88 for route responses
 internal struct AuthResponse: Encodable {
-  /// The authenticated user's CloudKit record name
-  let userRecordName: String
+  /// The authenticated user's CloudKit record name.
+  internal let userRecordName: String
 
-  /// CloudKit data retrieved during authentication (user info and zones)
-  let cloudKitData: CloudKitData
+  /// CloudKit data retrieved during authentication (user info and zones).
+  internal let cloudKitData: CloudKitData
 
-  /// Human-readable message describing the authentication result
-  let message: String
+  /// Human-readable message describing the authentication result.
+  internal let message: String
 }

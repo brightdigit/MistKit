@@ -30,11 +30,12 @@
 #if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import Foundation
 
-  enum NativeCloudKitError: Error, LocalizedError {
+  /// Errors specific to native CloudKit operations.
+  internal enum NativeCloudKitError: Error, LocalizedError {
     case unexpectedSaveResult
     case webAuthTokenUnavailable
 
-    var errorDescription: String? {
+    internal var errorDescription: String? {
       switch self {
       case .unexpectedSaveResult:
         return "CloudKit returned a record that couldn't be parsed as a Note."

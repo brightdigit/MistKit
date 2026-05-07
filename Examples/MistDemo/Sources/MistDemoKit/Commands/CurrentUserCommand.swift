@@ -32,34 +32,41 @@ import MistKit
 
 /// Command to get information about the authenticated user
 public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
+  /// The configuration type.
   public typealias Config = CurrentUserConfig
+  /// The command name.
   public static let commandName = "current-user"
+  /// The command abstract.
   public static let abstract = "Get current user information"
+  /// The command help text.
   public static let helpText = """
     CURRENT-USER - Get current user information
 
     USAGE:
-        mistdemo current-user [options]
+      mistdemo current-user [options]
 
     OPTIONS:
-        --api-token <token>        CloudKit API token
-        --web-auth-token <token>   Web authentication token (private/shared databases)
-        --database <type>          Database to target: public, private, shared (default: public)
-        --fields <fields>          Comma-separated list of fields to include
-        --output-format <format>   Output format: json, table, csv, yaml
+      --api-token <token>        CloudKit API token
+      --web-auth-token <token>   Web auth token
+      --database <type>          Database to target
+      --fields <fields>          Comma-separated fields
+      --output-format <format>   Output format
 
     NOTES:
-        - With --database public, this requires server-to-server credentials
-          (CLOUDKIT_KEY_ID + CLOUDKIT_PRIVATE_KEY[_PATH]); --web-auth-token is ignored.
-        - With --database private or shared, --web-auth-token is required.
+      - With --database public, requires server-to-server
+        credentials; --web-auth-token is ignored.
+      - With --database private or shared,
+        --web-auth-token is required.
     """
 
   private let config: CurrentUserConfig
 
+  /// Creates a new instance.
   public init(config: CurrentUserConfig) {
     self.config = config
   }
 
+  /// Executes the command.
   public func execute() async throws {
     do {
       // Create CloudKit client

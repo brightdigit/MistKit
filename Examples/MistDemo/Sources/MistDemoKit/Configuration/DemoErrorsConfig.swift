@@ -30,55 +30,46 @@
 public import ConfigKeyKit
 import Foundation
 
-/// Which error scenario(s) the `demo-errors` command should run.
-public enum ErrorScenario: String, Sendable, CaseIterable {
-  case all
-  case unauthorized = "401"
-  case notFound = "404"
-  case conflict = "409"
-}
-
-/// Configuration for demo-errors command
+/// Configuration for demo-errors command.
 public struct DemoErrorsConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = MistDemoConfig
 
+  /// The base MistDemo configuration.
   public let base: MistDemoConfig
+  /// The error scenario to demonstrate.
   public let scenario: ErrorScenario
 
+  /// Creates a new instance.
   public init(base: MistDemoConfig, scenario: ErrorScenario = .all) {
     self.base = base
     self.scenario = scenario
   }
 
-  /// Parse configuration from command line arguments
-  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: MistDemoConfig?
+  ) async throws {
     let baseConfig: MistDemoConfig
     if let base {
       baseConfig = base
     } else {
-      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+      baseConfig = try await MistDemoConfig(
+        configuration: configuration,
+        base: nil
+      )
     }
 
-    let scenarioString = configuration.string(forKey: "scenario", default: "all") ?? "all"
+    let scenarioString =
+      configuration.string(forKey: "scenario", default: "all")
+      ?? "all"
     guard let scenario = ErrorScenario(rawValue: scenarioString) else {
       throw DemoErrorsError.invalidScenario(scenarioString)
     }
 
     self.init(base: baseConfig, scenario: scenario)
-  }
-}
-
-/// Errors specific to the demo-errors command's configuration parsing.
-internal enum DemoErrorsError: LocalizedError {
-  case invalidScenario(String)
-
-  internal var errorDescription: String? {
-    switch self {
-    case .invalidScenario(let value):
-      return
-        "Invalid --scenario '\(value)'. Must be one of: "
-        + ErrorScenario.allCases.map(\.rawValue).joined(separator: ", ")
-    }
   }
 }

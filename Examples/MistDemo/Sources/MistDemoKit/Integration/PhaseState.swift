@@ -37,9 +37,9 @@ import MistKit
 /// through `PhaseStateEncodable.encode(to:)`. The runner threads a single
 /// `PhaseState` value through the pipeline via
 /// `IntegrationPhase.runErased(context:state:)`.
-struct PhaseState: Sendable {
-  var assetReceipt: AssetUploadReceipt?
-  var createdRecordNames: [String] = []
-  var syncToken: String?
-  var currentUser: UserInfo?
+internal struct PhaseState: Sendable {
+  internal var assetReceipt: AssetUploadReceipt?
+  internal var createdRecordNames: [String] = []
+  internal var syncToken: String?
+  internal var currentUser: UserInfo?
 }

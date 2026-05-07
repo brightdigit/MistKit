@@ -1,0 +1,72 @@
+//
+//  YAMLEscaperTests+QuoteAndBackslashEscaping.swift
+//  MistDemoTests
+//
+//  Created by Leo Dion.
+//  Copyright © 2026 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+import Foundation
+import Testing
+
+@testable import MistDemoKit
+
+extension YAMLEscaperTests {
+  @Suite("Quote and Backslash Escaping")
+  internal struct QuoteAndBackslashEscaping {
+    private let escaper = YAMLEscaper()
+
+    @Test("String with double quote is escaped")
+    internal func stringWithDoubleQuote() {
+      let input = "She said \"Hello\""
+      let output = escaper.escape(input)
+      #expect(output.hasPrefix("\""))
+      #expect(output.contains("\\\""))
+    }
+
+    @Test("String with backslash is escaped")
+    internal func stringWithBackslash() {
+      let input = "path\\to\\file"
+      let output = escaper.escape(input)
+      #expect(output.hasPrefix("\""))
+      #expect(output.contains("\\\\"))
+    }
+
+    @Test("String with tab character is escaped in single-line mode")
+    internal func stringWithTabEscaped() {
+      let input = "before\tafter"
+      let output = escaper.escape(input)
+      #expect(output.hasPrefix("\""))
+      #expect(output.contains("\\t"))
+    }
+
+    @Test("String with carriage return is escaped in single-line mode")
+    internal func stringWithCarriageReturn() {
+      let input = "before\rafter"
+      let output = escaper.escape(input)
+      #expect(output.hasPrefix("\""))
+      #expect(output.contains("\\r"))
+    }
+  }
+}

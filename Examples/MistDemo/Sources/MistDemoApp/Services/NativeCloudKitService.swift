@@ -41,22 +41,38 @@
     /// The shared demo container identifier — must match `MistDemoConfig.containerIdentifier`.
     public static let demoContainerIdentifier = "iCloud.com.brightdigit.MistDemo"
 
-    @Published var accountStatus: CKAccountStatus = .couldNotDetermine
-    @Published var lastError: String?
+    @Published internal var accountStatus: CKAccountStatus = .couldNotDetermine
+    @Published internal var lastError: String?
 
-    let containerIdentifier: String
+    internal let containerIdentifier: String
     private let container: CKContainer
 
+    /// Convenience: which database we want to demo against. The MistDemo CLI
+    /// defaults to `.private`, so mirror that here.
+    internal var database: CKDatabase { container.privateCloudDatabase }
+
+    /// Creates a new service for the given CloudKit container.
+    /// - Parameter containerIdentifier: The CloudKit container identifier.
     public init(containerIdentifier: String) {
       self.containerIdentifier = containerIdentifier
       self.container = CKContainer(identifier: containerIdentifier)
     }
 
-    /// Convenience: which database we want to demo against. The MistDemo CLI
-    /// defaults to `.private`, so mirror that here.
-    var database: CKDatabase { container.privateCloudDatabase }
+    /// Apply the editable fields onto a CKRecord. Always refreshes `modified`.
+    private static func apply(
+      title: String, index: Int64, imageURL: URL?, to record: CKRecord
+    ) {
+      record[Note.Fields.title] = title as NSString
+      record[Note.Fields.index] = NSNumber(value: index)
+      if let imageURL {
+        record[Note.Fields.image] = CKAsset(fileURL: imageURL)
+      }
+      record[Note.Fields.modified] = NSNumber(
+        value: Int64(Date().timeIntervalSince1970 * 1_000)
+      )
+    }
 
-    func refreshAccountStatus() async {
+    internal func refreshAccountStatus() async {
       do {
         let status = try await container.accountStatus()
         self.accountStatus = status
@@ -67,7 +83,7 @@
     }
 
     /// List all record zones in the private database (parity with `mistdemo lookup-zones`).
-    func loadZones() async throws -> [ZoneRow] {
+    internal func loadZones() async throws -> [ZoneRow] {
       let zones = try await database.allRecordZones()
       return zones.map(ZoneRow.init).sorted { $0.zoneName < $1.zoneName }
     }
@@ -75,7 +91,7 @@
     /// Query `Note` records from the demo container's private database, sorted
     /// by `index` (parity with `mistdemo query --record-type Note --sort index`).
     /// Note's schema is defined in `schema.ckdb`.
-    func queryNotes(limit: Int = 50) async throws -> [Note] {
+    internal func queryNotes(limit: Int = 50) async throws -> [Note] {
       let predicate = NSPredicate(value: true)
       let query = CKQuery(recordType: Note.recordType, predicate: predicate)
       query.sortDescriptors = [NSSortDescriptor(key: Note.Fields.index, ascending: true)]
@@ -115,7 +131,7 @@
     // MARK: - Write operations (parity with `mistdemo create / update / delete`)
 
     /// Create a new Note in the private database.
-    func createNote(title: String, index: Int64, imageURL: URL?) async throws -> Note {
+    internal func createNote(title: String, index: Int64, imageURL: URL?) async throws -> Note {
       let record = CKRecord(recordType: Note.recordType)
       Self.apply(title: title, index: index, imageURL: imageURL, to: record)
       record[Note.Fields.createdAt] = Date() as NSDate
@@ -128,9 +144,9 @@
 
     /// Update an existing Note. Fetches the current record (so the change tag
     /// is fresh), mutates the fields, and saves.
-    func updateNote(_ existing: Note, title: String, index: Int64, imageURL: URL?) async throws
-      -> Note
-    {
+    internal func updateNote(
+      _ existing: Note, title: String, index: Int64, imageURL: URL?
+    ) async throws -> Note {
       let recordID = CKRecord.ID(recordName: existing.id)
       let record = try await database.record(for: recordID)
       Self.apply(title: title, index: index, imageURL: imageURL, to: record)
@@ -142,7 +158,7 @@
     }
 
     /// Delete a Note by record name.
-    func deleteNote(_ note: Note) async throws {
+    internal func deleteNote(_ note: Note) async throws {
       let recordID = CKRecord.ID(recordName: note.id)
       _ = try await database.deleteRecord(withID: recordID)
     }
@@ -155,7 +171,7 @@
     ///
     /// `apiToken` is the public CloudKit API token from CloudKit Dashboard,
     /// not the user's iCloud password. It must match the configured container.
-    func fetchWebAuthToken(apiToken: String) async throws -> String {
+    internal func fetchWebAuthToken(apiToken: String) async throws -> String {
       try await withCheckedThrowingContinuation { continuation in
         let operation = CKFetchWebAuthTokenOperation(apiToken: apiToken)
         operation.qualityOfService = .userInitiated
@@ -163,23 +179,15 @@
           if let token {
             continuation.resume(returning: token)
           } else {
-            continuation.resume(throwing: error ?? NativeCloudKitError.webAuthTokenUnavailable)
+            continuation.resume(
+              throwing: error ?? NativeCloudKitError.webAuthTokenUnavailable
+            )
           }
         }
         // CKFetchWebAuthTokenOperation is a CKDatabaseOperation; running
         // it against the private database picks up the demo container.
         database.add(operation)
       }
-    }
-
-    /// Apply the editable fields onto a CKRecord. Always refreshes `modified`.
-    private static func apply(title: String, index: Int64, imageURL: URL?, to record: CKRecord) {
-      record[Note.Fields.title] = title as NSString
-      record[Note.Fields.index] = NSNumber(value: index)
-      if let imageURL {
-        record[Note.Fields.image] = CKAsset(fileURL: imageURL)
-      }
-      record[Note.Fields.modified] = NSNumber(value: Int64(Date().timeIntervalSince1970 * 1_000))
     }
   }
 #endif

@@ -50,6 +50,7 @@ internal struct CloudKitResponseProcessor {
       return try extractUserData(from: okResponse)
     default:
       // Should never reach here since all errors are handled above
+      assertionFailure("Unexpected response case after error handling")
       throw CloudKitError.invalidResponse
     }
   }
@@ -170,6 +171,7 @@ internal struct CloudKitResponseProcessor {
       }
     default:
       // Should never reach here since all errors are handled above
+      assertionFailure("Unexpected response case after error handling")
       throw CloudKitError.invalidResponse
     }
   }

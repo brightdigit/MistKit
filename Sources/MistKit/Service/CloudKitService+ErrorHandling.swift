@@ -28,6 +28,7 @@
 //
 
 import Foundation
+import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
   import FoundationNetworking
@@ -50,7 +51,11 @@ extension CloudKitService {
       return cloudKitError
     }
 
-    if let decodingError = error as? DecodingError {
+    // OpenAPIRuntime wraps transport-level errors in ClientError; unwrap to inspect the cause.
+    let inspected: any Error =
+      (error as? ClientError)?.underlyingError ?? error
+
+    if let decodingError = inspected as? DecodingError {
       MistKitLogger.logError(
         "JSON decoding failed in \(context): \(decodingError)",
         logger: MistKitLogger.api,
@@ -60,7 +65,7 @@ extension CloudKitService {
       return CloudKitError.decodingError(decodingError)
     }
 
-    if let urlError = error as? URLError {
+    if let urlError = inspected as? URLError {
       MistKitLogger.logError(
         "Network error in \(context): \(urlError)",
         logger: MistKitLogger.network,

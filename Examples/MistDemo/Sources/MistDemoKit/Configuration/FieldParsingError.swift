@@ -29,7 +29,7 @@
 
 public import Foundation
 
-/// Errors that can occur during field parsing
+/// Errors that can occur during field parsing.
 public enum FieldParsingError: Error, LocalizedError {
   case invalidFormat(String, expected: String)
   case emptyFieldName(String)
@@ -37,16 +37,21 @@ public enum FieldParsingError: Error, LocalizedError {
   case invalidValueForType(String, type: FieldType)
   case unsupportedFieldType(FieldType)
 
+  /// The localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .invalidFormat(let input, let expected):
-      return "Invalid field format '\(input)'. Expected format: \(expected)"
+      return
+        "Invalid field format '\(input)'. Expected format: \(expected)"
     case .emptyFieldName(let input):
       return "Empty field name in '\(input)'"
     case .unknownFieldType(let type, let available):
-      return "Unknown field type '\(type)'. Available types: \(available.joined(separator: ", "))"
+      return
+        "Unknown field type '\(type)'. "
+        + "Available types: \(available.joined(separator: ", "))"
     case .invalidValueForType(let value, let type):
-      return "Invalid value '\(value)' for field type '\(type.rawValue)'"
+      return
+        "Invalid value '\(value)' for field type '\(type.rawValue)'"
     case .unsupportedFieldType(let type):
       return "Field type '\(type.rawValue)' is not yet supported"
     }

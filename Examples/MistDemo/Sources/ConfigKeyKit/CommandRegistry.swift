@@ -31,21 +31,31 @@ import Foundation
 
 /// Actor-based registry for managing available commands
 public actor CommandRegistry {
-  private var registeredCommands: [String: any Command.Type] = [:]
-  private var commandMetadata: [String: CommandMetadata] = [:]
-
   /// Metadata about a command
   public struct CommandMetadata: Sendable {
+    /// The name used to invoke this command on the CLI.
     public let commandName: String
+    /// A short description of what the command does.
     public let abstract: String
+    /// Detailed help text for the command.
     public let helpText: String
   }
 
   /// Shared instance
   public static let shared = CommandRegistry()
 
+  private var registeredCommands: [String: any Command.Type] = [:]
+  private var commandMetadata: [String: CommandMetadata] = [:]
+
+  /// Get all registered command names
+  public var availableCommands: [String] {
+    Array(registeredCommands.keys).sorted()
+  }
+
   // Internal initializer for testability - allows tests to create isolated instances
   internal init() {}
+
+  // MARK: - Public Methods
 
   /// Register a command type with the registry
   public func register<T: Command>(_ commandType: T.Type) {
@@ -55,11 +65,6 @@ public actor CommandRegistry {
       abstract: T.abstract,
       helpText: T.helpText
     )
-  }
-
-  /// Get all registered command names
-  public var availableCommands: [String] {
-    Array(registeredCommands.keys).sorted()
   }
 
   /// Get command metadata

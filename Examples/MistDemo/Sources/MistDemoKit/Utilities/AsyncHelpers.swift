@@ -35,6 +35,7 @@ public enum AsyncTimeoutError: Error, LocalizedError {
   case timeout(String)
   case cancelled(String)
 
+  /// A localized description of the timeout error.
   public var errorDescription: String? {
     switch self {
     case .timeout(let message):

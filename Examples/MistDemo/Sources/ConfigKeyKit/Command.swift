@@ -46,11 +46,11 @@ public protocol Command: Sendable {
   /// Initialize command with configuration
   init(config: Config)
 
-  /// Execute the command asynchronously
-  func execute() async throws
-
   /// Create a command instance with configuration
   static func createInstance() async throws -> Self
+
+  /// Execute the command asynchronously
+  func execute() async throws
 }
 
 extension Command {

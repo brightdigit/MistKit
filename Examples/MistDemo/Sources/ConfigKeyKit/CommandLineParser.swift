@@ -33,6 +33,7 @@ import Foundation
 public struct CommandLineParser {
   private let arguments: [String]
 
+  /// Initialize with command line arguments.
   public init(arguments: [String] = CommandLine.arguments) {
     self.arguments = arguments
   }
@@ -40,7 +41,9 @@ public struct CommandLineParser {
   /// Parse the command name from command line arguments
   public func parseCommandName() -> String? {
     // Skip the executable name (first argument)
-    guard arguments.count > 1 else { return nil }
+    guard arguments.count > 1 else {
+      return nil
+    }
     let commandCandidate = arguments[1]
 
     // If it starts with '--', it's not a command but a global option
@@ -53,7 +56,9 @@ public struct CommandLineParser {
 
   /// Get all arguments after the command name for command-specific parsing
   public func commandArguments() -> [String] {
-    guard arguments.count > 1 else { return [] }
+    guard arguments.count > 1 else {
+      return []
+    }
     let commandName = arguments[1]
 
     // If first argument is an option, return all arguments for global parsing

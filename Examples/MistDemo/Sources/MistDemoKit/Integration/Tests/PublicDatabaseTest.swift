@@ -30,19 +30,11 @@
 import Foundation
 import MistKit
 
-struct PublicDatabaseTest: PhasedIntegrationTest {
-  let name = "Public Database"
-  let database: MistKit.Database
+internal struct PublicDatabaseTest: PhasedIntegrationTest {
+  internal let name = "Public Database"
+  internal let database: MistKit.Database
 
-  init(database: MistKit.Database = .public) {
-    precondition(
-      database == .public,
-      "PublicDatabaseTest only supports the public database"
-    )
-    self.database = database
-  }
-
-  let phases: [any IntegrationPhase] = [
+  internal let phases: [any IntegrationPhase] = [
     LookupZonePhase(),
     UploadAssetPhase(),
     CreateRecordsPhase(),
@@ -52,4 +44,12 @@ struct PublicDatabaseTest: PhasedIntegrationTest {
     FinalVerificationPhase(),
     CleanupPhase(),
   ]
+
+  internal init(database: MistKit.Database = .public) {
+    precondition(
+      database == .public,
+      "PublicDatabaseTest only supports the public database"
+    )
+    self.database = database
+  }
 }
