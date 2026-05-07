@@ -36,10 +36,6 @@ import OpenAPIRuntime
 internal struct AuthenticationMiddleware: ClientMiddleware {
   internal let tokenManager: any TokenManager
 
-  internal init(tokenManager: any TokenManager) {
-    self.tokenManager = tokenManager
-  }
-
   internal func intercept(
     _ request: HTTPRequest,
     body: HTTPBody?,

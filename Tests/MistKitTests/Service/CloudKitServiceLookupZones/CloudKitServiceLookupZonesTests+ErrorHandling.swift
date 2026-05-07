@@ -41,7 +41,8 @@ extension CloudKitServiceTests.LookupZones {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceTests.makeService(provider: ResponseProvider.connectionLost())
+      let service = try CloudKitServiceTests.makeService(
+        provider: ResponseProvider.connectionLost())
       let zone = ZoneID(zoneName: "_defaultZone", ownerName: nil)
 
       await #expect {
