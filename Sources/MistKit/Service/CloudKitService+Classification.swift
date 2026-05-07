@@ -49,25 +49,29 @@ extension CloudKitService {
   ///
   /// Used as the first step of the pre-fetch + classify pattern for tracking
   /// creates vs updates in batch modify operations. Internally this calls
-  /// `queryRecords(recordType:)` and projects the results down to a
+  /// `queryRecords(recordType:limit:)` and projects the results down to a
   /// `Set<String>` of record names.
   ///
-  /// - Important: This issues a single `queryRecords` call with the maximum
-  ///   per-request limit of 200 records. For record types with more than 200
-  ///   records, paginate at the call site or use a custom query.
+  /// - Important: This issues a single `queryRecords` call. CloudKit caps a
+  ///   single response at 200 records, so for larger record types you must
+  ///   paginate at the call site or use a custom query.
   ///
-  /// - Parameter recordType: The CloudKit record type to scan.
+  /// - Parameters:
+  ///   - recordType: The CloudKit record type to scan.
+  ///   - limit: Optional maximum number of records to fetch (1-200). Defaults
+  ///     to CloudKit's per-request maximum.
   /// - Returns: Set of existing record names.
   /// - Throws: `CloudKitError` if the underlying query fails.
   public func fetchExistingRecordNames(
-    recordType: String
+    recordType: String,
+    limit: Int? = nil
   ) async throws(CloudKitError) -> Set<String> {
-    // Pass `limit: 200` explicitly so overload resolution picks the
-    // typed-throws variant of `queryRecords` rather than the 1-param
-    // RecordManaging-conforming overload (which has untyped throws).
+    // Pass `limit:` explicitly so overload resolution picks the typed-throws
+    // variant of `queryRecords` rather than the 1-param RecordManaging-
+    // conforming overload (which has untyped throws).
     let records = try await queryRecords(
       recordType: recordType,
-      limit: 200
+      limit: limit ?? Self.maxRecordsPerRequest
     )
     return Set(records.map(\.recordName))
   }

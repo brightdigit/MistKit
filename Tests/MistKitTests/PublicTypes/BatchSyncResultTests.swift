@@ -48,16 +48,12 @@ internal struct BatchSyncResultTests {
     )
   }
 
-  /// CloudKit error responses are surfaced as RecordInfo with recordType
-  /// "Unknown"; the public init does not allow forging that, so use the
-  /// minimum of one error record by setting recordType to "Unknown".
-  internal static func makeErrorRecord(name: String = "Unknown") -> RecordInfo {
-    RecordInfo(
-      recordName: name,
-      recordType: "Unknown",
-      recordChangeTag: nil,
-      fields: [:]
-    )
+  /// Builds an error `RecordInfo` via the same response-decoding path used in
+  /// production (`RecordInfo.init(from:)` with an empty `RecordResponse`),
+  /// rather than hardcoding the "Unknown" sentinel string in the test.
+  /// This matches the pattern in `RecordInfoTests.recordInfoWithUnknownRecord`.
+  internal static func makeErrorRecord() -> RecordInfo {
+    RecordInfo(from: Components.Schemas.RecordResponse())
   }
 
   // MARK: - Tests
@@ -110,15 +106,18 @@ internal struct BatchSyncResultTests {
 
   @Test("treats error records as failures regardless of classification")
   internal func treatsErrorRecordsAsFailures() {
-    // Even if the recordName matches the creates set, the error sentinel
-    // (recordType == "Unknown") routes the record to the failed bucket.
+    // Build a classification that *would* claim the error record as a create
+    // by reading its actual recordName, then verify the failure check wins.
+    let errorRecord = Self.makeErrorRecord()
     let classification = OperationClassification(
-      creates: ["Unknown"],
+      creates: [errorRecord.recordName],
       updates: []
     )
-    let records: [RecordInfo] = [Self.makeErrorRecord()]
 
-    let result = BatchSyncResult(records: records, classification: classification)
+    let result = BatchSyncResult(
+      records: [errorRecord],
+      classification: classification
+    )
 
     #expect(result.failedCount == 1)
     #expect(result.createdCount == 0)

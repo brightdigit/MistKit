@@ -41,6 +41,9 @@ import OpenAPIRuntime
 /// Service for interacting with CloudKit Web Services
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct CloudKitService: Sendable {
+  /// CloudKit's maximum number of records returned per query/modify request.
+  internal static let maxRecordsPerRequest: Int = 200
+
   /// The CloudKit container identifier
   public let containerIdentifier: String
   /// The API token for authentication
