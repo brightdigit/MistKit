@@ -49,6 +49,10 @@ internal struct RecordOperationConversionTests {
   internal func operationTypeConvertsSuccessfully(
     operationType: RecordOperation.OperationType
   ) throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("RecordOperation conversion is not available on this operating system.")
+      return
+    }
     let operation = RecordOperation(
       operationType: operationType,
       recordType: "TestRecord",
@@ -63,6 +67,10 @@ internal struct RecordOperationConversionTests {
 
   @Test("Conversion preserves record fields")
   internal func conversionPreservesFields() throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("RecordOperation conversion is not available on this operating system.")
+      return
+    }
     let operation = RecordOperation(
       operationType: .create,
       recordType: "TestRecord",
@@ -79,6 +87,10 @@ internal struct RecordOperationConversionTests {
 
   @Test("Conversion preserves recordChangeTag")
   internal func conversionPreservesChangeTag() throws {
+    guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      Issue.record("RecordOperation conversion is not available on this operating system.")
+      return
+    }
     let operation = RecordOperation(
       operationType: .update,
       recordType: "TestRecord",
