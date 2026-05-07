@@ -17,8 +17,8 @@ internal struct TokenManagerProtocolTests {
     let isValid = try await mockManager.validateCredentials()
     #expect(isValid == true)
 
-    let credentials = try await mockManager.getCurrentCredentials()
-    #expect(credentials != nil)
+    let authenticator = try await mockManager.currentAuthenticator()
+    #expect(authenticator != nil)
 
     // Test computed properties
     let hasCredentials = await mockManager.hasCredentials
@@ -27,23 +27,19 @@ internal struct TokenManagerProtocolTests {
 
   // MARK: - Sendable Compliance Tests
 
-  /// Tests that all types are Sendable and can be used across async boundaries
+  /// Tests that authenticators and errors are Sendable across async boundaries.
   @Test("TokenManager sendable compliance")
-  internal func sendableCompliance() async {
-    let method = AuthenticationMethod.apiToken("test")
-    let credentials = TokenCredentials(method: method)
+  internal func sendableCompliance() async throws {
+    let authenticator = try APITokenAuthenticator(token: TestConstants.apiToken)
     let error = TokenManagerError.tokenExpired
 
-    // Test concurrent access patterns
-    async let task1 = credentials.processCredentials()
-    async let task2 = method.processMethod()
-    async let task3 = error.processError()
+    async let task1: String = {
+      type(of: authenticator).storageKey
+    }()
+    async let task2 = error.processError()
 
-    let results = await (task1, task2, task3)
-    #expect(results.0 == "api-token")
-    #expect(results.1 == "api-token")
-    #expect(results.2.isEmpty == false)
+    let results = await (task1, task2)
+    #expect(results.0 == APITokenAuthenticator.storageKey)
+    #expect(results.1.isEmpty == false)
   }
 }
-
-// MARK: - Mock TokenManager Implementation

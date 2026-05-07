@@ -157,32 +157,25 @@ extension APITokenManagerTests {
       }
     }
 
-    /// Tests getCurrentCredentials with valid token
-    @Test("getCurrentCredentials with valid token")
-    internal func getCurrentCredentialsValidToken() async throws {
+    /// Tests currentAuthenticator with valid token
+    @Test("currentAuthenticator with valid token")
+    internal func currentAuthenticatorValidToken() async throws {
       let validToken = TestConstants.apiToken
       let manager = APITokenManager(apiToken: validToken)
 
-      let credentials = try await manager.getCurrentCredentials()
-      #expect(credentials != nil)
-
-      if let credentials = credentials {
-        if case .apiToken(let token) = credentials.method {
-          #expect(token == validToken)
-        } else {
-          Issue.record("Expected .apiToken method")
-        }
-      }
+      let authenticator = try await manager.currentAuthenticator()
+      let api = try #require(authenticator as? APITokenAuthenticator)
+      #expect(api.token == validToken)
     }
 
-    /// Tests getCurrentCredentials with invalid token
-    @Test("getCurrentCredentials with invalid token")
-    internal func getCurrentCredentialsInvalidToken() async throws {
+    /// Tests currentAuthenticator with invalid token
+    @Test("currentAuthenticator with invalid token")
+    internal func currentAuthenticatorInvalidToken() async throws {
       let invalidToken = "invalid_token_format"
       let manager = APITokenManager(apiToken: invalidToken)
 
       do {
-        _ = try await manager.getCurrentCredentials()
+        _ = try await manager.currentAuthenticator()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
       } catch {
         switch error {

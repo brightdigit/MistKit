@@ -44,18 +44,11 @@ extension ServerToServerAuthManagerTests {
       // Verify manager properties
       #expect(manager.keyID == keyID)
 
-      // Test that we can get credentials
-      let credentials = try await manager.getCurrentCredentials()
-      #expect(credentials != nil)
-
-      if let credentials = credentials {
-        if case .serverToServer(let storedKeyID, let storedPrivateKey) = credentials.method {
-          #expect(storedKeyID == keyID)
-          #expect(storedPrivateKey == manager.privateKeyData)
-        } else {
-          Issue.record("Expected .serverToServer method")
-        }
-      }
+      // Test that we can get the authenticator
+      let authenticator = try await manager.currentAuthenticator()
+      let s2s = try #require(authenticator as? ServerToServerAuthenticator)
+      #expect(s2s.keyID == keyID)
+      #expect(s2s.privateKey.rawRepresentation == manager.privateKeyData)
     }
 
     /// Tests ServerToServerAuthManager initialization with private key data
@@ -76,18 +69,10 @@ extension ServerToServerAuthManagerTests {
       // Verify manager properties
       #expect(manager.keyID == keyID)
 
-      // Test that we can get credentials
-      let credentials = try await manager.getCurrentCredentials()
-      #expect(credentials != nil)
-
-      if let credentials = credentials {
-        if case .serverToServer(let storedKeyID, let storedPrivateKey) = credentials.method {
-          #expect(storedKeyID == keyID)
-          #expect(storedPrivateKey == privateKeyData)
-        } else {
-          Issue.record("Expected .serverToServer method")
-        }
-      }
+      let authenticator = try await manager.currentAuthenticator()
+      let s2s = try #require(authenticator as? ServerToServerAuthenticator)
+      #expect(s2s.keyID == keyID)
+      #expect(s2s.privateKey.rawRepresentation == privateKeyData)
     }
 
     /// Tests ServerToServerAuthManager initialization with PEM string
@@ -108,17 +93,9 @@ extension ServerToServerAuthManagerTests {
       // Verify manager properties
       #expect(manager.keyID == keyID)
 
-      // Test that we can get credentials
-      let credentials = try await manager.getCurrentCredentials()
-      #expect(credentials != nil)
-
-      if let credentials = credentials {
-        if case .serverToServer(let storedKeyID, _) = credentials.method {
-          #expect(storedKeyID == keyID)
-        } else {
-          Issue.record("Expected .serverToServer method")
-        }
-      }
+      let authenticator = try await manager.currentAuthenticator()
+      let s2s = try #require(authenticator as? ServerToServerAuthenticator)
+      #expect(s2s.keyID == keyID)
     }
 
     /// Tests ServerToServerAuthManager initialization with storage

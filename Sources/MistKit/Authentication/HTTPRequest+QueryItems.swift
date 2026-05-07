@@ -1,5 +1,5 @@
 //
-//  InternalErrorReason.swift
+//  HTTPRequest+QueryItems.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,24 +27,31 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
+internal import HTTPTypes
 
-/// Specific reasons for internal errors
-public enum InternalErrorReason: Sendable {
-  case noCredentialsAvailable
-  case serverToServerRequiresPlatformSupport
-  case tokenRefreshFailed(any Error)
+extension HTTPRequest {
+  /// Appends the given query items to this request's path, preserving any
+  /// existing query string.
+  internal mutating func appendQueryItems(_ items: [URLQueryItem]) {
+    let pathString = path ?? ""
+    let parts = pathString.split(separator: "?", maxSplits: 1)
+    let cleanPath = String(parts.first ?? "")
 
-  /// A human-readable description of the internal error reason
-  public var description: String {
-    switch self {
-    case .noCredentialsAvailable:
-      return "No credentials available"
-    case .serverToServerRequiresPlatformSupport:
-      return
-        "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
-    case .tokenRefreshFailed(let error):
-      return "Token refresh failed: \(error.localizedDescription)"
+    var components = URLComponents()
+    components.path = cleanPath
+    if parts.count > 1, let existing = URLComponents(string: "?" + String(parts[1])) {
+      components.queryItems = existing.queryItems ?? []
+    }
+
+    var queryItems = components.queryItems ?? []
+    queryItems.append(contentsOf: items)
+    components.queryItems = queryItems
+
+    if let query = components.query {
+      path = components.path + "?" + query
+    } else {
+      path = components.path
     }
   }
 }

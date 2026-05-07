@@ -44,12 +44,12 @@ internal final class MockTokenManagerWithRefreshFailure: TokenManager {
     return true
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     let count = await counter.increment()
     // Fail on odd calls
     if count % 2 == 1 {
       throw TokenManagerError.authenticationFailed(underlying: nil)
     }
-    return TokenCredentials.apiToken("refreshed-token")
+    return try APITokenAuthenticator(token: TestConstants.apiToken)
   }
 }

@@ -94,7 +94,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.8.0"),
     .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.2.0"),
     // Crypto library for cross-platform cryptographic operations
-    .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
+    .package(url: "https://github.com/apple/swift-crypto.git", from: "4.0.0"),
     // Logging library for cross-platform logging
     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
   ],

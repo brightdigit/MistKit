@@ -42,7 +42,7 @@ internal final class MockTokenManagerWithRecovery: TokenManager {
     return true
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     let count = await counter.increment()
     if count == 1 {
       throw TokenManagerError.networkError(
@@ -55,6 +55,6 @@ internal final class MockTokenManagerWithRecovery: TokenManager {
         )
       )
     }
-    return TokenCredentials.apiToken("recovered-token")
+    return try APITokenAuthenticator(token: TestConstants.apiToken)
   }
 }

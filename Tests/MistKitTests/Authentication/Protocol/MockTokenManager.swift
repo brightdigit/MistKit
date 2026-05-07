@@ -17,7 +17,7 @@ internal final class MockTokenManager: TokenManager {
     true
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
-    TokenCredentials.apiToken("mock-token")
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
+    try APITokenAuthenticator(token: TestConstants.apiToken)
   }
 }

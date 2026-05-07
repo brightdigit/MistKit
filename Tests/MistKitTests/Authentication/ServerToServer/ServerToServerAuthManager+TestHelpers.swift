@@ -15,11 +15,11 @@ extension ServerToServerAuthManager {
     }
   }
 
-  /// Test helper to get credentials and return them or nil
+  /// Test helper to get the current authenticator or nil on failure.
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal func getCredentialsFromManager() async -> TokenCredentials? {
+  internal func authenticatorFromManager() async -> (any Authenticator)? {
     do {
-      return try await getCurrentCredentials()
+      return try await currentAuthenticator()
     } catch {
       return nil
     }

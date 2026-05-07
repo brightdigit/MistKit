@@ -32,57 +32,42 @@ public import Foundation
 // MARK: - Convenience Methods
 
 extension InMemoryTokenStorage {
-  /// Stores credentials with automatic identifier based on authentication method
-  /// - Parameter credentials: The credentials to store
-  /// - Throws: TokenStorageError if the storage operation fails
-  public func store(_ credentials: TokenCredentials) async throws {
-    let identifier: String
-
-    switch credentials.method {
-    case .apiToken(let token):
-      identifier = "api-\(token.prefix(8))"
-    case .webAuthToken(let apiToken, _):
-      identifier = "web-\(apiToken.prefix(8))"
-    case .serverToServer(let keyID, _):
-      identifier = "s2s-\(keyID)"
-    }
-
-    try await store(credentials, identifier: identifier)
+  /// Stores an authenticator under its `defaultStorageIdentifier`.
+  /// - Parameter authenticator: The authenticator to persist.
+  /// - Throws: `TokenStorageError` if the storage operation fails.
+  public func store(_ authenticator: any Authenticator) async throws {
+    try await store(authenticator, identifier: authenticator.defaultStorageIdentifier)
   }
 
-  /// Retrieves credentials by authentication method type
-  /// - Parameter methodType: The authentication method type to search for
-  /// - Returns: First matching credentials or nil if not found
-  /// - Throws: TokenStorageError if the retrieval operation fails
-  public func retrieve(byMethodType methodType: String) async throws(TokenStorageError)
-    -> TokenCredentials?
+  /// Retrieves the first stored authenticator with the given storage key.
+  /// - Parameter storageKey: The storage key (`Authenticator.storageKey`) to
+  ///   look up — e.g. `APITokenAuthenticator.storageKey`.
+  /// - Returns: The first matching authenticator, or `nil` if none found.
+  /// - Throws: `TokenStorageError` if retrieval fails.
+  public func retrieve(byStorageKey storageKey: String) async throws(TokenStorageError)
+    -> (any Authenticator)?
   {
     let identifiers = try await listIdentifiers()
-
     for identifier in identifiers {
-      if let credentials = try await retrieve(identifier: identifier),
-        credentials.methodType == methodType
+      if let authenticator = try await retrieve(identifier: identifier),
+        type(of: authenticator).storageKey == storageKey
       {
-        return credentials
+        return authenticator
       }
     }
-
     return nil
   }
 
-  /// Lists all credentials grouped by method type
-  /// - Returns: Dictionary mapping method types to arrays of credentials
-  public func credentialsByMethodType() async throws -> [String: [TokenCredentials]] {
-    var result: [String: [TokenCredentials]] = [:]
+  /// Lists all stored authenticators grouped by their storage key.
+  public func authenticatorsByStorageKey() async throws -> [String: [any Authenticator]] {
+    var result: [String: [any Authenticator]] = [:]
     let identifiers = try await listIdentifiers()
-
     for identifier in identifiers {
-      if let credentials = try await retrieve(identifier: identifier) {
-        let methodType = credentials.methodType
-        result[methodType, default: []].append(credentials)
+      if let authenticator = try await retrieve(identifier: identifier) {
+        let key = type(of: authenticator).storageKey
+        result[key, default: []].append(authenticator)
       }
     }
-
     return result
   }
 }

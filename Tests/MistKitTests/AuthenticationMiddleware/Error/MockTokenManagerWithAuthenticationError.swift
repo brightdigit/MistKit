@@ -17,7 +17,7 @@ internal final class MockTokenManagerWithAuthenticationError: TokenManager {
     throw TokenManagerError.authenticationFailed(underlying: nil)
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     throw TokenManagerError.authenticationFailed(underlying: nil)
   }
 }
