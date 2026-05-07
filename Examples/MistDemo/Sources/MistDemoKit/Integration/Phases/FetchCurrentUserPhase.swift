@@ -30,15 +30,17 @@
 import Foundation
 import MistKit
 
-struct FetchCurrentUserPhase: IntegrationPhase {
-  typealias Input = NoState
-  typealias Output = UserInfo
+internal struct FetchCurrentUserPhase: IntegrationPhase {
+  internal typealias Input = NoState
+  internal typealias Output = UserInfo
 
-  static let title = "Fetch current user"
-  static let emoji = "👤"
-  static let apiName = "fetchCurrentUser"
+  internal static let title = "Fetch current user"
+  internal static let emoji = "👤"
+  internal static let apiName = "fetchCurrentUser"
 
-  func run(input: NoState, context: PhaseContext) async throws -> UserInfo {
+  internal func run(
+    input: NoState, context: PhaseContext
+  ) async throws -> UserInfo {
     print("\n\(Self.emoji) \(Self.title)")
 
     let userInfo = try await context.service.fetchCurrentUser()

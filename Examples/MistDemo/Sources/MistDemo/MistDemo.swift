@@ -30,9 +30,9 @@
 import MistDemoKit
 
 @main
-struct MistDemo {
+internal enum MistDemo {
   @MainActor
-  static func main() async throws {
+  internal static func main() async throws {
     try await MistDemoRunner.run()
   }
 }

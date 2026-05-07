@@ -29,17 +29,17 @@
 
 import Foundation
 
-/// Dynamic coding key for handling arbitrary JSON object keys
-struct DynamicKey: CodingKey {
-  var stringValue: String
-  var intValue: Int?
+/// Dynamic coding key for handling arbitrary JSON object keys.
+internal struct DynamicKey: CodingKey {
+  internal var stringValue: String
+  internal var intValue: Int?
 
-  init?(stringValue: String) {
+  internal init?(stringValue: String) {
     self.stringValue = stringValue
     self.intValue = nil
   }
 
-  init?(intValue: Int) {
+  internal init?(intValue: Int) {
     self.stringValue = String(intValue)
     self.intValue = intValue
   }

@@ -33,6 +33,7 @@ import Foundation
 public struct FieldsInput: Codable, Sendable {
   private let storage: [String: FieldInputValue]
 
+  /// Decode fields from a keyed JSON container.
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: DynamicKey.self)
     var fields: [String: FieldInputValue] = [:]
@@ -56,23 +57,35 @@ public struct FieldsInput: Codable, Sendable {
     self.storage = fields
   }
 
+  /// Encode fields to a keyed JSON container.
   public func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: DynamicKey.self)
 
     for (key, value) in storage {
-      let dynamicKey = DynamicKey(stringValue: key)!
-      switch value {
-      case .string(let stringValue):
-        try container.encode(stringValue, forKey: dynamicKey)
-      case .int(let intValue):
-        try container.encode(intValue, forKey: dynamicKey)
-      case .double(let doubleValue):
-        try container.encode(doubleValue, forKey: dynamicKey)
-      case .bool(let boolValue):
-        try container.encode(boolValue, forKey: dynamicKey)
-      case .asset(let url):
-        try container.encode(url, forKey: dynamicKey)
+      guard let dynamicKey = DynamicKey(stringValue: key) else {
+        continue
       }
+      try encodeValue(value, forKey: dynamicKey, in: &container)
+    }
+  }
+
+  /// Encode a single field value into the given container.
+  private func encodeValue(
+    _ value: FieldInputValue,
+    forKey key: DynamicKey,
+    in container: inout KeyedEncodingContainer<DynamicKey>
+  ) throws {
+    switch value {
+    case .string(let stringValue):
+      try container.encode(stringValue, forKey: key)
+    case .int(let intValue):
+      try container.encode(intValue, forKey: key)
+    case .double(let doubleValue):
+      try container.encode(doubleValue, forKey: key)
+    case .bool(let boolValue):
+      try container.encode(boolValue, forKey: key)
+    case .asset(let url):
+      try container.encode(url, forKey: key)
     }
   }
 

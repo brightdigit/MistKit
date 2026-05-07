@@ -29,8 +29,8 @@
 
 import Foundation
 
-/// Errors that can occur during authentication setup
-enum AuthenticationError: LocalizedError, Sendable {
+/// Errors that can occur during authentication setup.
+internal enum AuthenticationError: LocalizedError, Sendable {
   case serverToServerRequiresPublicDatabase
   case failedToReadPrivateKeyFile(path: String, errorDescription: String)
   case missingPrivateKey
@@ -43,7 +43,7 @@ enum AuthenticationError: LocalizedError, Sendable {
 
   // MARK: Internal
 
-  var errorDescription: String? {
+  internal var errorDescription: String? {
     switch self {
     case .serverToServerRequiresPublicDatabase:
       "Server-to-server authentication only supports public database access"
@@ -56,7 +56,8 @@ enum AuthenticationError: LocalizedError, Sendable {
     case .invalidServerToServerCredentials:
       "Server-to-server credentials validation failed. Check your key ID and private key."
     case .privateRequiresWebAuth:
-      "Private database access requires web authentication token. Use 'mistdemo auth' to sign in with Apple ID or provide --web-auth-token"
+      "Private database access requires web authentication token."
+        + " Use 'mistdemo auth' to sign in with Apple ID or provide --web-auth-token"
     case .invalidWebAuthCredentials:
       "Web authentication credentials validation failed. Token may be expired."
     case .invalidAPIToken:

@@ -32,85 +32,42 @@ import MistKit
 
 /// Command to create a new record in CloudKit
 public struct CreateCommand: MistDemoCommand, OutputFormatting {
+  /// The configuration type.
   public typealias Config = CreateConfig
+  /// The command name.
   public static let commandName = "create"
+  /// The command abstract.
   public static let abstract = "Create a new record in CloudKit"
+  /// The command help text.
   public static let helpText = """
     CREATE - Create a new record in CloudKit
 
     USAGE:
-        mistdemo create [options]
-
-    REQUIRED:
-        --api-token <token>            CloudKit API token
-        --web-auth-token <token>       Web authentication token
+      mistdemo create [options]
 
     OPTIONS:
-        --record-type <type>           Record type to create (default: Note)
-        --zone <zone>                  Zone name (default: _defaultZone)
-        --record-name <name>           Custom record name (auto-generated if omitted)
-        --database <type>              Database to target: public, private, shared (default: public)
-        --output-format <format>       Output format: json, table, csv, yaml
+      --record-type <type>         Record type (default: Note)
+      --record-name <name>         Custom record name
+      --output-format <format>     Output format
 
-    FIELD DEFINITION (choose one method):
-        --field <name:type:value>      Inline field definition
-        --json-file <file>             Load fields from JSON file
-        --stdin                        Read fields from stdin as JSON
-
-    FIELD FORMAT:
-        Format: name:type:value
-        Multiple fields: separate with commas
-
-    FIELD TYPES:
-        string      Text values
-        int64       Integer numbers
-        double      Decimal numbers
-        timestamp   Dates (ISO 8601 or Unix timestamp)
-        asset       Asset URL (from upload-asset command)
+    FIELD DEFINITION:
+      --field <name:type:value>    Inline field definition
+      --json-file <file>           Load fields from JSON
+      --stdin                      Read fields from stdin
 
     EXAMPLES:
-
-      1. Single field:
-         mistdemo create --field "title:string:My Note"
-
-      2. Multiple fields (comma-separated):
-         mistdemo create --field "title:string:My Note, priority:int64:5"
-
-      3. With timestamp:
-         mistdemo create --field "title:string:Task, due:timestamp:2026-02-01T09:00:00Z"
-
-      4. From JSON file:
-         mistdemo create --json-file fields.json
-
-         Example fields.json:
-         {
-           "title": "Project Plan",
-           "priority": 8,
-           "progress": 0.35
-         }
-
-      5. From stdin:
-         echo '{"title":"Quick Note"}' | mistdemo create --stdin
-
-      6. Table output format:
-         mistdemo create --field "title:string:Test" --output-format table
-
-      7. With asset (after upload-asset):
-         mistdemo create --field "title:string:My Photo, image:asset:https://cws.icloud-content.com:443/..."
-
-    NOTES:
-      • Record name is auto-generated if not provided
-      • JSON files auto-detect field types from values
-      • Use environment variables CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN
-        to avoid repeating tokens
+      mistdemo create --field "title:string:My Note"
+      mistdemo create --json-file fields.json
     """
 
   private let config: CreateConfig
 
+  /// Creates a new instance.
   public init(config: CreateConfig) {
     self.config = config
   }
 
+  /// Executes the command.
   public func execute() async throws {
     do {
       // Create CloudKit client
@@ -141,9 +98,9 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
   /// Generate a unique record name
   private func generateRecordName() -> String {
     let timestamp = Int(Date().timeIntervalSince1970)
-    let randomSuffix = String(
-      Int.random(
-        in: MistDemoConstants.Limits.randomSuffixMin...MistDemoConstants.Limits.randomSuffixMax))
+    let minSuffix = MistDemoConstants.Limits.randomSuffixMin
+    let maxSuffix = MistDemoConstants.Limits.randomSuffixMax
+    let randomSuffix = String(Int.random(in: minSuffix...maxSuffix))
     return "\(config.recordType.lowercased())-\(timestamp)-\(randomSuffix)"
   }
 }

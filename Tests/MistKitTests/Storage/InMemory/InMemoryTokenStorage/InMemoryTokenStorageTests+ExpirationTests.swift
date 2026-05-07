@@ -5,12 +5,12 @@ import Testing
 
 extension InMemoryTokenStorageTests {
   /// Expiration handling tests for InMemoryTokenStorage
-  @Suite("Expiration Tests")
+  @Suite("Expiration")
   internal struct ExpirationTests {
     // MARK: - Test Data Setup
 
     private static let testAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      TestConstants.apiToken
 
     // MARK: - Token Expiration Tests
 

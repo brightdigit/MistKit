@@ -34,13 +34,15 @@ public enum CurrentUserError: Error, LocalizedError {
   case operationFailed(String)
   case authenticationRequired
 
+  /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .operationFailed(let message):
       return "Current user operation failed: \(message)"
     case .authenticationRequired:
       return
-        "Authentication is required for current-user command. Use auth-token command first or provide --web-auth-token."
+        "Authentication is required for current-user command."
+        + " Use auth-token command first or provide --web-auth-token."
     }
   }
 }

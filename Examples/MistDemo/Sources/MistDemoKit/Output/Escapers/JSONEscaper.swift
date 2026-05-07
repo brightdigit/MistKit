@@ -31,8 +31,10 @@ import Foundation
 
 /// JSON escaper (usually handled by JSONEncoder, but useful for manual JSON building)
 public struct JSONEscaper: OutputEscaper {
+  /// Creates a new instance.
   public init() {}
 
+  /// Escapes the string for JSON output.
   public func escape(_ string: String) -> String {
     let escaped =
       string

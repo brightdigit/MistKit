@@ -33,9 +33,9 @@ import Testing
 @testable import MistDemoKit
 
 @Suite("LookupConfig Tests")
-struct LookupConfigTests {
+internal struct LookupConfigTests {
   @Test("LookupConfig initializes with a single record name")
-  func singleRecordName() async throws {
+  internal func singleRecordName() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"])
 
@@ -45,7 +45,7 @@ struct LookupConfigTests {
   }
 
   @Test("LookupConfig initializes with multiple record names")
-  func multipleRecordNames() async throws {
+  internal func multipleRecordNames() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = LookupConfig(base: baseConfig, recordNames: ["a", "b", "c"])
 
@@ -53,7 +53,7 @@ struct LookupConfigTests {
   }
 
   @Test("LookupConfig initializes with explicit fields filter")
-  func explicitFields() async throws {
+  internal func explicitFields() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = LookupConfig(
       base: baseConfig,
@@ -65,7 +65,7 @@ struct LookupConfigTests {
   }
 
   @Test("LookupConfig fields is nil when not provided")
-  func fieldsDefaultNil() async throws {
+  internal func fieldsDefaultNil() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"])
 
@@ -74,7 +74,7 @@ struct LookupConfigTests {
 
   @Test(
     "LookupConfig output formats round-trip", arguments: [OutputFormat.json, .table, .csv, .yaml])
-  func outputFormats(format: OutputFormat) async throws {
+  internal func outputFormats(format: OutputFormat) async throws {
     let baseConfig = try await MistDemoConfig()
     let config = LookupConfig(base: baseConfig, recordNames: ["rec-1"], output: format)
 
@@ -82,7 +82,7 @@ struct LookupConfigTests {
   }
 
   @Test("LookupConfig preserves order of record names")
-  func preservesOrder() async throws {
+  internal func preservesOrder() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = LookupConfig(base: baseConfig, recordNames: ["z", "a", "m"])
 
@@ -90,7 +90,7 @@ struct LookupConfigTests {
   }
 
   @Test("LookupConfig handles many record names")
-  func manyRecordNames() async throws {
+  internal func manyRecordNames() async throws {
     let baseConfig = try await MistDemoConfig()
     let names = (0..<50).map { "rec-\($0)" }
     let config = LookupConfig(base: baseConfig, recordNames: names)
@@ -98,26 +98,5 @@ struct LookupConfigTests {
     #expect(config.recordNames.count == 50)
     #expect(config.recordNames.first == "rec-0")
     #expect(config.recordNames.last == "rec-49")
-  }
-}
-
-@Suite("LookupError Tests")
-struct LookupErrorTests {
-  @Test("recordNamesRequired has a description")
-  func recordNamesRequiredDescription() {
-    let error = LookupError.recordNamesRequired
-    #expect(error.errorDescription != nil)
-  }
-
-  @Test("recordNamesRequired suggests using --record-names")
-  func recordNamesRequiredSuggestion() {
-    let error = LookupError.recordNamesRequired
-    #expect(error.recoverySuggestion?.contains("record-names") == true)
-  }
-
-  @Test("operationFailed wraps the underlying reason")
-  func operationFailedWrapsReason() {
-    let error = LookupError.operationFailed("some failure")
-    #expect(error.errorDescription?.contains("some failure") == true)
   }
 }

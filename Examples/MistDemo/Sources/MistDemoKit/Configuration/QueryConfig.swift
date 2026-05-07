@@ -31,22 +31,35 @@ public import ConfigKeyKit
 import Foundation
 public import MistKit
 
-/// Configuration for query command
+/// Configuration for query command.
 public struct QueryConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = MistDemoConfig
 
+  /// The base MistDemo configuration.
   public let base: MistDemoConfig
+  /// The CloudKit zone name.
   public let zone: String
+  /// The CloudKit record type.
   public let recordType: String
+  /// The filter expressions.
   public let filters: [String]
+  /// The optional sort field and order.
   public let sort: (field: String, order: SortOrder)?
+  /// The maximum number of records to return.
   public let limit: Int
+  /// The result offset for pagination.
   public let offset: Int
+  /// The optional field names to include in the response.
   public let fields: [String]?
+  /// The optional continuation marker for pagination.
   public let continuationMarker: String?
+  /// The output format.
   public let output: OutputFormat
 
+  /// Creates a new instance.
   public init(
     base: MistDemoConfig,
     zone: String = "_defaultZone",
@@ -71,95 +84,35 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
     self.output = output
   }
 
-  /// Parse configuration from command line arguments
-  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: MistDemoConfig?
+  ) async throws {
     let configReader = configuration
     let baseConfig: MistDemoConfig
     if let base = base {
       baseConfig = base
     } else {
-      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+      baseConfig = try await MistDemoConfig(
+        configuration: configuration,
+        base: nil
+      )
     }
 
-    // Parse query-specific options
-    let zone =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone)
-      ?? MistDemoConstants.Defaults.zone
-    let recordType =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.recordType,
-        default: MistDemoConstants.Defaults.recordType) ?? MistDemoConstants.Defaults.recordType
-
-    // Parse filters — multiple filters are separated by "|" so that commas
-    // remain available as value separators in IN/NOT_IN filter expressions.
-    // e.g. --filter "index:in:1,2,3|title:eq:Hello"
-    let filters = configReader.filterStrings(forKey: MistDemoConstants.ConfigKeys.filter)
-
-    // Parse sort option
-    let sortString = configReader.string(forKey: MistDemoConstants.ConfigKeys.sort)
-    let sort = try Self.parseSortOption(sortString)
-
-    // Parse limits and pagination
-    let limit =
-      configReader.int(
-        forKey: MistDemoConstants.ConfigKeys.limit, default: MistDemoConstants.Defaults.queryLimit)
-      ?? MistDemoConstants.Defaults.queryLimit
-    guard
-      limit >= MistDemoConstants.Limits.minQueryLimit
-        && limit <= MistDemoConstants.Limits.maxQueryLimit
-    else {
-      throw QueryError.invalidLimit(limit)
-    }
-
-    let offset = configReader.int(forKey: "offset", default: 0) ?? 0
-
-    // Parse fields filter
-    let fieldsString = configReader.string(forKey: MistDemoConstants.ConfigKeys.fields)
-    let fields = fieldsString?.split(separator: ",").map {
-      String($0).trimmingCharacters(in: .whitespaces)
-    }
-
-    // Parse continuation marker
-    let continuationMarker = configReader.string(forKey: "continuation.marker")
-
-    // Parse output format
-    let outputString =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
-    let output = OutputFormat(rawValue: outputString) ?? .json
+    let parsed = try Self.parseAllOptions(configReader)
 
     self.init(
       base: baseConfig,
-      zone: zone,
-      recordType: recordType,
-      filters: filters,
-      sort: sort,
-      limit: limit,
-      offset: offset,
-      fields: Array(fields ?? []),
-      continuationMarker: continuationMarker,
-      output: output
+      zone: parsed.zone,
+      recordType: parsed.recordType,
+      filters: parsed.filters,
+      sort: parsed.sort,
+      limit: parsed.pagination.limit,
+      offset: parsed.pagination.offset,
+      fields: parsed.pagination.fields,
+      continuationMarker: parsed.pagination.continuationMarker,
+      output: parsed.pagination.output
     )
-  }
-
-  private static func parseSortOption(_ sortString: String?) throws -> (
-    field: String, order: SortOrder
-  )? {
-    guard let sortString = sortString, !sortString.isEmpty else { return nil }
-
-    let components = sortString.split(separator: ":", maxSplits: 1)
-    guard components.count >= 1 else { return nil }
-
-    let field = String(components[0]).trimmingCharacters(in: .whitespaces)
-    let orderString =
-      components.count > 1 ? String(components[1]).trimmingCharacters(in: .whitespaces) : "asc"
-
-    guard let order = SortOrder(rawValue: orderString.lowercased()) else {
-      throw QueryError.invalidSortOrder(orderString, available: SortOrder.allCases.map(\.rawValue))
-    }
-
-    return (field: field, order: order)
   }
 }

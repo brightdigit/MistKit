@@ -33,14 +33,14 @@
 
   /// Sheet form for creating or editing a Note. The same view backs both flows;
   /// the `mode` value drives the title and which service method is called on save.
-  struct NoteEditView: View {
-    enum Mode {
+  internal struct NoteEditView: View {
+    internal enum Mode {
       case create
       case edit(Note)
     }
 
-    let mode: Mode
-    let onSaved: (Note) -> Void
+    internal let mode: Mode
+    internal let onSaved: (Note) -> Void
 
     @EnvironmentObject private var service: NativeCloudKitService
     @Environment(\.dismiss) private var dismiss
@@ -58,91 +58,12 @@
     // release the previous scope.
     @State private var scopedURL: URL?
 
-    var body: some View {
-      // swiftlint:disable:next closure_body_length
-      NavigationStack {
-        Form {
-          Section("Note") {
-            TextField("Title", text: $title)
-            TextField("Index", text: $indexText)
-              #if os(iOS)
-                .keyboardType(.numberPad)
-              #endif
-          }
-
-          Section("Image (optional)") {
-            if let imageURL {
-              LabeledContent("File") {
-                Text(imageURL.lastPathComponent)
-                  .lineLimit(1)
-                  .truncationMode(.middle)
-              }
-              Button("Remove", role: .destructive) {
-                releaseScopedURL()
-                self.imageURL = nil
-              }
-            }
-            Button("Choose image…") { showFileImporter = true }
-          }
-
-          if let saveError {
-            Section("Error") {
-              Text(saveError).foregroundStyle(.red).font(.callout)
-            }
-          }
-        }
-        .formStyle(.grouped)
-        .navigationTitle(navigationTitle)
-        .toolbar {
-          ToolbarItem(placement: .cancellationAction) {
-            Button("Cancel") { dismiss() }
-              .disabled(saving)
-          }
-          ToolbarItem(placement: .confirmationAction) {
-            if saving {
-              ProgressView().controlSize(.small)
-            } else {
-              Button("Save") { Task { await save() } }
-                .disabled(!isValid)
-            }
-          }
-        }
-        .fileImporter(
-          isPresented: $showFileImporter,
-          allowedContentTypes: [.image],
-          allowsMultipleSelection: false
-        ) { result in
-          switch result {
-          case .success(let urls):
-            if let url = urls.first {
-              guard url.startAccessingSecurityScopedResource() else {
-                saveError = "Couldn't access \(url.lastPathComponent) — file permissions denied."
-                return
-              }
-              // Release the previously-scoped URL before adopting the new one.
-              releaseScopedURL()
-              scopedURL = url
-              imageURL = url
-            }
-          case .failure(let error):
-            saveError = "Couldn't pick file: \(error.localizedDescription)"
-          }
-        }
-      }
-      .onAppear { populateInitialState() }
-      .onDisappear { releaseScopedURL() }
-      .frame(minWidth: 420, minHeight: 360)
-    }
-
-    private func releaseScopedURL() {
-      scopedURL?.stopAccessingSecurityScopedResource()
-      scopedURL = nil
-    }
-
     private var navigationTitle: String {
       switch mode {
-      case .create: return "New Note"
-      case .edit: return "Edit Note"
+      case .create:
+        return "New Note"
+      case .edit:
+        return "Edit Note"
       }
     }
 
@@ -151,8 +72,105 @@
         && Int64(indexText) != nil
     }
 
+    internal var body: some View {
+      NavigationStack {
+        formContent
+          .formStyle(.grouped)
+          .navigationTitle(navigationTitle)
+          .toolbar { toolbarContent }
+          .fileImporter(
+            isPresented: $showFileImporter,
+            allowedContentTypes: [.image],
+            allowsMultipleSelection: false
+          ) { result in
+            handleFileImport(result)
+          }
+      }
+      .onAppear { populateInitialState() }
+      .onDisappear { releaseScopedURL() }
+      .frame(minWidth: 420, minHeight: 360)
+    }
+
+    @ViewBuilder private var formContent: some View {
+      Form {
+        Section("Note") {
+          TextField("Title", text: $title)
+          TextField("Index", text: $indexText)
+            #if os(iOS)
+              .keyboardType(.numberPad)
+            #endif
+        }
+
+        imageSection
+
+        if let saveError {
+          Section("Error") {
+            Text(saveError).foregroundStyle(.red).font(.callout)
+          }
+        }
+      }
+    }
+
+    @ViewBuilder private var imageSection: some View {
+      Section("Image (optional)") {
+        if let imageURL {
+          LabeledContent("File") {
+            Text(imageURL.lastPathComponent)
+              .lineLimit(1)
+              .truncationMode(.middle)
+          }
+          Button("Remove", role: .destructive) {
+            releaseScopedURL()
+            self.imageURL = nil
+          }
+        }
+        Button("Choose image…") { showFileImporter = true }
+      }
+    }
+
+    @ToolbarContentBuilder private var toolbarContent: some ToolbarContent {
+      ToolbarItem(placement: .cancellationAction) {
+        Button("Cancel") { dismiss() }
+          .disabled(saving)
+      }
+      ToolbarItem(placement: .confirmationAction) {
+        if saving {
+          ProgressView().controlSize(.small)
+        } else {
+          Button("Save") { Task { await save() } }
+            .disabled(!isValid)
+        }
+      }
+    }
+
+    private func handleFileImport(_ result: Result<[URL], any Error>) {
+      switch result {
+      case .success(let urls):
+        if let url = urls.first {
+          guard url.startAccessingSecurityScopedResource() else {
+            saveError =
+              "Couldn't access \(url.lastPathComponent) — file permissions denied."
+            return
+          }
+          // Release the previously-scoped URL before adopting the new one.
+          releaseScopedURL()
+          scopedURL = url
+          imageURL = url
+        }
+      case .failure(let error):
+        saveError = "Couldn't pick file: \(error.localizedDescription)"
+      }
+    }
+
+    private func releaseScopedURL() {
+      scopedURL?.stopAccessingSecurityScopedResource()
+      scopedURL = nil
+    }
+
     private func populateInitialState() {
-      guard case .edit(let note) = mode else { return }
+      guard case .edit(let note) = mode else {
+        return
+      }
       title = note.title ?? ""
       indexText = note.index.map(String.init) ?? "0"
       imageURL = note.imageAssetURL

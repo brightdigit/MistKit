@@ -31,17 +31,25 @@ public import ConfigKeyKit
 import Foundation
 public import MistKit
 
-/// Configuration for auth-token command
+/// Configuration for auth-token command.
 public struct AuthTokenConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = Never
 
+  /// The CloudKit API token.
   public let apiToken: String
+  /// The CloudKit container identifier.
   public let containerIdentifier: String
+  /// The server port for authentication.
   public let port: Int
+  /// The server host for authentication.
   public let host: String
+  /// Whether to skip opening the browser.
   public let noBrowser: Bool
 
+  /// Creates a new instance.
   public init(
     apiToken: String,
     // Demo default — override via --container-identifier or config key "container.identifier"
@@ -57,27 +65,38 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     self.noBrowser = noBrowser
   }
 
-  /// Parse configuration from command line arguments
-  public init(configuration: MistDemoConfiguration, base: Never? = nil) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: Never? = nil
+  ) async throws {
     let configReader = configuration
 
     // Parse command-specific options
-    let apiToken = configReader.string(forKey: "api.token", isSecret: true) ?? ""
+    let apiToken =
+      configReader.string(forKey: "api.token", isSecret: true) ?? ""
     guard !apiToken.isEmpty else {
       throw ConfigurationError.missingRequired(
         "api.token",
-        suggestion: "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable")
+        suggestion:
+          "Provide via --api-token or CLOUDKIT_API_TOKEN environment variable"
+      )
     }
 
-    // Demo default — override via --container-identifier or config key "container.identifier"
+    // Demo default — override via --container-identifier
+    // or config key "container.identifier"
     let containerIdentifier =
       configReader.string(
         forKey: "container.identifier",
         default: MistDemoConstants.Defaults.containerIdentifier
       ) ?? MistDemoConstants.Defaults.containerIdentifier
-    let port = configReader.int(forKey: "port", default: 8_080) ?? 8_080
-    let host = configReader.string(forKey: "host", default: "127.0.0.1") ?? "127.0.0.1"
-    let noBrowser = configReader.bool(forKey: "no.browser", default: false)
+    let port =
+      configReader.int(forKey: "port", default: 8_080) ?? 8_080
+    let host =
+      configReader.string(forKey: "host", default: "127.0.0.1")
+      ?? "127.0.0.1"
+    let noBrowser =
+      configReader.bool(forKey: "no.browser", default: false)
 
     self.init(
       apiToken: apiToken,

@@ -33,6 +33,7 @@ public import Foundation
 public enum CommandRegistryError: Error, LocalizedError {
   case unknownCommand(String)
 
+  /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .unknownCommand(let name):

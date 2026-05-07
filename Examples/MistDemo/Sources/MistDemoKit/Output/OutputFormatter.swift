@@ -34,20 +34,3 @@ public protocol OutputFormatter: Sendable {
   /// Format an encodable value to a string
   func format<T: Encodable>(_ value: T) throws -> String
 }
-
-/// Supported output formats
-public enum OutputFormat: String, Sendable, CaseIterable {
-  case json
-  case table
-  case csv
-  case yaml
-
-  // MARK: Public
-
-  /// Create the appropriate formatter for this format
-  /// - Parameter pretty: Whether to use pretty printing (applies to JSON)
-  /// - Returns: A formatter configured for this format
-  public func createFormatter(pretty: Bool = false) -> any OutputFormatter {
-    OutputFormatterFactory.formatter(for: self, pretty: pretty)
-  }
-}

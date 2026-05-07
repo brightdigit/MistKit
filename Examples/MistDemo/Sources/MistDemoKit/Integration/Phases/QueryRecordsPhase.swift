@@ -30,15 +30,17 @@
 import Foundation
 import MistKit
 
-struct QueryRecordsPhase: IntegrationPhase {
-  typealias Input = CreatedRecordNames
-  typealias Output = NoState
+internal struct QueryRecordsPhase: IntegrationPhase {
+  internal typealias Input = CreatedRecordNames
+  internal typealias Output = NoState
 
-  static let title = "Query records by type"
-  static let emoji = "🔍"
-  static let apiName = "queryRecords"
+  internal static let title = "Query records by type"
+  internal static let emoji = "🔍"
+  internal static let apiName = "queryRecords"
 
-  func run(input: CreatedRecordNames, context: PhaseContext) async throws -> NoState {
+  internal func run(
+    input: CreatedRecordNames, context: PhaseContext
+  ) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     do {

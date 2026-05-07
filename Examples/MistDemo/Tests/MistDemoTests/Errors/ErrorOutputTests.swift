@@ -33,11 +33,11 @@ import Testing
 @testable import MistDemoKit
 
 @Suite("ErrorOutput Tests")
-struct ErrorOutputTests {
+internal struct ErrorOutputTests {
   // MARK: - Basic Structure Tests
 
   @Test("Create error output with all fields")
-  func createErrorOutputWithAllFields() {
+  internal func createErrorOutputWithAllFields() {
     let errorOutput = ErrorOutput(
       code: "TEST_ERROR",
       message: "This is a test error",
@@ -53,7 +53,7 @@ struct ErrorOutputTests {
   }
 
   @Test("Create error output without optional fields")
-  func createErrorOutputWithoutOptionalFields() {
+  internal func createErrorOutputWithoutOptionalFields() {
     let errorOutput = ErrorOutput(
       code: "SIMPLE_ERROR",
       message: "Simple error message"
@@ -68,7 +68,7 @@ struct ErrorOutputTests {
   // MARK: - JSON Serialization Tests
 
   @Test("Serialize error output to JSON")
-  func serializeToJSON() throws {
+  internal func serializeToJSON() throws {
     let errorOutput = ErrorOutput(
       code: "AUTH_FAILED",
       message: "Authentication failed",
@@ -88,7 +88,7 @@ struct ErrorOutputTests {
   }
 
   @Test("Serialize error output to pretty JSON")
-  func serializeToPrettyJSON() throws {
+  internal func serializeToPrettyJSON() throws {
     let errorOutput = ErrorOutput(
       code: "CONFIG_ERROR",
       message: "Configuration error"
@@ -103,7 +103,7 @@ struct ErrorOutputTests {
   }
 
   @Test("JSON output has correct structure")
-  func jsonOutputHasCorrectStructure() throws {
+  internal func jsonOutputHasCorrectStructure() throws {
     let errorOutput = ErrorOutput(
       code: "TEST",
       message: "Test message",
@@ -122,7 +122,7 @@ struct ErrorOutputTests {
   // MARK: - Edge Cases
 
   @Test("Handle empty details dictionary")
-  func handleEmptyDetails() throws {
+  internal func handleEmptyDetails() throws {
     let errorOutput = ErrorOutput(
       code: "ERROR",
       message: "Message",
@@ -134,7 +134,7 @@ struct ErrorOutputTests {
   }
 
   @Test("Handle special characters in message")
-  func handleSpecialCharacters() throws {
+  internal func handleSpecialCharacters() throws {
     let errorOutput = ErrorOutput(
       code: "SPECIAL",
       message: "Error with \"quotes\" and \\ backslash"
@@ -148,7 +148,7 @@ struct ErrorOutputTests {
   }
 
   @Test("Handle multiline suggestion")
-  func handleMultilineSuggestion() throws {
+  internal func handleMultilineSuggestion() throws {
     let errorOutput = ErrorOutput(
       code: "HELP",
       message: "Need help",

@@ -5,12 +5,12 @@ import Testing
 
 extension InMemoryTokenStorageTests {
   /// Concurrent removal tests for InMemoryTokenStorage
-  @Suite("Concurrent Removal Tests")
+  @Suite("Concurrent Removal")
   internal struct ConcurrentRemovalTests {
     // MARK: - Test Data Setup
 
     private static let testAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+      TestConstants.apiToken
 
     // MARK: - Concurrent Removal Tests
 

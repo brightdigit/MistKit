@@ -151,6 +151,22 @@ extension ResponseConfig {
     )
   }
 
+  /// Creates a transport-layer thrown error (e.g. URLError for timeouts or connection failures).
+  /// The transport throws this error before any HTTP response is produced.
+  internal static func networkError(_ error: any Error) -> ResponseConfig {
+    ResponseConfig(statusCode: 0, error: error)
+  }
+
+  /// Convenience: simulates a request timeout via URLError(.timedOut).
+  internal static func timeout() -> ResponseConfig {
+    .networkError(URLError(.timedOut))
+  }
+
+  /// Convenience: simulates a network connection failure via URLError(.networkConnectionLost).
+  internal static func connectionLost() -> ResponseConfig {
+    .networkError(URLError(.networkConnectionLost))
+  }
+
   /// Creates a successful query response
   internal static func successfulQuery(records: [String: Any] = [:]) -> ResponseConfig {
     let responseJSON = """

@@ -126,10 +126,28 @@ indentation_width:
 file_name:
     severity: error
     excluded:
+      - Package.swift
       - AsyncHelpers.swift
       - UserInfoTestExtension.swift
+      - TableFormatterTests+EdgeCases+FieldTypes.swift
+      - TableFormatterTests+EdgeCases+Whitespace.swift
+      - YAMLFormatterTests+YAMLEscaping+ReservedStrings.swift
+      - YAMLFormatterTests+YAMLEscaping+SpecialChars.swift
       - ConfigKey+MistDemoTests.swift
+      - ConfigKey+MistDemoTests+BooleanConfigKeyWithPrefix.swift
+      - ConfigKey+MistDemoTests+ConfigKeyWithPrefix.swift
+      - ConfigKey+MistDemoTests+EdgeCases.swift
+      - ConfigKey+MistDemoTests+OptionalConfigKeyWithPrefix.swift
+      - ConfigKey+MistDemoTests+RealWorldUsage.swift
       - FieldValue+FieldTypeTests.swift
+      - FieldValue+FieldTypeTests+BytesType.swift
+      - FieldValue+FieldTypeTests+DoubleType.swift
+      - FieldValue+FieldTypeTests+Int64Type.swift
+      - FieldValue+FieldTypeTests+InvalidTypeConversion.swift
+      - FieldValue+FieldTypeTests+StringType.swift
+      - FieldValue+FieldTypeTests+TimestampDateType.swift
+      - FieldValue+FieldTypeTests+UnsupportedType.swift
+      - EnvironmentTraits.swift
       - MistDemoApp.swift
 fatal_error_message:
     severity: error

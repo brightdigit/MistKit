@@ -125,6 +125,9 @@ internal struct AuthenticationMiddleware: ClientMiddleware {
     }
 
     guard let serverAuthManager = tokenManager as? ServerToServerAuthManager else {
+      assertionFailure(
+        "server-to-server auth configured but tokenManager is not ServerToServerAuthManager"
+      )
       throw TokenManagerError.internalError(.serverToServerRequiresSpecificManager)
     }
 

@@ -31,10 +31,15 @@ import Configuration
 import Foundation
 import SystemPackage
 
-/// Swift Configuration-based setup for MistDemo
+/// Swift Configuration-based setup for MistDemo.
 public struct MistDemoConfiguration: Sendable {
+  // MARK: Private
+
+  private let configReader: ConfigReader
+
   // MARK: Lifecycle
 
+  /// Creates a new instance from environment and CLI providers.
   public init() async throws {
     let envProvider = try await EnvironmentVariablesProvider(
       environmentFilePath: FilePath(".env"),
@@ -63,18 +68,16 @@ public struct MistDemoConfiguration: Sendable {
     ])
   }
 
-  /// Internal initializer for testing with InMemoryProvider
-  init(testProvider: InMemoryProvider) {
+  /// Internal initializer for testing with InMemoryProvider.
+  internal init(testProvider: InMemoryProvider) {
     self.configReader = ConfigReader(providers: [
       testProvider
     ])
   }
 
-  // MARK: Private
+  // MARK: Public
 
-  private let configReader: ConfigReader
-
-  /// Read string value with hierarchy: CLI → ENV → defaults
+  /// Read string value with hierarchy: CLI -> ENV -> defaults.
   public func string(
     forKey key: String,
     default defaultValue: String? = nil,
@@ -82,47 +85,65 @@ public struct MistDemoConfiguration: Sendable {
   ) -> String? {
     if let defaultValue = defaultValue {
       return configReader.string(
-        forKey: Configuration.ConfigKey(key), isSecret: isSecret, default: defaultValue)
+        forKey: Configuration.ConfigKey(key),
+        isSecret: isSecret,
+        default: defaultValue
+      )
     } else {
-      return configReader.string(forKey: Configuration.ConfigKey(key), isSecret: isSecret)
+      return configReader.string(
+        forKey: Configuration.ConfigKey(key),
+        isSecret: isSecret
+      )
     }
   }
 
-  /// Read required string value
+  /// Read required string value.
   public func requiredString(
     forKey key: String,
     isSecret: Bool = false
   ) throws -> String {
-    try configReader.requiredString(forKey: Configuration.ConfigKey(key), isSecret: isSecret)
+    try configReader.requiredString(
+      forKey: Configuration.ConfigKey(key),
+      isSecret: isSecret
+    )
   }
 
-  /// Read int value with hierarchy
+  /// Read int value with hierarchy.
   public func int(
     forKey key: String,
     default defaultValue: Int? = nil
   ) -> Int? {
     if let defaultValue = defaultValue {
-      return configReader.int(forKey: Configuration.ConfigKey(key), default: defaultValue)
+      return configReader.int(
+        forKey: Configuration.ConfigKey(key),
+        default: defaultValue
+      )
     } else {
-      return configReader.int(forKey: Configuration.ConfigKey(key))
+      return configReader.int(
+        forKey: Configuration.ConfigKey(key)
+      )
     }
   }
 
-  /// Read required int value
+  /// Read required int value.
   public func requiredInt(forKey key: String) throws -> Int {
-    try configReader.requiredInt(forKey: Configuration.ConfigKey(key))
+    try configReader.requiredInt(
+      forKey: Configuration.ConfigKey(key)
+    )
   }
 
-  /// Read bool value with hierarchy
+  /// Read bool value with hierarchy.
   public func bool(
     forKey key: String,
     default defaultValue: Bool = false
   ) -> Bool {
-    configReader.bool(forKey: Configuration.ConfigKey(key), default: defaultValue)
+    configReader.bool(
+      forKey: Configuration.ConfigKey(key),
+      default: defaultValue
+    )
   }
 
   /// Read a pipe-separated list of strings from configuration.
-  /// Splits on "|" and trims whitespace from each element.
   public func filterStrings(forKey key: String) -> [String] {
     string(forKey: key)?
       .split(separator: "|")

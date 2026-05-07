@@ -31,18 +31,27 @@ public import ConfigKeyKit
 import Foundation
 public import MistKit
 
-/// Configuration for create command
+/// Configuration for create command.
 public struct CreateConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = MistDemoConfig
 
+  /// The base MistDemo configuration.
   public let base: MistDemoConfig
+  /// The CloudKit zone name.
   public let zone: String
+  /// The CloudKit record type.
   public let recordType: String
+  /// The optional record name.
   public let recordName: String?
+  /// The fields to set on the record.
   public let fields: [Field]
+  /// The output format.
   public let output: OutputFormat
 
+  /// Creates a new instance.
   public init(
     base: MistDemoConfig,
     zone: String = "_defaultZone",
@@ -59,26 +68,36 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
     self.output = output
   }
 
-  /// Parse configuration from command line arguments
-  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: MistDemoConfig?
+  ) async throws {
     let configReader = configuration
     let baseConfig: MistDemoConfig
     if let base = base {
       baseConfig = base
     } else {
-      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+      baseConfig = try await MistDemoConfig(
+        configuration: configuration,
+        base: nil
+      )
     }
 
     // Parse create-specific options
     let zone =
       configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.zone, default: MistDemoConstants.Defaults.zone)
-      ?? MistDemoConstants.Defaults.zone
+        forKey: MistDemoConstants.ConfigKeys.zone,
+        default: MistDemoConstants.Defaults.zone
+      ) ?? MistDemoConstants.Defaults.zone
     let recordType =
       configReader.string(
         forKey: MistDemoConstants.ConfigKeys.recordType,
-        default: MistDemoConstants.Defaults.recordType) ?? MistDemoConstants.Defaults.recordType
-    let recordName = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordName)
+        default: MistDemoConstants.Defaults.recordType
+      ) ?? MistDemoConstants.Defaults.recordType
+    let recordName = configReader.string(
+      forKey: MistDemoConstants.ConfigKeys.recordName
+    )
 
     // Parse fields from various sources
     let fields = try Self.parseFieldsFromSources(configReader)
@@ -87,7 +106,8 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
     let outputString =
       configReader.string(
         forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
+        default: MistDemoConstants.Defaults.outputFormat
+      ) ?? MistDemoConstants.Defaults.outputFormat
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(
@@ -100,9 +120,9 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
     )
   }
 
-  private static func parseFieldsFromSources(_ configReader: MistDemoConfiguration) throws
-    -> [Field]
-  {
+  private static func parseFieldsFromSources(
+    _ configReader: MistDemoConfiguration
+  ) throws -> [Field] {
     var fields: [Field] = []
 
     // 1. Parse inline field definitions
@@ -115,13 +135,18 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
     }
 
     // 2. Parse from JSON file
-    if let jsonFile = configReader.string(forKey: MistDemoConstants.ConfigKeys.jsonFile) {
+    if let jsonFile = configReader.string(
+      forKey: MistDemoConstants.ConfigKeys.jsonFile
+    ) {
       let jsonFields = try parseFieldsFromJSONFile(jsonFile)
       fields.append(contentsOf: jsonFields)
     }
 
     // 3. Parse from stdin (check if data is available)
-    if configReader.bool(forKey: MistDemoConstants.ConfigKeys.stdin, default: false) {
+    if configReader.bool(
+      forKey: MistDemoConstants.ConfigKeys.stdin,
+      default: false
+    ) {
       let stdinFields = try parseFieldsFromStdin()
       fields.append(contentsOf: stdinFields)
     }
@@ -133,18 +158,26 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
     return fields
   }
 
-  /// Parse fields from JSON file
-  private static func parseFieldsFromJSONFile(_ filePath: String) throws -> [Field] {
+  /// Parse fields from JSON file.
+  private static func parseFieldsFromJSONFile(
+    _ filePath: String
+  ) throws -> [Field] {
     do {
       let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
-      let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: data)
+      let fieldsInput = try JSONDecoder().decode(
+        FieldsInput.self,
+        from: data
+      )
       return try fieldsInput.toFields()
     } catch {
-      throw CreateError.jsonFileError(filePath, error.localizedDescription)
+      throw CreateError.jsonFileError(
+        filePath,
+        error.localizedDescription
+      )
     }
   }
 
-  /// Parse fields from stdin
+  /// Parse fields from stdin.
   private static func parseFieldsFromStdin() throws -> [Field] {
     let stdinData = FileHandle.standardInput.readDataToEndOfFile()
 
@@ -153,7 +186,10 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
     }
 
     do {
-      let fieldsInput = try JSONDecoder().decode(FieldsInput.self, from: stdinData)
+      let fieldsInput = try JSONDecoder().decode(
+        FieldsInput.self,
+        from: stdinData
+      )
       return try fieldsInput.toFields()
     } catch {
       throw CreateError.stdinError(error.localizedDescription)

@@ -32,39 +32,42 @@ import MistKit
 
 /// Command to look up specific CloudKit zones by name
 public struct LookupZonesCommand: MistDemoCommand, OutputFormatting {
+  /// The configuration type.
   public typealias Config = LookupZonesConfig
+  /// The command name.
   public static let commandName = "lookup-zones"
+  /// The command abstract.
   public static let abstract = "Look up specific CloudKit zones by name"
+  /// The command help text.
   public static let helpText = """
-    LOOKUP-ZONES - Look up specific CloudKit zones by name
+    LOOKUP-ZONES - Look up specific CloudKit zones
 
     USAGE:
-        mistdemo lookup-zones [options]
+      mistdemo lookup-zones [options]
 
     OPTIONS:
-        --zone-names <names>       Comma-separated zone names (default: "_defaultZone")
-        --database <type>          Database to target: public, private, shared (default: public)
-        --output-format <format>   Output format: json, table, csv, yaml
+      --zone-names <names>       Zone names (default: _defaultZone)
+      --database <type>          Database to target
+      --output-format <format>   Output format
 
     EXAMPLES:
-        # Look up the default zone (public database)
-        mistdemo lookup-zones
-
-        # Look up specific zones in the private database
-        mistdemo lookup-zones --database private --zone-names "Articles,Photos"
+      mistdemo lookup-zones
+      mistdemo lookup-zones --database private \\
+        --zone-names "Articles,Photos"
 
     NOTES:
-        - Auth method follows --database: server-to-server for public,
-          web auth for private/shared.
-        - Zone names are case-sensitive
+      - Auth method follows --database
+      - Zone names are case-sensitive
     """
 
   private let config: LookupZonesConfig
 
+  /// Creates a new instance.
   public init(config: LookupZonesConfig) {
     self.config = config
   }
 
+  /// Executes the command.
   public func execute() async throws {
     print("\n" + String(repeating: "=", count: 60))
     print("🔍 Lookup CloudKit Zones")

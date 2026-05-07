@@ -32,32 +32,37 @@ import MistKit
 
 /// Command to query Note records from CloudKit with filtering and sorting
 public struct QueryCommand: MistDemoCommand, OutputFormatting {
+  /// The configuration type.
   public typealias Config = QueryConfig
+  /// The command name.
   public static let commandName = "query"
-  public static let abstract = "Query records from CloudKit with filtering and sorting"
+  /// The command abstract.
+  public static let abstract =
+    "Query records from CloudKit with filtering and sorting"
+  /// The command help text.
   public static let helpText = """
     QUERY - Query records from CloudKit
 
     USAGE:
-        mistdemo query [options]
+      mistdemo query [options]
 
     OPTIONS:
-        --record-type <type>       Record type to query (default: Note)
-        --zone <zone>              Zone name (default: _defaultZone)
-        --filter <filter>          Filter expression(s) (field:operator:value, use | to separate multiple)
-        --sort <field:order>       Sort by field (order: asc/desc)
-        --limit <count>            Maximum records to return (1-200)
-        --fields <fields>          Comma-separated fields to include
-        --database <type>          Database to target: public, private, shared (default: public)
-        --output-format <format>   Output format: json, table, csv, yaml
+      --record-type <type>     Record type (default: Note)
+      --filter <filter>        Filter: field:operator:value
+      --sort <field:order>     Sort (asc/desc)
+      --limit <count>          Max records (1-200)
+      --fields <fields>        Comma-separated fields
+      --output-format <format> Output format
     """
 
   private let config: QueryConfig
 
+  /// Creates a new instance.
   public init(config: QueryConfig) {
     self.config = config
   }
 
+  /// Executes the command.
   public func execute() async throws {
     do {
       // Create CloudKit client
@@ -98,7 +103,8 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   private func parseFilter(_ filterString: String) throws -> QueryFilter {
     let components = filterString.split(
-      separator: ":", maxSplits: 2, omittingEmptySubsequences: false)
+      separator: ":", maxSplits: 2, omittingEmptySubsequences: false
+    )
 
     guard components.count == 3 else {
       throw QueryError.invalidFilter(filterString, expected: "field:operator:value")
@@ -115,11 +121,31 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
     return try buildFilter(field: field, operatorString: operatorString, value: value)
   }
 
-  /// Build a QueryFilter from parsed components
+  /// Build a QueryFilter from parsed components.
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  private func buildFilter(field: String, operatorString: String, value: String) throws
-    -> QueryFilter
-  {
+  private func buildFilter(
+    field: String,
+    operatorString: String,
+    value: String
+  ) throws -> QueryFilter {
+    if let comparison = buildComparisonFilter(
+      field: field, operatorString: operatorString, value: value
+    ) {
+      return comparison
+    }
+    return try buildSpecialFilter(
+      field: field, operatorString: operatorString, value: value
+    )
+  }
+
+  // Build comparison-based filters (equals, not equals, greater/less than).
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  // swiftlint:disable:next cyclomatic_complexity
+  private func buildComparisonFilter(
+    field: String,
+    operatorString: String,
+    value: String
+  ) -> QueryFilter? {
     switch operatorString.lowercased() {
     case "eq", "equals", "==", "=":
       return .equals(field, inferFieldValue(value))
@@ -128,30 +154,57 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
     case "gt", ">":
       return .greaterThan(field, inferFieldValue(value))
     case "gte", ">=":
-      return .greaterThanOrEquals(field, inferFieldValue(value))
+      return .greaterThanOrEquals(
+        field, inferFieldValue(value)
+      )
     case "lt", "<":
       return .lessThan(field, inferFieldValue(value))
     case "lte", "<=":
-      return .lessThanOrEquals(field, inferFieldValue(value))
+      return .lessThanOrEquals(
+        field, inferFieldValue(value)
+      )
+    default:
+      return nil
+    }
+  }
+
+  /// Build string and list-based filters.
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  private func buildSpecialFilter(
+    field: String,
+    operatorString: String,
+    value: String
+  ) throws -> QueryFilter {
+    switch operatorString.lowercased() {
     case "contains", "like":
       return .containsAllTokens(field, value)
     case "begins_with", "starts_with":
       return .beginsWith(field, value)
     case "in":
-      let values = value.split(separator: ",").map { inferFieldValue(String($0)) }
+      let values = value.split(separator: ",").map {
+        inferFieldValue(String($0))
+      }
       return .in(field, values)
     case "not_in":
-      let values = value.split(separator: ",").map { inferFieldValue(String($0)) }
+      let values = value.split(separator: ",").map {
+        inferFieldValue(String($0))
+      }
       return .notIn(field, values)
     default:
       throw QueryError.unsupportedOperator(operatorString)
     }
   }
 
-  /// Infer a FieldValue from a string, preferring Int64, then Double, then String
-  private func inferFieldValue(_ string: String) -> FieldValue {
-    if let intValue = Int64(string) { return .int64(Int(intValue)) }
-    if let doubleValue = Double(string) { return .double(doubleValue) }
+  /// Infer a FieldValue from a string.
+  private func inferFieldValue(
+    _ string: String
+  ) -> FieldValue {
+    if let intValue = Int64(string) {
+      return .int64(Int(intValue))
+    }
+    if let doubleValue = Double(string) {
+      return .double(doubleValue)
+    }
     return .string(string)
   }
 

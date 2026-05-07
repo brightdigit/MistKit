@@ -33,9 +33,9 @@ import Testing
 @testable import MistDemoKit
 
 @Suite("DeleteConfig Tests")
-struct DeleteConfigTests {
+internal struct DeleteConfigTests {
   @Test("DeleteConfig initializes with defaults")
-  func initializeWithDefaults() async throws {
+  internal func initializeWithDefaults() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = DeleteConfig(base: baseConfig, recordName: "rec-1")
 
@@ -48,7 +48,7 @@ struct DeleteConfigTests {
   }
 
   @Test("DeleteConfig initializes with custom zone and record type")
-  func initializeWithCustomZoneAndType() async throws {
+  internal func initializeWithCustomZoneAndType() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = DeleteConfig(
       base: baseConfig,
@@ -62,7 +62,7 @@ struct DeleteConfigTests {
   }
 
   @Test("DeleteConfig accepts a record change tag")
-  func recordChangeTag() async throws {
+  internal func recordChangeTag() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = DeleteConfig(
       base: baseConfig,
@@ -74,7 +74,7 @@ struct DeleteConfigTests {
   }
 
   @Test("DeleteConfig defaults force to false")
-  func forceDefaultsFalse() async throws {
+  internal func forceDefaultsFalse() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = DeleteConfig(base: baseConfig, recordName: "rec-1")
 
@@ -82,7 +82,7 @@ struct DeleteConfigTests {
   }
 
   @Test("DeleteConfig accepts force=true")
-  func forceCanBeTrue() async throws {
+  internal func forceCanBeTrue() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = DeleteConfig(base: baseConfig, recordName: "rec-1", force: true)
 
@@ -91,7 +91,7 @@ struct DeleteConfigTests {
 
   @Test(
     "DeleteConfig output formats round-trip", arguments: [OutputFormat.json, .table, .csv, .yaml])
-  func outputFormats(format: OutputFormat) async throws {
+  internal func outputFormats(format: OutputFormat) async throws {
     let baseConfig = try await MistDemoConfig()
     let config = DeleteConfig(base: baseConfig, recordName: "rec-1", output: format)
 
@@ -99,7 +99,7 @@ struct DeleteConfigTests {
   }
 
   @Test("DeleteConfig handles all custom values together")
-  func allCustomValues() async throws {
+  internal func allCustomValues() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = DeleteConfig(
       base: baseConfig,
@@ -120,51 +120,10 @@ struct DeleteConfigTests {
   }
 
   @Test("DeleteConfig preserves special characters in record name")
-  func specialCharactersInRecordName() async throws {
+  internal func specialCharactersInRecordName() async throws {
     let baseConfig = try await MistDemoConfig()
     let config = DeleteConfig(base: baseConfig, recordName: "rec-name_with.special@chars")
 
     #expect(config.recordName == "rec-name_with.special@chars")
-  }
-}
-
-@Suite("DeleteError Tests")
-struct DeleteErrorTests {
-  @Test("recordNameRequired has a description")
-  func recordNameRequiredDescription() {
-    let error = DeleteError.recordNameRequired
-    #expect(error.errorDescription != nil)
-  }
-
-  @Test("conflict description includes the reason when present")
-  func conflictWithReason() {
-    let error = DeleteError.conflict(reason: "ATOMIC_ERROR")
-    #expect(error.errorDescription?.contains("ATOMIC_ERROR") == true)
-  }
-
-  @Test("conflict description is generic when reason is nil")
-  func conflictNoReason() {
-    let error = DeleteError.conflict(reason: nil)
-    #expect(error.errorDescription?.contains("conflict") == true)
-  }
-
-  @Test("conflict suggests --force as a remedy")
-  func conflictRecoveryMentionsForce() {
-    let error = DeleteError.conflict(reason: nil)
-    #expect(error.recoverySuggestion?.contains("--force") == true)
-  }
-}
-
-@Suite("DeleteResult Tests")
-struct DeleteResultTests {
-  @Test("DeleteResult encodes deleted=true by default")
-  func defaultsToDeletedTrue() throws {
-    let result = DeleteResult(recordName: "rec-1", recordType: "Note")
-    let data = try JSONEncoder().encode(result)
-    let json = try #require(String(data: data, encoding: .utf8))
-
-    #expect(json.contains("\"deleted\":true"))
-    #expect(json.contains("\"recordName\":\"rec-1\""))
-    #expect(json.contains("\"recordType\":\"Note\""))
   }
 }

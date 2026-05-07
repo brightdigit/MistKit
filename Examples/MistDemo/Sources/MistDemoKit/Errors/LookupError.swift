@@ -34,6 +34,7 @@ public enum LookupError: Error, LocalizedError {
   case recordNamesRequired
   case operationFailed(String)
 
+  /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .recordNamesRequired:
@@ -43,6 +44,7 @@ public enum LookupError: Error, LocalizedError {
     }
   }
 
+  /// A localized recovery suggestion.
   public var recoverySuggestion: String? {
     switch self {
     case .recordNamesRequired:

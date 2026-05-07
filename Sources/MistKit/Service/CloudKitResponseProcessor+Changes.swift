@@ -48,6 +48,7 @@ extension CloudKitResponseProcessor {
         return changesData
       }
     default:
+      // Should never reach here since all errors are handled above
       assertionFailure("Unexpected response case after error handling")
       throw CloudKitError.invalidResponse
     }
@@ -67,6 +68,7 @@ extension CloudKitResponseProcessor {
         return discoverData
       }
     default:
+      // Should never reach here since all errors are handled above
       assertionFailure("Unexpected response case after error handling")
       throw CloudKitError.invalidResponse
     }
@@ -89,6 +91,7 @@ extension CloudKitResponseProcessor {
         return uploadData
       }
     default:
+      // Should never reach here since all errors are handled above
       assertionFailure("Unexpected response case after error handling")
       throw CloudKitError.invalidResponse
     }
@@ -108,6 +111,7 @@ extension CloudKitResponseProcessor {
         return changesData
       }
     default:
+      // Should never reach here since all errors are handled above
       assertionFailure("Unexpected response case after error handling")
       throw CloudKitError.invalidResponse
     }

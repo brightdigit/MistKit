@@ -34,10 +34,12 @@ import MistKit
 public struct YAMLFormatter: OutputFormatter {
   // MARK: Lifecycle
 
+  /// Creates a new instance.
   public init() {}
 
   // MARK: Public
 
+  /// Formats the value as YAML.
   public func format<T: Encodable>(_ value: T) throws -> String {
     let escaper = YAMLEscaper()
 

@@ -34,10 +34,12 @@ import MistKit
 public struct CSVFormatter: OutputFormatter {
   // MARK: Lifecycle
 
+  /// Creates a new instance.
   public init() {}
 
   // MARK: Public
 
+  /// Formats the value as CSV.
   public func format<T: Encodable>(_ value: T) throws -> String {
     let escaper = CSVEscaper()
 

@@ -33,11 +33,11 @@ import Testing
 @testable import MistDemoKit
 
 @Suite("CurrentUserError Tests")
-struct CurrentUserErrorTests {
+internal struct CurrentUserErrorTests {
   // MARK: - Error Description Tests
 
   @Test("operationFailed error description")
-  func operationFailedDescription() {
+  internal func operationFailedDescription() {
     let error = CurrentUserError.operationFailed("network timeout")
     let description = error.errorDescription
 
@@ -47,7 +47,7 @@ struct CurrentUserErrorTests {
   }
 
   @Test("authenticationRequired error description")
-  func authenticationRequiredDescription() {
+  internal func authenticationRequiredDescription() {
     let error = CurrentUserError.authenticationRequired
     let description = error.errorDescription
 
@@ -60,13 +60,13 @@ struct CurrentUserErrorTests {
   // MARK: - LocalizedError Conformance Tests
 
   @Test("CurrentUserError conforms to LocalizedError")
-  func conformsToLocalizedError() {
+  internal func conformsToLocalizedError() {
     let error: any Error = CurrentUserError.authenticationRequired
     #expect(error is LocalizedError)
   }
 
   @Test("All error cases have non-nil descriptions")
-  func allCasesHaveDescriptions() {
+  internal func allCasesHaveDescriptions() {
     let errors: [CurrentUserError] = [
       .operationFailed("test reason"),
       .authenticationRequired,
@@ -74,21 +74,21 @@ struct CurrentUserErrorTests {
 
     for error in errors {
       #expect(error.errorDescription != nil)
-      #expect(!error.errorDescription!.isEmpty)
+      #expect(error.errorDescription?.isEmpty == false)
     }
   }
 
   // MARK: - Error Throwing Tests
 
   @Test("Can throw and catch CurrentUserError")
-  func throwAndCatch() {
+  internal func throwAndCatch() {
     #expect(throws: CurrentUserError.self) {
       throw CurrentUserError.authenticationRequired
     }
   }
 
   @Test("Can pattern match on specific error case")
-  func patternMatch() {
+  internal func patternMatch() {
     let error = CurrentUserError.operationFailed("test")
 
     if case .operationFailed(let message) = error {
@@ -101,19 +101,19 @@ struct CurrentUserErrorTests {
   // MARK: - Error Message Content Tests
 
   @Test("authenticationRequired provides recovery suggestion")
-  func authenticationRequiredSuggestion() {
+  internal func authenticationRequiredSuggestion() throws {
     let error = CurrentUserError.authenticationRequired
-    let description = error.errorDescription!
+    let description = try #require(error.errorDescription)
 
     #expect(description.contains("auth-token"))
     #expect(description.contains("--web-auth-token"))
   }
 
   @Test("operationFailed includes error message")
-  func operationFailedIncludesMessage() {
+  internal func operationFailedIncludesMessage() throws {
     let message = "Server returned 500"
     let error = CurrentUserError.operationFailed(message)
-    let description = error.errorDescription!
+    let description = try #require(error.errorDescription)
 
     #expect(description.contains(message))
   }
@@ -121,7 +121,7 @@ struct CurrentUserErrorTests {
   // MARK: - Error Type Tests
 
   @Test("Different error cases are distinguishable")
-  func errorCasesDistinguishable() {
+  internal func errorCasesDistinguishable() {
     let error1 = CurrentUserError.authenticationRequired
     let error2 = CurrentUserError.operationFailed("test")
 

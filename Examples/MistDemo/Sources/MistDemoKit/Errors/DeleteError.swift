@@ -35,6 +35,7 @@ public enum DeleteError: Error, LocalizedError {
   case operationFailed(String)
   case conflict(reason: String?)
 
+  /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .recordNameRequired:
@@ -49,6 +50,7 @@ public enum DeleteError: Error, LocalizedError {
     }
   }
 
+  /// A localized recovery suggestion.
   public var recoverySuggestion: String? {
     switch self {
     case .recordNameRequired:

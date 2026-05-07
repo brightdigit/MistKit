@@ -30,16 +30,23 @@
 public import ConfigKeyKit
 import Foundation
 
-/// Configuration for lookup command
+/// Configuration for lookup command.
 public struct LookupConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = MistDemoConfig
 
+  /// The base MistDemo configuration.
   public let base: MistDemoConfig
+  /// The record names to look up.
   public let recordNames: [String]
+  /// The optional field names to include in the response.
   public let fields: [String]?
+  /// The output format.
   public let output: OutputFormat
 
+  /// Creates a new instance.
   public init(
     base: MistDemoConfig,
     recordNames: [String],
@@ -52,22 +59,34 @@ public struct LookupConfig: Sendable, ConfigurationParseable {
     self.output = output
   }
 
-  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: MistDemoConfig?
+  ) async throws {
     let configReader = configuration
     let baseConfig: MistDemoConfig
     if let base {
       baseConfig = base
     } else {
-      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+      baseConfig = try await MistDemoConfig(
+        configuration: configuration,
+        base: nil
+      )
     }
 
-    // --record-names accepts a comma-separated list. --record-name (singular) also works for a single name.
+    // --record-names accepts a comma-separated list.
+    // --record-name (singular) also works for a single name.
     let recordNames: [String]
     if let raw = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordNames) {
-      recordNames = raw.split(separator: ",").map {
-        String($0).trimmingCharacters(in: .whitespaces)
-      }.filter { !$0.isEmpty }
-    } else if let single = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordName) {
+      recordNames =
+        raw
+        .split(separator: ",")
+        .map { String($0).trimmingCharacters(in: .whitespaces) }
+        .filter { !$0.isEmpty }
+    } else if let single = configReader.string(
+      forKey: MistDemoConstants.ConfigKeys.recordName
+    ) {
       recordNames = [single]
     } else {
       recordNames = []
@@ -77,15 +96,19 @@ public struct LookupConfig: Sendable, ConfigurationParseable {
       throw LookupError.recordNamesRequired
     }
 
-    let fieldsString = configReader.string(forKey: MistDemoConstants.ConfigKeys.fields)
-    let fields = fieldsString?.split(separator: ",").map {
-      String($0).trimmingCharacters(in: .whitespaces)
-    }.filter { !$0.isEmpty }
+    let fieldsString = configReader.string(
+      forKey: MistDemoConstants.ConfigKeys.fields
+    )
+    let fields = fieldsString?
+      .split(separator: ",")
+      .map { String($0).trimmingCharacters(in: .whitespaces) }
+      .filter { !$0.isEmpty }
 
     let outputString =
       configReader.string(
         forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat) ?? MistDemoConstants.Defaults.outputFormat
+        default: MistDemoConstants.Defaults.outputFormat
+      ) ?? MistDemoConstants.Defaults.outputFormat
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(

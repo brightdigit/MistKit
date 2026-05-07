@@ -42,12 +42,15 @@ public struct MistKitClientFactory: Sendable {
   /// `TokenManager` so the next CloudKit call yields a typed HTTP 401. Because
   /// that path always uses web auth, it is **not** supported on `.public` (which
   /// requires server-to-server signing) and will throw
-  /// `ConfigurationError.badCredentialsNotSupportedOnPublicDatabase`.
+  /// `ConfigurationError.badCredentialsOnPublicDB`.
   ///
-  /// - Parameter config: The base MistDemo configuration
-  /// - Throws: `ConfigurationError` if required credentials are missing, or if
-  ///   `badCredentials` is requested with a `.public` database.
-  public static func create(for config: MistDemoConfig) throws -> CloudKitService {
+  /// - Parameter config: The base MistDemo configuration.
+  /// - Throws: `ConfigurationError` if required credentials are
+  ///   missing, or if `badCredentials` is requested with `.public`.
+  /// - Returns: A configured `CloudKitService` instance.
+  public static func create(
+    for config: MistDemoConfig
+  ) throws -> CloudKitService {
     #if os(WASI)
       throw ConfigurationError.unsupportedPlatform(
         "MistDemo CLI requires URLSession; WASI builds must inject a transport explicitly"
@@ -55,7 +58,7 @@ public struct MistKitClientFactory: Sendable {
     #else
       if config.badCredentials {
         guard config.database != .public else {
-          throw ConfigurationError.badCredentialsNotSupportedOnPublicDatabase
+          throw ConfigurationError.badCredentialsOnPublicDB
         }
         return try create(from: config, tokenManager: makeBadCredentialsTokenManager())
       }
@@ -117,17 +120,26 @@ public struct MistKitClientFactory: Sendable {
 
 extension WebAuthTokenManager {
   fileprivate convenience init(from config: MistDemoConfig) throws {
-    let apiToken = AuthenticationHelper.resolveAPIToken(config.apiToken)
+    let apiToken = AuthenticationHelper.resolveAPIToken(
+      config.apiToken
+    )
     guard !apiToken.isEmpty else {
       throw ConfigurationError.missingRequired(
         "api.token",
-        suggestion: "Provide via CLOUDKIT_API_TOKEN environment variable")
+        suggestion:
+          "Provide via CLOUDKIT_API_TOKEN environment variable"
+      )
     }
-    let webAuthToken = config.webAuthToken.flatMap { AuthenticationHelper.resolveWebAuthToken($0) }
+    let webAuthToken = config.webAuthToken.flatMap {
+      AuthenticationHelper.resolveWebAuthToken($0)
+    }
     guard let webAuthToken else {
       throw ConfigurationError.missingRequired(
         "web.auth.token",
-        suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`")
+        suggestion:
+          "Provide via CLOUDKIT_WEB_AUTH_TOKEN"
+          + " or run `mistdemo auth-token`"
+      )
     }
     self.init(apiToken: apiToken, webAuthToken: webAuthToken)
   }
@@ -135,24 +147,43 @@ extension WebAuthTokenManager {
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension ServerToServerAuthManager {
-  fileprivate convenience init(from config: MistDemoConfig) throws {
+  fileprivate convenience init(
+    from config: MistDemoConfig
+  ) throws {
     guard let keyID = config.keyID, !keyID.isEmpty else {
       throw ConfigurationError.missingRequired(
         "key.id",
-        suggestion: "Provide via CLOUDKIT_KEY_ID environment variable")
+        suggestion:
+          "Provide via CLOUDKIT_KEY_ID environment variable"
+      )
     }
-    guard let rawKey = config.privateKey ?? Self.loadPrivateKeyFromFile(config.privateKeyFile),
+    let loadedKey = Self.loadPrivateKeyFromFile(
+      config.privateKeyFile
+    )
+    guard let rawKey = config.privateKey ?? loadedKey,
       !rawKey.isEmpty
     else {
       throw ConfigurationError.missingRequired(
         "private.key",
-        suggestion: "Provide via CLOUDKIT_PRIVATE_KEY or CLOUDKIT_PRIVATE_KEY_PATH")
+        suggestion:
+          "Provide via CLOUDKIT_PRIVATE_KEY"
+          + " or CLOUDKIT_PRIVATE_KEY_PATH"
+      )
     }
-    try self.init(keyID: keyID, pemString: rawKey.replacingOccurrences(of: "\\n", with: "\n"))
+    let pem = rawKey.replacingOccurrences(
+      of: "\\n", with: "\n"
+    )
+    try self.init(keyID: keyID, pemString: pem)
   }
 
-  private static func loadPrivateKeyFromFile(_ filePath: String?) -> String? {
-    guard let filePath, !filePath.isEmpty else { return nil }
-    return try? String(contentsOfFile: filePath, encoding: .utf8)
+  private static func loadPrivateKeyFromFile(
+    _ filePath: String?
+  ) -> String? {
+    guard let filePath, !filePath.isEmpty else {
+      return nil
+    }
+    return try? String(
+      contentsOfFile: filePath, encoding: .utf8
+    )
   }
 }

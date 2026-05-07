@@ -29,8 +29,8 @@
 
 import Foundation
 
-/// Errors that can occur during integration testing
-enum IntegrationTestError: LocalizedError, Sendable {
+/// Errors that can occur during integration testing.
+internal enum IntegrationTestError: LocalizedError, Sendable {
   case zoneNotFound(String)
   case uploadFailed(String)
   case recordCreationFailed(String)
@@ -41,7 +41,7 @@ enum IntegrationTestError: LocalizedError, Sendable {
   case missingWebAuthToken
   case missingPhaseState(String)
 
-  var errorDescription: String? {
+  internal var errorDescription: String? {
     switch self {
     case .zoneNotFound(let zone):
       return "Zone not found: \(zone)"

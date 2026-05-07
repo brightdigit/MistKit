@@ -30,15 +30,15 @@
 import Foundation
 import MistKit
 
-struct CreateRecordsPhase: IntegrationPhase {
-  typealias Input = AssetUploadReceipt
-  typealias Output = CreatedRecordNames
+internal struct CreateRecordsPhase: IntegrationPhase {
+  internal typealias Input = AssetUploadReceipt
+  internal typealias Output = CreatedRecordNames
 
-  static let title = "Create records with assets"
-  static let emoji = "📝"
-  static let apiName = "createRecord"
+  internal static let title = "Create records with assets"
+  internal static let emoji = "📝"
+  internal static let apiName = "createRecord"
 
-  func run(
+  internal func run(
     input: AssetUploadReceipt,
     context: PhaseContext
   ) async throws -> CreatedRecordNames {

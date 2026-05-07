@@ -37,12 +37,12 @@ import MistKit
 ///
 /// - Note: Used in AuthResponse.swift line 13 for encoding auth response data
 internal struct CloudKitData: Encodable {
-  /// User information retrieved from CloudKit (nil if retrieval failed)
-  let user: UserInfo?
+  /// User information retrieved from CloudKit (nil if retrieval failed).
+  internal let user: UserInfo?
 
-  /// List of available zones in the user's container
-  let zones: [ZoneInfo]
+  /// List of available zones in the user's container.
+  internal let zones: [ZoneInfo]
 
-  /// Error message if any part of the CloudKit data retrieval failed
-  let error: String?
+  /// Error message if any part of the CloudKit data retrieval failed.
+  internal let error: String?
 }

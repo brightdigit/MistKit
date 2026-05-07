@@ -30,15 +30,17 @@
 import Foundation
 import MistKit
 
-struct DiscoverUserIdentitiesPhase: IntegrationPhase {
-  typealias Input = UserInfo
-  typealias Output = NoState
+internal struct DiscoverUserIdentitiesPhase: IntegrationPhase {
+  internal typealias Input = UserInfo
+  internal typealias Output = NoState
 
-  static let title = "Discover user identities"
-  static let emoji = "👥"
-  static let apiName = "discoverUserIdentities"
+  internal static let title = "Discover user identities"
+  internal static let emoji = "👥"
+  internal static let apiName = "discoverUserIdentities"
 
-  func run(input: UserInfo, context: PhaseContext) async throws -> NoState {
+  internal func run(
+    input: UserInfo, context: PhaseContext
+  ) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     let lookupInfos = [UserIdentityLookupInfo(userRecordName: input.userRecordName)]

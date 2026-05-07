@@ -30,15 +30,21 @@
 public import ConfigKeyKit
 import Foundation
 
-/// Configuration for lookup-zones command
+/// Configuration for lookup-zones command.
 public struct LookupZonesConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = MistDemoConfig
 
+  /// The base MistDemo configuration.
   public let base: MistDemoConfig
+  /// The zone names to look up.
   public let zoneNames: [String]
+  /// The output format.
   public let output: OutputFormat
 
+  /// Creates a new instance.
   public init(
     base: MistDemoConfig,
     zoneNames: [String],
@@ -49,13 +55,19 @@ public struct LookupZonesConfig: Sendable, ConfigurationParseable {
     self.output = output
   }
 
-  /// Parse configuration from command line arguments
-  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: MistDemoConfig?
+  ) async throws {
     let baseConfig: MistDemoConfig
     if let base {
       baseConfig = base
     } else {
-      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+      baseConfig = try await MistDemoConfig(
+        configuration: configuration,
+        base: nil
+      )
     }
 
     let zoneNamesString =
@@ -67,9 +79,15 @@ public struct LookupZonesConfig: Sendable, ConfigurationParseable {
       $0.trimmingCharacters(in: .whitespaces)
     }
 
-    let outputString = configuration.string(forKey: "output.format", default: "table") ?? "table"
+    let outputString =
+      configuration.string(forKey: "output.format", default: "table")
+      ?? "table"
     let output = OutputFormat(rawValue: outputString) ?? .table
 
-    self.init(base: baseConfig, zoneNames: zoneNames, output: output)
+    self.init(
+      base: baseConfig,
+      zoneNames: zoneNames,
+      output: output
+    )
   }
 }

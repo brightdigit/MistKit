@@ -29,48 +29,55 @@
 
 import Foundation
 
-/// JSON-formatted error output for consistent error reporting
+/// JSON-formatted error output for consistent error reporting.
 public struct ErrorOutput: Sendable, Codable {
-  // MARK: Lifecycle
-
-  public init(
-    code: String, message: String, details: [String: String]? = nil, suggestion: String? = nil
-  ) {
-    self.error = ErrorDetail(code: code, message: message, details: details, suggestion: suggestion)
-  }
-
-  // MARK: Public
-
-  /// The error details
-  public let error: ErrorDetail
-
   // MARK: - Error Detail
 
-  /// Detailed error information
+  /// Detailed error information.
   public struct ErrorDetail: Sendable, Codable {
-    // MARK: Lifecycle
+    /// Error code (machine-readable).
+    public let code: String
 
+    /// Human-readable error message.
+    public let message: String
+
+    /// Optional additional details about the error.
+    public let details: [String: String]?
+
+    /// Optional suggestion for recovery.
+    public let suggestion: String?
+
+    /// Create a new error detail.
     public init(
-      code: String, message: String, details: [String: String]? = nil, suggestion: String? = nil
+      code: String,
+      message: String,
+      details: [String: String]? = nil,
+      suggestion: String? = nil
     ) {
       self.code = code
       self.message = message
       self.details = details
       self.suggestion = suggestion
     }
+  }
 
-    // MARK: Public
+  // MARK: Public
 
-    /// Error code (machine-readable)
-    public let code: String
+  /// The error details.
+  public let error: ErrorDetail
 
-    /// Human-readable error message
-    public let message: String
-
-    /// Optional additional details about the error
-    public let details: [String: String]?
-
-    /// Optional suggestion for recovery
-    public let suggestion: String?
+  /// Create a new error output.
+  public init(
+    code: String,
+    message: String,
+    details: [String: String]? = nil,
+    suggestion: String? = nil
+  ) {
+    self.error = ErrorDetail(
+      code: code,
+      message: message,
+      details: details,
+      suggestion: suggestion
+    )
   }
 }

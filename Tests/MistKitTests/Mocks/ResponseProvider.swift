@@ -72,6 +72,21 @@ internal actor ResponseProvider {
     ResponseProvider(defaultResponse: .successfulQuery(records: records))
   }
 
+  /// Response provider that throws a transport-level error (network failure or timeout).
+  internal static func networkError(_ error: any Error) -> ResponseProvider {
+    ResponseProvider(defaultResponse: .networkError(error))
+  }
+
+  /// Response provider that simulates a request timeout.
+  internal static func timeout() -> ResponseProvider {
+    ResponseProvider(defaultResponse: .timeout())
+  }
+
+  /// Response provider that simulates a connection failure.
+  internal static func connectionLost() -> ResponseProvider {
+    ResponseProvider(defaultResponse: .connectionLost())
+  }
+
   // MARK: - Configuration
 
   internal func configure(operationID: String, response: ResponseConfig) {

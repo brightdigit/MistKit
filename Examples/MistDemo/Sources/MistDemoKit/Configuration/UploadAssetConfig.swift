@@ -31,18 +31,27 @@ public import ConfigKeyKit
 import Foundation
 public import MistKit
 
-/// Configuration for upload-asset command
+/// Configuration for upload-asset command.
 public struct UploadAssetConfig: Sendable, ConfigurationParseable {
+  /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
+  /// The base configuration type.
   public typealias BaseConfig = MistDemoConfig
 
+  /// The base MistDemo configuration.
   public let base: MistDemoConfig
+  /// The file path to upload.
   public let file: String
+  /// The CloudKit record type.
   public let recordType: String
+  /// The field name for the asset.
   public let fieldName: String
+  /// The optional record name.
   public let recordName: String?
+  /// The output format.
   public let output: OutputFormat
 
+  /// Creates a new instance.
   public init(
     base: MistDemoConfig,
     file: String,
@@ -59,14 +68,20 @@ public struct UploadAssetConfig: Sendable, ConfigurationParseable {
     self.output = output
   }
 
-  /// Parse configuration from command line arguments
-  public init(configuration: MistDemoConfiguration, base: MistDemoConfig?) async throws {
+  /// Parse configuration from command line arguments.
+  public init(
+    configuration: MistDemoConfiguration,
+    base: MistDemoConfig?
+  ) async throws {
     let configReader = configuration
     let baseConfig: MistDemoConfig
     if let base = base {
       baseConfig = base
     } else {
-      baseConfig = try await MistDemoConfig(configuration: configuration, base: nil)
+      baseConfig = try await MistDemoConfig(
+        configuration: configuration,
+        base: nil
+      )
     }
 
     // Get file path from configuration
@@ -75,16 +90,20 @@ public struct UploadAssetConfig: Sendable, ConfigurationParseable {
     }
 
     // Get record type (defaults to "Note")
-    let recordType = configReader.string(forKey: "record-type") ?? "Note"
+    let recordType =
+      configReader.string(forKey: "record-type") ?? "Note"
 
     // Get field name (defaults to "image")
-    let fieldName = configReader.string(forKey: "field-name") ?? "image"
+    let fieldName =
+      configReader.string(forKey: "field-name") ?? "image"
 
     // Parse optional record name
     let recordName = configReader.string(forKey: "record-name")
 
     // Parse output format
-    let outputString = configReader.string(forKey: "output.format", default: "json") ?? "json"
+    let outputString =
+      configReader.string(forKey: "output.format", default: "json")
+      ?? "json"
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(

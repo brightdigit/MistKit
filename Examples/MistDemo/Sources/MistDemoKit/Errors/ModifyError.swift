@@ -36,28 +36,39 @@ public enum ModifyError: Error, LocalizedError {
   case emptyStdin
   case stdinError(String)
   case invalidOperationType(String)
-  case missingRecordName(opIndex: Int, op: String)
+  case missingRecordName(opIndex: Int, operation: String)
   case operationFailed(String)
 
+  /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .operationsRequired:
-      return "No operations provided. Use --operations-file <path> or pipe JSON to stdin."
+      return
+        "No operations provided."
+        + " Use --operations-file <path> or pipe JSON to stdin."
     case .operationsFileError(let path, let reason):
-      return "Failed to read operations file '\(path)': \(reason)"
+      return
+        "Failed to read operations file '\(path)': \(reason)"
     case .emptyStdin:
       return "Empty stdin. Provide a JSON array of operations."
     case .stdinError(let reason):
-      return "Failed to parse operations from stdin: \(reason)"
-    case .invalidOperationType(let op):
-      return "Unknown operation type '\(op)'. Use one of: create, update, delete."
-    case .missingRecordName(let index, let op):
-      return "Operation #\(index) (\(op)) is missing required 'recordName'."
+      return
+        "Failed to parse operations from stdin: \(reason)"
+    case .invalidOperationType(let opType):
+      return
+        "Unknown operation type '\(opType)'."
+        + " Use one of: create, update, delete."
+    case .missingRecordName(let index, let operation):
+      return
+        "Operation #\(index) (\(operation))"
+        + " is missing required 'recordName'."
     case .operationFailed(let reason):
       return "Modify operation failed: \(reason)"
     }
   }
 
+  /// A localized recovery suggestion.
+  /// A localized recovery suggestion.
   public var recoverySuggestion: String? {
     switch self {
     case .operationsRequired:
@@ -66,7 +77,10 @@ public enum ModifyError: Error, LocalizedError {
       return "Ensure the file exists and contains a JSON array of operations."
     case .emptyStdin:
       return
-        "Pipe JSON: echo '[{\"op\":\"create\",\"recordType\":\"Note\",\"fields\":{\"title\":\"x\"}}]' | mistdemo modify"
+        "Pipe JSON: echo"
+        + " '[{\"op\":\"create\",\"recordType\":\"Note\","
+        + "\"fields\":{\"title\":\"x\"}}]'"
+        + " | mistdemo modify"
     case .stdinError:
       return "Check the JSON syntax of the piped input."
     case .invalidOperationType:

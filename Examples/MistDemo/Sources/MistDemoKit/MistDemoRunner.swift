@@ -34,6 +34,7 @@ import Foundation
 /// parses arguments, and dispatches to the matching command — the executable
 /// target's `@main` is reduced to a single call into `run()`.
 public enum MistDemoRunner {
+  /// Parse arguments and dispatch to the matching command.
   @MainActor
   public static func run() async throws {
     let registry = CommandRegistry.shared

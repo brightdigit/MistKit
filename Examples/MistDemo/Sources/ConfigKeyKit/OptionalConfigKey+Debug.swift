@@ -28,6 +28,7 @@
 //
 
 extension OptionalConfigKey: CustomDebugStringConvertible {
+  /// A textual representation of this key suitable for debugging.
   public var debugDescription: String {
     let cliKey = key(for: .commandLine) ?? "nil"
     let envKey = key(for: .environment) ?? "nil"
