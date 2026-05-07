@@ -30,6 +30,15 @@
 import MistKit
 
 extension MistDemoConfig {
+  /// Canonical lowercase names recognized for the `environment` config key.
+  ///
+  /// Matching is case-insensitive against these full names — aliases
+  /// (e.g. `"prod"`, `"dev"`) are intentionally not accepted.
+  private enum EnvironmentName {
+    internal static let production = "production"
+    internal static let development = "development"
+  }
+
   internal struct CoreConfig {
     internal let containerIdentifier: String
     internal let apiToken: String
@@ -60,7 +69,7 @@ extension MistDemoConfig {
 
   internal static func parseCoreConfig(
     _ config: MistDemoConfiguration
-  ) -> CoreConfig {
+  ) throws -> CoreConfig {
     let containerIdentifier =
       config.string(
         forKey: "container.identifier",
@@ -77,16 +86,34 @@ extension MistDemoConfig {
     let envString =
       config.string(
         forKey: "environment",
-        default: "development"
-      ) ?? "development"
-    let environment: MistKit.Environment =
-      envString == "production" ? .production : .development
+        default: EnvironmentName.development
+      ) ?? EnvironmentName.development
+    let environment = try Self.parseEnvironment(envString)
 
     return CoreConfig(
       containerIdentifier: containerIdentifier,
       apiToken: apiToken,
       environment: environment
     )
+  }
+
+  /// Parses the `environment` config value into a `MistKit.Environment`.
+  ///
+  /// Matching is case-insensitive against the two canonical full names
+  /// (`production`, `development`). Any other value — including aliases
+  /// like `"prod"` or `"dev"` — throws `ConfigurationError.invalidEnvironment`
+  /// so misconfigured deployments fail fast at startup.
+  private static func parseEnvironment(
+    _ raw: String
+  ) throws -> MistKit.Environment {
+    switch raw.lowercased() {
+    case EnvironmentName.production:
+      return .production
+    case EnvironmentName.development:
+      return .development
+    default:
+      throw ConfigurationError.invalidEnvironment(raw)
+    }
   }
 
   internal static func parseAuthConfig(

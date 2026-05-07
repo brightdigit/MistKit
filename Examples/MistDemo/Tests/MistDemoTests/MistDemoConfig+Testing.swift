@@ -40,6 +40,25 @@ extension MistDemoConfig {
     self = try await MistDemoConfig(configuration: configuration)
   }
 
+  /// Create a test configuration that injects a raw `environment`
+  /// string into the underlying provider. Used to exercise the
+  /// env-validation logic with values the typed `environment:`
+  /// initializer cannot express (e.g. `"PRODUCTION"`, `"staging"`).
+  internal init(rawEnvironment: String) async throws {
+    func key(_ path: String) -> AbsoluteConfigKey {
+      AbsoluteConfigKey(path.split(separator: ".").map(String.init), context: [:])
+    }
+
+    let testProvider = InMemoryProvider(values: [
+      key("container.identifier"): .init(stringLiteral: "iCloud.com.test.App"),
+      key("api.token"): .init(stringLiteral: "test-api-token"),
+      key("environment"): .init(stringLiteral: rawEnvironment),
+      key("database"): .init(stringLiteral: "private"),
+    ])
+    let configuration = MistDemoConfiguration(testProvider: testProvider)
+    self = try await MistDemoConfig(configuration: configuration)
+  }
+
   /// Create a test configuration with custom values
   internal init(
     containerIdentifier: String = "iCloud.com.test.App",

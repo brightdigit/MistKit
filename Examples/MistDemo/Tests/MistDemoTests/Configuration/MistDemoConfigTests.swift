@@ -83,6 +83,38 @@ internal struct MistDemoConfigTests {
     #expect(config.environment == .development)
   }
 
+  @Test(
+    "Environment names are matched case-insensitively to .production",
+    arguments: ["production", "Production", "PRODUCTION", "PrOdUcTiOn"]
+  )
+  internal func environmentMatchesProductionCaseInsensitively(
+    raw: String
+  ) async throws {
+    let config = try await MistDemoConfig(rawEnvironment: raw)
+    #expect(config.environment == .production)
+  }
+
+  @Test(
+    "Environment names are matched case-insensitively to .development",
+    arguments: ["development", "Development", "DEVELOPMENT", "DeVeLoPmEnT"]
+  )
+  internal func environmentMatchesDevelopmentCaseInsensitively(
+    raw: String
+  ) async throws {
+    let config = try await MistDemoConfig(rawEnvironment: raw)
+    #expect(config.environment == .development)
+  }
+
+  @Test(
+    "Invalid environment values throw ConfigurationError.invalidEnvironment",
+    arguments: ["staging", "prod", "dev", "test", "qa", " production ", ""]
+  )
+  internal func invalidEnvironmentThrows(raw: String) async throws {
+    await #expect(throws: ConfigurationError.self) {
+      _ = try await MistDemoConfig(rawEnvironment: raw)
+    }
+  }
+
   // MARK: - Server Configuration Tests
 
   @Test("Default host is localhost")
