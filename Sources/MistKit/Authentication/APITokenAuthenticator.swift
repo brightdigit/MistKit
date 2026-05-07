@@ -37,11 +37,18 @@ public import OpenAPIRuntime
 /// the throwing initializer so that an invalid token format is rejected before
 /// the value can be used to authenticate a request.
 public struct APITokenAuthenticator: Authenticator {
+  private struct WireFormat: Codable {
+    let token: String
+  }
+
+  /// Stable storage key (`"api-token"`).
   public static let storageKey: String = "api-token"
 
   /// The 64-character hex CloudKit API token from Apple Developer Console.
   public let token: String
 
+  /// Identifier derived from the first 8 characters of the token so that
+  /// distinct tokens can be persisted side by side.
   public var defaultStorageIdentifier: String {
     "api-\(token.prefix(8))"
   }
@@ -61,6 +68,15 @@ public struct APITokenAuthenticator: Authenticator {
     self.token = token
   }
 
+  /// Reconstructs an `APITokenAuthenticator` from data previously produced
+  /// by `encoded()`. Re-runs format validation, so a corrupted or stale
+  /// payload throws `TokenManagerError.invalidCredentials`.
+  public init(decoding data: Data) throws {
+    let wire = try JSONDecoder().decode(WireFormat.self, from: data)
+    try self.init(token: wire.token)
+  }
+
+  /// Appends `ckAPIToken=<token>` as a query item on the outgoing request.
   public func authenticate(
     request: inout HTTPRequest,
     body: inout HTTPBody?
@@ -68,16 +84,8 @@ public struct APITokenAuthenticator: Authenticator {
     request.appendQueryItems([URLQueryItem(name: "ckAPIToken", value: token)])
   }
 
+  /// JSON-encodes the API token for persistence by `TokenStorage`.
   public func encoded() throws -> Data {
     try JSONEncoder().encode(WireFormat(token: token))
-  }
-
-  public init(decoding data: Data) throws {
-    let wire = try JSONDecoder().decode(WireFormat.self, from: data)
-    try self.init(token: wire.token)
-  }
-
-  private struct WireFormat: Codable {
-    let token: String
   }
 }

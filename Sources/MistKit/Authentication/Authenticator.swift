@@ -58,6 +58,9 @@ public protocol Authenticator: Sendable {
   /// storage under distinct keys.
   var defaultStorageIdentifier: String { get }
 
+  /// Reconstructs the authenticator from previously-encoded data.
+  init(decoding data: Data) throws
+
   /// Attaches this credential to the given HTTP request.
   ///
   /// - Parameters:
@@ -67,6 +70,9 @@ public protocol Authenticator: Sendable {
   ///     `ServerToServerAuthenticator` consumes the body to compute a
   ///     signature and replaces it with a buffered copy so downstream
   ///     middleware sees the same bytes.
+  /// - Throws: An error if the credential cannot be applied — for example,
+  ///   `OpenAPIRuntime` errors when buffering the request body fails or
+  ///   exceeds an authenticator-specific size limit.
   func authenticate(
     request: inout HTTPRequest,
     body: inout HTTPBody?
@@ -82,12 +88,11 @@ public protocol Authenticator: Sendable {
   ///   production deployments should provide a `TokenStorage` backed by
   ///   Keychain, a KMS, or an equivalent secret store.
   func encoded() throws -> Data
-
-  /// Reconstructs the authenticator from previously-encoded data.
-  init(decoding data: Data) throws
 }
 
 extension Authenticator {
+  /// Default implementation: returns `Self.storageKey`. Override on the
+  /// concrete type when a richer per-instance identifier is appropriate.
   public var defaultStorageIdentifier: String {
     Self.storageKey
   }

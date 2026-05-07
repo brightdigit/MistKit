@@ -78,14 +78,12 @@ internal struct ServerToServerAuthenticatorTests {
         privateKey: P256.Signing.PrivateKey()
       )
       Issue.record("Expected init to throw")
-    } catch let error as TokenManagerError {
+    } catch {
       if case .invalidCredentials(.keyIdEmpty) = error {
         // Expected
       } else {
         Issue.record("Unexpected error: \(error)")
       }
-    } catch {
-      Issue.record("Unexpected error: \(error)")
     }
   }
 
@@ -98,14 +96,12 @@ internal struct ServerToServerAuthenticatorTests {
         privateKey: P256.Signing.PrivateKey()
       )
       Issue.record("Expected init to throw")
-    } catch let error as TokenManagerError {
+    } catch {
       if case .invalidCredentials(.keyIdTooShort) = error {
         // Expected
       } else {
         Issue.record("Unexpected error: \(error)")
       }
-    } catch {
-      Issue.record("Unexpected error: \(error)")
     }
   }
 

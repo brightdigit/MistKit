@@ -80,14 +80,12 @@ internal struct WebAuthTokenAuthenticatorTests {
         webAuthToken: ""
       )
       Issue.record("Expected init to throw")
-    } catch let error as TokenManagerError {
+    } catch {
       if case .invalidCredentials(.webAuthTokenEmpty) = error {
         // Expected
       } else {
         Issue.record("Unexpected error: \(error)")
       }
-    } catch {
-      Issue.record("Unexpected error: \(error)")
     }
   }
 
@@ -99,14 +97,12 @@ internal struct WebAuthTokenAuthenticatorTests {
         webAuthToken: "tooshort"
       )
       Issue.record("Expected init to throw")
-    } catch let error as TokenManagerError {
+    } catch {
       if case .invalidCredentials(.webAuthTokenTooShort) = error {
         // Expected
       } else {
         Issue.record("Unexpected error: \(error)")
       }
-    } catch {
-      Issue.record("Unexpected error: \(error)")
     }
   }
 

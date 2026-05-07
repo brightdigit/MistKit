@@ -48,6 +48,11 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
     }
   }
 
+  /// The raw representation of the private key (32 bytes for P-256).
+  internal var privateKeyData: Data {
+    privateKey.rawRepresentation
+  }
+
   /// Creates a new server-to-server authentication manager.
   /// - Parameters:
   ///   - keyID: The key identifier from Apple Developer Console.
@@ -98,11 +103,6 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
       }
       throw TokenManagerError.invalidCredentials(.privateKeyParseFailed(error))
     }
-  }
-
-  /// The raw representation of the private key (32 bytes for P-256).
-  internal var privateKeyData: Data {
-    privateKey.rawRepresentation
   }
 
   /// Validates the stored credentials for format and completeness.

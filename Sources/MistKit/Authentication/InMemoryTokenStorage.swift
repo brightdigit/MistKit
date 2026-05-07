@@ -32,20 +32,6 @@ public import Foundation
 /// Simple in-memory implementation of `TokenStorage` for development and
 /// testing. Does not persist data across application restarts.
 public final class InMemoryTokenStorage: TokenStorage, Sendable {
-  /// Routes decoding by `Authenticator.storageKey`.
-  private static let factories: [String: @Sendable (Data) throws -> any Authenticator] = {
-    var entries: [String: @Sendable (Data) throws -> any Authenticator] = [
-      APITokenAuthenticator.storageKey: { try APITokenAuthenticator(decoding: $0) },
-      WebAuthTokenAuthenticator.storageKey: { try WebAuthTokenAuthenticator(decoding: $0) },
-    ]
-    if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
-      entries[ServerToServerAuthenticator.storageKey] = {
-        try ServerToServerAuthenticator(decoding: $0)
-      }
-    }
-    return entries
-  }()
-
   private struct StoredEntry: Sendable {
     let storageKey: String
     let payload: Data
@@ -91,6 +77,20 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
     }
   }
 
+  /// Routes decoding by `Authenticator.storageKey`.
+  private static let factories: [String: @Sendable (Data) throws -> any Authenticator] = {
+    var entries: [String: @Sendable (Data) throws -> any Authenticator] = [
+      APITokenAuthenticator.storageKey: { try APITokenAuthenticator(decoding: $0) },
+      WebAuthTokenAuthenticator.storageKey: { try WebAuthTokenAuthenticator(decoding: $0) },
+    ]
+    if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+      entries[ServerToServerAuthenticator.storageKey] = {
+        try ServerToServerAuthenticator(decoding: $0)
+      }
+    }
+    return entries
+  }()
+
   private let storage = Storage()
 
   /// Returns the number of stored credentials.
@@ -112,6 +112,8 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
 
   // MARK: - TokenStorage Protocol
 
+  /// Stores an authenticator under the given identifier (or `"default"` if
+  /// `nil`), without an expiration time.
   public func store(
     _ authenticator: any Authenticator,
     identifier: String?
@@ -139,6 +141,9 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
     await storage.store(entry, identifier: identifier)
   }
 
+  /// Retrieves the authenticator stored under the given identifier, or
+  /// `nil` if none is stored or the entry has expired. Routes decoding to
+  /// the correct concrete type via `Authenticator.storageKey`.
   public func retrieve(
     identifier: String?
   ) async throws(TokenStorageError) -> (any Authenticator)? {
@@ -155,10 +160,12 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
     }
   }
 
+  /// Removes the entry stored under the given identifier (no-op if none).
   public func remove(identifier: String?) async throws(TokenStorageError) {
     await storage.remove(identifier: identifier)
   }
 
+  /// Returns every identifier currently in storage, including expired ones.
   public func listIdentifiers() async throws(TokenStorageError) -> [String] {
     await storage.listIdentifiers()
   }

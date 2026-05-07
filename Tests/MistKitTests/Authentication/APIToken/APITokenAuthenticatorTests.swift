@@ -61,14 +61,12 @@ internal struct APITokenAuthenticatorTests {
     do {
       _ = try APITokenAuthenticator(token: "")
       Issue.record("Expected init to throw")
-    } catch let error as TokenManagerError {
+    } catch {
       if case .invalidCredentials(.apiTokenEmpty) = error {
         // Expected
       } else {
         Issue.record("Unexpected error: \(error)")
       }
-    } catch {
-      Issue.record("Unexpected error: \(error)")
     }
   }
 
@@ -77,14 +75,12 @@ internal struct APITokenAuthenticatorTests {
     do {
       _ = try APITokenAuthenticator(token: "not-a-valid-token")
       Issue.record("Expected init to throw")
-    } catch let error as TokenManagerError {
+    } catch {
       if case .invalidCredentials(.apiTokenInvalidFormat) = error {
         // Expected
       } else {
         Issue.record("Unexpected error: \(error)")
       }
-    } catch {
-      Issue.record("Unexpected error: \(error)")
     }
   }
 

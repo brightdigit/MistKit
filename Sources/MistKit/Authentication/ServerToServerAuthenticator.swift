@@ -41,6 +41,13 @@ public import OpenAPIRuntime
 /// `authenticate(request:body:)` reassigns `body` to a buffered copy.
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct ServerToServerAuthenticator: Authenticator {
+  private struct WireFormat: Codable {
+    let keyID: String
+    let privateKey: String  // base64-encoded raw representation
+    let bodyBufferLimit: Int?
+  }
+
+  /// Stable storage key (`"server-to-server"`).
   public static let storageKey: String = "server-to-server"
 
   /// Default upper bound (1 MiB) for buffering the request body when signing.
@@ -56,8 +63,15 @@ public struct ServerToServerAuthenticator: Authenticator {
   /// Requests with larger bodies will fail to sign.
   public let bodyBufferLimit: Int
 
+  /// Identifier derived from the key ID so that distinct service-account
+  /// keys can be persisted side by side.
   public var defaultStorageIdentifier: String {
     "s2s-\(keyID)"
+  }
+
+  /// The public key derived from the stored private key.
+  public var publicKey: P256.Signing.PublicKey {
+    privateKey.publicKey
   }
 
   /// Creates an authenticator from a key ID and private key.
@@ -124,11 +138,38 @@ public struct ServerToServerAuthenticator: Authenticator {
     try self.init(keyID: keyID, privateKey: key, bodyBufferLimit: bodyBufferLimit)
   }
 
-  /// The public key derived from the stored private key.
-  public var publicKey: P256.Signing.PublicKey {
-    privateKey.publicKey
+  /// Reconstructs a `ServerToServerAuthenticator` from data previously
+  /// produced by `encoded()`. Re-runs key parse + key-ID validation, so a
+  /// corrupted payload throws `TokenManagerError.invalidCredentials`.
+  public init(decoding data: Data) throws {
+    let wire = try JSONDecoder().decode(WireFormat.self, from: data)
+    guard let keyData = Data(base64Encoded: wire.privateKey) else {
+      throw TokenManagerError.invalidCredentials(
+        .privateKeyInvalidOrCorrupted(
+          NSError(
+            domain: "MistKit.ServerToServerAuthenticator",
+            code: 1,
+            userInfo: [NSLocalizedDescriptionKey: "Invalid base64 in encoded payload"]
+          )
+        )
+      )
+    }
+    try self.init(
+      keyID: wire.keyID,
+      privateKeyData: keyData,
+      bodyBufferLimit: wire.bodyBufferLimit ?? Self.defaultBodyBufferLimit
+    )
   }
 
+  /// Buffers the request body, signs the body + path with the stored private
+  /// key, and writes the CloudKit signature headers
+  /// (`X-Apple-CloudKit-Request-KeyID`, `…ISO8601Date`, `…SignatureV1`).
+  /// The body is reassigned to the buffered copy so downstream middleware
+  /// sees the same bytes regardless of `HTTPBody` iteration behavior.
+  ///
+  /// - Throws: `OpenAPIRuntime` errors when buffering fails or the body
+  ///   exceeds `bodyBufferLimit`; crypto errors from `P256.Signing` if
+  ///   signing fails.
   public func authenticate(
     request: inout HTTPRequest,
     body: inout HTTPBody?
@@ -156,40 +197,10 @@ public struct ServerToServerAuthenticator: Authenticator {
     request.headerFields[.cloudKitRequestSignatureV1] = signature.signature
   }
 
-  /// Signs a CloudKit Web Services request.
-  ///
-  /// - Parameters:
-  ///   - requestBody: The HTTP request body (for POST requests). May be nil.
-  ///   - webServiceURL: The CloudKit Web Services URL subpath.
-  ///   - date: The request date. Defaults to `Date()`.
-  /// - Returns: A `RequestSignature` containing the headers required by
-  ///   CloudKit.
-  public func signRequest(
-    requestBody: Data?,
-    webServiceURL: String,
-    date: Date = Date()
-  ) throws -> RequestSignature {
-    let formatter = ISO8601DateFormatter()
-    formatter.formatOptions = [.withInternetDateTime, .withTimeZone]
-    let iso8601Date = formatter.string(from: date)
-
-    let bodyHash: String
-    if let requestBody {
-      let hash = SHA256.hash(data: requestBody)
-      bodyHash = Data(hash).base64EncodedString()
-    } else {
-      bodyHash = ""
-    }
-
-    let payload = "\(iso8601Date):\(bodyHash):\(webServiceURL)"
-    let signature = try privateKey.signature(for: Data(payload.utf8))
-    return RequestSignature(
-      keyID: keyID,
-      date: iso8601Date,
-      signature: signature.derRepresentation.base64EncodedString()
-    )
-  }
-
+  /// JSON-encodes the key ID, base64-encoded private key, and
+  /// `bodyBufferLimit` for persistence by `TokenStorage`. The output
+  /// contains raw P-256 key material — see the protocol-level warning on
+  /// `Authenticator.encoded()`.
   public func encoded() throws -> Data {
     let wire = WireFormat(
       keyID: keyID,
@@ -197,31 +208,5 @@ public struct ServerToServerAuthenticator: Authenticator {
       bodyBufferLimit: bodyBufferLimit
     )
     return try JSONEncoder().encode(wire)
-  }
-
-  public init(decoding data: Data) throws {
-    let wire = try JSONDecoder().decode(WireFormat.self, from: data)
-    guard let keyData = Data(base64Encoded: wire.privateKey) else {
-      throw TokenManagerError.invalidCredentials(
-        .privateKeyInvalidOrCorrupted(
-          NSError(
-            domain: "MistKit.ServerToServerAuthenticator",
-            code: 1,
-            userInfo: [NSLocalizedDescriptionKey: "Invalid base64 in encoded payload"]
-          )
-        )
-      )
-    }
-    try self.init(
-      keyID: wire.keyID,
-      privateKeyData: keyData,
-      bodyBufferLimit: wire.bodyBufferLimit ?? Self.defaultBodyBufferLimit
-    )
-  }
-
-  private struct WireFormat: Codable {
-    let keyID: String
-    let privateKey: String  // base64-encoded raw representation
-    let bodyBufferLimit: Int?
   }
 }

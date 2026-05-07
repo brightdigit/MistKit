@@ -36,7 +36,15 @@ public import OpenAPIRuntime
 ///
 /// Required for user-specific operations on the private database.
 public struct WebAuthTokenAuthenticator: Authenticator {
+  private struct WireFormat: Codable {
+    let apiToken: String
+    let webAuthToken: String
+  }
+
+  /// Stable storage key (`"web-auth-token"`).
   public static let storageKey: String = "web-auth-token"
+
+  private static let encoder = CharacterMapEncoder()
 
   /// The 64-character hex CloudKit API token.
   public let apiToken: String
@@ -44,11 +52,16 @@ public struct WebAuthTokenAuthenticator: Authenticator {
   /// The web authentication token issued by CloudKit JS.
   public let webAuthToken: String
 
+  /// Identifier derived from the first 8 characters of `apiToken` so that
+  /// distinct authenticated sessions can be persisted side by side.
   public var defaultStorageIdentifier: String {
     "web-\(apiToken.prefix(8))"
   }
 
-  private static let encoder = CharacterMapEncoder()
+  /// The web auth token after applying CloudKit's character-map encoding.
+  public var encodedWebAuthToken: String {
+    Self.encoder.encode(webAuthToken)
+  }
 
   /// Creates an authenticator from API and web-auth tokens.
   /// - Parameters:
@@ -78,6 +91,16 @@ public struct WebAuthTokenAuthenticator: Authenticator {
     self.webAuthToken = webAuthToken
   }
 
+  /// Reconstructs a `WebAuthTokenAuthenticator` from data previously
+  /// produced by `encoded()`. Re-runs format validation, so a corrupted
+  /// or stale payload throws `TokenManagerError.invalidCredentials`.
+  public init(decoding data: Data) throws {
+    let wire = try JSONDecoder().decode(WireFormat.self, from: data)
+    try self.init(apiToken: wire.apiToken, webAuthToken: wire.webAuthToken)
+  }
+
+  /// Appends `ckAPIToken` and a character-map-encoded `ckWebAuthToken` as
+  /// query items on the outgoing request.
   public func authenticate(
     request: inout HTTPRequest,
     body: inout HTTPBody?
@@ -89,22 +112,8 @@ public struct WebAuthTokenAuthenticator: Authenticator {
     ])
   }
 
-  /// The web auth token after applying CloudKit's character-map encoding.
-  public var encodedWebAuthToken: String {
-    Self.encoder.encode(webAuthToken)
-  }
-
+  /// JSON-encodes both tokens for persistence by `TokenStorage`.
   public func encoded() throws -> Data {
     try JSONEncoder().encode(WireFormat(apiToken: apiToken, webAuthToken: webAuthToken))
-  }
-
-  public init(decoding data: Data) throws {
-    let wire = try JSONDecoder().decode(WireFormat.self, from: data)
-    try self.init(apiToken: wire.apiToken, webAuthToken: wire.webAuthToken)
-  }
-
-  private struct WireFormat: Codable {
-    let apiToken: String
-    let webAuthToken: String
   }
 }
