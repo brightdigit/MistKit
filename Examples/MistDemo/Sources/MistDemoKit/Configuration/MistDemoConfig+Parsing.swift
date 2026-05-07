@@ -60,7 +60,7 @@ extension MistDemoConfig {
 
   internal static func parseCoreConfig(
     _ config: MistDemoConfiguration
-  ) -> CoreConfig {
+  ) throws -> CoreConfig {
     let containerIdentifier =
       config.string(
         forKey: "container.identifier",
@@ -74,13 +74,12 @@ extension MistDemoConfig {
         isSecret: true
       ) ?? ""
 
+    let defaultEnv = MistKit.Environment.development.rawValue
     let envString =
-      config.string(
-        forKey: "environment",
-        default: "development"
-      ) ?? "development"
-    let environment: MistKit.Environment =
-      envString == "production" ? .production : .development
+      config.string(forKey: "environment", default: defaultEnv) ?? defaultEnv
+    guard let environment = MistKit.Environment(caseInsensitive: envString) else {
+      throw ConfigurationError.invalidEnvironment(envString)
+    }
 
     return CoreConfig(
       containerIdentifier: containerIdentifier,

@@ -50,7 +50,7 @@ internal enum AuthenticationHelper {
     keyID: String?,
     privateKey: String?,
     privateKeyFile: String?,
-    databaseOverride: String? = nil
+    databaseOverride: MistKit.Database? = nil
   ) async throws -> AuthenticationResult {
     if let keyID {
       return try await setupServerToServer(

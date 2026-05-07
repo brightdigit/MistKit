@@ -33,4 +33,11 @@ import Foundation
 public enum Environment: String, Sendable {
   case development
   case production
+
+  /// Initialize from a string by matching the raw value
+  /// case-insensitively. Returns `nil` if the input does not match
+  /// one of the canonical raw values (`"development"`, `"production"`).
+  public init?(caseInsensitive raw: String) {
+    self.init(rawValue: raw.lowercased())
+  }
 }

@@ -69,7 +69,7 @@ extension AuthenticationHelperTests {
           keyID: nil,
           privateKey: nil,
           privateKeyFile: nil,
-          databaseOverride: "public"
+          databaseOverride: .public
         )
 
         #expect(result.database == .public)
@@ -91,7 +91,7 @@ extension AuthenticationHelperTests {
           keyID: nil,
           privateKey: nil,
           privateKeyFile: nil,
-          databaseOverride: "private"
+          databaseOverride: .private
         )
 
         #expect(result.database == .private)
