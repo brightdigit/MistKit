@@ -232,7 +232,7 @@ extension CloudKitService {
     maxPages: Int = 1_000
   ) async throws(CloudKitError) -> [RecordInfo] {
     var allRecords: [RecordInfo] = []
-    var currentMarker: String? = nil
+    var currentMarker: String?
     var pageCount = 0
 
     repeat {
