@@ -28,7 +28,7 @@
 //
 
 public import CelestraKit
-public import Foundation
+internal import Foundation
 public import MistKit
 
 extension Article: CloudKitConvertible {

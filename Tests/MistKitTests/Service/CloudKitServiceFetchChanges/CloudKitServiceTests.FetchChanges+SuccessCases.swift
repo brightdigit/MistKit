@@ -90,8 +90,10 @@ extension CloudKitServiceTests.FetchChanges {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService(
-        recordCount: 2)
+      let service = try await CloudKitServiceTests.FetchChanges
+        .makeSuccessfulService(
+          recordCount: 2
+        )
 
       let result = try await service.fetchRecordChanges()
 

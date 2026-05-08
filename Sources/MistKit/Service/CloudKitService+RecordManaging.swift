@@ -38,8 +38,7 @@ extension CloudKitService: RecordManaging {
   /// Query records of a specific type from CloudKit (deprecated single-page form)
   @available(
     *, deprecated,
-    message:
-      "Returns at most one page (silently truncates at the server limit). Use queryAllRecords(recordType:) to fetch all pages, or call queryRecords(...) -> QueryResult to handle pagination explicitly."
+    message: "Silently truncates at one page. Use queryAllRecords or queryRecords -> QueryResult."
   )
   public func queryRecords(recordType: String) async throws -> [RecordInfo] {
     let result: QueryResult = try await self.queryRecords(
@@ -53,6 +52,7 @@ extension CloudKitService: RecordManaging {
     return result.records
   }
 
+  /// Execute a batch of record operations via modify
   public func executeBatchOperations(
     _ operations: [RecordOperation],
     recordType: String

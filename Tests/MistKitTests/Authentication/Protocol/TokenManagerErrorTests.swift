@@ -13,7 +13,8 @@ internal struct TokenManagerErrorTests {
   internal func tokenManagerError() {
     let invalidError = TokenManagerError.invalidCredentials(.apiTokenInvalidFormat)
     let authError = TokenManagerError.authenticationFailed(
-      .serverRejected(statusCode: 401, message: nil))
+      .serverRejected(statusCode: 401, message: nil)
+    )
     let expiredError = TokenManagerError.tokenExpired
     let networkError = TokenManagerError.networkError(
       .other(NSError(domain: "test", code: 123, userInfo: nil))

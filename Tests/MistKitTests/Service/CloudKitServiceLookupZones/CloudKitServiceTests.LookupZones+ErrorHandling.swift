@@ -42,7 +42,8 @@ extension CloudKitServiceTests.LookupZones {
         return
       }
       let service = try CloudKitServiceTests.makeService(
-        provider: ResponseProvider.connectionLost())
+        provider: ResponseProvider.connectionLost()
+      )
       let zone = ZoneID(zoneName: "_defaultZone", ownerName: nil)
 
       await #expect {

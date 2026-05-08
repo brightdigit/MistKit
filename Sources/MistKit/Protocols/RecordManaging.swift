@@ -42,8 +42,7 @@ public protocol RecordManaging {
   /// - Throws: CloudKit errors if the query fails
   @available(
     *, deprecated,
-    message:
-      "Returns at most one page (silently truncates at the server limit). Use queryAllRecords(recordType:) to fetch all pages, or call CloudKitService.queryRecords(...) -> QueryResult to handle pagination explicitly."
+    message: "Silently truncates at one page. Use queryAllRecords or queryRecords -> QueryResult."
   )
   func queryRecords(recordType: String) async throws -> [RecordInfo]
 
@@ -72,8 +71,7 @@ extension RecordManaging {
   /// auto-paginating implementation (e.g. `CloudKitService.queryAllRecords`).
   @available(
     *, deprecated,
-    message:
-      "Default implementation only returns one page. Override queryAllRecords with a real auto-paginating implementation."
+    message: "Default returns one page. Override with a real auto-paginating implementation."
   )
   public func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
     try await queryRecords(recordType: recordType)

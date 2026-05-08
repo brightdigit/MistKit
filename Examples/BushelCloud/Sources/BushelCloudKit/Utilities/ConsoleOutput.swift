@@ -28,6 +28,7 @@
 //
 
 import Foundation
+import Synchronization
 
 /// Console output control for CLI interface
 ///
@@ -36,11 +37,18 @@ import Foundation
 ///
 /// **Important**: All output goes to stderr to keep stdout clean for structured output (JSON, etc.)
 public enum ConsoleOutput {
-  /// Global verbose mode flag
+  private static let _isVerbose = Mutex<Bool>(false)
+
+  /// Global verbose mode flag.
   ///
-  /// Note: This is marked with `nonisolated(unsafe)` because it's set once at startup
-  /// before any concurrent access and then only read. This pattern is safe for CLI tools.
-  nonisolated(unsafe) public static var isVerbose = false
+  /// Backed by a `Mutex` so reads and writes are concurrency-safe across
+  /// arbitrary actors and threads — the previous `nonisolated(unsafe)` was a
+  /// data race waiting to happen if any caller ever toggled this off the main
+  /// path.
+  public static var isVerbose: Bool {
+    get { _isVerbose.withLock { $0 } }
+    set { _isVerbose.withLock { $0 = newValue } }
+  }
 
   /// Print to stderr (keeping stdout clean for structured output)
   ///

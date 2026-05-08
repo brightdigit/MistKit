@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceQueryPaginationTests+Helpers.swift
+//  CloudKitServiceTests.QueryPagination+Helpers.swift
 //  MistKit
 //
 //  Created by Leo Dion.

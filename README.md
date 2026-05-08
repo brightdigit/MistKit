@@ -57,7 +57,7 @@ Add MistKit to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-alpha.5")
+    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-beta.1")
 ]
 ```
 
@@ -269,7 +269,7 @@ let adaptiveManager = AdaptiveTokenManager(
 )
 
 // Later, upgrade to web authentication
-try await adaptiveManager.upgradeToWebAuth(webAuthToken: webToken)
+try await adaptiveManager.upgradeToWebAuthentication(webAuthToken: webToken)
 ```
 
 ### Examples
@@ -339,6 +339,33 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/44) ✅
 - [x] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/48) ✅
 - [x] [Fix QueryFilter IN/NOT_IN serialization](https://github.com/brightdigit/MistKit/issues/192)  ✅
+
+### v1.0.0-beta.1
+
+**Querying & Sync**
+- [x] Query pagination with continuation markers ([#306](https://github.com/brightdigit/MistKit/pull/306)) ✅
+- [x] Operation classification & batch sync result tracking ([#296](https://github.com/brightdigit/MistKit/pull/296)) ✅
+
+**Authentication**
+- [x] `AuthenticationMiddleware` refactor — each `Authenticator` applies itself ([#294](https://github.com/brightdigit/MistKit/pull/294)) ✅
+- [x] Strengthened environment & database configuration validation ([#293](https://github.com/brightdigit/MistKit/pull/293)) ✅
+
+**Error Handling**
+- [x] Typed `TokenManagerError` and safe `RecordOperation` conversion ([#305](https://github.com/brightdigit/MistKit/pull/305)) ✅
+- [x] Move `CloudKitResponseType` defaults to protocol extension ([#292](https://github.com/brightdigit/MistKit/pull/292)) ✅
+
+**Concurrency**
+- [x] Replace custom `AsyncChannel` with `swift-async-algorithms` ([#280](https://github.com/brightdigit/MistKit/pull/280)) ✅
+
+**MistDemo**
+- [x] `--database` flag and `demo-errors` command ([#282](https://github.com/brightdigit/MistKit/pull/282)) ✅
+- [x] Test split, CRUD commands, auth fix, native app ([#271](https://github.com/brightdigit/MistKit/pull/271) / [#273](https://github.com/brightdigit/MistKit/pull/273)) ✅
+- [x] `IntegrationTestRunner` refactored into protocol-based phase pipeline ([#283](https://github.com/brightdigit/MistKit/pull/283)) ✅
+
+**Tooling & CI**
+- [x] Test suite improvements ([#286](https://github.com/brightdigit/MistKit/pull/286) / [#287](https://github.com/brightdigit/MistKit/pull/287)) ✅
+- [x] CI updates for May 2026 ([#277](https://github.com/brightdigit/MistKit/pull/277)) ✅
+- [x] Fail lint job when any command fails ([#303](https://github.com/brightdigit/MistKit/pull/303)) ✅
 
 ### v1.0.0-alpha.X
 
