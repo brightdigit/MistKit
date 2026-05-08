@@ -148,9 +148,9 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
 
   // MARK: - RecordManaging Protocol Requirements
 
-  /// Query all records of a given type
+  /// Query all records of a given type, automatically paginating
   public func queryRecords(recordType: String) async throws -> [RecordInfo] {
-    try await service.queryRecords(recordType: recordType, limit: 200)
+    try await service.queryAllRecords(recordType: recordType)
   }
 
   /// Fetch existing record names for create/update classification

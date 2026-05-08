@@ -1,9 +1,9 @@
 //
-//  RecordManagingTests+List.swift
+//  CloudKitServiceTests.DiscoverUserIdentities+InvalidEmail.swift
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -32,36 +32,35 @@ import Testing
 
 @testable import MistKit
 
-extension RecordManagingTests {
-  @Suite("List Operations")
-  internal struct List {
-    @Test("list() calls queryRecords and doesn't throw")
-    internal func listCallsQueryRecords() async throws {
+extension CloudKitServiceTests.DiscoverUserIdentities {
+  @Suite("Invalid Email")
+  internal struct InvalidEmail {
+    @Test("discoverUserIdentities() surfaces server BAD_REQUEST for malformed email")
+    internal func discoverUserIdentitiesRejectsMalformedEmail() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("RecordManaging.list is not available on this operating system.")
+        Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = MockRecordManagingService()
-
-      await service.reset()
-      let mockRecords = [
-        RecordInfo(
-          recordName: "test-1",
-          recordType: "TestRecord",
-          fields: [
-            "name": .string("First"),
-            "count": .int64(1),
-            "isActive": FieldValue(booleanValue: true),
-          ]
+      let provider = ResponseProvider(
+        defaultResponse: .cloudKitError(
+          statusCode: 400,
+          serverErrorCode: "BAD_REQUEST",
+          reason: "Invalid email address format: not-an-email"
         )
-      ]
-      await service.setRecordsToReturn(mockRecords)
+      )
+      let service = try CloudKitServiceTests.makeService(provider: provider)
+      let lookup = UserIdentityLookupInfo(emailAddress: "not-an-email")
 
-      // list() outputs to console, so we just verify it doesn't throw
-      try await service.list(TestRecord.self)
-
-      let queryCount = await service.queryCallCount
-      #expect(queryCount == 1)
+      await #expect {
+        _ = try await service.discoverUserIdentities(lookupInfos: [lookup])
+      } throws: { error in
+        guard let ckError = error as? CloudKitError,
+          case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason) = ckError
+        else { return false }
+        return statusCode == 400
+          && serverErrorCode == "BAD_REQUEST"
+          && reason?.contains("Invalid email") == true
+      }
     }
   }
 }

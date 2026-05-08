@@ -1,9 +1,9 @@
 //
-//  RecordManagingTests+List.swift
+//  CloudKitServiceTests.FetchZoneChanges+Validation.swift
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -32,36 +32,20 @@ import Testing
 
 @testable import MistKit
 
-extension RecordManagingTests {
-  @Suite("List Operations")
-  internal struct List {
-    @Test("list() calls queryRecords and doesn't throw")
-    internal func listCallsQueryRecords() async throws {
+extension CloudKitServiceTests.FetchZoneChanges {
+  @Suite("Validation")
+  internal struct Validation {
+    @Test("fetchZoneChanges() throws on authentication error")
+    internal func fetchZoneChangesThrowsOnAuthError() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("RecordManaging.list is not available on this operating system.")
+        Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = MockRecordManagingService()
+      let service = try await CloudKitServiceTests.FetchZoneChanges.makeAuthErrorService()
 
-      await service.reset()
-      let mockRecords = [
-        RecordInfo(
-          recordName: "test-1",
-          recordType: "TestRecord",
-          fields: [
-            "name": .string("First"),
-            "count": .int64(1),
-            "isActive": FieldValue(booleanValue: true),
-          ]
-        )
-      ]
-      await service.setRecordsToReturn(mockRecords)
-
-      // list() outputs to console, so we just verify it doesn't throw
-      try await service.list(TestRecord.self)
-
-      let queryCount = await service.queryCallCount
-      #expect(queryCount == 1)
+      await #expect(throws: CloudKitError.self) {
+        try await service.fetchZoneChanges()
+      }
     }
   }
 }

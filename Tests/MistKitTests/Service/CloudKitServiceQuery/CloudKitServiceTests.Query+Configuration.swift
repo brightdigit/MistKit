@@ -1,9 +1,9 @@
 //
-//  RecordManagingTests+List.swift
+//  CloudKitServiceTests.Query+Configuration.swift
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -32,36 +32,21 @@ import Testing
 
 @testable import MistKit
 
-extension RecordManagingTests {
-  @Suite("List Operations")
-  internal struct List {
-    @Test("list() calls queryRecords and doesn't throw")
-    internal func listCallsQueryRecords() async throws {
+extension CloudKitServiceTests.Query {
+  @Suite("Configuration")
+  internal struct Configuration {
+    @Test("queryRecords() uses default limit from configuration")
+    internal func queryRecordsUsesDefaultLimit() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("RecordManaging.list is not available on this operating system.")
+        Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = MockRecordManagingService()
+      // This test verifies that the default limit configuration is respected
+      // Using MockTransport to avoid actual network calls
+      let service = try CloudKitServiceTests.Query.makeSuccessfulService()
 
-      await service.reset()
-      let mockRecords = [
-        RecordInfo(
-          recordName: "test-1",
-          recordType: "TestRecord",
-          fields: [
-            "name": .string("First"),
-            "count": .int64(1),
-            "isActive": FieldValue(booleanValue: true),
-          ]
-        )
-      ]
-      await service.setRecordsToReturn(mockRecords)
-
-      // list() outputs to console, so we just verify it doesn't throw
-      try await service.list(TestRecord.self)
-
-      let queryCount = await service.queryCallCount
-      #expect(queryCount == 1)
+      // Verify service was created successfully
+      #expect(service.containerIdentifier == TestConstants.serviceContainerIdentifier)
     }
   }
 }

@@ -101,7 +101,7 @@ extension RecordManaging where Self: CloudKitRecordCollection {
     try await Self.recordTypes.forEach { recordType in
       recordTypesList.append(recordType)
       let typeName = recordType.cloudKitRecordType
-      let records = try await queryRecords(recordType: typeName)
+      let records = try await queryAllRecords(recordType: typeName)
       countsByType[typeName] = records.count
       totalCount += records.count
 
@@ -148,7 +148,7 @@ extension RecordManaging where Self: CloudKitRecordCollection {
     // swift-format-ignore: ReplaceForEachWithForLoop
     try await Self.recordTypes.forEach { recordType in
       let typeName = recordType.cloudKitRecordType
-      let records = try await queryRecords(recordType: typeName)
+      let records = try await queryAllRecords(recordType: typeName)
 
       guard !records.isEmpty else {
         print("\n\(typeName): No records to delete")

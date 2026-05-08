@@ -31,7 +31,7 @@ import Foundation
 
 /// Public wrapper for CloudKit query sort descriptors
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-public struct QuerySort {
+public struct QuerySort: Sendable {
   // MARK: - Internal
 
   internal let sort: Components.Schemas.Sort
