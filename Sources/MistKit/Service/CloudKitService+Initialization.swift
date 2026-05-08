@@ -44,17 +44,19 @@ extension CloudKitService {
     containerIdentifier: String,
     apiToken: String,
     webAuthToken: String,
+    environment: Environment = .development,
+    database: Database = .private,
     transport: any ClientTransport
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
-    self.environment = .development
-    self.database = .private
+    self.environment = environment
+    self.database = database
 
     let config = MistKitConfiguration(
       container: containerIdentifier,
-      environment: .development,
-      database: .private,
+      environment: environment,
+      database: database,
       apiToken: apiToken,
       webAuthToken: webAuthToken
     )
@@ -69,17 +71,19 @@ extension CloudKitService {
   public init(
     containerIdentifier: String,
     apiToken: String,
+    environment: Environment = .development,
+    database: Database = .public,
     transport: any ClientTransport
   ) throws {
     self.containerIdentifier = containerIdentifier
     self.apiToken = apiToken
-    self.environment = .development
-    self.database = .public  // API-only supports public database
+    self.environment = environment
+    self.database = database
 
     let config = MistKitConfiguration(
       container: containerIdentifier,
-      environment: .development,
-      database: .public,  // API-only supports public database
+      environment: environment,
+      database: database,
       apiToken: apiToken,
       webAuthToken: nil,
       keyID: nil,
@@ -129,12 +133,16 @@ extension CloudKitService {
     public init(
       containerIdentifier: String,
       apiToken: String,
-      webAuthToken: String
+      webAuthToken: String,
+      environment: Environment = .development,
+      database: Database = .private
     ) throws {
       try self.init(
         containerIdentifier: containerIdentifier,
         apiToken: apiToken,
         webAuthToken: webAuthToken,
+        environment: environment,
+        database: database,
         transport: URLSessionTransport()
       )
     }
@@ -145,11 +153,15 @@ extension CloudKitService {
     /// For WASI builds, use the generic initializer that accepts a transport parameter.
     public init(
       containerIdentifier: String,
-      apiToken: String
+      apiToken: String,
+      environment: Environment = .development,
+      database: Database = .public
     ) throws {
       try self.init(
         containerIdentifier: containerIdentifier,
         apiToken: apiToken,
+        environment: environment,
+        database: database,
         transport: URLSessionTransport()
       )
     }

@@ -74,6 +74,64 @@ extension CloudKitResponseProcessor {
     }
   }
 
+  /// Process discoverAllUserIdentities response
+  internal func processDiscoverAllUserIdentitiesResponse(
+    _ response: Operations.discoverAllUserIdentities.Output
+  ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
+    if let error = CloudKitError(response) {
+      throw error
+    }
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let discoverData):
+        return discoverData
+      }
+    default:
+      // Should never reach here since all errors are handled above
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
+  }
+
+  /// Process lookupUsersByEmail response
+  internal func processLookupUsersByEmailResponse(
+    _ response: Operations.lookupUsersByEmail.Output
+  ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
+    if let error = CloudKitError(response) {
+      throw error
+    }
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let discoverData):
+        return discoverData
+      }
+    default:
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
+  }
+
+  /// Process lookupUsersByRecordName response
+  internal func processLookupUsersByRecordNameResponse(
+    _ response: Operations.lookupUsersByRecordName.Output
+  ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
+    if let error = CloudKitError(response) {
+      throw error
+    }
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let discoverData):
+        return discoverData
+      }
+    default:
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
+  }
+
   /// Process uploadAssets response
   /// - Parameter response: The response to process
   /// - Returns: The extracted asset upload response data

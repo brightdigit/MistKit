@@ -1,5 +1,5 @@
 //
-//  UserInfo.swift
+//  Operations.discoverAllUserIdentities.Output.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,36 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// User information from CloudKit (User Dictionary — returned by users/caller and users/lookup/*)
-public struct UserInfo: Encodable, Sendable {
-  /// The user's record name
-  public let userRecordName: String
-  /// The user's first name
-  public let firstName: String?
-  /// The user's last name
-  public let lastName: String?
-  /// The user's email address
-  public let emailAddress: String?
+extension Operations.discoverAllUserIdentities.Output: CloudKitResponseType {
+  internal var badRequestResponse: Components.Responses.BadRequest? {
+    if case .badRequest(let response) = self {
+      return response
+    } else {
+      return nil
+    }
+  }
 
-  internal init(from cloudKitUser: Components.Schemas.UserResponse) {
-    self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
-    self.firstName = cloudKitUser.firstName
-    self.lastName = cloudKitUser.lastName
-    self.emailAddress = cloudKitUser.emailAddress
+  internal var unauthorizedResponse: Components.Responses.Unauthorized? {
+    if case .unauthorized(let response) = self {
+      return response
+    } else {
+      return nil
+    }
+  }
+
+  internal var isOk: Bool {
+    if case .ok = self {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  internal var undocumentedStatusCode: Int? {
+    if case .undocumented(let statusCode, _) = self {
+      return statusCode
+    } else {
+      return nil
+    }
   }
 }

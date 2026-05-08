@@ -1,5 +1,5 @@
 //
-//  UserInfo.swift
+//  CloudKitServiceTests.LookupUsersByRecordName+Validation.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,26 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// User information from CloudKit (User Dictionary — returned by users/caller and users/lookup/*)
-public struct UserInfo: Encodable, Sendable {
-  /// The user's record name
-  public let userRecordName: String
-  /// The user's first name
-  public let firstName: String?
-  /// The user's last name
-  public let lastName: String?
-  /// The user's email address
-  public let emailAddress: String?
+import Foundation
+import Testing
 
-  internal init(from cloudKitUser: Components.Schemas.UserResponse) {
-    self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
-    self.firstName = cloudKitUser.firstName
-    self.lastName = cloudKitUser.lastName
-    self.emailAddress = cloudKitUser.emailAddress
+@testable import MistKit
+
+extension CloudKitServiceTests.LookupUsersByRecordName {
+  @Suite("Validation")
+  internal struct Validation {
+    @Test("lookupUsersByRecordName() throws on authentication error")
+    internal func throwsOnAuthError() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try await CloudKitServiceTests.LookupUsersByRecordName
+        .makeAuthErrorService()
+
+      await #expect(throws: CloudKitError.self) {
+        try await service.lookupUsersByRecordName(["_user-0"])
+      }
+    }
   }
 }

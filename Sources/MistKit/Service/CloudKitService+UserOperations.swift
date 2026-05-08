@@ -40,20 +40,111 @@ import OpenAPIRuntime
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
-  /// Fetch current user information
-  public func fetchCurrentUser() async throws(CloudKitError) -> UserInfo {
+  /// Fetch the caller's (current authenticated user's) information.
+  ///
+  /// Hits CloudKit's `users/caller` endpoint, which replaces the deprecated
+  /// `users/current`. Requires public-database routing with web-auth credentials
+  /// (user-context auth); calling against the private database returns
+  /// `BAD_REQUEST: endpoint not applicable in the database type`.
+  public func fetchCaller() async throws(CloudKitError) -> UserInfo {
     do {
-      let response = try await client.getCurrentUser(
+      let response = try await client.getCaller(
         .init(
-          path: createGetCurrentUserPath(containerIdentifier: containerIdentifier)
+          path: createGetCallerPath(containerIdentifier: containerIdentifier)
         )
       )
 
       let userData: Components.Schemas.UserResponse =
-        try await responseProcessor.processGetCurrentUserResponse(response)
+        try await responseProcessor.processGetCallerResponse(response)
       return UserInfo(from: userData)
     } catch {
-      throw mapToCloudKitError(error, context: "fetchCurrentUser")
+      throw mapToCloudKitError(error, context: "fetchCaller")
+    }
+  }
+
+  /// Fetch the current authenticated user's information.
+  @available(*, deprecated, renamed: "fetchCaller", message: "users/current is deprecated by Apple. Use fetchCaller() instead.")
+  public func fetchCurrentUser() async throws(CloudKitError) -> UserInfo {
+    try await fetchCaller()
+  }
+
+  /// Discover all user identities in the caller's CloudKit address book.
+  ///
+  /// Hits CloudKit's GET `users/discover` endpoint. Requires public-database
+  /// routing with web-auth credentials (user-context auth); only users who have
+  /// run the app and granted discoverability are returned.
+  public func discoverAllUserIdentities() async throws(CloudKitError) -> [UserIdentity] {
+    do {
+      let response = try await client.discoverAllUserIdentities(
+        .init(
+          path: createDiscoverAllUserIdentitiesPath(
+            containerIdentifier: containerIdentifier
+          )
+        )
+      )
+
+      let discoverData: Components.Schemas.DiscoverResponse =
+        try await responseProcessor.processDiscoverAllUserIdentitiesResponse(
+          response
+        )
+      return discoverData.users?.map(UserIdentity.init(from:)) ?? []
+    } catch {
+      throw mapToCloudKitError(error, context: "discoverAllUserIdentities")
+    }
+  }
+
+  /// Look up user identities by email address.
+  ///
+  /// Hits CloudKit's POST `users/lookup/email` endpoint. Each requested email
+  /// returns at most one identity in the result array. Requires public-database
+  /// routing with web-auth credentials (user-context auth).
+  public func lookupUsersByEmail(
+    _ emails: [String]
+  ) async throws(CloudKitError) -> [UserIdentity] {
+    do {
+      let response = try await client.lookupUsersByEmail(
+        .init(
+          path: createLookupUsersByEmailPath(
+            containerIdentifier: containerIdentifier
+          ),
+          body: .json(
+            .init(users: emails.map { .init(emailAddress: $0) })
+          )
+        )
+      )
+
+      let discoverData: Components.Schemas.DiscoverResponse =
+        try await responseProcessor.processLookupUsersByEmailResponse(response)
+      return discoverData.users?.map(UserIdentity.init(from:)) ?? []
+    } catch {
+      throw mapToCloudKitError(error, context: "lookupUsersByEmail")
+    }
+  }
+
+  /// Look up user identities by record name (CloudKit user record ID).
+  ///
+  /// Hits CloudKit's POST `users/lookup/id` endpoint. Requires public-database
+  /// routing with web-auth credentials (user-context auth).
+  public func lookupUsersByRecordName(
+    _ recordNames: [String]
+  ) async throws(CloudKitError) -> [UserIdentity] {
+    do {
+      let response = try await client.lookupUsersByRecordName(
+        .init(
+          path: createLookupUsersByRecordNamePath(
+            containerIdentifier: containerIdentifier
+          ),
+          body: .json(
+            .init(users: recordNames.map { .init(userRecordName: $0) })
+          )
+        )
+      )
+
+      let discoverData: Components.Schemas.DiscoverResponse =
+        try await responseProcessor.processLookupUsersByRecordNameResponse(response)
+      return discoverData.users?.map(UserIdentity.init(from:)) ?? []
+    } catch {
+      throw mapToCloudKitError(error, context: "lookupUsersByRecordName")
     }
   }
 

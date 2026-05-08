@@ -67,11 +67,11 @@ public struct CloudKitService: Sendable {
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
-  /// Create a standard path for getCurrentUser requests
+  /// Create a standard path for getCaller requests
   /// - Parameter containerIdentifier: The container identifier
   /// - Returns: A configured path for the request
-  internal func createGetCurrentUserPath(containerIdentifier: String)
-    -> Operations.getCurrentUser.Input.Path
+  internal func createGetCallerPath(containerIdentifier: String)
+    -> Operations.getCaller.Input.Path
   {
     .init(
       version: "1",
@@ -185,6 +185,48 @@ extension CloudKitService {
   internal func createDiscoverUserIdentitiesPath(
     containerIdentifier: String
   ) -> Operations.discoverUserIdentities.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for discoverAllUserIdentities requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createDiscoverAllUserIdentitiesPath(
+    containerIdentifier: String
+  ) -> Operations.discoverAllUserIdentities.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for lookupUsersByEmail requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createLookupUsersByEmailPath(
+    containerIdentifier: String
+  ) -> Operations.lookupUsersByEmail.Input.Path {
+    .init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
+  }
+
+  /// Create a standard path for lookupUsersByRecordName requests
+  /// - Parameter containerIdentifier: The container identifier
+  /// - Returns: A configured path for the request
+  internal func createLookupUsersByRecordNamePath(
+    containerIdentifier: String
+  ) -> Operations.lookupUsersByRecordName.Input.Path {
     .init(
       version: "1",
       container: containerIdentifier,
