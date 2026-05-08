@@ -1,5 +1,5 @@
 //
-//  DatabaseCredentialsTests.swift
+//  AuthenticationCredentialsTests.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -33,8 +33,8 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("DatabaseCredentials")
-internal enum DatabaseCredentialsTests {
+@Suite("AuthenticationCredentials & DatabaseConfiguration")
+internal enum AuthenticationCredentialsTests {
   @Suite("PrivateKeyMaterial")
   internal struct PrivateKeyMaterialTests {
     @Test("loadPEM raw returns content unchanged when no escapes present")
@@ -88,72 +88,90 @@ internal enum DatabaseCredentialsTests {
     }
   }
 
-  @Suite("database getter")
-  internal struct DatabaseGetterTests {
-    @Test("publicDatabase returns .public")
-    internal func publicMapsToPublic() {
-      let creds = DatabaseCredentials.publicDatabase(
-        keyID: "k",
-        privateKey: .raw("pem")
-      )
-      #expect(creds.database == .public)
-    }
-
-    @Test("privateDatabase returns .private")
-    internal func privateMapsToPrivate() {
-      let creds = DatabaseCredentials.privateDatabase(
-        apiToken: "a",
-        webAuthToken: "w"
-      )
-      #expect(creds.database == .private)
-    }
-
-    @Test("sharedDatabase returns .shared")
-    internal func sharedMapsToShared() {
-      let creds = DatabaseCredentials.sharedDatabase(
-        apiToken: "a",
-        webAuthToken: "w"
-      )
-      #expect(creds.database == .shared)
-    }
-  }
-
   @Suite("makeTokenManager")
   internal struct MakeTokenManagerTests {
-    @Test("privateDatabase produces a WebAuthTokenManager")
-    internal func privateProducesWebAuthManager() throws {
-      let creds = DatabaseCredentials.privateDatabase(
+    @Test("webAuth produces a WebAuthTokenManager")
+    internal func webAuthProducesManager() throws {
+      let auth = AuthenticationCredentials.webAuth(
         apiToken: "api",
         webAuthToken: "web"
       )
 
-      let manager = try creds.makeTokenManager()
-      #expect(manager is WebAuthTokenManager)
-    }
-
-    @Test("sharedDatabase produces a WebAuthTokenManager")
-    internal func sharedProducesWebAuthManager() throws {
-      let creds = DatabaseCredentials.sharedDatabase(
-        apiToken: "api",
-        webAuthToken: "web"
-      )
-
-      let manager = try creds.makeTokenManager()
+      let manager = try auth.makeTokenManager()
       #expect(manager is WebAuthTokenManager)
     }
 
     @Test(
-      "publicDatabase with malformed PEM surfaces the auth manager error",
+      "serverToServer with malformed PEM surfaces the auth manager error",
       .enabled(if: MistKitClientFactoryTests.isServerToServerSupported())
     )
-    internal func publicWithBadPEMThrows() throws {
-      let creds = DatabaseCredentials.publicDatabase(
+    internal func serverToServerWithBadPEMThrows() throws {
+      let auth = AuthenticationCredentials.serverToServer(
         keyID: "test-key-id",
         privateKey: .raw("not-a-real-pem")
       )
 
       #expect(throws: (any Error).self) {
-        _ = try creds.makeTokenManager()
+        _ = try auth.makeTokenManager()
+      }
+    }
+  }
+
+  @Suite("DatabaseConfiguration.make validation")
+  internal struct DatabaseConfigurationMakeTests {
+    @Test("public + serverToServer is allowed")
+    internal func publicWithServerToServerSucceeds() throws {
+      let configuration = try DatabaseConfiguration.make(
+        database: .public,
+        authentication: .serverToServer(keyID: "k", privateKey: .raw("pem"))
+      )
+      #expect(configuration.database == .public)
+    }
+
+    @Test("public + webAuth is allowed")
+    internal func publicWithWebAuthSucceeds() throws {
+      let configuration = try DatabaseConfiguration.make(
+        database: .public,
+        authentication: .webAuth(apiToken: "a", webAuthToken: "w")
+      )
+      #expect(configuration.database == .public)
+    }
+
+    @Test("private + webAuth is allowed")
+    internal func privateWithWebAuthSucceeds() throws {
+      let configuration = try DatabaseConfiguration.make(
+        database: .private,
+        authentication: .webAuth(apiToken: "a", webAuthToken: "w")
+      )
+      #expect(configuration.database == .private)
+    }
+
+    @Test("shared + webAuth is allowed")
+    internal func sharedWithWebAuthSucceeds() throws {
+      let configuration = try DatabaseConfiguration.make(
+        database: .shared,
+        authentication: .webAuth(apiToken: "a", webAuthToken: "w")
+      )
+      #expect(configuration.database == .shared)
+    }
+
+    @Test("private + serverToServer is rejected")
+    internal func privateWithServerToServerThrows() throws {
+      #expect(throws: ConfigurationError.self) {
+        _ = try DatabaseConfiguration.make(
+          database: .private,
+          authentication: .serverToServer(keyID: "k", privateKey: .raw("pem"))
+        )
+      }
+    }
+
+    @Test("shared + serverToServer is rejected")
+    internal func sharedWithServerToServerThrows() throws {
+      #expect(throws: ConfigurationError.self) {
+        _ = try DatabaseConfiguration.make(
+          database: .shared,
+          authentication: .serverToServer(keyID: "k", privateKey: .raw("pem"))
+        )
       }
     }
   }

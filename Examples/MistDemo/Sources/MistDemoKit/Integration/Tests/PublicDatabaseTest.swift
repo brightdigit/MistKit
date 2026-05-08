@@ -33,23 +33,41 @@ import MistKit
 internal struct PublicDatabaseTest: PhasedIntegrationTest {
   internal let name = "Public Database"
   internal let database: MistKit.Database
+  internal let phases: [any IntegrationPhase]
 
-  internal let phases: [any IntegrationPhase] = [
-    LookupZonePhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    ModifyRecordsPhase(),
-    FinalVerificationPhase(),
-    CleanupPhase(),
-  ]
-
-  internal init(database: MistKit.Database = .public) {
+  /// - Parameters:
+  ///   - database: must be `.public`. Defaults to `.public`.
+  ///   - includeUserContextPhases: when `true`, appends user-identity phases
+  ///     (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`, `users/lookup/*`)
+  ///     that require a public+web-auth `userContextService`. The runner sets
+  ///     this based on whether web-auth credentials are configured.
+  internal init(
+    database: MistKit.Database = .public,
+    includeUserContextPhases: Bool = false
+  ) {
     precondition(
       database == .public,
       "PublicDatabaseTest only supports the public database"
     )
     self.database = database
+
+    var phases: [any IntegrationPhase] = [
+      LookupZonePhase(),
+      UploadAssetPhase(),
+      CreateRecordsPhase(),
+      QueryRecordsPhase(),
+      LookupRecordsPhase(),
+      ModifyRecordsPhase(),
+      FinalVerificationPhase(),
+      CleanupPhase(),
+    ]
+    if includeUserContextPhases {
+      phases.append(FetchCallerPhase())
+      phases.append(DiscoverUserIdentitiesPhase())
+      phases.append(DiscoverAllUserIdentitiesPhase())
+      phases.append(LookupUsersByEmailPhase())
+      phases.append(LookupUsersByRecordNamePhase())
+    }
+    self.phases = phases
   }
 }

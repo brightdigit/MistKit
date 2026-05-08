@@ -73,7 +73,7 @@ public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
       let client = try MistKitClientFactory.create(for: config.base)
 
       // Fetch current user information
-      let userInfo = try await client.fetchCurrentUser()
+      let userInfo = try await client.fetchCaller()
 
       // Filter fields if requested
       let filteredUser = filterUserFields(userInfo, fields: config.fields)

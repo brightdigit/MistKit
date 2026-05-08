@@ -1,5 +1,5 @@
 //
-//  DatabaseCredentials.swift
+//  AuthenticationCredentials.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,25 +30,23 @@
 import Foundation
 import MistKit
 
-/// A database choice paired with the credentials required to access it.
+/// How MistDemo authenticates with CloudKit.
 ///
-/// Bundling these together means a constructed value cannot represent an
-/// invalid combination (e.g. `.public` without server-to-server signing
-/// credentials), shifting the validation that previously lived in
-/// `MistKitClientFactory.create(for:)` into the type system.
-internal enum DatabaseCredentials: Sendable {
-  case publicDatabase(keyID: String, privateKey: PrivateKeyMaterial)
-  case privateDatabase(apiToken: String, webAuthToken: String)
-  case sharedDatabase(apiToken: String, webAuthToken: String)
-
-  /// The corresponding `MistKit.Database` for this credentials variant.
-  internal var database: MistKit.Database {
-    switch self {
-    case .publicDatabase: return .public
-    case .privateDatabase: return .private
-    case .sharedDatabase: return .shared
-    }
-  }
+/// Distinct from the database (`MistKit.Database`) the request targets — the
+/// public/private/shared database axis and the auth-method axis are orthogonal.
+/// CloudKit accepts:
+///
+/// - public + server-to-server (CRUD with developer credentials)
+/// - public + web-auth (user-context endpoints like `users/caller`,
+///   `users/discover`, `users/lookup/*`)
+/// - private + web-auth, shared + web-auth (per-user data)
+///
+/// Server-to-server signing against the private/shared databases is rejected
+/// by Apple, so `DatabaseConfiguration.make(database:authentication:)`
+/// validates the combination at construction time.
+internal enum AuthenticationCredentials: Sendable {
+  case serverToServer(keyID: String, privateKey: PrivateKeyMaterial)
+  case webAuth(apiToken: String, webAuthToken: String)
 
   /// Construct the appropriate `TokenManager` for these credentials.
   ///
@@ -56,16 +54,15 @@ internal enum DatabaseCredentials: Sendable {
   ///   from `ServerToServerAuthManager` if the PEM string is malformed.
   internal func makeTokenManager() throws -> any TokenManager {
     switch self {
-    case .publicDatabase(let keyID, let privateKey):
+    case .serverToServer(let keyID, let privateKey):
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         throw ConfigurationError.unsupportedPlatform(
-          "Public database access requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
+          "Server-to-server authentication requires macOS 11.0+, iOS 14.0+, tvOS 14.0+, or watchOS 7.0+"
         )
       }
       let pem = try privateKey.loadPEM()
       return try ServerToServerAuthManager(keyID: keyID, pemString: pem)
-    case .privateDatabase(let apiToken, let webAuthToken),
-      .sharedDatabase(let apiToken, let webAuthToken):
+    case .webAuth(let apiToken, let webAuthToken):
       return WebAuthTokenManager(apiToken: apiToken, webAuthToken: webAuthToken)
     }
   }

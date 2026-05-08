@@ -1,5 +1,5 @@
 //
-//  MistDemoConfig+DatabaseCredentials.swift
+//  MistDemoConfig+DatabaseConfiguration.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -31,22 +31,43 @@ import Foundation
 import MistKit
 
 extension MistDemoConfig {
-  /// Bundle this config's flat auth fields into a `DatabaseCredentials` value
-  /// matching `self.database`, validating that the required credentials are
-  /// present.
+  /// Build the primary `DatabaseConfiguration` matching `self.database`.
+  ///
+  /// - `.public` → server-to-server (requires `keyID` + `privateKey`/`privateKeyFile`)
+  /// - `.private`, `.shared` → web-auth (requires `apiToken` + `webAuthToken`)
   ///
   /// - Throws: `ConfigurationError.missingRequired` if any required field for
   ///   the chosen database is missing or empty.
-  internal func toDatabaseCredentials() throws -> DatabaseCredentials {
+  internal func toPrimaryConfiguration() throws -> DatabaseConfiguration {
+    let auth: AuthenticationCredentials
     switch database {
     case .public:
-      return try toPublicCredentials()
+      auth = try resolveServerToServerAuth()
     case .private, .shared:
-      return try toUserCredentials()
+      auth = try resolveWebAuth()
     }
+    return try DatabaseConfiguration.make(
+      database: database,
+      authentication: auth
+    )
   }
 
-  private func toPublicCredentials() throws -> DatabaseCredentials {
+  /// Build a public+web-auth `DatabaseConfiguration` for user-context endpoints
+  /// (`users/caller`, `users/discover`, `users/lookup/*`).
+  ///
+  /// Returns `nil` when web-auth tokens are not available, allowing callers to
+  /// gracefully skip user-identity coverage instead of failing.
+  internal func toUserContextConfiguration() -> DatabaseConfiguration? {
+    guard let auth = try? resolveWebAuth() else { return nil }
+    return try? DatabaseConfiguration.make(
+      database: .public,
+      authentication: auth
+    )
+  }
+
+  // MARK: - Auth resolution helpers
+
+  private func resolveServerToServerAuth() throws -> AuthenticationCredentials {
     guard let keyID, !keyID.isEmpty else {
       throw ConfigurationError.missingRequired(
         "key.id",
@@ -54,7 +75,7 @@ extension MistDemoConfig {
       )
     }
     let material = try resolvePrivateKeyMaterial()
-    return .publicDatabase(keyID: keyID, privateKey: material)
+    return .serverToServer(keyID: keyID, privateKey: material)
   }
 
   private func resolvePrivateKeyMaterial() throws -> PrivateKeyMaterial {
@@ -69,7 +90,7 @@ extension MistDemoConfig {
     )
   }
 
-  private func toUserCredentials() throws -> DatabaseCredentials {
+  private func resolveWebAuth() throws -> AuthenticationCredentials {
     let resolvedAPIToken = AuthenticationHelper.resolveAPIToken(apiToken)
     guard !resolvedAPIToken.isEmpty else {
       throw ConfigurationError.missingRequired(
@@ -86,14 +107,6 @@ extension MistDemoConfig {
         suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`"
       )
     }
-    return database == .private
-      ? .privateDatabase(
-        apiToken: resolvedAPIToken,
-        webAuthToken: resolvedWebAuth
-      )
-      : .sharedDatabase(
-        apiToken: resolvedAPIToken,
-        webAuthToken: resolvedWebAuth
-      )
+    return .webAuth(apiToken: resolvedAPIToken, webAuthToken: resolvedWebAuth)
   }
 }

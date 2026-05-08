@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  DiscoverAllUserIdentitiesPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,27 +30,40 @@
 import Foundation
 import MistKit
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// Calls GET `/users/discover` to fetch every discoverable user identity in the
+/// caller's CloudKit address book.
+///
+/// Requires public-database web-auth (user-context) credentials.
+internal struct DiscoverAllUserIdentitiesPhase: IntegrationPhase {
+  internal typealias Input = NoState
+  internal typealias Output = NoState
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in a public-database
-  // pipeline that has access to a public+web-auth `userContextService`.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    LookupZonePhase(),
-    FetchZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    CleanupPhase(),
-  ]
+  internal static let title = "Discover all user identities"
+  internal static let emoji = "🌐"
+  internal static let apiName = "discoverAllUserIdentities"
+
+  internal func run(
+    input: NoState, context: PhaseContext
+  ) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
+
+    guard let service = context.userContextService else {
+      throw IntegrationTestError.missingUserContextService(phase: Self.apiName)
+    }
+
+    let identities = try await service.discoverAllUserIdentities()
+
+    print(
+      "✅ Found \(identities.count) discoverable user identit"
+        + "\(identities.count == 1 ? "y" : "ies")"
+    )
+
+    if context.verbose {
+      for identity in identities {
+        if let name = identity.userRecordName { print("   - \(name)") }
+      }
+    }
+
+    return NoState()
+  }
 }

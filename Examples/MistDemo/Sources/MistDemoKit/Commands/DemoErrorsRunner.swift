@@ -74,7 +74,7 @@ internal struct DemoErrorsRunner {
         from: config.with(database: .private),
         tokenManager: badTokenManager
       )
-      _ = try await service.fetchCurrentUser()
+      _ = try await service.fetchCaller()
       print("⚠️  Expected 401 but call succeeded — credentials may not be validated server-side.")
     } catch let error as CloudKitError {
       printCloudKitError(error, expectedStatus: 401)

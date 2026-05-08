@@ -75,9 +75,13 @@ public struct TestIntegrationCommand: MistDemoCommand {
   /// Executes the command.
   public func execute() async throws {
     let service = try MistKitClientFactory.create(for: config.base)
+    let userContextService = try MistKitClientFactory.createUserContext(
+      for: config.base
+    )
 
     let runner = IntegrationTestRunner(
       service: service,
+      userContextService: userContextService,
       containerIdentifier: config.base.containerIdentifier,
       database: config.base.database,
       recordCount: config.recordCount,

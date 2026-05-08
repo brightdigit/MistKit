@@ -62,13 +62,33 @@ public struct MistKitClientFactory: Sendable {
         }
         return try create(from: config, tokenManager: makeBadCredentialsTokenManager())
       }
-      let credentials = try config.toDatabaseCredentials()
-      let tokenManager = try credentials.makeTokenManager()
-      return try CloudKitService(
+      let configuration = try config.toPrimaryConfiguration()
+      return try makeService(
         containerIdentifier: config.containerIdentifier,
-        tokenManager: tokenManager,
         environment: config.environment,
-        database: credentials.database
+        configuration: configuration
+      )
+    #endif
+  }
+
+  /// Create the optional public+web-auth service used for user-context endpoints
+  /// (`users/caller`, `users/discover`, `users/lookup/*`).
+  ///
+  /// Returns `nil` when web-auth credentials are not configured, so callers can
+  /// gracefully skip user-identity coverage in integration runs.
+  public static func createUserContext(
+    for config: MistDemoConfig
+  ) throws -> CloudKitService? {
+    #if os(WASI)
+      return nil
+    #else
+      guard let configuration = config.toUserContextConfiguration() else {
+        return nil
+      }
+      return try makeService(
+        containerIdentifier: config.containerIdentifier,
+        environment: config.environment,
+        configuration: configuration
       )
     #endif
   }
@@ -106,4 +126,20 @@ public struct MistKitClientFactory: Sendable {
       )
     #endif
   }
+
+  #if !os(WASI)
+    private static func makeService(
+      containerIdentifier: String,
+      environment: MistKit.Environment,
+      configuration: DatabaseConfiguration
+    ) throws -> CloudKitService {
+      let tokenManager = try configuration.authentication.makeTokenManager()
+      return try CloudKitService(
+        containerIdentifier: containerIdentifier,
+        tokenManager: tokenManager,
+        environment: environment,
+        database: configuration.database
+      )
+    }
+  #endif
 }

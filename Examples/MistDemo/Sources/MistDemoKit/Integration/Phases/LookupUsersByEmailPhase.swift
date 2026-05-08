@@ -1,5 +1,5 @@
 //
-//  FetchCallerPhase.swift
+//  LookupUsersByEmailPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,40 +30,42 @@
 import Foundation
 import MistKit
 
-/// Calls `users/caller`, the user-context endpoint that replaced the deprecated
-/// `users/current`.
-///
-/// CloudKit only accepts this endpoint against the **public database with
-/// web-auth credentials**, so the phase requires `context.userContextService`.
-/// The runner only includes the phase when a user-context service is available;
-/// if the precondition fails the phase throws a typed error rather than silently
-/// hitting the wrong service.
-internal struct FetchCallerPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = UserInfo
+/// Calls POST `/users/lookup/email` with the caller's own email (when known) to
+/// exercise the endpoint without depending on third-party data.
+internal struct LookupUsersByEmailPhase: IntegrationPhase {
+  internal typealias Input = UserInfo
+  internal typealias Output = NoState
 
-  internal static let title = "Fetch caller (current user)"
-  internal static let emoji = "👤"
-  internal static let apiName = "fetchCaller"
+  internal static let title = "Lookup users by email"
+  internal static let emoji = "📧"
+  internal static let apiName = "lookupUsersByEmail"
 
   internal func run(
-    input: NoState, context: PhaseContext
-  ) async throws -> UserInfo {
+    input: UserInfo, context: PhaseContext
+  ) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     guard let service = context.userContextService else {
       throw IntegrationTestError.missingUserContextService(phase: Self.apiName)
     }
 
-    let userInfo = try await service.fetchCaller()
-
-    print("✅ Caller: \(userInfo.userRecordName)")
-
-    if context.verbose {
-      if let firstName = userInfo.firstName { print("   First name: \(firstName)") }
-      if let lastName = userInfo.lastName { print("   Last name: \(lastName)") }
+    guard let email = input.emailAddress, !email.isEmpty else {
+      print(
+        "⏭️  Skipping — caller's email address is not available; cannot self-lookup."
+      )
+      return NoState()
     }
 
-    return userInfo
+    let identities = try await service.lookupUsersByEmail([email])
+
+    print("✅ Looked up \(identities.count) identit\(identities.count == 1 ? "y" : "ies") by email")
+
+    if context.verbose {
+      for identity in identities {
+        if let name = identity.userRecordName { print("   - \(name)") }
+      }
+    }
+
+    return NoState()
   }
 }

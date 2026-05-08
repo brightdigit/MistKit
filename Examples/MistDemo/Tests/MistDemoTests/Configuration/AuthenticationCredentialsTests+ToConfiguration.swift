@@ -1,5 +1,5 @@
 //
-//  DatabaseCredentialsTests+ToDatabaseCredentials.swift
+//  AuthenticationCredentialsTests+ToConfiguration.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -33,16 +33,16 @@ import Testing
 
 @testable import MistDemoKit
 
-extension DatabaseCredentialsTests {
+extension AuthenticationCredentialsTests {
   @Suite(
-    "MistDemoConfig.toDatabaseCredentials",
+    "MistDemoConfig.toPrimaryConfiguration",
     .disabled(
       if: TestPlatform.isWasm32,
       "MistDemoConfig construction relies on Foundation IO unavailable on WASI"
     )
   )
-  internal struct ToDatabaseCredentialsTests {
-    @Test("public with raw private key produces .publicDatabase with .raw material")
+  internal struct ToPrimaryConfigurationTests {
+    @Test("public with raw private key produces .public + .serverToServer with .raw material")
     internal func publicWithRawKey() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
         database: .public,
@@ -50,9 +50,11 @@ extension DatabaseCredentialsTests {
         privateKey: MistKitClientFactoryTests.validPrivateKey
       )
 
-      let creds = try config.toDatabaseCredentials()
-      guard case .publicDatabase(let keyID, let material) = creds else {
-        Issue.record("Expected .publicDatabase, got \(creds)")
+      let configuration = try config.toPrimaryConfiguration()
+      #expect(configuration.database == .public)
+      guard case .serverToServer(let keyID, let material) = configuration.authentication
+      else {
+        Issue.record("Expected .serverToServer, got \(configuration.authentication)")
         return
       }
       #expect(keyID == "test-key-id")
@@ -63,7 +65,7 @@ extension DatabaseCredentialsTests {
       }
     }
 
-    @Test("public with private key file produces .publicDatabase with .file material")
+    @Test("public with private key file produces .serverToServer with .file material")
     internal func publicWithFilePath() throws {
       let config = MistDemoConfig(
         containerIdentifier: "iCloud.com.test.App",
@@ -85,9 +87,9 @@ extension DatabaseCredentialsTests {
         badCredentials: false
       )
 
-      let creds = try config.toDatabaseCredentials()
-      guard case .publicDatabase(_, let material) = creds else {
-        Issue.record("Expected .publicDatabase, got \(creds)")
+      let configuration = try config.toPrimaryConfiguration()
+      guard case .serverToServer(_, let material) = configuration.authentication else {
+        Issue.record("Expected .serverToServer, got \(configuration.authentication)")
         return
       }
       if case .file(let path) = material {
@@ -106,7 +108,7 @@ extension DatabaseCredentialsTests {
       )
 
       do {
-        _ = try config.toDatabaseCredentials()
+        _ = try config.toPrimaryConfiguration()
         Issue.record("Expected ConfigurationError.missingRequired")
       } catch let error as ConfigurationError {
         if case .missingRequired(let key, _) = error {
@@ -125,7 +127,7 @@ extension DatabaseCredentialsTests {
       )
 
       do {
-        _ = try config.toDatabaseCredentials()
+        _ = try config.toPrimaryConfiguration()
         Issue.record("Expected ConfigurationError.missingRequired")
       } catch let error as ConfigurationError {
         if case .missingRequired(let key, _) = error {
@@ -136,7 +138,7 @@ extension DatabaseCredentialsTests {
       }
     }
 
-    @Test("private database resolves into .privateDatabase")
+    @Test("private database resolves into .private + .webAuth")
     internal func privateHappyPath() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
         apiToken: "api",
@@ -144,16 +146,17 @@ extension DatabaseCredentialsTests {
         webAuthToken: "web"
       )
 
-      let creds = try config.toDatabaseCredentials()
-      if case .privateDatabase(let api, let web) = creds {
+      let configuration = try config.toPrimaryConfiguration()
+      #expect(configuration.database == .private)
+      if case .webAuth(let api, let web) = configuration.authentication {
         #expect(api == "api")
         #expect(web == "web")
       } else {
-        Issue.record("Expected .privateDatabase, got \(creds)")
+        Issue.record("Expected .webAuth, got \(configuration.authentication)")
       }
     }
 
-    @Test("shared database resolves into .sharedDatabase")
+    @Test("shared database resolves into .shared + .webAuth")
     internal func sharedHappyPath() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
         apiToken: "api",
@@ -161,13 +164,57 @@ extension DatabaseCredentialsTests {
         webAuthToken: "web"
       )
 
-      let creds = try config.toDatabaseCredentials()
-      if case .sharedDatabase(let api, let web) = creds {
+      let configuration = try config.toPrimaryConfiguration()
+      #expect(configuration.database == .shared)
+      if case .webAuth(let api, let web) = configuration.authentication {
         #expect(api == "api")
         #expect(web == "web")
       } else {
-        Issue.record("Expected .sharedDatabase, got \(creds)")
+        Issue.record("Expected .webAuth, got \(configuration.authentication)")
       }
+    }
+  }
+
+  @Suite(
+    "MistDemoConfig.toUserContextConfiguration",
+    .disabled(
+      if: TestPlatform.isWasm32,
+      "MistDemoConfig construction relies on Foundation IO unavailable on WASI"
+    )
+  )
+  internal struct ToUserContextConfigurationTests {
+    @Test("returns public+webAuth when web-auth tokens are populated")
+    internal func returnsPublicWebAuthWhenAvailable() async throws {
+      let config = try await MistKitClientFactoryTests.makeConfig(
+        apiToken: "api",
+        database: .public,
+        webAuthToken: "web",
+        keyID: "k",
+        privateKey: MistKitClientFactoryTests.validPrivateKey
+      )
+
+      let userContext = config.toUserContextConfiguration()
+      #expect(userContext != nil)
+      #expect(userContext?.database == .public)
+      if case .webAuth(let api, let web) = userContext?.authentication {
+        #expect(api == "api")
+        #expect(web == "web")
+      } else {
+        Issue.record("Expected .webAuth, got \(String(describing: userContext?.authentication))")
+      }
+    }
+
+    @Test("returns nil when web-auth tokens are missing")
+    internal func returnsNilWhenWebAuthMissing() async throws {
+      let config = try await MistKitClientFactoryTests.makeConfig(
+        apiToken: "",
+        database: .public,
+        webAuthToken: nil,
+        keyID: "k",
+        privateKey: MistKitClientFactoryTests.validPrivateKey
+      )
+
+      #expect(config.toUserContextConfiguration() == nil)
     }
   }
 }
