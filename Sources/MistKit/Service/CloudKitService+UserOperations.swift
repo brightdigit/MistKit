@@ -73,6 +73,22 @@ extension CloudKitService {
   /// Hits CloudKit's GET `users/discover` endpoint. Requires public-database
   /// routing with web-auth credentials (user-context auth); only users who have
   /// run the app and granted discoverability are returned.
+  ///
+  /// > Important: Marked `unavailable` until #28 is resolved. Live testing
+  /// > on 2026-05-08 against `iCloud.com.brightdigit.MistDemo` returned
+  /// > HTTP 500 from Apple. The GET form of `/users/discover` is referenced
+  /// > in CloudKitJS but does not appear in Apple's CloudKit Web Services
+  /// > REST documentation, and the live endpoint did not respond
+  /// > successfully. The OpenAPI definition, generated client, path
+  /// > builder, response processor, and Swift wrapper are all in place;
+  /// > unblocking is a one-line `@available` removal once the correct
+  /// > REST shape is determined. Tracking:
+  /// > [#28](https://github.com/brightdigit/MistKit/issues/28).
+  @available(
+    *, unavailable,
+    message:
+      "Not yet ready: live testing on 2026-05-08 returned HTTP 500 from Apple's GET /users/discover. The REST request shape is still under investigation. See #28."
+  )
   public func discoverAllUserIdentities() async throws(CloudKitError) -> [UserIdentity] {
     do {
       let response = try await client.discoverAllUserIdentities(

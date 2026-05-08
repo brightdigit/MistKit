@@ -64,7 +64,6 @@ internal struct PublicDatabaseTest: PhasedIntegrationTest {
     if includeUserContextPhases {
       phases.append(FetchCallerPhase())
       phases.append(DiscoverUserIdentitiesPhase())
-      phases.append(DiscoverAllUserIdentitiesPhase())
       phases.append(LookupUsersByEmailPhase())
       phases.append(LookupUsersByRecordNamePhase())
     }
