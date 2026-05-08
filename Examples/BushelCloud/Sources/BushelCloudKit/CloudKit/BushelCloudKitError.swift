@@ -35,6 +35,7 @@ public enum BushelCloudKitError: LocalizedError {
   case privateKeyFileReadFailed(path: String, error: any Error)
   case invalidPEMFormat(reason: String, suggestion: String)
   case invalidMetadataRecord(recordName: String)
+  case invalidKeyID(reason: String, suggestion: String)
 
   public var errorDescription: String? {
     switch self {
@@ -55,12 +56,20 @@ public enum BushelCloudKitError: LocalizedError {
         """
     case .invalidMetadataRecord(let recordName):
       return "Invalid DataSourceMetadata record: \(recordName) (missing required fields)"
+    case .invalidKeyID(let reason, let suggestion):
+      return """
+        Invalid CloudKit Server-to-Server Key ID: \(reason)
+
+        Suggestion: \(suggestion)
+        """
     }
   }
 
   public var recoverySuggestion: String? {
     switch self {
     case .invalidPEMFormat(_, let suggestion):
+      return suggestion
+    case .invalidKeyID(_, let suggestion):
       return suggestion
     case .privateKeyFileNotFound(let path):
       return """

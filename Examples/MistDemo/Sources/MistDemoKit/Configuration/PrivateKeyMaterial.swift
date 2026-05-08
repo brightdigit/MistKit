@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  PrivateKeyMaterial.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,29 +28,26 @@
 //
 
 import Foundation
-import MistKit
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// Source of a server-to-server private key — either inline PEM or a path to a `.pem` file.
+internal enum PrivateKeyMaterial: Sendable {
+  case raw(String)
+  case file(path: String)
 
-  // `DiscoverUserIdentitiesPhase` is intentionally absent: CloudKit Web
-  // Services rejects `/users/discover` on the private database with
-  // "endpoint not applicable in the database type 'privatedb'", so the
-  // phase only belongs in a public-database test pipeline.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    LookupZonePhase(),
-    FetchZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    CleanupPhase(),
-    FetchCurrentUserPhase(),
-  ]
+  internal func loadPEM() throws -> String {
+    switch self {
+    case .raw(let pem):
+      return pem.replacingOccurrences(of: "\\n", with: "\n")
+    case .file(let path):
+      do {
+        return try String(contentsOfFile: path, encoding: .utf8)
+      } catch {
+        throw ConfigurationError.missingRequired(
+          "private.key",
+          suggestion:
+            "Failed to read private key from '\(path)': \(error.localizedDescription)"
+        )
+      }
+    }
+  }
 }
