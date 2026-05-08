@@ -82,6 +82,9 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     privateKeyPath: String,
     environment: Environment = .development
   ) throws {
+    // Validate Key ID format before any file IO
+    try KeyIDValidator.validate(keyID)
+
     // Read PEM file from disk
     guard FileManager.default.fileExists(atPath: privateKeyPath) else {
       throw BushelCloudKitError.privateKeyFileNotFound(path: privateKeyPath)
@@ -128,6 +131,9 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     pemString: String,
     environment: Environment = .development
   ) throws {
+    // Validate Key ID format before any cryptographic work
+    try KeyIDValidator.validate(keyID)
+
     // Validate PEM format BEFORE passing to MistKit
     // This provides better error messages than MistKit's internal validation
     try PEMValidator.validate(pemString)
