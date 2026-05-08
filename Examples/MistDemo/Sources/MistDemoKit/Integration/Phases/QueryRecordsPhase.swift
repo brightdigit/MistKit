@@ -52,7 +52,13 @@ internal struct QueryRecordsPhase: IntegrationPhase {
         let ours = records.filter { input.names.contains($0.recordName) }
         print("   Found \(ours.count) of our \(input.names.count) test records")
       }
-    } catch CloudKitError.httpErrorWithDetails(statusCode: 404, serverErrorCode: _, reason: _) {
+    } catch {
+      // Workaround for Swift 6.3 SIL miscompile (MandatoryAllocBoxToStack) —
+      // a literal in a destructured-enum `catch` pattern crashes the pass on
+      // this branch. See SWIFT_COMPILER_BUG.md. Match via `guard case` instead.
+      guard case CloudKitError.httpErrorWithDetails(statusCode: 404, _, _) = error else {
+        throw error
+      }
       // Schema propagation in development can lag behind the first write.
       // LookupRecordsPhase already verifies the records exist by name.
       print("⚠️  queryRecords returned NOT_FOUND — schema may not be indexed yet (non-fatal)")

@@ -66,14 +66,11 @@ extension CloudKitService {
     recordType: String,
     limit: Int? = nil
   ) async throws(CloudKitError) -> Set<String> {
-    // Pass `limit:` explicitly so overload resolution picks the typed-throws
-    // variant of `queryRecords` rather than the 1-param RecordManaging-
-    // conforming overload (which has untyped throws).
-    let records = try await queryRecords(
+    let result: QueryResult = try await queryRecords(
       recordType: recordType,
       limit: limit ?? Self.maxRecordsPerRequest
     )
-    return Set(records.map(\.recordName))
+    return Set(result.records.map(\.recordName))
   }
 
   /// Modify CloudKit records and partition the response into creates,

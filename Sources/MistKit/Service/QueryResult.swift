@@ -1,9 +1,9 @@
 //
-//  RecordManagingTests+List.swift
+//  QueryResult.swift
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,41 +27,27 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+/// Result from querying records
+///
+/// Contains the matching records along with an optional continuation marker
+/// for fetching the next page of results.
+public struct QueryResult: Codable, Sendable {
+  /// Records matching the query
+  public let records: [RecordInfo]
+  /// Marker to pass into the next query request to fetch the next page
+  public let continuationMarker: String?
 
-@testable import MistKit
+  /// Initialize a query result
+  public init(
+    records: [RecordInfo],
+    continuationMarker: String?
+  ) {
+    self.records = records
+    self.continuationMarker = continuationMarker
+  }
 
-extension RecordManagingTests {
-  @Suite("List Operations")
-  internal struct List {
-    @Test("list() calls queryRecords and doesn't throw")
-    internal func listCallsQueryRecords() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("RecordManaging.list is not available on this operating system.")
-        return
-      }
-      let service = MockRecordManagingService()
-
-      await service.reset()
-      let mockRecords = [
-        RecordInfo(
-          recordName: "test-1",
-          recordType: "TestRecord",
-          fields: [
-            "name": .string("First"),
-            "count": .int64(1),
-            "isActive": FieldValue(booleanValue: true),
-          ]
-        )
-      ]
-      await service.setRecordsToReturn(mockRecords)
-
-      // list() outputs to console, so we just verify it doesn't throw
-      try await service.list(TestRecord.self)
-
-      let queryCount = await service.queryCallCount
-      #expect(queryCount == 1)
-    }
+  internal init(from response: Components.Schemas.QueryResponse) {
+    self.records = response.records?.compactMap { RecordInfo(from: $0) } ?? []
+    self.continuationMarker = response.continuationMarker
   }
 }
