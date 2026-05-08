@@ -4,15 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MistKit is a Swift Package for Server-Side and Command-Line Access to CloudKit Web Services. This is a fresh rewrite on the `claude` branch using modern Swift features and best practices.
+MistKit is a Swift Package for Server-Side and Command-Line Access to CloudKit Web Services. It targets cross-platform Swift (including Linux, WASI, and Windows) using modern Swift concurrency and code generated from Apple's CloudKit Web Services OpenAPI specification.
 
 ## Key Project Context
 
 - **Purpose**: Provides a Swift interface to CloudKit Web Services (REST API) rather than the CloudKit framework
-- **Target Platforms**: Cross-platform including Linux, server-side Swift, and command-line tools
-- **Current Branch**: `claude` - A modern rewrite leveraging latest Swift advancements
+- **Target Platforms**: Cross-platform including macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows
+- **Default Branch**: `main`
 - **API Reference**: The `openapi.yaml` file contains the OpenAPI 3.0.3 specification for Apple's CloudKit Web Services
-- **Repository State**: Fresh start with OpenAPI spec as the foundation for implementation
+- **Code Generation**: Generated client code lives in `Sources/MistKit/Generated/` and is not committed
 
 ## Development Commands
 
@@ -89,12 +89,16 @@ swift run mistdemo --help
 swift run mistdemo auth-token
 swift run mistdemo current-user
 swift run mistdemo query
+swift run mistdemo lookup
 swift run mistdemo create
 swift run mistdemo update
+swift run mistdemo modify
+swift run mistdemo delete
 swift run mistdemo upload-asset
 swift run mistdemo lookup-zones
 swift run mistdemo fetch-changes
 swift run mistdemo demo-in-filter
+swift run mistdemo demo-errors
 swift run mistdemo test-integration
 swift run mistdemo test-private
 
@@ -158,12 +162,17 @@ MistKit/
 
 | File | Operations |
 |------|-----------|
-| `CloudKitService+Operations.swift` | `queryRecords`, `queryAllRecords`, `lookupRecords`, `modifyRecords` |
+| `CloudKitService+Initialization.swift` | initializer overloads (API token, web auth token, server-to-server) |
+| `CloudKitService+Operations.swift` | `queryRecords`, `queryAllRecords`, `lookupRecords` |
+| `CloudKitService+WriteOperations.swift` | `modifyRecords`, `createRecord`, `updateRecord`, `deleteRecord` |
 | `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
 | `CloudKitService+UserOperations.swift` | `fetchCurrentUser()`, `discoverUserIdentities(lookupInfos:)` |
-| `CloudKitService+AssetOperations.swift` | `uploadAssets` |
-| `CloudKitService+WriteOperations.swift` | `requestAssetUploadURL`, `uploadAssetData` |
+| `CloudKitService+AssetOperations.swift` | `uploadAssets`, `requestAssetUploadURL` |
+| `CloudKitService+AssetUpload.swift` | `uploadAssetData` |
+| `CloudKitService+RecordManaging.swift` | record-managing convenience surface |
+| `CloudKitService+Classification.swift` | operation classification (batch sync result tracking) |
+| `CloudKitService+ErrorHandling.swift` | error mapping helpers |
 
 **Sync/Change Operations:**
 - `fetchRecordChanges(recordType:syncToken:)` → `/records/changes` — returns `RecordChangesResult` with `records`, `syncToken`, `moreComing`
@@ -175,9 +184,9 @@ MistKit/
 **Result Types (Sources/MistKit/Service/):**
 - `QueryResult` — `records: [RecordInfo]`, `continuationMarker: String?`
 - `RecordChangesResult` — `records: [RecordInfo]`, `syncToken: String?`, `moreComing: Bool`
-- `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`
-- `UserIdentity` — `userRecordName: String?`, `nameComponents: NameComponents?`
-- `UserIdentityLookupInfo` — `emailAddress: String?`, `phoneNumber: String?`
+- `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`, `moreComing: Bool`
+- `UserIdentity` — `userRecordName: String?`, `nameComponents: NameComponents?`, `lookupInfo: UserIdentityLookupInfo?`
+- `UserIdentityLookupInfo` — `emailAddress: String?`, `phoneNumber: String?`, `userRecordName: String?`
 - `NameComponents` — full personal name parts (givenName, familyName, nickname, etc.)
 
 **Protocols:**
@@ -248,10 +257,10 @@ Asset uploads use `URLSession.shared` directly rather than the injected `ClientT
 - AssetUploader type: `(Data, URL) async throws -> (statusCode: Int?, data: Data)`
 - Defined in: `Sources/MistKit/Core/AssetUploader.swift`
 - URLSession extension: `Sources/MistKit/Extensions/URLSession+AssetUpload.swift`
-- Upload orchestration: `Sources/MistKit/Service/CloudKitService+WriteOperations.swift`
-  - `uploadAssets()` - Complete two-step upload workflow
-  - `requestAssetUploadURL()` - Step 1: Get CDN upload URL
-  - `uploadAssetData()` - Step 2: Upload binary data to CDN
+- Upload orchestration:
+  - `uploadAssets()` - Complete two-step upload workflow → `Sources/MistKit/Service/CloudKitService+AssetOperations.swift`
+  - `requestAssetUploadURL()` - Step 1: Get CDN upload URL → `Sources/MistKit/Service/CloudKitService+AssetOperations.swift`
+  - `uploadAssetData()` - Step 2: Upload binary data to CDN → `Sources/MistKit/Service/CloudKitService+AssetUpload.swift`
 
 **Future Consideration:**
 A `ClientTransport` extension could provide a generic upload method, but would need to:
@@ -274,7 +283,7 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 - Authentication:
   - **Public database**: `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY` or `CLOUDKIT_PRIVATE_KEY_PATH` → server-to-server signing
   - **Private database**: `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` → web authentication
-- All operations should reference the OpenAPI spec in `cloudkit-api-openapi.yaml`
+- All operations should reference the OpenAPI spec in `openapi.yaml`
 - URL Pattern: `/database/{version}/{container}/{environment}/{database}/{operation}`
 - Supported databases: `public`, `private`, `shared`
 - Environments: `development`, `production`
@@ -297,16 +306,17 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 - Mock uploaders should simulate realistic HTTP responses
 
 **Test Files:**
-- `Tests/MistKitTests/Service/CloudKitServiceUploadTests+*.swift`
+- `Tests/MistKitTests/Service/CloudKitServiceUpload/CloudKitServiceTests.Upload+*.swift`
 - `Tests/MistKitTests/Service/AssetUploadTokenTests.swift`
 
 ### MistDemo Integration Test Runner
 
-`Examples/MistDemo/Sources/MistDemo/Integration/` provides a live end-to-end test suite that runs against a real CloudKit container:
+`Examples/MistDemo/Sources/MistDemoKit/Integration/` provides a live end-to-end test suite that runs against a real CloudKit container:
 
 - `IntegrationTestRunner.swift` — orchestrates all operations (query, create, update, lookup, upload, fetchChanges, lookupZones, discoverUserIdentities)
 - `IntegrationTestData.swift` — seed data for integration tests
 - `IntegrationTestError.swift` — typed errors for test failures
+- `IntegrationTest.swift`, `PhasedIntegrationTest.swift`, and `Tests/` subdirectory — protocol-based phase pipeline introduced in #283
 
 Run via `swift run mistdemo test-integration` or `swift run mistdemo test-private` (private database variant). Both commands require valid CloudKit credentials in the config file.
 
@@ -387,7 +397,7 @@ See `.claude/docs/README.md` for detailed topic breakdowns and integration guida
 
 For detailed schema workflows and integration:
 
-- **AI Schema Workflow** (`Examples/Celestra/AI_SCHEMA_WORKFLOW.md`) - Comprehensive guide for understanding, designing, modifying, and validating CloudKit schemas with text-based tools
+- **AI Schema Workflow** (`Examples/CelestraCloud/.claude/AI_SCHEMA_WORKFLOW.md`) - Comprehensive guide for understanding, designing, modifying, and validating CloudKit schemas with text-based tools
 - **Quick Reference** (`Examples/SCHEMA_QUICK_REFERENCE.md`) - One-page cheat sheet with syntax, patterns, cktool commands, and troubleshooting
 
 ## Additional Notes
