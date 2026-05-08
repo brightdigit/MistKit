@@ -37,6 +37,10 @@ extension RecordManagingTests {
   internal struct Query {
     @Test("query() returns parsed records")
     internal func queryReturnsParsedRecords() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("RecordManaging.query is not available on this operating system.")
+        return
+      }
       let service = MockRecordManagingService()
 
       // Set up mock data
@@ -79,6 +83,10 @@ extension RecordManagingTests {
 
     @Test("query() with filter applies filtering")
     internal func queryWithFilter() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("RecordManaging.query is not available on this operating system.")
+        return
+      }
       let service = MockRecordManagingService()
 
       await service.reset()
@@ -123,6 +131,10 @@ extension RecordManagingTests {
 
     @Test("query() filters out nil parse results")
     internal func queryFiltersOutInvalidRecords() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("RecordManaging.query is not available on this operating system.")
+        return
+      }
       let service = MockRecordManagingService()
 
       await service.reset()
@@ -164,6 +176,10 @@ extension RecordManagingTests {
 
     @Test("query() with no results returns empty array")
     internal func queryWithNoResults() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("RecordManaging.query is not available on this operating system.")
+        return
+      }
       let service = MockRecordManagingService()
 
       await service.reset()

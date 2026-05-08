@@ -37,6 +37,10 @@ extension RecordManagingTests {
   internal struct List {
     @Test("list() calls queryRecords and doesn't throw")
     internal func listCallsQueryRecords() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("RecordManaging.list is not available on this operating system.")
+        return
+      }
       let service = MockRecordManagingService()
 
       await service.reset()
