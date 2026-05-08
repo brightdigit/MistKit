@@ -30,29 +30,6 @@
 import Foundation
 import MistKit
 
-/// Source of a server-to-server private key — either inline PEM or a path to a `.pem` file.
-internal enum PrivateKeyMaterial: Sendable {
-  case raw(String)
-  case file(path: String)
-
-  internal func loadPEM() throws -> String {
-    switch self {
-    case .raw(let pem):
-      return pem.replacingOccurrences(of: "\\n", with: "\n")
-    case .file(let path):
-      do {
-        return try String(contentsOfFile: path, encoding: .utf8)
-      } catch {
-        throw ConfigurationError.missingRequired(
-          "private.key",
-          suggestion:
-            "Failed to read private key from '\(path)': \(error.localizedDescription)"
-        )
-      }
-    }
-  }
-}
-
 /// A database choice paired with the credentials required to access it.
 ///
 /// Bundling these together means a constructed value cannot represent an
@@ -90,59 +67,6 @@ internal enum DatabaseCredentials: Sendable {
     case .privateDatabase(let apiToken, let webAuthToken),
       .sharedDatabase(let apiToken, let webAuthToken):
       return WebAuthTokenManager(apiToken: apiToken, webAuthToken: webAuthToken)
-    }
-  }
-}
-
-extension MistDemoConfig {
-  /// Bundle this config's flat auth fields into a `DatabaseCredentials` value
-  /// matching `self.database`, validating that the required credentials are
-  /// present.
-  ///
-  /// - Throws: `ConfigurationError.missingRequired` if any required field for
-  ///   the chosen database is missing or empty.
-  internal func toDatabaseCredentials() throws -> DatabaseCredentials {
-    switch database {
-    case .public:
-      guard let keyID, !keyID.isEmpty else {
-        throw ConfigurationError.missingRequired(
-          "key.id",
-          suggestion: "Provide via CLOUDKIT_KEY_ID environment variable"
-        )
-      }
-      let material: PrivateKeyMaterial
-      if let raw = privateKey, !raw.isEmpty {
-        material = .raw(raw)
-      } else if let path = privateKeyFile, !path.isEmpty {
-        material = .file(path: path)
-      } else {
-        throw ConfigurationError.missingRequired(
-          "private.key",
-          suggestion: "Provide via CLOUDKIT_PRIVATE_KEY or CLOUDKIT_PRIVATE_KEY_PATH"
-        )
-      }
-      return .publicDatabase(keyID: keyID, privateKey: material)
-
-    case .private, .shared:
-      let resolvedAPIToken = AuthenticationHelper.resolveAPIToken(apiToken)
-      guard !resolvedAPIToken.isEmpty else {
-        throw ConfigurationError.missingRequired(
-          "api.token",
-          suggestion: "Provide via CLOUDKIT_API_TOKEN environment variable"
-        )
-      }
-      let resolvedWebAuth = webAuthToken.flatMap {
-        AuthenticationHelper.resolveWebAuthToken($0)
-      }
-      guard let resolvedWebAuth, !resolvedWebAuth.isEmpty else {
-        throw ConfigurationError.missingRequired(
-          "web.auth.token",
-          suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`"
-        )
-      }
-      return database == .private
-        ? .privateDatabase(apiToken: resolvedAPIToken, webAuthToken: resolvedWebAuth)
-        : .sharedDatabase(apiToken: resolvedAPIToken, webAuthToken: resolvedWebAuth)
     }
   }
 }

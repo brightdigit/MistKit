@@ -1,4 +1,4 @@
-## What's Changed
+## 1.0.0-beta.1
 
 ### Querying & Sync
 * Add query pagination support with continuation markers by @leogdion in https://github.com/brightdigit/MistKit/pull/306
@@ -26,3 +26,11 @@
 * Fail lint job when any command fails, not only in STRICT mode by @leogdion in https://github.com/brightdigit/MistKit/pull/303
 
 **Full Changelog**: https://github.com/brightdigit/MistKit/compare/1.0.0-alpha.5...1.0.0-beta.1
+
+## 1.0.0-alpha.5
+
+* Add lookupZones, fetchRecordChanges, and uploadAssets operations by @leogdion in https://github.com/brightdigit/MistKit/pull/204
+* Fix QueryFilter IN/NOT_IN serialization by @leogdion in https://github.com/brightdigit/MistKit/pull/205
+* Migrate server-side CloudKit tutorial content by @leogdion in https://github.com/brightdigit/MistKit/pull/248
+
+**Full Changelog**: https://github.com/brightdigit/MistKit/compare/1.0.0-alpha.4...1.0.0-alpha.5
