@@ -20,6 +20,13 @@ name: Setup Tools
 on:
   workflow_call:
 
+# Serialize across callers (MistKit.yml + MistDemo.yml) so a cold-cache
+# run after a mise.toml bump rebuilds tools once, not twice. The second
+# caller waits, then hits the cache and skips install.
+concurrency:
+  group: setup-tools-${{ github.head_ref || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   setup-tools:
     name: Setup mise tools
