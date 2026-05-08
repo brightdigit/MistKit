@@ -144,6 +144,9 @@ public enum CelestraError: LocalizedError {
     case .decodingError:
       // Decoding errors are not retriable (data format issue)
       return false
+    case .unsupportedOperationType, .paginationLimitExceeded:
+      // Programmer/configuration issues — not retriable
+      return false
     }
   }
 }
