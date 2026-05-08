@@ -23,6 +23,10 @@ env:
   PACKAGE_NAME: MistKit
 
 jobs:
+  setup-tools:
+    name: Setup Tools
+    uses: ./.github/workflows/setup-tools.yml
+
   configure:
     name: Configure Matrix
     runs-on: ubuntu-latest
@@ -316,12 +320,21 @@ jobs:
     name: Linting
     runs-on: ubuntu-latest
     if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
-    needs: [build-ubuntu, build-macos, build-macos-platforms, build-windows, build-android]
+    needs: [setup-tools, build-ubuntu, build-macos, build-macos-platforms, build-windows, build-android]
     steps:
       - uses: actions/checkout@v6
+      - name: Restore mise tools cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.local/share/mise/installs
+          key: mise-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.toml') }}
+          restore-keys: |
+            mise-v2-${{ runner.os }}-${{ runner.arch }}-
+          fail-on-cache-miss: true
       - uses: jdx/mise-action@v4
         with:
-          cache: true
+          install: false
+          cache: false
       - name: Lint
         run: |
           set -e
