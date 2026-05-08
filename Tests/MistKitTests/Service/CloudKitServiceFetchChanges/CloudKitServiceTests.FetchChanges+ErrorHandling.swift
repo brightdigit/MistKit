@@ -42,7 +42,8 @@ extension CloudKitServiceTests.FetchChanges {
         return
       }
       let service = try CloudKitServiceTests.makeService(
-        provider: ResponseProvider.connectionLost())
+        provider: ResponseProvider.connectionLost()
+      )
 
       await #expect {
         _ = try await service.fetchRecordChanges()

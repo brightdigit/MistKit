@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceQueryPaginationTests+SuccessCases.swift
+//  CloudKitServiceTests.QueryPagination+SuccessCases.swift
 //  MistKit
 //
 //  Created by Leo Dion.
