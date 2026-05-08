@@ -40,12 +40,22 @@ import OpenAPIRuntime
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
-  /// List zones in the user's private database
-  public func listZones() async throws(CloudKitError) -> [ZoneInfo] {
+  /// List zones in the target database.
+  ///
+  /// > Note: Public database only contains the default zone (`_defaultZone`),
+  /// > so listing zones against `.public` is degenerate. Use `.private` or
+  /// > `.shared` for meaningful results.
+  public func listZones(
+    database: Database? = nil
+  ) async throws(CloudKitError) -> [ZoneInfo] {
+    let effectiveDatabase = database ?? self.database
     do {
       let response = try await client.listZones(
         .init(
-          path: createListZonesPath(containerIdentifier: containerIdentifier)
+          path: createListZonesPath(
+            containerIdentifier: containerIdentifier,
+            database: effectiveDatabase
+          )
         )
       )
 
@@ -86,8 +96,10 @@ extension CloudKitService {
   /// )
   /// ```
   public func lookupZones(
-    zoneIDs: [ZoneID]
+    zoneIDs: [ZoneID],
+    database: Database? = nil
   ) async throws(CloudKitError) -> [ZoneInfo] {
+    let effectiveDatabase = database ?? self.database
     guard !zoneIDs.isEmpty else {
       throw CloudKitError.httpErrorWithRawResponse(
         statusCode: 400,
@@ -105,7 +117,8 @@ extension CloudKitService {
       let response = try await client.lookupZones(
         .init(
           path: createLookupZonesPath(
-            containerIdentifier: containerIdentifier
+            containerIdentifier: containerIdentifier,
+            database: effectiveDatabase
           ),
           body: .json(
             .init(
@@ -157,13 +170,16 @@ extension CloudKitService {
   /// )
   /// ```
   public func fetchZoneChanges(
-    syncToken: String? = nil
+    syncToken: String? = nil,
+    database: Database? = nil
   ) async throws(CloudKitError) -> ZoneChangesResult {
+    let effectiveDatabase = database ?? self.database
     do {
       let response = try await client.fetchZoneChanges(
         .init(
           path: createFetchZoneChangesPath(
-            containerIdentifier: containerIdentifier
+            containerIdentifier: containerIdentifier,
+            database: effectiveDatabase
           ),
           body: .json(
             .init(

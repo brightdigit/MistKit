@@ -74,24 +74,18 @@ extension CloudKitResponseProcessor {
     }
   }
 
-  /// Process discoverAllUserIdentities response
+  /// Process discoverAllUserIdentities response.
+  ///
+  /// Marked unavailable in lockstep with `CloudKitService.discoverAllUserIdentities()`.
+  /// The body is intentionally a `fatalError`: the only caller is itself
+  /// `@available(*, unavailable)`, so this code is unreachable. When #28 is
+  /// resolved, restore the protocol-generic implementation and re-add the
+  /// `CloudKitResponseType` conformance for `Operations.discoverAllUserIdentities.Output`.
+  @available(*, unavailable, message: "Pending #28: discoverAllUserIdentities is not yet ready.")
   internal func processDiscoverAllUserIdentitiesResponse(
     _ response: Operations.discoverAllUserIdentities.Output
   ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
-    if let error = CloudKitError(response) {
-      throw error
-    }
-    switch response {
-    case .ok(let okResponse):
-      switch okResponse.body {
-      case .json(let discoverData):
-        return discoverData
-      }
-    default:
-      // Should never reach here since all errors are handled above
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
-    }
+    fatalError("discoverAllUserIdentities is not yet ready (pending #28)")
   }
 
   /// Process lookupUsersByEmail response

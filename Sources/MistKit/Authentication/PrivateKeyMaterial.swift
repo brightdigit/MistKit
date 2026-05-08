@@ -1,5 +1,5 @@
 //
-//  Operations.discoverAllUserIdentities.Output.swift
+//  PrivateKeyMaterial.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,36 +27,29 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-extension Operations.discoverAllUserIdentities.Output: CloudKitResponseType {
-  internal var badRequestResponse: Components.Responses.BadRequest? {
-    if case .badRequest(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
+internal import Foundation
 
-  internal var unauthorizedResponse: Components.Responses.Unauthorized? {
-    if case .unauthorized(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
+/// Source of a server-to-server private key — either inline PEM or a path to a
+/// `.pem` file on disk.
+///
+/// Used by `ServerToServerCredentials` to defer reading the private key until
+/// the credentials are actually consumed by `CloudKitService`. Inline PEM may
+/// contain literal `\n` escape sequences (common when stored in environment
+/// variables); `loadPEM()` normalizes them to real newlines.
+public enum PrivateKeyMaterial: Sendable {
+  case raw(String)
+  case file(path: String)
 
-  internal var isOk: Bool {
-    if case .ok = self {
-      return true
-    } else {
-      return false
-    }
-  }
-
-  internal var undocumentedStatusCode: Int? {
-    if case .undocumented(let statusCode, _) = self {
-      return statusCode
-    } else {
-      return nil
+  /// Resolve the PEM text for this material.
+  ///
+  /// - Throws: Any error from the underlying file read when `.file(path:)` is
+  ///   used (e.g. file not found, permission denied).
+  public func loadPEM() throws -> String {
+    switch self {
+    case .raw(let pem):
+      return pem.replacingOccurrences(of: "\\n", with: "\n")
+    case .file(let path):
+      return try String(contentsOfFile: path, encoding: .utf8)
     }
   }
 }

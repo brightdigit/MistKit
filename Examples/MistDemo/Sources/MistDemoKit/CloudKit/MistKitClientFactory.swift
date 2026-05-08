@@ -27,27 +27,27 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 public import MistKit
 
-/// Factory for creating MistKit CloudKitService instances from MistDemo configuration
+/// Factory for creating MistKit `CloudKitService` instances from MistDemo
+/// configuration.
 public struct MistKitClientFactory: Sendable {
-  /// Create a CloudKitService for `config.database`, choosing auth method automatically.
+  /// Create a `CloudKitService` for `config.database`, choosing auth method
+  /// automatically.
   ///
   /// - `.public`: requires `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]`
-  /// - `.private` / `.shared`: requires `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN`
+  /// - `.private` / `.shared`: requires `CLOUDKIT_API_TOKEN` +
+  ///   `CLOUDKIT_WEB_AUTH_TOKEN`
   ///
-  /// When `config.badCredentials == true`, this short-circuits database-based auth
-  /// selection and returns a service backed by a deliberately invalid web-auth
-  /// `TokenManager` so the next CloudKit call yields a typed HTTP 401. Because
-  /// that path always uses web auth, it is **not** supported on `.public` (which
-  /// requires server-to-server signing) and will throw
+  /// When `config.badCredentials == true`, this short-circuits and returns a
+  /// service backed by a deliberately invalid web-auth `TokenManager` so the
+  /// next CloudKit call yields a typed HTTP 401. Because that path always uses
+  /// web auth, it is **not** supported on `.public` and will throw
   /// `ConfigurationError.badCredentialsOnPublicDB`.
   ///
-  /// - Parameter config: The base MistDemo configuration.
-  /// - Throws: `ConfigurationError` if required credentials are
-  ///   missing, or if `badCredentials` is requested with `.public`.
-  /// - Returns: A configured `CloudKitService` instance.
+  /// - Throws: `ConfigurationError` if required credentials are missing, or
+  ///   if `badCredentials` is requested with `.public`.
   public static func create(
     for config: MistDemoConfig
   ) throws -> CloudKitService {
@@ -62,44 +62,48 @@ public struct MistKitClientFactory: Sendable {
         }
         return try create(from: config, tokenManager: makeBadCredentialsTokenManager())
       }
-      let configuration = try config.toPrimaryConfiguration()
-      return try makeService(
+      let credentials = try config.toPrimaryCredentials()
+      return try CloudKitService(
         containerIdentifier: config.containerIdentifier,
+        credentials: credentials,
         environment: config.environment,
-        configuration: configuration
+        database: config.database
       )
     #endif
   }
 
-  /// Create the optional public+web-auth service used for user-context endpoints
-  /// (`users/caller`, `users/discover`, `users/lookup/*`).
+  /// Create the optional public+web-auth service used for user-context
+  /// endpoints (`users/caller`, `users/discover`, `users/lookup/*`).
   ///
-  /// Returns `nil` when web-auth credentials are not configured, so callers can
-  /// gracefully skip user-identity coverage in integration runs.
+  /// Returns `nil` when web-auth credentials are not configured, so callers
+  /// can gracefully skip user-identity coverage in integration runs.
+  ///
+  /// > Note: This returns a separate `CloudKitService` because CloudKit
+  /// > rejects server-to-server signing for user-identity routes — a single
+  /// > service that uses S2S auth for record ops cannot also serve those
+  /// > routes. Per-call token-manager dispatch is a future enhancement.
   public static func createUserContext(
     for config: MistDemoConfig
   ) throws -> CloudKitService? {
     #if os(WASI)
       return nil
     #else
-      guard let configuration = config.toUserContextConfiguration() else {
+      guard let credentials = config.toUserContextCredentials() else {
         return nil
       }
-      return try makeService(
+      return try CloudKitService(
         containerIdentifier: config.containerIdentifier,
+        credentials: credentials,
         environment: config.environment,
-        configuration: configuration
+        database: .public
       )
     #endif
   }
 
   /// Build a `WebAuthTokenManager` whose tokens pass `validateCredentials()`'s
-  /// local format check (64-char hex API token, ≥10-char web-auth token) but are
-  /// guaranteed to be rejected by Apple's servers, producing a real HTTP 401.
-  ///
-  /// Used by both the factory's `badCredentials` short-circuit and by
-  /// `DemoErrorsRunner.runUnauthorized` so the same definition feeds every
-  /// 401-demo path.
+  /// local format check (64-char hex API token, ≥10-char web-auth token) but
+  /// are guaranteed to be rejected by Apple's servers, producing a real HTTP
+  /// 401.
   internal static func makeBadCredentialsTokenManager() -> WebAuthTokenManager {
     WebAuthTokenManager(
       apiToken: String(repeating: "0", count: 64),
@@ -107,8 +111,8 @@ public struct MistKitClientFactory: Sendable {
     )
   }
 
-  /// Create a CloudKitService with a caller-supplied TokenManager, targeting
-  /// `config.database`.
+  /// Create a `CloudKitService` with a caller-supplied `TokenManager`,
+  /// targeting `config.database`. Used by the `--bad-credentials` demo path.
   public static func create(
     from config: MistDemoConfig,
     tokenManager: any TokenManager
@@ -126,20 +130,4 @@ public struct MistKitClientFactory: Sendable {
       )
     #endif
   }
-
-  #if !os(WASI)
-    private static func makeService(
-      containerIdentifier: String,
-      environment: MistKit.Environment,
-      configuration: DatabaseConfiguration
-    ) throws -> CloudKitService {
-      let tokenManager = try configuration.authentication.makeTokenManager()
-      return try CloudKitService(
-        containerIdentifier: containerIdentifier,
-        tokenManager: tokenManager,
-        environment: environment,
-        database: configuration.database
-      )
-    }
-  #endif
 }

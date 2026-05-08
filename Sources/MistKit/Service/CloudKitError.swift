@@ -45,6 +45,7 @@ public enum CloudKitError: LocalizedError, Sendable {
   case networkError(URLError)
   case unsupportedOperationType(String)
   case paginationLimitExceeded(maxPages: Int, recordsCollected: Int)
+  case missingCredentials(database: Database, reason: String)
 
   /// HTTP status code if this error originated from an HTTP response, otherwise nil.
   public var httpStatusCode: Int? {
@@ -54,7 +55,7 @@ public enum CloudKitError: LocalizedError, Sendable {
       .httpErrorWithRawResponse(let statusCode, _):
       return statusCode
     case .invalidResponse, .underlyingError, .decodingError, .networkError,
-      .unsupportedOperationType, .paginationLimitExceeded:
+      .unsupportedOperationType, .paginationLimitExceeded, .missingCredentials:
       return nil
     }
   }
@@ -124,6 +125,9 @@ public enum CloudKitError: LocalizedError, Sendable {
       return
         "CloudKit query exceeded pagination limit of \(maxPages) pages "
         + "(collected \(recordsCollected) records)"
+    case .missingCredentials(let database, let reason):
+      return
+        "Missing credentials for database '\(database.rawValue)': \(reason)"
     }
   }
 }

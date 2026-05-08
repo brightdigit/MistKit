@@ -33,7 +33,7 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("AuthenticationCredentials & DatabaseConfiguration")
+@Suite("Credentials helpers")
 internal enum AuthenticationCredentialsTests {
   @Suite("PrivateKeyMaterial")
   internal struct PrivateKeyMaterialTests {
@@ -71,108 +71,84 @@ internal enum AuthenticationCredentialsTests {
       #expect(try material.loadPEM() == pem)
     }
 
-    @Test("loadPEM file throws missingRequired when file is unreadable")
+    @Test("loadPEM file throws when file is unreadable")
     internal func loadPEMFileMissingThrows() throws {
       let material = PrivateKeyMaterial.file(path: "/non/existent/key-\(UUID().uuidString).pem")
 
-      do {
+      #expect(throws: (any Error).self) {
         _ = try material.loadPEM()
-        Issue.record("Expected ConfigurationError.missingRequired")
-      } catch let error as ConfigurationError {
-        if case .missingRequired(let key, _) = error {
-          #expect(key == "private.key")
-        } else {
-          Issue.record("Wrong ConfigurationError case: \(error)")
-        }
       }
     }
   }
 
-  @Suite("makeTokenManager")
-  internal struct MakeTokenManagerTests {
-    @Test("webAuth produces a WebAuthTokenManager")
-    internal func webAuthProducesManager() throws {
-      let auth = AuthenticationCredentials.webAuth(
-        apiToken: "api",
-        webAuthToken: "web"
+  @Suite("CloudKitService(credentials:database:) validation")
+  internal struct CredentialsValidationTests {
+    @Test(
+      "private + serverToServer-only credentials throws missingCredentials",
+      .enabled(if: MistKitClientFactoryTests.isServerToServerSupported())
+    )
+    internal func privateRejectsS2SOnly() throws {
+      let credentials = Credentials(
+        serverToServer: ServerToServerCredentials(
+          keyID: "k",
+          privateKey: .raw(MistKitClientFactoryTests.validPrivateKey)
+        )
       )
-
-      let manager = try auth.makeTokenManager()
-      #expect(manager is WebAuthTokenManager)
+      #expect(throws: CloudKitError.self) {
+        _ = try CloudKitService(
+          containerIdentifier: "iCloud.test",
+          credentials: credentials,
+          environment: .development,
+          database: .private
+        )
+      }
     }
 
     @Test(
-      "serverToServer with malformed PEM surfaces the auth manager error",
+      "shared + serverToServer-only credentials throws missingCredentials",
       .enabled(if: MistKitClientFactoryTests.isServerToServerSupported())
     )
-    internal func serverToServerWithBadPEMThrows() throws {
-      let auth = AuthenticationCredentials.serverToServer(
-        keyID: "test-key-id",
-        privateKey: .raw("not-a-real-pem")
+    internal func sharedRejectsS2SOnly() throws {
+      let credentials = Credentials(
+        serverToServer: ServerToServerCredentials(
+          keyID: "k",
+          privateKey: .raw(MistKitClientFactoryTests.validPrivateKey)
+        )
       )
-
-      #expect(throws: (any Error).self) {
-        _ = try auth.makeTokenManager()
+      #expect(throws: CloudKitError.self) {
+        _ = try CloudKitService(
+          containerIdentifier: "iCloud.test",
+          credentials: credentials,
+          environment: .development,
+          database: .shared
+        )
       }
     }
-  }
 
-  @Suite("DatabaseConfiguration.make validation")
-  internal struct DatabaseConfigurationMakeTests {
-    @Test("public + serverToServer is allowed")
-    internal func publicWithServerToServerSucceeds() throws {
-      let configuration = try DatabaseConfiguration.make(
-        database: .public,
-        authentication: .serverToServer(keyID: "k", privateKey: .raw("pem"))
-      )
-      #expect(configuration.database == .public)
-    }
-
-    @Test("public + webAuth is allowed")
-    internal func publicWithWebAuthSucceeds() throws {
-      let configuration = try DatabaseConfiguration.make(
-        database: .public,
-        authentication: .webAuth(apiToken: "a", webAuthToken: "w")
-      )
-      #expect(configuration.database == .public)
-    }
-
-    @Test("private + webAuth is allowed")
+    @Test("private with apiAuth + webAuthToken constructs successfully")
     internal func privateWithWebAuthSucceeds() throws {
-      let configuration = try DatabaseConfiguration.make(
-        database: .private,
-        authentication: .webAuth(apiToken: "a", webAuthToken: "w")
+      let credentials = Credentials(
+        apiAuth: APICredentials(apiToken: "api", webAuthToken: "web")
       )
-      #expect(configuration.database == .private)
-    }
-
-    @Test("shared + webAuth is allowed")
-    internal func sharedWithWebAuthSucceeds() throws {
-      let configuration = try DatabaseConfiguration.make(
-        database: .shared,
-        authentication: .webAuth(apiToken: "a", webAuthToken: "w")
+      _ = try CloudKitService(
+        containerIdentifier: "iCloud.test",
+        credentials: credentials,
+        environment: .development,
+        database: .private
       )
-      #expect(configuration.database == .shared)
     }
 
-    @Test("private + serverToServer is rejected")
-    internal func privateWithServerToServerThrows() throws {
-      #expect(throws: ConfigurationError.self) {
-        _ = try DatabaseConfiguration.make(
-          database: .private,
-          authentication: .serverToServer(keyID: "k", privateKey: .raw("pem"))
-        )
-      }
-    }
-
-    @Test("shared + serverToServer is rejected")
-    internal func sharedWithServerToServerThrows() throws {
-      #expect(throws: ConfigurationError.self) {
-        _ = try DatabaseConfiguration.make(
-          database: .shared,
-          authentication: .serverToServer(keyID: "k", privateKey: .raw("pem"))
-        )
-      }
+    @Test("public with apiAuth-only constructs successfully")
+    internal func publicWithAPIOnlySucceeds() throws {
+      let credentials = Credentials(
+        apiAuth: APICredentials(apiToken: "api")
+      )
+      _ = try CloudKitService(
+        containerIdentifier: "iCloud.test",
+        credentials: credentials,
+        environment: .development,
+        database: .public
+      )
     }
   }
 }

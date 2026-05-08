@@ -58,7 +58,8 @@ extension CloudKitService {
     sortBy: [QuerySort]? = nil,
     pageSize: Int? = nil,
     desiredKeys: [String]? = nil,
-    maxPages: Int = 1_000
+    maxPages: Int = 1_000,
+    database: Database? = nil
   ) async throws(CloudKitError) -> [RecordInfo] {
     var allRecords: [RecordInfo] = []
     var currentMarker: String?
@@ -84,7 +85,8 @@ extension CloudKitService {
         sortBy: sortBy,
         limit: pageSize,
         desiredKeys: desiredKeys,
-        continuationMarker: currentMarker
+        continuationMarker: currentMarker,
+        database: database
       )
 
       // Stuck-marker detection

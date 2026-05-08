@@ -146,9 +146,11 @@ extension CloudKitService {
     sortBy: [QuerySort]? = nil,
     limit: Int? = nil,
     desiredKeys: [String]? = nil,
-    continuationMarker: String? = nil
+    continuationMarker: String? = nil,
+    database: Database? = nil
   ) async throws(CloudKitError) -> QueryResult {
     let effectiveLimit = limit ?? defaultQueryLimit
+    let effectiveDatabase = database ?? self.database
 
     guard !recordType.isEmpty else {
       throw CloudKitError.httpErrorWithRawResponse(
@@ -176,7 +178,8 @@ extension CloudKitService {
       let response = try await client.queryRecords(
         .init(
           path: createQueryRecordsPath(
-            containerIdentifier: containerIdentifier
+            containerIdentifier: containerIdentifier,
+            database: effectiveDatabase
           ),
           body: .json(
             .init(

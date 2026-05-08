@@ -50,7 +50,10 @@ extension CloudKitService {
     do {
       let response = try await client.getCaller(
         .init(
-          path: createGetCallerPath(containerIdentifier: containerIdentifier)
+          path: createGetCallerPath(
+            containerIdentifier: containerIdentifier,
+            database: .public
+          )
         )
       )
 
@@ -63,7 +66,10 @@ extension CloudKitService {
   }
 
   /// Fetch the current authenticated user's information.
-  @available(*, deprecated, renamed: "fetchCaller", message: "users/current is deprecated by Apple. Use fetchCaller() instead.")
+  @available(
+    *, deprecated, renamed: "fetchCaller",
+    message: "users/current is deprecated by Apple. Use fetchCaller() instead."
+  )
   public func fetchCurrentUser() async throws(CloudKitError) -> UserInfo {
     try await fetchCaller()
   }
@@ -94,7 +100,8 @@ extension CloudKitService {
       let response = try await client.discoverAllUserIdentities(
         .init(
           path: createDiscoverAllUserIdentitiesPath(
-            containerIdentifier: containerIdentifier
+            containerIdentifier: containerIdentifier,
+            database: .public
           )
         )
       )
@@ -121,7 +128,8 @@ extension CloudKitService {
       let response = try await client.lookupUsersByEmail(
         .init(
           path: createLookupUsersByEmailPath(
-            containerIdentifier: containerIdentifier
+            containerIdentifier: containerIdentifier,
+            database: .public
           ),
           body: .json(
             .init(users: emails.map { .init(emailAddress: $0) })
@@ -148,7 +156,8 @@ extension CloudKitService {
       let response = try await client.lookupUsersByRecordName(
         .init(
           path: createLookupUsersByRecordNamePath(
-            containerIdentifier: containerIdentifier
+            containerIdentifier: containerIdentifier,
+            database: .public
           ),
           body: .json(
             .init(users: recordNames.map { .init(userRecordName: $0) })
@@ -172,7 +181,8 @@ extension CloudKitService {
       let response = try await client.discoverUserIdentities(
         .init(
           path: createDiscoverUserIdentitiesPath(
-            containerIdentifier: containerIdentifier
+            containerIdentifier: containerIdentifier,
+            database: .public
           ),
           body: .json(
             .init(

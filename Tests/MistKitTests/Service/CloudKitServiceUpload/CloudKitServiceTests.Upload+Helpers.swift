@@ -72,7 +72,7 @@ extension CloudKitServiceTests.Upload {
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      apiToken: testAPIToken,
+      credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),
       transport: transport
     )
   }
@@ -87,7 +87,7 @@ extension CloudKitServiceTests.Upload {
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      apiToken: testAPIToken,
+      credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),
       transport: transport
     )
   }
@@ -100,7 +100,7 @@ extension CloudKitServiceTests.Upload {
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      apiToken: testAPIToken,
+      credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),
       transport: transport
     )
   }

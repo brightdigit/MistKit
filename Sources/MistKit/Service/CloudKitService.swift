@@ -27,18 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import OpenAPIRuntime
+internal import Foundation
+internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 #if !os(WASI)
-  import OpenAPIURLSession
+  internal import OpenAPIURLSession
 #endif
 
-/// Service for interacting with CloudKit Web Services
+/// Service for interacting with CloudKit Web Services.
+///
+/// `CloudKitService` is configured with a CloudKit container identifier, an
+/// `Environment`, and a `Credentials` value that may carry server-to-server
+/// material, API/web-auth material, or both. The database to target is chosen
+/// **per call** on each operation that supports multiple databases; user-identity
+/// endpoints (e.g. `fetchCaller`) hard-code `.public` since CloudKit only
+/// accepts those routes against the public database.
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct CloudKitService: Sendable {
   /// CloudKit's maximum number of records returned per query/modify request.
@@ -46,12 +53,13 @@ public struct CloudKitService: Sendable {
 
   /// The CloudKit container identifier
   public let containerIdentifier: String
-  /// The API token for authentication
-  public let apiToken: String
   /// The CloudKit environment (development or production)
   public let environment: Environment
-  /// The CloudKit database (public, private, or shared)
-  public let database: Database
+
+  /// Default database used by operation methods when the caller does not
+  /// supply a `database:` argument. Set at construction; operations may
+  /// override per-call via their `database:` parameter.
+  internal let database: Database
 
   /// Default limit for query operations (1-200, default: 100)
   internal let defaultQueryLimit: Int = 100
@@ -63,16 +71,14 @@ public struct CloudKitService: Sendable {
   }
 }
 
-// MARK: - Private Helper Methods
+// MARK: - Path builders
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
-  /// Create a standard path for getCaller requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
-  internal func createGetCallerPath(containerIdentifier: String)
-    -> Operations.getCaller.Input.Path
-  {
+  internal func createGetCallerPath(
+    containerIdentifier: String,
+    database: Database
+  ) -> Operations.getCaller.Input.Path {
     .init(
       version: "1",
       container: containerIdentifier,
@@ -81,12 +87,10 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for listZones requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
-  internal func createListZonesPath(containerIdentifier: String)
-    -> Operations.listZones.Input.Path
-  {
+  internal func createListZonesPath(
+    containerIdentifier: String,
+    database: Database
+  ) -> Operations.listZones.Input.Path {
     .init(
       version: "1",
       container: containerIdentifier,
@@ -95,11 +99,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for queryRecords requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createQueryRecordsPath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.queryRecords.Input.Path {
     .init(
       version: "1",
@@ -109,11 +111,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for modifyRecords requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createModifyRecordsPath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.modifyRecords.Input.Path {
     .init(
       version: "1",
@@ -123,11 +123,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for lookupRecords requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createLookupRecordsPath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.lookupRecords.Input.Path {
     .init(
       version: "1",
@@ -137,11 +135,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for lookupZones requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createLookupZonesPath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.lookupZones.Input.Path {
     .init(
       version: "1",
@@ -151,11 +147,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for fetchRecordChanges requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createFetchRecordChangesPath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.fetchRecordChanges.Input.Path {
     .init(
       version: "1",
@@ -165,11 +159,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for uploadAssets requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createUploadAssetsPath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.uploadAssets.Input.Path {
     .init(
       version: "1",
@@ -179,11 +171,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for discoverUserIdentities requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createDiscoverUserIdentitiesPath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.discoverUserIdentities.Input.Path {
     .init(
       version: "1",
@@ -193,11 +183,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for discoverAllUserIdentities requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createDiscoverAllUserIdentitiesPath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.discoverAllUserIdentities.Input.Path {
     .init(
       version: "1",
@@ -207,11 +195,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for lookupUsersByEmail requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createLookupUsersByEmailPath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.lookupUsersByEmail.Input.Path {
     .init(
       version: "1",
@@ -221,11 +207,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for lookupUsersByRecordName requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createLookupUsersByRecordNamePath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.lookupUsersByRecordName.Input.Path {
     .init(
       version: "1",
@@ -235,11 +219,9 @@ extension CloudKitService {
     )
   }
 
-  /// Create a standard path for fetchZoneChanges requests
-  /// - Parameter containerIdentifier: The container identifier
-  /// - Returns: A configured path for the request
   internal func createFetchZoneChangesPath(
-    containerIdentifier: String
+    containerIdentifier: String,
+    database: Database
   ) -> Operations.fetchZoneChanges.Input.Path {
     .init(
       version: "1",

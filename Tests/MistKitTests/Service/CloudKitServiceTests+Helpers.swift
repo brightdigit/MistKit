@@ -46,7 +46,7 @@ extension CloudKitServiceTests {
     let transport = MockTransport(responseProvider: provider)
     return try CloudKitService(
       containerIdentifier: containerIdentifier,
-      apiToken: apiToken,
+      credentials: Credentials(apiAuth: APICredentials(apiToken: apiToken)),
       transport: transport
     )
   }

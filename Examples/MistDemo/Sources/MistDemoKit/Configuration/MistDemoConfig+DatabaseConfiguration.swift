@@ -27,47 +27,47 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 extension MistDemoConfig {
-  /// Build the primary `DatabaseConfiguration` matching `self.database`.
+  /// Build `Credentials` for the primary `CloudKitService` targeting
+  /// `self.database`.
   ///
-  /// - `.public` → server-to-server (requires `keyID` + `privateKey`/`privateKeyFile`)
-  /// - `.private`, `.shared` → web-auth (requires `apiToken` + `webAuthToken`)
+  /// - `.public`: requires server-to-server material (`keyID` +
+  ///   `privateKey`/`privateKeyFile`). If web-auth env vars are also set,
+  ///   they're populated alongside so the same `Credentials` can back a
+  ///   user-context service.
+  /// - `.private` / `.shared`: requires `apiToken` + `webAuthToken`.
   ///
   /// - Throws: `ConfigurationError.missingRequired` if any required field for
   ///   the chosen database is missing or empty.
-  internal func toPrimaryConfiguration() throws -> DatabaseConfiguration {
-    let auth: AuthenticationCredentials
+  internal func toPrimaryCredentials() throws -> Credentials {
     switch database {
     case .public:
-      auth = try resolveServerToServerAuth()
+      let s2s = try resolveServerToServerCredentials()
+      // Optional: also include web-auth so user-context services share creds
+      let webAuth = try? resolveAPICredentials()
+      return Credentials(serverToServer: s2s, apiAuth: webAuth)
     case .private, .shared:
-      auth = try resolveWebAuth()
+      let apiAuth = try resolveAPICredentials()
+      return Credentials(apiAuth: apiAuth)
     }
-    return try DatabaseConfiguration.make(
-      database: database,
-      authentication: auth
-    )
   }
 
-  /// Build a public+web-auth `DatabaseConfiguration` for user-context endpoints
-  /// (`users/caller`, `users/discover`, `users/lookup/*`).
+  /// Build `Credentials` carrying public+web-auth material for user-context
+  /// endpoints (`users/caller`, `users/discover`, `users/lookup/*`).
   ///
-  /// Returns `nil` when web-auth tokens are not available, allowing callers to
-  /// gracefully skip user-identity coverage instead of failing.
-  internal func toUserContextConfiguration() -> DatabaseConfiguration? {
-    guard let auth = try? resolveWebAuth() else { return nil }
-    return try? DatabaseConfiguration.make(
-      database: .public,
-      authentication: auth
-    )
+  /// Returns `nil` when API token + web-auth token aren't configured, so
+  /// callers can gracefully skip user-identity coverage.
+  internal func toUserContextCredentials() -> Credentials? {
+    guard let apiAuth = try? resolveAPICredentials() else { return nil }
+    return Credentials(apiAuth: apiAuth)
   }
 
-  // MARK: - Auth resolution helpers
+  // MARK: - Resolution helpers
 
-  private func resolveServerToServerAuth() throws -> AuthenticationCredentials {
+  private func resolveServerToServerCredentials() throws -> ServerToServerCredentials {
     guard let keyID, !keyID.isEmpty else {
       throw ConfigurationError.missingRequired(
         "key.id",
@@ -75,7 +75,7 @@ extension MistDemoConfig {
       )
     }
     let material = try resolvePrivateKeyMaterial()
-    return .serverToServer(keyID: keyID, privateKey: material)
+    return ServerToServerCredentials(keyID: keyID, privateKey: material)
   }
 
   private func resolvePrivateKeyMaterial() throws -> PrivateKeyMaterial {
@@ -90,7 +90,7 @@ extension MistDemoConfig {
     )
   }
 
-  private func resolveWebAuth() throws -> AuthenticationCredentials {
+  private func resolveAPICredentials() throws -> APICredentials {
     let resolvedAPIToken = AuthenticationHelper.resolveAPIToken(apiToken)
     guard !resolvedAPIToken.isEmpty else {
       throw ConfigurationError.missingRequired(
@@ -107,6 +107,9 @@ extension MistDemoConfig {
         suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`"
       )
     }
-    return .webAuth(apiToken: resolvedAPIToken, webAuthToken: resolvedWebAuth)
+    return APICredentials(
+      apiToken: resolvedAPIToken,
+      webAuthToken: resolvedWebAuth
+    )
   }
 }

@@ -37,7 +37,6 @@ internal enum ConfigurationError: LocalizedError {
   case missingRequired(String, suggestion: String)
   case unsupportedPlatform(String)
   case badCredentialsOnPublicDB
-  case unsupportedDatabaseAuthCombination(database: String, authentication: String)
 
   // MARK: Internal
 
@@ -59,10 +58,6 @@ internal enum ConfigurationError: LocalizedError {
       "The bad-credentials error demo is only supported on the "
         + "private and shared databases (it uses web auth). "
         + "Re-run with `--database private`."
-    case .unsupportedDatabaseAuthCombination(let database, let authentication):
-      "Database '\(database)' does not accept '\(authentication)' authentication. "
-        + "CloudKit allows server-to-server only against the public database; "
-        + "private and shared databases require web-auth credentials."
     }
   }
 }
