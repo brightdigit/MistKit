@@ -46,6 +46,7 @@ public enum CloudKitError: LocalizedError, Sendable {
   case unsupportedOperationType(String)
   case paginationLimitExceeded(maxPages: Int, recordsCollected: Int)
   case missingCredentials(database: Database, reason: String)
+  case invalidPrivateKey(path: String?, underlying: any Error)
 
   /// HTTP status code if this error originated from an HTTP response, otherwise nil.
   public var httpStatusCode: Int? {
@@ -55,7 +56,8 @@ public enum CloudKitError: LocalizedError, Sendable {
       .httpErrorWithRawResponse(let statusCode, _):
       return statusCode
     case .invalidResponse, .underlyingError, .decodingError, .networkError,
-      .unsupportedOperationType, .paginationLimitExceeded, .missingCredentials:
+      .unsupportedOperationType, .paginationLimitExceeded, .missingCredentials,
+      .invalidPrivateKey:
       return nil
     }
   }
@@ -128,6 +130,10 @@ public enum CloudKitError: LocalizedError, Sendable {
     case .missingCredentials(let database, let reason):
       return
         "Missing credentials for database '\(database.rawValue)': \(reason)"
+    case .invalidPrivateKey(let path, let underlying):
+      let location = path.map { "from '\($0)'" } ?? "from inline material"
+      return
+        "Failed to load CloudKit private key \(location): \(underlying.localizedDescription)"
     }
   }
 }

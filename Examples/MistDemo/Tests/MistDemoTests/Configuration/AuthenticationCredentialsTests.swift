@@ -80,5 +80,4 @@ internal enum AuthenticationCredentialsTests {
       }
     }
   }
-
 }

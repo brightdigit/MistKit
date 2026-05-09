@@ -84,10 +84,11 @@ public struct TestPrivateCommand: MistDemoCommand {
     // Private-database flows always carry web-auth credentials, so the same
     // service can also serve user-identity routes when this command needs
     // them. Per-call resolution picks the right token manager.
+    let supportsUserContextPhases = config.base.hasUserContextCredentials
 
     let runner = IntegrationTestRunner(
       service: service,
-      supportsUserContextPhases: true,
+      supportsUserContextPhases: supportsUserContextPhases,
       containerIdentifier: config.base.containerIdentifier,
       database: .private,
       recordCount: config.recordCount,

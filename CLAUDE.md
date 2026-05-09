@@ -168,7 +168,7 @@ MistKit/
 | `CloudKitService+WriteOperations.swift` | `modifyRecords`, `createRecord`, `updateRecord`, `deleteRecord` |
 | `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
-| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()`, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)`, `fetchCurrentUser()` (deprecated, forwards to `fetchCaller`) |
+| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(unavailable — pending #28)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)`, `fetchCurrentUser()` (deprecated, forwards to `fetchCaller`) |
 | `CloudKitService+AssetOperations.swift` | `uploadAssets`, `requestAssetUploadURL` |
 | `CloudKitService+AssetUpload.swift` | `uploadAssetData` |
 | `CloudKitService+RecordManaging.swift` | record-managing convenience surface |

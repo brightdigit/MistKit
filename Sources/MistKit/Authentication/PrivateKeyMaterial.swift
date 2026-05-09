@@ -40,6 +40,19 @@ public enum PrivateKeyMaterial: Sendable {
   case raw(String)
   case file(path: String)
 
+  /// The on-disk path when this material is `.file(path:)`, otherwise `nil`.
+  ///
+  /// Used by `CloudKitError.invalidPrivateKey` to attach a useful diagnostic
+  /// when `loadPEM()` fails on a missing or unreadable file.
+  public var filePath: String? {
+    switch self {
+    case .raw:
+      return nil
+    case .file(let path):
+      return path
+    }
+  }
+
   /// Resolve the PEM text for this material.
   ///
   /// - Throws: Any error from the underlying file read when `.file(path:)` is

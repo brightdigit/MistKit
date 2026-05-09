@@ -77,10 +77,12 @@ extension CloudKitResponseProcessor {
   /// Process discoverAllUserIdentities response.
   ///
   /// Marked unavailable in lockstep with `CloudKitService.discoverAllUserIdentities()`.
-  /// The body is intentionally a `fatalError`: the only caller is itself
-  /// `@available(*, unavailable)`, so this code is unreachable. When #28 is
-  /// resolved, restore the protocol-generic implementation and re-add the
-  /// `CloudKitResponseType` conformance for `Operations.discoverAllUserIdentities.Output`.
+  /// The body throws `CloudKitError.unsupportedOperationType` so any stray
+  /// caller (for example via `@testable import` under Swift 6.1, where the
+  /// `@available(*, unavailable)` cascade does not apply) gets a recoverable
+  /// error rather than a crash. When #28 is resolved, restore the
+  /// protocol-generic implementation and re-add the `CloudKitResponseType`
+  /// conformance for `Operations.discoverAllUserIdentities.Output`.
   ///
   /// The `@available(*, unavailable)` attribute is gated to Swift 6.2+ because
   /// Swift 6.1 rejects calls to an unavailable function from within another
@@ -90,11 +92,12 @@ extension CloudKitResponseProcessor {
   #if swift(>=6.2)
     @available(*, unavailable, message: "Pending #28: discoverAllUserIdentities is not yet ready.")
   #endif
-  // swiftlint:disable:next unavailable_function
   internal func processDiscoverAllUserIdentitiesResponse(
     _ response: Operations.discoverAllUserIdentities.Output
   ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
-    fatalError("discoverAllUserIdentities is not yet ready (pending #28)")
+    throw CloudKitError.unsupportedOperationType(
+      "discoverAllUserIdentities is not yet ready (pending #28)"
+    )
   }
 
   /// Process lookupUsersByEmail response

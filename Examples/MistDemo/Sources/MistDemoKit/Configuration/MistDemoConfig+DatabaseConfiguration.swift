@@ -49,7 +49,17 @@ extension MistDemoConfig {
       // Optional: also include web-auth so a single service can serve
       // user-identity routes (`fetchCaller`, `lookupUsers*`) alongside
       // S2S-signed record operations on `.public`.
-      let webAuth = try? resolveAPICredentials()
+      let webAuth: APICredentials?
+      do {
+        webAuth = try resolveAPICredentials()
+      } catch {
+        webAuth = nil
+        let line =
+          "INFO: Public-DB credentials resolved without web-auth — "
+          + "user-identity routes (fetchCaller, lookupUsers*) will be unavailable. "
+          + "Underlying: \(error.localizedDescription)\n"
+        FileHandle.standardError.write(Data(line.utf8))
+      }
       return try Credentials(serverToServer: s2s, apiAuth: webAuth)
     case .private, .shared:
       let apiAuth = try resolveAPICredentials()

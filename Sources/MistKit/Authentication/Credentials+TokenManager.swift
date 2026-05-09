@@ -47,8 +47,10 @@ extension Credentials {
   ///   `serverToServer` material is ignored on this path.
   ///
   /// - Throws: `CloudKitError.missingCredentials` when no populated credential
-  ///   set can satisfy the requested combination, or any error from
-  ///   `ServerToServerAuthManager.init` when the PEM is malformed.
+  ///   set can satisfy the requested combination,
+  ///   `CloudKitError.invalidPrivateKey` when a `.file(path:)` PEM cannot be
+  ///   read, or any error from `ServerToServerAuthManager.init` when the PEM
+  ///   is malformed.
   internal func makeTokenManager(
     for database: Database,
     requiresUserContext: Bool = false
@@ -69,7 +71,15 @@ extension Credentials {
     switch database {
     case .public:
       if let s2s = serverToServer {
-        let pem = try s2s.privateKey.loadPEM()
+        let pem: String
+        do {
+          pem = try s2s.privateKey.loadPEM()
+        } catch {
+          throw CloudKitError.invalidPrivateKey(
+            path: s2s.privateKey.filePath,
+            underlying: error
+          )
+        }
         return try ServerToServerAuthManager(
           keyID: s2s.keyID,
           pemString: pem
