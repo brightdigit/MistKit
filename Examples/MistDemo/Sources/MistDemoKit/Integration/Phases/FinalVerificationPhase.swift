@@ -41,7 +41,10 @@ internal struct FinalVerificationPhase: IntegrationPhase {
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
-    let finalZones = try await context.service.lookupZones(zoneIDs: [.defaultZone])
+    let finalZones = try await context.service.lookupZones(
+      zoneIDs: [.defaultZone],
+      database: context.database
+    )
 
     guard !finalZones.isEmpty else {
       throw IntegrationTestError.verificationFailed("Zone not found after operations")

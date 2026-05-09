@@ -42,11 +42,11 @@ import OpenAPIRuntime
 extension CloudKitService {
   /// List zones in the target database.
   ///
-  /// > Note: Public database only contains the default zone (`_defaultZone`),
-  /// > so listing zones against `.public` is degenerate. Use `.private` or
-  /// > `.shared` for meaningful results.
+  /// > Note: The default is `.private` because the public database only
+  /// > contains the default zone (`_defaultZone`); listing zones against
+  /// > `.public` is degenerate. Pass `.shared` for the shared database.
   public func listZones(
-    database: Database = .public
+    database: Database = .private
   ) async throws(CloudKitError) -> [ZoneInfo] {
     do {
       let client = try self.client(for: database)
@@ -97,7 +97,7 @@ extension CloudKitService {
   /// ```
   public func lookupZones(
     zoneIDs: [ZoneID],
-    database: Database = .public
+    database: Database = .private
   ) async throws(CloudKitError) -> [ZoneInfo] {
     guard !zoneIDs.isEmpty else {
       throw CloudKitError.httpErrorWithRawResponse(
@@ -171,7 +171,7 @@ extension CloudKitService {
   /// ```
   public func fetchZoneChanges(
     syncToken: String? = nil,
-    database: Database = .public
+    database: Database = .private
   ) async throws(CloudKitError) -> ZoneChangesResult {
     do {
       let client = try self.client(for: database)

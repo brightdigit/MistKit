@@ -81,7 +81,10 @@ public struct LookupZonesCommand: MistDemoCommand, OutputFormatting {
       print("   - \(name)")
     }
 
-    let zones = try await service.lookupZones(zoneIDs: zoneIDs)
+    let zones = try await service.lookupZones(
+      zoneIDs: zoneIDs,
+      database: config.base.database
+    )
     print("\n✅ Found \(zones.count) zone(s):")
     for zone in zones {
       print("   - \(zone.zoneName)")

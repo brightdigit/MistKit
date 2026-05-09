@@ -41,7 +41,7 @@ internal struct ListZonesPhase: IntegrationPhase {
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
-    let zones = try await context.service.listZones()
+    let zones = try await context.service.listZones(database: context.database)
 
     guard !zones.isEmpty else {
       throw IntegrationTestError.zoneNotFound("(any zone)")

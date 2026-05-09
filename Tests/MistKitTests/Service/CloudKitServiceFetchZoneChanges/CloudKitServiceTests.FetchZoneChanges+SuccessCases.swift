@@ -46,7 +46,7 @@ extension CloudKitServiceTests.FetchZoneChanges {
         syncToken: "zone-token-xyz"
       )
 
-      let result = try await service.fetchZoneChanges()
+      let result = try await service.fetchZoneChanges(database: .public)
 
       #expect(result.zones.count == 2)
       #expect(result.syncToken == "zone-token-xyz")
@@ -62,7 +62,7 @@ extension CloudKitServiceTests.FetchZoneChanges {
         zoneCount: 1
       )
 
-      let result = try await service.fetchZoneChanges()
+      let result = try await service.fetchZoneChanges(database: .public)
 
       #expect(result.zones.first?.zoneName == "test-zone-0")
     }
@@ -77,7 +77,7 @@ extension CloudKitServiceTests.FetchZoneChanges {
         zoneCount: 0
       )
 
-      let result = try await service.fetchZoneChanges()
+      let result = try await service.fetchZoneChanges(database: .public)
 
       #expect(result.zones.isEmpty)
       #expect(result.syncToken != nil)
@@ -94,7 +94,10 @@ extension CloudKitServiceTests.FetchZoneChanges {
         syncToken: "new-token"
       )
 
-      let result = try await service.fetchZoneChanges(syncToken: "previous-token")
+      let result = try await service.fetchZoneChanges(
+        syncToken: "previous-token",
+        database: .public
+      )
 
       #expect(result.zones.count == 1)
       #expect(result.syncToken == "new-token")
@@ -116,7 +119,7 @@ extension CloudKitServiceTests.FetchZoneChanges {
         transport: transport
       )
 
-      let result = try await service.fetchZoneChanges()
+      let result = try await service.fetchZoneChanges(database: .public)
 
       #expect(result.zones.count == 1, "Zone with nil zoneID should be filtered out")
       #expect(result.zones.first?.zoneName == "valid-zone")

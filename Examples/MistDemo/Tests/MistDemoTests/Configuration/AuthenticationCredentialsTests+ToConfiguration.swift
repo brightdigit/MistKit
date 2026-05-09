@@ -166,15 +166,15 @@ extension AuthenticationCredentialsTests {
   }
 
   @Suite(
-    "MistDemoConfig.toUserContextCredentials",
+    "MistDemoConfig user-context credentials",
     .disabled(
       if: TestPlatform.isWasm32,
       "MistDemoConfig construction relies on Foundation IO unavailable on WASI"
     )
   )
-  internal struct ToUserContextCredentialsTests {
-    @Test("returns apiAuth with web-auth when configured")
-    internal func returnsAPIAuthWhenAvailable() async throws {
+  internal struct UserContextCredentialsTests {
+    @Test("public with web-auth embeds apiAuth alongside serverToServer")
+    internal func publicEmbedsAPIAuthWhenAvailable() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
         apiToken: "api",
         database: .public,
@@ -183,15 +183,15 @@ extension AuthenticationCredentialsTests {
         privateKey: MistKitClientFactoryTests.validPrivateKey
       )
 
-      let userContext = config.toUserContextCredentials()
-      #expect(userContext != nil)
-      #expect(userContext?.apiAuth?.apiToken == "api")
-      #expect(userContext?.apiAuth?.webAuthToken == "web")
-      #expect(userContext?.serverToServer == nil)
+      let credentials = try config.toPrimaryCredentials()
+      #expect(credentials.serverToServer != nil)
+      #expect(credentials.apiAuth?.apiToken == "api")
+      #expect(credentials.apiAuth?.webAuthToken == "web")
+      #expect(config.hasUserContextCredentials)
     }
 
-    @Test("returns nil when web-auth tokens are missing")
-    internal func returnsNilWhenWebAuthMissing() async throws {
+    @Test("public without web-auth produces credentials without apiAuth")
+    internal func publicOmitsAPIAuthWhenWebAuthMissing() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
         apiToken: "",
         database: .public,
@@ -200,7 +200,10 @@ extension AuthenticationCredentialsTests {
         privateKey: MistKitClientFactoryTests.validPrivateKey
       )
 
-      #expect(config.toUserContextCredentials() == nil)
+      let credentials = try config.toPrimaryCredentials()
+      #expect(credentials.serverToServer != nil)
+      #expect(credentials.apiAuth == nil)
+      #expect(!config.hasUserContextCredentials)
     }
   }
 }
