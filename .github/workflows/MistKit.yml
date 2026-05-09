@@ -317,11 +317,14 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
     needs: [build-ubuntu, build-macos, build-macos-platforms, build-windows, build-android]
+    # Shared with MistDemo's lint job: serialize across workflows so a cold
+    # cache on a mise.toml bump only triggers one rebuild, not a race.
+    concurrency:
+      group: lint-tools-${{ github.head_ref || github.ref }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v6
-      - uses: jdx/mise-action@v4
-        with:
-          cache: true
+      - uses: ./.github/actions/setup-tools
       - name: Lint
         run: |
           set -e
