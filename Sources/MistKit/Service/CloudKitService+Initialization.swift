@@ -27,148 +27,104 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 public import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
-// MARK: - Generic Initializers (All Platforms)
+// MARK: - Credentials-based Initializer (All Platforms)
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
-  /// Initialize CloudKit service with web authentication
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  /// Initialize CloudKit service with `Credentials`.
+  ///
+  /// Accepts any combination of `serverToServer` and `apiAuth` material. The
+  /// service does **not** carry a database — every operation that supports
+  /// multiple databases takes a `database:` argument at the call site, and
+  /// the appropriate token manager is resolved from `credentials` per call.
+  ///
+  /// Provide both credential sets when a single service must serve, for
+  /// example, public-database record operations via server-to-server signing
+  /// **and** user-identity routes (`fetchCaller`, `lookupUsers*`) via
+  /// web-auth — those are picked apart at dispatch time.
+  ///
+  /// Misconfiguration (no credential set covers a given call's database +
+  /// user-context combination) surfaces at call time as
+  /// `CloudKitError.missingCredentials`, not at construction.
   public init(
     containerIdentifier: String,
-    apiToken: String,
-    webAuthToken: String,
+    credentials: Credentials,
+    environment: Environment = .development,
     transport: any ClientTransport
-  ) throws {
+  ) {
     self.containerIdentifier = containerIdentifier
-    self.apiToken = apiToken
-    self.environment = .development
-    self.database = .private
-
-    let config = MistKitConfiguration(
-      container: containerIdentifier,
-      environment: .development,
-      database: .private,
-      apiToken: apiToken,
-      webAuthToken: webAuthToken
-    )
-    self.mistKitClient = try MistKitClient(
-      configuration: config,
-      transport: transport
-    )
+    self.environment = environment
+    self.credentials = credentials
+    self.fixedTokenManager = nil
+    self.transport = transport
   }
 
-  /// Initialize CloudKit service with API-only authentication
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  public init(
-    containerIdentifier: String,
-    apiToken: String,
-    transport: any ClientTransport
-  ) throws {
-    self.containerIdentifier = containerIdentifier
-    self.apiToken = apiToken
-    self.environment = .development
-    self.database = .public  // API-only supports public database
-
-    let config = MistKitConfiguration(
-      container: containerIdentifier,
-      environment: .development,
-      database: .public,  // API-only supports public database
-      apiToken: apiToken,
-      webAuthToken: nil,
-      keyID: nil,
-      privateKeyData: nil
-    )
-    self.mistKitClient = try MistKitClient(
-      configuration: config,
-      transport: transport
-    )
-  }
-
-  /// Initialize CloudKit service with a custom TokenManager
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  /// Initialize CloudKit service with a caller-supplied `TokenManager`.
+  ///
+  /// The supplied manager is used for **every** dispatched operation
+  /// regardless of database or whether the route requires user context.
+  /// Useful for tests and bespoke auth setups where the standard
+  /// `Credentials`-driven per-call selection isn't appropriate.
   public init(
     containerIdentifier: String,
     tokenManager: any TokenManager,
     environment: Environment = .development,
-    database: Database = .private,
     transport: any ClientTransport
-  ) throws {
+  ) {
     self.containerIdentifier = containerIdentifier
-    self.apiToken = ""  // Not used when providing TokenManager directly
     self.environment = environment
-    self.database = database
-
-    self.mistKitClient = try MistKitClient(
-      container: containerIdentifier,
-      environment: environment,
-      database: database,
-      tokenManager: tokenManager,
-      transport: transport
-    )
+    self.credentials = nil
+    self.fixedTokenManager = tokenManager
+    self.transport = transport
   }
 }
 
 // MARK: - URLSession Convenience Initializers (Non-WASI Platforms)
 
 #if !os(WASI)
-  import OpenAPIURLSession
+  internal import OpenAPIURLSession
 
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   extension CloudKitService {
-    /// Initialize CloudKit service with web authentication using default URLSessionTransport
+    /// Initialize CloudKit service with `Credentials` using default
+    /// `URLSessionTransport`.
     ///
-    /// This convenience initializer is only available on platforms that support URLSession.
-    /// For WASI builds, use the generic initializer that accepts a transport parameter.
+    /// Available on platforms that support URLSession. For WASI builds, use
+    /// the generic initializer that accepts a transport parameter.
     public init(
       containerIdentifier: String,
-      apiToken: String,
-      webAuthToken: String
-    ) throws {
-      try self.init(
+      credentials: Credentials,
+      environment: Environment = .development
+    ) {
+      self.init(
         containerIdentifier: containerIdentifier,
-        apiToken: apiToken,
-        webAuthToken: webAuthToken,
+        credentials: credentials,
+        environment: environment,
         transport: URLSessionTransport()
       )
     }
 
-    /// Initialize CloudKit service with API-only authentication using default URLSessionTransport
+    /// Initialize CloudKit service with a custom `TokenManager` using default
+    /// `URLSessionTransport`.
     ///
-    /// This convenience initializer is only available on platforms that support URLSession.
-    /// For WASI builds, use the generic initializer that accepts a transport parameter.
-    public init(
-      containerIdentifier: String,
-      apiToken: String
-    ) throws {
-      try self.init(
-        containerIdentifier: containerIdentifier,
-        apiToken: apiToken,
-        transport: URLSessionTransport()
-      )
-    }
-
-    /// Initialize CloudKit service with a custom TokenManager using default URLSessionTransport
-    ///
-    /// This convenience initializer is only available on platforms that support URLSession.
-    /// For WASI builds, use the generic initializer that accepts a transport parameter.
+    /// Available on platforms that support URLSession. For WASI builds, use
+    /// the generic initializer that accepts a transport parameter.
     public init(
       containerIdentifier: String,
       tokenManager: any TokenManager,
-      environment: Environment = .development,
-      database: Database = .private
-    ) throws {
-      try self.init(
+      environment: Environment = .development
+    ) {
+      self.init(
         containerIdentifier: containerIdentifier,
         tokenManager: tokenManager,
         environment: environment,
-        database: database,
         transport: URLSessionTransport()
       )
     }

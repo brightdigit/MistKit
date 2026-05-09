@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Crypto
+internal import Crypto
 public import Foundation
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)

@@ -39,4 +39,9 @@ internal struct PhaseContext: Sendable {
   internal let assetSizeKB: Int
   internal let skipCleanup: Bool
   internal let verbose: Bool
+  /// Optional email address used by `LookupUsersByEmailPhase` to exercise
+  /// `users/lookup/email` against a known-discoverable iCloud account. When
+  /// nil, the phase falls back to the caller's own email (often unavailable)
+  /// and skips otherwise.
+  internal let lookupEmail: String?
 }

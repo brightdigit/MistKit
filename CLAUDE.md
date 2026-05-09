@@ -66,14 +66,15 @@ swift test --parallel
 # Show test output
 swift test --verbose
 
-# Format code (requires swift-format installation)
-swift-format -i -r Sources/ Tests/
+# Format + lint
+# swift-format, swiftlint, periphery, and swift-openapi-generator are pinned
+# in mise.toml — do NOT invoke them from PATH directly. Run them THROUGH mise:
+mise exec -- swift-format -i -r Sources/ Tests/
+mise exec -- swiftlint              # lint
+mise exec -- swiftlint --fix        # auto-fix
 
-# Lint code (requires swiftlint installation)
-swiftlint
-
-# Auto-fix linting issues
-swiftlint --fix
+# Or run the full lint pipeline (build + swiftlint + header.sh + periphery):
+./Scripts/lint.sh
 ```
 
 ### MistDemo Commands
@@ -167,7 +168,7 @@ MistKit/
 | `CloudKitService+WriteOperations.swift` | `modifyRecords`, `createRecord`, `updateRecord`, `deleteRecord` |
 | `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
-| `CloudKitService+UserOperations.swift` | `fetchCurrentUser()`, `discoverUserIdentities(lookupInfos:)` |
+| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(unavailable — pending #28)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)`, `fetchCurrentUser()` (deprecated, forwards to `fetchCaller`) |
 | `CloudKitService+AssetOperations.swift` | `uploadAssets`, `requestAssetUploadURL` |
 | `CloudKitService+AssetUpload.swift` | `uploadAssetData` |
 | `CloudKitService+RecordManaging.swift` | record-managing convenience surface |
@@ -179,7 +180,15 @@ MistKit/
 - `fetchAllRecordChanges(recordType:syncToken:)` — convenience wrapper that auto-paginates using `moreComing`
 - `fetchZoneChanges(syncToken:)` → `/zones/changes` — returns `ZoneChangesResult`
 - `lookupZones(zoneIDs:)` → `/zones/lookup` — returns `[ZoneInfo]`
-- `discoverUserIdentities(lookupInfos:)` → `/users/discover` — takes `[UserIdentityLookupInfo]`, returns `[UserIdentity]`
+- `discoverUserIdentities(lookupInfos:)` → POST `/users/discover` — takes `[UserIdentityLookupInfo]`, returns `[UserIdentity]`
+
+**User-Identity Operations (public DB + web-auth required):**
+- `fetchCaller()` → `/users/caller` — returns `UserInfo`. Replaces deprecated `fetchCurrentUser()` / `users/current`. Only valid against the public database with web-auth credentials.
+- `discoverAllUserIdentities()` → GET `/users/discover` — returns `[UserIdentity]` for every discoverable user in the caller's address book.
+- `lookupUsersByEmail(_:)` → POST `/users/lookup/email` — returns `[UserIdentity]`.
+- `lookupUsersByRecordName(_:)` → POST `/users/lookup/id` — returns `[UserIdentity]`.
+
+In MistDemo, integration runs targeting these endpoints use `PhaseContext.userContextService` (a public+web-auth `CloudKitService`) which is built from `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` regardless of the primary `--database` selection. The `DatabaseConfiguration` / `AuthenticationCredentials` types in `Examples/MistDemo/Sources/MistDemoKit/Configuration/` enforce valid database+auth combinations at construction time.
 
 **Result Types (Sources/MistKit/Service/):**
 - `QueryResult` — `records: [RecordInfo]`, `continuationMarker: String?`
@@ -344,7 +353,7 @@ Key endpoints documented in the OpenAPI spec:
 - Records: `/records/query`, `/records/modify`, `/records/lookup`, `/records/changes`
 - Zones: `/zones/list`, `/zones/lookup`, `/zones/modify`, `/zones/changes`
 - Subscriptions: `/subscriptions/list`, `/subscriptions/lookup`, `/subscriptions/modify`
-- Users: `/users/current`, `/users/discover`, `/users/lookup/contacts`
+- Users: `/users/caller`, `/users/discover` (POST + GET), `/users/lookup/email`, `/users/lookup/id`
 - Assets: `/assets/upload`
 - Tokens: `/tokens/create`, `/tokens/register`
 

@@ -522,11 +522,15 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /database/{version}/{container}/{environment}/{database}/users/current:
+  /database/{version}/{container}/{environment}/{database}/users/caller:
     get:
-      summary: Get Current User
-      description: Fetch the current authenticated user's information
-      operationId: getCurrentUser
+      summary: Get the Caller (Current User)
+      description: |
+        Fetch the authenticated caller's user information. This replaces the deprecated
+        `users/current` endpoint. Requires public database with a web-auth token
+        (user-context auth); server-to-server credentials and the private database
+        will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
+      operationId: getCaller
       tags:
         - Users
       parameters:
@@ -597,6 +601,114 @@ paths:
       responses:
         '200':
           description: User identities discovered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    # GET /users/discover — see #28
+    get:
+      summary: Discover All User Identities
+      description: |
+        Fetch every user identity in the caller's CloudKit address book.
+        Requires public-database routing with web-auth credentials (user-context
+        auth); only users who have run the app and granted discoverability are
+        returned.
+      operationId: discoverAllUserIdentities
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      responses:
+        '200':
+          description: All discoverable user identities returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/users/lookup/email:
+    post:
+      summary: Lookup Users by Email
+      description: |
+        Look up user identities by email address. Requires public-database
+        routing with web-auth credentials (user-context auth). Each requested
+        email returns at most one identity in the `users` array.
+      operationId: lookupUsersByEmail
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      emailAddress:
+                        type: string
+      responses:
+        '200':
+          description: User identities returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoverResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /database/{version}/{container}/{environment}/{database}/users/lookup/id:
+    post:
+      summary: Lookup Users by Record Name
+      description: |
+        Look up user identities by record name (CloudKit user record ID).
+        Requires public-database routing with web-auth credentials.
+      operationId: lookupUsersByRecordName
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      userRecordName:
+                        type: string
+      responses:
+        '200':
+          description: User identities returned successfully
           content:
             application/json:
               schema:

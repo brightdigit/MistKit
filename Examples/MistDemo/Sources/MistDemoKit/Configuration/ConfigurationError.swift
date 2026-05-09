@@ -31,7 +31,6 @@ import Foundation
 
 /// Configuration errors.
 internal enum ConfigurationError: LocalizedError {
-  case missingAPIToken
   case invalidEnvironment(String)
   case invalidDatabase(String)
   case missingRequired(String, suggestion: String)
@@ -42,9 +41,6 @@ internal enum ConfigurationError: LocalizedError {
 
   internal var errorDescription: String? {
     switch self {
-    case .missingAPIToken:
-      "CloudKit API token is required. "
-        + "Set CLOUDKIT_API_TOKEN environment variable or use --api-token"
     case .invalidEnvironment(let env):
       "Invalid environment '\(env)'. Must be 'development' or 'production'"
     case .invalidDatabase(let database):

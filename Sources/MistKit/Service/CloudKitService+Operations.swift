@@ -95,7 +95,8 @@ extension CloudKitService {
     filters: [QueryFilter]? = nil,
     sortBy: [QuerySort]? = nil,
     limit: Int? = nil,
-    desiredKeys: [String]? = nil
+    desiredKeys: [String]? = nil,
+    database: Database = .public
   ) async throws(CloudKitError) -> [RecordInfo] {
     let result: QueryResult = try await queryRecords(
       recordType: recordType,
@@ -103,7 +104,8 @@ extension CloudKitService {
       sortBy: sortBy,
       limit: limit,
       desiredKeys: desiredKeys,
-      continuationMarker: nil
+      continuationMarker: nil,
+      database: database
     )
     return result.records
   }
@@ -146,7 +148,8 @@ extension CloudKitService {
     sortBy: [QuerySort]? = nil,
     limit: Int? = nil,
     desiredKeys: [String]? = nil,
-    continuationMarker: String? = nil
+    continuationMarker: String? = nil,
+    database: Database = .public
   ) async throws(CloudKitError) -> QueryResult {
     let effectiveLimit = limit ?? defaultQueryLimit
 
@@ -173,10 +176,12 @@ extension CloudKitService {
     }
 
     do {
+      let client = try self.client(for: database)
       let response = try await client.queryRecords(
         .init(
           path: createQueryRecordsPath(
-            containerIdentifier: containerIdentifier
+            containerIdentifier: containerIdentifier,
+            database: database
           ),
           body: .json(
             .init(

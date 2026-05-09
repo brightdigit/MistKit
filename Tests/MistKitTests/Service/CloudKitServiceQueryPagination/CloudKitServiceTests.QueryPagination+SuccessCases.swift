@@ -176,7 +176,7 @@ extension CloudKitServiceTests.QueryPagination {
       let transport = MockTransport(responseProvider: provider)
       let service = try CloudKitService(
         containerIdentifier: TestConstants.serviceContainerIdentifier,
-        apiToken: TestConstants.apiToken,
+        credentials: Credentials(apiAuth: APICredentials(apiToken: TestConstants.apiToken)),
         transport: transport
       )
 

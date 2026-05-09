@@ -43,7 +43,10 @@ internal struct LookupZonePhase: IntegrationPhase {
   ) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
-    let zones = try await context.service.lookupZones(zoneIDs: [.defaultZone])
+    let zones = try await context.service.lookupZones(
+      zoneIDs: [.defaultZone],
+      database: context.database
+    )
 
     guard !zones.isEmpty else {
       throw IntegrationTestError.zoneNotFound("_defaultZone")

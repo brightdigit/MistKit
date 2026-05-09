@@ -136,7 +136,7 @@ extension CloudKitServiceTests.Upload {
       let transport = MockTransport(responseProvider: responseProvider)
       let service = try CloudKitService(
         containerIdentifier: TestConstants.serviceContainerIdentifier,
-        apiToken: TestConstants.apiToken,
+        credentials: Credentials(apiAuth: APICredentials(apiToken: TestConstants.apiToken)),
         transport: transport
       )
 

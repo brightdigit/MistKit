@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// A token encoder that replaces specific characters with URL-encoded equivalents
 internal struct CharacterMapEncoder: Sendable {

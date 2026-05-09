@@ -1,5 +1,5 @@
 //
-//  DatabaseCredentialsTests.swift
+//  AuthenticationCredentialsTests.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -33,8 +33,8 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("DatabaseCredentials")
-internal enum DatabaseCredentialsTests {
+@Suite("Credentials helpers")
+internal enum AuthenticationCredentialsTests {
   @Suite("PrivateKeyMaterial")
   internal struct PrivateKeyMaterialTests {
     @Test("loadPEM raw returns content unchanged when no escapes present")
@@ -71,89 +71,12 @@ internal enum DatabaseCredentialsTests {
       #expect(try material.loadPEM() == pem)
     }
 
-    @Test("loadPEM file throws missingRequired when file is unreadable")
+    @Test("loadPEM file throws when file is unreadable")
     internal func loadPEMFileMissingThrows() throws {
       let material = PrivateKeyMaterial.file(path: "/non/existent/key-\(UUID().uuidString).pem")
 
-      do {
-        _ = try material.loadPEM()
-        Issue.record("Expected ConfigurationError.missingRequired")
-      } catch let error as ConfigurationError {
-        if case .missingRequired(let key, _) = error {
-          #expect(key == "private.key")
-        } else {
-          Issue.record("Wrong ConfigurationError case: \(error)")
-        }
-      }
-    }
-  }
-
-  @Suite("database getter")
-  internal struct DatabaseGetterTests {
-    @Test("publicDatabase returns .public")
-    internal func publicMapsToPublic() {
-      let creds = DatabaseCredentials.publicDatabase(
-        keyID: "k",
-        privateKey: .raw("pem")
-      )
-      #expect(creds.database == .public)
-    }
-
-    @Test("privateDatabase returns .private")
-    internal func privateMapsToPrivate() {
-      let creds = DatabaseCredentials.privateDatabase(
-        apiToken: "a",
-        webAuthToken: "w"
-      )
-      #expect(creds.database == .private)
-    }
-
-    @Test("sharedDatabase returns .shared")
-    internal func sharedMapsToShared() {
-      let creds = DatabaseCredentials.sharedDatabase(
-        apiToken: "a",
-        webAuthToken: "w"
-      )
-      #expect(creds.database == .shared)
-    }
-  }
-
-  @Suite("makeTokenManager")
-  internal struct MakeTokenManagerTests {
-    @Test("privateDatabase produces a WebAuthTokenManager")
-    internal func privateProducesWebAuthManager() throws {
-      let creds = DatabaseCredentials.privateDatabase(
-        apiToken: "api",
-        webAuthToken: "web"
-      )
-
-      let manager = try creds.makeTokenManager()
-      #expect(manager is WebAuthTokenManager)
-    }
-
-    @Test("sharedDatabase produces a WebAuthTokenManager")
-    internal func sharedProducesWebAuthManager() throws {
-      let creds = DatabaseCredentials.sharedDatabase(
-        apiToken: "api",
-        webAuthToken: "web"
-      )
-
-      let manager = try creds.makeTokenManager()
-      #expect(manager is WebAuthTokenManager)
-    }
-
-    @Test(
-      "publicDatabase with malformed PEM surfaces the auth manager error",
-      .enabled(if: MistKitClientFactoryTests.isServerToServerSupported())
-    )
-    internal func publicWithBadPEMThrows() throws {
-      let creds = DatabaseCredentials.publicDatabase(
-        keyID: "test-key-id",
-        privateKey: .raw("not-a-real-pem")
-      )
-
       #expect(throws: (any Error).self) {
-        _ = try creds.makeTokenManager()
+        _ = try material.loadPEM()
       }
     }
   }

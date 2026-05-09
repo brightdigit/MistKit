@@ -42,7 +42,7 @@ internal struct FetchZoneChangesPhase: IntegrationPhase {
     print("\n\(Self.emoji) \(Self.title)")
 
     do {
-      let result = try await context.service.fetchZoneChanges()
+      let result = try await context.service.fetchZoneChanges(database: context.database)
       print("✅ Fetched \(result.zones.count) zone(s)")
       if context.verbose {
         for zone in result.zones {

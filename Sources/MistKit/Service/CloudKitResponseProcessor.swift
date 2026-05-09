@@ -32,11 +32,11 @@ import OpenAPIRuntime
 
 /// Processes CloudKit API responses and handles errors
 internal struct CloudKitResponseProcessor {
-  /// Process getCurrentUser response
+  /// Process getCaller response
   /// - Parameter response: The response to process
   /// - Returns: The extracted user data
   /// - Throws: CloudKitError for various error conditions
-  internal func processGetCurrentUserResponse(_ response: Operations.getCurrentUser.Output)
+  internal func processGetCallerResponse(_ response: Operations.getCaller.Output)
     async throws(CloudKitError) -> Components.Schemas.UserResponse
   {
     // Check for errors first
@@ -57,7 +57,7 @@ internal struct CloudKitResponseProcessor {
 
   /// Extract user data from OK response
   private func extractUserData(
-    from response: Operations.getCurrentUser.Output.Ok
+    from response: Operations.getCaller.Output.Ok
   ) throws(CloudKitError) -> Components.Schemas.UserResponse {
     switch response.body {
     case .json(let userData):

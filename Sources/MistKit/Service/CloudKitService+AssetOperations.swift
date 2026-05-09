@@ -74,7 +74,8 @@ extension CloudKitService {
     recordType: String,
     fieldName: String,
     recordName: String? = nil,
-    using uploader: AssetUploader? = nil
+    using uploader: AssetUploader? = nil,
+    database: Database = .public
   ) async throws(CloudKitError) -> AssetUploadReceipt {
     let maxSize: Int = 15 * 1_024 * 1_024
     guard data.count <= maxSize else {
@@ -96,7 +97,8 @@ extension CloudKitService {
       let urlToken = try await requestAssetUploadURL(
         recordType: recordType,
         fieldName: fieldName,
-        recordName: recordName
+        recordName: recordName,
+        database: database
       )
 
       guard let uploadURL = urlToken.url else {
@@ -135,7 +137,8 @@ extension CloudKitService {
     recordType: String,
     fieldName: String,
     recordName: String? = nil,
-    zoneID: ZoneID? = nil
+    zoneID: ZoneID? = nil,
+    database: Database = .public
   ) async throws(CloudKitError) -> AssetUploadToken {
     do {
       let tokenRequest =
@@ -151,9 +154,11 @@ extension CloudKitService {
         tokens: [tokenRequest]
       )
 
+      let client = try self.client(for: database)
       let response = try await client.uploadAssets(
         path: createUploadAssetsPath(
-          containerIdentifier: containerIdentifier
+          containerIdentifier: containerIdentifier,
+          database: database
         ),
         body: .json(requestBody)
       )

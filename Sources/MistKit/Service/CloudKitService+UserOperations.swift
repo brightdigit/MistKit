@@ -40,32 +40,149 @@ import OpenAPIRuntime
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
-  /// Fetch current user information
-  public func fetchCurrentUser() async throws(CloudKitError) -> UserInfo {
+  /// Fetch the caller's (current authenticated user's) information.
+  ///
+  /// Hits CloudKit's `users/caller` endpoint, which replaces the deprecated
+  /// `users/current`. Routed against the public database with web-auth
+  /// credentials — calling against private/shared returns
+  /// `BAD_REQUEST: endpoint not applicable in the database type`, so the
+  /// database is fixed in the path and not exposed to callers. The service's
+  /// `Credentials` must include an `apiAuth` with a `webAuthToken`.
+  public func fetchCaller() async throws(CloudKitError) -> UserInfo {
     do {
-      let response = try await client.getCurrentUser(
+      let client = try self.client(for: .public, requiresUserContext: true)
+      let response = try await client.getCaller(
         .init(
-          path: createGetCurrentUserPath(containerIdentifier: containerIdentifier)
+          path: createGetCallerPath(
+            containerIdentifier: containerIdentifier,
+            database: .public
+          )
         )
       )
 
       let userData: Components.Schemas.UserResponse =
-        try await responseProcessor.processGetCurrentUserResponse(response)
+        try await responseProcessor.processGetCallerResponse(response)
       return UserInfo(from: userData)
     } catch {
-      throw mapToCloudKitError(error, context: "fetchCurrentUser")
+      throw mapToCloudKitError(error, context: "fetchCaller")
     }
   }
 
-  /// Discover user identities by email addresses or record names
+  /// Fetch the current authenticated user's information.
+  @available(
+    *, deprecated, renamed: "fetchCaller",
+    message: "users/current is deprecated by Apple. Use fetchCaller() instead."
+  )
+  public func fetchCurrentUser() async throws(CloudKitError) -> UserInfo {
+    try await fetchCaller()
+  }
+
+  /// Discover all user identities in the caller's CloudKit address book.
+  ///
+  /// Hits CloudKit's GET `users/discover` endpoint. Routed against the public
+  /// database with web-auth credentials.
+  ///
+  /// > Important: Marked `unavailable` until #28 is resolved — see issue for
+  /// > the live-testing investigation log.
+  @available(
+    *, unavailable,
+    message: "Not yet ready: GET /users/discover returns HTTP 500 in live testing. See #28."
+  )
+  public func discoverAllUserIdentities() async throws(CloudKitError) -> [UserIdentity] {
+    do {
+      let client = try self.client(for: .public, requiresUserContext: true)
+      let response = try await client.discoverAllUserIdentities(
+        .init(
+          path: createDiscoverAllUserIdentitiesPath(
+            containerIdentifier: containerIdentifier,
+            database: .public
+          )
+        )
+      )
+
+      let discoverData: Components.Schemas.DiscoverResponse =
+        try await responseProcessor.processDiscoverAllUserIdentitiesResponse(
+          response
+        )
+      return discoverData.users?.map(UserIdentity.init(from:)) ?? []
+    } catch {
+      throw mapToCloudKitError(error, context: "discoverAllUserIdentities")
+    }
+  }
+
+  /// Look up user identities by email address.
+  ///
+  /// Hits CloudKit's POST `users/lookup/email` endpoint. Each requested email
+  /// returns at most one identity in the result array. Routed against the
+  /// public database with web-auth credentials.
+  public func lookupUsersByEmail(
+    _ emails: [String]
+  ) async throws(CloudKitError) -> [UserIdentity] {
+    do {
+      let client = try self.client(for: .public, requiresUserContext: true)
+      let response = try await client.lookupUsersByEmail(
+        .init(
+          path: createLookupUsersByEmailPath(
+            containerIdentifier: containerIdentifier,
+            database: .public
+          ),
+          body: .json(
+            .init(users: emails.map { .init(emailAddress: $0) })
+          )
+        )
+      )
+
+      let discoverData: Components.Schemas.DiscoverResponse =
+        try await responseProcessor.processLookupUsersByEmailResponse(response)
+      return discoverData.users?.map(UserIdentity.init(from:)) ?? []
+    } catch {
+      throw mapToCloudKitError(error, context: "lookupUsersByEmail")
+    }
+  }
+
+  /// Look up user identities by record name (CloudKit user record ID).
+  ///
+  /// Hits CloudKit's POST `users/lookup/id` endpoint. Routed against the
+  /// public database with web-auth credentials.
+  public func lookupUsersByRecordName(
+    _ recordNames: [String]
+  ) async throws(CloudKitError) -> [UserIdentity] {
+    do {
+      let client = try self.client(for: .public, requiresUserContext: true)
+      let response = try await client.lookupUsersByRecordName(
+        .init(
+          path: createLookupUsersByRecordNamePath(
+            containerIdentifier: containerIdentifier,
+            database: .public
+          ),
+          body: .json(
+            .init(users: recordNames.map { .init(userRecordName: $0) })
+          )
+        )
+      )
+
+      let discoverData: Components.Schemas.DiscoverResponse =
+        try await responseProcessor.processLookupUsersByRecordNameResponse(response)
+      return discoverData.users?.map(UserIdentity.init(from:)) ?? []
+    } catch {
+      throw mapToCloudKitError(error, context: "lookupUsersByRecordName")
+    }
+  }
+
+  /// Discover user identities by email addresses or record names.
+  ///
+  /// Hits CloudKit's POST `users/discover` endpoint. Routed against the public
+  /// database with web-auth credentials.
   public func discoverUserIdentities(
     lookupInfos: [UserIdentityLookupInfo]
   ) async throws(CloudKitError) -> [UserIdentity] {
     do {
+      let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.discoverUserIdentities(
         .init(
           path: createDiscoverUserIdentitiesPath(
-            containerIdentifier: containerIdentifier
+            containerIdentifier: containerIdentifier,
+            database: .public
           ),
           body: .json(
             .init(

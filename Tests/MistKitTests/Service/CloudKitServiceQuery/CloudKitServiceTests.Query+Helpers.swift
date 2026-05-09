@@ -43,7 +43,7 @@ extension CloudKitServiceTests.Query {
     )
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      apiToken: "test-token",
+      credentials: Credentials(apiAuth: APICredentials(apiToken: "test-token")),
       transport: transport
     )
   }
@@ -58,7 +58,7 @@ extension CloudKitServiceTests.Query {
     )
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      apiToken: "test-token",
+      credentials: Credentials(apiAuth: APICredentials(apiToken: "test-token")),
       transport: transport
     )
   }
@@ -71,7 +71,7 @@ extension CloudKitServiceTests.Query {
     )
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      apiToken: "test-token",
+      credentials: Credentials(apiAuth: APICredentials(apiToken: "test-token")),
       transport: transport
     )
   }

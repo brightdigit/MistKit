@@ -74,6 +74,70 @@ extension CloudKitResponseProcessor {
     }
   }
 
+  /// Process discoverAllUserIdentities response.
+  ///
+  /// Marked unavailable in lockstep with `CloudKitService.discoverAllUserIdentities()`.
+  /// The body throws `CloudKitError.unsupportedOperationType` so any stray
+  /// caller (for example via `@testable import` under Swift 6.1, where the
+  /// `@available(*, unavailable)` cascade does not apply) gets a recoverable
+  /// error rather than a crash. When #28 is resolved, restore the
+  /// protocol-generic implementation and re-add the `CloudKitResponseType`
+  /// conformance for `Operations.discoverAllUserIdentities.Output`.
+  ///
+  /// The `@available(*, unavailable)` attribute is gated to Swift 6.2+ because
+  /// Swift 6.1 rejects calls to an unavailable function from within another
+  /// unavailable function; 6.2 relaxed that rule. Once Swift 6.1 is dropped
+  /// from the support matrix, delete the `#if swift(>=6.2)`/`#endif` lines so
+  /// the attribute always applies.
+  #if swift(>=6.2)
+    @available(*, unavailable, message: "Pending #28: discoverAllUserIdentities is not yet ready.")
+  #endif
+  internal func processDiscoverAllUserIdentitiesResponse(
+    _ response: Operations.discoverAllUserIdentities.Output
+  ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
+    throw CloudKitError.unsupportedOperationType(
+      "discoverAllUserIdentities is not yet ready (pending #28)"
+    )
+  }
+
+  /// Process lookupUsersByEmail response
+  internal func processLookupUsersByEmailResponse(
+    _ response: Operations.lookupUsersByEmail.Output
+  ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
+    if let error = CloudKitError(response) {
+      throw error
+    }
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let discoverData):
+        return discoverData
+      }
+    default:
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
+  }
+
+  /// Process lookupUsersByRecordName response
+  internal func processLookupUsersByRecordNameResponse(
+    _ response: Operations.lookupUsersByRecordName.Output
+  ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
+    if let error = CloudKitError(response) {
+      throw error
+    }
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let discoverData):
+        return discoverData
+      }
+    default:
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
+  }
+
   /// Process uploadAssets response
   /// - Parameter response: The response to process
   /// - Returns: The extracted asset upload response data
