@@ -81,7 +81,16 @@ extension CloudKitResponseProcessor {
   /// `@available(*, unavailable)`, so this code is unreachable. When #28 is
   /// resolved, restore the protocol-generic implementation and re-add the
   /// `CloudKitResponseType` conformance for `Operations.discoverAllUserIdentities.Output`.
-  @available(*, unavailable, message: "Pending #28: discoverAllUserIdentities is not yet ready.")
+  ///
+  /// The `@available(*, unavailable)` attribute is gated to Swift 6.2+ because
+  /// Swift 6.1 rejects calls to an unavailable function from within another
+  /// unavailable function; 6.2 relaxed that rule. Once Swift 6.1 is dropped
+  /// from the support matrix, delete the `#if swift(>=6.2)`/`#endif` lines so
+  /// the attribute always applies.
+  #if swift(>=6.2)
+    @available(*, unavailable, message: "Pending #28: discoverAllUserIdentities is not yet ready.")
+  #endif
+  // swiftlint:disable:next unavailable_function
   internal func processDiscoverAllUserIdentitiesResponse(
     _ response: Operations.discoverAllUserIdentities.Output
   ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
