@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// Represents the current authentication mode
 public enum AuthenticationMode: Sendable, Equatable {

@@ -1,5 +1,5 @@
 //
-//  FetchCurrentUserPhase.swift
+//  FetchCallerPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,22 +30,29 @@
 import Foundation
 import MistKit
 
-internal struct FetchCurrentUserPhase: IntegrationPhase {
+/// Calls `users/caller`, the user-context endpoint that replaced the deprecated
+/// `users/current`.
+///
+/// CloudKit only accepts this endpoint against the **public database with
+/// web-auth credentials**. The runner only schedules this phase when the
+/// configured `Credentials` carries web-auth material; the service resolves
+/// the right token manager per call.
+internal struct FetchCallerPhase: IntegrationPhase {
   internal typealias Input = NoState
   internal typealias Output = UserInfo
 
-  internal static let title = "Fetch current user"
+  internal static let title = "Fetch caller (current user)"
   internal static let emoji = "👤"
-  internal static let apiName = "fetchCurrentUser"
+  internal static let apiName = "fetchCaller"
 
   internal func run(
     input: NoState, context: PhaseContext
   ) async throws -> UserInfo {
     print("\n\(Self.emoji) \(Self.title)")
 
-    let userInfo = try await context.service.fetchCurrentUser()
+    let userInfo = try await context.service.fetchCaller()
 
-    print("✅ Current user: \(userInfo.userRecordName)")
+    print("✅ Caller: \(userInfo.userRecordName)")
 
     if context.verbose {
       if let firstName = userInfo.firstName { print("   First name: \(firstName)") }

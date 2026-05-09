@@ -90,13 +90,28 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/subscriptions/modify`.
     /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)`.
     func modifySubscriptions(_ input: Operations.modifySubscriptions.Input) async throws -> Operations.modifySubscriptions.Output
-    /// Get Current User
+    /// Get the Caller (Current User)
     ///
-    /// Fetch the current authenticated user's information
+    /// Fetch the authenticated caller's user information. This replaces the deprecated
+    /// `users/current` endpoint. Requires public database with a web-auth token
+    /// (user-context auth); server-to-server credentials and the private database
+    /// will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
     ///
-    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)`.
-    func getCurrentUser(_ input: Operations.getCurrentUser.Input) async throws -> Operations.getCurrentUser.Output
+    ///
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/caller`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)`.
+    func getCaller(_ input: Operations.getCaller.Input) async throws -> Operations.getCaller.Output
+    /// Discover All User Identities
+    ///
+    /// Fetch every user identity in the caller's CloudKit address book.
+    /// Requires public-database routing with web-auth credentials (user-context
+    /// auth); only users who have run the app and granted discoverability are
+    /// returned.
+    ///
+    ///
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/discover`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/get(discoverAllUserIdentities)`.
+    func discoverAllUserIdentities(_ input: Operations.discoverAllUserIdentities.Input) async throws -> Operations.discoverAllUserIdentities.Output
     /// Discover User Identities
     ///
     /// Discover all user identities based on email addresses or user record names
@@ -104,6 +119,25 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/discover`.
     /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)`.
     func discoverUserIdentities(_ input: Operations.discoverUserIdentities.Input) async throws -> Operations.discoverUserIdentities.Output
+    /// Lookup Users by Email
+    ///
+    /// Look up user identities by email address. Requires public-database
+    /// routing with web-auth credentials (user-context auth). Each requested
+    /// email returns at most one identity in the `users` array.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/email`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/email/post(lookupUsersByEmail)`.
+    func lookupUsersByEmail(_ input: Operations.lookupUsersByEmail.Input) async throws -> Operations.lookupUsersByEmail.Output
+    /// Lookup Users by Record Name
+    ///
+    /// Look up user identities by record name (CloudKit user record ID).
+    /// Requires public-database routing with web-auth credentials.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/id`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/id/post(lookupUsersByRecordName)`.
+    func lookupUsersByRecordName(_ input: Operations.lookupUsersByRecordName.Input) async throws -> Operations.lookupUsersByRecordName.Output
     /// Lookup Contacts (Deprecated)
     ///
     /// Fetch contacts (This endpoint is deprecated)
@@ -325,17 +359,40 @@ extension APIProtocol {
             body: body
         ))
     }
-    /// Get Current User
+    /// Get the Caller (Current User)
     ///
-    /// Fetch the current authenticated user's information
+    /// Fetch the authenticated caller's user information. This replaces the deprecated
+    /// `users/current` endpoint. Requires public database with a web-auth token
+    /// (user-context auth); server-to-server credentials and the private database
+    /// will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
     ///
-    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)`.
-    internal func getCurrentUser(
-        path: Operations.getCurrentUser.Input.Path,
-        headers: Operations.getCurrentUser.Input.Headers = .init()
-    ) async throws -> Operations.getCurrentUser.Output {
-        try await getCurrentUser(Operations.getCurrentUser.Input(
+    ///
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/caller`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)`.
+    internal func getCaller(
+        path: Operations.getCaller.Input.Path,
+        headers: Operations.getCaller.Input.Headers = .init()
+    ) async throws -> Operations.getCaller.Output {
+        try await getCaller(Operations.getCaller.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Discover All User Identities
+    ///
+    /// Fetch every user identity in the caller's CloudKit address book.
+    /// Requires public-database routing with web-auth credentials (user-context
+    /// auth); only users who have run the app and granted discoverability are
+    /// returned.
+    ///
+    ///
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/discover`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/get(discoverAllUserIdentities)`.
+    internal func discoverAllUserIdentities(
+        path: Operations.discoverAllUserIdentities.Input.Path,
+        headers: Operations.discoverAllUserIdentities.Input.Headers = .init()
+    ) async throws -> Operations.discoverAllUserIdentities.Output {
+        try await discoverAllUserIdentities(Operations.discoverAllUserIdentities.Input(
             path: path,
             headers: headers
         ))
@@ -352,6 +409,45 @@ extension APIProtocol {
         body: Operations.discoverUserIdentities.Input.Body
     ) async throws -> Operations.discoverUserIdentities.Output {
         try await discoverUserIdentities(Operations.discoverUserIdentities.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Lookup Users by Email
+    ///
+    /// Look up user identities by email address. Requires public-database
+    /// routing with web-auth credentials (user-context auth). Each requested
+    /// email returns at most one identity in the `users` array.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/email`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/email/post(lookupUsersByEmail)`.
+    internal func lookupUsersByEmail(
+        path: Operations.lookupUsersByEmail.Input.Path,
+        headers: Operations.lookupUsersByEmail.Input.Headers = .init(),
+        body: Operations.lookupUsersByEmail.Input.Body
+    ) async throws -> Operations.lookupUsersByEmail.Output {
+        try await lookupUsersByEmail(Operations.lookupUsersByEmail.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Lookup Users by Record Name
+    ///
+    /// Look up user identities by record name (CloudKit user record ID).
+    /// Requires public-database routing with web-auth credentials.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/id`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/id/post(lookupUsersByRecordName)`.
+    internal func lookupUsersByRecordName(
+        path: Operations.lookupUsersByRecordName.Input.Path,
+        headers: Operations.lookupUsersByRecordName.Input.Headers = .init(),
+        body: Operations.lookupUsersByRecordName.Input.Body
+    ) async throws -> Operations.lookupUsersByRecordName.Output {
+        try await lookupUsersByRecordName(Operations.lookupUsersByRecordName.Input(
             path: path,
             headers: headers,
             body: body
@@ -6129,20 +6225,24 @@ internal enum Operations {
             }
         }
     }
-    /// Get Current User
+    /// Get the Caller (Current User)
     ///
-    /// Fetch the current authenticated user's information
+    /// Fetch the authenticated caller's user information. This replaces the deprecated
+    /// `users/current` endpoint. Requires public database with a web-auth token
+    /// (user-context auth); server-to-server credentials and the private database
+    /// will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
     ///
-    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)`.
-    internal enum getCurrentUser {
-        internal static let id: Swift.String = "getCurrentUser"
+    ///
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/caller`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)`.
+    internal enum getCaller {
+        internal static let id: Swift.String = "getCaller"
         internal struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/path`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/caller/GET/path`.
             internal struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/path/version`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/caller/GET/path/version`.
                 internal var version: Components.Parameters.version
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/path/container`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/caller/GET/path/container`.
                 internal var container: Components.Parameters.container
                 /// Container environment
                 ///
@@ -6151,7 +6251,7 @@ internal enum Operations {
                     case development = "development"
                     case production = "production"
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/path/environment`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/caller/GET/path/environment`.
                 internal var environment: Components.Parameters.environment
                 /// Database scope
                 ///
@@ -6161,7 +6261,7 @@ internal enum Operations {
                     case _private = "private"
                     case shared = "shared"
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/path/database`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/caller/GET/path/database`.
                 internal var database: Components.Parameters.database
                 /// Creates a new `Path`.
                 ///
@@ -6182,27 +6282,27 @@ internal enum Operations {
                     self.database = database
                 }
             }
-            internal var path: Operations.getCurrentUser.Input.Path
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/header`.
+            internal var path: Operations.getCaller.Input.Path
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/caller/GET/header`.
             internal struct Headers: Sendable, Hashable {
-                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getCurrentUser.AcceptableContentType>]
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getCaller.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getCurrentUser.AcceptableContentType>] = .defaultValues()) {
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getCaller.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            internal var headers: Operations.getCurrentUser.Input.Headers
+            internal var headers: Operations.getCaller.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
             internal init(
-                path: Operations.getCurrentUser.Input.Path,
-                headers: Operations.getCurrentUser.Input.Headers = .init()
+                path: Operations.getCaller.Input.Path,
+                headers: Operations.getCaller.Input.Headers = .init()
             ) {
                 self.path = path
                 self.headers = headers
@@ -6210,9 +6310,9 @@ internal enum Operations {
         }
         internal enum Output: Sendable, Hashable {
             internal struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/responses/200/content`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/caller/GET/responses/200/content`.
                 internal enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/current/GET/responses/200/content/application\/json`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/caller/GET/responses/200/content/application\/json`.
                     case json(Components.Schemas.UserResponse)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
@@ -6228,26 +6328,26 @@ internal enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                internal var body: Operations.getCurrentUser.Output.Ok.Body
+                internal var body: Operations.getCaller.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                internal init(body: Operations.getCurrentUser.Output.Ok.Body) {
+                internal init(body: Operations.getCaller.Output.Ok.Body) {
                     self.body = body
                 }
             }
             /// User information retrieved successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.getCurrentUser.Output.Ok)
+            case ok(Operations.getCaller.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            internal var ok: Operations.getCurrentUser.Output.Ok {
+            internal var ok: Operations.getCaller.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -6262,7 +6362,7 @@ internal enum Operations {
             }
             /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.BadRequest)
@@ -6285,7 +6385,7 @@ internal enum Operations {
             }
             /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)
@@ -6308,7 +6408,7 @@ internal enum Operations {
             }
             /// Forbidden (403) - ACCESS_DENIED
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/403`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
             case forbidden(Components.Responses.Forbidden)
@@ -6331,7 +6431,7 @@ internal enum Operations {
             }
             /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/404`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
             case notFound(Components.Responses.NotFound)
@@ -6354,7 +6454,7 @@ internal enum Operations {
             }
             /// Conflict (409) - CONFLICT, EXISTS
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/409`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/409`.
             ///
             /// HTTP response code: `409 conflict`.
             case conflict(Components.Responses.Conflict)
@@ -6377,7 +6477,7 @@ internal enum Operations {
             }
             /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/412`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/412`.
             ///
             /// HTTP response code: `412 preconditionFailed`.
             case preconditionFailed(Components.Responses.PreconditionFailed)
@@ -6400,7 +6500,7 @@ internal enum Operations {
             }
             /// Request entity too large (413) - QUOTA_EXCEEDED
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/413`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/413`.
             ///
             /// HTTP response code: `413 contentTooLarge`.
             case contentTooLarge(Components.Responses.RequestEntityTooLarge)
@@ -6423,7 +6523,7 @@ internal enum Operations {
             }
             /// Too many requests (429) - THROTTLED
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/429`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
             case tooManyRequests(Components.Responses.TooManyRequests)
@@ -6446,7 +6546,7 @@ internal enum Operations {
             }
             /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/421`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/421`.
             ///
             /// HTTP response code: `421 misdirectedRequest`.
             case misdirectedRequest(Components.Responses.UnprocessableEntity)
@@ -6469,7 +6569,7 @@ internal enum Operations {
             }
             /// Internal server error (500) - INTERNAL_ERROR
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/500`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses.InternalServerError)
@@ -6492,7 +6592,7 @@ internal enum Operations {
             }
             /// Service unavailable (503) - TRY_AGAIN_LATER
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)/responses/503`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/503`.
             ///
             /// HTTP response code: `503 serviceUnavailable`.
             case serviceUnavailable(Components.Responses.ServiceUnavailable)
@@ -6508,6 +6608,218 @@ internal enum Operations {
                     default:
                         try throwUnexpectedResponseStatus(
                             expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Discover All User Identities
+    ///
+    /// Fetch every user identity in the caller's CloudKit address book.
+    /// Requires public-database routing with web-auth credentials (user-context
+    /// auth); only users who have run the app and granted discoverability are
+    /// returned.
+    ///
+    ///
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/discover`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/get(discoverAllUserIdentities)`.
+    internal enum discoverAllUserIdentities {
+        internal static let id: Swift.String = "discoverAllUserIdentities"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/GET/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/GET/path/version`.
+                internal var version: Components.Parameters.version
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/GET/path/container`.
+                internal var container: Components.Parameters.container
+                /// Container environment
+                ///
+                /// - Remark: Generated from `#/components/parameters/environment`.
+                internal enum environment: String, Codable, Hashable, Sendable, CaseIterable {
+                    case development = "development"
+                    case production = "production"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/GET/path/environment`.
+                internal var environment: Components.Parameters.environment
+                /// Database scope
+                ///
+                /// - Remark: Generated from `#/components/parameters/database`.
+                internal enum database: String, Codable, Hashable, Sendable, CaseIterable {
+                    case _public = "public"
+                    case _private = "private"
+                    case shared = "shared"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/GET/path/database`.
+                internal var database: Components.Parameters.database
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - version:
+                ///   - container:
+                ///   - environment:
+                ///   - database:
+                internal init(
+                    version: Components.Parameters.version,
+                    container: Components.Parameters.container,
+                    environment: Components.Parameters.environment,
+                    database: Components.Parameters.database
+                ) {
+                    self.version = version
+                    self.container = container
+                    self.environment = environment
+                    self.database = database
+                }
+            }
+            internal var path: Operations.discoverAllUserIdentities.Input.Path
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/GET/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.discoverAllUserIdentities.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.discoverAllUserIdentities.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.discoverAllUserIdentities.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.discoverAllUserIdentities.Input.Path,
+                headers: Operations.discoverAllUserIdentities.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/GET/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/discover/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.DiscoverResponse)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverResponse {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.discoverAllUserIdentities.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.discoverAllUserIdentities.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// All discoverable user identities returned successfully
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/get(discoverAllUserIdentities)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.discoverAllUserIdentities.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.discoverAllUserIdentities.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/get(discoverAllUserIdentities)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.BadRequest)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            internal var badRequest: Components.Responses.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/get(discoverAllUserIdentities)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
                             response: self
                         )
                     }
@@ -6756,6 +7068,509 @@ internal enum Operations {
             /// Unauthorized (401) - AUTHENTICATION_FAILED
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Lookup Users by Email
+    ///
+    /// Look up user identities by email address. Requires public-database
+    /// routing with web-auth credentials (user-context auth). Each requested
+    /// email returns at most one identity in the `users` array.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/email`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/email/post(lookupUsersByEmail)`.
+    internal enum lookupUsersByEmail {
+        internal static let id: Swift.String = "lookupUsersByEmail"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/path/version`.
+                internal var version: Components.Parameters.version
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/path/container`.
+                internal var container: Components.Parameters.container
+                /// Container environment
+                ///
+                /// - Remark: Generated from `#/components/parameters/environment`.
+                internal enum environment: String, Codable, Hashable, Sendable, CaseIterable {
+                    case development = "development"
+                    case production = "production"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/path/environment`.
+                internal var environment: Components.Parameters.environment
+                /// Database scope
+                ///
+                /// - Remark: Generated from `#/components/parameters/database`.
+                internal enum database: String, Codable, Hashable, Sendable, CaseIterable {
+                    case _public = "public"
+                    case _private = "private"
+                    case shared = "shared"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/path/database`.
+                internal var database: Components.Parameters.database
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - version:
+                ///   - container:
+                ///   - environment:
+                ///   - database:
+                internal init(
+                    version: Components.Parameters.version,
+                    container: Components.Parameters.container,
+                    environment: Components.Parameters.environment,
+                    database: Components.Parameters.database
+                ) {
+                    self.version = version
+                    self.container = container
+                    self.environment = environment
+                    self.database = database
+                }
+            }
+            internal var path: Operations.lookupUsersByEmail.Input.Path
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupUsersByEmail.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupUsersByEmail.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.lookupUsersByEmail.Input.Headers
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/requestBody/json`.
+                internal struct jsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/requestBody/json/usersPayload`.
+                    internal struct usersPayloadPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/requestBody/json/usersPayload/emailAddress`.
+                        internal var emailAddress: Swift.String?
+                        /// Creates a new `usersPayloadPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - emailAddress:
+                        internal init(emailAddress: Swift.String? = nil) {
+                            self.emailAddress = emailAddress
+                        }
+                        internal enum CodingKeys: String, CodingKey {
+                            case emailAddress
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/requestBody/json/users`.
+                    internal typealias usersPayload = [Operations.lookupUsersByEmail.Input.Body.jsonPayload.usersPayloadPayload]
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/requestBody/json/users`.
+                    internal var users: Operations.lookupUsersByEmail.Input.Body.jsonPayload.usersPayload?
+                    /// Creates a new `jsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - users:
+                    internal init(users: Operations.lookupUsersByEmail.Input.Body.jsonPayload.usersPayload? = nil) {
+                        self.users = users
+                    }
+                    internal enum CodingKeys: String, CodingKey {
+                        case users
+                    }
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/requestBody/content/application\/json`.
+                case json(Operations.lookupUsersByEmail.Input.Body.jsonPayload)
+            }
+            internal var body: Operations.lookupUsersByEmail.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                path: Operations.lookupUsersByEmail.Input.Path,
+                headers: Operations.lookupUsersByEmail.Input.Headers = .init(),
+                body: Operations.lookupUsersByEmail.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/email/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.DiscoverResponse)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverResponse {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.lookupUsersByEmail.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.lookupUsersByEmail.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// User identities returned successfully
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/email/post(lookupUsersByEmail)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.lookupUsersByEmail.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.lookupUsersByEmail.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/email/post(lookupUsersByEmail)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.BadRequest)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            internal var badRequest: Components.Responses.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/email/post(lookupUsersByEmail)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Unauthorized)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Lookup Users by Record Name
+    ///
+    /// Look up user identities by record name (CloudKit user record ID).
+    /// Requires public-database routing with web-auth credentials.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/id`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/id/post(lookupUsersByRecordName)`.
+    internal enum lookupUsersByRecordName {
+        internal static let id: Swift.String = "lookupUsersByRecordName"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/path/version`.
+                internal var version: Components.Parameters.version
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/path/container`.
+                internal var container: Components.Parameters.container
+                /// Container environment
+                ///
+                /// - Remark: Generated from `#/components/parameters/environment`.
+                internal enum environment: String, Codable, Hashable, Sendable, CaseIterable {
+                    case development = "development"
+                    case production = "production"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/path/environment`.
+                internal var environment: Components.Parameters.environment
+                /// Database scope
+                ///
+                /// - Remark: Generated from `#/components/parameters/database`.
+                internal enum database: String, Codable, Hashable, Sendable, CaseIterable {
+                    case _public = "public"
+                    case _private = "private"
+                    case shared = "shared"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/path/database`.
+                internal var database: Components.Parameters.database
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - version:
+                ///   - container:
+                ///   - environment:
+                ///   - database:
+                internal init(
+                    version: Components.Parameters.version,
+                    container: Components.Parameters.container,
+                    environment: Components.Parameters.environment,
+                    database: Components.Parameters.database
+                ) {
+                    self.version = version
+                    self.container = container
+                    self.environment = environment
+                    self.database = database
+                }
+            }
+            internal var path: Operations.lookupUsersByRecordName.Input.Path
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupUsersByRecordName.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.lookupUsersByRecordName.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.lookupUsersByRecordName.Input.Headers
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/requestBody/json`.
+                internal struct jsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/requestBody/json/usersPayload`.
+                    internal struct usersPayloadPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/requestBody/json/usersPayload/userRecordName`.
+                        internal var userRecordName: Swift.String?
+                        /// Creates a new `usersPayloadPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - userRecordName:
+                        internal init(userRecordName: Swift.String? = nil) {
+                            self.userRecordName = userRecordName
+                        }
+                        internal enum CodingKeys: String, CodingKey {
+                            case userRecordName
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/requestBody/json/users`.
+                    internal typealias usersPayload = [Operations.lookupUsersByRecordName.Input.Body.jsonPayload.usersPayloadPayload]
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/requestBody/json/users`.
+                    internal var users: Operations.lookupUsersByRecordName.Input.Body.jsonPayload.usersPayload?
+                    /// Creates a new `jsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - users:
+                    internal init(users: Operations.lookupUsersByRecordName.Input.Body.jsonPayload.usersPayload? = nil) {
+                        self.users = users
+                    }
+                    internal enum CodingKeys: String, CodingKey {
+                        case users
+                    }
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/requestBody/content/application\/json`.
+                case json(Operations.lookupUsersByRecordName.Input.Body.jsonPayload)
+            }
+            internal var body: Operations.lookupUsersByRecordName.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                path: Operations.lookupUsersByRecordName.Input.Path,
+                headers: Operations.lookupUsersByRecordName.Input.Headers = .init(),
+                body: Operations.lookupUsersByRecordName.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/users/lookup/id/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.DiscoverResponse)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.DiscoverResponse {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.lookupUsersByRecordName.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.lookupUsersByRecordName.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// User identities returned successfully
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/id/post(lookupUsersByRecordName)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.lookupUsersByRecordName.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.lookupUsersByRecordName.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/id/post(lookupUsersByRecordName)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.BadRequest)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            internal var badRequest: Components.Responses.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/id/post(lookupUsersByRecordName)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Unauthorized)

@@ -47,7 +47,12 @@ extension CloudKitServiceTests.DiscoverUserIdentities {
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      apiToken: testAPIToken,
+      credentials: Credentials(
+        apiAuth: APICredentials(
+          apiToken: testAPIToken,
+          webAuthToken: TestConstants.webAuthToken
+        )
+      ),
       transport: transport
     )
   }
@@ -58,7 +63,12 @@ extension CloudKitServiceTests.DiscoverUserIdentities {
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      apiToken: testAPIToken,
+      credentials: Credentials(
+        apiAuth: APICredentials(
+          apiToken: testAPIToken,
+          webAuthToken: TestConstants.webAuthToken
+        )
+      ),
       transport: transport
     )
   }

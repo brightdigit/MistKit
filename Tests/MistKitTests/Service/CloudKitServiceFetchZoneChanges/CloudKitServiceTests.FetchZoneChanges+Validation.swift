@@ -44,7 +44,7 @@ extension CloudKitServiceTests.FetchZoneChanges {
       let service = try await CloudKitServiceTests.FetchZoneChanges.makeAuthErrorService()
 
       await #expect(throws: CloudKitError.self) {
-        try await service.fetchZoneChanges()
+        try await service.fetchZoneChanges(database: .public)
       }
     }
   }

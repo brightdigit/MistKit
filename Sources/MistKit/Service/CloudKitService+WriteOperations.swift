@@ -48,13 +48,15 @@ extension CloudKitService {
   /// - Throws: CloudKitError if the operation fails
   public func modifyRecords(
     _ operations: [RecordOperation],
-    atomic: Bool = false
+    atomic: Bool = false,
+    database: Database = .public
   ) async throws(CloudKitError) -> [RecordInfo] {
     do {
       let apiOperations = try operations.map {
         try Components.Schemas.RecordOperation(from: $0)
       }
 
+      let client = try self.client(for: database)
       let response = try await client.modifyRecords(
         .init(
           path: .init(
@@ -94,7 +96,8 @@ extension CloudKitService {
   public func createRecord(
     recordType: String,
     recordName: String? = nil,
-    fields: [String: FieldValue]
+    fields: [String: FieldValue],
+    database: Database = .public
   ) async throws(CloudKitError) -> RecordInfo {
     let operation = RecordOperation.create(
       recordType: recordType,
@@ -102,7 +105,7 @@ extension CloudKitService {
       fields: fields
     )
 
-    let results = try await modifyRecords([operation])
+    let results = try await modifyRecords([operation], database: database)
     guard let record = results.first else {
       throw CloudKitError.invalidResponse
     }
@@ -121,7 +124,8 @@ extension CloudKitService {
     recordType: String,
     recordName: String,
     fields: [String: FieldValue],
-    recordChangeTag: String? = nil
+    recordChangeTag: String? = nil,
+    database: Database = .public
   ) async throws(CloudKitError) -> RecordInfo {
     let operation = RecordOperation.update(
       recordType: recordType,
@@ -130,7 +134,7 @@ extension CloudKitService {
       recordChangeTag: recordChangeTag
     )
 
-    let results = try await modifyRecords([operation])
+    let results = try await modifyRecords([operation], database: database)
     guard let record = results.first else {
       throw CloudKitError.invalidResponse
     }
@@ -146,7 +150,8 @@ extension CloudKitService {
   public func deleteRecord(
     recordType: String,
     recordName: String,
-    recordChangeTag: String? = nil
+    recordChangeTag: String? = nil,
+    database: Database = .public
   ) async throws(CloudKitError) {
     let operation = RecordOperation.delete(
       recordType: recordType,
@@ -154,6 +159,6 @@ extension CloudKitService {
       recordChangeTag: recordChangeTag
     )
 
-    _ = try await modifyRecords([operation])
+    _ = try await modifyRecords([operation], database: database)
   }
 }

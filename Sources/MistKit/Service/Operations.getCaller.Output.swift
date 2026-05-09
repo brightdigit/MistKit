@@ -1,5 +1,5 @@
 //
-//  Operations.getCurrentUser.Output.swift
+//  Operations.getCaller.Output.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-extension Operations.getCurrentUser.Output: CloudKitResponseType {
+extension Operations.getCaller.Output: CloudKitResponseType {
   internal var badRequestResponse: Components.Responses.BadRequest? {
     if case .badRequest(let response) = self {
       return response

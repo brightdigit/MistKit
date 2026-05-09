@@ -1,5 +1,5 @@
 //
-//  MistKitClientTests.swift
+//  CloudKitServiceTests.FetchCaller.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,7 +27,15 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import Foundation
 import Testing
 
-@Suite("MistKit Client")
-internal enum MistKitClientTests {}
+@testable import MistKit
+
+extension CloudKitServiceTests {
+  @Suite(
+    "CloudKitService FetchCaller Operations",
+    .enabled(if: Platform.isCryptoAvailable)
+  )
+  internal enum FetchCaller {}
+}

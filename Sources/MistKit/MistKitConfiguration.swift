@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// Configuration for MistKit client
 internal struct MistKitConfiguration: Sendable {

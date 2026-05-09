@@ -55,10 +55,15 @@ public struct TestPrivateCommand: MistDemoCommand {
       --asset-size <kb>        Asset size in KB (default: 100)
       --skip-cleanup           Skip cleanup after test
       --verbose                Run in verbose mode
+      --lookup-email <email>   Email for users/lookup/email phase
+                               (CLOUDKIT_LOOKUP_EMAIL); must belong
+                               to an iCloud account discoverable to
+                               the caller, otherwise the phase skips
 
     EXAMPLES:
       mistdemo test-private --verbose
       mistdemo test-private --skip-cleanup --verbose
+      mistdemo test-private --lookup-email me@example.com
 
     NOTES:
       - Requires CLOUDKIT_API_TOKEN and
@@ -76,15 +81,21 @@ public struct TestPrivateCommand: MistDemoCommand {
   /// Executes the command.
   public func execute() async throws {
     let service = try MistKitClientFactory.create(for: config.base)
+    // Private-database flows always carry web-auth credentials, so the same
+    // service can also serve user-identity routes when this command needs
+    // them. Per-call resolution picks the right token manager.
+    let supportsUserContextPhases = config.base.hasUserContextCredentials
 
     let runner = IntegrationTestRunner(
       service: service,
+      supportsUserContextPhases: supportsUserContextPhases,
       containerIdentifier: config.base.containerIdentifier,
       database: .private,
       recordCount: config.recordCount,
       assetSizeKB: config.assetSizeKB,
       skipCleanup: config.skipCleanup,
-      verbose: config.verbose
+      verbose: config.verbose,
+      lookupEmail: config.lookupEmail
     )
 
     try await runner.runPrivateWorkflow()

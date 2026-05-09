@@ -30,6 +30,11 @@
 import Foundation
 import MistKit
 
+/// Calls POST `/users/discover` to look up specific user identities.
+///
+/// Requires public-database web-auth (user-context) credentials. The runner
+/// only schedules this phase when the configured `Credentials` carries
+/// web-auth material; the service resolves the right token manager per call.
 internal struct DiscoverUserIdentitiesPhase: IntegrationPhase {
   internal typealias Input = UserInfo
   internal typealias Output = NoState
@@ -44,7 +49,9 @@ internal struct DiscoverUserIdentitiesPhase: IntegrationPhase {
     print("\n\(Self.emoji) \(Self.title)")
 
     let lookupInfos = [UserIdentityLookupInfo(userRecordName: input.userRecordName)]
-    let identities = try await context.service.discoverUserIdentities(lookupInfos: lookupInfos)
+    let identities = try await context.service.discoverUserIdentities(
+      lookupInfos: lookupInfos
+    )
 
     print("✅ Discovered \(identities.count) user identit\(identities.count == 1 ? "y" : "ies")")
 

@@ -1,5 +1,5 @@
 //
-//  MistDemoConfig+DatabaseCredentials.swift
+//  MistDemoConfig+DatabaseConfiguration.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,26 +27,58 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 extension MistDemoConfig {
-  /// Bundle this config's flat auth fields into a `DatabaseCredentials` value
-  /// matching `self.database`, validating that the required credentials are
-  /// present.
+  /// Build `Credentials` for the primary `CloudKitService` targeting
+  /// `self.database`.
+  ///
+  /// - `.public`: requires server-to-server material (`keyID` +
+  ///   `privateKey`/`privateKeyFile`). If web-auth env vars are also set,
+  ///   they're populated alongside so the same `Credentials` can back a
+  ///   user-context service.
+  /// - `.private` / `.shared`: requires `apiToken` + `webAuthToken`.
   ///
   /// - Throws: `ConfigurationError.missingRequired` if any required field for
   ///   the chosen database is missing or empty.
-  internal func toDatabaseCredentials() throws -> DatabaseCredentials {
+  internal func toPrimaryCredentials() throws -> Credentials {
     switch database {
     case .public:
-      return try toPublicCredentials()
+      let s2s = try resolveServerToServerCredentials()
+      // Optional: also include web-auth so a single service can serve
+      // user-identity routes (`fetchCaller`, `lookupUsers*`) alongside
+      // S2S-signed record operations on `.public`.
+      let webAuth: APICredentials?
+      do {
+        webAuth = try resolveAPICredentials()
+      } catch {
+        webAuth = nil
+        let line =
+          "INFO: Public-DB credentials resolved without web-auth — "
+          + "user-identity routes (fetchCaller, lookupUsers*) will be unavailable. "
+          + "Underlying: \(error.localizedDescription)\n"
+        FileHandle.standardError.write(Data(line.utf8))
+      }
+      return try Credentials(serverToServer: s2s, apiAuth: webAuth)
     case .private, .shared:
-      return try toUserCredentials()
+      let apiAuth = try resolveAPICredentials()
+      return try Credentials(apiAuth: apiAuth)
     }
   }
 
-  private func toPublicCredentials() throws -> DatabaseCredentials {
+  /// Indicates whether `toPrimaryCredentials()` will produce credentials that
+  /// can satisfy user-identity endpoints (`fetchCaller`, `lookupUsers*`).
+  ///
+  /// Those routes require web-auth even on `.public`. Used by the integration
+  /// runner to decide whether to schedule user-identity phases.
+  internal var hasUserContextCredentials: Bool {
+    (try? resolveAPICredentials()) != nil
+  }
+
+  // MARK: - Resolution helpers
+
+  private func resolveServerToServerCredentials() throws -> ServerToServerCredentials {
     guard let keyID, !keyID.isEmpty else {
       throw ConfigurationError.missingRequired(
         "key.id",
@@ -54,7 +86,7 @@ extension MistDemoConfig {
       )
     }
     let material = try resolvePrivateKeyMaterial()
-    return .publicDatabase(keyID: keyID, privateKey: material)
+    return ServerToServerCredentials(keyID: keyID, privateKey: material)
   }
 
   private func resolvePrivateKeyMaterial() throws -> PrivateKeyMaterial {
@@ -69,7 +101,7 @@ extension MistDemoConfig {
     )
   }
 
-  private func toUserCredentials() throws -> DatabaseCredentials {
+  private func resolveAPICredentials() throws -> APICredentials {
     let resolvedAPIToken = AuthenticationHelper.resolveAPIToken(apiToken)
     guard !resolvedAPIToken.isEmpty else {
       throw ConfigurationError.missingRequired(
@@ -86,14 +118,9 @@ extension MistDemoConfig {
         suggestion: "Provide via CLOUDKIT_WEB_AUTH_TOKEN or run `mistdemo auth-token`"
       )
     }
-    return database == .private
-      ? .privateDatabase(
-        apiToken: resolvedAPIToken,
-        webAuthToken: resolvedWebAuth
-      )
-      : .sharedDatabase(
-        apiToken: resolvedAPIToken,
-        webAuthToken: resolvedWebAuth
-      )
+    return APICredentials(
+      apiToken: resolvedAPIToken,
+      webAuthToken: resolvedWebAuth
+    )
   }
 }

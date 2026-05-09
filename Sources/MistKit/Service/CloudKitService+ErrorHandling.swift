@@ -41,7 +41,7 @@ extension CloudKitService {
   ///
   /// - Parameters:
   ///   - error: The error to map
-  ///   - context: A description of the operation (e.g., "fetchCurrentUser")
+  ///   - context: A description of the operation (e.g., "fetchCaller")
   /// - Returns: A CloudKitError representing the original error
   internal func mapToCloudKitError(
     _ error: any Error,

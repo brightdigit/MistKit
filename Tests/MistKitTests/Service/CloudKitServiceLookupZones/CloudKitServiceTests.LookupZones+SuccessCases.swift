@@ -44,7 +44,8 @@ extension CloudKitServiceTests.LookupZones {
       let service = try await CloudKitServiceTests.LookupZones.makeSuccessfulService(zoneCount: 1)
 
       let zones = try await service.lookupZones(
-        zoneIDs: [ZoneID(zoneName: "_defaultZone", ownerName: nil)]
+        zoneIDs: [ZoneID(zoneName: "_defaultZone", ownerName: nil)],
+        database: .public
       )
 
       #expect(zones.count == 1)
@@ -64,7 +65,8 @@ extension CloudKitServiceTests.LookupZones {
           ZoneID(zoneName: "zone1", ownerName: nil),
           ZoneID(zoneName: "zone2", ownerName: nil),
           ZoneID(zoneName: "zone3", ownerName: nil),
-        ]
+        ],
+        database: .public
       )
 
       #expect(zones.count == 3)
@@ -82,7 +84,8 @@ extension CloudKitServiceTests.LookupZones {
       let service = try await CloudKitServiceTests.LookupZones.makeSuccessfulService(zoneCount: 0)
 
       let zones = try await service.lookupZones(
-        zoneIDs: [ZoneID(zoneName: "nonexistent", ownerName: nil)]
+        zoneIDs: [ZoneID(zoneName: "nonexistent", ownerName: nil)],
+        database: .public
       )
 
       #expect(zones.isEmpty)

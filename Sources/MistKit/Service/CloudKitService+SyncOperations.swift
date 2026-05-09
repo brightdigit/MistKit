@@ -80,7 +80,8 @@ extension CloudKitService {
   public func fetchRecordChanges(
     zoneID: ZoneID? = nil,
     syncToken: String? = nil,
-    resultsLimit: Int? = nil
+    resultsLimit: Int? = nil,
+    database: Database = .public
   ) async throws(CloudKitError) -> RecordChangesResult {
     if let limit = resultsLimit {
       guard limit > 0 && limit <= 200 else {
@@ -95,10 +96,12 @@ extension CloudKitService {
     let effectiveZoneID = zoneID ?? .defaultZone
 
     do {
+      let client = try self.client(for: database)
       let response = try await client.fetchRecordChanges(
         .init(
           path: createFetchRecordChangesPath(
-            containerIdentifier: containerIdentifier
+            containerIdentifier: containerIdentifier,
+            database: database
           ),
           body: .json(
             .init(
@@ -156,7 +159,8 @@ extension CloudKitService {
   public func fetchAllRecordChanges(
     zoneID: ZoneID? = nil,
     syncToken: String? = nil,
-    resultsLimit: Int? = nil
+    resultsLimit: Int? = nil,
+    database: Database = .public
   ) async throws(CloudKitError) -> (records: [RecordInfo], syncToken: String?) {
     var allRecords: [RecordInfo] = []
     var currentToken = syncToken
@@ -178,7 +182,8 @@ extension CloudKitService {
       let result = try await fetchRecordChanges(
         zoneID: zoneID,
         syncToken: currentToken,
-        resultsLimit: resultsLimit
+        resultsLimit: resultsLimit,
+        database: database
       )
 
       if result.records.isEmpty && result.moreComing && result.syncToken == currentToken {

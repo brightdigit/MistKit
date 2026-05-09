@@ -1,6 +1,6 @@
 //
 //  PrivateKeyMaterial.swift
-//  MistDemo
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,27 +27,42 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
-/// Source of a server-to-server private key — either inline PEM or a path to a `.pem` file.
-internal enum PrivateKeyMaterial: Sendable {
+/// Source of a server-to-server private key — either inline PEM or a path to a
+/// `.pem` file on disk.
+///
+/// Used by `ServerToServerCredentials` to defer reading the private key until
+/// the credentials are actually consumed by `CloudKitService`. Inline PEM may
+/// contain literal `\n` escape sequences (common when stored in environment
+/// variables); `loadPEM()` normalizes them to real newlines.
+public enum PrivateKeyMaterial: Sendable {
   case raw(String)
   case file(path: String)
 
-  internal func loadPEM() throws -> String {
+  /// The on-disk path when this material is `.file(path:)`, otherwise `nil`.
+  ///
+  /// Used by `CloudKitError.invalidPrivateKey` to attach a useful diagnostic
+  /// when `loadPEM()` fails on a missing or unreadable file.
+  public var filePath: String? {
+    switch self {
+    case .raw:
+      return nil
+    case .file(let path):
+      return path
+    }
+  }
+
+  /// Resolve the PEM text for this material.
+  ///
+  /// - Throws: Any error from the underlying file read when `.file(path:)` is
+  ///   used (e.g. file not found, permission denied).
+  public func loadPEM() throws -> String {
     switch self {
     case .raw(let pem):
       return pem.replacingOccurrences(of: "\\n", with: "\n")
     case .file(let path):
-      do {
-        return try String(contentsOfFile: path, encoding: .utf8)
-      } catch {
-        throw ConfigurationError.missingRequired(
-          "private.key",
-          suggestion:
-            "Failed to read private key from '\(path)': \(error.localizedDescription)"
-        )
-      }
+      return try String(contentsOfFile: path, encoding: .utf8)
     }
   }
 }

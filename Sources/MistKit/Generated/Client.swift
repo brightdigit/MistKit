@@ -2348,19 +2348,23 @@ internal struct Client: APIProtocol {
             }
         )
     }
-    /// Get Current User
+    /// Get the Caller (Current User)
     ///
-    /// Fetch the current authenticated user's information
+    /// Fetch the authenticated caller's user information. This replaces the deprecated
+    /// `users/current` endpoint. Requires public database with a web-auth token
+    /// (user-context auth); server-to-server credentials and the private database
+    /// will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
     ///
-    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/current`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/current/get(getCurrentUser)`.
-    internal func getCurrentUser(_ input: Operations.getCurrentUser.Input) async throws -> Operations.getCurrentUser.Output {
+    ///
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/caller`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)`.
+    internal func getCaller(_ input: Operations.getCaller.Input) async throws -> Operations.getCaller.Output {
         try await client.send(
             input: input,
-            forOperation: Operations.getCurrentUser.id,
+            forOperation: Operations.getCaller.id,
             serializer: { input in
                 let path = try converter.renderedPath(
-                    template: "/database/{}/{}/{}/{}/users/current",
+                    template: "/database/{}/{}/{}/{}/users/caller",
                     parameters: [
                         input.path.version,
                         input.path.container,
@@ -2383,7 +2387,7 @@ internal struct Client: APIProtocol {
                 switch response.status.code {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Operations.getCurrentUser.Output.Ok.Body
+                    let body: Operations.getCaller.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2657,6 +2661,121 @@ internal struct Client: APIProtocol {
             }
         )
     }
+    /// Discover All User Identities
+    ///
+    /// Fetch every user identity in the caller's CloudKit address book.
+    /// Requires public-database routing with web-auth credentials (user-context
+    /// auth); only users who have run the app and granted discoverability are
+    /// returned.
+    ///
+    ///
+    /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/discover`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/get(discoverAllUserIdentities)`.
+    internal func discoverAllUserIdentities(_ input: Operations.discoverAllUserIdentities.Input) async throws -> Operations.discoverAllUserIdentities.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.discoverAllUserIdentities.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/database/{}/{}/{}/{}/users/discover",
+                    parameters: [
+                        input.path.version,
+                        input.path.container,
+                        input.path.environment,
+                        input.path.database
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .get
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.discoverAllUserIdentities.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.DiscoverResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                case 400:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.BadRequest.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.ErrorResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .badRequest(.init(body: body))
+                case 401:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Unauthorized.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.ErrorResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .unauthorized(.init(body: body))
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
     /// Discover User Identities
     ///
     /// Discover all user identities based on email addresses or user record names
@@ -2702,6 +2821,251 @@ internal struct Client: APIProtocol {
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
                     let body: Operations.discoverUserIdentities.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.DiscoverResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                case 400:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.BadRequest.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.ErrorResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .badRequest(.init(body: body))
+                case 401:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Unauthorized.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.ErrorResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .unauthorized(.init(body: body))
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
+    /// Lookup Users by Email
+    ///
+    /// Look up user identities by email address. Requires public-database
+    /// routing with web-auth credentials (user-context auth). Each requested
+    /// email returns at most one identity in the `users` array.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/email`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/email/post(lookupUsersByEmail)`.
+    internal func lookupUsersByEmail(_ input: Operations.lookupUsersByEmail.Input) async throws -> Operations.lookupUsersByEmail.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.lookupUsersByEmail.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/database/{}/{}/{}/{}/users/lookup/email",
+                    parameters: [
+                        input.path.version,
+                        input.path.container,
+                        input.path.environment,
+                        input.path.database
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .post
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                let body: OpenAPIRuntime.HTTPBody?
+                switch input.body {
+                case let .json(value):
+                    body = try converter.setRequiredRequestBodyAsJSON(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "application/json; charset=utf-8"
+                    )
+                }
+                return (request, body)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.lookupUsersByEmail.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.DiscoverResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                case 400:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.BadRequest.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.ErrorResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .badRequest(.init(body: body))
+                case 401:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Unauthorized.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.ErrorResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .unauthorized(.init(body: body))
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
+    /// Lookup Users by Record Name
+    ///
+    /// Look up user identities by record name (CloudKit user record ID).
+    /// Requires public-database routing with web-auth credentials.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/users/lookup/id`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/id/post(lookupUsersByRecordName)`.
+    internal func lookupUsersByRecordName(_ input: Operations.lookupUsersByRecordName.Input) async throws -> Operations.lookupUsersByRecordName.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.lookupUsersByRecordName.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/database/{}/{}/{}/{}/users/lookup/id",
+                    parameters: [
+                        input.path.version,
+                        input.path.container,
+                        input.path.environment,
+                        input.path.database
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .post
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                let body: OpenAPIRuntime.HTTPBody?
+                switch input.body {
+                case let .json(value):
+                    body = try converter.setRequiredRequestBodyAsJSON(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "application/json; charset=utf-8"
+                    )
+                }
+                return (request, body)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.lookupUsersByRecordName.Output.Ok.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
