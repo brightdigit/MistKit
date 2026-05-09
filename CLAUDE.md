@@ -66,14 +66,15 @@ swift test --parallel
 # Show test output
 swift test --verbose
 
-# Format code (requires swift-format installation)
-swift-format -i -r Sources/ Tests/
+# Format + lint
+# swift-format, swiftlint, periphery, and swift-openapi-generator are pinned
+# in mise.toml — do NOT invoke them from PATH directly. Run them THROUGH mise:
+mise exec -- swift-format -i -r Sources/ Tests/
+mise exec -- swiftlint              # lint
+mise exec -- swiftlint --fix        # auto-fix
 
-# Lint code (requires swiftlint installation)
-swiftlint
-
-# Auto-fix linting issues
-swiftlint --fix
+# Or run the full lint pipeline (build + swiftlint + header.sh + periphery):
+./Scripts/lint.sh
 ```
 
 ### MistDemo Commands
