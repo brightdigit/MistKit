@@ -28,7 +28,7 @@
 //
 
 public import CelestraKit
-public import Foundation
+internal import Foundation
 
 /// Pure function type for building feed metadata updates
 public struct FeedMetadataBuilder: Sendable {

@@ -96,7 +96,7 @@ public struct CreateCommand: MistDemoCommand, OutputFormatting {
   }
 
   /// Generate a unique record name
-  private func generateRecordName() -> String {
+  internal func generateRecordName() -> String {
     let timestamp = Int(Date().timeIntervalSince1970)
     let minSuffix = MistDemoConstants.Limits.randomSuffixMin
     let maxSuffix = MistDemoConstants.Limits.randomSuffixMax

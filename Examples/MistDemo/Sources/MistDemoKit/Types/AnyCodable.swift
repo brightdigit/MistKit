@@ -33,7 +33,7 @@ import Foundation
 internal struct AnyCodable: Codable {
   internal let value: Any
 
-  internal init(from decoder: Decoder) throws {
+  internal init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
 
     if let stringValue = try? container.decode(String.self) {
@@ -56,7 +56,7 @@ internal struct AnyCodable: Codable {
     }
   }
 
-  internal func encode(to encoder: Encoder) throws {
+  internal func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
 
     switch value {
