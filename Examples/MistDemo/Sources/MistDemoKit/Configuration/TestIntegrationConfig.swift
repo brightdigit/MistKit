@@ -46,6 +46,9 @@ public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
   public let skipCleanup: Bool
   /// Whether to enable verbose output.
   public let verbose: Bool
+  /// Optional email used by the lookup-users-by-email phase. Must belong to
+  /// an iCloud account discoverable to the caller; otherwise the phase skips.
+  public let lookupEmail: String?
 
   /// Creates a new instance.
   public init(
@@ -53,13 +56,15 @@ public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
     recordCount: Int = 10,
     assetSizeKB: Int = 100,
     skipCleanup: Bool = false,
-    verbose: Bool = false
+    verbose: Bool = false,
+    lookupEmail: String? = nil
   ) {
     self.base = base
     self.recordCount = recordCount
     self.assetSizeKB = assetSizeKB
     self.skipCleanup = skipCleanup
     self.verbose = verbose
+    self.lookupEmail = lookupEmail
   }
 
   /// Parse configuration from command line arguments.
@@ -85,13 +90,15 @@ public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
       configuration.bool(forKey: "skip.cleanup", default: false)
     let verbose =
       configuration.bool(forKey: "verbose", default: false)
+    let lookupEmail = configuration.string(forKey: "lookup.email")
 
     self.init(
       base: baseConfig,
       recordCount: recordCount,
       assetSizeKB: assetSizeKB,
       skipCleanup: skipCleanup,
-      verbose: verbose
+      verbose: verbose,
+      lookupEmail: lookupEmail
     )
   }
 }

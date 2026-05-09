@@ -55,10 +55,15 @@ public struct TestIntegrationCommand: MistDemoCommand {
       --asset-size <kb>        Asset size in KB (default: 100)
       --skip-cleanup           Skip cleanup after test
       --verbose                Run in verbose mode
+      --lookup-email <email>   Email for users/lookup/email phase
+                               (CLOUDKIT_LOOKUP_EMAIL); must belong
+                               to an iCloud account discoverable to
+                               the caller, otherwise the phase skips
 
     EXAMPLES:
       mistdemo test-integration --verbose
       mistdemo test-integration --skip-cleanup --verbose
+      mistdemo test-integration --lookup-email me@example.com
 
     NOTES:
       - Requires CLOUDKIT_KEY_ID and CLOUDKIT_PRIVATE_KEY
@@ -89,7 +94,8 @@ public struct TestIntegrationCommand: MistDemoCommand {
       recordCount: config.recordCount,
       assetSizeKB: config.assetSizeKB,
       skipCleanup: config.skipCleanup,
-      verbose: config.verbose
+      verbose: config.verbose,
+      lookupEmail: config.lookupEmail
     )
 
     try await runner.runBasicWorkflow()

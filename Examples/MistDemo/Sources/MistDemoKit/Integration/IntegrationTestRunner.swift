@@ -45,6 +45,8 @@ internal struct IntegrationTestRunner {
   internal let assetSizeKB: Int
   internal let skipCleanup: Bool
   internal let verbose: Bool
+  /// Optional email forwarded to `PhaseContext.lookupEmail`.
+  internal let lookupEmail: String?
 
   /// Run the public-database workflow.
   internal func runBasicWorkflow() async throws {
@@ -68,7 +70,8 @@ internal struct IntegrationTestRunner {
       recordCount: recordCount,
       assetSizeKB: assetSizeKB,
       skipCleanup: skipCleanup,
-      verbose: verbose
+      verbose: verbose,
+      lookupEmail: lookupEmail
     )
   }
 }

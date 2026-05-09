@@ -30,8 +30,13 @@
 import Foundation
 import MistKit
 
-/// Calls POST `/users/lookup/email` with the caller's own email (when known) to
-/// exercise the endpoint without depending on third-party data.
+/// Calls POST `/users/lookup/email`.
+///
+/// Prefers the email supplied via `PhaseContext.lookupEmail`
+/// (`--lookup-email` / `CLOUDKIT_LOOKUP_EMAIL`) since CloudKit only resolves
+/// addresses that belong to iCloud accounts discoverable to the caller. Falls
+/// back to the caller's own email when the user-context endpoint exposes it,
+/// and skips otherwise — `users/caller` doesn't always return an address.
 internal struct LookupUsersByEmailPhase: IntegrationPhase {
   internal typealias Input = UserInfo
   internal typealias Output = NoState
@@ -45,11 +50,26 @@ internal struct LookupUsersByEmailPhase: IntegrationPhase {
   ) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
-    guard let email = input.emailAddress, !email.isEmpty else {
+    let email: String
+    let source: String
+    if let configured = context.lookupEmail, !configured.isEmpty {
+      email = configured
+      source = "configured --lookup-email"
+    } else if let callerEmail = input.emailAddress, !callerEmail.isEmpty {
+      email = callerEmail
+      source = "caller's own address"
+    } else {
       print(
-        "⏭️  Skipping — caller's email address is not available; cannot self-lookup."
+        """
+        ⏭️  Skipping — no email available. Set --lookup-email or \
+        CLOUDKIT_LOOKUP_EMAIL to exercise this phase.
+        """
       )
       return NoState()
+    }
+
+    if context.verbose {
+      print("   Looking up: \(email) (\(source))")
     }
 
     let identities = try await context.service.lookupUsersByEmail([email])
