@@ -46,23 +46,24 @@ extension MistDemoConfig {
     switch database {
     case .public:
       let s2s = try resolveServerToServerCredentials()
-      // Optional: also include web-auth so user-context services share creds
+      // Optional: also include web-auth so a single service can serve
+      // user-identity routes (`fetchCaller`, `lookupUsers*`) alongside
+      // S2S-signed record operations on `.public`.
       let webAuth = try? resolveAPICredentials()
-      return Credentials(serverToServer: s2s, apiAuth: webAuth)
+      return try Credentials(serverToServer: s2s, apiAuth: webAuth)
     case .private, .shared:
       let apiAuth = try resolveAPICredentials()
-      return Credentials(apiAuth: apiAuth)
+      return try Credentials(apiAuth: apiAuth)
     }
   }
 
-  /// Build `Credentials` carrying public+web-auth material for user-context
-  /// endpoints (`users/caller`, `users/discover`, `users/lookup/*`).
+  /// Indicates whether `toPrimaryCredentials()` will produce credentials that
+  /// can satisfy user-identity endpoints (`fetchCaller`, `lookupUsers*`).
   ///
-  /// Returns `nil` when API token + web-auth token aren't configured, so
-  /// callers can gracefully skip user-identity coverage.
-  internal func toUserContextCredentials() -> Credentials? {
-    guard let apiAuth = try? resolveAPICredentials() else { return nil }
-    return Credentials(apiAuth: apiAuth)
+  /// Those routes require web-auth even on `.public`. Used by the integration
+  /// runner to decide whether to schedule user-identity phases.
+  internal var hasUserContextCredentials: Bool {
+    (try? resolveAPICredentials()) != nil
   }
 
   // MARK: - Resolution helpers

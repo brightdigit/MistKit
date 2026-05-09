@@ -59,7 +59,7 @@ extension CloudKitService {
     pageSize: Int? = nil,
     desiredKeys: [String]? = nil,
     maxPages: Int = 1_000,
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> [RecordInfo] {
     var allRecords: [RecordInfo] = []
     var currentMarker: String?

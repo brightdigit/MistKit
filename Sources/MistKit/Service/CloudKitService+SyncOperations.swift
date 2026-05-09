@@ -81,9 +81,8 @@ extension CloudKitService {
     zoneID: ZoneID? = nil,
     syncToken: String? = nil,
     resultsLimit: Int? = nil,
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> RecordChangesResult {
-    let effectiveDatabase = database ?? self.database
     if let limit = resultsLimit {
       guard limit > 0 && limit <= 200 else {
         throw CloudKitError.httpErrorWithRawResponse(
@@ -97,11 +96,12 @@ extension CloudKitService {
     let effectiveZoneID = zoneID ?? .defaultZone
 
     do {
+      let client = try self.client(for: database)
       let response = try await client.fetchRecordChanges(
         .init(
           path: createFetchRecordChangesPath(
             containerIdentifier: containerIdentifier,
-            database: effectiveDatabase
+            database: database
           ),
           body: .json(
             .init(
@@ -160,7 +160,7 @@ extension CloudKitService {
     zoneID: ZoneID? = nil,
     syncToken: String? = nil,
     resultsLimit: Int? = nil,
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> (records: [RecordInfo], syncToken: String?) {
     var allRecords: [RecordInfo] = []
     var currentToken = syncToken

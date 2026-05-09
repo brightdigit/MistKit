@@ -27,39 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Server-to-server signing credentials for the public CloudKit database.
-///
-/// CloudKit accepts server-to-server signing only against the **public**
-/// database. Private and shared databases require web-auth credentials.
-public struct ServerToServerCredentials: Sendable {
-  public let keyID: String
-  public let privateKey: PrivateKeyMaterial
-
-  public init(keyID: String, privateKey: PrivateKeyMaterial) {
-    self.keyID = keyID
-    self.privateKey = privateKey
-  }
-}
-
-/// API-token credentials, optionally augmented with a web-auth token for
-/// user-context routes.
-///
-/// - `apiToken` alone is sufficient for read access against the public
-///   database.
-/// - `webAuthToken` is required for any route that operates as a specific
-///   user — that includes every user-identity endpoint (`fetchCaller`,
-///   `lookupUsersByEmail`, …) and any write/read against the private or
-///   shared databases.
-public struct APICredentials: Sendable {
-  public let apiToken: String
-  public let webAuthToken: String?
-
-  public init(apiToken: String, webAuthToken: String? = nil) {
-    self.apiToken = apiToken
-    self.webAuthToken = webAuthToken
-  }
-}
-
 /// CloudKit credentials for a `CloudKitService`.
 ///
 /// Holds either set of authentication material — server-to-server (public
@@ -75,17 +42,23 @@ public struct Credentials: Sendable {
 
   /// Construct credentials.
   ///
-  /// - Precondition: at least one of `serverToServer` or `apiAuth` must be
-  ///   non-nil. A `Credentials` with neither populated would fail every
-  ///   request with a missing-credentials error.
+  /// At least one of `serverToServer` or `apiAuth` must be non-nil. In debug
+  /// builds an empty `Credentials` triggers an `assert` so the misconfiguration
+  /// surfaces during development; in release builds the same misconfiguration
+  /// throws `CredentialsValidationError.empty` so callers loading credentials
+  /// from dynamic config (env vars, JSON, keychain) get a typed, recoverable
+  /// error instead of a crash.
   public init(
     serverToServer: ServerToServerCredentials? = nil,
     apiAuth: APICredentials? = nil
-  ) {
-    precondition(
+  ) throws(CredentialsValidationError) {
+    assert(
       serverToServer != nil || apiAuth != nil,
       "Credentials must include at least one of serverToServer or apiAuth"
     )
+    guard serverToServer != nil || apiAuth != nil else {
+      throw .empty
+    }
     self.serverToServer = serverToServer
     self.apiAuth = apiAuth
   }

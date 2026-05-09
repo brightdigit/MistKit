@@ -47,7 +47,12 @@ extension CloudKitServiceTests.LookupUsersByEmail {
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),
+      credentials: Credentials(
+        apiAuth: APICredentials(
+          apiToken: testAPIToken,
+          webAuthToken: TestConstants.webAuthToken
+        )
+      ),
       transport: transport
     )
   }
@@ -58,7 +63,12 @@ extension CloudKitServiceTests.LookupUsersByEmail {
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),
+      credentials: Credentials(
+        apiAuth: APICredentials(
+          apiToken: testAPIToken,
+          webAuthToken: TestConstants.webAuthToken
+        )
+      ),
       transport: transport
     )
   }

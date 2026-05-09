@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// Response structure for CloudKit CDN asset upload
 ///

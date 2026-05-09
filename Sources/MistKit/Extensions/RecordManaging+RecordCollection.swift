@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// Default implementations for RecordManaging when conforming to CloudKitRecordCollection
 ///

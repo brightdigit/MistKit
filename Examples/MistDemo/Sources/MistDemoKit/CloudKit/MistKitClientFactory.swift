@@ -33,12 +33,21 @@ public import MistKit
 /// Factory for creating MistKit `CloudKitService` instances from MistDemo
 /// configuration.
 public struct MistKitClientFactory: Sendable {
-  /// Create a `CloudKitService` for `config.database`, choosing auth method
-  /// automatically.
+  /// Create a `CloudKitService` configured for `config.database`, choosing
+  /// auth material automatically based on the populated environment.
   ///
-  /// - `.public`: requires `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]`
+  /// - `.public`: requires `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY[_FILE]`,
+  ///   optionally augmented with `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN`
+  ///   so the same service can also satisfy user-identity routes.
   /// - `.private` / `.shared`: requires `CLOUDKIT_API_TOKEN` +
-  ///   `CLOUDKIT_WEB_AUTH_TOKEN`
+  ///   `CLOUDKIT_WEB_AUTH_TOKEN`. The resulting web-auth credentials cover
+  ///   user-identity routes too (which CloudKit pins to `.public`).
+  ///
+  /// The service is database-agnostic — operations pick their database at the
+  /// call site, and `Credentials` resolves the appropriate token manager per
+  /// call. A single returned service therefore covers every phase the
+  /// integration runner exercises, including the user-context routes that
+  /// previously required a second service.
   ///
   /// When `config.badCredentials == true`, this short-circuits and returns a
   /// service backed by a deliberately invalid web-auth `TokenManager` so the
@@ -66,36 +75,7 @@ public struct MistKitClientFactory: Sendable {
       return try CloudKitService(
         containerIdentifier: config.containerIdentifier,
         credentials: credentials,
-        environment: config.environment,
-        database: config.database
-      )
-    #endif
-  }
-
-  /// Create the optional public+web-auth service used for user-context
-  /// endpoints (`users/caller`, `users/discover`, `users/lookup/*`).
-  ///
-  /// Returns `nil` when web-auth credentials are not configured, so callers
-  /// can gracefully skip user-identity coverage in integration runs.
-  ///
-  /// > Note: This returns a separate `CloudKitService` because CloudKit
-  /// > rejects server-to-server signing for user-identity routes — a single
-  /// > service that uses S2S auth for record ops cannot also serve those
-  /// > routes. Per-call token-manager dispatch is a future enhancement.
-  public static func createUserContext(
-    for config: MistDemoConfig
-  ) throws -> CloudKitService? {
-    #if os(WASI)
-      return nil
-    #else
-      guard let credentials = config.toUserContextCredentials() else {
-        return nil
-      }
-      return try CloudKitService(
-        containerIdentifier: config.containerIdentifier,
-        credentials: credentials,
-        environment: config.environment,
-        database: .public
+        environment: config.environment
       )
     #endif
   }
@@ -111,8 +91,8 @@ public struct MistKitClientFactory: Sendable {
     )
   }
 
-  /// Create a `CloudKitService` with a caller-supplied `TokenManager`,
-  /// targeting `config.database`. Used by the `--bad-credentials` demo path.
+  /// Create a `CloudKitService` with a caller-supplied `TokenManager`. Used
+  /// by the `--bad-credentials` demo path.
   public static func create(
     from config: MistDemoConfig,
     tokenManager: any TokenManager
@@ -125,8 +105,7 @@ public struct MistKitClientFactory: Sendable {
       return try CloudKitService(
         containerIdentifier: config.containerIdentifier,
         tokenManager: tokenManager,
-        environment: config.environment,
-        database: config.database
+        environment: config.environment
       )
     #endif
   }

@@ -43,11 +43,14 @@ extension CloudKitService {
   /// Fetch the caller's (current authenticated user's) information.
   ///
   /// Hits CloudKit's `users/caller` endpoint, which replaces the deprecated
-  /// `users/current`. Requires public-database routing with web-auth credentials
-  /// (user-context auth); calling against the private database returns
-  /// `BAD_REQUEST: endpoint not applicable in the database type`.
+  /// `users/current`. Routed against the public database with web-auth
+  /// credentials — calling against private/shared returns
+  /// `BAD_REQUEST: endpoint not applicable in the database type`, so the
+  /// database is fixed in the path and not exposed to callers. The service's
+  /// `Credentials` must include an `apiAuth` with a `webAuthToken`.
   public func fetchCaller() async throws(CloudKitError) -> UserInfo {
     do {
+      let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.getCaller(
         .init(
           path: createGetCallerPath(
@@ -76,27 +79,18 @@ extension CloudKitService {
 
   /// Discover all user identities in the caller's CloudKit address book.
   ///
-  /// Hits CloudKit's GET `users/discover` endpoint. Requires public-database
-  /// routing with web-auth credentials (user-context auth); only users who have
-  /// run the app and granted discoverability are returned.
+  /// Hits CloudKit's GET `users/discover` endpoint. Routed against the public
+  /// database with web-auth credentials.
   ///
-  /// > Important: Marked `unavailable` until #28 is resolved. Live testing
-  /// > on 2026-05-08 against `iCloud.com.brightdigit.MistDemo` returned
-  /// > HTTP 500 from Apple. The GET form of `/users/discover` is referenced
-  /// > in CloudKitJS but does not appear in Apple's CloudKit Web Services
-  /// > REST documentation, and the live endpoint did not respond
-  /// > successfully. The OpenAPI definition, generated client, path
-  /// > builder, response processor, and Swift wrapper are all in place;
-  /// > unblocking is a one-line `@available` removal once the correct
-  /// > REST shape is determined. Tracking:
-  /// > [#28](https://github.com/brightdigit/MistKit/issues/28).
+  /// > Important: Marked `unavailable` until #28 is resolved — see issue for
+  /// > the live-testing investigation log.
   @available(
     *, unavailable,
-    message:
-      "Not yet ready: live testing on 2026-05-08 returned HTTP 500 from Apple's GET /users/discover. The REST request shape is still under investigation. See #28."
+    message: "Not yet ready: GET /users/discover returns HTTP 500 in live testing. See #28."
   )
   public func discoverAllUserIdentities() async throws(CloudKitError) -> [UserIdentity] {
     do {
+      let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.discoverAllUserIdentities(
         .init(
           path: createDiscoverAllUserIdentitiesPath(
@@ -119,12 +113,13 @@ extension CloudKitService {
   /// Look up user identities by email address.
   ///
   /// Hits CloudKit's POST `users/lookup/email` endpoint. Each requested email
-  /// returns at most one identity in the result array. Requires public-database
-  /// routing with web-auth credentials (user-context auth).
+  /// returns at most one identity in the result array. Routed against the
+  /// public database with web-auth credentials.
   public func lookupUsersByEmail(
     _ emails: [String]
   ) async throws(CloudKitError) -> [UserIdentity] {
     do {
+      let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.lookupUsersByEmail(
         .init(
           path: createLookupUsersByEmailPath(
@@ -147,12 +142,13 @@ extension CloudKitService {
 
   /// Look up user identities by record name (CloudKit user record ID).
   ///
-  /// Hits CloudKit's POST `users/lookup/id` endpoint. Requires public-database
-  /// routing with web-auth credentials (user-context auth).
+  /// Hits CloudKit's POST `users/lookup/id` endpoint. Routed against the
+  /// public database with web-auth credentials.
   public func lookupUsersByRecordName(
     _ recordNames: [String]
   ) async throws(CloudKitError) -> [UserIdentity] {
     do {
+      let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.lookupUsersByRecordName(
         .init(
           path: createLookupUsersByRecordNamePath(
@@ -173,11 +169,15 @@ extension CloudKitService {
     }
   }
 
-  /// Discover user identities by email addresses or record names
+  /// Discover user identities by email addresses or record names.
+  ///
+  /// Hits CloudKit's POST `users/discover` endpoint. Routed against the public
+  /// database with web-auth credentials.
   public func discoverUserIdentities(
     lookupInfos: [UserIdentityLookupInfo]
   ) async throws(CloudKitError) -> [UserIdentity] {
     do {
+      let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.discoverUserIdentities(
         .init(
           path: createDiscoverUserIdentitiesPath(

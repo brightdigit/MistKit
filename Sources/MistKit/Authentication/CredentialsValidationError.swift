@@ -1,6 +1,6 @@
 //
-//  FetchCallerPhase.swift
-//  MistDemo
+//  CredentialsValidationError.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,38 +27,17 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+public import Foundation
 
-/// Calls `users/caller`, the user-context endpoint that replaced the deprecated
-/// `users/current`.
-///
-/// CloudKit only accepts this endpoint against the **public database with
-/// web-auth credentials**. The runner only schedules this phase when the
-/// configured `Credentials` carries web-auth material; the service resolves
-/// the right token manager per call.
-internal struct FetchCallerPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = UserInfo
+/// Construction-time validation errors for `Credentials`.
+public enum CredentialsValidationError: LocalizedError, Sendable {
+  /// `Credentials` was constructed without any populated credential set.
+  case empty
 
-  internal static let title = "Fetch caller (current user)"
-  internal static let emoji = "👤"
-  internal static let apiName = "fetchCaller"
-
-  internal func run(
-    input: NoState, context: PhaseContext
-  ) async throws -> UserInfo {
-    print("\n\(Self.emoji) \(Self.title)")
-
-    let userInfo = try await context.service.fetchCaller()
-
-    print("✅ Caller: \(userInfo.userRecordName)")
-
-    if context.verbose {
-      if let firstName = userInfo.firstName { print("   First name: \(firstName)") }
-      if let lastName = userInfo.lastName { print("   Last name: \(lastName)") }
+  public var errorDescription: String? {
+    switch self {
+    case .empty:
+      return "Credentials must include at least one of serverToServer or apiAuth"
     }
-
-    return userInfo
   }
 }

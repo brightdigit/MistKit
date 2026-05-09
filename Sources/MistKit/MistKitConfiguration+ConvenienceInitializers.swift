@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 extension MistKitConfiguration {
   /// Initialize configuration with API token only (container-level access)

@@ -46,6 +46,12 @@ internal import OpenAPIRuntime
 /// **per call** on each operation that supports multiple databases; user-identity
 /// endpoints (e.g. `fetchCaller`) hard-code `.public` since CloudKit only
 /// accepts those routes against the public database.
+///
+/// At dispatch time the service resolves the appropriate token manager from
+/// `Credentials` based on the target database and whether the operation
+/// requires user-context auth. A single service can therefore serve, for
+/// example, public-database record reads via server-to-server signing **and**
+/// `fetchCaller` via web-auth from one fully-populated `Credentials`.
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct CloudKitService: Sendable {
   /// CloudKit's maximum number of records returned per query/modify request.
@@ -56,19 +62,24 @@ public struct CloudKitService: Sendable {
   /// The CloudKit environment (development or production)
   public let environment: Environment
 
-  /// Default database used by operation methods when the caller does not
-  /// supply a `database:` argument. Set at construction; operations may
-  /// override per-call via their `database:` parameter.
-  internal let database: Database
-
   /// Default limit for query operations (1-200, default: 100)
   internal let defaultQueryLimit: Int = 100
 
-  internal let mistKitClient: MistKitClient
   internal let responseProcessor = CloudKitResponseProcessor()
-  internal var client: Client {
-    mistKitClient.client
-  }
+
+  /// Resolved at construction from `Credentials`. `nil` when this service
+  /// was built with a caller-supplied fixed `tokenManager`.
+  internal let credentials: Credentials?
+
+  /// Caller-supplied token manager that overrides per-call resolution.
+  /// Set by the bespoke `tokenManager:` initializer for tests and special
+  /// cases; otherwise `nil`.
+  internal let fixedTokenManager: (any TokenManager)?
+
+  /// Transport used for every dispatched request. Each operation builds a
+  /// fresh OpenAPI `Client` against this transport with the resolved token
+  /// manager wired into its middleware chain.
+  internal let transport: any ClientTransport
 }
 
 // MARK: - Path builders

@@ -34,10 +34,11 @@ import MistKit
 /// dispatches to the appropriate `PhasedIntegrationTest` implementation.
 internal struct IntegrationTestRunner {
   internal let service: CloudKitService
-  /// Optional public+web-auth service for user-identity endpoints. When `nil`,
-  /// user-identity phases (FetchCallerPhase, DiscoverUserIdentitiesPhase, etc.)
-  /// skip with a log message instead of failing the run.
-  internal let userContextService: CloudKitService?
+  /// Whether the configured `Credentials` carry web-auth material — i.e.
+  /// whether the single `service` can satisfy user-identity routes
+  /// (`fetchCaller`, `lookupUsers*`, `discoverUserIdentities`). User-identity
+  /// phases are scheduled only when this is true.
+  internal let supportsUserContextPhases: Bool
   internal let containerIdentifier: String
   internal let database: MistKit.Database
   internal let recordCount: Int
@@ -49,7 +50,7 @@ internal struct IntegrationTestRunner {
   internal func runBasicWorkflow() async throws {
     let test = PublicDatabaseTest(
       database: database,
-      includeUserContextPhases: userContextService != nil
+      includeUserContextPhases: supportsUserContextPhases
     )
     try await test.run(context: makeContext())
   }
@@ -62,7 +63,6 @@ internal struct IntegrationTestRunner {
   private func makeContext() -> PhaseContext {
     PhaseContext(
       service: service,
-      userContextService: userContextService,
       containerIdentifier: containerIdentifier,
       database: database,
       recordCount: recordCount,

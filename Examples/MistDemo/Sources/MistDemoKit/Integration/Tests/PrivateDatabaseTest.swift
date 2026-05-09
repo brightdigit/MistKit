@@ -37,8 +37,8 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
   // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
   // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
   // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in a public-database
-  // pipeline that has access to a public+web-auth `userContextService`.
+  // the database type 'privatedb'". They only belong in the public-database
+  // pipeline; the service resolves web-auth credentials per call when needed.
   internal let phases: [any IntegrationPhase] = [
     ListZonesPhase(),
     LookupZonePhase(),

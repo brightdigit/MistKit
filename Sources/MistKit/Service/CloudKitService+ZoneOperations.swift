@@ -46,15 +46,15 @@ extension CloudKitService {
   /// > so listing zones against `.public` is degenerate. Use `.private` or
   /// > `.shared` for meaningful results.
   public func listZones(
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> [ZoneInfo] {
-    let effectiveDatabase = database ?? self.database
     do {
+      let client = try self.client(for: database)
       let response = try await client.listZones(
         .init(
           path: createListZonesPath(
             containerIdentifier: containerIdentifier,
-            database: effectiveDatabase
+            database: database
           )
         )
       )
@@ -97,9 +97,8 @@ extension CloudKitService {
   /// ```
   public func lookupZones(
     zoneIDs: [ZoneID],
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> [ZoneInfo] {
-    let effectiveDatabase = database ?? self.database
     guard !zoneIDs.isEmpty else {
       throw CloudKitError.httpErrorWithRawResponse(
         statusCode: 400,
@@ -114,11 +113,12 @@ extension CloudKitService {
     }
 
     do {
+      let client = try self.client(for: database)
       let response = try await client.lookupZones(
         .init(
           path: createLookupZonesPath(
             containerIdentifier: containerIdentifier,
-            database: effectiveDatabase
+            database: database
           ),
           body: .json(
             .init(
@@ -171,15 +171,15 @@ extension CloudKitService {
   /// ```
   public func fetchZoneChanges(
     syncToken: String? = nil,
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> ZoneChangesResult {
-    let effectiveDatabase = database ?? self.database
     do {
+      let client = try self.client(for: database)
       let response = try await client.fetchZoneChanges(
         .init(
           path: createFetchZoneChangesPath(
             containerIdentifier: containerIdentifier,
-            database: effectiveDatabase
+            database: database
           ),
           body: .json(
             .init(

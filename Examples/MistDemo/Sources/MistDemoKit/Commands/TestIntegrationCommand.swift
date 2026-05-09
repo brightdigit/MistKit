@@ -75,13 +75,15 @@ public struct TestIntegrationCommand: MistDemoCommand {
   /// Executes the command.
   public func execute() async throws {
     let service = try MistKitClientFactory.create(for: config.base)
-    let userContextService = try MistKitClientFactory.createUserContext(
-      for: config.base
-    )
+    // A single service handles every phase: server-to-server signing on
+    // `.public` for record ops, plus web-auth for user-identity routes when
+    // the API/web-auth env vars are populated. The resolver picks the right
+    // token manager per call.
+    let supportsUserContextPhases = config.base.hasUserContextCredentials
 
     let runner = IntegrationTestRunner(
       service: service,
-      userContextService: userContextService,
+      supportsUserContextPhases: supportsUserContextPhases,
       containerIdentifier: config.base.containerIdentifier,
       database: config.base.database,
       recordCount: config.recordCount,

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// CloudKit Web Services request signature components
 public struct RequestSignature: Sendable {

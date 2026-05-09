@@ -33,10 +33,6 @@ import MistKit
 /// Shared dependencies and configuration available to every phase.
 internal struct PhaseContext: Sendable {
   internal let service: CloudKitService
-  /// Optional public+web-auth service for user-identity endpoints
-  /// (`users/caller`, `users/discover`, `users/lookup/*`). When `nil`,
-  /// user-identity phases skip with a log message instead of failing.
-  internal let userContextService: CloudKitService?
   internal let containerIdentifier: String
   internal let database: MistKit.Database
   internal let recordCount: Int

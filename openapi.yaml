@@ -609,6 +609,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+    # GET /users/discover — see #28
     get:
       summary: Discover All User Identities
       description: |

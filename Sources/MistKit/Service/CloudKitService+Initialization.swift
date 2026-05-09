@@ -40,107 +40,49 @@ public import OpenAPIRuntime
 extension CloudKitService {
   /// Initialize CloudKit service with `Credentials`.
   ///
-  /// Accepts any combination of `serverToServer` and `apiAuth` material.
-  /// The token manager is selected based on the target `database` and what
-  /// credentials are populated:
+  /// Accepts any combination of `serverToServer` and `apiAuth` material. The
+  /// service does **not** carry a database — every operation that supports
+  /// multiple databases takes a `database:` argument at the call site, and
+  /// the appropriate token manager is resolved from `credentials` per call.
   ///
-  /// - `.public`: prefers `serverToServer`. Falls back to `apiAuth` (web-auth
-  ///   if `webAuthToken` is set, otherwise API-token-only).
-  /// - `.private` / `.shared`: requires `apiAuth.webAuthToken`. CloudKit
-  ///   rejects server-to-server signing for these databases, so any
-  ///   `serverToServer` credential is ignored on this code path.
+  /// Provide both credential sets when a single service must serve, for
+  /// example, public-database record operations via server-to-server signing
+  /// **and** user-identity routes (`fetchCaller`, `lookupUsers*`) via
+  /// web-auth — those are picked apart at dispatch time.
   ///
-  /// - Throws: `CloudKitError.missingCredentials` when the target `database`
-  ///   cannot be served by any populated credential set, or any error from
-  ///   `ServerToServerAuthManager.init` when the PEM is malformed.
+  /// Misconfiguration (no credential set covers a given call's database +
+  /// user-context combination) surfaces at call time as
+  /// `CloudKitError.missingCredentials`, not at construction.
   public init(
     containerIdentifier: String,
     credentials: Credentials,
     environment: Environment = .development,
-    database: Database = .public,
     transport: any ClientTransport
-  ) throws {
-    let tokenManager = try Self.makeTokenManager(
-      credentials: credentials,
-      database: database
-    )
-
+  ) {
     self.containerIdentifier = containerIdentifier
     self.environment = environment
-    self.database = database
-
-    self.mistKitClient = try MistKitClient(
-      container: containerIdentifier,
-      environment: environment,
-      database: database,
-      tokenManager: tokenManager,
-      transport: transport
-    )
+    self.credentials = credentials
+    self.fixedTokenManager = nil
+    self.transport = transport
   }
 
   /// Initialize CloudKit service with a caller-supplied `TokenManager`.
   ///
+  /// The supplied manager is used for **every** dispatched operation
+  /// regardless of database or whether the route requires user context.
   /// Useful for tests and bespoke auth setups where the standard
-  /// `Credentials`-driven token-manager selection isn't appropriate.
+  /// `Credentials`-driven per-call selection isn't appropriate.
   public init(
     containerIdentifier: String,
     tokenManager: any TokenManager,
     environment: Environment = .development,
-    database: Database = .private,
     transport: any ClientTransport
-  ) throws {
+  ) {
     self.containerIdentifier = containerIdentifier
     self.environment = environment
-    self.database = database
-
-    self.mistKitClient = try MistKitClient(
-      container: containerIdentifier,
-      environment: environment,
-      database: database,
-      tokenManager: tokenManager,
-      transport: transport
-    )
-  }
-
-  internal static func makeTokenManager(
-    credentials: Credentials,
-    database: Database
-  ) throws -> any TokenManager {
-    switch database {
-    case .public:
-      if let s2s = credentials.serverToServer {
-        let pem = try s2s.privateKey.loadPEM()
-        return try ServerToServerAuthManager(
-          keyID: s2s.keyID,
-          pemString: pem
-        )
-      }
-      if let api = credentials.apiAuth {
-        if let webAuthToken = api.webAuthToken {
-          return WebAuthTokenManager(
-            apiToken: api.apiToken,
-            webAuthToken: webAuthToken
-          )
-        }
-        return try APITokenManager(apiToken: api.apiToken)
-      }
-      throw CloudKitError.missingCredentials(
-        database: .public,
-        reason: "expected serverToServer or apiAuth credentials"
-      )
-    case .private, .shared:
-      guard let api = credentials.apiAuth, let webAuthToken = api.webAuthToken else {
-        throw CloudKitError.missingCredentials(
-          database: database,
-          reason:
-            "private and shared databases require apiAuth with a webAuthToken"
-        )
-      }
-      return WebAuthTokenManager(
-        apiToken: api.apiToken,
-        webAuthToken: webAuthToken
-      )
-    }
+    self.credentials = nil
+    self.fixedTokenManager = tokenManager
+    self.transport = transport
   }
 }
 
@@ -159,14 +101,12 @@ extension CloudKitService {
     public init(
       containerIdentifier: String,
       credentials: Credentials,
-      environment: Environment = .development,
-      database: Database = .public
-    ) throws {
-      try self.init(
+      environment: Environment = .development
+    ) {
+      self.init(
         containerIdentifier: containerIdentifier,
         credentials: credentials,
         environment: environment,
-        database: database,
         transport: URLSessionTransport()
       )
     }
@@ -179,14 +119,12 @@ extension CloudKitService {
     public init(
       containerIdentifier: String,
       tokenManager: any TokenManager,
-      environment: Environment = .development,
-      database: Database = .private
-    ) throws {
-      try self.init(
+      environment: Environment = .development
+    ) {
+      self.init(
         containerIdentifier: containerIdentifier,
         tokenManager: tokenManager,
         environment: environment,
-        database: database,
         transport: URLSessionTransport()
       )
     }

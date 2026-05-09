@@ -76,12 +76,13 @@ public struct TestPrivateCommand: MistDemoCommand {
   /// Executes the command.
   public func execute() async throws {
     let service = try MistKitClientFactory.create(for: config.base)
-    // The private-database pipeline already authenticates with web-auth, so the
-    // primary `service` is sufficient — no separate userContextService is needed.
+    // Private-database flows always carry web-auth credentials, so the same
+    // service can also serve user-identity routes when this command needs
+    // them. Per-call resolution picks the right token manager.
 
     let runner = IntegrationTestRunner(
       service: service,
-      userContextService: nil,
+      supportsUserContextPhases: true,
       containerIdentifier: config.base.containerIdentifier,
       database: .private,
       recordCount: config.recordCount,

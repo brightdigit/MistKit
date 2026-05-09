@@ -40,7 +40,6 @@ internal enum IntegrationTestError: LocalizedError, Sendable {
   case noRecordsCreated
   case missingWebAuthToken
   case missingPhaseState(String)
-  case missingUserContextService(phase: String)
 
   internal var errorDescription: String? {
     switch self {
@@ -63,10 +62,6 @@ internal enum IntegrationTestError: LocalizedError, Sendable {
         "Web auth token is required for private database tests. Run 'mistdemo auth-token' first."
     case .missingPhaseState(let key):
       return "Required phase state '\(key)' is missing — preceding phase did not run"
-    case .missingUserContextService(let phase):
-      return
-        "Phase '\(phase)' requires public+web-auth user-context credentials. "
-        + "Set CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN to enable."
     }
   }
 }

@@ -1,6 +1,6 @@
 //
-//  LookupUsersByRecordNamePhase.swift
-//  MistDemo
+//  ServerToServerCredentials.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,38 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+/// Server-to-server signing credentials for the public CloudKit database.
+///
+/// CloudKit accepts server-to-server signing only against the **public**
+/// database. Private and shared databases require web-auth credentials.
+public struct ServerToServerCredentials: Sendable {
+  public let keyID: String
+  public let privateKey: PrivateKeyMaterial
 
-/// Calls POST `/users/lookup/id` with the caller's own user record name to
-/// exercise the endpoint via a self-lookup.
-internal struct LookupUsersByRecordNamePhase: IntegrationPhase {
-  internal typealias Input = UserInfo
-  internal typealias Output = NoState
-
-  internal static let title = "Lookup users by record name"
-  internal static let emoji = "🆔"
-  internal static let apiName = "lookupUsersByRecordName"
-
-  internal func run(
-    input: UserInfo, context: PhaseContext
-  ) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-
-    let identities = try await context.service.lookupUsersByRecordName(
-      [input.userRecordName]
-    )
-
-    print(
-      "✅ Looked up \(identities.count) identit\(identities.count == 1 ? "y" : "ies") by record name"
-    )
-
-    if context.verbose {
-      for identity in identities {
-        if let name = identity.userRecordName { print("   - \(name)") }
-      }
-    }
-
-    return NoState()
+  public init(keyID: String, privateKey: PrivateKeyMaterial) {
+    self.keyID = keyID
+    self.privateKey = privateKey
   }
 }

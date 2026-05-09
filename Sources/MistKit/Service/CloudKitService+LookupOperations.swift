@@ -39,15 +39,15 @@ extension CloudKitService {
   internal func modifyRecords(
     operations: [Components.Schemas.RecordOperation],
     atomic: Bool = true,
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> [RecordInfo] {
-    let effectiveDatabase = database ?? self.database
     do {
+      let client = try self.client(for: database)
       let response = try await client.modifyRecords(
         .init(
           path: createModifyRecordsPath(
             containerIdentifier: containerIdentifier,
-            database: effectiveDatabase
+            database: database
           ),
           body: .json(
             .init(
@@ -70,15 +70,15 @@ extension CloudKitService {
   public func lookupRecords(
     recordNames: [String],
     desiredKeys: [String]? = nil,
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> [RecordInfo] {
-    let effectiveDatabase = database ?? self.database
     do {
+      let client = try self.client(for: database)
       let response = try await client.lookupRecords(
         .init(
           path: createLookupRecordsPath(
             containerIdentifier: containerIdentifier,
-            database: effectiveDatabase
+            database: database
           ),
           body: .json(
             .init(

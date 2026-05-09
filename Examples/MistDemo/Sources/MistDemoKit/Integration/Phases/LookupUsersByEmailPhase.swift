@@ -45,10 +45,6 @@ internal struct LookupUsersByEmailPhase: IntegrationPhase {
   ) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
-    guard let service = context.userContextService else {
-      throw IntegrationTestError.missingUserContextService(phase: Self.apiName)
-    }
-
     guard let email = input.emailAddress, !email.isEmpty else {
       print(
         "⏭️  Skipping — caller's email address is not available; cannot self-lookup."
@@ -56,7 +52,7 @@ internal struct LookupUsersByEmailPhase: IntegrationPhase {
       return NoState()
     }
 
-    let identities = try await service.lookupUsersByEmail([email])
+    let identities = try await context.service.lookupUsersByEmail([email])
 
     print("✅ Looked up \(identities.count) identit\(identities.count == 1 ? "y" : "ies") by email")
 

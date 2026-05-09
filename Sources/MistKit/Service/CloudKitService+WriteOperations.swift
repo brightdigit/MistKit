@@ -49,21 +49,21 @@ extension CloudKitService {
   public func modifyRecords(
     _ operations: [RecordOperation],
     atomic: Bool = false,
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> [RecordInfo] {
-    let effectiveDatabase = database ?? self.database
     do {
       let apiOperations = try operations.map {
         try Components.Schemas.RecordOperation(from: $0)
       }
 
+      let client = try self.client(for: database)
       let response = try await client.modifyRecords(
         .init(
           path: .init(
             version: "1",
             container: containerIdentifier,
             environment: .init(from: environment),
-            database: .init(from: effectiveDatabase)
+            database: .init(from: database)
           ),
           body: .json(
             .init(
@@ -97,7 +97,7 @@ extension CloudKitService {
     recordType: String,
     recordName: String? = nil,
     fields: [String: FieldValue],
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> RecordInfo {
     let operation = RecordOperation.create(
       recordType: recordType,
@@ -125,7 +125,7 @@ extension CloudKitService {
     recordName: String,
     fields: [String: FieldValue],
     recordChangeTag: String? = nil,
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) -> RecordInfo {
     let operation = RecordOperation.update(
       recordType: recordType,
@@ -151,7 +151,7 @@ extension CloudKitService {
     recordType: String,
     recordName: String,
     recordChangeTag: String? = nil,
-    database: Database? = nil
+    database: Database = .public
   ) async throws(CloudKitError) {
     let operation = RecordOperation.delete(
       recordType: recordType,

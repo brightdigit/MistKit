@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceTests.LookupUsersByRecordName+Helpers.swift
+//  CloudKitServiceTests.FetchCaller+Helpers.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -28,19 +28,26 @@
 //
 
 import Foundation
+import HTTPTypes
 import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceTests.LookupUsersByRecordName {
+extension CloudKitServiceTests.FetchCaller {
   private static let testAPIToken = TestConstants.apiToken
 
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeSuccessfulService(
-    identityCount: Int = 1
+    userRecordName: String = "_user-caller",
+    firstName: String? = "Test",
+    lastName: String? = "User",
+    emailAddress: String? = "caller@example.com"
   ) async throws -> CloudKitService {
-    let responseProvider = try ResponseProvider.successfulDiscoverUserIdentities(
-      identityCount: identityCount
+    let responseProvider = try ResponseProvider.successfulFetchCaller(
+      userRecordName: userRecordName,
+      firstName: firstName,
+      lastName: lastName,
+      emailAddress: emailAddress
     )
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
@@ -68,6 +75,58 @@ extension CloudKitServiceTests.LookupUsersByRecordName {
         )
       ),
       transport: transport
+    )
+  }
+}
+
+// MARK: - FetchCaller Response Builders
+
+extension ResponseProvider {
+  internal static func successfulFetchCaller(
+    userRecordName: String = "_user-caller",
+    firstName: String? = "Test",
+    lastName: String? = "User",
+    emailAddress: String? = "caller@example.com"
+  ) throws -> ResponseProvider {
+    ResponseProvider(
+      defaultResponse: try .successfulFetchCallerResponse(
+        userRecordName: userRecordName,
+        firstName: firstName,
+        lastName: lastName,
+        emailAddress: emailAddress
+      )
+    )
+  }
+}
+
+extension ResponseConfig {
+  internal static func successfulFetchCallerResponse(
+    userRecordName: String = "_user-caller",
+    firstName: String? = "Test",
+    lastName: String? = "User",
+    emailAddress: String? = "caller@example.com"
+  ) throws -> ResponseConfig {
+    var fields: [String] = ["\"userRecordName\": \"\(userRecordName)\""]
+    if let firstName {
+      fields.append("\"firstName\": \"\(firstName)\"")
+    }
+    if let lastName {
+      fields.append("\"lastName\": \"\(lastName)\"")
+    }
+    if let emailAddress {
+      fields.append("\"emailAddress\": \"\(emailAddress)\"")
+    }
+
+    let responseJSON = "{ \(fields.joined(separator: ", ")) }"
+
+    var headers = HTTPFields()
+    headers[.contentType] = "application/json"
+
+    return ResponseConfig(
+      statusCode: 200,
+      headers: headers,
+      body: responseJSON.data(using: .utf8),
+      error: nil
     )
   }
 }

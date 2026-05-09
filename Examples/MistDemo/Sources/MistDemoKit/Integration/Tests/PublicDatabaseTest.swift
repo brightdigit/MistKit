@@ -38,9 +38,10 @@ internal struct PublicDatabaseTest: PhasedIntegrationTest {
   /// - Parameters:
   ///   - database: must be `.public`. Defaults to `.public`.
   ///   - includeUserContextPhases: when `true`, appends user-identity phases
-  ///     (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`, `users/lookup/*`)
-  ///     that require a public+web-auth `userContextService`. The runner sets
-  ///     this based on whether web-auth credentials are configured.
+  ///     (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`, `users/lookup/*`).
+  ///     Those phases need web-auth credentials, which the resolver picks per
+  ///     call from the service's `Credentials`. The runner sets this based on
+  ///     whether web-auth credentials are configured.
   internal init(
     database: MistKit.Database = .public,
     includeUserContextPhases: Bool = false
