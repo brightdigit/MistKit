@@ -109,7 +109,7 @@ extension CloudKitService {
   /// Delete all Feed records (paginated)
   public func deleteAllFeeds() async throws {
     var totalDeleted = 0
-    var continuationMarker: String? = nil
+    var continuationMarker: String?
 
     repeat {
       let result: QueryResult = try await queryRecords(

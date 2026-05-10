@@ -79,7 +79,9 @@ public protocol CloudKitRecordOperating: Sendable {
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService: CloudKitRecordOperating {
   /// Satisfy CloudKitRecordOperating protocol by forwarding to modifyRecords(_:atomic:)
-  public func modifyRecords(_ operations: [RecordOperation]) async throws(CloudKitError) -> [RecordInfo] {
+  public func modifyRecords(_ operations: [RecordOperation]) async throws(CloudKitError)
+    -> [RecordInfo]
+  {
     try await modifyRecords(operations, atomic: false)
   }
 

@@ -73,7 +73,8 @@ public struct UpdateReport: Codable, Sendable {
       self.notModifiedCount = notModifiedCount
       self.articlesCreated = articlesCreated
       self.articlesUpdated = articlesUpdated
-      self.successRate = totalFeeds > 0
+      self.successRate =
+        totalFeeds > 0
         ? Double(successCount) / Double(totalFeeds) * 100
         : 0
     }
