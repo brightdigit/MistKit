@@ -52,8 +52,9 @@ extension CloudKitService {
       let client = try self.client(for: database)
       let response = try await client.listZones(
         .init(
-          path: createListZonesPath(
+          path: Operations.listZones.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: database
           )
         )
@@ -116,8 +117,9 @@ extension CloudKitService {
       let client = try self.client(for: database)
       let response = try await client.lookupZones(
         .init(
-          path: createLookupZonesPath(
+          path: Operations.lookupZones.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: database
           ),
           body: .json(
@@ -177,8 +179,9 @@ extension CloudKitService {
       let client = try self.client(for: database)
       let response = try await client.fetchZoneChanges(
         .init(
-          path: createFetchZoneChangesPath(
+          path: Operations.fetchZoneChanges.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: database
           ),
           body: .json(

@@ -45,8 +45,9 @@ extension CloudKitService {
       let client = try self.client(for: database)
       let response = try await client.modifyRecords(
         .init(
-          path: createModifyRecordsPath(
+          path: Operations.modifyRecords.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: database
           ),
           body: .json(
@@ -76,8 +77,9 @@ extension CloudKitService {
       let client = try self.client(for: database)
       let response = try await client.lookupRecords(
         .init(
-          path: createLookupRecordsPath(
+          path: Operations.lookupRecords.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: database
           ),
           body: .json(

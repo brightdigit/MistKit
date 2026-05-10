@@ -99,8 +99,9 @@ extension CloudKitService {
       let client = try self.client(for: database)
       let response = try await client.fetchRecordChanges(
         .init(
-          path: createFetchRecordChangesPath(
+          path: Operations.fetchRecordChanges.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: database
           ),
           body: .json(
