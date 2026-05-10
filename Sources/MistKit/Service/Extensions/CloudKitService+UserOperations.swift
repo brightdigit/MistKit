@@ -53,8 +53,9 @@ extension CloudKitService {
       let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.getCaller(
         .init(
-          path: createGetCallerPath(
+          path: Operations.getCaller.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: .public
           )
         )
@@ -93,8 +94,9 @@ extension CloudKitService {
       let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.discoverAllUserIdentities(
         .init(
-          path: createDiscoverAllUserIdentitiesPath(
+          path: Operations.discoverAllUserIdentities.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: .public
           )
         )
@@ -122,8 +124,9 @@ extension CloudKitService {
       let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.lookupUsersByEmail(
         .init(
-          path: createLookupUsersByEmailPath(
+          path: Operations.lookupUsersByEmail.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: .public
           ),
           body: .json(
@@ -151,8 +154,9 @@ extension CloudKitService {
       let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.lookupUsersByRecordName(
         .init(
-          path: createLookupUsersByRecordNamePath(
+          path: Operations.lookupUsersByRecordName.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: .public
           ),
           body: .json(
@@ -180,8 +184,9 @@ extension CloudKitService {
       let client = try self.client(for: .public, requiresUserContext: true)
       let response = try await client.discoverUserIdentities(
         .init(
-          path: createDiscoverUserIdentitiesPath(
+          path: Operations.discoverUserIdentities.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: .public
           ),
           body: .json(

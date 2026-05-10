@@ -179,8 +179,9 @@ extension CloudKitService {
       let client = try self.client(for: database)
       let response = try await client.queryRecords(
         .init(
-          path: createQueryRecordsPath(
+          path: Operations.queryRecords.Input.Path(
             containerIdentifier: containerIdentifier,
+            environment: environment,
             database: database
           ),
           body: .json(

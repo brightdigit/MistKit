@@ -159,7 +159,7 @@ internal enum UpdateCommand {
           UpdateReport.FeedResult(
             feedURL: feed.feedURL,
             recordName: feed.recordName ?? "unknown",
-            status: "error",
+            status: .error,
             articlesCreated: 0,
             articlesUpdated: 0,
             duration: Date().timeIntervalSince(feedStartTime),

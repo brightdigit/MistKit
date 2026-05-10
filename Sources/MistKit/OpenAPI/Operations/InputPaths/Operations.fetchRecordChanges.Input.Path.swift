@@ -1,6 +1,6 @@
 //
-//  OutputFormatterFactory.swift
-//  MistDemo
+//  Operations.fetchRecordChanges.Input.Path.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,27 +27,21 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
-/// Factory for creating output formatters based on output format
-public enum OutputFormatterFactory {
-  /// Create an appropriate formatter for the given output format
-  /// - Parameters:
-  ///   - format: The output format
-  ///   - pretty: Whether to use pretty printing (applies to JSON)
-  /// - Returns: A formatter configured for the specified format
-  public static func formatter(for format: OutputFormat, pretty: Bool = false)
-    -> any OutputFormatter
-  {
-    switch format {
-    case .json:
-      return JSONFormatter(pretty: pretty)
-    case .table:
-      return TableFormatter()
-    case .csv:
-      return CSVFormatter()
-    case .yaml:
-      return YAMLFormatter()
-    }
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+extension Operations.fetchRecordChanges.Input.Path {
+  /// Initialize from MistKit configuration components.
+  internal init(
+    containerIdentifier: String,
+    environment: Environment,
+    database: Database
+  ) {
+    self.init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
+    )
   }
 }

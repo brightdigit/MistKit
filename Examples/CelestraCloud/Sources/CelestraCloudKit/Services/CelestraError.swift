@@ -147,6 +147,9 @@ public enum CelestraError: LocalizedError {
     case .unsupportedOperationType, .paginationLimitExceeded:
       // Programmer/configuration issues — not retriable
       return false
+    case .missingCredentials, .invalidPrivateKey:
+      // Credential/configuration issues — not retriable
+      return false
     }
   }
 }

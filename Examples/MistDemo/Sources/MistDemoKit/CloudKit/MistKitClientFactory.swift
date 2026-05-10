@@ -72,7 +72,7 @@ public struct MistKitClientFactory: Sendable {
         return try create(from: config, tokenManager: makeBadCredentialsTokenManager())
       }
       let credentials = try config.toPrimaryCredentials()
-      return try CloudKitService(
+      return CloudKitService(
         containerIdentifier: config.containerIdentifier,
         credentials: credentials,
         environment: config.environment
@@ -102,7 +102,7 @@ public struct MistKitClientFactory: Sendable {
         "MistDemo CLI requires URLSession; WASI builds must inject a transport explicitly"
       )
     #else
-      return try CloudKitService(
+      return CloudKitService(
         containerIdentifier: config.containerIdentifier,
         tokenManager: tokenManager,
         environment: config.environment

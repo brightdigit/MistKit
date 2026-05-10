@@ -156,8 +156,9 @@ extension CloudKitService {
 
       let client = try self.client(for: database)
       let response = try await client.uploadAssets(
-        path: createUploadAssetsPath(
+        path: Operations.uploadAssets.Input.Path(
           containerIdentifier: containerIdentifier,
+          environment: environment,
           database: database
         ),
         body: .json(requestBody)

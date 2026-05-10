@@ -34,7 +34,7 @@ public enum OutputEscaperFactory {
   /// Create an appropriate escaper for the given output format
   /// - Parameter format: The output format
   /// - Returns: An escaper configured for the specified format
-  public static func escaper(for format: OutputFormat) -> OutputEscaper {
+  public static func escaper(for format: OutputFormat) -> any OutputEscaper {
     switch format {
     case .csv:
       return CSVEscaper()

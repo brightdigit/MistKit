@@ -34,7 +34,7 @@ public struct FieldsInput: Codable, Sendable {
   private let storage: [String: FieldInputValue]
 
   /// Decode fields from a keyed JSON container.
-  public init(from decoder: Decoder) throws {
+  public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: DynamicKey.self)
     var fields: [String: FieldInputValue] = [:]
 
@@ -58,7 +58,7 @@ public struct FieldsInput: Codable, Sendable {
   }
 
   /// Encode fields to a keyed JSON container.
-  public func encode(to encoder: Encoder) throws {
+  public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: DynamicKey.self)
 
     for (key, value) in storage {

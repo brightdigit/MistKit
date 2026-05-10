@@ -93,7 +93,7 @@ internal struct DemoErrorsRunner {
     printSectionHeader("404 — Not Found (unknown record type)")
     do {
       let service = try MistKitClientFactory.create(for: config)
-      _ = try await service.queryRecords(recordType: Self.bogusRecordType)
+      _ = try await service.queryAllRecords(recordType: Self.bogusRecordType)
       print("⚠️  Expected 404 but query returned successfully — schema may have changed.")
     } catch let error as CloudKitError {
       printCloudKitError(error, expectedStatus: 404)
