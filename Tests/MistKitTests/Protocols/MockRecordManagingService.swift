@@ -44,6 +44,11 @@ internal actor MockRecordManagingService: RecordManaging {
     return recordsToReturn
   }
 
+  internal func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
+    queryCallCount += 1
+    return recordsToReturn
+  }
+
   internal func executeBatchOperations(_ operations: [RecordOperation], recordType: String)
     async throws
   {

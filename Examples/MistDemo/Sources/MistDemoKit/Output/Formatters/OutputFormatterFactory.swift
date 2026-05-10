@@ -36,7 +36,7 @@ public enum OutputFormatterFactory {
   ///   - format: The output format
   ///   - pretty: Whether to use pretty printing (applies to JSON)
   /// - Returns: A formatter configured for the specified format
-  public static func formatter(for format: OutputFormat, pretty: Bool = false) -> OutputFormatter {
+  public static func formatter(for format: OutputFormat, pretty: Bool = false) -> any OutputFormatter {
     switch format {
     case .json:
       return JSONFormatter(pretty: pretty)
