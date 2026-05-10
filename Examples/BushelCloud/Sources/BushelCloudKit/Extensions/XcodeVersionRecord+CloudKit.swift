@@ -28,8 +28,8 @@
 //
 
 public import BushelFoundation
-public import BushelUtilities
-public import Foundation
+internal import BushelUtilities
+internal import Foundation
 public import MistKit
 
 // MARK: - CloudKitRecord Conformance

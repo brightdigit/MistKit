@@ -106,11 +106,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
       pemString: pemString
     )
 
-    self.service = try CloudKitService(
+    self.service = CloudKitService(
       containerIdentifier: containerIdentifier,
       tokenManager: tokenManager,
-      environment: environment,
-      database: .public
+      environment: environment
     )
   }
 
@@ -144,11 +143,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
       pemString: pemString
     )
 
-    self.service = try CloudKitService(
+    self.service = CloudKitService(
       containerIdentifier: containerIdentifier,
       tokenManager: tokenManager,
-      environment: environment,
-      database: .public
+      environment: environment
     )
   }
 
@@ -169,7 +167,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   public func fetchExistingRecordNames(recordType: String) async throws -> Set<String> {
     Self.logger.debug("Pre-fetching existing record names for \(recordType)")
 
-    let records = try await queryRecords(recordType: recordType)
+    let records = try await service.queryAllRecords(
+      recordType: recordType,
+      desiredKeys: []
+    )
     let recordNames = Set(records.map(\.recordName))
 
     Self.logger.debug("Found \(recordNames.count) existing \(recordType) records")
@@ -244,7 +245,7 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
           totalFailed += 1
           failedRecordNames.append(result.recordName)
           Self.logger.debug(
-            "Error: recordName=\(result.recordName), reason=\(result.recordType)"
+            "Error: recordName=\(result.recordName)"
           )
         } else {
           // Classify as create or update based on pre-fetch

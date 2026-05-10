@@ -43,7 +43,7 @@ extension UpdateCommand {
       return UpdateReport.FeedResult(
         feedURL: feed.feedURL,
         recordName: feed.recordName ?? "unknown",
-        status: "success",
+        status: .success,
         articlesCreated: created,
         articlesUpdated: updated,
         duration: duration,
@@ -53,7 +53,7 @@ extension UpdateCommand {
       return UpdateReport.FeedResult(
         feedURL: feed.feedURL,
         recordName: feed.recordName ?? "unknown",
-        status: "notModified",
+        status: .notModified,
         articlesCreated: 0,
         articlesUpdated: 0,
         duration: duration,
@@ -63,7 +63,7 @@ extension UpdateCommand {
       return UpdateReport.FeedResult(
         feedURL: feed.feedURL,
         recordName: feed.recordName ?? "unknown",
-        status: "skipped",
+        status: .skipped,
         articlesCreated: 0,
         articlesUpdated: 0,
         duration: duration,
@@ -73,7 +73,7 @@ extension UpdateCommand {
       return UpdateReport.FeedResult(
         feedURL: feed.feedURL,
         recordName: feed.recordName ?? "unknown",
-        status: "error",
+        status: .error,
         articlesCreated: 0,
         articlesUpdated: 0,
         duration: duration,

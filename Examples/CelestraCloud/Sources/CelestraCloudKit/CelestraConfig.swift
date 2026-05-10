@@ -49,11 +49,10 @@ public enum CelestraConfig {
     )
 
     // Create and return CloudKit service
-    return try CloudKitService(
+    return CloudKitService(
       containerIdentifier: config.containerID,
       tokenManager: tokenManager,
-      environment: config.environment,
-      database: .public
+      environment: config.environment
     )
   }
 
@@ -93,11 +92,10 @@ public enum CelestraConfig {
     )
 
     // Create and return CloudKit service
-    return try CloudKitService(
+    return CloudKitService(
       containerIdentifier: containerID,
       tokenManager: tokenManager,
-      environment: environment,
-      database: .public
+      environment: environment
     )
   }
 }

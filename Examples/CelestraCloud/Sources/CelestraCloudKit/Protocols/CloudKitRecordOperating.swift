@@ -82,4 +82,44 @@ extension CloudKitService: CloudKitRecordOperating {
   public func modifyRecords(_ operations: [RecordOperation]) async throws(CloudKitError) -> [RecordInfo] {
     try await modifyRecords(operations, atomic: false)
   }
+
+  /// Satisfy CloudKitRecordOperating's `queryRecords` (no database param) by forwarding to the public-database overload.
+  public func queryRecords(
+    recordType: String,
+    filters: [QueryFilter]?,
+    sortBy: [QuerySort]?,
+    limit: Int?,
+    desiredKeys: [String]?
+  ) async throws(CloudKitError) -> [RecordInfo] {
+    let result: QueryResult = try await queryRecords(
+      recordType: recordType,
+      filters: filters,
+      sortBy: sortBy,
+      limit: limit,
+      desiredKeys: desiredKeys,
+      continuationMarker: nil,
+      database: .public
+    )
+    return result.records
+  }
+
+  /// Satisfy CloudKitRecordOperating's `queryAllRecords` (no database param) by forwarding to the public-database overload.
+  public func queryAllRecords(
+    recordType: String,
+    filters: [QueryFilter]?,
+    sortBy: [QuerySort]?,
+    pageSize: Int?,
+    desiredKeys: [String]?,
+    maxPages: Int
+  ) async throws(CloudKitError) -> [RecordInfo] {
+    try await queryAllRecords(
+      recordType: recordType,
+      filters: filters,
+      sortBy: sortBy,
+      pageSize: pageSize,
+      desiredKeys: desiredKeys,
+      maxPages: maxPages,
+      database: .public
+    )
+  }
 }

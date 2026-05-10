@@ -51,14 +51,8 @@ public struct UpdateReport: Codable, Sendable {
     public let articlesCreated: Int
     /// Total number of articles updated across all feeds.
     public let articlesUpdated: Int
-
     /// Percentage of feeds that updated successfully (0-100).
-    public var successRate: Double {
-      guard totalFeeds > 0 else {
-        return 0
-      }
-      return Double(successCount) / Double(totalFeeds) * 100
-    }
+    public let successRate: Double
 
     // MARK: - Lifecycle
 
@@ -79,6 +73,9 @@ public struct UpdateReport: Codable, Sendable {
       self.notModifiedCount = notModifiedCount
       self.articlesCreated = articlesCreated
       self.articlesUpdated = articlesUpdated
+      self.successRate = totalFeeds > 0
+        ? Double(successCount) / Double(totalFeeds) * 100
+        : 0
     }
   }
 
@@ -121,14 +118,22 @@ public struct UpdateReport: Codable, Sendable {
 
   /// Result for a single feed update.
   public struct FeedResult: Codable, Sendable {
+    /// Outcome status for a feed update.
+    public enum Status: String, Codable, Sendable {
+      case success
+      case error
+      case skipped
+      case notModified
+    }
+
     // MARK: - Properties
 
     /// URL of the feed that was processed.
     public let feedURL: String
     /// CloudKit record name for this feed.
     public let recordName: String
-    /// Outcome status: "success", "error", "skipped", or "notModified".
-    public let status: String
+    /// Outcome status for this feed update.
+    public let status: Status
     /// Number of new articles created for this feed.
     public let articlesCreated: Int
     /// Number of existing articles updated for this feed.
@@ -144,7 +149,7 @@ public struct UpdateReport: Codable, Sendable {
     public init(
       feedURL: String,
       recordName: String,
-      status: String,
+      status: Status,
       articlesCreated: Int,
       articlesUpdated: Int,
       duration: TimeInterval,
@@ -167,9 +172,7 @@ public struct UpdateReport: Codable, Sendable {
   /// When the update completed
   public let endTime: Date
   /// Total duration in seconds
-  public var duration: TimeInterval {
-    endTime.timeIntervalSince(startTime)
-  }
+  public let duration: TimeInterval
 
   /// Configuration used for this update
   public let configuration: UpdateConfiguration
@@ -190,6 +193,7 @@ public struct UpdateReport: Codable, Sendable {
   ) {
     self.startTime = startTime
     self.endTime = endTime
+    self.duration = endTime.timeIntervalSince(startTime)
     self.configuration = configuration
     self.summary = summary
     self.feeds = feeds
