@@ -37,7 +37,7 @@ extension CloudKitServiceTests.Upload {
   internal struct Validation {
     @Test("uploadAssets() validates empty data")
     internal func uploadAssetsValidatesEmptyData() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
@@ -64,7 +64,7 @@ extension CloudKitServiceTests.Upload {
 
     @Test("uploadAssets() validates 15 MB size limit", .disabled(if: Platform.isWasm))
     internal func uploadAssetsValidates15MBLimit() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
@@ -93,7 +93,7 @@ extension CloudKitServiceTests.Upload {
 
     @Test("uploadAssets() accepts valid data sizes", .disabled(if: Platform.isWasm))
     internal func uploadAssetsAcceptsValidSizes() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
@@ -126,7 +126,7 @@ extension CloudKitServiceTests.Upload {
 
     @Test("uploadAssets() throws invalidResponse when CloudKit returns token with no recordName")
     internal func uploadAssetsThrowsWhenRecordNameIsNil() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }

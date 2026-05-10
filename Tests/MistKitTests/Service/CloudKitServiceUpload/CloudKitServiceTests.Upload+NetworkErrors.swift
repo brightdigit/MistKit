@@ -37,7 +37,7 @@ extension CloudKitServiceTests.Upload {
   internal struct NetworkErrors {
     @Test("uploadAssets() surfaces a CloudKit-API timeout as networkError(.timedOut)")
     internal func uploadAssetsPropagatesAPITimeout() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
@@ -60,7 +60,7 @@ extension CloudKitServiceTests.Upload {
 
     @Test("uploadAssets() surfaces a CDN network failure thrown by a custom uploader")
     internal func uploadAssetsPropagatesCDNNetworkError() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
@@ -89,7 +89,7 @@ extension CloudKitServiceTests.Upload {
 
     @Test("uploadAssets() surfaces a CDN 421 Misdirected Request as httpError")
     internal func uploadAssetsPropagatesCDN421() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }

@@ -1,6 +1,6 @@
 //
-//  URLSession+AssetUpload.swift
-//  MistKit
+//  MistDemoConfiguration+Testing.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,33 +27,36 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Configuration
+import Foundation
 
-#if canImport(FoundationNetworking)
-  public import FoundationNetworking
-#endif
+@testable import MistDemoKit
 
-#if !os(WASI)
-  extension URLSession {
-    /// Upload asset data directly to CloudKit CDN
-    ///
-    /// Returns the raw HTTP response without decoding. CloudKitService handles JSON decoding.
-    ///
-    /// - Parameters:
-    ///   - data: Binary data to upload
-    ///   - url: CloudKit CDN upload URL
-    /// - Returns: Tuple containing optional HTTP status code and response data
-    /// - Throws: Error if upload fails
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    public func upload(_ data: Data, to url: URL) async throws -> (statusCode: Int?, data: Data) {
-      // Create URLRequest for direct upload to CDN
-      let request = URLRequest(forAssetUpload: data, to: url)
-
-      // Upload directly via URLSession
-      let (responseData, response) = try await self.data(for: request)
-
-      let statusCode = (response as? HTTPURLResponse)?.statusCode
-      return (statusCode, responseData)
+extension MistDemoConfiguration {
+  /// Build a `MistDemoConfiguration` backed by a single `InMemoryProvider`.
+  ///
+  /// String keys are split on `.` to form the underlying `AbsoluteConfigKey`
+  /// components, so callers can write `"container.identifier"` /
+  /// `"record.type"` exactly as production code reads them via
+  /// `MistDemoConfiguration.string(forKey:)`. Single-segment keys
+  /// (`"file"`, `"record-type"`) work too — the split just yields a one-element
+  /// path.
+  internal static func testing(
+    _ values: [String: ConfigValue]
+  ) -> MistDemoConfiguration {
+    func key(_ path: String) -> AbsoluteConfigKey {
+      AbsoluteConfigKey(
+        path.split(separator: ".").map(String.init),
+        context: [:]
+      )
     }
+
+    var mapped: [AbsoluteConfigKey: ConfigValue] = [:]
+    for (rawKey, value) in values {
+      mapped[key(rawKey)] = value
+    }
+    return MistDemoConfiguration(
+      testProvider: InMemoryProvider(values: mapped)
+    )
   }
-#endif
+}

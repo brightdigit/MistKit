@@ -205,18 +205,16 @@ extension CloudKitError {
 
     // Handle undocumented error
     if let statusCode = response.undocumentedStatusCode {
-      // Full body lives at debug level — may contain server-echoed request data
-      // (e.g. emails passed to lookupUsersByEmail). Warning stays sanitized so
-      // it can ship to ops/log aggregators without leaking PII.
+      // Both messages flow through SecureLogging.safeLogMessage so token-shaped
+      // substrings get masked before reaching the log sink. Set
+      // MISTKIT_DISABLE_LOG_REDACTION=1 to bypass redaction during debugging.
       MistKitLogger.logDebug(
         "Unhandled response (HTTP \(statusCode)): \(response)",
-        logger: MistKitLogger.api,
-        shouldRedact: false
+        logger: MistKitLogger.api
       )
       MistKitLogger.logWarning(
         "Unhandled \(type(of: response)) (HTTP \(statusCode)) - treating as generic HTTP error",
-        logger: MistKitLogger.api,
-        shouldRedact: false
+        logger: MistKitLogger.api
       )
       self = .httpError(statusCode: statusCode)
       return
@@ -224,13 +222,11 @@ extension CloudKitError {
 
     MistKitLogger.logDebug(
       "Unhandled response case: \(response)",
-      logger: MistKitLogger.api,
-      shouldRedact: false
+      logger: MistKitLogger.api
     )
     MistKitLogger.logWarning(
       "Unhandled \(type(of: response)) - treating as invalid response",
-      logger: MistKitLogger.api,
-      shouldRedact: false
+      logger: MistKitLogger.api
     )
     self = .invalidResponse
   }

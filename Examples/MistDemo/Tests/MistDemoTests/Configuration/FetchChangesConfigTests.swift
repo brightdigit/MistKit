@@ -1,6 +1,6 @@
 //
-//  URLSession+AssetUpload.swift
-//  MistKit
+//  FetchChangesConfigTests.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,33 +27,41 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+import Foundation
+import Testing
 
-#if canImport(FoundationNetworking)
-  public import FoundationNetworking
-#endif
+@testable import MistDemoKit
 
-#if !os(WASI)
-  extension URLSession {
-    /// Upload asset data directly to CloudKit CDN
-    ///
-    /// Returns the raw HTTP response without decoding. CloudKitService handles JSON decoding.
-    ///
-    /// - Parameters:
-    ///   - data: Binary data to upload
-    ///   - url: CloudKit CDN upload URL
-    /// - Returns: Tuple containing optional HTTP status code and response data
-    /// - Throws: Error if upload fails
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    public func upload(_ data: Data, to url: URL) async throws -> (statusCode: Int?, data: Data) {
-      // Create URLRequest for direct upload to CDN
-      let request = URLRequest(forAssetUpload: data, to: url)
+@Suite("FetchChangesConfig")
+internal struct FetchChangesConfigTests {
+  @Test("FetchChangesConfig initializes with defaults")
+  internal func initializesWithDefaults() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = FetchChangesConfig(base: baseConfig)
 
-      // Upload directly via URLSession
-      let (responseData, response) = try await self.data(for: request)
-
-      let statusCode = (response as? HTTPURLResponse)?.statusCode
-      return (statusCode, responseData)
-    }
+    #expect(config.syncToken == nil)
+    #expect(config.zone == "_defaultZone")
+    #expect(config.fetchAll == false)
+    #expect(config.limit == nil)
+    #expect(config.output == .table)
   }
-#endif
+
+  @Test("FetchChangesConfig keeps explicit memberwise values")
+  internal func acceptsExplicitFields() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = FetchChangesConfig(
+      base: baseConfig,
+      syncToken: "tok-1",
+      zone: "myZone",
+      fetchAll: true,
+      limit: 50,
+      output: .json
+    )
+
+    #expect(config.syncToken == "tok-1")
+    #expect(config.zone == "myZone")
+    #expect(config.fetchAll == true)
+    #expect(config.limit == 50)
+    #expect(config.output == .json)
+  }
+}
