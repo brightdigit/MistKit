@@ -158,6 +158,9 @@ let package = Package(
           condition: asyncAlgorithmsCondition
         ),
       ],
+      resources: [
+        .copy("Resources/auth-token-index.html")
+      ],
       swiftSettings: swiftSettings
     ),
     .executableTarget(
