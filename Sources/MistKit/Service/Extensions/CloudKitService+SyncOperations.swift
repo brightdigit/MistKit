@@ -135,8 +135,12 @@ extension CloudKitService {
   ///     (defaults to _defaultZone)
   ///   - syncToken: Optional token from previous fetch (nil = initial fetch)
   ///   - resultsLimit: Optional maximum records per request (1-200)
+  ///   - maxPages: Maximum number of pages to fetch before throwing
+  ///     `CloudKitError.paginationLimitExceeded` (defaults to 1,000)
   /// - Returns: Array of all changed records and final sync token
-  /// - Throws: CloudKitError if any fetch fails
+  /// - Throws: `CloudKitError`. When `maxPages` is exceeded, throws
+  ///   `.paginationLimitExceeded(maxPages:records:)` whose `records`
+  ///   payload contains every record collected before the cap was hit.
   ///
   /// Example:
   /// ```swift
@@ -153,7 +157,7 @@ extension CloudKitService {
   ///           with manual pagination for better memory control.
   /// - Warning: This method will stop early if the server repeatedly returns
   ///           `moreComing: true` with no records and the same sync token
-  ///           (stuck-token scenario), or if the page count exceeds 1000.
+  ///           (stuck-token scenario).
   /// - Note: Makes sequential requests with no backoff or cooperative
   ///         cancellation between pages. For fine-grained control,
   ///         use `fetchRecordChanges(syncToken:)` directly.
@@ -161,17 +165,20 @@ extension CloudKitService {
     zoneID: ZoneID? = nil,
     syncToken: String? = nil,
     resultsLimit: Int? = nil,
+    maxPages: Int = 1_000,
     database: Database = .public
   ) async throws(CloudKitError) -> (records: [RecordInfo], syncToken: String?) {
     var allRecords: [RecordInfo] = []
     var currentToken = syncToken
     var moreComing = true
     var pageCount = 0
-    let maxPages = 1_000
 
     while moreComing {
       guard pageCount < maxPages else {
-        throw CloudKitError.invalidResponse
+        throw CloudKitError.paginationLimitExceeded(
+          maxPages: maxPages,
+          records: allRecords
+        )
       }
 
       do {
