@@ -28,12 +28,9 @@
 //
 
 #if canImport(Hummingbird)
-  import AsyncAlgorithms
-  import Foundation
-  import HTTPTypes
-  import Hummingbird
-  import Logging
-  import MistKit
+  internal import AsyncAlgorithms
+  internal import Foundation
+  internal import Hummingbird
 
   /// Command to obtain web authentication token via browser flow.
   public struct AuthTokenCommand: MistDemoCommand {
@@ -66,35 +63,6 @@
       self.config = config
     }
 
-    // Exact-match host validation against an allowlist
-    // after stripping any port.
-    internal static func isLoopbackAuthority(
-      _ authority: String
-    ) -> Bool {
-      let host: String
-      if authority.hasPrefix("["),
-        let endBracket = authority.firstIndex(of: "]")
-      {
-        host = String(
-          authority[authority.startIndex...endBracket]
-        )
-        let afterBracket =
-          authority[authority.index(after: endBracket)...]
-        if !afterBracket.isEmpty,
-          !afterBracket.hasPrefix(":")
-        {
-          return false
-        }
-      } else {
-        host = String(
-          authority.split(separator: ":").first
-            ?? Substring(authority)
-        )
-      }
-      return ["localhost", "127.0.0.1", "[::1]"]
-        .contains(host)
-    }
-
     /// Executes the command.
     public func execute() async throws {
       print("📍 Server URL: http://\(config.host):\(config.port)")
@@ -102,17 +70,18 @@
       let tokenChannel = AsyncChannel<String>()
       let responseCompleteChannel = AsyncChannel<Void>()
 
-      let router = try buildRouter(
+      let server = AuthTokenServer(
+        apiToken: config.apiToken,
+        containerIdentifier: config.containerIdentifier,
         tokenChannel: tokenChannel,
         responseCompleteChannel: responseCompleteChannel
       )
+      let router = try server.makeRouter()
 
       let app = Application(
         router: router,
         configuration: .init(
-          address: .hostname(
-            config.host, port: config.port
-          )
+          address: .hostname(config.host, port: config.port)
         )
       )
 

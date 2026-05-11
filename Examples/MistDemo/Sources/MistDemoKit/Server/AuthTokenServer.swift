@@ -1,5 +1,5 @@
 //
-//  AuthTokenCommand+Routes.swift
+//  AuthTokenServer.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,99 +28,98 @@
 //
 
 #if canImport(Hummingbird)
-  import AsyncAlgorithms
-  import Foundation
-  import HTTPTypes
-  import Hummingbird
-  import Logging
-  import MistKit
+  internal import AsyncAlgorithms
+  internal import Foundation
+  internal import HTTPTypes
+  internal import Hummingbird
+  internal import Logging
 
-  extension AuthTokenCommand {
-    fileprivate struct CloudKitClientConfig: Encodable {
-      let apiToken: String
-      let containerIdentifier: String
+  /// Routing surface for the auth-token loopback flow.
+  ///
+  /// Owns the index, config, and authentication endpoints used by the
+  /// browser-side script during a CloudKit web-auth round trip. The owning
+  /// command (`AuthTokenCommand`) provides credentials and the rendezvous
+  /// channels and is responsible for the `Application` lifecycle; this type
+  /// only knows how to assemble a `Router`.
+  internal struct AuthTokenServer {
+    /// JSON payload returned from `GET /api/config`, consumed by the
+    /// browser-side script to configure CloudKit JS.
+    internal struct CloudKitClientConfig: Encodable {
+      internal let apiToken: String
+      internal let containerIdentifier: String
     }
 
-    internal func buildRouter(
-      tokenChannel: AsyncChannel<String>,
-      responseCompleteChannel: AsyncChannel<Void>
-    ) throws -> Router<BasicRequestContext> {
+    internal let apiToken: String
+    internal let containerIdentifier: String
+    internal let tokenChannel: AsyncChannel<String>
+    internal let responseCompleteChannel: AsyncChannel<Void>
+
+    /// Build the router for this server.
+    internal func makeRouter() throws -> Router<BasicRequestContext> {
       let router = Router(context: BasicRequestContext.self)
       router.middlewares.add(LogRequestsMiddleware(.info))
 
-      let indexBytes = ByteBuffer(
-        string: AuthTokenIndexHTML.content
+      addIndexEndpoint(router: router)
+
+      let api = router.group("api")
+      let configData = try JSONEncoder().encode(
+        CloudKitClientConfig(
+          apiToken: apiToken,
+          containerIdentifier: containerIdentifier
+        )
       )
+      addConfigEndpoint(api: api, configData: configData)
+      addAuthEndpoint(api: api)
+
+      return router
+    }
+
+    private func addIndexEndpoint(
+      router: Router<BasicRequestContext>
+    ) {
+      let indexBytes = ByteBuffer(string: AuthTokenIndexHTML.content)
       let indexResponseBuilder: @Sendable () -> Response = {
         Response(
           status: .ok,
-          headers: [
-            .contentType: "text/html; charset=utf-8"
-          ],
+          headers: [.contentType: "text/html; charset=utf-8"],
           body: ResponseBody { writer in
             try await writer.write(indexBytes)
             try await writer.finish(nil)
           }
         )
       }
-      router.get("/") { _, _ -> Response in
-        indexResponseBuilder()
-      }
+      router.get("/") { _, _ -> Response in indexResponseBuilder() }
       router.get("/index.html") { _, _ -> Response in
         indexResponseBuilder()
       }
-
-      let api = router.group("api")
-
-      let configPayload = CloudKitClientConfig(
-        apiToken: config.apiToken,
-        containerIdentifier: config.containerIdentifier
-      )
-      let configData = try JSONEncoder().encode(
-        configPayload
-      )
-
-      addConfigEndpoint(
-        api: api, configData: configData
-      )
-      addAuthEndpoint(
-        api: api,
-        tokenChannel: tokenChannel,
-        responseCompleteChannel: responseCompleteChannel
-      )
-
-      return router
     }
 
-    internal func addConfigEndpoint(
+    private func addConfigEndpoint(
       api: RouterGroup<BasicRequestContext>,
       configData: Data
     ) {
       api.get("config") { request, _ -> Response in
         let authority = request.head.authority ?? ""
-        guard Self.isLoopbackAuthority(authority) else {
+        guard LoopbackAuthority.isLoopback(authority) else {
           return Response(status: .forbidden)
         }
         return Response(
           status: .ok,
           headers: [.contentType: "application/json"],
           body: ResponseBody { writer in
-            try await writer.write(
-              ByteBuffer(bytes: configData)
-            )
+            try await writer.write(ByteBuffer(bytes: configData))
             try await writer.finish(nil)
           }
         )
       }
     }
 
-    internal func addAuthEndpoint(
-      api: RouterGroup<BasicRequestContext>,
-      tokenChannel: AsyncChannel<String>,
-      responseCompleteChannel: AsyncChannel<Void>
+    private func addAuthEndpoint(
+      api: RouterGroup<BasicRequestContext>
     ) {
-      api.post("authenticate") {
-        request, context -> Response in
+      let tokenChannel = self.tokenChannel
+      let responseCompleteChannel = self.responseCompleteChannel
+      api.post("authenticate") { request, context -> Response in
         let authRequest = try await request.decode(
           as: AuthRequest.self, context: context
         )
@@ -128,12 +127,9 @@
 
         let response = AuthResponse(
           userRecordName: authRequest.userRecordName,
-          cloudKitData: .init(
-            user: nil, zones: [], error: nil
-          ),
+          cloudKitData: .init(user: nil, zones: [], error: nil),
           message: "Authentication successful!"
         )
-
         let jsonData = try JSONEncoder().encode(response)
 
         Task {
@@ -145,9 +141,7 @@
           status: .ok,
           headers: [.contentType: "application/json"],
           body: ResponseBody { writer in
-            try await writer.write(
-              ByteBuffer(bytes: jsonData)
-            )
+            try await writer.write(ByteBuffer(bytes: jsonData))
             try await writer.finish(nil)
           }
         )

@@ -176,6 +176,20 @@ let package = Package(
         "ConfigKeyKit",
         .product(name: "MistKit", package: "MistKit"),
         .product(
+          name: "Hummingbird",
+          package: "hummingbird",
+          condition: .when(platforms: [
+            .macOS, .iOS, .tvOS, .visionOS, .macCatalyst, .linux,
+          ])
+        ),
+        .product(
+          name: "HummingbirdTesting",
+          package: "hummingbird",
+          condition: .when(platforms: [
+            .macOS, .iOS, .tvOS, .visionOS, .macCatalyst, .linux,
+          ])
+        ),
+        .product(
           name: "AsyncAlgorithms",
           package: "swift-async-algorithms",
           condition: asyncAlgorithmsCondition
