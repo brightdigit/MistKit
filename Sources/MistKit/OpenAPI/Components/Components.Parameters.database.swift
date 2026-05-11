@@ -1,5 +1,5 @@
 //
-//  Components.Parameters.database+MistKit.swift
+//  Components.Parameters.database.swift
 //  MistKit
 //
 //  Created by Leo Dion.

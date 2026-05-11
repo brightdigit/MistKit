@@ -1,5 +1,5 @@
 //
-//  Components.Schemas.Filter+MistKit.swift
+//  Components.Schemas.Filter.swift
 //  MistKit
 //
 //  Created by Leo Dion.

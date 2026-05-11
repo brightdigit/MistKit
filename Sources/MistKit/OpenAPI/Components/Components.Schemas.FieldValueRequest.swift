@@ -1,5 +1,5 @@
 //
-//  Components.Schemas.FieldValueRequest+MistKit.swift
+//  Components.Schemas.FieldValueRequest.swift
 //  MistKit
 //
 //  Created by Leo Dion.

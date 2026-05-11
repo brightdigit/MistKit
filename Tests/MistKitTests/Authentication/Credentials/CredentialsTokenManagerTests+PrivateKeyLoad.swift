@@ -1,5 +1,5 @@
 //
-//  Components.Schemas.Sort.swift
+//  CredentialsTokenManagerTests+PrivateKeyLoad.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,13 +27,36 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+import Foundation
+import Testing
 
-/// Extension to convert MistKit QuerySort to OpenAPI Components.Schemas.Sort
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension Components.Schemas.Sort {
-  /// Initialize from MistKit QuerySort
-  internal init(from querySort: QuerySort) {
-    self = querySort.sort
+@testable import MistKit
+
+extension CredentialsTokenManagerTests {
+  @Suite("Private-Key Load Failure")
+  internal struct PrivateKeyLoad {
+    @Test(".public + S2S with unreadable PEM file → throws invalidPrivateKey")
+    internal func publicWithUnreadablePEMFileThrowsInvalidPrivateKey() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        return
+      }
+      let missingPath = "/nonexistent/path/to/private-key-\(UUID().uuidString).pem"
+      let credentials = try Credentials(
+        serverToServer: ServerToServerCredentials(
+          keyID: "test-key-id-12345678",
+          privateKey: .file(path: missingPath)
+        )
+      )
+      do {
+        _ = try credentials.makeTokenManager(for: .public)
+        Issue.record("expected makeTokenManager to throw .invalidPrivateKey")
+      } catch let error as CloudKitError {
+        guard case .invalidPrivateKey(let path, _) = error else {
+          Issue.record("expected .invalidPrivateKey, got \(error)")
+          return
+        }
+        #expect(path == missingPath)
+      }
+    }
   }
 }
