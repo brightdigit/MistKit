@@ -11,7 +11,6 @@
 ### Error Handling
 * Improve error handling: typed TokenManagerError and safe RecordOperation conversion by @leogdion in https://github.com/brightdigit/MistKit/pull/305
 * Move CloudKitResponseType default implementations to protocol extension by @leogdion in https://github.com/brightdigit/MistKit/pull/292
-* **Breaking:** `CloudKitError.paginationLimitExceeded` now carries `records: [RecordInfo]` instead of `recordsCollected: Int`. When `queryAllRecords` / `fetchAllRecordChanges` exceed `maxPages`, callers can pattern-match the error to recover every record collected before the cap. `fetchAllRecordChanges` gains an explicit `maxPages:` parameter and no longer throws the generic `.invalidResponse` on overflow. Resolves [#313](https://github.com/brightdigit/MistKit/issues/313).
 
 ### Concurrency
 * Replace custom AsyncChannel with swift-async-algorithms by @leogdion in https://github.com/brightdigit/MistKit/pull/280

@@ -170,10 +170,10 @@ extension CloudKitService {
   ) async throws(CloudKitError) -> (records: [RecordInfo], syncToken: String?) {
     var allRecords: [RecordInfo] = []
     var currentToken = syncToken
-    var moreComing = true
+    var moreComing = false
     var pageCount = 0
 
-    while moreComing {
+    repeat {
       guard pageCount < maxPages else {
         throw CloudKitError.paginationLimitExceeded(
           maxPages: maxPages,
@@ -194,6 +194,7 @@ extension CloudKitService {
         database: database
       )
 
+      // Stuck-token detection
       if result.records.isEmpty && result.moreComing && result.syncToken == currentToken {
         break
       }
@@ -206,7 +207,7 @@ extension CloudKitService {
       currentToken = result.syncToken
       moreComing = result.moreComing
       pageCount += 1
-    }
+    } while moreComing
 
     return (allRecords, currentToken)
   }
