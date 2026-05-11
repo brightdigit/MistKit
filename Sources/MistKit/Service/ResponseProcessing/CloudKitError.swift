@@ -44,7 +44,7 @@ public enum CloudKitError: LocalizedError, Sendable {
   case decodingError(DecodingError)
   case networkError(URLError)
   case unsupportedOperationType(String)
-  case paginationLimitExceeded(maxPages: Int, recordsCollected: Int)
+  case paginationLimitExceeded(maxPages: Int, records: [RecordInfo])
   case missingCredentials(database: Database, reason: String)
   case invalidPrivateKey(path: String?, underlying: any Error)
 
@@ -123,10 +123,10 @@ public enum CloudKitError: LocalizedError, Sendable {
       return message
     case .unsupportedOperationType(let type):
       return "Unsupported record operation type: \(type)"
-    case .paginationLimitExceeded(let maxPages, let recordsCollected):
+    case .paginationLimitExceeded(let maxPages, let records):
       return
         "CloudKit query exceeded pagination limit of \(maxPages) pages "
-        + "(collected \(recordsCollected) records)"
+        + "(collected \(records.count) records)"
     case .missingCredentials(let database, let reason):
       return
         "Missing credentials for database '\(database.rawValue)': \(reason)"

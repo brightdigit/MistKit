@@ -73,6 +73,56 @@ extension CloudKitServiceTests.FetchChanges {
       }
     }
 
+    @Test("fetchAllRecordChanges() throws paginationLimitExceeded carrying collected records")
+    internal func fetchAllOverflowReturnsAccumulatedRecords() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      // Three pages, each still indicating moreComing:true, so the loop would
+      // keep going. With maxPages:2 the third page triggers the cap and we
+      // expect the records from pages 1 and 2 to come back inside the error.
+      let provider = ResponseProvider(
+        defaultResponse: try .successfulFetchChangesResponse(
+          recordCount: 0,
+          moreComing: true,
+          syncToken: "default-token"
+        )
+      )
+      await provider.enqueue(
+        try .successfulFetchChangesResponse(
+          recordCount: 3,
+          moreComing: true,
+          syncToken: "token-1"
+        ),
+        for: "fetchRecordChanges"
+      )
+      await provider.enqueue(
+        try .successfulFetchChangesResponse(
+          recordCount: 2,
+          moreComing: true,
+          syncToken: "token-2"
+        ),
+        for: "fetchRecordChanges"
+      )
+      let service = try CloudKitServiceTests.makeService(provider: provider)
+
+      do {
+        _ = try await service.fetchAllRecordChanges(maxPages: 2)
+        Issue.record("Expected paginationLimitExceeded to be thrown")
+      } catch CloudKitError.paginationLimitExceeded(let maxPages, let records) {
+        #expect(maxPages == 2)
+        #expect(records.count == 5)
+        #expect(
+          records.map(\.recordName) == [
+            "record-0", "record-1", "record-2",
+            "record-0", "record-1",
+          ])
+      } catch {
+        Issue.record("Expected paginationLimitExceeded, got \(error)")
+      }
+    }
+
     @Test("fetchAllRecordChanges() propagates a mid-pagination network failure")
     internal func fetchAllPropagatesMidPaginationFailure() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {

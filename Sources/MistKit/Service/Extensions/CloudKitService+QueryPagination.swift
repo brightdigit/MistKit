@@ -45,13 +45,16 @@ extension CloudKitService {
   ///     (1-200, defaults to `defaultQueryLimit`)
   ///   - desiredKeys: Optional array of field names to fetch
   ///   - maxPages: Maximum number of pages to fetch before throwing
-  ///     `CloudKitError.invalidResponse` (defaults to 1,000)
+  ///     `CloudKitError.paginationLimitExceeded` (defaults to 1,000)
   /// - Returns: Array of all matching records across all pages
-  /// - Throws: CloudKitError if any page request fails
+  /// - Throws: `CloudKitError`. When `maxPages` is exceeded, throws
+  ///   `.paginationLimitExceeded(maxPages:records:)` whose `records`
+  ///   payload contains every record collected before the cap was hit,
+  ///   so callers can resume or surface partial results.
   ///
   /// - Warning: Stops early if the server returns the same
   ///   continuation marker with no new records (stuck-marker
-  ///   scenario), or if the page count exceeds `maxPages`.
+  ///   scenario).
   public func queryAllRecords(
     recordType: String,
     filters: [QueryFilter]? = nil,
@@ -69,7 +72,7 @@ extension CloudKitService {
       guard pageCount < maxPages else {
         throw CloudKitError.paginationLimitExceeded(
           maxPages: maxPages,
-          recordsCollected: allRecords.count
+          records: allRecords
         )
       }
 
