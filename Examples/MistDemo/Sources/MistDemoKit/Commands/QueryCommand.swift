@@ -76,7 +76,7 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
         let filters: [QueryFilter]? =
           config.filters.isEmpty
           ? nil
-          : try config.filters.map { try parseFilter($0) }
+          : try config.filters.map { try Self.parseFilter($0) }
         recordInfos = try await client.queryRecords(
           recordType: config.recordType,
           filters: filters,
@@ -96,126 +96,6 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
       try await outputResults(recordInfos, format: config.output)
     } catch {
       throw QueryError.operationFailed(error.localizedDescription)
-    }
-  }
-
-  /// Parse a single filter expression "field:operator:value" into a QueryFilter
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  private func parseFilter(_ filterString: String) throws -> QueryFilter {
-    let components = filterString.split(
-      separator: ":", maxSplits: 2, omittingEmptySubsequences: false
-    )
-
-    guard components.count == 3 else {
-      throw QueryError.invalidFilter(filterString, expected: "field:operator:value")
-    }
-
-    let field = String(components[0]).trimmingCharacters(in: .whitespaces)
-    let operatorString = String(components[1]).trimmingCharacters(in: .whitespaces)
-    let value = String(components[2])
-
-    guard !field.isEmpty else {
-      throw QueryError.emptyFieldName(filterString)
-    }
-
-    return try buildFilter(field: field, operatorString: operatorString, value: value)
-  }
-
-  /// Build a QueryFilter from parsed components.
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  private func buildFilter(
-    field: String,
-    operatorString: String,
-    value: String
-  ) throws -> QueryFilter {
-    if let comparison = buildComparisonFilter(
-      field: field, operatorString: operatorString, value: value
-    ) {
-      return comparison
-    }
-    return try buildSpecialFilter(
-      field: field, operatorString: operatorString, value: value
-    )
-  }
-
-  // Build comparison-based filters (equals, not equals, greater/less than).
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  // swiftlint:disable:next cyclomatic_complexity
-  private func buildComparisonFilter(
-    field: String,
-    operatorString: String,
-    value: String
-  ) -> QueryFilter? {
-    switch operatorString.lowercased() {
-    case "eq", "equals", "==", "=":
-      return .equals(field, inferFieldValue(value))
-    case "ne", "not_equals", "!=":
-      return .notEquals(field, inferFieldValue(value))
-    case "gt", ">":
-      return .greaterThan(field, inferFieldValue(value))
-    case "gte", ">=":
-      return .greaterThanOrEquals(
-        field, inferFieldValue(value)
-      )
-    case "lt", "<":
-      return .lessThan(field, inferFieldValue(value))
-    case "lte", "<=":
-      return .lessThanOrEquals(
-        field, inferFieldValue(value)
-      )
-    default:
-      return nil
-    }
-  }
-
-  /// Build string and list-based filters.
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  private func buildSpecialFilter(
-    field: String,
-    operatorString: String,
-    value: String
-  ) throws -> QueryFilter {
-    switch operatorString.lowercased() {
-    case "contains", "like":
-      return .containsAllTokens(field, value)
-    case "begins_with", "starts_with":
-      return .beginsWith(field, value)
-    case "in":
-      let values = value.split(separator: ",").map {
-        inferFieldValue(String($0))
-      }
-      return .in(field, values)
-    case "not_in":
-      let values = value.split(separator: ",").map {
-        inferFieldValue(String($0))
-      }
-      return .notIn(field, values)
-    default:
-      throw QueryError.unsupportedOperator(operatorString)
-    }
-  }
-
-  /// Infer a FieldValue from a string.
-  private func inferFieldValue(
-    _ string: String
-  ) -> FieldValue {
-    if let intValue = Int64(string) {
-      return .int64(Int(intValue))
-    }
-    if let doubleValue = Double(string) {
-      return .double(doubleValue)
-    }
-    return .string(string)
-  }
-
-  /// Check if a field should be included based on field filter
-  private func shouldIncludeField(_ fieldName: String, fields: [String]?) -> Bool {
-    guard let fields = fields, !fields.isEmpty else {
-      return true  // Include all fields if no filter specified
-    }
-
-    return fields.contains { requestedField in
-      fieldName.lowercased() == requestedField.lowercased()
     }
   }
 }
