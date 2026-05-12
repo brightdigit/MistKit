@@ -60,7 +60,8 @@
         --environment <env>      development (default) | production
         --port <port>            Server port (default: 8080)
         --host <host>            Server host (default: 127.0.0.1)
-        --no-browser             Don't open browser automatically
+        --browser                Open browser on startup (overrides default)
+        --no-browser             Don't open browser on startup (default for web)
 
       The page authenticates against CloudKit via the browser, then
       exposes a CRUD UI that calls MistKit on the server. Ctrl+C to exit.
@@ -114,7 +115,7 @@
     }
 
     private func openBrowserIfNeeded() async {
-      guard !config.noBrowser else {
+      guard config.openBrowser else {
         return
       }
       try? await Task.sleep(nanoseconds: 1_000_000_000)

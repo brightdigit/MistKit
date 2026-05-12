@@ -48,8 +48,11 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
   public let port: Int
   /// The server host for authentication.
   public let host: String
-  /// Whether to skip opening the browser.
-  public let noBrowser: Bool
+  /// Whether to open the browser to the demo URL on startup.
+  /// Defaults to `true` for `auth-token` — the captured token is the
+  /// command's whole reason for existing, so a hands-off flow is the
+  /// expected UX.
+  public let openBrowser: Bool
 
   /// Creates a new instance.
   public init(
@@ -59,14 +62,14 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     environment: MistKit.Environment = .development,
     port: Int = 8_080,
     host: String = "127.0.0.1",
-    noBrowser: Bool = false
+    openBrowser: Bool = true
   ) {
     self.apiToken = apiToken
     self.containerIdentifier = containerIdentifier
     self.environment = environment
     self.port = port
     self.host = host
-    self.noBrowser = noBrowser
+    self.openBrowser = openBrowser
   }
 
   /// Parse configuration from command line arguments.
@@ -107,8 +110,10 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     let host =
       configReader.string(forKey: "host", default: "127.0.0.1")
       ?? "127.0.0.1"
-    let noBrowser =
-      configReader.bool(forKey: "no.browser", default: false)
+    let openBrowser = BrowserFlagResolver.resolve(
+      configReader: configReader,
+      default: true
+    )
 
     self.init(
       apiToken: apiToken,
@@ -116,7 +121,7 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
       environment: environment,
       port: port,
       host: host,
-      noBrowser: noBrowser
+      openBrowser: openBrowser
     )
   }
 }

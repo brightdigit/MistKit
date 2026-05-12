@@ -1,6 +1,6 @@
 //
-//  AuthTokenCommandTests+Configuration.swift
-//  MistDemoTests
+//  BrowserFlagResolver.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,39 +27,27 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Hummingbird)
-  import Foundation
-  import Testing
+import Foundation
 
-  @testable import MistDemoKit
-
-  extension AuthTokenCommandTests {
-    @Suite("Configuration")
-    internal struct Configuration {
-      @Test("AuthTokenConfig initializes with default values")
-      internal func authTokenConfigInitializesWithDefaults() {
-        let config = AuthTokenConfig(apiToken: "test-token")
-
-        #expect(config.apiToken == "test-token")
-        #expect(config.port == 8_080)
-        #expect(config.host == "127.0.0.1")
-        #expect(config.openBrowser == true)
-      }
-
-      @Test("AuthTokenConfig accepts custom values")
-      internal func authTokenConfigAcceptsCustomValues() {
-        let config = AuthTokenConfig(
-          apiToken: "custom-token",
-          port: 3_000,
-          host: "localhost",
-          openBrowser: false
-        )
-
-        #expect(config.apiToken == "custom-token")
-        #expect(config.port == 3_000)
-        #expect(config.host == "localhost")
-        #expect(config.openBrowser == false)
-      }
+/// Resolves the "should we open the browser on startup?" decision from
+/// the two mutually-exclusive CLI flags into a single boolean.
+///
+/// - `--no-browser` sets `no.browser=true` → resolves to `false` (wins).
+/// - `--browser` sets `browser=true` → resolves to `true`.
+/// - Neither set → falls back to the per-command default.
+internal enum BrowserFlagResolver {
+  internal static func resolve(
+    configReader: MistDemoConfiguration,
+    default defaultValue: Bool
+  ) -> Bool {
+    let noBrowser = configReader.bool(forKey: "no.browser", default: false)
+    if noBrowser {
+      return false
     }
+    let browser = configReader.bool(forKey: "browser", default: false)
+    if browser {
+      return true
+    }
+    return defaultValue
   }
-#endif
+}
