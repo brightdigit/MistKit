@@ -1,5 +1,5 @@
 //
-//  TestIntegrationCommand.swift
+//  TestPublicCommand.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -31,23 +31,23 @@ import Foundation
 import MistKit
 
 /// Command to run comprehensive integration tests for all CloudKit operations
-public struct TestIntegrationCommand: MistDemoCommand {
+public struct TestPublicCommand: MistDemoCommand {
   /// The configuration type.
-  public typealias Config = TestIntegrationConfig
+  public typealias Config = TestPublicConfig
   /// The command name.
-  public static let commandName = "test-integration"
+  public static let commandName = "test-public"
   /// The command abstract.
   public static let abstract =
     "Run integration tests for all CloudKit operations"
   /// The command help text.
   public static let helpText = """
-    TEST-INTEGRATION - Integration tests (public database)
+    TEST-PUBLIC - Integration tests (public database)
 
     Tests all non-user-scoped CloudKit API methods against
     the public database. Use 'test-private' for user APIs.
 
     USAGE:
-      mistdemo test-integration [options]
+      mistdemo test-public [options]
 
     OPTIONS:
       --database <type>        Database (default: public)
@@ -61,19 +61,19 @@ public struct TestIntegrationCommand: MistDemoCommand {
         otherwise the phase skips.
 
     EXAMPLES:
-      mistdemo test-integration --verbose
-      mistdemo test-integration --skip-cleanup --verbose
-      mistdemo test-integration --lookup-email me@example.com
+      mistdemo test-public --verbose
+      mistdemo test-public --skip-cleanup --verbose
+      mistdemo test-public --lookup-email me@example.com
 
     NOTES:
       - Requires CLOUDKIT_KEY_ID and CLOUDKIT_PRIVATE_KEY
       - Use 'test-private' for user-identity coverage
     """
 
-  private let config: TestIntegrationConfig
+  private let config: TestPublicConfig
 
   /// Creates a new instance.
-  public init(config: TestIntegrationConfig) {
+  public init(config: TestPublicConfig) {
     self.config = config
   }
 

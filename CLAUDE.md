@@ -100,7 +100,7 @@ swift run mistdemo lookup-zones
 swift run mistdemo fetch-changes
 swift run mistdemo demo-in-filter
 swift run mistdemo demo-errors
-swift run mistdemo test-integration
+swift run mistdemo test-public
 swift run mistdemo test-private
 
 # Run with specific configuration
@@ -327,7 +327,7 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 - `IntegrationTestError.swift` — typed errors for test failures
 - `IntegrationTest.swift`, `PhasedIntegrationTest.swift`, and `Tests/` subdirectory — protocol-based phase pipeline introduced in #283
 
-Run via `swift run mistdemo test-integration` or `swift run mistdemo test-private` (private database variant). Both commands require valid CloudKit credentials in the config file.
+Run via `swift run mistdemo test-public` or `swift run mistdemo test-private` (private database variant). Both commands require valid CloudKit credentials in the config file.
 
 ## Important Implementation Notes
 

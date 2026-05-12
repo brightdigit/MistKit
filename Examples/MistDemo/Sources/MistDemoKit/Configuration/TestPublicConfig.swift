@@ -1,5 +1,5 @@
 //
-//  TestIntegrationConfig.swift
+//  TestPublicConfig.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -29,8 +29,8 @@
 
 public import ConfigKeyKit
 
-/// Configuration for test-integration command.
-public struct TestIntegrationConfig: Sendable, ConfigurationParseable {
+/// Configuration for test-public command.
+public struct TestPublicConfig: Sendable, ConfigurationParseable {
   /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
   /// The base configuration type.

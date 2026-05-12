@@ -68,7 +68,7 @@ public struct TestPrivateCommand: MistDemoCommand {
     NOTES:
       - Requires CLOUDKIT_API_TOKEN and
         CLOUDKIT_WEB_AUTH_TOKEN
-      - Use 'test-integration' for public-database tests
+      - Use 'test-public' for public-database tests
     """
 
   private let config: TestPrivateConfig
