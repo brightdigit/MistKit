@@ -159,7 +159,7 @@ let package = Package(
         ),
       ],
       resources: [
-        .copy("Resources/web-demo-index.html"),
+        .copy("Resources/index.html"),
       ],
       swiftSettings: swiftSettings
     ),

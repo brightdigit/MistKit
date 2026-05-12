@@ -1,5 +1,5 @@
 //
-//  WebDemoCommand.swift
+//  WebCommand.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -39,7 +39,7 @@
   /// Unlike `AuthTokenCommand`, this command does not exit after the
   /// browser-side auth completes — the server keeps running so the user
   /// can exercise the CRUD endpoints until they Ctrl+C.
-  public struct WebDemoCommand: MistDemoCommand {
+  public struct WebCommand: MistDemoCommand {
     /// The configuration type.
     public typealias Config = WebDemoConfig
 
@@ -108,8 +108,7 @@
           group.addTask {
             await openBrowserIfNeeded()
           }
-          try await group.next()
-          group.cancelAll()
+          try await group.waitForAll()
         }
       }
     }

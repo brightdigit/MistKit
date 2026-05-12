@@ -1,5 +1,5 @@
 //
-//  WebDemoIndexHTML.swift
+//  LoopbackOnlyMiddleware.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,21 +28,24 @@
 //
 
 #if canImport(Hummingbird)
-  internal import Foundation
+  internal import Hummingbird
 
-  /// Loader for the web-demo's interactive page served by `WebDemoServer`.
-  ///
-  /// The HTML+JS lives in `Resources/index.html` and is read from
-  /// `Bundle.module` on first access. The mode toggle in this page lets
-  /// users compare MistKit (server-side) and CloudKit JS (browser-side)
-  /// against the same CloudKit container; the CloudKit JS side is wired
-  /// in by #329.
-  internal enum WebDemoIndexHTML {
-    internal static let content: String = try! String(
-      contentsOf: Bundle.module.url(
-        forResource: "index", withExtension: "html"
-      )!,
-      encoding: .utf8
-    )
+  /// Rejects requests whose `:authority` is not a loopback host with
+  /// `403 Forbidden`. Scoped to the `/api` router group so the local-only
+  /// surface (config, auth capture, CRUD) can't be reached from a
+  /// non-loopback origin while the index page itself stays unguarded.
+  internal struct LoopbackOnlyMiddleware<Context: RequestContext>:
+    RouterMiddleware
+  {
+    internal func handle(
+      _ request: Request,
+      context: Context,
+      next: (Request, Context) async throws -> Response
+    ) async throws -> Response {
+      guard LoopbackAuthority.isLoopback(request.head.authority ?? "") else {
+        return Response(status: .forbidden)
+      }
+      return try await next(request, context)
+    }
   }
 #endif

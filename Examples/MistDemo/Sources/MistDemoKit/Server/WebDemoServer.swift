@@ -69,6 +69,7 @@
       addIndexEndpoint(router: router)
 
       let api = router.group("api")
+        .add(middleware: LoopbackOnlyMiddleware<BasicRequestContext>())
       let configData = try JSONEncoder().encode(
         CloudKitClientConfig(
           apiToken: apiToken,
@@ -110,11 +111,8 @@
       api: RouterGroup<BasicRequestContext>,
       configData: Data
     ) {
-      api.get("config") { request, _ -> Response in
-        guard Self.isLoopback(request) else {
-          return Response(status: .forbidden)
-        }
-        return Self.jsonResponse(status: .ok, bytes: configData)
+      api.get("config") { _, _ -> Response in
+        Self.jsonResponse(status: .ok, bytes: configData)
       }
     }
 
@@ -125,9 +123,6 @@
       let successStatus: HTTPResponse.Status =
         terminatesAfterAuth ? .resetContent : .noContent
       api.post("authenticate") { request, context -> Response in
-        guard Self.isLoopback(request) else {
-          return Response(status: .forbidden)
-        }
         let authRequest = try await request.decode(
           as: AuthRequest.self, context: context
         )
@@ -144,9 +139,6 @@
       let tokenStore = self.tokenStore
       let backendFactory = self.backendFactory
       api.post("records/query") { request, context -> Response in
-        guard Self.isLoopback(request) else {
-          return Response(status: .forbidden)
-        }
         guard let token = await tokenStore.currentToken else {
           return Response(status: .unauthorized)
         }
@@ -171,9 +163,6 @@
       let tokenStore = self.tokenStore
       let backendFactory = self.backendFactory
       api.post("records/create") { request, context -> Response in
-        guard Self.isLoopback(request) else {
-          return Response(status: .forbidden)
-        }
         guard let token = await tokenStore.currentToken else {
           return Response(status: .unauthorized)
         }
@@ -199,9 +188,6 @@
       let tokenStore = self.tokenStore
       let backendFactory = self.backendFactory
       api.post("records/update") { request, context -> Response in
-        guard Self.isLoopback(request) else {
-          return Response(status: .forbidden)
-        }
         guard let token = await tokenStore.currentToken else {
           return Response(status: .unauthorized)
         }
@@ -228,9 +214,6 @@
       let tokenStore = self.tokenStore
       let backendFactory = self.backendFactory
       api.post("records/delete") { request, context -> Response in
-        guard Self.isLoopback(request) else {
-          return Response(status: .forbidden)
-        }
         guard let token = await tokenStore.currentToken else {
           return Response(status: .unauthorized)
         }
@@ -253,10 +236,6 @@
     }
 
     // MARK: - Helpers
-
-    private static func isLoopback(_ request: Request) -> Bool {
-      LoopbackAuthority.isLoopback(request.head.authority ?? "")
-    }
 
     private static func jsonResponse(
       status: HTTPResponse.Status, bytes: Data
