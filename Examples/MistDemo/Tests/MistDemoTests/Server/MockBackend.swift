@@ -33,49 +33,35 @@
 
   @testable import MistDemoKit
 
-  /// In-memory `WebDemoBackend` for routing-level tests. Records the last
+  /// In-memory `WebBackend` for routing-level tests. Records the last
   /// call to each operation and returns deterministic stub records.
-  internal final actor MockBackend: WebDemoBackend {
+  internal final actor MockBackend: WebBackend {
     internal struct QueryCall: Sendable {
-      let recordType: String
-      let limit: Int?
+      internal let recordType: String
+      internal let limit: Int?
     }
 
     internal struct CreateCall: Sendable {
-      let recordType: String
-      let fields: [String: String]
+      internal let recordType: String
+      internal let fields: [String: String]
     }
 
     internal struct UpdateCall: Sendable {
-      let recordType: String
-      let recordName: String
-      let fields: [String: String]
+      internal let recordType: String
+      internal let recordName: String
+      internal let fields: [String: String]
     }
 
     internal struct DeleteCall: Sendable {
-      let recordType: String
-      let recordName: String
+      internal let recordType: String
+      internal let recordName: String
     }
 
-    private(set) var lastQuery: QueryCall?
-    private(set) var lastCreate: CreateCall?
-    private(set) var lastUpdate: UpdateCall?
-    private(set) var lastDelete: DeleteCall?
+    internal private(set) var lastQuery: QueryCall?
+    internal private(set) var lastCreate: CreateCall?
+    internal private(set) var lastUpdate: UpdateCall?
+    internal private(set) var lastDelete: DeleteCall?
     private var pendingError: String?
-
-    internal func failNext(message: String) {
-      pendingError = message
-    }
-
-    private func consumePendingError() throws {
-      if let message = pendingError {
-        pendingError = nil
-        struct StubError: LocalizedError {
-          let errorDescription: String?
-        }
-        throw StubError(errorDescription: message)
-      }
-    }
 
     private static func stubRecord(
       recordType: String, recordName: String
@@ -99,7 +85,25 @@
       )
     }
 
-    internal func webDemoQuery(
+    /// Flatten FieldValue.string entries back to plain strings so tests
+    /// can `#expect(captured.fields["title"] == "Hi")` without unwrapping.
+    private static func flatten(
+      _ fields: [String: FieldValue]
+    ) -> [String: String] {
+      var result: [String: String] = [:]
+      for (name, value) in fields {
+        if case .string(let string) = value {
+          result[name] = string
+        }
+      }
+      return result
+    }
+
+    internal func failNext(message: String) {
+      pendingError = message
+    }
+
+    internal func webQuery(
       recordType: String, limit: Int?
     ) async throws -> [RecordInfo] {
       lastQuery = QueryCall(recordType: recordType, limit: limit)
@@ -109,7 +113,7 @@
       ]
     }
 
-    internal func webDemoCreate(
+    internal func webCreate(
       recordType: String, fields: [String: FieldValue]
     ) async throws -> RecordInfo {
       lastCreate = CreateCall(
@@ -122,7 +126,7 @@
       )
     }
 
-    internal func webDemoUpdate(
+    internal func webUpdate(
       recordType: String,
       recordName: String,
       fields: [String: FieldValue]
@@ -138,7 +142,7 @@
       )
     }
 
-    internal func webDemoDelete(
+    internal func webDelete(
       recordType: String, recordName: String
     ) async throws {
       lastDelete = DeleteCall(
@@ -147,18 +151,14 @@
       try consumePendingError()
     }
 
-    /// Flatten FieldValue.string entries back to plain strings so tests
-    /// can `#expect(captured.fields["title"] == "Hi")` without unwrapping.
-    private static func flatten(
-      _ fields: [String: FieldValue]
-    ) -> [String: String] {
-      var result: [String: String] = [:]
-      for (name, value) in fields {
-        if case .string(let string) = value {
-          result[name] = string
+    private func consumePendingError() throws {
+      if let message = pendingError {
+        pendingError = nil
+        struct StubError: LocalizedError {
+          let errorDescription: String?
         }
+        throw StubError(errorDescription: message)
       }
-      return result
     }
   }
 #endif

@@ -1,5 +1,5 @@
 //
-//  WebDemoBackend.swift
+//  WebBackend.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -37,32 +37,32 @@ internal import MistKit
 /// The production implementation is `CloudKitService` itself via
 /// extension; the web demo builds a new service per request using the
 /// captured `ckWebAuthToken`.
-internal protocol WebDemoBackend: Sendable {
-  func webDemoQuery(
+internal protocol WebBackend: Sendable {
+  func webQuery(
     recordType: String,
     limit: Int?
   ) async throws -> [RecordInfo]
 
-  func webDemoCreate(
+  func webCreate(
     recordType: String,
     fields: [String: FieldValue]
   ) async throws -> RecordInfo
 
-  func webDemoUpdate(
+  func webUpdate(
     recordType: String,
     recordName: String,
     fields: [String: FieldValue]
   ) async throws -> RecordInfo
 
-  func webDemoDelete(
+  func webDelete(
     recordType: String,
     recordName: String
   ) async throws
 }
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension CloudKitService: WebDemoBackend {
-  internal func webDemoQuery(
+extension CloudKitService: WebBackend {
+  internal func webQuery(
     recordType: String,
     limit: Int?
   ) async throws -> [RecordInfo] {
@@ -78,7 +78,7 @@ extension CloudKitService: WebDemoBackend {
     return result.records
   }
 
-  internal func webDemoCreate(
+  internal func webCreate(
     recordType: String,
     fields: [String: FieldValue]
   ) async throws -> RecordInfo {
@@ -89,7 +89,7 @@ extension CloudKitService: WebDemoBackend {
     )
   }
 
-  internal func webDemoUpdate(
+  internal func webUpdate(
     recordType: String,
     recordName: String,
     fields: [String: FieldValue]
@@ -102,7 +102,7 @@ extension CloudKitService: WebDemoBackend {
     )
   }
 
-  internal func webDemoDelete(
+  internal func webDelete(
     recordType: String,
     recordName: String
   ) async throws {
@@ -111,39 +111,5 @@ extension CloudKitService: WebDemoBackend {
       recordName: recordName,
       database: .private
     )
-  }
-}
-
-/// Factory that returns a `WebDemoBackend` configured with the captured
-/// web-auth token. Injected into `WebDemoServer` so tests can supply a
-/// mock without going through MistKit.
-internal struct WebDemoBackendFactory: Sendable {
-  internal let make: @Sendable (_ webAuthToken: String) throws -> any WebDemoBackend
-
-  internal init(
-    make: @escaping @Sendable (_ webAuthToken: String) throws -> any WebDemoBackend
-  ) {
-    self.make = make
-  }
-
-  /// Production factory: builds a `CloudKitService` for the private
-  /// database with the captured web-auth token paired with the
-  /// command's API token.
-  internal static func live(
-    apiToken: String,
-    containerIdentifier: String,
-    environment: MistKit.Environment
-  ) -> WebDemoBackendFactory {
-    WebDemoBackendFactory { webAuthToken in
-      let tokenManager = WebAuthTokenManager(
-        apiToken: apiToken,
-        webAuthToken: webAuthToken
-      )
-      return CloudKitService(
-        containerIdentifier: containerIdentifier,
-        tokenManager: tokenManager,
-        environment: environment
-      )
-    }
   }
 }

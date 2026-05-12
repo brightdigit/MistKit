@@ -96,28 +96,29 @@ curl -X POST http://127.0.0.1:8080/api/records/query \
 
 ```bash
 cd Examples/MistDemo
-swift test --filter WebDemoServerTests
+swift test --filter WebServerTests
 swift test --filter WebAuthTokenStoreTests
 ```
 
-`WebDemoServerTests` uses `MockBackend` to drive the routes without
+`WebServerTests` uses `MockBackend` to drive the routes without
 hitting CloudKit. `WebAuthTokenStoreTests` covers the token-capture
 stream that backs the auth response.
 
 ## Layout
 
-The web-demo code lives under `Sources/MistDemoKit/`:
+The web command's code lives under `Sources/MistDemoKit/`:
 
 ```
 Sources/MistDemoKit/
-├── Commands/WebDemoCommand.swift          # `mistdemo web` entry point
-├── Configuration/WebDemoConfig.swift      # Flags / env / config-file binding
-├── Resources/web-demo-index.html          # Served at GET /
+├── Commands/WebCommand.swift              # `mistdemo web` entry point
+├── Configuration/WebConfig.swift          # Flags / env / config-file binding
+├── Resources/index.html                   # Served at GET /
 └── Server/
-    ├── WebDemoServer.swift                # Hummingbird router + handlers
-    ├── WebDemoBackend.swift               # MistKit-backed backend
-    ├── WebDemoRequests.swift              # Request / response payloads
-    ├── WebDemoIndexHTML.swift             # Loads index HTML from Bundle.module
+    ├── WebServer.swift                    # Hummingbird router + handlers
+    ├── WebBackend.swift                   # MistKit-backed backend
+    ├── WebRequests.swift                  # Request payloads
+    ├── WebResponse.swift                  # Response payloads
+    ├── WebIndexHTML.swift                 # Loads index HTML from Bundle.module
     └── WebAuthTokenStore.swift            # Captures the token from /api/authenticate
 ```
 

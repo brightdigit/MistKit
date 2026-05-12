@@ -1,5 +1,5 @@
 //
-//  WebDemoServerTests.swift
+//  WebServerTests+CRUD.swift
 //  MistDemoTests
 //
 //  Created by Leo Dion.
@@ -37,14 +37,7 @@
 
   @testable import MistDemoKit
 
-  @Suite("WebDemoServer Tests")
-  internal struct WebDemoServerTests {
-    private struct ConfigPayload: Decodable {
-      let apiToken: String
-      let containerIdentifier: String
-      let environment: String
-    }
-
+  extension WebServerTests {
     private struct RecordsPayload: Decodable {
       let records: [RecordInfo]
     }
@@ -54,181 +47,10 @@
       let deleted: Bool
     }
 
-    private struct Fixture {
-      let server: WebDemoServer
-      let tokenStore: WebAuthTokenStore
-      let backend: MockBackend
-    }
-
-    private static func makeFixture(
-      authenticated: Bool = false,
-      terminatesAfterAuth: Bool = false
-    ) -> Fixture {
-      let backend = MockBackend()
-      let store = WebAuthTokenStore(
-        token: authenticated ? "captured-token" : nil
-      )
-      let factory = WebDemoBackendFactory { _ in backend }
-      let server = WebDemoServer(
-        apiToken: "test-api-token",
-        containerIdentifier: "iCloud.test.container",
-        environment: .development,
-        tokenStore: store,
-        backendFactory: factory,
-        terminatesAfterAuth: terminatesAfterAuth
-      )
-      return Fixture(server: server, tokenStore: store, backend: backend)
-    }
-
-    @Test("GET / returns the web demo HTML")
-    internal func indexReturnsHtml() async throws {
-      let fixture = Self.makeFixture()
-      let app = Application(router: try fixture.server.makeRouter())
-
-      try await app.test(.router) { client in
-        try await client.execute(uri: "/", method: .get) { response in
-          #expect(response.status == .ok)
-          let body = String(buffer: response.body)
-          #expect(body.contains("MistKit Web Demo"))
-        }
-      }
-    }
-
-    @Test("GET /api/config returns container + environment")
-    internal func configIncludesEnvironment() async throws {
-      let fixture = Self.makeFixture()
-      let app = Application(router: try fixture.server.makeRouter())
-
-      try await app.test(.router) { client in
-        try await client.execute(uri: "/api/config", method: .get) {
-          response in
-          #expect(response.status == .ok)
-          let payload = try JSONDecoder().decode(
-            ConfigPayload.self,
-            from: Data(response.body.readableBytesView)
-          )
-          #expect(payload.apiToken == "test-api-token")
-          #expect(payload.containerIdentifier == "iCloud.test.container")
-          #expect(payload.environment == "development")
-        }
-      }
-    }
-
-    @Test("POST /api/authenticate captures the token and returns 204")
-    internal func authenticateCapturesToken() async throws {
-      let fixture = Self.makeFixture()
-      let app = Application(router: try fixture.server.makeRouter())
-
-      let body = try JSONEncoder().encode([
-        "sessionToken": "session-xyz",
-        "userRecordName": "_abc",
-      ])
-
-      try await app.test(.router) { client in
-        try await client.execute(
-          uri: "/api/authenticate",
-          method: .post,
-          headers: [.contentType: "application/json"],
-          body: ByteBuffer(bytes: body)
-        ) { response in
-          #expect(response.status == .noContent)
-          #expect(response.body.readableBytes == 0)
-        }
-      }
-
-      let stored = await fixture.tokenStore.currentToken
-      #expect(stored == "session-xyz")
-    }
-
-    @Test("POST /api/authenticate returns 205 when terminatesAfterAuth")
-    internal func authenticateReturns205WhenTerminating() async throws {
-      let fixture = Self.makeFixture(terminatesAfterAuth: true)
-      let app = Application(router: try fixture.server.makeRouter())
-
-      let body = try JSONEncoder().encode([
-        "sessionToken": "session-xyz",
-        "userRecordName": "_abc",
-      ])
-
-      try await app.test(.router) { client in
-        try await client.execute(
-          uri: "/api/authenticate",
-          method: .post,
-          headers: [.contentType: "application/json"],
-          body: ByteBuffer(bytes: body)
-        ) { response in
-          #expect(response.status == .resetContent)
-          #expect(response.body.readableBytes == 0)
-        }
-      }
-
-      let stored = await fixture.tokenStore.currentToken
-      #expect(stored == "session-xyz")
-    }
-
-    @Test("tokenUpdates yields the captured token after authenticate")
-    internal func authenticateYieldsToTokenUpdates() async throws {
-      let fixture = Self.makeFixture()
-      let app = Application(router: try fixture.server.makeRouter())
-
-      let body = try JSONEncoder().encode([
-        "sessionToken": "session-xyz",
-        "userRecordName": "_abc",
-      ])
-
-      try await app.test(.router) { client in
-        async let firstToken: String? = {
-          var iterator = fixture.tokenStore.tokenUpdates.makeAsyncIterator()
-          return await iterator.next()
-        }()
-
-        try await client.execute(
-          uri: "/api/authenticate",
-          method: .post,
-          headers: [.contentType: "application/json"],
-          body: ByteBuffer(bytes: body)
-        ) { response in
-          #expect(response.status == .noContent)
-        }
-
-        #expect(await firstToken == "session-xyz")
-      }
-    }
-
-    @Test(
-      "CRUD routes return 401 when no auth token has been captured",
-      arguments: [
-        "/api/records/query",
-        "/api/records/create",
-        "/api/records/update",
-        "/api/records/delete",
-      ]
-    )
-    internal func crudRejectsPreAuth(path: String) async throws {
-      let fixture = Self.makeFixture(authenticated: false)
-      let app = Application(router: try fixture.server.makeRouter())
-
-      try await app.test(.router) { client in
-        try await client.execute(
-          uri: path,
-          method: .post,
-          headers: [.contentType: "application/json"],
-          body: ByteBuffer(string: "{}")
-        ) { response in
-          #expect(response.status == .unauthorized)
-        }
-      }
-    }
-
     @Test("POST /api/records/query forwards to the backend")
     internal func queryForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
-
-      let body = try JSONEncoder().encode([
-        "recordType": "Note", "limit": "10",
-      ] as [String: String])
-      // Re-encode with proper types so limit decodes as Int:
       let jsonBody = #"{"recordType":"Note","limit":10}"#
 
       try await app.test(.router) { client in
@@ -248,7 +70,6 @@
         }
       }
 
-      _ = body  // suppress unused warning
       let captured = await fixture.backend.lastQuery
       #expect(captured?.recordType == "Note")
       #expect(captured?.limit == 10)
@@ -258,7 +79,6 @@
     internal func createForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
-
       let jsonBody = #"{"recordType":"Note","fields":{"title":"Hi"}}"#
 
       try await app.test(.router) { client in
@@ -281,7 +101,6 @@
     internal func updateForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
-
       let jsonBody = """
         {"recordType":"Note","recordName":"abc","fields":{"title":"Up"}}
         """
@@ -307,7 +126,6 @@
     internal func deleteForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
-
       let jsonBody = #"{"recordType":"Note","recordName":"abc"}"#
 
       try await app.test(.router) { client in

@@ -41,7 +41,7 @@
   /// can exercise the CRUD endpoints until they Ctrl+C.
   public struct WebCommand: MistDemoCommand {
     /// The configuration type.
-    public typealias Config = WebDemoConfig
+    public typealias Config = WebConfig
 
     /// The command name.
     public static let commandName = "web"
@@ -66,10 +66,10 @@
       exposes a CRUD UI that calls MistKit on the server. Ctrl+C to exit.
       """
 
-    internal let config: WebDemoConfig
+    internal let config: WebConfig
 
     /// Creates a new instance.
-    public init(config: WebDemoConfig) {
+    public init(config: WebConfig) {
       self.config = config
     }
 
@@ -79,7 +79,7 @@
       print("Press Ctrl+C to stop.")
 
       let tokenStore = WebAuthTokenStore()
-      let server = WebDemoServer(
+      let server = WebServer(
         apiToken: config.apiToken,
         containerIdentifier: config.containerIdentifier,
         environment: config.environment,
@@ -114,7 +114,9 @@
     }
 
     private func openBrowserIfNeeded() async {
-      guard !config.noBrowser else { return }
+      guard !config.noBrowser else {
+        return
+      }
       try? await Task.sleep(nanoseconds: 1_000_000_000)
       BrowserOpener.openBrowser(
         url: "http://\(config.host):\(config.port)"

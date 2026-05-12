@@ -1,5 +1,5 @@
 //
-//  WebDemoConfig.swift
+//  WebConfig.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -36,7 +36,7 @@ public import MistKit
 /// Pairs the same auth-flow inputs as `AuthTokenConfig` with the CloudKit
 /// environment so the server can build a `CloudKitService` after the user
 /// completes the browser-side auth round trip.
-public struct WebDemoConfig: Sendable, ConfigurationParseable {
+public struct WebConfig: Sendable, ConfigurationParseable {
   /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
   /// The base configuration type.

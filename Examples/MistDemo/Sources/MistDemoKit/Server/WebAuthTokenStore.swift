@@ -38,17 +38,17 @@
 internal actor WebAuthTokenStore {
   private var token: String?
   private let updatesContinuation: AsyncStream<String>.Continuation
-  internal nonisolated let tokenUpdates: AsyncStream<String>
+  nonisolated internal let tokenUpdates: AsyncStream<String>
+
+  internal var currentToken: String? {
+    self.token
+  }
 
   internal init(token: String? = nil) {
     self.token = token
     let (stream, continuation) = AsyncStream<String>.makeStream()
     self.tokenUpdates = stream
     self.updatesContinuation = continuation
-  }
-
-  deinit {
-    updatesContinuation.finish()
   }
 
   internal func update(_ token: String) {
@@ -60,7 +60,7 @@ internal actor WebAuthTokenStore {
     self.token = nil
   }
 
-  internal var currentToken: String? {
-    self.token
+  deinit {
+    updatesContinuation.finish()
   }
 }

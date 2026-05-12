@@ -64,41 +64,18 @@
       self.config = config
     }
 
-    /// Executes the command.
-    public func execute() async throws {
-      print("📍 Server URL: http://\(config.host):\(config.port)")
-
-      let tokenStore = WebAuthTokenStore()
-      let server = WebDemoServer(
-        apiToken: config.apiToken,
-        containerIdentifier: config.containerIdentifier,
-        environment: config.environment,
-        tokenStore: tokenStore,
-        backendFactory: .live(
-          apiToken: config.apiToken,
-          containerIdentifier: config.containerIdentifier,
-          environment: config.environment
-        ),
-        terminatesAfterAuth: true
-      )
-      let router = try server.makeRouter()
-      let app = Application(
-        router: router,
-        configuration: .init(
-          address: .hostname(config.host, port: config.port)
-        )
-      )
-
-      let host = config.host
-      let port = config.port
-      let noBrowser = config.noBrowser
-
-      let token: String
+    private static func captureToken(
+      runService: @escaping @Sendable () async throws -> Void,
+      tokenStore: WebAuthTokenStore,
+      host: String,
+      port: Int,
+      noBrowser: Bool
+    ) async throws -> String {
       do {
-        token = try await withTimeoutAndSignals(seconds: 300) {
+        return try await withTimeoutAndSignals(seconds: 300) {
           try await withThrowingTaskGroup(of: String?.self) { group in
             group.addTask {
-              try await app.runService()
+              try await runService()
               return nil
             }
             group.addTask {
@@ -127,6 +104,39 @@
       } catch let error as AsyncTimeoutError {
         throw AuthTokenError.timeout(error.localizedDescription)
       }
+    }
+
+    /// Executes the command.
+    public func execute() async throws {
+      print("📍 Server URL: http://\(config.host):\(config.port)")
+
+      let tokenStore = WebAuthTokenStore()
+      let server = WebServer(
+        apiToken: config.apiToken,
+        containerIdentifier: config.containerIdentifier,
+        environment: config.environment,
+        tokenStore: tokenStore,
+        backendFactory: .live(
+          apiToken: config.apiToken,
+          containerIdentifier: config.containerIdentifier,
+          environment: config.environment
+        ),
+        terminatesAfterAuth: true
+      )
+      let app = Application(
+        router: try server.makeRouter(),
+        configuration: .init(
+          address: .hostname(config.host, port: config.port)
+        )
+      )
+
+      let token = try await Self.captureToken(
+        runService: { try await app.runService() },
+        tokenStore: tokenStore,
+        host: config.host,
+        port: config.port,
+        noBrowser: config.noBrowser
+      )
 
       // Let the 205 response reach the browser before the process exits.
       try? await Task.sleep(nanoseconds: 500_000_000)

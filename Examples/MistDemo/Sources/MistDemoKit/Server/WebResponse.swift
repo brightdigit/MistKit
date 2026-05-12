@@ -1,5 +1,5 @@
 //
-//  WebDemoRequests.swift
+//  WebResponse.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,63 +30,22 @@
 internal import Foundation
 internal import MistKit
 
-/// Request/response payloads for the web-demo's CRUD endpoints.
-///
-/// Field values are limited to string in the request body so the HTML form
-/// schema stays trivial. Wider FieldValue coverage (numbers, dates, refs)
-/// can land later once the demo UI exposes typed input controls.
-internal enum WebDemoRequests {
-  /// `POST /api/records/query`
-  internal struct QueryRequest: Decodable {
-    internal let recordType: String
-    internal let limit: Int?
-  }
-
-  /// `POST /api/records/create`
-  internal struct CreateRequest: Decodable {
-    internal let recordType: String
-    internal let fields: [String: String]
-  }
-
-  /// `POST /api/records/update`
-  internal struct UpdateRequest: Decodable {
-    internal let recordType: String
-    internal let recordName: String
-    internal let fields: [String: String]
-  }
-
-  /// `POST /api/records/delete`
-  internal struct DeleteRequest: Decodable {
-    internal let recordType: String
-    internal let recordName: String
-  }
-
+/// Response payloads for the web command's CRUD endpoints.
+internal enum WebResponse {
   /// Body returned by record-shaped routes (query / create / update).
-  internal struct RecordsResponse: Encodable {
+  internal struct Records: Encodable {
     internal let records: [RecordInfo]
   }
 
   /// Body returned by `delete` (no record payload).
-  internal struct DeleteResponse: Encodable {
+  internal struct Delete: Encodable {
     internal let recordName: String
     internal let deleted: Bool
   }
 
   /// Body returned for any handled CloudKit/MistKit error so the UI can
   /// surface the message without parsing transport-level failures.
-  internal struct ErrorResponse: Encodable {
+  internal struct Error: Encodable {
     internal let message: String
-  }
-
-  /// Convert a JSON `[String: String]` request payload into the
-  /// `FieldValue` map MistKit expects.
-  internal static func stringFields(
-    _ raw: [String: String]
-  ) -> [String: FieldValue] {
-    var result: [String: FieldValue] = [:]
-    for (name, value) in raw {
-      result[name] = .string(value)
-    }
-    return result
   }
 }
