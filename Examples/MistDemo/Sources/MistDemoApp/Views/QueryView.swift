@@ -76,9 +76,9 @@
                       .font(.caption)
                       .foregroundStyle(.secondary)
                   }
-                  if let createdAt = note.createdAt {
+                  if let creationDate = note.creationDate {
                     Label(
-                      createdAt.formatted(date: .abbreviated, time: .omitted),
+                      creationDate.formatted(date: .abbreviated, time: .omitted),
                       systemImage: "calendar"
                     )
                     .font(.caption)

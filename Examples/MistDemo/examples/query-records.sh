@@ -63,18 +63,18 @@ swift run mistdemo query $COMMON_ARGS --record-type Note \
     --output-format table
 
 echo ""
-echo -e "${GREEN}Example 4: Query with sorting (newest first)${NC}"
-echo "Command: swift run mistdemo query $COMMON_ARGS --sort \"createdAt:desc\""
+echo -e "${GREEN}Example 4: Query with sorting (by index, descending)${NC}"
+echo "Command: swift run mistdemo query $COMMON_ARGS --sort \"index:desc\""
 swift run mistdemo query $COMMON_ARGS --record-type Note \
-    --sort "createdAt:desc" \
+    --sort "index:desc" \
     --limit 5 \
     --output-format table
 
 echo ""
 echo -e "${GREEN}Example 5: Query with field selection${NC}"
-echo "Command: swift run mistdemo query $COMMON_ARGS --fields \"title,createdAt,priority\""
+echo "Command: swift run mistdemo query $COMMON_ARGS --fields \"title,index\""
 swift run mistdemo query $COMMON_ARGS --record-type Note \
-    --fields "title,createdAt,priority" \
+    --fields "title,index" \
     --limit 5 \
     --output-format table
 

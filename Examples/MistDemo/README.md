@@ -176,7 +176,7 @@ A SwiftUI demo app that talks to the same CloudKit container, but uses
 - **iCloud Account view** — `CKContainer.accountStatus()`
 - **Zones list** — `CKDatabase.allRecordZones()` (parity with `mistdemo lookup-zones`)
 - **Notes query** — `CKDatabase.records(matching:)` for `Note` records, sorted by `index`
-- **Note detail** — typed view of `title`, `index`, `image`, `createdAt`, `modified`
+- **Note detail** — typed view of `title`, `index`, `image`; created/modified come from CloudKit system metadata
 - **Create / update / delete** — `CKDatabase.save(_:)` and `deleteRecord(withID:)`
 
 The `Note` model in `Sources/MistDemoApp/Models/CloudKitModels.swift`

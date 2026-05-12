@@ -125,13 +125,6 @@
         LabeledContent("title", value: note.title ?? "—")
         LabeledContent("index", value: note.index.map(String.init) ?? "—")
         LabeledContent(
-          "createdAt",
-          value: note.createdAt?.formatted(
-            date: .abbreviated, time: .standard
-          ) ?? "—"
-        )
-        LabeledContent("modified", value: note.modified.map(String.init) ?? "—")
-        LabeledContent(
           "image",
           value: note.imageAssetURL?.lastPathComponent ?? "—"
         )

@@ -40,7 +40,8 @@ internal import MistKit
 internal protocol WebBackend: Sendable {
   func webQuery(
     recordType: String,
-    limit: Int?
+    limit: Int?,
+    sortBy: [WebRequests.QuerySortField]?
   ) async throws -> [RecordInfo]
 
   func webCreate(
@@ -51,12 +52,14 @@ internal protocol WebBackend: Sendable {
   func webUpdate(
     recordType: String,
     recordName: String,
-    fields: [String: FieldValue]
+    fields: [String: FieldValue],
+    recordChangeTag: String?
   ) async throws -> RecordInfo
 
   func webDelete(
     recordType: String,
-    recordName: String
+    recordName: String,
+    recordChangeTag: String?
   ) async throws
 }
 
@@ -64,12 +67,16 @@ internal protocol WebBackend: Sendable {
 extension CloudKitService: WebBackend {
   internal func webQuery(
     recordType: String,
-    limit: Int?
+    limit: Int?,
+    sortBy: [WebRequests.QuerySortField]?
   ) async throws -> [RecordInfo] {
+    let querySorts = sortBy?.map { sort in
+      QuerySort.sort(sort.field, ascending: sort.ascending)
+    }
     let result = try await queryRecords(
       recordType: recordType,
       filters: nil,
-      sortBy: nil,
+      sortBy: querySorts,
       limit: limit,
       desiredKeys: nil,
       continuationMarker: nil,
@@ -92,23 +99,27 @@ extension CloudKitService: WebBackend {
   internal func webUpdate(
     recordType: String,
     recordName: String,
-    fields: [String: FieldValue]
+    fields: [String: FieldValue],
+    recordChangeTag: String?
   ) async throws -> RecordInfo {
     try await updateRecord(
       recordType: recordType,
       recordName: recordName,
       fields: fields,
+      recordChangeTag: recordChangeTag,
       database: .private
     )
   }
 
   internal func webDelete(
     recordType: String,
-    recordName: String
+    recordName: String,
+    recordChangeTag: String?
   ) async throws {
     try await deleteRecord(
       recordType: recordType,
       recordName: recordName,
+      recordChangeTag: recordChangeTag,
       database: .private
     )
   }

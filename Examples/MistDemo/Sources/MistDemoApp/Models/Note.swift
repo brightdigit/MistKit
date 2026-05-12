@@ -34,20 +34,20 @@
   /// Note record, mirroring the `Note` type defined in `schema.ckdb`:
   ///
   ///     RECORD TYPE Note (
-  ///         "title"     STRING    QUERYABLE SORTABLE SEARCHABLE,
-  ///         "index"     INT64     QUERYABLE SORTABLE,
-  ///         "image"     ASSET,
-  ///         "createdAt" TIMESTAMP QUERYABLE SORTABLE,
-  ///         "modified"  INT64     QUERYABLE
+  ///         "title" STRING    QUERYABLE SORTABLE SEARCHABLE,
+  ///         "index" INT64     QUERYABLE SORTABLE,
+  ///         "image" ASSET
   ///     );
+  ///
+  /// Created / modified timestamps come from CloudKit's system metadata
+  /// (`CKRecord.creationDate` / `.modificationDate`), so there's no need
+  /// for custom `createdAt` / `modified` schema fields.
   internal struct Note: Identifiable, Hashable {
     /// Known field name constants for `Note` records.
     internal enum Fields {
       internal static let title = "title"
       internal static let index = "index"
       internal static let image = "image"
-      internal static let createdAt = "createdAt"
-      internal static let modified = "modified"
     }
 
     /// CloudKit record type identifier.
@@ -57,8 +57,6 @@
     internal let title: String?
     internal let index: Int64?
     internal let imageAssetURL: URL?
-    internal let createdAt: Date?
-    internal let modified: Int64?
 
     /// CloudKit-managed metadata
     internal let modificationDate: Date?
@@ -73,8 +71,6 @@
       self.title = record[Fields.title] as? String
       self.index = (record[Fields.index] as? NSNumber)?.int64Value
       self.imageAssetURL = (record[Fields.image] as? CKAsset)?.fileURL
-      self.createdAt = record[Fields.createdAt] as? Date
-      self.modified = (record[Fields.modified] as? NSNumber)?.int64Value
       self.modificationDate = record.modificationDate
       self.creationDate = record.creationDate
       self.recordChangeTag = record.recordChangeTag

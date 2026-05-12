@@ -39,6 +39,7 @@
     internal struct QueryCall: Sendable {
       internal let recordType: String
       internal let limit: Int?
+      internal let sortBy: [WebRequests.QuerySortField]?
     }
 
     internal struct CreateCall: Sendable {
@@ -50,11 +51,13 @@
       internal let recordType: String
       internal let recordName: String
       internal let fields: [String: String]
+      internal let recordChangeTag: String?
     }
 
     internal struct DeleteCall: Sendable {
       internal let recordType: String
       internal let recordName: String
+      internal let recordChangeTag: String?
     }
 
     internal private(set) var lastQuery: QueryCall?
@@ -85,15 +88,24 @@
       )
     }
 
-    /// Flatten FieldValue.string entries back to plain strings so tests
-    /// can `#expect(captured.fields["title"] == "Hi")` without unwrapping.
+    /// Flatten FieldValue entries into a printable form so tests can write
+    /// `#expect(captured.fields["title"] == "Hi")` for strings or
+    /// `#expect(captured.fields["index"] == "5")` for numbers without
+    /// pattern-matching on FieldValue in every assertion.
     private static func flatten(
       _ fields: [String: FieldValue]
     ) -> [String: String] {
       var result: [String: String] = [:]
       for (name, value) in fields {
-        if case .string(let string) = value {
+        switch value {
+        case .string(let string):
           result[name] = string
+        case .int64(let int):
+          result[name] = String(int)
+        case .double(let double):
+          result[name] = String(double)
+        default:
+          continue
         }
       }
       return result
@@ -104,9 +116,13 @@
     }
 
     internal func webQuery(
-      recordType: String, limit: Int?
+      recordType: String,
+      limit: Int?,
+      sortBy: [WebRequests.QuerySortField]?
     ) async throws -> [RecordInfo] {
-      lastQuery = QueryCall(recordType: recordType, limit: limit)
+      lastQuery = QueryCall(
+        recordType: recordType, limit: limit, sortBy: sortBy
+      )
       try consumePendingError()
       return [
         Self.stubRecord(recordType: recordType, recordName: "stub-1")
@@ -129,12 +145,14 @@
     internal func webUpdate(
       recordType: String,
       recordName: String,
-      fields: [String: FieldValue]
+      fields: [String: FieldValue],
+      recordChangeTag: String?
     ) async throws -> RecordInfo {
       lastUpdate = UpdateCall(
         recordType: recordType,
         recordName: recordName,
-        fields: Self.flatten(fields)
+        fields: Self.flatten(fields),
+        recordChangeTag: recordChangeTag
       )
       try consumePendingError()
       return Self.stubRecord(
@@ -143,10 +161,14 @@
     }
 
     internal func webDelete(
-      recordType: String, recordName: String
+      recordType: String,
+      recordName: String,
+      recordChangeTag: String?
     ) async throws {
       lastDelete = DeleteCall(
-        recordType: recordType, recordName: recordName
+        recordType: recordType,
+        recordName: recordName,
+        recordChangeTag: recordChangeTag
       )
       try consumePendingError()
     }

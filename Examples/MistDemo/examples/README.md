@@ -94,10 +94,10 @@ swift run mistdemo query --record-type Note --limit 10
 swift run mistdemo query --filter "title:contains:important" --filter "priority:gt:5"
 
 # With sorting
-swift run mistdemo query --sort "createdAt:desc" --limit 5
+swift run mistdemo query --sort "index:desc" --limit 5
 
 # Field selection
-swift run mistdemo query --fields "title,createdAt,priority"
+swift run mistdemo query --fields "title,index"
 ```
 
 ### 📤 upload-asset.sh

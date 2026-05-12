@@ -32,44 +32,54 @@ internal import MistKit
 
 /// Request payloads for the web command's CRUD endpoints.
 ///
-/// Field values are limited to string in the request body so the HTML form
-/// schema stays trivial. Wider FieldValue coverage (numbers, dates, refs)
-/// can land later once the demo UI exposes typed input controls.
+/// `fields` decodes directly into MistKit's `FieldValue`, which has a custom
+/// Codable that accepts raw JSON primitives (string → `.string`, integer →
+/// `.int64`, floating-point → `.double`) along with the complex CloudKit
+/// shapes (location, reference, asset, list). So the browser can send the
+/// natural `{"title":"Hi","index":5}` shape without a custom request type.
 internal enum WebRequests {
+  /// One sort descriptor: a field name plus a direction. Field names follow
+  /// CloudKit Web Services / CloudKit JS naming — including the implicit
+  /// system fields `___createTime` and `___modTime`, which must be marked
+  /// SORTABLE in the schema.
+  internal struct QuerySortField: Decodable, Sendable {
+    internal let field: String
+    internal let ascending: Bool
+  }
+
   /// `POST /api/records/query`
   internal struct Query: Decodable {
     internal let recordType: String
     internal let limit: Int?
+    internal let sortBy: [QuerySortField]?
   }
 
   /// `POST /api/records/create`
   internal struct Create: Decodable {
     internal let recordType: String
-    internal let fields: [String: String]
+    internal let fields: [String: FieldValue]
   }
 
   /// `POST /api/records/update`
+  ///
+  /// `recordChangeTag` carries the optimistic-locking token CloudKit returns
+  /// on every record. The browser already holds it from the last query, so
+  /// it forwards directly to MistKit without a server-side fetch round-trip.
   internal struct Update: Decodable {
     internal let recordType: String
     internal let recordName: String
-    internal let fields: [String: String]
+    internal let fields: [String: FieldValue]
+    internal let recordChangeTag: String?
   }
 
   /// `POST /api/records/delete`
+  ///
+  /// `recordChangeTag` is required by CloudKit Web Services to delete an
+  /// existing record. Omitting it produces `BadRequestException: missing
+  /// required field 'recordChangeTag'`.
   internal struct Delete: Decodable {
     internal let recordType: String
     internal let recordName: String
-  }
-
-  /// Convert a JSON `[String: String]` request payload into the
-  /// `FieldValue` map MistKit expects.
-  internal static func stringFields(
-    _ raw: [String: String]
-  ) -> [String: FieldValue] {
-    var result: [String: FieldValue] = [:]
-    for (name, value) in raw {
-      result[name] = .string(value)
-    }
-    return result
+    internal let recordChangeTag: String?
   }
 }

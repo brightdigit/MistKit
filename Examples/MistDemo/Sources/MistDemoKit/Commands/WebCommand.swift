@@ -101,16 +101,23 @@
         )
       )
 
-      try await withSignalHandling {
-        try await withThrowingTaskGroup(of: Void.self) { group in
-          group.addTask {
-            try await app.runService()
+      do {
+        try await withSignalHandling {
+          try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+              try await app.runService()
+            }
+            group.addTask {
+              await openBrowserIfNeeded()
+            }
+            try await group.waitForAll()
           }
-          group.addTask {
-            await openBrowserIfNeeded()
-          }
-          try await group.waitForAll()
         }
+      } catch AsyncTimeoutError.cancelled {
+        // Ctrl+C / SIGTERM is the intended exit path for the long-running
+        // web server — `withSignalHandling` throws cancelled to unwind the
+        // task group. Treat it as a clean shutdown.
+        print("Server stopped.")
       }
     }
 

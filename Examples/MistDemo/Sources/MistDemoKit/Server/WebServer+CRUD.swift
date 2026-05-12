@@ -48,9 +48,11 @@
         return try await Self.runOperation { () -> Data in
           let backend = try backendFactory.make(token)
           let records = try await backend.webQuery(
-            recordType: body.recordType, limit: body.limit
+            recordType: body.recordType,
+            limit: body.limit,
+            sortBy: body.sortBy
           )
-          return try JSONEncoder().encode(
+          return try WebJSON.encoder().encode(
             WebResponse.Records(records: records)
           )
         }
@@ -73,9 +75,9 @@
           let backend = try backendFactory.make(token)
           let record = try await backend.webCreate(
             recordType: body.recordType,
-            fields: WebRequests.stringFields(body.fields)
+            fields: body.fields
           )
-          return try JSONEncoder().encode(
+          return try WebJSON.encoder().encode(
             WebResponse.Records(records: [record])
           )
         }
@@ -99,9 +101,10 @@
           let record = try await backend.webUpdate(
             recordType: body.recordType,
             recordName: body.recordName,
-            fields: WebRequests.stringFields(body.fields)
+            fields: body.fields,
+            recordChangeTag: body.recordChangeTag
           )
-          return try JSONEncoder().encode(
+          return try WebJSON.encoder().encode(
             WebResponse.Records(records: [record])
           )
         }
@@ -124,9 +127,10 @@
           let backend = try backendFactory.make(token)
           try await backend.webDelete(
             recordType: body.recordType,
-            recordName: body.recordName
+            recordName: body.recordName,
+            recordChangeTag: body.recordChangeTag
           )
-          return try JSONEncoder().encode(
+          return try WebJSON.encoder().encode(
             WebResponse.Delete(
               recordName: body.recordName, deleted: true
             )
