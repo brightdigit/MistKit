@@ -1,6 +1,6 @@
 //
-//  WebJSON.swift
-//  MistDemo
+//  WebJSONTests.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,18 +27,30 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+#if canImport(Hummingbird)
+  import Foundation
+  import Testing
 
-/// Shared JSON encoder for the web demo's CRUD response bodies.
-///
-/// Uses `.millisecondsSince1970` so timestamps in `RecordInfo.created` /
-/// `RecordInfo.modified` arrive in the browser as epoch-millis numbers
-/// that JS can pass to `new Date(ms)` — the same shape CloudKit Web
-/// Services returns to CloudKit JS.
-internal enum WebJSON {
-  internal static func encoder() -> JSONEncoder {
-    let encoder = JSONEncoder()
-    encoder.dateEncodingStrategy = .millisecondsSince1970
-    return encoder
+  @testable import MistDemoKit
+
+  @Suite("WebJSON")
+  internal struct WebJSONTests {
+    private struct DateWrapper: Codable {
+      let date: Date
+    }
+
+    @Test("encoder writes Date as epoch-millis numbers")
+    internal func encoderEmitsEpochMillis() throws {
+      // 1500ms since 1970-01-01T00:00:00Z — chosen so the expected JSON
+      // value is a plain integer the browser's `new Date(1500)` can consume.
+      let date = Date(timeIntervalSince1970: 1.5)
+
+      let data = try WebJSON.encoder().encode(DateWrapper(date: date))
+
+      let json = try #require(
+        try JSONSerialization.jsonObject(with: data) as? [String: Any]
+      )
+      #expect(json["date"] as? Double == 1_500)
+    }
   }
-}
+#endif

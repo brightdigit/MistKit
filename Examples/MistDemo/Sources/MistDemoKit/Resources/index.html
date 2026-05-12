@@ -456,6 +456,9 @@
                 delBtn.className = 'danger';
                 delBtn.type = 'button';
                 delBtn.textContent = 'Delete';
+                // No confirm() — the demo prioritizes hands-on iteration; the
+                // raw response panel below the form shows the wire payload of
+                // every operation so accidents stay visible.
                 delBtn.addEventListener('click', () => deleteNote(note));
                 actionsTd.appendChild(delBtn);
                 tr.appendChild(actionsTd);
@@ -678,13 +681,17 @@
             }
         }
 
-        async function deleteNote(note) {
-            clearStatus(formStatusEl);
+        // statusEl defaults to tableStatusEl: per-row Delete buttons live in
+        // the table, so feedback belongs above the table. The form panel's
+        // Delete button passes formStatusEl explicitly to keep its status
+        // alongside the form it acts on.
+        async function deleteNote(note, statusEl = tableStatusEl) {
+            clearStatus(statusEl);
             try {
                 let payload;
                 if (currentMode === 'mistkit') {
                     payload = await postJSON('/api/records/delete', {
-                        recordType: note.recordType || recordTypeInput.value.trim(),
+                        recordType: note.recordType,
                         recordName: note.recordName,
                         recordChangeTag: note.recordChangeTag,
                     });
@@ -695,11 +702,11 @@
                     }
                 }
                 showRaw(payload);
-                setStatus(formStatusEl, `Deleted ${note.recordName}.`, 'success');
+                setStatus(statusEl, `Deleted ${note.recordName}.`, 'success');
                 if (note.recordName === selectedRecordName) clearForm();
                 await queryNotes();
             } catch (error) {
-                setStatus(formStatusEl, `Delete failed: ${error.message}`, 'error');
+                setStatus(statusEl, `Delete failed: ${error.message}`, 'error');
                 showRaw(error.payload || { message: error.message });
             }
         }
@@ -726,7 +733,7 @@
         clearBtn.addEventListener('click', clearForm);
         deleteBtn.addEventListener('click', () => {
             const note = selectedNote();
-            if (note) deleteNote(note);
+            if (note) deleteNote(note, formStatusEl);
         });
         refreshBtn.addEventListener('click', queryNotes);
 

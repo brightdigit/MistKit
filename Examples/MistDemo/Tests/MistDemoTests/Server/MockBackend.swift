@@ -92,6 +92,11 @@
     /// `#expect(captured.fields["title"] == "Hi")` for strings or
     /// `#expect(captured.fields["index"] == "5")` for numbers without
     /// pattern-matching on FieldValue in every assertion.
+    ///
+    /// Non-primitive cases (asset, date, reference, location, list, bytes)
+    /// are intentionally dropped — they yield no useful String form for an
+    /// equality assertion. Tests that need to assert those types should
+    /// inspect the FieldValue directly rather than going through `flatten`.
     private static func flatten(
       _ fields: [String: FieldValue]
     ) -> [String: String] {

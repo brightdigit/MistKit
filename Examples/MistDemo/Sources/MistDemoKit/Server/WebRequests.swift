@@ -43,6 +43,10 @@ internal enum WebRequests {
   /// system fields `___createTime` and `___modTime`, which must be marked
   /// SORTABLE in the schema.
   internal struct QuerySortField: Decodable, Sendable {
+    /// CloudKit Web Services field name. Note: CloudKit JS's
+    /// `performQuery({ sortBy })` uses `fieldName` for the same concept —
+    /// the browser-side code maps this property to `fieldName` when issuing
+    /// CloudKit-JS-mode queries (see `queryNotes` in `index.html`).
     internal let field: String
     internal let ascending: Bool
   }
