@@ -32,15 +32,28 @@
 /// The web-demo's `/api/authenticate` route writes here when the browser
 /// completes the CloudKit auth flow; the CRUD routes read here on each
 /// request to authorize themselves against the captured session.
+///
+/// `tokenUpdates` yields each captured token so one-shot consumers (e.g.
+/// the auth-token command) can await the first emission and shut down.
 internal actor WebAuthTokenStore {
   private var token: String?
+  private let updatesContinuation: AsyncStream<String>.Continuation
+  internal nonisolated let tokenUpdates: AsyncStream<String>
 
   internal init(token: String? = nil) {
     self.token = token
+    var continuation: AsyncStream<String>.Continuation!
+    self.tokenUpdates = AsyncStream { continuation = $0 }
+    self.updatesContinuation = continuation
+  }
+
+  deinit {
+    updatesContinuation.finish()
   }
 
   internal func update(_ token: String) {
     self.token = token
+    updatesContinuation.yield(token)
   }
 
   internal func clear() {
