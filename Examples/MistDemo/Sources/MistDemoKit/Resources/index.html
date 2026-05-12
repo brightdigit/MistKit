@@ -227,6 +227,18 @@
                 and exercise the same REST surface — only the SDK shape differs.
             </div>
 
+            <h2 style="margin-top: 24px;">Database</h2>
+            <div class="mode-toggle">
+                <button id="db-private" class="active" type="button">Private</button>
+                <button id="db-public" type="button">Public</button>
+            </div>
+            <div class="mode-hint" id="db-hint">
+                Private uses the captured Apple ID web-auth token; Public uses
+                server-to-server signing on the MistKit side and the API token on
+                the CloudKit JS side. Browsers can't perform S2S signing, so
+                "MistKit + Public" is unique to the server path.
+            </div>
+
             <h2 style="margin-top: 24px;">Auth</h2>
             <div id="signin-area">
                 <div id="signin-button"></div>
@@ -236,7 +248,7 @@
         </div>
 
         <div class="card pre-auth" id="notes-card">
-            <h2>Notes <span class="badge" id="mode-badge">MistKit</span></h2>
+            <h2>Notes <span class="badge" id="mode-badge">MistKit</span> <span class="badge" id="db-badge">Private</span></h2>
             <div class="notes-grid">
                 <section>
                     <div class="table-toolbar">
@@ -304,6 +316,13 @@
         let webAuthToken = null;
         let authenticationInProgress = false;
         let currentMode = 'mistkit';            // 'mistkit' | 'cloudkitjs'
+        let currentDatabase = 'private';        // 'private' | 'public'
+        // True only when the server reports server-to-server credentials are
+        // configured. CloudKit JS can hit `.public` regardless (it only needs
+        // an API token), so the picker stays usable in cloudkitjs mode even
+        // when this is false — the constraint is "MistKit + public requires
+        // S2S on the server."
+        let publicDatabaseAvailable = false;
         let notes = [];                          // [{ recordName, title, index, created, modified, recordChangeTag, raw }]
         let selectedRecordName = null;
         let authComplete = false;
@@ -316,6 +335,10 @@
         const signoutButton = document.getElementById('signout-button');
         const notesCard = document.getElementById('notes-card');
         const modeBadge = document.getElementById('mode-badge');
+        const dbBadge = document.getElementById('db-badge');
+        const dbPrivateBtn = document.getElementById('db-private');
+        const dbPublicBtn = document.getElementById('db-public');
+        const dbHint = document.getElementById('db-hint');
         const tbody = document.getElementById('notes-tbody');
         const tableStatusEl = document.getElementById('table-status');
         const formStatusEl = document.getElementById('form-status');
@@ -556,7 +579,9 @@
         }
 
         function ckJsDatabase() {
-            return container.privateCloudDatabase;
+            return currentDatabase === 'public'
+                ? container.publicCloudDatabase
+                : container.privateCloudDatabase;
         }
 
         function buildFields() {
@@ -593,6 +618,7 @@
                 if (currentMode === 'mistkit') {
                     payload = await postJSON('/api/records/query', {
                         recordType,
+                        database: currentDatabase,
                         limit: isFinite(limit) ? limit : undefined,
                         sortBy: currentSort
                             ? [{ field: currentSort.field, ascending: currentSort.ascending }]
@@ -651,13 +677,16 @@
                     if (isUpdate) {
                         payload = await postJSON('/api/records/update', {
                             recordType,
+                            database: currentDatabase,
                             recordName: note.recordName,
                             fields,
                             recordChangeTag: note.recordChangeTag,
                         });
                     } else {
                         payload = await postJSON('/api/records/create', {
-                            recordType, fields,
+                            recordType,
+                            database: currentDatabase,
+                            fields,
                         });
                     }
                 } else {
@@ -692,6 +721,7 @@
                 if (currentMode === 'mistkit') {
                     payload = await postJSON('/api/records/delete', {
                         recordType: note.recordType,
+                        database: currentDatabase,
                         recordName: note.recordName,
                         recordChangeTag: note.recordChangeTag,
                     });
@@ -724,7 +754,58 @@
             mistKitBtn.classList.toggle('active', mode === 'mistkit');
             cloudKitJsBtn.classList.toggle('active', mode === 'cloudkitjs');
             modeBadge.textContent = mode === 'mistkit' ? 'MistKit' : 'CloudKit JS';
+            // Switching to MistKit while sitting on Public is only valid when
+            // the server holds S2S material. If not, drop back to Private so
+            // the user doesn't post requests that will 500 server-side.
+            refreshDatabasePicker();
             if (authComplete) queryNotes();
+        }
+
+        // ---- database toggle ----
+
+        dbPrivateBtn.addEventListener('click', () => setDatabase('private'));
+        dbPublicBtn.addEventListener('click', () => setDatabase('public'));
+
+        function setDatabase(database) {
+            if (database === currentDatabase) return;
+            if (database === 'public' && !isPublicAllowedForCurrentMode()) {
+                // Defensive — button should already be disabled in this case.
+                return;
+            }
+            currentDatabase = database;
+            refreshDatabasePicker();
+            if (authComplete) queryNotes();
+        }
+
+        function isPublicAllowedForCurrentMode() {
+            // CloudKit JS can talk to public from the browser regardless of
+            // server S2S credentials; MistKit + public requires the server to
+            // hold the key pair.
+            return currentMode === 'cloudkitjs' || publicDatabaseAvailable;
+        }
+
+        function refreshDatabasePicker() {
+            const publicAllowed = isPublicAllowedForCurrentMode();
+            dbPublicBtn.disabled = !publicAllowed;
+            if (!publicAllowed && currentDatabase === 'public') {
+                currentDatabase = 'private';
+            }
+            dbPrivateBtn.classList.toggle('active', currentDatabase === 'private');
+            dbPublicBtn.classList.toggle('active', currentDatabase === 'public');
+            dbBadge.textContent = currentDatabase === 'public' ? 'Public' : 'Private';
+            if (!publicDatabaseAvailable && currentMode === 'mistkit') {
+                dbHint.textContent =
+                    'MistKit + Public requires server-to-server credentials ' +
+                    '(CLOUDKIT_KEY_ID + CLOUDKIT_PRIVATE_KEY[_PATH]). ' +
+                    'Restart the server with those set to enable Public on this side.';
+            } else {
+                dbHint.textContent =
+                    'Private uses the captured Apple ID web-auth token; Public ' +
+                    'uses server-to-server signing on the MistKit side and the ' +
+                    'API token on the CloudKit JS side. Browsers can’t ' +
+                    'perform S2S signing, so "MistKit + Public" is unique to ' +
+                    'the server path.';
+            }
         }
 
         // ---- form wiring ----
@@ -842,6 +923,8 @@
                     throw new Error('CloudKit.js failed to load');
                 }
                 const serverConfig = await loadServerConfig();
+                publicDatabaseAvailable = !!serverConfig.publicDatabaseAvailable;
+                refreshDatabasePicker();
                 CloudKit.configure({
                     containers: [{
                         containerIdentifier: serverConfig.containerIdentifier,
@@ -875,6 +958,7 @@
         }
 
         refreshFormState();
+        refreshDatabasePicker();
         initializeCloudKit();
     </script>
 </body>

@@ -35,7 +35,10 @@ public import MistKit
 ///
 /// Pairs the same auth-flow inputs as `AuthTokenConfig` with the CloudKit
 /// environment so the server can build a `CloudKitService` after the user
-/// completes the browser-side auth round trip.
+/// completes the browser-side auth round trip. If server-to-server key
+/// material is also supplied (`keyID` + either `privateKey` or
+/// `privateKeyFile`), the demo additionally enables the public database
+/// path so the UI can compare web-auth vs S2S signing side-by-side.
 public struct WebConfig: Sendable, ConfigurationParseable {
   /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
@@ -57,6 +60,24 @@ public struct WebConfig: Sendable, ConfigurationParseable {
   /// driven from another machine (or a non-default browser), so silent
   /// startup is the safer UX. Override with `--browser`.
   public let openBrowser: Bool
+  /// Server-to-server key identifier (optional). When paired with
+  /// `privateKey` or `privateKeyFile`, unlocks the public-database path.
+  public let keyID: String?
+  /// Server-to-server private key material (optional, secret).
+  public let privateKey: String?
+  /// Path to a server-to-server private key file (optional).
+  public let privateKeyFile: String?
+
+  /// Whether the configuration carries the credentials needed to target
+  /// the public database via server-to-server signing.
+  public var publicDatabaseAvailable: Bool {
+    guard let keyID, !keyID.isEmpty else {
+      return false
+    }
+    let hasInlineKey = (privateKey?.isEmpty == false)
+    let hasKeyFile = (privateKeyFile?.isEmpty == false)
+    return hasInlineKey || hasKeyFile
+  }
 
   /// Creates a new instance.
   public init(
@@ -65,7 +86,10 @@ public struct WebConfig: Sendable, ConfigurationParseable {
     environment: MistKit.Environment = .development,
     port: Int = 8_080,
     host: String = "127.0.0.1",
-    openBrowser: Bool = false
+    openBrowser: Bool = false,
+    keyID: String? = nil,
+    privateKey: String? = nil,
+    privateKeyFile: String? = nil
   ) {
     self.apiToken = apiToken
     self.containerIdentifier = containerIdentifier
@@ -73,6 +97,9 @@ public struct WebConfig: Sendable, ConfigurationParseable {
     self.port = port
     self.host = host
     self.openBrowser = openBrowser
+    self.keyID = keyID
+    self.privateKey = privateKey
+    self.privateKeyFile = privateKeyFile
   }
 
   /// Parse configuration from command line arguments.
@@ -115,13 +142,23 @@ public struct WebConfig: Sendable, ConfigurationParseable {
       default: false
     )
 
+    let keyID = configReader.string(forKey: "key.id")
+    let privateKey = configReader.string(
+      forKey: "private.key",
+      isSecret: true
+    )
+    let privateKeyFile = configReader.string(forKey: "private.key.path")
+
     self.init(
       apiToken: apiToken,
       containerIdentifier: containerIdentifier,
       environment: environment,
       port: port,
       host: host,
-      openBrowser: openBrowser
+      openBrowser: openBrowser,
+      keyID: keyID,
+      privateKey: privateKey,
+      privateKeyFile: privateKeyFile
     )
   }
 }

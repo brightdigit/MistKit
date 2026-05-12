@@ -45,15 +45,23 @@
     /// JSON payload returned by `GET /api/config`, consumed by the
     /// browser-side script to configure both CloudKit JS and the mode-
     /// toggle's MistKit handlers.
+    ///
+    /// `publicDatabaseAvailable` lets the browser know whether the server
+    /// holds server-to-server credentials and can therefore route MistKit
+    /// requests against `.public`. CloudKit JS can always target the public
+    /// database from the browser (it only needs the API token), so the flag
+    /// gates only the MistKit + public profile.
     internal struct CloudKitClientConfig: Encodable {
       internal let apiToken: String
       internal let containerIdentifier: String
       internal let environment: String
+      internal let publicDatabaseAvailable: Bool
     }
 
     internal let apiToken: String
     internal let containerIdentifier: String
     internal let environment: MistKit.Environment
+    internal let publicDatabaseAvailable: Bool
     internal let tokenStore: WebAuthTokenStore
     internal let backendFactory: WebBackendFactory
     /// When `true`, `POST /api/authenticate` returns `205 Reset Content` to
@@ -108,7 +116,8 @@
         CloudKitClientConfig(
           apiToken: apiToken,
           containerIdentifier: containerIdentifier,
-          environment: environment.rawValue
+          environment: environment.rawValue,
+          publicDatabaseAvailable: publicDatabaseAvailable
         )
       )
       addConfigEndpoint(api: api, configData: configData)

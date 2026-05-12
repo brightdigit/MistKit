@@ -40,11 +40,13 @@
       internal let recordType: String
       internal let limit: Int?
       internal let sortBy: [WebRequests.QuerySortField]?
+      internal let database: MistKit.Database
     }
 
     internal struct CreateCall: Sendable {
       internal let recordType: String
       internal let fields: [String: String]
+      internal let database: MistKit.Database
     }
 
     internal struct UpdateCall: Sendable {
@@ -52,12 +54,14 @@
       internal let recordName: String
       internal let fields: [String: String]
       internal let recordChangeTag: String?
+      internal let database: MistKit.Database
     }
 
     internal struct DeleteCall: Sendable {
       internal let recordType: String
       internal let recordName: String
       internal let recordChangeTag: String?
+      internal let database: MistKit.Database
     }
 
     internal private(set) var lastQuery: QueryCall?
@@ -123,10 +127,14 @@
     internal func webQuery(
       recordType: String,
       limit: Int?,
-      sortBy: [WebRequests.QuerySortField]?
+      sortBy: [WebRequests.QuerySortField]?,
+      database: MistKit.Database
     ) async throws -> [RecordInfo] {
       lastQuery = QueryCall(
-        recordType: recordType, limit: limit, sortBy: sortBy
+        recordType: recordType,
+        limit: limit,
+        sortBy: sortBy,
+        database: database
       )
       try consumePendingError()
       return [
@@ -135,11 +143,14 @@
     }
 
     internal func webCreate(
-      recordType: String, fields: [String: FieldValue]
+      recordType: String,
+      fields: [String: FieldValue],
+      database: MistKit.Database
     ) async throws -> RecordInfo {
       lastCreate = CreateCall(
         recordType: recordType,
-        fields: Self.flatten(fields)
+        fields: Self.flatten(fields),
+        database: database
       )
       try consumePendingError()
       return Self.stubRecord(
@@ -151,13 +162,15 @@
       recordType: String,
       recordName: String,
       fields: [String: FieldValue],
-      recordChangeTag: String?
+      recordChangeTag: String?,
+      database: MistKit.Database
     ) async throws -> RecordInfo {
       lastUpdate = UpdateCall(
         recordType: recordType,
         recordName: recordName,
         fields: Self.flatten(fields),
-        recordChangeTag: recordChangeTag
+        recordChangeTag: recordChangeTag,
+        database: database
       )
       try consumePendingError()
       return Self.stubRecord(
@@ -168,12 +181,14 @@
     internal func webDelete(
       recordType: String,
       recordName: String,
-      recordChangeTag: String?
+      recordChangeTag: String?,
+      database: MistKit.Database
     ) async throws {
       lastDelete = DeleteCall(
         recordType: recordType,
         recordName: recordName,
-        recordChangeTag: recordChangeTag
+        recordChangeTag: recordChangeTag,
+        database: database
       )
       try consumePendingError()
     }

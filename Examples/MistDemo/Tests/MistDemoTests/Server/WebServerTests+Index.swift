@@ -70,5 +70,22 @@
         }
       }
     }
+
+    @Test("Index HTML exposes a public/private database picker")
+    internal func indexExposesDatabasePicker() async throws {
+      let fixture = Self.makeFixture()
+      let app = Application(router: try fixture.server.makeRouter())
+
+      try await app.test(.router) { client in
+        try await client.execute(uri: "/", method: .get) { response in
+          #expect(response.status == .ok)
+          let body = String(buffer: response.body)
+          #expect(body.contains(#"id="db-private""#))
+          #expect(body.contains(#"id="db-public""#))
+          #expect(body.contains("publicCloudDatabase"))
+          #expect(body.contains("privateCloudDatabase"))
+        }
+      }
+    }
   }
 #endif

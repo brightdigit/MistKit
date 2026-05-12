@@ -33,6 +33,10 @@ internal import MistKit
 /// Factory that returns a `WebBackend` configured with the captured
 /// web-auth token. Injected into `WebServer` so tests can supply a
 /// mock without going through MistKit.
+///
+/// When server-to-server credentials are present, the produced service
+/// holds both auth flavors and `CloudKitService` picks the right one
+/// per operation based on the request's `database`.
 internal struct WebBackendFactory: Sendable {
   internal let make: @Sendable (_ webAuthToken: String) throws -> any WebBackend
 
@@ -42,22 +46,28 @@ internal struct WebBackendFactory: Sendable {
     self.make = make
   }
 
-  /// Production factory: builds a `CloudKitService` for the private
-  /// database with the captured web-auth token paired with the
-  /// command's API token.
+  /// Production factory: builds a `CloudKitService` for the captured
+  /// web-auth token paired with the command's API token. If
+  /// `serverToServer` is non-nil, the same service can also satisfy
+  /// public-database routes via S2S signing.
   internal static func live(
     apiToken: String,
     containerIdentifier: String,
-    environment: MistKit.Environment
+    environment: MistKit.Environment,
+    serverToServer: ServerToServerCredentials? = nil
   ) -> WebBackendFactory {
     WebBackendFactory { webAuthToken in
-      let tokenManager = WebAuthTokenManager(
+      let apiAuth = APICredentials(
         apiToken: apiToken,
         webAuthToken: webAuthToken
       )
+      let credentials = try Credentials(
+        serverToServer: serverToServer,
+        apiAuth: apiAuth
+      )
       return CloudKitService(
         containerIdentifier: containerIdentifier,
-        tokenManager: tokenManager,
+        credentials: credentials,
         environment: environment
       )
     }

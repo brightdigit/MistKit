@@ -49,11 +49,13 @@
       let apiToken: String
       let containerIdentifier: String
       let environment: String
+      let publicDatabaseAvailable: Bool
     }
 
     internal static func makeFixture(
       authenticated: Bool = false,
-      terminatesAfterAuth: Bool = false
+      terminatesAfterAuth: Bool = false,
+      publicDatabaseAvailable: Bool = false
     ) -> Fixture {
       let backend = MockBackend()
       let store = WebAuthTokenStore(
@@ -64,6 +66,7 @@
         apiToken: "test-api-token",
         containerIdentifier: "iCloud.test.container",
         environment: .development,
+        publicDatabaseAvailable: publicDatabaseAvailable,
         tokenStore: store,
         backendFactory: factory,
         terminatesAfterAuth: terminatesAfterAuth
@@ -87,6 +90,25 @@
           #expect(payload.apiToken == "test-api-token")
           #expect(payload.containerIdentifier == "iCloud.test.container")
           #expect(payload.environment == "development")
+          #expect(payload.publicDatabaseAvailable == false)
+        }
+      }
+    }
+
+    @Test("GET /api/config advertises publicDatabaseAvailable when S2S configured")
+    internal func configAdvertisesPublicDatabase() async throws {
+      let fixture = Self.makeFixture(publicDatabaseAvailable: true)
+      let app = Application(router: try fixture.server.makeRouter())
+
+      try await app.test(.router) { client in
+        try await client.execute(uri: "/api/config", method: .get) {
+          response in
+          #expect(response.status == .ok)
+          let payload = try JSONDecoder().decode(
+            ConfigPayload.self,
+            from: Data(response.body.readableBytesView)
+          )
+          #expect(payload.publicDatabaseAvailable == true)
         }
       }
     }
