@@ -68,9 +68,12 @@ Or via env var:
 CLOUDKIT_API_TOKEN=… swift run mistdemo web
 ```
 
-The CLI prints the server URL and opens your browser automatically.
-Sign in with your Apple ID; the server captures the web-auth token and
-the CRUD UI on the page becomes live.
+The CLI prints the server URL. The `web` command does **not** open the
+browser by default (the server is long-running and often driven from a
+different machine); pass `--browser` to opt in. The `auth-token` command
+**does** open the browser by default — the captured token is the whole
+point of running it. Sign in with your Apple ID; the server captures the
+web-auth token and the CRUD UI on the page becomes live.
 
 ### Options
 
@@ -81,11 +84,12 @@ the CRUD UI on the page becomes live.
 | `--environment <env>` | `development` | `development` or `production` |
 | `--host <host>` | `127.0.0.1` | Bind address |
 | `--port <port>` | `8080` | Server port |
-| `--no-browser` | off | Don't auto-open the browser |
+| `--browser` | on for `auth-token`, off for `web` | Open browser on startup |
+| `--no-browser` | — | Suppress the open (wins if both flags set) |
 
 Configuration is read via `MistDemoConfiguration`, so the same keys
 (`api.token`, `container.identifier`, `environment`, `port`, `host`,
-`no.browser`) can be supplied through `--config-file ~/.mistdemo/config.json`
+`browser`, `no.browser`) can be supplied through `--config-file ~/.mistdemo/config.json`
 or environment variables.
 
 ### What the server exposes

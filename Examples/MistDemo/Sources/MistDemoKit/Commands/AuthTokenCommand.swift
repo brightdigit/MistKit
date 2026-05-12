@@ -54,7 +54,8 @@
         --environment <env>      development (default) | production
         --port <port>            Server port (default: 8080)
         --host <host>            Server host (default: 127.0.0.1)
-        --no-browser             Don't open browser automatically
+        --browser                Open browser on startup (default for auth-token)
+        --no-browser             Don't open browser on startup (overrides --browser)
       """
 
     internal let config: AuthTokenConfig
@@ -69,7 +70,7 @@
       tokenStore: WebAuthTokenStore,
       host: String,
       port: Int,
-      noBrowser: Bool
+      openBrowser: Bool
     ) async throws -> String {
       do {
         return try await withTimeoutAndSignals(seconds: 300) {
@@ -79,7 +80,7 @@
               return nil
             }
             group.addTask {
-              if !noBrowser {
+              if openBrowser {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 BrowserOpener.openBrowser(url: "http://\(host):\(port)")
               }
@@ -135,7 +136,7 @@
         tokenStore: tokenStore,
         host: config.host,
         port: config.port,
-        noBrowser: config.noBrowser
+        openBrowser: config.openBrowser
       )
 
       // Let the 205 response reach the browser before the process exits.

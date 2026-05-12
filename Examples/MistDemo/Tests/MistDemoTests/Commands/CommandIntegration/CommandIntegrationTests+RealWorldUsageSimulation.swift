@@ -46,7 +46,7 @@ extension CommandIntegrationTests {
       #if canImport(Hummingbird)
         let authConfig = AuthTokenConfig(
           apiToken: "mock-api-token-for-test",
-          noBrowser: true
+          openBrowser: false
         )
         _ = AuthTokenCommand(config: authConfig)
       #endif
