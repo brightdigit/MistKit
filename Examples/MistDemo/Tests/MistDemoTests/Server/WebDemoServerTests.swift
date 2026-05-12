@@ -60,7 +60,10 @@
       let backend: MockBackend
     }
 
-    private static func makeFixture(authenticated: Bool = false) -> Fixture {
+    private static func makeFixture(
+      authenticated: Bool = false,
+      terminatesAfterAuth: Bool = false
+    ) -> Fixture {
       let backend = MockBackend()
       let store = WebAuthTokenStore(
         token: authenticated ? "captured-token" : nil
@@ -71,7 +74,8 @@
         containerIdentifier: "iCloud.test.container",
         environment: .development,
         tokenStore: store,
-        backendFactory: factory
+        backendFactory: factory,
+        terminatesAfterAuth: terminatesAfterAuth
       )
       return Fixture(server: server, tokenStore: store, backend: backend)
     }
@@ -110,7 +114,7 @@
       }
     }
 
-    @Test("POST /api/authenticate captures the token into the store")
+    @Test("POST /api/authenticate captures the token and returns 204")
     internal func authenticateCapturesToken() async throws {
       let fixture = Self.makeFixture()
       let app = Application(router: try fixture.server.makeRouter())
@@ -127,12 +131,68 @@
           headers: [.contentType: "application/json"],
           body: ByteBuffer(bytes: body)
         ) { response in
-          #expect(response.status == .ok)
+          #expect(response.status == .noContent)
+          #expect(response.body.readableBytes == 0)
         }
       }
 
       let stored = await fixture.tokenStore.currentToken
       #expect(stored == "session-xyz")
+    }
+
+    @Test("POST /api/authenticate returns 205 when terminatesAfterAuth")
+    internal func authenticateReturns205WhenTerminating() async throws {
+      let fixture = Self.makeFixture(terminatesAfterAuth: true)
+      let app = Application(router: try fixture.server.makeRouter())
+
+      let body = try JSONEncoder().encode([
+        "sessionToken": "session-xyz",
+        "userRecordName": "_abc",
+      ])
+
+      try await app.test(.router) { client in
+        try await client.execute(
+          uri: "/api/authenticate",
+          method: .post,
+          headers: [.contentType: "application/json"],
+          body: ByteBuffer(bytes: body)
+        ) { response in
+          #expect(response.status == .resetContent)
+          #expect(response.body.readableBytes == 0)
+        }
+      }
+
+      let stored = await fixture.tokenStore.currentToken
+      #expect(stored == "session-xyz")
+    }
+
+    @Test("tokenUpdates yields the captured token after authenticate")
+    internal func authenticateYieldsToTokenUpdates() async throws {
+      let fixture = Self.makeFixture()
+      let app = Application(router: try fixture.server.makeRouter())
+
+      let body = try JSONEncoder().encode([
+        "sessionToken": "session-xyz",
+        "userRecordName": "_abc",
+      ])
+
+      try await app.test(.router) { client in
+        async let firstToken: String? = {
+          var iterator = fixture.tokenStore.tokenUpdates.makeAsyncIterator()
+          return await iterator.next()
+        }()
+
+        try await client.execute(
+          uri: "/api/authenticate",
+          method: .post,
+          headers: [.contentType: "application/json"],
+          body: ByteBuffer(bytes: body)
+        ) { response in
+          #expect(response.status == .noContent)
+        }
+
+        #expect(await firstToken == "session-xyz")
+      }
     }
 
     @Test(

@@ -88,7 +88,8 @@
           apiToken: config.apiToken,
           containerIdentifier: config.containerIdentifier,
           environment: config.environment
-        )
+        ),
+        terminatesAfterAuth: false
       )
       let router = try server.makeRouter()
 

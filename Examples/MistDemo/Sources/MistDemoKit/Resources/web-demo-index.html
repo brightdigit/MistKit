@@ -391,10 +391,32 @@
         }
 
         async function postAuthenticate(userIdentity, token) {
-            await postJSON('/api/authenticate', {
-                sessionToken: token,
-                userRecordName: userIdentity.userRecordName,
+            const response = await fetch('/api/authenticate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionToken: token,
+                    userRecordName: userIdentity.userRecordName,
+                }),
             });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.status;
+        }
+
+        function renderTokenDisplay(token) {
+            crudCard.style.display = 'none';
+            document.getElementById('signin-area').style.display = 'none';
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <h2>Web Auth Token captured</h2>
+                <p>Use this token for command-line CloudKit API access:</p>
+                <pre style="user-select: all; padding: 12px; background: #f6f8fa; border-radius: 6px; word-break: break-all; white-space: pre-wrap;">${token}</pre>
+                <p>The server has shut down — you can close this window.</p>
+            `;
+            document.querySelector('.layout').appendChild(card);
         }
 
         async function handleAuthentication(userIdentity) {
@@ -404,9 +426,14 @@
             try {
                 const token = await pollWebAuthToken();
                 webAuthToken = token;
-                await postAuthenticate(userIdentity, token);
-                setStatus(authStatusDiv, `Authenticated as ${userIdentity.userRecordName}.`, 'success');
-                setAuthed(true);
+                const status = await postAuthenticate(userIdentity, token);
+                if (status === 205) {
+                    setStatus(authStatusDiv, 'Authentication complete.', 'success');
+                    renderTokenDisplay(token);
+                } else {
+                    setStatus(authStatusDiv, `Authenticated as ${userIdentity.userRecordName}.`, 'success');
+                    setAuthed(true);
+                }
             } catch (error) {
                 setStatus(authStatusDiv, `Authentication failed: ${error.message}`, 'error');
             } finally {

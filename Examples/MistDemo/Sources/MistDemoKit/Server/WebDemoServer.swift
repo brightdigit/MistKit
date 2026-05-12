@@ -56,6 +56,10 @@
     internal let environment: MistKit.Environment
     internal let tokenStore: WebAuthTokenStore
     internal let backendFactory: WebDemoBackendFactory
+    /// When `true`, `POST /api/authenticate` returns `205 Reset Content` to
+    /// signal the browser that the server is about to shut down (auth-token
+    /// flow). When `false`, returns `204 No Content` (web flow stays up).
+    internal let terminatesAfterAuth: Bool
 
     /// Build the router for this server.
     internal func makeRouter() throws -> Router<BasicRequestContext> {
@@ -118,6 +122,8 @@
       api: RouterGroup<BasicRequestContext>
     ) {
       let tokenStore = self.tokenStore
+      let successStatus: HTTPResponse.Status =
+        terminatesAfterAuth ? .resetContent : .noContent
       api.post("authenticate") { request, context -> Response in
         guard Self.isLoopback(request) else {
           return Response(status: .forbidden)
@@ -126,14 +132,7 @@
           as: AuthRequest.self, context: context
         )
         await tokenStore.update(authRequest.sessionToken)
-
-        let response = AuthResponse(
-          userRecordName: authRequest.userRecordName,
-          cloudKitData: .init(user: nil, zones: [], error: nil),
-          message: "Authentication successful!"
-        )
-        let jsonData = try JSONEncoder().encode(response)
-        return Self.jsonResponse(status: .ok, bytes: jsonData)
+        return Response(status: successStatus)
       }
     }
 
