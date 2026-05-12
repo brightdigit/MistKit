@@ -97,8 +97,58 @@
       #expect(captured?.fields["title"] == "Hi")
     }
 
-    @Test("POST /api/records/update forwards record name + fields")
+    @Test("POST /api/records/create accepts JSON-number fields (Int + Double)")
+    internal func createAcceptsNumericFields() async throws {
+      let fixture = Self.makeFixture(authenticated: true)
+      let app = Application(router: try fixture.server.makeRouter())
+      let jsonBody = """
+        {"recordType":"Note","fields":{"title":"Hi","index":5,"score":1.5}}
+        """
+      try await app.test(.router) { client in
+        try await client.execute(
+          uri: "/api/records/create",
+          method: .post,
+          headers: [.contentType: "application/json"],
+          body: ByteBuffer(string: jsonBody)
+        ) { response in
+          #expect(response.status == .ok)
+        }
+      }
+      let captured = await fixture.backend.lastCreate
+      #expect(captured?.fields["title"] == "Hi")
+      #expect(captured?.fields["index"] == "5")
+      #expect(captured?.fields["score"] == "1.5")
+    }
+
+    @Test("POST /api/records/update forwards recordName, fields, changeTag")
     internal func updateForwards() async throws {
+      let fixture = Self.makeFixture(authenticated: true)
+      let app = Application(router: try fixture.server.makeRouter())
+      let jsonBody = """
+        {"recordType":"Note","recordName":"abc","fields":{"title":"Up"},\
+        "recordChangeTag":"tag-1"}
+        """
+
+      try await app.test(.router) { client in
+        try await client.execute(
+          uri: "/api/records/update",
+          method: .post,
+          headers: [.contentType: "application/json"],
+          body: ByteBuffer(string: jsonBody)
+        ) { response in
+          #expect(response.status == .ok)
+        }
+      }
+
+      let captured = await fixture.backend.lastUpdate
+      #expect(captured?.recordType == "Note")
+      #expect(captured?.recordName == "abc")
+      #expect(captured?.fields["title"] == "Up")
+      #expect(captured?.recordChangeTag == "tag-1")
+    }
+
+    @Test("POST /api/records/update accepts a missing recordChangeTag")
+    internal func updateAcceptsAbsentChangeTag() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
       let jsonBody = """
@@ -117,16 +167,16 @@
       }
 
       let captured = await fixture.backend.lastUpdate
-      #expect(captured?.recordType == "Note")
-      #expect(captured?.recordName == "abc")
-      #expect(captured?.fields["title"] == "Up")
+      #expect(captured?.recordChangeTag == nil)
     }
 
-    @Test("POST /api/records/delete forwards record name")
+    @Test("POST /api/records/delete forwards recordName + changeTag")
     internal func deleteForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
-      let jsonBody = #"{"recordType":"Note","recordName":"abc"}"#
+      let jsonBody = #"""
+        {"recordType":"Note","recordName":"abc","recordChangeTag":"tag-9"}
+        """#
 
       try await app.test(.router) { client in
         try await client.execute(
@@ -148,6 +198,7 @@
       let captured = await fixture.backend.lastDelete
       #expect(captured?.recordType == "Note")
       #expect(captured?.recordName == "abc")
+      #expect(captured?.recordChangeTag == "tag-9")
     }
 
     @Test("Backend errors surface as 500 with a JSON message body")

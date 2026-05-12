@@ -1,5 +1,5 @@
 //
-//  ModifyRecordsPhase.swift
+//  WebJSON.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,45 +27,18 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
 
-internal struct ModifyRecordsPhase: IntegrationPhase {
-  internal typealias Input = CreatedRecordNames
-  internal typealias Output = NoState
-
-  internal static let title = "Modify some records"
-  internal static let emoji = "\u{270F}\u{FE0F} "
-  internal static let apiName = "updateRecord"
-
-  internal func run(
-    input: CreatedRecordNames, context: PhaseContext
-  ) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-
-    let recordsToUpdate = Array(input.names.prefix(min(3, input.names.count)))
-
-    let operations = recordsToUpdate.enumerated().map { offset, recordName in
-      RecordOperation(
-        operationType: .forceReplace,
-        recordType: IntegrationTestData.recordType,
-        recordName: recordName,
-        fields: [
-          "title": .string("Updated Record \(offset + 1)")
-        ]
-      )
-    }
-
-    _ = try await context.service.modifyRecords(operations)
-
-    if context.verbose {
-      for recordName in recordsToUpdate {
-        print("   ✅ Updated: \(recordName)")
-      }
-    }
-
-    print("✅ Updated \(recordsToUpdate.count) records")
-
-    return NoState()
+/// Shared JSON encoder for the web demo's CRUD response bodies.
+///
+/// Uses `.millisecondsSince1970` so timestamps in `RecordInfo.created` /
+/// `RecordInfo.modified` arrive in the browser as epoch-millis numbers
+/// that JS can pass to `new Date(ms)` — the same shape CloudKit Web
+/// Services returns to CloudKit JS.
+internal enum WebJSON {
+  internal static func encoder() -> JSONEncoder {
+    let encoder = JSONEncoder()
+    encoder.dateEncodingStrategy = .millisecondsSince1970
+    return encoder
   }
 }

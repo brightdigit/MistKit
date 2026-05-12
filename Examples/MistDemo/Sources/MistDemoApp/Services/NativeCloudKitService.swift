@@ -58,7 +58,9 @@
       self.container = CKContainer(identifier: containerIdentifier)
     }
 
-    /// Apply the editable fields onto a CKRecord. Always refreshes `modified`.
+    /// Apply the editable fields onto a CKRecord. CloudKit's system metadata
+    /// (`creationDate`, `modificationDate`) is refreshed by the server on save,
+    /// so no manual timestamping is needed.
     private static func apply(
       title: String, index: Int64, imageURL: URL?, to record: CKRecord
     ) {
@@ -67,9 +69,6 @@
       if let imageURL {
         record[Note.Fields.image] = CKAsset(fileURL: imageURL)
       }
-      record[Note.Fields.modified] = NSNumber(
-        value: Int64(Date().timeIntervalSince1970 * 1_000)
-      )
     }
 
     internal func refreshAccountStatus() async {
@@ -134,7 +133,6 @@
     internal func createNote(title: String, index: Int64, imageURL: URL?) async throws -> Note {
       let record = CKRecord(recordType: Note.recordType)
       Self.apply(title: title, index: index, imageURL: imageURL, to: record)
-      record[Note.Fields.createdAt] = Date() as NSDate
       let saved = try await database.save(record)
       guard let note = Note(saved) else {
         throw NativeCloudKitError.unexpectedSaveResult

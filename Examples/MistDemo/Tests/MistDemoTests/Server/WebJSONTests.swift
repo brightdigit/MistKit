@@ -1,6 +1,6 @@
 //
-//  ModifyRecordsPhase.swift
-//  MistDemo
+//  WebJSONTests.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,45 +27,30 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+#if canImport(Hummingbird)
+  import Foundation
+  import Testing
 
-internal struct ModifyRecordsPhase: IntegrationPhase {
-  internal typealias Input = CreatedRecordNames
-  internal typealias Output = NoState
+  @testable import MistDemoKit
 
-  internal static let title = "Modify some records"
-  internal static let emoji = "\u{270F}\u{FE0F} "
-  internal static let apiName = "updateRecord"
+  @Suite("WebJSON")
+  internal struct WebJSONTests {
+    private struct DateWrapper: Codable {
+      let date: Date
+    }
 
-  internal func run(
-    input: CreatedRecordNames, context: PhaseContext
-  ) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
+    @Test("encoder writes Date as epoch-millis numbers")
+    internal func encoderEmitsEpochMillis() throws {
+      // 1500ms since 1970-01-01T00:00:00Z — chosen so the expected JSON
+      // value is a plain integer the browser's `new Date(1500)` can consume.
+      let date = Date(timeIntervalSince1970: 1.5)
 
-    let recordsToUpdate = Array(input.names.prefix(min(3, input.names.count)))
+      let data = try WebJSON.encoder().encode(DateWrapper(date: date))
 
-    let operations = recordsToUpdate.enumerated().map { offset, recordName in
-      RecordOperation(
-        operationType: .forceReplace,
-        recordType: IntegrationTestData.recordType,
-        recordName: recordName,
-        fields: [
-          "title": .string("Updated Record \(offset + 1)")
-        ]
+      let json = try #require(
+        try JSONSerialization.jsonObject(with: data) as? [String: Any]
       )
+      #expect(json["date"] as? Double == 1_500)
     }
-
-    _ = try await context.service.modifyRecords(operations)
-
-    if context.verbose {
-      for recordName in recordsToUpdate {
-        print("   ✅ Updated: \(recordName)")
-      }
-    }
-
-    print("✅ Updated \(recordsToUpdate.count) records")
-
-    return NoState()
   }
-}
+#endif

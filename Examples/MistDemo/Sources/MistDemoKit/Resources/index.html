@@ -12,11 +12,13 @@
             --muted: #6e6e73;
             --accent: #0369a1;
             --accent-dark: #0c4a6e;
+            --danger: #c00;
+            --danger-bg: #fdd;
             --success-bg: #d1f5d3;
             --success-fg: #1d5e20;
-            --error-bg: #fdd;
-            --error-fg: #c00;
             --border: #d0d7de;
+            --row-hover: #f0f4f8;
+            --row-selected: #dbeafe;
         }
         * { box-sizing: border-box; }
         body {
@@ -27,7 +29,7 @@
             color: var(--ink);
         }
         .layout {
-            max-width: 920px;
+            max-width: 1100px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
@@ -44,7 +46,7 @@
         h3 { font-size: 15px; margin: 0 0 8px 0; }
         p { color: var(--muted); margin: 0 0 16px 0; line-height: 1.5; }
         label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
-        input, textarea, select {
+        input {
             width: 100%;
             padding: 8px 10px;
             border: 1px solid var(--border);
@@ -52,7 +54,6 @@
             font-size: 14px;
             font-family: inherit;
         }
-        textarea { font-family: 'SF Mono', Menlo, monospace; min-height: 80px; }
         button {
             background: var(--accent);
             color: white;
@@ -65,15 +66,30 @@
         }
         button:hover:not(:disabled) { background: var(--accent-dark); }
         button:disabled { opacity: 0.45; cursor: not-allowed; }
+        button.secondary {
+            background: transparent;
+            color: var(--ink);
+            border: 1px solid var(--border);
+            font-weight: 500;
+        }
+        button.secondary:hover:not(:disabled) {
+            background: var(--row-hover);
+        }
+        button.danger {
+            background: var(--danger);
+        }
+        button.danger:hover:not(:disabled) {
+            background: #900;
+        }
         .status {
-            margin-top: 16px;
+            margin-top: 12px;
             padding: 10px 12px;
             border-radius: 8px;
             font-size: 13px;
             display: none;
         }
         .status.success { background: var(--success-bg); color: var(--success-fg); display: block; }
-        .status.error { background: var(--error-bg); color: var(--error-fg); display: block; }
+        .status.error { background: var(--danger-bg); color: var(--danger); display: block; }
         pre {
             background: #0d1117;
             color: #c9d1d9;
@@ -82,7 +98,7 @@
             font-size: 12px;
             overflow-x: auto;
             margin: 8px 0 0 0;
-            max-height: 320px;
+            max-height: 240px;
         }
         .mode-toggle {
             display: flex;
@@ -100,20 +116,92 @@
             color: white;
             border-color: var(--accent);
         }
-        .mode-toggle button[disabled] { opacity: 0.5; }
         .mode-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
-        .crud-grid {
+        .notes-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
         }
-        @media (max-width: 720px) {
-            .crud-grid { grid-template-columns: 1fr; }
+        @media (max-width: 820px) {
+            .notes-grid { grid-template-columns: 1fr; }
+        }
+        .table-toolbar {
+            display: flex;
+            align-items: end;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .table-toolbar label { margin: 0 0 4px; }
+        .table-toolbar .limit-field { width: 100px; }
+        .table-wrap {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: auto;
+            max-height: 480px;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td {
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            position: sticky;
+            top: 0;
+            background: var(--row-hover);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+        }
+        th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+        th.sortable:hover { color: var(--accent); }
+        th.sortable.active { color: var(--accent); }
+        .sort-indicator { display: inline-block; width: 12px; margin-left: 4px; }
+        td.timestamp {
+            font-size: 12px;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+        tbody tr { cursor: pointer; }
+        tbody tr:hover { background: var(--row-hover); }
+        tbody tr.selected { background: var(--row-selected); }
+        td.record-name {
+            font-family: 'SF Mono', Menlo, monospace;
+            font-size: 12px;
+            color: var(--muted);
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        td.actions { width: 1%; white-space: nowrap; }
+        td.actions button { padding: 4px 10px; font-size: 12px; }
+        .empty-state {
+            padding: 24px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .form-mode-label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
         }
         .pre-auth { opacity: 0.5; pointer-events: none; }
         #signin-area { margin-top: 8px; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #eef; color: var(--accent); }
-        .row { display: flex; align-items: center; gap: 8px; }
+        .raw-response summary { font-size: 12px; color: var(--muted); cursor: pointer; margin-top: 12px; }
+        .raw-response[open] summary { margin-bottom: 4px; }
     </style>
     <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js" onerror="console.log('Failed to load CloudKit.js')"></script>
 </head>
@@ -147,61 +235,65 @@
             <div id="auth-status" class="status"></div>
         </div>
 
-        <div class="card crud-card pre-auth" id="crud-card">
-            <h2>Records <span class="badge" id="crud-mode-badge">MistKit</span></h2>
-            <div class="crud-grid">
+        <div class="card pre-auth" id="notes-card">
+            <h2>Notes <span class="badge" id="mode-badge">MistKit</span></h2>
+            <div class="notes-grid">
                 <section>
-                    <h3>Query</h3>
-                    <label for="query-record-type">Record type</label>
-                    <input id="query-record-type" type="text" value="Note">
-                    <label for="query-limit">Limit (1–200)</label>
-                    <input id="query-limit" type="number" value="20" min="1" max="200">
-                    <div class="row" style="margin-top: 8px;">
-                        <button id="query-btn" type="button">Query</button>
+                    <div class="table-toolbar">
+                        <div>
+                            <label for="record-type">Record type</label>
+                            <input id="record-type" type="text" value="Note">
+                        </div>
+                        <div>
+                            <label for="query-limit">Limit</label>
+                            <input id="query-limit" class="limit-field" type="number" value="20" min="1" max="200">
+                        </div>
+                        <div style="flex: 1; display: flex; justify-content: flex-end;">
+                            <button id="refresh-btn" type="button">Refresh</button>
+                        </div>
                     </div>
-                    <div id="query-status" class="status"></div>
-                    <pre id="query-result" style="display: none;"></pre>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Index</th>
+                                    <th class="sortable" data-sort-field="___createTime">
+                                        <span class="sort-label">Created</span><span class="sort-indicator"></span>
+                                    </th>
+                                    <th class="sortable" data-sort-field="___modTime">
+                                        <span class="sort-label">Modified</span><span class="sort-indicator"></span>
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="notes-tbody">
+                                <tr><td colspan="5" class="empty-state" id="notes-empty">No notes loaded — click Refresh.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="table-status" class="status"></div>
                 </section>
 
                 <section>
-                    <h3>Create</h3>
-                    <label for="create-record-type">Record type</label>
-                    <input id="create-record-type" type="text" value="Note">
-                    <label for="create-fields">Fields (JSON object of string values)</label>
-                    <textarea id="create-fields">{"title": "Hello from MistKit"}</textarea>
-                    <div class="row" style="margin-top: 8px;">
-                        <button id="create-btn" type="button">Create</button>
+                    <h3>
+                        <span id="form-heading">New note</span>
+                        <span class="form-mode-label" id="form-record-name"></span>
+                    </h3>
+                    <label for="form-title">Title</label>
+                    <input id="form-title" type="text" placeholder="Hello from MistKit">
+                    <label for="form-index">Index</label>
+                    <input id="form-index" type="number" placeholder="0">
+                    <div class="form-actions">
+                        <button id="save-btn" type="button">Create</button>
+                        <button id="clear-btn" class="secondary" type="button">New</button>
+                        <button id="delete-btn" class="danger" type="button" disabled>Delete</button>
                     </div>
-                    <div id="create-status" class="status"></div>
-                    <pre id="create-result" style="display: none;"></pre>
-                </section>
-
-                <section>
-                    <h3>Update</h3>
-                    <label for="update-record-type">Record type</label>
-                    <input id="update-record-type" type="text" value="Note">
-                    <label for="update-record-name">Record name</label>
-                    <input id="update-record-name" type="text" placeholder="e.g. abc-123">
-                    <label for="update-fields">Fields (JSON object of string values)</label>
-                    <textarea id="update-fields">{"title": "Updated"}</textarea>
-                    <div class="row" style="margin-top: 8px;">
-                        <button id="update-btn" type="button">Update</button>
-                    </div>
-                    <div id="update-status" class="status"></div>
-                    <pre id="update-result" style="display: none;"></pre>
-                </section>
-
-                <section>
-                    <h3>Delete</h3>
-                    <label for="delete-record-type">Record type</label>
-                    <input id="delete-record-type" type="text" value="Note">
-                    <label for="delete-record-name">Record name</label>
-                    <input id="delete-record-name" type="text" placeholder="e.g. abc-123">
-                    <div class="row" style="margin-top: 8px;">
-                        <button id="delete-btn" type="button">Delete</button>
-                    </div>
-                    <div id="delete-status" class="status"></div>
-                    <pre id="delete-result" style="display: none;"></pre>
+                    <div id="form-status" class="status"></div>
+                    <details class="raw-response">
+                        <summary>Last raw response</summary>
+                        <pre id="raw-response" style="display: block;">(none yet)</pre>
+                    </details>
                 </section>
             </div>
         </div>
@@ -211,13 +303,33 @@
         let container = null;
         let webAuthToken = null;
         let authenticationInProgress = false;
-        let currentMode = 'mistkit'; // 'mistkit' | 'cloudkitjs'
+        let currentMode = 'mistkit';            // 'mistkit' | 'cloudkitjs'
+        let notes = [];                          // [{ recordName, title, index, created, modified, recordChangeTag, raw }]
+        let selectedRecordName = null;
+        let authComplete = false;
+        // null until the user clicks a sortable column header. Once set,
+        // both MistKit-mode and CloudKit-JS-mode queries forward it.
+        let currentSort = null;                  // { field, ascending } | null
 
         const authStatusDiv = document.getElementById('auth-status');
         const signinButton = document.getElementById('signin-button');
         const signoutButton = document.getElementById('signout-button');
-        const crudCard = document.getElementById('crud-card');
-        const modeBadge = document.getElementById('crud-mode-badge');
+        const notesCard = document.getElementById('notes-card');
+        const modeBadge = document.getElementById('mode-badge');
+        const tbody = document.getElementById('notes-tbody');
+        const tableStatusEl = document.getElementById('table-status');
+        const formStatusEl = document.getElementById('form-status');
+        const formHeading = document.getElementById('form-heading');
+        const formRecordName = document.getElementById('form-record-name');
+        const titleInput = document.getElementById('form-title');
+        const indexInput = document.getElementById('form-index');
+        const saveBtn = document.getElementById('save-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const deleteBtn = document.getElementById('delete-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const recordTypeInput = document.getElementById('record-type');
+        const queryLimitInput = document.getElementById('query-limit');
+        const rawResponseEl = document.getElementById('raw-response');
 
         // ---- shared helpers ----
 
@@ -233,9 +345,8 @@
             el.style.display = 'none';
         }
 
-        function showResult(el, value) {
-            el.style.display = 'block';
-            el.textContent = JSON.stringify(value, null, 2);
+        function showRaw(value) {
+            rawResponseEl.textContent = value == null ? '(none)' : JSON.stringify(value, null, 2);
         }
 
         async function postJSON(path, body) {
@@ -257,61 +368,213 @@
             return payload;
         }
 
-        // ---- mode toggle ----
+        // ---- form state ----
 
-        document.getElementById('mode-mistkit').addEventListener('click', () => setMode('mistkit'));
-        document.getElementById('mode-cloudkitjs').addEventListener('click', () => setMode('cloudkitjs'));
-
-        function setMode(mode) {
-            currentMode = mode;
-            const mistKitBtn = document.getElementById('mode-mistkit');
-            const cloudKitJsBtn = document.getElementById('mode-cloudkitjs');
-            mistKitBtn.classList.toggle('active', mode === 'mistkit');
-            cloudKitJsBtn.classList.toggle('active', mode === 'cloudkitjs');
-            modeBadge.textContent = mode === 'mistkit' ? 'MistKit' : 'CloudKit JS';
+        function selectedNote() {
+            return notes.find(n => n.recordName === selectedRecordName) || null;
         }
 
-        // ---- CRUD ----
+        function refreshFormState() {
+            const note = selectedNote();
+            if (note) {
+                formHeading.textContent = 'Edit note';
+                formRecordName.textContent = `· ${note.recordName}`;
+                saveBtn.textContent = 'Save';
+                deleteBtn.disabled = false;
+            } else {
+                formHeading.textContent = 'New note';
+                formRecordName.textContent = '';
+                saveBtn.textContent = 'Create';
+                deleteBtn.disabled = true;
+            }
+        }
 
-        function parseFieldsJSON(raw, statusEl) {
-            try {
-                const parsed = JSON.parse(raw);
-                if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-                    throw new Error('Fields must be a JSON object');
+        function clearForm() {
+            selectedRecordName = null;
+            titleInput.value = '';
+            indexInput.value = '';
+            clearStatus(formStatusEl);
+            refreshFormState();
+            renderRows();
+        }
+
+        function loadNoteIntoForm(note) {
+            selectedRecordName = note.recordName;
+            titleInput.value = note.title ?? '';
+            indexInput.value = note.index != null ? String(note.index) : '';
+            clearStatus(formStatusEl);
+            refreshFormState();
+            renderRows();
+        }
+
+        // ---- render ----
+
+        function renderRows() {
+            tbody.innerHTML = '';
+            if (notes.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 5;
+                td.className = 'empty-state';
+                td.textContent = 'No notes — Refresh or Create one.';
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                return;
+            }
+            for (const note of notes) {
+                const tr = document.createElement('tr');
+                tr.title = note.recordName;
+                if (note.recordName === selectedRecordName) tr.classList.add('selected');
+                tr.addEventListener('click', (e) => {
+                    if (e.target.closest('button')) return;
+                    loadNoteIntoForm(note);
+                });
+
+                const titleTd = document.createElement('td');
+                titleTd.textContent = note.title ?? '';
+                tr.appendChild(titleTd);
+
+                const indexTd = document.createElement('td');
+                indexTd.textContent = note.index != null ? String(note.index) : '';
+                tr.appendChild(indexTd);
+
+                const createdTd = document.createElement('td');
+                createdTd.className = 'timestamp';
+                createdTd.textContent = formatTimestamp(note.created);
+                if (note.created) createdTd.title = note.created.toISOString();
+                tr.appendChild(createdTd);
+
+                const modifiedTd = document.createElement('td');
+                modifiedTd.className = 'timestamp';
+                modifiedTd.textContent = formatTimestamp(note.modified);
+                if (note.modified) modifiedTd.title = note.modified.toISOString();
+                tr.appendChild(modifiedTd);
+
+                const actionsTd = document.createElement('td');
+                actionsTd.className = 'actions';
+                const delBtn = document.createElement('button');
+                delBtn.className = 'danger';
+                delBtn.type = 'button';
+                delBtn.textContent = 'Delete';
+                // No confirm() — the demo prioritizes hands-on iteration; the
+                // raw response panel below the form shows the wire payload of
+                // every operation so accidents stay visible.
+                delBtn.addEventListener('click', () => deleteNote(note));
+                actionsTd.appendChild(delBtn);
+                tr.appendChild(actionsTd);
+
+                tbody.appendChild(tr);
+            }
+        }
+
+        function refreshSortIndicators() {
+            document.querySelectorAll('th.sortable').forEach(th => {
+                const field = th.dataset.sortField;
+                const isActive = currentSort && currentSort.field === field;
+                th.classList.toggle('active', isActive);
+                const indicator = th.querySelector('.sort-indicator');
+                if (isActive) {
+                    indicator.textContent = currentSort.ascending ? '↑' : '↓';
+                } else {
+                    indicator.textContent = '';
                 }
-                for (const [k, v] of Object.entries(parsed)) {
-                    if (typeof v !== 'string') {
-                        throw new Error(`Field "${k}" must be a string (this demo only supports string fields)`);
+            });
+        }
+
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const field = th.dataset.sortField;
+                if (currentSort && currentSort.field === field) {
+                    if (currentSort.ascending) {
+                        currentSort = { field, ascending: false };
+                    } else {
+                        currentSort = null;            // third click clears
                     }
+                } else {
+                    currentSort = { field, ascending: true };
                 }
-                return parsed;
-            } catch (error) {
-                setStatus(statusEl, error.message, 'error');
-                return null;
-            }
+                refreshSortIndicators();
+                if (authComplete) queryNotes();
+            });
+        });
+
+        // ---- backend normalization ----
+
+        // Project the MistKit-mode `/api/records/query` payload (which mirrors
+        // CloudKit Web Services on the wire) and the CloudKit JS response
+        // into the single shape the table renders from.
+        //
+        // Timestamps:
+        //   - MistKit-mode wire: `created.timestamp` / `modified.timestamp`
+        //     are epoch-millis numbers (encoded with WebJSON's
+        //     .millisecondsSince1970 strategy on the server).
+        //   - CloudKit JS: `created` / `modified` are typed Date objects.
+        // The browser normalizes both into a Date instance.
+        function normalizeRecords(payload) {
+            const list = (payload && payload.records) || [];
+            return list.map(record => {
+                const fields = record.fields || {};
+                const titleField = fields.title;
+                const indexField = fields.index;
+                return {
+                    recordName: record.recordName,
+                    recordType: record.recordType,
+                    recordChangeTag: record.recordChangeTag,
+                    title: titleField && (titleField.value ?? titleField),
+                    index: indexField && Number(indexField.value ?? indexField),
+                    created: toDate(record.created),
+                    modified: toDate(record.modified),
+                    raw: record,
+                };
+            });
         }
 
-        async function runMistKitOperation(label, path, body, statusEl, resultEl) {
-            clearStatus(statusEl);
-            resultEl.style.display = 'none';
-            try {
-                const data = await postJSON(path, body);
-                setStatus(statusEl, `${label} succeeded.`, 'success');
-                showResult(resultEl, data);
-            } catch (error) {
-                setStatus(statusEl, `${label} failed: ${error.message}`, 'error');
-                if (error.payload) showResult(resultEl, error.payload);
+        function toDate(value) {
+            if (value == null) return null;
+            // CloudKit JS shape: a Date object directly on record.created/modified,
+            // OR an envelope { timestamp: Date|number, userRecordName }.
+            if (value instanceof Date) return value;
+            if (typeof value === 'number') return new Date(value);
+            if (typeof value === 'object') {
+                const inner = value.timestamp;
+                if (inner == null) return null;
+                if (inner instanceof Date) return inner;
+                if (typeof inner === 'number') return new Date(inner);
+                if (typeof inner === 'string') {
+                    const parsed = Date.parse(inner);
+                    return isNaN(parsed) ? null : new Date(parsed);
+                }
             }
+            return null;
+        }
+
+        function formatTimestamp(date) {
+            if (!date) return '—';
+            return date.toLocaleString(undefined, {
+                dateStyle: 'short', timeStyle: 'short',
+            });
         }
 
         function ckJsDatabase() {
             return container.privateCloudDatabase;
         }
 
-        // CloudKit JS expects field values as { key: { value: ... } } while the
-        // MistKit-mode endpoints accept the flat { key: "value" } shape this
-        // demo's textareas already produce — wrap before saveRecords.
-        function fieldsToCKJS(fields) {
+        function buildFields() {
+            const out = {};
+            const title = titleInput.value.trim();
+            if (title.length > 0) out.title = title;
+            const indexRaw = indexInput.value.trim();
+            if (indexRaw.length > 0) {
+                const parsed = Number(indexRaw);
+                if (!isFinite(parsed)) {
+                    throw new Error('Index must be a number.');
+                }
+                out.index = parsed;
+            }
+            return out;
+        }
+
+        function ckJsFields(fields) {
             const wrapped = {};
             for (const [k, v] of Object.entries(fields)) {
                 wrapped[k] = { value: v };
@@ -319,122 +582,166 @@
             return wrapped;
         }
 
-        async function runCloudKitJsOperation(label, work, statusEl, resultEl) {
-            clearStatus(statusEl);
-            resultEl.style.display = 'none';
+        // ---- operations ----
+
+        async function queryNotes() {
+            const recordType = recordTypeInput.value.trim();
+            const limit = parseInt(queryLimitInput.value, 10);
+            clearStatus(tableStatusEl);
             try {
-                const data = await work();
-                if (data && data.hasErrors && data.errors && data.errors.length) {
-                    const first = data.errors[0];
-                    const message = (first && (first.reason || first.serverErrorCode))
-                        || 'CloudKit JS reported an error';
-                    setStatus(statusEl, `${label} failed: ${message}`, 'error');
-                    showResult(resultEl, data);
-                    return;
+                let payload;
+                if (currentMode === 'mistkit') {
+                    payload = await postJSON('/api/records/query', {
+                        recordType,
+                        limit: isFinite(limit) ? limit : undefined,
+                        sortBy: currentSort
+                            ? [{ field: currentSort.field, ascending: currentSort.ascending }]
+                            : undefined,
+                    });
+                } else {
+                    const query = { recordType };
+                    if (currentSort) {
+                        query.sortBy = [{
+                            fieldName: currentSort.field,
+                            ascending: currentSort.ascending,
+                        }];
+                    }
+                    payload = await ckJsDatabase().performQuery(query, {
+                        resultsLimit: isFinite(limit) ? limit : undefined,
+                    });
+                    if (payload && payload.hasErrors && payload.errors.length) {
+                        throw new Error(payload.errors[0].reason || 'CloudKit JS query failed');
+                    }
                 }
-                setStatus(statusEl, `${label} succeeded.`, 'success');
-                showResult(resultEl, data);
+                notes = normalizeRecords(payload);
+                if (selectedRecordName && !notes.some(n => n.recordName === selectedRecordName)) {
+                    clearForm();
+                } else {
+                    refreshFormState();
+                    renderRows();
+                }
+                showRaw(payload);
+                setStatus(tableStatusEl, `Loaded ${notes.length} record${notes.length === 1 ? '' : 's'}.`, 'success');
             } catch (error) {
-                const message = (error && error.message) || String(error);
-                setStatus(statusEl, `${label} failed: ${message}`, 'error');
-                if (error && typeof error === 'object') showResult(resultEl, error);
+                setStatus(tableStatusEl, `Query failed: ${error.message}`, 'error');
+                showRaw(error.payload || { message: error.message });
             }
         }
 
-        async function fetchRecordChangeTag(recordName) {
-            const result = await ckJsDatabase().fetchRecords([{ recordName }]);
-            if (result.hasErrors && result.errors.length) {
-                const first = result.errors[0];
-                throw new Error((first && first.reason) || 'fetchRecords failed');
+        async function saveNote() {
+            let fields;
+            try {
+                fields = buildFields();
+            } catch (error) {
+                setStatus(formStatusEl, error.message, 'error');
+                return;
             }
-            const record = result.records && result.records[0];
-            if (!record) throw new Error(`Record "${recordName}" not found`);
-            return record.recordChangeTag;
+            if (Object.keys(fields).length === 0) {
+                setStatus(formStatusEl, 'Provide a title or index.', 'error');
+                return;
+            }
+            const recordType = recordTypeInput.value.trim();
+            const note = selectedNote();
+            const isUpdate = note != null;
+            const label = isUpdate ? 'Update' : 'Create';
+            clearStatus(formStatusEl);
+            try {
+                let payload;
+                if (currentMode === 'mistkit') {
+                    if (isUpdate) {
+                        payload = await postJSON('/api/records/update', {
+                            recordType,
+                            recordName: note.recordName,
+                            fields,
+                            recordChangeTag: note.recordChangeTag,
+                        });
+                    } else {
+                        payload = await postJSON('/api/records/create', {
+                            recordType, fields,
+                        });
+                    }
+                } else {
+                    const record = { recordType, fields: ckJsFields(fields) };
+                    if (isUpdate) {
+                        record.recordName = note.recordName;
+                        record.recordChangeTag = note.recordChangeTag;
+                    }
+                    payload = await ckJsDatabase().saveRecords([record]);
+                    if (payload && payload.hasErrors && payload.errors.length) {
+                        throw new Error(payload.errors[0].reason || 'CloudKit JS save failed');
+                    }
+                }
+                showRaw(payload);
+                setStatus(formStatusEl, `${label} succeeded.`, 'success');
+                if (!isUpdate) clearForm();
+                await queryNotes();
+            } catch (error) {
+                setStatus(formStatusEl, `${label} failed: ${error.message}`, 'error');
+                showRaw(error.payload || { message: error.message });
+            }
         }
 
-        document.getElementById('query-btn').addEventListener('click', async () => {
-            const recordType = document.getElementById('query-record-type').value.trim();
-            const limit = parseInt(document.getElementById('query-limit').value, 10);
-            const statusEl = document.getElementById('query-status');
-            const resultEl = document.getElementById('query-result');
-            if (currentMode === 'mistkit') {
-                await runMistKitOperation('Query', '/api/records/query', {
-                    recordType, limit: isFinite(limit) ? limit : undefined,
-                }, statusEl, resultEl);
-                return;
+        // statusEl defaults to tableStatusEl: per-row Delete buttons live in
+        // the table, so feedback belongs above the table. The form panel's
+        // Delete button passes formStatusEl explicitly to keep its status
+        // alongside the form it acts on.
+        async function deleteNote(note, statusEl = tableStatusEl) {
+            clearStatus(statusEl);
+            try {
+                let payload;
+                if (currentMode === 'mistkit') {
+                    payload = await postJSON('/api/records/delete', {
+                        recordType: note.recordType,
+                        recordName: note.recordName,
+                        recordChangeTag: note.recordChangeTag,
+                    });
+                } else {
+                    payload = await ckJsDatabase().deleteRecords([{ recordName: note.recordName }]);
+                    if (payload && payload.hasErrors && payload.errors.length) {
+                        throw new Error(payload.errors[0].reason || 'CloudKit JS delete failed');
+                    }
+                }
+                showRaw(payload);
+                setStatus(statusEl, `Deleted ${note.recordName}.`, 'success');
+                if (note.recordName === selectedRecordName) clearForm();
+                await queryNotes();
+            } catch (error) {
+                setStatus(statusEl, `Delete failed: ${error.message}`, 'error');
+                showRaw(error.payload || { message: error.message });
             }
-            await runCloudKitJsOperation('Query', () =>
-                ckJsDatabase().performQuery({ recordType }, {
-                    resultsLimit: isFinite(limit) ? limit : undefined,
-                }),
-                statusEl, resultEl);
-        });
+        }
 
-        document.getElementById('create-btn').addEventListener('click', async () => {
-            const recordType = document.getElementById('create-record-type').value.trim();
-            const statusEl = document.getElementById('create-status');
-            const resultEl = document.getElementById('create-result');
-            const fields = parseFieldsJSON(document.getElementById('create-fields').value, statusEl);
-            if (!fields) return;
-            if (currentMode === 'mistkit') {
-                await runMistKitOperation('Create', '/api/records/create',
-                    { recordType, fields }, statusEl, resultEl);
-                return;
-            }
-            await runCloudKitJsOperation('Create', () =>
-                ckJsDatabase().saveRecords([{ recordType, fields: fieldsToCKJS(fields) }]),
-                statusEl, resultEl);
-        });
+        // ---- mode toggle ----
 
-        document.getElementById('update-btn').addEventListener('click', async () => {
-            const recordType = document.getElementById('update-record-type').value.trim();
-            const recordName = document.getElementById('update-record-name').value.trim();
-            const statusEl = document.getElementById('update-status');
-            const resultEl = document.getElementById('update-result');
-            if (!recordName) {
-                setStatus(statusEl, 'Record name is required.', 'error');
-                return;
-            }
-            const fields = parseFieldsJSON(document.getElementById('update-fields').value, statusEl);
-            if (!fields) return;
-            if (currentMode === 'mistkit') {
-                await runMistKitOperation('Update', '/api/records/update', {
-                    recordType, recordName, fields,
-                }, statusEl, resultEl);
-                return;
-            }
-            await runCloudKitJsOperation('Update', async () => {
-                const recordChangeTag = await fetchRecordChangeTag(recordName);
-                return ckJsDatabase().saveRecords([{
-                    recordType, recordName, recordChangeTag,
-                    fields: fieldsToCKJS(fields),
-                }]);
-            }, statusEl, resultEl);
-        });
+        document.getElementById('mode-mistkit').addEventListener('click', () => setMode('mistkit'));
+        document.getElementById('mode-cloudkitjs').addEventListener('click', () => setMode('cloudkitjs'));
 
-        document.getElementById('delete-btn').addEventListener('click', async () => {
-            const recordType = document.getElementById('delete-record-type').value.trim();
-            const recordName = document.getElementById('delete-record-name').value.trim();
-            const statusEl = document.getElementById('delete-status');
-            const resultEl = document.getElementById('delete-result');
-            if (!recordName) {
-                setStatus(statusEl, 'Record name is required.', 'error');
-                return;
-            }
-            if (currentMode === 'mistkit') {
-                await runMistKitOperation('Delete', '/api/records/delete',
-                    { recordType, recordName }, statusEl, resultEl);
-                return;
-            }
-            await runCloudKitJsOperation('Delete', () =>
-                ckJsDatabase().deleteRecords([{ recordName }]),
-                statusEl, resultEl);
+        function setMode(mode) {
+            if (mode === currentMode) return;
+            currentMode = mode;
+            const mistKitBtn = document.getElementById('mode-mistkit');
+            const cloudKitJsBtn = document.getElementById('mode-cloudkitjs');
+            mistKitBtn.classList.toggle('active', mode === 'mistkit');
+            cloudKitJsBtn.classList.toggle('active', mode === 'cloudkitjs');
+            modeBadge.textContent = mode === 'mistkit' ? 'MistKit' : 'CloudKit JS';
+            if (authComplete) queryNotes();
+        }
+
+        // ---- form wiring ----
+
+        saveBtn.addEventListener('click', saveNote);
+        clearBtn.addEventListener('click', clearForm);
+        deleteBtn.addEventListener('click', () => {
+            const note = selectedNote();
+            if (note) deleteNote(note, formStatusEl);
         });
+        refreshBtn.addEventListener('click', queryNotes);
 
         // ---- auth flow ----
 
         function setAuthed(authed) {
-            crudCard.classList.toggle('pre-auth', !authed);
+            authComplete = authed;
+            notesCard.classList.toggle('pre-auth', !authed);
             signoutButton.style.display = authed ? 'inline-block' : 'none';
         }
 
@@ -480,7 +787,7 @@
         }
 
         function renderTokenDisplay(token) {
-            crudCard.style.display = 'none';
+            notesCard.style.display = 'none';
             document.getElementById('signin-area').style.display = 'none';
             const card = document.createElement('div');
             card.className = 'card';
@@ -507,6 +814,7 @@
                 } else {
                     setStatus(authStatusDiv, `Authenticated as ${userIdentity.userRecordName}.`, 'success');
                     setAuthed(true);
+                    queryNotes();
                 }
             } catch (error) {
                 setStatus(authStatusDiv, `Authentication failed: ${error.message}`, 'error');
@@ -520,6 +828,8 @@
                 await container.signOut();
                 webAuthToken = null;
                 setAuthed(false);
+                notes = [];
+                clearForm();
                 setStatus(authStatusDiv, 'Signed out.', 'success');
             } catch (error) {
                 setStatus(authStatusDiv, 'Sign out failed: ' + error.message, 'error');
@@ -555,6 +865,8 @@
                 container.whenUserSignsOut().then(() => {
                     webAuthToken = null;
                     setAuthed(false);
+                    notes = [];
+                    clearForm();
                     setStatus(authStatusDiv, 'Signed out.', 'success');
                 });
             } catch (error) {
@@ -562,6 +874,7 @@
             }
         }
 
+        refreshFormState();
         initializeCloudKit();
     </script>
 </body>
