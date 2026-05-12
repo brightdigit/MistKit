@@ -29,6 +29,7 @@
 
 import Configuration
 import Foundation
+import MistKit
 import Testing
 
 @testable import MistDemoKit
@@ -55,6 +56,7 @@ internal struct AuthTokenConfigTests {
 
     #expect(config.apiToken == "tok")
     #expect(config.containerIdentifier == MistDemoConstants.Defaults.containerIdentifier)
+    #expect(config.environment == .development)
     #expect(config.port == 8_080)
     #expect(config.host == "127.0.0.1")
     #expect(config.noBrowser == false)
@@ -65,6 +67,7 @@ internal struct AuthTokenConfigTests {
     let config = AuthTokenConfig(
       apiToken: "tok",
       containerIdentifier: "iCloud.custom.id",
+      environment: .production,
       port: 9_000,
       host: "0.0.0.0",
       noBrowser: true
@@ -72,6 +75,7 @@ internal struct AuthTokenConfigTests {
 
     #expect(config.apiToken == "tok")
     #expect(config.containerIdentifier == "iCloud.custom.id")
+    #expect(config.environment == .production)
     #expect(config.port == 9_000)
     #expect(config.host == "0.0.0.0")
     #expect(config.noBrowser == true)
@@ -107,6 +111,7 @@ internal struct AuthTokenConfigTests {
 
     #expect(config.apiToken == "tok-xyz")
     #expect(config.containerIdentifier == MistDemoConstants.Defaults.containerIdentifier)
+    #expect(config.environment == .development)
     #expect(config.port == 8_080)
     #expect(config.host == "127.0.0.1")
     #expect(config.noBrowser == false)
@@ -117,6 +122,7 @@ internal struct AuthTokenConfigTests {
     let configuration = Self.configuration(values: [
       "api.token": .init(stringLiteral: "tok-xyz"),
       "container.identifier": .init(stringLiteral: "iCloud.custom.id"),
+      "environment": .init(stringLiteral: "production"),
       "port": .init(integerLiteral: 9_090),
       "host": .init(stringLiteral: "192.168.1.10"),
       "no.browser": .init(booleanLiteral: true),
@@ -126,8 +132,21 @@ internal struct AuthTokenConfigTests {
 
     #expect(config.apiToken == "tok-xyz")
     #expect(config.containerIdentifier == "iCloud.custom.id")
+    #expect(config.environment == .production)
     #expect(config.port == 9_090)
     #expect(config.host == "192.168.1.10")
     #expect(config.noBrowser == true)
+  }
+
+  @Test("Configuration init throws on invalid environment")
+  internal func invalidEnvironmentThrows() async {
+    let configuration = Self.configuration(values: [
+      "api.token": .init(stringLiteral: "tok-xyz"),
+      "environment": .init(stringLiteral: "staging"),
+    ])
+
+    await #expect(throws: ConfigurationError.self) {
+      _ = try await AuthTokenConfig(configuration: configuration)
+    }
   }
 }

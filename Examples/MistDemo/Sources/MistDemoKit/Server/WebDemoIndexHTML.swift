@@ -38,20 +38,11 @@
   /// against the same CloudKit container; the CloudKit JS side is wired
   /// in by #329.
   internal enum WebDemoIndexHTML {
-    internal static let content: String = {
-      guard
-        let url = Bundle.module.url(
-          forResource: "web-demo-index",
-          withExtension: "html"
-        ),
-        let data = try? Data(contentsOf: url),
-        let string = String(data: data, encoding: .utf8)
-      else {
-        preconditionFailure(
-          "web-demo-index.html missing from MistDemoKit bundle"
-        )
-      }
-      return string
-    }()
+    internal static let content: String = try! String(
+      contentsOf: Bundle.module.url(
+        forResource: "web-demo-index", withExtension: "html"
+      )!,
+      encoding: .utf8
+    ) 
   }
 #endif

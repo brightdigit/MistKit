@@ -42,8 +42,8 @@ internal actor WebAuthTokenStore {
 
   internal init(token: String? = nil) {
     self.token = token
-    var continuation: AsyncStream<String>.Continuation!
-    self.tokenUpdates = AsyncStream { continuation = $0 }
+    let (stream, continuation) = AsyncStream<String>.makeStream()
+    self.tokenUpdates = stream
     self.updatesContinuation = continuation
   }
 

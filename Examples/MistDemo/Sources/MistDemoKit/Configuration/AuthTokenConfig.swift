@@ -42,6 +42,8 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
   public let apiToken: String
   /// The CloudKit container identifier.
   public let containerIdentifier: String
+  /// The CloudKit environment (development / production).
+  public let environment: MistKit.Environment
   /// The server port for authentication.
   public let port: Int
   /// The server host for authentication.
@@ -54,12 +56,14 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     apiToken: String,
     // Demo default — override via --container-identifier or config key "container.identifier"
     containerIdentifier: String = MistDemoConstants.Defaults.containerIdentifier,
+    environment: MistKit.Environment = .development,
     port: Int = 8_080,
     host: String = "127.0.0.1",
     noBrowser: Bool = false
   ) {
     self.apiToken = apiToken
     self.containerIdentifier = containerIdentifier
+    self.environment = environment
     self.port = port
     self.host = host
     self.noBrowser = noBrowser
@@ -90,6 +94,14 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
         forKey: "container.identifier",
         default: MistDemoConstants.Defaults.containerIdentifier
       ) ?? MistDemoConstants.Defaults.containerIdentifier
+
+    let envString =
+      configReader.string(forKey: "environment", default: "development")
+      ?? "development"
+    guard let environment = MistKit.Environment(caseInsensitive: envString) else {
+      throw ConfigurationError.invalidEnvironment(envString)
+    }
+
     let port =
       configReader.int(forKey: "port", default: 8_080) ?? 8_080
     let host =
@@ -101,6 +113,7 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     self.init(
       apiToken: apiToken,
       containerIdentifier: containerIdentifier,
+      environment: environment,
       port: port,
       host: host,
       noBrowser: noBrowser

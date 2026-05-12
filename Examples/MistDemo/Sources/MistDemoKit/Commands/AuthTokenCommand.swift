@@ -28,9 +28,9 @@
 //
 
 #if canImport(Hummingbird)
-  internal import AsyncAlgorithms
   internal import Foundation
   internal import Hummingbird
+  internal import MistKit
 
   /// Command to obtain web authentication token via browser flow.
   public struct AuthTokenCommand: MistDemoCommand {
@@ -50,10 +50,11 @@
         mistdemo auth-token [options]
 
       OPTIONS:
-        --api-token <token>   CloudKit API token
-        --port <port>         Server port (default: 8080)
-        --host <host>         Server host (default: 127.0.0.1)
-        --no-browser          Don't open browser automatically
+        --api-token <token>      CloudKit API token
+        --environment <env>      development (default) | production
+        --port <port>            Server port (default: 8080)
+        --host <host>            Server host (default: 127.0.0.1)
+        --no-browser             Don't open browser automatically
       """
 
     internal let config: AuthTokenConfig
@@ -67,17 +68,20 @@
     public func execute() async throws {
       print("📍 Server URL: http://\(config.host):\(config.port)")
 
-      let tokenChannel = AsyncChannel<String>()
-      let responseCompleteChannel = AsyncChannel<Void>()
-
-      let server = AuthTokenServer(
+      let tokenStore = WebAuthTokenStore()
+      let server = WebDemoServer(
         apiToken: config.apiToken,
         containerIdentifier: config.containerIdentifier,
-        tokenChannel: tokenChannel,
-        responseCompleteChannel: responseCompleteChannel
+        environment: config.environment,
+        tokenStore: tokenStore,
+        backendFactory: .live(
+          apiToken: config.apiToken,
+          containerIdentifier: config.containerIdentifier,
+          environment: config.environment
+        ),
+        terminatesAfterAuth: true
       )
       let router = try server.makeRouter()
-
       let app = Application(
         router: router,
         configuration: .init(
@@ -85,58 +89,48 @@
         )
       )
 
-      let serverTask = Task { try await app.runService() }
+      let host = config.host
+      let port = config.port
+      let noBrowser = config.noBrowser
 
-      openBrowserIfNeeded()
-      let token = try await waitForToken(
-        channel: tokenChannel, serverTask: serverTask
-      )
-
-      var responseIterator =
-        responseCompleteChannel.makeAsyncIterator()
-      _ = await responseIterator.next()
-
-      serverTask.cancel()
-      try await Task.sleep(nanoseconds: 500_000_000)
-      print(token)
-    }
-
-    private func openBrowserIfNeeded() {
-      if !config.noBrowser {
-        Task {
-          try await Task.sleep(nanoseconds: 1_000_000_000)
-          BrowserOpener.openBrowser(
-            url: "http://\(config.host):\(config.port)"
-          )
-        }
-      }
-    }
-
-    private func waitForToken(
-      channel: AsyncChannel<String>,
-      serverTask: Task<Void, any Error>
-    ) async throws -> String {
+      let token: String
       do {
-        return try await withTimeoutAndSignals(
-          seconds: 300
-        ) {
-          var iterator = channel.makeAsyncIterator()
-          guard let value = await iterator.next() else {
+        token = try await withTimeoutAndSignals(seconds: 300) {
+          try await withThrowingTaskGroup(of: String?.self) { group in
+            group.addTask {
+              try await app.runService()
+              return nil
+            }
+            group.addTask {
+              if !noBrowser {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                BrowserOpener.openBrowser(url: "http://\(host):\(port)")
+              }
+              return nil
+            }
+            group.addTask {
+              var iterator = tokenStore.tokenUpdates.makeAsyncIterator()
+              return await iterator.next()
+            }
+
+            while let result = try await group.next() {
+              if let captured = result {
+                group.cancelAll()
+                return captured
+              }
+            }
             throw AuthTokenError.serverError(
-              "Token channel closed"
+              "Token capture failed unexpectedly"
             )
           }
-          return value
         }
       } catch let error as AsyncTimeoutError {
-        serverTask.cancel()
-        throw AuthTokenError.timeout(
-          error.localizedDescription
-        )
-      } catch {
-        serverTask.cancel()
-        throw error
+        throw AuthTokenError.timeout(error.localizedDescription)
       }
+
+      // Let the 205 response reach the browser before the process exits.
+      try? await Task.sleep(nanoseconds: 500_000_000)
+      print(token)
     }
   }
 #endif

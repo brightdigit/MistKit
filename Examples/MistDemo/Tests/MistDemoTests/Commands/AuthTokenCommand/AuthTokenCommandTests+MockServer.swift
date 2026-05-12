@@ -52,19 +52,6 @@
         #expect(request.userRecordName == "user123")
       }
 
-      @Test("AuthResponse encodes correctly")
-      internal func authResponseEncodesCorrectly() throws {
-        let response = AuthResponse(
-          userRecordName: "user123",
-          cloudKitData: CloudKitData(user: nil, zones: [], error: nil),
-          message: "Success"
-        )
-
-        let data = try JSONEncoder().encode(response)
-
-        // Verify the encoded data is not empty
-        #expect(!data.isEmpty)
-      }
     }
   }
 #endif
