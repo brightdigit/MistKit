@@ -130,11 +130,13 @@
             <h2>Backend</h2>
             <div class="mode-toggle">
                 <button id="mode-mistkit" class="active" type="button">MistKit (server)</button>
-                <button id="mode-cloudkitjs" type="button" disabled>CloudKit JS (browser)</button>
+                <button id="mode-cloudkitjs" type="button">CloudKit JS (browser)</button>
             </div>
             <div class="mode-hint" id="mode-hint">
-                MistKit mode routes through Hummingbird → CloudKit Web Services. CloudKit JS
-                mode (browser → CloudKit Web Services) is wired in by #329.
+                MistKit mode routes browser → Hummingbird → CloudKit Web Services.
+                CloudKit JS mode routes browser → CloudKit Web Services directly.
+                Both share the same Apple ID session token, hit the same container,
+                and exercise the same REST surface — only the SDK shape differs.
             </div>
 
             <h2 style="margin-top: 24px;">Auth</h2>
@@ -302,8 +304,52 @@
             }
         }
 
-        function cloudKitJsNotWired(label, statusEl) {
-            setStatus(statusEl, `${label} via CloudKit JS is not wired yet — see #329.`, 'error');
+        function ckJsDatabase() {
+            return container.privateCloudDatabase;
+        }
+
+        // CloudKit JS expects field values as { key: { value: ... } } while the
+        // MistKit-mode endpoints accept the flat { key: "value" } shape this
+        // demo's textareas already produce — wrap before saveRecords.
+        function fieldsToCKJS(fields) {
+            const wrapped = {};
+            for (const [k, v] of Object.entries(fields)) {
+                wrapped[k] = { value: v };
+            }
+            return wrapped;
+        }
+
+        async function runCloudKitJsOperation(label, work, statusEl, resultEl) {
+            clearStatus(statusEl);
+            resultEl.style.display = 'none';
+            try {
+                const data = await work();
+                if (data && data.hasErrors && data.errors && data.errors.length) {
+                    const first = data.errors[0];
+                    const message = (first && (first.reason || first.serverErrorCode))
+                        || 'CloudKit JS reported an error';
+                    setStatus(statusEl, `${label} failed: ${message}`, 'error');
+                    showResult(resultEl, data);
+                    return;
+                }
+                setStatus(statusEl, `${label} succeeded.`, 'success');
+                showResult(resultEl, data);
+            } catch (error) {
+                const message = (error && error.message) || String(error);
+                setStatus(statusEl, `${label} failed: ${message}`, 'error');
+                if (error && typeof error === 'object') showResult(resultEl, error);
+            }
+        }
+
+        async function fetchRecordChangeTag(recordName) {
+            const result = await ckJsDatabase().fetchRecords([{ recordName }]);
+            if (result.hasErrors && result.errors.length) {
+                const first = result.errors[0];
+                throw new Error((first && first.reason) || 'fetchRecords failed');
+            }
+            const record = result.records && result.records[0];
+            if (!record) throw new Error(`Record "${recordName}" not found`);
+            return record.recordChangeTag;
         }
 
         document.getElementById('query-btn').addEventListener('click', async () => {
@@ -311,20 +357,33 @@
             const limit = parseInt(document.getElementById('query-limit').value, 10);
             const statusEl = document.getElementById('query-status');
             const resultEl = document.getElementById('query-result');
-            if (currentMode !== 'mistkit') return cloudKitJsNotWired('Query', statusEl);
-            await runMistKitOperation('Query', '/api/records/query', {
-                recordType, limit: isFinite(limit) ? limit : undefined,
-            }, statusEl, resultEl);
+            if (currentMode === 'mistkit') {
+                await runMistKitOperation('Query', '/api/records/query', {
+                    recordType, limit: isFinite(limit) ? limit : undefined,
+                }, statusEl, resultEl);
+                return;
+            }
+            await runCloudKitJsOperation('Query', () =>
+                ckJsDatabase().performQuery({ recordType }, {
+                    resultsLimit: isFinite(limit) ? limit : undefined,
+                }),
+                statusEl, resultEl);
         });
 
         document.getElementById('create-btn').addEventListener('click', async () => {
             const recordType = document.getElementById('create-record-type').value.trim();
             const statusEl = document.getElementById('create-status');
             const resultEl = document.getElementById('create-result');
-            if (currentMode !== 'mistkit') return cloudKitJsNotWired('Create', statusEl);
             const fields = parseFieldsJSON(document.getElementById('create-fields').value, statusEl);
             if (!fields) return;
-            await runMistKitOperation('Create', '/api/records/create', { recordType, fields }, statusEl, resultEl);
+            if (currentMode === 'mistkit') {
+                await runMistKitOperation('Create', '/api/records/create',
+                    { recordType, fields }, statusEl, resultEl);
+                return;
+            }
+            await runCloudKitJsOperation('Create', () =>
+                ckJsDatabase().saveRecords([{ recordType, fields: fieldsToCKJS(fields) }]),
+                statusEl, resultEl);
         });
 
         document.getElementById('update-btn').addEventListener('click', async () => {
@@ -332,15 +391,24 @@
             const recordName = document.getElementById('update-record-name').value.trim();
             const statusEl = document.getElementById('update-status');
             const resultEl = document.getElementById('update-result');
-            if (currentMode !== 'mistkit') return cloudKitJsNotWired('Update', statusEl);
             if (!recordName) {
                 setStatus(statusEl, 'Record name is required.', 'error');
                 return;
             }
             const fields = parseFieldsJSON(document.getElementById('update-fields').value, statusEl);
             if (!fields) return;
-            await runMistKitOperation('Update', '/api/records/update', {
-                recordType, recordName, fields,
+            if (currentMode === 'mistkit') {
+                await runMistKitOperation('Update', '/api/records/update', {
+                    recordType, recordName, fields,
+                }, statusEl, resultEl);
+                return;
+            }
+            await runCloudKitJsOperation('Update', async () => {
+                const recordChangeTag = await fetchRecordChangeTag(recordName);
+                return ckJsDatabase().saveRecords([{
+                    recordType, recordName, recordChangeTag,
+                    fields: fieldsToCKJS(fields),
+                }]);
             }, statusEl, resultEl);
         });
 
@@ -349,12 +417,18 @@
             const recordName = document.getElementById('delete-record-name').value.trim();
             const statusEl = document.getElementById('delete-status');
             const resultEl = document.getElementById('delete-result');
-            if (currentMode !== 'mistkit') return cloudKitJsNotWired('Delete', statusEl);
             if (!recordName) {
                 setStatus(statusEl, 'Record name is required.', 'error');
                 return;
             }
-            await runMistKitOperation('Delete', '/api/records/delete', { recordType, recordName }, statusEl, resultEl);
+            if (currentMode === 'mistkit') {
+                await runMistKitOperation('Delete', '/api/records/delete',
+                    { recordType, recordName }, statusEl, resultEl);
+                return;
+            }
+            await runCloudKitJsOperation('Delete', () =>
+                ckJsDatabase().deleteRecords([{ recordName }]),
+                statusEl, resultEl);
         });
 
         // ---- auth flow ----
