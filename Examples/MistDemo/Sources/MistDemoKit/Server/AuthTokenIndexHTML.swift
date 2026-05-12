@@ -38,20 +38,11 @@
   /// CLI executable (macOS / Linux); the iOS MistDemoApp target does not
   /// depend on MistDemoKit and therefore never bundles this resource.
   internal enum AuthTokenIndexHTML {
-    internal static let content: String = {
-      guard
-        let url = Bundle.module.url(
-          forResource: "auth-token-index",
-          withExtension: "html"
-        ),
-        let data = try? Data(contentsOf: url),
-        let string = String(data: data, encoding: .utf8)
-      else {
-        preconditionFailure(
-          "auth-token-index.html missing from MistDemoKit bundle"
-        )
-      }
-      return string
-    }()
+    internal static let content: String = try! String(
+      contentsOf: Bundle.module.url(
+        forResource: "auth-token-index", withExtension: "html"
+      )!,
+      encoding: .utf8
+    )
   }
 #endif
