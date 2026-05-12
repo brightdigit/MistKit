@@ -1,5 +1,5 @@
 //
-//  TestIntegrationConfigTests.swift
+//  TestPublicConfigTests.swift
 //  MistDemoTests
 //
 //  Created by Leo Dion.
@@ -32,12 +32,12 @@ import Testing
 
 @testable import MistDemoKit
 
-@Suite("TestIntegrationConfig Tests")
-internal struct TestIntegrationConfigTests {
+@Suite("TestPublicConfig Tests")
+internal struct TestPublicConfigTests {
   @Test("Memberwise defaults: recordCount=10, assetSizeKB=100, flags false, lookupEmail nil")
   internal func defaults() async throws {
     let baseConfig = try await MistDemoConfig()
-    let config = TestIntegrationConfig(base: baseConfig)
+    let config = TestPublicConfig(base: baseConfig)
 
     #expect(config.recordCount == 10)
     #expect(config.assetSizeKB == 100)
@@ -49,7 +49,7 @@ internal struct TestIntegrationConfigTests {
   @Test("Memberwise init accepts custom values")
   internal func customValues() async throws {
     let baseConfig = try await MistDemoConfig()
-    let config = TestIntegrationConfig(
+    let config = TestPublicConfig(
       base: baseConfig,
       recordCount: 25,
       assetSizeKB: 512,
@@ -68,7 +68,7 @@ internal struct TestIntegrationConfigTests {
   @Test("Memberwise init preserves base configuration values")
   internal func preservesBase() async throws {
     let baseConfig = try await MistDemoConfig(containerIdentifier: "iCloud.integration.test")
-    let config = TestIntegrationConfig(base: baseConfig)
+    let config = TestPublicConfig(base: baseConfig)
 
     #expect(config.base.containerIdentifier == "iCloud.integration.test")
   }
@@ -76,7 +76,7 @@ internal struct TestIntegrationConfigTests {
   @Test("Memberwise init accepts zero recordCount")
   internal func zeroRecordCount() async throws {
     let baseConfig = try await MistDemoConfig()
-    let config = TestIntegrationConfig(base: baseConfig, recordCount: 0)
+    let config = TestPublicConfig(base: baseConfig, recordCount: 0)
 
     #expect(config.recordCount == 0)
   }

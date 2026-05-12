@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MistKit Web Demo</title>
+    <style>
+        :root {
+            --bg: #f5f5f7;
+            --card: #ffffff;
+            --ink: #1d1d1f;
+            --muted: #6e6e73;
+            --accent: #0369a1;
+            --accent-dark: #0c4a6e;
+            --success-bg: #d1f5d3;
+            --success-fg: #1d5e20;
+            --error-bg: #fdd;
+            --error-fg: #c00;
+            --border: #d0d7de;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background-color: var(--bg);
+            color: var(--ink);
+        }
+        .layout {
+            max-width: 920px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        }
+        h1 { font-size: 24px; margin: 0 0 4px 0; }
+        h2 { font-size: 18px; margin: 0 0 12px 0; }
+        h3 { font-size: 15px; margin: 0 0 8px 0; }
+        p { color: var(--muted); margin: 0 0 16px 0; line-height: 1.5; }
+        label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        textarea { font-family: 'SF Mono', Menlo, monospace; min-height: 80px; }
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        button:hover:not(:disabled) { background: var(--accent-dark); }
+        button:disabled { opacity: 0.45; cursor: not-allowed; }
+        .status {
+            margin-top: 16px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+        }
+        .status.success { background: var(--success-bg); color: var(--success-fg); display: block; }
+        .status.error { background: var(--error-bg); color: var(--error-fg); display: block; }
+        pre {
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 8px 0 0 0;
+            max-height: 320px;
+        }
+        .mode-toggle {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0 4px;
+        }
+        .mode-toggle button {
+            background: transparent;
+            color: var(--ink);
+            border: 1px solid var(--border);
+            font-weight: 500;
+        }
+        .mode-toggle button.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .mode-toggle button[disabled] { opacity: 0.5; }
+        .mode-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        .crud-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 720px) {
+            .crud-grid { grid-template-columns: 1fr; }
+        }
+        .pre-auth { opacity: 0.5; pointer-events: none; }
+        #signin-area { margin-top: 8px; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #eef; color: var(--accent); }
+        .row { display: flex; align-items: center; gap: 8px; }
+    </style>
+    <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js" onerror="console.log('Failed to load CloudKit.js')"></script>
+</head>
+<body>
+    <div class="layout">
+        <div class="card">
+            <h1>MistKit Web Demo</h1>
+            <p>
+                Authenticate with your Apple ID, then exercise the same CloudKit
+                operations through MistKit (server) or CloudKit JS (browser) and
+                compare the wire-level behavior.
+            </p>
+
+            <h2>Backend</h2>
+            <div class="mode-toggle">
+                <button id="mode-mistkit" class="active" type="button">MistKit (server)</button>
+                <button id="mode-cloudkitjs" type="button" disabled>CloudKit JS (browser)</button>
+            </div>
+            <div class="mode-hint" id="mode-hint">
+                MistKit mode routes through Hummingbird → CloudKit Web Services. CloudKit JS
+                mode (browser → CloudKit Web Services) is wired in by #329.
+            </div>
+
+            <h2 style="margin-top: 24px;">Auth</h2>
+            <div id="signin-area">
+                <div id="signin-button"></div>
+                <button id="signout-button" type="button" style="display: none; background: #ff3b30;">Sign Out</button>
+            </div>
+            <div id="auth-status" class="status"></div>
+        </div>
+
+        <div class="card crud-card pre-auth" id="crud-card">
+            <h2>Records <span class="badge" id="crud-mode-badge">MistKit</span></h2>
+            <div class="crud-grid">
+                <section>
+                    <h3>Query</h3>
+                    <label for="query-record-type">Record type</label>
+                    <input id="query-record-type" type="text" value="Note">
+                    <label for="query-limit">Limit (1–200)</label>
+                    <input id="query-limit" type="number" value="20" min="1" max="200">
+                    <div class="row" style="margin-top: 8px;">
+                        <button id="query-btn" type="button">Query</button>
+                    </div>
+                    <div id="query-status" class="status"></div>
+                    <pre id="query-result" style="display: none;"></pre>
+                </section>
+
+                <section>
+                    <h3>Create</h3>
+                    <label for="create-record-type">Record type</label>
+                    <input id="create-record-type" type="text" value="Note">
+                    <label for="create-fields">Fields (JSON object of string values)</label>
+                    <textarea id="create-fields">{"title": "Hello from MistKit"}</textarea>
+                    <div class="row" style="margin-top: 8px;">
+                        <button id="create-btn" type="button">Create</button>
+                    </div>
+                    <div id="create-status" class="status"></div>
+                    <pre id="create-result" style="display: none;"></pre>
+                </section>
+
+                <section>
+                    <h3>Update</h3>
+                    <label for="update-record-type">Record type</label>
+                    <input id="update-record-type" type="text" value="Note">
+                    <label for="update-record-name">Record name</label>
+                    <input id="update-record-name" type="text" placeholder="e.g. abc-123">
+                    <label for="update-fields">Fields (JSON object of string values)</label>
+                    <textarea id="update-fields">{"title": "Updated"}</textarea>
+                    <div class="row" style="margin-top: 8px;">
+                        <button id="update-btn" type="button">Update</button>
+                    </div>
+                    <div id="update-status" class="status"></div>
+                    <pre id="update-result" style="display: none;"></pre>
+                </section>
+
+                <section>
+                    <h3>Delete</h3>
+                    <label for="delete-record-type">Record type</label>
+                    <input id="delete-record-type" type="text" value="Note">
+                    <label for="delete-record-name">Record name</label>
+                    <input id="delete-record-name" type="text" placeholder="e.g. abc-123">
+                    <div class="row" style="margin-top: 8px;">
+                        <button id="delete-btn" type="button">Delete</button>
+                    </div>
+                    <div id="delete-status" class="status"></div>
+                    <pre id="delete-result" style="display: none;"></pre>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let container = null;
+        let webAuthToken = null;
+        let authenticationInProgress = false;
+        let currentMode = 'mistkit'; // 'mistkit' | 'cloudkitjs'
+
+        const authStatusDiv = document.getElementById('auth-status');
+        const signinButton = document.getElementById('signin-button');
+        const signoutButton = document.getElementById('signout-button');
+        const crudCard = document.getElementById('crud-card');
+        const modeBadge = document.getElementById('crud-mode-badge');
+
+        // ---- shared helpers ----
+
+        function setStatus(el, message, kind) {
+            el.className = `status ${kind || ''}`;
+            el.textContent = message;
+            if (kind) el.style.display = 'block';
+        }
+
+        function clearStatus(el) {
+            el.className = 'status';
+            el.textContent = '';
+            el.style.display = 'none';
+        }
+
+        function showResult(el, value) {
+            el.style.display = 'block';
+            el.textContent = JSON.stringify(value, null, 2);
+        }
+
+        async function postJSON(path, body) {
+            const response = await fetch(path, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            const text = await response.text();
+            let payload;
+            try { payload = text ? JSON.parse(text) : null; } catch { payload = { message: text }; }
+            if (!response.ok) {
+                const msg = (payload && payload.message) || `HTTP ${response.status}`;
+                const err = new Error(msg);
+                err.payload = payload;
+                err.status = response.status;
+                throw err;
+            }
+            return payload;
+        }
+
+        // ---- mode toggle ----
+
+        document.getElementById('mode-mistkit').addEventListener('click', () => setMode('mistkit'));
+        document.getElementById('mode-cloudkitjs').addEventListener('click', () => setMode('cloudkitjs'));
+
+        function setMode(mode) {
+            currentMode = mode;
+            const mistKitBtn = document.getElementById('mode-mistkit');
+            const cloudKitJsBtn = document.getElementById('mode-cloudkitjs');
+            mistKitBtn.classList.toggle('active', mode === 'mistkit');
+            cloudKitJsBtn.classList.toggle('active', mode === 'cloudkitjs');
+            modeBadge.textContent = mode === 'mistkit' ? 'MistKit' : 'CloudKit JS';
+        }
+
+        // ---- CRUD ----
+
+        function parseFieldsJSON(raw, statusEl) {
+            try {
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                    throw new Error('Fields must be a JSON object');
+                }
+                for (const [k, v] of Object.entries(parsed)) {
+                    if (typeof v !== 'string') {
+                        throw new Error(`Field "${k}" must be a string (this demo only supports string fields)`);
+                    }
+                }
+                return parsed;
+            } catch (error) {
+                setStatus(statusEl, error.message, 'error');
+                return null;
+            }
+        }
+
+        async function runMistKitOperation(label, path, body, statusEl, resultEl) {
+            clearStatus(statusEl);
+            resultEl.style.display = 'none';
+            try {
+                const data = await postJSON(path, body);
+                setStatus(statusEl, `${label} succeeded.`, 'success');
+                showResult(resultEl, data);
+            } catch (error) {
+                setStatus(statusEl, `${label} failed: ${error.message}`, 'error');
+                if (error.payload) showResult(resultEl, error.payload);
+            }
+        }
+
+        function cloudKitJsNotWired(label, statusEl) {
+            setStatus(statusEl, `${label} via CloudKit JS is not wired yet — see #329.`, 'error');
+        }
+
+        document.getElementById('query-btn').addEventListener('click', async () => {
+            const recordType = document.getElementById('query-record-type').value.trim();
+            const limit = parseInt(document.getElementById('query-limit').value, 10);
+            const statusEl = document.getElementById('query-status');
+            const resultEl = document.getElementById('query-result');
+            if (currentMode !== 'mistkit') return cloudKitJsNotWired('Query', statusEl);
+            await runMistKitOperation('Query', '/api/records/query', {
+                recordType, limit: isFinite(limit) ? limit : undefined,
+            }, statusEl, resultEl);
+        });
+
+        document.getElementById('create-btn').addEventListener('click', async () => {
+            const recordType = document.getElementById('create-record-type').value.trim();
+            const statusEl = document.getElementById('create-status');
+            const resultEl = document.getElementById('create-result');
+            if (currentMode !== 'mistkit') return cloudKitJsNotWired('Create', statusEl);
+            const fields = parseFieldsJSON(document.getElementById('create-fields').value, statusEl);
+            if (!fields) return;
+            await runMistKitOperation('Create', '/api/records/create', { recordType, fields }, statusEl, resultEl);
+        });
+
+        document.getElementById('update-btn').addEventListener('click', async () => {
+            const recordType = document.getElementById('update-record-type').value.trim();
+            const recordName = document.getElementById('update-record-name').value.trim();
+            const statusEl = document.getElementById('update-status');
+            const resultEl = document.getElementById('update-result');
+            if (currentMode !== 'mistkit') return cloudKitJsNotWired('Update', statusEl);
+            if (!recordName) {
+                setStatus(statusEl, 'Record name is required.', 'error');
+                return;
+            }
+            const fields = parseFieldsJSON(document.getElementById('update-fields').value, statusEl);
+            if (!fields) return;
+            await runMistKitOperation('Update', '/api/records/update', {
+                recordType, recordName, fields,
+            }, statusEl, resultEl);
+        });
+
+        document.getElementById('delete-btn').addEventListener('click', async () => {
+            const recordType = document.getElementById('delete-record-type').value.trim();
+            const recordName = document.getElementById('delete-record-name').value.trim();
+            const statusEl = document.getElementById('delete-status');
+            const resultEl = document.getElementById('delete-result');
+            if (currentMode !== 'mistkit') return cloudKitJsNotWired('Delete', statusEl);
+            if (!recordName) {
+                setStatus(statusEl, 'Record name is required.', 'error');
+                return;
+            }
+            await runMistKitOperation('Delete', '/api/records/delete', { recordType, recordName }, statusEl, resultEl);
+        });
+
+        // ---- auth flow ----
+
+        function setAuthed(authed) {
+            crudCard.classList.toggle('pre-auth', !authed);
+            signoutButton.style.display = authed ? 'inline-block' : 'none';
+        }
+
+        async function loadServerConfig() {
+            const response = await fetch('/api/config');
+            if (!response.ok) throw new Error('Failed to load server config: ' + response.status);
+            return response.json();
+        }
+
+        async function pollWebAuthToken() {
+            const pollIntervalMs = 250;
+            const pollDeadlineMs = 10_000;
+            const pollStart = Date.now();
+            return new Promise((resolve, reject) => {
+                const handle = setInterval(() => {
+                    const token = container?._auth?._ckSession;
+                    if (token) {
+                        clearInterval(handle);
+                        resolve(token);
+                        return;
+                    }
+                    if (Date.now() - pollStart >= pollDeadlineMs) {
+                        clearInterval(handle);
+                        reject(new Error('Timeout waiting for web auth token'));
+                    }
+                }, pollIntervalMs);
+            });
+        }
+
+        async function postAuthenticate(userIdentity, token) {
+            const response = await fetch('/api/authenticate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionToken: token,
+                    userRecordName: userIdentity.userRecordName,
+                }),
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.status;
+        }
+
+        function renderTokenDisplay(token) {
+            crudCard.style.display = 'none';
+            document.getElementById('signin-area').style.display = 'none';
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <h2>Web Auth Token captured</h2>
+                <p>Use this token for command-line CloudKit API access:</p>
+                <pre style="user-select: all; padding: 12px; background: #f6f8fa; border-radius: 6px; word-break: break-all; white-space: pre-wrap;">${token}</pre>
+                <p>The server has shut down — you can close this window.</p>
+            `;
+            document.querySelector('.layout').appendChild(card);
+        }
+
+        async function handleAuthentication(userIdentity) {
+            if (authenticationInProgress) return;
+            authenticationInProgress = true;
+            setStatus(authStatusDiv, 'Capturing web auth token...', 'success');
+            try {
+                const token = await pollWebAuthToken();
+                webAuthToken = token;
+                const status = await postAuthenticate(userIdentity, token);
+                if (status === 205) {
+                    setStatus(authStatusDiv, 'Authentication complete.', 'success');
+                    renderTokenDisplay(token);
+                } else {
+                    setStatus(authStatusDiv, `Authenticated as ${userIdentity.userRecordName}.`, 'success');
+                    setAuthed(true);
+                }
+            } catch (error) {
+                setStatus(authStatusDiv, `Authentication failed: ${error.message}`, 'error');
+            } finally {
+                authenticationInProgress = false;
+            }
+        }
+
+        signoutButton.addEventListener('click', async () => {
+            try {
+                await container.signOut();
+                webAuthToken = null;
+                setAuthed(false);
+                setStatus(authStatusDiv, 'Signed out.', 'success');
+            } catch (error) {
+                setStatus(authStatusDiv, 'Sign out failed: ' + error.message, 'error');
+            }
+        });
+
+        async function initializeCloudKit() {
+            try {
+                if (typeof CloudKit === 'undefined') {
+                    throw new Error('CloudKit.js failed to load');
+                }
+                const serverConfig = await loadServerConfig();
+                CloudKit.configure({
+                    containers: [{
+                        containerIdentifier: serverConfig.containerIdentifier,
+                        apiTokenAuth: {
+                            apiToken: serverConfig.apiToken,
+                            persist: true,
+                            signInButton: { id: 'signin-button', theme: 'black' },
+                        },
+                        environment: serverConfig.environment || 'development',
+                    }],
+                });
+                container = CloudKit.getDefaultContainer();
+                const userIdentity = await container.setUpAuth();
+                if (userIdentity) {
+                    setStatus(authStatusDiv, 'Already signed in. Capturing token...', 'success');
+                    await handleAuthentication(userIdentity);
+                } else {
+                    setStatus(authStatusDiv, 'Click "Sign In with Apple ID" to authenticate.', 'success');
+                }
+                container.whenUserSignsIn().then((identity) => handleAuthentication(identity));
+                container.whenUserSignsOut().then(() => {
+                    webAuthToken = null;
+                    setAuthed(false);
+                    setStatus(authStatusDiv, 'Signed out.', 'success');
+                });
+            } catch (error) {
+                setStatus(authStatusDiv, 'CloudKit setup failed: ' + error.message, 'error');
+            }
+        }
+
+        initializeCloudKit();
+    </script>
+</body>
+</html>

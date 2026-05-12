@@ -1,5 +1,5 @@
 //
-//  AuthTokenConfig.swift
+//  WebConfig.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -31,8 +31,12 @@ public import ConfigKeyKit
 import Foundation
 public import MistKit
 
-/// Configuration for auth-token command.
-public struct AuthTokenConfig: Sendable, ConfigurationParseable {
+/// Configuration for the long-running `web` demo command.
+///
+/// Pairs the same auth-flow inputs as `AuthTokenConfig` with the CloudKit
+/// environment so the server can build a `CloudKitService` after the user
+/// completes the browser-side auth round trip.
+public struct WebConfig: Sendable, ConfigurationParseable {
   /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
   /// The base configuration type.
@@ -44,9 +48,9 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
   public let containerIdentifier: String
   /// The CloudKit environment (development / production).
   public let environment: MistKit.Environment
-  /// The server port for authentication.
+  /// The server port.
   public let port: Int
-  /// The server host for authentication.
+  /// The server host.
   public let host: String
   /// Whether to skip opening the browser.
   public let noBrowser: Bool
@@ -54,7 +58,6 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
   /// Creates a new instance.
   public init(
     apiToken: String,
-    // Demo default — override via --container-identifier or config key "container.identifier"
     containerIdentifier: String = MistDemoConstants.Defaults.containerIdentifier,
     environment: MistKit.Environment = .development,
     port: Int = 8_080,
@@ -76,7 +79,6 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
   ) async throws {
     let configReader = configuration
 
-    // Parse command-specific options
     let apiToken =
       configReader.string(forKey: "api.token", isSecret: true) ?? ""
     guard !apiToken.isEmpty else {
@@ -87,8 +89,6 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
       )
     }
 
-    // Demo default — override via --container-identifier
-    // or config key "container.identifier"
     let containerIdentifier =
       configReader.string(
         forKey: "container.identifier",

@@ -1,6 +1,6 @@
 //
-//  AuthTokenCommandTests+MockServer.swift
-//  MistDemoTests
+//  WebAuthTokenStore.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,30 +27,40 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Hummingbird)
-  import Foundation
-  import Testing
+/// Thread-safe holder for the captured `ckWebAuthToken`.
+///
+/// The web-demo's `/api/authenticate` route writes here when the browser
+/// completes the CloudKit auth flow; the CRUD routes read here on each
+/// request to authorize themselves against the captured session.
+///
+/// `tokenUpdates` yields each captured token so one-shot consumers (e.g.
+/// the auth-token command) can await the first emission and shut down.
+internal actor WebAuthTokenStore {
+  private var token: String?
+  private let updatesContinuation: AsyncStream<String>.Continuation
+  nonisolated internal let tokenUpdates: AsyncStream<String>
 
-  @testable import MistDemoKit
-
-  extension AuthTokenCommandTests {
-    @Suite("Mock Server")
-    internal struct MockServer {
-      @Test("AuthRequest decodes correctly")
-      internal func authRequestDecodesCorrectly() throws {
-        let json = """
-          {
-            "sessionToken": "mock-session-token",
-            "userRecordName": "user123"
-          }
-          """
-
-        let data = Data(json.utf8)
-        let request = try JSONDecoder().decode(AuthRequest.self, from: data)
-
-        #expect(request.sessionToken == "mock-session-token")
-        #expect(request.userRecordName == "user123")
-      }
-    }
+  internal var currentToken: String? {
+    self.token
   }
-#endif
+
+  internal init(token: String? = nil) {
+    self.token = token
+    let (stream, continuation) = AsyncStream<String>.makeStream()
+    self.tokenUpdates = stream
+    self.updatesContinuation = continuation
+  }
+
+  internal func update(_ token: String) {
+    self.token = token
+    updatesContinuation.yield(token)
+  }
+
+  internal func clear() {
+    self.token = nil
+  }
+
+  deinit {
+    updatesContinuation.finish()
+  }
+}

@@ -1,5 +1,5 @@
 //
-//  AuthTokenIndexHTML.swift
+//  LoopbackOnlyMiddleware.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,21 +28,24 @@
 //
 
 #if canImport(Hummingbird)
-  internal import Foundation
+  internal import Hummingbird
 
-  /// Loader for the CloudKit auth-flow page served by `AuthTokenServer`.
-  ///
-  /// The HTML+JS lives in `Resources/auth-token-index.html` and is read
-  /// from `Bundle.module` on first access. The resource only ships in the
-  /// MistDemoKit bundle, which is consumed exclusively by the `mistdemo`
-  /// CLI executable (macOS / Linux); the iOS MistDemoApp target does not
-  /// depend on MistDemoKit and therefore never bundles this resource.
-  internal enum AuthTokenIndexHTML {
-    internal static let content: String = try! String(
-      contentsOf: Bundle.module.url(
-        forResource: "auth-token-index", withExtension: "html"
-      )!,
-      encoding: .utf8
-    )
+  /// Rejects requests whose `:authority` is not a loopback host with
+  /// `403 Forbidden`. Scoped to the `/api` router group so the local-only
+  /// surface (config, auth capture, CRUD) can't be reached from a
+  /// non-loopback origin while the index page itself stays unguarded.
+  internal struct LoopbackOnlyMiddleware<Context: RequestContext>:
+    RouterMiddleware
+  {
+    internal func handle(
+      _ request: Request,
+      context: Context,
+      next: (Request, Context) async throws -> Response
+    ) async throws -> Response {
+      guard LoopbackAuthority.isLoopback(request.head.authority ?? "") else {
+        return Response(status: .forbidden)
+      }
+      return try await next(request, context)
+    }
   }
 #endif

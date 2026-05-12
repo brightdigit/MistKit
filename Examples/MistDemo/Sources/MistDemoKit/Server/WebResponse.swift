@@ -1,5 +1,5 @@
 //
-//  CloudKitData.swift
+//  WebResponse.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,22 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import MistKit
+internal import Foundation
+internal import MistKit
 
-/// CloudKit user and zone data for authentication response.
-///
-/// This model encapsulates CloudKit information retrieved during the
-/// authentication flow, including user details and available zones.
-/// It is used to serialize CloudKit information in auth flow responses.
-///
-/// - Note: Used in AuthResponse.swift line 13 for encoding auth response data
-internal struct CloudKitData: Encodable {
-  /// User information retrieved from CloudKit (nil if retrieval failed).
-  internal let user: UserInfo?
+/// Response payloads for the web command's CRUD endpoints.
+internal enum WebResponse {
+  /// Body returned by record-shaped routes (query / create / update).
+  internal struct Records: Encodable {
+    internal let records: [RecordInfo]
+  }
 
-  /// List of available zones in the user's container.
-  internal let zones: [ZoneInfo]
+  /// Body returned by `delete` (no record payload).
+  internal struct Delete: Encodable {
+    internal let recordName: String
+    internal let deleted: Bool
+  }
 
-  /// Error message if any part of the CloudKit data retrieval failed.
-  internal let error: String?
+  /// Body returned for any handled CloudKit/MistKit error so the UI can
+  /// surface the message without parsing transport-level failures.
+  internal struct Error: Encodable {
+    internal let message: String
+  }
 }

@@ -105,13 +105,20 @@ public func withSignalHandling<T: Sendable>(
   #endif
 }
 
-/// Execute an async operation with both timeout and signal handling
+/// Execute an async operation with signal handling and an optional timeout.
+///
+/// Pass `seconds: nil` to run until a signal (Ctrl+C / SIGTERM) arrives —
+/// used by long-running commands like `mistdemo web`. Pass a positive value
+/// to cap the wait — used by one-shot commands like `mistdemo auth-token`.
 public func withTimeoutAndSignals<T: Sendable>(
-  seconds: Double,
+  seconds: Double?,
   operation: @escaping @Sendable () async throws -> T
 ) async throws -> T {
   try await withSignalHandling {
-    try await withTimeout(seconds: seconds, operation: operation)
+    if let seconds {
+      return try await withTimeout(seconds: seconds, operation: operation)
+    }
+    return try await operation()
   }
 }
 

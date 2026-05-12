@@ -1,5 +1,5 @@
 //
-//  AuthResponse.swift
+//  WebIndexHTML.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,23 +27,31 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+#if canImport(Hummingbird)
+  internal import Foundation
 
-/// Response model for authentication callback endpoints.
-///
-/// This model is returned by the AuthTokenCommand's Hummingbird routes after
-/// processing CloudKit authentication callbacks. It provides comprehensive
-/// feedback about the authentication result, including user information and
-/// available zones.
-///
-/// - Note: Used in AuthTokenCommand.swift line 88 for route responses
-internal struct AuthResponse: Encodable {
-  /// The authenticated user's CloudKit record name.
-  internal let userRecordName: String
+  /// Loader for the web command's interactive page served by `WebServer`.
+  ///
+  /// The HTML+JS lives in `Resources/index.html` and is read from
+  /// `Bundle.module` on first access. The mode toggle in this page lets
+  /// users compare MistKit (server-side) and CloudKit JS (browser-side)
+  /// against the same CloudKit container; the CloudKit JS side is wired
+  /// in by #329.
+  internal enum WebIndexHTML {
+    internal static let content: String = loadContent()
 
-  /// CloudKit data retrieved during authentication (user info and zones).
-  internal let cloudKitData: CloudKitData
-
-  /// Human-readable message describing the authentication result.
-  internal let message: String
-}
+    private static func loadContent() -> String {
+      guard
+        let url = Bundle.module.url(
+          forResource: "index", withExtension: "html"
+        ),
+        let html = try? String(contentsOf: url, encoding: .utf8)
+      else {
+        preconditionFailure(
+          "Resources/index.html missing from MistDemoKit bundle"
+        )
+      }
+      return html
+    }
+  }
+#endif

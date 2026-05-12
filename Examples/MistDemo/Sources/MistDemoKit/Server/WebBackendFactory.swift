@@ -1,6 +1,6 @@
 //
-//  AuthTokenCommandTests+MockServer.swift
-//  MistDemoTests
+//  WebBackendFactory.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,30 +27,39 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(Hummingbird)
-  import Foundation
-  import Testing
+internal import Foundation
+internal import MistKit
 
-  @testable import MistDemoKit
+/// Factory that returns a `WebBackend` configured with the captured
+/// web-auth token. Injected into `WebServer` so tests can supply a
+/// mock without going through MistKit.
+internal struct WebBackendFactory: Sendable {
+  internal let make: @Sendable (_ webAuthToken: String) throws -> any WebBackend
 
-  extension AuthTokenCommandTests {
-    @Suite("Mock Server")
-    internal struct MockServer {
-      @Test("AuthRequest decodes correctly")
-      internal func authRequestDecodesCorrectly() throws {
-        let json = """
-          {
-            "sessionToken": "mock-session-token",
-            "userRecordName": "user123"
-          }
-          """
+  internal init(
+    make: @escaping @Sendable (_ webAuthToken: String) throws -> any WebBackend
+  ) {
+    self.make = make
+  }
 
-        let data = Data(json.utf8)
-        let request = try JSONDecoder().decode(AuthRequest.self, from: data)
-
-        #expect(request.sessionToken == "mock-session-token")
-        #expect(request.userRecordName == "user123")
-      }
+  /// Production factory: builds a `CloudKitService` for the private
+  /// database with the captured web-auth token paired with the
+  /// command's API token.
+  internal static func live(
+    apiToken: String,
+    containerIdentifier: String,
+    environment: MistKit.Environment
+  ) -> WebBackendFactory {
+    WebBackendFactory { webAuthToken in
+      let tokenManager = WebAuthTokenManager(
+        apiToken: apiToken,
+        webAuthToken: webAuthToken
+      )
+      return CloudKitService(
+        containerIdentifier: containerIdentifier,
+        tokenManager: tokenManager,
+        environment: environment
+      )
     }
   }
-#endif
+}

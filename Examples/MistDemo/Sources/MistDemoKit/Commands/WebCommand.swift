@@ -1,5 +1,5 @@
 //
-//  AuthTokenCommand.swift
+//  WebCommand.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -32,22 +32,28 @@
   internal import Hummingbird
   internal import MistKit
 
-  /// Command to obtain web authentication token via browser flow.
-  public struct AuthTokenCommand: MistDemoCommand {
+  /// Long-running interactive web demo: serves a single HTML page that
+  /// performs the CloudKit auth round trip and then exposes a CRUD UI
+  /// driven by MistKit on the server.
+  ///
+  /// Unlike `AuthTokenCommand`, this command does not exit after the
+  /// browser-side auth completes — the server keeps running so the user
+  /// can exercise the CRUD endpoints until they Ctrl+C.
+  public struct WebCommand: MistDemoCommand {
     /// The configuration type.
-    public typealias Config = AuthTokenConfig
+    public typealias Config = WebConfig
 
     /// The command name.
-    public static let commandName = "auth-token"
+    public static let commandName = "web"
     /// The command abstract.
     public static let abstract =
-      "Obtain a web authentication token via browser flow"
+      "Run the interactive MistKit web demo (CRUD + auth)"
     /// The command help text.
     public static let helpText = """
-      AUTH-TOKEN - Obtain web authentication token
+      WEB - Interactive MistKit web demo
 
       USAGE:
-        mistdemo auth-token [options]
+        mistdemo web [options]
 
       OPTIONS:
         --api-token <token>      CloudKit API token
@@ -55,60 +61,22 @@
         --port <port>            Server port (default: 8080)
         --host <host>            Server host (default: 127.0.0.1)
         --no-browser             Don't open browser automatically
+
+      The page authenticates against CloudKit via the browser, then
+      exposes a CRUD UI that calls MistKit on the server. Ctrl+C to exit.
       """
 
-    internal let config: AuthTokenConfig
+    internal let config: WebConfig
 
     /// Creates a new instance.
-    public init(config: AuthTokenConfig) {
+    public init(config: WebConfig) {
       self.config = config
-    }
-
-    private static func captureToken(
-      runService: @escaping @Sendable () async throws -> Void,
-      tokenStore: WebAuthTokenStore,
-      host: String,
-      port: Int,
-      noBrowser: Bool
-    ) async throws -> String {
-      do {
-        return try await withTimeoutAndSignals(seconds: 300) {
-          try await withThrowingTaskGroup(of: String?.self) { group in
-            group.addTask {
-              try await runService()
-              return nil
-            }
-            group.addTask {
-              if !noBrowser {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                BrowserOpener.openBrowser(url: "http://\(host):\(port)")
-              }
-              return nil
-            }
-            group.addTask {
-              var iterator = tokenStore.tokenUpdates.makeAsyncIterator()
-              return await iterator.next()
-            }
-
-            while let result = try await group.next() {
-              if let captured = result {
-                group.cancelAll()
-                return captured
-              }
-            }
-            throw AuthTokenError.serverError(
-              "Token capture failed unexpectedly"
-            )
-          }
-        }
-      } catch let error as AsyncTimeoutError {
-        throw AuthTokenError.timeout(error.localizedDescription)
-      }
     }
 
     /// Executes the command.
     public func execute() async throws {
       print("📍 Server URL: http://\(config.host):\(config.port)")
+      print("Press Ctrl+C to stop.")
 
       let tokenStore = WebAuthTokenStore()
       let server = WebServer(
@@ -121,26 +89,38 @@
           containerIdentifier: config.containerIdentifier,
           environment: config.environment
         ),
-        terminatesAfterAuth: true
+        terminatesAfterAuth: false
       )
+      let router = try server.makeRouter()
+
       let app = Application(
-        router: try server.makeRouter(),
+        router: router,
         configuration: .init(
           address: .hostname(config.host, port: config.port)
         )
       )
 
-      let token = try await Self.captureToken(
-        runService: { try await app.runService() },
-        tokenStore: tokenStore,
-        host: config.host,
-        port: config.port,
-        noBrowser: config.noBrowser
-      )
+      try await withSignalHandling {
+        try await withThrowingTaskGroup(of: Void.self) { group in
+          group.addTask {
+            try await app.runService()
+          }
+          group.addTask {
+            await openBrowserIfNeeded()
+          }
+          try await group.waitForAll()
+        }
+      }
+    }
 
-      // Let the 205 response reach the browser before the process exits.
-      try? await Task.sleep(nanoseconds: 500_000_000)
-      print(token)
+    private func openBrowserIfNeeded() async {
+      guard !config.noBrowser else {
+        return
+      }
+      try? await Task.sleep(nanoseconds: 1_000_000_000)
+      BrowserOpener.openBrowser(
+        url: "http://\(config.host):\(config.port)"
+      )
     }
   }
 #endif

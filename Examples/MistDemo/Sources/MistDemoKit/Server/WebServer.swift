@@ -1,5 +1,5 @@
 //
-//  AuthTokenServer.swift
+//  WebServer.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,31 +28,72 @@
 //
 
 #if canImport(Hummingbird)
-  internal import AsyncAlgorithms
   internal import Foundation
   internal import HTTPTypes
   internal import Hummingbird
   internal import Logging
+  internal import MistKit
 
-  /// Routing surface for the auth-token loopback flow.
+  /// Routing surface for the long-running `mistdemo web` command.
   ///
-  /// Owns the index, config, and authentication endpoints used by the
-  /// browser-side script during a CloudKit web-auth round trip. The owning
-  /// command (`AuthTokenCommand`) provides credentials and the rendezvous
-  /// channels and is responsible for the `Application` lifecycle; this type
-  /// only knows how to assemble a `Router`.
-  internal struct AuthTokenServer {
-    /// JSON payload returned from `GET /api/config`, consumed by the
-    /// browser-side script to configure CloudKit JS.
+  /// Owns the index page, the CloudKit JS config endpoint, the auth-capture
+  /// endpoint, and the CRUD record endpoints. Mode-toggle between MistKit
+  /// (server-side, this server's routes) and CloudKit JS (browser-side,
+  /// served from Apple's CDN) lives in the HTML; this server only
+  /// implements the MistKit side.
+  internal struct WebServer {
+    /// JSON payload returned by `GET /api/config`, consumed by the
+    /// browser-side script to configure both CloudKit JS and the mode-
+    /// toggle's MistKit handlers.
     internal struct CloudKitClientConfig: Encodable {
       internal let apiToken: String
       internal let containerIdentifier: String
+      internal let environment: String
     }
 
     internal let apiToken: String
     internal let containerIdentifier: String
-    internal let tokenChannel: AsyncChannel<String>
-    internal let responseCompleteChannel: AsyncChannel<Void>
+    internal let environment: MistKit.Environment
+    internal let tokenStore: WebAuthTokenStore
+    internal let backendFactory: WebBackendFactory
+    /// When `true`, `POST /api/authenticate` returns `205 Reset Content` to
+    /// signal the browser that the server is about to shut down (auth-token
+    /// flow). When `false`, returns `204 No Content` (web flow stays up).
+    internal let terminatesAfterAuth: Bool
+
+    internal static func jsonResponse(
+      status: HTTPResponse.Status, bytes: Data
+    ) -> Response {
+      Response(
+        status: status,
+        headers: [.contentType: "application/json"],
+        body: ResponseBody { writer in
+          try await writer.write(ByteBuffer(bytes: bytes))
+          try await writer.finish(nil)
+        }
+      )
+    }
+
+    /// Run a route operation that produces a success JSON body. Any thrown
+    /// error becomes a `500` response with a JSON error payload so the UI
+    /// can surface the failure without parsing transport-level errors.
+    internal static func runOperation(
+      _ operation: @Sendable () async throws -> Data
+    ) async throws -> Response {
+      do {
+        let bytes = try await operation()
+        return jsonResponse(status: .ok, bytes: bytes)
+      } catch {
+        let errorBody = try JSONEncoder().encode(
+          WebResponse.Error(
+            message: error.localizedDescription
+          )
+        )
+        return jsonResponse(
+          status: .internalServerError, bytes: errorBody
+        )
+      }
+    }
 
     /// Build the router for this server.
     internal func makeRouter() throws -> Router<BasicRequestContext> {
@@ -62,14 +103,20 @@
       addIndexEndpoint(router: router)
 
       let api = router.group("api")
+        .add(middleware: LoopbackOnlyMiddleware<BasicRequestContext>())
       let configData = try JSONEncoder().encode(
         CloudKitClientConfig(
           apiToken: apiToken,
-          containerIdentifier: containerIdentifier
+          containerIdentifier: containerIdentifier,
+          environment: environment.rawValue
         )
       )
       addConfigEndpoint(api: api, configData: configData)
       addAuthEndpoint(api: api)
+      addQueryEndpoint(api: api)
+      addCreateEndpoint(api: api)
+      addUpdateEndpoint(api: api)
+      addDeleteEndpoint(api: api)
 
       return router
     }
@@ -77,7 +124,7 @@
     private func addIndexEndpoint(
       router: Router<BasicRequestContext>
     ) {
-      let indexBytes = ByteBuffer(string: AuthTokenIndexHTML.content)
+      let indexBytes = ByteBuffer(string: WebIndexHTML.content)
       let indexResponseBuilder: @Sendable () -> Response = {
         Response(
           status: .ok,
@@ -98,53 +145,23 @@
       api: RouterGroup<BasicRequestContext>,
       configData: Data
     ) {
-      api.get("config") { request, _ -> Response in
-        let authority = request.head.authority ?? ""
-        guard LoopbackAuthority.isLoopback(authority) else {
-          return Response(status: .forbidden)
-        }
-        return Response(
-          status: .ok,
-          headers: [.contentType: "application/json"],
-          body: ResponseBody { writer in
-            try await writer.write(ByteBuffer(bytes: configData))
-            try await writer.finish(nil)
-          }
-        )
+      api.get("config") { _, _ -> Response in
+        Self.jsonResponse(status: .ok, bytes: configData)
       }
     }
 
     private func addAuthEndpoint(
       api: RouterGroup<BasicRequestContext>
     ) {
-      let tokenChannel = self.tokenChannel
-      let responseCompleteChannel = self.responseCompleteChannel
+      let tokenStore = self.tokenStore
+      let successStatus: HTTPResponse.Status =
+        terminatesAfterAuth ? .resetContent : .noContent
       api.post("authenticate") { request, context -> Response in
         let authRequest = try await request.decode(
           as: AuthRequest.self, context: context
         )
-        await tokenChannel.send(authRequest.sessionToken)
-
-        let response = AuthResponse(
-          userRecordName: authRequest.userRecordName,
-          cloudKitData: .init(user: nil, zones: [], error: nil),
-          message: "Authentication successful!"
-        )
-        let jsonData = try JSONEncoder().encode(response)
-
-        Task {
-          try await Task.sleep(nanoseconds: 200_000_000)
-          await responseCompleteChannel.send(())
-        }
-
-        return Response(
-          status: .ok,
-          headers: [.contentType: "application/json"],
-          body: ResponseBody { writer in
-            try await writer.write(ByteBuffer(bytes: jsonData))
-            try await writer.finish(nil)
-          }
-        )
+        await tokenStore.update(authRequest.sessionToken)
+        return Response(status: successStatus)
       }
     }
   }

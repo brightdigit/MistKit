@@ -31,6 +31,15 @@ internal import Foundation
 internal import MistKit
 
 extension MistDemoConfig {
+  /// Indicates whether `toPrimaryCredentials()` will produce credentials that
+  /// can satisfy user-identity endpoints (`fetchCaller`, `lookupUsers*`).
+  ///
+  /// Those routes require web-auth even on `.public`. Used by the integration
+  /// runner to decide whether to schedule user-identity phases.
+  internal var hasUserContextCredentials: Bool {
+    (try? resolveAPICredentials()) != nil
+  }
+
   /// Build `Credentials` for the primary `CloudKitService` targeting
   /// `self.database`.
   ///
@@ -65,15 +74,6 @@ extension MistDemoConfig {
       let apiAuth = try resolveAPICredentials()
       return try Credentials(apiAuth: apiAuth)
     }
-  }
-
-  /// Indicates whether `toPrimaryCredentials()` will produce credentials that
-  /// can satisfy user-identity endpoints (`fetchCaller`, `lookupUsers*`).
-  ///
-  /// Those routes require web-auth even on `.public`. Used by the integration
-  /// runner to decide whether to schedule user-identity phases.
-  internal var hasUserContextCredentials: Bool {
-    (try? resolveAPICredentials()) != nil
   }
 
   // MARK: - Resolution helpers

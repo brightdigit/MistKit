@@ -159,7 +159,7 @@ let package = Package(
         ),
       ],
       resources: [
-        .copy("Resources/auth-token-index.html")
+        .copy("Resources/index.html"),
       ],
       swiftSettings: swiftSettings
     ),

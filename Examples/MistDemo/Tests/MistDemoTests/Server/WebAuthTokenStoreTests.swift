@@ -1,5 +1,5 @@
 //
-//  AuthTokenCommandTests+MockServer.swift
+//  WebAuthTokenStoreTests.swift
 //  MistDemoTests
 //
 //  Created by Leo Dion.
@@ -28,29 +28,41 @@
 //
 
 #if canImport(Hummingbird)
-  import Foundation
   import Testing
 
   @testable import MistDemoKit
 
-  extension AuthTokenCommandTests {
-    @Suite("Mock Server")
-    internal struct MockServer {
-      @Test("AuthRequest decodes correctly")
-      internal func authRequestDecodesCorrectly() throws {
-        let json = """
-          {
-            "sessionToken": "mock-session-token",
-            "userRecordName": "user123"
-          }
-          """
+  @Suite("WebAuthTokenStore Tests")
+  internal struct WebAuthTokenStoreTests {
+    @Test("Starts empty when initialized without a token")
+    internal func startsEmpty() async {
+      let store = WebAuthTokenStore()
+      let value = await store.currentToken
+      #expect(value == nil)
+    }
 
-        let data = Data(json.utf8)
-        let request = try JSONDecoder().decode(AuthRequest.self, from: data)
+    @Test("Returns the token passed to the initializer")
+    internal func preSeeded() async {
+      let store = WebAuthTokenStore(token: "seed")
+      let value = await store.currentToken
+      #expect(value == "seed")
+    }
 
-        #expect(request.sessionToken == "mock-session-token")
-        #expect(request.userRecordName == "user123")
-      }
+    @Test("update(_:) replaces the stored token")
+    internal func updateReplaces() async {
+      let store = WebAuthTokenStore()
+      await store.update("first")
+      await store.update("second")
+      let value = await store.currentToken
+      #expect(value == "second")
+    }
+
+    @Test("clear() removes the stored token")
+    internal func clearRemoves() async {
+      let store = WebAuthTokenStore(token: "tok")
+      await store.clear()
+      let value = await store.currentToken
+      #expect(value == nil)
     }
   }
 #endif
