@@ -69,7 +69,7 @@
           List(notes, selection: $selectedNote) { note in
             NavigationLink(value: note) {
               VStack(alignment: .leading, spacing: 2) {
-                Text(note.title ?? note.recordName).font(.body)
+                Text(note.title ?? note.id).font(.body)
                 HStack(spacing: 12) {
                   if let index = note.index {
                     Label("\(index)", systemImage: "number")

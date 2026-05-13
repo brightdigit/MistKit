@@ -55,7 +55,7 @@
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(note.title ?? note.recordName)
+      .navigationTitle(note.title ?? note.id)
       .toolbar {
         ToolbarItem {
           Button {
@@ -81,7 +81,7 @@
         .environment(service)
       }
       .confirmationDialog(
-        "Delete \(note.title ?? note.recordName)?",
+        "Delete \(note.title ?? note.id)?",
         isPresented: $showDeleteConfirmation,
         titleVisibility: .visible
       ) {
@@ -96,7 +96,7 @@
 
     private var identitySection: some View {
       Section("Identity") {
-        LabeledContent("Record Name", value: note.recordName)
+        LabeledContent("Record Name", value: note.id)
         LabeledContent("Record Type", value: Note.recordType)
         if let recordChangeTag = note.recordChangeTag {
           LabeledContent("Change Tag", value: recordChangeTag)

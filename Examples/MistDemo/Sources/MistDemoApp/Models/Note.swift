@@ -39,9 +39,9 @@
   ///         "image" ASSET
   ///     );
   ///
-  /// Wraps a `CKRecord` rather than copying fields out of it — the record is
-  /// the source of truth, so an update can mutate it in place and `save` it
-  /// without re-fetching to refresh the change tag.
+  /// Created / modified timestamps come from CloudKit's system metadata
+  /// (`CKRecord.creationDate` / `.modificationDate`), so there's no need
+  /// for custom `createdAt` / `modified` schema fields.
   internal struct Note: Identifiable, Hashable {
     /// Known field name constants for `Note` records.
     internal enum Fields {
@@ -53,33 +53,33 @@
     /// CloudKit record type identifier.
     internal static let recordType = "Note"
 
-    internal let record: CKRecord
+    internal let id: String
+    internal let title: String?
+    internal let index: Int64?
+    internal let imageAssetURL: URL?
 
-    internal var id: CKRecord.ID { record.recordID }
-    internal var recordName: String { record.recordID.recordName }
-    internal var title: String? { record[Fields.title] as? String }
-    internal var index: Int64? { (record[Fields.index] as? NSNumber)?.int64Value }
-    internal var imageAssetURL: URL? { (record[Fields.image] as? CKAsset)?.fileURL }
-    internal var creationDate: Date? { record.creationDate }
-    internal var modificationDate: Date? { record.modificationDate }
-    internal var recordChangeTag: String? { record.recordChangeTag }
+    /// CloudKit-managed metadata
+    internal let modificationDate: Date?
+    internal let creationDate: Date?
+    internal let recordChangeTag: String?
 
     internal init?(_ record: CKRecord) {
       guard record.recordType == Self.recordType else {
         return nil
       }
-      self.record = record
+      self.id = record.recordID.recordName
+      self.title = record[Fields.title] as? String
+      self.index = (record[Fields.index] as? NSNumber)?.int64Value
+      self.imageAssetURL = (record[Fields.image] as? CKAsset)?.fileURL
+      self.modificationDate = record.modificationDate
+      self.creationDate = record.creationDate
+      self.recordChangeTag = record.recordChangeTag
     }
 
-    // Identity-based equality so SwiftUI selection / NavigationLink paths
-    // remain stable across edits. RecordDetailView replaces its `@State` Note
-    // with a fresh wrapper after save, which is what drives the re-render —
-    // not Equatable comparison.
-    internal static func == (lhs: Note, rhs: Note) -> Bool {
-      lhs.record.recordID == rhs.record.recordID
-    }
-    internal func hash(into hasher: inout Hasher) {
-      hasher.combine(record.recordID)
-    }
+    // Identity-based equality: two Notes with the same recordID are equal
+    // regardless of field state. Lets SwiftUI selection bindings track a
+    // record across edits without losing focus when fields change.
+    internal static func == (lhs: Note, rhs: Note) -> Bool { lhs.id == rhs.id }
+    internal func hash(into hasher: inout Hasher) { hasher.combine(id) }
   }
 #endif

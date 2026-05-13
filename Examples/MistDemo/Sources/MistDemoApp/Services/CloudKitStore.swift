@@ -162,14 +162,17 @@
       return note
     }
 
-    /// Mutate the existing record in place and save. The record carries its
-    /// own change tag from the original query, so no extra fetch round-trip
-    /// is needed before save.
+    /// Update an existing Note: fetch the underlying record by ID, apply the
+    /// new field values, and save. The fetch picks up the current change tag
+    /// so the save is rejected (rather than blindly clobbering) if the record
+    /// has been modified since the caller read it.
     internal func updateNote(
       _ existing: Note, title: String, index: Int64, imageURL: URL?
     ) async throws -> Note {
-      Self.apply(title: title, index: index, imageURL: imageURL, to: existing.record)
-      let saved = try await database.save(existing.record)
+      let recordID = CKRecord.ID(recordName: existing.id)
+      let record = try await database.record(for: recordID)
+      Self.apply(title: title, index: index, imageURL: imageURL, to: record)
+      let saved = try await database.save(record)
       guard let note = Note(saved) else {
         throw CloudKitStoreError.unexpectedSaveResult
       }
@@ -178,7 +181,31 @@
 
     /// Delete a Note by record ID.
     internal func deleteNote(_ note: Note) async throws {
-      _ = try await database.deleteRecord(withID: note.record.recordID)
+      _ = try await database.deleteRecord(
+        withID: CKRecord.ID(recordName: note.id)
+      )
+    }
+
+    /// Capture a web-auth token via `CKFetchWebAuthTokenOperation` for the
+    /// given CloudKit API token. Issues the same `158__…` value that
+    /// MistKit / `mistdemo auth-token` consume.
+    internal func fetchWebAuthToken(apiToken: String) async throws -> String {
+      try await withCheckedThrowingContinuation { continuation in
+        let operation = CKFetchWebAuthTokenOperation(apiToken: apiToken)
+        operation.qualityOfService = .userInitiated
+        operation.fetchWebAuthTokenCompletionBlock = { token, error in
+          if let token {
+            continuation.resume(returning: token)
+          } else {
+            continuation.resume(
+              throwing: error ?? CloudKitStoreError.webAuthTokenUnavailable
+            )
+          }
+        }
+        // CKFetchWebAuthTokenOperation is a CKDatabaseOperation; running it
+        // against the selected database picks up the demo container.
+        database.add(operation)
+      }
     }
   }
 #endif
