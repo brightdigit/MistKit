@@ -87,5 +87,35 @@
         }
       }
     }
+
+    @Test("Index HTML carries the post-database-picker UX additions")
+    internal func indexCarriesUxPolish() async throws {
+      let fixture = Self.makeFixture()
+      let app = Application(router: try fixture.server.makeRouter())
+
+      try await app.test(.router) { client in
+        try await client.execute(uri: "/", method: .get) { response in
+          #expect(response.status == .ok)
+          let body = String(buffer: response.body)
+          // 1. Loading state
+          #expect(body.contains(".status.loading"))
+          #expect(body.contains("queryInFlight"))
+          #expect(body.contains("setQueryControlsDisabled"))
+          // 2. Post-create delay
+          #expect(body.contains("REFRESH_DELAY_MS"))
+          #expect(body.contains("waiting"))
+          // 3. "You" badge wired to the captured user identity
+          #expect(body.contains("currentUserRecordName"))
+          #expect(body.contains("badge-you"))
+          #expect(body.contains("extractUserRecordName"))
+          // 4. Default sort = ___createTime descending
+          #expect(
+            body.contains(
+              "currentSort = { field: '___createTime', ascending: false }"
+            )
+          )
+        }
+      }
+    }
   }
 #endif
