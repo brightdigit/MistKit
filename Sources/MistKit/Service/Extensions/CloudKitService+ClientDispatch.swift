@@ -35,29 +35,29 @@ extension CloudKitService {
   /// Resolve the token manager for an outgoing request and build a fresh
   /// OpenAPI `Client` whose middleware chain authenticates against it.
   ///
-  /// Called once per dispatched operation. When the service was built with a
-  /// caller-supplied `tokenManager:`, that fixed manager is used regardless of
-  /// `database` / `requiresUserContext`. Otherwise `Credentials` picks an
-  /// appropriate manager via its `makeTokenManager(for:requiresUserContext:)`
-  /// extension.
+  /// Called once per dispatched operation. The signing choice for `.public`
+  /// requests is carried by the `Database` value itself
+  /// (`.public(PublicAuthPreference)`); `.private` / `.shared` always use
+  /// web-auth.
+  ///
+  /// When the service was built with a caller-supplied `tokenManager:`, that
+  /// fixed manager is used regardless of `database`. Otherwise `Credentials`
+  /// resolves the manager via `makeTokenManager(for:)`.
   ///
   /// - Throws: `CloudKitError.missingCredentials` when `Credentials` cannot
   ///   satisfy the requested combination.
   internal func client(
-    for database: Database,
-    requiresUserContext: Bool = false
+    for database: Database
   ) throws -> Client {
     let tokenManager: any TokenManager
     if let fixedTokenManager {
       tokenManager = fixedTokenManager
     } else if let credentials {
-      tokenManager = try credentials.makeTokenManager(
-        for: database,
-        requiresUserContext: requiresUserContext
-      )
+      tokenManager = try credentials.makeTokenManager(for: database)
     } else {
       throw CloudKitError.missingCredentials(
         database: database,
+        availability: .notConfigured,
         reason: "service has neither credentials nor a fixed token manager"
       )
     }

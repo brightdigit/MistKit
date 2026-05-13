@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceTests.FetchZoneChanges+Validation.swift
+//  CredentialAvailability.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,25 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+/// Why a credential set was missing when the dispatcher tried to satisfy
+/// a request.
+///
+/// Attached to `CloudKitError.missingCredentials(_:availability:reason:)` so
+/// callers can distinguish a misconfiguration ("no credentials at all") from
+/// a deliberate `PublicAuthPreference.requires(...)` that couldn't be
+/// satisfied ("we have web-auth but the caller required server-to-server").
+public enum CredentialAvailability: Sendable, Hashable {
+  /// No credential of the type the route needs is configured on
+  /// `Credentials`.
+  case notConfigured
 
-@testable import MistKit
-
-extension CloudKitServiceTests.FetchZoneChanges {
-  @Suite("Validation")
-  internal struct Validation {
-    @Test("fetchZoneChanges() throws on authentication error")
-    internal func fetchZoneChangesThrowsOnAuthError() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let service = try await CloudKitServiceTests.FetchZoneChanges.makeAuthErrorService()
-
-      await #expect(throws: CloudKitError.self) {
-        try await service.fetchZoneChanges(database: .public(.prefers(.serverToServer)))
-      }
-    }
-  }
+  /// A credential type was required by `PublicAuthPreference.requires(_:)`
+  /// but is not configured. The dispatcher refuses to silently substitute
+  /// the other credential set.
+  case preferenceRequired
 }

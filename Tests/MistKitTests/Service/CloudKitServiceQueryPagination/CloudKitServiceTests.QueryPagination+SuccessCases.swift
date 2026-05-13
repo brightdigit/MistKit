@@ -50,7 +50,8 @@ extension CloudKitServiceTests.QueryPagination {
 
       let result: QueryResult = try await service.queryRecords(
         recordType: "TestRecord",
-        continuationMarker: nil
+        continuationMarker: nil,
+        database: .public(.prefers(.serverToServer))
       )
 
       #expect(result.records.count == 3)
@@ -69,7 +70,8 @@ extension CloudKitServiceTests.QueryPagination {
       )
 
       let result: QueryResult = try await service.queryRecords(
-        recordType: "TestRecord"
+        recordType: "TestRecord",
+        database: .public(.prefers(.serverToServer))
       )
 
       #expect(result.records.count == 2)
@@ -89,7 +91,8 @@ extension CloudKitServiceTests.QueryPagination {
 
       let result: QueryResult = try await service.queryRecords(
         recordType: "TestRecord",
-        continuationMarker: "previous-marker"
+        continuationMarker: "previous-marker",
+        database: .public(.prefers(.serverToServer))
       )
 
       #expect(result.records.count == 1)

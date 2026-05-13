@@ -46,7 +46,7 @@ extension CloudKitServiceTests.FetchChanges {
       )
 
       await #expect {
-        _ = try await service.fetchRecordChanges()
+        _ = try await service.fetchRecordChanges(database: .public(.prefers(.serverToServer)))
       } throws: { error in
         guard let ckError = error as? CloudKitError,
           case .networkError(let urlError) = ckError
@@ -64,7 +64,7 @@ extension CloudKitServiceTests.FetchChanges {
       let service = try CloudKitServiceTests.makeService(provider: ResponseProvider.timeout())
 
       await #expect {
-        _ = try await service.fetchRecordChanges()
+        _ = try await service.fetchRecordChanges(database: .public(.prefers(.serverToServer)))
       } throws: { error in
         guard let ckError = error as? CloudKitError,
           case .networkError(let urlError) = ckError
@@ -108,7 +108,10 @@ extension CloudKitServiceTests.FetchChanges {
       let service = try CloudKitServiceTests.makeService(provider: provider)
 
       do {
-        _ = try await service.fetchAllRecordChanges(maxPages: 2)
+        _ = try await service.fetchAllRecordChanges(
+          maxPages: 2,
+          database: .public(.prefers(.serverToServer))
+        )
         Issue.record("Expected paginationLimitExceeded to be thrown")
       } catch CloudKitError.paginationLimitExceeded(let maxPages, let records) {
         #expect(maxPages == 2)
@@ -148,7 +151,7 @@ extension CloudKitServiceTests.FetchChanges {
       let service = try CloudKitServiceTests.makeService(provider: provider)
 
       await #expect {
-        _ = try await service.fetchAllRecordChanges()
+        _ = try await service.fetchAllRecordChanges(database: .public(.prefers(.serverToServer)))
       } throws: { error in
         guard let ckError = error as? CloudKitError,
           case .networkError(let urlError) = ckError

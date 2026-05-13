@@ -81,7 +81,7 @@ extension CloudKitService {
     zoneID: ZoneID? = nil,
     syncToken: String? = nil,
     resultsLimit: Int? = nil,
-    database: Database = .public
+    database: Database
   ) async throws(CloudKitError) -> RecordChangesResult {
     if let limit = resultsLimit {
       guard limit > 0 && limit <= 200 else {
@@ -166,7 +166,7 @@ extension CloudKitService {
     syncToken: String? = nil,
     resultsLimit: Int? = nil,
     maxPages: Int = 1_000,
-    database: Database = .public
+    database: Database
   ) async throws(CloudKitError) -> (records: [RecordInfo], syncToken: String?) {
     var allRecords: [RecordInfo] = []
     var currentToken = syncToken

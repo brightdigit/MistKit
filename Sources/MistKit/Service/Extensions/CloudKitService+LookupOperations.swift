@@ -39,7 +39,7 @@ extension CloudKitService {
   internal func modifyRecords(
     operations: [Components.Schemas.RecordOperation],
     atomic: Bool = true,
-    database: Database = .public
+    database: Database
   ) async throws(CloudKitError) -> [RecordInfo] {
     do {
       let client = try self.client(for: database)
@@ -71,7 +71,7 @@ extension CloudKitService {
   public func lookupRecords(
     recordNames: [String],
     desiredKeys: [String]? = nil,
-    database: Database = .public
+    database: Database
   ) async throws(CloudKitError) -> [RecordInfo] {
     do {
       let client = try self.client(for: database)

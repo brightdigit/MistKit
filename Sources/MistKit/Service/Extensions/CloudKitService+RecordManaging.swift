@@ -36,6 +36,12 @@ import Foundation
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService: RecordManaging {
   /// Query records of a specific type from CloudKit (deprecated single-page form)
+  ///
+  /// `RecordManaging` is a database-agnostic abstraction predating per-call
+  /// `PublicAuthPreference`; this conformance targets the public database
+  /// with `.requires(.serverToServer)` to preserve the previous "S2S when
+  /// configured" behavior. Callers who need different attribution should
+  /// call `CloudKitService` directly with an explicit `Database` value.
   @available(
     *, deprecated,
     message: "Silently truncates at one page. Use queryAllRecords or queryRecords -> QueryResult."
@@ -47,7 +53,8 @@ extension CloudKitService: RecordManaging {
       sortBy: nil,
       limit: 200,
       desiredKeys: nil,
-      continuationMarker: nil
+      continuationMarker: nil,
+      database: .public(.prefers(.serverToServer))
     )
     return result.records
   }
@@ -57,7 +64,10 @@ extension CloudKitService: RecordManaging {
     _ operations: [RecordOperation],
     recordType: String
   ) async throws {
-    _ = try await self.modifyRecords(operations)
+    _ = try await self.modifyRecords(
+      operations,
+      database: .public(.prefers(.serverToServer))
+    )
   }
 
   /// Query all records of a specific type, automatically paginating
@@ -66,7 +76,8 @@ extension CloudKitService: RecordManaging {
       recordType: recordType,
       filters: nil,
       sortBy: nil,
-      pageSize: nil
+      pageSize: nil,
+      database: .public(.prefers(.serverToServer))
     )
   }
 }

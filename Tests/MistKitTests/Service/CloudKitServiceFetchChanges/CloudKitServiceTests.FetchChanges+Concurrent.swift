@@ -53,7 +53,7 @@ extension CloudKitServiceTests.FetchChanges {
       ) { group in
         for _ in 0..<taskCount {
           group.addTask {
-            try? await service.fetchAllRecordChanges()
+            try? await service.fetchAllRecordChanges(database: .public(.prefers(.serverToServer)))
           }
         }
         var collected: [(records: [RecordInfo], syncToken: String?)] = []

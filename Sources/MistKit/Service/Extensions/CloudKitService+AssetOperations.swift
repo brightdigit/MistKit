@@ -75,7 +75,7 @@ extension CloudKitService {
     fieldName: String,
     recordName: String? = nil,
     using uploader: AssetUploader? = nil,
-    database: Database = .public
+    database: Database
   ) async throws(CloudKitError) -> AssetUploadReceipt {
     let maxSize: Int = 15 * 1_024 * 1_024
     guard data.count <= maxSize else {
@@ -138,7 +138,7 @@ extension CloudKitService {
     fieldName: String,
     recordName: String? = nil,
     zoneID: ZoneID? = nil,
-    database: Database = .public
+    database: Database
   ) async throws(CloudKitError) -> AssetUploadToken {
     do {
       let tokenRequest =
