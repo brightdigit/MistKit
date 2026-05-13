@@ -877,11 +877,13 @@
                     'MistKit + Public requires server-to-server credentials ' +
                     '(CLOUDKIT_KEY_ID + CLOUDKIT_PRIVATE_KEY[_PATH]). ' +
                     'Restart the server with those set to enable Public on this side.';
-            } else if (currentMode === 'cloudkitjs') {
+            } else if (currentMode === 'mistkit' && currentDatabase === 'public') {
                 dbHint.textContent =
-                    'CloudKit JS does not surface the record creator on query ' +
-                    'responses, so the "You" badge only appears in MistKit ' +
-                    'mode — that wire-shape gap is itself a teaching point.';
+                    'Heads-up: on MistKit + Public, records you write are owned ' +
+                    'by the server-to-server key, not your iCloud user — so they ' +
+                    'won’t carry a "You" badge. The badge tracks your iCloud ' +
+                    'identity, which only appears on records written via ' +
+                    'CloudKit JS or via the web-auth flow on the private database.';
             } else {
                 dbHint.textContent =
                     'Private uses the captured Apple ID web-auth token; Public ' +
