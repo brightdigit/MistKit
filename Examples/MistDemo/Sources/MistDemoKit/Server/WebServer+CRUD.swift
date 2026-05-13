@@ -50,7 +50,8 @@
           let records = try await backend.webQuery(
             recordType: body.recordType,
             limit: body.limit,
-            sortBy: body.sortBy
+            sortBy: body.sortBy,
+            database: body.database
           )
           return try WebJSON.encoder().encode(
             WebResponse.Records(records: records)
@@ -75,7 +76,8 @@
           let backend = try backendFactory.make(token)
           let record = try await backend.webCreate(
             recordType: body.recordType,
-            fields: body.fields
+            fields: body.fields,
+            database: body.database
           )
           return try WebJSON.encoder().encode(
             WebResponse.Records(records: [record])
@@ -102,7 +104,8 @@
             recordType: body.recordType,
             recordName: body.recordName,
             fields: body.fields,
-            recordChangeTag: body.recordChangeTag
+            recordChangeTag: body.recordChangeTag,
+            database: body.database
           )
           return try WebJSON.encoder().encode(
             WebResponse.Records(records: [record])
@@ -128,7 +131,8 @@
           try await backend.webDelete(
             recordType: body.recordType,
             recordName: body.recordName,
-            recordChangeTag: body.recordChangeTag
+            recordChangeTag: body.recordChangeTag,
+            database: body.database
           )
           return try WebJSON.encoder().encode(
             WebResponse.Delete(

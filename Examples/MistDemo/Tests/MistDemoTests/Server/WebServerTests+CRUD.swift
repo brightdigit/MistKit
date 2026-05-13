@@ -73,6 +73,7 @@
       let captured = await fixture.backend.lastQuery
       #expect(captured?.recordType == "Note")
       #expect(captured?.limit == 10)
+      #expect(captured?.database == .private)
     }
 
     @Test("POST /api/records/create forwards fields to the backend")

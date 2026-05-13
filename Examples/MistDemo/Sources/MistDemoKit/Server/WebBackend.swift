@@ -36,30 +36,35 @@ internal import MistKit
 ///
 /// The production implementation is `CloudKitService` itself via
 /// extension; the web demo builds a new service per request using the
-/// captured `ckWebAuthToken`.
+/// captured `ckWebAuthToken` (and, when configured, server-to-server
+/// signing material for the public database).
 internal protocol WebBackend: Sendable {
   func webQuery(
     recordType: String,
     limit: Int?,
-    sortBy: [WebRequests.QuerySortField]?
+    sortBy: [WebRequests.QuerySortField]?,
+    database: MistKit.Database
   ) async throws -> [RecordInfo]
 
   func webCreate(
     recordType: String,
-    fields: [String: FieldValue]
+    fields: [String: FieldValue],
+    database: MistKit.Database
   ) async throws -> RecordInfo
 
   func webUpdate(
     recordType: String,
     recordName: String,
     fields: [String: FieldValue],
-    recordChangeTag: String?
+    recordChangeTag: String?,
+    database: MistKit.Database
   ) async throws -> RecordInfo
 
   func webDelete(
     recordType: String,
     recordName: String,
-    recordChangeTag: String?
+    recordChangeTag: String?,
+    database: MistKit.Database
   ) async throws
 }
 
@@ -68,7 +73,8 @@ extension CloudKitService: WebBackend {
   internal func webQuery(
     recordType: String,
     limit: Int?,
-    sortBy: [WebRequests.QuerySortField]?
+    sortBy: [WebRequests.QuerySortField]?,
+    database: MistKit.Database
   ) async throws -> [RecordInfo] {
     let querySorts = sortBy?.map { sort in
       QuerySort.sort(sort.field, ascending: sort.ascending)
@@ -80,19 +86,20 @@ extension CloudKitService: WebBackend {
       limit: limit,
       desiredKeys: nil,
       continuationMarker: nil,
-      database: .private
+      database: database
     )
     return result.records
   }
 
   internal func webCreate(
     recordType: String,
-    fields: [String: FieldValue]
+    fields: [String: FieldValue],
+    database: MistKit.Database
   ) async throws -> RecordInfo {
     try await createRecord(
       recordType: recordType,
       fields: fields,
-      database: .private
+      database: database
     )
   }
 
@@ -100,27 +107,29 @@ extension CloudKitService: WebBackend {
     recordType: String,
     recordName: String,
     fields: [String: FieldValue],
-    recordChangeTag: String?
+    recordChangeTag: String?,
+    database: MistKit.Database
   ) async throws -> RecordInfo {
     try await updateRecord(
       recordType: recordType,
       recordName: recordName,
       fields: fields,
       recordChangeTag: recordChangeTag,
-      database: .private
+      database: database
     )
   }
 
   internal func webDelete(
     recordType: String,
     recordName: String,
-    recordChangeTag: String?
+    recordChangeTag: String?,
+    database: MistKit.Database
   ) async throws {
     try await deleteRecord(
       recordType: recordType,
       recordName: recordName,
       recordChangeTag: recordChangeTag,
-      database: .private
+      database: database
     )
   }
 }

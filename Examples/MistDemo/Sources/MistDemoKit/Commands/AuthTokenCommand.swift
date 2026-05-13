@@ -116,6 +116,7 @@
         apiToken: config.apiToken,
         containerIdentifier: config.containerIdentifier,
         environment: config.environment,
+        publicDatabaseAvailable: false,
         tokenStore: tokenStore,
         backendFactory: .live(
           apiToken: config.apiToken,

@@ -53,15 +53,53 @@ internal enum WebRequests {
 
   /// `POST /api/records/query`
   internal struct Query: Decodable {
+    private enum CodingKeys: String, CodingKey {
+      case recordType
+      case limit
+      case sortBy
+      case database
+    }
+
     internal let recordType: String
     internal let limit: Int?
     internal let sortBy: [QuerySortField]?
+    internal let database: MistKit.Database
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.recordType = try container.decode(String.self, forKey: .recordType)
+      self.limit = try container.decodeIfPresent(Int.self, forKey: .limit)
+      self.sortBy = try container.decodeIfPresent(
+        [QuerySortField].self, forKey: .sortBy
+      )
+      self.database = try WebRequests.decodeDatabase(
+        from: container, forKey: .database
+      )
+    }
   }
 
   /// `POST /api/records/create`
   internal struct Create: Decodable {
+    private enum CodingKeys: String, CodingKey {
+      case recordType
+      case fields
+      case database
+    }
+
     internal let recordType: String
     internal let fields: [String: FieldValue]
+    internal let database: MistKit.Database
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.recordType = try container.decode(String.self, forKey: .recordType)
+      self.fields = try container.decode(
+        [String: FieldValue].self, forKey: .fields
+      )
+      self.database = try WebRequests.decodeDatabase(
+        from: container, forKey: .database
+      )
+    }
   }
 
   /// `POST /api/records/update`
@@ -70,10 +108,34 @@ internal enum WebRequests {
   /// on every record. The browser already holds it from the last query, so
   /// it forwards directly to MistKit without a server-side fetch round-trip.
   internal struct Update: Decodable {
+    private enum CodingKeys: String, CodingKey {
+      case recordType
+      case recordName
+      case fields
+      case recordChangeTag
+      case database
+    }
+
     internal let recordType: String
     internal let recordName: String
     internal let fields: [String: FieldValue]
     internal let recordChangeTag: String?
+    internal let database: MistKit.Database
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.recordType = try container.decode(String.self, forKey: .recordType)
+      self.recordName = try container.decode(String.self, forKey: .recordName)
+      self.fields = try container.decode(
+        [String: FieldValue].self, forKey: .fields
+      )
+      self.recordChangeTag = try container.decodeIfPresent(
+        String.self, forKey: .recordChangeTag
+      )
+      self.database = try WebRequests.decodeDatabase(
+        from: container, forKey: .database
+      )
+    }
   }
 
   /// `POST /api/records/delete`
@@ -82,8 +144,55 @@ internal enum WebRequests {
   /// existing record. Omitting it produces `BadRequestException: missing
   /// required field 'recordChangeTag'`.
   internal struct Delete: Decodable {
+    private enum CodingKeys: String, CodingKey {
+      case recordType
+      case recordName
+      case recordChangeTag
+      case database
+    }
+
     internal let recordType: String
     internal let recordName: String
     internal let recordChangeTag: String?
+    internal let database: MistKit.Database
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.recordType = try container.decode(String.self, forKey: .recordType)
+      self.recordName = try container.decode(String.self, forKey: .recordName)
+      self.recordChangeTag = try container.decodeIfPresent(
+        String.self, forKey: .recordChangeTag
+      )
+      self.database = try WebRequests.decodeDatabase(
+        from: container, forKey: .database
+      )
+    }
+  }
+
+  /// CloudKit database targeted by a request. Defaults to `.private` when
+  /// the field is omitted so legacy clients (pre-database-picker) keep
+  /// working.
+  internal static let defaultDatabase: MistKit.Database = .private
+
+  /// Decode `database` (string raw-value) from a keyed container. Falls back
+  /// to `defaultDatabase` when the key is absent and throws when present but
+  /// unrecognized so a typo surfaces as a `400` rather than a silent default.
+  fileprivate static func decodeDatabase<Key: CodingKey>(
+    from container: KeyedDecodingContainer<Key>,
+    forKey key: Key
+  ) throws -> MistKit.Database {
+    guard let raw = try container.decodeIfPresent(String.self, forKey: key)
+    else {
+      return defaultDatabase
+    }
+    guard let database = MistKit.Database(rawValue: raw) else {
+      throw DecodingError.dataCorruptedError(
+        forKey: key,
+        in: container,
+        debugDescription:
+          "Unrecognized database '\(raw)' — expected one of: public, private, shared"
+      )
+    }
+    return database
   }
 }

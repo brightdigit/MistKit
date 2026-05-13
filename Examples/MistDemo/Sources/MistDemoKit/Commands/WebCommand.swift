@@ -63,8 +63,16 @@
         --browser                Open browser on startup (overrides default)
         --no-browser             Don't open browser on startup (default for web)
 
+      OPTIONAL — public database (server-to-server):
+        --key-id <id>            CloudKit server-to-server key ID
+        --private-key <pem>      Server-to-server private key (inline PEM)
+        --private-key-path <p>   Path to server-to-server private key file
+
       The page authenticates against CloudKit via the browser, then
-      exposes a CRUD UI that calls MistKit on the server. Ctrl+C to exit.
+      exposes a CRUD UI that calls MistKit on the server. When key
+      material is provided, the UI also exposes a public-database mode
+      that signs requests with the key pair instead of the browser-
+      captured web auth token. Ctrl+C to exit.
       """
 
     internal let config: WebConfig
@@ -77,6 +85,9 @@
     /// Executes the command.
     public func execute() async throws {
       print("📍 Server URL: http://\(config.host):\(config.port)")
+      if config.publicDatabaseAvailable {
+        print("🌐 Public database (server-to-server) mode available.")
+      }
       print("Press Ctrl+C to stop.")
 
       let tokenStore = WebAuthTokenStore()
@@ -84,11 +95,13 @@
         apiToken: config.apiToken,
         containerIdentifier: config.containerIdentifier,
         environment: config.environment,
+        publicDatabaseAvailable: config.publicDatabaseAvailable,
         tokenStore: tokenStore,
         backendFactory: .live(
           apiToken: config.apiToken,
           containerIdentifier: config.containerIdentifier,
-          environment: config.environment
+          environment: config.environment,
+          serverToServer: try makeServerToServerCredentials()
         ),
         terminatesAfterAuth: false
       )
@@ -119,6 +132,42 @@
         // task group. Treat it as a clean shutdown.
         print("Server stopped.")
       }
+    }
+
+    /// Build server-to-server credentials when the user supplied key
+    /// material. Returns `nil` (i.e. private-only mode) when nothing is
+    /// provided; throws only if an incomplete combination is supplied so
+    /// silent misconfigurations don't masquerade as "public unavailable".
+    private func makeServerToServerCredentials() throws
+      -> ServerToServerCredentials?
+    {
+      let hasKeyID = (config.keyID?.isEmpty == false)
+      let hasInlineKey = (config.privateKey?.isEmpty == false)
+      let hasKeyFile = (config.privateKeyFile?.isEmpty == false)
+
+      guard hasKeyID || hasInlineKey || hasKeyFile else {
+        return nil
+      }
+      guard let keyID = config.keyID, !keyID.isEmpty else {
+        throw ConfigurationError.missingRequired(
+          "key.id",
+          suggestion: "Provide via --key-id or CLOUDKIT_KEY_ID environment variable"
+        )
+      }
+
+      let material: PrivateKeyMaterial
+      if let inline = config.privateKey, !inline.isEmpty {
+        material = .raw(inline)
+      } else if let path = config.privateKeyFile, !path.isEmpty {
+        material = .file(path: path)
+      } else {
+        throw ConfigurationError.missingRequired(
+          "private.key",
+          suggestion: "Provide via --private-key or --private-key-path"
+        )
+      }
+
+      return ServerToServerCredentials(keyID: keyID, privateKey: material)
     }
 
     private func openBrowserIfNeeded() async {

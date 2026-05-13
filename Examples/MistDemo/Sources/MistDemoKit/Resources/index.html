@@ -90,6 +90,20 @@
         }
         .status.success { background: var(--success-bg); color: var(--success-fg); display: block; }
         .status.error { background: var(--danger-bg); color: var(--danger); display: block; }
+        .status.loading { background: var(--row-hover); color: var(--muted); display: block; }
+        .status.loading::after {
+            content: '…';
+            display: inline-block;
+            margin-left: 4px;
+            animation: status-loading-dots 1.2s steps(4, end) infinite;
+            width: 1ch;
+            overflow: hidden;
+            vertical-align: bottom;
+        }
+        @keyframes status-loading-dots {
+            0% { width: 0; }
+            100% { width: 1ch; }
+        }
         pre {
             background: #0d1117;
             color: #c9d1d9;
@@ -200,6 +214,7 @@
         .pre-auth { opacity: 0.5; pointer-events: none; }
         #signin-area { margin-top: 8px; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #eef; color: var(--accent); }
+        .badge-you { background: var(--success-bg); color: var(--success-fg); margin-left: 8px; }
         .raw-response summary { font-size: 12px; color: var(--muted); cursor: pointer; margin-top: 12px; }
         .raw-response[open] summary { margin-bottom: 4px; }
     </style>
@@ -227,6 +242,18 @@
                 and exercise the same REST surface — only the SDK shape differs.
             </div>
 
+            <h2 style="margin-top: 24px;">Database</h2>
+            <div class="mode-toggle">
+                <button id="db-private" class="active" type="button">Private</button>
+                <button id="db-public" type="button">Public</button>
+            </div>
+            <div class="mode-hint" id="db-hint">
+                Private uses the captured Apple ID web-auth token; Public uses
+                server-to-server signing on the MistKit side and the API token on
+                the CloudKit JS side. Browsers can't perform S2S signing, so
+                "MistKit + Public" is unique to the server path.
+            </div>
+
             <h2 style="margin-top: 24px;">Auth</h2>
             <div id="signin-area">
                 <div id="signin-button"></div>
@@ -236,7 +263,7 @@
         </div>
 
         <div class="card pre-auth" id="notes-card">
-            <h2>Notes <span class="badge" id="mode-badge">MistKit</span></h2>
+            <h2>Notes <span class="badge" id="mode-badge">MistKit</span> <span class="badge" id="db-badge">Private</span></h2>
             <div class="notes-grid">
                 <section>
                     <div class="table-toolbar">
@@ -304,18 +331,40 @@
         let webAuthToken = null;
         let authenticationInProgress = false;
         let currentMode = 'mistkit';            // 'mistkit' | 'cloudkitjs'
-        let notes = [];                          // [{ recordName, title, index, created, modified, recordChangeTag, raw }]
+        let currentDatabase = 'private';        // 'private' | 'public'
+        // True only when the server reports server-to-server credentials are
+        // configured. CloudKit JS can hit `.public` regardless (it only needs
+        // an API token), so the picker stays usable in cloudkitjs mode even
+        // when this is false — the constraint is "MistKit + public requires
+        // S2S on the server."
+        let publicDatabaseAvailable = false;
+        let notes = [];                          // [{ recordName, title, index, created, modified, createdBy, recordChangeTag, raw }]
         let selectedRecordName = null;
         let authComplete = false;
-        // null until the user clicks a sortable column header. Once set,
-        // both MistKit-mode and CloudKit-JS-mode queries forward it.
-        let currentSort = null;                  // { field, ascending } | null
+        let queryInFlight = false;
+        // Captured from the userIdentity returned by setUpAuth() so the table
+        // can flag rows whose creator (created.userRecordName from the
+        // MistKit-mode payload) matches the signed-in user.
+        let currentUserRecordName = null;
+        // Default: latest created first. The third click on the Created header
+        // still clears the sort to null, after which the next click cycles back
+        // through ascending → descending → null.
+        let currentSort = { field: '___createTime', ascending: false };
+        // Pause between a successful Create and the auto-refresh that follows.
+        // CloudKit Web Services is eventually consistent — without this pause
+        // the new record is often missing from the next list, especially on
+        // the public database.
+        const REFRESH_DELAY_MS = 1200;
 
         const authStatusDiv = document.getElementById('auth-status');
         const signinButton = document.getElementById('signin-button');
         const signoutButton = document.getElementById('signout-button');
         const notesCard = document.getElementById('notes-card');
         const modeBadge = document.getElementById('mode-badge');
+        const dbBadge = document.getElementById('db-badge');
+        const dbPrivateBtn = document.getElementById('db-private');
+        const dbPublicBtn = document.getElementById('db-public');
+        const dbHint = document.getElementById('db-hint');
         const tbody = document.getElementById('notes-tbody');
         const tableStatusEl = document.getElementById('table-status');
         const formStatusEl = document.getElementById('form-status');
@@ -432,6 +481,13 @@
 
                 const titleTd = document.createElement('td');
                 titleTd.textContent = note.title ?? '';
+                if (note.createdBy && note.createdBy === currentUserRecordName) {
+                    const youBadge = document.createElement('span');
+                    youBadge.className = 'badge badge-you';
+                    youBadge.textContent = 'You';
+                    youBadge.title = `Created by ${note.createdBy}`;
+                    titleTd.appendChild(youBadge);
+                }
                 tr.appendChild(titleTd);
 
                 const indexTd = document.createElement('td');
@@ -524,9 +580,21 @@
                     index: indexField && Number(indexField.value ?? indexField),
                     created: toDate(record.created),
                     modified: toDate(record.modified),
+                    // MistKit-mode wire: `created` is { timestamp, userRecordName }.
+                    // CloudKit JS: `created` is a bare Date object — no creator
+                    // available on the record. Falls back to null in that case;
+                    // the table treats it as "unknown".
+                    createdBy: extractUserRecordName(record.created),
                     raw: record,
                 };
             });
+        }
+
+        function extractUserRecordName(value) {
+            if (value == null || typeof value !== 'object' || value instanceof Date) {
+                return null;
+            }
+            return value.userRecordName ?? null;
         }
 
         function toDate(value) {
@@ -556,7 +624,9 @@
         }
 
         function ckJsDatabase() {
-            return container.privateCloudDatabase;
+            return currentDatabase === 'public'
+                ? container.publicCloudDatabase
+                : container.privateCloudDatabase;
         }
 
         function buildFields() {
@@ -585,14 +655,20 @@
         // ---- operations ----
 
         async function queryNotes() {
+            if (queryInFlight) return;
             const recordType = recordTypeInput.value.trim();
             const limit = parseInt(queryLimitInput.value, 10);
-            clearStatus(tableStatusEl);
+            queryInFlight = true;
+            setQueryControlsDisabled(true);
+            const dbLabel = currentDatabase === 'public' ? 'public' : 'private';
+            const modeLabel = currentMode === 'mistkit' ? 'MistKit' : 'CloudKit JS';
+            setStatus(tableStatusEl, `Loading ${dbLabel} via ${modeLabel}`, 'loading');
             try {
                 let payload;
                 if (currentMode === 'mistkit') {
                     payload = await postJSON('/api/records/query', {
                         recordType,
+                        database: currentDatabase,
                         limit: isFinite(limit) ? limit : undefined,
                         sortBy: currentSort
                             ? [{ field: currentSort.field, ascending: currentSort.ascending }]
@@ -625,6 +701,24 @@
             } catch (error) {
                 setStatus(tableStatusEl, `Query failed: ${error.message}`, 'error');
                 showRaw(error.payload || { message: error.message });
+            } finally {
+                queryInFlight = false;
+                setQueryControlsDisabled(false);
+                // Re-evaluate the picker so the public-availability gate
+                // (which writes to the same buttons we just re-enabled) wins.
+                refreshDatabasePicker();
+            }
+        }
+
+        function setQueryControlsDisabled(disabled) {
+            const ids = [
+                'refresh-btn', 'db-private', 'db-public',
+                'mode-mistkit', 'mode-cloudkitjs',
+                'save-btn', 'delete-btn',
+            ];
+            for (const id of ids) {
+                const el = document.getElementById(id);
+                if (el) el.disabled = disabled;
             }
         }
 
@@ -651,13 +745,16 @@
                     if (isUpdate) {
                         payload = await postJSON('/api/records/update', {
                             recordType,
+                            database: currentDatabase,
                             recordName: note.recordName,
                             fields,
                             recordChangeTag: note.recordChangeTag,
                         });
                     } else {
                         payload = await postJSON('/api/records/create', {
-                            recordType, fields,
+                            recordType,
+                            database: currentDatabase,
+                            fields,
                         });
                     }
                 } else {
@@ -674,6 +771,17 @@
                 showRaw(payload);
                 setStatus(formStatusEl, `${label} succeeded.`, 'success');
                 if (!isUpdate) clearForm();
+                if (!isUpdate) {
+                    // Public-DB writes routinely take a beat to show up in the
+                    // next list query. Pause once with a visible status so the
+                    // user understands why the table doesn't refresh instantly.
+                    setStatus(
+                        formStatusEl,
+                        `Created — waiting ${REFRESH_DELAY_MS}ms for CloudKit to settle`,
+                        'loading'
+                    );
+                    await new Promise(r => setTimeout(r, REFRESH_DELAY_MS));
+                }
                 await queryNotes();
             } catch (error) {
                 setStatus(formStatusEl, `${label} failed: ${error.message}`, 'error');
@@ -692,6 +800,7 @@
                 if (currentMode === 'mistkit') {
                     payload = await postJSON('/api/records/delete', {
                         recordType: note.recordType,
+                        database: currentDatabase,
                         recordName: note.recordName,
                         recordChangeTag: note.recordChangeTag,
                     });
@@ -724,7 +833,65 @@
             mistKitBtn.classList.toggle('active', mode === 'mistkit');
             cloudKitJsBtn.classList.toggle('active', mode === 'cloudkitjs');
             modeBadge.textContent = mode === 'mistkit' ? 'MistKit' : 'CloudKit JS';
+            // Switching to MistKit while sitting on Public is only valid when
+            // the server holds S2S material. If not, drop back to Private so
+            // the user doesn't post requests that will 500 server-side.
+            refreshDatabasePicker();
             if (authComplete) queryNotes();
+        }
+
+        // ---- database toggle ----
+
+        dbPrivateBtn.addEventListener('click', () => setDatabase('private'));
+        dbPublicBtn.addEventListener('click', () => setDatabase('public'));
+
+        function setDatabase(database) {
+            if (database === currentDatabase) return;
+            if (database === 'public' && !isPublicAllowedForCurrentMode()) {
+                // Defensive — button should already be disabled in this case.
+                return;
+            }
+            currentDatabase = database;
+            refreshDatabasePicker();
+            if (authComplete) queryNotes();
+        }
+
+        function isPublicAllowedForCurrentMode() {
+            // CloudKit JS can talk to public from the browser regardless of
+            // server S2S credentials; MistKit + public requires the server to
+            // hold the key pair.
+            return currentMode === 'cloudkitjs' || publicDatabaseAvailable;
+        }
+
+        function refreshDatabasePicker() {
+            const publicAllowed = isPublicAllowedForCurrentMode();
+            dbPublicBtn.disabled = !publicAllowed;
+            if (!publicAllowed && currentDatabase === 'public') {
+                currentDatabase = 'private';
+            }
+            dbPrivateBtn.classList.toggle('active', currentDatabase === 'private');
+            dbPublicBtn.classList.toggle('active', currentDatabase === 'public');
+            dbBadge.textContent = currentDatabase === 'public' ? 'Public' : 'Private';
+            if (!publicDatabaseAvailable && currentMode === 'mistkit') {
+                dbHint.textContent =
+                    'MistKit + Public requires server-to-server credentials ' +
+                    '(CLOUDKIT_KEY_ID + CLOUDKIT_PRIVATE_KEY[_PATH]). ' +
+                    'Restart the server with those set to enable Public on this side.';
+            } else if (currentMode === 'mistkit' && currentDatabase === 'public') {
+                dbHint.textContent =
+                    'Heads-up: on MistKit + Public, records you write are owned ' +
+                    'by the server-to-server key, not your iCloud user — so they ' +
+                    'won’t carry a "You" badge. The badge tracks your iCloud ' +
+                    'identity, which only appears on records written via ' +
+                    'CloudKit JS or via the web-auth flow on the private database.';
+            } else {
+                dbHint.textContent =
+                    'Private uses the captured Apple ID web-auth token; Public ' +
+                    'uses server-to-server signing on the MistKit side and the ' +
+                    'API token on the CloudKit JS side. Browsers can’t ' +
+                    'perform S2S signing, so "MistKit + Public" is unique to ' +
+                    'the server path.';
+            }
         }
 
         // ---- form wiring ----
@@ -803,6 +970,7 @@
         async function handleAuthentication(userIdentity) {
             if (authenticationInProgress) return;
             authenticationInProgress = true;
+            currentUserRecordName = userIdentity?.userRecordName ?? null;
             setStatus(authStatusDiv, 'Capturing web auth token...', 'success');
             try {
                 const token = await pollWebAuthToken();
@@ -827,6 +995,7 @@
             try {
                 await container.signOut();
                 webAuthToken = null;
+                currentUserRecordName = null;
                 setAuthed(false);
                 notes = [];
                 clearForm();
@@ -842,6 +1011,8 @@
                     throw new Error('CloudKit.js failed to load');
                 }
                 const serverConfig = await loadServerConfig();
+                publicDatabaseAvailable = !!serverConfig.publicDatabaseAvailable;
+                refreshDatabasePicker();
                 CloudKit.configure({
                     containers: [{
                         containerIdentifier: serverConfig.containerIdentifier,
@@ -864,6 +1035,7 @@
                 container.whenUserSignsIn().then((identity) => handleAuthentication(identity));
                 container.whenUserSignsOut().then(() => {
                     webAuthToken = null;
+                    currentUserRecordName = null;
                     setAuthed(false);
                     notes = [];
                     clearForm();
@@ -875,6 +1047,8 @@
         }
 
         refreshFormState();
+        refreshDatabasePicker();
+        refreshSortIndicators();
         initializeCloudKit();
     </script>
 </body>
