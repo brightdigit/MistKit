@@ -48,7 +48,7 @@ extension AuthenticationHelperTests {
           databaseOverride: nil
         )
 
-        #expect(result.database == .public)
+        #expect(result.database == .public(.prefers(.serverToServer)))
         #expect(result.authMethod.contains("API-only"))
       } catch AuthenticationError.invalidAPIToken {
         // Expected with test token

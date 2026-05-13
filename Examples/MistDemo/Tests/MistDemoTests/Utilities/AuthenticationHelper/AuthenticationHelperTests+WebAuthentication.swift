@@ -69,10 +69,10 @@ extension AuthenticationHelperTests {
           keyID: nil,
           privateKey: nil,
           privateKeyFile: nil,
-          databaseOverride: .public
+          databaseOverride: .public(.prefers(.serverToServer))
         )
 
-        #expect(result.database == .public)
+        #expect(result.database == .public(.prefers(.serverToServer)))
         #expect(result.authMethod.contains("Web authentication"))
         #expect(result.authMethod.contains("public"))
       } catch AuthenticationError.invalidWebAuthCredentials {

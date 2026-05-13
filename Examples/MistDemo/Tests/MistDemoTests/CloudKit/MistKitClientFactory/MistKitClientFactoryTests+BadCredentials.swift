@@ -66,7 +66,7 @@ extension MistKitClientFactoryTests {
     internal func badCredentialsOnPublicDatabaseThrows() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
         apiToken: "real-config-token",
-        database: .public,
+        database: .public(.prefers(.serverToServer)),
         keyID: "real-key-id",
         privateKey: MistKitClientFactoryTests.validPrivateKey,
         badCredentials: true

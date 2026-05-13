@@ -39,7 +39,7 @@ extension MistKitClientFactoryTests {
     @Test("Create client for public database")
     internal func createForPublicDatabaseTest() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
-        apiToken: "api-token", database: .public
+        apiToken: "api-token", database: .public(.prefers(.serverToServer))
       )
       let tokenManager = APITokenManager(apiToken: "api-token")
 
@@ -53,7 +53,9 @@ extension MistKitClientFactoryTests {
 
     @Test("Public database creation requires API token")
     internal func publicDatabaseRequiresAPIToken() async throws {
-      let config = try await MistKitClientFactoryTests.makeConfig(apiToken: "", database: .public)
+      let config = try await MistKitClientFactoryTests.makeConfig(
+        apiToken: "", database: .public(.prefers(.serverToServer))
+      )
 
       #expect(throws: ConfigurationError.self) {
         try MistKitClientFactory.create(for: config)

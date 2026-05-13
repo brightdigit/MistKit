@@ -110,7 +110,7 @@
       default:
         captured = nil
       }
-      #expect(captured == .public)
+      #expect(captured == .public(.prefers(.serverToServer)))
     }
 
     @Test("CRUD requests with an unknown `database` value return 400")

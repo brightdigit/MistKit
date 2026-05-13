@@ -45,7 +45,7 @@ extension AuthenticationCredentialsTests {
     @Test("public with raw private key produces serverToServer with .raw material")
     internal func publicWithRawKey() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
-        database: .public,
+        database: .public(.prefers(.serverToServer)),
         keyID: "test-key-id",
         privateKey: MistKitClientFactoryTests.validPrivateKey
       )
@@ -69,7 +69,7 @@ extension AuthenticationCredentialsTests {
         containerIdentifier: "iCloud.com.test.App",
         apiToken: "test-api-token",
         environment: .development,
-        database: .public,
+        database: .public(.prefers(.serverToServer)),
         webAuthToken: nil,
         keyID: "test-key-id",
         privateKey: nil,
@@ -100,7 +100,7 @@ extension AuthenticationCredentialsTests {
     @Test("public missing keyID throws missingRequired(\"key.id\")")
     internal func publicMissingKeyIDThrows() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
-        database: .public,
+        database: .public(.prefers(.serverToServer)),
         keyID: "",
         privateKey: MistKitClientFactoryTests.validPrivateKey
       )
@@ -120,7 +120,7 @@ extension AuthenticationCredentialsTests {
     @Test("public missing private key material throws missingRequired(\"private.key\")")
     internal func publicMissingPrivateKeyThrows() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
-        database: .public,
+        database: .public(.prefers(.serverToServer)),
         keyID: "test-key-id"
       )
 
@@ -177,7 +177,7 @@ extension AuthenticationCredentialsTests {
     internal func publicEmbedsAPIAuthWhenAvailable() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
         apiToken: "api",
-        database: .public,
+        database: .public(.prefers(.serverToServer)),
         webAuthToken: "web",
         keyID: "k",
         privateKey: MistKitClientFactoryTests.validPrivateKey
@@ -194,7 +194,7 @@ extension AuthenticationCredentialsTests {
     internal func publicOmitsAPIAuthWhenWebAuthMissing() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
         apiToken: "",
-        database: .public,
+        database: .public(.prefers(.serverToServer)),
         webAuthToken: nil,
         keyID: "k",
         privateKey: MistKitClientFactoryTests.validPrivateKey
