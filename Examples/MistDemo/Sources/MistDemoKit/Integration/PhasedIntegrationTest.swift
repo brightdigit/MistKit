@@ -97,7 +97,7 @@ extension PhasedIntegrationTest {
     print("\u{1F9EA} Integration Test Suite: \(name)")
     print(String(repeating: "=", count: 80))
     print("Container: \(context.containerIdentifier)")
-    let dbLabel = database == .public ? "public" : "private"
+    let dbLabel = database.pathSegment == "public" ? "public" : "private"
     print("Database: \(dbLabel)")
     print("Record Count: \(context.recordCount)")
     print("Asset Size: \(context.assetSizeKB) KB")
@@ -118,7 +118,7 @@ extension PhasedIntegrationTest {
     )
     let cid = context.containerIdentifier
     print("   2. Select your container: \(cid)")
-    let dbName = database == .public ? "Public" : "Private"
+    let dbName = database.pathSegment == "public" ? "Public" : "Private"
     print(
       "   3. Navigate to \(dbName) Database \u{2192} Records"
     )

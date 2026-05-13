@@ -185,7 +185,7 @@ internal enum WebRequests {
     else {
       return defaultDatabase
     }
-    guard let database = MistKit.Database(rawValue: raw) else {
+    guard let database = MistDemoConfig.parseDatabase(raw) else {
       throw DecodingError.dataCorruptedError(
         forKey: key,
         in: container,

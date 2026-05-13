@@ -59,7 +59,8 @@ internal struct CreateRecordsPhase: IntegrationPhase {
           "title": .string("Test Record \(recordIndex)"),
           "index": .int64(recordIndex),
           "image": .asset(input.asset),
-        ]
+        ],
+        database: context.database
       )
       createdRecordNames.append(record.recordName)
       if context.verbose {

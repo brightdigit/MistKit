@@ -80,7 +80,9 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
         }
 
       let results = try await client.modifyRecords(
-        operations, atomic: config.atomic
+        operations,
+        atomic: config.atomic,
+        database: config.base.database
       )
 
       let rows = results.map { record in

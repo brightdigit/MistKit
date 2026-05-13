@@ -53,7 +53,8 @@ internal struct UploadAssetPhase: IntegrationPhase {
     let receipt = try await context.service.uploadAssets(
       data: testData,
       recordType: IntegrationTestData.recordType,
-      fieldName: "image"
+      fieldName: "image",
+      database: context.database
     )
 
     print("✅ Uploaded asset: \(testData.count) bytes")
