@@ -35,7 +35,7 @@
     @State internal var note: Note
     internal let onChange: () -> Void
 
-    @EnvironmentObject private var service: NativeCloudKitService
+    @Environment(CloudKitStore.self) private var service
     @Environment(\.dismiss) private var dismiss
 
     @State private var showEditSheet = false
@@ -55,7 +55,7 @@
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(note.title ?? note.id)
+      .navigationTitle(note.title ?? note.recordName)
       .toolbar {
         ToolbarItem {
           Button {
@@ -78,10 +78,10 @@
           note = updated
           onChange()
         }
-        .environmentObject(service)
+        .environment(service)
       }
       .confirmationDialog(
-        "Delete \(note.title ?? note.id)?",
+        "Delete \(note.title ?? note.recordName)?",
         isPresented: $showDeleteConfirmation,
         titleVisibility: .visible
       ) {
@@ -96,7 +96,7 @@
 
     private var identitySection: some View {
       Section("Identity") {
-        LabeledContent("Record Name", value: note.id)
+        LabeledContent("Record Name", value: note.recordName)
         LabeledContent("Record Type", value: Note.recordType)
         if let recordChangeTag = note.recordChangeTag {
           LabeledContent("Change Tag", value: recordChangeTag)

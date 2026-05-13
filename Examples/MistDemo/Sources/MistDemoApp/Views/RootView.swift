@@ -32,7 +32,7 @@
 
   /// Root view hosting the navigation split between sidebar and detail.
   public struct RootView: View {
-    @EnvironmentObject private var service: NativeCloudKitService
+    @Environment(CloudKitStore.self) private var service
     @State private var selection: SidebarItem? = .account
 
     /// The view body.

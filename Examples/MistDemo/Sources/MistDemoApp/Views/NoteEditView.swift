@@ -42,7 +42,7 @@
     internal let mode: Mode
     internal let onSaved: (Note) -> Void
 
-    @EnvironmentObject private var service: NativeCloudKitService
+    @Environment(CloudKitStore.self) private var service
     @Environment(\.dismiss) private var dismiss
 
     @State private var title: String = ""

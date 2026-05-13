@@ -1,5 +1,5 @@
 //
-//  NativeCloudKitError.swift
+//  CloudKitStoreError.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,17 +30,14 @@
 #if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import Foundation
 
-  /// Errors specific to native CloudKit operations.
-  internal enum NativeCloudKitError: Error, LocalizedError {
+  /// Errors specific to `CloudKitStore` operations.
+  internal enum CloudKitStoreError: Error, LocalizedError {
     case unexpectedSaveResult
-    case webAuthTokenUnavailable
 
     internal var errorDescription: String? {
       switch self {
       case .unexpectedSaveResult:
         return "CloudKit returned a record that couldn't be parsed as a Note."
-      case .webAuthTokenUnavailable:
-        return "CloudKit returned no web auth token and no error."
       }
     }
   }

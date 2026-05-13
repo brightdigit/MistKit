@@ -32,7 +32,7 @@
 
   /// View for querying Note records from CloudKit.
   internal struct QueryView: View {
-    @EnvironmentObject private var service: NativeCloudKitService
+    @Environment(CloudKitStore.self) private var service
     @State private var limit: Int = 50
     @State private var notes: [Note] = []
     @State private var loading = false
@@ -69,7 +69,7 @@
           List(notes, selection: $selectedNote) { note in
             NavigationLink(value: note) {
               VStack(alignment: .leading, spacing: 2) {
-                Text(note.title ?? note.id).font(.body)
+                Text(note.title ?? note.recordName).font(.body)
                 HStack(spacing: 12) {
                   if let index = note.index {
                     Label("\(index)", systemImage: "number")
@@ -98,7 +98,11 @@
       .navigationDestination(for: Note.self) { note in
         RecordDetailView(note: note, onChange: { Task { await runQuery() } })
       }
-      .navigationTitle("Notes")
+      .navigationTitle("Notes — \(service.databaseScope.label)")
+      .onChange(of: service.databaseScope) { _, _ in
+        notes = []
+        Task { await runQuery() }
+      }
       .toolbar {
         ToolbarItem {
           Button {
@@ -112,7 +116,7 @@
         NoteEditView(mode: .create) { _ in
           Task { await runQuery() }
         }
-        .environmentObject(service)
+        .environment(service)
       }
     }
 

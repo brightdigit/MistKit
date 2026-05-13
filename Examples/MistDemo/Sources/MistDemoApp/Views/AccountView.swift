@@ -31,34 +31,24 @@
   import CloudKit
   import SwiftUI
 
-  #if canImport(AppKit)
-    import AppKit
-  #elseif canImport(UIKit)
-    import UIKit
-  #endif
-
-  /// View for managing the iCloud account and web auth token.
+  /// View showing the iCloud account status and the public/private database
+  /// selector. The native app authenticates via the signed-in iCloud user, so
+  /// there's no token plumbing to surface.
   internal struct AccountView: View {
-    /// Where the current `apiToken` value came from on this launch.
-    internal enum TokenSource {
-      case manual
-      case environment
-    }
-
-    /// Env var name the MistDemo CLI also reads.
-    internal static let envVarName = "CLOUDKIT_API_TOKEN"
-
-    @EnvironmentObject internal var service: NativeCloudKitService
-    @AppStorage("MistDemoApp.cloudKitApiToken") internal var apiToken: String = ""
-    @State internal var webAuthToken: String?
-    @State internal var fetchingWebAuthToken = false
-    @State internal var webAuthTokenError: String?
-    @State internal var tokenSource: TokenSource = .manual
+    @Environment(CloudKitStore.self) private var service
 
     internal var body: some View {
+      @Bindable var bindable = service
       Form {
-        containerSection
-        webAuthTokenSection
+        Section("Container") {
+          LabeledContent("Container", value: service.containerIdentifier)
+          Picker("Database", selection: $bindable.databaseScope) {
+            ForEach(CloudKitStore.DatabaseScope.allCases) { scope in
+              Text(scope.label).tag(scope)
+            }
+          }
+          LabeledContent("iCloud Status", value: statusLabel)
+        }
         if let error = service.lastError {
           Section("Last Service Error") {
             Text(error).font(.callout).foregroundStyle(.red)
@@ -74,17 +64,6 @@
           }
         }
       }
-      .onAppear { seedTokenIfNeeded() }
-    }
-
-    private var sourceCaption: String? {
-      switch tokenSource {
-      case .manual:
-        return nil
-      case .environment:
-        return
-          "Loaded from $\(Self.envVarName) (xcodegen baked it into the scheme from .env)."
-      }
     }
 
     private var statusLabel: String {
@@ -95,98 +74,6 @@
       case .couldNotDetermine: return "Could Not Determine"
       case .temporarilyUnavailable: return "Temporarily Unavailable"
       @unknown default: return "Unknown"
-      }
-    }
-
-    private var containerSection: some View {
-      Section("Container") {
-        LabeledContent("Container", value: service.containerIdentifier)
-        LabeledContent("Database", value: "Private")
-        LabeledContent("iCloud Status", value: statusLabel)
-      }
-    }
-
-    private var webAuthTokenSection: some View {
-      Section {
-        tokenTextField
-        tokenActions
-        tokenDisplay
-      } header: {
-        Text("Web Auth Token")
-      } footer: {
-        Text(
-          "Issues the same `158__…` token that MistKit / "
-            + "`mistdemo auth-token` consume. "
-            + "Uses CKFetchWebAuthTokenOperation."
-        )
-        .font(.caption)
-        .foregroundStyle(.secondary)
-      }
-    }
-
-    private var tokenTextField: some View {
-      Group {
-        TextField(
-          "CloudKit API Token",
-          text: $apiToken,
-          prompt: Text("Paste from CloudKit Dashboard")
-        )
-        .textFieldStyle(.roundedBorder)
-        .font(.body.monospaced())
-        .onChange(of: apiToken) { _, _ in tokenSource = .manual }
-        #if os(iOS)
-          .autocorrectionDisabled(true)
-          .textInputAutocapitalization(.never)
-        #endif
-        if let caption = sourceCaption {
-          Text(caption).font(.caption).foregroundStyle(.secondary)
-        }
-      }
-    }
-
-    private var tokenActions: some View {
-      HStack {
-        Button {
-          Task { await fetchToken() }
-        } label: {
-          if fetchingWebAuthToken {
-            HStack(spacing: 6) {
-              ProgressView().controlSize(.small)
-              Text("Fetching…")
-            }
-          } else {
-            Text("Fetch Web Auth Token")
-          }
-        }
-        .buttonStyle(.borderedProminent)
-        .disabled(apiToken.isEmpty || fetchingWebAuthToken)
-        if webAuthToken != nil {
-          Button("Clear", role: .destructive) {
-            webAuthToken = nil
-            webAuthTokenError = nil
-          }
-        }
-      }
-    }
-
-    @ViewBuilder
-    private var tokenDisplay: some View {
-      if let webAuthToken {
-        LabeledContent("Web Auth Token") {
-          VStack(alignment: .trailing, spacing: 6) {
-            Text(webAuthToken)
-              .font(.callout.monospaced())
-              .lineLimit(3)
-              .truncationMode(.middle)
-              .textSelection(.enabled)
-            Button("Copy") { copy(webAuthToken) }
-              .buttonStyle(.bordered)
-              .controlSize(.small)
-          }
-        }
-      }
-      if let webAuthTokenError {
-        Text(webAuthTokenError).font(.callout).foregroundStyle(.red)
       }
     }
   }
