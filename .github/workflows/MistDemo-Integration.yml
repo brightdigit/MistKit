@@ -13,6 +13,15 @@
 #                                 (base64 -w0 key.pem)
 #   CLOUDKIT_CONTAINER_ID       - iCloud.com.brightdigit.MistDemo
 #
+# Two-job design:
+#   1) `build` runs in `swift:6.3-noble` and produces the mistdemo
+#      binary plus the Swift runtime libs it needs at run time
+#      (libswiftCore, libdispatch, libFoundation, ...).
+#   2) `integration` runs on plain `ubuntu-24.04` (matching the
+#      container's glibc), downloads the bundle, and executes the live
+#      CloudKit phases with LD_LIBRARY_PATH set to the bundled libs.
+#      No Swift toolchain on the run host.
+#
 # Secrets are NOT exposed to fork pull requests — there is no
 # pull_request trigger on this workflow by design.
 
@@ -33,21 +42,76 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build:
+    name: Build mistdemo bundle
+    runs-on: ubuntu-24.04
+    container: swift:6.3-noble
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: swift build
+        working-directory: Examples/MistDemo
+        run: swift build
+
+      - name: Bundle binary + Swift runtime
+        run: |
+          set -euo pipefail
+          mkdir -p bundle/lib
+          cp Examples/MistDemo/.build/debug/mistdemo bundle/mistdemo
+          # Swift runtime: libswiftCore, libdispatch, libFoundation*,
+          # libBlocksRuntime, libswift_Concurrency, ...
+          cp -a /usr/lib/swift/linux/. bundle/lib/
+          # System libs whose ABI is tied to the build image. ubuntu-24.04
+          # (noble) ships matching versions, but bundling avoids drift if
+          # the runner image changes minor versions.
+          for so in libcurl libxml2 libssl libcrypto; do
+            for path in /usr/lib/x86_64-linux-gnu/${so}*.so*; do
+              [ -e "$path" ] && cp -a "$path" bundle/lib/
+            done
+          done
+          tar czf mistdemo-bundle.tar.gz -C bundle .
+          ls -lh mistdemo-bundle.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mistdemo-bundle
+          path: mistdemo-bundle.tar.gz
+          retention-days: 1
+          # tarball is already gzipped — skip the action's redundant zip.
+          compression-level: 0
+
   integration:
     name: Live CloudKit Integration
-    runs-on: ubuntu-latest
-    container: swift:6.3-noble
+    needs: build
+    runs-on: ubuntu-24.04
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     timeout-minutes: 30
     defaults:
       run:
         shell: bash
-        working-directory: Examples/MistDemo
+    env:
+      LD_LIBRARY_PATH: ${{ github.workspace }}/bundle/lib
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          name: mistdemo-bundle
+
+      - name: Extract bundle
+        run: |
+          set -euo pipefail
+          mkdir -p bundle integration-logs
+          tar xzf mistdemo-bundle.tar.gz -C bundle
+          chmod +x bundle/mistdemo
+          # Smoke check: does the binary even start? --help has no network
+          # or auth dependencies, so failure here means we mis-bundled libs.
+          ./bundle/mistdemo --help >/dev/null
 
       - name: Decode server-to-server private key
-        working-directory: ${{ github.workspace }}
         env:
           CLOUDKIT_PRIVATE_KEY_BASE64: ${{ secrets.CLOUDKIT_PRIVATE_KEY_BASE64 }}
         run: |
@@ -62,13 +126,6 @@ jobs:
           done < "$KEY_PATH"
           echo "CLOUDKIT_PRIVATE_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
 
-      - name: Pre-create log directory
-        run: mkdir -p integration-logs
-
-      - name: Warm Swift build
-        timeout-minutes: 10
-        run: swift build
-
       - name: test-public
         timeout-minutes: 10
         env:
@@ -78,7 +135,7 @@ jobs:
           CLOUDKIT_ENVIRONMENT: development
         run: |
           set -o pipefail
-          swift run mistdemo test-public \
+          ./bundle/mistdemo test-public \
             --record-count 5 \
             --asset-size 50 \
             2>&1 | tee integration-logs/test-public.log
@@ -92,7 +149,7 @@ jobs:
           CLOUDKIT_ENVIRONMENT: development
         run: |
           set -o pipefail
-          swift run mistdemo test-private \
+          ./bundle/mistdemo test-private \
             --record-count 5 \
             --asset-size 50 \
             2>&1 | tee integration-logs/test-private.log
@@ -107,7 +164,7 @@ jobs:
           CLOUDKIT_ENVIRONMENT: development
         run: |
           set -o pipefail
-          swift run mistdemo demo-errors --scenario all \
+          ./bundle/mistdemo demo-errors --scenario all \
             2>&1 | tee integration-logs/demo-errors.log
           # demo-errors exits 0 by design — assert all scenarios actually
           # ran by checking for the per-scenario completion markers.
@@ -128,7 +185,7 @@ jobs:
           CLOUDKIT_ENVIRONMENT: development
         run: |
           set -o pipefail
-          swift run mistdemo demo-in-filter \
+          ./bundle/mistdemo demo-in-filter \
             2>&1 | tee integration-logs/demo-in-filter.log
 
       - name: Upload integration logs
@@ -136,13 +193,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: integration-logs
-          path: Examples/MistDemo/integration-logs/
+          path: integration-logs/
           retention-days: 14
           if-no-files-found: warn
 
       - name: Cleanup decoded private key
         if: always()
-        working-directory: ${{ github.workspace }}
         run: |
           if [ -n "${CLOUDKIT_PRIVATE_KEY_PATH:-}" ] && [ -f "$CLOUDKIT_PRIVATE_KEY_PATH" ]; then
             rm -f "$CLOUDKIT_PRIVATE_KEY_PATH"
