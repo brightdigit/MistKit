@@ -71,12 +71,12 @@ internal struct TestPrivateConfigTests {
     // Even though we configure the base for the public DB, TestPrivateConfig
     // must override to `.private`. The init also requires web-auth credentials.
     let baseConfig = try await MistDemoConfig(
-      database: .public,
+      database: .public(.prefers(.serverToServer)),
       webAuthToken: "wat-xyz"
     )
     let config = TestPrivateConfig(base: baseConfig.with(database: .private))
 
-    #expect(config.base.database == .private)
+    #expect(config.base.database == MistKit.Database.private)
   }
 
   @Test("Memberwise init preserves base configuration values")

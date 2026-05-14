@@ -31,20 +31,19 @@
 extension Credentials {
   /// Resolve the appropriate token manager for an outgoing request.
   ///
-  /// Picks among the populated `serverToServer` and `apiAuth` credentials
-  /// based on the target `database` and whether the route requires
-  /// user-context authentication:
+  /// The signing choice is encoded in `database`:
+  /// - `.public(let auth)` consults `auth` and the populated credential sets
+  ///   per the table below.
+  /// - `.private` / `.shared` always use web-auth — CloudKit rejects
+  ///   server-to-server signing on those scopes — and require
+  ///   `apiAuth.webAuthToken`.
   ///
-  /// - `requiresUserContext == true`: web-auth is mandatory regardless of
-  ///   database. CloudKit's user-identity routes (`fetchCaller`,
-  ///   `lookupUsersByEmail`, `lookupUsersByRecordName`,
-  ///   `discoverAllUserIdentities`) live on `.public` but still need
-  ///   web-auth to identify the caller.
-  /// - `.public` + no user context: prefers server-to-server signing, falls
-  ///   back to web-auth, then bare API-token.
-  /// - `.private` / `.shared`: requires `apiAuth.webAuthToken`. CloudKit
-  ///   rejects server-to-server signing for these databases, so any
-  ///   `serverToServer` material is ignored on this path.
+  /// Resolution for `.public(let auth)`:
+  /// - `auth.required` + mode's creds present → use `auth.mode`.
+  /// - `auth.required` + mode's creds absent → throw `.preferenceRequired`.
+  /// - `auth.prefers` + mode's creds present → use `auth.mode`.
+  /// - `auth.prefers` + mode's creds absent → fall back to the other mode.
+  /// - `auth.prefers` + neither mode configured → throw `.notConfigured`.
   ///
   /// - Throws: `CloudKitError.missingCredentials` when no populated credential
   ///   set can satisfy the requested combination,
@@ -52,63 +51,78 @@ extension Credentials {
   ///   read, or any error from `ServerToServerAuthManager.init` when the PEM
   ///   is malformed.
   internal func makeTokenManager(
-    for database: Database,
-    requiresUserContext: Bool = false
+    for database: Database
   ) throws -> any TokenManager {
-    if requiresUserContext {
-      return try makeUserContextTokenManager(database: database)
-    }
     switch database {
-    case .public:
-      return try makePublicTokenManager()
+    case .public(let auth):
+      return try makePublicTokenManager(auth: auth)
     case .private, .shared:
       return try makePrivateOrSharedTokenManager(database)
     }
   }
 
-  private func makeUserContextTokenManager(
-    database: Database
+  private func makePublicTokenManager(
+    auth: PublicAuthPreference
   ) throws -> any TokenManager {
-    guard let api = apiAuth, let webAuthToken = api.webAuthToken else {
-      throw CloudKitError.missingCredentials(
-        database: database,
-        reason: "user-context routes require apiAuth with a webAuthToken"
-      )
+    switch auth.mode {
+    case .serverToServer:
+      return try makePublicWithS2SPreference(auth: auth)
+    case .webAuth:
+      return try makePublicWithWebAuthPreference(auth: auth)
     }
-    return WebAuthTokenManager(
-      apiToken: api.apiToken,
-      webAuthToken: webAuthToken
-    )
   }
 
-  private func makePublicTokenManager() throws -> any TokenManager {
+  private func makePublicWithS2SPreference(
+    auth: PublicAuthPreference
+  ) throws -> any TokenManager {
     if let s2s = serverToServer {
-      let pem: String
-      do {
-        pem = try s2s.privateKey.loadPEM()
-      } catch {
-        throw CloudKitError.invalidPrivateKey(
-          path: s2s.privateKey.filePath,
-          underlying: error
-        )
-      }
-      return try ServerToServerAuthManager(
-        keyID: s2s.keyID,
-        pemString: pem
+      return try makeServerToServerManager(s2s)
+    }
+    if auth.required {
+      throw CloudKitError.missingCredentials(
+        database: .public(auth),
+        availability: .preferenceRequired,
+        reason: "PublicAuthPreference.requires(.serverToServer) "
+          + "but no serverToServer credentials are configured"
       )
     }
     if let api = apiAuth {
-      if let webAuthToken = api.webAuthToken {
-        return WebAuthTokenManager(
-          apiToken: api.apiToken,
-          webAuthToken: webAuthToken
-        )
-      }
-      return APITokenManager(apiToken: api.apiToken)
+      return makeAPITokenManager(api)
     }
     throw CloudKitError.missingCredentials(
-      database: .public,
+      database: .public(auth),
+      availability: .notConfigured,
       reason: "expected serverToServer or apiAuth credentials"
+    )
+  }
+
+  private func makePublicWithWebAuthPreference(
+    auth: PublicAuthPreference
+  ) throws -> any TokenManager {
+    if let api = apiAuth, let webAuthToken = api.webAuthToken {
+      return WebAuthTokenManager(
+        apiToken: api.apiToken,
+        webAuthToken: webAuthToken
+      )
+    }
+    if auth.required {
+      throw CloudKitError.missingCredentials(
+        database: .public(auth),
+        availability: .preferenceRequired,
+        reason: "PublicAuthPreference.requires(.webAuth) "
+          + "but no apiAuth.webAuthToken is configured"
+      )
+    }
+    if let s2s = serverToServer {
+      return try makeServerToServerManager(s2s)
+    }
+    if let api = apiAuth {
+      return makeAPITokenManager(api)
+    }
+    throw CloudKitError.missingCredentials(
+      database: .public(auth),
+      availability: .notConfigured,
+      reason: "expected apiAuth.webAuthToken or serverToServer credentials"
     )
   }
 
@@ -118,6 +132,7 @@ extension Credentials {
     guard let api = apiAuth, let webAuthToken = api.webAuthToken else {
       throw CloudKitError.missingCredentials(
         database: database,
+        availability: .notConfigured,
         reason:
           "private and shared databases require apiAuth with a webAuthToken"
       )
@@ -126,5 +141,35 @@ extension Credentials {
       apiToken: api.apiToken,
       webAuthToken: webAuthToken
     )
+  }
+
+  private func makeServerToServerManager(
+    _ s2s: ServerToServerCredentials
+  ) throws -> any TokenManager {
+    let pem: String
+    do {
+      pem = try s2s.privateKey.loadPEM()
+    } catch {
+      throw CloudKitError.invalidPrivateKey(
+        path: s2s.privateKey.filePath,
+        underlying: error
+      )
+    }
+    return try ServerToServerAuthManager(
+      keyID: s2s.keyID,
+      pemString: pem
+    )
+  }
+
+  private func makeAPITokenManager(
+    _ api: APICredentials
+  ) -> any TokenManager {
+    if let webAuthToken = api.webAuthToken {
+      return WebAuthTokenManager(
+        apiToken: api.apiToken,
+        webAuthToken: webAuthToken
+      )
+    }
+    return APITokenManager(apiToken: api.apiToken)
   }
 }

@@ -46,7 +46,11 @@ extension CloudKitServiceTests.Query {
       // With nil limit, should use defaultQueryLimit (100)
       // This test verifies the parameter handling - actual call will fail without auth
       do {
-        _ = try await service.queryRecords(recordType: "Article", limit: nil as Int?)
+        _ = try await service.queryRecords(
+          recordType: "Article",
+          limit: nil as Int?,
+          database: .public(.prefers(.serverToServer))
+        )
       } catch {
         // Validation should pass (no 400 error)
         if case .httpErrorWithRawResponse(let statusCode, _) = error {
@@ -67,7 +71,8 @@ extension CloudKitServiceTests.Query {
         _ = try await service.queryRecords(
           recordType: "Article",
           filters: [],
-          limit: 10
+          limit: 10,
+          database: .public(.prefers(.serverToServer))
         )
       } catch {
         // Should not fail validation
@@ -89,7 +94,8 @@ extension CloudKitServiceTests.Query {
         _ = try await service.queryRecords(
           recordType: "Article",
           sortBy: [],
-          limit: 10
+          limit: 10,
+          database: .public(.prefers(.serverToServer))
         )
       } catch {
         // Should not fail validation

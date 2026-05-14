@@ -44,7 +44,10 @@ extension CloudKitServiceTests.Query {
       let service = try CloudKitServiceTests.Query.makeValidationErrorService(.emptyRecordType)
 
       do {
-        _ = try await service.queryRecords(recordType: "")
+        _ = try await service.queryRecords(
+          recordType: "",
+          database: .public(.prefers(.serverToServer))
+        )
         Issue.record("Expected error for empty recordType")
       } catch let error as CloudKitError {
         // Verify we get the correct validation error
@@ -68,7 +71,11 @@ extension CloudKitServiceTests.Query {
       let service = try CloudKitServiceTests.Query.makeValidationErrorService(.limitTooSmall(limit))
 
       do {
-        _ = try await service.queryRecords(recordType: "Article", limit: limit)
+        _ = try await service.queryRecords(
+          recordType: "Article",
+          limit: limit,
+          database: .public(.prefers(.serverToServer))
+        )
         Issue.record("Expected error for limit \(limit)")
       } catch {
         if case .httpErrorWithRawResponse(let statusCode, let response) = error {
@@ -89,7 +96,11 @@ extension CloudKitServiceTests.Query {
       let service = try CloudKitServiceTests.Query.makeValidationErrorService(.limitTooLarge(limit))
 
       do {
-        _ = try await service.queryRecords(recordType: "Article", limit: limit)
+        _ = try await service.queryRecords(
+          recordType: "Article",
+          limit: limit,
+          database: .public(.prefers(.serverToServer))
+        )
         Issue.record("Expected error for limit \(limit)")
       } catch {
         if case .httpErrorWithRawResponse(let statusCode, let response) = error {
@@ -112,7 +123,11 @@ extension CloudKitServiceTests.Query {
       // This test verifies validation passes - actual API call will fail without real credentials
       // but we're testing that validation doesn't throw
       do {
-        _ = try await service.queryRecords(recordType: "Article", limit: limit)
+        _ = try await service.queryRecords(
+          recordType: "Article",
+          limit: limit,
+          database: .public(.prefers(.serverToServer))
+        )
         Issue.record("Expected network error since we don't have real credentials")
       } catch {
         // We expect a network/auth error, not a validation error

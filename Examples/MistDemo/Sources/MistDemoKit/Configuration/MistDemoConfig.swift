@@ -103,7 +103,7 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
 
     let databaseString =
       config.string(forKey: "database", default: "public") ?? "public"
-    guard let database = MistKit.Database(rawValue: databaseString) else {
+    guard let database = MistDemoConfig.parseDatabase(databaseString) else {
       throw ConfigurationError.invalidDatabase(databaseString)
     }
     self.database = database
@@ -165,6 +165,27 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
     self.testAdaptive = testAdaptive
     self.testServerToServer = testServerToServer
     self.badCredentials = badCredentials
+  }
+
+  /// Map a `"public" | "private" | "shared"` string to a `MistKit.Database`.
+  ///
+  /// `"public"` resolves to `.public(.prefers(.serverToServer))` to match
+  /// `toPrimaryCredentials()`'s "S2S-preferred, web-auth augments" policy.
+  /// Returns `nil` for unrecognized strings so callers can raise a
+  /// configuration error.
+  internal static func parseDatabase(
+    _ raw: String
+  ) -> MistKit.Database? {
+    switch raw {
+    case "public":
+      return .public(.prefers(.serverToServer))
+    case "private":
+      return .private
+    case "shared":
+      return .shared
+    default:
+      return nil
+    }
   }
 
   /// Returns a copy with the given database override.

@@ -38,7 +38,7 @@ extension AuthenticationHelper {
     privateKeyFile: String?,
     databaseOverride: MistKit.Database?
   ) async throws -> AuthenticationResult {
-    let database = MistKit.Database.public
+    let database: MistKit.Database = .public(.prefers(.serverToServer))
 
     if databaseOverride == .private {
       throw AuthenticationError.serverToServerRequiresPublicDatabase
@@ -85,7 +85,7 @@ extension AuthenticationHelper {
     apiToken: String,
     databaseOverride: MistKit.Database?
   ) async throws -> AuthenticationResult {
-    let database = MistKit.Database.public
+    let database: MistKit.Database = .public(.prefers(.serverToServer))
 
     if databaseOverride == .private {
       throw AuthenticationError.privateRequiresWebAuth

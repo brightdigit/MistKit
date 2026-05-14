@@ -145,7 +145,8 @@ internal struct DemoErrorsRunner {
       let created = try await service.createRecord(
         recordType: Self.conflictRecordType,
         recordName: recordName,
-        fields: ["title": .string("original")]
+        fields: ["title": .string("original")],
+        database: config.database
       )
       createdRecordName = created.recordName
       staleTag = created.recordChangeTag
@@ -160,7 +161,8 @@ internal struct DemoErrorsRunner {
         recordType: Self.conflictRecordType,
         recordName: recordName,
         fields: ["title": .string("first-update")],
-        recordChangeTag: staleTag
+        recordChangeTag: staleTag,
+        database: config.database
       )
     } catch {
       print("❌ Setup update failed: \(error)")
@@ -173,7 +175,8 @@ internal struct DemoErrorsRunner {
         recordType: Self.conflictRecordType,
         recordName: recordName,
         fields: ["title": .string("second-update-stale")],
-        recordChangeTag: staleTag
+        recordChangeTag: staleTag,
+        database: config.database
       )
       print("⚠️  Expected 409 but update was accepted.")
     } catch {
@@ -198,7 +201,8 @@ internal struct DemoErrorsRunner {
     do {
       try await service.deleteRecord(
         recordType: Self.conflictRecordType,
-        recordName: createdRecordName
+        recordName: createdRecordName,
+        database: config.database
       )
       print("   ✅ Deleted.")
     } catch {

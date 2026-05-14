@@ -46,7 +46,9 @@ extension CloudKitServiceTests.FetchChanges {
         syncToken: "new-token-123"
       )
 
-      let result = try await service.fetchRecordChanges()
+      let result = try await service.fetchRecordChanges(
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(result.records.count == 3)
       #expect(result.syncToken == "new-token-123")
@@ -64,7 +66,9 @@ extension CloudKitServiceTests.FetchChanges {
         moreComing: true
       )
 
-      let result = try await service.fetchRecordChanges()
+      let result = try await service.fetchRecordChanges(
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(result.moreComing == true)
       #expect(result.records.count == 2)
@@ -78,7 +82,10 @@ extension CloudKitServiceTests.FetchChanges {
       }
       let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService()
 
-      let result = try await service.fetchRecordChanges(syncToken: nil)
+      let result = try await service.fetchRecordChanges(
+        syncToken: nil,
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(result.records.isEmpty == false)
       #expect(result.syncToken != nil)
@@ -95,7 +102,9 @@ extension CloudKitServiceTests.FetchChanges {
           recordCount: 2
         )
 
-      let result = try await service.fetchRecordChanges()
+      let result = try await service.fetchRecordChanges(
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(result.records[0].recordName == "record-0")
       #expect(result.records[0].recordType == "Note")
@@ -114,7 +123,9 @@ extension CloudKitServiceTests.FetchChanges {
         syncToken: "final-token"
       )
 
-      let (records, token) = try await service.fetchAllRecordChanges()
+      let (records, token) = try await service.fetchAllRecordChanges(
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(records.count == 3)
       #expect(token == "final-token")
@@ -131,7 +142,9 @@ extension CloudKitServiceTests.FetchChanges {
         (recordCount: 2, syncToken: "token-2"),
       ])
 
-      let (records, token) = try await service.fetchAllRecordChanges()
+      let (records, token) = try await service.fetchAllRecordChanges(
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(records.count == 5)
       #expect(token == "token-2")
@@ -148,7 +161,9 @@ extension CloudKitServiceTests.FetchChanges {
         (recordCount: 1, syncToken: "final-token"),
       ])
 
-      let (_, token) = try await service.fetchAllRecordChanges()
+      let (_, token) = try await service.fetchAllRecordChanges(
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(token == "final-token")
     }
@@ -164,7 +179,9 @@ extension CloudKitServiceTests.FetchChanges {
         (recordCount: 3, syncToken: "token-2"),
       ])
 
-      let (records, token) = try await service.fetchAllRecordChanges()
+      let (records, token) = try await service.fetchAllRecordChanges(
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(records.count == 3)
       #expect(token == "token-2")
@@ -182,7 +199,9 @@ extension CloudKitServiceTests.FetchChanges {
         (recordCount: 2, syncToken: "token-3"),
       ])
 
-      let (records, token) = try await service.fetchAllRecordChanges()
+      let (records, token) = try await service.fetchAllRecordChanges(
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(records.count == 7)
       #expect(token == "token-3")
@@ -204,7 +223,9 @@ extension CloudKitServiceTests.FetchChanges {
         transport: transport
       )
 
-      let result = try await service.fetchRecordChanges()
+      let result = try await service.fetchRecordChanges(
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(result.records.count == 2)
       let deletedRecord = try #require(result.records.first { $0.recordName == "deleted-record-0" })

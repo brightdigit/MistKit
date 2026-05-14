@@ -33,10 +33,15 @@ import Testing
 @testable import MistKit
 
 extension CredentialsTokenManagerTests {
+  /// Coverage for the "user-context" routes (`users/caller`,
+  /// `users/lookup/*`, `users/discover`). With the per-call
+  /// `PublicAuthPreference` rewrite these no longer take a separate
+  /// `requiresUserContext` flag — they pass `.public(.requires(.webAuth))`
+  /// directly to the dispatcher.
   @Suite("User-Context Branch")
   internal struct UserContext {
-    @Test("requiresUserContext on .public → WebAuthTokenManager")
-    internal func userContextOnPublicPicksWebAuth() async throws {
+    @Test(".public(.requires(.webAuth)) + both creds → web-auth (S2S ignored)")
+    internal func requiresWebAuthOnPublicIgnoresS2S() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         return
       }
@@ -45,14 +50,13 @@ extension CredentialsTokenManagerTests {
         apiAuth: CredentialsTokenManagerTests.makeAPICredentialsWithWebAuth()
       )
       let manager = try credentials.makeTokenManager(
-        for: .public, requiresUserContext: true
+        for: .public(.requires(.webAuth))
       )
-      // S2S is present, but user-context routes ignore it — must pick web-auth.
       #expect(manager is WebAuthTokenManager)
     }
 
-    @Test("requiresUserContext without web-auth → throws missingCredentials")
-    internal func userContextWithoutWebAuthThrows() async throws {
+    @Test(".public(.requires(.webAuth)) + S2S only → throws preferenceRequired")
+    internal func requiresWebAuthWithoutWebAuthThrows() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         return
       }
@@ -61,13 +65,13 @@ extension CredentialsTokenManagerTests {
       )
       #expect(throws: CloudKitError.self) {
         _ = try credentials.makeTokenManager(
-          for: .public, requiresUserContext: true
+          for: .public(.requires(.webAuth))
         )
       }
     }
 
-    @Test("requiresUserContext with apiAuth (token only) → throws missingCredentials")
-    internal func userContextWithAPITokenOnlyThrows() async throws {
+    @Test(".public(.requires(.webAuth)) + API token only → throws preferenceRequired")
+    internal func requiresWebAuthWithAPITokenOnlyThrows() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         return
       }
@@ -76,65 +80,7 @@ extension CredentialsTokenManagerTests {
       )
       #expect(throws: CloudKitError.self) {
         _ = try credentials.makeTokenManager(
-          for: .public, requiresUserContext: true
-        )
-      }
-    }
-
-    @Test("requiresUserContext on .private + web-auth → WebAuthTokenManager")
-    internal func userContextOnPrivatePicksWebAuth() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        return
-      }
-      let credentials = try Credentials(
-        apiAuth: CredentialsTokenManagerTests.makeAPICredentialsWithWebAuth()
-      )
-      let manager = try credentials.makeTokenManager(
-        for: .private, requiresUserContext: true
-      )
-      #expect(manager is WebAuthTokenManager)
-    }
-
-    @Test("requiresUserContext on .shared + web-auth → WebAuthTokenManager")
-    internal func userContextOnSharedPicksWebAuth() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        return
-      }
-      let credentials = try Credentials(
-        apiAuth: CredentialsTokenManagerTests.makeAPICredentialsWithWebAuth()
-      )
-      let manager = try credentials.makeTokenManager(
-        for: .shared, requiresUserContext: true
-      )
-      #expect(manager is WebAuthTokenManager)
-    }
-
-    @Test("requiresUserContext on .private + S2S only → throws missingCredentials")
-    internal func userContextOnPrivateRejectsServerToServerOnly() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        return
-      }
-      let credentials = try Credentials(
-        serverToServer: CredentialsTokenManagerTests.makeServerToServerCredentials()
-      )
-      #expect(throws: CloudKitError.self) {
-        _ = try credentials.makeTokenManager(
-          for: .private, requiresUserContext: true
-        )
-      }
-    }
-
-    @Test("requiresUserContext on .shared + S2S only → throws missingCredentials")
-    internal func userContextOnSharedRejectsServerToServerOnly() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        return
-      }
-      let credentials = try Credentials(
-        serverToServer: CredentialsTokenManagerTests.makeServerToServerCredentials()
-      )
-      #expect(throws: CloudKitError.self) {
-        _ = try credentials.makeTokenManager(
-          for: .shared, requiresUserContext: true
+          for: .public(.requires(.webAuth))
         )
       }
     }

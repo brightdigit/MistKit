@@ -45,7 +45,7 @@ extension CloudKitServiceTests.LookupZones {
 
       let zones = try await service.lookupZones(
         zoneIDs: [ZoneID(zoneName: "_defaultZone", ownerName: nil)],
-        database: .public
+        database: .public(.prefers(.serverToServer))
       )
 
       #expect(zones.count == 1)
@@ -66,7 +66,7 @@ extension CloudKitServiceTests.LookupZones {
           ZoneID(zoneName: "zone2", ownerName: nil),
           ZoneID(zoneName: "zone3", ownerName: nil),
         ],
-        database: .public
+        database: .public(.prefers(.serverToServer))
       )
 
       #expect(zones.count == 3)
@@ -85,7 +85,7 @@ extension CloudKitServiceTests.LookupZones {
 
       let zones = try await service.lookupZones(
         zoneIDs: [ZoneID(zoneName: "nonexistent", ownerName: nil)],
-        database: .public
+        database: .public(.prefers(.serverToServer))
       )
 
       #expect(zones.isEmpty)

@@ -137,7 +137,8 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
       data: data,
       recordType: config.recordType,
       fieldName: config.fieldName,
-      recordName: config.recordName
+      recordName: config.recordName,
+      database: config.base.database
     )
     print("\n✅ Asset uploaded!")
     print("   Record Name: \(result.recordName)")
@@ -186,7 +187,8 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
       return try await service.createRecord(
         recordType: config.recordType,
         recordName: newRecordName,
-        fields: fields
+        fields: fields,
+        database: config.base.database
       )
     }
   }
@@ -197,7 +199,8 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
     service: CloudKitService
   ) async throws -> RecordInfo {
     let existingRecords = try await service.lookupRecords(
-      recordNames: [recordName]
+      recordNames: [recordName],
+      database: config.base.database
     )
     guard let existingRecord = existingRecords.first else {
       throw UploadAssetError.operationFailed(
@@ -208,7 +211,8 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
       recordType: config.recordType,
       recordName: recordName,
       fields: fields,
-      recordChangeTag: existingRecord.recordChangeTag
+      recordChangeTag: existingRecord.recordChangeTag,
+      database: config.base.database
     )
   }
 }

@@ -27,11 +27,36 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+/// CloudKit database scope plus, for `.public`, the per-call attribution
+/// choice between server-to-server signing and web-auth signing.
+///
+/// The auth payload is part of `.public` rather than a separate parameter
+/// because it only matters there — CloudKit rejects server-to-server signing
+/// on `.private` and `.shared`, so those cases carry no payload. Encoding
+/// the choice in the type means call sites either pick one explicitly
+/// (`Database.public(.requires(.webAuth))`) or use a scope where the choice
+/// doesn't exist (`Database.private`).
+public enum Database: Sendable, Hashable {
+  /// Public database. Caller must pick a signing method via
+  /// `PublicAuthPreference`.
+  case `public`(PublicAuthPreference)
 
-/// CloudKit database types
-public enum Database: String, Sendable {
-  case `public`
+  /// Private database. Web-auth is the only valid signing method.
   case `private`
+
+  /// Shared database. Web-auth is the only valid signing method.
   case shared
+
+  /// The path segment used to build CloudKit Web Services URLs
+  /// (`/database/{version}/{container}/{environment}/{database}/…`).
+  public var pathSegment: String {
+    switch self {
+    case .public:
+      return "public"
+    case .private:
+      return "private"
+    case .shared:
+      return "shared"
+    }
+  }
 }

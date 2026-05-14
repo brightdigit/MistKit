@@ -100,7 +100,8 @@ extension MistKitConfiguration {
     MistKitConfiguration(
       container: container,
       environment: environment,
-      database: .public,  // Server-to-server only supports public database
+      database: .public(.requires(.serverToServer)),
+      // Server-to-server only supports public database
       apiToken: "",  // Not used with server-to-server auth
       webAuthToken: nil,
       keyID: keyID,

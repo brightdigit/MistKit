@@ -49,7 +49,8 @@ extension CloudKitServiceTests.Upload {
         _ = try await service.uploadAssets(
           data: Data(),
           recordType: "Note",
-          fieldName: "image"
+          fieldName: "image",
+          database: .public(.prefers(.serverToServer))
         )
         Issue.record("Expected error for empty data")
       } catch {
@@ -78,7 +79,8 @@ extension CloudKitServiceTests.Upload {
         _ = try await service.uploadAssets(
           data: oversizedData,
           recordType: "Note",
-          fieldName: "image"
+          fieldName: "image",
+          database: .public(.prefers(.serverToServer))
         )
         Issue.record("Expected error for oversized asset")
       } catch {
@@ -115,7 +117,8 @@ extension CloudKitServiceTests.Upload {
             data: data,
             recordType: "Note",
             fieldName: "image",
-            using: CloudKitServiceTests.Upload.makeMockAssetUploader()
+            using: CloudKitServiceTests.Upload.makeMockAssetUploader(),
+            database: .public(.prefers(.serverToServer))
           )
           #expect(result.asset.receipt != nil, "Should receive asset with receipt")
         } catch {
@@ -145,7 +148,8 @@ extension CloudKitServiceTests.Upload {
           data: Data(count: 1_024),
           recordType: "Note",
           fieldName: "image",
-          using: CloudKitServiceTests.Upload.makeMockAssetUploader()
+          using: CloudKitServiceTests.Upload.makeMockAssetUploader(),
+          database: .public(.prefers(.serverToServer))
         )
       }
     }

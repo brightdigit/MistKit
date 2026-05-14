@@ -56,7 +56,10 @@ internal struct ModifyRecordsPhase: IntegrationPhase {
       )
     }
 
-    _ = try await context.service.modifyRecords(operations)
+    _ = try await context.service.modifyRecords(
+      operations,
+      database: context.database
+    )
 
     if context.verbose {
       for recordName in recordsToUpdate {
