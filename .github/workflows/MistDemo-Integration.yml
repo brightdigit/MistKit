@@ -102,6 +102,7 @@ jobs:
         env:
           CLOUDKIT_API_TOKEN: ${{ secrets.CLOUDKIT_API_TOKEN }}
           CLOUDKIT_WEB_AUTH_TOKEN: ${{ secrets.CLOUDKIT_WEB_AUTH_TOKEN }}
+          CLOUDKIT_KEY_ID: ${{ secrets.CLOUDKIT_KEY_ID }}
           CLOUDKIT_CONTAINER_ID: ${{ secrets.CLOUDKIT_CONTAINER_ID }}
           CLOUDKIT_ENVIRONMENT: development
         run: |
@@ -122,6 +123,7 @@ jobs:
         env:
           CLOUDKIT_API_TOKEN: ${{ secrets.CLOUDKIT_API_TOKEN }}
           CLOUDKIT_WEB_AUTH_TOKEN: ${{ secrets.CLOUDKIT_WEB_AUTH_TOKEN }}
+          CLOUDKIT_KEY_ID: ${{ secrets.CLOUDKIT_KEY_ID }}
           CLOUDKIT_CONTAINER_ID: ${{ secrets.CLOUDKIT_CONTAINER_ID }}
           CLOUDKIT_ENVIRONMENT: development
         run: |
