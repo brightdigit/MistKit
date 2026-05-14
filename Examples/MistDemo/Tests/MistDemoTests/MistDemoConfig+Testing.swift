@@ -92,7 +92,7 @@ extension MistDemoConfig {
       key("container.identifier"): .init(stringLiteral: containerIdentifier),
       key("api.token"): .init(stringLiteral: apiToken),
       key("environment"): .init(stringLiteral: envString),
-      key("database"): .init(stringLiteral: database.rawValue),
+      key("database"): .init(stringLiteral: database.pathSegment),
       key("host"): .init(stringLiteral: host),
       key("port"): .init(integerLiteral: port),
       key("auth.timeout"): .init(integerLiteral: Int(authTimeout)),

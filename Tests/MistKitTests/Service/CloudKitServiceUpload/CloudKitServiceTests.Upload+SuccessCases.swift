@@ -48,7 +48,8 @@ extension CloudKitServiceTests.Upload {
         data: testData,
         recordType: "Note",
         fieldName: "image",
-        using: CloudKitServiceTests.Upload.makeMockAssetUploader()
+        using: CloudKitServiceTests.Upload.makeMockAssetUploader(),
+        database: .public(.prefers(.serverToServer))
       )
 
       #expect(result.recordName.isEmpty == false, "Result should have a record name")
@@ -69,7 +70,8 @@ extension CloudKitServiceTests.Upload {
         data: testData,
         recordType: "Note",
         fieldName: "image",
-        using: CloudKitServiceTests.Upload.makeMockAssetUploader()
+        using: CloudKitServiceTests.Upload.makeMockAssetUploader(),
+        database: .public(.prefers(.serverToServer))
       )
 
       #expect(result.recordName == "test-record-0")
@@ -90,7 +92,8 @@ extension CloudKitServiceTests.Upload {
         data: testData,
         recordType: "Note",
         fieldName: "image",
-        using: CloudKitServiceTests.Upload.makeMockAssetUploader()
+        using: CloudKitServiceTests.Upload.makeMockAssetUploader(),
+        database: .public(.prefers(.serverToServer))
       )
 
       #expect(result.recordName == "test-record-0")
@@ -108,7 +111,8 @@ extension CloudKitServiceTests.Upload {
 
       let token = try await service.requestAssetUploadURL(
         recordType: "Note",
-        fieldName: "image"
+        fieldName: "image",
+        database: .public(.prefers(.serverToServer))
       )
 
       #expect(token.url != nil)
@@ -150,7 +154,8 @@ extension CloudKitServiceTests.Upload {
         data: Data(count: 1_024),
         recordType: "Note",
         fieldName: "image",
-        using: trackingUploader
+        using: trackingUploader,
+        database: .public(.prefers(.serverToServer))
       )
 
       let count = await tracker.callCount

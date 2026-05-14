@@ -44,7 +44,10 @@ extension CloudKitServiceTests.FetchChanges {
       let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService()
 
       await #expect {
-        try await service.fetchRecordChanges(resultsLimit: 0)
+        try await service.fetchRecordChanges(
+          resultsLimit: 0,
+          database: .public(.prefers(.serverToServer))
+        )
       } throws: { error in
         guard let ckError = error as? CloudKitError,
           case .httpErrorWithRawResponse(let status, _) = ckError
@@ -62,7 +65,10 @@ extension CloudKitServiceTests.FetchChanges {
       let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService()
 
       await #expect {
-        try await service.fetchRecordChanges(resultsLimit: 201)
+        try await service.fetchRecordChanges(
+          resultsLimit: 201,
+          database: .public(.prefers(.serverToServer))
+        )
       } throws: { error in
         guard let ckError = error as? CloudKitError,
           case .httpErrorWithRawResponse(let status, _) = ckError
@@ -80,11 +86,17 @@ extension CloudKitServiceTests.FetchChanges {
       let service = try await CloudKitServiceTests.FetchChanges.makeSuccessfulService()
 
       // Minimum valid limit
-      let result1 = try await service.fetchRecordChanges(resultsLimit: 1)
+      let result1 = try await service.fetchRecordChanges(
+        resultsLimit: 1,
+        database: .public(.prefers(.serverToServer))
+      )
       #expect(result1.records.isEmpty == false || result1.syncToken != nil)
 
       // Maximum valid limit
-      let result200 = try await service.fetchRecordChanges(resultsLimit: 200)
+      let result200 = try await service.fetchRecordChanges(
+        resultsLimit: 200,
+        database: .public(.prefers(.serverToServer))
+      )
       #expect(result200.records.isEmpty == false || result200.syncToken != nil)
     }
 
@@ -105,7 +117,7 @@ extension CloudKitServiceTests.FetchChanges {
       )
 
       await #expect(throws: CloudKitError.self) {
-        _ = try await service.fetchAllRecordChanges()
+        _ = try await service.fetchAllRecordChanges(database: .public(.prefers(.serverToServer)))
       }
     }
 
@@ -121,7 +133,9 @@ extension CloudKitServiceTests.FetchChanges {
         syncToken: "stuck-token"
       )
 
-      let (records, token) = try await service.fetchAllRecordChanges()
+      let (records, token) = try await service.fetchAllRecordChanges(
+        database: .public(.prefers(.serverToServer))
+      )
 
       #expect(records.isEmpty)
       #expect(token == "stuck-token")

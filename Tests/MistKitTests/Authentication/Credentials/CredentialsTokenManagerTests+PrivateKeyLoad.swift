@@ -48,7 +48,7 @@ extension CredentialsTokenManagerTests {
         )
       )
       do {
-        _ = try credentials.makeTokenManager(for: .public)
+        _ = try credentials.makeTokenManager(for: .public(.requires(.serverToServer)))
         Issue.record("expected makeTokenManager to throw .invalidPrivateKey")
       } catch let error as CloudKitError {
         guard case .invalidPrivateKey(let path, _) = error else {

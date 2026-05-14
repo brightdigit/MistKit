@@ -106,7 +106,8 @@ public struct DemoInFilterCommand: MistDemoCommand {
         fields: [
           "title": .string("demo-in-filter-\(tag)-idx\(idx)"),
           "index": .int64(idx),
-        ]
+        ],
+        database: config.database
       )
       createdNames.append(record.recordName)
       print("  Created \(record.recordName) (index=\(idx))")
@@ -122,7 +123,9 @@ public struct DemoInFilterCommand: MistDemoCommand {
   ) async throws {
     print("\nVerifying records are queryable...")
     let allRecords = try await client.queryRecords(
-      recordType: recordType, limit: 200
+      recordType: recordType,
+      limit: 200,
+      database: config.database
     )
     let visible = allRecords.filter {
       createdNames.contains($0.recordName)
@@ -136,7 +139,8 @@ public struct DemoInFilterCommand: MistDemoCommand {
     let results = try await client.queryRecords(
       recordType: recordType,
       filters: [.in("index", [.int64(10), .int64(30)])],
-      limit: 200
+      limit: 200,
+      database: config.database
     )
 
     let matching = results.filter {
@@ -163,7 +167,10 @@ public struct DemoInFilterCommand: MistDemoCommand {
         recordType: recordType,
         recordName: name
       )
-      _ = try await client.modifyRecords([operation])
+      _ = try await client.modifyRecords(
+        [operation],
+        database: config.database
+      )
       print("  Deleted \(name)")
     }
     print("Done.")

@@ -50,13 +50,13 @@ extension CloudKitService {
   /// `Credentials` must include an `apiAuth` with a `webAuthToken`.
   public func fetchCaller() async throws(CloudKitError) -> UserInfo {
     do {
-      let client = try self.client(for: .public, requiresUserContext: true)
+      let client = try self.client(for: .public(.requires(.webAuth)))
       let response = try await client.getCaller(
         .init(
           path: Operations.getCaller.Input.Path(
             containerIdentifier: containerIdentifier,
             environment: environment,
-            database: .public
+            database: .public(.requires(.webAuth))
           )
         )
       )
@@ -91,13 +91,13 @@ extension CloudKitService {
   )
   public func discoverAllUserIdentities() async throws(CloudKitError) -> [UserIdentity] {
     do {
-      let client = try self.client(for: .public, requiresUserContext: true)
+      let client = try self.client(for: .public(.requires(.webAuth)))
       let response = try await client.discoverAllUserIdentities(
         .init(
           path: Operations.discoverAllUserIdentities.Input.Path(
             containerIdentifier: containerIdentifier,
             environment: environment,
-            database: .public
+            database: .public(.requires(.webAuth))
           )
         )
       )
@@ -121,13 +121,13 @@ extension CloudKitService {
     _ emails: [String]
   ) async throws(CloudKitError) -> [UserIdentity] {
     do {
-      let client = try self.client(for: .public, requiresUserContext: true)
+      let client = try self.client(for: .public(.requires(.webAuth)))
       let response = try await client.lookupUsersByEmail(
         .init(
           path: Operations.lookupUsersByEmail.Input.Path(
             containerIdentifier: containerIdentifier,
             environment: environment,
-            database: .public
+            database: .public(.requires(.webAuth))
           ),
           body: .json(
             .init(users: emails.map { .init(emailAddress: $0) })
@@ -151,13 +151,13 @@ extension CloudKitService {
     _ recordNames: [String]
   ) async throws(CloudKitError) -> [UserIdentity] {
     do {
-      let client = try self.client(for: .public, requiresUserContext: true)
+      let client = try self.client(for: .public(.requires(.webAuth)))
       let response = try await client.lookupUsersByRecordName(
         .init(
           path: Operations.lookupUsersByRecordName.Input.Path(
             containerIdentifier: containerIdentifier,
             environment: environment,
-            database: .public
+            database: .public(.requires(.webAuth))
           ),
           body: .json(
             .init(users: recordNames.map { .init(userRecordName: $0) })
@@ -181,13 +181,13 @@ extension CloudKitService {
     lookupInfos: [UserIdentityLookupInfo]
   ) async throws(CloudKitError) -> [UserIdentity] {
     do {
-      let client = try self.client(for: .public, requiresUserContext: true)
+      let client = try self.client(for: .public(.requires(.webAuth)))
       let response = try await client.discoverUserIdentities(
         .init(
           path: Operations.discoverUserIdentities.Input.Path(
             containerIdentifier: containerIdentifier,
             environment: environment,
-            database: .public
+            database: .public(.requires(.webAuth))
           ),
           body: .json(
             .init(

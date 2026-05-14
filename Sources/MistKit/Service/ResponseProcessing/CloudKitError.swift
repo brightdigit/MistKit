@@ -45,7 +45,11 @@ public enum CloudKitError: LocalizedError, Sendable {
   case networkError(URLError)
   case unsupportedOperationType(String)
   case paginationLimitExceeded(maxPages: Int, records: [RecordInfo])
-  case missingCredentials(database: Database, reason: String)
+  case missingCredentials(
+    database: Database,
+    availability: CredentialAvailability = .notConfigured,
+    reason: String
+  )
   case invalidPrivateKey(path: String?, underlying: any Error)
 
   /// HTTP status code if this error originated from an HTTP response, otherwise nil.
@@ -127,9 +131,17 @@ public enum CloudKitError: LocalizedError, Sendable {
       return
         "CloudKit query exceeded pagination limit of \(maxPages) pages "
         + "(collected \(records.count) records)"
-    case .missingCredentials(let database, let reason):
+    case .missingCredentials(let database, let availability, let reason):
+      let availabilityLabel: String
+      switch availability {
+      case .notConfigured:
+        availabilityLabel = "not configured"
+      case .preferenceRequired:
+        availabilityLabel = "required by preference but not configured"
+      }
       return
-        "Missing credentials for database '\(database.rawValue)': \(reason)"
+        "Missing credentials for database '\(database.pathSegment)' "
+        + "(\(availabilityLabel)): \(reason)"
     case .invalidPrivateKey(let path, let underlying):
       let location = path.map { "from '\($0)'" } ?? "from inline material"
       return

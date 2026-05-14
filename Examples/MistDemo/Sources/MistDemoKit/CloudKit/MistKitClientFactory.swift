@@ -66,7 +66,7 @@ public struct MistKitClientFactory: Sendable {
       )
     #else
       if config.badCredentials {
-        guard config.database != .public else {
+        if case .public = config.database {
           throw ConfigurationError.badCredentialsOnPublicDB
         }
         return try create(from: config, tokenManager: makeBadCredentialsTokenManager())

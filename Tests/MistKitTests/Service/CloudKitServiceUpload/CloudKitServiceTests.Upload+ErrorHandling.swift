@@ -48,7 +48,8 @@ extension CloudKitServiceTests.Upload {
         _ = try await service.uploadAssets(
           data: testData,
           recordType: "Note",
-          fieldName: "image"
+          fieldName: "image",
+          database: .public(.prefers(.serverToServer))
         )
         Issue.record("Expected authentication error")
       } catch let error as CloudKitError {
@@ -79,7 +80,8 @@ extension CloudKitServiceTests.Upload {
         _ = try await service.uploadAssets(
           data: testData,
           recordType: "Note",
-          fieldName: "image"
+          fieldName: "image",
+          database: .public(.prefers(.serverToServer))
         )
         Issue.record("Expected bad request error")
       } catch let error as CloudKitError {

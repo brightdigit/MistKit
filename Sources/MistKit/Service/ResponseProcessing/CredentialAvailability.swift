@@ -1,6 +1,6 @@
 //
-//  LookupRecordsPhase.swift
-//  MistDemo
+//  CredentialAvailability.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,40 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+/// Why a credential set was missing when the dispatcher tried to satisfy
+/// a request.
+///
+/// Attached to `CloudKitError.missingCredentials(_:availability:reason:)` so
+/// callers can distinguish a misconfiguration ("no credentials at all") from
+/// a deliberate `PublicAuthPreference.requires(...)` that couldn't be
+/// satisfied ("we have web-auth but the caller required server-to-server").
+public enum CredentialAvailability: Sendable, Hashable {
+  /// No credential of the type the route needs is configured on
+  /// `Credentials`.
+  case notConfigured
 
-internal struct LookupRecordsPhase: IntegrationPhase {
-  internal typealias Input = CreatedRecordNames
-  internal typealias Output = NoState
-
-  internal static let title = "Lookup records by name"
-  internal static let emoji = "🔍"
-  internal static let apiName = "lookupRecords"
-
-  internal func run(
-    input: CreatedRecordNames, context: PhaseContext
-  ) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-
-    let lookupNames = Array(input.names.prefix(min(3, input.names.count)))
-    if context.verbose {
-      print("   Looking up \(lookupNames.count) of \(input.names.count) record(s) by name")
-    }
-
-    let records = try await context.service.lookupRecords(
-      recordNames: lookupNames,
-      database: context.database
-    )
-
-    print("✅ Looked up \(records.count) record(s)")
-
-    if context.verbose {
-      for record in records {
-        print("   - \(record.recordName)")
-      }
-    }
-
-    return NoState()
-  }
+  /// A credential type was required by `PublicAuthPreference.requires(_:)`
+  /// but is not configured. The dispatcher refuses to silently substitute
+  /// the other credential set.
+  case preferenceRequired
 }

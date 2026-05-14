@@ -43,13 +43,13 @@ internal struct PublicDatabaseTest: PhasedIntegrationTest {
   ///     call from the service's `Credentials`. The runner sets this based on
   ///     whether web-auth credentials are configured.
   internal init(
-    database: MistKit.Database = .public,
+    database: MistKit.Database = .public(.prefers(.serverToServer)),
     includeUserContextPhases: Bool = false
   ) {
-    precondition(
-      database == .public,
-      "PublicDatabaseTest only supports the public database"
-    )
+    if case .public = database {
+    } else {
+      preconditionFailure("PublicDatabaseTest only supports the public database")
+    }
     self.database = database
 
     var phases: [any IntegrationPhase] = [

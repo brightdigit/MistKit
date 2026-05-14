@@ -52,7 +52,8 @@ extension CloudKitServiceTests.QueryPagination {
       do {
         _ = try await service.queryAllRecords(
           recordType: "TestRecord",
-          maxPages: 2
+          maxPages: 2,
+          database: .public(.prefers(.serverToServer))
         )
         Issue.record("Expected paginationLimitExceeded to be thrown")
       } catch CloudKitError.paginationLimitExceeded(let maxPages, let records) {

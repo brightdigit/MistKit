@@ -56,7 +56,10 @@ internal struct IncrementalSyncPhase: IntegrationPhase {
     }
 
     do {
-      let incrementalResult = try await context.service.fetchRecordChanges(syncToken: token)
+      let incrementalResult = try await context.service.fetchRecordChanges(
+        syncToken: token,
+        database: context.database
+      )
 
       print("✅ Fetched \(incrementalResult.records.count) changed records")
 
