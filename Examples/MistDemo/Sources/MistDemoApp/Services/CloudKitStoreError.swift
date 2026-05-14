@@ -1,6 +1,6 @@
 //
-//  MistDemoApp.swift
-//  MistDemoApp
+//  CloudKitStoreError.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,22 +27,18 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import MistDemoApp
-import SwiftUI
+#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+  import Foundation
 
-@main
-internal struct MistDemoAppMain: App {
-  @State private var service = CloudKitStore(
-    containerIdentifier: CloudKitStore.demoContainerIdentifier
-  )
+  /// Errors specific to `CloudKitStore` operations.
+  internal enum CloudKitStoreError: Error, LocalizedError {
+    case unexpectedSaveResult
 
-  internal var body: some Scene {
-    WindowGroup("MistDemo (Native CloudKit)") {
-      RootView()
-        .environment(service)
+    internal var errorDescription: String? {
+      switch self {
+      case .unexpectedSaveResult:
+        return "CloudKit returned a record that couldn't be parsed as a Note."
+      }
     }
-    #if os(macOS)
-    .defaultSize(width: 880, height: 600)
-    #endif
   }
-}
+#endif

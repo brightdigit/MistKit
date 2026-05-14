@@ -32,7 +32,7 @@
 
   /// View for querying Note records from CloudKit.
   internal struct QueryView: View {
-    @EnvironmentObject private var service: NativeCloudKitService
+    @Environment(CloudKitStore.self) private var service
     @State private var limit: Int = 50
     @State private var notes: [Note] = []
     @State private var loading = false
@@ -69,7 +69,12 @@
           List(notes, selection: $selectedNote) { note in
             NavigationLink(value: note) {
               VStack(alignment: .leading, spacing: 2) {
-                Text(note.title ?? note.id).font(.body)
+                HStack(spacing: 8) {
+                  Text(note.title ?? note.id).font(.body)
+                  if isOwnedByCurrentUser(note) {
+                    ownerBadge(creator: note.creatorUserRecordName)
+                  }
+                }
                 HStack(spacing: 12) {
                   if let index = note.index {
                     Label("\(index)", systemImage: "number")
@@ -98,7 +103,11 @@
       .navigationDestination(for: Note.self) { note in
         RecordDetailView(note: note, onChange: { Task { await runQuery() } })
       }
-      .navigationTitle("Notes")
+      .navigationTitle("Notes — \(service.databaseScope.label)")
+      .onChange(of: service.databaseScope) { _, _ in
+        notes = []
+        Task { await runQuery() }
+      }
       .toolbar {
         ToolbarItem {
           Button {
@@ -112,7 +121,7 @@
         NoteEditView(mode: .create) { _ in
           Task { await runQuery() }
         }
-        .environmentObject(service)
+        .environment(service)
       }
     }
 
@@ -130,6 +139,26 @@
         Button("Run Query") { Task { await runQuery() } }
           .buttonStyle(.borderedProminent)
       }
+    }
+
+    /// Mirrors the web demo's "You" badge — flag notes the signed-in user
+    /// created. CloudKit may stamp the creator as `__defaultOwner__` for
+    /// records the caller just created, so accept that sentinel as well.
+    private func isOwnedByCurrentUser(_ note: Note) -> Bool {
+      guard let creator = note.creatorUserRecordName else { return false }
+      if creator == "__defaultOwner__" { return true }
+      return creator == service.currentUserRecordName
+    }
+
+    private func ownerBadge(creator: String?) -> some View {
+      Text("You")
+        .font(.caption2.weight(.semibold))
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(Color.green.opacity(0.2), in: Capsule())
+        .foregroundStyle(.green)
+        .accessibilityLabel("Created by you")
+        .help(creator.map { "Created by \($0)" } ?? "Created by you")
     }
 
     private func runQuery() async {

@@ -62,6 +62,7 @@
     internal let modificationDate: Date?
     internal let creationDate: Date?
     internal let recordChangeTag: String?
+    internal let creatorUserRecordName: String?
 
     internal init?(_ record: CKRecord) {
       guard record.recordType == Self.recordType else {
@@ -74,6 +75,7 @@
       self.modificationDate = record.modificationDate
       self.creationDate = record.creationDate
       self.recordChangeTag = record.recordChangeTag
+      self.creatorUserRecordName = record.creatorUserRecordID?.recordName
     }
 
     // Identity-based equality: two Notes with the same recordID are equal

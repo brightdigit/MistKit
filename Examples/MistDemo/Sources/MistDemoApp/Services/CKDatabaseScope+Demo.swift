@@ -1,5 +1,5 @@
 //
-//  NativeCloudKitError.swift
+//  CKDatabaseScope+Demo.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,19 +28,19 @@
 //
 
 #if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
-  import Foundation
+  import CloudKit
 
-  /// Errors specific to native CloudKit operations.
-  internal enum NativeCloudKitError: Error, LocalizedError {
-    case unexpectedSaveResult
-    case webAuthTokenUnavailable
+  extension CKDatabase.Scope {
+    /// Scopes exposed in the MistDemoApp picker. `.shared` is intentionally
+    /// excluded because the demo's `schema.ckdb` has no shared zones.
+    internal static let selectable: [CKDatabase.Scope] = [.public, .private]
 
-    internal var errorDescription: String? {
+    internal var label: String {
       switch self {
-      case .unexpectedSaveResult:
-        return "CloudKit returned a record that couldn't be parsed as a Note."
-      case .webAuthTokenUnavailable:
-        return "CloudKit returned no web auth token and no error."
+      case .public: return "Public"
+      case .private: return "Private"
+      case .shared: return "Shared"
+      @unknown default: return "Unknown"
       }
     }
   }
