@@ -14,13 +14,12 @@
 #   CLOUDKIT_CONTAINER_ID       - iCloud.com.brightdigit.MistDemo
 #
 # Two-job design:
-#   1) `build` runs in `swift:6.3-noble` and produces the mistdemo
-#      binary plus the Swift runtime libs it needs at run time
-#      (libswiftCore, libdispatch, libFoundation, ...).
-#   2) `integration` runs on plain `ubuntu-24.04` (matching the
-#      container's glibc), downloads the bundle, and executes the live
-#      CloudKit phases with LD_LIBRARY_PATH set to the bundled libs.
-#      No Swift toolchain on the run host.
+#   1) `build` runs in `swift:6.3-noble`, installs the Swift Static
+#      Linux SDK (musl), and produces a self-contained statically
+#      linked mistdemo binary.
+#   2) `integration` runs on plain `ubuntu-24.04` (no Swift toolchain,
+#      no LD_LIBRARY_PATH needed) and executes the live CloudKit
+#      phases against the static binary.
 #
 # Secrets are NOT exposed to fork pull requests — there is no
 # pull_request trigger on this workflow by design.
@@ -43,47 +42,54 @@ concurrency:
 
 jobs:
   build:
-    name: Build mistdemo bundle
+    name: Build static mistdemo
     runs-on: ubuntu-24.04
-    container: swift:6.3-noble
+    # Pin to an exact Swift patch — the Static Linux SDK URL + checksum
+    # below are tied to this same version. Bump together.
+    container: swift:6.3.2-noble
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
-    timeout-minutes: 20
+    timeout-minutes: 45
     defaults:
       run:
         shell: bash
     steps:
       - uses: actions/checkout@v6
 
-      - name: swift build
-        working-directory: Examples/MistDemo
-        run: swift build
-
-      - name: Bundle binary + Swift runtime
+      - name: Install Swift Static Linux SDK
         run: |
           set -euo pipefail
-          mkdir -p bundle/lib
-          cp Examples/MistDemo/.build/debug/mistdemo bundle/mistdemo
-          # Swift runtime: libswiftCore, libdispatch, libFoundation*,
-          # libBlocksRuntime, libswift_Concurrency, ...
-          cp -a /usr/lib/swift/linux/. bundle/lib/
-          # System libs whose ABI is tied to the build image. ubuntu-24.04
-          # (noble) ships matching versions, but bundling avoids drift if
-          # the runner image changes minor versions.
-          for so in libcurl libxml2 libssl libcrypto; do
-            for path in /usr/lib/x86_64-linux-gnu/${so}*.so*; do
-              [ -e "$path" ] && cp -a "$path" bundle/lib/
-            done
-          done
-          tar czf mistdemo-bundle.tar.gz -C bundle .
-          ls -lh mistdemo-bundle.tar.gz
+          swift sdk install \
+            https://download.swift.org/swift-6.3.2-release/static-sdk/swift-6.3.2-RELEASE/swift-6.3.2-RELEASE_static-linux-0.1.0.artifactbundle.tar.gz \
+            --checksum 3fd798bef6f4408f1ea5a6f94ce4d4052830c4326ab85ebc04f983f01b3da407
+          swift sdk list
+
+      - name: swift build --swift-sdk x86_64-swift-linux-musl -c release
+        working-directory: Examples/MistDemo
+        run: swift build -c release --swift-sdk x86_64-swift-linux-musl
+
+      - name: Verify static linkage
+        working-directory: Examples/MistDemo
+        run: |
+          set -euo pipefail
+          BIN=.build/x86_64-swift-linux-musl/release/mistdemo
+          ls -lh "$BIN"
+          file "$BIN"
+          # A statically linked binary either reports "not a dynamic
+          # executable" (musl) or "statically linked" (glibc). Anything
+          # else means we picked up shared deps and broke the goal.
+          LDD_OUTPUT=$(ldd "$BIN" 2>&1 || true)
+          echo "$LDD_OUTPUT"
+          if ! echo "$LDD_OUTPUT" | grep -qE 'not a dynamic executable|statically linked'; then
+            echo "::error::Binary has dynamic dependencies; static link failed"
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: mistdemo-bundle
-          path: mistdemo-bundle.tar.gz
+          name: mistdemo
+          path: Examples/MistDemo/.build/x86_64-swift-linux-musl/release/mistdemo
           retention-days: 1
-          # tarball is already gzipped — skip the action's redundant zip.
-          compression-level: 0
+          # Single executable; default zip compression is fine.
 
   integration:
     name: Live CloudKit Integration
@@ -94,22 +100,18 @@ jobs:
     defaults:
       run:
         shell: bash
-    env:
-      LD_LIBRARY_PATH: ${{ github.workspace }}/bundle/lib
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: mistdemo-bundle
+          name: mistdemo
 
-      - name: Extract bundle
+      - name: Prep binary
         run: |
           set -euo pipefail
-          mkdir -p bundle integration-logs
-          tar xzf mistdemo-bundle.tar.gz -C bundle
-          chmod +x bundle/mistdemo
-          # Smoke check: does the binary even start? --help has no network
-          # or auth dependencies, so failure here means we mis-bundled libs.
-          ./bundle/mistdemo --help >/dev/null
+          chmod +x ./mistdemo
+          mkdir -p integration-logs
+          # Smoke check the binary before touching the network.
+          ./mistdemo --help >/dev/null
 
       - name: Decode server-to-server private key
         env:
@@ -135,7 +137,7 @@ jobs:
           CLOUDKIT_ENVIRONMENT: development
         run: |
           set -o pipefail
-          ./bundle/mistdemo test-public \
+          ./mistdemo test-public \
             --record-count 5 \
             --asset-size 50 \
             2>&1 | tee integration-logs/test-public.log
@@ -149,7 +151,7 @@ jobs:
           CLOUDKIT_ENVIRONMENT: development
         run: |
           set -o pipefail
-          ./bundle/mistdemo test-private \
+          ./mistdemo test-private \
             --record-count 5 \
             --asset-size 50 \
             2>&1 | tee integration-logs/test-private.log
@@ -164,7 +166,7 @@ jobs:
           CLOUDKIT_ENVIRONMENT: development
         run: |
           set -o pipefail
-          ./bundle/mistdemo demo-errors --scenario all \
+          ./mistdemo demo-errors --scenario all \
             2>&1 | tee integration-logs/demo-errors.log
           # demo-errors exits 0 by design — assert all scenarios actually
           # ran by checking for the per-scenario completion markers.
@@ -185,7 +187,7 @@ jobs:
           CLOUDKIT_ENVIRONMENT: development
         run: |
           set -o pipefail
-          ./bundle/mistdemo demo-in-filter \
+          ./mistdemo demo-in-filter \
             2>&1 | tee integration-logs/demo-in-filter.log
 
       - name: Upload integration logs
