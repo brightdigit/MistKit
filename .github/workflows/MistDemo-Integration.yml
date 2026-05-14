@@ -41,6 +41,7 @@ jobs:
     timeout-minutes: 30
     defaults:
       run:
+        shell: bash
         working-directory: Examples/MistDemo
     steps:
       - uses: actions/checkout@v6
