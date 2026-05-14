@@ -169,7 +169,7 @@
     /// Capture a web-auth token via `CKFetchWebAuthTokenOperation` for the
     /// given CloudKit API token. Issues the same `158__…` value that
     /// MistKit / `mistdemo auth-token` consume.
-    internal func fetchWebAuthToken(apiToken: String) async throws -> String {
+    nonisolated internal func fetchWebAuthToken(apiToken: String) async throws -> String {
       try await withCheckedThrowingContinuation { continuation in
         let operation = CKFetchWebAuthTokenOperation(apiToken: apiToken)
         operation.qualityOfService = .userInitiated
