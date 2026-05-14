@@ -2,11 +2,11 @@ DEFINE SCHEMA
 
 RECORD TYPE Note (
     "___recordID"            REFERENCE QUERYABLE,
+    "___createTime"          TIMESTAMP QUERYABLE SORTABLE,
+    "___modTime"             TIMESTAMP QUERYABLE SORTABLE,
     "title"                  STRING QUERYABLE SORTABLE SEARCHABLE,
     "index"                  INT64 QUERYABLE SORTABLE,
     "image"                  ASSET,
-    "createdAt"              TIMESTAMP QUERYABLE SORTABLE,
-    "modified"               INT64 QUERYABLE,
 
     GRANT READ, CREATE, WRITE TO "_creator",
     GRANT READ, CREATE, WRITE TO "_icloud",

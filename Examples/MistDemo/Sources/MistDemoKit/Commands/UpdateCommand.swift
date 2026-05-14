@@ -106,7 +106,8 @@ public struct UpdateCommand: MistDemoCommand, OutputFormatting {
         recordType: config.recordType,
         recordName: config.recordName,
         fields: cloudKitFields,
-        recordChangeTag: effectiveChangeTag
+        recordChangeTag: effectiveChangeTag,
+        database: config.base.database
       )
 
       try await outputResult(recordInfo, format: config.output)

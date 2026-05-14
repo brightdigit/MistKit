@@ -78,7 +78,8 @@ public struct LookupCommand: MistDemoCommand, OutputFormatting {
 
       let records = try await client.lookupRecords(
         recordNames: config.recordNames,
-        desiredKeys: config.fields
+        desiredKeys: config.fields,
+        database: config.base.database
       )
 
       // Report missing names to stderr so a JSON/CSV/etc. stdout stream stays parseable

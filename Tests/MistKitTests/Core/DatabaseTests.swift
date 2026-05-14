@@ -6,11 +6,12 @@ import Testing
 /// Test suite for Database enum functionality and behavior validation
 @Suite("Database")
 internal struct DatabaseTests {
-  /// Tests Database enum raw values
-  @Test("Database enum raw values")
-  internal func databaseRawValues() {
-    #expect(Database.public.rawValue == "public")
-    #expect(Database.private.rawValue == "private")
-    #expect(Database.shared.rawValue == "shared")
+  /// Tests that each Database scope produces the expected URL path segment.
+  @Test("Database pathSegment values")
+  internal func databasePathSegments() {
+    #expect(Database.public(.prefers(.serverToServer)).pathSegment == "public")
+    #expect(Database.public(.requires(.webAuth)).pathSegment == "public")
+    #expect(Database.private.pathSegment == "private")
+    #expect(Database.shared.pathSegment == "shared")
   }
 }

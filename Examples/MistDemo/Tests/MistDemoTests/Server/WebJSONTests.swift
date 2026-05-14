@@ -1,5 +1,5 @@
 //
-//  AuthTokenCommandTests+LoopbackAuthorityValidation.swift
+//  WebJSONTests.swift
 //  MistDemoTests
 //
 //  Created by Leo Dion.
@@ -33,44 +33,24 @@
 
   @testable import MistDemoKit
 
-  extension AuthTokenCommandTests {
-    @Suite("Loopback Authority Validation")
-    internal struct LoopbackAuthorityValidation {
-      @Test(
-        "isLoopbackAuthority accepts loopback hosts",
-        arguments: [
-          "localhost",
-          "localhost:8080",
-          "127.0.0.1",
-          "127.0.0.1:3000",
-          "[::1]",
-          "[::1]:8080",
-        ]
-      )
-      internal func isLoopbackAuthorityAcceptsLoopback(authority: String) {
-        #expect(AuthTokenCommand.isLoopbackAuthority(authority))
-      }
+  @Suite("WebJSON")
+  internal struct WebJSONTests {
+    private struct DateWrapper: Codable {
+      let date: Date
+    }
 
-      @Test(
-        "isLoopbackAuthority rejects non-loopback and bypass attempts",
-        arguments: [
-          "",
-          "evil.com",
-          "evil.com:8080",
-          "localhost.evil.com",
-          "localhost.evil.com:8080",
-          "127.0.0.1.evil.com",
-          "127.0.0.1.evil.com:8080",
-          "127.0.0.2",
-          "0.0.0.0",
-          "[::2]",
-          "[::1].evil.com",
-          "api.apple-cloudkit.com",
-        ]
+    @Test("encoder writes Date as epoch-millis numbers")
+    internal func encoderEmitsEpochMillis() throws {
+      // 1500ms since 1970-01-01T00:00:00Z — chosen so the expected JSON
+      // value is a plain integer the browser's `new Date(1500)` can consume.
+      let date = Date(timeIntervalSince1970: 1.5)
+
+      let data = try WebJSON.encoder().encode(DateWrapper(date: date))
+
+      let json = try #require(
+        try JSONSerialization.jsonObject(with: data) as? [String: Any]
       )
-      internal func isLoopbackAuthorityRejectsBypassAttempts(authority: String) {
-        #expect(!AuthTokenCommand.isLoopbackAuthority(authority))
-      }
+      #expect(json["date"] as? Double == 1_500)
     }
   }
 #endif

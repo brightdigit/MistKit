@@ -29,6 +29,7 @@
 
 import Configuration
 import Foundation
+import MistKit
 import Testing
 
 @testable import MistDemoKit
@@ -49,15 +50,17 @@ internal struct AuthTokenConfigTests {
     return MistDemoConfiguration(testProvider: InMemoryProvider(values: mapped))
   }
 
-  @Test("Memberwise init applies defaults for port, host, noBrowser, container")
+  @Test("Memberwise init applies defaults for port, host, openBrowser, container")
   internal func memberwiseDefaults() {
     let config = AuthTokenConfig(apiToken: "tok")
 
     #expect(config.apiToken == "tok")
     #expect(config.containerIdentifier == MistDemoConstants.Defaults.containerIdentifier)
+    #expect(config.environment == .development)
     #expect(config.port == 8_080)
     #expect(config.host == "127.0.0.1")
-    #expect(config.noBrowser == false)
+    // auth-token defaults to opening the browser.
+    #expect(config.openBrowser == true)
   }
 
   @Test("Memberwise init accepts custom values for every field")
@@ -65,16 +68,18 @@ internal struct AuthTokenConfigTests {
     let config = AuthTokenConfig(
       apiToken: "tok",
       containerIdentifier: "iCloud.custom.id",
+      environment: .production,
       port: 9_000,
       host: "0.0.0.0",
-      noBrowser: true
+      openBrowser: false
     )
 
     #expect(config.apiToken == "tok")
     #expect(config.containerIdentifier == "iCloud.custom.id")
+    #expect(config.environment == .production)
     #expect(config.port == 9_000)
     #expect(config.host == "0.0.0.0")
-    #expect(config.noBrowser == true)
+    #expect(config.openBrowser == false)
   }
 
   @Test("Configuration init throws missingRequired when api.token is absent")
@@ -107,9 +112,10 @@ internal struct AuthTokenConfigTests {
 
     #expect(config.apiToken == "tok-xyz")
     #expect(config.containerIdentifier == MistDemoConstants.Defaults.containerIdentifier)
+    #expect(config.environment == .development)
     #expect(config.port == 8_080)
     #expect(config.host == "127.0.0.1")
-    #expect(config.noBrowser == false)
+    #expect(config.openBrowser == true)
   }
 
   @Test("Configuration init honors every override key")
@@ -117,6 +123,7 @@ internal struct AuthTokenConfigTests {
     let configuration = Self.configuration(values: [
       "api.token": .init(stringLiteral: "tok-xyz"),
       "container.identifier": .init(stringLiteral: "iCloud.custom.id"),
+      "environment": .init(stringLiteral: "production"),
       "port": .init(integerLiteral: 9_090),
       "host": .init(stringLiteral: "192.168.1.10"),
       "no.browser": .init(booleanLiteral: true),
@@ -126,8 +133,34 @@ internal struct AuthTokenConfigTests {
 
     #expect(config.apiToken == "tok-xyz")
     #expect(config.containerIdentifier == "iCloud.custom.id")
+    #expect(config.environment == .production)
     #expect(config.port == 9_090)
     #expect(config.host == "192.168.1.10")
-    #expect(config.noBrowser == true)
+    #expect(config.openBrowser == false)
+  }
+
+  @Test("--no-browser wins when both browser flags are set")
+  internal func noBrowserWinsOverBrowser() async throws {
+    let configuration = Self.configuration(values: [
+      "api.token": .init(stringLiteral: "tok-xyz"),
+      "browser": .init(booleanLiteral: true),
+      "no.browser": .init(booleanLiteral: true),
+    ])
+
+    let config = try await AuthTokenConfig(configuration: configuration)
+
+    #expect(config.openBrowser == false)
+  }
+
+  @Test("Configuration init throws on invalid environment")
+  internal func invalidEnvironmentThrows() async {
+    let configuration = Self.configuration(values: [
+      "api.token": .init(stringLiteral: "tok-xyz"),
+      "environment": .init(stringLiteral: "staging"),
+    ])
+
+    await #expect(throws: ConfigurationError.self) {
+      _ = try await AuthTokenConfig(configuration: configuration)
+    }
   }
 }

@@ -81,14 +81,16 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
           recordType: config.recordType,
           filters: filters,
           sortBy: nil,
-          limit: config.limit
+          limit: config.limit,
+          database: config.base.database
         )
       } else {
         recordInfos = try await client.queryRecords(
           recordType: config.recordType,
           filters: nil,
           sortBy: nil,
-          limit: config.limit
+          limit: config.limit,
+          database: config.base.database
         )
       }
 

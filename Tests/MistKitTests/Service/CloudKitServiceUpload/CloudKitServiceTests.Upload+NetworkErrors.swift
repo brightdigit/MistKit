@@ -48,7 +48,8 @@ extension CloudKitServiceTests.Upload {
         _ = try await service.uploadAssets(
           data: testData,
           recordType: "Note",
-          fieldName: "image"
+          fieldName: "image",
+          database: .public(.prefers(.serverToServer))
         )
       } throws: { error in
         guard let ckError = error as? CloudKitError,
@@ -77,7 +78,8 @@ extension CloudKitServiceTests.Upload {
           data: testData,
           recordType: "Note",
           fieldName: "image",
-          using: throwingUploader
+          using: throwingUploader,
+          database: .public(.prefers(.serverToServer))
         )
       } throws: { error in
         guard let ckError = error as? CloudKitError,
@@ -105,7 +107,8 @@ extension CloudKitServiceTests.Upload {
           data: testData,
           recordType: "Note",
           fieldName: "image",
-          using: misdirectedUploader
+          using: misdirectedUploader,
+          database: .public(.prefers(.serverToServer))
         )
       } throws: { error in
         guard let ckError = error as? CloudKitError,

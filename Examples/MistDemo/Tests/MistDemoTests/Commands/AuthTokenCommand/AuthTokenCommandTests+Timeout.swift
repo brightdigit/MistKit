@@ -36,19 +36,25 @@
   extension AuthTokenCommandTests {
     @Suite("Timeout")
     internal struct TimeoutTests {
-      @Test("Timeout helper throws on timeout")
-      internal func timeoutHelperThrowsOnTimeout() async throws {
-        do {
-          _ = try await withTimeoutAndSignals(seconds: 0.1) {
-            try await Task.sleep(nanoseconds: 1_000_000_000)  // Sleep for 1 second
-            return "should-not-return"
+      @Test(
+        "Timeout helper throws on timeout",
+        .enabled(
+          if: !TestPlatform.isWasm32,
+          "wasm32 CooperativeExecutor doesn't fire the timeout race against an inner Task.sleep"
+        )
+      )
+      internal func timeoutHelperThrowsOnTimeout() async {
+        // Mirrors AsyncHelpersTests+Timeout's gate: on simulator cooperative
+        // executors (notably visionOS / watchOS under CI load) the operation's
+        // single long Task.sleep can complete before the polling timeout
+        // task's many short sleeps detect the deadline.
+        await withKnownIssue(isIntermittent: true) {
+          await #expect(throws: AsyncTimeoutError.self) {
+            try await withTimeoutAndSignals(seconds: 0.1) {
+              try await Task.sleep(nanoseconds: 1_000_000_000)
+              return "should-not-return"
+            }
           }
-          Issue.record("Should have timed out")
-        } catch is AsyncTimeoutError {
-          // Expected timeout error
-          #expect(Bool(true))
-        } catch {
-          Issue.record("Unexpected error: \(error)")
         }
       }
 

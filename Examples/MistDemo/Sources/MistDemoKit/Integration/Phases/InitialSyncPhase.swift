@@ -44,7 +44,9 @@ internal struct InitialSyncPhase: IntegrationPhase {
     print("\n\(Self.emoji) \(Self.title)")
 
     do {
-      let initialResult = try await context.service.fetchRecordChanges()
+      let initialResult = try await context.service.fetchRecordChanges(
+        database: context.database
+      )
 
       print("✅ Fetched \(initialResult.records.count) records")
 

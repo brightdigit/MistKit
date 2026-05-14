@@ -108,7 +108,8 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
     print("\n📦 Fetching all changes (automatic pagination)...")
     let (records, newToken) = try await service.fetchAllRecordChanges(
       zoneID: zoneID,
-      syncToken: config.syncToken
+      syncToken: config.syncToken,
+      database: config.base.database
     )
     print("\n✅ Fetched \(records.count) record(s)")
     displayRecords(records, limit: 5)
@@ -125,7 +126,8 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
     let result = try await service.fetchRecordChanges(
       zoneID: zoneID,
       syncToken: config.syncToken,
-      resultsLimit: config.limit ?? 10
+      resultsLimit: config.limit ?? 10,
+      database: config.base.database
     )
     print("\n✅ Fetched \(result.records.count) record(s)")
     displayRecords(result.records, limit: 5)

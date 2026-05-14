@@ -37,7 +37,9 @@
     import UIKit
   #endif
 
-  /// View for managing the iCloud account and web auth token.
+  /// View showing the iCloud account status, the public/private database
+  /// selector, and a web-auth-token capture flow that mirrors
+  /// `mistdemo auth-token`.
   internal struct AccountView: View {
     /// Where the current `apiToken` value came from on this launch.
     internal enum TokenSource {
@@ -48,7 +50,7 @@
     /// Env var name the MistDemo CLI also reads.
     internal static let envVarName = "CLOUDKIT_API_TOKEN"
 
-    @EnvironmentObject internal var service: NativeCloudKitService
+    @Environment(CloudKitStore.self) internal var service
     @AppStorage("MistDemoApp.cloudKitApiToken") internal var apiToken: String = ""
     @State internal var webAuthToken: String?
     @State internal var fetchingWebAuthToken = false
@@ -56,8 +58,17 @@
     @State internal var tokenSource: TokenSource = .manual
 
     internal var body: some View {
+      @Bindable var bindable = service
       Form {
-        containerSection
+        Section("Container") {
+          LabeledContent("Container", value: service.containerIdentifier)
+          Picker("Database", selection: $bindable.databaseScope) {
+            ForEach(CKDatabase.Scope.selectable, id: \.self) { scope in
+              Text(scope.label).tag(scope)
+            }
+          }
+          LabeledContent("iCloud Status", value: statusLabel)
+        }
         webAuthTokenSection
         if let error = service.lastError {
           Section("Last Service Error") {
@@ -95,14 +106,6 @@
       case .couldNotDetermine: return "Could Not Determine"
       case .temporarilyUnavailable: return "Temporarily Unavailable"
       @unknown default: return "Unknown"
-      }
-    }
-
-    private var containerSection: some View {
-      Section("Container") {
-        LabeledContent("Container", value: service.containerIdentifier)
-        LabeledContent("Database", value: "Private")
-        LabeledContent("iCloud Status", value: statusLabel)
       }
     }
 

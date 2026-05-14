@@ -64,11 +64,13 @@ extension CloudKitService {
   /// - Throws: `CloudKitError` if the underlying query fails.
   public func fetchExistingRecordNames(
     recordType: String,
-    limit: Int? = nil
+    limit: Int? = nil,
+    database: Database
   ) async throws(CloudKitError) -> Set<String> {
     let result: QueryResult = try await queryRecords(
       recordType: recordType,
-      limit: limit ?? Self.maxRecordsPerRequest
+      limit: limit ?? Self.maxRecordsPerRequest,
+      database: database
     )
     return Set(result.records.map(\.recordName))
   }
@@ -108,9 +110,14 @@ extension CloudKitService {
   public func modifyRecords(
     _ operations: [RecordOperation],
     classification: OperationClassification,
-    atomic: Bool = false
+    atomic: Bool = false,
+    database: Database
   ) async throws(CloudKitError) -> BatchSyncResult {
-    let records = try await modifyRecords(operations, atomic: atomic)
+    let records = try await modifyRecords(
+      operations,
+      atomic: atomic,
+      database: database
+    )
     return BatchSyncResult(records: records, classification: classification)
   }
 }

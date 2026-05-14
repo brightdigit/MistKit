@@ -43,7 +43,7 @@
         #expect(config.apiToken == "test-token")
         #expect(config.port == 8_080)
         #expect(config.host == "127.0.0.1")
-        #expect(config.noBrowser == false)
+        #expect(config.openBrowser == true)
       }
 
       @Test("AuthTokenConfig accepts custom values")
@@ -52,13 +52,13 @@
           apiToken: "custom-token",
           port: 3_000,
           host: "localhost",
-          noBrowser: true
+          openBrowser: false
         )
 
         #expect(config.apiToken == "custom-token")
         #expect(config.port == 3_000)
         #expect(config.host == "localhost")
-        #expect(config.noBrowser == true)
+        #expect(config.openBrowser == false)
       }
     }
   }

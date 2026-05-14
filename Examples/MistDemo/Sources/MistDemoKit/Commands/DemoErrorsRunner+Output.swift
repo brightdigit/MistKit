@@ -36,7 +36,7 @@ extension DemoErrorsRunner {
     print("🛑 CloudKit Error Demo — typed CloudKitError handling")
     print(String(repeating: "=", count: 80))
     print("Container: \(config.containerIdentifier)")
-    print("Database:  \(config.database.rawValue)")
+    print("Database:  \(config.database.pathSegment)")
     print(String(repeating: "=", count: 80))
   }
 

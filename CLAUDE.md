@@ -100,7 +100,7 @@ swift run mistdemo lookup-zones
 swift run mistdemo fetch-changes
 swift run mistdemo demo-in-filter
 swift run mistdemo demo-errors
-swift run mistdemo test-integration
+swift run mistdemo test-public
 swift run mistdemo test-private
 
 # Run with specific configuration
@@ -290,12 +290,33 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 ### CloudKit Web Services Integration
 - Base URL: `https://api.apple-cloudkit.com`
 - Authentication:
-  - **Public database**: `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY` or `CLOUDKIT_PRIVATE_KEY_PATH` → server-to-server signing
-  - **Private database**: `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` → web authentication
+  - **Public database**: caller picks per-call via `PublicAuthPreference` carried on `Database.public(_:)`. Either `.requires(.serverToServer)` (key-pair signing — needs `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY` or `CLOUDKIT_PRIVATE_KEY_PATH`) or `.requires(.webAuth)` (user-attributed — needs `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN`). Use `.prefers(_:)` to fall back to whichever cred is configured.
+  - **Private / Shared database**: always `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` → web-auth (CloudKit rejects S2S on these scopes).
 - All operations should reference the OpenAPI spec in `openapi.yaml`
 - URL Pattern: `/database/{version}/{container}/{environment}/{database}/{operation}`
-- Supported databases: `public`, `private`, `shared`
+- Supported databases: `Database.public(PublicAuthPreference)`, `Database.private`, `Database.shared`
 - Environments: `development`, `production`
+
+### Per-call attribution for `.public`
+
+`Database` carries the signing choice when targeting public:
+
+```swift
+public enum Database {
+  case `public`(PublicAuthPreference)
+  case `private`
+  case shared
+}
+```
+
+`PublicAuthPreference` is constructed via two factories — never via the (internal) memberwise init:
+
+- `.prefers(.serverToServer)` — try S2S, fall back to web-auth/API-token if S2S isn't configured.
+- `.prefers(.webAuth)` — try web-auth, fall back to S2S if web-auth isn't configured.
+- `.requires(.serverToServer)` — must use S2S; throw `missingCredentials(.preferenceRequired)` otherwise.
+- `.requires(.webAuth)` — must use web-auth; throw `missingCredentials(.preferenceRequired)` otherwise.
+
+There is **no default** on the operation `database:` parameter — every call must pick explicitly. The `requiresUserContext` flag on the dispatcher is gone; user-context routes (`users/*`) pass `.public(.requires(.webAuth))` directly. See `Sources/MistKit/Authentication/PublicAuthPreference.swift` and `Sources/MistKit/Authentication/Credentials/Credentials+TokenManager.swift`.
 
 ### Testing Strategy
 - Use Swift Testing framework (`@Test` macro) for all tests
@@ -327,7 +348,7 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 - `IntegrationTestError.swift` — typed errors for test failures
 - `IntegrationTest.swift`, `PhasedIntegrationTest.swift`, and `Tests/` subdirectory — protocol-based phase pipeline introduced in #283
 
-Run via `swift run mistdemo test-integration` or `swift run mistdemo test-private` (private database variant). Both commands require valid CloudKit credentials in the config file.
+Run via `swift run mistdemo test-public` or `swift run mistdemo test-private` (private database variant). Both commands require valid CloudKit credentials in the config file.
 
 ## Important Implementation Notes
 

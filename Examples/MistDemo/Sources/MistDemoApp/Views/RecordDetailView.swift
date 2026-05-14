@@ -35,7 +35,7 @@
     @State internal var note: Note
     internal let onChange: () -> Void
 
-    @EnvironmentObject private var service: NativeCloudKitService
+    @Environment(CloudKitStore.self) private var service
     @Environment(\.dismiss) private var dismiss
 
     @State private var showEditSheet = false
@@ -78,7 +78,7 @@
           note = updated
           onChange()
         }
-        .environmentObject(service)
+        .environment(service)
       }
       .confirmationDialog(
         "Delete \(note.title ?? note.id)?",
@@ -124,13 +124,6 @@
       Section("Note Fields") {
         LabeledContent("title", value: note.title ?? "—")
         LabeledContent("index", value: note.index.map(String.init) ?? "—")
-        LabeledContent(
-          "createdAt",
-          value: note.createdAt?.formatted(
-            date: .abbreviated, time: .standard
-          ) ?? "—"
-        )
-        LabeledContent("modified", value: note.modified.map(String.init) ?? "—")
         LabeledContent(
           "image",
           value: note.imageAssetURL?.lastPathComponent ?? "—"

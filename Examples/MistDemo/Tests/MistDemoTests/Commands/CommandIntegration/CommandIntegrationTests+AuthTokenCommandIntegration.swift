@@ -43,7 +43,7 @@
           apiToken: "test-api-token-123",
           port: 8_080,
           host: "127.0.0.1",
-          noBrowser: true
+          openBrowser: false
         )
 
         _ = AuthTokenCommand(config: config)

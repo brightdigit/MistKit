@@ -55,10 +55,10 @@ public struct TestPrivateCommand: MistDemoCommand {
       --asset-size <kb>        Asset size in KB (default: 100)
       --skip-cleanup           Skip cleanup after test
       --verbose                Run in verbose mode
-      --lookup-email <email>   Email for users/lookup/email phase
-                               (CLOUDKIT_LOOKUP_EMAIL); must belong
-                               to an iCloud account discoverable to
-                               the caller, otherwise the phase skips
+      --lookup-email <email>
+        Email for users/lookup/email phase (CLOUDKIT_LOOKUP_EMAIL).
+        Must belong to an iCloud account discoverable to the caller,
+        otherwise the phase skips.
 
     EXAMPLES:
       mistdemo test-private --verbose
@@ -68,7 +68,7 @@ public struct TestPrivateCommand: MistDemoCommand {
     NOTES:
       - Requires CLOUDKIT_API_TOKEN and
         CLOUDKIT_WEB_AUTH_TOKEN
-      - Use 'test-integration' for public-database tests
+      - Use 'test-public' for public-database tests
     """
 
   private let config: TestPrivateConfig

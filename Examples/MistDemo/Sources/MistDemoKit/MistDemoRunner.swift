@@ -42,6 +42,7 @@ public enum MistDemoRunner {
     // Register available commands
     #if canImport(Hummingbird)
       await registry.register(AuthTokenCommand.self)
+      await registry.register(WebCommand.self)
     #endif
     await registry.register(CurrentUserCommand.self)
     await registry.register(QueryCommand.self)
@@ -54,7 +55,7 @@ public enum MistDemoRunner {
     await registry.register(DemoInFilterCommand.self)
     await registry.register(LookupZonesCommand.self)
     await registry.register(FetchChangesCommand.self)
-    await registry.register(TestIntegrationCommand.self)
+    await registry.register(TestPublicCommand.self)
     await registry.register(TestPrivateCommand.self)
     await registry.register(DemoErrorsCommand.self)
 

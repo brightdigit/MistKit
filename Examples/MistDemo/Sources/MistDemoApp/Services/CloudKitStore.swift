@@ -1,5 +1,5 @@
 //
-//  NativeCloudKitService.swift
+//  CloudKitStore.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -29,27 +29,34 @@
 
 #if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import CloudKit
-  public import Combine
   import Foundation
+  public import Observation
 
-  /// Thin wrapper around Apple's CloudKit framework that mirrors the read-side
-  /// operations the MistKit-driven MistDemo CLI exposes. The two demos hit the
-  /// same CloudKit container, so a presentation can flip between them and show
-  /// identical data accessed through different stacks.
+  /// Observable source of truth for the MistDemo app's CloudKit state.
+  ///
+  /// Wraps `CKContainer`/`CKDatabase` directly. MistKit's REST surface is
+  /// reserved for server/Linux/WASI/Windows contexts where the CloudKit
+  /// framework isn't available.
+  @Observable
   @MainActor
-  public final class NativeCloudKitService: ObservableObject {
+  public final class CloudKitStore {
     /// The shared demo container identifier — must match `MistDemoConfig.containerIdentifier`.
     public static let demoContainerIdentifier = "iCloud.com.brightdigit.MistDemo"
 
-    @Published internal var accountStatus: CKAccountStatus = .couldNotDetermine
-    @Published internal var lastError: String?
+    internal var accountStatus: CKAccountStatus = .couldNotDetermine
+    internal var lastError: String?
+    internal var databaseScope: CKDatabase.Scope = .private
+
+    /// The signed-in iCloud user's record name. Mirrors `currentUserRecordName`
+    /// in the web demo and is used to flag the "You" badge on notes the
+    /// current user created.
+    internal var currentUserRecordName: String?
 
     internal let containerIdentifier: String
-    private let container: CKContainer
+    @ObservationIgnored private let container: CKContainer
 
-    /// Convenience: which database we want to demo against. The MistDemo CLI
-    /// defaults to `.private`, so mirror that here.
-    internal var database: CKDatabase { container.privateCloudDatabase }
+    /// The CloudKit database for the current `databaseScope`.
+    internal var database: CKDatabase { container.database(with: databaseScope) }
 
     /// Creates a new service for the given CloudKit container.
     /// - Parameter containerIdentifier: The CloudKit container identifier.
@@ -58,7 +65,9 @@
       self.container = CKContainer(identifier: containerIdentifier)
     }
 
-    /// Apply the editable fields onto a CKRecord. Always refreshes `modified`.
+    /// Apply the editable fields onto a CKRecord. CloudKit's system metadata
+    /// (`creationDate`, `modificationDate`) is refreshed by the server on save,
+    /// so no manual timestamping is needed.
     private static func apply(
       title: String, index: Int64, imageURL: URL?, to record: CKRecord
     ) {
@@ -67,9 +76,6 @@
       if let imageURL {
         record[Note.Fields.image] = CKAsset(fileURL: imageURL)
       }
-      record[Note.Fields.modified] = NSNumber(
-        value: Int64(Date().timeIntervalSince1970 * 1_000)
-      )
     }
 
     internal func refreshAccountStatus() async {
@@ -80,21 +86,37 @@
         self.accountStatus = .couldNotDetermine
         self.lastError = error.localizedDescription
       }
+      if accountStatus == .available {
+        do {
+          let recordID = try await container.userRecordID()
+          self.currentUserRecordName = recordID.recordName
+        } catch {
+          self.currentUserRecordName = nil
+          self.lastError = error.localizedDescription
+        }
+      } else {
+        self.currentUserRecordName = nil
+      }
     }
 
-    /// List all record zones in the private database (parity with `mistdemo lookup-zones`).
+    /// List all record zones in the selected database (parity with `mistdemo lookup-zones`).
     internal func loadZones() async throws -> [ZoneRow] {
       let zones = try await database.allRecordZones()
       return zones.map(ZoneRow.init).sorted { $0.zoneName < $1.zoneName }
     }
 
-    /// Query `Note` records from the demo container's private database, sorted
-    /// by `index` (parity with `mistdemo query --record-type Note --sort index`).
-    /// Note's schema is defined in `schema.ckdb`.
+    /// Query `Note` records from the selected database, newest first —
+    /// primary sort on creation date desc, modification date desc as the
+    /// tiebreaker. Matches the web demo's default sort.
+    /// Note's schema is defined in `schema.ckdb` (`___createTime` and
+    /// `___modTime` are both `SORTABLE`).
     internal func queryNotes(limit: Int = 50) async throws -> [Note] {
       let predicate = NSPredicate(value: true)
       let query = CKQuery(recordType: Note.recordType, predicate: predicate)
-      query.sortDescriptors = [NSSortDescriptor(key: Note.Fields.index, ascending: true)]
+      query.sortDescriptors = [
+        NSSortDescriptor(key: "creationDate", ascending: false),
+        NSSortDescriptor(key: "modificationDate", ascending: false),
+      ]
 
       let (matchResults, _) = try await database.records(
         matching: query,
@@ -130,20 +152,21 @@
 
     // MARK: - Write operations (parity with `mistdemo create / update / delete`)
 
-    /// Create a new Note in the private database.
+    /// Create a new Note in the selected database.
     internal func createNote(title: String, index: Int64, imageURL: URL?) async throws -> Note {
       let record = CKRecord(recordType: Note.recordType)
       Self.apply(title: title, index: index, imageURL: imageURL, to: record)
-      record[Note.Fields.createdAt] = Date() as NSDate
       let saved = try await database.save(record)
       guard let note = Note(saved) else {
-        throw NativeCloudKitError.unexpectedSaveResult
+        throw CloudKitStoreError.unexpectedSaveResult
       }
       return note
     }
 
-    /// Update an existing Note. Fetches the current record (so the change tag
-    /// is fresh), mutates the fields, and saves.
+    /// Update an existing Note: fetch the underlying record by ID, apply the
+    /// new field values, and save. The fetch picks up the current change tag
+    /// so the save is rejected (rather than blindly clobbering) if the record
+    /// has been modified since the caller read it.
     internal func updateNote(
       _ existing: Note, title: String, index: Int64, imageURL: URL?
     ) async throws -> Note {
@@ -152,41 +175,32 @@
       Self.apply(title: title, index: index, imageURL: imageURL, to: record)
       let saved = try await database.save(record)
       guard let note = Note(saved) else {
-        throw NativeCloudKitError.unexpectedSaveResult
+        throw CloudKitStoreError.unexpectedSaveResult
       }
       return note
     }
 
-    /// Delete a Note by record name.
+    /// Delete a Note by record ID.
     internal func deleteNote(_ note: Note) async throws {
-      let recordID = CKRecord.ID(recordName: note.id)
-      _ = try await database.deleteRecord(withID: recordID)
+      _ = try await database.deleteRecord(
+        withID: CKRecord.ID(recordName: note.id)
+      )
     }
 
-    // MARK: - Web auth token (parity with `mistdemo auth-token`)
-
-    /// Fetch a CloudKit web auth token (the `158__...` value that MistKit /
-    /// the MistDemo CLI consume). Demonstrates that a native app and a
-    /// REST-based MistKit consumer can share the same auth surface.
-    ///
-    /// `apiToken` is the public CloudKit API token from CloudKit Dashboard,
-    /// not the user's iCloud password. It must match the configured container.
-    internal func fetchWebAuthToken(apiToken: String) async throws -> String {
+    /// Capture a web-auth token via `CKFetchWebAuthTokenOperation` for the
+    /// given CloudKit API token. Issues the same `158__…` value that
+    /// MistKit / `mistdemo auth-token` consume.
+    nonisolated internal func fetchWebAuthToken(apiToken: String) async throws -> String {
       try await withCheckedThrowingContinuation { continuation in
         let operation = CKFetchWebAuthTokenOperation(apiToken: apiToken)
         operation.qualityOfService = .userInitiated
-        operation.fetchWebAuthTokenCompletionBlock = { token, error in
-          if let token {
-            continuation.resume(returning: token)
-          } else {
-            continuation.resume(
-              throwing: error ?? NativeCloudKitError.webAuthTokenUnavailable
-            )
-          }
+        operation.fetchWebAuthTokenResultBlock = { result in
+          continuation.resume(with: result)
         }
-        // CKFetchWebAuthTokenOperation is a CKDatabaseOperation; running
-        // it against the private database picks up the demo container.
-        database.add(operation)
+        // CKFetchWebAuthTokenOperation must run against the private database
+        // regardless of the user's scope selection — running it on the public
+        // database fails or returns an unattributed token.
+        container.privateCloudDatabase.add(operation)
       }
     }
   }

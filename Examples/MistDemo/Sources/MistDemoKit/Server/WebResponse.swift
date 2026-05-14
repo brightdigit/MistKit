@@ -1,5 +1,5 @@
 //
-//  NativeCloudKitError.swift
+//  WebResponse.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,21 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
-  import Foundation
+internal import Foundation
+internal import MistKit
 
-  /// Errors specific to native CloudKit operations.
-  internal enum NativeCloudKitError: Error, LocalizedError {
-    case unexpectedSaveResult
-    case webAuthTokenUnavailable
-
-    internal var errorDescription: String? {
-      switch self {
-      case .unexpectedSaveResult:
-        return "CloudKit returned a record that couldn't be parsed as a Note."
-      case .webAuthTokenUnavailable:
-        return "CloudKit returned no web auth token and no error."
-      }
-    }
+/// Response payloads for the web command's CRUD endpoints.
+internal enum WebResponse {
+  /// Body returned by record-shaped routes (query / create / update).
+  internal struct Records: Encodable {
+    internal let records: [RecordInfo]
   }
-#endif
+
+  /// Body returned by `delete` (no record payload).
+  internal struct Delete: Encodable {
+    internal let recordName: String
+    internal let deleted: Bool
+  }
+
+  /// Body returned for any handled CloudKit/MistKit error so the UI can
+  /// surface the message without parsing transport-level failures.
+  internal struct Error: Encodable {
+    internal let message: String
+  }
+}

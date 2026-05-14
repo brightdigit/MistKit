@@ -32,7 +32,7 @@
 
   /// View listing all CloudKit record zones.
   internal struct ZoneListView: View {
-    @EnvironmentObject private var service: NativeCloudKitService
+    @Environment(CloudKitStore.self) private var service
     @State private var zones: [ZoneRow] = []
     @State private var loading = false
     @State private var loadError: String?
@@ -67,13 +67,17 @@
           }
         }
       }
-      .navigationTitle("Zones")
+      .navigationTitle("Zones — \(service.databaseScope.label)")
       .toolbar {
         ToolbarItem {
           Button("Refresh") { Task { await refresh() } }
         }
       }
       .task { await refresh() }
+      .onChange(of: service.databaseScope) { _, _ in
+        zones = []
+        Task { await refresh() }
+      }
     }
 
     private func refresh() async {

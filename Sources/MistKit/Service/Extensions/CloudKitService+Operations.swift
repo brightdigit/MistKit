@@ -96,7 +96,7 @@ extension CloudKitService {
     sortBy: [QuerySort]? = nil,
     limit: Int? = nil,
     desiredKeys: [String]? = nil,
-    database: Database = .public
+    database: Database
   ) async throws(CloudKitError) -> [RecordInfo] {
     let result: QueryResult = try await queryRecords(
       recordType: recordType,
@@ -149,7 +149,7 @@ extension CloudKitService {
     limit: Int? = nil,
     desiredKeys: [String]? = nil,
     continuationMarker: String? = nil,
-    database: Database = .public
+    database: Database
   ) async throws(CloudKitError) -> QueryResult {
     let effectiveLimit = limit ?? defaultQueryLimit
 

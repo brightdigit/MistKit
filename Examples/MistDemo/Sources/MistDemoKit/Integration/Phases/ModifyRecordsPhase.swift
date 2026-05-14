@@ -51,13 +51,15 @@ internal struct ModifyRecordsPhase: IntegrationPhase {
         recordType: IntegrationTestData.recordType,
         recordName: recordName,
         fields: [
-          "title": .string("Updated Record \(offset + 1)"),
-          "modified": .int64(1),
+          "title": .string("Updated Record \(offset + 1)")
         ]
       )
     }
 
-    _ = try await context.service.modifyRecords(operations)
+    _ = try await context.service.modifyRecords(
+      operations,
+      database: context.database
+    )
 
     if context.verbose {
       for recordName in recordsToUpdate {

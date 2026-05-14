@@ -1,5 +1,5 @@
 //
-//  CloudKitData.swift
+//  CKDatabaseScope+Demo.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,22 +27,21 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import MistKit
+#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+  import CloudKit
 
-/// CloudKit user and zone data for authentication response.
-///
-/// This model encapsulates CloudKit information retrieved during the
-/// authentication flow, including user details and available zones.
-/// It is used to serialize CloudKit information in auth flow responses.
-///
-/// - Note: Used in AuthResponse.swift line 13 for encoding auth response data
-internal struct CloudKitData: Encodable {
-  /// User information retrieved from CloudKit (nil if retrieval failed).
-  internal let user: UserInfo?
+  extension CKDatabase.Scope {
+    /// Scopes exposed in the MistDemoApp picker. `.shared` is intentionally
+    /// excluded because the demo's `schema.ckdb` has no shared zones.
+    internal static let selectable: [CKDatabase.Scope] = [.public, .private]
 
-  /// List of available zones in the user's container.
-  internal let zones: [ZoneInfo]
-
-  /// Error message if any part of the CloudKit data retrieval failed.
-  internal let error: String?
-}
+    internal var label: String {
+      switch self {
+      case .public: return "Public"
+      case .private: return "Private"
+      case .shared: return "Shared"
+      @unknown default: return "Unknown"
+      }
+    }
+  }
+#endif

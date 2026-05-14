@@ -59,7 +59,10 @@ internal struct CleanupPhase: IntegrationPhase, CleanupPhaseMarker {
     }
 
     do {
-      _ = try await context.service.modifyRecords(deleteOps)
+      _ = try await context.service.modifyRecords(
+        deleteOps,
+        database: context.database
+      )
       deletedCount = input.names.count
       if context.verbose {
         for name in input.names { print("   ✅ Deleted: \(name)") }
