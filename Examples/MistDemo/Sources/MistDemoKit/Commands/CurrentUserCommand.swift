@@ -72,26 +72,11 @@ public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {
       // Create CloudKit client
       let client = try MistKitClientFactory.create(for: config.base)
 
-      // Fetch current user information
       let userInfo = try await client.fetchCaller()
-
-      // Filter fields if requested
-      let filteredUser = filterUserFields(userInfo, fields: config.fields)
-
-      // Format and output result
-      try await outputResult(filteredUser, format: config.output)
+      try await outputResult(userInfo, format: config.output)
     } catch {
       throw CurrentUserError.operationFailed(error.localizedDescription)
     }
-  }
-
-  /// Filter user fields based on requested fields
-  /// Since UserInfo constructor is internal, we work with the original object
-  /// and filter during output instead
-  private func filterUserFields(_ userInfo: UserInfo, fields _: [String]?) -> UserInfo {
-    // Since we can't create new UserInfo instances, return the original
-    // Field filtering will be handled in the output methods
-    userInfo
   }
 }
 

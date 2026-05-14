@@ -82,18 +82,16 @@ internal actor MockCloudKitService: RecordManaging {
     return storedRecords[recordType] ?? []
   }
 
-  internal func executeBatchOperations(
-    _ operations: [RecordOperation],
-    recordType: String
-  ) async throws {
+  internal func executeBatchOperations(_ operations: [RecordOperation]) async throws {
     operationHistory.append(operations)
 
     if shouldFailModify {
       throw modifyError ?? MockCloudKitError.networkError
     }
 
-    // Process operations
+    // Each operation carries its own record type
     for operation in operations {
+      let recordType = operation.recordType
       switch operation.operationType {
       case .create, .forceReplace:
         handleCreateOrReplace(operation, recordType: recordType)

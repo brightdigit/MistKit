@@ -49,9 +49,7 @@ internal actor MockRecordManagingService: RecordManaging {
     return recordsToReturn
   }
 
-  internal func executeBatchOperations(_ operations: [RecordOperation], recordType _: String)
-    async throws
-  {
+  internal func executeBatchOperations(_ operations: [RecordOperation]) async throws {
     executeCallCount += 1
     batchSizes.append(operations.count)
     lastExecutedOperations.append(contentsOf: operations)
