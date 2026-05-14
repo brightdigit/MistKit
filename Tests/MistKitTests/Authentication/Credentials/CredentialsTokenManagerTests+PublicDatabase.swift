@@ -126,6 +126,20 @@ extension CredentialsTokenManagerTests {
       #expect(manager is ServerToServerAuthManager)
     }
 
+    @Test(".public(.prefers(.webAuth)) + API token only → APITokenManager")
+    internal func prefersWebAuthAPITokenOnlyFallsBackToAPIToken() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        return
+      }
+      let credentials = try Credentials(
+        apiAuth: CredentialsTokenManagerTests.makeAPICredentialsTokenOnly()
+      )
+      let manager = try credentials.makeTokenManager(
+        for: .public(.prefers(.webAuth))
+      )
+      #expect(manager is APITokenManager)
+    }
+
     // MARK: - requires(.serverToServer)
 
     @Test(".public(.requires(.serverToServer)) + both creds → S2S")
