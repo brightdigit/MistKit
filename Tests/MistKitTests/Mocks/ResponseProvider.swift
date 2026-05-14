@@ -68,8 +68,8 @@ internal actor ResponseProvider {
   }
 
   /// Response provider for successful query operations
-  internal static func successfulQuery(records: [String: Any] = [:]) -> ResponseProvider {
-    ResponseProvider(defaultResponse: .successfulQuery(records: records))
+  internal static func successfulQuery() -> ResponseProvider {
+    ResponseProvider(defaultResponse: .successfulQuery())
   }
 
   /// Response provider that simulates a request timeout.

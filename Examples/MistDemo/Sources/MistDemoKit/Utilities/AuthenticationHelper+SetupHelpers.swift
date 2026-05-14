@@ -32,7 +32,6 @@ import MistKit
 
 extension AuthenticationHelper {
   internal static func setupServerToServer(
-    apiToken _: String,
     keyID: String,
     privateKey: String?,
     privateKeyFile: String?,

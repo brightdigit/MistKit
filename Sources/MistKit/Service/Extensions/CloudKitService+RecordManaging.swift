@@ -60,10 +60,7 @@ extension CloudKitService: RecordManaging {
   }
 
   /// Execute a batch of record operations via modify
-  public func executeBatchOperations(
-    _ operations: [RecordOperation],
-    recordType _: String
-  ) async throws {
+  public func executeBatchOperations(_ operations: [RecordOperation]) async throws {
     _ = try await self.modifyRecords(
       operations,
       database: .public(.prefers(.serverToServer))

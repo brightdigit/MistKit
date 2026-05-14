@@ -139,8 +139,8 @@ extension ResponseConfig {
     .networkError(URLError(.networkConnectionLost))
   }
 
-  /// Creates a successful query response
-  internal static func successfulQuery(records _: [String: Any] = [:]) -> ResponseConfig {
+  /// Creates a successful query response with an empty records body
+  internal static func successfulQuery() -> ResponseConfig {
     let responseJSON = """
       {
         "records": []

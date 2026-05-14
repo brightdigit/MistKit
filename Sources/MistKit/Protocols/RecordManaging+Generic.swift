@@ -64,7 +64,7 @@ extension RecordManaging {
     let batches = operations.chunked(into: 200)
 
     for batch in batches {
-      try await executeBatchOperations(batch, recordType: T.cloudKitRecordType)
+      try await executeBatchOperations(batch)
     }
   }
 

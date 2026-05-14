@@ -182,11 +182,8 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   ///
   /// This is the protocol-conforming version that doesn't track create vs update.
   /// For detailed tracking, use the overload with `classification` parameter.
-  public func executeBatchOperations(
-    _ operations: [RecordOperation],
-    recordType: String
-  ) async throws {
-    // Create empty classification (no tracking)
+  public func executeBatchOperations(_ operations: [RecordOperation]) async throws {
+    guard let recordType = operations.first?.recordType else { return }
     let classification = OperationClassification(proposedRecords: [], existingRecords: [])
     _ = try await executeBatchOperations(
       operations, recordType: recordType, classification: classification
