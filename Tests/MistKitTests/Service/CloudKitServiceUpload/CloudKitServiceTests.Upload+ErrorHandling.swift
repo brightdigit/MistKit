@@ -37,7 +37,7 @@ extension CloudKitServiceTests.Upload {
   internal struct ErrorHandling {
     @Test("uploadAssets() handles unauthorized error (401)")
     internal func uploadAssetsHandlesUnauthorizedError() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
@@ -67,7 +67,7 @@ extension CloudKitServiceTests.Upload {
 
     @Test("uploadAssets() handles bad request error (400)")
     internal func uploadAssetsHandlesBadRequestError() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }

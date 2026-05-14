@@ -37,7 +37,7 @@ extension CloudKitServiceTests.Upload {
   internal struct SuccessCases {
     @Test("uploadAssets() successfully uploads valid asset")
     internal func uploadAssetsSuccessfullyUploadsValidAsset() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
@@ -59,7 +59,7 @@ extension CloudKitServiceTests.Upload {
 
     @Test("uploadAssets() parses single token from response")
     internal func uploadAssetsParseSingleToken() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
@@ -81,7 +81,7 @@ extension CloudKitServiceTests.Upload {
 
     @Test("uploadAssets() returns a single token")
     internal func uploadAssetsReturnsSingleToken() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
@@ -103,7 +103,7 @@ extension CloudKitServiceTests.Upload {
 
     @Test("requestAssetUploadURL() returns token with url, recordName, and fieldName")
     internal func requestAssetUploadURLReturnsToken() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
@@ -122,7 +122,7 @@ extension CloudKitServiceTests.Upload {
 
     @Test("uploadAssets() invokes injected AssetUploader closure, not URLSession.shared")
     internal func uploadAssetsInvokesInjectedUploader() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }

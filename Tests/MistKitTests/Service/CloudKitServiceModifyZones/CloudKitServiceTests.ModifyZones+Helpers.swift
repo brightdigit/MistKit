@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceTests.LookupZones+Helpers.swift
+//  CloudKitServiceTests.ModifyZones+Helpers.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -33,39 +33,43 @@ import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceTests.LookupZones {
-  private static let testAPIToken =
-    TestConstants.apiToken
+extension CloudKitServiceTests.ModifyZones {
+  private static let testAPIToken = TestConstants.apiToken
 
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeSuccessfulService(
     zoneCount: Int = 1
   ) async throws -> CloudKitService {
-    let responseProvider = try ResponseProvider.successfulLookupZones(zoneCount: zoneCount)
+    let responseProvider = try ResponseProvider.successfulModifyZones(zoneCount: zoneCount)
     let transport = MockTransport(responseProvider: responseProvider)
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
-      credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),
+      credentials: Credentials(
+        apiAuth: APICredentials(
+          apiToken: testAPIToken,
+          webAuthToken: TestConstants.webAuthToken
+        )
+      ),
       transport: transport
     )
   }
 }
 
-// MARK: - LookupZones Response Builders
+// MARK: - ModifyZones Response Builders
 
 extension ResponseProvider {
-  internal static func successfulLookupZones(zoneCount: Int = 1) throws -> ResponseProvider {
-    ResponseProvider(defaultResponse: try .successfulLookupZonesResponse(zoneCount: zoneCount))
+  internal static func successfulModifyZones(zoneCount: Int = 1) throws -> ResponseProvider {
+    ResponseProvider(defaultResponse: try .successfulModifyZonesResponse(zoneCount: zoneCount))
   }
 }
 
 extension ResponseConfig {
-  internal static func successfulLookupZonesResponse(zoneCount: Int = 1) throws -> ResponseConfig {
+  internal static func successfulModifyZonesResponse(zoneCount: Int = 1) throws -> ResponseConfig {
     var zones: [[String: Any]] = []
     for index in 0..<zoneCount {
       zones.append([
         "zoneID": [
-          "zoneName": "test-zone-\(index)",
+          "zoneName": "modified-zone-\(index)",
           "ownerName": "_defaultOwner",
         ]
       ])

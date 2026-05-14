@@ -1,5 +1,5 @@
 //
-//  Operations.discoverAllUserIdentities.Input.Path.swift
+//  CloudKitServiceTests.ModifyZones.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+import Foundation
+import Testing
 
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension Operations.discoverAllUserIdentities.Input.Path {
-  /// Initialize from MistKit configuration components.
-  internal init(
-    containerIdentifier: String,
-    environment: Environment,
-    database: Database
-  ) {
-    self.init(
-      version: "1",
-      container: containerIdentifier,
-      environment: .init(from: environment),
-      database: .init(from: database)
-    )
-  }
+@testable import MistKit
+
+extension CloudKitServiceTests {
+  @Suite("CloudKitService ModifyZones Operations", .enabled(if: Platform.isCryptoAvailable))
+  internal enum ModifyZones {}
 }

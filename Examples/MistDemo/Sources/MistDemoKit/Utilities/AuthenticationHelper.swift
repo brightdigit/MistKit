@@ -54,7 +54,6 @@ internal enum AuthenticationHelper {
   ) async throws -> AuthenticationResult {
     if let keyID {
       return try await setupServerToServer(
-        apiToken: apiToken,
         keyID: keyID,
         privateKey: privateKey,
         privateKeyFile: privateKeyFile,

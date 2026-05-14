@@ -32,25 +32,6 @@ import MistKit
 
 /// Utility for formatting FieldValue objects for display.
 internal enum FieldValueFormatter {
-  /// Format FieldValue fields for display.
-  internal static func formatFields(
-    _ fields: [String: FieldValue]
-  ) -> String {
-    if fields.isEmpty {
-      return "{}"
-    }
-
-    let formattedFields =
-      fields
-      .map { key, value in
-        let valueString = formatFieldValue(value)
-        return "\(key): \(valueString)"
-      }
-      .joined(separator: ", ")
-
-    return "{\(formattedFields)}"
-  }
-
   // Extract the raw display string from a FieldValue.
   // swiftlint:disable:next cyclomatic_complexity
   internal static func displayString(

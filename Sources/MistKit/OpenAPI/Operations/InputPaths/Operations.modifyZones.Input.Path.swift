@@ -1,6 +1,6 @@
 //
-//  MockCommandTokenManager.swift
-//  MistDemoTests
+//  Operations.modifyZones.Input.Path.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,23 +27,21 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import MistKit
+internal import Foundation
 
-@testable import MistDemoKit
-
-internal final class MockCommandTokenManager: TokenManager {
-  internal var hasCredentials: Bool {
-    get async { true }
-  }
-
-  internal func validateCredentials() async throws(TokenManagerError) -> Bool {
-    true
-  }
-
-  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
-    try WebAuthTokenAuthenticator(
-      apiToken: "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234",
-      webAuthToken: "mock-web-auth-token"
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+extension Operations.modifyZones.Input.Path {
+  /// Initialize from MistKit configuration components.
+  internal init(
+    containerIdentifier: String,
+    environment: Environment,
+    database: Database
+  ) {
+    self.init(
+      version: "1",
+      container: containerIdentifier,
+      environment: .init(from: environment),
+      database: .init(from: database)
     )
   }
 }

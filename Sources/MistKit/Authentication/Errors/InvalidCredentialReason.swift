@@ -76,7 +76,7 @@ public enum InvalidCredentialReason: Sendable {
       return """
         Server-to-server authentication only supports the public database. \
         Current database: \(currentDatabase). \
-        Use MistKitConfiguration.serverToServer() for proper configuration.
+        Construct CloudKitService with a public database and server-to-server credentials.
         """
     }
   }

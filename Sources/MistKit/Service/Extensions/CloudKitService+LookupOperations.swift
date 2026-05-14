@@ -31,42 +31,6 @@ import Foundation
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
-  /// Modify (create, update, delete) records
-  @available(
-    *, deprecated,
-    message: "Use modifyRecords(_:) with RecordOperation in CloudKitService+WriteOperations instead"
-  )
-  internal func modifyRecords(
-    operations: [Components.Schemas.RecordOperation],
-    atomic: Bool = true,
-    database: Database
-  ) async throws(CloudKitError) -> [RecordInfo] {
-    do {
-      let client = try self.client(for: database)
-      let response = try await client.modifyRecords(
-        .init(
-          path: Operations.modifyRecords.Input.Path(
-            containerIdentifier: containerIdentifier,
-            environment: environment,
-            database: database
-          ),
-          body: .json(
-            .init(
-              operations: operations,
-              atomic: atomic
-            )
-          )
-        )
-      )
-
-      let modifyData: Components.Schemas.ModifyResponse =
-        try await responseProcessor.processModifyRecordsResponse(response)
-      return modifyData.records?.compactMap { RecordInfo(from: $0) } ?? []
-    } catch {
-      throw mapToCloudKitError(error, context: "modifyRecords")
-    }
-  }
-
   /// Lookup records by record names
   public func lookupRecords(
     recordNames: [String],

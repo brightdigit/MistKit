@@ -68,13 +68,8 @@ internal actor ResponseProvider {
   }
 
   /// Response provider for successful query operations
-  internal static func successfulQuery(records: [String: Any] = [:]) -> ResponseProvider {
-    ResponseProvider(defaultResponse: .successfulQuery(records: records))
-  }
-
-  /// Response provider that throws a transport-level error (network failure or timeout).
-  internal static func networkError(_ error: any Error) -> ResponseProvider {
-    ResponseProvider(defaultResponse: .networkError(error))
+  internal static func successfulQuery() -> ResponseProvider {
+    ResponseProvider(defaultResponse: .successfulQuery())
   }
 
   /// Response provider that simulates a request timeout.
@@ -89,21 +84,13 @@ internal actor ResponseProvider {
 
   // MARK: - Configuration
 
-  internal func configure(operationID: String, response: ResponseConfig) {
-    responses[operationID] = response
-  }
-
-  internal func configureDefault(response: ResponseConfig) {
-    defaultResponse = response
-  }
-
   internal func enqueue(_ response: ResponseConfig, for operationID: String) {
     responseQueues[operationID, default: []].append(response)
   }
 
   internal func response(
     for operationID: String,
-    request: HTTPRequest
+    request _: HTTPRequest
   ) throws -> (HTTPResponse, HTTPBody?) {
     let config: ResponseConfig
     if var queue = responseQueues[operationID], !queue.isEmpty {

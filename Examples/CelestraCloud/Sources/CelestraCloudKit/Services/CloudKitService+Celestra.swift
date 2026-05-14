@@ -93,7 +93,8 @@ extension CloudKitService {
       recordType: "Feed",
       filters: filters.isEmpty ? nil : filters,
       sortBy: [.ascending("feedURL")],  // Use feedURL since usageCount might have issues
-      pageSize: limit
+      pageSize: limit,
+      database: .public(.prefers(.serverToServer))
     )
 
     do {
@@ -116,7 +117,8 @@ extension CloudKitService {
         recordType: "Feed",
         limit: 200,
         desiredKeys: ["___recordID"],
-        continuationMarker: continuationMarker
+        continuationMarker: continuationMarker,
+        database: .public(.prefers(.serverToServer))
       )
       let feeds = result.records
 

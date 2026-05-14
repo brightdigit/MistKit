@@ -53,13 +53,4 @@ internal enum TestConstants {
 
   /// Default operation ID used in middleware intercept tests.
   internal static let operationID = "test-operation"
-
-  /// CloudKit Web Services authority (host) — `api.apple-cloudkit.com`.
-  internal static let cloudKitAuthority = "api.apple-cloudkit.com"
-
-  /// CloudKit's default zone name (`_defaultZone`).
-  internal static let defaultZoneName = "_defaultZone"
-
-  /// CloudKit's default zone-owner name (`_defaultOwner`).
-  internal static let defaultZoneOwnerName = "_defaultOwner"
 }

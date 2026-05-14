@@ -82,7 +82,11 @@ extension CloudKitService: CloudKitRecordOperating {
   public func modifyRecords(_ operations: [RecordOperation]) async throws(CloudKitError)
     -> [RecordInfo]
   {
-    try await modifyRecords(operations, atomic: false)
+    try await modifyRecords(
+      operations,
+      atomic: false,
+      database: .public(.prefers(.serverToServer))
+    )
   }
 
   /// Satisfy CloudKitRecordOperating's `queryRecords` (no database param) by forwarding to the public-database overload.
@@ -100,7 +104,7 @@ extension CloudKitService: CloudKitRecordOperating {
       limit: limit,
       desiredKeys: desiredKeys,
       continuationMarker: nil,
-      database: .public
+      database: .public(.prefers(.serverToServer))
     )
     return result.records
   }
@@ -121,7 +125,7 @@ extension CloudKitService: CloudKitRecordOperating {
       pageSize: pageSize,
       desiredKeys: desiredKeys,
       maxPages: maxPages,
-      database: .public
+      database: .public(.prefers(.serverToServer))
     )
   }
 }

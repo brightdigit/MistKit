@@ -217,10 +217,8 @@ extension CredentialsTokenManagerTests {
     }
 
     // Note: The "no creds at all" path in the dispatcher's resolution table
-    // (".prefers + neither mode configured → throws notConfigured") is not
-    // tested here because `Credentials.init` asserts that at least one of
-    // `serverToServer` or `apiAuth` is populated. Reaching `notConfigured`
-    // would require constructing an empty `Credentials`, which the type
-    // doesn't permit.
+    // (".prefers + neither mode configured → notConfigured") is unreachable
+    // because `Credentials.init` requires at least one of `serverToServer`
+    // or `apiAuth`; constructing an empty `Credentials` isn't permitted.
   }
 }

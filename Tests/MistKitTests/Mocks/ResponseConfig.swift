@@ -64,34 +64,6 @@ internal struct ResponseConfig: Sendable {
       error: nil
     )
   }
-
-  /// HTTP error with status code
-  internal static func httpError(statusCode: Int, message: String? = nil) -> ResponseConfig {
-    let body: Data? =
-      if let msg = message {
-        Data(
-          """
-          {
-            "error": "\(msg)"
-          }
-          """.utf8
-        )
-      } else {
-        nil
-      }
-
-    var headers = HTTPFields()
-    if body != nil {
-      headers[.contentType] = "application/json"
-    }
-
-    return ResponseConfig(
-      statusCode: statusCode,
-      headers: headers,
-      body: body,
-      error: nil
-    )
-  }
 }
 
 // MARK: - CloudKit Response Builders
@@ -167,8 +139,8 @@ extension ResponseConfig {
     .networkError(URLError(.networkConnectionLost))
   }
 
-  /// Creates a successful query response
-  internal static func successfulQuery(records: [String: Any] = [:]) -> ResponseConfig {
+  /// Creates a successful query response with an empty records body
+  internal static func successfulQuery() -> ResponseConfig {
     let responseJSON = """
       {
         "records": []

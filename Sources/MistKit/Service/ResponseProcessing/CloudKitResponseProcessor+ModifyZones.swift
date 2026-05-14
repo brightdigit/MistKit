@@ -1,5 +1,5 @@
 //
-//  Operations.modifyRecords.Input.Path.swift
+//  CloudKitResponseProcessor+ModifyZones.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,21 +27,27 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+extension CloudKitResponseProcessor {
+  /// Process modifyZones response
+  /// - Parameter response: The response to process
+  /// - Returns: The extracted zones modify data
+  /// - Throws: CloudKitError for various error conditions
+  internal func processModifyZonesResponse(_ response: Operations.modifyZones.Output)
+    async throws(CloudKitError) -> Components.Schemas.ZonesModifyResponse
+  {
+    if let error = CloudKitError(response) {
+      throw error
+    }
 
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension Operations.modifyRecords.Input.Path {
-  /// Initialize from MistKit configuration components.
-  internal init(
-    containerIdentifier: String,
-    environment: Environment,
-    database: Database
-  ) {
-    self.init(
-      version: "1",
-      container: containerIdentifier,
-      environment: .init(from: environment),
-      database: .init(from: database)
-    )
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let zonesData):
+        return zonesData
+      }
+    default:
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
   }
 }

@@ -49,13 +49,12 @@ public protocol RecordManaging {
   /// Execute a batch of record operations
   ///
   /// Handles batching operations to respect CloudKit's 200 operations/request limit.
-  /// Provides detailed progress reporting and error tracking.
+  /// Each `RecordOperation` carries its own record type, so no separate
+  /// `recordType` parameter is required.
   ///
-  /// - Parameters:
-  ///   - operations: Array of record operations to execute
-  ///   - recordType: The record type being operated on (for logging)
+  /// - Parameter operations: Array of record operations to execute
   /// - Throws: CloudKit errors if the batch operations fail
-  func executeBatchOperations(_ operations: [RecordOperation], recordType: String) async throws
+  func executeBatchOperations(_ operations: [RecordOperation]) async throws
 
   /// Query all records of a specific type, automatically paginating
   ///

@@ -34,6 +34,7 @@ public import Foundation
 #endif
 
 #if !os(WASI)
+  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
   extension URLSession {
     /// Upload asset data directly to CloudKit CDN
     ///

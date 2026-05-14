@@ -78,40 +78,6 @@ extension CloudKitService {
     try await fetchCaller()
   }
 
-  /// Discover all user identities in the caller's CloudKit address book.
-  ///
-  /// Hits CloudKit's GET `users/discover` endpoint. Routed against the public
-  /// database with web-auth credentials.
-  ///
-  /// > Important: Marked `unavailable` until #28 is resolved — see issue for
-  /// > the live-testing investigation log.
-  @available(
-    *, unavailable,
-    message: "Not yet ready: GET /users/discover returns HTTP 500 in live testing. See #28."
-  )
-  public func discoverAllUserIdentities() async throws(CloudKitError) -> [UserIdentity] {
-    do {
-      let client = try self.client(for: .public(.requires(.webAuth)))
-      let response = try await client.discoverAllUserIdentities(
-        .init(
-          path: Operations.discoverAllUserIdentities.Input.Path(
-            containerIdentifier: containerIdentifier,
-            environment: environment,
-            database: .public(.requires(.webAuth))
-          )
-        )
-      )
-
-      let discoverData: Components.Schemas.DiscoverResponse =
-        try await responseProcessor.processDiscoverAllUserIdentitiesResponse(
-          response
-        )
-      return discoverData.users?.map(UserIdentity.init(from:)) ?? []
-    } catch {
-      throw mapToCloudKitError(error, context: "discoverAllUserIdentities")
-    }
-  }
-
   /// Look up user identities by email address.
   ///
   /// Hits CloudKit's POST `users/lookup/email` endpoint. Each requested email

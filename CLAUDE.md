@@ -167,6 +167,7 @@ MistKit/
 | `CloudKitService+Operations.swift` | `queryRecords`, `queryAllRecords`, `lookupRecords` |
 | `CloudKitService+WriteOperations.swift` | `modifyRecords`, `createRecord`, `updateRecord`, `deleteRecord` |
 | `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
+| `CloudKitService+ModifyZones.swift` | `modifyZones(_:database:)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
 | `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(unavailable — pending #28)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)`, `fetchCurrentUser()` (deprecated, forwards to `fetchCaller`) |
 | `CloudKitService+AssetOperations.swift` | `uploadAssets`, `requestAssetUploadURL` |

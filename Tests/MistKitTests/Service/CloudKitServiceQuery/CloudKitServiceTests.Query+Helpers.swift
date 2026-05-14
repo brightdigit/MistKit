@@ -50,24 +50,9 @@ extension CloudKitServiceTests.Query {
 
   /// Create service for successful operations
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal static func makeSuccessfulService(
-    records: [String: Any] = [:]
-  ) throws -> CloudKitService {
+  internal static func makeSuccessfulService() throws -> CloudKitService {
     let transport = MockTransport(
-      responseProvider: .successfulQuery(records: records)
-    )
-    return try CloudKitService(
-      containerIdentifier: TestConstants.serviceContainerIdentifier,
-      credentials: Credentials(apiAuth: APICredentials(apiToken: "test-token")),
-      transport: transport
-    )
-  }
-
-  /// Create service for auth errors
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal static func makeAuthErrorService() throws -> CloudKitService {
-    let transport = MockTransport(
-      responseProvider: .authenticationError()
+      responseProvider: .successfulQuery()
     )
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,

@@ -81,7 +81,7 @@ extension RecordManaging where Self: CloudKitRecordCollection {
       }
 
       // Execute batch operation for this record type
-      try await executeBatchOperations(operations, recordType: typeName)
+      try await executeBatchOperations(operations)
     }
   }
 
@@ -168,7 +168,7 @@ extension RecordManaging where Self: CloudKitRecordCollection {
       }
 
       // Execute batch delete operations
-      try await executeBatchOperations(operations, recordType: typeName)
+      try await executeBatchOperations(operations)
 
       deletedByType[typeName] = records.count
       totalDeleted += records.count

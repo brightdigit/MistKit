@@ -169,7 +169,8 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
 
     let records = try await service.queryAllRecords(
       recordType: recordType,
-      desiredKeys: []
+      desiredKeys: [],
+      database: .public(.prefers(.serverToServer))
     )
     let recordNames = Set(records.map(\.recordName))
 
@@ -181,11 +182,8 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   ///
   /// This is the protocol-conforming version that doesn't track create vs update.
   /// For detailed tracking, use the overload with `classification` parameter.
-  public func executeBatchOperations(
-    _ operations: [RecordOperation],
-    recordType: String
-  ) async throws {
-    // Create empty classification (no tracking)
+  public func executeBatchOperations(_ operations: [RecordOperation]) async throws {
+    guard let recordType = operations.first?.recordType else { return }
     let classification = OperationClassification(proposedRecords: [], existingRecords: [])
     _ = try await executeBatchOperations(
       operations, recordType: recordType, classification: classification
@@ -233,7 +231,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
         "Calling MistKit service.modifyRecords() with \(batch.count) RecordOperation objects"
       )
 
-      let results = try await service.modifyRecords(batch)
+      let results = try await service.modifyRecords(
+        batch,
+        database: .public(.prefers(.serverToServer))
+      )
 
       Self.logger.debug(
         "Received \(results.count) RecordInfo responses from CloudKit"
