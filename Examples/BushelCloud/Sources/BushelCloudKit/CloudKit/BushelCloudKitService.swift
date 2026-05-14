@@ -169,7 +169,8 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
 
     let records = try await service.queryAllRecords(
       recordType: recordType,
-      desiredKeys: []
+      desiredKeys: [],
+      database: .public(.prefers(.serverToServer))
     )
     let recordNames = Set(records.map(\.recordName))
 
@@ -233,7 +234,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
         "Calling MistKit service.modifyRecords() with \(batch.count) RecordOperation objects"
       )
 
-      let results = try await service.modifyRecords(batch)
+      let results = try await service.modifyRecords(
+        batch,
+        database: .public(.prefers(.serverToServer))
+      )
 
       Self.logger.debug(
         "Received \(results.count) RecordInfo responses from CloudKit"

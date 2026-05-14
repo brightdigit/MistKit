@@ -1,5 +1,5 @@
 //
-//  MistKitConfiguration.swift
+//  Operations.modifyZones.Output.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,44 +27,36 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+extension Operations.modifyZones.Output: CloudKitResponseType {
+  internal var badRequestResponse: Components.Responses.BadRequest? {
+    if case .badRequest(let response) = self {
+      return response
+    } else {
+      return nil
+    }
+  }
 
-/// Configuration for MistKit client
-internal struct MistKitConfiguration: Sendable {
-  /// The CloudKit container identifier (e.g., "iCloud.com.example.app")
-  internal let container: String
+  internal var unauthorizedResponse: Components.Responses.Unauthorized? {
+    if case .unauthorized(let response) = self {
+      return response
+    } else {
+      return nil
+    }
+  }
 
-  /// The CloudKit environment
-  internal let environment: Environment
+  internal var isOk: Bool {
+    if case .ok = self {
+      return true
+    } else {
+      return false
+    }
+  }
 
-  /// The CloudKit database type
-  internal let database: Database
-
-  /// API Token for authentication
-  internal let apiToken: String
-
-  /// Optional Web Auth Token for user authentication
-  internal let webAuthToken: String?
-
-  /// Protocol version (currently "1")
-  internal let version: String = "1"
-
-  internal let serverURL: URL
-
-  /// Initialize MistKit configuration
-  internal init(
-    container: String,
-    environment: Environment,
-    database: Database = .private,
-    serverURL: URL = .MistKit.cloudKitAPI,
-    apiToken: String,
-    webAuthToken: String? = nil
-  ) {
-    self.container = container
-    self.environment = environment
-    self.database = database
-    self.serverURL = serverURL
-    self.apiToken = apiToken
-    self.webAuthToken = webAuthToken
+  internal var undocumentedStatusCode: Int? {
+    if case .undocumented(let statusCode, _) = self {
+      return statusCode
+    } else {
+      return nil
+    }
   }
 }

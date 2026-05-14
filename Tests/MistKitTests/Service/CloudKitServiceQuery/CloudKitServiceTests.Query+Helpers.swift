@@ -62,17 +62,4 @@ extension CloudKitServiceTests.Query {
       transport: transport
     )
   }
-
-  /// Create service for auth errors
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal static func makeAuthErrorService() throws -> CloudKitService {
-    let transport = MockTransport(
-      responseProvider: .authenticationError()
-    )
-    return try CloudKitService(
-      containerIdentifier: TestConstants.serviceContainerIdentifier,
-      credentials: Credentials(apiAuth: APICredentials(apiToken: "test-token")),
-      transport: transport
-    )
-  }
 }

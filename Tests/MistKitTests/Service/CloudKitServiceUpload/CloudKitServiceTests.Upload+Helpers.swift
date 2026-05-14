@@ -63,7 +63,7 @@ extension CloudKitServiceTests.Upload {
     }
   }
 
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
   internal static func makeSuccessfulUploadService(
     tokenCount: Int = 1
   ) async throws -> CloudKitService {
@@ -78,7 +78,7 @@ extension CloudKitServiceTests.Upload {
   }
 
   /// Create service for validation error testing
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
   internal static func makeUploadValidationErrorService(
     _ errorType: UploadValidationErrorType
   ) async throws -> CloudKitService {
@@ -93,7 +93,7 @@ extension CloudKitServiceTests.Upload {
   }
 
   /// Create service for auth errors
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
   internal static func makeAuthErrorService() async throws -> CloudKitService {
     let responseProvider = ResponseProvider.authenticationError()
 

@@ -93,7 +93,7 @@ extension CloudKitResponseProcessor {
     @available(*, unavailable, message: "Pending #28: discoverAllUserIdentities is not yet ready.")
   #endif
   internal func processDiscoverAllUserIdentitiesResponse(
-    _ response: Operations.discoverAllUserIdentities.Output
+    _: Operations.discoverAllUserIdentities.Output
   ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
     throw CloudKitError.unsupportedOperationType(
       "discoverAllUserIdentities is not yet ready (pending #28)"

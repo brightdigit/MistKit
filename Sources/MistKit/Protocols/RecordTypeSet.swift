@@ -50,7 +50,7 @@ public struct RecordTypeSet<each RecordType: CloudKitRecord>: Sendable, RecordTy
   /// Initialize with a parameter pack of CloudKit record types
   ///
   /// - Parameter types: Variadic parameter pack of CloudKit record types
-  public init(_ types: repeat (each RecordType).Type) {}
+  public init(_: repeat (each RecordType).Type) {}
 
   /// Iterate through all record types in the parameter pack
   ///

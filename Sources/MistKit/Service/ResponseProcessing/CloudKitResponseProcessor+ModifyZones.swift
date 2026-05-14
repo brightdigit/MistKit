@@ -1,5 +1,5 @@
 //
-//  MistKitConfiguration.swift
+//  CloudKitResponseProcessor+ModifyZones.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,44 +27,27 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+extension CloudKitResponseProcessor {
+  /// Process modifyZones response
+  /// - Parameter response: The response to process
+  /// - Returns: The extracted zones modify data
+  /// - Throws: CloudKitError for various error conditions
+  internal func processModifyZonesResponse(_ response: Operations.modifyZones.Output)
+    async throws(CloudKitError) -> Components.Schemas.ZonesModifyResponse
+  {
+    if let error = CloudKitError(response) {
+      throw error
+    }
 
-/// Configuration for MistKit client
-internal struct MistKitConfiguration: Sendable {
-  /// The CloudKit container identifier (e.g., "iCloud.com.example.app")
-  internal let container: String
-
-  /// The CloudKit environment
-  internal let environment: Environment
-
-  /// The CloudKit database type
-  internal let database: Database
-
-  /// API Token for authentication
-  internal let apiToken: String
-
-  /// Optional Web Auth Token for user authentication
-  internal let webAuthToken: String?
-
-  /// Protocol version (currently "1")
-  internal let version: String = "1"
-
-  internal let serverURL: URL
-
-  /// Initialize MistKit configuration
-  internal init(
-    container: String,
-    environment: Environment,
-    database: Database = .private,
-    serverURL: URL = .MistKit.cloudKitAPI,
-    apiToken: String,
-    webAuthToken: String? = nil
-  ) {
-    self.container = container
-    self.environment = environment
-    self.database = database
-    self.serverURL = serverURL
-    self.apiToken = apiToken
-    self.webAuthToken = webAuthToken
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let zonesData):
+        return zonesData
+      }
+    default:
+      assertionFailure("Unexpected response case after error handling")
+      throw CloudKitError.invalidResponse
+    }
   }
 }

@@ -1,5 +1,5 @@
 //
-//  MistKitConfiguration.swift
+//  ZoneOperation.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,44 +27,37 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+/// A create-or-delete operation against a CloudKit zone, used by
+/// `CloudKitService.modifyZones(_:database:)`.
+public enum ZoneOperation: Sendable, Equatable, Hashable {
+  /// Create the given zone.
+  case create(ZoneID)
 
-/// Configuration for MistKit client
-internal struct MistKitConfiguration: Sendable {
-  /// The CloudKit container identifier (e.g., "iCloud.com.example.app")
-  internal let container: String
+  /// Delete the given zone.
+  case delete(ZoneID)
 
-  /// The CloudKit environment
-  internal let environment: Environment
+  /// The zone identifier that this operation targets.
+  public var zoneID: ZoneID {
+    switch self {
+    case .create(let zoneID), .delete(let zoneID):
+      return zoneID
+    }
+  }
+}
 
-  /// The CloudKit database type
-  internal let database: Database
-
-  /// API Token for authentication
-  internal let apiToken: String
-
-  /// Optional Web Auth Token for user authentication
-  internal let webAuthToken: String?
-
-  /// Protocol version (currently "1")
-  internal let version: String = "1"
-
-  internal let serverURL: URL
-
-  /// Initialize MistKit configuration
-  internal init(
-    container: String,
-    environment: Environment,
-    database: Database = .private,
-    serverURL: URL = .MistKit.cloudKitAPI,
-    apiToken: String,
-    webAuthToken: String? = nil
-  ) {
-    self.container = container
-    self.environment = environment
-    self.database = database
-    self.serverURL = serverURL
-    self.apiToken = apiToken
-    self.webAuthToken = webAuthToken
+// MARK: - Internal Conversion
+extension Components.Schemas.ZoneOperation {
+  internal init(from operation: ZoneOperation) {
+    let operationType: Components.Schemas.ZoneOperation.operationTypePayload
+    switch operation {
+    case .create:
+      operationType = .create
+    case .delete:
+      operationType = .delete
+    }
+    self.init(
+      operationType: operationType,
+      zone: .init(zoneID: Components.Schemas.ZoneID(from: operation.zoneID))
+    )
   }
 }

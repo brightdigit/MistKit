@@ -74,17 +74,6 @@ internal enum MistKitLogger {
     logger.warning("\(finalMessage)")
   }
 
-  /// Log info with optional redaction
-  internal static func logInfo(
-    _ message: String,
-    logger: Logger,
-    shouldRedact: Bool = true
-  ) {
-    let finalMessage =
-      (isRedactionDisabled || !shouldRedact) ? message : SecureLogging.safeLogMessage(message)
-    logger.info("\(finalMessage)")
-  }
-
   /// Log debug with optional redaction
   internal static func logDebug(
     _ message: String,

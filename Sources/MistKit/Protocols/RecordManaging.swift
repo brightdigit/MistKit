@@ -55,7 +55,7 @@ public protocol RecordManaging {
   ///   - operations: Array of record operations to execute
   ///   - recordType: The record type being operated on (for logging)
   /// - Throws: CloudKit errors if the batch operations fail
-  func executeBatchOperations(_ operations: [RecordOperation], recordType: String) async throws
+  func executeBatchOperations(_ operations: [RecordOperation], recordType _: String) async throws
 
   /// Query all records of a specific type, automatically paginating
   ///

@@ -37,7 +37,7 @@ public import Foundation
   import OpenAPIURLSession
 #endif
 
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 extension CloudKitService {
   /// Upload binary data to a CloudKit asset upload URL
   ///

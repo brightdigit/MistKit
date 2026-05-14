@@ -81,17 +81,6 @@ extension CloudKitServiceTests.FetchChanges {
       transport: transport
     )
   }
-
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  internal static func makeAuthErrorService() async throws -> CloudKitService {
-    let responseProvider = ResponseProvider.authenticationError()
-    let transport = MockTransport(responseProvider: responseProvider)
-    return try CloudKitService(
-      containerIdentifier: TestConstants.serviceContainerIdentifier,
-      credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),
-      transport: transport
-    )
-  }
 }
 
 // MARK: - FetchChanges Response Builders
