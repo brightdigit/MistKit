@@ -40,38 +40,18 @@
   @Observable
   @MainActor
   public final class CloudKitStore {
-    /// Public or private CloudKit database, selectable at runtime.
-    public enum DatabaseScope: String, CaseIterable, Identifiable, Sendable {
-      case `public`
-      case `private`
-
-      public var id: String { rawValue }
-
-      public var label: String {
-        switch self {
-        case .public: return "Public"
-        case .private: return "Private"
-        }
-      }
-    }
-
     /// The shared demo container identifier — must match `MistDemoConfig.containerIdentifier`.
     public static let demoContainerIdentifier = "iCloud.com.brightdigit.MistDemo"
 
     internal var accountStatus: CKAccountStatus = .couldNotDetermine
     internal var lastError: String?
-    internal var databaseScope: DatabaseScope = .private
+    internal var databaseScope: CKDatabase.Scope = .private
 
     internal let containerIdentifier: String
     @ObservationIgnored private let container: CKContainer
 
     /// The CloudKit database for the current `databaseScope`.
-    internal var database: CKDatabase {
-      switch databaseScope {
-      case .public: return container.publicCloudDatabase
-      case .private: return container.privateCloudDatabase
-      }
-    }
+    internal var database: CKDatabase { container.database(with: databaseScope) }
 
     /// Creates a new service for the given CloudKit container.
     /// - Parameter containerIdentifier: The CloudKit container identifier.
@@ -193,18 +173,13 @@
       try await withCheckedThrowingContinuation { continuation in
         let operation = CKFetchWebAuthTokenOperation(apiToken: apiToken)
         operation.qualityOfService = .userInitiated
-        operation.fetchWebAuthTokenCompletionBlock = { token, error in
-          if let token {
-            continuation.resume(returning: token)
-          } else {
-            continuation.resume(
-              throwing: error ?? CloudKitStoreError.webAuthTokenUnavailable
-            )
-          }
+        operation.fetchWebAuthTokenResultBlock = { result in
+          continuation.resume(with: result)
         }
-        // CKFetchWebAuthTokenOperation is a CKDatabaseOperation; running it
-        // against the selected database picks up the demo container.
-        database.add(operation)
+        // CKFetchWebAuthTokenOperation must run against the private database
+        // regardless of the user's scope selection — running it on the public
+        // database fails or returns an unattributed token.
+        container.privateCloudDatabase.add(operation)
       }
     }
   }

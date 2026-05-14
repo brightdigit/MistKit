@@ -73,6 +73,8 @@ schemes:
         MistDemoApp-macOS: all
     run:
       config: Debug
+      environmentVariables:
+        CLOUDKIT_API_TOKEN: ${CLOUDKIT_API_TOKEN}
     test:
       config: Debug
     archive:
@@ -84,6 +86,8 @@ schemes:
         MistDemoApp-iOS: all
     run:
       config: Debug
+      environmentVariables:
+        CLOUDKIT_API_TOKEN: ${CLOUDKIT_API_TOKEN}
     test:
       config: Debug
     archive:

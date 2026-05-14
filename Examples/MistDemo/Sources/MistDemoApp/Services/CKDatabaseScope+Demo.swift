@@ -1,5 +1,5 @@
 //
-//  CloudKitStoreError.swift
+//  CKDatabaseScope+Demo.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,16 +28,19 @@
 //
 
 #if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
-  import Foundation
+  import CloudKit
 
-  /// Errors specific to `CloudKitStore` operations.
-  internal enum CloudKitStoreError: Error, LocalizedError {
-    case unexpectedSaveResult
+  extension CKDatabase.Scope {
+    /// Scopes exposed in the MistDemoApp picker. `.shared` is intentionally
+    /// excluded because the demo's `schema.ckdb` has no shared zones.
+    internal static let selectable: [CKDatabase.Scope] = [.public, .private]
 
-    internal var errorDescription: String? {
+    internal var label: String {
       switch self {
-      case .unexpectedSaveResult:
-        return "CloudKit returned a record that couldn't be parsed as a Note."
+      case .public: return "Public"
+      case .private: return "Private"
+      case .shared: return "Shared"
+      @unknown default: return "Unknown"
       }
     }
   }
