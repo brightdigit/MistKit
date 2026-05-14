@@ -47,6 +47,11 @@
     internal var lastError: String?
     internal var databaseScope: CKDatabase.Scope = .private
 
+    /// The signed-in iCloud user's record name. Mirrors `currentUserRecordName`
+    /// in the web demo and is used to flag the "You" badge on notes the
+    /// current user created.
+    internal var currentUserRecordName: String?
+
     internal let containerIdentifier: String
     @ObservationIgnored private let container: CKContainer
 
@@ -81,6 +86,17 @@
         self.accountStatus = .couldNotDetermine
         self.lastError = error.localizedDescription
       }
+      if accountStatus == .available {
+        do {
+          let recordID = try await container.userRecordID()
+          self.currentUserRecordName = recordID.recordName
+        } catch {
+          self.currentUserRecordName = nil
+          self.lastError = error.localizedDescription
+        }
+      } else {
+        self.currentUserRecordName = nil
+      }
     }
 
     /// List all record zones in the selected database (parity with `mistdemo lookup-zones`).
@@ -89,13 +105,18 @@
       return zones.map(ZoneRow.init).sorted { $0.zoneName < $1.zoneName }
     }
 
-    /// Query `Note` records from the selected database, sorted by `index`
-    /// (parity with `mistdemo query --record-type Note --sort index`).
-    /// Note's schema is defined in `schema.ckdb`.
+    /// Query `Note` records from the selected database, newest first —
+    /// primary sort on creation date desc, modification date desc as the
+    /// tiebreaker. Matches the web demo's default sort.
+    /// Note's schema is defined in `schema.ckdb` (`___createTime` and
+    /// `___modTime` are both `SORTABLE`).
     internal func queryNotes(limit: Int = 50) async throws -> [Note] {
       let predicate = NSPredicate(value: true)
       let query = CKQuery(recordType: Note.recordType, predicate: predicate)
-      query.sortDescriptors = [NSSortDescriptor(key: Note.Fields.index, ascending: true)]
+      query.sortDescriptors = [
+        NSSortDescriptor(key: "creationDate", ascending: false),
+        NSSortDescriptor(key: "modificationDate", ascending: false),
+      ]
 
       let (matchResults, _) = try await database.records(
         matching: query,
