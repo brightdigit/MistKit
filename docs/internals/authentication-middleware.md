@@ -240,6 +240,8 @@ See `Sources/MistKit/Authentication/PublicAuthPreference.swift` and `Sources/Mis
 
 ## Complete Authentication Flow
 
+The shared middleware pipeline is the same regardless of scheme — the per-scheme work happens inside `Authenticator.authenticate(request:body:)`, expanded in the diagrams that follow.
+
 ```mermaid
 sequenceDiagram
   autonumber
@@ -248,7 +250,6 @@ sequenceDiagram
   participant Mid as AuthenticationMiddleware
   participant TM as TokenManager
   participant Auth as Authenticator
-  participant Sig as RequestSignature
   participant Net as next middleware / URLSession
   participant CK as CloudKit
 
@@ -262,22 +263,7 @@ sequenceDiagram
   else has credentials
     TM-->>Mid: (any Authenticator)
     Mid->>Auth: authenticate(&request, &body)
-
-    alt APITokenAuthenticator
-      Auth->>Auth: append ?ckAPIToken=<64-hex>
-    else WebAuthTokenAuthenticator
-      Auth->>Auth: append ?ckAPIToken=<…>&ckWebAuthToken=<URL-encoded>
-    else ServerToServerAuthenticator
-      Auth->>Auth: buffer body (≤ bodyBufferLimit)
-      Auth->>Auth: reassign body = HTTPBody(bytes)
-      Auth->>Sig: RequestSignature(keyID, privateKey, requestBody, webServiceURL)
-      Sig->>Sig: SHA256.cloudKitBodyHash(of: body)
-      Sig->>Sig: format ISO 8601 (Date.ISO8601FormatStyle or fallback)
-      Sig->>Sig: privateKey.signature(for: "<date>:<hash>:<path>")
-      Sig-->>Auth: RequestSignature (keyID, iso8601DateString, signatureDerRepresentation)
-      Auth->>Auth: request.headerFields.append(contentsOf: signature.headers)
-    end
-
+    Note over Auth: scheme-specific work —<br/>see per-scheme diagrams below
     Auth-->>Mid: (request and body now carry credentials)
     Mid->>Net: next(request, body, baseURL)
     Net->>CK: HTTPS request
@@ -286,6 +272,52 @@ sequenceDiagram
     Mid-->>Client: (response, body)
     Client-->>App: decoded result
   end
+```
+
+### API Token Flow
+
+The `APITokenAuthenticator` branch is a single mutation — it appends `?ckAPIToken=<64-hex>` to the request URL and returns. No body buffering, no async work.
+
+### Web Auth Flow
+
+`WebAuthTokenAuthenticator` URL-encodes the user-specific token via `CharacterMapEncoder` before appending it as a second query parameter alongside the API token:
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Mid as AuthenticationMiddleware
+  participant Auth as WebAuthTokenAuthenticator
+  participant Enc as CharacterMapEncoder
+
+  Mid->>Auth: authenticate(&request, &body)
+  Auth->>Enc: encode(webAuthToken)
+  Note right of Enc: + → %2B<br/>/ → %2F<br/>= → %3D
+  Enc-->>Auth: URL-encoded token
+  Auth->>Auth: append ?ckAPIToken=<…>&ckWebAuthToken=<encoded>
+  Auth-->>Mid: request carries query params
+```
+
+### Server-to-Server (ECDSA P-256) Flow
+
+`ServerToServerAuthenticator` buffers the body so it can be hashed, builds a `RequestSignature`, and appends the three `X-Apple-CloudKit-*` headers:
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Mid as AuthenticationMiddleware
+  participant Auth as ServerToServerAuthenticator
+  participant Sig as RequestSignature
+
+  Mid->>Auth: authenticate(&request, &body)
+  Auth->>Auth: buffer body (≤ bodyBufferLimit)
+  Auth->>Auth: reassign body = HTTPBody(bytes)
+  Auth->>Sig: RequestSignature(keyID, privateKey, requestBody, webServiceURL)
+  Sig->>Sig: SHA256.cloudKitBodyHash(of: body)
+  Sig->>Sig: format ISO 8601 (Date.ISO8601FormatStyle or fallback)
+  Sig->>Sig: privateKey.signature(for: "<date>:<hash>:<path>")
+  Sig-->>Auth: RequestSignature (keyID, iso8601DateString, signatureDerRepresentation)
+  Auth->>Auth: request.headerFields.append(contentsOf: signature.headers)
+  Auth-->>Mid: request carries X-Apple-CloudKit-* headers
 ```
 
 ### Token Manager Selection
