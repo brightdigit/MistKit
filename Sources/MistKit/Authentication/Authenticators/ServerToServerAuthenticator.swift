@@ -187,14 +187,14 @@ public struct ServerToServerAuthenticator: Authenticator {
       bodyData = nil
     }
 
-    let signature = try signRequest(
+    let signature = try RequestSignature(
+      keyID: keyID,
+      privateKey: privateKey,
       requestBody: bodyData,
       webServiceURL: request.path ?? ""
     )
 
-    request.headerFields[.cloudKitRequestKeyID] = signature.keyID
-    request.headerFields[.cloudKitRequestISO8601Date] = signature.date
-    request.headerFields[.cloudKitRequestSignatureV1] = signature.signature
+    request.headerFields.append(contentsOf: signature.headers)
   }
 
   /// JSON-encodes the key ID, base64-encoded private key, and
