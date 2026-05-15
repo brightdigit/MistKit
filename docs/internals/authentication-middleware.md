@@ -312,10 +312,7 @@ sequenceDiagram
   Auth->>Auth: buffer body (≤ bodyBufferLimit)
   Auth->>Auth: reassign body = HTTPBody(bytes)
   Auth->>Sig: RequestSignature(keyID, privateKey, requestBody, webServiceURL)
-  Sig->>Sig: SHA256.cloudKitBodyHash(of: body)
-  Sig->>Sig: format ISO 8601 (Date.ISO8601FormatStyle or fallback)
-  Sig->>Sig: privateKey.signature(for: "<date>:<hash>:<path>")
-  Sig-->>Auth: RequestSignature (keyID, iso8601DateString, signatureDerRepresentation)
+  Sig-->>Auth: signed header bundle
   Auth->>Auth: request.headerFields.append(contentsOf: signature.headers)
   Auth-->>Mid: request carries X-Apple-CloudKit-* headers
 ```
