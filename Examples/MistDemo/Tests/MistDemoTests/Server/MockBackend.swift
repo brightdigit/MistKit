@@ -86,10 +86,13 @@
         """
       // RecordInfo is Codable; round-trip through JSON keeps the stub
       // independent of MistKit's internal initializer.
-      // swiftlint:disable:next force_try
-      return try! JSONDecoder().decode(
-        RecordInfo.self, from: Data(json.utf8)
-      )
+      do {
+        return try JSONDecoder().decode(
+          RecordInfo.self, from: Data(json.utf8)
+        )
+      } catch {
+        fatalError("MockBackend stubRecord JSON failed to decode: \(error)")
+      }
     }
 
     /// Flatten FieldValue entries into a printable form so tests can write

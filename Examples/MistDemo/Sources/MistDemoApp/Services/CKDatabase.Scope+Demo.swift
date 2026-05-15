@@ -1,5 +1,5 @@
 //
-//  CKDatabaseScope+Demo.swift
+//  CKDatabase.Scope+Demo.swift
 //  MistDemo
 //
 //  Created by Leo Dion.

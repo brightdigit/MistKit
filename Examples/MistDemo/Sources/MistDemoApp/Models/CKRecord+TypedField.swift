@@ -43,7 +43,9 @@
       forField field: String,
       as _: T.Type = T.self
     ) -> T? {
-      guard let raw = self[field] else { return nil }
+      guard let raw = self[field] else {
+        return nil
+      }
       guard let typed = raw as? T else {
         assertionFailure(
           "CKRecord field '\(field)' on record type '\(recordType)' "

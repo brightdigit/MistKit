@@ -27,23 +27,21 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-  import Foundation
+internal import Foundation
 
-  /// Display-friendly snapshot of a CKRecordZone for the SwiftUI list.
+/// Display-friendly snapshot of a CKRecordZone for the SwiftUI list.
 public struct ZoneRow: Identifiable, Hashable {
+  /// Stable identifier composed of zone + owner name.
+  public let id: String
+  /// CloudKit zone name.
+  public let zoneName: String
+  /// CloudKit zone owner record name.
+  public let ownerName: String
+
+  /// Creates a row from its component identifiers.
   public init(id: String, zoneName: String, ownerName: String) {
     self.id = id
     self.zoneName = zoneName
     self.ownerName = ownerName
   }
-
-  public let id: String
-  public let zoneName: String
-  public let ownerName: String
-
-//    internal init(_ zone: CKRecordZone) {
-//      self.id = "\(zone.zoneID.zoneName)|\(zone.zoneID.ownerName)"
-//      self.zoneName = zone.zoneID.zoneName
-//      self.ownerName = zone.zoneID.ownerName
-//    }
-  }
+}

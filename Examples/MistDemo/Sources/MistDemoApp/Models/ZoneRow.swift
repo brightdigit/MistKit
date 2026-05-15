@@ -28,13 +28,12 @@
 //
 
 #if canImport(CloudKit)
-import MistDemoKit
   import CloudKit
   import Foundation
+  import MistDemoKit
 
   /// Display-friendly snapshot of a CKRecordZone for the SwiftUI list.
   extension ZoneRow {
-
     internal init(_ zone: CKRecordZone) {
       self.init(
         id: "\(zone.zoneID.zoneName)|\(zone.zoneID.ownerName)",

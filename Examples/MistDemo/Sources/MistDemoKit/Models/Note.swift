@@ -29,19 +29,60 @@
 
 public import Foundation
 
-  /// Note record, mirroring the `Note` type defined in `schema.ckdb`:
-  ///
-  ///     RECORD TYPE Note (
-  ///         "title" STRING    QUERYABLE SORTABLE SEARCHABLE,
-  ///         "index" INT64     QUERYABLE SORTABLE,
-  ///         "image" ASSET
-  ///     );
-  ///
-  /// Created / modified timestamps come from CloudKit's system metadata
-  /// (`CKRecord.creationDate` / `.modificationDate`), so there's no need
-  /// for custom `createdAt` / `modified` schema fields.
+/// Note record, mirroring the `Note` type defined in `schema.ckdb`:
+///
+///     RECORD TYPE Note (
+///         "title" STRING    QUERYABLE SORTABLE SEARCHABLE,
+///         "index" INT64     QUERYABLE SORTABLE,
+///         "image" ASSET
+///     );
+///
+/// Created / modified timestamps come from CloudKit's system metadata
+/// (`CKRecord.creationDate` / `.modificationDate`), so there's no need
+/// for custom `createdAt` / `modified` schema fields.
 public struct Note: Identifiable, Hashable {
-  public init(id: String, title: String? = nil, index: Int64? = nil, imageAssetURL: URL? = nil, modificationDate: Date? = nil, creationDate: Date? = nil, recordChangeTag: String? = nil, creatorUserRecordName: String? = nil) {
+  /// Known field name constants for `Note` records.
+  public enum Fields {
+    /// Title field name.
+    public static let title = "title"
+    /// Index field name.
+    public static let index = "index"
+    /// Image asset field name.
+    public static let image = "image"
+  }
+
+  /// CloudKit record type identifier.
+  public static let recordType = "Note"
+
+  /// Record name / identifier.
+  public let id: String
+  /// Note title.
+  public let title: String?
+  /// Sort-order index.
+  public let index: Int64?
+  /// URL of the attached image asset, if any.
+  public let imageAssetURL: URL?
+
+  /// Last-modification timestamp from CloudKit system metadata.
+  public let modificationDate: Date?
+  /// Creation timestamp from CloudKit system metadata.
+  public let creationDate: Date?
+  /// CloudKit change tag for optimistic concurrency.
+  public let recordChangeTag: String?
+  /// `recordName` of the user who created the record.
+  public let creatorUserRecordName: String?
+
+  /// Creates a `Note` from its field values plus optional CloudKit metadata.
+  public init(
+    id: String,
+    title: String? = nil,
+    index: Int64? = nil,
+    imageAssetURL: URL? = nil,
+    modificationDate: Date? = nil,
+    creationDate: Date? = nil,
+    recordChangeTag: String? = nil,
+    creatorUserRecordName: String? = nil
+  ) {
     self.id = id
     self.title = title
     self.index = index
@@ -51,45 +92,13 @@ public struct Note: Identifiable, Hashable {
     self.recordChangeTag = recordChangeTag
     self.creatorUserRecordName = creatorUserRecordName
   }
-  
-    /// Known field name constants for `Note` records.
-    public enum Fields {
-      public static let title = "title"
-      public static let index = "index"
-      public static let image = "image"
-    }
 
-    /// CloudKit record type identifier.
-    public static let recordType = "Note"
+  // Identity-based equality: two Notes with the same recordID are equal
+  // regardless of field state. Lets SwiftUI selection bindings track a
+  // record across edits without losing focus when fields change.
 
-    public let id: String
-    public let title: String?
-    public let index: Int64?
-    public let imageAssetURL: URL?
-
-    /// CloudKit-managed metadata
-    public let modificationDate: Date?
-    public let creationDate: Date?
-    public let recordChangeTag: String?
-    public let creatorUserRecordName: String?
-
-//    internal init?(_ record: CKRecord) {
-//      guard record.recordType == Self.recordType else {
-//        return nil
-//      }
-//      self.id = record.recordID.recordName
-//      self.title = record[Fields.title] as? String
-//      self.index = (record[Fields.index] as? NSNumber)?.int64Value
-//      self.imageAssetURL = (record[Fields.image] as? CKAsset)?.fileURL
-//      self.modificationDate = record.modificationDate
-//      self.creationDate = record.creationDate
-//      self.recordChangeTag = record.recordChangeTag
-//      self.creatorUserRecordName = record.creatorUserRecordID?.recordName
-//    }
-
-    // Identity-based equality: two Notes with the same recordID are equal
-    // regardless of field state. Lets SwiftUI selection bindings track a
-    // record across edits without losing focus when fields change.
-    public static func == (lhs: Note, rhs: Note) -> Bool { lhs.id == rhs.id }
-    public func hash(into hasher: inout Hasher) { hasher.combine(id) }
-  }
+  /// Identity-based equality on `id`.
+  public static func == (lhs: Note, rhs: Note) -> Bool { lhs.id == rhs.id }
+  /// Identity-based hashing on `id`.
+  public func hash(into hasher: inout Hasher) { hasher.combine(id) }
+}

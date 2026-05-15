@@ -45,61 +45,8 @@
       VStack(spacing: 0) {
         controls
           .padding()
-
         Divider()
-
-        if loading {
-          Spacer()
-          ProgressView("Querying \(Note.recordType)…")
-          Spacer()
-        } else if let loadError {
-          ContentUnavailableView(
-            "Query failed",
-            systemImage: "exclamationmark.triangle",
-            description: Text(loadError)
-          )
-        } else if notes.isEmpty {
-          ContentUnavailableView(
-            "No notes",
-            systemImage: "tray",
-            description: Text(
-              "Tap + to create the first one, or run `mistdemo create` from the CLI."
-            )
-          )
-        } else {
-          List(notes, selection: $selectedNote) { note in
-            NavigationLink(value: note) {
-              VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 8) {
-                  Text(note.title ?? note.id).font(.body)
-                  if isOwnedByCurrentUser(note) {
-                    ownerBadge(creator: note.creatorUserRecordName)
-                  }
-                }
-                HStack(spacing: 12) {
-                  if let index = note.index {
-                    Label("\(index)", systemImage: "number")
-                      .font(.caption)
-                      .foregroundStyle(.secondary)
-                  }
-                  if let creationDate = note.creationDate {
-                    Label(
-                      creationDate.formatted(date: .abbreviated, time: .omitted),
-                      systemImage: "calendar"
-                    )
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                  }
-                }
-              }
-            }
-            .swipeActions(edge: .trailing) {
-              Button("Delete", role: .destructive) {
-                Task { await delete(note) }
-              }
-            }
-          }
-        }
+        content
       }
       .navigationDestination(for: Note.self) { note in
         RecordDetailView(note: note, onChange: { Task { await runQuery() } })
@@ -126,6 +73,44 @@
       }
     }
 
+    @ViewBuilder
+    private var content: some View {
+      if loading {
+        Spacer()
+        ProgressView("Querying \(Note.recordType)…")
+        Spacer()
+      } else if let loadError {
+        ContentUnavailableView(
+          "Query failed",
+          systemImage: "exclamationmark.triangle",
+          description: Text(loadError)
+        )
+      } else if notes.isEmpty {
+        ContentUnavailableView(
+          "No notes",
+          systemImage: "tray",
+          description: Text(
+            "Tap + to create the first one, or run `mistdemo create` from the CLI."
+          )
+        )
+      } else {
+        notesList
+      }
+    }
+
+    private var notesList: some View {
+      List(notes, selection: $selectedNote) { note in
+        NavigationLink(value: note) {
+          noteRow(note)
+        }
+        .swipeActions(edge: .trailing) {
+          Button("Delete", role: .destructive) {
+            Task { await delete(note) }
+          }
+        }
+      }
+    }
+
     private var controls: some View {
       HStack(spacing: 12) {
         Text("Type: \(Note.recordType)")
@@ -142,12 +127,42 @@
       }
     }
 
+    private func noteRow(_ note: Note) -> some View {
+      VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: 8) {
+          Text(note.title ?? note.id).font(.body)
+          if isOwnedByCurrentUser(note) {
+            ownerBadge(creator: note.creatorUserRecordName)
+          }
+        }
+        HStack(spacing: 12) {
+          if let index = note.index {
+            Label("\(index)", systemImage: "number")
+              .font(.caption)
+              .foregroundStyle(.secondary)
+          }
+          if let creationDate = note.creationDate {
+            Label(
+              creationDate.formatted(date: .abbreviated, time: .omitted),
+              systemImage: "calendar"
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+          }
+        }
+      }
+    }
+
     /// Mirrors the web demo's "You" badge — flag notes the signed-in user
     /// created. CloudKit may stamp the creator as `__defaultOwner__` for
     /// records the caller just created, so accept that sentinel as well.
     private func isOwnedByCurrentUser(_ note: Note) -> Bool {
-      guard let creator = note.creatorUserRecordName else { return false }
-      if creator == "__defaultOwner__" { return true }
+      guard let creator = note.creatorUserRecordName else {
+        return false
+      }
+      if creator == "__defaultOwner__" {
+        return true
+      }
       return creator == service.currentUserRecordName
     }
 

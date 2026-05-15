@@ -32,5 +32,4 @@ import SwiftUI
 
 @main
 internal struct MistDemoAppMain: AppMain {
-  
 }

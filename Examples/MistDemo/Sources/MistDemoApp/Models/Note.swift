@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(CloudKit) 
+#if canImport(CloudKit)
   import CloudKit
-import MistDemoKit
   import Foundation
+  import MistDemoKit
 
   /// Note record, mirroring the `Note` type defined in `schema.ckdb`:
   ///
@@ -43,9 +43,7 @@ import MistDemoKit
   /// Created / modified timestamps come from CloudKit's system metadata
   /// (`CKRecord.creationDate` / `.modificationDate`), so there's no need
   /// for custom `createdAt` / `modified` schema fields.
-  extension  Note {
-    
-
+  extension Note {
     internal init?(_ record: CKRecord) {
       guard record.recordType == Self.recordType else {
         return nil
@@ -61,6 +59,5 @@ import MistDemoKit
         creatorUserRecordName: record.creatorUserRecordID?.recordName
       )
     }
-
   }
 #endif
