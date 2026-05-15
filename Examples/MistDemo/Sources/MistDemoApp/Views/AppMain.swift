@@ -1,5 +1,5 @@
 //
-//  SidebarItem.swift
+//  AppMain.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,25 +27,26 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Sidebar navigation items for the MistDemo app.
-internal enum SidebarItem: Hashable, CaseIterable {
-  case account
-  case zones
-  case query
+#if canImport(SwiftUI)
+  public import SwiftUI
 
-  internal var label: String {
-    switch self {
-    case .account: return "iCloud Account"
-    case .zones: return "Zones"
-    case .query: return "Query Records"
-    }
+  /// SwiftUI `App` entry point for the native MistDemo build.
+  ///
+  /// Concrete `@main` types in the demo target conform to `AppMain` to inherit
+  /// the standard window setup; the protocol exists so the scene wiring lives
+  /// in `MistDemoApp` rather than being duplicated in every executable target.
+  public protocol AppMain: App {
   }
 
-  internal var systemImage: String {
-    switch self {
-    case .account: return "person.crop.circle"
-    case .zones: return "tray.full"
-    case .query: return "magnifyingglass"
+  extension AppMain {
+    /// Default scene: a single window hosting `RootView`.
+    public var body: some Scene {
+      WindowGroup("MistDemo (Native CloudKit)") {
+        RootView()
+      }
+      #if os(macOS)
+        .defaultSize(width: 880, height: 600)
+      #endif
     }
   }
-}
+#endif

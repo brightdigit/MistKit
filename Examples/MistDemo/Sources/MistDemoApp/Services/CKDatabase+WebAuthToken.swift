@@ -1,5 +1,5 @@
 //
-//  Note.swift
+//  CKDatabase+WebAuthToken.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -29,35 +29,24 @@
 
 #if canImport(CloudKit)
   import CloudKit
-  import Foundation
-  import MistDemoKit
 
-  /// Note record, mirroring the `Note` type defined in `schema.ckdb`:
-  ///
-  ///     RECORD TYPE Note (
-  ///         "title" STRING    QUERYABLE SORTABLE SEARCHABLE,
-  ///         "index" INT64     QUERYABLE SORTABLE,
-  ///         "image" ASSET
-  ///     );
-  ///
-  /// Created / modified timestamps come from CloudKit's system metadata
-  /// (`CKRecord.creationDate` / `.modificationDate`), so there's no need
-  /// for custom `createdAt` / `modified` schema fields.
-  extension Note {
-    internal init?(_ record: CKRecord) {
-      guard record.recordType == Self.recordType else {
-        return nil
+  extension CKDatabase {
+    /// Capture a web-auth token via `CKFetchWebAuthTokenOperation` for the
+    /// given CloudKit API token. Issues the same `158__…` value that
+    /// MistKit / `mistdemo auth-token` consume.
+    ///
+    /// `CKFetchWebAuthTokenOperation` must run against the private database
+    /// — running it on the public database fails or returns an unattributed
+    /// token.
+    internal func fetchWebAuthToken(apiToken: String) async throws -> String {
+      try await withCheckedThrowingContinuation { continuation in
+        let operation = CKFetchWebAuthTokenOperation(apiToken: apiToken)
+        operation.qualityOfService = .userInitiated
+        operation.fetchWebAuthTokenResultBlock = { @Sendable result in
+          continuation.resume(with: result)
+        }
+        add(operation)
       }
-      self.init(
-        id: record.recordID.recordName,
-        title: record.typedValue(forField: Fields.title, as: String.self),
-        index: record.typedValue(forField: Fields.index, as: NSNumber.self)?.int64Value,
-        imageAssetURL: record.typedValue(forField: Fields.image, as: CKAsset.self)?.fileURL,
-        modificationDate: record.modificationDate,
-        creationDate: record.creationDate,
-        recordChangeTag: record.recordChangeTag,
-        creatorUserRecordName: record.creatorUserRecordID?.recordName
-      )
     }
   }
 #endif

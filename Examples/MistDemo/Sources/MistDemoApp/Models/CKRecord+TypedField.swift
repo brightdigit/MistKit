@@ -1,5 +1,5 @@
 //
-//  FormattingError.swift
+//  CKRecord+TypedField.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,24 +27,34 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+#if canImport(CloudKit)
+  import CloudKit
+  import Foundation
 
-/// Formatting errors
-internal enum FormattingError: LocalizedError, Sendable {
-  case encodingFailed
-  case invalidStructure(String)
-  case unsupportedFormat(OutputFormat)
-
-  // MARK: Internal
-
-  internal var errorDescription: String? {
-    switch self {
-    case .encodingFailed:
-      "Failed to encode data to UTF-8 string"
-    case .invalidStructure(let message):
-      "Invalid data structure: \(message)"
-    case .unsupportedFormat(let format):
-      "\(format.rawValue) format is not yet implemented. Use 'json' format instead."
+  extension CKRecord {
+    /// Reads `field` from the record and casts it to `T`.
+    ///
+    /// Returns `nil` when the field is absent — that's a normal optional
+    /// field. When the field is present but holds a value of the wrong
+    /// type, this triggers `assertionFailure` (debug-only crash) before
+    /// returning `nil`. A type mismatch indicates a schema/code drift
+    /// that should be caught loudly during development.
+    internal func typedValue<T>(
+      forField field: String,
+      as _: T.Type = T.self
+    ) -> T? {
+      guard let raw = self[field] else {
+        return nil
+      }
+      guard let typed = raw as? T else {
+        assertionFailure(
+          "CKRecord field '\(field)' on record type '\(recordType)' "
+            + "expected \(T.self) but got \(Swift.type(of: raw)) "
+            + "(value: \(raw))"
+        )
+        return nil
+      }
+      return typed
     }
   }
-}
+#endif

@@ -58,7 +58,7 @@ extension AsyncHelpersTests {
     @Test("AsyncTimeoutError conforms to LocalizedError")
     internal func timeoutErrorIsLocalizedError() {
       let error: any Error = AsyncTimeoutError.timeout("test")
-      #expect(error is LocalizedError)
+      #expect(error is any LocalizedError)
     }
   }
 }

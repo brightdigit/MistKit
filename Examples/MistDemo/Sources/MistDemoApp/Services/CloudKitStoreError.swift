@@ -27,8 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(CloudKit)
   import Foundation
+  import MistDemoKit
 
   /// Errors specific to `CloudKitStore` operations.
   internal enum CloudKitStoreError: Error, LocalizedError {

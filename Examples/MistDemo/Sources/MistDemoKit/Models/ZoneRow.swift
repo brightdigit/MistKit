@@ -1,5 +1,5 @@
 //
-//  SidebarItem.swift
+//  ZoneRow.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,25 +27,21 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Sidebar navigation items for the MistDemo app.
-internal enum SidebarItem: Hashable, CaseIterable {
-  case account
-  case zones
-  case query
+internal import Foundation
 
-  internal var label: String {
-    switch self {
-    case .account: return "iCloud Account"
-    case .zones: return "Zones"
-    case .query: return "Query Records"
-    }
-  }
+/// Display-friendly snapshot of a CKRecordZone for the SwiftUI list.
+public struct ZoneRow: Identifiable, Hashable {
+  /// Stable identifier composed of zone + owner name.
+  public let id: String
+  /// CloudKit zone name.
+  public let zoneName: String
+  /// CloudKit zone owner record name.
+  public let ownerName: String
 
-  internal var systemImage: String {
-    switch self {
-    case .account: return "person.crop.circle"
-    case .zones: return "tray.full"
-    case .query: return "magnifyingglass"
-    }
+  /// Creates a row from its component identifiers.
+  public init(id: String, zoneName: String, ownerName: String) {
+    self.id = id
+    self.zoneName = zoneName
+    self.ownerName = ownerName
   }
 }

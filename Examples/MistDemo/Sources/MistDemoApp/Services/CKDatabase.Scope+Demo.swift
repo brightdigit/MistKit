@@ -1,5 +1,5 @@
 //
-//  CKDatabaseScope+Demo.swift
+//  CKDatabase.Scope+Demo.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(CloudKit)
   import CloudKit
 
   extension CKDatabase.Scope {
