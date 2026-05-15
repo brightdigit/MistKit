@@ -4,49 +4,54 @@ MistKit's authentication system uses an HTTP middleware pattern to transparently
 
 ## TokenManager Protocol
 
-All authentication flows implement a common protocol:
+A `TokenManager` is the lifecycle owner of credentials (loading, validating, rotating, persisting). It vends an `Authenticator` to whomever needs to apply those credentials to an outgoing request:
 
 ```swift
 public protocol TokenManager: Sendable {
   var hasCredentials: Bool { get async }
   func validateCredentials() async throws(TokenManagerError) -> Bool
-  func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials?
+  func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)?
 }
 ```
 
-`TokenCredentials` carries an `AuthenticationMethod` enum:
+Each concrete `Authenticator` (`APITokenAuthenticator`, `WebAuthTokenAuthenticator`, `ServerToServerAuthenticator`) owns both the credential payload and the rule for attaching it to a request:
 
 ```swift
-public enum AuthenticationMethod: Sendable {
-  case apiToken(String)
-  case webAuthToken(apiToken: String, webToken: String)
-  case serverToServer(keyID: String, privateKey: Data)
+public protocol Authenticator: Sendable {
+  static var storageKey: String { get }
+  var defaultStorageIdentifier: String { get }
+  init(decoding data: Data) throws
+  func authenticate(request: inout HTTPRequest, body: inout HTTPBody?) async throws
+  func encoded() throws -> Data
 }
 ```
+
+Bundling the credential with the application logic keeps new authentication schemes from rippling into the middleware: any `Authenticator` can be plugged in without changes elsewhere.
 
 ## The Middleware Intercept
 
-`AuthenticationMiddleware` conforms to the OpenAPI middleware protocol and intercepts every outgoing request:
+`AuthenticationMiddleware` conforms to the OpenAPI `ClientMiddleware` protocol and intercepts every outgoing request. The middleware itself is trivial — it asks the token manager for the current authenticator and lets the authenticator apply itself:
 
 ```swift
-func intercept(_ request: HTTPRequest, body: HTTPBody?,
-               next: (HTTPRequest, HTTPBody?) async throws -> (HTTPResponse, HTTPBody?))
-    async throws -> (HTTPResponse, HTTPBody?)
-{
-    let credentials = try await tokenManager.getCurrentCredentials()
+internal func intercept(
+  _ request: HTTPRequest,
+  body: HTTPBody?,
+  baseURL: URL,
+  operationID: String,
+  next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+) async throws -> (HTTPResponse, HTTPBody?) {
+  guard let authenticator = try await tokenManager.currentAuthenticator() else {
+    throw TokenManagerError.invalidCredentials(.noCredentialsAvailable)
+  }
 
-    switch credentials.method {
-    case .apiToken(let token):
-        // Append ?ckAPIToken=<token> to URL
-    case .webAuthToken(let apiToken, let webToken):
-        // Append ?ckAPIToken=<token>&ckWebAuthToken=<encoded-token>
-    case .serverToServer(let keyID, let privateKey):
-        // Add ECDSA signature headers
-    }
-
-    return try await next(modifiedRequest, body)
+  var modifiedRequest = request
+  var modifiedBody = body
+  try await authenticator.authenticate(request: &modifiedRequest, body: &modifiedBody)
+  return try await next(modifiedRequest, modifiedBody, baseURL)
 }
 ```
+
+The branching the middleware used to do — query parameter for API token, two query parameters for web auth, signed headers for server-to-server — now lives inside each concrete `Authenticator.authenticate(request:body:)` implementation.
 
 ## API Token Authentication
 
@@ -118,37 +123,42 @@ func signRequest(url: URL, body: Data?) throws -> RequestSignature {
 
 ## AdaptiveTokenManager & `upgradeToWebAuthentication`
 
-`AdaptiveTokenManager` is an **actor** that enables runtime transitions between auth methods:
+`AdaptiveTokenManager` is an **actor** that enables runtime transitions between auth methods. It vends an `APITokenAuthenticator` while API-only and switches to a `WebAuthTokenAuthenticator` once upgraded:
 
 ```swift
 public actor AdaptiveTokenManager: TokenManager {
-    private var apiToken: String
-    private var webAuthToken: String?
-    private var storage: TokenStorage?
+    internal let apiToken: String
+    internal var webAuthToken: String?
+    internal let storage: (any TokenStorage)?
 
-    public func upgradeToWebAuthentication(webAuthToken: String)
-        async throws(TokenManagerError) -> TokenCredentials
-    {
-        // Validate
-        guard !webAuthToken.isEmpty else {
-            throw TokenManagerError.invalidCredentials(.webAuthTokenEmpty)
+    public func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
+        if let webToken = webAuthToken {
+            return try WebAuthTokenAuthenticator(apiToken: apiToken, webAuthToken: webToken)
         }
-        guard webAuthToken.count >= 10 else {
-            throw TokenManagerError.invalidCredentials(.webAuthTokenTooShort)
-        }
+        return try APITokenAuthenticator(token: apiToken)
+    }
 
-        // Store (actor isolation ensures thread safety)
+    @discardableResult
+    public func upgradeToWebAuthentication(
+        webAuthToken: String
+    ) async throws(TokenManagerError) -> WebAuthTokenAuthenticator {
+        let authenticator = try WebAuthTokenAuthenticator(
+            apiToken: apiToken,
+            webAuthToken: webAuthToken
+        )
         self.webAuthToken = webAuthToken
 
-        // Optionally persist
         if let storage = storage {
-            try await storage.store(credentials, identifier: apiToken)
+            // Don't fail the upgrade if storage fails — just log.
+            try? await storage.store(authenticator, identifier: apiToken)
         }
 
-        return credentials  // Now returns .webAuthToken method
+        return authenticator
     }
 }
 ```
+
+`WebAuthTokenAuthenticator`'s initializer is what validates the token (empty / too-short tokens throw `TokenManagerError.invalidCredentials`), so the manager doesn't duplicate that logic. The companion `downgradeToAPIOnly()` and `updateWebAuthToken(_:)` methods live alongside on `AdaptiveTokenManager+Transitions`.
 
 ### Why This Matters
 
@@ -165,28 +175,26 @@ The actor ensures thread-safe state mutation, and the optional `TokenStorage` pr
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   AuthenticationMiddleware                    │
-│                                                              │
-│  Request ──→ tokenManager.getCurrentCredentials()            │
-│                         │                                    │
-│              ┌──────────┼──────────┐                         │
-│              ▼          ▼          ▼                         │
-│         apiToken   webAuthToken  serverToServer              │
-│              │          │          │                         │
-│         Add query   Add query   Sign with                   │
-│         param       params      ECDSA P-256                 │
-│              │          │          │                         │
-│              └──────────┼──────────┘                         │
-│                         ▼                                    │
-│                   next(request, body)                        │
+│                   AuthenticationMiddleware                  │
+│                                                             │
+│  Request ──→ tokenManager.currentAuthenticator()            │
+│                         │                                   │
+│                         ▼                                   │
+│      authenticator.authenticate(request:body:)              │
+│         (concrete type decides query param vs.              │
+│          query params vs. ECDSA P-256 headers)              │
+│                         │                                   │
+│                         ▼                                   │
+│                  next(request, body)                        │
 └─────────────────────────────────────────────────────────────┘
 
         AdaptiveTokenManager (actor)
-        ┌─────────────────────────────┐
-        │  apiToken ──────────────────│──→ Public DB only
-        │       │                     │
-        │  upgradeToWebAuth()         │
-        │       ▼                     │
-        │  apiToken + webAuthToken ───│──→ Private/Shared DB
-        └─────────────────────────────┘
+        ┌──────────────────────────────────────────────┐
+        │  apiToken ──────→ APITokenAuthenticator      │──→ Public DB only
+        │       │                                      │
+        │  upgradeToWebAuthentication(webAuthToken:)   │
+        │       ▼                                      │
+        │  apiToken + webAuthToken ──→                 │
+        │                  WebAuthTokenAuthenticator   │──→ Private/Shared DB
+        └──────────────────────────────────────────────┘
 ```

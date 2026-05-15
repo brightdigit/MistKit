@@ -226,7 +226,7 @@ It's also worth knowing what each database actually supports — public, private
 
 ### The `TokenManager` Protocol
 
-`TokenManager` is the seam MistKit uses to plug in any of the three auth methods at runtime. Three concrete implementations ship in the box — `APITokenManager`, `WebAuthTokenManager`, and `ServerToServerAuthManager` — and they all conform to the same protocol. The `AuthenticationMiddleware` asks the manager for credentials before each request and applies them appropriately (query parameters for the token-based methods, signed headers for server-to-server). You can also implement your own `TokenManager` if you need to source credentials from a secrets vault or rotate them at runtime.
+`TokenManager` is the seam MistKit uses to plug in any of the three auth methods at runtime. Three concrete implementations ship in the box — `APITokenManager`, `WebAuthTokenManager`, and `ServerToServerAuthManager` — and they all conform to the same protocol. Before each request, `AuthenticationMiddleware` asks the manager for its current `Authenticator` and lets the authenticator apply itself — query parameters for the token-based methods, signed headers for server-to-server. You can also implement your own `TokenManager` if you need to source credentials from a secrets vault or rotate them at runtime.
 
 ### API Token Configuration
 
