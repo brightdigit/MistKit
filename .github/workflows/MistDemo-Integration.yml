@@ -31,9 +31,6 @@ on:
     branches:
       - main
       - 'v*.*.*'
-      # TEMPORARY: remove before merge — lets us iterate on this workflow
-      # in real CI without merging to main first.
-      - claude/plan-issue-325-aQGRH
   workflow_dispatch:
 
 concurrency:
