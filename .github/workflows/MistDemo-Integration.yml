@@ -73,7 +73,6 @@ jobs:
           set -euo pipefail
           BIN=.build/x86_64-swift-linux-musl/release/mistdemo
           ls -lh "$BIN"
-          file "$BIN"
           # A statically linked binary either reports "not a dynamic
           # executable" (musl) or "statically linked" (glibc). Anything
           # else means we picked up shared deps and broke the goal.
