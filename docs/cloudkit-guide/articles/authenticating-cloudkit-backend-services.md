@@ -187,7 +187,7 @@ X-Apple-CloudKit-Request-ISO8601Date:  [the same date that was signed]
 X-Apple-CloudKit-Request-SignatureV1:  [base64-encoded ECDSA signature]
 ```
 
-If you've used AWS SigV4 or similar schemes, this is similar in spirit but its own dialect. MistKit's `AuthenticationMiddleware` builds these for you on every request — see [`Sources/MistKit/AuthenticationMiddleware.swift`](https://github.com/brightdigit/MistKit/blob/main/Sources/MistKit/AuthenticationMiddleware.swift) and [`Sources/MistKit/Authentication/ServerToServerAuthManager+RequestSigning.swift`](https://github.com/brightdigit/MistKit/blob/main/Sources/MistKit/Authentication/ServerToServerAuthManager+RequestSigning.swift) for the implementation.
+If you've used AWS SigV4 or similar schemes, this is similar in spirit but its own dialect. MistKit's `AuthenticationMiddleware` builds these for you on every request — see [`Sources/MistKit/AuthenticationMiddleware.swift`](https://github.com/brightdigit/MistKit/blob/main/Sources/MistKit/AuthenticationMiddleware.swift) and [`Sources/MistKit/Authentication/Internal/RequestSignature.swift`](https://github.com/brightdigit/MistKit/blob/main/Sources/MistKit/Authentication/Internal/RequestSignature.swift) for the implementation.
 
 ### Key File Management
 
@@ -228,27 +228,39 @@ It's also worth knowing what each database actually supports — public, private
 
 `TokenManager` is the seam MistKit uses to plug in any of the three auth methods at runtime. Three concrete implementations ship in the box — `APITokenManager`, `WebAuthTokenManager`, and `ServerToServerAuthManager` — and they all conform to the same protocol. Before each request, `AuthenticationMiddleware` asks the manager for its current `Authenticator` and lets the authenticator apply itself — query parameters for the token-based methods, signed headers for server-to-server. You can also implement your own `TokenManager` if you need to source credentials from a secrets vault or rotate them at runtime.
 
+`CloudKitService` itself is database-agnostic: the database to target is chosen **per call** on each operation that supports multiple databases (`queryRecords`, `createRecord`, etc.). For `.public`, every call also picks how to attribute itself via `PublicAuthPreference` — `.requires(.serverToServer)`, `.requires(.webAuth)`, or one of the `.prefers(_:)` variants for fallback behavior. Private and shared databases ignore this since CloudKit only accepts web-auth on those scopes.
+
 ### API Token Configuration
 
 ```swift
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: "iCloud.com.example.MyApp",
     tokenManager: APITokenManager(apiToken: apiToken),
-    environment: .development,
-    database: .public
+    environment: .development
+)
+
+// Public-database call — API token grants limited reads only.
+let results = try await service.queryRecords(
+    /* ... */
+    database: .public(.prefers(.webAuth))
 )
 ```
 
 ### Web Auth Token Configuration
 
 ```swift
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: "iCloud.com.example.MyApp",
     tokenManager: WebAuthTokenManager(
         apiToken: apiToken,
         webAuthToken: webAuthToken
     ),
-    environment: .development,
+    environment: .development
+)
+
+// Private-database call — no PublicAuthPreference needed.
+let results = try await service.queryRecords(
+    /* ... */
     database: .private
 )
 ```
@@ -266,11 +278,16 @@ let manager = try ServerToServerAuthManager(
 let pem = try String(contentsOfFile: privateKeyPath, encoding: .utf8)
 let manager = try ServerToServerAuthManager(keyID: keyID, pemString: pem)
 
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: "iCloud.com.example.MyApp",
     tokenManager: manager,
-    environment: .development,
-    database: .public
+    environment: .development
+)
+
+// Public-database call — service-attributed via S2S signing.
+let results = try await service.queryRecords(
+    /* ... */
+    database: .public(.requires(.serverToServer))
 )
 ```
 
