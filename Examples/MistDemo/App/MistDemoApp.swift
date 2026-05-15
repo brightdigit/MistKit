@@ -31,18 +31,6 @@ import MistDemoApp
 import SwiftUI
 
 @main
-internal struct MistDemoAppMain: App {
-  @State private var service = CloudKitStore(
-    containerIdentifier: CloudKitStore.demoContainerIdentifier
-  )
-
-  internal var body: some Scene {
-    WindowGroup("MistDemo (Native CloudKit)") {
-      RootView()
-        .environment(service)
-    }
-    #if os(macOS)
-    .defaultSize(width: 880, height: 600)
-    #endif
-  }
+internal struct MistDemoAppMain: AppMain {
+  
 }

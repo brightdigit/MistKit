@@ -1,5 +1,5 @@
 //
-//  CloudKitStoreError.swift
+//  ZoneRow.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,19 +27,23 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import Foundation
-  import MistDemoKit
 
-  /// Errors specific to `CloudKitStore` operations.
-  internal enum CloudKitStoreError: Error, LocalizedError {
-    case unexpectedSaveResult
-
-    internal var errorDescription: String? {
-      switch self {
-      case .unexpectedSaveResult:
-        return "CloudKit returned a record that couldn't be parsed as a Note."
-      }
-    }
+  /// Display-friendly snapshot of a CKRecordZone for the SwiftUI list.
+public struct ZoneRow: Identifiable, Hashable {
+  public init(id: String, zoneName: String, ownerName: String) {
+    self.id = id
+    self.zoneName = zoneName
+    self.ownerName = ownerName
   }
-#endif
+
+  public let id: String
+  public let zoneName: String
+  public let ownerName: String
+
+//    internal init(_ zone: CKRecordZone) {
+//      self.id = "\(zone.zoneID.zoneName)|\(zone.zoneID.ownerName)"
+//      self.zoneName = zone.zoneID.zoneName
+//      self.ownerName = zone.zoneID.ownerName
+//    }
+  }

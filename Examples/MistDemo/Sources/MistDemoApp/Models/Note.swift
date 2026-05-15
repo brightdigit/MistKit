@@ -27,8 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(CloudKit) 
   import CloudKit
+import MistDemoKit
   import Foundation
 
   /// Note record, mirroring the `Note` type defined in `schema.ckdb`:
@@ -42,46 +43,24 @@
   /// Created / modified timestamps come from CloudKit's system metadata
   /// (`CKRecord.creationDate` / `.modificationDate`), so there's no need
   /// for custom `createdAt` / `modified` schema fields.
-  internal struct Note: Identifiable, Hashable {
-    /// Known field name constants for `Note` records.
-    internal enum Fields {
-      internal static let title = "title"
-      internal static let index = "index"
-      internal static let image = "image"
-    }
-
-    /// CloudKit record type identifier.
-    internal static let recordType = "Note"
-
-    internal let id: String
-    internal let title: String?
-    internal let index: Int64?
-    internal let imageAssetURL: URL?
-
-    /// CloudKit-managed metadata
-    internal let modificationDate: Date?
-    internal let creationDate: Date?
-    internal let recordChangeTag: String?
-    internal let creatorUserRecordName: String?
+  extension  Note {
+    
 
     internal init?(_ record: CKRecord) {
       guard record.recordType == Self.recordType else {
         return nil
       }
-      self.id = record.recordID.recordName
-      self.title = record[Fields.title] as? String
-      self.index = (record[Fields.index] as? NSNumber)?.int64Value
-      self.imageAssetURL = (record[Fields.image] as? CKAsset)?.fileURL
-      self.modificationDate = record.modificationDate
-      self.creationDate = record.creationDate
-      self.recordChangeTag = record.recordChangeTag
-      self.creatorUserRecordName = record.creatorUserRecordID?.recordName
+      self.init(
+        id: record.recordID.recordName,
+        title: record.typedValue(forField: Fields.title, as: String.self),
+        index: record.typedValue(forField: Fields.index, as: NSNumber.self)?.int64Value,
+        imageAssetURL: record.typedValue(forField: Fields.image, as: CKAsset.self)?.fileURL,
+        modificationDate: record.modificationDate,
+        creationDate: record.creationDate,
+        recordChangeTag: record.recordChangeTag,
+        creatorUserRecordName: record.creatorUserRecordID?.recordName
+      )
     }
 
-    // Identity-based equality: two Notes with the same recordID are equal
-    // regardless of field state. Lets SwiftUI selection bindings track a
-    // record across edits without losing focus when fields change.
-    internal static func == (lhs: Note, rhs: Note) -> Bool { lhs.id == rhs.id }
-    internal func hash(into hasher: inout Hasher) { hasher.combine(id) }
   }
 #endif

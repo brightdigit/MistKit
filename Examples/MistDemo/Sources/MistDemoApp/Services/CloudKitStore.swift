@@ -30,6 +30,7 @@
 #if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
   import CloudKit
   import Foundation
+  import MistDemoKit
   public import Observation
 
   /// Observable source of truth for the MistDemo app's CloudKit state.
@@ -188,20 +189,11 @@
     }
 
     /// Capture a web-auth token via `CKFetchWebAuthTokenOperation` for the
-    /// given CloudKit API token. Issues the same `158__…` value that
-    /// MistKit / `mistdemo auth-token` consume.
-    nonisolated internal func fetchWebAuthToken(apiToken: String) async throws -> String {
-      try await withCheckedThrowingContinuation { continuation in
-        let operation = CKFetchWebAuthTokenOperation(apiToken: apiToken)
-        operation.qualityOfService = .userInitiated
-        operation.fetchWebAuthTokenResultBlock = { result in
-          continuation.resume(with: result)
-        }
-        // CKFetchWebAuthTokenOperation must run against the private database
-        // regardless of the user's scope selection — running it on the public
-        // database fails or returns an unattributed token.
-        container.privateCloudDatabase.add(operation)
-      }
+    /// given CloudKit API token. Always runs against the private database —
+    /// running the operation against the public database fails or returns
+    /// an unattributed token, regardless of the user's scope selection.
+    internal func fetchWebAuthToken(apiToken: String) async throws -> String {
+      try await container.privateCloudDatabase.fetchWebAuthToken(apiToken: apiToken)
     }
   }
 #endif

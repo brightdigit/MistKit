@@ -28,6 +28,7 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+  import MistDemoKit
   import SwiftUI
 
   /// View listing all CloudKit record zones.

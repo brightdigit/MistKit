@@ -1,5 +1,5 @@
 //
-//  CloudKitStoreError.swift
+//  CKRecord+TypedField.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,19 +27,32 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(CloudKit)
+  import CloudKit
   import Foundation
-  import MistDemoKit
 
-  /// Errors specific to `CloudKitStore` operations.
-  internal enum CloudKitStoreError: Error, LocalizedError {
-    case unexpectedSaveResult
-
-    internal var errorDescription: String? {
-      switch self {
-      case .unexpectedSaveResult:
-        return "CloudKit returned a record that couldn't be parsed as a Note."
+  extension CKRecord {
+    /// Reads `field` from the record and casts it to `T`.
+    ///
+    /// Returns `nil` when the field is absent — that's a normal optional
+    /// field. When the field is present but holds a value of the wrong
+    /// type, this triggers `assertionFailure` (debug-only crash) before
+    /// returning `nil`. A type mismatch indicates a schema/code drift
+    /// that should be caught loudly during development.
+    internal func typedValue<T>(
+      forField field: String,
+      as _: T.Type = T.self
+    ) -> T? {
+      guard let raw = self[field] else { return nil }
+      guard let typed = raw as? T else {
+        assertionFailure(
+          "CKRecord field '\(field)' on record type '\(recordType)' "
+            + "expected \(T.self) but got \(Swift.type(of: raw)) "
+            + "(value: \(raw))"
+        )
+        return nil
       }
+      return typed
     }
   }
 #endif

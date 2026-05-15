@@ -32,7 +32,9 @@
 
   /// Root view hosting the navigation split between sidebar and detail.
   public struct RootView: View {
-    @Environment(CloudKitStore.self) private var service
+    @State private var service = CloudKitStore(
+      containerIdentifier: CloudKitStore.demoContainerIdentifier
+    )
     @State private var selection: SidebarItem? = .account
 
     /// The view body.
@@ -48,6 +50,7 @@
           DetailColumnRoot(selection: selection)
         }
       }
+      .environment(service)
       .task {
         await service.refreshAccountStatus()
       }

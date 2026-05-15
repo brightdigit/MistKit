@@ -28,6 +28,7 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+  import MistDemoKit
   import SwiftUI
 
   /// Detail view showing all fields and metadata for a single Note record.

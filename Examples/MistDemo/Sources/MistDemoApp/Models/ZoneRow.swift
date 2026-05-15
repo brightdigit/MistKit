@@ -27,20 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(CloudKit)
+import MistDemoKit
   import CloudKit
   import Foundation
 
   /// Display-friendly snapshot of a CKRecordZone for the SwiftUI list.
-  internal struct ZoneRow: Identifiable, Hashable {
-    internal let id: String
-    internal let zoneName: String
-    internal let ownerName: String
+  extension ZoneRow {
 
     internal init(_ zone: CKRecordZone) {
-      self.id = "\(zone.zoneID.zoneName)|\(zone.zoneID.ownerName)"
-      self.zoneName = zone.zoneID.zoneName
-      self.ownerName = zone.zoneID.ownerName
+      self.init(
+        id: "\(zone.zoneID.zoneName)|\(zone.zoneID.ownerName)",
+        zoneName: zone.zoneID.zoneName,
+        ownerName: zone.zoneID.ownerName
+      )
     }
   }
 #endif

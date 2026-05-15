@@ -1,5 +1,5 @@
 //
-//  CloudKitStoreError.swift
+//  CKDatabase+WebAuthToken.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,17 +28,24 @@
 //
 
 #if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
-  import Foundation
-  import MistDemoKit
+  import CloudKit
 
-  /// Errors specific to `CloudKitStore` operations.
-  internal enum CloudKitStoreError: Error, LocalizedError {
-    case unexpectedSaveResult
-
-    internal var errorDescription: String? {
-      switch self {
-      case .unexpectedSaveResult:
-        return "CloudKit returned a record that couldn't be parsed as a Note."
+  extension CKDatabase {
+    /// Capture a web-auth token via `CKFetchWebAuthTokenOperation` for the
+    /// given CloudKit API token. Issues the same `158__…` value that
+    /// MistKit / `mistdemo auth-token` consume.
+    ///
+    /// `CKFetchWebAuthTokenOperation` must run against the private database
+    /// — running it on the public database fails or returns an unattributed
+    /// token.
+    internal func fetchWebAuthToken(apiToken: String) async throws -> String {
+      try await withCheckedThrowingContinuation { continuation in
+        let operation = CKFetchWebAuthTokenOperation(apiToken: apiToken)
+        operation.qualityOfService = .userInitiated
+        operation.fetchWebAuthTokenResultBlock = { @Sendable result in
+          continuation.resume(with: result)
+        }
+        add(operation)
       }
     }
   }

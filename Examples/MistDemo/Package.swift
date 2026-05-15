@@ -132,7 +132,7 @@ let package = Package(
     ),
     .target(
       name: "MistDemoApp",
-      dependencies: [],
+      dependencies: ["MistDemoKit"],
       swiftSettings: swiftSettings
     ),
     .target(
