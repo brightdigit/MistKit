@@ -27,27 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if !os(tvOS) && !os(watchOS)
-  /// Sidebar navigation items for the MistDemo app.
-  internal enum SidebarItem: Hashable, CaseIterable {
-    case account
-    case zones
-    case query
+/// Sidebar navigation items for the MistDemo app.
+internal enum SidebarItem: Hashable, CaseIterable {
+  case account
+  case zones
+  case query
 
-    internal var label: String {
-      switch self {
-      case .account: return "iCloud Account"
-      case .zones: return "Zones"
-      case .query: return "Query Records"
-      }
-    }
-
-    internal var systemImage: String {
-      switch self {
-      case .account: return "person.crop.circle"
-      case .zones: return "tray.full"
-      case .query: return "magnifyingglass"
-      }
+  internal var label: String {
+    switch self {
+    case .account: return "iCloud Account"
+    case .zones: return "Zones"
+    case .query: return "Query Records"
     }
   }
-#endif
+
+  internal var systemImage: String {
+    switch self {
+    case .account: return "person.crop.circle"
+    case .zones: return "tray.full"
+    case .query: return "magnifyingglass"
+    }
+  }
+}

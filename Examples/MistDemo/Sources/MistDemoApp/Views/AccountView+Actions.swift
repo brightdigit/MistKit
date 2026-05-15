@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(SwiftUI) && canImport(CloudKit)
   import CloudKit
   import SwiftUI
 
@@ -70,7 +70,7 @@
       #if canImport(AppKit)
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(value, forType: .string)
-      #elseif canImport(UIKit)
+      #elseif canImport(UIKit) && !os(tvOS) && !os(watchOS)
         UIPasteboard.general.string = value
       #endif
     }

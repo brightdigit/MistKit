@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(SwiftUI) && canImport(CloudKit)
   import MistDemoKit
   import SwiftUI
 
@@ -103,11 +103,13 @@
         NavigationLink(value: note) {
           noteRow(note)
         }
-        .swipeActions(edge: .trailing) {
-          Button("Delete", role: .destructive) {
-            Task { await delete(note) }
+        #if !os(tvOS) && !os(watchOS)
+          .swipeActions(edge: .trailing) {
+            Button("Delete", role: .destructive) {
+              Task { await delete(note) }
+            }
           }
-        }
+        #endif
       }
     }
 
@@ -117,10 +119,12 @@
           .font(.body.monospaced())
           .foregroundStyle(.secondary)
 
-        Stepper(value: $limit, in: 1...200, step: 10) {
-          Text("Limit: \(limit)")
-        }
-        .frame(maxWidth: 200)
+        #if !os(tvOS) && !os(watchOS)
+          Stepper(value: $limit, in: 1...200, step: 10) {
+            Text("Limit: \(limit)")
+          }
+          .frame(maxWidth: 200)
+        #endif
 
         Button("Run Query") { Task { await runQuery() } }
           .buttonStyle(.borderedProminent)

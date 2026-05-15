@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(SwiftUI) && canImport(CloudKit)
   public import SwiftUI
 
   /// Root view hosting the navigation split between sidebar and detail.
@@ -35,6 +35,7 @@
     @State private var service = CloudKitStore(
       containerIdentifier: CloudKitStore.demoContainerIdentifier
     )
+
     @State private var selection: SidebarItem? = .account
 
     /// The view body.

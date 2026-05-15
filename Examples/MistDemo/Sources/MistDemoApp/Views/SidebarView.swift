@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(SwiftUI)
   import SwiftUI
 
   /// Sidebar list of navigation items.

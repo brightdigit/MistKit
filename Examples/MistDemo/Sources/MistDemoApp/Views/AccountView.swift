@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(SwiftUI) && canImport(CloudKit)
   import CloudKit
   import SwiftUI
 
@@ -134,7 +134,9 @@
           text: $apiToken,
           prompt: Text("Paste from CloudKit Dashboard")
         )
-        .textFieldStyle(.roundedBorder)
+        #if !os(tvOS) && !os(watchOS)
+          .textFieldStyle(.roundedBorder)
+        #endif
         .font(.body.monospaced())
         .onChange(of: apiToken) { _, _ in tokenSource = .manual }
         #if os(iOS)
@@ -181,7 +183,10 @@
               .font(.callout.monospaced())
               .lineLimit(3)
               .truncationMode(.middle)
-              .textSelection(.enabled)
+
+              #if !os(tvOS) && !os(watchOS)
+                .textSelection(.enabled)
+              #endif
             Button("Copy") { copy(webAuthToken) }
               .buttonStyle(.bordered)
               .controlSize(.small)

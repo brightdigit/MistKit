@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(CloudKit)
   import CloudKit
   import Foundation
   import MistDemoKit

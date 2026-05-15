@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI) && canImport(CloudKit) && !os(tvOS) && !os(watchOS)
+#if canImport(SwiftUI) && canImport(CloudKit)
   import MistDemoKit
   import SwiftUI
   import UniformTypeIdentifiers
@@ -79,13 +79,16 @@
           .formStyle(.grouped)
           .navigationTitle(navigationTitle)
           .toolbar { toolbarContent }
-          .fileImporter(
-            isPresented: $showFileImporter,
-            allowedContentTypes: [.image],
-            allowsMultipleSelection: false
-          ) { result in
-            handleFileImport(result)
-          }
+
+          #if !os(tvOS) && !os(watchOS)
+            .fileImporter(
+              isPresented: $showFileImporter,
+              allowedContentTypes: [.image],
+              allowsMultipleSelection: false
+            ) { result in
+              handleFileImport(result)
+            }
+          #endif
       }
       .onAppear { populateInitialState() }
       .onDisappear { releaseScopedURL() }
