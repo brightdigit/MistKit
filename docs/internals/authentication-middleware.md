@@ -63,7 +63,11 @@ The per-scheme branching — query parameter for API token, two query parameters
 
 ## API Token Authentication
 
-The simplest method — appends a query parameter:
+The simplest method — appends a query parameter. `APITokenAuthenticator.authenticate(request:body:)` does the work:
+
+1. **Append the query parameter** — `?ckAPIToken=<64-hex>` is added to the request URL.
+
+Example:
 
 ```
 GET /database/1/iCloud.com.example/development/public/records/query?ckAPIToken=abc123...
@@ -75,13 +79,18 @@ GET /database/1/iCloud.com.example/development/public/records/query?ckAPIToken=a
 
 ## Web Auth Token Authentication
 
-Adds a second query parameter for user-specific operations:
+Adds a second query parameter for user-specific operations. `WebAuthTokenAuthenticator.authenticate(request:body:)` does the work:
+
+1. **URL-encode the web auth token** via `CharacterMapEncoder` to escape characters CloudKit rejects in query strings.
+2. **Append both query parameters** — `?ckAPIToken=<…>&ckWebAuthToken=<encoded>` is added to the request URL.
+
+Example:
 
 ```
 GET ...?ckAPIToken=abc123...&ckWebAuthToken=encoded-token
 ```
 
-The web auth token is URL-encoded via `CharacterMapEncoder`:
+The encoder replaces URL-unsafe characters:
 
 ```swift
 // CharacterMapEncoder replaces URL-unsafe characters:
@@ -293,6 +302,7 @@ sequenceDiagram
   Auth->>Enc: encode(webAuthToken)
   Note right of Enc: + → %2B<br/>/ → %2F<br/>= → %3D
   Enc-->>Auth: URL-encoded token
+  Note over Auth: attach credentials to request
   Auth->>Auth: append ?ckAPIToken=<…>&ckWebAuthToken=<encoded>
   Auth-->>Mid: request carries query params
 ```
@@ -309,10 +319,10 @@ sequenceDiagram
   participant Sig as RequestSignature
 
   Mid->>Auth: authenticate(&request, &body)
-  Auth->>Auth: buffer body (≤ bodyBufferLimit)
-  Auth->>Auth: reassign body = HTTPBody(bytes)
+  Auth->>Auth: buffer body and reassign as replayable HTTPBody
   Auth->>Sig: RequestSignature(keyID, privateKey, requestBody, webServiceURL)
   Sig-->>Auth: signed header bundle
+  Note over Auth: attach credentials to request
   Auth->>Auth: request.headerFields.append(contentsOf: signature.headers)
   Auth-->>Mid: request carries X-Apple-CloudKit-* headers
 ```
