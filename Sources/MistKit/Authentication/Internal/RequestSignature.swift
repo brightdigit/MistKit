@@ -91,7 +91,7 @@ extension RequestSignature {
   ///   - keyID: The CloudKit key identifier from Apple Developer Console.
   ///   - privateKey: The ECDSA P-256 private key used to sign the payload.
   ///   - requestBody: The HTTP request body (for POST requests). May be nil.
-  ///   - webServiceURL: The CloudKit Web Services URL subpath.
+  ///   - webServiceSubpath: The CloudKit Web Services URL subpath.
   ///   - date: The request date. Defaults to `Date()`.
   /// - Throws: A `Crypto` error if `P256.Signing.PrivateKey.signature(for:)`
   ///   fails to produce a signature.
@@ -99,14 +99,18 @@ extension RequestSignature {
     keyID: String,
     privateKey: P256.Signing.PrivateKey,
     requestBody: Data?,
-    webServiceURL: String,
+    webServiceSubpath: String?,
     date: Date = Date()
   ) throws {
+    assert(
+      webServiceSubpath != nil,
+      "RequestSignature requires a non-nil webServiceSubpath; HTTPRequest.path was nil"
+    )
     try self.init(
       keyID: keyID,
       privateKey: privateKey,
       bodyHash: SHA256.cloudKitBodyHash(of: requestBody),
-      webServiceURL: webServiceURL,
+      webServiceSubpath: webServiceSubpath ?? "",
       iso8601DateString: Self.iso8601String(from: date)
     )
   }
@@ -120,7 +124,7 @@ extension RequestSignature {
   ///   - privateKey: The ECDSA P-256 private key used to sign the payload.
   ///   - bodyHash: The base64-encoded SHA-256 hash of the request body, or
   ///     the empty string when no body is present.
-  ///   - webServiceURL: The CloudKit Web Services URL subpath.
+  ///   - webServiceSubpath: The CloudKit Web Services URL subpath.
   ///   - iso8601DateString: The ISO8601-formatted request date. This exact
   ///     string is both signed and emitted on the wire — keep them in sync.
   /// - Throws: A `Crypto` error if `P256.Signing.PrivateKey.signature(for:)`
@@ -129,10 +133,10 @@ extension RequestSignature {
     keyID: String,
     privateKey: P256.Signing.PrivateKey,
     bodyHash: String,
-    webServiceURL: String,
+    webServiceSubpath: String,
     iso8601DateString: String
   ) throws {
-    let payload = "\(iso8601DateString):\(bodyHash):\(webServiceURL)"
+    let payload = "\(iso8601DateString):\(bodyHash):\(webServiceSubpath)"
     let signature = try privateKey.signature(for: Data(payload.utf8))
 
     self.init(

@@ -1,5 +1,5 @@
 //
-//  SHA256+CloudKitBodyHash.swift
+//  HashFunction+CloudKitBodyHash.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -31,14 +31,14 @@ internal import Crypto
 internal import Foundation
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension SHA256 {
-  /// Returns the base64-encoded SHA-256 hash of the given body, or the empty
+extension HashFunction {
+  /// Returns the base64-encoded hash of the given body, or the empty
   /// string when `body` is nil — matching CloudKit Web Services' convention
   /// for signing requests with no body.
   internal static func cloudKitBodyHash(of body: Data?) -> String {
     guard let body else {
       return ""
     }
-    return Data(SHA256.hash(data: body)).base64EncodedString()
+    return Data(Self.hash(data: body)).base64EncodedString()
   }
 }

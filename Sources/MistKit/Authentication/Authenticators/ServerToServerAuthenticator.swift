@@ -176,7 +176,7 @@ public struct ServerToServerAuthenticator: Authenticator {
       keyID: keyID,
       privateKey: privateKey,
       requestBody: bodyData,
-      webServiceURL: request.path ?? ""
+      webServiceSubpath: request.path
     )
 
     request.headerFields.append(contentsOf: signature.headers)
