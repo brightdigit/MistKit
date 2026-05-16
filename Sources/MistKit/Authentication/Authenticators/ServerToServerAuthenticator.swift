@@ -144,15 +144,7 @@ public struct ServerToServerAuthenticator: Authenticator {
   public init(decoding data: Data) throws {
     let wire = try JSONDecoder().decode(WireFormat.self, from: data)
     guard let keyData = Data(base64Encoded: wire.privateKey) else {
-      throw TokenManagerError.invalidCredentials(
-        .privateKeyInvalidOrCorrupted(
-          NSError(
-            domain: "MistKit.ServerToServerAuthenticator",
-            code: 1,
-            userInfo: [NSLocalizedDescriptionKey: "Invalid base64 in encoded payload"]
-          )
-        )
-      )
+      throw TokenManagerError.invalidCredentials(.encodedPayloadInvalidBase64)
     }
     try self.init(
       keyID: wire.keyID,
@@ -178,14 +170,7 @@ public struct ServerToServerAuthenticator: Authenticator {
     // If buffering fails (oversize body, transport error) we propagate the
     // error rather than signing over an empty body and mismatching what the
     // downstream transport actually sends.
-    let bodyData: Data?
-    if let original = body {
-      let bytes = try await Data(collecting: original, upTo: bodyBufferLimit)
-      body = HTTPBody(bytes)
-      bodyData = bytes
-    } else {
-      bodyData = nil
-    }
+    let bodyData = try await Data(buffering: &body, upTo: bodyBufferLimit)
 
     let signature = try RequestSignature(
       keyID: keyID,

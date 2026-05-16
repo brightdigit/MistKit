@@ -42,6 +42,7 @@ public enum InvalidCredentialReason: Sendable {
   case invalidPEMFormat(any Error)
   case privateKeyParseFailed(any Error)
   case privateKeyInvalidOrCorrupted(any Error)
+  case encodedPayloadInvalidBase64
   case authenticationModeMismatch
   case serverToServerOnlySupportsPublicDatabase(String)
 
@@ -70,6 +71,8 @@ public enum InvalidCredentialReason: Sendable {
       return "Failed to parse private key from PEM string: \(error.localizedDescription)"
     case .privateKeyInvalidOrCorrupted(let error):
       return "Private key is invalid or corrupted: \(error.localizedDescription)"
+    case .encodedPayloadInvalidBase64:
+      return "Encoded authenticator payload contains invalid base64 data"
     case .authenticationModeMismatch:
       return "Cannot update web auth token when not in web authentication mode"
     case .serverToServerOnlySupportsPublicDatabase(let currentDatabase):
