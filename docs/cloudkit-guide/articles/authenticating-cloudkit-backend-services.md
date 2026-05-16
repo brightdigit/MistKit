@@ -187,6 +187,14 @@ X-Apple-CloudKit-Request-ISO8601Date:  [the same date that was signed]
 X-Apple-CloudKit-Request-SignatureV1:  [base64-encoded ECDSA signature]
 ```
 
+For example, a signed request might carry:
+
+```
+X-Apple-CloudKit-Request-KeyID:        fc9f8fc677ffe615a2e28b6be189f937c093a2393e49556d7fa459497ebb7a4a
+X-Apple-CloudKit-Request-ISO8601Date:  2026-05-06T14:30:00Z
+X-Apple-CloudKit-Request-SignatureV1:  MEUCIQDx3pT8K2v9hN5L1Q3R4sT5uV6wX7yZ8aB9cD0eF1gH2wIgI3jK4lM5nO6pQ7rS8tU9vW0xY1zA2bC3dE4fG5hI6jK=
+```
+
 If you've used AWS SigV4 or similar schemes, this is similar in spirit but its own dialect. MistKit's `AuthenticationMiddleware` builds these for you on every request — see [`Sources/MistKit/AuthenticationMiddleware.swift`](https://github.com/brightdigit/MistKit/blob/main/Sources/MistKit/AuthenticationMiddleware.swift) and [`Sources/MistKit/Authentication/Internal/RequestSignature.swift`](https://github.com/brightdigit/MistKit/blob/main/Sources/MistKit/Authentication/Internal/RequestSignature.swift) for the implementation.
 
 ### Key File Management
