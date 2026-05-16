@@ -68,7 +68,7 @@
           }
         }
       }
-      .navigationTitle("Zones — \(service.databaseScope.label)")
+      .navigationTitle(service.databaseScope.label.map { "Zones — \($0)" } ?? "Zones")
       .toolbar {
         ToolbarItem {
           Button("Refresh") { Task { await refresh() } }

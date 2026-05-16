@@ -35,13 +35,16 @@
     /// excluded because the demo's `schema.ckdb` has no shared zones.
     internal static let selectable: [CKDatabase.Scope] = [.public, .private]
 
-    internal var label: String {
-      switch self {
-      case .public: return "Public"
-      case .private: return "Private"
-      case .shared: return "Shared"
-      @unknown default: return "Unknown"
-      }
+    private static let labels: [CKDatabase.Scope: String] = [
+      .public: "Public",
+      .private: "Private",
+      .shared: "Shared",
+    ]
+
+    internal var label: String? {
+      let label = Self.labels[self]
+      assert(label != nil, "Unknown CKDatabase.Scope: \(self)")
+      return label
     }
   }
 #endif

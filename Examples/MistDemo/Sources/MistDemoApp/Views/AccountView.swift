@@ -64,7 +64,9 @@
           LabeledContent("Container", value: service.containerIdentifier)
           Picker("Database", selection: $bindable.databaseScope) {
             ForEach(CKDatabase.Scope.selectable, id: \.self) { scope in
-              Text(scope.label).tag(scope)
+              if let label = scope.label {
+                Text(label).tag(scope)
+              }
             }
           }
           LabeledContent("iCloud Status", value: statusLabel)
