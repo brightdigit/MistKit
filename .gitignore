@@ -192,3 +192,4 @@ dev-debug.log
 # tasks.json
 # tasks/ 
 .claude/scheduled_tasks.lock
+build
