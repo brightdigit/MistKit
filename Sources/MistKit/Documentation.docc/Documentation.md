@@ -65,12 +65,11 @@ The wrapper layer is described in <doc:AbstractionLayerArchitecture>. The code-g
 
 ## Platform support
 
-| Capability | Minimum |
-| --- | --- |
-| Core API (most operations) | macOS 11, iOS 14, tvOS 14, watchOS 7, visionOS 1, Linux, WASI, Windows |
-| Server-to-server signing (requires Crypto) | macOS 11, iOS 14, tvOS 14, watchOS 7, Linux (via swift-crypto) |
+MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. Server-to-server signing depends on Crypto / swift-crypto, so it is unavailable on Windows and WASI — those targets must use API-token + web-auth credentials. URL-loading conveniences and asset upload use `URLSession`; on WASI builds you supply a `ClientTransport` explicitly via the generic initializer.
 
-URL-loading conveniences and asset upload use `URLSession`; on WASI builds you supply a `ClientTransport` explicitly via the generic initializer.
+> Tip: On native Apple platforms (macOS, iOS, tvOS, watchOS, visionOS) prefer the native [CloudKit framework](https://developer.apple.com/documentation/cloudkit). It integrates with the system account, handles push notifications and long-lived operations, and avoids the per-request signing overhead of the web-services API. MistKit is intended for environments where the native framework isn't available — server-side Swift, CLIs, Linux, and Windows.
+
+> Warning: WASI is not a fully supported target. The web-services API requires HMAC/ECDSA signing and a working HTTP transport, neither of which has a first-class story on WASI today. For CloudKit access from the browser, use Apple's official [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs) library instead.
 
 ## Topics
 
