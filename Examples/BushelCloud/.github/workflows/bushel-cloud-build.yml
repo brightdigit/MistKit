@@ -40,7 +40,7 @@ jobs:
       - name: Setup MistKit
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
         with:
-          branch: main
+          branch: v1.0.0-beta.1
 
       - name: Verify Swift version
         run: |

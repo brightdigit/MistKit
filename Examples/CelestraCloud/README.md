@@ -353,12 +353,14 @@ let tokenManager = try ServerToServerAuthManager(
     pemString: privateKeyPEM
 )
 
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: containerID,
     tokenManager: tokenManager,
-    environment: environment,
-    database: .public
+    environment: environment
 )
+
+// Database is selected per call:
+// `database: .public(.prefers(.serverToServer))`
 ```
 
 ## Architecture
@@ -582,12 +584,14 @@ let tokenManager = try ServerToServerAuthManager(
     pemString: privateKeyPEM
 )
 
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: containerID,
     tokenManager: tokenManager,
-    environment: environment,
-    database: .public
+    environment: environment
 )
+
+// Per-call database selection, e.g.:
+// `database: .public(.prefers(.serverToServer))`
 ```
 
 ### Error Handling Strategy

@@ -367,12 +367,12 @@ let tokenManager = try ServerToServerAuthManager(
     pemString: pemString
 )
 
-// Create CloudKit service
-let service = try CloudKitService(
+// Create CloudKit service — database is now selected per call,
+// e.g. `database: .public(.prefers(.serverToServer))`.
+let service = CloudKitService(
     containerIdentifier: containerID,
     tokenManager: tokenManager,
-    environment: environment,
-    database: .public
+    environment: environment
 )
 ```
 

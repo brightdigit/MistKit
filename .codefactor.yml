@@ -1,0 +1,2 @@
+exclude:
+  - "Scripts/mermaid-to-pptx.py"

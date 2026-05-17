@@ -49,12 +49,12 @@ struct BushelCloudKitService {
         )
 
         // 4. Initialize CloudKit service
-        self.service = try CloudKitService(
+        self.service = CloudKitService(
             containerIdentifier: containerIdentifier,
             tokenManager: tokenManager,
-            environment: .development,  // or .production
-            database: .public
+            environment: .development  // or .production
         )
+        // Pass database: .public(.prefers(.serverToServer)) on each per-call operation.
     }
 }
 ```
@@ -371,10 +371,11 @@ let environment: CloudKitEnvironment = {
     #endif
 }()
 
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: containerID,
     tokenManager: tokenManager,
-    environment: environment,
-    database: .public
+    environment: environment
 )
+// Each operation picks its database scope explicitly, e.g.
+// `database: .public(.prefers(.serverToServer))`.
 ```

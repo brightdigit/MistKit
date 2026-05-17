@@ -91,55 +91,71 @@ Or add it through Xcode:
 
 #### 1. Choose Your Authentication Method
 
-MistKit supports three authentication methods depending on your use case:
+MistKit supports three credential types via the `Credentials` value. The service
+does **not** carry a database — each operation picks its database (and signing
+method, for the public database) at the call site.
 
-##### API Token (Container-level access)
+##### API Token (read-only against the public database)
 ```swift
 import MistKit
 
-let service = try CloudKitService(
-    containerIdentifier: "iCloud.com.example.MyApp",
-    apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
-)
-```
-
-##### Web Authentication (User-specific access)
-```swift
-let service = try CloudKitService(
-    containerIdentifier: "iCloud.com.example.MyApp",
-    apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!,
-    webAuthToken: userWebAuthToken
-)
-```
-
-##### Server-to-Server (Enterprise access, public database only)
-```swift
-let serverManager = try ServerToServerAuthManager(
-    keyIdentifier: ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"]!,
-    privateKeyData: privateKeyData
-)
-
-let service = try CloudKitService(
-    containerIdentifier: "iCloud.com.example.MyApp",
-    tokenManager: serverManager,
-    environment: .production,
-    database: .public
-)
-```
-
-#### 2. Create CloudKit Service
-
-```swift
-do {
-    let service = try CloudKitService(
-        containerIdentifier: "iCloud.com.example.MyApp",
+let credentials = try Credentials(
+    apiAuth: APICredentials(
         apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
     )
-    // Use service for CloudKit operations
-} catch {
-    print("Failed to create service: \\(error)")
-}
+)
+let service = CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
+    credentials: credentials
+)
 ```
+
+##### Web Authentication (user-context routes, private/shared database)
+```swift
+let credentials = try Credentials(
+    apiAuth: APICredentials(
+        apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!,
+        webAuthToken: userWebAuthToken
+    )
+)
+let service = CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
+    credentials: credentials
+)
+```
+
+##### Server-to-Server (public database only)
+```swift
+let credentials = try Credentials(
+    serverToServer: ServerToServerCredentials(
+        keyID: ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"]!,
+        privateKey: .file(path: "private_key.pem")
+    )
+)
+let service = CloudKitService(
+    containerIdentifier: "iCloud.com.example.MyApp",
+    credentials: credentials,
+    environment: .production
+)
+```
+
+Provide both `apiAuth` and `serverToServer` to a single `Credentials` when one
+service must hit public-database routes via S2S signing **and** user-context
+routes via web-auth — MistKit picks the appropriate token manager per call.
+
+#### 2. Call an Operation (database chosen per call)
+
+```swift
+let records = try await service.queryRecords(
+    recordType: "Post",
+    database: .public(.prefers(.serverToServer))
+)
+```
+
+`Database.public` carries a `PublicAuthPreference`:
+`.prefers(.serverToServer)` / `.prefers(.webAuth)` (fall back if not configured)
+or `.requires(.serverToServer)` / `.requires(.webAuth)` (throw if not configured).
+Private/shared always use web-auth.
 
 ## Usage
 
@@ -159,9 +175,14 @@ do {
 
 3. **Use in Code**:
    ```swift
-   let service = try CloudKitService(
+   let credentials = try Credentials(
+       apiAuth: APICredentials(
+           apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
+       )
+   )
+   let service = CloudKitService(
        containerIdentifier: "iCloud.com.example.MyApp",
-       apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
+       credentials: credentials
    )
    ```
 
@@ -170,10 +191,12 @@ do {
 Web authentication enables user-specific operations and requires both an API token and a web authentication token. The token can be obtained either through [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs) authentication (browser flow) or from an iOS/macOS app via [`CKFetchWebAuthTokenOperation`](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation), which exchanges the user's existing iCloud session for a token your backend can use.
 
 ```swift
-let service = try CloudKitService(
+let credentials = try Credentials(
+    apiAuth: APICredentials(apiToken: apiToken, webAuthToken: webAuthToken)
+)
+let service = CloudKitService(
     containerIdentifier: "iCloud.com.example.MyApp",
-    apiToken: apiToken,
-    webAuthToken: webAuthToken
+    credentials: credentials
 )
 ```
 
@@ -192,19 +215,40 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
 
 2. **Upload Public Key**: Upload the public key to Apple Developer Console
 
-3. **Use in Code**:
+3. **Use in Code** (the simplest path — `Credentials` resolves the PEM at first use):
    ```swift
-   let privateKeyData = try Data(contentsOf: URL(fileURLWithPath: "private_key.pem"))
-
-   let serverManager = try ServerToServerAuthManager(
-       keyIdentifier: "your_key_id",
-       privateKeyData: privateKeyData
+   let credentials = try Credentials(
+       serverToServer: ServerToServerCredentials(
+           keyID: "your_key_id",
+           privateKey: .file(path: "private_key.pem")
+       )
    )
-   let service = try CloudKitService(
+   let service = CloudKitService(
+       containerIdentifier: "iCloud.com.example.MyApp",
+       credentials: credentials,
+       environment: .production
+   )
+
+   // Each call selects its database scope explicitly:
+   let records = try await service.queryRecords(
+       recordType: "Post",
+       database: .public(.requires(.serverToServer))
+   )
+   ```
+
+   To plug in a custom `TokenManager` (e.g. with shared connection pooling),
+   use the `tokenManager:` initializer instead:
+
+   ```swift
+   let pemString = try String(contentsOfFile: "private_key.pem", encoding: .utf8)
+   let serverManager = try ServerToServerAuthManager(
+       keyID: "your_key_id",
+       pemString: pemString
+   )
+   let service = CloudKitService(
        containerIdentifier: "iCloud.com.example.MyApp",
        tokenManager: serverManager,
-       environment: .production,
-       database: .public
+       environment: .production
    )
    ```
 
@@ -214,15 +258,24 @@ MistKit provides comprehensive error handling with typed errors:
 
 ```swift
 do {
-    let service = try CloudKitService(
-        containerIdentifier: "iCloud.com.example.MyApp",
-        apiToken: apiToken
+    let credentials = try Credentials(
+        apiAuth: APICredentials(apiToken: apiToken)
     )
-    // Perform operations
+    let service = CloudKitService(
+        containerIdentifier: "iCloud.com.example.MyApp",
+        credentials: credentials
+    )
+    // Perform operations — each call picks its database, e.g.:
+    let posts = try await service.queryRecords(
+        recordType: "Post",
+        database: .public(.prefers(.serverToServer))
+    )
 } catch let error as CloudKitError {
     print("CloudKit error: \\(error.localizedDescription)")
 } catch let error as TokenManagerError {
     print("Authentication error: \\(error.localizedDescription)")
+} catch let error as CredentialsValidationError {
+    print("Credentials error: \\(error.localizedDescription)")
 } catch {
     print("Unexpected error: \\(error)")
 }
@@ -230,33 +283,24 @@ do {
 
 #### Error Types
 
-- **`CloudKitError`**: CloudKit Web Services API errors
+- **`CloudKitError`**: CloudKit Web Services API errors (typed throws on every operation)
+- **`CredentialsValidationError`**: Surfaces when `Credentials.init` is called with neither `apiAuth` nor `serverToServer`
 - **`TokenManagerError`**: Authentication and credential errors
 - **`TokenStorageError`**: Token storage and persistence errors
 
 ### Advanced Usage
 
-#### Using AsyncHTTPClient Transport
+#### HTTP Transport
 
-For server-side applications, MistKit can use [swift-openapi-async-http-client](https://github.com/swift-server/swift-openapi-async-http-client) as the underlying HTTP transport, backed by [AsyncHTTPClient](https://github.com/swift-server/async-http-client). This is particularly useful for server-side Swift applications that need robust HTTP client capabilities.
+Non-WASI platforms default to `URLSessionTransport` — no transport plumbing is
+required. On Apple platforms, the default convenience initializer used in the
+examples above wires up `URLSessionTransport` automatically.
 
-```swift
-import MistKit
-import OpenAPIAsyncHTTPClient
-
-// AsyncHTTPClient instance usually supplied by the Server API
-let httpClient : HTTPClient
-
-// Create the transport
-let transport = AsyncHTTPClientTransport(client: httpClient)
-
-// Use with CloudKit service
-let service = try CloudKitService(
-    containerIdentifier: "iCloud.com.example.MyApp",
-    apiToken: apiToken,
-    transport: transport
-)
-```
+WASI builds use the generic, transport-accepting initializer; see
+`Sources/MistKit/CloudKitService/CloudKitService+Initialization.swift` for the
+internal entry point. A custom transport on Apple platforms (e.g. for
+server-side Swift with AsyncHTTPClient) is not yet exposed in the public
+v1.0.0-beta surface — track via the project roadmap.
 
 #### Adaptive Token Manager
 

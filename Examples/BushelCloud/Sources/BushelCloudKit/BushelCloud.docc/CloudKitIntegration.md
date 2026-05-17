@@ -16,13 +16,14 @@ let tokenManager = try ServerToServerAuthManager(
     pemString: pemFileContents
 )
 
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: "iCloud.com.company.App",
     tokenManager: tokenManager,
-    environment: .development,
-    database: .public
+    environment: .development
 )
 ```
+
+The database scope is now chosen per call (see "Batch Operations" below).
 
 Authentication tokens are automatically refreshed by MistKit.
 
@@ -33,7 +34,10 @@ CloudKit limits operations to 200 per request. BushelCloud handles this automati
 ```swift
 let batches = operations.chunked(into: 200)
 for batch in batches {
-    let results = try await service.modifyRecords(batch)
+    let results = try await service.modifyRecords(
+        batch,
+        database: .public(.prefers(.serverToServer))
+    )
     // Handle results...
 }
 ```
@@ -116,7 +120,10 @@ if case .reference(let ref) = fieldValue {
 Check for partial failures in batch operations:
 
 ```swift
-let results = try await service.modifyRecords(operations)
+let results = try await service.modifyRecords(
+    operations,
+    database: .public(.prefers(.serverToServer))
+)
 for result in results {
     if result.isError {
         logger.error("Failed: \\(result.serverErrorCode ?? "unknown")")

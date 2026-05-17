@@ -438,10 +438,11 @@ for article in articles {
 ```swift
 let privateKeyPEM = try String(contentsOfFile: privateKeyPath, encoding: .utf8)
 let tokenManager = try ServerToServerAuthManager(keyID: keyID, pemString: privateKeyPEM)
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: containerID,
     tokenManager: tokenManager,
-    environment: environment,
-    database: .public
+    environment: environment
 )
 ```
+
+Database scope is now selected per call (e.g. `database: .public(.prefers(.serverToServer))`); the init no longer carries a `database:` argument and is not throwing.
