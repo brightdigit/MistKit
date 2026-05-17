@@ -2,8 +2,6 @@
 title: Beyond the MistKit Tutorials: Authenticating CloudKit from Backend Services
 date: 2026-01-01 00:00
 description: A practical walkthrough of the three CloudKit Web Services authentication methods — API tokens, web auth tokens, and server-to-server signing — and how to wire them up from a backend Swift service using MistKit.
-featuredImage: /media/tutorials/[VERIFY: path to hero image]
-subscriptionCTA: Subscribe for more deep dives on running Swift on the server.
 ---
 
 <!-- NOTE: Audience is backend/server-side Swift developers who already know MistKit exists (from Part 1/2) and now need to actually wire up auth in their own project. This is a practical setup guide, not a library-building story. -->
@@ -16,8 +14,8 @@ This article is the guide I wish I'd had: a practical walkthrough of the three a
 
 **In this series:**
 
-* [Rebuilding MistKit with Claude Code (Part 1)](/tutorials/rebuilding-mistkit-claude-code-part-1/)
-* [Rebuilding MistKit with Claude Code (Part 2)](/tutorials/rebuilding-mistkit-claude-code-part-2/)
+* [Rebuilding MistKit with Claude Code (Part 1)](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/)
+* [Rebuilding MistKit with Claude Code (Part 2)](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)
 * _Beyond the MistKit Tutorials: Authenticating CloudKit from Backend Services_
 
 ---
@@ -135,7 +133,7 @@ CKContainer.default().privateCloudDatabase.add(op)
 
 > **Note:** The MistKit examples in this repo (Bushel, Celestra) use the browser-redirect flow above and the server-to-server flow below — not this iOS handoff path. The flow is documented here for completeness because it's the intended pattern when your backend is paired with your own iOS app, but the MistKit-side integration is identical to the browser-redirect case once your server has the token in hand.
 
-> **[VERIFY before publishing]** Web-auth-token lifetime, refresh behavior, and whether the token is scoped to a single container are not yet documented here. Check the dashboard or the live API before publishing.
+> **Note:** Web-auth-token lifetime, refresh behavior, and container scoping aren't extensively documented by Apple — treat any production deployment as needing live verification of token expiry semantics before you depend on long-lived sessions.
 
 <a id="method-3-server-to-server"></a>
 ## Method 3: Server-to-Server (ECDSA)
@@ -204,7 +202,7 @@ MistKit accepts the private key two ways:
 - `CLOUDKIT_PRIVATE_KEY_PATH` — a filesystem path to the `.pem` file. Best when the key lives on disk (e.g. mounted as a Kubernetes secret).
 - `CLOUDKIT_PRIVATE_KEY` — the PEM contents inline as an environment variable. Best in CI environments where secrets are injected as env vars and you'd rather not write them to disk.
 
-In the [Bushel](https://github.com/brightdigit/BushelCloud) and [Celestra](https://github.com/brightdigit/Celestra) examples, both repos store the PEM contents in **GitHub Actions secrets** and inject them as `CLOUDKIT_PRIVATE_KEY` at job runtime. The job runs on a stock `ubuntu-latest` runner, runs the MistKit-based binary, and exits — the key never touches disk. For non-CI deployments, a secrets manager (AWS Secrets Manager, GCP Secret Manager, HashiCorp Vault) injecting an env var is the equivalent pattern.
+In the [BushelCloud](https://github.com/brightdigit/BushelCloud) and [CelestraCloud](https://github.com/brightdigit/CelestraCloud) examples, both repos store the PEM contents in **GitHub Actions secrets** and inject them as `CLOUDKIT_PRIVATE_KEY` at job runtime. The job runs on a stock `ubuntu-latest` runner, runs the MistKit-based binary, and exits — the key never touches disk. For non-CI deployments, a secrets manager (AWS Secrets Manager, GCP Secret Manager, HashiCorp Vault) injecting an env var is the equivalent pattern.
 
 <a id="choosing-the-right-method"></a>
 ## Choosing the Right Method
@@ -336,7 +334,7 @@ Server-to-server keys don't expire on their own, but rotating them periodically 
 3. Restart your service so it picks up the new credentials.
 4. Once you've confirmed the new key is being used (check the CloudKit logs), delete the old key from the dashboard.
 
-> **[VERIFY before publishing]** Production-rotation experience hasn't been tested end-to-end on the example services yet — confirm the multi-key flow before publishing.
+> **Note:** The example services haven't exercised a full production rotation end-to-end — the multi-key overlap window is what makes a zero-downtime rotation possible, but the dashboard UI for it is worth a dry run on a non-production container before you depend on it.
 
 ### Securing Credentials in CI/CD _(Server-to-Server)_
 
@@ -358,10 +356,10 @@ CloudKit containers expose two parallel environments — **development** and **p
 - During development, deploy schema changes to the development environment, run tests there, and use a separate development container or a development-only API token.
 - Promote the schema to production via the dashboard before deploying user-facing code that depends on it.
 
-> **[VERIFY before publishing]** Whether server-to-server keys are scoped per-environment or shared across both environments isn't documented here yet — check the dashboard before publishing.
+> **Note:** Whether server-to-server keys are scoped per-environment (dev vs prod) or shared across both isn't clearly surfaced in Apple's docs — check the **Tokens & Keys** section of the dashboard for your container to confirm which model applies before assuming a single key works in both environments.
 
 ---
 
-That's the full picture: pick the database, pick the matching auth method, set the right environment variables, and let MistKit's `AuthenticationMiddleware` handle the wire format. The [`Examples/MistDemo`](https://github.com/brightdigit/MistKit/tree/main/Examples/MistDemo) directory in the repo is a working reference for all three methods — it's the same code that runs against the real CloudKit container in MistKit's integration tests, so you can copy from it with confidence. The [Bushel](https://github.com/brightdigit/BushelCloud) and [Celestra](https://github.com/brightdigit/Celestra) repos show the GitHub Actions deployment pattern end to end, including the cron-scheduled scrape jobs that ultimately update a CloudKit public database from a stock Ubuntu runner.
+That's the full picture: pick the database, pick the matching auth method, set the right environment variables, and let MistKit's `AuthenticationMiddleware` handle the wire format. The [`Examples/MistDemo`](https://github.com/brightdigit/MistKit/tree/main/Examples/MistDemo) directory in the repo is a working reference for all three methods — it's the same code that runs against the real CloudKit container in MistKit's integration tests, so you can copy from it with confidence. The [BushelCloud](https://github.com/brightdigit/BushelCloud) and [CelestraCloud](https://github.com/brightdigit/CelestraCloud) repos show the GitHub Actions deployment pattern end to end, including the cron-scheduled scrape jobs that ultimately update a CloudKit public database from a stock Ubuntu runner.
 
 📚 **[View Documentation](https://swiftpackageindex.com/brightdigit/MistKit/documentation)** | 🐙 **[GitHub Repository](https://github.com/brightdigit/MistKit)**

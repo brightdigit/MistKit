@@ -133,13 +133,13 @@ private static func makeSimpleFieldValue(
 
 The response `type` field is essential here — without it, a timestamp would be indistinguishable from a plain double.
 
-## Known Gap: Asset Schema Is Not Split
+## Known Limitation: Asset Schema Is Not Split
 
 Unlike `FieldValue`, the `AssetValue` schema is **not** split into request/response variants. A single `AssetValue` is referenced from both `FieldValueRequest` and `FieldValueResponse` (`openapi.yaml:1016`), and the domain-level `Asset` struct mirrors that — all fields are optional on a single type.
 
-### Why this is a gap
+### What this means for callers
 
-CloudKit's asset payload is semantically asymmetric, but the schema doesn't enforce it:
+CloudKit's asset payload is semantically asymmetric, but the current schema doesn't enforce it:
 
 | Field | Request side (write) | Response side (read) |
 |-------|----------------------|----------------------|
@@ -148,22 +148,21 @@ CloudKit's asset payload is semantically asymmetric, but the schema doesn't enfo
 | `downloadURL` | Ignored if sent | Required — where to fetch bytes |
 | `fileChecksum`, `size` | Optional metadata | Returned by CloudKit |
 
-Because `AssetValue` flattens both shapes into one all-optional struct:
+Because `AssetValue` flattens both shapes into one all-optional struct, the compiler cannot prevent putting a `downloadURL` into a write payload or expecting a `receipt` on a read. A response asset and a request asset are the same Swift type, so callers can in principle round-trip the wrong shape.
 
-- The compiler cannot prevent putting a `downloadURL` into a write payload, or expecting a `receipt` on a read.
-- A response asset and a request asset are the same Swift type, so callers can accidentally round-trip the wrong shape.
+### How the service layer compensates
 
-### How we address it in practice
-
-Rather than splitting the schema, the asymmetry is handled at the **service layer**:
+Rather than splitting the schema, the asymmetry is handled at the service layer:
 
 1. **Two-step upload flow** (`CloudKitService+WriteOperations.swift`) hides raw asset request construction from callers. `uploadAssets()` calls `requestAssetUploadURL()` → `uploadAssetData()` → produces an `Asset` populated with `receipt`/`wrappingKey`/`size` ready for a follow-up `modifyRecords` call. Callers don't hand-build write-side `Asset` values.
 2. **Read-side `Asset` values** are constructed in `FieldValue+Components.swift` from `FieldValueResponse`, populated only with the fields CloudKit actually returns (`downloadURL`, `fileChecksum`, `size`).
 3. **Convention over compilation:** when consuming code needs to act on a download URL, it pattern-matches `case .asset(let asset)` and reads `asset.downloadURL`. The unused write-side fields are simply `nil`.
 
-### Future work
+In practice this is sufficient because callers never construct write-side asset values directly — the upload flow always hands them a fully-populated `Asset`.
 
-Splitting `AssetValue` → `AssetValueRequest` + `AssetValueResponse` in `openapi.yaml` (mirroring the `FieldValueRequest`/`FieldValueResponse` split) would push this asymmetry into the type system. The blocker is that `Asset` is a single public domain type — splitting it would either require two domain types (breaking the 9-case enum symmetry) or a domain-level distinction the public API currently doesn't make.
+### Why the asymmetry isn't pushed into types
+
+A schema split (`AssetValueRequest` + `AssetValueResponse`, mirroring the `FieldValue` split) would move this asymmetry into the type system, but it would also require either two public domain types — breaking the 9-case enum symmetry on `FieldValue` — or a domain-level read/write distinction the public API deliberately doesn't make. The current design treats `Asset` as a single round-trippable value and contains the asymmetry inside the service layer instead.
 
 ## Recursive List Handling
 

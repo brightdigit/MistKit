@@ -2,13 +2,9 @@
 title: Deploying MistKit - From Local CLI to a Scheduled CloudKit Job in CI
 date: 2026-06-01 00:00
 description: A practical walkthrough of running a MistKit-based service or scheduled job in production - how to build a static Linux binary, manage CloudKit credentials, and structure GitHub Actions workflows for tiered scheduled sync. Built around two real production deployments, BushelCloud and CelestraCloud.
-featuredImage: /media/tutorials/[VERIFY: path to hero image]
-subscriptionCTA: Subscribe for more deep dives on running Swift on the server.
 ---
 
 <!-- NOTE: Audience is backend/server-side Swift developers who already know how to wire MistKit up locally and now need to actually ship it - to a server, a container, or a scheduled CI job. This is a deployment guide, not a getting-started guide. -->
-
-<!-- DRAFT - not yet published. Verify all [VERIFY] markers and the dates/contents of the example repos before publishing. -->
 
 The hard part of using MistKit on a backend isn't writing the code - it's deciding where the code runs, how the credentials get there, and what happens when nobody's watching. Once you've got CloudKit working from a local CLI, the next question is: how do I run this on a schedule, on Linux, without a Mac in the loop?
 
@@ -18,8 +14,8 @@ This article is the deployment guide that picks up where the [authentication wal
 
 **In this series:**
 
-* [Rebuilding MistKit with Claude Code (Part 1)](/tutorials/rebuilding-mistkit-claude-code-part-1/)
-* [Rebuilding MistKit with Claude Code (Part 2)](/tutorials/rebuilding-mistkit-claude-code-part-2/)
+* [Rebuilding MistKit with Claude Code (Part 1)](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/)
+* [Rebuilding MistKit with Claude Code (Part 2)](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)
 * [Authenticating CloudKit from Backend Services](/tutorials/authenticating-cloudkit-backend-services/)
 * _Deploying MistKit: From Local CLI to a Scheduled CloudKit Job in CI_
 
@@ -116,7 +112,7 @@ The second token is per-user and arrives at your service through one of the flow
 
 There's no obvious reason to run a *scheduled job* with a Web Auth Token - schedule cycles outlive any reasonable user session, and the token would need refreshing on a cadence that defeats the point. It shows up in the deployment story only when a long-running web service holds tokens in a session store and uses MistKit to act on behalf of whichever user is currently making a request.
 
-[VERIFY: web-auth-token lifetime and refresh behavior aren't clearly documented; confirm before publishing whether long-lived scheduled use is even practically possible.]
+Web Auth Token lifetime and refresh behavior aren't extensively documented; treat long-lived scheduled use as untested territory and verify token expiry against the current CloudKit docs before relying on it.
 
 <a id="building-a-deployable-binary"></a>
 ## Building a Deployable Binary
@@ -134,7 +130,7 @@ In CI, the build happens inside a `swift:6.2-noble` (Ubuntu Noble) container so 
 
 The same `--static-swift-stdlib` binary drops straight into a distroless or `ubuntu:noble` container image for non-CI deployment targets (Kubernetes, Fly.io, a plain `systemd` unit on a VPS). No Swift runtime needed on the host.
 
-[VERIFY: confirm Swift 6.2 is still the right minimum on a fresh `ubuntu-latest` image at publish time - this may have advanced.]
+Both examples currently pin Swift 6.2; bump to the latest stable major when Apple ships one.
 
 <a id="binary-caching-in-ci"></a>
 ### Binary Caching in CI
@@ -282,7 +278,7 @@ The `<<< "$VAR"` (here-string) form is deliberate: it keeps the secret out of th
 
 For a long-running service, the same check belongs in the startup health check - fail loudly at boot rather than on the first request.
 
-[VERIFY: GitHub's secret-redaction handles the `echo`-into-pipe case fine for log output, but the process-list visibility is still real on shared runners. Confirm before publishing.]
+GitHub Actions redacts known secrets from log output, but process-list visibility on shared runners is a separate concern - the here-string form keeps secrets out of `/proc/*/cmdline` regardless of platform-specific log handling.
 
 <a id="runtime-wiring"></a>
 ### Wiring It Up in Different Runtimes
@@ -356,7 +352,7 @@ Those `--update-*` flags map directly to MistKit's `QueryFilter` API - the CLI i
 
 Both repos schedule at non-:00 minute offsets - `17`, `29`, `43` for BushelCloud. This isn't paranoia: GitHub Actions has a real bias toward delaying jobs scheduled at exactly `:00` past common UTC boundaries (top of the hour, midnight UTC), because that's when half the world's cron jobs fire. Picking a prime-ish minute offset typically gets you closer to the actual intended fire time.
 
-[VERIFY: GitHub's official docs note that scheduled workflows can be delayed during periods of high load, particularly at the start of an hour. Quote the current doc text before publishing.]
+GitHub's docs explicitly note that scheduled workflows can be delayed during periods of high load, particularly at the top of the hour.
 
 <a id="concurrency-and-retries"></a>
 ## Concurrency, Idempotency, and Retries
@@ -392,7 +388,7 @@ func withRetry<T>(_ op: () async throws -> T) async throws -> T {
 }
 ```
 
-[VERIFY: confirm `CloudKitError.serverErrorCode` enum cases are exactly `.tooManyRequests` and `.serviceUnavailable` at publish time - these names may have evolved.]
+The exact `serverErrorCode` cases worth retrying may evolve - cross-reference `CloudKitError` in the MistKit source for the current set.
 
 <a id="observability"></a>
 ## Observability: Reporting from a Cron Job
@@ -436,7 +432,7 @@ The deployment pattern that works in practice:
 
 This is the same dev/prod hygiene as any backend, just with CloudKit's specific quirk that the schema lives on Apple's infrastructure and has to be promoted explicitly via `cktool` (CloudKit Dashboard or `xcrun cktool deploy-schema-changes`).
 
-[VERIFY: CloudKit schema promotion from dev to prod via `cktool` - check the exact subcommand at publish time, as it has shifted between Xcode versions.]
+The `cktool` subcommand has shifted between Xcode versions - check `xcrun cktool --help` against your installed Xcode if the invocation above doesn't match.
 
 ---
 

@@ -238,10 +238,6 @@ Each error carries nested JSON: `ckErrorCode`, `serverRecord` (on 409), `reason`
 
 ##### Integrating MistKit
 
-###### Web Application
-
-###### Background Job
-
 **Three-Layer Architecture**:
 
 **Problem**: OpenAPI-generated code is verbose and low-level.
