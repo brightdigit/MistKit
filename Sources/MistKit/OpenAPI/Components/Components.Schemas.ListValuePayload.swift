@@ -28,6 +28,7 @@
 //
 
 internal import Foundation
+internal import MistKitOpenAPI
 
 extension Components.Schemas.ListValuePayload {
   /// Initialize from MistKit FieldValue for list elements
@@ -74,7 +75,7 @@ extension Components.Schemas.ListValuePayload {
     }
   }
 
-  private static func makeLocationValue(_ location: FieldValue.Location)
+  private static func makeLocationValue(_ location: Location)
     -> Components.Schemas.LocationValue
   {
     Components.Schemas.LocationValue(
@@ -89,7 +90,7 @@ extension Components.Schemas.ListValuePayload {
     )
   }
 
-  private static func makeReferenceValue(_ reference: FieldValue.Reference)
+  private static func makeReferenceValue(_ reference: Reference)
     -> Components.Schemas.ReferenceValue
   {
     let action: Components.Schemas.ReferenceValue.actionPayload?
@@ -107,7 +108,7 @@ extension Components.Schemas.ListValuePayload {
     )
   }
 
-  private static func makeAssetValue(_ asset: FieldValue.Asset) -> Components.Schemas.AssetValue {
+  private static func makeAssetValue(_ asset: Asset) -> Components.Schemas.AssetValue {
     Components.Schemas.AssetValue(
       fileChecksum: asset.fileChecksum,
       size: asset.size,

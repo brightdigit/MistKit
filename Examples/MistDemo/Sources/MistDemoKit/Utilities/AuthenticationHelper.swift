@@ -36,9 +36,9 @@ internal enum AuthenticationHelper {
   internal typealias EnvironmentReader =
     @Sendable (String) -> String?
 
-  /// Default reader backed by `ProcessInfo` via `EnvironmentConfig`.
+  /// Default reader backed by `ProcessInfo`.
   internal static let processEnvironmentReader: EnvironmentReader = {
-    EnvironmentConfig.getOptional($0)
+    ProcessInfo.processInfo.environment[$0]
   }
 
   // MARK: - Public API
@@ -81,7 +81,7 @@ internal enum AuthenticationHelper {
     environment: EnvironmentReader = processEnvironmentReader
   ) -> String {
     apiToken.isEmpty
-      ? environment(EnvironmentConfig.Keys.cloudKitAPIToken) ?? ""
+      ? environment("CLOUDKIT_API_TOKEN") ?? ""
       : apiToken
   }
 

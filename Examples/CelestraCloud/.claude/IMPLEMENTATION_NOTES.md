@@ -756,7 +756,7 @@ Switch from string-based to proper CloudKit references:
 fields["feedRecordName"] = .string(feedRecordName)
 
 // Use:
-fields["feed"] = .reference(FieldValue.Reference(recordName: feedRecordName))
+fields["feed"] = .reference(Reference(recordName: feedRecordName))
 ```
 
 **Trade-off Analysis**:

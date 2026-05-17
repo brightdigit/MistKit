@@ -85,27 +85,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/QueryResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: '#/components/responses/Failure'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/Failure'
         '409':
-          $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/Failure'
         '412':
-          $ref: '#/components/responses/PreconditionFailed'
+          $ref: '#/components/responses/Failure'
         '413':
-          $ref: '#/components/responses/RequestEntityTooLarge'
+          $ref: '#/components/responses/Failure'
         '429':
-          $ref: '#/components/responses/TooManyRequests'
+          $ref: '#/components/responses/Failure'
         '421':
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/Failure'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: '#/components/responses/Failure'
         '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/records/modify:
     post:
@@ -141,27 +141,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/ModifyResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: '#/components/responses/Failure'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/Failure'
         '409':
-          $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/Failure'
         '412':
-          $ref: '#/components/responses/PreconditionFailed'
+          $ref: '#/components/responses/Failure'
         '413':
-          $ref: '#/components/responses/RequestEntityTooLarge'
+          $ref: '#/components/responses/Failure'
         '429':
-          $ref: '#/components/responses/TooManyRequests'
+          $ref: '#/components/responses/Failure'
         '421':
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/Failure'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: '#/components/responses/Failure'
         '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/records/lookup:
     post:
@@ -201,27 +201,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/LookupResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: '#/components/responses/Failure'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/Failure'
         '409':
-          $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/Failure'
         '412':
-          $ref: '#/components/responses/PreconditionFailed'
+          $ref: '#/components/responses/Failure'
         '413':
-          $ref: '#/components/responses/RequestEntityTooLarge'
+          $ref: '#/components/responses/Failure'
         '429':
-          $ref: '#/components/responses/TooManyRequests'
+          $ref: '#/components/responses/Failure'
         '421':
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/Failure'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: '#/components/responses/Failure'
         '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/records/changes:
     post:
@@ -257,27 +257,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChangesResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: '#/components/responses/Failure'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/Failure'
         '409':
-          $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/Failure'
         '412':
-          $ref: '#/components/responses/PreconditionFailed'
+          $ref: '#/components/responses/Failure'
         '413':
-          $ref: '#/components/responses/RequestEntityTooLarge'
+          $ref: '#/components/responses/Failure'
         '429':
-          $ref: '#/components/responses/TooManyRequests'
+          $ref: '#/components/responses/Failure'
         '421':
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/Failure'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: '#/components/responses/Failure'
         '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/zones/list:
     get:
@@ -299,27 +299,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/ZonesListResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: '#/components/responses/Failure'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/Failure'
         '409':
-          $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/Failure'
         '412':
-          $ref: '#/components/responses/PreconditionFailed'
+          $ref: '#/components/responses/Failure'
         '413':
-          $ref: '#/components/responses/RequestEntityTooLarge'
+          $ref: '#/components/responses/Failure'
         '429':
-          $ref: '#/components/responses/TooManyRequests'
+          $ref: '#/components/responses/Failure'
         '421':
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/Failure'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: '#/components/responses/Failure'
         '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/zones/lookup:
     post:
@@ -352,9 +352,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ZonesLookupResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/zones/modify:
     post:
@@ -387,9 +387,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ZonesModifyResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/zones/changes:
     post:
@@ -421,9 +421,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ZoneChangesResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/subscriptions/list:
     get:
@@ -445,9 +445,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubscriptionsListResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/subscriptions/lookup:
     post:
@@ -483,9 +483,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubscriptionsLookupResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/subscriptions/modify:
     post:
@@ -518,9 +518,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubscriptionsModifyResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/users/caller:
     get:
@@ -546,27 +546,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: '#/components/responses/Failure'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/Failure'
         '409':
-          $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/Failure'
         '412':
-          $ref: '#/components/responses/PreconditionFailed'
+          $ref: '#/components/responses/Failure'
         '413':
-          $ref: '#/components/responses/RequestEntityTooLarge'
+          $ref: '#/components/responses/Failure'
         '429':
-          $ref: '#/components/responses/TooManyRequests'
+          $ref: '#/components/responses/Failure'
         '421':
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/Failure'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: '#/components/responses/Failure'
         '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/users/discover:
     post:
@@ -606,9 +606,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/DiscoverResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
     # GET /users/discover — see #28
     get:
       summary: Discover All User Identities
@@ -633,9 +633,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/DiscoverResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/users/lookup/email:
     post:
@@ -674,9 +674,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/DiscoverResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/users/lookup/id:
     post:
@@ -714,9 +714,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/DiscoverResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/users/lookup/contacts:
     post:
@@ -750,9 +750,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContactsResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/assets/upload:
     post:
@@ -809,9 +809,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/AssetUploadResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/tokens/create:
     post:
@@ -843,9 +843,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/tokens/register:
     post:
@@ -873,9 +873,9 @@ paths:
         '200':
           description: Token registered successfully
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/Failure'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: '#/components/responses/Failure'
 
 components:
   securitySchemes:
@@ -1475,68 +1475,23 @@ components:
           type: string
 
   responses:
-    BadRequest:
-      description: Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Unauthorized (401) - AUTHENTICATION_FAILED
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Forbidden:
-      description: Forbidden (403) - ACCESS_DENIED
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    NotFound:
-      description: Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Conflict:
-      description: Conflict (409) - CONFLICT, EXISTS
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    PreconditionFailed:
-      description: Precondition failed (412) - VALIDATING_REFERENCE_ERROR
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    RequestEntityTooLarge:
-      description: Request entity too large (413) - QUOTA_EXCEEDED
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    TooManyRequests:
-      description: Too many requests (429) - THROTTLED
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    UnprocessableEntity:
-      description: Unprocessable entity (421) - AUTHENTICATION_REQUIRED
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    InternalServerError:
-      description: Internal server error (500) - INTERNAL_ERROR
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    ServiceUnavailable:
-      description: Service unavailable (503) - TRY_AGAIN_LATER
+    Failure:
+      description: |
+        Error response shared by all endpoints. The body schema is the same for
+        every 4xx/5xx status code; the HTTP status code itself disambiguates
+        which CloudKit failure occurred. See Apple's CloudKit Web Services
+        Error Codes documentation for the full code → status mapping:
+        - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+        - 401 Unauthorized (AUTHENTICATION_FAILED)
+        - 403 Forbidden (ACCESS_DENIED)
+        - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+        - 409 Conflict (CONFLICT, EXISTS)
+        - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+        - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+        - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+        - 429 TooManyRequests (THROTTLED)
+        - 500 InternalServerError (INTERNAL_ERROR)
+        - 503 ServiceUnavailable (TRY_AGAIN_LATER)
       content:
         application/json:
           schema:

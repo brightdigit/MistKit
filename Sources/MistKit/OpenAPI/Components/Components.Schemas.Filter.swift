@@ -28,9 +28,9 @@
 //
 
 internal import Foundation
+internal import MistKitOpenAPI
 
 /// Extension to convert MistKit QueryFilter to OpenAPI Components.Schemas.Filter
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension Components.Schemas.Filter {
   /// Initialize from MistKit QueryFilter
   internal init(from queryFilter: QueryFilter) {

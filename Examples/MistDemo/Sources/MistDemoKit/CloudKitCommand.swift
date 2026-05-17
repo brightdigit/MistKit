@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import Foundation
 public import MistKit
 
 /// Protocol for commands that interact with CloudKit.
@@ -43,7 +44,7 @@ extension CloudKitCommand {
   /// Resolve API token from option or environment variable
   public func resolvedApiToken() -> String {
     apiToken.isEmpty
-      ? EnvironmentConfig.getOptional(EnvironmentConfig.Keys.cloudKitAPIToken) ?? "" : apiToken
+      ? ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"] ?? "" : apiToken
   }
 
   /// Convert environment string to MistKit Environment

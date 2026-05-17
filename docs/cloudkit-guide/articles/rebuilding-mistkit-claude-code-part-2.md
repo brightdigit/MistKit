@@ -93,7 +93,7 @@ protocol CloudKitRecord {
 
 // Relationship handling
 fields["minimumMacOS"] = .reference(
-    FieldValue.Reference(recordName: restoreImageRecordName)
+    Reference(recordName: restoreImageRecordName)
 )
 ```
 

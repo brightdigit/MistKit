@@ -99,7 +99,7 @@ Create relationships using record names:
 
 ```swift
 fields["minimumMacOS"] = .reference(
-    FieldValue.Reference(recordName: "RestoreImage-23C71")
+    Reference(recordName: "RestoreImage-23C71")
 )
 ```
 

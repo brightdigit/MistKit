@@ -28,9 +28,9 @@
 //
 
 internal import Foundation
+internal import MistKitOpenAPI
 
 /// Extension to convert MistKit RecordOperation to OpenAPI Components.Schemas.RecordOperation
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension Components.Schemas.RecordOperation {
   /// Mapping from RecordOperation.OperationType to OpenAPI operationTypePayload
   private static let operationTypeMapping:

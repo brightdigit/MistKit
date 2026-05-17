@@ -42,13 +42,19 @@ import Testing
 /// `.private`/`.shared`, the user-context branch, and PEM-load failure.
 @Suite("Credentials.makeTokenManager", .enabled(if: Platform.isCryptoAvailable))
 internal enum CredentialsTokenManagerTests {
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeServerToServerCredentials() -> ServerToServerCredentials {
-    let pem = P256.Signing.PrivateKey().pemRepresentation
-    return ServerToServerCredentials(
-      keyID: "test-key-id-12345678",
-      privateKey: .raw(pem)
-    )
+    if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+      let pem = P256.Signing.PrivateKey().pemRepresentation
+      return ServerToServerCredentials(
+        keyID: "test-key-id-12345678",
+        privateKey: .raw(pem)
+      )
+    } else {
+      Issue.record(
+        "ServerToServerCredentials requires macOS 11.0+ / iOS 14.0+ / tvOS 14.0+ / watchOS 7.0+"
+      )
+      return ServerToServerCredentials(keyID: "unavailable", privateKey: .raw(""))
+    }
   }
 
   internal static func makeAPICredentialsWithWebAuth() -> APICredentials {

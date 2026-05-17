@@ -19,10 +19,16 @@ extension ServerToServerAuthManagerTests {
       return privateKey.rawRepresentation
     }
 
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     private static func generateTestPEMString() throws -> String {
       let privateKey = try generateTestPrivateKey()
-      return privateKey.pemRepresentation
+      if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+        return privateKey.pemRepresentation
+      } else {
+        Issue.record(
+          "pemRepresentation requires macOS 11.0+ / iOS 14.0+ / tvOS 14.0+ / watchOS 7.0+"
+        )
+        return ""
+      }
     }
 
     // MARK: - Initialization Tests

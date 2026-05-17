@@ -1,189 +1,151 @@
 # ``MistKit``
 
-A Swift Package for Server-Side and Command-Line Access to CloudKit Web Services
+A Swift package for server-side and command-line access to CloudKit Web Services.
 
 ![MistKit Logo](logo)
 
 ## Overview
 
-MistKit provides a modern Swift interface to CloudKit Web Services REST API, enabling cross-platform CloudKit access for server-side Swift applications, command-line tools, and platforms where the CloudKit framework isn't available.
+MistKit wraps Apple's [CloudKit Web Services REST API](https://developer.apple.com/documentation/cloudkitwebservices) with a modern Swift surface so server-side code, CLIs, and platforms without the native CloudKit framework (Linux, WASI, Windows) can read and write the same containers as your Apple apps.
 
-Built with Swift concurrency (async/await) and designed for modern Swift applications, MistKit supports all three CloudKit authentication methods and provides type-safe access to CloudKit operations.
+The library is built on `swift-openapi-generator` against Apple's published OpenAPI specification, with a hand-written abstraction layer on top that exposes typed records, async iteration, structured errors, and three authentication schemes.
 
-## Key Features
+## Quick start
 
-- **Cross-Platform Support**: Works on macOS, iOS, tvOS, watchOS, visionOS, and Linux
-- **Modern Swift**: Built with Swift 6 concurrency features and structured error handling
-- **Multiple Authentication Methods**: API token, web authentication, and server-to-server authentication
-- **Type-Safe**: Comprehensive type safety with Swift's type system
-- **OpenAPI-Based**: Generated from CloudKit Web Services OpenAPI specification
-- **Secure**: Built-in security best practices and credential management
-
-## Authentication Methods
-
-### API Token Authentication
-
-Provides container-level access using an API token from Apple Developer Console:
-
-```swift
-let service = try CloudKitService(
-    containerIdentifier: "iCloud.com.example.MyApp",
-    apiToken: "your-api-token"
-)
-```
-
-### Web Authentication
-
-Enables user-specific operations with both API token and web authentication token:
-
-```swift
-let service = try CloudKitService(
-    containerIdentifier: "iCloud.com.example.MyApp",
-    apiToken: "your-api-token",
-    webAuthToken: "user-web-auth-token"
-)
-```
-
-### Server-to-Server Authentication
-
-Enterprise-level authentication using ECDSA P-256 key signing (public database only):
-
-```swift
-let serverManager = try ServerToServerAuthManager(
-    keyIdentifier: "your-key-id",
-    privateKeyData: privateKeyData
-)
-
-let service = try CloudKitService(
-    containerIdentifier: "iCloud.com.example.MyApp",
-    tokenManager: serverManager,
-    environment: .production,
-    database: .public
-)
-```
-
-## Getting Started
-
-### Installation
-
-Add MistKit to your project using Swift Package Manager:
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/your-org/MistKit.git", from: "1.0.0")
-]
-```
-
-### Basic Usage
-
-1. **Choose Authentication**: Select your authentication method based on your needs
-2. **Create Service**: Initialize CloudKitService with your authentication details
-3. **Perform Operations**: Use the service to interact with CloudKit Web Services
+Construct a ``CloudKitService`` with a ``Credentials`` value and pick a ``Database`` at each call site:
 
 ```swift
 import MistKit
 
-// Create service with API token authentication
-let service = try CloudKitService(
-    containerIdentifier: "iCloud.com.example.MyApp",
-    apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!
+let credentials = try Credentials(
+  apiAuth: APICredentials(
+    apiToken: ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"]!,
+    webAuthToken: ProcessInfo.processInfo.environment["CLOUDKIT_WEB_AUTH_TOKEN"]
+  )
 )
 
-// Use the service for CloudKit operations
-// (Specific operations depend on your use case)
+let service = CloudKitService(
+  containerIdentifier: "iCloud.com.example.MyApp",
+  credentials: credentials,
+  environment: .production
+)
+
+let result = try await service.queryRecords(
+  recordType: "Note",
+  database: .private
+)
 ```
 
-## Error Handling
+`.private` and `.shared` always sign with the web-auth token. `.public` carries a ``PublicAuthPreference`` — either ``PublicAuthPreference/prefers(_:)`` or ``PublicAuthPreference/requires(_:)`` — so each public-database call decides whether it is attributed to the developer key (server-to-server) or to the iCloud user (web-auth).
 
-MistKit provides comprehensive error handling with typed errors:
+For the full set-up walkthrough — obtaining tokens, generating an ECDSA P-256 key, and running the service on a backend — see <doc:AuthenticationAndDatabases>.
 
-- ``CloudKitError`` - CloudKit Web Services API errors
-- ``TokenManagerError`` - Authentication and credential errors
-- ``TokenStorageError`` - Token storage and persistence errors
+## Architecture at a glance
 
-All errors conform to `LocalizedError` for user-friendly error messages.
+```
+Your code
+    │
+    ▼
+CloudKitService            ←  per-call Database; resolves a TokenManager
+    │                          from Credentials
+    ▼
+AuthenticationMiddleware   ←  asks the current Authenticator to sign/attach
+    │
+    ▼
+Generated OpenAPI Client   ←  produced by swift-openapi-generator
+    │
+    ▼
+ClientTransport            ←  URLSessionTransport by default
+    │
+    ▼
+api.apple-cloudkit.com
+```
 
-## Security Best Practices
+The wrapper layer is described in <doc:AbstractionLayerArchitecture>. The code-generation pipeline that produces the OpenAPI client is covered in <doc:OpenAPICodeGeneration> and <doc:GeneratedCodeAnalysis>.
 
-- **Environment Variables**: Store sensitive credentials in environment variables
-- **Token Rotation**: Implement proper token rotation for server-to-server authentication
-- **Secure Storage**: Use secure storage mechanisms for persistent credentials
-- **Logging**: Sensitive information is automatically masked in logs
+## Platform support
 
-## Platform Support
+MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. Server-to-server signing depends on Crypto / swift-crypto, so it is unavailable on Windows and WASI — those targets must use API-token + web-auth credentials. URL-loading conveniences and asset upload use `URLSession`; on WASI builds you supply a `ClientTransport` explicitly via the generic initializer.
 
-### Minimum Platform Versions
+> Tip: On native Apple platforms (macOS, iOS, tvOS, watchOS, visionOS) prefer the native [CloudKit framework](https://developer.apple.com/documentation/cloudkit). It integrates with the system account, handles push notifications and long-lived operations, and avoids the per-request signing overhead of the web-services API. MistKit is intended for environments where the native framework isn't available — server-side Swift, CLIs, Linux, and Windows.
 
-- macOS 10.15+
-- iOS 13.0+
-- tvOS 13.0+
-- watchOS 6.0+
-- visionOS 1.0+
-- Linux (Ubuntu 18.04+)
-
-### Server-to-Server Authentication
-
-Server-to-server authentication requires Crypto framework support:
-- macOS 11.0+
-- iOS 14.0+
-- tvOS 14.0+
-- watchOS 7.0+
-- Linux with swift-crypto
+> Warning: WASI is not a fully supported target. The web-services API requires HMAC/ECDSA signing and a working HTTP transport, neither of which has a first-class story on WASI today. For CloudKit access from the browser, use Apple's official [CloudKit JS](https://developer.apple.com/documentation/cloudkitjs) library instead.
 
 ## Topics
 
-### Architecture and Development
+### Getting Started
 
-- <doc:OpenAPICodeGeneration>
-- <doc:GeneratedCodeAnalysis>
-- <doc:GeneratedCodeWorkflow>
 - <doc:AbstractionLayerArchitecture>
-
-### Services
-
 - ``CloudKitService``
-- ``RequestSignature``
+- ``Database``
+- ``Environment``
+- ``CloudKitError``
+- ``RecordInfo``
+- ``FieldValue``
+- ``QueryFilter``
+- ``QuerySort``
+- ``QueryResult``
+- ``RecordOperation``
+- ``RecordChangesResult``
+- ``RecordTimestamp``
+- ``ZoneID``
+- ``ZoneInfo``
+- ``ZoneOperation``
+- ``ZoneChangesResult``
+- ``UserInfo``
+- ``UserIdentity``
+- ``UserIdentityLookupInfo``
+- ``NameComponents``
+- ``OperationClassification``
+- ``BatchSyncResult``
+- ``AssetUploadResponse``
+- ``AssetUploadReceipt``
+- ``AssetUploadToken``
+- ``AssetUploader``
 
 ### Authentication
 
+- <doc:AuthenticationAndDatabases>
+- ``Credentials``
+- ``APICredentials``
+- ``ServerToServerCredentials``
+- ``PublicAuthPreference``
+- ``PrivateKeyMaterial``
+- ``Authenticator``
+- ``APITokenAuthenticator``
+- ``WebAuthTokenAuthenticator``
+- ``ServerToServerAuthenticator``
 - ``TokenManager``
 - ``APITokenManager``
 - ``WebAuthTokenManager``
 - ``AdaptiveTokenManager``
 - ``ServerToServerAuthManager``
-- ``TokenCredentials``
-- ``AuthenticationMethod``
-- ``AuthenticationMode``
-
-### Storage
-
 - ``TokenStorage``
-- ``InMemoryTokenStorage``
+- ``CredentialsValidationError``
+- ``CredentialAvailability``
+- ``InvalidCredentialReason``
+- ``AuthenticationFailedReason``
+- ``NetworkErrorReason``
+- ``InternalErrorReason``
+- ``TokenManagerError``
 - ``TokenStorageError``
 
-### Configuration
+### Record management
 
-- ``Environment``
-- ``Database``
-- ``EnvironmentConfig``
+- ``CloudKitRecord``
+- ``RecordManaging``
+- ``CloudKitRecordCollection``
+- ``RecordTypeSet``
+- ``RecordTypeIterating``
 
-### Errors
+### OpenAPI code generation
 
-- ``CloudKitError``
-- ``TokenManagerError``
-- ``InvalidCredentialReason``
-- ``InternalErrorReason``
-
-### Core Types
-
-- ``FieldValue``
-- ``RecordInfo``
-- ``UserInfo``
-- ``ZoneInfo``
-
+- <doc:OpenAPICodeGeneration>
+- <doc:GeneratedCodeWorkflow>
+- <doc:GeneratedCodeAnalysis>
 
 ## See Also
 
-- [CloudKit Web Services Documentation](https://developer.apple.com/documentation/cloudkitwebservices)
+- [CloudKit Web Services documentation](https://developer.apple.com/documentation/cloudkitwebservices)
 - [Apple Developer Console](https://developer.apple.com)
-- [Swift Package Manager](https://swift.org/package-manager/)
+- [swift-openapi-generator](https://github.com/apple/swift-openapi-generator)

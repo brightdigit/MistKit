@@ -293,10 +293,10 @@ try await uploadXcodeVersions()    // References SwiftVersion and RestoreImage
 **Creating a reference:**
 ```swift
 fields["minimumMacOS"] = .reference(
-    FieldValue.Reference(recordName: "RestoreImage-23C71")
+    Reference(recordName: "RestoreImage-23C71")
 )
 fields["swiftVersion"] = .reference(
-    FieldValue.Reference(recordName: "SwiftVersion-6.0")
+    Reference(recordName: "SwiftVersion-6.0")
 )
 ```
 

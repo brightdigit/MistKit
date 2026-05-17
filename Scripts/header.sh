@@ -68,15 +68,16 @@ EOF
 
 # Loop through each Swift file in the specified directory and subdirectories
 find "$directory" -type f -name "*.swift" | while read -r file; do
-  # Skip files in the Generated directory
-  if [[ "$file" == *"/Generated/"* ]]; then
-    echo "Skipping $file (generated file)"
-    continue
-  fi
-
-  # Check if the first line is the swift-format-ignore indicator
-  first_line=$(head -n 1 "$file")
-  if [[ "$first_line" == "// swift-format-ignore-file" ]]; then
+  # Skip files carrying `// swift-format-ignore-file` anywhere in the leading
+  # comment block. This is the opt-out used by generated files (e.g.
+  # swift-openapi-generator emits it via `additionalFileComments`) and lets
+  # them sit anywhere in the tree without needing a path-based exclusion.
+  if awk '
+    /^\/\/[[:space:]]*swift-format-ignore-file[[:space:]]*$/ { found = 1; exit }
+    /^[[:space:]]*$/ || /^\/\// { next }
+    { exit }
+    END { exit !found }
+  ' "$file"; then
     echo "Skipping $file due to swift-format-ignore directive."
     continue
   fi

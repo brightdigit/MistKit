@@ -100,7 +100,7 @@ extension FieldValue {
     guard let urlString = value as? String else {
       return nil
     }
-    let asset = FieldValue.Asset(
+    let asset = Asset(
       fileChecksum: nil,
       size: nil,
       referenceChecksum: nil,

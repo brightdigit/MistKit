@@ -19,7 +19,7 @@ fi
 pushd $PACKAGE_DIR
 
 swift-openapi-generator generate \
-    --output-directory Sources/MistKit/Generated \
+    --output-directory Sources/MistKitOpenAPI \
     --config openapi-generator-config.yaml \
     openapi.yaml
 

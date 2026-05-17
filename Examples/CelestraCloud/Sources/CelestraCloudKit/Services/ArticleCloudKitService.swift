@@ -98,7 +98,9 @@ public struct ArticleCloudKitService: Sendable {
       return []
     }
     var allArticles: [Article] = []
-    let guidBatches = guids.chunked(into: guidQueryBatchSize)
+    let guidBatches = stride(from: 0, to: guids.count, by: guidQueryBatchSize).map {
+      Array(guids[$0..<Swift.min($0 + guidQueryBatchSize, guids.count)])
+    }
     for batch in guidBatches {
       let batchArticles = try await queryArticleBatch(batch, feedRecordName: feedRecordName)
       allArticles.append(contentsOf: batchArticles)
@@ -155,7 +157,9 @@ public struct ArticleCloudKitService: Sendable {
       return BatchOperationResult()
     }
     CelestraLogger.cloudkit.info("Creating \(articles.count) article(s)...")
-    let articleBatches = articles.chunked(into: articleMutationBatchSize)
+    let articleBatches = stride(from: 0, to: articles.count, by: articleMutationBatchSize).map {
+      Array(articles[$0..<Swift.min($0 + articleMutationBatchSize, articles.count)])
+    }
     var result = BatchOperationResult()
     for (index, batch) in articleBatches.enumerated() {
       try await processBatch(
@@ -200,7 +204,9 @@ public struct ArticleCloudKitService: Sendable {
     guard !validArticles.isEmpty else {
       return BatchOperationResult()
     }
-    let batches = validArticles.chunked(into: articleMutationBatchSize)
+    let batches = stride(from: 0, to: validArticles.count, by: articleMutationBatchSize).map {
+      Array(validArticles[$0..<Swift.min($0 + articleMutationBatchSize, validArticles.count)])
+    }
     var result = BatchOperationResult()
     for (index, batch) in batches.enumerated() {
       try await processBatch(

@@ -51,7 +51,7 @@
       .navigationDestination(for: Note.self) { note in
         RecordDetailView(note: note, onChange: { Task { await runQuery() } })
       }
-      .navigationTitle("Notes — \(service.databaseScope.label)")
+      .navigationTitle(service.databaseScope.label.map { "Notes — \($0)" } ?? "Notes")
       .onChange(of: service.databaseScope) { _, _ in
         notes = []
         Task { await runQuery() }

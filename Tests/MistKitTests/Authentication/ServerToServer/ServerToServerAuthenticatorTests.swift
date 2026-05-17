@@ -20,7 +20,6 @@ internal struct ServerToServerAuthenticatorTests {
   // MARK: - authenticate(request:body:)
 
   @Test("authenticate adds CloudKit signature headers")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal func addsSignatureHeaders() async throws {
     let authenticator = try ServerToServerAuthenticator(
       keyID: "test-key-id-12345678",
@@ -42,7 +41,6 @@ internal struct ServerToServerAuthenticatorTests {
   }
 
   @Test("authenticate buffers body so downstream sees the same bytes")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal func bufferReplacesSingleIterationBody() async throws {
     let authenticator = try ServerToServerAuthenticator(
       keyID: "test-key-id-12345678",
@@ -70,7 +68,6 @@ internal struct ServerToServerAuthenticatorTests {
   // MARK: - init validation
 
   @Test("init throws on empty key ID")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal func emptyKeyIDThrows() {
     do {
       _ = try ServerToServerAuthenticator(
@@ -88,7 +85,6 @@ internal struct ServerToServerAuthenticatorTests {
   }
 
   @Test("init throws on key ID shorter than 8 characters")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal func shortKeyIDThrows() {
     do {
       _ = try ServerToServerAuthenticator(
@@ -108,7 +104,6 @@ internal struct ServerToServerAuthenticatorTests {
   // MARK: - serialization round-trip
 
   @Test("encoded then init(decoding:) round-trips key + bodyBufferLimit")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal func encodingRoundTrip() throws {
     let key = P256.Signing.PrivateKey()
     let original = try ServerToServerAuthenticator(
@@ -124,13 +119,11 @@ internal struct ServerToServerAuthenticatorTests {
   }
 
   @Test("storageKey is stable")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal func storageKey() {
     #expect(ServerToServerAuthenticator.storageKey == "server-to-server")
   }
 
   @Test("defaultStorageIdentifier uses keyID")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal func defaultStorageIdentifier() throws {
     let authenticator = try ServerToServerAuthenticator(
       keyID: "test-key-id-12345678",
@@ -140,7 +133,6 @@ internal struct ServerToServerAuthenticatorTests {
   }
 
   @Test("authenticate throws when body exceeds bodyBufferLimit")
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal func authenticateThrowsOnOversizeBody() async throws {
     let authenticator = try ServerToServerAuthenticator(
       keyID: "test-key-id-12345678",

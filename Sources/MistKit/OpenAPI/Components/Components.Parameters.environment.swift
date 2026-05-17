@@ -28,9 +28,9 @@
 //
 
 internal import Foundation
+internal import MistKitOpenAPI
 
 /// Extension to convert MistKit Environment to OpenAPI Components.Parameters.environment
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension Components.Parameters.environment {
   /// Initialize from MistKit Environment
   internal init(from environment: Environment) {

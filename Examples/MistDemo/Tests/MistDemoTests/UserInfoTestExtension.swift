@@ -28,6 +28,7 @@
 //
 
 import Foundation
+internal import MistKitOpenAPI
 
 @testable import MistKit
 

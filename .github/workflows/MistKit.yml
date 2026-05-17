@@ -184,7 +184,6 @@ jobs:
           swap-storage: true
       - uses: brightdigit/swift-build@v1
         with:
-          scheme: ${{ env.PACKAGE_NAME }}
           type: android
           android-swift-version: ${{ matrix.swift.version }}
           android-api-level: ${{ matrix.android-api-level }}
@@ -216,7 +215,7 @@ jobs:
         id: build
         uses: brightdigit/swift-build@v1
         with:
-          scheme: ${{ env.PACKAGE_NAME }}
+          scheme: ${{ env.PACKAGE_NAME }}-Package
           type: ${{ matrix.type }}
           xcode: ${{ matrix.xcode }}
           deviceName: ${{ matrix.deviceName }}
@@ -293,7 +292,7 @@ jobs:
         id: build
         uses: brightdigit/swift-build@v1
         with:
-          scheme: ${{ env.PACKAGE_NAME }}
+          scheme: ${{ env.PACKAGE_NAME }}-Package
           type: ${{ matrix.type }}
           xcode: ${{ matrix.xcode }}
           deviceName: ${{ matrix.deviceName }}
