@@ -37,7 +37,6 @@ extension CloudKitServiceTests.QueryPagination {
   private static let testAPIToken =
     TestConstants.apiToken
 
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeSuccessfulService(
     recordCount: Int = 2,
     continuationMarker: String? = nil
@@ -56,7 +55,6 @@ extension CloudKitServiceTests.QueryPagination {
     )
   }
 
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makePaginatedService(
     pages: [(recordCount: Int, continuationMarker: String?)]
   ) async throws -> CloudKitService {

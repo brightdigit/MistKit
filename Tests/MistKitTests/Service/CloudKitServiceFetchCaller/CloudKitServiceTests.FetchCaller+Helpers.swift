@@ -36,7 +36,6 @@ import Testing
 extension CloudKitServiceTests.FetchCaller {
   private static let testAPIToken = TestConstants.apiToken
 
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeSuccessfulService(
     userRecordName: String = "_user-caller",
     firstName: String? = "Test",
@@ -62,7 +61,6 @@ extension CloudKitServiceTests.FetchCaller {
     )
   }
 
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeAuthErrorService() async throws -> CloudKitService {
     let responseProvider = ResponseProvider.authenticationError()
     let transport = MockTransport(responseProvider: responseProvider)

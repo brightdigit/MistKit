@@ -52,7 +52,6 @@ internal import OpenAPIRuntime
 /// requires user-context auth. A single service can therefore serve, for
 /// example, public-database record reads via server-to-server signing **and**
 /// `fetchCaller` via web-auth from one fully-populated `Credentials`.
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct CloudKitService: Sendable {
   /// CloudKit's maximum number of records returned per query/modify request.
   internal static let maxRecordsPerRequest: Int = 200

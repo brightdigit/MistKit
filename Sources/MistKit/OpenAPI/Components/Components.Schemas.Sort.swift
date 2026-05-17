@@ -31,7 +31,6 @@ internal import Foundation
 internal import MistKitOpenAPI
 
 /// Extension to convert MistKit QuerySort to OpenAPI Components.Schemas.Sort
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension Components.Schemas.Sort {
   /// Initialize from MistKit QuerySort
   internal init(from querySort: QuerySort) {

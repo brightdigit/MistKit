@@ -27,7 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension Credentials {
   /// Resolve the appropriate token manager for an outgoing request.
   ///
@@ -76,7 +75,9 @@ extension Credentials {
     auth: PublicAuthPreference
   ) throws -> any TokenManager {
     if let s2s = serverToServer {
-      return try makeServerToServerManager(s2s)
+      if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+        return try makeServerToServerManager(s2s)
+      }
     }
     if auth.required {
       throw CloudKitError.missingCredentials(
@@ -114,7 +115,9 @@ extension Credentials {
       )
     }
     if let s2s = serverToServer {
-      return try makeServerToServerManager(s2s)
+      if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+        return try makeServerToServerManager(s2s)
+      }
     }
     if let api = apiAuth {
       return makeAPITokenManager(api)
@@ -143,6 +146,7 @@ extension Credentials {
     )
   }
 
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   private func makeServerToServerManager(
     _ s2s: ServerToServerCredentials
   ) throws -> any TokenManager {

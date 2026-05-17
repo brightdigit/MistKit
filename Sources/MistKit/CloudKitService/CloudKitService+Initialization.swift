@@ -36,7 +36,6 @@ public import OpenAPIRuntime
 
 // MARK: - Credentials-based Initializer (All Platforms)
 
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
   /// Initialize CloudKit service with `Credentials`.
   ///
@@ -91,7 +90,6 @@ extension CloudKitService {
 #if !os(WASI)
   internal import OpenAPIURLSession
 
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   extension CloudKitService {
     /// Initialize CloudKit service with `Credentials` using default
     /// `URLSessionTransport`.

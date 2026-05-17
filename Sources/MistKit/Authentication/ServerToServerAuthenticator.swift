@@ -39,7 +39,6 @@ public import OpenAPIRuntime
 /// The body is read once during signing. To keep downstream middleware
 /// working with the same bytes regardless of `HTTPBody` iteration behavior,
 /// `authenticate(request:body:)` reassigns `body` to a buffered copy.
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct ServerToServerAuthenticator: Authenticator {
   private struct WireFormat: Codable {
     let keyID: String
@@ -119,6 +118,7 @@ public struct ServerToServerAuthenticator: Authenticator {
   }
 
   /// Convenience initializer with a PEM-encoded private key string.
+  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public init(
     keyID: String,
     pemString: String,

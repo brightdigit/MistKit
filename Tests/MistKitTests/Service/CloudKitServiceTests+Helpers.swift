@@ -37,7 +37,6 @@ extension CloudKitServiceTests {
   ///
   /// Shared across the per-operation error-handling sub-suites so each one
   /// doesn't need to re-declare the same factory + `testAPIToken` constant.
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeService(
     provider: ResponseProvider,
     apiToken: String = TestConstants.apiToken,

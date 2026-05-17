@@ -31,7 +31,6 @@ import Foundation
 internal import MistKitOpenAPI
 
 /// A builder for constructing CloudKit query filters
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 internal struct FilterBuilder {
   // MARK: - Lifecycle
 

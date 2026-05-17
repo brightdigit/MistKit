@@ -31,7 +31,6 @@ internal import Foundation
 internal import MistKitOpenAPI
 
 /// Extension to convert MistKit Database to OpenAPI Components.Parameters.database
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension Components.Parameters.database {
   /// Initialize from MistKit Database
   internal init(from database: Database) {

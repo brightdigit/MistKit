@@ -43,7 +43,6 @@ import Foundation
 /// 3. Call `modifyRecords(_:classification:atomic:)` to perform the modify and
 ///    receive a `BatchSyncResult` with creates/updates/failures already
 ///    partitioned.
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
   /// Fetch the set of record names that already exist for a record type.
   ///

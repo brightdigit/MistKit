@@ -33,7 +33,6 @@ import Foundation
 ///
 /// This extension makes CloudKitService compatible with the generic RecordManaging
 /// operations, enabling protocol-oriented patterns for CloudKit operations.
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService: RecordManaging {
   /// Query records of a specific type from CloudKit (deprecated single-page form)
   ///

@@ -36,7 +36,6 @@ import Testing
 extension CloudKitServiceTests.ModifyZones {
   private static let testAPIToken = TestConstants.apiToken
 
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeSuccessfulService(
     zoneCount: Int = 1
   ) async throws -> CloudKitService {

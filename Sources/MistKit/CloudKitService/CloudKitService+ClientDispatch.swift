@@ -31,7 +31,6 @@ internal import Foundation
 internal import MistKitOpenAPI
 internal import OpenAPIRuntime
 
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
   /// Resolve the token manager for an outgoing request and build a fresh
   /// OpenAPI `Client` whose middleware chain authenticates against it.

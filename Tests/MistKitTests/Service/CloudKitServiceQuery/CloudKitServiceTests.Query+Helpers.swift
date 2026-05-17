@@ -34,7 +34,6 @@ import Testing
 
 extension CloudKitServiceTests.Query {
   /// Create service for validation error testing
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeValidationErrorService(
     _ errorType: ValidationErrorType
   ) throws -> CloudKitService {
@@ -49,7 +48,6 @@ extension CloudKitServiceTests.Query {
   }
 
   /// Create service for successful operations
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func makeSuccessfulService() throws -> CloudKitService {
     let transport = MockTransport(
       responseProvider: .successfulQuery()

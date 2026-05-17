@@ -61,7 +61,6 @@ extension InMemoryTokenStorageTests {
       "Store server-to-server credentials",
       .enabled(if: Platform.isCryptoAvailable)
     )
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     internal func storeServerToServerCredentials() async throws {
       let storage = InMemoryTokenStorage()
       let keyID = "test-key-id-12345678"
