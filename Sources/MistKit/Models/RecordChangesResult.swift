@@ -27,12 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Result from fetching record changes
+internal import MistKitOpenAPI
+
+/// Result from fetching record changes.
 ///
 /// Contains records that have changed since the provided sync token,
 /// along with a new sync token for subsequent fetches.
-internal import MistKitOpenAPI
-
 public struct RecordChangesResult: Codable, Sendable {
   /// Records that have changed (created, updated, or deleted)
   public let records: [RecordInfo]

@@ -27,12 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Result from querying records
+internal import MistKitOpenAPI
+
+/// Result from querying records.
 ///
 /// Contains the matching records along with an optional continuation marker
 /// for fetching the next page of results.
-internal import MistKitOpenAPI
-
 public struct QueryResult: Codable, Sendable {
   /// Records matching the query
   public let records: [RecordInfo]

@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// A user identity returned by CloudKit discover endpoints (users/discover, users/caller)
 internal import MistKitOpenAPI
 
+/// A user identity returned by CloudKit discover endpoints (`users/discover`, `users/caller`).
 public struct UserIdentity: Codable, Sendable {
   /// The record name of the user in the Users zone
   public let userRecordName: String?

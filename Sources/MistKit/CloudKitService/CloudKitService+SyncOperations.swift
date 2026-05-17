@@ -51,6 +51,7 @@ extension CloudKitService {
   ///     (defaults to _defaultZone)
   ///   - syncToken: Optional token from previous fetch (nil = initial fetch)
   ///   - resultsLimit: Optional maximum number of records (1-200)
+  ///   - database: The CloudKit database scope to query (`.public`, `.private`, `.shared`)
   /// - Returns: RecordChangesResult containing changed records
   ///   and new sync token
   /// - Throws: CloudKitError if the fetch fails
@@ -137,6 +138,7 @@ extension CloudKitService {
   ///   - resultsLimit: Optional maximum records per request (1-200)
   ///   - maxPages: Maximum number of pages to fetch before throwing
   ///     `CloudKitError.paginationLimitExceeded` (defaults to 1,000)
+  ///   - database: The CloudKit database scope to query (`.public`, `.private`, `.shared`)
   /// - Returns: Array of all changed records and final sync token
   /// - Throws: `CloudKitError`. When `maxPages` is exceeded, throws
   ///   `.paginationLimitExceeded(maxPages:records:)` whose `records`

@@ -44,6 +44,7 @@ extension CloudKitService {
   /// - Parameters:
   ///   - operations: Array of record operations to perform
   ///   - atomic: When true, the entire batch fails if any single operation fails (default: false)
+  ///   - database: The CloudKit database scope to modify (`.public`, `.private`, `.shared`)
   /// - Returns: Array of RecordInfo for the modified records
   /// - Throws: CloudKitError if the operation fails
   public func modifyRecords(
@@ -91,6 +92,7 @@ extension CloudKitService {
   ///   - recordType: The type of record to create
   ///   - recordName: Optional unique record name
   ///   - fields: Dictionary of field names to FieldValue
+  ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
   /// - Returns: RecordInfo for the created record
   /// - Throws: CloudKitError if the operation fails
   public func createRecord(
@@ -118,6 +120,7 @@ extension CloudKitService {
   ///   - recordName: The unique record name
   ///   - fields: Dictionary of field names to FieldValue
   ///   - recordChangeTag: Optional change tag for optimistic locking
+  ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
   /// - Returns: RecordInfo for the updated record
   /// - Throws: CloudKitError if the operation fails
   public func updateRecord(
@@ -146,6 +149,7 @@ extension CloudKitService {
   ///   - recordType: The type of record to delete
   ///   - recordName: The unique record name
   ///   - recordChangeTag: Optional change tag for optimistic locking
+  ///   - database: The CloudKit database scope to delete from (`.public`, `.private`, `.shared`)
   /// - Throws: CloudKitError if the operation fails
   public func deleteRecord(
     recordType: String,

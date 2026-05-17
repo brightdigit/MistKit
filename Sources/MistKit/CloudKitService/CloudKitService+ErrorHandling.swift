@@ -87,11 +87,17 @@ extension CloudKitService {
       )
     case .typeMismatch(let type, let context):
       logger.debug(
-        "Type mismatch: expected \(type), Context: \(context.debugDescription), Coding path: \(context.codingPath)"
+        """
+        Type mismatch: expected \(type), Context: \(context.debugDescription), \
+        Coding path: \(context.codingPath)
+        """
       )
     case .valueNotFound(let type, let context):
       logger.debug(
-        "Value not found: expected \(type), Context: \(context.debugDescription), Coding path: \(context.codingPath)"
+        """
+        Value not found: expected \(type), Context: \(context.debugDescription), \
+        Coding path: \(context.codingPath)
+        """
       )
     case .dataCorrupted(let context):
       logger.debug(

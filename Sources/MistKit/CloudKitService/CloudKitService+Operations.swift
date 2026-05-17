@@ -53,6 +53,7 @@ extension CloudKitService {
   ///   - limit: Maximum number of records to return
   ///     (1-200, defaults to `defaultQueryLimit`)
   ///   - desiredKeys: Optional array of field names to fetch
+  ///   - database: The CloudKit database scope to query (`.public`, `.private`, `.shared`)
   /// - Returns: Array of matching records
   /// - Throws: CloudKitError if validation fails or the request fails
   ///
@@ -125,6 +126,7 @@ extension CloudKitService {
   ///   - desiredKeys: Optional array of field names to fetch
   ///   - continuationMarker: Marker from a previous `QueryResult`
   ///     to fetch the next page of results
+  ///   - database: The CloudKit database scope to query (`.public`, `.private`, `.shared`)
   /// - Returns: A `QueryResult` with matching records and an optional
   ///   continuation marker for the next page
   /// - Throws: CloudKitError if validation fails or the request fails

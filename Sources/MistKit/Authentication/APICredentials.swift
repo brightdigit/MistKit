@@ -37,9 +37,12 @@
 ///   `lookupUsersByEmail`, …) and any write/read against the private or
 ///   shared databases.
 public struct APICredentials: Sendable {
+  /// CloudKit API token issued in CloudKit Dashboard for this container.
   public let apiToken: String
+  /// User-context web-auth token; required for private/shared databases and user-identity routes.
   public let webAuthToken: String?
 
+  /// Construct API credentials, optionally with a web-auth token for user-context routes.
   public init(apiToken: String, webAuthToken: String? = nil) {
     self.apiToken = apiToken
     self.webAuthToken = webAuthToken

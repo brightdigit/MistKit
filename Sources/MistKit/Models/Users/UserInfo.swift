@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// User information from CloudKit (User Dictionary — returned by users/caller and users/lookup/*)
 internal import MistKitOpenAPI
 
+/// User information from CloudKit (User Dictionary — returned by `users/caller` and `users/lookup/*`).
 public struct UserInfo: Encodable, Sendable {
   /// The user's record name
   public let userRecordName: String

@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Information used to look up a user identity from CloudKit
 internal import MistKitOpenAPI
 
+/// Information used to look up a user identity from CloudKit.
 public struct UserIdentityLookupInfo: Codable, Sendable {
   /// The email address to look up
   public let emailAddress: String?

@@ -37,7 +37,9 @@
 /// Provide both when a single service must hit public-database routes via
 /// server-to-server signing **and** user-context routes via web-auth.
 public struct Credentials: Sendable {
+  /// Server-to-server signing credentials; valid only against the public database.
   public let serverToServer: ServerToServerCredentials?
+  /// API-token credentials; required for private/shared databases and user-context routes.
   public let apiAuth: APICredentials?
 
   /// Construct credentials.

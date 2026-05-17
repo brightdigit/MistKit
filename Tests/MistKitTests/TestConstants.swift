@@ -48,9 +48,6 @@ internal enum TestConstants {
   /// Container identifier used by `CloudKitService` integration-style tests.
   internal static let serviceContainerIdentifier = "iCloud.com.example.test"
 
-  /// Container identifier used by middleware and client construction tests.
-  internal static let appContainerIdentifier = "iCloud.com.example.app"
-
   /// Default operation ID used in middleware intercept tests.
   internal static let operationID = "test-operation"
 }

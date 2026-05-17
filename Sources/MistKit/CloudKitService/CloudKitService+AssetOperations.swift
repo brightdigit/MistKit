@@ -55,6 +55,7 @@ extension CloudKitService {
   ///   - fieldName: The name of the asset field
   ///   - recordName: Optional unique record name
   ///   - uploader: Optional custom upload handler
+  ///   - database: The CloudKit database scope to upload to (`.public`, `.private`, `.shared`)
   /// - Returns: AssetUploadReceipt containing the upload result
   /// - Throws: CloudKitError if the upload fails
   ///
@@ -132,6 +133,7 @@ extension CloudKitService {
   ///   - fieldName: The name of the asset field
   ///   - recordName: Optional unique record name
   ///   - zoneID: Optional zone ID (defaults to default zone)
+  ///   - database: The CloudKit database scope (`.public`, `.private`, `.shared`)
   /// - Returns: AssetUploadToken containing the upload URL
   /// - Throws: CloudKitError if the request fails
   public func requestAssetUploadURL(

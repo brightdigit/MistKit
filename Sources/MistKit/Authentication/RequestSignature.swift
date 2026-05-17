@@ -62,6 +62,7 @@ public struct RequestSignature: Sendable {
     return fields
   }
 
+  /// Construct a signature from the CloudKit key ID, ISO-8601 date, and DER signature bytes.
   public init(
     keyID: String,
     iso8601DateString: String,

@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// A create-or-delete operation against a CloudKit zone, used by
-/// `CloudKitService.modifyZones(_:database:)`.
 internal import MistKitOpenAPI
 
+/// A create-or-delete operation against a CloudKit zone, used by
+/// `CloudKitService.modifyZones(_:database:)`.
 public enum ZoneOperation: Sendable, Equatable, Hashable {
   /// Create the given zone.
   case create(ZoneID)

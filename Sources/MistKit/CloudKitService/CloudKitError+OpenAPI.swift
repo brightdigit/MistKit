@@ -34,7 +34,9 @@ extension CloudKitError {
   /// Generic failable initializer for any `CloudKitResponseType`.
   /// Returns `nil` when the response is `.ok`.
   internal init?<T: CloudKitResponseType>(_ response: T) {
-    guard let error = response.toCloudKitError() else { return nil }
+    guard let error = response.toCloudKitError() else {
+      return nil
+    }
     self = error
   }
 

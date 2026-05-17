@@ -59,6 +59,7 @@ extension CloudKitService {
   ///   - recordType: The CloudKit record type to scan.
   ///   - limit: Optional maximum number of records to fetch (1-200). Defaults
   ///     to CloudKit's per-request maximum.
+  ///   - database: The CloudKit database scope to query (`.public`, `.private`, `.shared`).
   /// - Returns: Set of existing record names.
   /// - Throws: `CloudKitError` if the underlying query fails.
   public func fetchExistingRecordNames(
@@ -104,6 +105,7 @@ extension CloudKitService {
   ///     vs updates, typically from `fetchExistingRecordNames(recordType:)`.
   ///   - atomic: When `true`, the entire batch fails if any single operation
   ///     fails (default: `false`).
+  ///   - database: The CloudKit database scope to modify (`.public`, `.private`, `.shared`).
   /// - Returns: A `BatchSyncResult` partitioning the response.
   /// - Throws: `CloudKitError` if the modify request fails.
   public func modifyRecords(

@@ -34,6 +34,7 @@ public enum CredentialsValidationError: LocalizedError, Sendable {
   /// `Credentials` was constructed without any populated credential set.
   case empty
 
+  /// Human-readable description of the validation failure.
   public var errorDescription: String? {
     switch self {
     case .empty:

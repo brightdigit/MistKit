@@ -40,7 +40,7 @@ This article describes how that layer is organised. For the per-call authenticat
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-Every box above either lives in `Sources/MistKit/` (hand-written) or is generated to `Sources/MistKit/Generated/` (not committed). The generated layer never imports anything from the wrapper; the wrapper depends on the generated layer one-way.
+Every box above either lives in `Sources/MistKit/` (hand-written) or is generated to `Sources/MistKitOpenAPI/` (committed). The generated layer never imports anything from the wrapper; the wrapper depends on the generated layer one-way.
 
 ## CloudKitService: the single entry point
 
@@ -58,7 +58,7 @@ public struct CloudKitService: Sendable {
 }
 ```
 
-The four public initialisers live in `Service/Extensions/CloudKitService+Initialization.swift`:
+The four public initialisers live in `Sources/MistKit/CloudKitService/CloudKitService+Initialization.swift`:
 
 | Initializer | Use case |
 | --- | --- |
@@ -186,8 +186,8 @@ The CloudKit API is asymmetric: a field value in a request body omits the `type`
 
 The wrapper exposes a single domain type, ``FieldValue``, and converts both directions:
 
-- `Extensions/OpenAPI/Components+FieldValue.swift` — domain ``FieldValue`` → `FieldValueRequest`.
-- `Service/FieldValueConversion/FieldValue+Components.swift` — `FieldValueResponse` → domain ``FieldValue``.
+- `Sources/MistKit/OpenAPI/Components/Components.Schemas.FieldValueRequest.swift` — domain ``FieldValue`` → `FieldValueRequest`.
+- `Sources/MistKit/Models/FieldValues/FieldValue+Components.swift` — `FieldValueResponse` → domain ``FieldValue``.
 
 Splitting the generated types means the compiler refuses to put a response value in a request slot. The single domain enum gives callers an ergonomic API.
 

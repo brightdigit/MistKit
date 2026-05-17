@@ -27,8 +27,8 @@ openapi.yaml
      ▼
 swift-openapi-generator  (provisioned by mise)
      │
-     ├── Sources/MistKit/Generated/Client.swift   (~3,600 lines, .gitignored)
-     └── Sources/MistKit/Generated/Types.swift    (~8,600 lines, .gitignored)
+     ├── Sources/MistKitOpenAPI/Client.swift   (~3,600 lines, committed)
+     └── Sources/MistKitOpenAPI/Types.swift    (~8,600 lines, committed)
      │
      ▼
 Hand-written wrapper (Sources/MistKit/, committed)
@@ -169,13 +169,13 @@ That asymmetry flows through code generation:
 
 The compiler refuses to slot a response value into a request, and vice versa. Conversions to and from the single domain ``FieldValue`` enum live in:
 
-- `Extensions/OpenAPI/Components+FieldValue.swift` — domain → `FieldValueRequest`.
-- `Service/FieldValueConversion/FieldValue+Components.swift` — `FieldValueResponse` → domain.
+- `Sources/MistKit/OpenAPI/Components/Components.Schemas.FieldValueRequest.swift` — domain → `FieldValueRequest`.
+- `Sources/MistKit/Models/FieldValues/FieldValue+Components.swift` — `FieldValueResponse` → domain.
 
 ## Files produced
 
 ```
-Sources/MistKit/Generated/
+Sources/MistKitOpenAPI/
 ├── Client.swift   (~3,600 lines, committed)
 └── Types.swift    (~8,600 lines, committed)
 ```
@@ -193,7 +193,7 @@ The anatomy of these files — `APIProtocol`, `Components.Schemas.*`, `Operation
 
 ## Version control
 
-`Sources/MistKit/Generated/` is **committed**. Library consumers get a working package without installing mise or `swift-openapi-generator`. Two consequences:
+`Sources/MistKitOpenAPI/` is **committed**. Library consumers get a working package without installing mise or `swift-openapi-generator`. Two consequences:
 
 1. Pull requests touching `openapi.yaml` should also include the regenerated `Client.swift` / `Types.swift` so reviewers see the API change.
 2. CI verifies that committed generated code matches what the current `openapi.yaml` would produce (re-run the generator, diff the output) — drift fails the build.
@@ -205,11 +205,11 @@ The anatomy of these files — `APIProtocol`, `Components.Schemas.*`, `Operation
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `swift-openapi-generator: command not found` | mise tools not on `$PATH` | `mise install` then `eval "$(mise env -s bash)"` (or use `./Scripts/generate-openapi.sh`, which does this for you) |
-| Generated code doesn't compile | Wrapper extensions reference a renamed/removed symbol | Re-run the generator; then update the affected extension in `Sources/MistKit/Service/Extensions/` or `Sources/MistKit/OpenAPI/Components/` |
-| `Sources/MistKit/Generated/` is unexpectedly empty | Accidental deletion or merge issue | `./Scripts/generate-openapi.sh`, then commit the result |
+| Generated code doesn't compile | Wrapper extensions reference a renamed/removed symbol | Re-run the generator; then update the affected extension in `Sources/MistKit/CloudKitService/` or `Sources/MistKit/OpenAPI/Components/` |
+| `Sources/MistKitOpenAPI/` is unexpectedly empty | Accidental deletion or merge issue | `./Scripts/generate-openapi.sh`, then commit the result |
 | Linter complains about generated files | The header comments were stripped | Regenerate; do not hand-edit. `additionalFileComments` re-emits the linter pragmas |
 
-Never edit anything under `Sources/MistKit/Generated/` by hand — change `openapi.yaml` and regenerate.
+Never edit anything under `Sources/MistKitOpenAPI/` by hand — change `openapi.yaml` and regenerate.
 
 ## See Also
 

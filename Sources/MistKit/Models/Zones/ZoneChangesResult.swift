@@ -27,12 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Result from fetching zone changes
+internal import MistKitOpenAPI
+
+/// Result from fetching zone changes.
 ///
 /// Contains zones that have changed since the provided sync token,
 /// along with a new sync token for subsequent fetches.
-internal import MistKitOpenAPI
-
 public struct ZoneChangesResult: Codable, Sendable {
   /// Zones that have changed
   public let zones: [ZoneInfo]

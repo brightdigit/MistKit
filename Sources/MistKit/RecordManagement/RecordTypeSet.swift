@@ -47,9 +47,7 @@
 /// ```
 @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
 public struct RecordTypeSet<each RecordType: CloudKitRecord>: Sendable, RecordTypeIterating {
-  /// Initialize with a parameter pack of CloudKit record types
-  ///
-  /// - Parameter types: Variadic parameter pack of CloudKit record types
+  /// Initialize with a variadic parameter pack of CloudKit record types.
   public init(_: repeat (each RecordType).Type) {}
 
   /// Iterate through all record types in the parameter pack

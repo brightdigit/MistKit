@@ -83,7 +83,9 @@ extension CloudKitService {
   /// Unlike listZones which returns all zones, this operation retrieves
   /// specific zones identified by their zone IDs.
   ///
-  /// - Parameter zoneIDs: Array of zone identifiers to lookup
+  /// - Parameters:
+  ///   - zoneIDs: Array of zone identifiers to lookup
+  ///   - database: The CloudKit database scope to query (defaults to `.private`)
   /// - Returns: Array of ZoneInfo objects for the requested zones
   /// - Throws: CloudKitError if the lookup fails
   ///
@@ -153,8 +155,9 @@ extension CloudKitService {
   /// Retrieves all zones that have changed since the provided sync token.
   /// Use this for efficient incremental sync at the zone level.
   ///
-  /// - Parameter syncToken: Optional token from previous fetch
-  ///   (nil = initial fetch)
+  /// - Parameters:
+  ///   - syncToken: Optional token from previous fetch (nil = initial fetch)
+  ///   - database: The CloudKit database scope to query (defaults to `.private`)
   /// - Returns: ZoneChangesResult containing changed zones and new sync token
   /// - Throws: CloudKitError if the fetch fails
   ///

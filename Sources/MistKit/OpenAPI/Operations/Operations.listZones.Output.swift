@@ -30,6 +30,7 @@
 internal import MistKitOpenAPI
 
 extension Operations.listZones.Output: CloudKitResponseType {
+  // swiftlint:disable:next cyclomatic_complexity
   internal func toCloudKitError() -> CloudKitError? {
     switch self {
     case .ok: return nil

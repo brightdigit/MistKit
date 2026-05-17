@@ -32,9 +32,12 @@
 /// CloudKit accepts server-to-server signing only against the **public**
 /// database. Private and shared databases require web-auth credentials.
 public struct ServerToServerCredentials: Sendable {
+  /// Hex-encoded CloudKit server-to-server key ID issued in CloudKit Dashboard.
   public let keyID: String
+  /// EC P-256 private key material that signs each CloudKit request.
   public let privateKey: PrivateKeyMaterial
 
+  /// Construct credentials from a CloudKit key ID and matching private key.
   public init(keyID: String, privateKey: PrivateKeyMaterial) {
     self.keyID = keyID
     self.privateKey = privateKey

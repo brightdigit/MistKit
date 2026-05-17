@@ -87,7 +87,9 @@ internal struct LoggingMiddleware: ClientMiddleware {
       )
     }
 
-    guard logger.logLevel <= .debug else { return body }
+    guard logger.logLevel <= .debug else {
+      return body
+    }
 
     #if !os(WASI)
       return await logResponseBody(body)

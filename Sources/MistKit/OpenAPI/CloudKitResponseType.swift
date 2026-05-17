@@ -31,12 +31,12 @@
 /// Conformers exhaustively switch over their response cases so a new case in
 /// `openapi.yaml` becomes a build error instead of being silently dropped.
 ///
-/// - TODO: The per-operation `Operations.*.Output` conformances in
+/// - Note: The per-operation `Operations.*.Output` conformances in
 ///   `OpenAPI/Operations/Operations.*.Output.swift` are mechanical, identical
 ///   except for the type name, and replicate the same status-code-to-case
-///   mapping. Replace them with an internal attached macro
-///   (e.g. `@CloudKitResponse`) that synthesizes `toCloudKitError()` from
-///   the response enum's cases, eliminating ~13 boilerplate files.
+///   mapping. A future refactor could replace them with an internal attached
+///   macro (e.g. `@CloudKitResponse`) that synthesizes `toCloudKitError()`
+///   from the response enum's cases, eliminating ~13 boilerplate files.
 internal protocol CloudKitResponseType {
   /// Returns the `CloudKitError` for this response, or `nil` for `.ok`.
   func toCloudKitError() -> CloudKitError?

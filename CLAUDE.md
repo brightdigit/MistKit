@@ -115,7 +115,7 @@ swift run mistdemo --config-file ~/.mistdemo/config.json query
 MistKit uses separate types for requests and responses at the OpenAPI schema level to accurately model CloudKit's asymmetric API behavior:
 
 **Type Layers:**
-1. **Domain Layer**: `FieldValue` enum - Pure Swift types, no API metadata (`Sources/MistKit/Models/FieldValue.swift`)
+1. **Domain Layer**: `FieldValue` enum - Pure Swift types, no API metadata (`Sources/MistKit/Models/FieldValues/FieldValue.swift`)
 2. **API Request Layer**: `FieldValueRequest` - No type field, CloudKit infers type from value structure
 3. **API Response Layer**: `FieldValueResponse` - Optional type field for explicit type information
 
@@ -133,8 +133,8 @@ MistKit uses separate types for requests and responses at the OpenAPI schema lev
 - `Components.Schemas.RecordResponse` - Records in response bodies
 
 **Conversion:**
-- Request conversion: `Extensions/OpenAPI/Components+FieldValue.swift` converts domain `FieldValue` → `FieldValueRequest`
-- Response conversion: `Service/FieldValue+Components.swift` converts `FieldValueResponse` → domain `FieldValue`
+- Request conversion: `Sources/MistKit/OpenAPI/Components/Components.Schemas.FieldValueRequest.swift` converts domain `FieldValue` → `FieldValueRequest`
+- Response conversion: `Sources/MistKit/Models/FieldValues/FieldValue+Components.swift` converts `FieldValueResponse` → domain `FieldValue`
 
 ### Modern Swift Features to Utilize
 - Swift Concurrency (async/await) for all network operations
@@ -159,7 +159,7 @@ MistKit/
 
 ### CloudKitService Operations
 
-`CloudKitService` operations are split across focused extension files:
+`CloudKitService` operations are split across focused extension files (all paths relative to `Sources/MistKit/CloudKitService/`):
 
 | File | Operations |
 |------|-----------|
@@ -191,7 +191,7 @@ MistKit/
 
 In MistDemo, integration runs targeting these endpoints use `PhaseContext.userContextService` (a public+web-auth `CloudKitService`) which is built from `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` regardless of the primary `--database` selection. The `DatabaseConfiguration` / `AuthenticationCredentials` types in `Examples/MistDemo/Sources/MistDemoKit/Configuration/` enforce valid database+auth combinations at construction time.
 
-**Result Types (Sources/MistKit/Service/):**
+**Result Types (Sources/MistKit/Models/ and Sources/MistKit/Models/Zones/):**
 - `QueryResult` — `records: [RecordInfo]`, `continuationMarker: String?`
 - `RecordChangesResult` — `records: [RecordInfo]`, `syncToken: String?`, `moreComing: Bool`
 - `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`, `moreComing: Bool`
@@ -200,7 +200,7 @@ In MistDemo, integration runs targeting these endpoints use `PhaseContext.userCo
 - `NameComponents` — full personal name parts (givenName, familyName, nickname, etc.)
 
 **Protocols:**
-- `RecordTypeIterating` (`Sources/MistKit/Protocols/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; used by `fetchAllRecordChanges`
+- `RecordTypeIterating` (`Sources/MistKit/RecordManagement/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; used by `fetchAllRecordChanges`
 
 ### Key Design Principles
 1. **Protocol-Oriented**: Define protocols for all major components (TokenManager, NetworkClient, etc.)
@@ -211,7 +211,7 @@ In MistDemo, integration runs targeting these endpoints use `PhaseContext.userCo
 ### Logging
 MistKit uses [swift-log](https://github.com/apple/swift-log) for cross-platform logging. The package emits to four labeled subsystems; consumers install a `LogHandler` and choose verbosity via `logLevel`.
 
-**Subsystems** (declared in `Sources/MistKit/Logger+Subsystem.swift`):
+**Subsystems** (declared in `Sources/MistKit/Extensions/Logger+Subsystem.swift`):
 
 | Label | Use |
 |-------|-----|
@@ -260,12 +260,12 @@ Asset uploads use `URLSession.shared` directly rather than the injected `ClientT
 
 **Implementation Details:**
 - AssetUploader type: `(Data, URL) async throws -> (statusCode: Int?, data: Data)`
-- Defined in: `Sources/MistKit/Core/AssetUploader.swift`
-- URLSession extension: `Sources/MistKit/Extensions/URLSession+AssetUpload.swift`
+- Defined in: `Sources/MistKit/Models/AssetUploading/AssetUploader.swift`
+- URLSession extension: `Sources/MistKit/Models/AssetUploading/URLSession+AssetUpload.swift`
 - Upload orchestration:
-  - `uploadAssets()` - Complete two-step upload workflow → `Sources/MistKit/Service/CloudKitService+AssetOperations.swift`
-  - `requestAssetUploadURL()` - Step 1: Get CDN upload URL → `Sources/MistKit/Service/CloudKitService+AssetOperations.swift`
-  - `uploadAssetData()` - Step 2: Upload binary data to CDN → `Sources/MistKit/Service/CloudKitService+AssetUpload.swift`
+  - `uploadAssets()` - Complete two-step upload workflow → `Sources/MistKit/CloudKitService/CloudKitService+AssetOperations.swift`
+  - `requestAssetUploadURL()` - Step 1: Get CDN upload URL → `Sources/MistKit/CloudKitService/CloudKitService+AssetOperations.swift`
+  - `uploadAssetData()` - Step 2: Upload binary data to CDN → `Sources/MistKit/CloudKitService/CloudKitService+AssetUpload.swift`
 
 **Future Consideration:**
 A `ClientTransport` extension could provide a generic upload method, but would need to:
@@ -277,9 +277,9 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 
 `FilterBuilder` is split across extension files for maintainability:
 
-- `Sources/MistKit/Helpers/FilterBuilder.swift` — core comparators (EQUALS, NOT_EQUALS, LESS_THAN, etc.) and IN/NOT_IN
-- `Sources/MistKit/Helpers/FilterBuilder+StringFilters.swift` — string-specific: `beginsWith`, `notBeginsWith`, `containsAllTokens`
-- `Sources/MistKit/Helpers/FilterBuilder+ListMemberFilters.swift` — list-specific: `listContains`, etc.
+- `Sources/MistKit/Models/Queries/FilterBuilder/FilterBuilder.swift` — core comparators (EQUALS, NOT_EQUALS, LESS_THAN, etc.) and IN/NOT_IN
+- `Sources/MistKit/Models/Queries/FilterBuilder/FilterBuilder+StringFilters.swift` — string-specific: `beginsWith`, `notBeginsWith`, `containsAllTokens`
+- `Sources/MistKit/Models/Queries/FilterBuilder/FilterBuilder+ListMemberFilters.swift` — list-specific: `listContains`, etc.
 
 **IN/NOT_IN serialization:** Uses `ListValuePayload` (`Components.Schemas.ListValuePayload`) to wrap array values. The fix in v1.0.0-alpha.5 ensures the correct `value` key structure is used when serializing list comparators.
 
@@ -312,7 +312,7 @@ public enum Database {
 - `.requires(.serverToServer)` — must use S2S; throw `missingCredentials(.preferenceRequired)` otherwise.
 - `.requires(.webAuth)` — must use web-auth; throw `missingCredentials(.preferenceRequired)` otherwise.
 
-There is **no default** on the operation `database:` parameter — every call must pick explicitly. The `requiresUserContext` flag on the dispatcher is gone; user-context routes (`users/*`) pass `.public(.requires(.webAuth))` directly. See `Sources/MistKit/Authentication/PublicAuthPreference.swift` and `Sources/MistKit/Authentication/Credentials/Credentials+TokenManager.swift`.
+There is **no default** on the operation `database:` parameter — every call must pick explicitly. The `requiresUserContext` flag on the dispatcher is gone; user-context routes (`users/*`) pass `.public(.requires(.webAuth))` directly. See `Sources/MistKit/Authentication/PublicAuthPreference.swift` and `Sources/MistKit/Authentication/Credentials+TokenManager.swift`.
 
 ### Testing Strategy
 - Use Swift Testing framework (`@Test` macro) for all tests
@@ -332,8 +332,8 @@ There is **no default** on the operation `database:` parameter — every call mu
 - Mock uploaders should simulate realistic HTTP responses
 
 **Test Files:**
-- `Tests/MistKitTests/Service/CloudKitServiceUpload/CloudKitServiceTests.Upload+*.swift`
-- `Tests/MistKitTests/Service/AssetUploadTokenTests.swift`
+- `Tests/MistKitTests/CloudKitService/Upload/CloudKitServiceTests.Upload+*.swift`
+- `Tests/MistKitTests/Models/AssetUploading/AssetUploadTokenTests.swift`
 
 ### MistDemo Integration Test Runner
 

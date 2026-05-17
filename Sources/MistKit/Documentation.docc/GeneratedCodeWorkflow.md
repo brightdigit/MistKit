@@ -4,7 +4,7 @@ When to regenerate, what to commit, and how to review changes when `openapi.yaml
 
 ## Overview
 
-MistKit commits its generated OpenAPI client code (`Sources/MistKit/Generated/Client.swift`, `Types.swift`) so that consumers don't need any generation tooling. The trade-off is that contributors take on a small discipline: regenerate after editing `openapi.yaml`, commit the spec change and the regenerated files together, and review the diff like any other code.
+MistKit commits its generated OpenAPI client code (`Sources/MistKitOpenAPI/Client.swift`, `Types.swift`) so that consumers don't need any generation tooling. The trade-off is that contributors take on a small discipline: regenerate after editing `openapi.yaml`, commit the spec change and the regenerated files together, and review the diff like any other code.
 
 This article walks the workflow. For the toolchain itself see <doc:OpenAPICodeGeneration>; for what the generated code looks like see <doc:GeneratedCodeAnalysis>.
 
@@ -57,14 +57,14 @@ Common edits:
 ./Scripts/generate-openapi.sh
 ```
 
-The script puts mise-managed binaries on `$PATH`, then runs `swift-openapi-generator generate` with `openapi-generator-config.yaml`. Both `Sources/MistKit/Generated/Client.swift` and `Sources/MistKit/Generated/Types.swift` are overwritten.
+The script puts mise-managed binaries on `$PATH`, then runs `swift-openapi-generator generate` with `openapi-generator-config.yaml`. Both `Sources/MistKitOpenAPI/Client.swift` and `Sources/MistKitOpenAPI/Types.swift` are overwritten.
 
 ### 3. Update the wrapper
 
 The hand-written layer often needs to follow. Common follow-ups:
 
-- New operation → add a method on ``CloudKitService`` (typically a new file under `Service/Extensions/CloudKitService+*.swift`).
-- New schema → add a domain model under `Service/Models/` and the conversion under `Service/FieldValueConversion/` or `Extensions/OpenAPI/Components/`.
+- New operation → add a method on ``CloudKitService`` (typically a new file under `Sources/MistKit/CloudKitService/CloudKitService+*.swift`).
+- New schema → add a domain model under `Sources/MistKit/Models/` and the conversion under `Sources/MistKit/Models/FieldValues/` (response → domain) or `Sources/MistKit/OpenAPI/Components/` (domain → request).
 - Renamed enum case → fix any switch statements that referenced the old name. The compiler will list every site.
 - Removed schema → remove any wrapper code that referenced it.
 
@@ -89,7 +89,7 @@ Or the full pipeline:
 Both the spec change and the regenerated files should land in the same commit (or back-to-back commits) so `git bisect` and code review can tell what produced the change:
 
 ```bash
-git add openapi.yaml Sources/MistKit/Generated/ Sources/MistKit/…  # wrapper updates
+git add openapi.yaml Sources/MistKitOpenAPI/ Sources/MistKit/…  # wrapper updates
 git commit -m "feat(records): add /records/lookupChanges endpoint"
 ```
 
@@ -160,7 +160,7 @@ mise install
 ./Scripts/generate-openapi.sh
 
 # 4. Review the diff
-git diff Sources/MistKit/Generated/
+git diff Sources/MistKitOpenAPI/
 
 # 5. Build + test
 swift build && swift test
@@ -177,7 +177,7 @@ Commit message style:
 ```
 chore(deps): bump swift-openapi-generator to 1.11.0 in mise.toml
 
-Regenerated Sources/MistKit/Generated/. Tests pass; wrapper layer
+Regenerated Sources/MistKitOpenAPI/. Tests pass; wrapper layer
 unaffected.
 ```
 
@@ -197,7 +197,7 @@ A typical CI job to verify generated code is up to date:
 
 - name: Fail if generated code drifts from spec
   run: |
-    if ! git diff --exit-code Sources/MistKit/Generated/; then
+    if ! git diff --exit-code Sources/MistKitOpenAPI/; then
       echo "::error::Generated code is out of date. Run ./Scripts/generate-openapi.sh and commit."
       exit 1
     fi
@@ -212,7 +212,7 @@ This catches the "edited `openapi.yaml`, forgot to commit the regenerated files"
 
 ### Generated code refers to a symbol that doesn't exist
 
-The committed `Generated/` files were produced from an earlier `openapi.yaml`. Regenerate:
+The committed files under `Sources/MistKitOpenAPI/` were produced from an earlier `openapi.yaml`. Regenerate:
 
 ```bash
 ./Scripts/generate-openapi.sh
@@ -234,7 +234,7 @@ Don't resolve by hand. Take one side arbitrarily, then regenerate from the merge
 
 ```bash
 # Accept either side of the generated diff (doesn't matter which)
-git checkout --theirs Sources/MistKit/Generated/
+git checkout --theirs Sources/MistKitOpenAPI/
 
 # Resolve the openapi.yaml conflict normally
 $EDITOR openapi.yaml
@@ -243,23 +243,23 @@ $EDITOR openapi.yaml
 ./Scripts/generate-openapi.sh
 
 # Stage the now-correct generated files
-git add openapi.yaml Sources/MistKit/Generated/
+git add openapi.yaml Sources/MistKitOpenAPI/
 ```
 
 ### Wrapper test fails after regeneration
 
 A schema change rippled into the wrapper's conversion layer. Look at:
 
-- `Service/FieldValueConversion/FieldValue+Components.swift` — response → domain
-- `Extensions/OpenAPI/Components+FieldValue.swift` — domain → request
-- `Service/ResponseProcessing/` — generated error → ``CloudKitError`` mapping
-- `Service/Models/` — domain models that mirror schema fields
+- `Sources/MistKit/Models/FieldValues/FieldValue+Components.swift` — response → domain
+- `Sources/MistKit/OpenAPI/Components/Components.Schemas.FieldValueRequest.swift` — domain → request
+- `Sources/MistKit/CloudKitService/CloudKitResponseProcessor*.swift` plus `Sources/MistKit/OpenAPI/Operations/Operations.*.Output.swift` — generated error → ``CloudKitError`` mapping
+- `Sources/MistKit/Models/` — domain models that mirror schema fields
 
 Fix the conversion, re-run `swift test`.
 
 ## What never to do
 
-- **Don't edit `Sources/MistKit/Generated/` by hand.** Any change is silently lost the next time someone regenerates.
+- **Don't edit `Sources/MistKitOpenAPI/` by hand.** Any change is silently lost the next time someone regenerates.
 - **Don't commit `openapi.yaml` without the matching regenerated files.** The next CI run (and the next contributor) will surface drift.
 - **Don't `--no-verify` past pre-commit hooks** to bypass linting on regenerated code. The `additionalFileComments` in `openapi-generator-config.yaml` emit `swift-format-ignore-file` and `periphery:ignore:all` so the linters already skip these files; if something complains, investigate before bypassing.
 - **Don't ignore drift warnings in CI.** They almost always mean either an upstream generator update or someone forgot to commit a regeneration.

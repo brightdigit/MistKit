@@ -7,7 +7,7 @@ What `swift-openapi-generator` produces from `openapi.yaml`, how those types are
 Running `./Scripts/generate-openapi.sh` emits two files:
 
 ```
-Sources/MistKit/Generated/
+Sources/MistKitOpenAPI/
 ├── Client.swift  (~3,600 lines)
 └── Types.swift   (~8,600 lines)
 ```
@@ -237,13 +237,15 @@ CloudKit's API is asymmetric — request bodies omit the `type` field, response 
 
 The compiler refuses to put a response value in a request. MistKit's wrapper hides the split behind a single domain ``FieldValue`` enum and converts at the boundary:
 
-- Outgoing: `Extensions/OpenAPI/Components+FieldValue.swift` converts ``FieldValue`` → `FieldValueRequest`.
-- Incoming: `Service/FieldValueConversion/FieldValue+Components.swift` converts `FieldValueResponse` → ``FieldValue``.
+- Outgoing: `Sources/MistKit/OpenAPI/Components/Components.Schemas.FieldValueRequest.swift` converts ``FieldValue`` → `FieldValueRequest`.
+- Incoming: `Sources/MistKit/Models/FieldValues/FieldValue+Components.swift` converts `FieldValueResponse` → ``FieldValue``.
 
 ### Error responses
 
+CloudKit's HTTP error responses share one body schema regardless of status code. The OpenAPI spec models this as a single unified `Failure` response:
+
 ```swift
-internal struct ErrorResponse: Codable, Hashable, Sendable {
+internal struct Failure: Codable, Hashable, Sendable {
   internal var uuid: Swift.String?
   internal enum serverErrorCodePayload: String, Codable, Hashable, Sendable {
     case ACCESS_DENIED, ATOMIC_ERROR, AUTHENTICATION_FAILED, AUTHENTICATION_REQUIRED,
@@ -257,7 +259,7 @@ internal struct ErrorResponse: Codable, Hashable, Sendable {
 }
 ```
 
-`CloudKitResponseProcessor` (under `Service/ResponseProcessing/`) maps these into ``CloudKitError`` cases so callers never see the generated payload type.
+The wrapper's `CloudKitResponseType` protocol (`Sources/MistKit/OpenAPI/CloudKitResponseType.swift`) plus its per-operation conformances under `Sources/MistKit/OpenAPI/Operations/Operations.*.Output.swift` map each operation's status-keyed response cases into ``CloudKitError`` cases so callers never see the generated payload type. `CloudKitResponseProcessor` (`Sources/MistKit/CloudKitService/CloudKitResponseProcessor*.swift`) handles the dispatching side.
 
 ### Parameters
 
@@ -373,7 +375,7 @@ Three integration points connect the wrapper to the generated layer:
 
 ### 1. CloudKitService builds a Client per dispatch
 
-Operations under `Service/Extensions/CloudKitService+*.swift` instantiate the generated `Client` with `Servers.Server1.url()`, the configured transport, and a middleware chain headed by `AuthenticationMiddleware`. A fresh client per dispatch keeps each request's authenticator independent and makes per-call ``Database`` selection straightforward.
+Operations under `Sources/MistKit/CloudKitService/CloudKitService+*.swift` instantiate the generated `Client` with `Servers.Server1.url()`, the configured transport, and a middleware chain headed by `AuthenticationMiddleware`. A fresh client per dispatch keeps each request's authenticator independent and makes per-call ``Database`` selection straightforward.
 
 ### 2. AuthenticationMiddleware delegates to Authenticator
 

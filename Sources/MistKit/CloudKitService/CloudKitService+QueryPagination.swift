@@ -45,6 +45,7 @@ extension CloudKitService {
   ///   - desiredKeys: Optional array of field names to fetch
   ///   - maxPages: Maximum number of pages to fetch before throwing
   ///     `CloudKitError.paginationLimitExceeded` (defaults to 1,000)
+  ///   - database: The CloudKit database scope to query (`.public`, `.private`, `.shared`)
   /// - Returns: Array of all matching records across all pages
   /// - Throws: `CloudKitError`. When `maxPages` is exceeded, throws
   ///   `.paginationLimitExceeded(maxPages:records:)` whose `records`
