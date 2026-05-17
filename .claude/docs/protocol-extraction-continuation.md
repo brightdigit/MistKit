@@ -441,8 +441,8 @@ struct XcodeVersionRecord: CloudKitRecord {
     var version: String
     var buildNumber: String
     var releaseDate: Date
-    var swiftVersion: FieldValue.Reference  // Reference to SwiftVersionRecord
-    var macOSVersion: FieldValue.Reference  // Reference to another record
+    var swiftVersion: Reference  // Reference to SwiftVersionRecord
+    var macOSVersion: Reference  // Reference to another record
 
     // Implement protocol requirements...
 }

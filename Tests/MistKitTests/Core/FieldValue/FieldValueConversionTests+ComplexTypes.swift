@@ -13,7 +13,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let location = FieldValue.Location(
+      let location = Location(
         latitude: 37.7749,
         longitude: -122.4194,
         horizontalAccuracy: 10.0,
@@ -46,7 +46,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let location = FieldValue.Location(latitude: 0.0, longitude: 0.0)
+      let location = Location(latitude: 0.0, longitude: 0.0)
       let fieldValue = FieldValue.location(location)
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
@@ -70,7 +70,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let reference = FieldValue.Reference(recordName: "test-record-123")
+      let reference = Reference(recordName: "test-record-123")
       let fieldValue = FieldValue.reference(reference)
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
@@ -88,7 +88,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let reference = FieldValue.Reference(recordName: "test-record-456", action: .deleteSelf)
+      let reference = Reference(recordName: "test-record-456", action: .deleteSelf)
       let fieldValue = FieldValue.reference(reference)
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 
@@ -106,8 +106,8 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let reference = FieldValue.Reference(
-        recordName: "test-record-789", action: FieldValue.Reference.Action.none
+      let reference = Reference(
+        recordName: "test-record-789", action: Reference.Action.none
       )
       let fieldValue = FieldValue.reference(reference)
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
@@ -126,7 +126,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let asset = FieldValue.Asset(
+      let asset = Asset(
         fileChecksum: "abc123",
         size: 1_024,
         referenceChecksum: "def456",
@@ -155,7 +155,7 @@ extension FieldValueConversionTests {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      let asset = FieldValue.Asset()
+      let asset = Asset()
       let fieldValue = FieldValue.asset(asset)
       let components = Components.Schemas.FieldValueRequest(from: fieldValue)
 

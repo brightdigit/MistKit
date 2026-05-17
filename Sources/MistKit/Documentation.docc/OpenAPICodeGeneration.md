@@ -36,7 +36,7 @@ Hand-written wrapper (Sources/MistKit/, committed)
      ├── CloudKitService + extensions
      ├── Authenticator family + AuthenticationMiddleware
      ├── FieldValue / RecordInfo / QueryFilter / …
-     └── CustomFieldValue + FieldValueRequest/Response conversions
+     └── FieldValueRequest/Response conversions
 ```
 
 ## Toolchain: mise
@@ -171,8 +171,6 @@ The compiler refuses to slot a response value into a request, and vice versa. Co
 
 - `Extensions/OpenAPI/Components+FieldValue.swift` — domain → `FieldValueRequest`.
 - `Service/FieldValueConversion/FieldValue+Components.swift` — `FieldValueResponse` → domain.
-
-A previous version of this configuration used a `typeOverrides` override to substitute a single `CustomFieldValue`. That approach pre-dated the schema split; the current setup is the cleaner one.
 
 ## Files produced
 

@@ -1,6 +1,6 @@
 //
-//  CloudKitCommand.swift
-//  MistDemo
+//  FieldValue.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,28 +27,17 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-public import MistKit
+public import Foundation
 
-/// Protocol for commands that interact with CloudKit.
-public protocol CloudKitCommand {
-  /// The CloudKit container identifier.
-  var containerIdentifier: String { get }
-  /// The CloudKit API token.
-  var apiToken: String { get }
-  /// The CloudKit environment (development or production).
-  var environment: String { get }
-}
-
-extension CloudKitCommand {
-  /// Resolve API token from option or environment variable
-  public func resolvedApiToken() -> String {
-    apiToken.isEmpty
-      ? ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"] ?? "" : apiToken
-  }
-
-  /// Convert environment string to MistKit Environment
-  public func cloudKitEnvironment() -> MistKit.Environment {
-    environment == "production" ? .production : .development
-  }
+/// Represents a CloudKit field value as defined in the CloudKit Web Services API
+public enum FieldValue: Codable, Equatable, Sendable {
+  case string(String)
+  case int64(Int)
+  case double(Double)
+  case bytes(String)  // Base64-encoded string
+  case date(Date)  // Date/time value
+  case location(Location)
+  case reference(Reference)
+  case asset(Asset)
+  case list([FieldValue])
 }

@@ -1,5 +1,5 @@
 //
-//  SortDescriptor.swift
+//  AssetUploadReceipt.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,37 +27,26 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-internal import MistKitOpenAPI
+/// Receipt from uploading an asset to CloudKit
+///
+/// After uploading binary data to CloudKit, you receive an asset dictionary containing
+/// the receipt, checksums, and other metadata needed to associate the asset with a record.
+/// This type contains that complete asset information along with the target record and field.
+public struct AssetUploadReceipt: Codable, Sendable {
+  /// The complete asset data including receipt and checksums
+  /// Use this when creating or updating records
+  public let asset: Asset
 
-/// A builder for constructing CloudKit query sort descriptors
-internal struct SortDescriptor {
-  // MARK: - Lifecycle
+  /// The record name this asset is associated with
+  public let recordName: String
 
-  private init() {}
+  /// The field name this asset should be assigned to
+  public let fieldName: String
 
-  // MARK: - Public
-
-  /// Creates an ascending sort descriptor
-  /// - Parameter field: The field name to sort by
-  /// - Returns: A configured Sort
-  internal static func ascending(_ field: String) -> Components.Schemas.Sort {
-    .init(fieldName: field, ascending: true)
-  }
-
-  /// Creates a descending sort descriptor
-  /// - Parameter field: The field name to sort by
-  /// - Returns: A configured Sort
-  internal static func descending(_ field: String) -> Components.Schemas.Sort {
-    .init(fieldName: field, ascending: false)
-  }
-
-  /// Creates a sort descriptor with explicit direction
-  /// - Parameters:
-  ///   - field: The field name to sort by
-  ///   - ascending: Whether to sort in ascending order
-  /// - Returns: A configured Sort
-  internal static func sort(_ field: String, ascending: Bool = true) -> Components.Schemas.Sort {
-    .init(fieldName: field, ascending: ascending)
+  /// Initialize an asset upload receipt
+  public init(asset: Asset, recordName: String, fieldName: String) {
+    self.asset = asset
+    self.recordName = recordName
+    self.fieldName = fieldName
   }
 }

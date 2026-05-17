@@ -115,7 +115,7 @@ swift run mistdemo --config-file ~/.mistdemo/config.json query
 MistKit uses separate types for requests and responses at the OpenAPI schema level to accurately model CloudKit's asymmetric API behavior:
 
 **Type Layers:**
-1. **Domain Layer**: `FieldValue` enum - Pure Swift types, no API metadata (Sources/MistKit/FieldValue.swift)
+1. **Domain Layer**: `FieldValue` enum - Pure Swift types, no API metadata (`Sources/MistKit/Models/FieldValue.swift`)
 2. **API Request Layer**: `FieldValueRequest` - No type field, CloudKit infers type from value structure
 3. **API Response Layer**: `FieldValueResponse` - Optional type field for explicit type information
 

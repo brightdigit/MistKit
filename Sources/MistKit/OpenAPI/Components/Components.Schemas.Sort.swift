@@ -36,4 +36,27 @@ extension Components.Schemas.Sort {
   internal init(from querySort: QuerySort) {
     self = querySort.sort
   }
+
+  /// Creates an ascending sort descriptor
+  /// - Parameter field: The field name to sort by
+  /// - Returns: A configured Sort
+  internal static func ascending(_ field: String) -> Self {
+    .init(fieldName: field, ascending: true)
+  }
+
+  /// Creates a descending sort descriptor
+  /// - Parameter field: The field name to sort by
+  /// - Returns: A configured Sort
+  internal static func descending(_ field: String) -> Self {
+    .init(fieldName: field, ascending: false)
+  }
+
+  /// Creates a sort descriptor with explicit direction
+  /// - Parameters:
+  ///   - field: The field name to sort by
+  ///   - ascending: Whether to sort in ascending order
+  /// - Returns: A configured Sort
+  internal static func sort(_ field: String, ascending: Bool = true) -> Self {
+    .init(fieldName: field, ascending: ascending)
+  }
 }

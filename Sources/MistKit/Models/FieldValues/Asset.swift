@@ -1,6 +1,6 @@
 //
-//  CloudKitCommand.swift
-//  MistDemo
+//  Asset.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,28 +27,35 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-public import MistKit
+/// Asset dictionary as defined in CloudKit Web Services
+public struct Asset: Codable, Equatable, Sendable {
+  /// The file checksum
+  public let fileChecksum: String?
+  /// The file size in bytes
+  public let size: Int64?
+  /// The reference checksum
+  public let referenceChecksum: String?
+  /// The wrapping key for encryption
+  public let wrappingKey: String?
+  /// The upload receipt
+  public let receipt: String?
+  /// The download URL
+  public let downloadURL: String?
 
-/// Protocol for commands that interact with CloudKit.
-public protocol CloudKitCommand {
-  /// The CloudKit container identifier.
-  var containerIdentifier: String { get }
-  /// The CloudKit API token.
-  var apiToken: String { get }
-  /// The CloudKit environment (development or production).
-  var environment: String { get }
-}
-
-extension CloudKitCommand {
-  /// Resolve API token from option or environment variable
-  public func resolvedApiToken() -> String {
-    apiToken.isEmpty
-      ? ProcessInfo.processInfo.environment["CLOUDKIT_API_TOKEN"] ?? "" : apiToken
-  }
-
-  /// Convert environment string to MistKit Environment
-  public func cloudKitEnvironment() -> MistKit.Environment {
-    environment == "production" ? .production : .development
+  /// Initialize an asset value
+  public init(
+    fileChecksum: String? = nil,
+    size: Int64? = nil,
+    referenceChecksum: String? = nil,
+    wrappingKey: String? = nil,
+    receipt: String? = nil,
+    downloadURL: String? = nil
+  ) {
+    self.fileChecksum = fileChecksum
+    self.size = size
+    self.referenceChecksum = referenceChecksum
+    self.wrappingKey = wrappingKey
+    self.receipt = receipt
+    self.downloadURL = downloadURL
   }
 }

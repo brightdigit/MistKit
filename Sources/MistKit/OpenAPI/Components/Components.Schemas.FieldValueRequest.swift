@@ -44,7 +44,7 @@ extension Components.Schemas.FieldValueRequest {
   }
 
   /// Initialize from Location to Components LocationValue
-  private init(location: FieldValue.Location) {
+  private init(location: Location) {
     let locationValue = Components.Schemas.LocationValue(
       latitude: location.latitude,
       longitude: location.longitude,
@@ -59,7 +59,7 @@ extension Components.Schemas.FieldValueRequest {
   }
 
   /// Initialize from Reference to Components ReferenceValue
-  private init(reference: FieldValue.Reference) {
+  private init(reference: Reference) {
     let action: Components.Schemas.ReferenceValue.actionPayload?
     switch reference.action {
     case .some(.deleteSelf):
@@ -77,7 +77,7 @@ extension Components.Schemas.FieldValueRequest {
   }
 
   /// Initialize from Asset to Components AssetValue
-  private init(asset: FieldValue.Asset) {
+  private init(asset: Asset) {
     let assetValue = Components.Schemas.AssetValue(
       fileChecksum: asset.fileChecksum,
       size: asset.size,

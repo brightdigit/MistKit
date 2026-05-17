@@ -26,7 +26,7 @@ extension QueryFilterTests {
         Issue.record("QueryFilter is not available on this operating system.")
         return
       }
-      let reference = FieldValue.Reference(recordName: "parent-record-123")
+      let reference = Reference(recordName: "parent-record-123")
       let filter = QueryFilter.equals("parentRef", .reference(reference))
       let components = Components.Schemas.Filter(from: filter)
       #expect(components.comparator == .EQUALS)

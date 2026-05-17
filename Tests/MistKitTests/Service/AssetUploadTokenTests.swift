@@ -86,7 +86,7 @@ internal struct AssetUploadTokenTests {
 
   @Test("AssetUploadReceipt initializes with all fields")
   internal func assetUploadReceiptInitializesWithAllFields() {
-    let asset = FieldValue.Asset(
+    let asset = Asset(
       fileChecksum: "abc123",
       size: 1_024,
       referenceChecksum: "ref456",
@@ -110,7 +110,7 @@ internal struct AssetUploadTokenTests {
 
   @Test("AssetUploadReceipt initializes with minimal asset data")
   internal func assetUploadReceiptInitializesWithMinimalAssetData() {
-    let asset = FieldValue.Asset(receipt: "minimal-receipt")
+    let asset = Asset(receipt: "minimal-receipt")
 
     let result = AssetUploadReceipt(
       asset: asset,

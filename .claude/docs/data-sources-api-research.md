@@ -386,7 +386,7 @@ let createdAt: FieldValue = .date(Date())
 
 // Reference to another record
 let categoryRef: FieldValue = .reference(
-    FieldValue.Reference(
+    Reference(
         recordName: "category-123",
         action: nil  // or "DELETE_SELF" for cascade delete
     )
@@ -394,7 +394,7 @@ let categoryRef: FieldValue = .reference(
 
 // Location
 let location: FieldValue = .location(
-    FieldValue.Location(
+    Location(
         latitude: 37.7749,
         longitude: -122.4194
     )

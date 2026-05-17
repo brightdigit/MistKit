@@ -135,7 +135,7 @@ The response `type` field is essential here — without it, a timestamp would be
 
 ## Known Gap: Asset Schema Is Not Split
 
-Unlike `FieldValue`, the `AssetValue` schema is **not** split into request/response variants. A single `AssetValue` is referenced from both `FieldValueRequest` and `FieldValueResponse` (`openapi.yaml:1016`), and the domain-level `FieldValue.Asset` struct mirrors that — all fields are optional on a single type.
+Unlike `FieldValue`, the `AssetValue` schema is **not** split into request/response variants. A single `AssetValue` is referenced from both `FieldValueRequest` and `FieldValueResponse` (`openapi.yaml:1016`), and the domain-level `Asset` struct mirrors that — all fields are optional on a single type.
 
 ### Why this is a gap
 
@@ -163,7 +163,7 @@ Rather than splitting the schema, the asymmetry is handled at the **service laye
 
 ### Future work
 
-Splitting `AssetValue` → `AssetValueRequest` + `AssetValueResponse` in `openapi.yaml` (mirroring the `FieldValueRequest`/`FieldValueResponse` split) would push this asymmetry into the type system. The blocker is that `FieldValue.Asset` is a single public domain type — splitting it would either require two domain types (breaking the 9-case enum symmetry) or a domain-level distinction the public API currently doesn't make.
+Splitting `AssetValue` → `AssetValueRequest` + `AssetValueResponse` in `openapi.yaml` (mirroring the `FieldValueRequest`/`FieldValueResponse` split) would push this asymmetry into the type system. The blocker is that `Asset` is a single public domain type — splitting it would either require two domain types (breaking the 9-case enum symmetry) or a domain-level distinction the public API currently doesn't make.
 
 ## Recursive List Handling
 

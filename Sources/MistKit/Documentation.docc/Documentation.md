@@ -73,33 +73,49 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. S
 
 ## Topics
 
-### Essentials
+### Getting Started
 
-- <doc:AuthenticationAndDatabases>
+- <doc:AbstractionLayerArchitecture>
 - ``CloudKitService``
-- ``Credentials``
 - ``Database``
 - ``Environment``
+- ``CloudKitError``
+- ``RecordInfo``
+- ``FieldValue``
+- ``QueryFilter``
+- ``QuerySort``
+- ``QueryResult``
+- ``RecordOperation``
+- ``RecordChangesResult``
+- ``RecordTimestamp``
+- ``ZoneID``
+- ``ZoneInfo``
+- ``ZoneOperation``
+- ``ZoneChangesResult``
+- ``UserInfo``
+- ``UserIdentity``
+- ``UserIdentityLookupInfo``
+- ``NameComponents``
+- ``OperationClassification``
+- ``BatchSyncResult``
+- ``AssetUploadResponse``
+- ``AssetUploadReceipt``
+- ``AssetUploadToken``
+- ``AssetUploader``
 
-### Authentication primitives
+### Authentication
 
+- <doc:AuthenticationAndDatabases>
+- ``Credentials``
 - ``APICredentials``
 - ``ServerToServerCredentials``
-- ``PrivateKeyMaterial``
 - ``PublicAuthPreference``
+- ``PrivateKeyMaterial``
 - ``RequestSignature``
-
-### Custom authenticators
-
 - ``Authenticator``
 - ``APITokenAuthenticator``
 - ``WebAuthTokenAuthenticator``
 - ``ServerToServerAuthenticator``
-
-### Advanced — custom token managers and storage
-
-The `TokenManager` protocol drives `AuthenticationMiddleware` for every dispatched request. Most code never touches it: pass a ``Credentials`` to ``CloudKitService`` and per-call resolution picks the right manager. Provide your own implementation only when ``Credentials``-driven selection isn't appropriate — for example, dynamic refresh against a remote secret store. Inject it via the bespoke `init(containerIdentifier:tokenManager:environment:transport:)` overload.
-
 - ``TokenManager``
 - ``APITokenManager``
 - ``WebAuthTokenManager``
@@ -108,54 +124,28 @@ The `TokenManager` protocol drives `AuthenticationMiddleware` for every dispatch
 - ``AuthenticationMode``
 - ``TokenStorage``
 - ``InMemoryTokenStorage``
-- ``TokenStorageError``
-
-### Operation results
-
-- ``QueryResult``
-- ``RecordInfo``
-- ``RecordChangesResult``
-- ``ZoneChangesResult``
-- ``ZoneInfo``
-- ``ZoneID``
-- ``ZoneOperation``
-- ``UserInfo``
-- ``UserIdentity``
-- ``UserIdentityLookupInfo``
-- ``NameComponents``
-- ``RecordTimestamp``
-- ``OperationClassification``
-- ``BatchSyncResult``
-
-### Field values
-
-- ``FieldValue``
-- ``QueryFilter``
-- ``QuerySort``
-
-### Asset upload
-
-- ``AssetUploadResponse``
-- ``AssetUploadReceipt``
-- ``AssetUploadToken``
-
-### Errors
-
-- ``CloudKitError``
-- ``CredentialAvailability``
 - ``CredentialsValidationError``
-- ``TokenManagerError``
+- ``CredentialAvailability``
 - ``InvalidCredentialReason``
 - ``AuthenticationFailedReason``
 - ``NetworkErrorReason``
 - ``InternalErrorReason``
+- ``TokenManagerError``
+- ``TokenStorageError``
 
-### Internals
+### Record management
 
-- <doc:AbstractionLayerArchitecture>
+- ``CloudKitRecord``
+- ``RecordManaging``
+- ``CloudKitRecordCollection``
+- ``RecordTypeSet``
+- ``RecordTypeIterating``
+
+### OpenAPI code generation
+
 - <doc:OpenAPICodeGeneration>
-- <doc:GeneratedCodeAnalysis>
 - <doc:GeneratedCodeWorkflow>
+- <doc:GeneratedCodeAnalysis>
 
 ## See Also
 

@@ -48,7 +48,7 @@ internal struct FieldValueTests {
   /// Tests FieldValue location type creation and equality
   @Test("FieldValue location type creation and equality")
   internal func fieldValueLocation() {
-    let location = FieldValue.Location(
+    let location = Location(
       latitude: 37.7749,
       longitude: -122.4194,
       horizontalAccuracy: 10.0
@@ -60,7 +60,7 @@ internal struct FieldValueTests {
   /// Tests FieldValue reference type creation and equality
   @Test("FieldValue reference type creation and equality")
   internal func fieldValueReference() {
-    let reference = FieldValue.Reference(recordName: "test-record")
+    let reference = Reference(recordName: "test-record")
     let value = FieldValue.reference(reference)
     #expect(value == .reference(reference))
   }
@@ -68,7 +68,7 @@ internal struct FieldValueTests {
   /// Tests FieldValue asset type creation and equality
   @Test("FieldValue asset type creation and equality")
   internal func fieldValueAsset() {
-    let asset = FieldValue.Asset(
+    let asset = Asset(
       fileChecksum: "abc123",
       size: 1_024,
       downloadURL: "https://example.com/file"

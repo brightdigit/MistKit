@@ -130,7 +130,7 @@ internal struct FieldValueConvenienceTests {
 
   @Test("locationValue extracts Location from .location case")
   internal func locationValueExtraction() {
-    let location = FieldValue.Location(
+    let location = Location(
       latitude: 37.7749,
       longitude: -122.4194,
       horizontalAccuracy: 10.0
@@ -146,7 +146,7 @@ internal struct FieldValueConvenienceTests {
 
   @Test("referenceValue extracts Reference from .reference case")
   internal func referenceValueExtraction() {
-    let reference = FieldValue.Reference(recordName: "test-record")
+    let reference = Reference(recordName: "test-record")
     let value = FieldValue.reference(reference)
     #expect(value.referenceValue == reference)
   }
@@ -158,7 +158,7 @@ internal struct FieldValueConvenienceTests {
 
   @Test("assetValue extracts Asset from .asset case")
   internal func assetValueExtraction() {
-    let asset = FieldValue.Asset(
+    let asset = Asset(
       fileChecksum: "abc123",
       size: 1_024,
       downloadURL: "https://example.com/file"

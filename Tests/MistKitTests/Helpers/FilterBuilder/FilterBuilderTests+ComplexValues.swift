@@ -24,7 +24,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let reference = FieldValue.Reference(recordName: "user-123")
+      let reference = Reference(recordName: "user-123")
       let filter = FilterBuilder.equals("owner", .reference(reference))
       #expect(filter.comparator == .EQUALS)
       #expect(filter.fieldName == "owner")
@@ -36,7 +36,7 @@ extension FilterBuilderTests {
         Issue.record("FilterBuilder is not available on this operating system.")
         return
       }
-      let location = FieldValue.Location(
+      let location = Location(
         latitude: 37.7749,
         longitude: -122.4194
       )

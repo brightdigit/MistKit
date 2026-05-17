@@ -48,14 +48,14 @@ public struct QuerySort: Sendable {
   /// - Parameter field: The field name to sort by
   /// - Returns: A configured QuerySort
   public static func ascending(_ field: String) -> QuerySort {
-    QuerySort(SortDescriptor.ascending(field))
+    QuerySort(.ascending(field))
   }
 
   /// Creates a descending sort descriptor
   /// - Parameter field: The field name to sort by
   /// - Returns: A configured QuerySort
   public static func descending(_ field: String) -> QuerySort {
-    QuerySort(SortDescriptor.descending(field))
+    QuerySort(.descending(field))
   }
 
   /// Creates a sort descriptor with explicit direction
@@ -64,6 +64,6 @@ public struct QuerySort: Sendable {
   ///   - ascending: Whether to sort in ascending order
   /// - Returns: A configured QuerySort
   public static func sort(_ field: String, ascending: Bool = true) -> QuerySort {
-    QuerySort(SortDescriptor.sort(field, ascending: ascending))
+    QuerySort(.sort(field, ascending: ascending))
   }
 }

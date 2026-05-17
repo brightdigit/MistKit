@@ -420,7 +420,7 @@ CloudKit references use record names (not IDs):
 ```swift
 // Creating a reference
 fields["minimumMacOS"] = .reference(
-    FieldValue.Reference(recordName: "RestoreImage-23C71")
+    Reference(recordName: "RestoreImage-23C71")
 )
 
 // Reading a reference

@@ -1,5 +1,5 @@
 //
-//  AssetUploadReceipt.swift
+//  Reference.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,26 +27,22 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Receipt from uploading an asset to CloudKit
-///
-/// After uploading binary data to CloudKit, you receive an asset dictionary containing
-/// the receipt, checksums, and other metadata needed to associate the asset with a record.
-/// This type contains that complete asset information along with the target record and field.
-public struct AssetUploadReceipt: Codable, Sendable {
-  /// The complete asset data including receipt and checksums
-  /// Use this when creating or updating records
-  public let asset: FieldValue.Asset
+/// Reference dictionary as defined in CloudKit Web Services
+public struct Reference: Codable, Equatable, Sendable {
+  /// Reference action types supported by CloudKit
+  public enum Action: String, Codable, Sendable {
+    case deleteSelf = "DELETE_SELF"
+    case none = "NONE"
+  }
 
-  /// The record name this asset is associated with
+  /// The record name being referenced
   public let recordName: String
+  /// The action to take (DELETE_SELF, NONE, or nil)
+  public let action: Action?
 
-  /// The field name this asset should be assigned to
-  public let fieldName: String
-
-  /// Initialize an asset upload receipt
-  public init(asset: FieldValue.Asset, recordName: String, fieldName: String) {
-    self.asset = asset
+  /// Initialize a reference value
+  public init(recordName: String, action: Action? = nil) {
     self.recordName = recordName
-    self.fieldName = fieldName
+    self.action = action
   }
 }

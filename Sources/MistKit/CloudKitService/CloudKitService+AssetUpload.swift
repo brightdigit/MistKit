@@ -55,7 +55,7 @@ extension CloudKitService {
     _ data: Data,
     to url: URL,
     using uploader: AssetUploader? = nil
-  ) async throws(CloudKitError) -> FieldValue.Asset {
+  ) async throws(CloudKitError) -> Asset {
     do {
       let uploadHandler =
         uploader ?? { data, url in
@@ -88,7 +88,7 @@ extension CloudKitService {
         AssetUploadResponse.self, from: responseData
       )
 
-      return FieldValue.Asset(
+      return Asset(
         fileChecksum: uploadResponse.singleFile.fileChecksum,
         size: uploadResponse.singleFile.size,
         referenceChecksum: uploadResponse.singleFile.referenceChecksum,
