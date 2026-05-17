@@ -1,4 +1,5 @@
 import Foundation
+internal import MistKitOpenAPI
 import Testing
 
 @testable import MistKit

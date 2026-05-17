@@ -28,6 +28,7 @@
 //
 
 internal import Foundation
+internal import MistKitOpenAPI
 
 extension Components.Schemas.ListValuePayload {
   /// Initialize from MistKit FieldValue for list elements

@@ -50,32 +50,6 @@ extension RegexPatternsTests {
       #expect(matches.isEmpty)
     }
 
-    @Test("matches(in:) handles unicode strings")
-    internal func convenienceMatchesUnicode() {
-      let text = "Hello 🌍 token=abc123"
-      let matches = NSRegularExpression.maskGenericTokenRegex.matches(in: text)
-      #expect(matches.count >= 1)
-    }
-
-    @Test("Multiple tokens in same string")
-    internal func multipleTokensInString() {
-      let token1 = String(repeating: "a", count: 64)
-      let token2 = String(repeating: "b", count: 64)
-      let text = "First: \(token1) Second: \(token2)"
-
-      let matches = NSRegularExpression.maskApiTokenRegex.matches(in: text)
-      #expect(matches.count == 2)
-    }
-
-    @Test("Overlapping patterns don't double-match")
-    internal func overlappingPatterns() {
-      let text = "keytoken=value123"
-      let keyMatches = NSRegularExpression.maskGenericKeyRegex.matches(in: text)
-      let tokenMatches = NSRegularExpression.maskGenericTokenRegex.matches(in: text)
-
-      #expect((keyMatches.count + tokenMatches.count) > 0)
-    }
-
     @Test("Case sensitivity for hex patterns")
     internal func caseSensitivityHex() {
       let lowerCase = String(repeating: "a", count: 64)

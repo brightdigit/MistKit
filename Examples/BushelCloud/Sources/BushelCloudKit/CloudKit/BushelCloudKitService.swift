@@ -206,7 +206,9 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
     classification: OperationClassification
   ) async throws -> SyncEngine.TypeSyncResult {
     let batchSize = 200
-    let batches = operations.chunked(into: batchSize)
+    let batches = stride(from: 0, to: operations.count, by: batchSize).map {
+      Array(operations[$0..<Swift.min($0 + batchSize, operations.count)])
+    }
 
     ConsoleOutput.print(
       "Syncing \(operations.count) \(recordType) record(s) in \(batches.count) batch(es)...")

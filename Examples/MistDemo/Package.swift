@@ -178,6 +178,7 @@ let package = Package(
         "MistDemoKit",
         "ConfigKeyKit",
         .product(name: "MistKit", package: "MistKit"),
+        .product(name: "MistKitOpenAPI", package: "MistKit"),
         .product(
           name: "Hummingbird",
           package: "hummingbird",

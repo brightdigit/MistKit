@@ -28,6 +28,7 @@
 //
 
 internal import Foundation
+internal import MistKitOpenAPI
 
 /// Extension to convert MistKit FieldValue to OpenAPI FieldValueRequest for API requests
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)

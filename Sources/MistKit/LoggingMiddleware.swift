@@ -29,15 +29,16 @@
 
 import Foundation
 import HTTPTypes
-import Logging
+internal import Logging
 import OpenAPIRuntime
 
-/// Logging middleware for debugging
+/// Logging middleware for HTTP request/response tracing.
+///
+/// Emits at `.debug` level — install a `LogHandler` and set
+/// `logLevel = .debug` on `com.brightdigit.MistKit.middleware` to opt in.
 internal struct LoggingMiddleware: ClientMiddleware {
-  #if DEBUG
-    /// Logger for middleware HTTP request/response logging
-    private let logger = Logger(label: "com.brightdigit.MistKit.middleware")
-  #endif
+  private let logger = Logger(subsystem: .middleware)
+
   internal func intercept(
     _ request: HTTPRequest,
     body: HTTPBody?,
@@ -45,84 +46,57 @@ internal struct LoggingMiddleware: ClientMiddleware {
     operationID: String,
     next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
   ) async throws -> (HTTPResponse, HTTPBody?) {
-    #if DEBUG
-      logRequest(request, baseURL: baseURL)
-    #endif
-
+    logRequest(request, baseURL: baseURL)
     let (response, responseBody) = try await next(request, body, baseURL)
+    let finalResponseBody = await logResponse(response, body: responseBody)
+    return (response, finalResponseBody)
+  }
 
-    #if DEBUG
-      let finalResponseBody = await logResponse(response, body: responseBody)
-      return (response, finalResponseBody)
+  private func logRequest(_ request: HTTPRequest, baseURL: URL) {
+    let fullPath = baseURL.absoluteString + (request.path ?? "")
+    logger.debug("🌐 CloudKit Request: \(request.method.rawValue) \(fullPath)")
+    logger.debug("   Base URL: \(baseURL.absoluteString)")
+    logger.debug("   Path: \(request.path ?? "none")")
+    logger.debug("   Headers: \(request.headerFields)")
+
+    logQueryParameters(for: request, baseURL: baseURL)
+  }
+
+  private func logQueryParameters(for request: HTTPRequest, baseURL: URL) {
+    guard logger.logLevel <= .debug,
+      let path = request.path,
+      let url = URL(string: path, relativeTo: baseURL),
+      let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+      let queryItems = components.queryItems
+    else {
+      return
+    }
+
+    logger.debug("   Query Parameters:")
+    for item in queryItems {
+      logger.debug("     \(item.name): \(item.value ?? "nil")")
+    }
+  }
+
+  private func logResponse(_ response: HTTPResponse, body: HTTPBody?) async -> HTTPBody? {
+    logger.debug("✅ CloudKit Response: \(response.status.code)")
+
+    if response.status.code == 421 {
+      logger.warning(
+        "⚠️  421 Misdirected Request - The server cannot produce a response for this request"
+      )
+    }
+
+    guard logger.logLevel <= .debug else { return body }
+
+    #if !os(WASI)
+      return await logResponseBody(body)
     #else
-      return (response, responseBody)
+      return body
     #endif
   }
 
-  #if DEBUG
-    /// Log outgoing request details
-    private func logRequest(_ request: HTTPRequest, baseURL: URL) {
-      let fullPath = baseURL.absoluteString + (request.path ?? "")
-      logger.debug("🌐 CloudKit Request: \(request.method.rawValue) \(fullPath)")
-      logger.debug("   Base URL: \(baseURL.absoluteString)")
-      logger.debug("   Path: \(request.path ?? "none")")
-      logger.debug("   Headers: \(request.headerFields)")
-
-      logQueryParameters(for: request, baseURL: baseURL)
-    }
-
-    /// Log query parameters from request
-    private func logQueryParameters(for request: HTTPRequest, baseURL: URL) {
-      guard let path = request.path,
-        let url = URL(string: path, relativeTo: baseURL),
-        let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
-        let queryItems = components.queryItems
-      else {
-        return
-      }
-
-      logger.debug("   Query Parameters:")
-      for item in queryItems {
-        let value = formatQueryValue(for: item)
-        logger.debug("     \(item.name): \(value)")
-      }
-    }
-
-    /// Format query parameter value for logging
-    private func formatQueryValue(for item: URLQueryItem) -> String {
-      guard let value = item.value else {
-        return "nil"
-      }
-
-      // Mask sensitive query parameters
-      let lowercasedName = item.name.lowercased()
-      if lowercasedName.contains("token") || lowercasedName.contains("key")
-        || lowercasedName.contains("secret") || lowercasedName.contains("auth")
-      {
-        return SecureLogging.maskToken(value)
-      }
-
-      return value
-    }
-
-    /// Log incoming response details
-    private func logResponse(_ response: HTTPResponse, body: HTTPBody?) async -> HTTPBody? {
-      logger.debug("✅ CloudKit Response: \(response.status.code)")
-
-      if response.status.code == 421 {
-        logger.warning(
-          "⚠️  421 Misdirected Request - The server cannot produce a response for this request"
-        )
-      }
-
-      #if !os(WASI)
-        return await logResponseBody(body)
-      #else
-        return body
-      #endif
-    }
-
-    /// Log response body content
+  #if !os(WASI)
     private func logResponseBody(_ responseBody: HTTPBody?) async -> HTTPBody? {
       guard let responseBody = responseBody else {
         return nil
@@ -138,11 +112,10 @@ internal struct LoggingMiddleware: ClientMiddleware {
       }
     }
 
-    /// Log the actual body data content
     private func logBodyData(_ bodyData: Data) {
       if let jsonString = String(data: bodyData, encoding: .utf8) {
         logger.debug("📄 Response Body:")
-        logger.debug("\(SecureLogging.safeLogMessage(jsonString))")
+        logger.debug("\(jsonString)")
       } else {
         logger.debug("📄 Response Body: <non-UTF8 data, \(bodyData.count) bytes>")
       }

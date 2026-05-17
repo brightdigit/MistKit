@@ -28,6 +28,7 @@
 //
 
 import Foundation
+internal import MistKitOpenAPI
 
 extension CustomFieldValue.CustomFieldValuePayload {
   /// Initialize from decoder

@@ -28,6 +28,7 @@
 //
 
 import Foundation
+internal import MistKitOpenAPI
 import OpenAPIRuntime
 
 /// Custom implementation of FieldValue with proper ASSETID handling
