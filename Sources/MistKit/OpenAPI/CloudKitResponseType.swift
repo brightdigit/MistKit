@@ -27,58 +27,17 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Protocol for CloudKit operation response types that support unified error handling
-internal import MistKitOpenAPI
-
+/// Protocol for CloudKit operation response types that support unified error handling.
+/// Conformers exhaustively switch over their response cases so a new case in
+/// `openapi.yaml` becomes a build error instead of being silently dropped.
+///
+/// - TODO: The per-operation `Operations.*.Output` conformances in
+///   `OpenAPI/Operations/Operations.*.Output.swift` are mechanical, identical
+///   except for the type name, and replicate the same status-code-to-case
+///   mapping. Replace them with an internal attached macro
+///   (e.g. `@CloudKitResponse`) that synthesizes `toCloudKitError()` from
+///   the response enum's cases, eliminating ~13 boilerplate files.
 internal protocol CloudKitResponseType {
-  /// Extract BadRequest response if present
-  var badRequestResponse: Components.Responses.BadRequest? { get }
-
-  /// Extract Unauthorized response if present
-  var unauthorizedResponse: Components.Responses.Unauthorized? { get }
-
-  /// Extract Forbidden response if present
-  var forbiddenResponse: Components.Responses.Forbidden? { get }
-
-  /// Extract NotFound response if present
-  var notFoundResponse: Components.Responses.NotFound? { get }
-
-  /// Extract Conflict response if present
-  var conflictResponse: Components.Responses.Conflict? { get }
-
-  /// Extract PreconditionFailed response if present
-  var preconditionFailedResponse: Components.Responses.PreconditionFailed? { get }
-
-  /// Extract ContentTooLarge response if present
-  var contentTooLargeResponse: Components.Responses.RequestEntityTooLarge? { get }
-
-  /// Extract MisdirectedRequest response if present
-  var misdirectedRequestResponse: Components.Responses.UnprocessableEntity? { get }
-
-  /// Extract TooManyRequests response if present
-  var tooManyRequestsResponse: Components.Responses.TooManyRequests? { get }
-
-  /// Extract InternalServerError response if present
-  var internalServerErrorResponse: Components.Responses.InternalServerError? { get }
-
-  /// Extract ServiceUnavailable response if present
-  var serviceUnavailableResponse: Components.Responses.ServiceUnavailable? { get }
-
-  /// Check if response is successful (.ok case)
-  var isOk: Bool { get }
-
-  /// Extract status code from undocumented response if present
-  var undocumentedStatusCode: Int? { get }
-}
-
-extension CloudKitResponseType {
-  internal var forbiddenResponse: Components.Responses.Forbidden? { nil }
-  internal var notFoundResponse: Components.Responses.NotFound? { nil }
-  internal var conflictResponse: Components.Responses.Conflict? { nil }
-  internal var preconditionFailedResponse: Components.Responses.PreconditionFailed? { nil }
-  internal var contentTooLargeResponse: Components.Responses.RequestEntityTooLarge? { nil }
-  internal var misdirectedRequestResponse: Components.Responses.UnprocessableEntity? { nil }
-  internal var tooManyRequestsResponse: Components.Responses.TooManyRequests? { nil }
-  internal var internalServerErrorResponse: Components.Responses.InternalServerError? { nil }
-  internal var serviceUnavailableResponse: Components.Responses.ServiceUnavailable? { nil }
+  /// Returns the `CloudKitError` for this response, or `nil` for `.ok`.
+  func toCloudKitError() -> CloudKitError?
 }

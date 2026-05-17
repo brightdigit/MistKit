@@ -30,107 +30,22 @@
 internal import MistKitOpenAPI
 
 extension Operations.lookupRecords.Output: CloudKitResponseType {
-  internal var badRequestResponse: Components.Responses.BadRequest? {
-    if case .badRequest(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var unauthorizedResponse: Components.Responses.Unauthorized? {
-    if case .unauthorized(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var forbiddenResponse: Components.Responses.Forbidden? {
-    if case .forbidden(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var notFoundResponse: Components.Responses.NotFound? {
-    if case .notFound(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var conflictResponse: Components.Responses.Conflict? {
-    if case .conflict(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var preconditionFailedResponse: Components.Responses.PreconditionFailed? {
-    if case .preconditionFailed(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var contentTooLargeResponse: Components.Responses.RequestEntityTooLarge? {
-    if case .contentTooLarge(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var misdirectedRequestResponse: Components.Responses.UnprocessableEntity? {
-    if case .misdirectedRequest(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var tooManyRequestsResponse: Components.Responses.TooManyRequests? {
-    if case .tooManyRequests(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var internalServerErrorResponse: Components.Responses.InternalServerError? {
-    if case .internalServerError(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var serviceUnavailableResponse: Components.Responses.ServiceUnavailable? {
-    if case .serviceUnavailable(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var isOk: Bool {
-    if case .ok = self {
-      return true
-    } else {
-      return false
-    }
-  }
-
-  internal var undocumentedStatusCode: Int? {
-    if case .undocumented(let statusCode, _) = self {
-      return statusCode
-    } else {
-      return nil
+  internal func toCloudKitError() -> CloudKitError? {
+    switch self {
+    case .ok: return nil
+    case .badRequest(let response): return .init(response, statusCode: 400)
+    case .unauthorized(let response): return .init(response, statusCode: 401)
+    case .forbidden(let response): return .init(response, statusCode: 403)
+    case .notFound(let response): return .init(response, statusCode: 404)
+    case .conflict(let response): return .init(response, statusCode: 409)
+    case .preconditionFailed(let response): return .init(response, statusCode: 412)
+    case .contentTooLarge(let response): return .init(response, statusCode: 413)
+    case .misdirectedRequest(let response): return .init(response, statusCode: 421)
+    case .tooManyRequests(let response): return .init(response, statusCode: 429)
+    case .internalServerError(let response): return .init(response, statusCode: 500)
+    case .serviceUnavailable(let response): return .init(response, statusCode: 503)
+    case .undocumented(let statusCode, _):
+      return .undocumented(statusCode: statusCode, response: self)
     }
   }
 }

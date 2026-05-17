@@ -3,13 +3,13 @@
 // swift-format-ignore-file
 @_spi(Generated) import OpenAPIRuntime
 #if os(Linux)
+@preconcurrency import struct Foundation.URL
 @preconcurrency import struct Foundation.Data
 @preconcurrency import struct Foundation.Date
-@preconcurrency import struct Foundation.URL
 #else
+import struct Foundation.URL
 import struct Foundation.Data
 import struct Foundation.Date
-import struct Foundation.URL
 #endif
 /// A type that performs HTTP operations defined by the OpenAPI document.
 public protocol APIProtocol: Sendable {
@@ -2238,10 +2238,10 @@ public enum Components {
     public enum RequestBodies {}
     /// Types generated from the `#/components/responses` section of the OpenAPI document.
     public enum Responses {
-        public struct BadRequest: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/BadRequest/content`.
+        public struct Failure: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/Failure/content`.
             @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/BadRequest/content/application\/json`.
+                /// - Remark: Generated from `#/components/responses/Failure/content/application\/json`.
                 case json(Components.Schemas.ErrorResponse)
                 /// The associated value of the enum case if `self` is `.json`.
                 ///
@@ -2257,292 +2257,12 @@ public enum Components {
                 }
             }
             /// Received HTTP response body
-            public var body: Components.Responses.BadRequest.Body
-            /// Creates a new `BadRequest`.
+            public var body: Components.Responses.Failure.Body
+            /// Creates a new `Failure`.
             ///
             /// - Parameters:
             ///   - body: Received HTTP response body
-            public init(body: Components.Responses.BadRequest.Body) {
-                self.body = body
-            }
-        }
-        public struct Unauthorized: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/Unauthorized/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/Unauthorized/content/application\/json`.
-                case json(Components.Schemas.ErrorResponse)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas.ErrorResponse {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.Unauthorized.Body
-            /// Creates a new `Unauthorized`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.Unauthorized.Body) {
-                self.body = body
-            }
-        }
-        public struct Forbidden: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/Forbidden/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/Forbidden/content/application\/json`.
-                case json(Components.Schemas.ErrorResponse)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas.ErrorResponse {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.Forbidden.Body
-            /// Creates a new `Forbidden`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.Forbidden.Body) {
-                self.body = body
-            }
-        }
-        public struct NotFound: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/NotFound/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/NotFound/content/application\/json`.
-                case json(Components.Schemas.ErrorResponse)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas.ErrorResponse {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.NotFound.Body
-            /// Creates a new `NotFound`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.NotFound.Body) {
-                self.body = body
-            }
-        }
-        public struct Conflict: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/Conflict/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/Conflict/content/application\/json`.
-                case json(Components.Schemas.ErrorResponse)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas.ErrorResponse {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.Conflict.Body
-            /// Creates a new `Conflict`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.Conflict.Body) {
-                self.body = body
-            }
-        }
-        public struct PreconditionFailed: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/PreconditionFailed/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/PreconditionFailed/content/application\/json`.
-                case json(Components.Schemas.ErrorResponse)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas.ErrorResponse {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.PreconditionFailed.Body
-            /// Creates a new `PreconditionFailed`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.PreconditionFailed.Body) {
-                self.body = body
-            }
-        }
-        public struct RequestEntityTooLarge: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/RequestEntityTooLarge/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/RequestEntityTooLarge/content/application\/json`.
-                case json(Components.Schemas.ErrorResponse)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas.ErrorResponse {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.RequestEntityTooLarge.Body
-            /// Creates a new `RequestEntityTooLarge`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.RequestEntityTooLarge.Body) {
-                self.body = body
-            }
-        }
-        public struct TooManyRequests: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/TooManyRequests/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/TooManyRequests/content/application\/json`.
-                case json(Components.Schemas.ErrorResponse)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas.ErrorResponse {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.TooManyRequests.Body
-            /// Creates a new `TooManyRequests`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.TooManyRequests.Body) {
-                self.body = body
-            }
-        }
-        public struct UnprocessableEntity: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/UnprocessableEntity/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/UnprocessableEntity/content/application\/json`.
-                case json(Components.Schemas.ErrorResponse)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas.ErrorResponse {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.UnprocessableEntity.Body
-            /// Creates a new `UnprocessableEntity`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.UnprocessableEntity.Body) {
-                self.body = body
-            }
-        }
-        public struct InternalServerError: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/InternalServerError/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/InternalServerError/content/application\/json`.
-                case json(Components.Schemas.ErrorResponse)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas.ErrorResponse {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.InternalServerError.Body
-            /// Creates a new `InternalServerError`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.InternalServerError.Body) {
-                self.body = body
-            }
-        }
-        public struct ServiceUnavailable: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/ServiceUnavailable/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/ServiceUnavailable/content/application\/json`.
-                case json(Components.Schemas.ErrorResponse)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas.ErrorResponse {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.ServiceUnavailable.Body
-            /// Creates a new `ServiceUnavailable`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.ServiceUnavailable.Body) {
+            public init(body: Components.Responses.Failure.Body) {
                 self.body = body
             }
         }
@@ -2771,17 +2491,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -2794,17 +2529,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -2817,17 +2567,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Forbidden (403) - ACCESS_DENIED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
+            case forbidden(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.forbidden`.
             ///
             /// - Throws: An error if `self` is not `.forbidden`.
             /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
+            public var forbidden: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .forbidden(response):
@@ -2840,17 +2605,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses.NotFound)
+            case notFound(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.notFound`.
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            public var notFound: Components.Responses.NotFound {
+            public var notFound: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -2863,17 +2643,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Conflict (409) - CONFLICT, EXISTS
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/409`.
             ///
             /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses.Conflict)
+            case conflict(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.conflict`.
             ///
             /// - Throws: An error if `self` is not `.conflict`.
             /// - SeeAlso: `.conflict`.
-            public var conflict: Components.Responses.Conflict {
+            public var conflict: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .conflict(response):
@@ -2886,17 +2681,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/412`.
             ///
             /// HTTP response code: `412 preconditionFailed`.
-            case preconditionFailed(Components.Responses.PreconditionFailed)
+            case preconditionFailed(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.preconditionFailed`.
             ///
             /// - Throws: An error if `self` is not `.preconditionFailed`.
             /// - SeeAlso: `.preconditionFailed`.
-            public var preconditionFailed: Components.Responses.PreconditionFailed {
+            public var preconditionFailed: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .preconditionFailed(response):
@@ -2909,17 +2719,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Request entity too large (413) - QUOTA_EXCEEDED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/413`.
             ///
             /// HTTP response code: `413 contentTooLarge`.
-            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            case contentTooLarge(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.contentTooLarge`.
             ///
             /// - Throws: An error if `self` is not `.contentTooLarge`.
             /// - SeeAlso: `.contentTooLarge`.
-            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+            public var contentTooLarge: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .contentTooLarge(response):
@@ -2932,17 +2757,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Too many requests (429) - THROTTLED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
+            case tooManyRequests(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.tooManyRequests`.
             ///
             /// - Throws: An error if `self` is not `.tooManyRequests`.
             /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
+            public var tooManyRequests: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .tooManyRequests(response):
@@ -2955,17 +2795,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/421`.
             ///
             /// HTTP response code: `421 misdirectedRequest`.
-            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            case misdirectedRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.misdirectedRequest`.
             ///
             /// - Throws: An error if `self` is not `.misdirectedRequest`.
             /// - SeeAlso: `.misdirectedRequest`.
-            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+            public var misdirectedRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .misdirectedRequest(response):
@@ -2978,17 +2833,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Internal server error (500) - INTERNAL_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
-            case internalServerError(Components.Responses.InternalServerError)
+            case internalServerError(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.internalServerError`.
             ///
             /// - Throws: An error if `self` is not `.internalServerError`.
             /// - SeeAlso: `.internalServerError`.
-            public var internalServerError: Components.Responses.InternalServerError {
+            public var internalServerError: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .internalServerError(response):
@@ -3001,17 +2871,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Service unavailable (503) - TRY_AGAIN_LATER
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/query/post(queryRecords)/responses/503`.
             ///
             /// HTTP response code: `503 serviceUnavailable`.
-            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            case serviceUnavailable(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.serviceUnavailable`.
             ///
             /// - Throws: An error if `self` is not `.serviceUnavailable`.
             /// - SeeAlso: `.serviceUnavailable`.
-            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+            public var serviceUnavailable: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .serviceUnavailable(response):
@@ -3220,17 +3105,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -3243,17 +3143,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -3266,17 +3181,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Forbidden (403) - ACCESS_DENIED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
+            case forbidden(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.forbidden`.
             ///
             /// - Throws: An error if `self` is not `.forbidden`.
             /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
+            public var forbidden: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .forbidden(response):
@@ -3289,17 +3219,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses.NotFound)
+            case notFound(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.notFound`.
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            public var notFound: Components.Responses.NotFound {
+            public var notFound: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -3312,17 +3257,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Conflict (409) - CONFLICT, EXISTS
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/409`.
             ///
             /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses.Conflict)
+            case conflict(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.conflict`.
             ///
             /// - Throws: An error if `self` is not `.conflict`.
             /// - SeeAlso: `.conflict`.
-            public var conflict: Components.Responses.Conflict {
+            public var conflict: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .conflict(response):
@@ -3335,17 +3295,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/412`.
             ///
             /// HTTP response code: `412 preconditionFailed`.
-            case preconditionFailed(Components.Responses.PreconditionFailed)
+            case preconditionFailed(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.preconditionFailed`.
             ///
             /// - Throws: An error if `self` is not `.preconditionFailed`.
             /// - SeeAlso: `.preconditionFailed`.
-            public var preconditionFailed: Components.Responses.PreconditionFailed {
+            public var preconditionFailed: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .preconditionFailed(response):
@@ -3358,17 +3333,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Request entity too large (413) - QUOTA_EXCEEDED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/413`.
             ///
             /// HTTP response code: `413 contentTooLarge`.
-            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            case contentTooLarge(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.contentTooLarge`.
             ///
             /// - Throws: An error if `self` is not `.contentTooLarge`.
             /// - SeeAlso: `.contentTooLarge`.
-            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+            public var contentTooLarge: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .contentTooLarge(response):
@@ -3381,17 +3371,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Too many requests (429) - THROTTLED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
+            case tooManyRequests(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.tooManyRequests`.
             ///
             /// - Throws: An error if `self` is not `.tooManyRequests`.
             /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
+            public var tooManyRequests: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .tooManyRequests(response):
@@ -3404,17 +3409,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/421`.
             ///
             /// HTTP response code: `421 misdirectedRequest`.
-            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            case misdirectedRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.misdirectedRequest`.
             ///
             /// - Throws: An error if `self` is not `.misdirectedRequest`.
             /// - SeeAlso: `.misdirectedRequest`.
-            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+            public var misdirectedRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .misdirectedRequest(response):
@@ -3427,17 +3447,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Internal server error (500) - INTERNAL_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
-            case internalServerError(Components.Responses.InternalServerError)
+            case internalServerError(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.internalServerError`.
             ///
             /// - Throws: An error if `self` is not `.internalServerError`.
             /// - SeeAlso: `.internalServerError`.
-            public var internalServerError: Components.Responses.InternalServerError {
+            public var internalServerError: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .internalServerError(response):
@@ -3450,17 +3485,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Service unavailable (503) - TRY_AGAIN_LATER
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/modify/post(modifyRecords)/responses/503`.
             ///
             /// HTTP response code: `503 serviceUnavailable`.
-            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            case serviceUnavailable(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.serviceUnavailable`.
             ///
             /// - Throws: An error if `self` is not `.serviceUnavailable`.
             /// - SeeAlso: `.serviceUnavailable`.
-            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+            public var serviceUnavailable: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .serviceUnavailable(response):
@@ -3684,17 +3734,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -3707,17 +3772,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -3730,17 +3810,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Forbidden (403) - ACCESS_DENIED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
+            case forbidden(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.forbidden`.
             ///
             /// - Throws: An error if `self` is not `.forbidden`.
             /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
+            public var forbidden: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .forbidden(response):
@@ -3753,17 +3848,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses.NotFound)
+            case notFound(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.notFound`.
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            public var notFound: Components.Responses.NotFound {
+            public var notFound: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -3776,17 +3886,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Conflict (409) - CONFLICT, EXISTS
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/409`.
             ///
             /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses.Conflict)
+            case conflict(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.conflict`.
             ///
             /// - Throws: An error if `self` is not `.conflict`.
             /// - SeeAlso: `.conflict`.
-            public var conflict: Components.Responses.Conflict {
+            public var conflict: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .conflict(response):
@@ -3799,17 +3924,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/412`.
             ///
             /// HTTP response code: `412 preconditionFailed`.
-            case preconditionFailed(Components.Responses.PreconditionFailed)
+            case preconditionFailed(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.preconditionFailed`.
             ///
             /// - Throws: An error if `self` is not `.preconditionFailed`.
             /// - SeeAlso: `.preconditionFailed`.
-            public var preconditionFailed: Components.Responses.PreconditionFailed {
+            public var preconditionFailed: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .preconditionFailed(response):
@@ -3822,17 +3962,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Request entity too large (413) - QUOTA_EXCEEDED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/413`.
             ///
             /// HTTP response code: `413 contentTooLarge`.
-            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            case contentTooLarge(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.contentTooLarge`.
             ///
             /// - Throws: An error if `self` is not `.contentTooLarge`.
             /// - SeeAlso: `.contentTooLarge`.
-            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+            public var contentTooLarge: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .contentTooLarge(response):
@@ -3845,17 +4000,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Too many requests (429) - THROTTLED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
+            case tooManyRequests(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.tooManyRequests`.
             ///
             /// - Throws: An error if `self` is not `.tooManyRequests`.
             /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
+            public var tooManyRequests: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .tooManyRequests(response):
@@ -3868,17 +4038,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/421`.
             ///
             /// HTTP response code: `421 misdirectedRequest`.
-            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            case misdirectedRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.misdirectedRequest`.
             ///
             /// - Throws: An error if `self` is not `.misdirectedRequest`.
             /// - SeeAlso: `.misdirectedRequest`.
-            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+            public var misdirectedRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .misdirectedRequest(response):
@@ -3891,17 +4076,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Internal server error (500) - INTERNAL_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
-            case internalServerError(Components.Responses.InternalServerError)
+            case internalServerError(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.internalServerError`.
             ///
             /// - Throws: An error if `self` is not `.internalServerError`.
             /// - SeeAlso: `.internalServerError`.
-            public var internalServerError: Components.Responses.InternalServerError {
+            public var internalServerError: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .internalServerError(response):
@@ -3914,17 +4114,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Service unavailable (503) - TRY_AGAIN_LATER
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/503`.
             ///
             /// HTTP response code: `503 serviceUnavailable`.
-            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            case serviceUnavailable(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.serviceUnavailable`.
             ///
             /// - Throws: An error if `self` is not `.serviceUnavailable`.
             /// - SeeAlso: `.serviceUnavailable`.
-            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+            public var serviceUnavailable: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .serviceUnavailable(response):
@@ -4139,17 +4354,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -4162,17 +4392,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -4185,17 +4430,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Forbidden (403) - ACCESS_DENIED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
+            case forbidden(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.forbidden`.
             ///
             /// - Throws: An error if `self` is not `.forbidden`.
             /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
+            public var forbidden: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .forbidden(response):
@@ -4208,17 +4468,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses.NotFound)
+            case notFound(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.notFound`.
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            public var notFound: Components.Responses.NotFound {
+            public var notFound: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -4231,17 +4506,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Conflict (409) - CONFLICT, EXISTS
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/409`.
             ///
             /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses.Conflict)
+            case conflict(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.conflict`.
             ///
             /// - Throws: An error if `self` is not `.conflict`.
             /// - SeeAlso: `.conflict`.
-            public var conflict: Components.Responses.Conflict {
+            public var conflict: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .conflict(response):
@@ -4254,17 +4544,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/412`.
             ///
             /// HTTP response code: `412 preconditionFailed`.
-            case preconditionFailed(Components.Responses.PreconditionFailed)
+            case preconditionFailed(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.preconditionFailed`.
             ///
             /// - Throws: An error if `self` is not `.preconditionFailed`.
             /// - SeeAlso: `.preconditionFailed`.
-            public var preconditionFailed: Components.Responses.PreconditionFailed {
+            public var preconditionFailed: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .preconditionFailed(response):
@@ -4277,17 +4582,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Request entity too large (413) - QUOTA_EXCEEDED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/413`.
             ///
             /// HTTP response code: `413 contentTooLarge`.
-            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            case contentTooLarge(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.contentTooLarge`.
             ///
             /// - Throws: An error if `self` is not `.contentTooLarge`.
             /// - SeeAlso: `.contentTooLarge`.
-            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+            public var contentTooLarge: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .contentTooLarge(response):
@@ -4300,17 +4620,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Too many requests (429) - THROTTLED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
+            case tooManyRequests(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.tooManyRequests`.
             ///
             /// - Throws: An error if `self` is not `.tooManyRequests`.
             /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
+            public var tooManyRequests: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .tooManyRequests(response):
@@ -4323,17 +4658,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/421`.
             ///
             /// HTTP response code: `421 misdirectedRequest`.
-            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            case misdirectedRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.misdirectedRequest`.
             ///
             /// - Throws: An error if `self` is not `.misdirectedRequest`.
             /// - SeeAlso: `.misdirectedRequest`.
-            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+            public var misdirectedRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .misdirectedRequest(response):
@@ -4346,17 +4696,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Internal server error (500) - INTERNAL_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
-            case internalServerError(Components.Responses.InternalServerError)
+            case internalServerError(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.internalServerError`.
             ///
             /// - Throws: An error if `self` is not `.internalServerError`.
             /// - SeeAlso: `.internalServerError`.
-            public var internalServerError: Components.Responses.InternalServerError {
+            public var internalServerError: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .internalServerError(response):
@@ -4369,17 +4734,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Service unavailable (503) - TRY_AGAIN_LATER
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/changes/post(fetchRecordChanges)/responses/503`.
             ///
             /// HTTP response code: `503 serviceUnavailable`.
-            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            case serviceUnavailable(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.serviceUnavailable`.
             ///
             /// - Throws: An error if `self` is not `.serviceUnavailable`.
             /// - SeeAlso: `.serviceUnavailable`.
-            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+            public var serviceUnavailable: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .serviceUnavailable(response):
@@ -4554,17 +4934,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -4577,17 +4972,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -4600,17 +5010,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Forbidden (403) - ACCESS_DENIED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
+            case forbidden(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.forbidden`.
             ///
             /// - Throws: An error if `self` is not `.forbidden`.
             /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
+            public var forbidden: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .forbidden(response):
@@ -4623,17 +5048,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses.NotFound)
+            case notFound(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.notFound`.
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            public var notFound: Components.Responses.NotFound {
+            public var notFound: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -4646,17 +5086,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Conflict (409) - CONFLICT, EXISTS
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/409`.
             ///
             /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses.Conflict)
+            case conflict(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.conflict`.
             ///
             /// - Throws: An error if `self` is not `.conflict`.
             /// - SeeAlso: `.conflict`.
-            public var conflict: Components.Responses.Conflict {
+            public var conflict: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .conflict(response):
@@ -4669,17 +5124,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/412`.
             ///
             /// HTTP response code: `412 preconditionFailed`.
-            case preconditionFailed(Components.Responses.PreconditionFailed)
+            case preconditionFailed(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.preconditionFailed`.
             ///
             /// - Throws: An error if `self` is not `.preconditionFailed`.
             /// - SeeAlso: `.preconditionFailed`.
-            public var preconditionFailed: Components.Responses.PreconditionFailed {
+            public var preconditionFailed: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .preconditionFailed(response):
@@ -4692,17 +5162,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Request entity too large (413) - QUOTA_EXCEEDED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/413`.
             ///
             /// HTTP response code: `413 contentTooLarge`.
-            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            case contentTooLarge(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.contentTooLarge`.
             ///
             /// - Throws: An error if `self` is not `.contentTooLarge`.
             /// - SeeAlso: `.contentTooLarge`.
-            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+            public var contentTooLarge: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .contentTooLarge(response):
@@ -4715,17 +5200,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Too many requests (429) - THROTTLED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
+            case tooManyRequests(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.tooManyRequests`.
             ///
             /// - Throws: An error if `self` is not `.tooManyRequests`.
             /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
+            public var tooManyRequests: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .tooManyRequests(response):
@@ -4738,17 +5238,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/421`.
             ///
             /// HTTP response code: `421 misdirectedRequest`.
-            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            case misdirectedRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.misdirectedRequest`.
             ///
             /// - Throws: An error if `self` is not `.misdirectedRequest`.
             /// - SeeAlso: `.misdirectedRequest`.
-            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+            public var misdirectedRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .misdirectedRequest(response):
@@ -4761,17 +5276,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Internal server error (500) - INTERNAL_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
-            case internalServerError(Components.Responses.InternalServerError)
+            case internalServerError(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.internalServerError`.
             ///
             /// - Throws: An error if `self` is not `.internalServerError`.
             /// - SeeAlso: `.internalServerError`.
-            public var internalServerError: Components.Responses.InternalServerError {
+            public var internalServerError: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .internalServerError(response):
@@ -4784,17 +5314,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Service unavailable (503) - TRY_AGAIN_LATER
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/list/get(listZones)/responses/503`.
             ///
             /// HTTP response code: `503 serviceUnavailable`.
-            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            case serviceUnavailable(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.serviceUnavailable`.
             ///
             /// - Throws: An error if `self` is not `.serviceUnavailable`.
             /// - SeeAlso: `.serviceUnavailable`.
-            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+            public var serviceUnavailable: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .serviceUnavailable(response):
@@ -4993,17 +5538,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -5016,17 +5576,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/lookup/post(lookupZones)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -5225,17 +5800,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -5248,17 +5838,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/modify/post(modifyZones)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -5459,17 +6064,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -5482,17 +6102,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/zones/changes/post(fetchZoneChanges)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -5667,17 +6302,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -5690,17 +6340,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/list/get(listSubscriptions)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -5916,17 +6581,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -5939,17 +6619,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/lookup/post(lookupSubscriptions)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -6148,17 +6843,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -6171,17 +6881,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/subscriptions/modify/post(modifySubscriptions)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -6360,17 +7085,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -6383,17 +7123,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -6406,17 +7161,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Forbidden (403) - ACCESS_DENIED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
+            case forbidden(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.forbidden`.
             ///
             /// - Throws: An error if `self` is not `.forbidden`.
             /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
+            public var forbidden: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .forbidden(response):
@@ -6429,17 +7199,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Not found (404) - NOT_FOUND, ZONE_NOT_FOUND
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses.NotFound)
+            case notFound(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.notFound`.
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            public var notFound: Components.Responses.NotFound {
+            public var notFound: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -6452,17 +7237,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Conflict (409) - CONFLICT, EXISTS
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/409`.
             ///
             /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses.Conflict)
+            case conflict(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.conflict`.
             ///
             /// - Throws: An error if `self` is not `.conflict`.
             /// - SeeAlso: `.conflict`.
-            public var conflict: Components.Responses.Conflict {
+            public var conflict: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .conflict(response):
@@ -6475,17 +7275,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Precondition failed (412) - VALIDATING_REFERENCE_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/412`.
             ///
             /// HTTP response code: `412 preconditionFailed`.
-            case preconditionFailed(Components.Responses.PreconditionFailed)
+            case preconditionFailed(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.preconditionFailed`.
             ///
             /// - Throws: An error if `self` is not `.preconditionFailed`.
             /// - SeeAlso: `.preconditionFailed`.
-            public var preconditionFailed: Components.Responses.PreconditionFailed {
+            public var preconditionFailed: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .preconditionFailed(response):
@@ -6498,17 +7313,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Request entity too large (413) - QUOTA_EXCEEDED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/413`.
             ///
             /// HTTP response code: `413 contentTooLarge`.
-            case contentTooLarge(Components.Responses.RequestEntityTooLarge)
+            case contentTooLarge(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.contentTooLarge`.
             ///
             /// - Throws: An error if `self` is not `.contentTooLarge`.
             /// - SeeAlso: `.contentTooLarge`.
-            public var contentTooLarge: Components.Responses.RequestEntityTooLarge {
+            public var contentTooLarge: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .contentTooLarge(response):
@@ -6521,17 +7351,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Too many requests (429) - THROTTLED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
+            case tooManyRequests(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.tooManyRequests`.
             ///
             /// - Throws: An error if `self` is not `.tooManyRequests`.
             /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
+            public var tooManyRequests: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .tooManyRequests(response):
@@ -6544,17 +7389,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unprocessable entity (421) - AUTHENTICATION_REQUIRED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/421`.
             ///
             /// HTTP response code: `421 misdirectedRequest`.
-            case misdirectedRequest(Components.Responses.UnprocessableEntity)
+            case misdirectedRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.misdirectedRequest`.
             ///
             /// - Throws: An error if `self` is not `.misdirectedRequest`.
             /// - SeeAlso: `.misdirectedRequest`.
-            public var misdirectedRequest: Components.Responses.UnprocessableEntity {
+            public var misdirectedRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .misdirectedRequest(response):
@@ -6567,17 +7427,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Internal server error (500) - INTERNAL_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
-            case internalServerError(Components.Responses.InternalServerError)
+            case internalServerError(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.internalServerError`.
             ///
             /// - Throws: An error if `self` is not `.internalServerError`.
             /// - SeeAlso: `.internalServerError`.
-            public var internalServerError: Components.Responses.InternalServerError {
+            public var internalServerError: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .internalServerError(response):
@@ -6590,17 +7465,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Service unavailable (503) - TRY_AGAIN_LATER
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/caller/get(getCaller)/responses/503`.
             ///
             /// HTTP response code: `503 serviceUnavailable`.
-            case serviceUnavailable(Components.Responses.ServiceUnavailable)
+            case serviceUnavailable(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.serviceUnavailable`.
             ///
             /// - Throws: An error if `self` is not `.serviceUnavailable`.
             /// - SeeAlso: `.serviceUnavailable`.
-            public var serviceUnavailable: Components.Responses.ServiceUnavailable {
+            public var serviceUnavailable: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .serviceUnavailable(response):
@@ -6779,17 +7669,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/get(discoverAllUserIdentities)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -6802,17 +7707,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/get(discoverAllUserIdentities)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -7042,17 +7962,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -7065,17 +8000,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/discover/post(discoverUserIdentities)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -7294,17 +8244,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/email/post(lookupUsersByEmail)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -7317,17 +8282,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/email/post(lookupUsersByEmail)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -7545,17 +8525,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/id/post(lookupUsersByRecordName)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -7568,17 +8563,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/id/post(lookupUsersByRecordName)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -7777,17 +8787,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -7800,17 +8825,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/users/lookup/contacts/post(lookupContacts)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -8063,17 +9103,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -8086,17 +9141,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -8300,17 +9370,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -8323,17 +9408,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):
@@ -8518,17 +9618,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Bad request (400) - BAD_REQUEST, ATOMIC_ERROR
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
+            case badRequest(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.badRequest`.
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
+            public var badRequest: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -8541,17 +9656,32 @@ public enum Operations {
                     }
                 }
             }
-            /// Unauthorized (401) - AUTHENTICATION_FAILED
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
+            case unauthorized(Components.Responses.Failure)
             /// The associated value of the enum case if `self` is `.unauthorized`.
             ///
             /// - Throws: An error if `self` is not `.unauthorized`.
             /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
+            public var unauthorized: Components.Responses.Failure {
                 get throws {
                     switch self {
                     case let .unauthorized(response):

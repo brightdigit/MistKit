@@ -3,13 +3,13 @@
 // swift-format-ignore-file
 @_spi(Generated) import OpenAPIRuntime
 #if os(Linux)
+@preconcurrency import struct Foundation.URL
 @preconcurrency import struct Foundation.Data
 @preconcurrency import struct Foundation.Date
-@preconcurrency import struct Foundation.URL
 #else
+import struct Foundation.URL
 import struct Foundation.Data
 import struct Foundation.Date
-import struct Foundation.URL
 #endif
 import HTTPTypes
 /// CloudKit web services provides an HTTP interface to fetch, create, update, and delete records, zones, and subscriptions.
@@ -122,7 +122,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -144,7 +144,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -166,7 +166,7 @@ public struct Client: APIProtocol {
                     return .unauthorized(.init(body: body))
                 case 403:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Forbidden.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -188,7 +188,7 @@ public struct Client: APIProtocol {
                     return .forbidden(.init(body: body))
                 case 404:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.NotFound.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -210,7 +210,7 @@ public struct Client: APIProtocol {
                     return .notFound(.init(body: body))
                 case 409:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Conflict.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -232,7 +232,7 @@ public struct Client: APIProtocol {
                     return .conflict(.init(body: body))
                 case 412:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.PreconditionFailed.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -254,7 +254,7 @@ public struct Client: APIProtocol {
                     return .preconditionFailed(.init(body: body))
                 case 413:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.RequestEntityTooLarge.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -276,7 +276,7 @@ public struct Client: APIProtocol {
                     return .contentTooLarge(.init(body: body))
                 case 429:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.TooManyRequests.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -298,7 +298,7 @@ public struct Client: APIProtocol {
                     return .tooManyRequests(.init(body: body))
                 case 421:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.UnprocessableEntity.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -320,7 +320,7 @@ public struct Client: APIProtocol {
                     return .misdirectedRequest(.init(body: body))
                 case 500:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.InternalServerError.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -342,7 +342,7 @@ public struct Client: APIProtocol {
                     return .internalServerError(.init(body: body))
                 case 503:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.ServiceUnavailable.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -440,7 +440,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -462,7 +462,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -484,7 +484,7 @@ public struct Client: APIProtocol {
                     return .unauthorized(.init(body: body))
                 case 403:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Forbidden.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -506,7 +506,7 @@ public struct Client: APIProtocol {
                     return .forbidden(.init(body: body))
                 case 404:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.NotFound.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -528,7 +528,7 @@ public struct Client: APIProtocol {
                     return .notFound(.init(body: body))
                 case 409:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Conflict.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -550,7 +550,7 @@ public struct Client: APIProtocol {
                     return .conflict(.init(body: body))
                 case 412:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.PreconditionFailed.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -572,7 +572,7 @@ public struct Client: APIProtocol {
                     return .preconditionFailed(.init(body: body))
                 case 413:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.RequestEntityTooLarge.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -594,7 +594,7 @@ public struct Client: APIProtocol {
                     return .contentTooLarge(.init(body: body))
                 case 429:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.TooManyRequests.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -616,7 +616,7 @@ public struct Client: APIProtocol {
                     return .tooManyRequests(.init(body: body))
                 case 421:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.UnprocessableEntity.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -638,7 +638,7 @@ public struct Client: APIProtocol {
                     return .misdirectedRequest(.init(body: body))
                 case 500:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.InternalServerError.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -660,7 +660,7 @@ public struct Client: APIProtocol {
                     return .internalServerError(.init(body: body))
                 case 503:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.ServiceUnavailable.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -758,7 +758,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -780,7 +780,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -802,7 +802,7 @@ public struct Client: APIProtocol {
                     return .unauthorized(.init(body: body))
                 case 403:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Forbidden.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -824,7 +824,7 @@ public struct Client: APIProtocol {
                     return .forbidden(.init(body: body))
                 case 404:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.NotFound.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -846,7 +846,7 @@ public struct Client: APIProtocol {
                     return .notFound(.init(body: body))
                 case 409:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Conflict.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -868,7 +868,7 @@ public struct Client: APIProtocol {
                     return .conflict(.init(body: body))
                 case 412:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.PreconditionFailed.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -890,7 +890,7 @@ public struct Client: APIProtocol {
                     return .preconditionFailed(.init(body: body))
                 case 413:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.RequestEntityTooLarge.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -912,7 +912,7 @@ public struct Client: APIProtocol {
                     return .contentTooLarge(.init(body: body))
                 case 429:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.TooManyRequests.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -934,7 +934,7 @@ public struct Client: APIProtocol {
                     return .tooManyRequests(.init(body: body))
                 case 421:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.UnprocessableEntity.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -956,7 +956,7 @@ public struct Client: APIProtocol {
                     return .misdirectedRequest(.init(body: body))
                 case 500:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.InternalServerError.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -978,7 +978,7 @@ public struct Client: APIProtocol {
                     return .internalServerError(.init(body: body))
                 case 503:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.ServiceUnavailable.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1076,7 +1076,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1098,7 +1098,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1120,7 +1120,7 @@ public struct Client: APIProtocol {
                     return .unauthorized(.init(body: body))
                 case 403:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Forbidden.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1142,7 +1142,7 @@ public struct Client: APIProtocol {
                     return .forbidden(.init(body: body))
                 case 404:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.NotFound.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1164,7 +1164,7 @@ public struct Client: APIProtocol {
                     return .notFound(.init(body: body))
                 case 409:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Conflict.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1186,7 +1186,7 @@ public struct Client: APIProtocol {
                     return .conflict(.init(body: body))
                 case 412:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.PreconditionFailed.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1208,7 +1208,7 @@ public struct Client: APIProtocol {
                     return .preconditionFailed(.init(body: body))
                 case 413:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.RequestEntityTooLarge.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1230,7 +1230,7 @@ public struct Client: APIProtocol {
                     return .contentTooLarge(.init(body: body))
                 case 429:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.TooManyRequests.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1252,7 +1252,7 @@ public struct Client: APIProtocol {
                     return .tooManyRequests(.init(body: body))
                 case 421:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.UnprocessableEntity.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1274,7 +1274,7 @@ public struct Client: APIProtocol {
                     return .misdirectedRequest(.init(body: body))
                 case 500:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.InternalServerError.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1296,7 +1296,7 @@ public struct Client: APIProtocol {
                     return .internalServerError(.init(body: body))
                 case 503:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.ServiceUnavailable.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1385,7 +1385,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1407,7 +1407,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1429,7 +1429,7 @@ public struct Client: APIProtocol {
                     return .unauthorized(.init(body: body))
                 case 403:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Forbidden.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1451,7 +1451,7 @@ public struct Client: APIProtocol {
                     return .forbidden(.init(body: body))
                 case 404:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.NotFound.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1473,7 +1473,7 @@ public struct Client: APIProtocol {
                     return .notFound(.init(body: body))
                 case 409:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Conflict.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1495,7 +1495,7 @@ public struct Client: APIProtocol {
                     return .conflict(.init(body: body))
                 case 412:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.PreconditionFailed.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1517,7 +1517,7 @@ public struct Client: APIProtocol {
                     return .preconditionFailed(.init(body: body))
                 case 413:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.RequestEntityTooLarge.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1539,7 +1539,7 @@ public struct Client: APIProtocol {
                     return .contentTooLarge(.init(body: body))
                 case 429:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.TooManyRequests.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1561,7 +1561,7 @@ public struct Client: APIProtocol {
                     return .tooManyRequests(.init(body: body))
                 case 421:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.UnprocessableEntity.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1583,7 +1583,7 @@ public struct Client: APIProtocol {
                     return .misdirectedRequest(.init(body: body))
                 case 500:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.InternalServerError.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1605,7 +1605,7 @@ public struct Client: APIProtocol {
                     return .internalServerError(.init(body: body))
                 case 503:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.ServiceUnavailable.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1703,7 +1703,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1725,7 +1725,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1823,7 +1823,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1845,7 +1845,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1943,7 +1943,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -1965,7 +1965,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2054,7 +2054,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2076,7 +2076,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2174,7 +2174,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2196,7 +2196,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2294,7 +2294,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2316,7 +2316,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2409,7 +2409,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2431,7 +2431,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2453,7 +2453,7 @@ public struct Client: APIProtocol {
                     return .unauthorized(.init(body: body))
                 case 403:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Forbidden.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2475,7 +2475,7 @@ public struct Client: APIProtocol {
                     return .forbidden(.init(body: body))
                 case 404:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.NotFound.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2497,7 +2497,7 @@ public struct Client: APIProtocol {
                     return .notFound(.init(body: body))
                 case 409:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Conflict.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2519,7 +2519,7 @@ public struct Client: APIProtocol {
                     return .conflict(.init(body: body))
                 case 412:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.PreconditionFailed.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2541,7 +2541,7 @@ public struct Client: APIProtocol {
                     return .preconditionFailed(.init(body: body))
                 case 413:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.RequestEntityTooLarge.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2563,7 +2563,7 @@ public struct Client: APIProtocol {
                     return .contentTooLarge(.init(body: body))
                 case 429:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.TooManyRequests.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2585,7 +2585,7 @@ public struct Client: APIProtocol {
                     return .tooManyRequests(.init(body: body))
                 case 421:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.UnprocessableEntity.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2607,7 +2607,7 @@ public struct Client: APIProtocol {
                     return .misdirectedRequest(.init(body: body))
                 case 500:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.InternalServerError.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2629,7 +2629,7 @@ public struct Client: APIProtocol {
                     return .internalServerError(.init(body: body))
                 case 503:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.ServiceUnavailable.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2722,7 +2722,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2744,7 +2744,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2842,7 +2842,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2864,7 +2864,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2965,7 +2965,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -2987,7 +2987,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -3087,7 +3087,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -3109,7 +3109,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -3208,7 +3208,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -3230,7 +3230,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -3333,7 +3333,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -3355,7 +3355,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -3453,7 +3453,7 @@ public struct Client: APIProtocol {
                     return .ok(.init(body: body))
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -3475,7 +3475,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -3553,7 +3553,7 @@ public struct Client: APIProtocol {
                     return .ok(.init())
                 case 400:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.BadRequest.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
@@ -3575,7 +3575,7 @@ public struct Client: APIProtocol {
                     return .badRequest(.init(body: body))
                 case 401:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
-                    let body: Components.Responses.Unauthorized.Body
+                    let body: Components.Responses.Failure.Body
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [

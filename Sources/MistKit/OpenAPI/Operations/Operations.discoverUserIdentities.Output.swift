@@ -30,35 +30,13 @@
 internal import MistKitOpenAPI
 
 extension Operations.discoverUserIdentities.Output: CloudKitResponseType {
-  internal var badRequestResponse: Components.Responses.BadRequest? {
-    if case .badRequest(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var unauthorizedResponse: Components.Responses.Unauthorized? {
-    if case .unauthorized(let response) = self {
-      return response
-    } else {
-      return nil
-    }
-  }
-
-  internal var isOk: Bool {
-    if case .ok = self {
-      return true
-    } else {
-      return false
-    }
-  }
-
-  internal var undocumentedStatusCode: Int? {
-    if case .undocumented(let statusCode, _) = self {
-      return statusCode
-    } else {
-      return nil
+  internal func toCloudKitError() -> CloudKitError? {
+    switch self {
+    case .ok: return nil
+    case .badRequest(let response): return .init(response, statusCode: 400)
+    case .unauthorized(let response): return .init(response, statusCode: 401)
+    case .undocumented(let statusCode, _):
+      return .undocumented(statusCode: statusCode, response: self)
     }
   }
 }
