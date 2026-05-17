@@ -19,7 +19,7 @@ extension ConcurrentTokenRefreshTests {
 
       let request = ConcurrentTokenRefreshTests.makeRequest()
       let next = ConcurrentTokenRefreshTests.successNextHandler()
-      let baseURL = URL.MistKit.cloudKitAPI
+      let baseURL = CloudKitService.baseURL
 
       // Test concurrent access patterns
       let results = await ConcurrentTokenRefreshTests.runConcurrent(
@@ -52,7 +52,7 @@ extension ConcurrentTokenRefreshTests {
 
       let request = ConcurrentTokenRefreshTests.makeRequest()
       let next = ConcurrentTokenRefreshTests.successNextHandler()
-      let baseURL = URL.MistKit.cloudKitAPI
+      let baseURL = CloudKitService.baseURL
 
       // Test concurrent access with different middlewares
       let results = await executeConcurrentMiddlewareCallsWithDifferentMiddlewares(

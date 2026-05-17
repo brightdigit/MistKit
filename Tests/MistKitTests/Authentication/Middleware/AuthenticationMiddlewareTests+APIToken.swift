@@ -44,13 +44,13 @@ extension AuthenticationMiddlewareTests {
       _ = try await middleware.intercept(
         originalRequest,
         body: nil as HTTPBody?,
-        baseURL: URL.MistKit.cloudKitAPI,
+        baseURL: CloudKitService.baseURL,
         operationID: Self.testOperationID,
         next: next
       )
 
       #expect(interceptedRequest != nil)
-      #expect(interceptedBaseURL == URL.MistKit.cloudKitAPI)
+      #expect(interceptedBaseURL == CloudKitService.baseURL)
 
       if let interceptedRequest = interceptedRequest {
         #expect(interceptedRequest.path?.contains("ckAPIToken=\(Self.validAPIToken)") == true)
@@ -81,7 +81,7 @@ extension AuthenticationMiddlewareTests {
       _ = try await middleware.intercept(
         originalRequest,
         body: nil as HTTPBody?,
-        baseURL: URL.MistKit.cloudKitAPI,
+        baseURL: CloudKitService.baseURL,
         operationID: Self.testOperationID,
         next: next
       )

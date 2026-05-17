@@ -27,34 +27,34 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Crypto
-public import Foundation
-public import HTTPTypes
+internal import Crypto
+internal import Foundation
+internal import HTTPTypes
 
 /// CloudKit Web Services request signature components
-public struct RequestSignature: Sendable {
+internal struct RequestSignature: Sendable {
   /// The key identifier for X-Apple-CloudKit-Request-KeyID header
-  public let keyID: String
+  internal let keyID: String
 
   /// The ISO8601 date string for X-Apple-CloudKit-Request-ISO8601Date header.
   /// Stored as the exact string that was signed so the wire value cannot drift
   /// from the signed payload.
-  public let iso8601DateString: String
+  internal let iso8601DateString: String
 
   /// The DER-encoded ECDSA signature bytes used for the
   /// X-Apple-CloudKit-Request-SignatureV1 header. Base64-encoded on demand
   /// via `signatureBase64` when building the header value.
-  public let signatureDerRepresentation: Data
+  internal let signatureDerRepresentation: Data
 
   /// The base64-encoded signature value for the
   /// X-Apple-CloudKit-Request-SignatureV1 header.
-  public var signatureBase64: String {
+  internal var signatureBase64: String {
     signatureDerRepresentation.base64EncodedString()
   }
 
   /// The CloudKit signature headers in typed form. Merge with
   /// `HTTPRequest.headerFields` via `append(contentsOf:)`.
-  public var headers: HTTPFields {
+  internal var headers: HTTPFields {
     var fields = HTTPFields()
     fields[.cloudKitRequestKeyID] = keyID
     fields[.cloudKitRequestISO8601Date] = iso8601DateString
@@ -63,7 +63,7 @@ public struct RequestSignature: Sendable {
   }
 
   /// Construct a signature from the CloudKit key ID, ISO-8601 date, and DER signature bytes.
-  public init(
+  internal init(
     keyID: String,
     iso8601DateString: String,
     signatureDerRepresentation: Data
@@ -95,7 +95,7 @@ extension RequestSignature {
   ///   - date: The request date. Defaults to `Date()`.
   /// - Throws: A `Crypto` error if `P256.Signing.PrivateKey.signature(for:)`
   ///   fails to produce a signature.
-  public init(
+  internal init(
     keyID: String,
     privateKey: P256.Signing.PrivateKey,
     requestBody: Data?,
@@ -129,7 +129,7 @@ extension RequestSignature {
   ///     string is both signed and emitted on the wire — keep them in sync.
   /// - Throws: A `Crypto` error if `P256.Signing.PrivateKey.signature(for:)`
   ///   fails to produce a signature.
-  public init(
+  internal init(
     keyID: String,
     privateKey: P256.Signing.PrivateKey,
     bodyHash: String,

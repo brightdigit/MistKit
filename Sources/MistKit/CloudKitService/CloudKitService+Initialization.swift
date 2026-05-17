@@ -28,7 +28,7 @@
 //
 
 internal import Foundation
-public import OpenAPIRuntime
+internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
   internal import FoundationNetworking
@@ -52,7 +52,7 @@ extension CloudKitService {
   /// Misconfiguration (no credential set covers a given call's database +
   /// user-context combination) surfaces at call time as
   /// `CloudKitError.missingCredentials`, not at construction.
-  public init(
+  internal init(
     containerIdentifier: String,
     credentials: Credentials,
     environment: Environment = .development,
@@ -71,7 +71,7 @@ extension CloudKitService {
   /// regardless of database or whether the route requires user context.
   /// Useful for tests and bespoke auth setups where the standard
   /// `Credentials`-driven per-call selection isn't appropriate.
-  public init(
+  internal init(
     containerIdentifier: String,
     tokenManager: any TokenManager,
     environment: Environment = .development,

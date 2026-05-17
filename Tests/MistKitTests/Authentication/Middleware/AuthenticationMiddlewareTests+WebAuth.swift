@@ -46,7 +46,7 @@ extension AuthenticationMiddlewareTests {
       _ = try await middleware.intercept(
         originalRequest,
         body: nil as HTTPBody?,
-        baseURL: URL.MistKit.cloudKitAPI,
+        baseURL: CloudKitService.baseURL,
         operationID: Self.testOperationID,
         next: next
       )
@@ -87,7 +87,7 @@ extension AuthenticationMiddlewareTests {
       _ = try await middleware.intercept(
         originalRequest,
         body: nil as HTTPBody?,
-        baseURL: URL.MistKit.cloudKitAPI,
+        baseURL: CloudKitService.baseURL,
         operationID: Self.testOperationID,
         next: next
       )

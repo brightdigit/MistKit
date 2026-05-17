@@ -87,7 +87,7 @@ public struct BatchSyncResult: Sendable {
   ///
   /// Prefer `init(records:classification:)` in production code; this
   /// initializer is intended for tests and manual construction.
-  public init(
+  internal init(
     created: [RecordInfo],
     updated: [RecordInfo],
     failed: [RecordInfo],
@@ -113,7 +113,7 @@ public struct BatchSyncResult: Sendable {
   /// - Parameters:
   ///   - records: The records returned by `modifyRecords`.
   ///   - classification: The classification used to partition the records.
-  public init(
+  internal init(
     records: [RecordInfo],
     classification: OperationClassification
   ) {

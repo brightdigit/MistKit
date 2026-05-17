@@ -19,7 +19,7 @@ extension ConcurrentTokenRefreshTests {
 
       let request = ConcurrentTokenRefreshTests.makeRequest()
       let next = ConcurrentTokenRefreshTests.successNextHandler()
-      let baseURL = URL.MistKit.cloudKitAPI
+      let baseURL = CloudKitService.baseURL
 
       // Test concurrent access with rate limiting
       let results = await ConcurrentTokenRefreshTests.runConcurrent(

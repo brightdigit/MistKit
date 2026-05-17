@@ -62,21 +62,21 @@ extension AuthenticationMiddlewareTests {
       // Test concurrent access patterns with separate closures
       async let task1 = middleware.interceptWithMiddleware(
         request: originalRequest,
-        baseURL: URL.MistKit.cloudKitAPI,
+        baseURL: CloudKitService.baseURL,
         operationID: Self.testOperationID
       ) { _, _, _ in
         (HTTPResponse(status: .ok), nil)
       }
       async let task2 = middleware.interceptWithMiddleware(
         request: originalRequest,
-        baseURL: URL.MistKit.cloudKitAPI,
+        baseURL: CloudKitService.baseURL,
         operationID: Self.testOperationID
       ) { _, _, _ in
         (HTTPResponse(status: .ok), nil)
       }
       async let task3 = middleware.interceptWithMiddleware(
         request: originalRequest,
-        baseURL: URL.MistKit.cloudKitAPI,
+        baseURL: CloudKitService.baseURL,
         operationID: Self.testOperationID
       ) { _, _, _ in
         (HTTPResponse(status: .ok), nil)

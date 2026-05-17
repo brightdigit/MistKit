@@ -38,7 +38,7 @@ extension NetworkErrorTests {
         _ = try await middleware.intercept(
           originalRequest,
           body: nil,
-          baseURL: URL.MistKit.cloudKitAPI,
+          baseURL: CloudKitService.baseURL,
           operationID: TestConstants.operationID,
           next: next
         )
@@ -55,7 +55,7 @@ extension NetworkErrorTests {
       let response = try await middleware.intercept(
         originalRequest,
         body: nil,
-        baseURL: URL.MistKit.cloudKitAPI,
+        baseURL: CloudKitService.baseURL,
         operationID: TestConstants.operationID,
         next: next
       )
@@ -89,7 +89,7 @@ extension NetworkErrorTests {
           let response = try await middleware.intercept(
             originalRequest,
             body: nil,
-            baseURL: URL.MistKit.cloudKitAPI,
+            baseURL: CloudKitService.baseURL,
             operationID: TestConstants.operationID,
             next: next
           )
@@ -133,7 +133,7 @@ extension NetworkErrorTests {
         _ = try await middleware.intercept(
           originalRequest,
           body: nil,
-          baseURL: URL.MistKit.cloudKitAPI,
+          baseURL: CloudKitService.baseURL,
           operationID: TestConstants.operationID,
           next: next
         )

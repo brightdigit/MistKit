@@ -63,7 +63,7 @@ extension CloudKitService {
     }
 
     return Client(
-      serverURL: URL.MistKit.cloudKitAPI,
+      serverURL: CloudKitService.baseURL,
       transport: transport,
       middlewares: [
         AuthenticationMiddleware(tokenManager: tokenManager),

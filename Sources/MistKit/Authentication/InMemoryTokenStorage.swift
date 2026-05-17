@@ -27,11 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// Simple in-memory implementation of `TokenStorage` for development and
 /// testing. Does not persist data across application restarts.
-public final class InMemoryTokenStorage: TokenStorage, Sendable {
+internal final class InMemoryTokenStorage: TokenStorage, Sendable {
   private struct StoredEntry: Sendable {
     let storageKey: String
     let payload: Data
@@ -94,27 +94,27 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
   private let storage = Storage()
 
   /// Returns the number of stored credentials.
-  public var count: Int {
+  internal var count: Int {
     get async {
       await storage.listIdentifiers().count
     }
   }
 
   /// Returns true if the storage is empty.
-  public var isEmpty: Bool {
+  internal var isEmpty: Bool {
     get async {
       await storage.listIdentifiers().isEmpty
     }
   }
 
   /// Creates a new in-memory token storage.
-  public init() {}
+  internal init() {}
 
   // MARK: - TokenStorage Protocol
 
   /// Stores an authenticator under the given identifier (or `"default"` if
   /// `nil`), without an expiration time.
-  public func store(
+  internal func store(
     _ authenticator: any Authenticator,
     identifier: String?
   ) async throws(TokenStorageError) {
@@ -122,7 +122,7 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
   }
 
   /// Stores an authenticator with an expiration time.
-  public func store(
+  internal func store(
     _ authenticator: any Authenticator,
     identifier: String?,
     expirationTime: Date?
@@ -144,7 +144,7 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
   /// Retrieves the authenticator stored under the given identifier, or
   /// `nil` if none is stored or the entry has expired. Routes decoding to
   /// the correct concrete type via `Authenticator.storageKey`.
-  public func retrieve(
+  internal func retrieve(
     identifier: String?
   ) async throws(TokenStorageError) -> (any Authenticator)? {
     guard let entry = await storage.retrieve(identifier: identifier) else {
@@ -161,22 +161,22 @@ public final class InMemoryTokenStorage: TokenStorage, Sendable {
   }
 
   /// Removes the entry stored under the given identifier (no-op if none).
-  public func remove(identifier: String?) async throws(TokenStorageError) {
+  internal func remove(identifier: String?) async throws(TokenStorageError) {
     await storage.remove(identifier: identifier)
   }
 
   /// Returns every identifier currently in storage, including expired ones.
-  public func listIdentifiers() async throws(TokenStorageError) -> [String] {
+  internal func listIdentifiers() async throws(TokenStorageError) -> [String] {
     await storage.listIdentifiers()
   }
 
   /// Clears all stored credentials.
-  public func clear() async {
+  internal func clear() async {
     await storage.clear()
   }
 
   /// Cleans up expired tokens from storage.
-  public func cleanupExpiredTokens() async {
+  internal func cleanupExpiredTokens() async {
     await storage.cleanupExpiredTokens()
   }
 }

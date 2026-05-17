@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 // MARK: - Common Regex Patterns
 extension NSRegularExpression {
@@ -45,17 +45,17 @@ extension NSRegularExpression {
 // swift-format-ignore: NeverUseForceTry
 extension NSRegularExpression {
   /// Compiled regex for API token validation
-  public static let apiTokenRegex: NSRegularExpression = {
+  internal static let apiTokenRegex: NSRegularExpression = {
     try! NSRegularExpression(pattern: apiTokenPattern)
   }()
 
   /// Compiled regex for web auth token validation
-  public static let webAuthTokenRegex: NSRegularExpression = {
+  internal static let webAuthTokenRegex: NSRegularExpression = {
     try! NSRegularExpression(pattern: webAuthTokenPattern)
   }()
 
   /// Compiled regex for key ID validation
-  public static let keyIDRegex: NSRegularExpression = {
+  internal static let keyIDRegex: NSRegularExpression = {
     try! NSRegularExpression(pattern: keyIDPattern)
   }()
 }
@@ -66,7 +66,7 @@ extension NSRegularExpression {
   /// Convenience method to match against the entire string
   /// - Parameter string: The string to search in
   /// - Returns: Array of NSTextCheckingResult objects
-  public func matches(in string: String) -> [NSTextCheckingResult] {
+  internal func matches(in string: String) -> [NSTextCheckingResult] {
     let range = NSRange(string.startIndex..<string.endIndex, in: string)
     return matches(in: string, range: range)
   }

@@ -87,7 +87,7 @@ Three concrete implementations cover the CloudKit schemes:
 
 - ``APITokenAuthenticator`` — appends `ckAPIToken=...` as a query item.
 - ``WebAuthTokenAuthenticator`` — appends `ckAPIToken=...` and `ckWebAuthToken=...`.
-- ``ServerToServerAuthenticator`` — buffers the body, computes an ECDSA P-256 signature via ``RequestSignature``, and writes the `X-Apple-CloudKit-Request-*` headers.
+- ``ServerToServerAuthenticator`` — buffers the body, computes an ECDSA P-256 signature, and writes the `X-Apple-CloudKit-Request-*` headers.
 
 `authenticate(request:body:)` takes both `inout`. Server-to-server is the reason: it must read the request body to compute the signed payload, so it consumes the streaming body, hashes it, and re-assigns a buffered copy that downstream middleware and the transport can read again. The other two authenticators leave the body untouched.
 

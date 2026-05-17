@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+public import Foundation
 internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
@@ -53,6 +53,11 @@ internal import OpenAPIRuntime
 /// example, public-database record reads via server-to-server signing **and**
 /// `fetchCaller` via web-auth from one fully-populated `Credentials`.
 public struct CloudKitService: Sendable {
+  // swiftlint:disable force_unwrapping
+  /// The base URL for CloudKit Web Services.
+  public static let baseURL = URL(string: "https://api.apple-cloudkit.com")!
+  // swiftlint:enable force_unwrapping
+
   /// CloudKit's maximum number of records returned per query/modify request.
   internal static let maxRecordsPerRequest: Int = 200
 

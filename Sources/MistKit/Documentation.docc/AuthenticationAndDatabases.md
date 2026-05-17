@@ -166,19 +166,7 @@ service.createRecord(database: .public(.requires(.webAuth)))
         next(request, body, baseURL)
 ```
 
-For server-to-server, ``ServerToServerAuthenticator`` consumes the request body to compute the signed payload, then reassigns a buffered copy so downstream middleware and the transport see the same bytes. The signing math itself lives in ``RequestSignature``, which is the public type to reach for if you need to produce CloudKit headers outside of MistKit's middleware (testing, ad-hoc tooling).
-
-```swift
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-let signature = try RequestSignature(
-  keyID: keyID,
-  privateKey: privateKey,
-  requestBody: bodyData,
-  webServiceURL: "/database/1/iCloud.com.example/production/public/records/query"
-)
-
-request.headerFields.append(contentsOf: signature.headers)
-```
+For server-to-server, ``ServerToServerAuthenticator`` consumes the request body to compute the signed payload, then reassigns a buffered copy so downstream middleware and the transport see the same bytes.
 
 ## When to use a custom TokenManager
 
@@ -215,7 +203,6 @@ The longer prose guides live in the repo (outside this DocC bundle):
 
 ### Request signing
 
-- ``RequestSignature``
 - ``Authenticator``
 - ``APITokenAuthenticator``
 - ``WebAuthTokenAuthenticator``

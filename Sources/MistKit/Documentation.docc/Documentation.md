@@ -111,7 +111,6 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. S
 - ``ServerToServerCredentials``
 - ``PublicAuthPreference``
 - ``PrivateKeyMaterial``
-- ``RequestSignature``
 - ``Authenticator``
 - ``APITokenAuthenticator``
 - ``WebAuthTokenAuthenticator``
@@ -121,9 +120,7 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. S
 - ``WebAuthTokenManager``
 - ``AdaptiveTokenManager``
 - ``ServerToServerAuthManager``
-- ``AuthenticationMode``
 - ``TokenStorage``
-- ``InMemoryTokenStorage``
 - ``CredentialsValidationError``
 - ``CredentialAvailability``
 - ``InvalidCredentialReason``

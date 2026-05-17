@@ -113,7 +113,7 @@ public struct OperationClassification: Sendable, Equatable {
   /// Direct initializer for tests and manual construction.
   ///
   /// Prefer the comparison-based initializers in production code.
-  public init(creates: Set<String>, updates: Set<String>) {
+  internal init(creates: Set<String>, updates: Set<String>) {
     self.creates = creates
     self.updates = updates
   }
