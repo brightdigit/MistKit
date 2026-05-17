@@ -28,8 +28,8 @@
 //
 
 public import BushelFoundation
-public import BushelUtilities
-public import Foundation
+internal import BushelUtilities
+internal import Foundation
 public import MistKit
 
 // MARK: - CloudKitRecord Conformance
@@ -92,7 +92,7 @@ extension XcodeVersionRecord: @retroactive CloudKitRecord {
 
     if let minimumMacOS {
       fields["minimumMacOS"] = .reference(
-        FieldValue.Reference(
+        Reference(
           recordName: minimumMacOS,
           action: nil
         )
@@ -101,7 +101,7 @@ extension XcodeVersionRecord: @retroactive CloudKitRecord {
 
     if let includedSwiftVersion {
       fields["includedSwiftVersion"] = .reference(
-        FieldValue.Reference(
+        Reference(
           recordName: includedSwiftVersion,
           action: nil
         )

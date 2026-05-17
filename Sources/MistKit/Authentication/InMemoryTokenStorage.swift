@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -27,142 +27,156 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
-/// Simple in-memory implementation of TokenStorage for development and testing
-/// This implementation does not persist data across application restarts
-public final class InMemoryTokenStorage: TokenStorage, Sendable {
-  /// Thread-safe storage using actor
+/// Simple in-memory implementation of `TokenStorage` for development and
+/// testing. Does not persist data across application restarts.
+internal final class InMemoryTokenStorage: TokenStorage, Sendable {
+  private struct StoredEntry: Sendable {
+    let storageKey: String
+    let payload: Data
+    let expirationTime: Date?
+  }
+
   private actor Storage {
-    private var credentials: [String: TokenCredentials] = [:]
-    private var expirationTimes: [String: Date] = [:]
+    private var entries: [String: StoredEntry] = [:]
 
-    func store(
-      _ tokenCredentials: TokenCredentials, identifier: String?, expirationTime: Date? = nil
-    ) {
-      let key = identifier ?? "default"
-      credentials[key] = tokenCredentials
-      expirationTimes[key] = expirationTime
+    func store(_ entry: StoredEntry, identifier: String?) {
+      entries[identifier ?? "default"] = entry
     }
 
-    func retrieve(identifier: String?) -> TokenCredentials? {
+    func retrieve(identifier: String?) -> StoredEntry? {
       let key = identifier ?? "default"
-
-      // Check if token has expired
-      if let expirationTime = expirationTimes[key], expirationTime <= Date() {
-        // Token has expired, remove it
-        credentials.removeValue(forKey: key)
-        expirationTimes.removeValue(forKey: key)
+      if let expiration = entries[key]?.expirationTime, expiration <= Date() {
+        entries.removeValue(forKey: key)
         return nil
       }
-
-      return credentials[key]
+      return entries[key]
     }
 
     func remove(identifier: String?) {
-      let key = identifier ?? "default"
-      credentials.removeValue(forKey: key)
-      expirationTimes.removeValue(forKey: key)
+      entries.removeValue(forKey: identifier ?? "default")
     }
 
     func listIdentifiers() -> [String] {
-      // Return all stored identifiers, including expired ones
-      Array(credentials.keys)
+      Array(entries.keys)
     }
 
     func clear() {
-      credentials.removeAll()
-      expirationTimes.removeAll()
+      entries.removeAll()
     }
 
     func cleanupExpiredTokens() {
       let now = Date()
-      let expiredKeys = expirationTimes.compactMap { key, expirationTime in
-        expirationTime <= now ? key : nil
-      }
-
-      for key in expiredKeys {
-        credentials.removeValue(forKey: key)
-        expirationTimes.removeValue(forKey: key)
+      entries = entries.filter { _, entry in
+        guard let expiration = entry.expirationTime else {
+          return true
+        }
+        return expiration > now
       }
     }
   }
+
+  /// Routes decoding by `Authenticator.storageKey`.
+  private static let factories: [String: @Sendable (Data) throws -> any Authenticator] = {
+    var entries: [String: @Sendable (Data) throws -> any Authenticator] = [
+      APITokenAuthenticator.storageKey: { try APITokenAuthenticator(decoding: $0) },
+      WebAuthTokenAuthenticator.storageKey: { try WebAuthTokenAuthenticator(decoding: $0) },
+    ]
+    if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+      entries[ServerToServerAuthenticator.storageKey] = {
+        try ServerToServerAuthenticator(decoding: $0)
+      }
+    }
+    return entries
+  }()
 
   private let storage = Storage()
 
-  /// Returns the number of stored credentials
-  public var count: Int {
+  /// Returns the number of stored credentials.
+  internal var count: Int {
     get async {
-      let identifiers = await storage.listIdentifiers()
-      return identifiers.count
+      await storage.listIdentifiers().count
     }
   }
 
-  /// Returns true if the storage is empty
-  public var isEmpty: Bool {
+  /// Returns true if the storage is empty.
+  internal var isEmpty: Bool {
     get async {
-      let identifiers = await storage.listIdentifiers()
-      return identifiers.isEmpty
+      await storage.listIdentifiers().isEmpty
     }
   }
 
-  /// Creates a new in-memory token storage
-  public init() {}
+  /// Creates a new in-memory token storage.
+  internal init() {}
 
   // MARK: - TokenStorage Protocol
 
-  /// Stores credentials in memory using the provided identifier
-  /// - Parameters:
-  ///   - credentials: The token credentials to store
-  ///   - identifier: Optional identifier for the credentials (uses "default" if nil)
-  /// - Throws: TokenStorageError if storage operation fails
-  public func store(_ credentials: TokenCredentials, identifier: String?)
-    async throws(TokenStorageError)
-  {
-    await storage.store(credentials, identifier: identifier, expirationTime: nil)
+  /// Stores an authenticator under the given identifier (or `"default"` if
+  /// `nil`), without an expiration time.
+  internal func store(
+    _ authenticator: any Authenticator,
+    identifier: String?
+  ) async throws(TokenStorageError) {
+    try await store(authenticator, identifier: identifier, expirationTime: nil)
   }
 
-  /// Stores credentials with expiration time
-  /// - Parameters:
-  ///   - credentials: The credentials to store
-  ///   - identifier: Optional identifier for the credentials
-  ///   - expirationTime: When the credentials expire
-  /// - Throws: TokenStorageError if storage operation fails
-  public func store(_ credentials: TokenCredentials, identifier: String?, expirationTime: Date?)
-    async throws(TokenStorageError)
-  {
-    await storage.store(credentials, identifier: identifier, expirationTime: expirationTime)
+  /// Stores an authenticator with an expiration time.
+  internal func store(
+    _ authenticator: any Authenticator,
+    identifier: String?,
+    expirationTime: Date?
+  ) async throws(TokenStorageError) {
+    let payload: Data
+    do {
+      payload = try authenticator.encoded()
+    } catch {
+      throw TokenStorageError.storageFailed(reason: error.localizedDescription)
+    }
+    let entry = StoredEntry(
+      storageKey: type(of: authenticator).storageKey,
+      payload: payload,
+      expirationTime: expirationTime
+    )
+    await storage.store(entry, identifier: identifier)
   }
 
-  /// Retrieves credentials from memory using the provided identifier
-  /// - Parameter identifier: Optional identifier for the credentials (uses "default" if nil)
-  /// - Returns: The stored credentials, or nil if not found or expired
-  /// - Throws: TokenStorageError if retrieval operation fails
-  public func retrieve(identifier: String?) async throws(TokenStorageError) -> TokenCredentials? {
-    await storage.retrieve(identifier: identifier)
+  /// Retrieves the authenticator stored under the given identifier, or
+  /// `nil` if none is stored or the entry has expired. Routes decoding to
+  /// the correct concrete type via `Authenticator.storageKey`.
+  internal func retrieve(
+    identifier: String?
+  ) async throws(TokenStorageError) -> (any Authenticator)? {
+    guard let entry = await storage.retrieve(identifier: identifier) else {
+      return nil
+    }
+    guard let factory = Self.factories[entry.storageKey] else {
+      throw TokenStorageError.corruptedStorage
+    }
+    do {
+      return try factory(entry.payload)
+    } catch {
+      throw TokenStorageError.corruptedStorage
+    }
   }
 
-  /// Removes credentials from memory using the provided identifier
-  /// - Parameter identifier: Optional identifier for the credentials (uses "default" if nil)
-  /// - Throws: TokenStorageError if removal operation fails
-  public func remove(identifier: String?) async throws(TokenStorageError) {
+  /// Removes the entry stored under the given identifier (no-op if none).
+  internal func remove(identifier: String?) async throws(TokenStorageError) {
     await storage.remove(identifier: identifier)
   }
 
-  /// Lists all identifiers currently stored in memory
-  /// - Returns: Array of identifier strings for all stored credentials
-  /// - Throws: TokenStorageError if listing operation fails
-  public func listIdentifiers() async throws(TokenStorageError) -> [String] {
+  /// Returns every identifier currently in storage, including expired ones.
+  internal func listIdentifiers() async throws(TokenStorageError) -> [String] {
     await storage.listIdentifiers()
   }
 
-  /// Clears all stored credentials (useful for testing and development)
-  public func clear() async {
+  /// Clears all stored credentials.
+  internal func clear() async {
     await storage.clear()
   }
 
-  /// Cleans up expired tokens from storage
-  public func cleanupExpiredTokens() async {
+  /// Cleans up expired tokens from storage.
+  internal func cleanupExpiredTokens() async {
     await storage.cleanupExpiredTokens()
   }
 }

@@ -30,32 +30,16 @@ internal final class MockTokenManagerWithRetry: TokenManager {
   internal func validateCredentials() async throws(TokenManagerError) -> Bool {
     let count = await counter.increment()
     if count <= 2 {
-      throw TokenManagerError.networkError(
-        underlying: NSError(
-          domain: "NetworkError",
-          code: -1_009,
-          userInfo: [
-            NSLocalizedDescriptionKey: "Network error"
-          ]
-        )
-      )
+      throw TokenManagerError.networkError(.notConnectedToInternet)
     }
     return true
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     let count = await counter.increment()
     if count <= 2 {
-      throw TokenManagerError.networkError(
-        underlying: NSError(
-          domain: "NetworkError",
-          code: -1_009,
-          userInfo: [
-            NSLocalizedDescriptionKey: "Network error"
-          ]
-        )
-      )
+      throw TokenManagerError.networkError(.notConnectedToInternet)
     }
-    return TokenCredentials.apiToken("retry-token")
+    return try APITokenAuthenticator(token: TestConstants.apiToken)
   }
 }

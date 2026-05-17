@@ -420,7 +420,7 @@ CloudKit references use record names (not IDs):
 ```swift
 // Creating a reference
 fields["minimumMacOS"] = .reference(
-    FieldValue.Reference(recordName: "RestoreImage-23C71")
+    Reference(recordName: "RestoreImage-23C71")
 )
 
 // Reading a reference
@@ -439,7 +439,10 @@ CloudKit enforces a **200 operations per request** limit. Operations are automat
 let batchSize = 200
 let batches = operations.chunked(into: batchSize)
 for batch in batches {
-    let results = try await service.modifyRecords(batch)
+    let results = try await service.modifyRecords(
+        batch,
+        database: .public(.prefers(.serverToServer))
+    )
 }
 ```
 
@@ -482,13 +485,14 @@ let tokenManager = try ServerToServerAuthManager(
     pemString: pemFileContents
 )
 
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: "iCloud.com.company.App",
     tokenManager: tokenManager,
-    environment: .development,
-    database: .public
+    environment: .development
 )
 ```
+
+The database scope is picked per call now (e.g. `database: .public(.prefers(.serverToServer))`); it's no longer fixed at init time.
 
 **Key setup**:
 1. Generate key pair in CloudKit Dashboard

@@ -87,9 +87,9 @@ extension ServerToServerAuthManagerTests {
       #expect(isValid == true)
     }
 
-    /// Tests getCurrentCredentials with valid credentials
-    @Test("getCurrentCredentials with valid credentials", .enabled(if: Platform.isCryptoAvailable))
-    internal func getCurrentCredentialsValidCredentials() async throws {
+    /// Tests currentAuthenticator with valid credentials
+    @Test("currentAuthenticator with valid credentials", .enabled(if: Platform.isCryptoAvailable))
+    internal func currentAuthenticatorValidCredentials() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -100,23 +100,16 @@ extension ServerToServerAuthManagerTests {
         privateKeyCallback: try Self.generateTestPrivateKey()
       )
 
-      let credentials = try await manager.getCurrentCredentials()
-      #expect(credentials != nil)
-
-      if let credentials = credentials {
-        if case .serverToServer(let storedKeyID, let storedPrivateKey) = credentials.method {
-          #expect(storedKeyID == keyID)
-          #expect(storedPrivateKey == manager.privateKeyData)
-        } else {
-          Issue.record("Expected .serverToServer method")
-        }
-      }
+      let authenticator = try await manager.currentAuthenticator()
+      let s2s = try #require(authenticator as? ServerToServerAuthenticator)
+      #expect(s2s.keyID == keyID)
+      #expect(s2s.privateKey.rawRepresentation == manager.privateKeyData)
     }
 
-    /// Tests getCurrentCredentials with invalid credentials
+    /// Tests currentAuthenticator with invalid credentials
     @Test(
-      "getCurrentCredentials with invalid credentials", .enabled(if: Platform.isCryptoAvailable))
-    internal func getCurrentCredentialsInvalidCredentials() async throws {
+      "currentAuthenticator with invalid credentials", .enabled(if: Platform.isCryptoAvailable))
+    internal func currentAuthenticatorInvalidCredentials() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("ServerToServerAuthManager is not available on this operating system.")
         return
@@ -131,7 +124,7 @@ extension ServerToServerAuthManagerTests {
       )
 
       do {
-        _ = try await manager.getCurrentCredentials()
+        _ = try await manager.currentAuthenticator()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
       } catch {
         switch error {

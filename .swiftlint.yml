@@ -108,6 +108,11 @@ line_length:
 closure_body_length:
   - 50
   - 60
+type_name:
+  min_length: 3
+  max_length:
+    warning: 50
+    error: 60
 identifier_name:
   excluded:
     - id
@@ -117,7 +122,7 @@ excluded:
   - .build
   - Mint
   - Examples
-  - Sources/MistKit/Generated
+  - Sources/MistKitOpenAPI
   - Package.swift
 indentation_width:
   indentation_width: 2
@@ -134,3 +139,9 @@ disabled_rules:
     - opening_brace
     - optional_data_string_conversion
     - pattern_matching_keywords
+custom_rules:
+  no_unchecked_sendable:
+    name: "No Unchecked Sendable"
+    regex: '@unchecked\s+Sendable'
+    message: "Use proper Sendable conformance instead of @unchecked Sendable to maintain strict concurrency safety"
+    severity: error

@@ -3,7 +3,7 @@
 //  CelestraCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -31,41 +31,32 @@ public import Foundation
 
 /// Comprehensive report of feed update operations for JSON export
 public struct UpdateReport: Codable, Sendable {
-  /// When the update started
-  public let startTime: Date
-
-  /// When the update completed
-  public let endTime: Date
-
-  /// Total duration in seconds
-  public var duration: TimeInterval {
-    endTime.timeIntervalSince(startTime)
-  }
-
-  /// Configuration used for this update
-  public let configuration: UpdateConfiguration
-
-  /// Summary statistics
-  public let summary: Summary
-
-  /// Detailed per-feed results
-  public let feeds: [FeedResult]
+  // MARK: - Subtypes
 
   /// Summary statistics for the update operation
   public struct Summary: Codable, Sendable {
+    // MARK: - Properties
+
+    /// Total number of feeds processed.
     public let totalFeeds: Int
+    /// Number of feeds that updated successfully.
     public let successCount: Int
+    /// Number of feeds that encountered errors.
     public let errorCount: Int
+    /// Number of feeds that were skipped.
     public let skippedCount: Int
+    /// Number of feeds that returned not-modified responses.
     public let notModifiedCount: Int
+    /// Total number of articles created across all feeds.
     public let articlesCreated: Int
+    /// Total number of articles updated across all feeds.
     public let articlesUpdated: Int
+    /// Percentage of feeds that updated successfully (0-100).
+    public let successRate: Double
 
-    public var successRate: Double {
-      guard totalFeeds > 0 else { return 0 }
-      return Double(successCount) / Double(totalFeeds) * 100
-    }
+    // MARK: - Lifecycle
 
+    /// Creates a new summary with the given statistics.
     public init(
       totalFeeds: Int,
       successCount: Int,
@@ -82,18 +73,33 @@ public struct UpdateReport: Codable, Sendable {
       self.notModifiedCount = notModifiedCount
       self.articlesCreated = articlesCreated
       self.articlesUpdated = articlesUpdated
+      self.successRate =
+        totalFeeds > 0
+        ? Double(successCount) / Double(totalFeeds) * 100
+        : 0
     }
   }
 
-  /// Configuration snapshot
+  /// Configuration snapshot used for an update run.
   public struct UpdateConfiguration: Codable, Sendable {
+    // MARK: - Properties
+
+    /// Delay in seconds between feed updates.
     public let delay: Double
+    /// Whether robots.txt checking was skipped.
     public let skipRobotsCheck: Bool
+    /// Maximum number of consecutive failures before skipping a feed.
     public let maxFailures: Int?
+    /// Minimum subscriber count required to update a feed.
     public let minPopularity: Int?
+    /// Maximum number of feeds to process.
     public let limit: Int?
+    /// CloudKit environment used for this update.
     public let environment: String
 
+    // MARK: - Lifecycle
+
+    /// Creates a new configuration snapshot.
     public init(
       delay: Double,
       skipRobotsCheck: Bool,
@@ -111,20 +117,40 @@ public struct UpdateReport: Codable, Sendable {
     }
   }
 
-  /// Result for a single feed update
+  /// Result for a single feed update.
   public struct FeedResult: Codable, Sendable {
+    /// Outcome status for a feed update.
+    public enum Status: String, Codable, Sendable {
+      case success
+      case error
+      case skipped
+      case notModified
+    }
+
+    // MARK: - Properties
+
+    /// URL of the feed that was processed.
     public let feedURL: String
+    /// CloudKit record name for this feed.
     public let recordName: String
-    public let status: String  // "success", "error", "skipped", "notModified"
+    /// Outcome status for this feed update.
+    public let status: Status
+    /// Number of new articles created for this feed.
     public let articlesCreated: Int
+    /// Number of existing articles updated for this feed.
     public let articlesUpdated: Int
+    /// Time in seconds taken to process this feed.
     public let duration: TimeInterval
+    /// Error message if the feed update failed, nil otherwise.
     public let error: String?
 
+    // MARK: - Lifecycle
+
+    /// Creates a new feed result.
     public init(
       feedURL: String,
       recordName: String,
-      status: String,
+      status: Status,
       articlesCreated: Int,
       articlesUpdated: Int,
       duration: TimeInterval,
@@ -140,6 +166,25 @@ public struct UpdateReport: Codable, Sendable {
     }
   }
 
+  // MARK: - Properties
+
+  /// When the update started
+  public let startTime: Date
+  /// When the update completed
+  public let endTime: Date
+  /// Total duration in seconds
+  public let duration: TimeInterval
+
+  /// Configuration used for this update
+  public let configuration: UpdateConfiguration
+  /// Summary statistics
+  public let summary: Summary
+  /// Detailed per-feed results
+  public let feeds: [FeedResult]
+
+  // MARK: - Lifecycle
+
+  /// Creates a new update report.
   public init(
     startTime: Date,
     endTime: Date,
@@ -149,22 +194,9 @@ public struct UpdateReport: Codable, Sendable {
   ) {
     self.startTime = startTime
     self.endTime = endTime
+    self.duration = endTime.timeIntervalSince(startTime)
     self.configuration = configuration
     self.summary = summary
     self.feeds = feeds
-  }
-}
-
-// MARK: - JSON Output
-
-extension UpdateReport {
-  /// Write the report to a JSON file
-  public func writeJSON(to path: String) throws {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    encoder.dateEncodingStrategy = .iso8601
-
-    let data = try encoder.encode(self)
-    try data.write(to: URL(fileURLWithPath: path))
   }
 }

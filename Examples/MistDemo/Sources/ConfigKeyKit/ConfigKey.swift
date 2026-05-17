@@ -49,6 +49,7 @@ public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
   internal let baseKey: String?
   internal let styles: [ConfigKeySource: any NamingStyle]
   internal let explicitKeys: [ConfigKeySource: String]
+  /// The default value returned when no source provides a value.
   public let defaultValue: Value  // Non-optional!
 
   /// The base key string used for this configuration key
@@ -96,6 +97,7 @@ public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     self.defaultValue = defaultVal
   }
 
+  /// Returns the resolved key string for the given source.
   public func key(for source: ConfigKeySource) -> String? {
     // Check for explicit key first
     if let explicit = explicitKeys[source] {
@@ -110,4 +112,3 @@ public struct ConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     return style.transform(base)
   }
 }
-

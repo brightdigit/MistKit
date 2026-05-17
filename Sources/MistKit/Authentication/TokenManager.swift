@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -29,49 +29,21 @@
 
 import Foundation
 
-/// Protocol for managing authentication tokens and credentials for CloudKit Web Services
+/// Protocol for managing authentication tokens and credentials for CloudKit Web Services.
+///
+/// A `TokenManager` is the lifecycle owner of credentials (loading, validating,
+/// rotating, persisting). It vends an `Authenticator` to whomever needs to apply
+/// those credentials to an outgoing request.
 public protocol TokenManager: Sendable {
-  /// Checks if credentials are currently available
+  /// Checks if credentials are currently available.
   var hasCredentials: Bool { get async }
 
-  /// Validates the current authentication credentials
-  /// - Returns: True if credentials are valid and usable
-  /// - Throws: TokenManagerError if validation fails
+  /// Validates the current authentication credentials.
+  /// - Returns: True if credentials are valid and usable.
+  /// - Throws: `TokenManagerError` if validation fails.
   func validateCredentials() async throws(TokenManagerError) -> Bool
 
-  /// Retrieves the current token credentials
-  /// - Returns: Current TokenCredentials or nil if none available
-  /// - Throws: TokenManagerError if retrieval fails
-  func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials?
-}
-
-extension TokenManager {
-  /// Validates API token format using regex
-  /// - Parameter apiToken: The API token to validate
-  /// - Throws: TokenManagerError if validation fails
-  internal static func validateAPITokenFormat(_ apiToken: String) throws(TokenManagerError) {
-    guard !apiToken.isEmpty else {
-      throw TokenManagerError.invalidCredentials(.apiTokenEmpty)
-    }
-
-    let regex = NSRegularExpression.apiTokenRegex
-    let matches = regex.matches(in: apiToken)
-
-    guard !matches.isEmpty else {
-      throw TokenManagerError.invalidCredentials(.apiTokenInvalidFormat)
-    }
-  }
-
-  /// Validates web auth token format
-  /// - Parameter webToken: The web auth token to validate
-  /// - Throws: TokenManagerError if validation fails
-  internal static func validateWebAuthTokenFormat(_ webToken: String) throws(TokenManagerError) {
-    guard !webToken.isEmpty else {
-      throw TokenManagerError.invalidCredentials(.webAuthTokenEmpty)
-    }
-
-    guard webToken.count >= 10 else {
-      throw TokenManagerError.invalidCredentials(.webAuthTokenTooShort)
-    }
-  }
+  /// Returns the authenticator that should be used for the next request,
+  /// or `nil` if no credentials are available.
+  func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)?
 }

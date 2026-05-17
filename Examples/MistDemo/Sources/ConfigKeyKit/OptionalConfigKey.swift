@@ -86,6 +86,7 @@ public struct OptionalConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     self.explicitKeys = [:]
   }
 
+  /// Returns the resolved key string for the given source.
   public func key(for source: ConfigKeySource) -> String? {
     // Check for explicit key first
     if let explicit = explicitKeys[source] {
@@ -100,4 +101,3 @@ public struct OptionalConfigKey<Value: Sendable>: ConfigurationKey, Sendable {
     return style.transform(base)
   }
 }
-

@@ -1,6 +1,6 @@
 //
 //  ConfigurationParseable.swift
-//  ConfigKeyKit
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -29,26 +29,28 @@
 
 import Foundation
 
-/// Protocol for configuration types that can parse themselves from command line arguments and environment variables
+/// Protocol for configuration types that can parse themselves
+/// from command line arguments and environment variables.
 public protocol ConfigurationParseable: Sendable {
-    /// Associated type for the configuration reader
-    associatedtype ConfigReader: Sendable
+  /// Associated type for the configuration reader
+  associatedtype ConfigReader: Sendable
 
-    /// Associated type for the parent configuration
-    /// Use `Never` for root configurations that have no parent
-    associatedtype BaseConfig: Sendable
+  /// Associated type for the parent configuration
+  /// Use `Never` for root configurations that have no parent
+  associatedtype BaseConfig: Sendable
 
-    /// Initialize the configuration by parsing from available sources (CLI args, environment variables, defaults)
-    /// - Parameters:
-    ///   - configuration: The configuration reader to parse values from
-    ///   - base: Optional parent configuration (nil for root configs)
-    init(configuration: ConfigReader, base: BaseConfig?) async throws
+  /// Initialize the configuration by parsing from available sources.
+  /// - Parameters:
+  ///   - configuration: The configuration reader to parse values from.
+  ///   - base: Optional parent configuration (nil for root configs).
+  /// - Throws: An error if parsing fails.
+  init(configuration: ConfigReader, base: BaseConfig?) async throws
 }
 
 /// Extension for root configurations (where BaseConfig == Never)
-public extension ConfigurationParseable where BaseConfig == Never {
-    /// Convenience initializer for root configs that don't need a parent
-    init(configuration: ConfigReader) async throws {
-        try await self.init(configuration: configuration, base: nil)
-    }
+extension ConfigurationParseable where BaseConfig == Never {
+  /// Convenience initializer for root configs that don't need a parent
+  public init(configuration: ConfigReader) async throws {
+    try await self.init(configuration: configuration, base: nil)
+  }
 }

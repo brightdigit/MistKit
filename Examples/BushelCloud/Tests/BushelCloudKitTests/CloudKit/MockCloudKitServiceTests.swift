@@ -59,7 +59,7 @@ internal struct MockCloudKitServiceTests {
       fields: record.toCloudKitFields()
     )
 
-    try await service.executeBatchOperations([operation], recordType: "RestoreImage")
+    try await service.executeBatchOperations([operation])
 
     let storedRecords = await service.getStoredRecords(ofType: "RestoreImage")
     #expect(storedRecords.count == 1)
@@ -79,7 +79,7 @@ internal struct MockCloudKitServiceTests {
       recordName: recordName,
       fields: initialRecord.toCloudKitFields()
     )
-    try await service.executeBatchOperations([createOp], recordType: "RestoreImage")
+    try await service.executeBatchOperations([createOp])
 
     // Replace with updated record
     let updatedRecord = RestoreImageRecord(
@@ -103,7 +103,7 @@ internal struct MockCloudKitServiceTests {
       recordName: recordName,
       fields: updatedRecord.toCloudKitFields()
     )
-    try await service.executeBatchOperations([replaceOp], recordType: "RestoreImage")
+    try await service.executeBatchOperations([replaceOp])
 
     // Verify only one record exists with updated data
     let storedRecords = await service.getStoredRecords(ofType: "RestoreImage")
@@ -130,7 +130,7 @@ internal struct MockCloudKitServiceTests {
       recordName: recordName,
       fields: record.toCloudKitFields()
     )
-    try await service.executeBatchOperations([createOp], recordType: "RestoreImage")
+    try await service.executeBatchOperations([createOp])
 
     // Delete record
     let deleteOp = RecordOperation(
@@ -138,7 +138,7 @@ internal struct MockCloudKitServiceTests {
       recordType: "RestoreImage",
       recordName: recordName
     )
-    try await service.executeBatchOperations([deleteOp], recordType: "RestoreImage")
+    try await service.executeBatchOperations([deleteOp])
 
     // Verify record is gone
     let storedRecords = await service.getStoredRecords(ofType: "RestoreImage")
@@ -170,11 +170,8 @@ internal struct MockCloudKitServiceTests {
       ),
     ]
 
-    try await service.executeBatchOperations(
-      Array(operations[0...1]),
-      recordType: "RestoreImage"
-    )
-    try await service.executeBatchOperations([operations[2]], recordType: "XcodeVersion")
+    try await service.executeBatchOperations(Array(operations[0...1]))
+    try await service.executeBatchOperations([operations[2]])
 
     let restoreImages = await service.getStoredRecords(ofType: "RestoreImage")
     let xcodeVersions = await service.getStoredRecords(ofType: "XcodeVersion")
@@ -213,7 +210,7 @@ internal struct MockCloudKitServiceTests {
     )
 
     do {
-      try await service.executeBatchOperations([operation], recordType: "RestoreImage")
+      try await service.executeBatchOperations([operation])
       Issue.record("Expected error to be thrown")
     } catch is MockCloudKitError {
       // Success - error was thrown as expected
@@ -244,8 +241,8 @@ internal struct MockCloudKitServiceTests {
       )
     ]
 
-    try await service.executeBatchOperations(batch1, recordType: "RestoreImage")
-    try await service.executeBatchOperations(batch2, recordType: "XcodeVersion")
+    try await service.executeBatchOperations(batch1)
+    try await service.executeBatchOperations(batch2)
 
     let history = await service.getOperationHistory()
     #expect(history.count == 2)
@@ -264,7 +261,7 @@ internal struct MockCloudKitServiceTests {
       recordName: "test",
       fields: TestFixtures.sonoma1421.toCloudKitFields()
     )
-    try await service.executeBatchOperations([operation], recordType: "RestoreImage")
+    try await service.executeBatchOperations([operation])
 
     // Clear storage
     await service.clearStorage()

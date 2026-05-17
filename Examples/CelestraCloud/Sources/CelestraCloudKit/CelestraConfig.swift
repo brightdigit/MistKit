@@ -3,11 +3,11 @@
 //  CelestraCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -29,26 +29,6 @@
 
 public import Foundation
 public import MistKit
-
-// MARK: - Configuration Error
-
-/// Custom error for configuration issues (library-compatible)
-public struct ConfigurationError: LocalizedError {
-  /// The error message describing what went wrong.
-  public let message: String
-
-  /// A localized description of the error.
-  public var errorDescription: String? {
-    message
-  }
-
-  /// Creates a new configuration error.
-  ///
-  /// - Parameter message: The error message describing what went wrong.
-  public init(_ message: String) {
-    self.message = message
-  }
-}
 
 // MARK: - Shared Configuration
 
@@ -69,11 +49,10 @@ public enum CelestraConfig {
     )
 
     // Create and return CloudKit service
-    return try CloudKitService(
+    return CloudKitService(
       containerIdentifier: config.containerID,
       tokenManager: tokenManager,
-      environment: config.environment,
-      database: .public
+      environment: config.environment
     )
   }
 
@@ -113,11 +92,10 @@ public enum CelestraConfig {
     )
 
     // Create and return CloudKit service
-    return try CloudKitService(
+    return CloudKitService(
       containerIdentifier: containerID,
       tokenManager: tokenManager,
-      environment: environment,
-      database: .public
+      environment: environment
     )
   }
 }

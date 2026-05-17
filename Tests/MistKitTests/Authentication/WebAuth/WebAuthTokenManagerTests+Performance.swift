@@ -5,13 +5,13 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Performance edge cases tests for WebAuthTokenManager
-  @Suite("Edge Cases Performance Tests")
+  @Suite("Edge Cases Performance")
   internal struct Performance {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
-    private static let validWebAuthToken = "user123_web_auth_token_abcdef"
+      TestConstants.apiToken
+    private static let validWebAuthToken = TestConstants.webAuthToken
 
     // MARK: - Performance Edge Cases
 
@@ -69,7 +69,7 @@ extension WebAuthTokenManagerTests {
       }
 
       do {
-        _ = try await manager.getCurrentCredentials()
+        _ = try await manager.currentAuthenticator()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
       } catch {
         switch error {

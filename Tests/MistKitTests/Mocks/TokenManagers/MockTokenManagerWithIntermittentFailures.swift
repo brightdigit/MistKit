@@ -31,33 +31,17 @@ internal final class MockTokenManagerWithIntermittentFailures: TokenManager {
     let count = await counter.increment()
     // Fail on odd attempts
     if count % 2 == 1 {
-      throw TokenManagerError.networkError(
-        underlying: NSError(
-          domain: "IntermittentError",
-          code: -1_001,
-          userInfo: [
-            NSLocalizedDescriptionKey: "Intermittent network failure"
-          ]
-        )
-      )
+      throw TokenManagerError.networkError(.timeout)
     }
     return true
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     let count = await counter.increment()
     // Fail on odd attempts
     if count % 2 == 1 {
-      throw TokenManagerError.networkError(
-        underlying: NSError(
-          domain: "IntermittentError",
-          code: -1_001,
-          userInfo: [
-            NSLocalizedDescriptionKey: "Intermittent network failure"
-          ]
-        )
-      )
+      throw TokenManagerError.networkError(.timeout)
     }
-    return TokenCredentials.apiToken("intermittent-token")
+    return try APITokenAuthenticator(token: TestConstants.apiToken)
   }
 }

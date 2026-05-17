@@ -6,7 +6,7 @@ import Testing
 
 extension ServerToServerAuthManagerTests {
   /// Private key validation tests for ServerToServerAuthManager
-  @Suite("Private Key Tests", .enabled(if: Platform.isCryptoAvailable))
+  @Suite("Private Key", .enabled(if: Platform.isCryptoAvailable))
   internal struct PrivateKeyTests {
     private static func generateTestPrivateKeyClosure()
       -> @Sendable () throws ->
@@ -63,22 +63,15 @@ extension ServerToServerAuthManagerTests {
       #expect(isValid2 == true)
 
       // But they should have different private keys
-      let credentials1 = try await manager1.getCurrentCredentials()
-      let credentials2 = try await manager2.getCurrentCredentials()
+      let auth1 = try #require(
+        try await manager1.currentAuthenticator() as? ServerToServerAuthenticator
+      )
+      let auth2 = try #require(
+        try await manager2.currentAuthenticator() as? ServerToServerAuthenticator
+      )
 
-      #expect(credentials1 != nil)
-      #expect(credentials2 != nil)
-
-      if let cred1 = credentials1, let cred2 = credentials2 {
-        if case .serverToServer(let keyID1, let privateKeyData1) = cred1.method,
-          case .serverToServer(let keyID2, let privateKeyData2) = cred2.method
-        {
-          #expect(keyID1 == keyID2)  // Same key ID
-          #expect(privateKeyData1 != privateKeyData2)  // Different private keys
-        } else {
-          Issue.record("Expected serverToServer method")
-        }
-      }
+      #expect(auth1.keyID == auth2.keyID)
+      #expect(auth1.privateKey.rawRepresentation != auth2.privateKey.rawRepresentation)
     }
 
     // MARK: - Sendable Compliance Tests
@@ -98,7 +91,7 @@ extension ServerToServerAuthManagerTests {
 
       // Test concurrent access patterns
       async let task1 = manager.validateManager()
-      async let task2 = manager.getCredentialsFromManager()
+      async let task2 = manager.authenticatorFromManager()
       async let task3 = manager.checkHasCredentials()
 
       let results = await (task1, task2, task3)

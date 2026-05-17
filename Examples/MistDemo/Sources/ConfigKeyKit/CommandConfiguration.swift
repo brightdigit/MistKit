@@ -1,6 +1,6 @@
 //
 //  CommandConfiguration.swift
-//  ConfigKeyKit
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -29,11 +29,14 @@
 
 /// Command configuration for identifying and routing commands
 public struct CommandConfiguration {
-    public let commandName: String
-    public let abstract: String
-    
-    public init(commandName: String, abstract: String) {
-        self.commandName = commandName
-        self.abstract = abstract
-    }
+  /// The name used to invoke this command on the CLI.
+  public let commandName: String
+  /// A short description of what the command does.
+  public let abstract: String
+
+  /// Initialize with the command name and abstract description.
+  public init(commandName: String, abstract: String) {
+    self.commandName = commandName
+    self.abstract = abstract
+  }
 }

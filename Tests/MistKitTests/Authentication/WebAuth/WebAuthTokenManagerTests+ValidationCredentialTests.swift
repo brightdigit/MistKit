@@ -5,13 +5,13 @@ import Testing
 
 extension WebAuthTokenManagerTests {
   /// Credential validation tests for WebAuthTokenManager
-  @Suite("Validation Credential Tests")
+  @Suite("Validation Credential")
   internal struct Validation {
     // MARK: - Test Data Setup
 
     private static let validAPIToken =
-      "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
-    private static let validWebAuthToken = "user123_web_auth_token_abcdef"
+      TestConstants.apiToken
+    private static let validWebAuthToken = TestConstants.webAuthToken
     private static let invalidAPIToken = "invalid_token_format"
     private static let shortWebAuthToken = "short"
 
@@ -41,37 +41,30 @@ extension WebAuthTokenManagerTests {
       #expect(hasCredentials == false)
     }
 
-    /// Tests getCurrentCredentials with valid tokens
-    @Test("getCurrentCredentials with valid tokens")
-    internal func getCurrentCredentialsValidTokens() async throws {
+    /// Tests currentAuthenticator with valid tokens
+    @Test("currentAuthenticator with valid tokens")
+    internal func currentAuthenticatorValidTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
       )
 
-      let credentials = try await manager.getCurrentCredentials()
-      #expect(credentials != nil)
-
-      if let credentials = credentials {
-        if case .webAuthToken(let api, let web) = credentials.method {
-          #expect(api == Self.validAPIToken)
-          #expect(web == Self.validWebAuthToken)
-        } else {
-          Issue.record("Expected .webAuthToken method")
-        }
-      }
+      let authenticator = try await manager.currentAuthenticator()
+      let web = try #require(authenticator as? WebAuthTokenAuthenticator)
+      #expect(web.apiToken == Self.validAPIToken)
+      #expect(web.webAuthToken == Self.validWebAuthToken)
     }
 
-    /// Tests getCurrentCredentials with invalid tokens
-    @Test("getCurrentCredentials with invalid tokens")
-    internal func getCurrentCredentialsInvalidTokens() async throws {
+    /// Tests currentAuthenticator with invalid tokens
+    @Test("currentAuthenticator with invalid tokens")
+    internal func currentAuthenticatorInvalidTokens() async throws {
       let manager = WebAuthTokenManager(
         apiToken: Self.invalidAPIToken,
         webAuthToken: Self.shortWebAuthToken
       )
 
       do {
-        _ = try await manager.getCurrentCredentials()
+        _ = try await manager.currentAuthenticator()
         Issue.record("Should have thrown TokenManagerError.invalidCredentials")
       } catch {
         switch error {

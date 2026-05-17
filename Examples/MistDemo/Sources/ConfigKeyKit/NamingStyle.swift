@@ -27,8 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// MARK: - Naming Style
-
 /// Protocol for transforming base key strings into different naming conventions
 public protocol NamingStyle: Sendable {
   /// Transform a base key string according to this naming style

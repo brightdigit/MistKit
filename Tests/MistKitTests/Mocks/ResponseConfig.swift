@@ -64,34 +64,6 @@ internal struct ResponseConfig: Sendable {
       error: nil
     )
   }
-
-  /// HTTP error with status code
-  internal static func httpError(statusCode: Int, message: String? = nil) -> ResponseConfig {
-    let body: Data? =
-      if let msg = message {
-        Data(
-          """
-          {
-            "error": "\(msg)"
-          }
-          """.utf8
-        )
-      } else {
-        nil
-      }
-
-    var headers = HTTPFields()
-    if body != nil {
-      headers[.contentType] = "application/json"
-    }
-
-    return ResponseConfig(
-      statusCode: statusCode,
-      headers: headers,
-      body: body,
-      error: nil
-    )
-  }
 }
 
 // MARK: - CloudKit Response Builders
@@ -151,8 +123,24 @@ extension ResponseConfig {
     )
   }
 
-  /// Creates a successful query response
-  internal static func successfulQuery(records: [String: Any] = [:]) -> ResponseConfig {
+  /// Creates a transport-layer thrown error (e.g. URLError for timeouts or connection failures).
+  /// The transport throws this error before any HTTP response is produced.
+  internal static func networkError(_ error: any Error) -> ResponseConfig {
+    ResponseConfig(statusCode: 0, error: error)
+  }
+
+  /// Convenience: simulates a request timeout via URLError(.timedOut).
+  internal static func timeout() -> ResponseConfig {
+    .networkError(URLError(.timedOut))
+  }
+
+  /// Convenience: simulates a network connection failure via URLError(.networkConnectionLost).
+  internal static func connectionLost() -> ResponseConfig {
+    .networkError(URLError(.networkConnectionLost))
+  }
+
+  /// Creates a successful query response with an empty records body
+  internal static func successfulQuery() -> ResponseConfig {
     let responseJSON = """
       {
         "records": []

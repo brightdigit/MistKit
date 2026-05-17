@@ -4,15 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MistKit is a Swift Package for Server-Side and Command-Line Access to CloudKit Web Services. This is a fresh rewrite on the `claude` branch using modern Swift features and best practices.
+MistKit is a Swift Package for Server-Side and Command-Line Access to CloudKit Web Services. It targets cross-platform Swift (including Linux, WASI, and Windows) using modern Swift concurrency and code generated from Apple's CloudKit Web Services OpenAPI specification.
 
 ## Key Project Context
 
 - **Purpose**: Provides a Swift interface to CloudKit Web Services (REST API) rather than the CloudKit framework
-- **Target Platforms**: Cross-platform including Linux, server-side Swift, and command-line tools
-- **Current Branch**: `claude` - A modern rewrite leveraging latest Swift advancements
+- **Target Platforms**: Cross-platform including macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows
+- **Default Branch**: `main`
 - **API Reference**: The `openapi.yaml` file contains the OpenAPI 3.0.3 specification for Apple's CloudKit Web Services
-- **Repository State**: Fresh start with OpenAPI spec as the foundation for implementation
+- **Code Generation**: Generated client code lives in `Sources/MistKitOpenAPI/` (its own target/product) and is committed
+- **Targets/products**: `MistKit` (curated wrapper) and `MistKitOpenAPI` (raw generated client + types, `public`). `import MistKit` for the curated API; add `import MistKitOpenAPI` only to reach raw generated types
 
 ## Development Commands
 
@@ -50,7 +51,7 @@ swift package generate-xcodeproj
 
 # Or manually with swift-openapi-generator
 swift run swift-openapi-generator generate \
-    --output-directory Sources/MistKit/Generated \
+    --output-directory Sources/MistKitOpenAPI \
     --config openapi-generator-config.yaml \
     openapi.yaml
 ```
@@ -66,14 +67,15 @@ swift test --parallel
 # Show test output
 swift test --verbose
 
-# Format code (requires swift-format installation)
-swift-format -i -r Sources/ Tests/
+# Format + lint
+# swift-format, swiftlint, periphery, and swift-openapi-generator are pinned
+# in mise.toml — do NOT invoke them from PATH directly. Run them THROUGH mise:
+mise exec -- swift-format -i -r Sources/ Tests/
+mise exec -- swiftlint              # lint
+mise exec -- swiftlint --fix        # auto-fix
 
-# Lint code (requires swiftlint installation)
-swiftlint
-
-# Auto-fix linting issues
-swiftlint --fix
+# Or run the full lint pipeline (build + swiftlint + header.sh + periphery):
+./Scripts/lint.sh
 ```
 
 ### MistDemo Commands
@@ -89,13 +91,17 @@ swift run mistdemo --help
 swift run mistdemo auth-token
 swift run mistdemo current-user
 swift run mistdemo query
+swift run mistdemo lookup
 swift run mistdemo create
 swift run mistdemo update
+swift run mistdemo modify
+swift run mistdemo delete
 swift run mistdemo upload-asset
 swift run mistdemo lookup-zones
 swift run mistdemo fetch-changes
 swift run mistdemo demo-in-filter
-swift run mistdemo test-integration
+swift run mistdemo demo-errors
+swift run mistdemo test-public
 swift run mistdemo test-private
 
 # Run with specific configuration
@@ -109,7 +115,7 @@ swift run mistdemo --config-file ~/.mistdemo/config.json query
 MistKit uses separate types for requests and responses at the OpenAPI schema level to accurately model CloudKit's asymmetric API behavior:
 
 **Type Layers:**
-1. **Domain Layer**: `FieldValue` enum - Pure Swift types, no API metadata (Sources/MistKit/FieldValue.swift)
+1. **Domain Layer**: `FieldValue` enum - Pure Swift types, no API metadata (`Sources/MistKit/Models/FieldValues/FieldValue.swift`)
 2. **API Request Layer**: `FieldValueRequest` - No type field, CloudKit infers type from value structure
 3. **API Response Layer**: `FieldValueResponse` - Optional type field for explicit type information
 
@@ -127,8 +133,8 @@ MistKit uses separate types for requests and responses at the OpenAPI schema lev
 - `Components.Schemas.RecordResponse` - Records in response bodies
 
 **Conversion:**
-- Request conversion: `Extensions/OpenAPI/Components+FieldValue.swift` converts domain `FieldValue` → `FieldValueRequest`
-- Response conversion: `Service/FieldValue+Components.swift` converts `FieldValueResponse` → domain `FieldValue`
+- Request conversion: `Sources/MistKit/OpenAPI/Components/Components.Schemas.FieldValueRequest.swift` converts domain `FieldValue` → `FieldValueRequest`
+- Response conversion: `Sources/MistKit/Models/FieldValues/FieldValue+Components.swift` converts `FieldValueResponse` → domain `FieldValue`
 
 ### Modern Swift Features to Utilize
 - Swift Concurrency (async/await) for all network operations
@@ -141,46 +147,60 @@ MistKit uses separate types for requests and responses at the OpenAPI schema lev
 ```
 MistKit/
 ├── Sources/
-│   └── MistKit/
-│       ├── Generated/      # Auto-generated OpenAPI client code (not committed)
-│       └── MistKitClient.swift  # Main client wrapper
+│   ├── MistKit/           # Curated wrapper (CloudKitService, domain types, auth)
+│   └── MistKitOpenAPI/    # Generated OpenAPI client + types (public, committed)
 ├── Tests/
 │   └── MistKitTests/
 ├── Scripts/
-│   └── generate-openapi.sh # Script to generate OpenAPI code
+│   └── generate-openapi.sh # Script to generate OpenAPI code → Sources/MistKitOpenAPI/
 ├── openapi.yaml           # CloudKit Web Services OpenAPI specification
 └── openapi-generator-config.yaml # Configuration for code generation
 ```
 
 ### CloudKitService Operations
 
-`CloudKitService` operations are split across focused extension files:
+`CloudKitService` operations are split across focused extension files (all paths relative to `Sources/MistKit/CloudKitService/`):
 
 | File | Operations |
 |------|-----------|
-| `CloudKitService+Operations.swift` | `queryRecords`, `lookupRecords`, `modifyRecords` |
+| `CloudKitService+Initialization.swift` | initializer overloads (API token, web auth token, server-to-server) |
+| `CloudKitService+Operations.swift` | `queryRecords`, `queryAllRecords`, `lookupRecords` |
+| `CloudKitService+WriteOperations.swift` | `modifyRecords`, `createRecord`, `updateRecord`, `deleteRecord` |
 | `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
+| `CloudKitService+ModifyZones.swift` | `modifyZones(_:database:)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
-| `CloudKitService+UserOperations.swift` | `fetchCurrentUser()`, `discoverUserIdentities(lookupInfos:)` |
-| `CloudKitService+AssetOperations.swift` | `uploadAssets` |
-| `CloudKitService+WriteOperations.swift` | `requestAssetUploadURL`, `uploadAssetData` |
+| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(unavailable — pending #28)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)`, `fetchCurrentUser()` (deprecated, forwards to `fetchCaller`) |
+| `CloudKitService+AssetOperations.swift` | `uploadAssets`, `requestAssetUploadURL` |
+| `CloudKitService+AssetUpload.swift` | `uploadAssetData` |
+| `CloudKitService+RecordManaging.swift` | record-managing convenience surface |
+| `CloudKitService+Classification.swift` | operation classification (batch sync result tracking) |
+| `CloudKitService+ErrorHandling.swift` | error mapping helpers |
 
 **Sync/Change Operations:**
 - `fetchRecordChanges(recordType:syncToken:)` → `/records/changes` — returns `RecordChangesResult` with `records`, `syncToken`, `moreComing`
 - `fetchAllRecordChanges(recordType:syncToken:)` — convenience wrapper that auto-paginates using `moreComing`
 - `fetchZoneChanges(syncToken:)` → `/zones/changes` — returns `ZoneChangesResult`
 - `lookupZones(zoneIDs:)` → `/zones/lookup` — returns `[ZoneInfo]`
-- `discoverUserIdentities(lookupInfos:)` → `/users/discover` — takes `[UserIdentityLookupInfo]`, returns `[UserIdentity]`
+- `discoverUserIdentities(lookupInfos:)` → POST `/users/discover` — takes `[UserIdentityLookupInfo]`, returns `[UserIdentity]`
 
-**Result Types (Sources/MistKit/Service/):**
+**User-Identity Operations (public DB + web-auth required):**
+- `fetchCaller()` → `/users/caller` — returns `UserInfo`. Replaces deprecated `fetchCurrentUser()` / `users/current`. Only valid against the public database with web-auth credentials.
+- `discoverAllUserIdentities()` → GET `/users/discover` — returns `[UserIdentity]` for every discoverable user in the caller's address book.
+- `lookupUsersByEmail(_:)` → POST `/users/lookup/email` — returns `[UserIdentity]`.
+- `lookupUsersByRecordName(_:)` → POST `/users/lookup/id` — returns `[UserIdentity]`.
+
+In MistDemo, integration runs targeting these endpoints use `PhaseContext.userContextService` (a public+web-auth `CloudKitService`) which is built from `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` regardless of the primary `--database` selection. The `DatabaseConfiguration` / `AuthenticationCredentials` types in `Examples/MistDemo/Sources/MistDemoKit/Configuration/` enforce valid database+auth combinations at construction time.
+
+**Result Types (Sources/MistKit/Models/ and Sources/MistKit/Models/Zones/):**
+- `QueryResult` — `records: [RecordInfo]`, `continuationMarker: String?`
 - `RecordChangesResult` — `records: [RecordInfo]`, `syncToken: String?`, `moreComing: Bool`
-- `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`
-- `UserIdentity` — `userRecordName: String?`, `nameComponents: NameComponents?`
-- `UserIdentityLookupInfo` — `emailAddress: String?`, `phoneNumber: String?`
+- `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`, `moreComing: Bool`
+- `UserIdentity` — `userRecordName: String?`, `nameComponents: NameComponents?`, `lookupInfo: UserIdentityLookupInfo?`
+- `UserIdentityLookupInfo` — `emailAddress: String?`, `phoneNumber: String?`, `userRecordName: String?`
 - `NameComponents` — full personal name parts (givenName, familyName, nickname, etc.)
 
 **Protocols:**
-- `RecordTypeIterating` (`Sources/MistKit/Protocols/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; used by `fetchAllRecordChanges`
+- `RecordTypeIterating` (`Sources/MistKit/RecordManagement/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; used by `fetchAllRecordChanges`
 
 ### Key Design Principles
 1. **Protocol-Oriented**: Define protocols for all major components (TokenManager, NetworkClient, etc.)
@@ -189,33 +209,28 @@ MistKit/
 4. **Sendable Compliance**: Ensure all types are Sendable for concurrency safety
 
 ### Logging
-MistKit uses [swift-log](https://github.com/apple/swift-log) for cross-platform logging support, enabling usage on macOS, Linux, Windows, and other platforms.
+MistKit uses [swift-log](https://github.com/apple/swift-log) for cross-platform logging. The package emits to four labeled subsystems; consumers install a `LogHandler` and choose verbosity via `logLevel`.
 
-**Key Logging Components:**
-- `MistKitLogger` - Centralized logging infrastructure with subsystems for `api`, `auth`, and `network`
-- Environment-based privacy control via `MISTKIT_DISABLE_LOG_REDACTION` environment variable
-- `SecureLogging` utilities for token masking and safe message formatting
-- Structured logging in `LoggingMiddleware` for HTTP request/response debugging (DEBUG builds only)
+**Subsystems** (declared in `Sources/MistKit/Extensions/Logger+Subsystem.swift`):
 
-**Logging Subsystems:**
+| Label | Use |
+|-------|-----|
+| `com.brightdigit.MistKit.api`        | CloudKit API operations |
+| `com.brightdigit.MistKit.auth`       | Authentication and token management |
+| `com.brightdigit.MistKit.network`    | Network errors |
+| `com.brightdigit.MistKit.middleware` | HTTP request/response traces (debug-level) |
+
+**Internal usage** (inside MistKit):
 ```swift
-MistKitLogger.api      // CloudKit API operations
-MistKitLogger.auth     // Authentication and token management
-MistKitLogger.network  // Network operations
+let logger = Logger(subsystem: .api)
+logger.debug("…")    // protocol detail
+logger.warning("…")
+logger.error("…")
 ```
 
-**Helper Methods:**
-```swift
-MistKitLogger.logError(_:logger:shouldRedact:)    // Error level
-MistKitLogger.logWarning(_:logger:shouldRedact:)  // Warning level
-MistKitLogger.logInfo(_:logger:shouldRedact:)     // Info level
-MistKitLogger.logDebug(_:logger:shouldRedact:)    // Debug level
-```
+**For consumers:** install a `LogHandler` (e.g. `StreamLogHandler.standardOutput`) via `LoggingSystem.bootstrap` and set the level per-subsystem. Protocol traces — request/response bodies, headers, query params — are emitted at `.debug`. The middleware guards expensive work (1 MiB body collection, query-param parsing) behind `logger.logLevel <= .debug`, so the default `.info` level pays no overhead.
 
-**Privacy Controls:**
-- By default, logs use `SecureLogging.safeLogMessage()` to redact sensitive information
-- Set `MISTKIT_DISABLE_LOG_REDACTION=1` to disable redaction for debugging
-- Tokens, keys, and secrets are automatically masked in logged messages
+There is no built-in redaction. Sensitive data (tokens, raw bodies) appears only at `.debug`; control exposure via `logLevel`.
 
 ### Asset Upload Transport Design
 
@@ -245,12 +260,12 @@ Asset uploads use `URLSession.shared` directly rather than the injected `ClientT
 
 **Implementation Details:**
 - AssetUploader type: `(Data, URL) async throws -> (statusCode: Int?, data: Data)`
-- Defined in: `Sources/MistKit/Core/AssetUploader.swift`
-- URLSession extension: `Sources/MistKit/Extensions/URLSession+AssetUpload.swift`
-- Upload orchestration: `Sources/MistKit/Service/CloudKitService+WriteOperations.swift`
-  - `uploadAssets()` - Complete two-step upload workflow
-  - `requestAssetUploadURL()` - Step 1: Get CDN upload URL
-  - `uploadAssetData()` - Step 2: Upload binary data to CDN
+- Defined in: `Sources/MistKit/Models/AssetUploading/AssetUploader.swift`
+- URLSession extension: `Sources/MistKit/Models/AssetUploading/URLSession+AssetUpload.swift`
+- Upload orchestration:
+  - `uploadAssets()` - Complete two-step upload workflow → `Sources/MistKit/CloudKitService/CloudKitService+AssetOperations.swift`
+  - `requestAssetUploadURL()` - Step 1: Get CDN upload URL → `Sources/MistKit/CloudKitService/CloudKitService+AssetOperations.swift`
+  - `uploadAssetData()` - Step 2: Upload binary data to CDN → `Sources/MistKit/CloudKitService/CloudKitService+AssetUpload.swift`
 
 **Future Consideration:**
 A `ClientTransport` extension could provide a generic upload method, but would need to:
@@ -262,21 +277,42 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 
 `FilterBuilder` is split across extension files for maintainability:
 
-- `Sources/MistKit/Helpers/FilterBuilder.swift` — core comparators (EQUALS, NOT_EQUALS, LESS_THAN, etc.) and IN/NOT_IN
-- `Sources/MistKit/Helpers/FilterBuilder+StringFilters.swift` — string-specific: `beginsWith`, `notBeginsWith`, `containsAllTokens`
-- `Sources/MistKit/Helpers/FilterBuilder+ListMemberFilters.swift` — list-specific: `listContains`, etc.
+- `Sources/MistKit/Models/Queries/FilterBuilder/FilterBuilder.swift` — core comparators (EQUALS, NOT_EQUALS, LESS_THAN, etc.) and IN/NOT_IN
+- `Sources/MistKit/Models/Queries/FilterBuilder/FilterBuilder+StringFilters.swift` — string-specific: `beginsWith`, `notBeginsWith`, `containsAllTokens`
+- `Sources/MistKit/Models/Queries/FilterBuilder/FilterBuilder+ListMemberFilters.swift` — list-specific: `listContains`, etc.
 
 **IN/NOT_IN serialization:** Uses `ListValuePayload` (`Components.Schemas.ListValuePayload`) to wrap array values. The fix in v1.0.0-alpha.5 ensures the correct `value` key structure is used when serializing list comparators.
 
 ### CloudKit Web Services Integration
 - Base URL: `https://api.apple-cloudkit.com`
 - Authentication:
-  - **Public database**: `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY` or `CLOUDKIT_PRIVATE_KEY_PATH` → server-to-server signing
-  - **Private database**: `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` → web authentication
-- All operations should reference the OpenAPI spec in `cloudkit-api-openapi.yaml`
+  - **Public database**: caller picks per-call via `PublicAuthPreference` carried on `Database.public(_:)`. Either `.requires(.serverToServer)` (key-pair signing — needs `CLOUDKIT_KEY_ID` + `CLOUDKIT_PRIVATE_KEY` or `CLOUDKIT_PRIVATE_KEY_PATH`) or `.requires(.webAuth)` (user-attributed — needs `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN`). Use `.prefers(_:)` to fall back to whichever cred is configured.
+  - **Private / Shared database**: always `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` → web-auth (CloudKit rejects S2S on these scopes).
+- All operations should reference the OpenAPI spec in `openapi.yaml`
 - URL Pattern: `/database/{version}/{container}/{environment}/{database}/{operation}`
-- Supported databases: `public`, `private`, `shared`
+- Supported databases: `Database.public(PublicAuthPreference)`, `Database.private`, `Database.shared`
 - Environments: `development`, `production`
+
+### Per-call attribution for `.public`
+
+`Database` carries the signing choice when targeting public:
+
+```swift
+public enum Database {
+  case `public`(PublicAuthPreference)
+  case `private`
+  case shared
+}
+```
+
+`PublicAuthPreference` is constructed via two factories — never via the (internal) memberwise init:
+
+- `.prefers(.serverToServer)` — try S2S, fall back to web-auth/API-token if S2S isn't configured.
+- `.prefers(.webAuth)` — try web-auth, fall back to S2S if web-auth isn't configured.
+- `.requires(.serverToServer)` — must use S2S; throw `missingCredentials(.preferenceRequired)` otherwise.
+- `.requires(.webAuth)` — must use web-auth; throw `missingCredentials(.preferenceRequired)` otherwise.
+
+There is **no default** on the operation `database:` parameter — every call must pick explicitly. The `requiresUserContext` flag on the dispatcher is gone; user-context routes (`users/*`) pass `.public(.requires(.webAuth))` directly. See `Sources/MistKit/Authentication/PublicAuthPreference.swift` and `Sources/MistKit/Authentication/Credentials+TokenManager.swift`.
 
 ### Testing Strategy
 - Use Swift Testing framework (`@Test` macro) for all tests
@@ -296,18 +332,19 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 - Mock uploaders should simulate realistic HTTP responses
 
 **Test Files:**
-- `Tests/MistKitTests/Service/CloudKitServiceUploadTests+*.swift`
-- `Tests/MistKitTests/Service/AssetUploadTokenTests.swift`
+- `Tests/MistKitTests/CloudKitService/Upload/CloudKitServiceTests.Upload+*.swift`
+- `Tests/MistKitTests/Models/AssetUploading/AssetUploadTokenTests.swift`
 
 ### MistDemo Integration Test Runner
 
-`Examples/MistDemo/Sources/MistDemo/Integration/` provides a live end-to-end test suite that runs against a real CloudKit container:
+`Examples/MistDemo/Sources/MistDemoKit/Integration/` provides a live end-to-end test suite that runs against a real CloudKit container:
 
 - `IntegrationTestRunner.swift` — orchestrates all operations (query, create, update, lookup, upload, fetchChanges, lookupZones, discoverUserIdentities)
 - `IntegrationTestData.swift` — seed data for integration tests
 - `IntegrationTestError.swift` — typed errors for test failures
+- `IntegrationTest.swift`, `PhasedIntegrationTest.swift`, and `Tests/` subdirectory — protocol-based phase pipeline introduced in #283
 
-Run via `swift run mistdemo test-integration` or `swift run mistdemo test-private` (private database variant). Both commands require valid CloudKit credentials in the config file.
+Run via `swift run mistdemo test-public` or `swift run mistdemo test-private` (private database variant). Both commands require valid CloudKit credentials in the config file.
 
 ## Important Implementation Notes
 
@@ -319,9 +356,9 @@ Run via `swift run mistdemo test-integration` or `swift run mistdemo test-privat
 
 ## OpenAPI-Driven Development
 
-The Swift package uses Apple's swift-openapi-generator to create type-safe client code from the OpenAPI specification. Generated code is placed in `Sources/MistKit/Generated/` and should not be committed to version control.
+The Swift package uses Apple's swift-openapi-generator to create type-safe client code from the OpenAPI specification. Generated code is placed in the standalone `MistKitOpenAPI` target at `Sources/MistKitOpenAPI/` (`accessModifier: public` so downstream code can `import MistKitOpenAPI` as an escape hatch). It is committed.
 
-> **IMPORTANT: Never manually edit files in `Sources/MistKit/Generated/`.** These files are auto-generated from `openapi.yaml`. Any manual edits will be lost when code is regenerated. Instead, modify `openapi.yaml` and regenerate using `./Scripts/generate-openapi.sh`.
+> **IMPORTANT: Never manually edit files in `Sources/MistKitOpenAPI/`.** These files are auto-generated from `openapi.yaml`. Any manual edits will be lost when code is regenerated. Instead, modify `openapi.yaml` and regenerate using `./Scripts/generate-openapi.sh`.
 
 The `openapi.yaml` file serves as the source of truth for:
 - All available endpoints and their HTTP methods
@@ -333,7 +370,7 @@ Key endpoints documented in the OpenAPI spec:
 - Records: `/records/query`, `/records/modify`, `/records/lookup`, `/records/changes`
 - Zones: `/zones/list`, `/zones/lookup`, `/zones/modify`, `/zones/changes`
 - Subscriptions: `/subscriptions/list`, `/subscriptions/lookup`, `/subscriptions/modify`
-- Users: `/users/current`, `/users/discover`, `/users/lookup/contacts`
+- Users: `/users/caller`, `/users/discover` (POST + GET), `/users/lookup/email`, `/users/lookup/id`
 - Assets: `/assets/upload`
 - Tokens: `/tokens/create`, `/tokens/register`
 
@@ -386,7 +423,7 @@ See `.claude/docs/README.md` for detailed topic breakdowns and integration guida
 
 For detailed schema workflows and integration:
 
-- **AI Schema Workflow** (`Examples/Celestra/AI_SCHEMA_WORKFLOW.md`) - Comprehensive guide for understanding, designing, modifying, and validating CloudKit schemas with text-based tools
+- **AI Schema Workflow** (`Examples/CelestraCloud/.claude/AI_SCHEMA_WORKFLOW.md`) - Comprehensive guide for understanding, designing, modifying, and validating CloudKit schemas with text-based tools
 - **Quick Reference** (`Examples/SCHEMA_QUICK_REFERENCE.md`) - One-page cheat sheet with syntax, patterns, cktool commands, and troubleshooting
 
 ## Additional Notes

@@ -7,6 +7,17 @@ import PackageDescription
 
 // MARK: - Swift Settings Configuration
 
+// Swift settings for the generated OpenAPI target. swift-openapi-generator
+// emits bare `import Foundation` / `import OpenAPIRuntime`; under SE-0409
+// (InternalImportsByDefault) those flip to `internal`, which breaks the
+// public initializers on the generated `Client`. Leave InternalImportsByDefault
+// off for the generated target.
+let generatedSwiftSettings: [SwiftSetting] = [
+  .enableUpcomingFeature("ExistentialAny"),
+  .enableUpcomingFeature("MemberImportVisibility"),
+  .enableUpcomingFeature("FullTypedThrows"),
+]
+
 // Base Swift settings for all platforms
 let swiftSettings: [SwiftSetting] = [
   // Swift 6.2 Upcoming Features (not yet enabled by default)
@@ -88,13 +99,17 @@ let package = Package(
       name: "MistKit",
       targets: ["MistKit"]
     ),
+    .library(
+      name: "MistKitOpenAPI",
+      targets: ["MistKitOpenAPI"]
+    ),
   ],
   dependencies: [
     // Swift OpenAPI Runtime dependencies
     .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.8.0"),
     .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.2.0"),
     // Crypto library for cross-platform cryptographic operations
-    .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
+    .package(url: "https://github.com/apple/swift-crypto.git", from: "4.0.0"),
     // Logging library for cross-platform logging
     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
   ],
@@ -102,8 +117,16 @@ let package = Package(
     // Targets are the basic building blocks of a package, defining a module or a test suite.
     // Targets can depend on other targets in this package and products from dependencies.
     .target(
+      name: "MistKitOpenAPI",
+      dependencies: [
+        .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+      ],
+      swiftSettings: generatedSwiftSettings
+    ),
+    .target(
       name: "MistKit",
       dependencies: [
+        "MistKitOpenAPI",
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
         // URLSession transport only available on non-WASM platforms
         .product(
@@ -118,7 +141,7 @@ let package = Package(
     ),
     .testTarget(
       name: "MistKitTests",
-      dependencies: ["MistKit"],
+      dependencies: ["MistKit", "MistKitOpenAPI"],
       swiftSettings: swiftSettings
     ),
   ]

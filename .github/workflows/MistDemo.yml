@@ -1,0 +1,323 @@
+name: MistDemo
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Examples/MistDemo/**'
+      - 'Sources/MistKit/**'
+      - 'Package.swift'
+      - '.github/workflows/MistDemo.yml'
+  pull_request:
+    paths:
+      - 'Examples/MistDemo/**'
+      - 'Sources/MistKit/**'
+      - 'Package.swift'
+      - '.github/workflows/MistDemo.yml'
+
+concurrency:
+  group: mistdemo-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PACKAGE_NAME: MistDemo
+  WORKING_DIR: Examples/MistDemo
+
+jobs:
+  configure:
+    name: Configure Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      full-matrix: ${{ steps.check.outputs.full }}
+      ubuntu-os: ${{ steps.matrix.outputs.ubuntu-os }}
+      ubuntu-swift: ${{ steps.matrix.outputs.ubuntu-swift }}
+      ubuntu-type: ${{ steps.matrix.outputs.ubuntu-type }}
+    steps:
+      - id: check
+        name: Determine matrix scope
+        run: |
+          FULL=false
+          REF="${{ github.ref }}"
+          EVENT="${{ github.event_name }}"
+          BASE_REF="${{ github.base_ref }}"
+
+          # Full matrix on main
+          if [[ "$REF" == "refs/heads/main" ]]; then
+            FULL=true
+          # Full matrix on semver branches (v1.0.0, 1.2.3-alpha.1, etc.)
+          elif [[ "$REF" =~ ^refs/heads/v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            FULL=true
+          # Full matrix on PRs targeting main or semver branches
+          elif [[ "$EVENT" == "pull_request" ]]; then
+            if [[ "$BASE_REF" == "main" || "$BASE_REF" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+              FULL=true
+            fi
+          fi
+
+          echo "full=$FULL" >> "$GITHUB_OUTPUT"
+          echo "Full matrix: $FULL (ref=$REF, event=$EVENT, base_ref=$BASE_REF)"
+
+      - id: matrix
+        name: Build matrix values
+        run: |
+          # MistDemo's Package.swift declares swift-tools-version: 6.2,
+          # so Swift 6.1 is not supported.
+          if [[ "${{ steps.check.outputs.full }}" == "true" ]]; then
+            echo 'ubuntu-os=["noble","jammy"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-swift=["6.2","6.3"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-type=["","wasm","wasm-embedded"]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ubuntu-os=["noble"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-swift=["6.3"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-type=[""]' >> "$GITHUB_OUTPUT"
+          fi
+
+  build-ubuntu:
+    name: Build on Ubuntu
+    needs: configure
+    runs-on: ubuntu-latest
+    container: swift:${{ matrix.swift }}-${{ matrix.os }}
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(needs.configure.outputs.ubuntu-os) }}
+        swift: ${{ fromJSON(needs.configure.outputs.ubuntu-swift) }}
+        type: ${{ fromJSON(needs.configure.outputs.ubuntu-type) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: brightdigit/swift-build@v1
+        id: build
+        with:
+          type: ${{ matrix.type }}
+          wasmtime-version: "40.0.2"
+          wasm-swift-flags: >-
+            -Xcc -D_WASI_EMULATED_SIGNAL
+            -Xcc -D_WASI_EMULATED_MMAN
+            -Xlinker -lwasi-emulated-signal
+            -Xlinker -lwasi-emulated-mman
+          working-directory: ${{ env.WORKING_DIR }}
+      - name: Install curl (required by Codecov uploader)
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        run: |
+          if command -v apt-get >/dev/null 2>&1; then
+            apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+          fi
+      - name: Install coverage.py (silences codecov-cli probe warning)
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        run: pip3 install --quiet --user coverage 2>/dev/null || true
+      - uses: sersoft-gmbh/swift-coverage-action@v5
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        id: coverage-files
+        with:
+          fail-on-empty-output: true
+          search-paths: ${{ env.WORKING_DIR }}/.build
+      - name: Upload coverage to Codecov
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: codecov/codecov-action@v6
+        with:
+          fail_ci_if_error: true
+          flags: mistdemo-swift-${{ matrix.swift }}-${{ matrix.os }}
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
+
+  build-windows:
+    name: Build on Windows
+    needs: configure
+    runs-on: ${{ matrix.runs-on }}
+    if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [windows-2022, windows-2025]
+        # MistDemo's Package.swift declares swift-tools-version: 6.2,
+        # so Swift 6.1 is not supported.
+        # TODO: re-add swift-6.2-release once the swift-testing 6.2 +
+        # Windows parallel-runner crash is resolved (test process exits
+        # 1 with no diagnostic output after fanning out parallel tests;
+        # 6.3 is unaffected).
+        swift:
+          - version: swift-6.3-release
+            build: 6.3-RELEASE
+    steps:
+      - uses: actions/checkout@v6
+      - uses: brightdigit/swift-build@v1
+        id: build
+        with:
+          windows-swift-version: ${{ matrix.swift.version }}
+          windows-swift-build: ${{ matrix.swift.build }}
+          working-directory: ${{ env.WORKING_DIR }}
+      - name: Upload coverage to Codecov
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: codecov/codecov-action@v6
+        with:
+          fail_ci_if_error: true
+          flags: mistdemo-swift-${{ matrix.swift.version }},windows
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          os: windows
+          swift_project: MistDemo
+
+  build-android:
+    name: Build on Android
+    needs: configure
+    runs-on: ubuntu-latest
+    if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # MistDemo's Package.swift declares swift-tools-version: 6.2,
+        # so Swift 6.1 is not supported.
+        swift:
+          - version: "6.2"
+          - version: "6.3"
+        android-api-level: [33, 34]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+      - uses: brightdigit/swift-build@v1
+        with:
+          scheme: ${{ env.PACKAGE_NAME }}
+          type: android
+          android-swift-version: ${{ matrix.swift.version }}
+          android-api-level: ${{ matrix.android-api-level }}
+          android-run-tests: true
+          working-directory: ${{ env.WORKING_DIR }}
+      # Note: Code coverage is not supported on Android builds
+      # The Swift Android SDK does not include LLVM coverage tools (llvm-profdata, llvm-cov)
+
+  # Minimal macOS builds — always runs (SPM + iOS)
+  build-macos:
+    name: Build on macOS
+    runs-on: macos-26
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # SPM build
+          - xcode: "/Applications/Xcode_26.4.app"
+
+          # iOS build
+          - type: ios
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "iPhone 17 Pro"
+            osVersion: "26.4.1"
+            download-platform: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build and Test
+        id: build
+        uses: brightdigit/swift-build@v1
+        with:
+          scheme: ${{ env.PACKAGE_NAME }}-Package
+          type: ${{ matrix.type }}
+          xcode: ${{ matrix.xcode }}
+          deviceName: ${{ matrix.deviceName }}
+          osVersion: ${{ matrix.osVersion }}
+          download-platform: ${{ matrix.download-platform }}
+          working-directory: ${{ env.WORKING_DIR }}
+      - name: Install coverage.py (silences codecov-cli probe warning)
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        run: pip3 install --quiet --user coverage 2>/dev/null || true
+      - name: Process Coverage
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: sersoft-gmbh/swift-coverage-action@v5
+        with:
+          search-paths: ${{ env.WORKING_DIR }}/.build
+      - name: Upload Coverage
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.type && format('mistdemo-{0}{1}', matrix.type, matrix.osVersion) || 'mistdemo-spm-macos' }}
+
+  # Full macOS platform builds — only on main, semver branches, and PRs targeting them
+  build-macos-platforms:
+    name: Build on macOS (Platforms)
+    needs: configure
+    runs-on: macos-26
+    if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macOS
+          - type: macos
+            xcode: "/Applications/Xcode_26.4.app"
+
+          # watchOS
+          - type: watchos
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "Apple Watch Ultra 3 (49mm)"
+            osVersion: "26.4"
+            download-platform: true
+
+          # tvOS
+          - type: tvos
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "Apple TV"
+            osVersion: "26.4"
+            download-platform: true
+
+          # visionOS
+          - type: visionos
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "Apple Vision Pro"
+            osVersion: "26.4.1"
+            download-platform: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build and Test
+        id: build
+        uses: brightdigit/swift-build@v1
+        with:
+          scheme: ${{ env.PACKAGE_NAME }}-Package
+          type: ${{ matrix.type }}
+          xcode: ${{ matrix.xcode }}
+          deviceName: ${{ matrix.deviceName }}
+          osVersion: ${{ matrix.osVersion }}
+          download-platform: ${{ matrix.download-platform }}
+          working-directory: ${{ env.WORKING_DIR }}
+      - name: Install coverage.py (silences codecov-cli probe warning)
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        run: pip3 install --quiet --user coverage 2>/dev/null || true
+      - name: Process Coverage
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: sersoft-gmbh/swift-coverage-action@v5
+        with:
+          search-paths: ${{ env.WORKING_DIR }}/.build
+      - name: Upload Coverage
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.type && format('mistdemo-{0}{1}', matrix.type, matrix.osVersion) || 'mistdemo-spm-macos' }}
+
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
+    needs: [build-ubuntu, build-macos, build-macos-platforms, build-windows, build-android]
+    # Shared with MistKit's lint job: serialize across workflows so a cold
+    # cache on a mise.toml bump only triggers one rebuild, not a race.
+    concurrency:
+      group: lint-tools-${{ github.head_ref || github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-tools
+      - name: Lint
+        run: |
+          set -e
+          ./Scripts/lint.sh

@@ -11,31 +11,15 @@ echo "🔄 Generating OpenAPI code..."
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 PACKAGE_DIR="${SCRIPT_DIR}/.."
 
-# Detect OS and set paths accordingly
-if [ "$(uname)" = "Darwin" ]; then
-	DEFAULT_MINT_PATH="/opt/homebrew/bin/mint"
-elif [ "$(uname)" = "Linux" ] && [ -n "$GITHUB_ACTIONS" ]; then
-	DEFAULT_MINT_PATH="$GITHUB_WORKSPACE/Mint/.mint/bin/mint"
-elif [ "$(uname)" = "Linux" ]; then
-	DEFAULT_MINT_PATH="/usr/local/bin/mint"
-else
-	echo "Unsupported operating system"
-	exit 1
+# Put mise-managed tools on PATH (swift-openapi-generator is provisioned via mise.toml)
+if command -v mise >/dev/null 2>&1; then
+	eval "$(mise -C "$PACKAGE_DIR" env -s bash)"
 fi
 
-# Use environment MINT_CMD if set, otherwise use default path
-MINT_CMD=${MINT_CMD:-$DEFAULT_MINT_PATH}
-
-export MINT_PATH="$PACKAGE_DIR/.mint"
-MINT_ARGS="-n -m $PACKAGE_DIR/Mintfile --silent"
-MINT_RUN="$MINT_CMD run $MINT_ARGS"
-
 pushd $PACKAGE_DIR
-$MINT_CMD bootstrap -m Mintfile
 
-# Run the OpenAPI generator via Mint
-$MINT_RUN swift-openapi-generator generate \
-    --output-directory Sources/MistKit/Generated \
+swift-openapi-generator generate \
+    --output-directory Sources/MistKitOpenAPI \
     --config openapi-generator-config.yaml \
     openapi.yaml
 

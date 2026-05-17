@@ -1,0 +1,204 @@
+//
+//  QueryView.swift
+//  MistDemo
+//
+//  Created by Leo Dion.
+//  Copyright © 2026 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+#if canImport(SwiftUI) && canImport(CloudKit)
+  import MistDemoKit
+  import SwiftUI
+
+  /// View for querying Note records from CloudKit.
+  internal struct QueryView: View {
+    @Environment(CloudKitStore.self) private var service
+    @State private var limit: Int = 50
+    @State private var notes: [Note] = []
+    @State private var loading = false
+    @State private var loadError: String?
+    @State private var selectedNote: Note?
+    @State private var showCreateSheet = false
+
+    internal var body: some View {
+      VStack(spacing: 0) {
+        controls
+          .padding()
+        Divider()
+        content
+      }
+      .navigationDestination(for: Note.self) { note in
+        RecordDetailView(note: note, onChange: { Task { await runQuery() } })
+      }
+      .navigationTitle(service.databaseScope.label.map { "Notes — \($0)" } ?? "Notes")
+      .onChange(of: service.databaseScope) { _, _ in
+        notes = []
+        Task { await runQuery() }
+      }
+      .toolbar {
+        ToolbarItem {
+          Button {
+            showCreateSheet = true
+          } label: {
+            Label("New Note", systemImage: "plus")
+          }
+        }
+      }
+      .sheet(isPresented: $showCreateSheet) {
+        NoteEditView(mode: .create) { _ in
+          Task { await runQuery() }
+        }
+        .environment(service)
+      }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+      if loading {
+        Spacer()
+        ProgressView("Querying \(Note.recordType)…")
+        Spacer()
+      } else if let loadError {
+        ContentUnavailableView(
+          "Query failed",
+          systemImage: "exclamationmark.triangle",
+          description: Text(loadError)
+        )
+      } else if notes.isEmpty {
+        ContentUnavailableView(
+          "No notes",
+          systemImage: "tray",
+          description: Text(
+            "Tap + to create the first one, or run `mistdemo create` from the CLI."
+          )
+        )
+      } else {
+        notesList
+      }
+    }
+
+    private var notesList: some View {
+      List(notes, selection: $selectedNote) { note in
+        NavigationLink(value: note) {
+          noteRow(note)
+        }
+        #if !os(tvOS) && !os(watchOS)
+          .swipeActions(edge: .trailing) {
+            Button("Delete", role: .destructive) {
+              Task { await delete(note) }
+            }
+          }
+        #endif
+      }
+    }
+
+    private var controls: some View {
+      HStack(spacing: 12) {
+        Text("Type: \(Note.recordType)")
+          .font(.body.monospaced())
+          .foregroundStyle(.secondary)
+
+        #if !os(tvOS) && !os(watchOS)
+          Stepper(value: $limit, in: 1...200, step: 10) {
+            Text("Limit: \(limit)")
+          }
+          .frame(maxWidth: 200)
+        #endif
+
+        Button("Run Query") { Task { await runQuery() } }
+          .buttonStyle(.borderedProminent)
+      }
+    }
+
+    private func noteRow(_ note: Note) -> some View {
+      VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: 8) {
+          Text(note.title ?? note.id).font(.body)
+          if isOwnedByCurrentUser(note) {
+            ownerBadge(creator: note.creatorUserRecordName)
+          }
+        }
+        HStack(spacing: 12) {
+          if let index = note.index {
+            Label("\(index)", systemImage: "number")
+              .font(.caption)
+              .foregroundStyle(.secondary)
+          }
+          if let creationDate = note.creationDate {
+            Label(
+              creationDate.formatted(date: .abbreviated, time: .omitted),
+              systemImage: "calendar"
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+          }
+        }
+      }
+    }
+
+    /// Mirrors the web demo's "You" badge — flag notes the signed-in user
+    /// created. CloudKit may stamp the creator as `__defaultOwner__` for
+    /// records the caller just created, so accept that sentinel as well.
+    private func isOwnedByCurrentUser(_ note: Note) -> Bool {
+      guard let creator = note.creatorUserRecordName else {
+        return false
+      }
+      if creator == "__defaultOwner__" {
+        return true
+      }
+      return creator == service.currentUserRecordName
+    }
+
+    private func ownerBadge(creator: String?) -> some View {
+      Text("You")
+        .font(.caption2.weight(.semibold))
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(Color.green.opacity(0.2), in: Capsule())
+        .foregroundStyle(.green)
+        .accessibilityLabel("Created by you")
+        .help(creator.map { "Created by \($0)" } ?? "Created by you")
+    }
+
+    private func runQuery() async {
+      loading = true
+      loadError = nil
+      defer { loading = false }
+      do {
+        notes = try await service.queryNotes(limit: limit)
+      } catch {
+        loadError = error.localizedDescription
+      }
+    }
+
+    private func delete(_ note: Note) async {
+      do {
+        try await service.deleteNote(note)
+        notes.removeAll { $0.id == note.id }
+      } catch {
+        loadError = error.localizedDescription
+      }
+    }
+  }
+#endif

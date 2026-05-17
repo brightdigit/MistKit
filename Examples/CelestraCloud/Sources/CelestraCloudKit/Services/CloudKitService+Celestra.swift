@@ -3,11 +3,11 @@
 //  CelestraCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -29,7 +29,7 @@
 
 public import CelestraKit
 public import Foundation
-public import Logging
+internal import Logging
 public import MistKit
 
 /// CloudKit service extensions for Celestra operations
@@ -89,11 +89,12 @@ extension CloudKitService {
     }
 
     // Query with filters and sort by feedURL (always queryable+sortable)
-    let records = try await queryRecords(
+    let records = try await queryAllRecords(
       recordType: "Feed",
       filters: filters.isEmpty ? nil : filters,
       sortBy: [.ascending("feedURL")],  // Use feedURL since usageCount might have issues
-      limit: limit
+      pageSize: limit,
+      database: .public(.prefers(.serverToServer))
     )
 
     do {
@@ -109,13 +110,17 @@ extension CloudKitService {
   /// Delete all Feed records (paginated)
   public func deleteAllFeeds() async throws {
     var totalDeleted = 0
+    var continuationMarker: String?
 
-    while true {
-      let feeds = try await queryRecords(
+    repeat {
+      let result: QueryResult = try await queryRecords(
         recordType: "Feed",
         limit: 200,
-        desiredKeys: ["___recordID"]
+        desiredKeys: ["___recordID"],
+        continuationMarker: continuationMarker,
+        database: .public(.prefers(.serverToServer))
       )
+      let feeds = result.records
 
       guard !feeds.isEmpty else {
         break  // No more feeds to delete
@@ -134,11 +139,8 @@ extension CloudKitService {
 
       CelestraLogger.operations.info("Deleted \(feeds.count) feeds (total: \(totalDeleted))")
 
-      // If we got fewer than the limit, we're done
-      if feeds.count < 200 {
-        break
-      }
-    }
+      continuationMarker = result.continuationMarker
+    } while continuationMarker != nil
 
     CelestraLogger.cloudkit.info("✅ Deleted \(totalDeleted) total feeds")
   }

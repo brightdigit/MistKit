@@ -49,12 +49,12 @@ struct BushelCloudKitService {
         )
 
         // 4. Initialize CloudKit service
-        self.service = try CloudKitService(
+        self.service = CloudKitService(
             containerIdentifier: containerIdentifier,
             tokenManager: tokenManager,
-            environment: .development,  // or .production
-            database: .public
+            environment: .development  // or .production
         )
+        // Pass database: .public(.prefers(.serverToServer)) on each per-call operation.
     }
 }
 ```
@@ -293,10 +293,10 @@ try await uploadXcodeVersions()    // References SwiftVersion and RestoreImage
 **Creating a reference:**
 ```swift
 fields["minimumMacOS"] = .reference(
-    FieldValue.Reference(recordName: "RestoreImage-23C71")
+    Reference(recordName: "RestoreImage-23C71")
 )
 fields["swiftVersion"] = .reference(
-    FieldValue.Reference(recordName: "SwiftVersion-6.0")
+    Reference(recordName: "SwiftVersion-6.0")
 )
 ```
 
@@ -371,10 +371,11 @@ let environment: CloudKitEnvironment = {
     #endif
 }()
 
-let service = try CloudKitService(
+let service = CloudKitService(
     containerIdentifier: containerID,
     tokenManager: tokenManager,
-    environment: environment,
-    database: .public
+    environment: environment
 )
+// Each operation picks its database scope explicitly, e.g.
+// `database: .public(.prefers(.serverToServer))`.
 ```

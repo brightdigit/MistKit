@@ -1,2 +1,11 @@
+coverage:
+  status:
+    patch:
+      default:
+        target: auto
+        threshold: 2%
+
 ignore:
   - "Tests"
+  - "Sources/MistKitOpenAPI"
+  - "Examples"

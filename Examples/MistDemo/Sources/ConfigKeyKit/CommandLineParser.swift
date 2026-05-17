@@ -1,6 +1,6 @@
 //
 //  CommandLineParser.swift
-//  ConfigKeyKit
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -31,44 +31,49 @@ import Foundation
 
 /// Command line argument parser for Swift Configuration integration
 public struct CommandLineParser {
-    private let arguments: [String]
-    
-    public init(arguments: [String] = CommandLine.arguments) {
-        self.arguments = arguments
+  private let arguments: [String]
+
+  /// Initialize with command line arguments.
+  public init(arguments: [String] = CommandLine.arguments) {
+    self.arguments = arguments
+  }
+
+  /// Parse the command name from command line arguments
+  public func parseCommandName() -> String? {
+    // Skip the executable name (first argument)
+    guard arguments.count > 1 else {
+      return nil
     }
-    
-    /// Parse the command name from command line arguments
-    public func parseCommandName() -> String? {
-        // Skip the executable name (first argument)
-        guard arguments.count > 1 else { return nil }
-        let commandCandidate = arguments[1]
-        
-        // If it starts with '--', it's not a command but a global option
-        if commandCandidate.hasPrefix("--") {
-            return nil
-        }
-        
-        return commandCandidate
+    let commandCandidate = arguments[1]
+
+    // If it starts with '--', it's not a command but a global option
+    if commandCandidate.hasPrefix("--") {
+      return nil
     }
-    
-    /// Get all arguments after the command name for command-specific parsing
-    public func commandArguments() -> [String] {
-        guard arguments.count > 1 else { return [] }
-        let commandName = arguments[1]
-        
-        // If first argument is an option, return all arguments for global parsing
-        if commandName.hasPrefix("--") {
-            return Array(arguments.dropFirst())
-        }
-        
-        // Return arguments after command name
-        return Array(arguments.dropFirst(2))
+
+    return commandCandidate
+  }
+
+  /// Get all arguments after the command name for command-specific parsing
+  public func commandArguments() -> [String] {
+    guard arguments.count > 1 else {
+      return []
     }
-    
-    /// Check if help was requested
-    public func isHelpRequested() -> Bool {
-        arguments.contains { arg in
-            arg == "--help" || arg == "-h" || arg == "help"
-        }
+    let commandName = arguments[1]
+
+    // If first argument is an option, return all arguments for global parsing
+    if commandName.hasPrefix("--") {
+      return Array(arguments.dropFirst())
     }
+
+    // Return arguments after command name
+    return Array(arguments.dropFirst(2))
+  }
+
+  /// Check if help was requested
+  public func isHelpRequested() -> Bool {
+    arguments.contains { arg in
+      arg == "--help" || arg == "-h" || arg == "help"
+    }
+  }
 }

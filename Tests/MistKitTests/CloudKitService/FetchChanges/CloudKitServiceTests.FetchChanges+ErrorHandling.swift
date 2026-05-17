@@ -1,0 +1,163 @@
+//
+//  CloudKitServiceTests.FetchChanges+ErrorHandling.swift
+//  MistKit
+//
+//  Created by Leo Dion.
+//  Copyright © 2026 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+import Foundation
+import Testing
+
+@testable import MistKit
+
+extension CloudKitServiceTests.FetchChanges {
+  @Suite("Error Handling")
+  internal struct ErrorHandling {
+    @Test("fetchRecordChanges() surfaces network connection failure as networkError")
+    internal func fetchRecordChangesPropagatesConnectionLost() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try CloudKitServiceTests.makeService(
+        provider: ResponseProvider.connectionLost()
+      )
+
+      await #expect {
+        _ = try await service.fetchRecordChanges(database: .public(.prefers(.serverToServer)))
+      } throws: { error in
+        guard let ckError = error as? CloudKitError,
+          case .networkError(let urlError) = ckError
+        else { return false }
+        return urlError.code == .networkConnectionLost
+      }
+    }
+
+    @Test("fetchRecordChanges() surfaces request timeout as networkError(.timedOut)")
+    internal func fetchRecordChangesPropagatesTimeout() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try CloudKitServiceTests.makeService(provider: ResponseProvider.timeout())
+
+      await #expect {
+        _ = try await service.fetchRecordChanges(database: .public(.prefers(.serverToServer)))
+      } throws: { error in
+        guard let ckError = error as? CloudKitError,
+          case .networkError(let urlError) = ckError
+        else { return false }
+        return urlError.code == .timedOut
+      }
+    }
+
+    @Test("fetchAllRecordChanges() throws paginationLimitExceeded carrying collected records")
+    internal func fetchAllOverflowReturnsAccumulatedRecords() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      // Three pages, each still indicating moreComing:true, so the loop would
+      // keep going. With maxPages:2 the third page triggers the cap and we
+      // expect the records from pages 1 and 2 to come back inside the error.
+      let provider = ResponseProvider(
+        defaultResponse: try .successfulFetchChangesResponse(
+          recordCount: 0,
+          moreComing: true,
+          syncToken: "default-token"
+        )
+      )
+      await provider.enqueue(
+        try .successfulFetchChangesResponse(
+          recordCount: 3,
+          moreComing: true,
+          syncToken: "token-1"
+        ),
+        for: "fetchRecordChanges"
+      )
+      await provider.enqueue(
+        try .successfulFetchChangesResponse(
+          recordCount: 2,
+          moreComing: true,
+          syncToken: "token-2"
+        ),
+        for: "fetchRecordChanges"
+      )
+      let service = try CloudKitServiceTests.makeService(provider: provider)
+
+      do {
+        _ = try await service.fetchAllRecordChanges(
+          maxPages: 2,
+          database: .public(.prefers(.serverToServer))
+        )
+        Issue.record("Expected paginationLimitExceeded to be thrown")
+      } catch CloudKitError.paginationLimitExceeded(let maxPages, let records) {
+        #expect(maxPages == 2)
+        #expect(records.count == 5)
+        #expect(
+          records.map(\.recordName) == [
+            "record-0", "record-1", "record-2",
+            "record-0", "record-1",
+          ])
+      } catch {
+        Issue.record("Expected paginationLimitExceeded, got \(error)")
+      }
+    }
+
+    @Test("fetchAllRecordChanges() propagates a mid-pagination network failure")
+    internal func fetchAllPropagatesMidPaginationFailure() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      // First page succeeds with moreComing:true, second page throws a transport error.
+      let provider = ResponseProvider(
+        defaultResponse: ResponseConfig.timeout()
+      )
+      await provider.enqueue(
+        try ResponseConfig.successfulFetchChangesResponse(
+          recordCount: 2,
+          moreComing: true,
+          syncToken: "page-1-token"
+        ),
+        for: "fetchRecordChanges"
+      )
+      await provider.enqueue(
+        ResponseConfig.timeout(),
+        for: "fetchRecordChanges"
+      )
+      let service = try CloudKitServiceTests.makeService(provider: provider)
+
+      await #expect {
+        _ = try await service.fetchAllRecordChanges(database: .public(.prefers(.serverToServer)))
+      } throws: { error in
+        guard let ckError = error as? CloudKitError,
+          case .networkError(let urlError) = ckError
+        else { return false }
+        return urlError.code == .timedOut
+      }
+    }
+  }
+}

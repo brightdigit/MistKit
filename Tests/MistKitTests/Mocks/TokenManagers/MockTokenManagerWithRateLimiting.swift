@@ -44,13 +44,13 @@ internal final class MockTokenManagerWithRateLimiting: TokenManager {
       do {
         try await Task.sleep(nanoseconds: 50_000_000)  // 0.05 seconds
       } catch {
-        throw TokenManagerError.networkError(underlying: error)
+        throw TokenManagerError.networkError(.other(error))
       }
     }
     return true
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     let count = await counter.increment()
     // Simulate rate limiting - succeed after multiple attempts
     if count <= 3 {
@@ -58,9 +58,9 @@ internal final class MockTokenManagerWithRateLimiting: TokenManager {
       do {
         try await Task.sleep(nanoseconds: 50_000_000)  // 0.05 seconds
       } catch {
-        throw TokenManagerError.networkError(underlying: error)
+        throw TokenManagerError.networkError(.other(error))
       }
     }
-    return TokenCredentials.apiToken("rate-limited-token")
+    return try APITokenAuthenticator(token: TestConstants.apiToken)
   }
 }

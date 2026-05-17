@@ -31,20 +31,20 @@ import Foundation
 import MistKit
 import Testing
 
-@testable import MistDemo
+@testable import MistDemoKit
 
 @Suite("MistDemoConfig Tests")
-struct MistDemoConfigTests {
+internal struct MistDemoConfigTests {
   // MARK: - Default Values Tests
 
   @Test("Config initializes with default values")
-  func configInitializesWithDefaults() async throws {
+  internal func configInitializesWithDefaults() async throws {
     let config = try await MistDemoConfig()
 
     #expect(config.containerIdentifier == "iCloud.com.brightdigit.MistDemo")
     #expect(config.environment == .development)
     #expect(config.host == "127.0.0.1")
-    #expect(config.port == 8080)
+    #expect(config.port == 8_080)
     #expect(config.skipAuth == false)
     #expect(config.testAllAuth == false)
     #expect(config.testApiOnly == false)
@@ -55,7 +55,7 @@ struct MistDemoConfigTests {
   // MARK: - Public API Tests
 
   @Test("Config properties are accessible")
-  func configPropertiesAccessible() async throws {
+  internal func configPropertiesAccessible() async throws {
     let config = try await MistDemoConfig()
 
     // Verify all properties can be read
@@ -75,33 +75,46 @@ struct MistDemoConfigTests {
     _ = config.testServerToServer
   }
 
-
   // MARK: - Environment Tests
 
   @Test("Development environment is default")
-  func developmentEnvironmentIsDefault() async throws {
+  internal func developmentEnvironmentIsDefault() async throws {
     let config = try await MistDemoConfig()
     #expect(config.environment == .development)
+  }
+
+  @Test("Invalid environment surfaces as ConfigurationError.invalidEnvironment")
+  internal func invalidEnvironmentThrows() async throws {
+    do {
+      _ = try await MistDemoConfig(rawEnvironment: "staging")
+      Issue.record("Expected ConfigurationError.invalidEnvironment")
+    } catch let error as ConfigurationError {
+      if case .invalidEnvironment(let raw) = error {
+        #expect(raw == "staging")
+      } else {
+        Issue.record("Wrong ConfigurationError case: \(error)")
+      }
+    }
   }
 
   // MARK: - Server Configuration Tests
 
   @Test("Default host is localhost")
-  func defaultHostIsLocalhost() async throws {
+  internal func defaultHostIsLocalhost() async throws {
     let config = try await MistDemoConfig()
     #expect(config.host == "127.0.0.1")
   }
 
   @Test("Default port is 8080")
-  func defaultPortIs8080() async throws {
+  internal func defaultPortIs8080() async throws {
     let config = try await MistDemoConfig()
-    #expect(config.port == 8080)
+    #expect(config.port == 8_080)
   }
 
   // MARK: - Test Flags Tests
 
   @Test("All test flags default to false")
-  func allTestFlagsDefaultToFalse() async throws {
+  internal func allTestFlagsDefaultToFalse() async throws {
     let config = try await MistDemoConfig()
 
     #expect(config.skipAuth == false)

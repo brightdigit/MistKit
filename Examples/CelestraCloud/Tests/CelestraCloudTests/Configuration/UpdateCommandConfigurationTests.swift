@@ -104,7 +104,7 @@ internal struct UpdateCommandConfigurationTests {
 
   @Test("Last attempted before date")
   internal func testLastAttemptedBefore() {
-    let testDate = Date(timeIntervalSince1970: 1_704_067_200) // 2024-01-01T00:00:00Z
+    let testDate = Date(timeIntervalSince1970: 1_704_067_200)  // 2024-01-01T00:00:00Z
     let config = UpdateCommandConfiguration(
       delay: 2.0,
       skipRobotsCheck: false,

@@ -45,13 +45,13 @@ internal final class MockTokenManagerWithRefresh: TokenManager {
       do {
         try await Task.sleep(nanoseconds: 100_000_000)  // 0.1 seconds
       } catch {
-        throw TokenManagerError.networkError(underlying: error)
+        throw TokenManagerError.networkError(.other(error))
       }
     }
     return true
   }
 
-  internal func getCurrentCredentials() async throws(TokenManagerError) -> TokenCredentials? {
+  internal func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)? {
     let count = await counter.increment()
     // Simulate refresh on first call
     if count == 1 {
@@ -59,9 +59,9 @@ internal final class MockTokenManagerWithRefresh: TokenManager {
       do {
         try await Task.sleep(nanoseconds: 100_000_000)  // 0.1 seconds
       } catch {
-        throw TokenManagerError.networkError(underlying: error)
+        throw TokenManagerError.networkError(.other(error))
       }
     }
-    return TokenCredentials.apiToken("refreshed-token")
+    return try APITokenAuthenticator(token: TestConstants.apiToken)
   }
 }

@@ -29,112 +29,112 @@
 
 import Foundation
 import Testing
-@testable import MistDemo
+
+@testable import MistDemoKit
 
 @Suite("CurrentUserError Tests")
-struct CurrentUserErrorTests {
+internal struct CurrentUserErrorTests {
+  // MARK: - Error Description Tests
 
-    // MARK: - Error Description Tests
+  @Test("operationFailed error description")
+  internal func operationFailedDescription() {
+    let error = CurrentUserError.operationFailed("network timeout")
+    let description = error.errorDescription
 
-    @Test("operationFailed error description")
-    func operationFailedDescription() {
-        let error = CurrentUserError.operationFailed("network timeout")
-        let description = error.errorDescription
+    #expect(description != nil)
+    #expect(description?.contains("Current user operation failed") == true)
+    #expect(description?.contains("network timeout") == true)
+  }
 
-        #expect(description != nil)
-        #expect(description?.contains("Current user operation failed") == true)
-        #expect(description?.contains("network timeout") == true)
+  @Test("authenticationRequired error description")
+  internal func authenticationRequiredDescription() {
+    let error = CurrentUserError.authenticationRequired
+    let description = error.errorDescription
+
+    #expect(description != nil)
+    #expect(description?.contains("Authentication is required") == true)
+    #expect(description?.contains("current-user") == true)
+    #expect(description?.contains("auth-token") == true)
+  }
+
+  // MARK: - LocalizedError Conformance Tests
+
+  @Test("CurrentUserError conforms to LocalizedError")
+  internal func conformsToLocalizedError() {
+    let error: any Error = CurrentUserError.authenticationRequired
+    #expect(error is LocalizedError)
+  }
+
+  @Test("All error cases have non-nil descriptions")
+  internal func allCasesHaveDescriptions() {
+    let errors: [CurrentUserError] = [
+      .operationFailed("test reason"),
+      .authenticationRequired,
+    ]
+
+    for error in errors {
+      #expect(error.errorDescription != nil)
+      #expect(error.errorDescription?.isEmpty == false)
+    }
+  }
+
+  // MARK: - Error Throwing Tests
+
+  @Test("Can throw and catch CurrentUserError")
+  internal func throwAndCatch() {
+    #expect(throws: CurrentUserError.self) {
+      throw CurrentUserError.authenticationRequired
+    }
+  }
+
+  @Test("Can pattern match on specific error case")
+  internal func patternMatch() {
+    let error = CurrentUserError.operationFailed("test")
+
+    if case .operationFailed(let message) = error {
+      #expect(message == "test")
+    } else {
+      Issue.record("Pattern match failed")
+    }
+  }
+
+  // MARK: - Error Message Content Tests
+
+  @Test("authenticationRequired provides recovery suggestion")
+  internal func authenticationRequiredSuggestion() throws {
+    let error = CurrentUserError.authenticationRequired
+    let description = try #require(error.errorDescription)
+
+    #expect(description.contains("auth-token"))
+    #expect(description.contains("--web-auth-token"))
+  }
+
+  @Test("operationFailed includes error message")
+  internal func operationFailedIncludesMessage() throws {
+    let message = "Server returned 500"
+    let error = CurrentUserError.operationFailed(message)
+    let description = try #require(error.errorDescription)
+
+    #expect(description.contains(message))
+  }
+
+  // MARK: - Error Type Tests
+
+  @Test("Different error cases are distinguishable")
+  internal func errorCasesDistinguishable() {
+    let error1 = CurrentUserError.authenticationRequired
+    let error2 = CurrentUserError.operationFailed("test")
+
+    if case .authenticationRequired = error1 {
+      // Success
+    } else {
+      Issue.record("Error case mismatch")
     }
 
-    @Test("authenticationRequired error description")
-    func authenticationRequiredDescription() {
-        let error = CurrentUserError.authenticationRequired
-        let description = error.errorDescription
-
-        #expect(description != nil)
-        #expect(description?.contains("Authentication is required") == true)
-        #expect(description?.contains("current-user") == true)
-        #expect(description?.contains("auth-token") == true)
+    if case .operationFailed = error2 {
+      // Success
+    } else {
+      Issue.record("Error case mismatch")
     }
-
-    // MARK: - LocalizedError Conformance Tests
-
-    @Test("CurrentUserError conforms to LocalizedError")
-    func conformsToLocalizedError() {
-        let error: any Error = CurrentUserError.authenticationRequired
-        #expect(error is LocalizedError)
-    }
-
-    @Test("All error cases have non-nil descriptions")
-    func allCasesHaveDescriptions() {
-        let errors: [CurrentUserError] = [
-            .operationFailed("test reason"),
-            .authenticationRequired
-        ]
-
-        for error in errors {
-            #expect(error.errorDescription != nil)
-            #expect(!error.errorDescription!.isEmpty)
-        }
-    }
-
-    // MARK: - Error Throwing Tests
-
-    @Test("Can throw and catch CurrentUserError")
-    func throwAndCatch() {
-        #expect(throws: CurrentUserError.self) {
-            throw CurrentUserError.authenticationRequired
-        }
-    }
-
-    @Test("Can pattern match on specific error case")
-    func patternMatch() {
-        let error = CurrentUserError.operationFailed("test")
-
-        if case .operationFailed(let message) = error {
-            #expect(message == "test")
-        } else {
-            Issue.record("Pattern match failed")
-        }
-    }
-
-    // MARK: - Error Message Content Tests
-
-    @Test("authenticationRequired provides recovery suggestion")
-    func authenticationRequiredSuggestion() {
-        let error = CurrentUserError.authenticationRequired
-        let description = error.errorDescription!
-
-        #expect(description.contains("auth-token"))
-        #expect(description.contains("--web-auth-token"))
-    }
-
-    @Test("operationFailed includes error message")
-    func operationFailedIncludesMessage() {
-        let message = "Server returned 500"
-        let error = CurrentUserError.operationFailed(message)
-        let description = error.errorDescription!
-
-        #expect(description.contains(message))
-    }
-
-    // MARK: - Error Type Tests
-
-    @Test("Different error cases are distinguishable")
-    func errorCasesDistinguishable() {
-        let error1 = CurrentUserError.authenticationRequired
-        let error2 = CurrentUserError.operationFailed("test")
-
-        if case .authenticationRequired = error1 {
-            // Success
-        } else {
-            Issue.record("Error case mismatch")
-        }
-
-        if case .operationFailed = error2 {
-            // Success
-        } else {
-            Issue.record("Error case mismatch")
-        }
-    }
+  }
 }

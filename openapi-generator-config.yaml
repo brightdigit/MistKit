@@ -1,7 +1,7 @@
 generate:
   - types
   - client
-accessModifier: internal
+accessModifier: public
 additionalFileComments:
   - periphery:ignore:all
   - swift-format-ignore-file

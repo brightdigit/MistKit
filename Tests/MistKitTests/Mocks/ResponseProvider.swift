@@ -68,19 +68,21 @@ internal actor ResponseProvider {
   }
 
   /// Response provider for successful query operations
-  internal static func successfulQuery(records: [String: Any] = [:]) -> ResponseProvider {
-    ResponseProvider(defaultResponse: .successfulQuery(records: records))
+  internal static func successfulQuery() -> ResponseProvider {
+    ResponseProvider(defaultResponse: .successfulQuery())
+  }
+
+  /// Response provider that simulates a request timeout.
+  internal static func timeout() -> ResponseProvider {
+    ResponseProvider(defaultResponse: .timeout())
+  }
+
+  /// Response provider that simulates a connection failure.
+  internal static func connectionLost() -> ResponseProvider {
+    ResponseProvider(defaultResponse: .connectionLost())
   }
 
   // MARK: - Configuration
-
-  internal func configure(operationID: String, response: ResponseConfig) {
-    responses[operationID] = response
-  }
-
-  internal func configureDefault(response: ResponseConfig) {
-    defaultResponse = response
-  }
 
   internal func enqueue(_ response: ResponseConfig, for operationID: String) {
     responseQueues[operationID, default: []].append(response)
@@ -88,7 +90,7 @@ internal actor ResponseProvider {
 
   internal func response(
     for operationID: String,
-    request: HTTPRequest
+    request _: HTTPRequest
   ) throws -> (HTTPResponse, HTTPBody?) {
     let config: ResponseConfig
     if var queue = responseQueues[operationID], !queue.isEmpty {

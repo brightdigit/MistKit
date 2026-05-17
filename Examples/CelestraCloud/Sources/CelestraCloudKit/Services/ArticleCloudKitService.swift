@@ -3,11 +3,11 @@
 //  CelestraCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -98,7 +98,9 @@ public struct ArticleCloudKitService: Sendable {
       return []
     }
     var allArticles: [Article] = []
-    let guidBatches = guids.chunked(into: guidQueryBatchSize)
+    let guidBatches = stride(from: 0, to: guids.count, by: guidQueryBatchSize).map {
+      Array(guids[$0..<Swift.min($0 + guidQueryBatchSize, guids.count)])
+    }
     for batch in guidBatches {
       let batchArticles = try await queryArticleBatch(batch, feedRecordName: feedRecordName)
       allArticles.append(contentsOf: batchArticles)
@@ -155,7 +157,9 @@ public struct ArticleCloudKitService: Sendable {
       return BatchOperationResult()
     }
     CelestraLogger.cloudkit.info("Creating \(articles.count) article(s)...")
-    let articleBatches = articles.chunked(into: articleMutationBatchSize)
+    let articleBatches = stride(from: 0, to: articles.count, by: articleMutationBatchSize).map {
+      Array(articles[$0..<Swift.min($0 + articleMutationBatchSize, articles.count)])
+    }
     var result = BatchOperationResult()
     for (index, batch) in articleBatches.enumerated() {
       try await processBatch(
@@ -200,7 +204,9 @@ public struct ArticleCloudKitService: Sendable {
     guard !validArticles.isEmpty else {
       return BatchOperationResult()
     }
-    let batches = validArticles.chunked(into: articleMutationBatchSize)
+    let batches = stride(from: 0, to: validArticles.count, by: articleMutationBatchSize).map {
+      Array(validArticles[$0..<Swift.min($0 + articleMutationBatchSize, validArticles.count)])
+    }
     var result = BatchOperationResult()
     for (index, batch) in batches.enumerated() {
       try await processBatch(
