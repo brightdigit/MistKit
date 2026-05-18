@@ -48,6 +48,31 @@ extension CloudKitServiceTests.LookupZones {
       transport: transport
     )
   }
+
+  internal static func makeServiceReturningZoneWithoutName() async throws -> CloudKitService {
+    let responseJSON = """
+      {
+        "zones": [
+          { "zoneID": { "zoneName": "valid-zone", "ownerName": "_defaultOwner" } },
+          { "zoneID": { "ownerName": "_defaultOwner" } }
+        ]
+      }
+      """
+    var headers = HTTPFields()
+    headers[.contentType] = "application/json"
+    let response = ResponseConfig(
+      statusCode: 200,
+      headers: headers,
+      body: Data(responseJSON.utf8),
+      error: nil
+    )
+    let transport = MockTransport(responseProvider: ResponseProvider(defaultResponse: response))
+    return try CloudKitService(
+      containerIdentifier: TestConstants.serviceContainerIdentifier,
+      credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),
+      transport: transport
+    )
+  }
 }
 
 // MARK: - LookupZones Response Builders

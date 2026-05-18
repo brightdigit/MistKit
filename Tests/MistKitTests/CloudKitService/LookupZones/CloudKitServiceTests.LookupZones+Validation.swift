@@ -35,7 +35,7 @@ import Testing
 extension CloudKitServiceTests.LookupZones {
   @Suite("Validation")
   internal struct Validation {
-    @Test("lookupZones() throws 400 for empty zoneIDs array")
+    @Test("lookupZones() throws invalidArgument for empty zoneIDs array")
     internal func lookupZonesThrowsForEmptyZoneIDs() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
@@ -47,13 +47,13 @@ extension CloudKitServiceTests.LookupZones {
         try await service.lookupZones(zoneIDs: [])
       } throws: { error in
         guard let ckError = error as? CloudKitError,
-          case .httpErrorWithRawResponse(let status, _) = ckError
+          case .invalidArgument(let parameter, let reason) = ckError
         else { return false }
-        return status == 400
+        return parameter == "zoneIDs" && reason.contains("must not be empty")
       }
     }
 
-    @Test("lookupZones() throws 400 for zone with empty zoneName")
+    @Test("lookupZones() throws invalidArgument for zone with empty zoneName")
     internal func lookupZonesThrowsForEmptyZoneName() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
@@ -65,13 +65,13 @@ extension CloudKitServiceTests.LookupZones {
         try await service.lookupZones(zoneIDs: [ZoneID(zoneName: "", ownerName: nil)])
       } throws: { error in
         guard let ckError = error as? CloudKitError,
-          case .httpErrorWithRawResponse(let status, _) = ckError
+          case .invalidArgument(let parameter, let reason) = ckError
         else { return false }
-        return status == 400
+        return parameter == "zoneIDs" && reason.contains("empty zoneName")
       }
     }
 
-    @Test("lookupZones() throws 400 when any zone has an empty zoneName")
+    @Test("lookupZones() throws invalidArgument when any zone has an empty zoneName")
     internal func lookupZonesThrowsForMixedZoneNames() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
@@ -87,9 +87,9 @@ extension CloudKitServiceTests.LookupZones {
         try await service.lookupZones(zoneIDs: zoneIDs)
       } throws: { error in
         guard let ckError = error as? CloudKitError,
-          case .httpErrorWithRawResponse(let status, _) = ckError
+          case .invalidArgument(let parameter, _) = ckError
         else { return false }
-        return status == 400
+        return parameter == "zoneIDs"
       }
     }
   }

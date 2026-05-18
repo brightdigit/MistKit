@@ -63,11 +63,11 @@ extension CloudKitService {
       let zonesData: Components.Schemas.ZonesListResponse =
         try await responseProcessor.processListZonesResponse(response)
       return zonesData.zones?.compactMap { zone in
-        guard let zoneID = zone.zoneID else {
+        guard let zoneID = zone.zoneID, let zoneName = zoneID.zoneName else {
           return nil
         }
         return ZoneInfo(
-          zoneName: zoneID.zoneName ?? "Unknown",
+          zoneName: zoneName,
           ownerRecordName: zoneID.ownerName,
           capabilities: []
         )
@@ -103,15 +103,15 @@ extension CloudKitService {
     database: Database = .private
   ) async throws(CloudKitError) -> [ZoneInfo] {
     guard !zoneIDs.isEmpty else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 400,
-        rawResponse: "zoneIDs cannot be empty"
+      throw CloudKitError.invalidArgument(
+        parameter: "zoneIDs",
+        reason: "must not be empty"
       )
     }
     guard zoneIDs.allSatisfy({ !$0.zoneName.isEmpty }) else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 400,
-        rawResponse: "zoneIDs contains a zone with an empty zoneName"
+      throw CloudKitError.invalidArgument(
+        parameter: "zoneIDs",
+        reason: "contains a zone with an empty zoneName"
       )
     }
 
@@ -136,11 +136,11 @@ extension CloudKitService {
         try await responseProcessor.processLookupZonesResponse(response)
 
       return zonesData.zones?.compactMap { zone in
-        guard let zoneID = zone.zoneID else {
+        guard let zoneID = zone.zoneID, let zoneName = zoneID.zoneName else {
           return nil
         }
         return ZoneInfo(
-          zoneName: zoneID.zoneName ?? "Unknown",
+          zoneName: zoneName,
           ownerRecordName: zoneID.ownerName,
           capabilities: []
         )
