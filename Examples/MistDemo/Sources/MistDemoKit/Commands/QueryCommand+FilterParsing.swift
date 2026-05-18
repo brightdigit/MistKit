@@ -32,7 +32,6 @@ import MistKit
 
 extension QueryCommand {
   /// Parse a single filter expression "field:operator:value" into a QueryFilter
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func parseFilter(_ filterString: String) throws -> QueryFilter {
     let components = filterString.split(
       separator: ":", maxSplits: 2, omittingEmptySubsequences: false
@@ -54,7 +53,6 @@ extension QueryCommand {
   }
 
   /// Build a QueryFilter from parsed components.
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func buildFilter(
     field: String,
     operatorString: String,
@@ -71,7 +69,6 @@ extension QueryCommand {
   }
 
   /// Build comparison-based filters (equals, not equals, greater/less than).
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   // swiftlint:disable:next cyclomatic_complexity
   internal static func buildComparisonFilter(
     field: String,
@@ -101,7 +98,6 @@ extension QueryCommand {
   }
 
   /// Build string and list-based filters.
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func buildSpecialFilter(
     field: String,
     operatorString: String,

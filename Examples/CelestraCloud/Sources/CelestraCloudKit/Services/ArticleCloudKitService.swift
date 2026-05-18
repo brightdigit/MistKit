@@ -55,7 +55,6 @@ private let guidQueryBatchSize = 150
 private let articleMutationBatchSize = 10
 
 /// Service for Article-related CloudKit operations with dependency injection support
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct ArticleCloudKitService: Sendable {
   private enum BatchOperation {
     case create

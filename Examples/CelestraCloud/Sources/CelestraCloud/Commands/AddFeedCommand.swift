@@ -35,7 +35,6 @@ import MistKit
 // MARK: - Main Type
 
 internal enum AddFeedCommand {
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func run(args: [String]) async throws {
     guard let feedURL = args.first else {
       print("Error: Missing feed URL")

@@ -34,7 +34,6 @@ public import MistKit
 /// Pure function type for building CloudKit record operations from articles.
 /// Follows the pattern of ArticleCategorizer and FeedMetadataBuilder for testable,
 /// dependency-free operation building.
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct ArticleOperationBuilder: Sendable {
   /// Initialize article operation builder
   public init() {}

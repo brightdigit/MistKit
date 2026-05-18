@@ -33,7 +33,6 @@ import Foundation
 import MistKit
 
 internal enum UpdateCommand {
-  @available(macOS 13.0, *)
   internal static func run() async throws {
     let startTime = Date()
     let loader = ConfigurationLoader()
@@ -91,7 +90,6 @@ internal enum UpdateCommand {
     }
   }
 
-  @available(macOS 13.0, *)
   private static func createProcessor(
     config: CelestraConfiguration
   ) throws -> FeedUpdateProcessor {
@@ -115,7 +113,6 @@ internal enum UpdateCommand {
     )
   }
 
-  @available(macOS 13.0, *)
   private static func queryFeeds(
     config: CelestraConfiguration,
     processor: FeedUpdateProcessor
@@ -138,7 +135,6 @@ internal enum UpdateCommand {
     return feeds
   }
 
-  @available(macOS 13.0, *)
   private static func processFeeds(
     _ feeds: [Feed],
     processor: FeedUpdateProcessor

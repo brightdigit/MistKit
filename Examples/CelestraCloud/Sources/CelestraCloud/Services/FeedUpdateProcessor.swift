@@ -33,7 +33,6 @@ import Foundation
 import MistKit
 
 /// Processes individual feed updates
-@available(macOS 13.0, *)
 internal struct FeedUpdateProcessor {
   internal let service: CloudKitService
   internal let fetcher: RSSFetcherService

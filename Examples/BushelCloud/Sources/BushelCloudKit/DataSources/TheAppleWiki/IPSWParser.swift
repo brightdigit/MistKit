@@ -58,7 +58,6 @@ internal enum TheAppleWikiError: LocalizedError {
 // MARK: - Parser
 
 /// Fetches macOS IPSW metadata from TheAppleWiki.com
-@available(macOS 12.0, *)
 internal struct IPSWParser: Sendable {
   private let baseURL = "https://theapplewiki.com"
   private let apiEndpoint = "/api.php"

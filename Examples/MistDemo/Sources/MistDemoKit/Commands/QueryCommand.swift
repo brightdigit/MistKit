@@ -71,28 +71,17 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
       // Build filters
       // NOTE: Zone, offset, and continuation marker support require
       // enhancements to CloudKitService.queryRecords method (GitHub issues #145, #146)
-      let recordInfos: [RecordInfo]
-      if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
-        let filters: [QueryFilter]? =
-          config.filters.isEmpty
-          ? nil
-          : try config.filters.map { try Self.parseFilter($0) }
-        recordInfos = try await client.queryRecords(
-          recordType: config.recordType,
-          filters: filters,
-          sortBy: nil,
-          limit: config.limit,
-          database: config.base.database
-        )
-      } else {
-        recordInfos = try await client.queryRecords(
-          recordType: config.recordType,
-          filters: nil,
-          sortBy: nil,
-          limit: config.limit,
-          database: config.base.database
-        )
-      }
+      let filters: [QueryFilter]? =
+        config.filters.isEmpty
+        ? nil
+        : try config.filters.map { try Self.parseFilter($0) }
+      let recordInfos = try await client.queryRecords(
+        recordType: config.recordType,
+        filters: filters,
+        sortBy: nil,
+        limit: config.limit,
+        database: config.base.database
+      )
 
       // Format and output results
       try await outputResults(recordInfos, format: config.output)

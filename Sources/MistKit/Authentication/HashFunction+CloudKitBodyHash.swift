@@ -30,7 +30,6 @@
 internal import Crypto
 internal import Foundation
 
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension HashFunction {
   /// Returns the base64-encoded hash of the given body, or the empty
   /// string when `body` is nil — matching CloudKit Web Services' convention

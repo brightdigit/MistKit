@@ -77,15 +77,15 @@ Or add it through Xcode:
 
 #### Minimum Platform Versions
 
-| Platform | Minimum Version | Server-to-Server Auth |
-|----------|-----------------|----------------------|
-| macOS | 10.15+ | 11.0+ |
-| iOS | 13.0+ | 14.0+ |
-| tvOS | 13.0+ | 14.0+ |
-| watchOS | 6.0+ | 7.0+ |
-| visionOS | 1.0+ | 1.0+ |
-| Linux | Ubuntu 18.04+ | ✅ |
-| Windows | 10+ | ✅ |
+| Platform | Minimum Version |
+|----------|-----------------|
+| macOS | 11.0+ |
+| iOS | 14.0+ |
+| tvOS | 14.0+ |
+| watchOS | 7.0+ |
+| visionOS | 1.0+ |
+| Linux | Ubuntu 18.04+ |
+| Windows | 10+ |
 
 ### Quick Start
 
