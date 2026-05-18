@@ -39,19 +39,16 @@ extension CloudKitResponseProcessor {
   internal func processFetchRecordChangesResponse(_ response: Operations.fetchRecordChanges.Output)
     async throws(CloudKitError) -> Components.Schemas.ChangesResponse
   {
-    if let error = CloudKitError(response) {
-      throw error
-    }
     switch response {
     case .ok(let okResponse):
       switch okResponse.body {
       case .json(let changesData):
         return changesData
       }
-    default:
-      // Should never reach here since all errors are handled above
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+    case .badRequest, .unauthorized, .forbidden, .notFound, .conflict,
+      .preconditionFailed, .contentTooLarge, .misdirectedRequest,
+      .tooManyRequests, .internalServerError, .serviceUnavailable, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
     }
   }
 
@@ -59,19 +56,14 @@ extension CloudKitResponseProcessor {
   internal func processDiscoverUserIdentitiesResponse(
     _ response: Operations.discoverUserIdentities.Output
   ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
-    if let error = CloudKitError(response) {
-      throw error
-    }
     switch response {
     case .ok(let okResponse):
       switch okResponse.body {
       case .json(let discoverData):
         return discoverData
       }
-    default:
-      // Should never reach here since all errors are handled above
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
     }
   }
 
@@ -79,18 +71,14 @@ extension CloudKitResponseProcessor {
   internal func processLookupUsersByEmailResponse(
     _ response: Operations.lookupUsersByEmail.Output
   ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
-    if let error = CloudKitError(response) {
-      throw error
-    }
     switch response {
     case .ok(let okResponse):
       switch okResponse.body {
       case .json(let discoverData):
         return discoverData
       }
-    default:
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
     }
   }
 
@@ -98,18 +86,14 @@ extension CloudKitResponseProcessor {
   internal func processLookupUsersByRecordNameResponse(
     _ response: Operations.lookupUsersByRecordName.Output
   ) async throws(CloudKitError) -> Components.Schemas.DiscoverResponse {
-    if let error = CloudKitError(response) {
-      throw error
-    }
     switch response {
     case .ok(let okResponse):
       switch okResponse.body {
       case .json(let discoverData):
         return discoverData
       }
-    default:
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
     }
   }
 
@@ -120,19 +104,14 @@ extension CloudKitResponseProcessor {
   internal func processUploadAssetsResponse(_ response: Operations.uploadAssets.Output)
     async throws(CloudKitError) -> Components.Schemas.AssetUploadResponse
   {
-    if let error = CloudKitError(response) {
-      throw error
-    }
     switch response {
     case .ok(let okResponse):
       switch okResponse.body {
       case .json(let uploadData):
         return uploadData
       }
-    default:
-      // Should never reach here since all errors are handled above
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
     }
   }
 
@@ -140,19 +119,14 @@ extension CloudKitResponseProcessor {
   internal func processFetchZoneChangesResponse(_ response: Operations.fetchZoneChanges.Output)
     async throws(CloudKitError) -> Components.Schemas.ZoneChangesResponse
   {
-    if let error = CloudKitError(response) {
-      throw error
-    }
     switch response {
     case .ok(let okResponse):
       switch okResponse.body {
       case .json(let changesData):
         return changesData
       }
-    default:
-      // Should never reach here since all errors are handled above
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
     }
   }
 }
