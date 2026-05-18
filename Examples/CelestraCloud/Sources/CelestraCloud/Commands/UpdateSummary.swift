@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import CelestraCloudKit
+internal import CelestraCloudKit
 
 /// Tracks update operation statistics
 internal struct UpdateSummary {

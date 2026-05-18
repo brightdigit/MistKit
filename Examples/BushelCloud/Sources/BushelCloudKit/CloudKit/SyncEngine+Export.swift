@@ -27,13 +27,13 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import BushelLogging
-import BushelUtilities
-import Logging
+internal import BushelLogging
+internal import BushelUtilities
+internal import Logging
 public import MistKit
 
 #if canImport(FelinePineSwift)
-  import FelinePineSwift
+  internal import FelinePineSwift
 #endif
 
 // MARK: - Export Operations

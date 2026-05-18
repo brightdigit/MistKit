@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Command to run comprehensive integration tests for all CloudKit operations
 public struct TestPublicCommand: MistDemoCommand {

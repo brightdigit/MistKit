@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Represents an installation source (IPSW, OTA, or IA)
 internal struct AppleDBSource: Codable {

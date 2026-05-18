@@ -5,10 +5,10 @@
 //  Comprehensive tests for ConfigurationLoader
 //
 
-import Configuration
-import Foundation
-import MistKit
-import Testing
+internal import Configuration
+internal import Foundation
+internal import MistKit
+internal import Testing
 
 @testable import BushelCloudKit
 @testable import BushelFoundation

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Testing
+internal import Testing
 
 /// A `TestTrait` / `SuiteTrait` that scopes a fake environment for the test.
 /// Apply with `.mockEnvironment(["KEY": "value"])` to declare the environment

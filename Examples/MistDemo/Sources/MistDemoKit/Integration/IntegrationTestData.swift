@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Test data generation utilities for integration tests.
 internal enum IntegrationTestData {

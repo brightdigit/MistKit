@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ConfigKeyKit
-import Foundation
+internal import ConfigKeyKit
+internal import Foundation
 
 /// Configuration keys for reading from providers
 internal enum ConfigurationKeys {

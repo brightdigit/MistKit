@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import MistKit
+internal import MistKit
 
 extension MistDemoConfig {
   internal struct CoreConfig {

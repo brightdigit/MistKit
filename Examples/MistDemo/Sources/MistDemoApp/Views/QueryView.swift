@@ -28,8 +28,8 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit)
-  import MistDemoKit
-  import SwiftUI
+  internal import MistDemoKit
+  internal import SwiftUI
 
   /// View for querying Note records from CloudKit.
   internal struct QueryView: View {

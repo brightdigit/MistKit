@@ -28,8 +28,8 @@
 //
 
 public import BushelFoundation
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 // MARK: - Configuration Error
 

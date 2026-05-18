@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 internal import MistKitOpenAPI
 
 /// Public wrapper for CloudKit query sort descriptors

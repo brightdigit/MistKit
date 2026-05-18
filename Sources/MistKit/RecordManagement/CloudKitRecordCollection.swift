@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Protocol for services that manage a collection of CloudKit record types using variadic generics
 ///

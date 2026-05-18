@@ -30,11 +30,11 @@
 public import BushelFoundation
 public import BushelLogging
 public import Foundation
-import Logging
+internal import Logging
 public import MistKit
 
 #if canImport(FelinePineSwift)
-  import FelinePineSwift
+  internal import FelinePineSwift
 #endif
 
 /// CloudKit service wrapper for Bushel demo operations

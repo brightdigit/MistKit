@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import HTTPTypes
+internal import HTTPTypes
 
 // swiftlint:disable force_unwrapping
 // swift-format-ignore: NeverForceUnwrap

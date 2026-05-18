@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Sentinel used as `Input` or `Output` when a phase consumes or produces
 /// no `PhaseState`. Stands in for `Void`, which cannot conform to protocols.

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Testing
+internal import Testing
 
 @Suite("FieldParsingError LocalizedError")
 internal enum FieldParsingErrorTests {}

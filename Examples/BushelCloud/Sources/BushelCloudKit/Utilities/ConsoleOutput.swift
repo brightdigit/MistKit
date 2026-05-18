@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Synchronization
+internal import Foundation
+internal import Synchronization
 
 /// Console output control for CLI interface
 ///

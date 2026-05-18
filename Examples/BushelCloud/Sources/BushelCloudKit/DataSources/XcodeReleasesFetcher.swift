@@ -29,15 +29,15 @@
 
 public import BushelFoundation
 public import BushelLogging
-import Foundation
-import Logging
+internal import Foundation
+internal import Logging
 
 #if canImport(FelinePineSwift)
-  import FelinePineSwift
+  internal import FelinePineSwift
 #endif
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 /// Fetcher for Xcode releases from xcodereleases.com JSON API

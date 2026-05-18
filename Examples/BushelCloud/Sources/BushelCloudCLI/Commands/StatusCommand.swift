@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import BushelCloudKit
-import BushelFoundation
-import Foundation
+internal import BushelCloudKit
+internal import BushelFoundation
+internal import Foundation
 internal import MistKit
 
 internal enum StatusCommand {

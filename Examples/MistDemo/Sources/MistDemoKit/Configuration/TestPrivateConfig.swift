@@ -28,7 +28,7 @@
 //
 
 public import ConfigKeyKit
-import MistKit
+internal import MistKit
 
 /// Configuration for test-private command (private database).
 public struct TestPrivateConfig: Sendable, ConfigurationParseable {

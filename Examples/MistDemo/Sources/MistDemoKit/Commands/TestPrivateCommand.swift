@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Command to run comprehensive integration tests against the private database,
 /// covering all CloudKit API methods including user-identity endpoints.

@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Configuration
-import Foundation
-import SystemPackage
+internal import Configuration
+internal import Foundation
+internal import SystemPackage
 
 /// Swift Configuration-based setup for MistDemo.
 public struct MistDemoConfiguration: Sendable {

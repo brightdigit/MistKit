@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// IPSW metadata from TheAppleWiki
 internal struct IPSWVersion: Codable, Sendable {

@@ -28,7 +28,7 @@
 //
 
 public import ConfigKeyKit
-import Foundation
+internal import Foundation
 
 /// Configuration for delete command.
 public struct DeleteConfig: Sendable, ConfigurationParseable {

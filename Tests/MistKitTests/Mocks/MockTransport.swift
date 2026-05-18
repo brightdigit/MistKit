@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import HTTPTypes
-import OpenAPIRuntime
+internal import Foundation
+internal import HTTPTypes
+internal import OpenAPIRuntime
 
 /// Mock transport for testing that doesn't make actual network calls
 internal struct MockTransport: ClientTransport, Sendable {

@@ -28,7 +28,7 @@
 //
 
 public import ConfigKeyKit
-import Foundation
+internal import Foundation
 
 /// Configuration for demo-errors command.
 public struct DemoErrorsConfig: Sendable, ConfigurationParseable {

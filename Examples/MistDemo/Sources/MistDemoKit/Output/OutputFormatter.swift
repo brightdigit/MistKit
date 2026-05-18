@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Protocol for formatting output in different formats
 public protocol OutputFormatter: Sendable {

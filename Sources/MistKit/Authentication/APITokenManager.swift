@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Token manager for simple API token authentication.
 /// Provides container-level access to CloudKit Web Services.

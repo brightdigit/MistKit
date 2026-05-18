@@ -28,7 +28,7 @@
 //
 
 #if canImport(SwiftUI)
-  import SwiftUI
+  internal import SwiftUI
 
   /// Routes the sidebar selection to the appropriate detail view.
   internal struct DetailColumnRoot: View {

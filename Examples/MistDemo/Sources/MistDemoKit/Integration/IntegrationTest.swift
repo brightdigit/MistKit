@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// An integration test scenario -- typically one per CloudKit database.
 internal protocol IntegrationTest {

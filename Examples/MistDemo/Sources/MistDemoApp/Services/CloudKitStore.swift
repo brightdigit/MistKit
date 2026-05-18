@@ -28,9 +28,9 @@
 //
 
 #if canImport(CloudKit)
-  import CloudKit
-  import Foundation
-  import MistDemoKit
+  internal import CloudKit
+  internal import Foundation
+  internal import MistDemoKit
   public import Observation
 
   /// Observable source of truth for the MistDemo app's CloudKit state.

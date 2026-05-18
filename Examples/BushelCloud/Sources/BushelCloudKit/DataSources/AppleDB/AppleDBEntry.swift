@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Represents a single macOS build entry from AppleDB
 internal struct AppleDBEntry: Codable {

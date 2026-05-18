@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Supported output formats
 public enum OutputFormat: String, Sendable, CaseIterable {

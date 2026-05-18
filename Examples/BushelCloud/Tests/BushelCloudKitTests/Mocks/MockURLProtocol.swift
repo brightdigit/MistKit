@@ -30,7 +30,7 @@
 public import Foundation
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 /// Mock URLProtocol for intercepting and simulating HTTP requests in tests

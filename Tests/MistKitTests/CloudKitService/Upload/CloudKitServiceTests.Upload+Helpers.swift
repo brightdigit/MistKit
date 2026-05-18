@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import HTTPTypes
-import Testing
+internal import Foundation
+internal import HTTPTypes
+internal import Testing
 
 @testable import MistKit
 

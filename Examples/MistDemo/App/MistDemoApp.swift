@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import MistDemoApp
-import SwiftUI
+internal import MistDemoApp
+internal import SwiftUI
 
 @main
 internal struct MistDemoAppMain: AppMain {

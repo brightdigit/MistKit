@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Table escaper for plain text table output
 public struct TableEscaper: OutputEscaper {

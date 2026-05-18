@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import CelestraCloudKit
-import CelestraKit
-import Foundation
-import MistKit
+internal import CelestraCloudKit
+internal import CelestraKit
+internal import Foundation
+internal import MistKit
 
 internal enum UpdateCommand {
   internal static func run() async throws {
