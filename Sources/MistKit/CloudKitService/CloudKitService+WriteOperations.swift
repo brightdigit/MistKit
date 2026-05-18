@@ -40,6 +40,35 @@ import OpenAPIRuntime
 #endif
 
 extension CloudKitService {
+  /// Verify each record's field data fits CloudKit's 1 MB per-record limit.
+  ///
+  /// The JSON encoding of the entire `RecordRequest` (fields, recordType,
+  /// etc.) is used as a proxy for "record data size". Asset values in the
+  /// fields dict carry only their reference metadata at this layer; the
+  /// binary blob travels via the CDN and isn't measured here.
+  private static func validateRecordDataSize(
+    _ operations: [Components.Schemas.RecordOperation]
+  ) throws(CloudKitError) {
+    let encoder = JSONEncoder()
+    for (index, operation) in operations.enumerated() {
+      guard let record = operation.record else { continue }
+      let encoded: Data
+      do {
+        encoded = try encoder.encode(record)
+      } catch {
+        throw .underlyingError(error)
+      }
+      guard encoded.count <= maxRecordDataBytes else {
+        throw .invalidArgument(
+          parameter: "operations[\(index)].record",
+          reason:
+            "exceeds 1 MB CloudKit record-data limit "
+            + "(encoded \(encoded.count) bytes, max \(maxRecordDataBytes))"
+        )
+      }
+    }
+  }
+
   /// Modify (create, update, or delete) CloudKit records
   /// - Parameters:
   ///   - operations: Array of record operations to perform
@@ -56,6 +85,7 @@ extension CloudKitService {
       let apiOperations = try operations.map {
         try Components.Schemas.RecordOperation(from: $0)
       }
+      try Self.validateRecordDataSize(apiOperations)
 
       let client = try self.client(for: database)
       let response = try await client.modifyRecords(

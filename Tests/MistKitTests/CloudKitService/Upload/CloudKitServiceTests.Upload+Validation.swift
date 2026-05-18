@@ -54,11 +54,11 @@ extension CloudKitServiceTests.Upload {
         )
         Issue.record("Expected error for empty data")
       } catch {
-        if case .httpErrorWithRawResponse(let statusCode, let response) = error {
-          #expect(statusCode == 400)
-          #expect(response.contains("Asset data cannot be empty"))
+        if case .invalidArgument(let parameter, let reason) = error {
+          #expect(parameter == "data")
+          #expect(reason.contains("must not be empty"))
         } else {
-          Issue.record("Expected httpErrorWithRawResponse error")
+          Issue.record("Expected invalidArgument error")
         }
       }
     }
@@ -84,11 +84,11 @@ extension CloudKitServiceTests.Upload {
         )
         Issue.record("Expected error for oversized asset")
       } catch {
-        if case .httpErrorWithRawResponse(let statusCode, let response) = error {
-          #expect(statusCode == 413)
-          #expect(response.contains("exceeds maximum"))
+        if case .invalidArgument(let parameter, let reason) = error {
+          #expect(parameter == "data")
+          #expect(reason.contains("15 MB"))
         } else {
-          Issue.record("Expected httpErrorWithRawResponse error, got \(error)")
+          Issue.record("Expected invalidArgument error, got \(error)")
         }
       }
     }

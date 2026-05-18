@@ -74,7 +74,9 @@ extension CloudKitServiceTests.Upload {
       let service = try await CloudKitServiceTests.Upload.makeUploadValidationErrorService(
         .emptyData
       )
-      let testData = Data()  // Empty data triggers 400
+      // Pass non-empty data so the client-side .invalidArgument check passes
+      // and the server-side 400 response is exercised.
+      let testData = Data(count: 1)
 
       do {
         _ = try await service.uploadAssets(
@@ -85,10 +87,10 @@ extension CloudKitServiceTests.Upload {
         )
         Issue.record("Expected bad request error")
       } catch let error as CloudKitError {
-        if case .httpErrorWithRawResponse(let statusCode, _) = error {
+        if case .httpErrorWithDetails(let statusCode, _, _) = error {
           #expect(statusCode == 400, "Should return 400 Bad Request")
         } else {
-          Issue.record("Expected httpErrorWithRawResponse error, got \(error)")
+          Issue.record("Expected httpErrorWithDetails error, got \(error)")
         }
       } catch {
         Issue.record("Expected CloudKitError, got \(type(of: error))")
