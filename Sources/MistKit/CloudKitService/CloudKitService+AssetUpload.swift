@@ -98,6 +98,19 @@ extension CloudKitService {
       )
     } catch {
       throw mapToCloudKitError(error, context: "uploadAssetData")
+        .addingQuotaHint(Self.assetSizeQuotaHint(for: data))
     }
+  }
+
+  /// Returns a `.assetExceedsSizeLimit` hint when local `data` is over
+  /// CloudKit's per-asset upload limit. Returns `nil` otherwise (the
+  /// `QUOTA_EXCEEDED` is presumably caused by the user's iCloud storage
+  /// being full, not the asset size).
+  private static func assetSizeQuotaHint(for data: Data) -> QuotaHint? {
+    guard data.count > maxAssetUploadBytes else { return nil }
+    return .assetExceedsSizeLimit(
+      dataBytes: data.count,
+      maxBytes: maxAssetUploadBytes
+    )
   }
 }

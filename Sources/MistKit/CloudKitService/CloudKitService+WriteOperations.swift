@@ -52,11 +52,18 @@ extension CloudKitService {
     atomic: Bool = false,
     database: Database
   ) async throws(CloudKitError) -> [RecordInfo] {
+    let apiOperations: [Components.Schemas.RecordOperation]
     do {
-      let apiOperations = try operations.map {
+      apiOperations = try operations.map {
         try Components.Schemas.RecordOperation(from: $0)
       }
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch {
+      throw CloudKitError.underlyingError(error)
+    }
 
+    do {
       let client = try self.client(for: database)
       let response = try await client.modifyRecords(
         .init(
@@ -81,10 +88,35 @@ extension CloudKitService {
       return modifyResponse.records?.compactMap { RecordInfo(from: $0) }
         ?? []
     } catch let cloudKitError as CloudKitError {
-      throw cloudKitError
+      throw cloudKitError.addingQuotaHint(
+        Self.recordSizeQuotaHint(for: apiOperations)
+      )
     } catch {
       throw CloudKitError.underlyingError(error)
     }
+  }
+
+  /// Inspect a batch of API record operations and return a `QuotaHint` for
+  /// the first record whose JSON-encoded size exceeds CloudKit's per-record
+  /// limit. Returns `nil` if every record is within bounds — which is the
+  /// usual case when the server's `QUOTA_EXCEEDED` is caused by storage-quota
+  /// exhaustion rather than per-record size.
+  private static func recordSizeQuotaHint(
+    for apiOperations: [Components.Schemas.RecordOperation]
+  ) -> QuotaHint? {
+    let encoder = JSONEncoder()
+    for (index, operation) in apiOperations.enumerated() {
+      guard let record = operation.record,
+        let encoded = try? encoder.encode(record),
+        encoded.count > maxRecordDataBytes
+      else { continue }
+      return .recordExceedsSizeLimit(
+        operationIndex: index,
+        encodedBytes: encoded.count,
+        maxBytes: maxRecordDataBytes
+      )
+    }
+    return nil
   }
 
   /// Create a single record in CloudKit

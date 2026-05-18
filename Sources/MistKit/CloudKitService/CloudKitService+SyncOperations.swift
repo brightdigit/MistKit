@@ -84,16 +84,6 @@ extension CloudKitService {
     resultsLimit: Int? = nil,
     database: Database
   ) async throws(CloudKitError) -> RecordChangesResult {
-    if let limit = resultsLimit {
-      guard limit > 0 && limit <= 200 else {
-        throw CloudKitError.httpErrorWithRawResponse(
-          statusCode: 400,
-          rawResponse:
-            "resultsLimit must be between 1 and 200, got \(limit)"
-        )
-      }
-    }
-
     let effectiveZoneID = zoneID ?? .defaultZone
 
     do {

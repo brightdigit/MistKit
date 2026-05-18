@@ -35,34 +35,6 @@ import Testing
 extension CloudKitServiceTests.Upload {
   @Suite("Validation")
   internal struct Validation {
-    @Test("uploadAssets() validates empty data")
-    internal func uploadAssetsValidatesEmptyData() async throws {
-      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let service = try await CloudKitServiceTests.Upload.makeUploadValidationErrorService(
-        .emptyData
-      )
-
-      do {
-        _ = try await service.uploadAssets(
-          data: Data(),
-          recordType: "Note",
-          fieldName: "image",
-          database: .public(.prefers(.serverToServer))
-        )
-        Issue.record("Expected error for empty data")
-      } catch {
-        if case .invalidArgument(let parameter, let reason) = error {
-          #expect(parameter == "data")
-          #expect(reason.contains("must not be empty"))
-        } else {
-          Issue.record("Expected invalidArgument error")
-        }
-      }
-    }
-
     @Test("uploadAssets() accepts valid data sizes", .disabled(if: Platform.isWasm))
     internal func uploadAssetsAcceptsValidSizes() async throws {
       guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {

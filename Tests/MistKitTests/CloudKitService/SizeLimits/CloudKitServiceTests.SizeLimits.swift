@@ -1,9 +1,9 @@
 //
-//  ValidationErrorType.swift
+//  CloudKitServiceTests.SizeLimits.swift
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Types of validation errors that can occur
-internal enum ValidationErrorType: Sendable {
-  case emptyRecordType
-  case limitTooSmall(Int)
-  case limitTooLarge(Int)
+import Testing
+
+extension CloudKitServiceTests {
+  @Suite("SizeLimits")
+  internal enum SizeLimits {}
 }

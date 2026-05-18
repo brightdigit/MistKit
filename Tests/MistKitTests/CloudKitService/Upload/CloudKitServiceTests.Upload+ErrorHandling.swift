@@ -71,11 +71,7 @@ extension CloudKitServiceTests.Upload {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try await CloudKitServiceTests.Upload.makeUploadValidationErrorService(
-        .emptyData
-      )
-      // Pass non-empty data so the empty-data guard passes and the
-      // server-side 400 response is exercised.
+      let service = try await CloudKitServiceTests.Upload.makeUploadBadRequestService()
       let testData = Data(count: 1)
 
       do {
@@ -87,10 +83,10 @@ extension CloudKitServiceTests.Upload {
         )
         Issue.record("Expected bad request error")
       } catch let error as CloudKitError {
-        if case .httpErrorWithDetails(let statusCode, _, _) = error {
-          #expect(statusCode == 400, "Should return 400 Bad Request")
+        if case .badRequest = error {
+          // expected
         } else {
-          Issue.record("Expected httpErrorWithDetails error, got \(error)")
+          Issue.record("Expected .badRequest error, got \(error)")
         }
       } catch {
         Issue.record("Expected CloudKitError, got \(type(of: error))")

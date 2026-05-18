@@ -33,20 +33,6 @@ import Testing
 @testable import MistKit
 
 extension CloudKitServiceTests.Query {
-  /// Create service for validation error testing
-  internal static func makeValidationErrorService(
-    _ errorType: ValidationErrorType
-  ) throws -> CloudKitService {
-    let transport = MockTransport(
-      responseProvider: .validationError(errorType)
-    )
-    return try CloudKitService(
-      containerIdentifier: TestConstants.serviceContainerIdentifier,
-      credentials: Credentials(apiAuth: APICredentials(apiToken: "test-token")),
-      transport: transport
-    )
-  }
-
   /// Create service for successful operations
   internal static func makeSuccessfulService() throws -> CloudKitService {
     let transport = MockTransport(

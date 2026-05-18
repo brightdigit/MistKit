@@ -33,11 +33,6 @@ import Testing
 
 @testable import MistKit
 
-/// Types of upload validation errors that can occur
-internal enum UploadValidationErrorType: Sendable {
-  case emptyData
-}
-
 extension CloudKitServiceTests.Upload {
   /// Create service for successful upload operations
   /// Test API token in 64-character hexadecimal format as required by MistKit validation
@@ -76,14 +71,21 @@ extension CloudKitServiceTests.Upload {
     )
   }
 
-  /// Create service for validation error testing
+  /// Create service that responds with a 400 BAD_REQUEST for any call —
+  /// used to exercise CloudKit's server-side bad-request path on
+  /// asset-upload operations.
   @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-  internal static func makeUploadValidationErrorService(
-    _ errorType: UploadValidationErrorType
+  internal static func makeUploadBadRequestService(
+    reason: String = "Asset data cannot be empty"
   ) async throws -> CloudKitService {
-    let responseProvider = ResponseProvider.uploadValidationError(errorType)
-
-    let transport = MockTransport(responseProvider: responseProvider)
+    let provider = ResponseProvider(
+      defaultResponse: .cloudKitError(
+        statusCode: 400,
+        serverErrorCode: "BAD_REQUEST",
+        reason: reason
+      )
+    )
+    let transport = MockTransport(responseProvider: provider)
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
       credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),
@@ -111,12 +113,6 @@ extension ResponseProvider {
   /// Response provider for successful upload operations
   internal static func successfulUpload(tokenCount: Int = 1) -> ResponseProvider {
     ResponseProvider(defaultResponse: .successfulUploadResponse(tokenCount: tokenCount))
-  }
-
-  /// Response provider for upload validation errors
-  internal static func uploadValidationError(_ type: UploadValidationErrorType) -> ResponseProvider
-  {
-    ResponseProvider(defaultResponse: .uploadValidationError(type))
   }
 }
 
@@ -176,24 +172,6 @@ extension ResponseConfig {
       headers: headers,
       body: responseJSON.data(using: .utf8),
       error: nil
-    )
-  }
-
-  /// Creates an upload validation error response (400 Bad Request)
-  ///
-  /// - Parameter type: The type of upload validation error
-  /// - Returns: ResponseConfig with appropriate validation error message
-  internal static func uploadValidationError(_ type: UploadValidationErrorType) -> ResponseConfig {
-    let reason: String
-    switch type {
-    case .emptyData:
-      reason = "Asset data cannot be empty"
-    }
-
-    return cloudKitError(
-      statusCode: 400,
-      serverErrorCode: "BAD_REQUEST",
-      reason: reason
     )
   }
 }

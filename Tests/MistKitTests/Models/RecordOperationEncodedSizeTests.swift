@@ -36,8 +36,8 @@ import Testing
 internal struct RecordOperationEncodedSizeTests {
   @Test("delete operations report a small envelope-only size")
   internal func deleteReportsSmallSize() throws {
-    let op = RecordOperation.delete(recordType: "Note", recordName: "n-1")
-    let size = try op.encodedRecordSize()
+    let operation = RecordOperation.delete(recordType: "Note", recordName: "n-1")
+    let size = try operation.encodedRecordSize()
     #expect(size > 0)
     // Envelope only: recordName + recordType + empty fields object.
     #expect(size < 200)
@@ -45,11 +45,11 @@ internal struct RecordOperationEncodedSizeTests {
 
   @Test("create operation reports a non-zero size")
   internal func createReturnsPositive() throws {
-    let op = RecordOperation.create(
+    let operation = RecordOperation.create(
       recordType: "Note",
       fields: ["body": .string("hello")]
     )
-    #expect(try op.encodedRecordSize() > 0)
+    #expect(try operation.encodedRecordSize() > 0)
   }
 
   @Test("size scales with field content length")
@@ -72,11 +72,11 @@ internal struct RecordOperationEncodedSizeTests {
 
   @Test("size can be compared against CloudKitService.maxRecordDataBytes")
   internal func boundaryComparisonCompiles() throws {
-    let op = RecordOperation.create(
+    let operation = RecordOperation.create(
       recordType: "Note",
       fields: ["body": .string("ok")]
     )
-    let size = try op.encodedRecordSize()
+    let size = try operation.encodedRecordSize()
     #expect(size <= CloudKitService.maxRecordDataBytes)
   }
 }

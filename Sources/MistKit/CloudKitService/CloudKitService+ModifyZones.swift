@@ -67,25 +67,6 @@ extension CloudKitService {
     _ operations: [ZoneOperation],
     database: Database
   ) async throws(CloudKitError) -> [ZoneInfo] {
-    guard !operations.isEmpty else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 400,
-        rawResponse: "operations cannot be empty"
-      )
-    }
-    guard operations.allSatisfy({ !$0.zoneID.zoneName.isEmpty }) else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 400,
-        rawResponse: "operations contains a zone with an empty zoneName"
-      )
-    }
-    if case .public = database {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 400,
-        rawResponse: "modifyZones is not supported on the public database"
-      )
-    }
-
     do {
       let client = try self.client(for: database)
       let response = try await client.modifyZones(

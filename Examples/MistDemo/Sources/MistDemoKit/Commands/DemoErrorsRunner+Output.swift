@@ -56,10 +56,23 @@ extension DemoErrorsRunner {
     let status = error.httpStatusCode.map(String.init) ?? "n/a"
     let prefix = error.httpStatusCode == expectedStatus ? "✅" : "❌"
     print("\(prefix) Caught CloudKitError — status: \(status)")
-    if case .httpErrorWithDetails(_, let serverErrorCode, let reason) = error {
+    switch error {
+    case .httpErrorWithDetails(_, let serverErrorCode, let reason):
       print("   serverErrorCode: \(serverErrorCode ?? "<none>")")
       print("   reason:          \(reason ?? "<none>")")
-    } else {
+    case .badRequest(let reason):
+      print("   serverErrorCode: BAD_REQUEST")
+      print("   reason:          \(reason ?? "<none>")")
+    case .quotaExceeded(let reason, let hint):
+      print("   serverErrorCode: QUOTA_EXCEEDED")
+      print("   reason:          \(reason ?? "<none>")")
+      if let hint {
+        print("   hint:            \(hint.description)")
+      }
+    case .atomicFailure(let reason):
+      print("   serverErrorCode: ATOMIC_ERROR")
+      print("   reason:          \(reason ?? "<none>")")
+    default:
       print("   detail: \(error.localizedDescription)")
     }
   }

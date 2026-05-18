@@ -155,20 +155,6 @@ extension CloudKitService {
   ) async throws(CloudKitError) -> QueryResult {
     let effectiveLimit = limit ?? defaultQueryLimit
 
-    guard !recordType.isEmpty else {
-      throw CloudKitError.invalidArgument(
-        parameter: "recordType",
-        reason: "must not be empty"
-      )
-    }
-
-    guard effectiveLimit > 0 && effectiveLimit <= 200 else {
-      throw CloudKitError.invalidArgument(
-        parameter: "limit",
-        reason: "must be between 1 and 200, got \(effectiveLimit)"
-      )
-    }
-
     let componentsFilters = filters?.map {
       Components.Schemas.Filter(from: $0)
     }

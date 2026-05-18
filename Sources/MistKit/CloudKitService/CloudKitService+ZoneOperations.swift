@@ -102,19 +102,6 @@ extension CloudKitService {
     zoneIDs: [ZoneID],
     database: Database = .private
   ) async throws(CloudKitError) -> [ZoneInfo] {
-    guard !zoneIDs.isEmpty else {
-      throw CloudKitError.invalidArgument(
-        parameter: "zoneIDs",
-        reason: "must not be empty"
-      )
-    }
-    guard zoneIDs.allSatisfy({ !$0.zoneName.isEmpty }) else {
-      throw CloudKitError.invalidArgument(
-        parameter: "zoneIDs",
-        reason: "contains a zone with an empty zoneName"
-      )
-    }
-
     do {
       let client = try self.client(for: database)
       let response = try await client.lookupZones(

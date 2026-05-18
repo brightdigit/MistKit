@@ -79,13 +79,6 @@ extension CloudKitService {
     using uploader: AssetUploader? = nil,
     database: Database
   ) async throws(CloudKitError) -> AssetUploadReceipt {
-    guard !data.isEmpty else {
-      throw CloudKitError.invalidArgument(
-        parameter: "data",
-        reason: "must not be empty"
-      )
-    }
-
     do {
       let urlToken = try await requestAssetUploadURL(
         recordType: recordType,

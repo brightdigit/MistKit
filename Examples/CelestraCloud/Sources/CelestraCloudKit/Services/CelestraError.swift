@@ -144,11 +144,18 @@ public enum CelestraError: LocalizedError {
     case .decodingError:
       // Decoding errors are not retriable (data format issue)
       return false
-    case .unsupportedOperationType, .paginationLimitExceeded, .invalidArgument:
+    case .unsupportedOperationType, .paginationLimitExceeded:
       // Programmer/configuration issues — not retriable
       return false
     case .missingCredentials, .invalidPrivateKey:
       // Credential/configuration issues — not retriable
+      return false
+    case .badRequest, .atomicFailure:
+      // Server-side malformed-request / atomic-batch failures — not retriable
+      return false
+    case .quotaExceeded:
+      // Could be size-limit (not retriable) or storage-quota exhaustion
+      // (also not retriable until the user frees space). Either way, no.
       return false
     }
   }
