@@ -127,6 +127,15 @@ extension CloudKitService {
   ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
   /// - Returns: RecordInfo for the created record
   /// - Throws: CloudKitError if the operation fails
+  ///
+  /// # Example
+  /// ```swift
+  /// let article = try await service.createRecord(
+  ///   recordType: "Article",
+  ///   fields: ["title": .string("Hello, CloudKit")],
+  ///   database: .private
+  /// )
+  /// ```
   public func createRecord(
     recordType: String,
     recordName: String? = nil,
@@ -155,6 +164,17 @@ extension CloudKitService {
   ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
   /// - Returns: RecordInfo for the updated record
   /// - Throws: CloudKitError if the operation fails
+  ///
+  /// # Example
+  /// ```swift
+  /// let updated = try await service.updateRecord(
+  ///   recordType: "Article",
+  ///   recordName: existing.recordName,
+  ///   fields: ["title": .string("Renamed")],
+  ///   recordChangeTag: existing.recordChangeTag,
+  ///   database: .private
+  /// )
+  /// ```
   public func updateRecord(
     recordType: String,
     recordName: String,
