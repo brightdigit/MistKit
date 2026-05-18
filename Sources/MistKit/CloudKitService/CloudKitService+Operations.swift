@@ -156,17 +156,16 @@ extension CloudKitService {
     let effectiveLimit = limit ?? defaultQueryLimit
 
     guard !recordType.isEmpty else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 400,
-        rawResponse: "recordType cannot be empty"
+      throw CloudKitError.invalidArgument(
+        parameter: "recordType",
+        reason: "must not be empty"
       )
     }
 
     guard effectiveLimit > 0 && effectiveLimit <= 200 else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 400,
-        rawResponse:
-          "limit must be between 1 and 200, got \(effectiveLimit)"
+      throw CloudKitError.invalidArgument(
+        parameter: "limit",
+        reason: "must be between 1 and 200, got \(effectiveLimit)"
       )
     }
 

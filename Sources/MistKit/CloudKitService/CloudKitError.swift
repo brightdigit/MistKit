@@ -51,6 +51,11 @@ public enum CloudKitError: LocalizedError, Sendable {
     reason: String
   )
   case invalidPrivateKey(path: String?, underlying: any Error)
+  /// Caller-side argument validation failed before any HTTP request was issued.
+  ///
+  /// Distinct from `httpError*` so middleware and metrics can tell client bugs
+  /// from server-reported 4xx responses. No `httpStatusCode` is reported.
+  case invalidArgument(parameter: String, reason: String)
 
   /// HTTP status code if this error originated from an HTTP response, otherwise nil.
   public var httpStatusCode: Int? {
@@ -61,7 +66,7 @@ public enum CloudKitError: LocalizedError, Sendable {
       return statusCode
     case .invalidResponse, .underlyingError, .decodingError, .networkError,
       .unsupportedOperationType, .paginationLimitExceeded, .missingCredentials,
-      .invalidPrivateKey:
+      .invalidPrivateKey, .invalidArgument:
       return nil
     }
   }
@@ -146,6 +151,8 @@ public enum CloudKitError: LocalizedError, Sendable {
       let location = path.map { "from '\($0)'" } ?? "from inline material"
       return
         "Failed to load CloudKit private key \(location): \(underlying.localizedDescription)"
+    case .invalidArgument(let parameter, let reason):
+      return "Invalid argument '\(parameter)': \(reason)"
     }
   }
 }

@@ -50,12 +50,11 @@ extension CloudKitServiceTests.Query {
         )
         Issue.record("Expected error for empty recordType")
       } catch let error as CloudKitError {
-        // Verify we get the correct validation error
-        if case .httpErrorWithRawResponse(let statusCode, let response) = error {
-          #expect(statusCode == 400)
-          #expect(response.contains("recordType cannot be empty"))
+        if case .invalidArgument(let parameter, let reason) = error {
+          #expect(parameter == "recordType")
+          #expect(reason.contains("must not be empty"))
         } else {
-          Issue.record("Expected httpErrorWithRawResponse error")
+          Issue.record("Expected invalidArgument error")
         }
       } catch {
         Issue.record("Expected CloudKitError, got \(type(of: error))")
@@ -78,11 +77,11 @@ extension CloudKitServiceTests.Query {
         )
         Issue.record("Expected error for limit \(limit)")
       } catch {
-        if case .httpErrorWithRawResponse(let statusCode, let response) = error {
-          #expect(statusCode == 400)
-          #expect(response.contains("limit must be between 1 and 200"))
+        if case .invalidArgument(let parameter, let reason) = error {
+          #expect(parameter == "limit")
+          #expect(reason.contains("must be between 1 and 200"))
         } else {
-          Issue.record("Expected httpErrorWithRawResponse error")
+          Issue.record("Expected invalidArgument error")
         }
       }
     }
@@ -103,11 +102,11 @@ extension CloudKitServiceTests.Query {
         )
         Issue.record("Expected error for limit \(limit)")
       } catch {
-        if case .httpErrorWithRawResponse(let statusCode, let response) = error {
-          #expect(statusCode == 400)
-          #expect(response.contains("limit must be between 1 and 200"))
+        if case .invalidArgument(let parameter, let reason) = error {
+          #expect(parameter == "limit")
+          #expect(reason.contains("must be between 1 and 200"))
         } else {
-          Issue.record("Expected httpErrorWithRawResponse error")
+          Issue.record("Expected invalidArgument error")
         }
       }
     }
@@ -130,10 +129,9 @@ extension CloudKitServiceTests.Query {
         )
         Issue.record("Expected network error since we don't have real credentials")
       } catch {
-        // We expect a network/auth error, not a validation error
-        // Validation errors have status code 400
-        if case .httpErrorWithRawResponse(let statusCode, _) = error {
-          #expect(statusCode != 400, "Validation should not fail for limit \(limit)")
+        // We expect a network/auth error, not a validation error.
+        if case .invalidArgument = error {
+          Issue.record("Validation should not fail for limit \(limit)")
         }
         // Other CloudKit errors are expected (auth, network, etc.)
       }
