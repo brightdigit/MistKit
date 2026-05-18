@@ -47,6 +47,30 @@ extension CloudKitService {
   ///   - database: The CloudKit database scope to modify (`.public`, `.private`, `.shared`)
   /// - Returns: Array of RecordInfo for the modified records
   /// - Throws: CloudKitError if the operation fails
+  ///
+  /// # Example: Batched create/update/delete
+  /// ```swift
+  /// let results = try await service.modifyRecords(
+  ///   [
+  ///     .create(
+  ///       recordType: "Article",
+  ///       fields: ["title": .string("New post")]
+  ///     ),
+  ///     .update(
+  ///       recordType: "Article",
+  ///       recordName: existing.recordName,
+  ///       fields: ["title": .string("Renamed")],
+  ///       recordChangeTag: existing.recordChangeTag
+  ///     ),
+  ///     .delete(
+  ///       recordType: "Article",
+  ///       recordName: "old-id"
+  ///     )
+  ///   ],
+  ///   atomic: true,
+  ///   database: .private
+  /// )
+  /// ```
   public func modifyRecords(
     _ operations: [RecordOperation],
     atomic: Bool = false,
@@ -95,6 +119,19 @@ extension CloudKitService {
   ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
   /// - Returns: RecordInfo for the created record
   /// - Throws: CloudKitError if the operation fails
+  ///
+  /// # Example: Create with mixed field types
+  /// ```swift
+  /// let article = try await service.createRecord(
+  ///   recordType: "Article",
+  ///   fields: [
+  ///     "title": .string("Hello, CloudKit"),
+  ///     "wordCount": .int64(2),
+  ///     "publishedDate": .date(Date())
+  ///   ],
+  ///   database: .private
+  /// )
+  /// ```
   public func createRecord(
     recordType: String,
     recordName: String? = nil,
@@ -123,6 +160,17 @@ extension CloudKitService {
   ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
   /// - Returns: RecordInfo for the updated record
   /// - Throws: CloudKitError if the operation fails
+  ///
+  /// # Example: Optimistic update
+  /// ```swift
+  /// let updated = try await service.updateRecord(
+  ///   recordType: "Article",
+  ///   recordName: existing.recordName,
+  ///   fields: ["title": .string("Hello, CloudKit (revised)")],
+  ///   recordChangeTag: existing.recordChangeTag,
+  ///   database: .private
+  /// )
+  /// ```
   public func updateRecord(
     recordType: String,
     recordName: String,
@@ -151,6 +199,15 @@ extension CloudKitService {
   ///   - recordChangeTag: Optional change tag for optimistic locking
   ///   - database: The CloudKit database scope to delete from (`.public`, `.private`, `.shared`)
   /// - Throws: CloudKitError if the operation fails
+  ///
+  /// # Example: Delete by record name
+  /// ```swift
+  /// try await service.deleteRecord(
+  ///   recordType: "Article",
+  ///   recordName: stale.recordName,
+  ///   database: .private
+  /// )
+  /// ```
   public func deleteRecord(
     recordType: String,
     recordName: String,

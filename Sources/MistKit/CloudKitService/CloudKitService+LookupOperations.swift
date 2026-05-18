@@ -32,6 +32,24 @@ internal import MistKitOpenAPI
 
 extension CloudKitService {
   /// Lookup records by record names
+  /// - Parameters:
+  ///   - recordNames: Record names to fetch
+  ///   - desiredKeys: Optional array of field names to fetch
+  ///   - database: The CloudKit database scope to read from (`.public`, `.private`, `.shared`)
+  /// - Returns: Array of RecordInfo for the matched records
+  /// - Throws: CloudKitError if the operation fails
+  ///
+  /// # Example: Bulk lookup with field projection
+  /// ```swift
+  /// let articles = try await service.lookupRecords(
+  ///   recordNames: ["article-001", "article-002", "article-003"],
+  ///   desiredKeys: ["title", "publishedDate"],
+  ///   database: .private
+  /// )
+  /// ```
+  ///
+  /// - Note: Pass `desiredKeys` to limit which fields come back. Useful
+  ///   for list views that only need a projection.
   public func lookupRecords(
     recordNames: [String],
     desiredKeys: [String]? = nil,
