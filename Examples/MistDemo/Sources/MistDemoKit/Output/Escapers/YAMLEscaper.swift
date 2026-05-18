@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// YAML escaper for proper string formatting
 public struct YAMLEscaper: OutputEscaper {

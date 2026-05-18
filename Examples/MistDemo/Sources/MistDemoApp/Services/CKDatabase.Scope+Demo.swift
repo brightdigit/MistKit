@@ -28,7 +28,7 @@
 //
 
 #if canImport(CloudKit)
-  import CloudKit
+  internal import CloudKit
 
   extension CKDatabase.Scope {
     /// Scopes exposed in the MistDemoApp picker. `.shared` is intentionally

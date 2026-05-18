@@ -28,12 +28,12 @@
 //
 
 #if canImport(Hummingbird)
-  import Foundation
-  import HTTPTypes
-  import Hummingbird
-  import HummingbirdTesting
-  import MistKit
-  import Testing
+  internal import Foundation
+  internal import HTTPTypes
+  internal import Hummingbird
+  internal import HummingbirdTesting
+  internal import MistKit
+  internal import Testing
 
   @testable import MistDemoKit
 

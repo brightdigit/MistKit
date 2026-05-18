@@ -28,7 +28,7 @@
 //
 
 public import ConfigKeyKit
-import Foundation
+internal import Foundation
 
 /// Typealias for MistDemo commands - now uses generic Command protocol
 public typealias MistDemoCommand = Command

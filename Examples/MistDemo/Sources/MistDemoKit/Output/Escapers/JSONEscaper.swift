@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// JSON escaper (usually handled by JSONEncoder, but useful for manual JSON building)
 public struct JSONEscaper: OutputEscaper {

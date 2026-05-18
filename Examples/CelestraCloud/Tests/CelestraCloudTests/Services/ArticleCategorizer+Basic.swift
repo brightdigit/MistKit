@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import CelestraKit
-import Foundation
-import Testing
+internal import CelestraKit
+internal import Foundation
+internal import Testing
 
 @testable import CelestraCloudKit
 

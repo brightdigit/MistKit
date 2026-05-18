@@ -5,7 +5,7 @@
 //  Tests for naming style transformations
 //
 
-import Testing
+internal import Testing
 
 @testable import ConfigKeyKit
 

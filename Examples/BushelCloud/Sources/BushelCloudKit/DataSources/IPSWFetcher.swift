@@ -27,15 +27,15 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import BushelFoundation
-import BushelUtilities
-import Foundation
-import IPSWDownloads
-import OpenAPIURLSession
-import OSVer
+internal import BushelFoundation
+internal import BushelUtilities
+internal import Foundation
+internal import IPSWDownloads
+internal import OSVer
+internal import OpenAPIURLSession
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 /// Fetcher for macOS restore images using the IPSWDownloads package

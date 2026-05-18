@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
-import Synchronization
+internal import Foundation
+internal import MistKit
+internal import Synchronization
 
 @testable import CelestraCloudKit
 

@@ -1,6 +1,6 @@
-import Crypto
-import Foundation
-import Testing
+internal import Crypto
+internal import Foundation
+internal import Testing
 
 @testable import MistKit
 

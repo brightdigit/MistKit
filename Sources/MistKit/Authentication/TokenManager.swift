@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Protocol for managing authentication tokens and credentials for CloudKit Web Services.
 ///

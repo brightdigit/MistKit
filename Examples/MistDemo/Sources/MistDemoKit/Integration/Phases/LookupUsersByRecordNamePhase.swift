@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Calls POST `/users/lookup/id` with the caller's own user record name to
 /// exercise the endpoint via a self-lookup.

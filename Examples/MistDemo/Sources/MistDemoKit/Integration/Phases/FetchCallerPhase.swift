@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Calls `users/caller`, the user-context endpoint that replaced the deprecated
 /// `users/current`.

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Validates CloudKit Server-to-Server Key ID format
 internal enum KeyIDValidator {

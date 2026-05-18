@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Generic protocol for CLI commands using Swift Configuration
 public protocol Command: Sendable {

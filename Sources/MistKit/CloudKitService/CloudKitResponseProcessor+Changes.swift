@@ -29,7 +29,7 @@
 
 internal import Foundation
 internal import MistKitOpenAPI
-import OpenAPIRuntime
+internal import OpenAPIRuntime
 
 extension CloudKitResponseProcessor {
   /// Process fetchRecordChanges response

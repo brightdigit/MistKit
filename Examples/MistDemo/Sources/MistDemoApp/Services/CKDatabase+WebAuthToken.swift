@@ -28,7 +28,7 @@
 //
 
 #if canImport(CloudKit)
-  import CloudKit
+  internal import CloudKit
 
   extension CKDatabase {
     /// Capture a web-auth token via `CKFetchWebAuthTokenOperation` for the

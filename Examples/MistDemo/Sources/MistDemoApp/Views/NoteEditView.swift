@@ -28,9 +28,9 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit)
-  import MistDemoKit
-  import SwiftUI
-  import UniformTypeIdentifiers
+  internal import MistDemoKit
+  internal import SwiftUI
+  internal import UniformTypeIdentifiers
 
   /// Sheet form for creating or editing a Note. The same view backs both flows;
   /// the `mode` value drives the title and which service method is called on save.

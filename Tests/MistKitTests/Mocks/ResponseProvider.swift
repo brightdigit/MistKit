@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import HTTPTypes
-import OpenAPIRuntime
+internal import HTTPTypes
+internal import OpenAPIRuntime
 
 /// Thread-safe provider for configuring mock responses
 internal actor ResponseProvider {

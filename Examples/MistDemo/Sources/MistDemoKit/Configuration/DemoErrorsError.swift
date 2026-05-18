@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Errors specific to the demo-errors command's configuration parsing.
 internal enum DemoErrorsError: LocalizedError {

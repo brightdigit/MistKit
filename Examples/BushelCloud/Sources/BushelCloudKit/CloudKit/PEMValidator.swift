@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Validates PEM format for CloudKit Server-to-Server private keys
 internal enum PEMValidator {

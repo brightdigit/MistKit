@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import HTTPTypes
+internal import Foundation
+internal import HTTPTypes
 internal import Logging
-import OpenAPIRuntime
+internal import OpenAPIRuntime
 
 /// Logging middleware for HTTP request/response tracing.
 ///

@@ -1,7 +1,7 @@
-import Foundation
-import HTTPTypes
-import OpenAPIRuntime
-import Testing
+internal import Foundation
+internal import HTTPTypes
+internal import OpenAPIRuntime
+internal import Testing
 
 @testable import MistKit
 

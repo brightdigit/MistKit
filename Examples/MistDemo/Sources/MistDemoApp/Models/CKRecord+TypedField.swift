@@ -28,8 +28,8 @@
 //
 
 #if canImport(CloudKit)
-  import CloudKit
-  import Foundation
+  internal import CloudKit
+  internal import Foundation
 
   extension CKRecord {
     /// Reads `field` from the record and casts it to `T`.

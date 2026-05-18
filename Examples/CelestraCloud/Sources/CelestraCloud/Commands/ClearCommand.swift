@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import CelestraCloudKit
-import CelestraKit
-import Foundation
-import MistKit
+internal import CelestraCloudKit
+internal import CelestraKit
+internal import Foundation
+internal import MistKit
 
 internal enum ClearCommand {
   @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)

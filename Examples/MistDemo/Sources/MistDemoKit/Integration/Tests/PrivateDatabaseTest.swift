@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 internal struct PrivateDatabaseTest: PhasedIntegrationTest {
   internal let name = "Private Database"

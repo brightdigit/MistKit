@@ -30,7 +30,7 @@
 internal import Foundation
 internal import Logging
 internal import MistKitOpenAPI
-import OpenAPIRuntime
+internal import OpenAPIRuntime
 
 /// Processes CloudKit API responses and handles errors
 internal struct CloudKitResponseProcessor {

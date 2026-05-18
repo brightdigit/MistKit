@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 extension QueryCommand {
   /// Parse a single filter expression "field:operator:value" into a QueryFilter

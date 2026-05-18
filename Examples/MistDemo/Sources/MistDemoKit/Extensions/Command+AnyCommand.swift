@@ -28,7 +28,7 @@
 //
 
 public import ConfigKeyKit
-import Foundation
+internal import Foundation
 
 /// Default implementation of createInstance for all MistDemo commands.
 extension Command where Config.ConfigReader == MistDemoConfiguration {

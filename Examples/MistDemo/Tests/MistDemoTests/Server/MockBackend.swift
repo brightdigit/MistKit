@@ -28,8 +28,8 @@
 //
 
 #if canImport(Hummingbird)
-  import Foundation
-  import MistKit
+  internal import Foundation
+  internal import MistKit
 
   @testable import MistDemoKit
 

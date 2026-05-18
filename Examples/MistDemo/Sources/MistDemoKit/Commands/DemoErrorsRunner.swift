@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Runs the talk's CloudKit error scenarios (401, 404, 409) and prints typed
 /// `CloudKitError` details. Mirrors the section/prefix style of

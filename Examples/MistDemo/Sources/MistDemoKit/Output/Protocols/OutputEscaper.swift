@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Protocol for escaping strings for specific output formats
 public protocol OutputEscaper: Sendable {

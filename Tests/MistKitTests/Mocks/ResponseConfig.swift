@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import HTTPTypes
+internal import Foundation
+internal import HTTPTypes
 
 /// Configuration for a mock HTTP response
 internal struct ResponseConfig: Sendable {

@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Command to query Note records from CloudKit with filtering and sorting
 public struct QueryCommand: MistDemoCommand, OutputFormatting {

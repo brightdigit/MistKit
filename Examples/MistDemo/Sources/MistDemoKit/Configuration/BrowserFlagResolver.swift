@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Resolves the "should we open the browser on startup?" decision from
 /// the two mutually-exclusive CLI flags into a single boolean.

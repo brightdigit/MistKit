@@ -29,7 +29,7 @@
 
 public import CelestraKit
 public import Foundation
-import Logging
+internal import Logging
 public import MistKit
 
 /// Service for Feed-related CloudKit operations with dependency injection support

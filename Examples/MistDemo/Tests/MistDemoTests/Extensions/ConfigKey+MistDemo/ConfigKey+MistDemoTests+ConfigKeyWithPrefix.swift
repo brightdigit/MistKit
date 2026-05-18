@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ConfigKeyKit
-import Foundation
-import Testing
+internal import ConfigKeyKit
+internal import Foundation
+internal import Testing
 
 @testable import MistDemoKit
 
