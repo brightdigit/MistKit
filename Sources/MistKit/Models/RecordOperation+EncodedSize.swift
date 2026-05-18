@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceTests.SizeLimits.swift
+//  RecordOperation+EncodedSize.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,9 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Testing
+internal import Foundation
+internal import MistKitOpenAPI
 
-extension CloudKitServiceTests {
-  @Suite("SizeLimits")
-  internal enum SizeLimits {}
+extension RecordOperation {
+  /// Size in bytes of this operation's record envelope when JSON-encoded for
+  /// the wire.
+  ///
+  /// Compare against ``CloudKitService/maxRecordDataBytes`` (1 MB) to
+  /// pre-flight CloudKit's per-record data limit before calling
+  /// ``CloudKitService/modifyRecords(_:atomic:database:)``. Delete operations
+  /// carry a small envelope (record name, record type, empty fields) so they
+  /// report a tiny but non-zero size.
+  ///
+  /// Asset field values carry only their reference metadata here; the binary
+  /// blob travels via the CDN and is bounded separately by
+  /// ``CloudKitService/maxAssetUploadBytes``.
+  public func encodedRecordSize() throws -> Int {
+    let apiOperation = try Components.Schemas.RecordOperation(from: self)
+    guard let record = apiOperation.record else { return 0 }
+    return try JSONEncoder().encode(record).count
+  }
 }

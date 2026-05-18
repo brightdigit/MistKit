@@ -63,36 +63,6 @@ extension CloudKitServiceTests.Upload {
       }
     }
 
-    @Test("uploadAssets() validates 15 MB size limit", .disabled(if: Platform.isWasm))
-    internal func uploadAssetsValidates15MBLimit() async throws {
-      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      // Create data just over 15 MB (15 * 1024 * 1024 + 1 bytes)
-      let oversizedData = Data(count: 15_728_641)
-      let service = try await CloudKitServiceTests.Upload.makeUploadValidationErrorService(
-        .oversizedAsset(oversizedData.count)
-      )
-
-      do {
-        _ = try await service.uploadAssets(
-          data: oversizedData,
-          recordType: "Note",
-          fieldName: "image",
-          database: .public(.prefers(.serverToServer))
-        )
-        Issue.record("Expected error for oversized asset")
-      } catch {
-        if case .invalidArgument(let parameter, let reason) = error {
-          #expect(parameter == "data")
-          #expect(reason.contains("15 MB"))
-        } else {
-          Issue.record("Expected invalidArgument error, got \(error)")
-        }
-      }
-    }
-
     @Test("uploadAssets() accepts valid data sizes", .disabled(if: Platform.isWasm))
     internal func uploadAssetsAcceptsValidSizes() async throws {
       guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {

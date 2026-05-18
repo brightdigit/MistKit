@@ -56,14 +56,6 @@ extension CloudKitService {
     to url: URL,
     using uploader: AssetUploader? = nil
   ) async throws(CloudKitError) -> Asset {
-    guard data.count <= Self.maxAssetUploadBytes else {
-      throw CloudKitError.invalidArgument(
-        parameter: "data",
-        reason:
-          "exceeds 15 MB CloudKit per-asset upload limit "
-          + "(got \(data.count) bytes, max \(Self.maxAssetUploadBytes))"
-      )
-    }
     do {
       let uploadHandler =
         uploader ?? { data, url in

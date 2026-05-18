@@ -36,7 +36,6 @@ import Testing
 /// Types of upload validation errors that can occur
 internal enum UploadValidationErrorType: Sendable {
   case emptyData
-  case oversizedAsset(Int)
 }
 
 extension CloudKitServiceTests.Upload {
@@ -189,8 +188,6 @@ extension ResponseConfig {
     switch type {
     case .emptyData:
       reason = "Asset data cannot be empty"
-    case .oversizedAsset(let size):
-      reason = "Asset size \(size) bytes exceeds maximum allowed size of 262144000 bytes (250 MB)"
     }
 
     return cloudKitError(

@@ -74,8 +74,8 @@ extension CloudKitServiceTests.Upload {
       let service = try await CloudKitServiceTests.Upload.makeUploadValidationErrorService(
         .emptyData
       )
-      // Pass non-empty data so the client-side .invalidArgument check passes
-      // and the server-side 400 response is exercised.
+      // Pass non-empty data so the empty-data guard passes and the
+      // server-side 400 response is exercised.
       let testData = Data(count: 1)
 
       do {

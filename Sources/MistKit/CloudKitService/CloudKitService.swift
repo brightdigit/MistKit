@@ -61,13 +61,18 @@ public struct CloudKitService: Sendable {
   /// CloudKit's maximum number of records returned per query/modify request.
   internal static let maxRecordsPerRequest: Int = 200
 
-  /// CloudKit caps non-asset record field data at 1 MB; assets travel via the
-  /// CDN and don't count against this limit.
-  internal static let maxRecordDataBytes: Int = 1_024 * 1_024
+  /// CloudKit's documented per-record field-data limit (1 MB). Assets travel
+  /// via the CDN and don't count against this limit. MistKit does not
+  /// pre-flight this — `modifyRecords` lets CloudKit reject oversized records
+  /// — but callers who want to check ahead can compare
+  /// `RecordOperation.encodedRecordSize()` against this constant.
+  public static let maxRecordDataBytes: Int = 1_024 * 1_024
 
-  /// CloudKit caps a single asset upload at 15 MB. Larger uploads must be
-  /// split across multiple assets by the caller.
-  internal static let maxAssetUploadBytes: Int = 15 * 1_024 * 1_024
+  /// CloudKit's documented per-asset upload limit (15 MB). MistKit does not
+  /// pre-flight this — `uploadAssets`/`uploadAssetData` let the CDN reject —
+  /// but callers who want to check ahead can compare `data.count` against
+  /// this constant.
+  public static let maxAssetUploadBytes: Int = 15 * 1_024 * 1_024
 
   /// The CloudKit container identifier
   public let containerIdentifier: String
