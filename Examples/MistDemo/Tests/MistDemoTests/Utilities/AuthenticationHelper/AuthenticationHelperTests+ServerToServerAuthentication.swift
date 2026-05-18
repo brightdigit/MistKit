@@ -43,7 +43,6 @@ extension AuthenticationHelperTests {
         "FileManager.temporaryDirectory write isn't supported under WASI sandbox"
       )
     )
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     internal func serverToServerAuthWithKeyID() async throws {
       // Create a temporary private key file
       let tempDir = FileManager.default.temporaryDirectory
@@ -79,7 +78,6 @@ extension AuthenticationHelperTests {
     }
 
     @Test("Server-to-server auth with inline private key")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     internal func serverToServerAuthWithInlineKey() async throws {
       let privateKeyPEM = AuthenticationHelperTests.testPrivateKeyPEM
 
@@ -101,7 +99,6 @@ extension AuthenticationHelperTests {
     }
 
     @Test("Server-to-server auth enforces public database")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     internal func serverToServerEnforcesPublicDatabase() async throws {
       let privateKeyPEM = AuthenticationHelperTests.testPrivateKeyPEM
 
@@ -126,7 +123,6 @@ extension AuthenticationHelperTests {
     }
 
     @Test("Server-to-server auth throws on missing private key")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     internal func serverToServerThrowsOnMissingPrivateKey() async throws {
       do {
         _ = try await AuthenticationHelper.setupAuthentication(
@@ -148,7 +144,6 @@ extension AuthenticationHelperTests {
     }
 
     @Test("Server-to-server auth throws on invalid key file path")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     internal func serverToServerThrowsOnInvalidKeyFile() async throws {
       let invalidPath = "/nonexistent/path/to/key.pem"
 

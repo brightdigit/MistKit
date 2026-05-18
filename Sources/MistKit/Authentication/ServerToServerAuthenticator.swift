@@ -118,7 +118,6 @@ public struct ServerToServerAuthenticator: Authenticator {
   }
 
   /// Convenience initializer with a PEM-encoded private key string.
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public init(
     keyID: String,
     pemString: String,

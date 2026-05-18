@@ -37,7 +37,6 @@ extension AuthenticationHelperTests {
   @Suite("Authentication Method Priority")
   internal struct AuthenticationMethodPriority {
     @Test("Server-to-server takes precedence over web auth")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     internal func serverToServerTakesPrecedence() async throws {
       let privateKeyPEM = AuthenticationHelperTests.testPrivateKeyPEM
 

@@ -37,6 +37,13 @@ import OpenAPIRuntime
 /// Emits at `.debug` level — install a `LogHandler` and set
 /// `logLevel = .debug` on `com.brightdigit.MistKit.middleware` to opt in.
 internal struct LoggingMiddleware: ClientMiddleware {
+  /// Maximum bytes of a response body collected at debug level.
+  ///
+  /// Sized to surface the JSON envelope and error reason without doubling
+  /// the memory footprint of large CloudKit responses. Bodies bigger than
+  /// this still stream through to the caller untouched.
+  private static let responseBodyLogCap: Int = 64 * 1_024
+
   private let logger = Logger(subsystem: .middleware)
 
   internal func intercept(
@@ -92,20 +99,36 @@ internal struct LoggingMiddleware: ClientMiddleware {
     }
 
     #if !os(WASI)
-      return await logResponseBody(body)
+      return await logResponseBody(body, contentType: response.headerFields[.contentType])
     #else
       return body
     #endif
   }
 
   #if !os(WASI)
-    private func logResponseBody(_ responseBody: HTTPBody?) async -> HTTPBody? {
+    private func logResponseBody(
+      _ responseBody: HTTPBody?,
+      contentType: String?
+    ) async -> HTTPBody? {
       guard let responseBody = responseBody else {
         return nil
       }
 
+      // Only collect bodies we can actually render as text. Asset payloads
+      // and other binary streams just inflate memory without producing a
+      // useful log line.
+      guard let contentType = contentType,
+        contentType.lowercased().contains("application/json")
+      else {
+        logger.debug("📄 Response Body: <skipped, content-type=\(contentType ?? "unknown")>")
+        return responseBody
+      }
+
       do {
-        let bodyData = try await Data(collecting: responseBody, upTo: 1_024 * 1_024)
+        let bodyData = try await Data(
+          collecting: responseBody,
+          upTo: Self.responseBodyLogCap
+        )
         logBodyData(bodyData)
         return HTTPBody(bodyData)
       } catch {

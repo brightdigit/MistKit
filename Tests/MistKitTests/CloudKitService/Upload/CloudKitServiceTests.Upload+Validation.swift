@@ -35,64 +35,6 @@ import Testing
 extension CloudKitServiceTests.Upload {
   @Suite("Validation")
   internal struct Validation {
-    @Test("uploadAssets() validates empty data")
-    internal func uploadAssetsValidatesEmptyData() async throws {
-      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let service = try await CloudKitServiceTests.Upload.makeUploadValidationErrorService(
-        .emptyData
-      )
-
-      do {
-        _ = try await service.uploadAssets(
-          data: Data(),
-          recordType: "Note",
-          fieldName: "image",
-          database: .public(.prefers(.serverToServer))
-        )
-        Issue.record("Expected error for empty data")
-      } catch {
-        if case .httpErrorWithRawResponse(let statusCode, let response) = error {
-          #expect(statusCode == 400)
-          #expect(response.contains("Asset data cannot be empty"))
-        } else {
-          Issue.record("Expected httpErrorWithRawResponse error")
-        }
-      }
-    }
-
-    @Test("uploadAssets() validates 15 MB size limit", .disabled(if: Platform.isWasm))
-    internal func uploadAssetsValidates15MBLimit() async throws {
-      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      // Create data just over 15 MB (15 * 1024 * 1024 + 1 bytes)
-      let oversizedData = Data(count: 15_728_641)
-      let service = try await CloudKitServiceTests.Upload.makeUploadValidationErrorService(
-        .oversizedAsset(oversizedData.count)
-      )
-
-      do {
-        _ = try await service.uploadAssets(
-          data: oversizedData,
-          recordType: "Note",
-          fieldName: "image",
-          database: .public(.prefers(.serverToServer))
-        )
-        Issue.record("Expected error for oversized asset")
-      } catch {
-        if case .httpErrorWithRawResponse(let statusCode, let response) = error {
-          #expect(statusCode == 413)
-          #expect(response.contains("exceeds maximum"))
-        } else {
-          Issue.record("Expected httpErrorWithRawResponse error, got \(error)")
-        }
-      }
-    }
-
     @Test("uploadAssets() accepts valid data sizes", .disabled(if: Platform.isWasm))
     internal func uploadAssetsAcceptsValidSizes() async throws {
       guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {

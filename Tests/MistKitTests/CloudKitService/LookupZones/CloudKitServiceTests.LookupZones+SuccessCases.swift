@@ -90,5 +90,24 @@ extension CloudKitServiceTests.LookupZones {
 
       #expect(zones.isEmpty)
     }
+
+    @Test("lookupZones() drops zones with missing zoneName instead of substituting placeholder")
+    internal func lookupZonesDropsZonesWithoutName() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service =
+        try await CloudKitServiceTests.LookupZones.makeServiceReturningZoneWithoutName()
+
+      let zones = try await service.lookupZones(
+        zoneIDs: [ZoneID(zoneName: "valid-zone", ownerName: nil)],
+        database: .public(.prefers(.serverToServer))
+      )
+
+      #expect(zones.count == 1)
+      #expect(zones.first?.zoneName == "valid-zone")
+      #expect(!zones.contains { $0.zoneName == "Unknown" })
+    }
   }
 }

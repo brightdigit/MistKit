@@ -84,11 +84,11 @@ let swiftSettings: [SwiftSetting] = [
 let package = Package(
   name: "MistKit",
   platforms: [
-    .macOS(.v10_15),   // Minimum for swift-crypto
-    .iOS(.v13),        // Minimum for swift-crypto
-    .tvOS(.v13),       // Minimum for swift-crypto
-    .watchOS(.v6),     // Minimum for swift-crypto
-    .visionOS(.v1)     // Vision OS already requires newer versions
+    .macOS(.v11),
+    .iOS(.v14),
+    .tvOS(.v14),
+    .watchOS(.v7),
+    .visionOS(.v1)
     // Note: WASM/WASI support doesn't require explicit platform declaration
     // Use --swift-sdk wasm32-unknown-wasi when building for WASM
   ],

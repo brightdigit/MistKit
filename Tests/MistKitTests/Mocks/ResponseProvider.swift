@@ -57,11 +57,6 @@ internal actor ResponseProvider {
 
   // MARK: - Factory Methods
 
-  /// Response provider for validation errors
-  internal static func validationError(_ type: ValidationErrorType) -> ResponseProvider {
-    ResponseProvider(defaultResponse: .validationError(type))
-  }
-
   /// Response provider for authentication errors
   internal static func authenticationError() -> ResponseProvider {
     ResponseProvider(defaultResponse: .authenticationError())

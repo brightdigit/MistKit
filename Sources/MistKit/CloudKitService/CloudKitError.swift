@@ -37,8 +37,21 @@ import OpenAPIRuntime
 /// Represents errors that can occur when interacting with CloudKit Web Services
 public enum CloudKitError: LocalizedError, Sendable {
   case httpError(statusCode: Int)
+  /// Server-returned error for `serverErrorCode` values **other than**
+  /// `QUOTA_EXCEEDED`, `BAD_REQUEST`, and `ATOMIC_ERROR` — those have their own
+  /// dedicated cases (`.quotaExceeded`, `.badRequest`, `.atomicFailure`).
   case httpErrorWithDetails(statusCode: Int, serverErrorCode: String?, reason: String?)
   case httpErrorWithRawResponse(statusCode: Int, rawResponse: String)
+  /// HTTP 413 / `QUOTA_EXCEEDED`. Same server code is used for storage-quota
+  /// exhaustion and per-record / per-asset size limits; `hint` (when non-nil)
+  /// disambiguates from local request context.
+  case quotaExceeded(reason: String?, hint: QuotaHint?)
+  /// HTTP 400 / `BAD_REQUEST`. The server's `reason` describes the specific
+  /// malformed input.
+  case badRequest(reason: String?)
+  /// HTTP 400 / `ATOMIC_ERROR`. A `modifyRecords` call with `atomic: true`
+  /// rolled back because at least one operation in the batch failed.
+  case atomicFailure(reason: String?)
   case invalidResponse
   case underlyingError(any Error)
   case decodingError(DecodingError)
@@ -59,6 +72,10 @@ public enum CloudKitError: LocalizedError, Sendable {
       .httpErrorWithDetails(let statusCode, _, _),
       .httpErrorWithRawResponse(let statusCode, _):
       return statusCode
+    case .quotaExceeded:
+      return 413
+    case .badRequest, .atomicFailure:
+      return 400
     case .invalidResponse, .underlyingError, .decodingError, .networkError,
       .unsupportedOperationType, .paginationLimitExceeded, .missingCredentials,
       .invalidPrivateKey:
@@ -146,6 +163,27 @@ public enum CloudKitError: LocalizedError, Sendable {
       let location = path.map { "from '\($0)'" } ?? "from inline material"
       return
         "Failed to load CloudKit private key \(location): \(underlying.localizedDescription)"
+    case .quotaExceeded(let reason, let hint):
+      var message = "CloudKit quota exceeded (HTTP 413 / QUOTA_EXCEEDED)"
+      if let reason {
+        message += "\nReason: \(reason)"
+      }
+      if let hint {
+        message += "\nHint: \(hint.description)"
+      }
+      return message
+    case .badRequest(let reason):
+      var message = "CloudKit bad request (HTTP 400 / BAD_REQUEST)"
+      if let reason {
+        message += "\nReason: \(reason)"
+      }
+      return message
+    case .atomicFailure(let reason):
+      var message = "CloudKit atomic batch failure (HTTP 400 / ATOMIC_ERROR)"
+      if let reason {
+        message += "\nReason: \(reason)"
+      }
+      return message
     }
   }
 }

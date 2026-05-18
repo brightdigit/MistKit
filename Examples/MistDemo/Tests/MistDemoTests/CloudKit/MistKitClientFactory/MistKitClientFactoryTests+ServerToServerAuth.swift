@@ -36,10 +36,7 @@ import Testing
 extension MistKitClientFactoryTests {
   @Suite("Server-to-Server Auth")
   internal struct ServerToServerAuth {
-    @Test(
-      "Create client with server-to-server auth",
-      .enabled(if: MistKitClientFactoryTests.isServerToServerSupported())
-    )
+    @Test("Create client with server-to-server auth")
     internal func createWithServerToServerAuth() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
         apiToken: "api-token",
@@ -52,10 +49,7 @@ extension MistKitClientFactoryTests {
       #expect(client != nil)
     }
 
-    @Test(
-      "Throw error when server-to-server auth incomplete",
-      .enabled(if: MistKitClientFactoryTests.isServerToServerSupported())
-    )
+    @Test("Throw error when server-to-server auth incomplete")
     internal func throwErrorWhenServerToServerIncomplete() async throws {
       let config = try await MistKitClientFactoryTests.makeConfig(
         apiToken: "api-token",

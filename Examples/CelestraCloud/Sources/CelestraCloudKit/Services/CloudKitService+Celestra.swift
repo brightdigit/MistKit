@@ -33,7 +33,6 @@ internal import Logging
 public import MistKit
 
 /// CloudKit service extensions for Celestra operations
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 extension CloudKitService {
   // MARK: - Feed Operations
 

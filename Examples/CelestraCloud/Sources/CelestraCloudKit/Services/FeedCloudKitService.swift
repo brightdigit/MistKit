@@ -33,7 +33,6 @@ import Logging
 public import MistKit
 
 /// Service for Feed-related CloudKit operations with dependency injection support
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 public struct FeedCloudKitService: Sendable {
   private let recordOperator: any CloudKitRecordOperating
 

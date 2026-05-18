@@ -150,6 +150,13 @@ public enum CelestraError: LocalizedError {
     case .missingCredentials, .invalidPrivateKey:
       // Credential/configuration issues — not retriable
       return false
+    case .badRequest, .atomicFailure:
+      // Server-side malformed-request / atomic-batch failures — not retriable
+      return false
+    case .quotaExceeded:
+      // Could be size-limit (not retriable) or storage-quota exhaustion
+      // (also not retriable until the user frees space). Either way, no.
+      return false
     }
   }
 }

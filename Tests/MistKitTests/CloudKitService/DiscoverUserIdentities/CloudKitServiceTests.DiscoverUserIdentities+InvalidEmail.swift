@@ -55,11 +55,9 @@ extension CloudKitServiceTests.DiscoverUserIdentities {
         _ = try await service.discoverUserIdentities(lookupInfos: [lookup])
       } throws: { error in
         guard let ckError = error as? CloudKitError,
-          case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason) = ckError
+          case .badRequest(let reason) = ckError
         else { return false }
-        return statusCode == 400
-          && serverErrorCode == "BAD_REQUEST"
-          && reason?.contains("Invalid email") == true
+        return reason?.contains("Invalid email") == true
       }
     }
   }

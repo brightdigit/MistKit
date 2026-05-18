@@ -32,7 +32,6 @@ import CelestraKit
 import Foundation
 import MistKit
 
-@available(macOS 13.0, *)
 extension FeedUpdateProcessor {
   internal func processSuccessfulFetch(
     feed: Feed,

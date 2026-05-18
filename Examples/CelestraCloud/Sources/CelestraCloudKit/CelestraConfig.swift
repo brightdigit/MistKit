@@ -35,7 +35,6 @@ public import MistKit
 /// Shared configuration helper for creating CloudKit service
 public enum CelestraConfig {
   /// Create CloudKit service from validated configuration
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public static func createCloudKitService(from config: ValidatedCloudKitConfiguration) throws
     -> CloudKitService
   {
@@ -57,7 +56,6 @@ public enum CelestraConfig {
   }
 
   /// Create CloudKit service from environment variables
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   @available(
     *, deprecated, message: "Use ConfigurationLoader with createCloudKitService(from:) instead"
   )
