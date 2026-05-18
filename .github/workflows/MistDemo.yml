@@ -280,6 +280,14 @@ jobs:
       - uses: actions/checkout@v6
       - name: Build and Test
         id: build
+        # Forward CI=true into the simulator's test process. xcodebuild launches
+        # simulator tests via simctl, which only propagates env vars prefixed
+        # with SIMCTL_CHILD_ (stripping the prefix on arrival). Without this,
+        # `TestPlatform.isFlakyTimeoutSimulator` reads ProcessInfo["CI"] as nil
+        # inside the sim and the cooperative-executor flake gates in #334 stay
+        # strict on visionOS/watchOS sim CI runs, surfacing as real failures.
+        env:
+          SIMCTL_CHILD_CI: "true"
         uses: brightdigit/swift-build@v1
         with:
           scheme: ${{ env.PACKAGE_NAME }}-Package
