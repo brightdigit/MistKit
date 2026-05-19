@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 internal enum MockFetcherError: Error, Sendable {
   case networkError(String)

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Root response from TheAppleWiki parse API
 internal struct ParseResponse: Codable, Sendable {

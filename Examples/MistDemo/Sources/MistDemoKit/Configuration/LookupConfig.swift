@@ -28,7 +28,7 @@
 //
 
 public import ConfigKeyKit
-import Foundation
+internal import Foundation
 
 /// Configuration for lookup command.
 public struct LookupConfig: Sendable, ConfigurationParseable {

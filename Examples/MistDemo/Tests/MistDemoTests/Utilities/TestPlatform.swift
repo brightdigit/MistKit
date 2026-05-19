@@ -27,6 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import Foundation
+
 /// Compile-time platform constants exposed as runtime values so tests can read
 /// them via Swift Testing traits like `.enabled(if:)` / `.disabled(if:)` —
 /// keeping the gating in a trait on the test rather than `#if` around it.
@@ -37,6 +39,18 @@ internal enum TestPlatform {
   internal static let isWasm32: Bool = {
     #if arch(wasm32)
       return true
+    #else
+      return false
+    #endif
+  }()
+
+  /// True when running inside CI on a simulator whose cooperative executor can
+  /// starve the polling timeout task in `withTimeout` — see #334. The race is
+  /// bounded to visionOS / watchOS simulators under CI load; local sim runs
+  /// (CI env unset) stay strict to surface real regressions in the helper.
+  internal static let isFlakyTimeoutSimulator: Bool = {
+    #if (os(visionOS) || os(watchOS)) && targetEnvironment(simulator)
+      return ProcessInfo.processInfo.environment["CI"] != nil
     #else
       return false
     #endif

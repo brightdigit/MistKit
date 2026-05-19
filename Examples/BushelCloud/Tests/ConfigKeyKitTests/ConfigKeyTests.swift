@@ -5,7 +5,7 @@
 //  Tests for ConfigKey configuration
 //
 
-import Testing
+internal import Testing
 
 @testable import ConfigKeyKit
 

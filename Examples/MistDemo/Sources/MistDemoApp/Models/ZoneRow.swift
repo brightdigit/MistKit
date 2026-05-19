@@ -28,9 +28,9 @@
 //
 
 #if canImport(CloudKit)
-  import CloudKit
-  import Foundation
-  import MistDemoKit
+  internal import CloudKit
+  internal import Foundation
+  internal import MistDemoKit
 
   /// Display-friendly snapshot of a CKRecordZone for the SwiftUI list.
   extension ZoneRow {

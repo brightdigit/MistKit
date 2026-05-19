@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Marker protocol identifying the cleanup phase so the runner can skip it
 /// when `--skip-cleanup` is set and re-run it on failure.

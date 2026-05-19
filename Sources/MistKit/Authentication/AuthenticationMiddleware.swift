@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import HTTPTypes
-import OpenAPIRuntime
+internal import Foundation
+internal import HTTPTypes
+internal import OpenAPIRuntime
 
 /// Authentication middleware that delegates request mutation to whichever
 /// `Authenticator` the `TokenManager` currently vends.

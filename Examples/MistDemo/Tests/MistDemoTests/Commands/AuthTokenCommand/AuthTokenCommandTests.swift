@@ -28,7 +28,7 @@
 //
 
 #if canImport(Hummingbird)
-  import Testing
+  internal import Testing
 
   @Suite("AuthTokenCommand")
   internal enum AuthTokenCommandTests {}

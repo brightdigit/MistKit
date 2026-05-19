@@ -28,13 +28,13 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit)
-  import CloudKit
-  import SwiftUI
+  internal import CloudKit
+  internal import SwiftUI
 
   #if canImport(AppKit)
-    import AppKit
+    internal import AppKit
   #elseif canImport(UIKit)
-    import UIKit
+    internal import UIKit
   #endif
 
   extension AccountView {

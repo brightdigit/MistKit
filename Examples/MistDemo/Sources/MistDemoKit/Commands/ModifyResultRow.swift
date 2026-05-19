@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// One row in the modify command's output.
 public struct ModifyResultRow: Encodable, Sendable {

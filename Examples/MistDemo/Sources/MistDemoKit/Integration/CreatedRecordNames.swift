@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Wraps the `createdRecordNames` slot of `PhaseState`.
 internal struct CreatedRecordNames: PhaseStateDecodable,

@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ConfigKeyKit
-import Configuration
-import Foundation
+internal import ConfigKeyKit
+internal import Configuration
+internal import Foundation
 
 /// Actor responsible for loading configuration from CLI arguments and environment variables
 public actor ConfigurationLoader {

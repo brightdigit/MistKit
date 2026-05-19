@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// JSON envelope for modify output.
 public struct ModifyOutput: Encodable, Sendable {

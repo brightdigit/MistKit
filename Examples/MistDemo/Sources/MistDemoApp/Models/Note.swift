@@ -28,9 +28,9 @@
 //
 
 #if canImport(CloudKit)
-  import CloudKit
-  import Foundation
-  import MistDemoKit
+  internal import CloudKit
+  internal import Foundation
+  internal import MistDemoKit
 
   /// Note record, mirroring the `Note` type defined in `schema.ckdb`:
   ///

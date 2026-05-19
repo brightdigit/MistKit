@@ -30,7 +30,7 @@
 public import Foundation
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 /// Specific reasons for network errors during authentication

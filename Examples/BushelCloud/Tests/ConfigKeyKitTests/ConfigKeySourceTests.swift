@@ -5,7 +5,7 @@
 //  Tests for ConfigKeySource enum
 //
 
-import Testing
+internal import Testing
 
 @testable import ConfigKeyKit
 

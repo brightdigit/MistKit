@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Testing
+internal import Testing
 
 @Suite("TableEscaper - Single-Line Conversion")
 internal enum TableEscaperTests {}

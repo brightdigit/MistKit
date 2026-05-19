@@ -27,12 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import BushelFoundation
-import Foundation
-import SwiftSoup
+internal import BushelFoundation
+internal import Foundation
+internal import SwiftSoup
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 /// Fetcher for Swift compiler versions from swiftversion.net

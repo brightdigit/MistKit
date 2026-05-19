@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Comprehensive error type for MistDemo operations.
 internal enum MistDemoError: LocalizedError, Sendable {

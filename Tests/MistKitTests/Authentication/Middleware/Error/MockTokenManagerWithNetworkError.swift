@@ -5,7 +5,7 @@
 //  Created by Leo Dion on 9/25/25.
 //
 
-import Foundation
+internal import Foundation
 
 @testable import MistKit
 

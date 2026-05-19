@@ -28,8 +28,8 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit)
-  import MistDemoKit
-  import SwiftUI
+  internal import MistDemoKit
+  internal import SwiftUI
 
   /// View listing all CloudKit record zones.
   internal struct ZoneListView: View {

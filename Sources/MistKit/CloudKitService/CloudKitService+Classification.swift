@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Helpers for tracking creates vs updates in `modifyRecords` responses.
 ///

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// CSV escaper conforming to RFC 4180
 public struct CSVEscaper: OutputEscaper {

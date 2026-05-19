@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+internal import Foundation
+internal import Testing
 
 @testable import MistDemoKit
 
@@ -43,12 +43,13 @@ extension AsyncHelpersTests {
       )
     )
     internal func cancelsOtherTasks() async throws {
-      // Intermittent on simulator cooperative executors (watchOS in particular):
-      // the operation's single long Task.sleep can complete before the polling
-      // timeout's many short sleeps detect the deadline — same root cause as
-      // the wasm32 gate above and the throwsOnTimeout / returnsAsyncValue
-      // tests in AsyncHelpersTests+Timeout.swift.
-      await withKnownIssue(isIntermittent: true) {
+      // Intermittent only on `TestPlatform.isFlakyTimeoutSimulator` (CI sim
+      // cooperative executors) — same root cause as the timeout tests in
+      // AsyncHelpersTests+Timeout.swift; strict everywhere else. See #334.
+      await withKnownIssue(
+        isIntermittent: true,
+        when: TestPlatform.isFlakyTimeoutSimulator
+      ) {
         await #expect(throws: AsyncTimeoutError.self) {
           try await withTimeout(seconds: 0.1) {
             try await Task.sleep(nanoseconds: 500_000_000)
@@ -78,10 +79,12 @@ extension AsyncHelpersTests {
         }
 
         group.addTask {
-          // Intermittent on watchOS simulator cooperative executor — same root
-          // cause as `cancelsOtherTasks` above: a single long Task.sleep can win
-          // the race against the polling timeout's short sleeps.
-          await withKnownIssue(isIntermittent: true) {
+          // Intermittent only on `TestPlatform.isFlakyTimeoutSimulator` — same
+          // root cause as `cancelsOtherTasks` above; strict elsewhere. See #334.
+          await withKnownIssue(
+            isIntermittent: true,
+            when: TestPlatform.isFlakyTimeoutSimulator
+          ) {
             do {
               _ = try await withTimeout(seconds: 0.2) {
                 try await Task.sleep(nanoseconds: 2_000_000_000)

@@ -28,8 +28,8 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit)
-  import MistDemoKit
-  import SwiftUI
+  internal import MistDemoKit
+  internal import SwiftUI
 
   /// Detail view showing all fields and metadata for a single Note record.
   internal struct RecordDetailView: View {

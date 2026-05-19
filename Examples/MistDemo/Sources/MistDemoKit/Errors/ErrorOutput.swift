@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// JSON-formatted error output for consistent error reporting.
 public struct ErrorOutput: Sendable, Codable {

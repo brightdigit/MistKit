@@ -6,8 +6,8 @@
 //  Copyright © 2025 BrightDigit.
 //
 
-import MistKit
-import Testing
+internal import MistKit
+internal import Testing
 
 @testable import BushelCloudKit
 @testable import BushelFoundation

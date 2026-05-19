@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import BushelFoundation
-import Foundation
-import MistKit
-import Testing
+internal import BushelFoundation
+internal import Foundation
+internal import MistKit
+internal import Testing
 
 @testable import BushelCloudKit
 

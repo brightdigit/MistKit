@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Thin façade that builds a `PhaseContext` from CLI configuration and
 /// dispatches to the appropriate `PhasedIntegrationTest` implementation.

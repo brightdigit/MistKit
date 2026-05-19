@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Command line argument parser for Swift Configuration integration
 public struct CommandLineParser {

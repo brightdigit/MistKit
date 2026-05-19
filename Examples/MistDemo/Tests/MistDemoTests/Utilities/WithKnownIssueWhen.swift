@@ -1,5 +1,5 @@
 //
-//  OutputFormatterFactory.swift
+//  WithKnownIssueWhen.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,27 +27,35 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import Testing
 
-/// Factory for creating output formatters based on output format
-public enum OutputFormatterFactory {
-  /// Create an appropriate formatter for the given output format
-  /// - Parameters:
-  ///   - format: The output format
-  ///   - pretty: Whether to use pretty printing (applies to JSON)
-  /// - Returns: A formatter configured for the specified format
-  public static func formatter(for format: OutputFormat, pretty: Bool = false)
-    -> any OutputFormatter
-  {
-    switch format {
-    case .json:
-      return JSONFormatter(pretty: pretty)
-    case .table:
-      return TableFormatter()
-    case .csv:
-      return CSVFormatter()
-    case .yaml:
-      return YAMLFormatter()
+/// `withKnownIssue` that only wraps `body` when `when` is true; otherwise runs
+/// `body` strictly (any throw is recorded as a real `Issue`). Lets call sites
+/// say "expected to flake on these platforms / environments, must succeed
+/// everywhere else" without duplicating the body across an if/else.
+///
+/// See `TestPlatform.isFlakyTimeoutSimulator` for the canonical caller — gates
+/// the `withTimeout` polling-race flake on CI simulator runs (#334) while
+/// keeping the assertions strict on every other platform/environment.
+internal func withKnownIssue(
+  _ comment: Comment? = nil,
+  isIntermittent: Bool = false,
+  when condition: Bool,
+  sourceLocation: SourceLocation = #_sourceLocation,
+  _ body: () async throws -> Void
+) async {
+  if condition {
+    await withKnownIssue(
+      comment,
+      isIntermittent: isIntermittent,
+      sourceLocation: sourceLocation,
+      body
+    )
+  } else {
+    do {
+      try await body()
+    } catch {
+      Issue.record(error, sourceLocation: sourceLocation)
     }
   }
 }

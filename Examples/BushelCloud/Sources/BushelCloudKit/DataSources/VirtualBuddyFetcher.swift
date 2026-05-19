@@ -27,13 +27,13 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import BushelFoundation
-import BushelUtilities
-import BushelVirtualBuddy
-import Foundation
+internal import BushelFoundation
+internal import BushelUtilities
+internal import BushelVirtualBuddy
+internal import Foundation
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 /// Fetcher for enriching restore images with VirtualBuddy TSS signing status

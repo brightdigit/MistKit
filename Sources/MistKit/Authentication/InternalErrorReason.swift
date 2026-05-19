@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Specific reasons for internal errors
 public enum InternalErrorReason: Sendable {

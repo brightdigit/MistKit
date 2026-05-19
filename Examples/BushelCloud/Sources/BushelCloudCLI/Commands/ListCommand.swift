@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import BushelCloudKit
-import BushelFoundation
-import Foundation
-import MistKit
+internal import BushelCloudKit
+internal import BushelFoundation
+internal import Foundation
+internal import MistKit
 
 internal enum ListCommand {
   internal static func run(_ args: [String]) async throws {

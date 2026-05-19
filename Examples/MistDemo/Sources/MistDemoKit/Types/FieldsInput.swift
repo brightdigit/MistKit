@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Type-safe representation of field input from JSON
 public struct FieldsInput: Codable, Sendable {

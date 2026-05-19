@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ConfigKeyKit
-import Foundation
+internal import ConfigKeyKit
+internal import Foundation
 
 /// Top-level driver for the `mistdemo` CLI. Registers all available commands,
 /// parses arguments, and dispatches to the matching command — the executable

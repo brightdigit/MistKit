@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Command to perform batch create/update/delete operations.
 public struct ModifyCommand: MistDemoCommand, OutputFormatting {

@@ -28,11 +28,11 @@
 //
 
 public import BushelFoundation
-import BushelUtilities
-import Foundation
+internal import BushelUtilities
+internal import Foundation
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 /// Fetcher for Apple MESU (Mobile Equipment Software Update) manifest

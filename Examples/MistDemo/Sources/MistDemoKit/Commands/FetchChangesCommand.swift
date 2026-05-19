@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Command to fetch record changes with incremental sync
 public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {

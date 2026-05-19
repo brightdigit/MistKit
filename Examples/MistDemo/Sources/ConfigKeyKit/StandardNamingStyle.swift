@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Common naming styles for configuration keys
 public enum StandardNamingStyle: NamingStyle, Sendable {

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Dynamic coding key for handling arbitrary JSON object keys.
 internal struct DynamicKey: CodingKey {

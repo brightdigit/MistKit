@@ -28,8 +28,8 @@
 //
 
 public import ConfigKeyKit
-import Configuration
-import Foundation
+internal import Configuration
+internal import Foundation
 public import MistKit
 
 /// Centralized configuration for MistDemo.

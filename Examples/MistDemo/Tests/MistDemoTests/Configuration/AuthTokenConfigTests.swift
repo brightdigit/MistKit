@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Configuration
-import Foundation
-import MistKit
-import Testing
+internal import Configuration
+internal import Foundation
+internal import MistKit
+internal import Testing
 
 @testable import MistDemoKit
 

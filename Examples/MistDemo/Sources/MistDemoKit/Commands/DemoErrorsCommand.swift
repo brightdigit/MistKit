@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Walks the audience through CloudKit's typed errors for the talk's
 /// "CloudKit as Your Backend" / Act 3, Step 4 — Error handling segment.
