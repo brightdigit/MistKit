@@ -128,7 +128,7 @@ public func authenticate(
     keyID: keyID,
     privateKey: privateKey,
     requestBody: bodyData,
-    webServiceURL: request.path ?? ""
+    webServiceSubpath: request.path
   )
 
   request.headerFields.append(contentsOf: signature.headers)
@@ -156,15 +156,15 @@ It's a transport-format value, not a domain value:
 
 ### Signing process
 
-The convenience initializer `init(keyID:privateKey:requestBody:webServiceURL:date:)` does:
+The convenience initializer `init(keyID:privateKey:requestBody:webServiceSubpath:date:)` does:
 
 1. **Format the ISO 8601 date.** On macOS 12 / iOS 15 / tvOS 15 / watchOS 8 and later, `Date.ISO8601FormatStyle` (Sendable value type). On older OSes, a `nonisolated(unsafe)` cached `ISO8601DateFormatter` (documented thread-safe for `string(from:)`).
 2. **Hash the body.** `SHA256.cloudKitBodyHash(of: body)` returns `base64(SHA256(body))`, or the empty string when the body is `nil` — matching CloudKit's no-body convention.
-3. **Build the signing payload:** `"<iso8601Date>:<bodyHash>:<webServiceURL>"`
+3. **Build the signing payload:** `"<iso8601Date>:<bodyHash>:<webServiceSubpath>"`
 4. **Sign with P-256.** `privateKey.signature(for: Data(payload.utf8))` → DER bytes.
 5. **Delegate to the storage init**, capturing `iso8601DateString`, `signatureDerRepresentation`, and `keyID`.
 
-A second initializer — `init(keyID:privateKey:bodyHash:webServiceURL:iso8601DateString:)` — takes the pre-formatted strings directly. It's the core signing path (no formatting, no hashing); the convenience init delegates to it. Useful for deterministic testing or when the caller already has those values.
+A second initializer — `init(keyID:privateKey:bodyHash:webServiceSubpath:iso8601DateString:)` — takes the pre-formatted strings directly. It's the core signing path (no formatting, no hashing); the convenience init delegates to it. Useful for deterministic testing or when the caller already has those values.
 
 ### Wire format
 
@@ -215,7 +215,7 @@ public actor AdaptiveTokenManager: TokenManager {
 }
 ```
 
-`WebAuthTokenAuthenticator`'s initializer is what validates the token (empty / too-short tokens throw `TokenManagerError.invalidCredentials`), so the manager doesn't duplicate that logic. The companion `downgradeToAPIOnly()` and `updateWebAuthToken(_:)` methods live alongside on `AdaptiveTokenManager+Transitions`.
+`WebAuthTokenAuthenticator`'s initializer is what validates the token (empty / too-short tokens throw `TokenManagerError.invalidCredentials`), so the manager doesn't duplicate that logic. The `upgradeToWebAuthentication(_:)` method lives on `AdaptiveTokenManager+Transitions`.
 
 A typical client-app flow:
 
@@ -245,7 +245,7 @@ public enum Database {
 
 There is **no default** — every public-database call picks explicitly. User-context routes (`/users/*`) pass `.public(.requires(.webAuth))` directly because CloudKit only accepts web-auth on those endpoints. Private and shared databases ignore this — they always require web-auth, since CloudKit rejects S2S on those scopes.
 
-See `Sources/MistKit/Authentication/PublicAuthPreference.swift` and `Sources/MistKit/Authentication/Credentials/Credentials+TokenManager.swift` for the resolution logic.
+See `Sources/MistKit/Authentication/PublicAuthPreference.swift` and `Sources/MistKit/Authentication/Credentials+TokenManager.swift` for the resolution logic.
 
 ## Complete Authentication Flow
 
@@ -320,7 +320,7 @@ sequenceDiagram
 
   Mid->>Auth: authenticate(&request, &body)
   Auth->>Auth: buffer body and reassign as replayable HTTPBody
-  Auth->>Sig: RequestSignature(keyID, privateKey, requestBody, webServiceURL)
+  Auth->>Sig: RequestSignature(keyID, privateKey, requestBody, webServiceSubpath)
   Sig-->>Auth: signed header bundle
   Note over Auth: attach credentials to request
   Auth->>Auth: request.headerFields.append(contentsOf: signature.headers)
@@ -343,7 +343,7 @@ flowchart LR
   Adapt -. "before upgrade" .-> APIA
   Adapt -. "after upgradeToWebAuthentication(_:)" .-> WAA
 
-  APIA --> Pub["Public DB (user-attributed)"]
+  APIA --> Pub["Public DB"]
   WAA --> PrivShared["Private / Shared DB"]
   S2SA --> PubS2S["Public DB (service-attributed)"]
 ```
