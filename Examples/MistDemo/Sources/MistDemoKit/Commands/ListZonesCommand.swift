@@ -47,12 +47,12 @@ public struct ListZonesCommand: MistDemoCommand, OutputFormatting {
 
     OPTIONS:
       --database <type>              Database to target (private, shared)
-      --zones.include-default        Include `_defaultZone` in the output
+      --zones-include-default        Include `_defaultZone` in the output
       --output-format <format>       Output format (json, table, csv, yaml)
 
     EXAMPLES:
       mistdemo list-zones --database private
-      mistdemo list-zones --database shared --zones.include-default
+      mistdemo list-zones --database shared --zones-include-default
 
     NOTES:
       - Only `private` and `shared` databases support zone listing.

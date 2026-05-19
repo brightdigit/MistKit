@@ -47,8 +47,8 @@ public struct ValidateCommand: MistDemoCommand, OutputFormatting {
       mistdemo validate [options]
 
     OPTIONS:
-      --validate.skip-network    Only parse credentials; skip network call.
-      --validate.test-query      Also run a minimal listZones query.
+      --validate-skip-network    Only parse credentials; skip network call.
+      --validate-test-query      Also run a minimal listZones query.
       --output-format <format>   Output format (json, table, csv, yaml).
 
     EXIT CODES:

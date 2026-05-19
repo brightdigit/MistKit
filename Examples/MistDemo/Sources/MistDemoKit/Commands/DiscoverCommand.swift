@@ -43,11 +43,11 @@ public struct DiscoverCommand: MistDemoCommand, OutputFormatting {
     DISCOVER - Discover user identities by email
 
     USAGE:
-      mistdemo discover --discover.emails <list>
+      mistdemo discover --discover-emails <list>
       cat emails.txt | mistdemo discover --stdin
 
     INPUT (choose one):
-      --discover.emails <list>       Comma-separated email addresses
+      --discover-emails <list>       Comma-separated email addresses
       --stdin                        Read one email per line from stdin
 
     OPTIONS:
