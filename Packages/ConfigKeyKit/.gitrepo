@@ -7,6 +7,6 @@
 	remote = git@github.com:brightdigit/ConfigKeyKit.git
 	branch = main
 	commit = a9a8bc8be5b33d4aa732a9d0d06a05e8281b4855
-	parent = 5d1a87aeaffbdfc883b2d13467503dda592d1ec0
+	parent = abff797b5cea271cf680f60e3e6d34ea359925d9
 	method = merge
 	cmdver = 0.4.9
