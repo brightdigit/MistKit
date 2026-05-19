@@ -54,6 +54,8 @@ public enum MistDemoRunner {
     await registry.register(UploadAssetCommand.self)
     await registry.register(DemoInFilterCommand.self)
     await registry.register(LookupZonesCommand.self)
+    await registry.register(CreateZoneCommand.self)
+    await registry.register(DeleteZoneCommand.self)
     await registry.register(FetchChangesCommand.self)
     await registry.register(TestPublicCommand.self)
     await registry.register(TestPrivateCommand.self)

@@ -101,4 +101,74 @@ extension CloudKitService {
       throw mapToCloudKitError(error, context: "modifyZones")
     }
   }
+
+  /// Create a single zone in the target database.
+  ///
+  /// Convenience wrapper over ``modifyZones(_:database:)`` for the common case
+  /// of creating one zone. CloudKit's `zones/modify` endpoint is only supported
+  /// on `.private` and `.shared`.
+  ///
+  /// - Parameters:
+  ///   - zoneName: Non-empty zone name. Case-sensitive.
+  ///   - ownerRecordName: Optional owner record name. Pass `nil` for the
+  ///     caller's own zones (typical).
+  ///   - database: Target database. Must not be `.public`.
+  /// - Returns: `ZoneInfo` for the created zone.
+  /// - Throws: `CloudKitError`. ``CloudKitError/invalidResponse`` if the
+  ///   server returns no zone in its response.
+  ///
+  /// # Example
+  /// ```swift
+  /// let zone = try await service.createZone(
+  ///   zoneName: "Articles",
+  ///   database: .private
+  /// )
+  /// ```
+  public func createZone(
+    zoneName: String,
+    ownerRecordName: String? = nil,
+    database: Database
+  ) async throws(CloudKitError) -> ZoneInfo {
+    let operation = ZoneOperation.create(
+      ZoneID(zoneName: zoneName, ownerName: ownerRecordName)
+    )
+
+    let results = try await modifyZones([operation], database: database)
+    guard let zone = results.first else {
+      throw CloudKitError.invalidResponse
+    }
+    return zone
+  }
+
+  /// Delete a single zone from the target database.
+  ///
+  /// Convenience wrapper over ``modifyZones(_:database:)`` for the common case
+  /// of deleting one zone. CloudKit's `zones/modify` endpoint is only supported
+  /// on `.private` and `.shared`.
+  ///
+  /// - Parameters:
+  ///   - zoneName: Non-empty zone name. Case-sensitive.
+  ///   - ownerRecordName: Optional owner record name. Pass `nil` for the
+  ///     caller's own zones (typical).
+  ///   - database: Target database. Must not be `.public`.
+  /// - Throws: `CloudKitError` if validation fails or the request fails.
+  ///
+  /// # Example
+  /// ```swift
+  /// try await service.deleteZone(
+  ///   zoneName: "Articles",
+  ///   database: .private
+  /// )
+  /// ```
+  public func deleteZone(
+    zoneName: String,
+    ownerRecordName: String? = nil,
+    database: Database
+  ) async throws(CloudKitError) {
+    let operation = ZoneOperation.delete(
+      ZoneID(zoneName: zoneName, ownerName: ownerRecordName)
+    )
+
+    _ = try await modifyZones([operation], database: database)
+  }
 }

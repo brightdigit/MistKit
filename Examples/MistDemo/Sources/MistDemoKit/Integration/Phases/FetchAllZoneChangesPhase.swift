@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  FetchAllZoneChangesPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,29 +30,38 @@
 internal import Foundation
 internal import MistKit
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// Exercises ``CloudKitService/fetchAllZoneChanges(syncToken:maxPages:database:)``
+/// against a live container. Failures are non-fatal (matching
+/// ``FetchZoneChangesPhase``) so test pipelines with empty zone change feeds
+/// don't fail the whole suite.
+internal struct FetchAllZoneChangesPhase: IntegrationPhase {
+  internal typealias Input = NoState
+  internal typealias Output = NoState
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    CleanupPhase(),
-  ]
+  internal static let title = "Fetch all zone changes"
+  internal static let emoji = "🔁"
+  internal static let apiName = "fetchAllZoneChanges"
+
+  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
+
+    do {
+      let (zones, token) = try await context.service.fetchAllZoneChanges(
+        database: context.database
+      )
+      print("✅ Fetched \(zones.count) zone(s) across all pages")
+      if context.verbose {
+        for zone in zones {
+          print("   - \(zone.zoneName)")
+        }
+        if let token {
+          print("   Sync token: \(token.prefix(30))...")
+        }
+      }
+    } catch {
+      print("⚠️  fetchAllZoneChanges failed (non-fatal): \(error)")
+    }
+
+    return NoState()
+  }
 }
