@@ -87,12 +87,12 @@ let package = Package(
         .visionOS(.v2)
     ],
     products: [
-        .library(name: "ConfigKeyKit", targets: ["ConfigKeyKit"]),
         .library(name: "BushelCloudKit", targets: ["BushelCloudKit"]),
         .executable(name: "bushel-cloud", targets: ["BushelCloudCLI"])
     ],
     dependencies: [
         .package(name: "MistKit", path: "../.."),
+        .package(name: "ConfigKeyKit", path: "../../Packages/ConfigKeyKit"),
         .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.0.0-alpha.2"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0"),
@@ -104,14 +104,9 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "ConfigKeyKit",
-            dependencies: [],
-            swiftSettings: swiftSettings
-        ),
-        .target(
             name: "BushelCloudKit",
             dependencies: [
-                .target(name: "ConfigKeyKit"),
+                .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
                 .product(name: "MistKit", package: "MistKit"),
                 .product(name: "BushelLogging", package: "BushelKit"),
                 .product(name: "BushelFoundation", package: "BushelKit"),
@@ -127,13 +122,6 @@ let package = Package(
             name: "BushelCloudCLI",
             dependencies: [
                 .target(name: "BushelCloudKit")
-            ],
-            swiftSettings: swiftSettings
-        ),
-        .testTarget(
-            name: "ConfigKeyKitTests",
-            dependencies: [
-                .target(name: "ConfigKeyKit")
             ],
             swiftSettings: swiftSettings
         ),

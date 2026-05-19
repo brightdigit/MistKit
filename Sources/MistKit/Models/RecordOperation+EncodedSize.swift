@@ -45,7 +45,9 @@ extension RecordOperation {
   /// ``CloudKitService/maxAssetUploadBytes``.
   public func encodedRecordSize() throws -> Int {
     let apiOperation = try Components.Schemas.RecordOperation(from: self)
-    guard let record = apiOperation.record else { return 0 }
-    return try JSONEncoder().encode(record).count
+    guard let record = apiOperation.record else {
+      return 0
+    }
+    return try JSONEncoder.shared.encode(record).count
   }
 }

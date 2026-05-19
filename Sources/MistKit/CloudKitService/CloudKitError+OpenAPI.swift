@@ -73,6 +73,19 @@ extension CloudKitError {
     }
   }
 
+  /// Build an `.httpError` for an undocumented response and log the occurrence.
+  /// The full response value is logged at `.debug` because it may echo server-side
+  /// request data (e.g. emails passed to `lookupUsersByEmail`); the `.warning` line
+  /// stays sanitized so it can ship to ops/log aggregators without leaking PII.
+  internal static func undocumented(statusCode: Int, response: some Any) -> CloudKitError {
+    let logger = Logger(subsystem: .api)
+    logger.debug("Unhandled response (HTTP \(statusCode)): \(response)")
+    logger.warning(
+      "Unhandled \(type(of: response)) (HTTP \(statusCode)) - treating as generic HTTP error"
+    )
+    return .httpError(statusCode: statusCode)
+  }
+
   /// Returns a copy of this error with the given hint attached.
   ///
   /// If `self` is already `.quotaExceeded`, the existing reason is preserved
@@ -86,7 +99,9 @@ extension CloudKitError {
   /// with information that can only be computed from the local request state
   /// (e.g., the actual encoded record size, the asset byte count).
   internal func addingQuotaHint(_ hint: QuotaHint?) -> CloudKitError {
-    guard let hint else { return self }
+    guard let hint else {
+      return self
+    }
     switch self {
     case .quotaExceeded(let reason, _):
       return .quotaExceeded(reason: reason, hint: hint)
@@ -97,18 +112,5 @@ extension CloudKitError {
     default:
       return self
     }
-  }
-
-  /// Build an `.httpError` for an undocumented response and log the occurrence.
-  /// The full response value is logged at `.debug` because it may echo server-side
-  /// request data (e.g. emails passed to `lookupUsersByEmail`); the `.warning` line
-  /// stays sanitized so it can ship to ops/log aggregators without leaking PII.
-  internal static func undocumented(statusCode: Int, response: some Any) -> CloudKitError {
-    let logger = Logger(subsystem: .api)
-    logger.debug("Unhandled response (HTTP \(statusCode)): \(response)")
-    logger.warning(
-      "Unhandled \(type(of: response)) (HTTP \(statusCode)) - treating as generic HTTP error"
-    )
-    return .httpError(statusCode: statusCode)
   }
 }

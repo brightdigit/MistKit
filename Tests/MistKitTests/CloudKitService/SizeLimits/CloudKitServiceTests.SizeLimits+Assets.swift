@@ -99,7 +99,9 @@ extension CloudKitServiceTests.SizeLimits {
           using: Self.failingUploader(status: 413)
         )
       } throws: { error in
-        guard let ckError = error as? CloudKitError else { return false }
+        guard let ckError = error as? CloudKitError else {
+          return false
+        }
         // No quota hint should be attached — the bare 413 propagates as-is.
         if case .quotaExceeded(_, let hint) = ckError, hint != nil {
           return false

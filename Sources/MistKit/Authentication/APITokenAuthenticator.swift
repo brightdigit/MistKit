@@ -72,7 +72,7 @@ public struct APITokenAuthenticator: Authenticator {
   /// by `encoded()`. Re-runs format validation, so a corrupted or stale
   /// payload throws `TokenManagerError.invalidCredentials`.
   public init(decoding data: Data) throws {
-    let wire = try JSONDecoder().decode(WireFormat.self, from: data)
+    let wire = try JSONDecoder.shared.decode(WireFormat.self, from: data)
     try self.init(token: wire.token)
   }
 
@@ -86,6 +86,6 @@ public struct APITokenAuthenticator: Authenticator {
 
   /// JSON-encodes the API token for persistence by `TokenStorage`.
   public func encoded() throws -> Data {
-    try JSONEncoder().encode(WireFormat(token: token))
+    try JSONEncoder.shared.encode(WireFormat(token: token))
   }
 }
