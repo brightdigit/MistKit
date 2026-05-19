@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  ZoneOperationsEnvelope.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,32 +28,15 @@
 //
 
 internal import Foundation
-internal import MistKit
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// JSON envelope for the `modify-zones` payload:
+/// `{ "operations": [ZoneOperationInput] }`.
+public struct ZoneOperationsEnvelope: Codable, Sendable {
+  /// The list of zone operations.
+  public let operations: [ZoneOperationInput]
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    CleanupPhase(),
-  ]
+  /// Creates a new instance.
+  public init(operations: [ZoneOperationInput]) {
+    self.operations = operations
+  }
 }

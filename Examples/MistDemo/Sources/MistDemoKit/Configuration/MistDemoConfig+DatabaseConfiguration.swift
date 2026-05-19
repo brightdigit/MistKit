@@ -40,6 +40,13 @@ extension MistDemoConfig {
     (try? resolveAPICredentials()) != nil
   }
 
+  /// Indicates whether server-to-server signing material (key ID + private
+  /// key) is present in the configuration. Required to sign `.public`
+  /// database requests.
+  internal var hasServerToServerCredentials: Bool {
+    (try? resolveServerToServerCredentials()) != nil
+  }
+
   /// Build `Credentials` for the primary `CloudKitService` targeting
   /// `self.database`.
   ///
