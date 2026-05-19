@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  ListZonesError.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,33 +27,27 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+public import Foundation
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// Errors that can occur during list-zones command execution.
+public enum ListZonesError: Error, LocalizedError {
+  case databaseNotSupported
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    CleanupPhase(),
-  ]
+  /// A localized description of the error.
+  public var errorDescription: String? {
+    switch self {
+    case .databaseNotSupported:
+      return
+        "Zone listing requires --database private or --database shared. "
+        + "CloudKit's public database has no enumerable zones."
+    }
+  }
+
+  /// A localized recovery suggestion.
+  public var recoverySuggestion: String? {
+    switch self {
+    case .databaseNotSupported:
+      return "Rerun with --database private or --database shared."
+    }
+  }
 }

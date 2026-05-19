@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  ValidateError.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,33 +27,23 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+public import Foundation
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// Signals that the `validate` command's full pipeline did not pass. The
+/// per-check failure messages are joined into `reason` and are also present
+/// in the structured `ValidationResult.errors` already emitted to stdout —
+/// this error exists purely to drive a non-zero exit code.
+public struct ValidateError: Error, LocalizedError {
+  /// The joined reason(s) from the individual validation checks.
+  public let reason: String
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    CleanupPhase(),
-  ]
+  /// A localized description of the error.
+  public var errorDescription: String? {
+    "Validation failed: \(reason)"
+  }
+
+  /// Creates a new instance.
+  public init(reason: String) {
+    self.reason = reason
+  }
 }

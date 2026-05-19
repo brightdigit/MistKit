@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  DiscoverError.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,33 +27,39 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+public import Foundation
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// Errors that can occur during discover command execution.
+public enum DiscoverError: Error, LocalizedError {
+  case emailsRequired
+  case webAuthRequired
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    CleanupPhase(),
-  ]
+  /// A localized description of the error.
+  public var errorDescription: String? {
+    switch self {
+    case .emailsRequired:
+      return
+        "No emails provided. Use --discover-emails <list> or pipe "
+        + "one address per line to stdin."
+    case .webAuthRequired:
+      return
+        "discover requires API + web-auth credentials. Set "
+        + "CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN, or run "
+        + "`mistdemo auth-token` first."
+    }
+  }
+
+  /// A localized recovery suggestion.
+  public var recoverySuggestion: String? {
+    switch self {
+    case .emailsRequired:
+      return
+        "Pass --discover-emails alice@example.com,bob@example.com, "
+        + "or pipe addresses to stdin with --stdin."
+    case .webAuthRequired:
+      return
+        "User-identity routes (lookupUsersByEmail) are pinned to "
+        + "CloudKit's public DB and require web-auth."
+    }
+  }
 }

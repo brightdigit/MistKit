@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  ZoneOperationInput.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,33 +27,40 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+public import Foundation
+public import MistKit
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// One zone operation parsed from the modify-zones JSON payload.
+public struct ZoneOperationInput: Codable, Sendable, Equatable {
+  /// The operation kind ("create" or "delete").
+  public let type: String
+  /// The CloudKit zone name.
+  public let zoneName: String
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    CleanupPhase(),
-  ]
+  /// Creates a new instance.
+  public init(type: String, zoneName: String) {
+    self.type = type
+    self.zoneName = zoneName
+  }
+
+  /// Convert this operation input into a MistKit `ZoneOperation`.
+  ///
+  /// - Throws: `ModifyZonesError.invalidOperationType` for unknown `type`
+  ///   values, or `.invalidZoneName` for empty / whitespace-only names.
+  public func toZoneOperation() throws -> ZoneOperation {
+    let trimmed = zoneName.trimmingCharacters(in: .whitespaces)
+    guard !trimmed.isEmpty else {
+      throw ModifyZonesError.invalidZoneName(zoneName)
+    }
+    let zoneID = ZoneID(zoneName: trimmed, ownerName: nil)
+
+    switch type.lowercased() {
+    case "create":
+      return .create(zoneID)
+    case "delete":
+      return .delete(zoneID)
+    default:
+      throw ModifyZonesError.invalidOperationType(type)
+    }
+  }
 }
