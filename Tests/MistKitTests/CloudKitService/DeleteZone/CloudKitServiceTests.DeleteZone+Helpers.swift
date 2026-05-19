@@ -1,6 +1,6 @@
 //
-//  PrivateDatabaseTest.swift
-//  MistDemo
+//  CloudKitServiceTests.DeleteZone+Helpers.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,31 +28,26 @@
 //
 
 internal import Foundation
-internal import MistKit
+internal import HTTPTypes
+internal import Testing
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+@testable import MistKit
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    CleanupPhase(),
-  ]
+extension CloudKitServiceTests.DeleteZone {
+  private static let testAPIToken = TestConstants.apiToken
+
+  internal static func makeSuccessfulService() async throws -> CloudKitService {
+    let responseProvider = try ResponseProvider.successfulModifyZones(zoneCount: 1)
+    let transport = MockTransport(responseProvider: responseProvider)
+    return try CloudKitService(
+      containerIdentifier: TestConstants.serviceContainerIdentifier,
+      credentials: Credentials(
+        apiAuth: APICredentials(
+          apiToken: testAPIToken,
+          webAuthToken: TestConstants.webAuthToken
+        )
+      ),
+      transport: transport
+    )
+  }
 }

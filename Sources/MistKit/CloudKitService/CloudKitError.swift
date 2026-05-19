@@ -58,6 +58,10 @@ public enum CloudKitError: LocalizedError, Sendable {
   case networkError(URLError)
   case unsupportedOperationType(String)
   case paginationLimitExceeded(maxPages: Int, records: [RecordInfo])
+  /// Auto-paginating zone-changes call hit its `maxPages` ceiling. The
+  /// `zones` payload carries every zone collected before the cap was hit so
+  /// callers can resume from the partial result.
+  case zonePaginationLimitExceeded(maxPages: Int, zones: [ZoneInfo])
   case missingCredentials(
     database: Database,
     availability: CredentialAvailability = .notConfigured,
@@ -77,8 +81,8 @@ public enum CloudKitError: LocalizedError, Sendable {
     case .badRequest, .atomicFailure:
       return 400
     case .invalidResponse, .underlyingError, .decodingError, .networkError,
-      .unsupportedOperationType, .paginationLimitExceeded, .missingCredentials,
-      .invalidPrivateKey:
+      .unsupportedOperationType, .paginationLimitExceeded,
+      .zonePaginationLimitExceeded, .missingCredentials, .invalidPrivateKey:
       return nil
     }
   }
@@ -148,6 +152,10 @@ public enum CloudKitError: LocalizedError, Sendable {
       return
         "CloudKit query exceeded pagination limit of \(maxPages) pages "
         + "(collected \(records.count) records)"
+    case .zonePaginationLimitExceeded(let maxPages, let zones):
+      return
+        "CloudKit zone-changes exceeded pagination limit of \(maxPages) pages "
+        + "(collected \(zones.count) zones)"
     case .missingCredentials(let database, let availability, let reason):
       let availabilityLabel: String
       switch availability {
