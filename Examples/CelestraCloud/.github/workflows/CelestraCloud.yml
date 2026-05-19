@@ -21,7 +21,7 @@ concurrency:
 
 env:
   PACKAGE_NAME: CelestraCloud
-  MISTKIT_BRANCH: v1.0.0-beta.1
+  MISTKIT_BRANCH: v1.0.0-beta.2
 
 jobs:
   configure:

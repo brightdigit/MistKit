@@ -122,6 +122,7 @@ excluded:
   - .build
   - Mint
   - Examples
+  - Packages
   - Sources/MistKitOpenAPI
   - Package.swift
 indentation_width:

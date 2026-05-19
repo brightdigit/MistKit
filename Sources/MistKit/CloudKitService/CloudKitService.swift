@@ -54,6 +54,7 @@ internal import OpenAPIRuntime
 /// `fetchCaller` via web-auth from one fully-populated `Credentials`.
 public struct CloudKitService: Sendable {
   // swiftlint:disable force_unwrapping
+  // swift-format-ignore: NeverForceUnwrap
   /// The base URL for CloudKit Web Services.
   public static let baseURL = URL(string: "https://api.apple-cloudkit.com")!
   // swiftlint:enable force_unwrapping

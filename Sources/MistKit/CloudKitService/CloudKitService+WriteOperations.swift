@@ -40,6 +40,28 @@ internal import OpenAPIRuntime
 #endif
 
 extension CloudKitService {
+  /// Inspect a batch of API record operations and return a `QuotaHint` for
+  /// the first record whose JSON-encoded size exceeds CloudKit's per-record
+  /// limit. Returns `nil` if every record is within bounds — which is the
+  /// usual case when the server's `QUOTA_EXCEEDED` is caused by storage-quota
+  /// exhaustion rather than per-record size.
+  private static func recordSizeQuotaHint(
+    for apiOperations: [Components.Schemas.RecordOperation]
+  ) -> QuotaHint? {
+    for (index, operation) in apiOperations.enumerated() {
+      guard let record = operation.record,
+        let encoded = try? JSONEncoder.shared.encode(record),
+        encoded.count > maxRecordDataBytes
+      else { continue }
+      return .recordExceedsSizeLimit(
+        operationIndex: index,
+        encodedBytes: encoded.count,
+        maxBytes: maxRecordDataBytes
+      )
+    }
+    return nil
+  }
+
   /// Modify (create, update, or delete) CloudKit records
   /// - Parameters:
   ///   - operations: Array of record operations to perform
@@ -94,29 +116,6 @@ extension CloudKitService {
     } catch {
       throw CloudKitError.underlyingError(error)
     }
-  }
-
-  /// Inspect a batch of API record operations and return a `QuotaHint` for
-  /// the first record whose JSON-encoded size exceeds CloudKit's per-record
-  /// limit. Returns `nil` if every record is within bounds — which is the
-  /// usual case when the server's `QUOTA_EXCEEDED` is caused by storage-quota
-  /// exhaustion rather than per-record size.
-  private static func recordSizeQuotaHint(
-    for apiOperations: [Components.Schemas.RecordOperation]
-  ) -> QuotaHint? {
-    let encoder = JSONEncoder()
-    for (index, operation) in apiOperations.enumerated() {
-      guard let record = operation.record,
-        let encoded = try? encoder.encode(record),
-        encoded.count > maxRecordDataBytes
-      else { continue }
-      return .recordExceedsSizeLimit(
-        operationIndex: index,
-        encodedBytes: encoded.count,
-        maxBytes: maxRecordDataBytes
-      )
-    }
-    return nil
   }
 
   /// Create a single record in CloudKit
