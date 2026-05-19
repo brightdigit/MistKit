@@ -2,6 +2,18 @@
 
 MistKit's authentication system uses an HTTP middleware pattern to transparently sign every request with the correct credentials, supporting three authentication methods and runtime upgrades between them.
 
+## Database / Authentication Support
+
+CloudKit constrains which authentication mode is valid for each database scope. MistKit surfaces those constraints through `Database` and `PublicAuthPreference`:
+
+| Authentication mode                                | **Private**          | **Shared**           | **Public**                                                                |
+|----------------------------------------------------|----------------------|----------------------|---------------------------------------------------------------------------|
+| **API Token only** (`ckAPIToken`)                  | Not supported        | Not supported        | Whatever the public schema grants the `_world` role (typically reads of `/records/query`, `/records/lookup`) |
+| **Web Auth** (`ckAPIToken` + `ckWebAuthToken`)     | All endpoints        | All endpoints        | All endpoints — **only** mode accepted for `/users/*`                     |
+| **Server-to-Server** (ECDSA P-256)                 | Rejected by CloudKit | Rejected by CloudKit | All endpoints **except** `/users/*` (CloudKit rejects S2S there)          |
+
+Public-database calls pick attribution per-call via `PublicAuthPreference` on `Database.public(_:)` — see [Per-Call Attribution](#per-call-attribution-publicauthpreference). Private and shared scopes always require web-auth; CloudKit rejects server-to-server signatures on those endpoints. User-context routes (`/users/*`) always pass `.public(.requires(.webAuth))` because CloudKit only honors web-auth there.
+
 ## TokenManager Protocol
 
 A `TokenManager` is the lifecycle owner of credentials (loading, validating, rotating, persisting). It vends an `Authenticator` to whomever needs to apply those credentials to an outgoing request:
