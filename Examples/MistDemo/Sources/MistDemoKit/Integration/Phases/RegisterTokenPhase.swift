@@ -1,5 +1,5 @@
 //
-//  DetailColumnRoot.swift
+//  RegisterTokenPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,38 +27,22 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI)
-  internal import SwiftUI
+internal import Foundation
 
-  /// Routes the sidebar selection to the appropriate detail view.
-  internal struct DetailColumnRoot: View {
-    internal let selection: SidebarItem?
+/// Stub phase for `tokens/register`. Not wired into the public/private
+/// pipelines yet; `#53` flips this into a real run when the MistKit Swift
+/// wrapper lands.
+internal struct RegisterTokenPhase: IntegrationPhase {
+  internal typealias Input = NoState
+  internal typealias Output = NoState
 
-    internal var body: some View {
-      switch selection {
-      case .account:
-        AccountView()
-      case .zones:
-        ZoneListView()
-      case .query:
-        QueryView()
-      case .records:
-        RecordsView()
-      case .subscriptions:
-        SubscriptionsView()
-      case .pushTokens:
-        PushTokensView()
-      case .assets:
-        AssetsView()
-      case .users:
-        UsersView()
-      case nil:
-        ContentUnavailableView(
-          "Pick a section from the sidebar",
-          systemImage: "sidebar.left",
-          description: Text("Account, Zones, Records, Subscriptions, …")
-        )
-      }
-    }
+  internal static let title = "Register token (pending #53)"
+  internal static let emoji = "📨"
+  internal static let apiName = "registerToken"
+
+  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
+    PendingStub.printPending(endpoint: "tokens/register", trackingIssue: 53)
+    return NoState()
   }
-#endif
+}

@@ -1,5 +1,5 @@
 //
-//  DetailColumnRoot.swift
+//  PushTokenReceiver.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,38 +27,15 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI)
-  internal import SwiftUI
+internal import Foundation
 
-  /// Routes the sidebar selection to the appropriate detail view.
-  internal struct DetailColumnRoot: View {
-    internal let selection: SidebarItem?
-
-    internal var body: some View {
-      switch selection {
-      case .account:
-        AccountView()
-      case .zones:
-        ZoneListView()
-      case .query:
-        QueryView()
-      case .records:
-        RecordsView()
-      case .subscriptions:
-        SubscriptionsView()
-      case .pushTokens:
-        PushTokensView()
-      case .assets:
-        AssetsView()
-      case .users:
-        UsersView()
-      case nil:
-        ContentUnavailableView(
-          "Pick a section from the sidebar",
-          systemImage: "sidebar.left",
-          description: Text("Account, Zones, Records, Subscriptions, …")
-        )
-      }
-    }
-  }
-#endif
+/// Receiver side of the platform push-notification bridge. The
+/// `PushNotificationDelegate` (AppKit / UIKit) forwards OS callbacks
+/// to whatever object is currently registered as
+/// `PushNotificationDelegate.receiver`.
+@MainActor
+internal protocol PushTokenReceiver: AnyObject {
+  func didRegisterForRemoteNotifications(deviceToken: Data)
+  func didFailToRegisterForRemoteNotifications(error: any Error)
+  func didReceiveRemoteNotification(userInfo: [AnyHashable: Any])
+}

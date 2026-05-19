@@ -1,5 +1,5 @@
 //
-//  DetailColumnRoot.swift
+//  LookupSubscriptionPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,38 +27,22 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI)
-  internal import SwiftUI
+internal import Foundation
 
-  /// Routes the sidebar selection to the appropriate detail view.
-  internal struct DetailColumnRoot: View {
-    internal let selection: SidebarItem?
+/// Stub phase for `subscriptions/lookup`. Not wired into the public/private
+/// pipelines yet; `#50` flips this into a real run when the MistKit Swift
+/// wrapper lands.
+internal struct LookupSubscriptionPhase: IntegrationPhase {
+  internal typealias Input = NoState
+  internal typealias Output = NoState
 
-    internal var body: some View {
-      switch selection {
-      case .account:
-        AccountView()
-      case .zones:
-        ZoneListView()
-      case .query:
-        QueryView()
-      case .records:
-        RecordsView()
-      case .subscriptions:
-        SubscriptionsView()
-      case .pushTokens:
-        PushTokensView()
-      case .assets:
-        AssetsView()
-      case .users:
-        UsersView()
-      case nil:
-        ContentUnavailableView(
-          "Pick a section from the sidebar",
-          systemImage: "sidebar.left",
-          description: Text("Account, Zones, Records, Subscriptions, …")
-        )
-      }
-    }
+  internal static let title = "Lookup subscription (pending #50)"
+  internal static let emoji = "🔍"
+  internal static let apiName = "lookupSubscription"
+
+  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
+    PendingStub.printPending(endpoint: "subscriptions/lookup", trackingIssue: 50)
+    return NoState()
   }
-#endif
+}

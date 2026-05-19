@@ -32,4 +32,14 @@ internal import SwiftUI
 
 @main
 internal struct MistDemoAppMain: AppMain {
+  // SwiftUI owns the AppDelegate's lifecycle via this adaptor; the
+  // delegate's static-weak `receiver` is wired from `CloudKitStore.init`
+  // so the OS-delivered APNs token lands back in the observable store.
+  #if canImport(AppKit) && !targetEnvironment(macCatalyst)
+    @NSApplicationDelegateAdaptor(PushNotificationDelegate.self)
+    private var pushDelegate
+  #elseif canImport(UIKit)
+    @UIApplicationDelegateAdaptor(PushNotificationDelegate.self)
+    private var pushDelegate
+  #endif
 }

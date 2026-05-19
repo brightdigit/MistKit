@@ -1,5 +1,5 @@
 //
-//  DetailColumnRoot.swift
+//  ResolveResult.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,38 +27,21 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI)
-  internal import SwiftUI
+#if canImport(CloudKit)
+  internal import Foundation
 
-  /// Routes the sidebar selection to the appropriate detail view.
-  internal struct DetailColumnRoot: View {
-    internal let selection: SidebarItem?
-
-    internal var body: some View {
-      switch selection {
-      case .account:
-        AccountView()
-      case .zones:
-        ZoneListView()
-      case .query:
-        QueryView()
-      case .records:
-        RecordsView()
-      case .subscriptions:
-        SubscriptionsView()
-      case .pushTokens:
-        PushTokensView()
-      case .assets:
-        AssetsView()
-      case .users:
-        UsersView()
-      case nil:
-        ContentUnavailableView(
-          "Pick a section from the sidebar",
-          systemImage: "sidebar.left",
-          description: Text("Account, Zones, Records, Subscriptions, …")
-        )
-      }
+  /// Result of a composed `records/resolve`. The REST endpoint takes
+  /// either a record name or a share URL; the native CloudKit surface
+  /// branches on the input shape, so we record which branch ran.
+  internal struct ResolveResult: Sendable {
+    internal enum Source: String, Sendable {
+      case recordName
+      case shareURL
     }
+
+    internal let source: Source
+    internal let recordName: String?
+    internal let recordType: String?
+    internal let shareTitle: String?
   }
 #endif

@@ -4,220 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MistKit Web Demo</title>
-    <style>
-        :root {
-            --bg: #f5f5f7;
-            --card: #ffffff;
-            --ink: #1d1d1f;
-            --muted: #6e6e73;
-            --accent: #0369a1;
-            --accent-dark: #0c4a6e;
-            --danger: #c00;
-            --danger-bg: #fdd;
-            --success-bg: #d1f5d3;
-            --success-fg: #1d5e20;
-            --border: #d0d7de;
-            --row-hover: #f0f4f8;
-            --row-selected: #dbeafe;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 24px;
-            background-color: var(--bg);
-            color: var(--ink);
-        }
-        .layout {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-        }
-        h1 { font-size: 24px; margin: 0 0 4px; }
-        h2 { font-size: 18px; margin: 0 0 12px; }
-        h3 { font-size: 15px; margin: 0 0 8px; }
-        p { color: var(--muted); margin: 0 0 16px; line-height: 1.5; }
-        label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
-        input {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-        button {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        button:hover:not(:disabled) { background: var(--accent-dark); }
-        button:disabled { opacity: 0.45; cursor: not-allowed; }
-        button.secondary {
-            background: transparent;
-            color: var(--ink);
-            border: 1px solid var(--border);
-            font-weight: 500;
-        }
-        button.secondary:hover:not(:disabled) {
-            background: var(--row-hover);
-        }
-        button.danger {
-            background: var(--danger);
-        }
-        button.danger:hover:not(:disabled) {
-            background: #900;
-        }
-        .status {
-            margin-top: 12px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            display: none;
-        }
-        .status.success { background: var(--success-bg); color: var(--success-fg); display: block; }
-        .status.error { background: var(--danger-bg); color: var(--danger); display: block; }
-        .status.loading { background: var(--row-hover); color: var(--muted); display: block; }
-        .status.loading::after {
-            content: '…';
-            display: inline-block;
-            margin-left: 4px;
-            animation: status-loading-dots 1.2s steps(4, end) infinite;
-            width: 1ch;
-            overflow: hidden;
-            vertical-align: bottom;
-        }
-        @keyframes status-loading-dots {
-            0% { width: 0; }
-            100% { width: 1ch; }
-        }
-        pre {
-            background: #0d1117;
-            color: #c9d1d9;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            overflow-x: auto;
-            margin: 8px 0 0;
-            max-height: 240px;
-        }
-        .mode-toggle {
-            display: flex;
-            gap: 8px;
-            margin: 12px 0 4px;
-        }
-        .mode-toggle button {
-            background: transparent;
-            color: var(--ink);
-            border: 1px solid var(--border);
-            font-weight: 500;
-        }
-        .mode-toggle button.active {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-        .mode-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
-        .notes-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-            gap: 24px;
-            align-items: start;
-        }
-        @media (max-width: 820px) {
-            .notes-grid { grid-template-columns: 1fr; }
-        }
-        .table-toolbar {
-            display: flex;
-            align-items: end;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-        .table-toolbar label { margin: 0 0 4px; }
-        .table-toolbar .limit-field { width: 100px; }
-        .table-wrap {
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: auto;
-            max-height: 480px;
-        }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td {
-            text-align: left;
-            padding: 8px 10px;
-            border-bottom: 1px solid var(--border);
-        }
-        th {
-            position: sticky;
-            top: 0;
-            background: var(--row-hover);
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--muted);
-        }
-        th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
-        th.sortable:hover { color: var(--accent); }
-        th.sortable.active { color: var(--accent); }
-        .sort-indicator { display: inline-block; width: 12px; margin-left: 4px; }
-        td.timestamp {
-            font-size: 12px;
-            color: var(--muted);
-            white-space: nowrap;
-        }
-        tbody tr { cursor: pointer; }
-        tbody tr:hover { background: var(--row-hover); }
-        tbody tr.selected { background: var(--row-selected); }
-        td.record-name {
-            font-family: 'SF Mono', Menlo, monospace;
-            font-size: 12px;
-            color: var(--muted);
-            max-width: 180px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        td.actions { width: 1%; white-space: nowrap; }
-        td.actions button { padding: 4px 10px; font-size: 12px; }
-        .empty-state {
-            padding: 24px;
-            text-align: center;
-            color: var(--muted);
-            font-size: 13px;
-        }
-        .form-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        .form-mode-label {
-            font-size: 12px;
-            color: var(--muted);
-            font-weight: 500;
-        }
-        .pre-auth { opacity: 0.5; pointer-events: none; }
-        #signin-area { margin-top: 8px; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #eef; color: var(--accent); }
-        .badge-you { background: var(--success-bg); color: var(--success-fg); margin-left: 8px; }
-        .raw-response summary { font-size: 12px; color: var(--muted); cursor: pointer; margin-top: 12px; }
-        .raw-response[open] summary { margin-bottom: 4px; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js" onerror="console.log('Failed to load CloudKit.js')"></script>
 </head>
 <body>
@@ -225,9 +12,9 @@
         <div class="card">
             <h1>MistKit Web Demo</h1>
             <p>
-                Authenticate with your Apple ID, then exercise the same CloudKit
-                operations through MistKit (server) or CloudKit JS (browser) and
-                compare the wire-level behavior.
+                Authenticate with your Apple ID, then exercise the v1.0.0-beta.2 CloudKit
+                surface through MistKit (server) or CloudKit JS (browser) and compare the
+                wire-level behavior side-by-side.
             </p>
 
             <h2>Backend</h2>
@@ -250,8 +37,7 @@
             <div class="mode-hint" id="db-hint">
                 Private uses the captured Apple ID web-auth token; Public uses
                 server-to-server signing on the MistKit side and the API token on
-                the CloudKit JS side. Browsers can't perform S2S signing, so
-                "MistKit + Public" is unique to the server path.
+                the CloudKit JS side.
             </div>
 
             <h2 style="margin-top: 24px;">Auth</h2>
@@ -262,8 +48,11 @@
             <div id="auth-status" class="status"></div>
         </div>
 
+        <!-- Notes CRUD (records/query, records/modify) -->
         <div class="card pre-auth" id="notes-card">
-            <h2>Notes <span class="badge" id="mode-badge">MistKit</span> <span class="badge" id="db-badge">Private</span></h2>
+            <h2>Notes <span class="badge" id="mode-badge">MistKit</span> <span class="badge" id="db-badge">Private</span>
+                <span class="endpoint-label">records/query · records/modify</span>
+            </h2>
             <div class="notes-grid">
                 <section>
                     <div class="table-toolbar">
@@ -324,732 +113,225 @@
                 </section>
             </div>
         </div>
+
+        <!-- Records lookup / changes / resolve -->
+        <div class="card pre-auth">
+            <h2>Records <span class="endpoint-label">records/lookup · records/changes · records/resolve</span></h2>
+            <div class="panel-grid">
+                <section>
+                    <h3>Lookup <span class="endpoint-label">records/lookup</span></h3>
+                    <div class="panel-row">
+                        <input id="records-lookup-input" type="text" placeholder="record name(s), comma-separated">
+                        <button id="records-lookup-btn" type="button">Lookup</button>
+                    </div>
+                    <div id="records-lookup-status" class="status"></div>
+                    <pre id="records-lookup-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Changes <span class="endpoint-label">records/changes</span></h3>
+                    <div class="panel-row">
+                        <input id="records-changes-zone" type="text" placeholder="zone name (default: _defaultZone)">
+                        <input id="records-changes-token" type="text" placeholder="sync token (optional)">
+                        <button id="records-changes-btn" type="button">Fetch Changes</button>
+                    </div>
+                    <div id="records-changes-status" class="status"></div>
+                    <pre id="records-changes-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Resolve <span class="endpoint-label">records/resolve <em>(MistKit pending #41 — CloudKit JS composed)</em></span></h3>
+                    <div class="panel-row">
+                        <input id="records-resolve-input" type="text" placeholder="record name or share URL">
+                        <button id="records-resolve-btn" type="button">Resolve</button>
+                    </div>
+                    <div id="records-resolve-status" class="status"></div>
+                    <pre id="records-resolve-raw">(none yet)</pre>
+                    <details class="composition">
+                        <summary>📎 CloudKit JS composition</summary>
+                        <ol>
+                            <li>Share URL → <code>container.fetchShareMetadataWithURL(url)</code></li>
+                            <li>Record name → <code>database.fetchRecords([{ recordName }])</code></li>
+                        </ol>
+                    </details>
+                </section>
+            </div>
+        </div>
+
+        <!-- Zones list / lookup / modify / changes -->
+        <div class="card pre-auth">
+            <h2>Zones <span class="endpoint-label">zones/list · zones/lookup · zones/modify · zones/changes</span></h2>
+            <div class="panel-grid">
+                <section>
+                    <h3>List <span class="endpoint-label">zones/list</span></h3>
+                    <div class="panel-row">
+                        <button id="zones-list-btn" type="button">Fetch Zones</button>
+                    </div>
+                    <div id="zones-list-status" class="status"></div>
+                    <pre id="zones-list-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Lookup <span class="endpoint-label">zones/lookup</span></h3>
+                    <div class="panel-row">
+                        <input id="zones-lookup-input" type="text" placeholder="zone name(s), comma-separated">
+                        <button id="zones-lookup-btn" type="button">Lookup</button>
+                    </div>
+                    <div id="zones-lookup-status" class="status"></div>
+                    <pre id="zones-lookup-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Modify <span class="endpoint-label">zones/modify</span></h3>
+                    <div class="panel-row">
+                        <input id="zones-modify-create" type="text" placeholder="create zone name">
+                        <button id="zones-modify-create-btn" type="button">Create Zone</button>
+                        <input id="zones-modify-delete" type="text" placeholder="delete zone name">
+                        <button id="zones-modify-delete-btn" class="danger" type="button">Delete Zone</button>
+                    </div>
+                    <div id="zones-modify-status" class="status"></div>
+                    <pre id="zones-modify-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Changes <span class="endpoint-label">zones/changes</span></h3>
+                    <div class="panel-row">
+                        <input id="zones-changes-token" type="text" placeholder="sync token (optional)">
+                        <button id="zones-changes-btn" type="button">Fetch Changes</button>
+                    </div>
+                    <div id="zones-changes-status" class="status"></div>
+                    <pre id="zones-changes-raw">(none yet)</pre>
+                </section>
+            </div>
+        </div>
+
+        <!-- Users caller / discover / lookup -->
+        <div class="card pre-auth">
+            <h2>Users <span class="endpoint-label">users/caller · users/discover · users/lookup/email · users/lookup/id</span></h2>
+            <div class="panel-grid">
+                <section>
+                    <h3>Caller <span class="endpoint-label">users/caller</span></h3>
+                    <div class="panel-row">
+                        <button id="users-caller-btn" type="button">Fetch Caller</button>
+                    </div>
+                    <div id="users-caller-status" class="status"></div>
+                    <pre id="users-caller-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Lookup by Email <span class="endpoint-label">users/lookup/email</span></h3>
+                    <div class="panel-row">
+                        <input id="users-email-input" type="email" placeholder="user@example.com">
+                        <button id="users-email-btn" type="button">Lookup</button>
+                    </div>
+                    <div id="users-email-status" class="status"></div>
+                    <pre id="users-email-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Lookup by Record Name <span class="endpoint-label">users/lookup/id</span></h3>
+                    <div class="panel-row">
+                        <input id="users-id-input" type="text" placeholder="userRecordName">
+                        <button id="users-id-btn" type="button">Lookup</button>
+                    </div>
+                    <div id="users-id-status" class="status"></div>
+                    <pre id="users-id-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Discover <span class="endpoint-label">users/discover (POST) <em>(CloudKit JS loops per-email)</em></span></h3>
+                    <div class="panel-row">
+                        <textarea id="users-discover-input" placeholder="one or more emails, comma-separated"></textarea>
+                        <button id="users-discover-btn" type="button">Discover</button>
+                    </div>
+                    <div id="users-discover-status" class="status"></div>
+                    <pre id="users-discover-raw">(none yet)</pre>
+                </section>
+            </div>
+        </div>
+
+        <!-- Subscriptions list / lookup -->
+        <div class="card pre-auth">
+            <h2>Subscriptions <span class="endpoint-label">subscriptions/list · subscriptions/lookup (MistKit pending #49/#50 — CloudKit JS direct)</span></h2>
+            <div class="panel-grid">
+                <section>
+                    <h3>List <span class="endpoint-label">subscriptions/list</span></h3>
+                    <div class="panel-row">
+                        <button id="subs-list-btn" type="button">Fetch All</button>
+                    </div>
+                    <div id="subs-list-status" class="status"></div>
+                    <pre id="subs-list-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Lookup <span class="endpoint-label">subscriptions/lookup</span></h3>
+                    <div class="panel-row">
+                        <input id="subs-lookup-input" type="text" placeholder="subscription ID(s), comma-separated">
+                        <button id="subs-lookup-btn" type="button">Lookup</button>
+                    </div>
+                    <div id="subs-lookup-status" class="status"></div>
+                    <pre id="subs-lookup-raw">(none yet)</pre>
+                </section>
+            </div>
+        </div>
+
+        <!-- Push tokens -->
+        <div class="card pre-auth">
+            <h2>Push Tokens <span class="endpoint-label">tokens/create · tokens/register (MistKit pending #52/#53 — CloudKit JS combines via registerForNotifications)</span></h2>
+            <div class="panel-grid">
+                <section>
+                    <h3>Register for Notifications <span class="endpoint-label">CloudKit JS: container.registerForNotifications</span></h3>
+                    <div class="panel-row">
+                        <button id="tokens-register-btn" type="button">Register</button>
+                    </div>
+                    <div id="tokens-status" class="status"></div>
+                    <pre id="tokens-raw">(none yet)</pre>
+                    <details class="composition">
+                        <summary>📎 CloudKit JS composition</summary>
+                        <ol>
+                            <li><code>container.registerForNotifications()</code> — combines tokens/create + tokens/register</li>
+                            <li><code>container.addNotificationListener(cb)</code> — surfaces incoming notifications in this panel</li>
+                        </ol>
+                    </details>
+                </section>
+            </div>
+        </div>
+
+        <!-- Assets upload / rereference -->
+        <div class="card pre-auth">
+            <h2>Assets <span class="endpoint-label">assets/upload · assets/rereference (MistKit pending #31 — CloudKit JS composed)</span></h2>
+            <div class="panel-grid">
+                <section>
+                    <h3>Upload <span class="endpoint-label">assets/upload</span></h3>
+                    <p>
+                        Upload via the Notes panel above — set a title, pick a file via the
+                        record's image field. Native CKAsset uploads inline as part of saveRecords.
+                    </p>
+                </section>
+                <section>
+                    <h3>Rereference <span class="endpoint-label">assets/rereference</span></h3>
+                    <div class="panel-row">
+                        <input id="assets-source" type="text" placeholder="source record name">
+                        <input id="assets-field" type="text" placeholder="asset field (e.g. image)">
+                        <input id="assets-target" type="text" placeholder="target record name">
+                        <input id="assets-target-field" type="text" placeholder="target field (optional)">
+                        <button id="assets-rereference-btn" type="button">Rereference</button>
+                    </div>
+                    <div id="assets-status" class="status"></div>
+                    <pre id="assets-raw">(none yet)</pre>
+                    <details class="composition">
+                        <summary>📎 CloudKit JS composition</summary>
+                        <ol>
+                            <li><code>database.fetchRecords([sourceRecordName])</code> — pull source record</li>
+                            <li>Read CloudKit.Asset descriptor from source's asset field</li>
+                            <li><code>database.saveRecords([target])</code> — save target with reused asset</li>
+                        </ol>
+                    </details>
+                </section>
+            </div>
+        </div>
     </div>
 
-    <script>
-        let container = null;
-        let webAuthToken = null;
-        let authenticationInProgress = false;
-        let currentMode = 'mistkit';            // 'mistkit' | 'cloudkitjs'
-        let currentDatabase = 'private';        // 'private' | 'public'
-        // True only when the server reports server-to-server credentials are
-        // configured. CloudKit JS can hit `.public` regardless (it only needs
-        // an API token), so the picker stays usable in cloudkitjs mode even
-        // when this is false — the constraint is "MistKit + public requires
-        // S2S on the server."
-        let publicDatabaseAvailable = false;
-        let notes = [];                          // [{ recordName, title, index, created, modified, createdBy, recordChangeTag, raw }]
-        let selectedRecordName = null;
-        let authComplete = false;
-        let queryInFlight = false;
-        // Captured from the userIdentity returned by setUpAuth() so the table
-        // can flag rows whose creator (created.userRecordName from the
-        // MistKit-mode payload) matches the signed-in user.
-        let currentUserRecordName = null;
-        // Default: latest created first. The third click on the Created header
-        // still clears the sort to null, after which the next click cycles back
-        // through ascending → descending → null.
-        let currentSort = { field: '___createTime', ascending: false };
-        // Pause between a successful Create and the auto-refresh that follows.
-        // CloudKit Web Services is eventually consistent — without this pause
-        // the new record is often missing from the next list, especially on
-        // the public database.
-        const REFRESH_DELAY_MS = 1200;
-
-        const authStatusDiv = document.getElementById('auth-status');
-        const signinButton = document.getElementById('signin-button');
-        const signoutButton = document.getElementById('signout-button');
-        const notesCard = document.getElementById('notes-card');
-        const modeBadge = document.getElementById('mode-badge');
-        const dbBadge = document.getElementById('db-badge');
-        const dbPrivateBtn = document.getElementById('db-private');
-        const dbPublicBtn = document.getElementById('db-public');
-        const dbHint = document.getElementById('db-hint');
-        const tbody = document.getElementById('notes-tbody');
-        const tableStatusEl = document.getElementById('table-status');
-        const formStatusEl = document.getElementById('form-status');
-        const formHeading = document.getElementById('form-heading');
-        const formRecordName = document.getElementById('form-record-name');
-        const titleInput = document.getElementById('form-title');
-        const indexInput = document.getElementById('form-index');
-        const saveBtn = document.getElementById('save-btn');
-        const clearBtn = document.getElementById('clear-btn');
-        const deleteBtn = document.getElementById('delete-btn');
-        const refreshBtn = document.getElementById('refresh-btn');
-        const recordTypeInput = document.getElementById('record-type');
-        const queryLimitInput = document.getElementById('query-limit');
-        const rawResponseEl = document.getElementById('raw-response');
-
-        // ---- shared helpers ----
-
-        function setStatus(el, message, kind) {
-            el.className = `status ${kind || ''}`;
-            el.textContent = message;
-            if (kind) el.style.display = 'block';
-        }
-
-        function clearStatus(el) {
-            el.className = 'status';
-            el.textContent = '';
-            el.style.display = 'none';
-        }
-
-        function showRaw(value) {
-            rawResponseEl.textContent = value == null ? '(none)' : JSON.stringify(value, null, 2);
-        }
-
-        async function postJSON(path, body) {
-            const response = await fetch(path, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            const text = await response.text();
-            let payload;
-            try { payload = text ? JSON.parse(text) : null; } catch { payload = { message: text }; }
-            if (!response.ok) {
-                const msg = (payload && payload.message) || `HTTP ${response.status}`;
-                const err = new Error(msg);
-                err.payload = payload;
-                err.status = response.status;
-                throw err;
-            }
-            return payload;
-        }
-
-        // ---- form state ----
-
-        function selectedNote() {
-            return notes.find(n => n.recordName === selectedRecordName) || null;
-        }
-
-        function refreshFormState() {
-            const note = selectedNote();
-            if (note) {
-                formHeading.textContent = 'Edit note';
-                formRecordName.textContent = `· ${note.recordName}`;
-                saveBtn.textContent = 'Save';
-                deleteBtn.disabled = false;
-            } else {
-                formHeading.textContent = 'New note';
-                formRecordName.textContent = '';
-                saveBtn.textContent = 'Create';
-                deleteBtn.disabled = true;
-            }
-        }
-
-        function clearForm() {
-            selectedRecordName = null;
-            titleInput.value = '';
-            indexInput.value = '';
-            clearStatus(formStatusEl);
-            refreshFormState();
-            renderRows();
-        }
-
-        function loadNoteIntoForm(note) {
-            selectedRecordName = note.recordName;
-            titleInput.value = note.title ?? '';
-            indexInput.value = note.index != null ? String(note.index) : '';
-            clearStatus(formStatusEl);
-            refreshFormState();
-            renderRows();
-        }
-
-        // ---- render ----
-
-        function renderRows() {
-            tbody.innerHTML = '';
-            if (notes.length === 0) {
-                const tr = document.createElement('tr');
-                const td = document.createElement('td');
-                td.colSpan = 5;
-                td.className = 'empty-state';
-                td.textContent = 'No notes — Refresh or Create one.';
-                tr.appendChild(td);
-                tbody.appendChild(tr);
-                return;
-            }
-            for (const note of notes) {
-                const tr = document.createElement('tr');
-                tr.title = note.recordName;
-                if (note.recordName === selectedRecordName) tr.classList.add('selected');
-                tr.addEventListener('click', (e) => {
-                    if (e.target.closest('button')) return;
-                    loadNoteIntoForm(note);
-                });
-
-                const titleTd = document.createElement('td');
-                titleTd.textContent = note.title ?? '';
-                if (note.createdBy && note.createdBy === currentUserRecordName) {
-                    const youBadge = document.createElement('span');
-                    youBadge.className = 'badge badge-you';
-                    youBadge.textContent = 'You';
-                    youBadge.title = `Created by ${note.createdBy}`;
-                    titleTd.appendChild(youBadge);
-                }
-                tr.appendChild(titleTd);
-
-                const indexTd = document.createElement('td');
-                indexTd.textContent = note.index != null ? String(note.index) : '';
-                tr.appendChild(indexTd);
-
-                const createdTd = document.createElement('td');
-                createdTd.className = 'timestamp';
-                createdTd.textContent = formatTimestamp(note.created);
-                if (note.created) createdTd.title = note.created.toISOString();
-                tr.appendChild(createdTd);
-
-                const modifiedTd = document.createElement('td');
-                modifiedTd.className = 'timestamp';
-                modifiedTd.textContent = formatTimestamp(note.modified);
-                if (note.modified) modifiedTd.title = note.modified.toISOString();
-                tr.appendChild(modifiedTd);
-
-                const actionsTd = document.createElement('td');
-                actionsTd.className = 'actions';
-                const delBtn = document.createElement('button');
-                delBtn.className = 'danger';
-                delBtn.type = 'button';
-                delBtn.textContent = 'Delete';
-                // No confirm() — the demo prioritizes hands-on iteration; the
-                // raw response panel below the form shows the wire payload of
-                // every operation so accidents stay visible.
-                delBtn.addEventListener('click', () => deleteNote(note));
-                actionsTd.appendChild(delBtn);
-                tr.appendChild(actionsTd);
-
-                tbody.appendChild(tr);
-            }
-        }
-
-        function refreshSortIndicators() {
-            document.querySelectorAll('th.sortable').forEach(th => {
-                const field = th.dataset.sortField;
-                const isActive = currentSort && currentSort.field === field;
-                th.classList.toggle('active', isActive);
-                const indicator = th.querySelector('.sort-indicator');
-                if (isActive) {
-                    indicator.textContent = currentSort.ascending ? '↑' : '↓';
-                } else {
-                    indicator.textContent = '';
-                }
-            });
-        }
-
-        document.querySelectorAll('th.sortable').forEach(th => {
-            th.addEventListener('click', () => {
-                const field = th.dataset.sortField;
-                if (currentSort && currentSort.field === field) {
-                    if (currentSort.ascending) {
-                        currentSort = { field, ascending: false };
-                    } else {
-                        currentSort = null;            // third click clears
-                    }
-                } else {
-                    currentSort = { field, ascending: true };
-                }
-                refreshSortIndicators();
-                if (authComplete) queryNotes();
-            });
-        });
-
-        // ---- backend normalization ----
-
-        // Project the MistKit-mode `/api/records/query` payload (which mirrors
-        // CloudKit Web Services on the wire) and the CloudKit JS response
-        // into the single shape the table renders from.
-        //
-        // Timestamps:
-        //   - MistKit-mode wire: `created.timestamp` / `modified.timestamp`
-        //     are epoch-millis numbers (encoded with WebJSON's
-        //     .millisecondsSince1970 strategy on the server).
-        //   - CloudKit JS: `created` / `modified` are typed Date objects.
-        // The browser normalizes both into a Date instance.
-        function normalizeRecords(payload) {
-            const list = (payload && payload.records) || [];
-            return list.map(record => {
-                const fields = record.fields || {};
-                const titleField = fields.title;
-                const indexField = fields.index;
-                return {
-                    recordName: record.recordName,
-                    recordType: record.recordType,
-                    recordChangeTag: record.recordChangeTag,
-                    title: titleField && (titleField.value ?? titleField),
-                    index: indexField && Number(indexField.value ?? indexField),
-                    created: toDate(record.created),
-                    modified: toDate(record.modified),
-                    // MistKit-mode wire: `created` is { timestamp, userRecordName }.
-                    // CloudKit JS: `created` is a bare Date object — no creator
-                    // available on the record. Falls back to null in that case;
-                    // the table treats it as "unknown".
-                    createdBy: extractUserRecordName(record.created),
-                    raw: record,
-                };
-            });
-        }
-
-        function extractUserRecordName(value) {
-            if (value == null || typeof value !== 'object' || value instanceof Date) {
-                return null;
-            }
-            return value.userRecordName ?? null;
-        }
-
-        function toDate(value) {
-            if (value == null) return null;
-            // CloudKit JS shape: a Date object directly on record.created/modified,
-            // OR an envelope { timestamp: Date|number, userRecordName }.
-            if (value instanceof Date) return value;
-            if (typeof value === 'number') return new Date(value);
-            if (typeof value === 'object') {
-                const inner = value.timestamp;
-                if (inner == null) return null;
-                if (inner instanceof Date) return inner;
-                if (typeof inner === 'number') return new Date(inner);
-                if (typeof inner === 'string') {
-                    const parsed = Date.parse(inner);
-                    return isNaN(parsed) ? null : new Date(parsed);
-                }
-            }
-            return null;
-        }
-
-        function formatTimestamp(date) {
-            if (!date) return '—';
-            return date.toLocaleString(undefined, {
-                dateStyle: 'short', timeStyle: 'short',
-            });
-        }
-
-        function ckJsDatabase() {
-            return currentDatabase === 'public'
-                ? container.publicCloudDatabase
-                : container.privateCloudDatabase;
-        }
-
-        function buildFields() {
-            const out = {};
-            const title = titleInput.value.trim();
-            if (title.length > 0) out.title = title;
-            const indexRaw = indexInput.value.trim();
-            if (indexRaw.length > 0) {
-                const parsed = Number(indexRaw);
-                if (!isFinite(parsed)) {
-                    throw new Error('Index must be a number.');
-                }
-                out.index = parsed;
-            }
-            return out;
-        }
-
-        function ckJsFields(fields) {
-            const wrapped = {};
-            for (const [k, v] of Object.entries(fields)) {
-                wrapped[k] = { value: v };
-            }
-            return wrapped;
-        }
-
-        // ---- operations ----
-
-        async function queryNotes() {
-            if (queryInFlight) return;
-            const recordType = recordTypeInput.value.trim();
-            const limit = parseInt(queryLimitInput.value, 10);
-            queryInFlight = true;
-            setQueryControlsDisabled(true);
-            const dbLabel = currentDatabase === 'public' ? 'public' : 'private';
-            const modeLabel = currentMode === 'mistkit' ? 'MistKit' : 'CloudKit JS';
-            setStatus(tableStatusEl, `Loading ${dbLabel} via ${modeLabel}`, 'loading');
-            try {
-                let payload;
-                if (currentMode === 'mistkit') {
-                    payload = await postJSON('/api/records/query', {
-                        recordType,
-                        database: currentDatabase,
-                        limit: isFinite(limit) ? limit : undefined,
-                        sortBy: currentSort
-                            ? [{ field: currentSort.field, ascending: currentSort.ascending }]
-                            : undefined,
-                    });
-                } else {
-                    const query = { recordType };
-                    if (currentSort) {
-                        query.sortBy = [{
-                            fieldName: currentSort.field,
-                            ascending: currentSort.ascending,
-                        }];
-                    }
-                    payload = await ckJsDatabase().performQuery(query, {
-                        resultsLimit: isFinite(limit) ? limit : undefined,
-                    });
-                    if (payload && payload.hasErrors && payload.errors.length) {
-                        throw new Error(payload.errors[0].reason || 'CloudKit JS query failed');
-                    }
-                }
-                notes = normalizeRecords(payload);
-                if (selectedRecordName && !notes.some(n => n.recordName === selectedRecordName)) {
-                    clearForm();
-                } else {
-                    refreshFormState();
-                    renderRows();
-                }
-                showRaw(payload);
-                setStatus(tableStatusEl, `Loaded ${notes.length} record${notes.length === 1 ? '' : 's'}.`, 'success');
-            } catch (error) {
-                setStatus(tableStatusEl, `Query failed: ${error.message}`, 'error');
-                showRaw(error.payload || { message: error.message });
-            } finally {
-                queryInFlight = false;
-                setQueryControlsDisabled(false);
-                // Re-evaluate the picker so the public-availability gate
-                // (which writes to the same buttons we just re-enabled) wins.
-                refreshDatabasePicker();
-            }
-        }
-
-        function setQueryControlsDisabled(disabled) {
-            const ids = [
-                'refresh-btn', 'db-private', 'db-public',
-                'mode-mistkit', 'mode-cloudkitjs',
-                'save-btn', 'delete-btn',
-            ];
-            for (const id of ids) {
-                const el = document.getElementById(id);
-                if (el) el.disabled = disabled;
-            }
-        }
-
-        async function saveNote() {
-            let fields;
-            try {
-                fields = buildFields();
-            } catch (error) {
-                setStatus(formStatusEl, error.message, 'error');
-                return;
-            }
-            if (Object.keys(fields).length === 0) {
-                setStatus(formStatusEl, 'Provide a title or index.', 'error');
-                return;
-            }
-            const recordType = recordTypeInput.value.trim();
-            const note = selectedNote();
-            const isUpdate = note != null;
-            const label = isUpdate ? 'Update' : 'Create';
-            clearStatus(formStatusEl);
-            try {
-                let payload;
-                if (currentMode === 'mistkit') {
-                    if (isUpdate) {
-                        payload = await postJSON('/api/records/update', {
-                            recordType,
-                            database: currentDatabase,
-                            recordName: note.recordName,
-                            fields,
-                            recordChangeTag: note.recordChangeTag,
-                        });
-                    } else {
-                        payload = await postJSON('/api/records/create', {
-                            recordType,
-                            database: currentDatabase,
-                            fields,
-                        });
-                    }
-                } else {
-                    const record = { recordType, fields: ckJsFields(fields) };
-                    if (isUpdate) {
-                        record.recordName = note.recordName;
-                        record.recordChangeTag = note.recordChangeTag;
-                    }
-                    payload = await ckJsDatabase().saveRecords([record]);
-                    if (payload && payload.hasErrors && payload.errors.length) {
-                        throw new Error(payload.errors[0].reason || 'CloudKit JS save failed');
-                    }
-                }
-                showRaw(payload);
-                setStatus(formStatusEl, `${label} succeeded.`, 'success');
-                if (!isUpdate) clearForm();
-                if (!isUpdate) {
-                    // Public-DB writes routinely take a beat to show up in the
-                    // next list query. Pause once with a visible status so the
-                    // user understands why the table doesn't refresh instantly.
-                    setStatus(
-                        formStatusEl,
-                        `Created — waiting ${REFRESH_DELAY_MS}ms for CloudKit to settle`,
-                        'loading'
-                    );
-                    await new Promise(r => setTimeout(r, REFRESH_DELAY_MS));
-                }
-                await queryNotes();
-            } catch (error) {
-                setStatus(formStatusEl, `${label} failed: ${error.message}`, 'error');
-                showRaw(error.payload || { message: error.message });
-            }
-        }
-
-        // statusEl defaults to tableStatusEl: per-row Delete buttons live in
-        // the table, so feedback belongs above the table. The form panel's
-        // Delete button passes formStatusEl explicitly to keep its status
-        // alongside the form it acts on.
-        async function deleteNote(note, statusEl = tableStatusEl) {
-            clearStatus(statusEl);
-            try {
-                let payload;
-                if (currentMode === 'mistkit') {
-                    payload = await postJSON('/api/records/delete', {
-                        recordType: note.recordType,
-                        database: currentDatabase,
-                        recordName: note.recordName,
-                        recordChangeTag: note.recordChangeTag,
-                    });
-                } else {
-                    payload = await ckJsDatabase().deleteRecords([{ recordName: note.recordName }]);
-                    if (payload && payload.hasErrors && payload.errors.length) {
-                        throw new Error(payload.errors[0].reason || 'CloudKit JS delete failed');
-                    }
-                }
-                showRaw(payload);
-                setStatus(statusEl, `Deleted ${note.recordName}.`, 'success');
-                if (note.recordName === selectedRecordName) clearForm();
-                await queryNotes();
-            } catch (error) {
-                setStatus(statusEl, `Delete failed: ${error.message}`, 'error');
-                showRaw(error.payload || { message: error.message });
-            }
-        }
-
-        // ---- mode toggle ----
-
-        document.getElementById('mode-mistkit').addEventListener('click', () => setMode('mistkit'));
-        document.getElementById('mode-cloudkitjs').addEventListener('click', () => setMode('cloudkitjs'));
-
-        function setMode(mode) {
-            if (mode === currentMode) return;
-            currentMode = mode;
-            const mistKitBtn = document.getElementById('mode-mistkit');
-            const cloudKitJsBtn = document.getElementById('mode-cloudkitjs');
-            mistKitBtn.classList.toggle('active', mode === 'mistkit');
-            cloudKitJsBtn.classList.toggle('active', mode === 'cloudkitjs');
-            modeBadge.textContent = mode === 'mistkit' ? 'MistKit' : 'CloudKit JS';
-            // Switching to MistKit while sitting on Public is only valid when
-            // the server holds S2S material. If not, drop back to Private so
-            // the user doesn't post requests that will 500 server-side.
-            refreshDatabasePicker();
-            if (authComplete) queryNotes();
-        }
-
-        // ---- database toggle ----
-
-        dbPrivateBtn.addEventListener('click', () => setDatabase('private'));
-        dbPublicBtn.addEventListener('click', () => setDatabase('public'));
-
-        function setDatabase(database) {
-            if (database === currentDatabase) return;
-            if (database === 'public' && !isPublicAllowedForCurrentMode()) {
-                // Defensive — button should already be disabled in this case.
-                return;
-            }
-            currentDatabase = database;
-            refreshDatabasePicker();
-            if (authComplete) queryNotes();
-        }
-
-        function isPublicAllowedForCurrentMode() {
-            // CloudKit JS can talk to public from the browser regardless of
-            // server S2S credentials; MistKit + public requires the server to
-            // hold the key pair.
-            return currentMode === 'cloudkitjs' || publicDatabaseAvailable;
-        }
-
-        function refreshDatabasePicker() {
-            const publicAllowed = isPublicAllowedForCurrentMode();
-            dbPublicBtn.disabled = !publicAllowed;
-            if (!publicAllowed && currentDatabase === 'public') {
-                currentDatabase = 'private';
-            }
-            dbPrivateBtn.classList.toggle('active', currentDatabase === 'private');
-            dbPublicBtn.classList.toggle('active', currentDatabase === 'public');
-            dbBadge.textContent = currentDatabase === 'public' ? 'Public' : 'Private';
-            if (!publicDatabaseAvailable && currentMode === 'mistkit') {
-                dbHint.textContent =
-                    'MistKit + Public requires server-to-server credentials ' +
-                    '(CLOUDKIT_KEY_ID + CLOUDKIT_PRIVATE_KEY[_PATH]). ' +
-                    'Restart the server with those set to enable Public on this side.';
-            } else if (currentMode === 'mistkit' && currentDatabase === 'public') {
-                dbHint.textContent =
-                    'Heads-up: on MistKit + Public, records you write are owned ' +
-                    'by the server-to-server key, not your iCloud user — so they ' +
-                    'won’t carry a "You" badge. The badge tracks your iCloud ' +
-                    'identity, which only appears on records written via ' +
-                    'CloudKit JS or via the web-auth flow on the private database.';
-            } else {
-                dbHint.textContent =
-                    'Private uses the captured Apple ID web-auth token; Public ' +
-                    'uses server-to-server signing on the MistKit side and the ' +
-                    'API token on the CloudKit JS side. Browsers can’t ' +
-                    'perform S2S signing, so "MistKit + Public" is unique to ' +
-                    'the server path.';
-            }
-        }
-
-        // ---- form wiring ----
-
-        saveBtn.addEventListener('click', saveNote);
-        clearBtn.addEventListener('click', clearForm);
-        deleteBtn.addEventListener('click', () => {
-            const note = selectedNote();
-            if (note) deleteNote(note, formStatusEl);
-        });
-        refreshBtn.addEventListener('click', queryNotes);
-
-        // ---- auth flow ----
-
-        function setAuthed(authed) {
-            authComplete = authed;
-            notesCard.classList.toggle('pre-auth', !authed);
-            signoutButton.style.display = authed ? 'inline-block' : 'none';
-        }
-
-        async function loadServerConfig() {
-            const response = await fetch('/api/config');
-            if (!response.ok) throw new Error('Failed to load server config: ' + response.status);
-            return response.json();
-        }
-
-        async function pollWebAuthToken() {
-            const pollIntervalMs = 250;
-            const pollDeadlineMs = 10_000;
-            const pollStart = Date.now();
-            return new Promise((resolve, reject) => {
-                const handle = setInterval(() => {
-                    const token = container?._auth?._ckSession;
-                    if (token) {
-                        clearInterval(handle);
-                        resolve(token);
-                        return;
-                    }
-                    if (Date.now() - pollStart >= pollDeadlineMs) {
-                        clearInterval(handle);
-                        reject(new Error('Timeout waiting for web auth token'));
-                    }
-                }, pollIntervalMs);
-            });
-        }
-
-        async function postAuthenticate(userIdentity, token) {
-            const response = await fetch('/api/authenticate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sessionToken: token,
-                    userRecordName: userIdentity.userRecordName,
-                }),
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            return response.status;
-        }
-
-        function renderTokenDisplay(token) {
-            notesCard.style.display = 'none';
-            document.getElementById('signin-area').style.display = 'none';
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <h2>Web Auth Token captured</h2>
-                <p>Use this token for command-line CloudKit API access:</p>
-                <pre style="user-select: all; padding: 12px; background: #f6f8fa; border-radius: 6px; word-break: break-all; white-space: pre-wrap;">${token}</pre>
-                <p>The server has shut down — you can close this window.</p>
-            `;
-            document.querySelector('.layout').appendChild(card);
-        }
-
-        async function handleAuthentication(userIdentity) {
-            if (authenticationInProgress) return;
-            authenticationInProgress = true;
-            currentUserRecordName = userIdentity?.userRecordName ?? null;
-            setStatus(authStatusDiv, 'Capturing web auth token...', 'success');
-            try {
-                const token = await pollWebAuthToken();
-                webAuthToken = token;
-                const status = await postAuthenticate(userIdentity, token);
-                if (status === 205) {
-                    setStatus(authStatusDiv, 'Authentication complete.', 'success');
-                    renderTokenDisplay(token);
-                } else {
-                    setStatus(authStatusDiv, `Authenticated as ${userIdentity.userRecordName}.`, 'success');
-                    setAuthed(true);
-                    queryNotes();
-                }
-            } catch (error) {
-                setStatus(authStatusDiv, `Authentication failed: ${error.message}`, 'error');
-            } finally {
-                authenticationInProgress = false;
-            }
-        }
-
-        signoutButton.addEventListener('click', async () => {
-            try {
-                await container.signOut();
-                webAuthToken = null;
-                currentUserRecordName = null;
-                setAuthed(false);
-                notes = [];
-                clearForm();
-                setStatus(authStatusDiv, 'Signed out.', 'success');
-            } catch (error) {
-                setStatus(authStatusDiv, 'Sign out failed: ' + error.message, 'error');
-            }
-        });
-
-        async function initializeCloudKit() {
-            try {
-                if (typeof CloudKit === 'undefined') {
-                    throw new Error('CloudKit.js failed to load');
-                }
-                const serverConfig = await loadServerConfig();
-                publicDatabaseAvailable = !!serverConfig.publicDatabaseAvailable;
-                refreshDatabasePicker();
-                CloudKit.configure({
-                    containers: [{
-                        containerIdentifier: serverConfig.containerIdentifier,
-                        apiTokenAuth: {
-                            apiToken: serverConfig.apiToken,
-                            persist: true,
-                            signInButton: { id: 'signin-button', theme: 'black' },
-                        },
-                        environment: serverConfig.environment || 'development',
-                    }],
-                });
-                container = CloudKit.getDefaultContainer();
-                const userIdentity = await container.setUpAuth();
-                if (userIdentity) {
-                    setStatus(authStatusDiv, 'Already signed in. Capturing token...', 'success');
-                    await handleAuthentication(userIdentity);
-                } else {
-                    setStatus(authStatusDiv, 'Click "Sign In with Apple ID" to authenticate.', 'success');
-                }
-                container.whenUserSignsIn().then((identity) => handleAuthentication(identity));
-                container.whenUserSignsOut().then(() => {
-                    webAuthToken = null;
-                    currentUserRecordName = null;
-                    setAuthed(false);
-                    notes = [];
-                    clearForm();
-                    setStatus(authStatusDiv, 'Signed out.', 'success');
-                });
-            } catch (error) {
-                setStatus(authStatusDiv, 'CloudKit setup failed: ' + error.message, 'error');
-            }
-        }
-
-        refreshFormState();
-        refreshDatabasePicker();
-        refreshSortIndicators();
-        initializeCloudKit();
-    </script>
+    <script src="js/app.js"></script>
+    <script src="js/mode.js"></script>
+    <script src="js/pending.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/records.js"></script>
+    <script src="js/zones.js"></script>
+    <script src="js/subscriptions.js"></script>
+    <script src="js/tokens.js"></script>
+    <script src="js/assets.js"></script>
+    <script src="js/users.js"></script>
 </body>
 </html>

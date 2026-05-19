@@ -1,5 +1,5 @@
 //
-//  DetailColumnRoot.swift
+//  RecordZoneChangesSnapshot.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,38 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(SwiftUI)
-  internal import SwiftUI
+#if canImport(CloudKit)
+  internal import CloudKit
+  internal import Foundation
 
-  /// Routes the sidebar selection to the appropriate detail view.
-  internal struct DetailColumnRoot: View {
-    internal let selection: SidebarItem?
-
-    internal var body: some View {
-      switch selection {
-      case .account:
-        AccountView()
-      case .zones:
-        ZoneListView()
-      case .query:
-        QueryView()
-      case .records:
-        RecordsView()
-      case .subscriptions:
-        SubscriptionsView()
-      case .pushTokens:
-        PushTokensView()
-      case .assets:
-        AssetsView()
-      case .users:
-        UsersView()
-      case nil:
-        ContentUnavailableView(
-          "Pick a section from the sidebar",
-          systemImage: "sidebar.left",
-          description: Text("Account, Zones, Records, Subscriptions, …")
-        )
-      }
-    }
+  /// Snapshot from `CKFetchRecordZoneChangesOperation` so the UI can show
+  /// what changed since the last sync token.
+  internal struct RecordZoneChangesSnapshot: Sendable {
+    internal let changedRecordNames: [String]
+    internal let deletedRecordNames: [String]
+    internal let serverChangeToken: CKServerChangeToken?
+    internal let moreComing: Bool
   }
 #endif

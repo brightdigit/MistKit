@@ -1,5 +1,5 @@
 //
-//  DetailColumnRoot.swift
+//  CompositionDisclosure.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,35 +30,37 @@
 #if canImport(SwiftUI)
   internal import SwiftUI
 
-  /// Routes the sidebar selection to the appropriate detail view.
-  internal struct DetailColumnRoot: View {
-    internal let selection: SidebarItem?
+  /// Disclosure group documenting the underlying CloudKit operations that
+  /// compose a single REST endpoint. Used by `RecordsView` (`records/resolve`)
+  /// and `AssetsView` (`assets/rereference`) so users learning the SDK can
+  /// see where native CloudKit's API shape diverges from the REST surface.
+  internal struct CompositionDisclosure: View {
+    internal let restEndpoint: String
+    internal let steps: [String]
 
     internal var body: some View {
-      switch selection {
-      case .account:
-        AccountView()
-      case .zones:
-        ZoneListView()
-      case .query:
-        QueryView()
-      case .records:
-        RecordsView()
-      case .subscriptions:
-        SubscriptionsView()
-      case .pushTokens:
-        PushTokensView()
-      case .assets:
-        AssetsView()
-      case .users:
-        UsersView()
-      case nil:
-        ContentUnavailableView(
-          "Pick a section from the sidebar",
-          systemImage: "sidebar.left",
-          description: Text("Account, Zones, Records, Subscriptions, …")
-        )
+      DisclosureGroup("📎 Composition") {
+        VStack(alignment: .leading, spacing: 6) {
+          Text("REST endpoint: ").font(.caption.bold())
+            + Text(restEndpoint).font(.caption.monospaced())
+          Text("Underlying CloudKit operations:")
+            .font(.caption.bold())
+          ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+            HStack(alignment: .top, spacing: 6) {
+              Text("\(index + 1).").font(.caption)
+              Text(step).font(.caption.monospaced())
+            }
+          }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 4)
       }
+      .font(.subheadline)
+    }
+
+    internal init(restEndpoint: String, steps: [String]) {
+      self.restEndpoint = restEndpoint
+      self.steps = steps
     }
   }
 #endif
