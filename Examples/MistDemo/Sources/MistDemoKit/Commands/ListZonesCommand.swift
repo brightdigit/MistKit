@@ -73,22 +73,14 @@ public struct ListZonesCommand: MistDemoCommand, OutputFormatting {
       throw ListZonesError.databaseNotSupported
     }
 
-    do {
-      let service = try MistKitClientFactory.create(for: config.base)
-      let zones = try await service.listZones(
-        database: config.base.database
-      )
+    let service = try MistKitClientFactory.create(for: config.base)
+    let zones = try await service.listZones(database: config.base.database)
 
-      let filtered =
-        config.includeDefault
-        ? zones
-        : zones.filter { $0.zoneName != ZoneID.defaultZone.zoneName }
+    let filtered =
+      config.includeDefault
+      ? zones
+      : zones.filter { $0.zoneName != ZoneID.defaultZone.zoneName }
 
-      try await outputResults(filtered, format: config.output)
-    } catch let error as ListZonesError {
-      throw error
-    } catch {
-      throw ListZonesError.operationFailed(error.localizedDescription)
-    }
+    try await outputResults(filtered, format: config.output)
   }
 }

@@ -33,22 +33,19 @@ public import Foundation
 public enum DiscoverError: Error, LocalizedError {
   case emailsRequired
   case webAuthRequired
-  case operationFailed(String)
 
   /// A localized description of the error.
   public var errorDescription: String? {
     switch self {
     case .emailsRequired:
       return
-        "No emails provided. Use --discover.emails <list> or pipe "
+        "No emails provided. Use --discover-emails <list> or pipe "
         + "one address per line to stdin."
     case .webAuthRequired:
       return
         "discover requires API + web-auth credentials. Set "
         + "CLOUDKIT_API_TOKEN and CLOUDKIT_WEB_AUTH_TOKEN, or run "
         + "`mistdemo auth-token` first."
-    case .operationFailed(let reason):
-      return "Discover operation failed: \(reason)"
     }
   }
 
@@ -57,14 +54,12 @@ public enum DiscoverError: Error, LocalizedError {
     switch self {
     case .emailsRequired:
       return
-        "Pass --discover.emails alice@example.com,bob@example.com, "
+        "Pass --discover-emails alice@example.com,bob@example.com, "
         + "or pipe addresses to stdin with --stdin."
     case .webAuthRequired:
       return
         "User-identity routes (lookupUsersByEmail) are pinned to "
         + "CloudKit's public DB and require web-auth."
-    case .operationFailed:
-      return nil
     }
   }
 }

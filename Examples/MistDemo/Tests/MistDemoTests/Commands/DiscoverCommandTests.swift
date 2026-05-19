@@ -65,8 +65,12 @@ internal struct DiscoverCommandTests {
 
   @Test("Execute rejects missing web-auth")
   internal func rejectsMissingWebAuth() async throws {
-    // No webAuthToken set → hasUserContextCredentials == false
-    let baseConfig = try await MistDemoConfig()
+    // Construct a config that explicitly lacks web-auth so the test does
+    // not depend on whether a local .env happens to provide credentials.
+    let baseConfig = try await MistDemoConfig(
+      apiToken: "test-api-token",
+      webAuthToken: nil
+    )
     let config = DiscoverConfig(
       base: baseConfig,
       emails: ["alice@example.com"]

@@ -38,7 +38,6 @@ public enum ModifyZonesError: Error, LocalizedError {
   case parsingFailed(String)
   case invalidOperationType(String)
   case invalidZoneName(String)
-  case operationFailed(String)
 
   /// A localized description of the error.
   public var errorDescription: String? {
@@ -63,8 +62,6 @@ public enum ModifyZonesError: Error, LocalizedError {
         + "Use one of: create, delete."
     case .invalidZoneName(let name):
       return "Invalid zone name '\(name)'."
-    case .operationFailed(let reason):
-      return "Modify-zones operation failed: \(reason)"
     }
   }
 
@@ -90,8 +87,6 @@ public enum ModifyZonesError: Error, LocalizedError {
       return "Set 'type' to 'create' or 'delete'."
     case .invalidZoneName:
       return "Provide a non-empty zone name without leading/trailing whitespace."
-    case .operationFailed:
-      return nil
     }
   }
 }

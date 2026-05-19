@@ -77,14 +77,8 @@ public struct DiscoverCommand: MistDemoCommand, OutputFormatting {
       throw DiscoverError.webAuthRequired
     }
 
-    do {
-      let service = try MistKitClientFactory.create(for: config.base)
-      let identities = try await service.lookupUsersByEmail(config.emails)
-      try await outputResults(identities, format: config.output)
-    } catch let error as DiscoverError {
-      throw error
-    } catch {
-      throw DiscoverError.operationFailed(error.localizedDescription)
-    }
+    let service = try MistKitClientFactory.create(for: config.base)
+    let identities = try await service.lookupUsersByEmail(config.emails)
+    try await outputResults(identities, format: config.output)
   }
 }

@@ -32,7 +32,6 @@ public import Foundation
 /// Errors that can occur during list-zones command execution.
 public enum ListZonesError: Error, LocalizedError {
   case databaseNotSupported
-  case operationFailed(String)
 
   /// A localized description of the error.
   public var errorDescription: String? {
@@ -41,8 +40,6 @@ public enum ListZonesError: Error, LocalizedError {
       return
         "Zone listing requires --database private or --database shared. "
         + "CloudKit's public database has no enumerable zones."
-    case .operationFailed(let reason):
-      return "List-zones operation failed: \(reason)"
     }
   }
 
@@ -51,8 +48,6 @@ public enum ListZonesError: Error, LocalizedError {
     switch self {
     case .databaseNotSupported:
       return "Rerun with --database private or --database shared."
-    case .operationFailed:
-      return nil
     }
   }
 }

@@ -93,9 +93,7 @@ public struct ValidateCommand: MistDemoCommand, OutputFormatting {
     try await emit(result)
 
     if !errors.isEmpty {
-      throw ValidateError.missingCredentials(
-        errors.joined(separator: "; ")
-      )
+      throw ValidateError(reason: errors.joined(separator: "; "))
     }
   }
 

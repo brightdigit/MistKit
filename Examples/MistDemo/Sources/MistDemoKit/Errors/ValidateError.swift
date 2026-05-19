@@ -29,40 +29,21 @@
 
 public import Foundation
 
-/// Errors that can occur during validate command execution.
-public enum ValidateError: Error, LocalizedError {
-  case missingCredentials(String)
-  case networkCheckFailed(String)
-  case testQueryFailed(String)
+/// Signals that the `validate` command's full pipeline did not pass. The
+/// per-check failure messages are joined into `reason` and are also present
+/// in the structured `ValidationResult.errors` already emitted to stdout —
+/// this error exists purely to drive a non-zero exit code.
+public struct ValidateError: Error, LocalizedError {
+  /// The joined reason(s) from the individual validation checks.
+  public let reason: String
 
   /// A localized description of the error.
   public var errorDescription: String? {
-    switch self {
-    case .missingCredentials(let reason):
-      return "Credential validation failed: \(reason)"
-    case .networkCheckFailed(let reason):
-      return "Network reachability check failed: \(reason)"
-    case .testQueryFailed(let reason):
-      return "Test query failed: \(reason)"
-    }
+    "Validation failed: \(reason)"
   }
 
-  /// A localized recovery suggestion.
-  public var recoverySuggestion: String? {
-    switch self {
-    case .missingCredentials:
-      return
-        "Set CLOUDKIT_API_TOKEN + CLOUDKIT_WEB_AUTH_TOKEN for "
-        + "private/shared databases, or CLOUDKIT_KEY_ID + "
-        + "CLOUDKIT_PRIVATE_KEY[_PATH] for public."
-    case .networkCheckFailed:
-      return
-        "Verify your credentials, container identifier, and "
-        + "environment, then retry."
-    case .testQueryFailed:
-      return
-        "Verify the configured database and record type, or "
-        + "drop --test-query to validate credentials only."
-    }
+  /// Creates a new instance.
+  public init(reason: String) {
+    self.reason = reason
   }
 }

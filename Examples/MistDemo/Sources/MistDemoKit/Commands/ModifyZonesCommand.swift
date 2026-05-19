@@ -80,28 +80,22 @@ public struct ModifyZonesCommand: MistDemoCommand, OutputFormatting {
       throw ModifyZonesError.databaseNotSupported
     }
 
-    do {
-      let service = try MistKitClientFactory.create(for: config.base)
+    let service = try MistKitClientFactory.create(for: config.base)
 
-      let operations = try config.operations.map { input -> ZoneOperation in
-        let operation = try input.toZoneOperation()
-        if case .delete(let zoneID) = operation {
-          let warning = "⚠️  Deleting zone '\(zoneID.zoneName)'\n"
-          FileHandle.standardError.write(Data(warning.utf8))
-        }
-        return operation
+    let operations = try config.operations.map { input -> ZoneOperation in
+      let operation = try input.toZoneOperation()
+      if case .delete(let zoneID) = operation {
+        let warning = "⚠️  Deleting zone '\(zoneID.zoneName)'\n"
+        FileHandle.standardError.write(Data(warning.utf8))
       }
-
-      let results = try await service.modifyZones(
-        operations,
-        database: config.base.database
-      )
-
-      try await outputResults(results, format: config.output)
-    } catch let error as ModifyZonesError {
-      throw error
-    } catch {
-      throw ModifyZonesError.operationFailed(error.localizedDescription)
+      return operation
     }
+
+    let results = try await service.modifyZones(
+      operations,
+      database: config.base.database
+    )
+
+    try await outputResults(results, format: config.output)
   }
 }
