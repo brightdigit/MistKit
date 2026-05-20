@@ -29,7 +29,7 @@
 
 #if canImport(CloudKit)
   internal import CloudKit
-  internal import Foundation
+  public import Foundation
   internal import MistDemoKit
 
   #if canImport(AppKit) && !targetEnvironment(macCatalyst)
@@ -38,30 +38,19 @@
     internal import UIKit
   #endif
 
-  /// The push-token registration state surfaced to the UI. APNs requires a
-  /// signed app + push entitlement; on simulators or unentitled builds the
-  /// OS reports an error which the UI renders inline.
-  internal enum PushTokenStatus: Sendable {
-    case idle
-    case requesting
-    case registered(hexToken: String)
-    case failed(message: String)
-  }
-
   extension CloudKitStore {
     /// Trigger APNs registration. Returns immediately after asking the OS;
     /// the actual token arrives via the platform app delegate hook, which
     /// the demo app forwards back into the store via `recordDeviceToken`.
     /// On platforms where APNs isn't available we report `.failed`.
     internal func requestPushNotificationRegistration() {
-      #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
-        PlatformApplication.registerSharedForRemoteNotifications()
-        pushTokenStatus = .requesting
-      #else
-        pushTokenStatus = .failed(
-          message: "APNs registration is unavailable on this platform."
-        )
-      #endif
+      PlatformApplication.registerSharedForRemoteNotifications()
+      pushTokenStatus = .requesting
+      //      #else
+      //        pushTokenStatus = .failed(
+      //          message: "APNs registration is unavailable on this platform."
+      //        )
+      //      #endif
     }
 
     /// Forward the APNs device token captured by the platform app delegate.
@@ -84,19 +73,22 @@
     }
   }
 
-  #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
-    extension CloudKitStore: PushTokenReceiver {
-      internal func didRegisterForRemoteNotifications(deviceToken: Data) {
-        recordDeviceToken(deviceToken)
-      }
-
-      internal func didFailToRegisterForRemoteNotifications(error: any Error) {
-        recordDeviceTokenError(error)
-      }
-
-      internal func didReceiveRemoteNotification(userInfo: [AnyHashable: Any]) {
-        lastReceivedNotification = String(describing: userInfo)
-      }
+  extension CloudKitStore: PushTokenReceiver {
+    /// Records the APNs device token forwarded by the platform app delegate.
+    public func didRegisterForRemoteNotifications(deviceToken: Data) {
+      recordDeviceToken(deviceToken)
     }
-  #endif
+
+    /// Records the APNs registration failure forwarded by the platform app
+    /// delegate.
+    public func didFailToRegisterForRemoteNotifications(error: any Error) {
+      recordDeviceTokenError(error)
+    }
+
+    /// Stores a description of the most recent remote notification payload.
+    public func didReceiveRemoteNotification(userInfo: [AnyHashable: Any]) {
+      lastReceivedNotification = String(describing: userInfo)
+    }
+  }
+
 #endif

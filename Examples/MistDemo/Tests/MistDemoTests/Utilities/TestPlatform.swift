@@ -46,16 +46,11 @@ internal enum TestPlatform {
 
   /// True when running inside CI on a simulator whose cooperative executor can
   /// starve the polling timeout task in `withTimeout` — see #334. The race is
-  /// bounded to iOS / visionOS / watchOS simulators under CI load; local sim
-  /// runs (CI env unset) stay strict to surface real regressions in the helper.
-  ///
-  /// The `CI` flag is delivered into the simulator's test-runner process via the
-  /// `TEST_RUNNER_CI` job-level env in the workflow — `xcodebuild test`
-  /// re-exports `TEST_RUNNER_`-prefixed host vars to the runner with the prefix
-  /// stripped, so it arrives as `CI`. (The earlier `SIMCTL_CHILD_CI` approach
-  /// never reached the xctest runner; an env dump confirmed it.)
+  /// bounded to Apple simulators (iOS / tvOS / visionOS / watchOS) under CI
+  /// load; local sim runs (CI env unset) stay strict to surface real
+  /// regressions in the helper.
   internal static let isFlakyTimeoutSimulator: Bool = {
-    #if (os(iOS) || os(visionOS) || os(watchOS)) && targetEnvironment(simulator)
+    #if (os(iOS) || os(tvOS) || os(visionOS) || os(watchOS)) && targetEnvironment(simulator)
       return ProcessInfo.processInfo.environment["CI"] != nil
     #else
       return false

@@ -27,14 +27,15 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+public import Foundation
 
 /// Receiver side of the platform push-notification bridge. The
 /// `PushNotificationDelegate` (AppKit / UIKit) forwards OS callbacks
 /// to whatever object is currently registered as
 /// `PushNotificationDelegate.receiver`.
 @MainActor
-internal protocol PushTokenReceiver: AnyObject {
+@objc
+public protocol PushTokenReceiver: AnyObject {
   func didRegisterForRemoteNotifications(deviceToken: Data)
   func didFailToRegisterForRemoteNotifications(error: any Error)
   func didReceiveRemoteNotification(userInfo: [AnyHashable: Any])

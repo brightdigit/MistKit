@@ -1,6 +1,6 @@
 //
-//  MistDemoApp.swift
-//  MistDemoApp
+//  PushTokenStatus.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,14 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistDemoApp
-internal import SwiftUI
-
-@main
-internal struct MistDemoAppMain: AppMain {
-  // SwiftUI owns the AppDelegate's lifecycle via this adaptor; the
-  // delegate's static-weak `receiver` is wired from `CloudKitStore.init`
-  // so the OS-delivered APNs token lands back in the observable store.
-    @PlatformApplicationDelegateAdaptor(PushNotificationDelegate.self)
-    private var pushDelegate
+/// The push-token registration state surfaced to the UI. APNs requires a
+/// signed app + push entitlement; on simulators or unentitled builds the
+/// OS reports an error which the UI renders inline.
+public enum PushTokenStatus: Sendable {
+  case idle
+  case requesting
+  case registered(hexToken: String)
+  case failed(message: String)
 }

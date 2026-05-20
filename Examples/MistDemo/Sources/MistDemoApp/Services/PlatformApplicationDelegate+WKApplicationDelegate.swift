@@ -1,5 +1,5 @@
 //
-//  PushNotificationDelegate+ReceiveNotification.swift
+//  PlatformApplicationDelegate+WKApplicationDelegate.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,35 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// The inbound `didReceiveRemoteNotification` delegate selector genuinely
-// differs between platforms — UIKit hands back a fetch-completion handler,
-// AppKit does not — so each variant lives in its own platform extension
-// rather than as inline `#if` branches inside the delegate class. Both funnel
-// through the same `PushTokenReceiver` method.
+#if canImport(WatchKit)
+  internal import Foundation
+  public import WatchKit
 
-#if canImport(AppKit) && !targetEnvironment(macCatalyst)
-  public import AppKit
-  public import Foundation
-
-  extension PushNotificationDelegate {
-    /// A remote notification arrived (AppKit variant).
-    public func application(
-      _ application: NSApplication,
-      didReceiveRemoteNotification userInfo: [String: Any]
-    ) {
-      Self.receiver?.didReceiveRemoteNotification(userInfo: userInfo)
+  extension PlatformApplicationDelegate where Self: WKApplicationDelegate {
+    /// APNs delivered a device token — forward it to the registered receiver.
+    public func didRegisterForRemoteNotifications(withDeviceToken deviceToken: Data) {
+      Self.receiver?.didRegisterForRemoteNotifications(deviceToken: deviceToken)
     }
-  }
-#elseif canImport(UIKit) && !os(watchOS)
-  public import Foundation
-  public import UIKit
 
-  extension PushNotificationDelegate {
-    /// A remote notification arrived (UIKit variant).
-    public func application(
-      _ application: UIApplication,
-      didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    /// APNs refused registration — forward the error to the receiver.
+    public func didFailToRegisterForRemoteNotificationsWithError(_ error: any Error) {
+      Self.receiver?.didFailToRegisterForRemoteNotifications(error: error)
+    }
+
+    /// A remote notification arrived (watchOS variant).
+    public func didReceiveRemoteNotification(
+      _ userInfo: [AnyHashable: Any],
+      fetchCompletionHandler completionHandler: @escaping (WKBackgroundFetchResult) -> Void
     ) {
       Self.receiver?.didReceiveRemoteNotification(userInfo: userInfo)
       completionHandler(.newData)

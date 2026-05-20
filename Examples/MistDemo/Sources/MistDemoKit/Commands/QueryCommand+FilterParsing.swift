@@ -68,8 +68,8 @@ extension QueryCommand {
     )
   }
 
+  // swiftlint:disable cyclomatic_complexity
   /// Build comparison-based filters (equals, not equals, greater/less than).
-  // swiftlint:disable:next cyclomatic_complexity
   internal static func buildComparisonFilter(
     field: String,
     operatorString: String,
@@ -96,6 +96,7 @@ extension QueryCommand {
       return nil
     }
   }
+  // swiftlint:enable cyclomatic_complexity
 
   /// Build string and list-based filters.
   internal static func buildSpecialFilter(

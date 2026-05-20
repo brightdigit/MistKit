@@ -1,6 +1,6 @@
 //
-//  MistDemoApp.swift
-//  MistDemoApp
+//  PlatformApplicationDelegate+UIApplicationDelegate.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,14 +27,19 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistDemoApp
-internal import SwiftUI
+#if canImport(UIKit) && !os(watchOS)
+  internal import Foundation
+  public import UIKit
 
-@main
-internal struct MistDemoAppMain: AppMain {
-  // SwiftUI owns the AppDelegate's lifecycle via this adaptor; the
-  // delegate's static-weak `receiver` is wired from `CloudKitStore.init`
-  // so the OS-delivered APNs token lands back in the observable store.
-    @PlatformApplicationDelegateAdaptor(PushNotificationDelegate.self)
-    private var pushDelegate
-}
+  extension PlatformApplicationDelegate where Self: UIApplicationDelegate {
+    /// A remote notification arrived (UIKit variant).
+    public func application(
+      _ application: UIApplication,
+      didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    ) {
+      Self.receiver?.didReceiveRemoteNotification(userInfo: userInfo)
+      completionHandler(.newData)
+    }
+  }
+#endif

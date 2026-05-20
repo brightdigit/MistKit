@@ -73,11 +73,10 @@
     public init(containerIdentifier: String) {
       self.containerIdentifier = containerIdentifier
       self.container = CKContainer(identifier: containerIdentifier)
-      #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
-        // The platform AppDelegate is owned by SwiftUI; weak-link this store
-        // as the sink for its APNs callbacks.
-        PushNotificationDelegate.receiver = self
-      #endif
+
+      // The platform AppDelegate is owned by SwiftUI; weak-link this store
+      // as the sink for its APNs callbacks.
+      PushNotificationDelegate.receiver = self
     }
 
     /// Apply the editable fields onto a CKRecord. CloudKit's system metadata

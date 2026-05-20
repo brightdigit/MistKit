@@ -27,51 +27,38 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
-  public import Foundation
+public import Foundation
 
-  #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-    public import AppKit
-  #elseif canImport(UIKit) && !os(watchOS)
-    public import UIKit
-  #endif
-
-  /// Universal AppKit/UIKit delegate that catches APNs callbacks SwiftUI
-  /// can't observe directly. SwiftUI's `@NSApplicationDelegateAdaptor` /
-  /// `@UIApplicationDelegateAdaptor` instantiates this with the parameterless
-  /// `NSObject` init, so the receiver is wired via a `static weak` set by
-  /// `CloudKitStore.init` rather than passed in.
-  @MainActor
-  public final class PushNotificationDelegate: NSObject, PlatformApplicationDelegate {
-    internal static weak var receiver: (any PushTokenReceiver)?
-
-    /// Required by SwiftUI's delegate adaptor, which constructs the
-    /// delegate with no arguments at app launch.
-    override public init() {
-      super.init()
-    }
-
-    /// APNs delivered a device token — forward it to the registered receiver.
-    public func application(
-      _ application: PlatformApplication,
-      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
-    ) {
-      Self.receiver?.didRegisterForRemoteNotifications(deviceToken: deviceToken)
-    }
-
-    /// APNs refused registration — forward the error to the receiver so it
-    /// can surface in the UI.
-    public func application(
-      _ application: PlatformApplication,
-      didFailToRegisterForRemoteNotificationsWithError error: any Error
-    ) {
-      Self.receiver?.didFailToRegisterForRemoteNotifications(error: error)
-    }
-
-    // The inbound `didReceiveRemoteNotification` signatures genuinely differ
-    // between platforms (UIKit takes a fetch-completion handler, AppKit does
-    // not), so each lives in its own platform extension in
-    // `PushNotificationDelegate+ReceiveNotification.swift` rather than as
-    // inline `#if` branches here.
-  }
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
+  public import AppKit
+#elseif canImport(WatchKit)
+  public import WatchKit
+#elseif canImport(UIKit) && !os(watchOS)
+  public import UIKit
 #endif
+
+/// Universal AppKit/UIKit/watchOS delegate that catches APNs callbacks
+/// SwiftUI can't observe directly. SwiftUI's `@NSApplicationDelegateAdaptor`
+/// / `@UIApplicationDelegateAdaptor` / `@WKApplicationDelegateAdaptor`
+/// instantiates this with the parameterless `NSObject` init, so the receiver
+/// is wired via a `static weak` set by `CloudKitStore.init` rather than
+/// passed in.
+///
+/// The APNs callbacks themselves are supplied by ``PlatformApplicationDelegate``
+/// and its per-platform extensions; conforming to both that protocol and the
+/// system ``ApplicationDelegate`` (required by the SwiftUI adaptor) is all
+/// this class needs to declare.
+@MainActor
+public final class PushNotificationDelegate:
+  NSObject, ApplicationDelegate, PlatformApplicationDelegate
+{
+  /// The object the platform delegate forwards APNs callbacks to. Set by
+  /// `CloudKitStore.init`; held weakly so the store's lifetime governs it.
+  public static weak var receiver: (any PushTokenReceiver)?
+
+  /// Required by SwiftUI's delegate adaptor, which constructs the
+  /// delegate with no arguments at app launch.
+  override public init() {
+    super.init()
+  }
+}

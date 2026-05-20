@@ -66,7 +66,7 @@
 
       let captured = await fixture.backend.lastModifyZones
       #expect(captured?.create == ["Articles"])
-      #expect(captured?.delete == [])
+      #expect(captured?.delete.isEmpty == true)
       #expect(captured?.database == .private)
     }
 
@@ -88,7 +88,7 @@
       }
 
       let captured = await fixture.backend.lastModifyZones
-      #expect(captured?.create == [])
+      #expect(captured?.create.isEmpty == true)
       #expect(captured?.delete == ["Archive"])
     }
 
