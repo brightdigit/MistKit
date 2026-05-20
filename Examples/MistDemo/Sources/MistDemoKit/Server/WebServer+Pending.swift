@@ -129,6 +129,86 @@
         endpoint: "tokens/register",
         trackingIssue: 53
       )
+
+      addUnwiredLandedEndpoints(api: api)
+    }
+
+    /// Register 501 stubs for endpoints whose MistKit Swift wrapper *has*
+    /// already landed but isn't exposed on the demo server yet — only the
+    /// `/api/*` route wiring is outstanding, tracked by #370. These return
+    /// the same structured pending body as `addPendingEndpoints`; replacing a
+    /// stub here with a real handler (mirroring `WebServer+Zones`) is the
+    /// remaining work for #370's "exercisable in both modes" criterion.
+    ///
+    /// Note: #370 is the tracking issue for the *route wiring*, not for the
+    /// wrapper (which shipped under #215/#45/#47/#48/#367).
+    internal func addUnwiredLandedEndpoints(
+      api: RouterGroup<BasicRequestContext>
+    ) {
+      let routeWiringIssue = 370
+      Self.registerPending(
+        api: api,
+        verb: .post,
+        path: "records/lookup",
+        endpoint: "records/lookup",
+        trackingIssue: routeWiringIssue
+      )
+      Self.registerPending(
+        api: api,
+        verb: .post,
+        path: "records/changes",
+        endpoint: "records/changes",
+        trackingIssue: routeWiringIssue
+      )
+      Self.registerPending(
+        api: api,
+        verb: .post,
+        path: "zones/list",
+        endpoint: "zones/list",
+        trackingIssue: routeWiringIssue
+      )
+      Self.registerPending(
+        api: api,
+        verb: .post,
+        path: "zones/lookup",
+        endpoint: "zones/lookup",
+        trackingIssue: routeWiringIssue
+      )
+      Self.registerPending(
+        api: api,
+        verb: .post,
+        path: "zones/changes",
+        endpoint: "zones/changes",
+        trackingIssue: routeWiringIssue
+      )
+      Self.registerPending(
+        api: api,
+        verb: .get,
+        path: "users/caller",
+        endpoint: "users/caller",
+        trackingIssue: routeWiringIssue
+      )
+      Self.registerPending(
+        api: api,
+        verb: .post,
+        path: "users/discover",
+        endpoint: "users/discover",
+        trackingIssue: routeWiringIssue
+      )
+      Self.registerPending(
+        api: api,
+        verb: .post,
+        path: "users/lookup/email",
+        endpoint: "users/lookup/email",
+        trackingIssue: routeWiringIssue
+      )
+      Self.registerPending(
+        api: api,
+        verb: .post,
+        path: "users/lookup/id",
+        endpoint: "users/lookup/id",
+        trackingIssue: routeWiringIssue
+      )
     }
   }
 #endif
