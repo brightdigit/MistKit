@@ -50,11 +50,13 @@ extension CloudKitService {
   ///
   /// - Note: Pass `desiredKeys` to limit which fields come back. Useful
   ///   for list views that only need a projection.
+  /// - Returns: A ``RecordResult`` per requested record — `.success` for a found
+  ///   record, `.failure` (e.g. `NOT_FOUND`) for one CloudKit could not return.
   public func lookupRecords(
     recordNames: [String],
     desiredKeys: [String]? = nil,
     database: Database
-  ) async throws(CloudKitError) -> [RecordInfo] {
+  ) async throws(CloudKitError) -> [RecordResult] {
     do {
       let client = try self.client(for: database)
       let response = try await client.lookupRecords(
@@ -79,7 +81,7 @@ extension CloudKitService {
 
       let lookupData: Components.Schemas.LookupResponse =
         try await responseProcessor.processLookupRecordsResponse(response)
-      return lookupData.records?.compactMap { RecordInfo(from: $0) } ?? []
+      return try (lookupData.records ?? []).map { try RecordResult(from: $0) }
     } catch {
       throw mapToCloudKitError(error, context: "lookupRecords")
     }

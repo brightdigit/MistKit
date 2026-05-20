@@ -48,10 +48,11 @@ internal struct LookupRecordsPhase: IntegrationPhase {
       print("   Looking up \(lookupNames.count) of \(input.names.count) record(s) by name")
     }
 
-    let records = try await context.service.lookupRecords(
+    let results = try await context.service.lookupRecords(
       recordNames: lookupNames,
       database: context.database
     )
+    let records = results.compactMap(\.record)
 
     print("✅ Looked up \(records.count) record(s)")
 

@@ -27,6 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import MistKitOpenAPI
+
 /// Zone information from CloudKit
 public struct ZoneInfo: Codable, Sendable {
   /// The zone name
@@ -43,5 +45,24 @@ public struct ZoneInfo: Codable, Sendable {
     self.zoneName = zoneName
     self.ownerRecordName = ownerRecordName
     self.capabilities = capabilities
+  }
+
+  /// Convert a CloudKit zone payload's `zoneID` into a `ZoneInfo`.
+  ///
+  /// All zone responses (`list`/`lookup`/`modify`/`changes`) expose an optional
+  /// `zoneID`; a missing `zoneID` or `zoneName` is a conversion failure (logged,
+  /// asserted in DEBUG, and thrown) rather than a silently-dropped zone.
+  internal init(fromZoneID zoneID: Components.Schemas.ZoneID?) throws {
+    guard let zoneID else {
+      try CloudKitError.reportConversionFailure("Zone entry missing zoneID")
+    }
+    guard let zoneName = zoneID.zoneName else {
+      try CloudKitError.reportConversionFailure("Zone entry missing zoneName")
+    }
+    self.init(
+      zoneName: zoneName,
+      ownerRecordName: zoneID.ownerName,
+      capabilities: []
+    )
   }
 }

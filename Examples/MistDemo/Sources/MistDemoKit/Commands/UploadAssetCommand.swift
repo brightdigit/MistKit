@@ -202,7 +202,7 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
       recordNames: [recordName],
       database: config.base.database
     )
-    guard let existingRecord = existingRecords.first else {
+    guard let existingRecord = existingRecords.first?.record else {
       throw UploadAssetError.operationFailed(
         "Record '\(recordName)' not found"
       )

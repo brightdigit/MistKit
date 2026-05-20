@@ -39,6 +39,9 @@ public struct UserIdentity: Codable, Sendable {
   public let lookupInfo: UserIdentityLookupInfo?
 
   internal init(from schema: Components.Schemas.UserIdentity) {
+    // `userRecordName` is intentionally optional: CloudKit returns an identity
+    // with only `lookupInfo` for a non-discoverable user, so a nil here is a
+    // valid response — not a conversion failure.
     self.userRecordName = schema.userRecordName
     self.nameComponents = schema.nameComponents.map(NameComponents.init(from:))
     self.lookupInfo = schema.lookupInfo.map(UserIdentityLookupInfo.init(from:))

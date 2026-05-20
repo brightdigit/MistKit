@@ -67,13 +67,14 @@ extension CloudKitService {
   ///   - operations: Array of record operations to perform
   ///   - atomic: When true, the entire batch fails if any single operation fails (default: false)
   ///   - database: The CloudKit database scope to modify (`.public`, `.private`, `.shared`)
-  /// - Returns: Array of RecordInfo for the modified records
+  /// - Returns: A ``RecordResult`` per operation — `.success` for a saved/deleted
+  ///   record, `.failure` (a ``RecordError``) for one that CloudKit rejected.
   /// - Throws: CloudKitError if the operation fails
   public func modifyRecords(
     _ operations: [RecordOperation],
     atomic: Bool = false,
     database: Database
-  ) async throws(CloudKitError) -> [RecordInfo] {
+  ) async throws(CloudKitError) -> [RecordResult] {
     let apiOperations: [Components.Schemas.RecordOperation]
     do {
       apiOperations = try operations.map {
@@ -107,8 +108,7 @@ extension CloudKitService {
       let modifyResponse: Components.Schemas.ModifyResponse =
         try await responseProcessor.processModifyRecordsResponse(response)
 
-      return modifyResponse.records?.compactMap { RecordInfo(from: $0) }
-        ?? []
+      return try (modifyResponse.records ?? []).map { try RecordResult(from: $0) }
     } catch let cloudKitError as CloudKitError {
       throw cloudKitError.addingQuotaHint(
         Self.recordSizeQuotaHint(for: apiOperations)
@@ -148,10 +148,10 @@ extension CloudKitService {
     )
 
     let results = try await modifyRecords([operation], database: database)
-    guard let record = results.first else {
+    guard let result = results.first else {
       throw CloudKitError.invalidResponse
     }
-    return record
+    return try result.get()
   }
 
   /// Update a single record in CloudKit
@@ -189,10 +189,10 @@ extension CloudKitService {
     )
 
     let results = try await modifyRecords([operation], database: database)
-    guard let record = results.first else {
+    guard let result = results.first else {
       throw CloudKitError.invalidResponse
     }
-    return record
+    return try result.get()
   }
 
   /// Delete a single record from CloudKit
@@ -214,6 +214,11 @@ extension CloudKitService {
       recordChangeTag: recordChangeTag
     )
 
-    _ = try await modifyRecords([operation], database: database)
+    let results = try await modifyRecords([operation], database: database)
+    for result in results {
+      if let error = result.error {
+        throw CloudKitError.recordOperationFailed(error)
+      }
+    }
   }
 }

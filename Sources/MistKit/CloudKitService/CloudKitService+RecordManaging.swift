@@ -60,10 +60,15 @@ extension CloudKitService: RecordManaging {
 
   /// Execute a batch of record operations via modify
   public func executeBatchOperations(_ operations: [RecordOperation]) async throws {
-    _ = try await self.modifyRecords(
+    let results = try await self.modifyRecords(
       operations,
       database: .public(.prefers(.serverToServer))
     )
+    for result in results {
+      if let error = result.error {
+        throw CloudKitError.recordOperationFailed(error)
+      }
+    }
   }
 
   /// Query all records of a specific type, automatically paginating

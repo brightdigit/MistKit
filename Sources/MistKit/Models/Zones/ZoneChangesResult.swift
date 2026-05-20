@@ -52,18 +52,8 @@ public struct ZoneChangesResult: Codable, Sendable {
     self.moreComing = moreComing
   }
 
-  internal init(from response: Components.Schemas.ZoneChangesResponse) {
-    self.zones =
-      response.zones?.compactMap { zonePayload in
-        guard let zoneID = zonePayload.zoneID else {
-          return nil
-        }
-        return ZoneInfo(
-          zoneName: zoneID.zoneName ?? "Unknown",
-          ownerRecordName: zoneID.ownerName,
-          capabilities: []  // CloudKit Web Services zone-changes responses omit capabilities
-        )
-      } ?? []
+  internal init(from response: Components.Schemas.ZoneChangesResponse) throws {
+    self.zones = try (response.zones ?? []).map { try ZoneInfo(fromZoneID: $0.zoneID) }
     self.syncToken = response.syncToken
     self.moreComing = response.moreComing ?? false
   }

@@ -125,8 +125,11 @@ let results = try await service.modifyRecords(
     database: .public(.prefers(.serverToServer))
 )
 for result in results {
-    if result.isError {
-        logger.error("Failed: \\(result.serverErrorCode ?? "unknown")")
+    switch result {
+    case .success(let record):
+        logger.debug("Saved: \\(record.recordName)")
+    case .failure(let error):
+        logger.error("Failed \\(error.recordName): \\(error.serverErrorCode.rawValue)")
     }
 }
 ```
@@ -155,6 +158,6 @@ This logs:
 
 1. **Batch wisely**: Stay under 200 operations per request
 2. **Order matters**: Upload dependencies first (SwiftVersion before XcodeVersion)
-3. **Handle partials**: Check `RecordInfo.isError` for each result
+3. **Handle partials**: Switch over each `RecordResult` (`.success` / `.failure`)
 4. **Use references**: Link related records with CloudKit references
 5. **Verbose development**: Use `--verbose` flag during development

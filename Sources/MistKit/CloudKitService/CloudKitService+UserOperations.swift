@@ -63,7 +63,7 @@ extension CloudKitService {
 
       let userData: Components.Schemas.UserResponse =
         try await responseProcessor.processGetCallerResponse(response)
-      return UserInfo(from: userData)
+      return try UserInfo(from: userData)
     } catch {
       throw mapToCloudKitError(error, context: "fetchCaller")
     }

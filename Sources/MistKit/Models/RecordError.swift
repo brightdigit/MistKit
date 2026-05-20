@@ -1,5 +1,5 @@
 //
-//  RecordTimestamp.swift
+//  RecordError.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,37 +27,19 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
-internal import MistKitOpenAPI
+public import MistKitOpenAPI
 
-/// Timestamp information for record creation or modification
-public struct RecordTimestamp: Codable, Sendable {
-  /// The date when the action occurred
-  public let timestamp: Date?
-  /// The record name of the user who performed the action
-  public let userRecordName: String?
-
-  internal init(from schema: Components.Schemas.RecordTimestamp) throws {
-    if let millis = schema.timestamp {
-      guard millis >= 0 else {
-        try CloudKitError.reportConversionFailure(
-          "Invalid negative timestamp (\(millis) ms)"
-        )
-      }
-      self.timestamp = Date(timeIntervalSince1970: millis / 1_000.0)
-    } else {
-      self.timestamp = nil
-    }
-    self.userRecordName = schema.userRecordName
-  }
-
-  /// Public initializer for creating RecordTimestamp instances
-  ///
-  /// - Parameters:
-  ///   - timestamp: The date when the action occurred
-  ///   - userRecordName: The record name of the user who performed the action
-  public init(timestamp: Date? = nil, userRecordName: String? = nil) {
-    self.timestamp = timestamp
-    self.userRecordName = userRecordName
-  }
-}
+/// A per-record error returned inline in a CloudKit `modifyRecords` or
+/// `lookupRecords` response.
+///
+/// CloudKit reports per-operation failures as error entries within the
+/// otherwise-successful (HTTP 200) `records` array, carrying the failed
+/// record's name, a server error code, and optional retry/redirect hints.
+/// `RecordError` reuses the generated OpenAPI schema type directly so no
+/// information is discarded.
+///
+/// Surfaced via ``RecordResult/failure(_:)`` from `modifyRecords` /
+/// `lookupRecords`, and wrapped in ``CloudKitError/recordOperationFailed(_:)``
+/// when a single-record convenience (`createRecord`/`updateRecord`/
+/// `deleteRecord`) hits one.
+public typealias RecordError = Components.Schemas.RecordError

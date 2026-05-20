@@ -86,10 +86,6 @@ extension FieldValue {
     if let value = try? container.decode(Asset.self) {
       return .asset(value)
     }
-    // Try to decode as date (milliseconds since epoch)
-    if let value = try? container.decode(Double.self) {
-      return .date(Date(timeIntervalSince1970: value / Self.millisecondsPerSecond))
-    }
     return nil
   }
 

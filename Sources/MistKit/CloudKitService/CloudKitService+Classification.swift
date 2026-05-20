@@ -114,11 +114,11 @@ extension CloudKitService {
     atomic: Bool = false,
     database: Database
   ) async throws(CloudKitError) -> BatchSyncResult {
-    let records = try await modifyRecords(
+    let results = try await modifyRecords(
       operations,
       atomic: atomic,
       database: database
     )
-    return BatchSyncResult(records: records, classification: classification)
+    return BatchSyncResult(results: results, classification: classification)
   }
 }

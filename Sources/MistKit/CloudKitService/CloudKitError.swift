@@ -28,6 +28,7 @@
 //
 
 public import Foundation
+public import MistKitOpenAPI
 internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
@@ -53,6 +54,15 @@ public enum CloudKitError: LocalizedError, Sendable {
   /// rolled back because at least one operation in the batch failed.
   case atomicFailure(reason: String?)
   case invalidResponse
+  /// A CloudKit response decoded at the transport layer but could not be
+  /// mapped into a MistKit domain type — e.g. an unmappable field value, a
+  /// record/zone/user missing a required identifier, or an unknown union case.
+  /// `context` names the field, type, and record involved.
+  case responseConversionFailed(context: String)
+  /// A per-record operation in a `modifyRecords`/`lookupRecords` batch came
+  /// back as a `RecordError`, surfaced by a single-record convenience
+  /// (`createRecord`/`updateRecord`/`deleteRecord`).
+  case recordOperationFailed(RecordError)
   case underlyingError(any Error)
   case decodingError(DecodingError)
   case networkError(URLError)
@@ -80,7 +90,8 @@ public enum CloudKitError: LocalizedError, Sendable {
       return 413
     case .badRequest, .atomicFailure:
       return 400
-    case .invalidResponse, .underlyingError, .decodingError, .networkError,
+    case .invalidResponse, .responseConversionFailed, .recordOperationFailed,
+      .underlyingError, .decodingError, .networkError,
       .unsupportedOperationType, .paginationLimitExceeded,
       .zonePaginationLimitExceeded, .missingCredentials, .invalidPrivateKey:
       return nil
@@ -105,6 +116,16 @@ public enum CloudKitError: LocalizedError, Sendable {
       return "CloudKit API error: HTTP \(statusCode)\nRaw Response: \(rawResponse)"
     case .invalidResponse:
       return "Invalid response from CloudKit"
+    case .responseConversionFailed(let context):
+      return "Failed to convert CloudKit response into a MistKit type: \(context)"
+    case .recordOperationFailed(let recordError):
+      var message =
+        "CloudKit record operation failed for '\(recordError.recordName)' "
+        + "(\(recordError.serverErrorCode.rawValue))"
+      if let reason = recordError.reason {
+        message += "\nReason: \(reason)"
+      }
+      return message
     case .underlyingError(let error):
       return "CloudKit operation failed with underlying error: \(String(reflecting: error))"
     case .decodingError(let error):

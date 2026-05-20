@@ -52,8 +52,8 @@ public struct RecordChangesResult: Codable, Sendable {
     self.moreComing = moreComing
   }
 
-  internal init(from response: Components.Schemas.ChangesResponse) {
-    self.records = response.records?.compactMap { RecordInfo(from: $0) } ?? []
+  internal init(from response: Components.Schemas.ChangesResponse) throws {
+    self.records = try (response.records ?? []).map { try RecordInfo(from: $0) }
     self.syncToken = response.syncToken
     self.moreComing = response.moreComing ?? false
   }

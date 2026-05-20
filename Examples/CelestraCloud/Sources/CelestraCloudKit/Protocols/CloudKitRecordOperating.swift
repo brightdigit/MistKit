@@ -77,15 +77,26 @@ public protocol CloudKitRecordOperating: Sendable {
 // MARK: - CloudKitService Conformance
 
 extension CloudKitService: CloudKitRecordOperating {
-  /// Satisfy CloudKitRecordOperating protocol by forwarding to modifyRecords(_:atomic:)
+  /// Satisfy CloudKitRecordOperating protocol by forwarding to modifyRecords(_:atomic:).
+  ///
+  /// MistKit now returns `[RecordResult]`; this protocol keeps the `[RecordInfo]` contract,
+  /// so a per-record `.failure` is rethrown as `CloudKitError.recordOperationFailed`. That
+  /// matches Celestra's conservative all-or-nothing batch handling (a failure surfaces as a
+  /// thrown error, which the caller treats as a failed batch).
   public func modifyRecords(_ operations: [RecordOperation]) async throws(CloudKitError)
     -> [RecordInfo]
   {
-    try await modifyRecords(
+    let results = try await modifyRecords(
       operations,
       atomic: false,
       database: .public(.prefers(.serverToServer))
     )
+    var records: [RecordInfo] = []
+    records.reserveCapacity(results.count)
+    for result in results {
+      records.append(try result.get())
+    }
+    return records
   }
 
   /// Satisfy CloudKitRecordOperating's `queryRecords` (no database param) by forwarding to the public-database overload.
