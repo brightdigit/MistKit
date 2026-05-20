@@ -13,7 +13,7 @@
 [![Maintainability](https://qlty.sh/badges/55637213-d307-477e-a710-f9dba332d955/maintainability.svg)](https://qlty.sh/gh/brightdigit/projects/MistKit)
 [![Documentation](https://img.shields.io/badge/docc-read_documentation-blue)](https://swiftpackageindex.com/brightdigit/MistKit/documentation)
 
-A Swift Package for Server-Side and Command-Line Access to [CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)
+A Swift Package for Server-Side and Command-Line Access to [CloudKit Web Services](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html)
 
 ## Table of Contents
 - [Overview](#overview)
@@ -330,7 +330,7 @@ Check out the `Examples/` directory for complete working examples:
 
 ### Apple References
 
-- **[CloudKit Web Services](https://developer.apple.com/documentation/cloudkitwebservices)**: Official CloudKit Web Services REST API documentation
+- **[CloudKit Web Services](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/index.html)**: Official CloudKit Web Services REST API documentation
 - **[CloudKit framework](https://developer.apple.com/documentation/cloudkit)**: On-device CloudKit framework (iOS/macOS)
 - **[CloudKit JS](https://developer.apple.com/documentation/cloudkitjs)**: Browser-based CloudKit access used for web auth token capture
 - **[CKFetchWebAuthTokenOperation](https://developer.apple.com/documentation/cloudkit/ckfetchwebauthtokenoperation)**: iOS/macOS API for exchanging an iCloud session for a web auth token
