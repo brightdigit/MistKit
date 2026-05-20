@@ -1221,7 +1221,7 @@ components:
           type: array
           items:
             oneOf:
-              - $ref: '#/components/schemas/RecordError'
+              - $ref: '#/components/schemas/RecordOperationFailure'
               - $ref: '#/components/schemas/RecordResponse'
 
     LookupResponse:
@@ -1231,7 +1231,7 @@ components:
           type: array
           items:
             oneOf:
-              - $ref: '#/components/schemas/RecordError'
+              - $ref: '#/components/schemas/RecordOperationFailure'
               - $ref: '#/components/schemas/RecordResponse'
 
     ChangesResponse:
@@ -1433,7 +1433,7 @@ components:
         webcAuthToken:
           type: string
 
-    RecordError:
+    RecordOperationFailure:
       type: object
       description: |
         Per-record error returned inline in the `records` array of a 200

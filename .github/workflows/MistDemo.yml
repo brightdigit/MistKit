@@ -248,6 +248,17 @@ jobs:
     needs: configure
     runs-on: macos-26
     if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+    # Forward CI=true into the simulator's test process. xcodebuild launches
+    # simulator tests via CoreSimulator, whose `launchd_sim` only inherits env
+    # vars prefixed with SIMCTL_CHILD_ (stripping the prefix) that are present
+    # *when the simulator boots*. Setting it at job scope — rather than only on
+    # the Build and Test step — guarantees it's in the environment whenever the
+    # action boots the sim, so `TestPlatform.isFlakyTimeoutSimulator` reads
+    # ProcessInfo["CI"] as non-nil inside the sim and the cooperative-executor
+    # flake gates in #334 are tolerated on visionOS/watchOS sim CI runs instead
+    # of surfacing as real failures (run 26164436291).
+    env:
+      SIMCTL_CHILD_CI: "true"
     strategy:
       fail-fast: false
       matrix:
@@ -280,14 +291,6 @@ jobs:
       - uses: actions/checkout@v6
       - name: Build and Test
         id: build
-        # Forward CI=true into the simulator's test process. xcodebuild launches
-        # simulator tests via simctl, which only propagates env vars prefixed
-        # with SIMCTL_CHILD_ (stripping the prefix on arrival). Without this,
-        # `TestPlatform.isFlakyTimeoutSimulator` reads ProcessInfo["CI"] as nil
-        # inside the sim and the cooperative-executor flake gates in #334 stay
-        # strict on visionOS/watchOS sim CI runs, surfacing as real failures.
-        env:
-          SIMCTL_CHILD_CI: "true"
         uses: brightdigit/swift-build@v1
         with:
           scheme: ${{ env.PACKAGE_NAME }}-Package

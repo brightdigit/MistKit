@@ -78,7 +78,7 @@ internal struct LookupUsersByEmailPhase: IntegrationPhase {
 
     if context.verbose {
       for identity in identities {
-        if let name = identity.userRecordName { print("   - \(name)") }
+        if let name = identity.userRecordName.value { print("   - \(name)") }
       }
     }
 

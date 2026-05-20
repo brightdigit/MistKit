@@ -29,7 +29,6 @@
 
 internal import Foundation
 internal import MistKit
-internal import MistKitOpenAPI
 
 /// Command to perform batch create/update/delete operations.
 public struct ModifyCommand: MistDemoCommand, OutputFormatting {

@@ -68,7 +68,8 @@ extension CloudKitService {
   ///   - atomic: When true, the entire batch fails if any single operation fails (default: false)
   ///   - database: The CloudKit database scope to modify (`.public`, `.private`, `.shared`)
   /// - Returns: A ``RecordResult`` per operation — `.success` for a saved/deleted
-  ///   record, `.failure` (a ``RecordError``) for one that CloudKit rejected.
+  ///   record, `.failure` (a ``RecordOperationFailure``) for one that CloudKit
+  ///   rejected.
   /// - Throws: CloudKitError if the operation fails
   public func modifyRecords(
     _ operations: [RecordOperation],

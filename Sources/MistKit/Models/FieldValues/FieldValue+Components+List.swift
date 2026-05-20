@@ -36,8 +36,11 @@ extension FieldValue {
   internal init(
     listValue: [Components.Schemas.ListValuePayload],
     fieldName: String
-  ) throws {
-    let convertedList = try listValue.map { try Self(listItem: $0, fieldName: fieldName) }
+  ) throws(ConversionError) {
+    var convertedList: [FieldValue] = []
+    for item in listValue {
+      convertedList.append(try Self(listItem: item, fieldName: fieldName))
+    }
     self = .list(convertedList)
   }
 
@@ -45,16 +48,15 @@ extension FieldValue {
   internal init(
     listItem: Components.Schemas.ListValuePayload,
     fieldName: String
-  ) throws {
+  ) throws(ConversionError) {
     if let simpleValue = Self.makeSimpleListItem(from: listItem) {
       self = simpleValue
     } else if let complexValue = try Self.makeComplexListItem(from: listItem, fieldName: fieldName)
     {
       self = complexValue
     } else {
-      try CloudKitError.reportConversionFailure(
-        "Unmappable list item for field '\(fieldName)' (\(listItem))"
-      )
+      let failure = ConversionError.unmappableListItem(fieldName: fieldName, item: "\(listItem)")
+      try failure.reportAndThrow()
     }
   }
 
@@ -62,9 +64,10 @@ extension FieldValue {
   internal init(
     nestedListValue: [Components.Schemas.ListValuePayload],
     fieldName: String
-  ) throws {
-    let convertedNestedList = try nestedListValue.map {
-      try Self(basicListItem: $0, fieldName: fieldName)
+  ) throws(ConversionError) {
+    var convertedNestedList: [FieldValue] = []
+    for item in nestedListValue {
+      convertedNestedList.append(try Self(basicListItem: item, fieldName: fieldName))
     }
     self = .list(convertedNestedList)
   }
@@ -73,7 +76,7 @@ extension FieldValue {
   internal init(
     basicListItem: Components.Schemas.ListValuePayload,
     fieldName: String
-  ) throws {
+  ) throws(ConversionError) {
     switch basicListItem {
     case .StringValue(let stringValue):
       self = .string(stringValue)
@@ -84,9 +87,11 @@ extension FieldValue {
     case .BytesValue(let bytesValue):
       self = .bytes(bytesValue)
     default:
-      try CloudKitError.reportConversionFailure(
-        "Unmappable nested list item for field '\(fieldName)' (\(basicListItem))"
+      let failure = ConversionError.unmappableNestedListItem(
+        fieldName: fieldName,
+        item: "\(basicListItem)"
       )
+      try failure.reportAndThrow()
     }
   }
 
@@ -114,7 +119,7 @@ extension FieldValue {
   private static func makeComplexListItem(
     from listItem: Components.Schemas.ListValuePayload,
     fieldName: String
-  ) throws -> FieldValue? {
+  ) throws(ConversionError) -> FieldValue? {
     if case .LocationValue(let locationValue) = listItem {
       return try Self(locationValue: locationValue, fieldName: fieldName)
     }

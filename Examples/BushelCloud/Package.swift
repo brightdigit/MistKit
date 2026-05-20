@@ -108,7 +108,6 @@ let package = Package(
             dependencies: [
                 .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
                 .product(name: "MistKit", package: "MistKit"),
-                .product(name: "MistKitOpenAPI", package: "MistKit"),
                 .product(name: "BushelLogging", package: "BushelKit"),
                 .product(name: "BushelFoundation", package: "BushelKit"),
                 .product(name: "BushelUtilities", package: "BushelKit"),

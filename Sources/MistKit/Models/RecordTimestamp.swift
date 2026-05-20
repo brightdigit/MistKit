@@ -37,12 +37,10 @@ public struct RecordTimestamp: Codable, Sendable {
   /// The record name of the user who performed the action
   public let userRecordName: String?
 
-  internal init(from schema: Components.Schemas.RecordTimestamp) throws {
+  internal init(from schema: Components.Schemas.RecordTimestamp) throws(ConversionError) {
     if let millis = schema.timestamp {
       guard millis >= 0 else {
-        try CloudKitError.reportConversionFailure(
-          "Invalid negative timestamp (\(millis) ms)"
-        )
+        try ConversionError.negativeTimestamp(milliseconds: millis).reportAndThrow()
       }
       self.timestamp = Date(timeIntervalSince1970: millis / 1_000.0)
     } else {

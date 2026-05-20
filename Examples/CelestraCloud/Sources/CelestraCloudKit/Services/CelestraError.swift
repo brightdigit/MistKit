@@ -147,7 +147,7 @@ public enum CelestraError: LocalizedError {
     case .unsupportedOperationType, .paginationLimitExceeded, .zonePaginationLimitExceeded:
       // Programmer/configuration issues — not retriable
       return false
-    case .responseConversionFailed, .recordOperationFailed:
+    case .conversionFailed, .recordOperationFailed:
       // Response could not be mapped, or a per-record operation failed — not retriable
       return false
     case .missingCredentials, .invalidPrivateKey:

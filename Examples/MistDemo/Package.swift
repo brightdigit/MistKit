@@ -136,7 +136,6 @@ let package = Package(
       dependencies: [
         .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
         .product(name: "MistKit", package: "MistKit"),
-        .product(name: "MistKitOpenAPI", package: "MistKit"),
         .product(
           name: "Hummingbird",
           package: "hummingbird",
@@ -175,7 +174,6 @@ let package = Package(
         "MistDemoKit",
         .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
         .product(name: "MistKit", package: "MistKit"),
-        .product(name: "MistKitOpenAPI", package: "MistKit"),
         .product(
           name: "Hummingbird",
           package: "hummingbird",

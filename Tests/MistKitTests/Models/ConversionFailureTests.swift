@@ -38,7 +38,7 @@ internal import Testing
 /// assertion trap is suppressed so the thrown error is observable.
 @Suite("Conversion Failures")
 internal struct ConversionFailureTests {
-  /// Runs `body`, expecting it to throw a `CloudKitError`, with the DEBUG
+  /// Runs `body`, expecting it to throw a `ConversionError`, with the DEBUG
   /// assertion handler suppressed so the throw is observed rather than trapped.
   private func expectConversionThrow(
     _ body: () throws -> Void
@@ -46,7 +46,7 @@ internal struct ConversionFailureTests {
     ConversionFailureReporter.$assertionHandler.withValue(
       { _, _, _ in },
       operation: {
-        #expect(throws: CloudKitError.self) {
+        #expect(throws: ConversionError.self) {
           try body()
         }
       }
@@ -84,7 +84,7 @@ internal struct ConversionFailureTests {
     let schema = Components.Schemas.UserIdentity()
     let identity = UserIdentity(from: schema)
 
-    #expect(identity.userRecordName == nil)
+    #expect(identity.userRecordName == .nonDiscoverable)
   }
 
   @Test("UserInfo throws when userRecordName is missing")
@@ -105,14 +105,14 @@ internal struct ConversionFailureTests {
 
   @Test("RecordResult maps an error item to .failure with the server error code")
   internal func recordResultMapsErrorItem() throws {
-    let item = Components.Schemas.ModifyResponse.recordsPayloadPayload.RecordError(
+    let item = Components.Schemas.ModifyResponse.recordsPayloadPayload.RecordOperationFailure(
       .init(recordName: "rec-1", serverErrorCode: .NOT_FOUND)
     )
     let result = try RecordResult(from: item)
 
     #expect(result.record == nil)
     #expect(result.error?.recordName == "rec-1")
-    #expect(result.error?.serverErrorCode == .NOT_FOUND)
+    #expect(result.error?.serverErrorCode == .notFound)
   }
 
   @Test("RecordResult maps a record item to .success")
@@ -129,7 +129,7 @@ internal struct ConversionFailureTests {
   @Test("RecordResult.get() rethrows a failure as recordOperationFailed")
   internal func recordResultGetThrowsOnFailure() {
     let result = RecordResult.failure(
-      RecordError(recordName: "rec-1", serverErrorCode: .BAD_REQUEST)
+      RecordOperationFailure(recordName: "rec-1", serverErrorCode: .badRequest)
     )
     #expect(throws: CloudKitError.self) {
       _ = try result.get()

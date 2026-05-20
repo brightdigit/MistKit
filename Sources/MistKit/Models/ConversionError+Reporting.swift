@@ -1,5 +1,5 @@
 //
-//  CloudKitError+ConversionFailure.swift
+//  ConversionError+Reporting.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,7 +29,7 @@
 
 internal import Logging
 
-/// Trap hook used by ``CloudKitError/reportConversionFailure(_:function:file:line:)``.
+/// Trap hook used by ``ConversionError/reportAndThrow(function:file:line:)``.
 ///
 /// The default handler calls Swift's `assertionFailure`, so a response→domain
 /// conversion failure traps loudly in DEBUG. Tests override the handler via
@@ -42,25 +42,30 @@ internal enum ConversionFailureReporter {
     }
 }
 
-extension CloudKitError {
+extension ConversionError {
+  /// Wraps this typed conversion failure into a ``CloudKitError`` for the
+  /// `CloudKitService` boundary, which throws `CloudKitError`.
+  internal var asCloudKitError: CloudKitError {
+    .conversionFailed(self)
+  }
+
   /// Reports a response→domain conversion failure loudly and uniformly:
   /// - logs at `.error` on every build (with full context),
   /// - traps via the injectable assertion handler in DEBUG (no-op in release),
-  /// - always throws ``CloudKitError/responseConversionFailed(context:)`` so
-  ///   callers never receive silently-truncated data.
+  /// - always throws `self` (a typed ``ConversionError``) so callers never
+  ///   receive silently-truncated data.
   ///
   /// The `-> Never` shape lets call sites read as a single `try` statement.
   /// In DEBUG the handler traps *before* the throw is reached; in release it is
   /// a no-op, so the function logs then throws.
-  internal static func reportConversionFailure(
-    _ context: @autoclosure () -> String,
+  internal func reportAndThrow(
     function: StaticString = #function,
     file: StaticString = #fileID,
     line: UInt = #line
-  ) throws -> Never {
-    let message = context()
+  ) throws(ConversionError) -> Never {
+    let message = self.message
     Logger(subsystem: .api).error("Conversion failure in \(function): \(message)")
     ConversionFailureReporter.assertionHandler(message, file, line)
-    throw CloudKitError.responseConversionFailed(context: message)
+    throw self
   }
 }

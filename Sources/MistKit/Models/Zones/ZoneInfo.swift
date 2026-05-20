@@ -52,12 +52,12 @@ public struct ZoneInfo: Codable, Sendable {
   /// All zone responses (`list`/`lookup`/`modify`/`changes`) expose an optional
   /// `zoneID`; a missing `zoneID` or `zoneName` is a conversion failure (logged,
   /// asserted in DEBUG, and thrown) rather than a silently-dropped zone.
-  internal init(fromZoneID zoneID: Components.Schemas.ZoneID?) throws {
+  internal init(fromZoneID zoneID: Components.Schemas.ZoneID?) throws(ConversionError) {
     guard let zoneID else {
-      try CloudKitError.reportConversionFailure("Zone entry missing zoneID")
+      try ConversionError.zoneMissingID.reportAndThrow()
     }
     guard let zoneName = zoneID.zoneName else {
-      try CloudKitError.reportConversionFailure("Zone entry missing zoneName")
+      try ConversionError.zoneMissingName.reportAndThrow()
     }
     self.init(
       zoneName: zoneName,

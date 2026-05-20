@@ -51,6 +51,11 @@ extension CloudKitService {
       return cloudKitError
     }
 
+    // A response→domain conversion failed; preserve the structured cause.
+    if let conversionError = error as? ConversionError {
+      return conversionError.asCloudKitError
+    }
+
     // OpenAPIRuntime wraps transport-level errors in ClientError; unwrap to inspect the cause.
     let inspected: any Error =
       (error as? ClientError)?.underlyingError ?? error

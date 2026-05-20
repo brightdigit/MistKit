@@ -52,7 +52,7 @@ public struct BatchSyncResult: Sendable {
   public let updated: [RecordInfo]
 
   /// Per-record errors returned by CloudKit for operations that failed.
-  public let failed: [RecordError]
+  public let failed: [RecordOperationFailure]
 
   /// Successful records that could not be classified as either a create or update.
   ///
@@ -90,7 +90,7 @@ public struct BatchSyncResult: Sendable {
   internal init(
     created: [RecordInfo],
     updated: [RecordInfo],
-    failed: [RecordError],
+    failed: [RecordOperationFailure],
     unclassified: [RecordInfo] = []
   ) {
     self.created = created
@@ -103,7 +103,7 @@ public struct BatchSyncResult: Sendable {
   /// using a pre-computed classification.
   ///
   /// Each result is sorted as follows:
-  /// 1. If the result is a `.failure`, its `RecordError` is added to `failed`.
+  /// 1. If the result is a `.failure`, its `RecordOperationFailure` is added to `failed`.
   /// 2. Else if `record.recordName` is in `classification.creates`, it is added
   ///    to `created`.
   /// 3. Else if `record.recordName` is in `classification.updates`, it is added
@@ -119,7 +119,7 @@ public struct BatchSyncResult: Sendable {
   ) {
     var created: [RecordInfo] = []
     var updated: [RecordInfo] = []
-    var failed: [RecordError] = []
+    var failed: [RecordOperationFailure] = []
     var unclassified: [RecordInfo] = []
 
     for result in results {

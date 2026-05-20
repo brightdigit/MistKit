@@ -35,7 +35,7 @@ internal import MistKitOpenAPI
 /// A `RecordInfo` always represents a successfully-returned record: it carries a
 /// non-optional `recordName` and `recordType`. Per-record failures from
 /// `modifyRecords` / `lookupRecords` are surfaced separately as
-/// ``RecordResult/failure(_:)`` (a ``RecordError``) and never become a
+/// ``RecordResult/failure(_:)`` (a ``RecordOperationFailure``) and never become a
 /// `RecordInfo`. A response record missing its identifiers is treated as a
 /// conversion failure (logged, asserted in DEBUG, and thrown).
 public struct RecordInfo: Codable, Sendable {
@@ -55,19 +55,27 @@ public struct RecordInfo: Codable, Sendable {
   /// the record was deleted and should be removed from local storage.
   public let deleted: Bool
 
-  internal init(from record: Components.Schemas.RecordResponse) throws {
+  internal init(from record: Components.Schemas.RecordResponse) throws(ConversionError) {
     guard let recordName = record.recordName, let recordType = record.recordType else {
-      try CloudKitError.reportConversionFailure(
-        "RecordResponse missing required identifier(s) "
-          + "(recordName: \(String(describing: record.recordName)), "
-          + "recordType: \(String(describing: record.recordType)))"
+      let failure = ConversionError.recordMissingIdentifier(
+        recordName: record.recordName,
+        recordType: record.recordType
       )
+      try failure.reportAndThrow()
     }
     self.recordName = recordName
     self.recordType = recordType
     self.recordChangeTag = record.recordChangeTag
-    self.created = try record.created.map(RecordTimestamp.init(from:))
-    self.modified = try record.modified.map(RecordTimestamp.init(from:))
+    if let created = record.created {
+      self.created = try RecordTimestamp(from: created)
+    } else {
+      self.created = nil
+    }
+    if let modified = record.modified {
+      self.modified = try RecordTimestamp(from: modified)
+    } else {
+      self.modified = nil
+    }
     self.deleted = record.deleted ?? false
 
     // Convert fields to FieldValue representation

@@ -16,7 +16,7 @@ internal struct RecordInfoTests {
     ConversionFailureReporter.$assertionHandler.withValue(
       { _, _, _ in },
       operation: {
-        #expect(throws: CloudKitError.self) {
+        #expect(throws: ConversionError.self) {
           _ = try RecordInfo(from: mockRecord)
         }
       }

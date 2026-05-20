@@ -28,7 +28,6 @@
 //
 
 internal import Foundation
-internal import MistKitOpenAPI
 internal import Testing
 
 @testable import MistKit
@@ -57,9 +56,9 @@ internal struct BatchSyncResultTests {
   /// A per-record error payload, as CloudKit returns inline in a batch.
   internal static func makeError(
     name: String,
-    code: RecordError.serverErrorCodePayload = .BAD_REQUEST
-  ) -> RecordError {
-    RecordError(recordName: name, serverErrorCode: code)
+    code: RecordOperationFailure.ServerErrorCode = .badRequest
+  ) -> RecordOperationFailure {
+    RecordOperationFailure(recordName: name, serverErrorCode: code)
   }
 
   /// A failed per-record result.

@@ -48,6 +48,11 @@ internal enum TestPlatform {
   /// starve the polling timeout task in `withTimeout` — see #334. The race is
   /// bounded to visionOS / watchOS simulators under CI load; local sim runs
   /// (CI env unset) stay strict to surface real regressions in the helper.
+  ///
+  /// The `CI` flag is delivered into the simulator's test process via the
+  /// `SIMCTL_CHILD_CI` job-level env in the workflow — CoreSimulator's
+  /// `launchd_sim` only inherits `SIMCTL_CHILD_`-prefixed vars present when the
+  /// simulator boots, so it must be set job-wide, not just on the test step.
   internal static let isFlakyTimeoutSimulator: Bool = {
     #if (os(visionOS) || os(watchOS)) && targetEnvironment(simulator)
       return ProcessInfo.processInfo.environment["CI"] != nil

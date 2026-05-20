@@ -62,9 +62,9 @@ public struct UserInfo: Encodable, Sendable {
     self.emailAddress = emailAddress
   }
 
-  internal init(from cloudKitUser: Components.Schemas.UserResponse) throws {
+  internal init(from cloudKitUser: Components.Schemas.UserResponse) throws(ConversionError) {
     guard let userRecordName = cloudKitUser.userRecordName else {
-      try CloudKitError.reportConversionFailure("UserResponse missing userRecordName")
+      try ConversionError.userMissingRecordName.reportAndThrow()
     }
     self.userRecordName = userRecordName
     self.firstName = cloudKitUser.firstName

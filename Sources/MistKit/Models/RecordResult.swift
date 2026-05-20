@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import MistKitOpenAPI
+internal import MistKitOpenAPI
 
 /// The outcome of a single operation in a `modifyRecords` or `lookupRecords`
 /// batch.
@@ -49,8 +49,9 @@ public import MistKitOpenAPI
 public enum RecordResult: Sendable {
   /// The operation succeeded and CloudKit returned the resulting record.
   case success(RecordInfo)
-  /// The operation failed; the associated ``RecordError`` describes the failure.
-  case failure(RecordError)
+  /// The operation failed; the associated ``RecordOperationFailure`` describes
+  /// the failure.
+  case failure(RecordOperationFailure)
 
   /// The record for a successful result, or `nil` for a failure.
   public var record: RecordInfo? {
@@ -61,26 +62,30 @@ public enum RecordResult: Sendable {
   }
 
   /// The error for a failed result, or `nil` for a success.
-  public var error: RecordError? {
+  public var error: RecordOperationFailure? {
     guard case .failure(let error) = self else {
       return nil
     }
     return error
   }
 
-  internal init(from item: Components.Schemas.ModifyResponse.recordsPayloadPayload) throws {
+  internal init(
+    from item: Components.Schemas.ModifyResponse.recordsPayloadPayload
+  ) throws(ConversionError) {
     switch item {
-    case .RecordError(let error):
-      self = .failure(error)
+    case .RecordOperationFailure(let error):
+      self = .failure(RecordOperationFailure(from: error))
     case .RecordResponse(let record):
       self = .success(try RecordInfo(from: record))
     }
   }
 
-  internal init(from item: Components.Schemas.LookupResponse.recordsPayloadPayload) throws {
+  internal init(
+    from item: Components.Schemas.LookupResponse.recordsPayloadPayload
+  ) throws(ConversionError) {
     switch item {
-    case .RecordError(let error):
-      self = .failure(error)
+    case .RecordOperationFailure(let error):
+      self = .failure(RecordOperationFailure(from: error))
     case .RecordResponse(let record):
       self = .success(try RecordInfo(from: record))
     }

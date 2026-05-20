@@ -32,7 +32,6 @@ public import BushelLogging
 public import Foundation
 internal import Logging
 public import MistKit
-internal import MistKitOpenAPI
 
 #if canImport(FelinePineSwift)
   internal import FelinePineSwift

@@ -34,12 +34,15 @@ internal import MistKitOpenAPI
 extension FieldValue {
   /// Initialize from OpenAPI Components.Schemas.FieldValueResponse (from API responses).
   ///
-  /// - Parameter fieldName: The name of the field being converted, used to give
-  ///   conversion-failure diagnostics meaningful context.
+  /// - Parameters:
+  ///   - fieldData: The decoded CloudKit field value to convert.
+  ///   - fieldName: The name of the field being converted, used to give
+  ///     conversion-failure diagnostics meaningful context.
+  /// - Throws: ``ConversionError`` if the value can't be mapped to a `FieldValue`.
   internal init(
     _ fieldData: Components.Schemas.FieldValueResponse,
     fieldName: String
-  ) throws {
+  ) throws(ConversionError) {
     try self.init(valuePayload: fieldData.value, typePayload: fieldData._type, fieldName: fieldName)
   }
 
@@ -48,7 +51,7 @@ extension FieldValue {
     valuePayload: Components.Schemas.FieldValueResponse.valuePayload,
     typePayload: Components.Schemas.FieldValueResponse._typePayload?,
     fieldName: String
-  ) throws {
+  ) throws(ConversionError) {
     if let simpleValue = Self.makeSimpleFieldValue(from: valuePayload, type: typePayload) {
       self = simpleValue
     } else if let complexValue =
@@ -56,10 +59,12 @@ extension FieldValue {
     {
       self = complexValue
     } else {
-      try CloudKitError.reportConversionFailure(
-        "Unmappable FieldValue for field '\(fieldName)' "
-          + "(value: \(valuePayload), type: \(String(describing: typePayload)))"
+      let failure = ConversionError.unmappableFieldValue(
+        fieldName: fieldName,
+        value: "\(valuePayload)",
+        type: typePayload.map { "\($0)" }
       )
+      try failure.reportAndThrow()
     }
   }
 
@@ -67,13 +72,11 @@ extension FieldValue {
   internal init(
     locationValue: Components.Schemas.LocationValue,
     fieldName: String
-  ) throws {
+  ) throws(ConversionError) {
     guard let latitude = locationValue.latitude,
       let longitude = locationValue.longitude
     else {
-      try CloudKitError.reportConversionFailure(
-        "Location field '\(fieldName)' missing latitude/longitude"
-      )
+      try ConversionError.locationMissingCoordinates(fieldName: fieldName).reportAndThrow()
     }
 
     let location = Location(
@@ -93,11 +96,9 @@ extension FieldValue {
   internal init(
     referenceValue: Components.Schemas.ReferenceValue,
     fieldName: String
-  ) throws {
+  ) throws(ConversionError) {
     guard let recordName = referenceValue.recordName else {
-      try CloudKitError.reportConversionFailure(
-        "Reference field '\(fieldName)' missing recordName"
-      )
+      try ConversionError.referenceMissingRecordName(fieldName: fieldName).reportAndThrow()
     }
     let action: Reference.Action?
     switch referenceValue.action {
@@ -155,7 +156,7 @@ extension FieldValue {
   private static func makeComplexFieldValue(
     from value: Components.Schemas.FieldValueResponse.valuePayload,
     fieldName: String
-  ) throws -> FieldValue? {
+  ) throws(ConversionError) -> FieldValue? {
     if case .LocationValue(let locationValue) = value {
       return try Self(locationValue: locationValue, fieldName: fieldName)
     }
