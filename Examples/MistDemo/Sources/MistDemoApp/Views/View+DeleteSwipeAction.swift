@@ -1,6 +1,6 @@
 //
-//  MistDemoApp.swift
-//  MistDemoApp
+//  View+DeleteSwipeAction.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,16 +27,26 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistDemoApp
-internal import SwiftUI
+#if canImport(SwiftUI)
+  internal import SwiftUI
 
-@main
-internal struct MistDemoAppMain: AppMain {
-  // SwiftUI owns the AppDelegate's lifecycle via this adaptor; the
-  // delegate's static-weak `receiver` is wired from `CloudKitStore.init`
-  // so the OS-delivered APNs token lands back in the observable store.
-  #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
-    @PlatformApplicationDelegateAdaptor(PushNotificationDelegate.self)
-    private var pushDelegate
-  #endif
-}
+  extension View {
+    /// Attaches a trailing destructive "Delete" swipe action.
+    ///
+    /// `swipeActions(...)` is unavailable on tvOS, so this is a no-op there;
+    /// every list row that offers swipe-to-delete routes through this helper
+    /// so the platform guard lives in exactly one place.
+    @ViewBuilder
+    internal func deleteSwipeAction(
+      perform action: @escaping () -> Void
+    ) -> some View {
+      #if os(tvOS)
+        self
+      #else
+        self.swipeActions {
+          Button("Delete", role: .destructive, action: action)
+        }
+      #endif
+    }
+  }
+#endif

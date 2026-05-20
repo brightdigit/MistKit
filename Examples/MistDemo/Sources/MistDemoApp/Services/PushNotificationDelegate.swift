@@ -27,12 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if canImport(AppKit) || canImport(UIKit)
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
   public import Foundation
 
   #if canImport(AppKit) && !targetEnvironment(macCatalyst)
     public import AppKit
-  #elseif canImport(UIKit)
+  #elseif canImport(UIKit) && !os(watchOS)
     public import UIKit
   #endif
 
@@ -68,27 +68,10 @@
       Self.receiver?.didFailToRegisterForRemoteNotifications(error: error)
     }
 
-    // Inbound notification signatures genuinely differ between platforms —
-    // UIKit takes a fetch-completion handler, AppKit does not. Both branches
-    // funnel through the same receiver method.
-    #if canImport(UIKit) && !canImport(AppKit)
-      /// A remote notification arrived (UIKit variant).
-      public func application(
-        _ application: UIApplication,
-        didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-        fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
-      ) {
-        Self.receiver?.didReceiveRemoteNotification(userInfo: userInfo)
-        completionHandler(.newData)
-      }
-    #elseif canImport(AppKit) && !targetEnvironment(macCatalyst)
-      /// A remote notification arrived (AppKit variant).
-      public func application(
-        _ application: NSApplication,
-        didReceiveRemoteNotification userInfo: [String: Any]
-      ) {
-        Self.receiver?.didReceiveRemoteNotification(userInfo: userInfo)
-      }
-    #endif
+    // The inbound `didReceiveRemoteNotification` signatures genuinely differ
+    // between platforms (UIKit takes a fetch-completion handler, AppKit does
+    // not), so each lives in its own platform extension in
+    // `PushNotificationDelegate+ReceiveNotification.swift` rather than as
+    // inline `#if` branches here.
   }
 #endif

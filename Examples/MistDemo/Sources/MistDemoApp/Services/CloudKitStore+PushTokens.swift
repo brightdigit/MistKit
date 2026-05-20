@@ -34,7 +34,7 @@
 
   #if canImport(AppKit) && !targetEnvironment(macCatalyst)
     internal import AppKit
-  #elseif canImport(UIKit)
+  #elseif canImport(UIKit) && !os(watchOS)
     internal import UIKit
   #endif
 
@@ -54,11 +54,8 @@
     /// the demo app forwards back into the store via `recordDeviceToken`.
     /// On platforms where APNs isn't available we report `.failed`.
     internal func requestPushNotificationRegistration() {
-      #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-        NSApplication.shared.registerForRemoteNotifications()
-        pushTokenStatus = .requesting
-      #elseif canImport(UIKit)
-        UIApplication.shared.registerForRemoteNotifications()
+      #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
+        PlatformApplication.registerSharedForRemoteNotifications()
         pushTokenStatus = .requesting
       #else
         pushTokenStatus = .failed(
@@ -87,7 +84,7 @@
     }
   }
 
-  #if canImport(AppKit) || canImport(UIKit)
+  #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
     extension CloudKitStore: PushTokenReceiver {
       internal func didRegisterForRemoteNotifications(deviceToken: Data) {
         recordDeviceToken(deviceToken)

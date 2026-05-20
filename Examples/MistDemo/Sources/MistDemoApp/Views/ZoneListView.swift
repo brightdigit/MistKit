@@ -70,10 +70,8 @@
                 .foregroundStyle(.secondary)
             }
             .padding(.vertical, 2)
-            .swipeActions {
-              Button("Delete", role: .destructive) {
-                Task { await deleteZone(named: zone.zoneName) }
-              }
+            .deleteSwipeAction {
+              Task { await deleteZone(named: zone.zoneName) }
             }
           }
         }

@@ -39,23 +39,37 @@
     internal let steps: [String]
 
     internal var body: some View {
-      DisclosureGroup("📎 Composition") {
+      // `DisclosureGroup` is unavailable on watchOS and tvOS, so there the
+      // composition detail is shown inline (non-collapsible) under a plain
+      // header.
+      #if os(watchOS) || os(tvOS)
         VStack(alignment: .leading, spacing: 6) {
-          Text("REST endpoint: ").font(.caption.bold())
-            + Text(restEndpoint).font(.caption.monospaced())
-          Text("Underlying CloudKit operations:")
-            .font(.caption.bold())
-          ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-            HStack(alignment: .top, spacing: 6) {
-              Text("\(index + 1).").font(.caption)
-              Text(step).font(.caption.monospaced())
-            }
+          Text("📎 Composition").font(.subheadline.bold())
+          compositionDetail
+        }
+      #else
+        DisclosureGroup("📎 Composition") {
+          compositionDetail
+        }
+        .font(.subheadline)
+      #endif
+    }
+
+    private var compositionDetail: some View {
+      VStack(alignment: .leading, spacing: 6) {
+        Text("REST endpoint: ").font(.caption.bold())
+          + Text(restEndpoint).font(.caption.monospaced())
+        Text("Underlying CloudKit operations:")
+          .font(.caption.bold())
+        ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+          HStack(alignment: .top, spacing: 6) {
+            Text("\(index + 1).").font(.caption)
+            Text(step).font(.caption.monospaced())
           }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 4)
       }
-      .font(.subheadline)
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .padding(.vertical, 4)
     }
 
     internal init(restEndpoint: String, steps: [String]) {

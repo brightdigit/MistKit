@@ -32,31 +32,64 @@
 // branches, which the rule mis-flags.
 // swiftlint:disable file_types_order
 
-#if canImport(AppKit) && !targetEnvironment(macCatalyst)
-  public import AppKit
+// Remote-notification registration is available on AppKit (non-Catalyst),
+// iOS, tvOS, Catalyst, and visionOS — but NOT watchOS, where `UIApplication`
+// and its delegate are unavailable even though UIKit imports. This combined
+// condition is the single source of truth for "the platform has APNs
+// registration"; every push call site guards on the same shape.
+#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
+  public import SwiftUI
 
-  /// The platform application type (`NSApplication` on AppKit,
-  /// `UIApplication` on UIKit). Used so the demo's push-notification
-  /// delegate can implement the
-  /// `application(_:didRegisterForRemoteNotificationsWithDeviceToken:)`-style
-  /// hooks once instead of twice. Public so the executable target's `@main`
-  /// can reach `PushNotificationDelegate` (which conforms via the matching
-  /// `PlatformApplicationDelegate` alias).
-  public typealias PlatformApplication = NSApplication
+  #if canImport(AppKit) && !targetEnvironment(macCatalyst)
+    public import AppKit
 
-  /// The platform application delegate protocol matching
-  /// ``PlatformApplication``.
-  public typealias PlatformApplicationDelegate = NSApplicationDelegate
-#elseif canImport(UIKit)
-  public import UIKit
+    /// The platform application type (`NSApplication` on AppKit,
+    /// `UIApplication` on UIKit). Lets the push-notification delegate and
+    /// registration call sites name one type instead of branching.
+    public typealias PlatformApplication = NSApplication
 
-  /// The platform application type (`NSApplication` on AppKit,
-  /// `UIApplication` on UIKit). See the AppKit branch for full notes.
-  public typealias PlatformApplication = UIApplication
+    /// The platform application delegate protocol matching
+    /// ``PlatformApplication``.
+    public typealias PlatformApplicationDelegate = NSApplicationDelegate
 
-  /// The platform application delegate protocol matching
-  /// ``PlatformApplication``.
-  public typealias PlatformApplicationDelegate = UIApplicationDelegate
+    /// SwiftUI's delegate-adaptor property wrapper matching
+    /// ``PlatformApplicationDelegate``. Lets `@main` declare the adaptor once
+    /// rather than under parallel `#if` branches.
+    public typealias PlatformApplicationDelegateAdaptor = NSApplicationDelegateAdaptor
+  #elseif canImport(UIKit) && !os(watchOS)
+    public import UIKit
+
+    /// The platform application type. See the AppKit branch for full notes.
+    public typealias PlatformApplication = UIApplication
+
+    /// The platform application delegate protocol matching
+    /// ``PlatformApplication``.
+    public typealias PlatformApplicationDelegate = UIApplicationDelegate
+
+    /// SwiftUI's delegate-adaptor property wrapper matching
+    /// ``PlatformApplicationDelegate``.
+    public typealias PlatformApplicationDelegateAdaptor = UIApplicationDelegateAdaptor
+  #endif
+
+  /// Unifies the per-platform "register for remote notifications" entry point
+  /// so push code can call it through ``PlatformApplication`` without
+  /// branching. Both `NSApplication` and `UIApplication` already expose this
+  /// surface; the protocol just names the shared shape.
+  @MainActor
+  internal protocol RemoteNotificationRegistering {
+    static var shared: PlatformApplication { get }
+    func registerForRemoteNotifications()
+  }
+
+  extension RemoteNotificationRegistering {
+    /// Registers the shared platform application for remote notifications —
+    /// the single cross-platform entry point push code calls.
+    internal static func registerSharedForRemoteNotifications() {
+      shared.registerForRemoteNotifications()
+    }
+  }
+
+  extension PlatformApplication: RemoteNotificationRegistering {}
 #endif
 
 // swiftlint:enable file_types_order

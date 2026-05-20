@@ -72,10 +72,8 @@
                   .foregroundStyle(.secondary)
               }
             }
-            .swipeActions {
-              Button("Delete", role: .destructive) {
-                Task { await deleteSubscription(id: row.id) }
-              }
+            .deleteSwipeAction {
+              Task { await deleteSubscription(id: row.id) }
             }
           }
         }
