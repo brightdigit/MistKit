@@ -39,6 +39,38 @@
       case post
     }
 
+    private static func registerPending(
+      api: RouterGroup<BasicRequestContext>,
+      verb: PendingVerb,
+      path: String,
+      endpoint: String,
+      trackingIssue: Int
+    ) {
+      let bytes: Data
+      do {
+        bytes = try PendingStub.responseJSON(
+          endpoint: endpoint, trackingIssue: trackingIssue
+        )
+      } catch {
+        // PendingStub.responseJSON encodes a fixed shape; failure here would
+        // be a programmer error, not a runtime failure. Crash early so a
+        // broken stub doesn't masquerade as a working route.
+        preconditionFailure(
+          "Failed to encode pending-stub body for \(endpoint): \(error)"
+        )
+      }
+      let handler: @Sendable (Request, BasicRequestContext) async throws -> Response = {
+        _, _ -> Response in
+        Self.jsonResponse(status: .notImplemented, bytes: bytes)
+      }
+      switch verb {
+      case .get:
+        api.get(RouterPath(path), use: handler)
+      case .post:
+        api.post(RouterPath(path), use: handler)
+      }
+    }
+
     /// Register 501 stubs for every CloudKit Web Services endpoint whose
     /// MistKit Swift wrapper hasn't landed yet. Each route returns the
     /// shared `PendingStub.responseJSON` payload so the browser-side panel
@@ -79,6 +111,13 @@
       Self.registerPending(
         api: api,
         verb: .post,
+        path: "subscriptions/modify",
+        endpoint: "subscriptions/modify",
+        trackingIssue: 51
+      )
+      Self.registerPending(
+        api: api,
+        verb: .post,
         path: "tokens",
         endpoint: "tokens/create",
         trackingIssue: 52
@@ -90,38 +129,6 @@
         endpoint: "tokens/register",
         trackingIssue: 53
       )
-    }
-
-    private static func registerPending(
-      api: RouterGroup<BasicRequestContext>,
-      verb: PendingVerb,
-      path: String,
-      endpoint: String,
-      trackingIssue: Int
-    ) {
-      let bytes: Data
-      do {
-        bytes = try PendingStub.responseJSON(
-          endpoint: endpoint, trackingIssue: trackingIssue
-        )
-      } catch {
-        // PendingStub.responseJSON encodes a fixed shape; failure here would
-        // be a programmer error, not a runtime failure. Crash early so a
-        // broken stub doesn't masquerade as a working route.
-        preconditionFailure(
-          "Failed to encode pending-stub body for \(endpoint): \(error)"
-        )
-      }
-      let handler: @Sendable (Request, BasicRequestContext) async throws -> Response = {
-        _, _ -> Response in
-        Self.jsonResponse(status: .notImplemented, bytes: bytes)
-      }
-      switch verb {
-      case .get:
-        api.get(RouterPath(path), use: handler)
-      case .post:
-        api.post(RouterPath(path), use: handler)
-      }
     }
   }
 #endif

@@ -64,10 +64,17 @@
       internal let database: MistKit.Database
     }
 
+    internal struct ModifyZonesCall: Sendable {
+      internal let create: [String]
+      internal let delete: [String]
+      internal let database: MistKit.Database
+    }
+
     internal private(set) var lastQuery: QueryCall?
     internal private(set) var lastCreate: CreateCall?
     internal private(set) var lastUpdate: UpdateCall?
     internal private(set) var lastDelete: DeleteCall?
+    internal private(set) var lastModifyZones: ModifyZonesCall?
     private var pendingError: String?
 
     private static func stubRecord(
@@ -194,6 +201,22 @@
         database: database
       )
       try consumePendingError()
+    }
+
+    internal func webModifyZones(
+      create: [String],
+      delete: [String],
+      database: MistKit.Database
+    ) async throws -> [ZoneInfo] {
+      lastModifyZones = ModifyZonesCall(
+        create: create,
+        delete: delete,
+        database: database
+      )
+      try consumePendingError()
+      return create.map { name in
+        ZoneInfo(zoneName: name, ownerRecordName: nil, capabilities: [])
+      }
     }
 
     private func consumePendingError() throws {

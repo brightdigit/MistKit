@@ -54,10 +54,10 @@ document.getElementById('records-changes-btn').addEventListener('click', async (
                     syncToken,
                 });
             }
-            const payload = await ckJsDatabase().fetchRecordChanges(
-                { zoneName },
-                { previousServerChangeToken: syncToken }
-            );
+            const payload = await ckJsDatabase().fetchRecordZoneChanges({
+                zoneID: { zoneName },
+                syncToken,
+            });
             if (payload && payload.hasErrors && payload.errors.length) {
                 throw new Error(payload.errors[0].reason || 'CloudKit JS changes failed');
             }

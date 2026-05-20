@@ -166,7 +166,20 @@
                         <button id="zones-list-btn" type="button">Fetch Zones</button>
                     </div>
                     <div id="zones-list-status" class="status"></div>
-                    <pre id="zones-list-raw">(none yet)</pre>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Zone Name</th><th>Owner</th><th>Atomic</th></tr>
+                            </thead>
+                            <tbody id="zones-list-tbody">
+                                <tr><td colspan="3" class="empty-state">No zones loaded — click Fetch Zones.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <details class="raw-response">
+                        <summary>Last raw response</summary>
+                        <pre id="zones-list-raw">(none yet)</pre>
+                    </details>
                 </section>
                 <section>
                     <h3>Lookup <span class="endpoint-label">zones/lookup</span></h3>
@@ -244,7 +257,7 @@
 
         <!-- Subscriptions list / lookup -->
         <div class="card pre-auth">
-            <h2>Subscriptions <span class="endpoint-label">subscriptions/list · subscriptions/lookup (MistKit pending #49/#50 — CloudKit JS direct)</span></h2>
+            <h2>Subscriptions <span class="endpoint-label">subscriptions/list · subscriptions/lookup · subscriptions/modify (MistKit pending #49/#50/#51 — CloudKit JS direct)</span></h2>
             <div class="panel-grid">
                 <section>
                     <h3>List <span class="endpoint-label">subscriptions/list</span></h3>
@@ -252,7 +265,20 @@
                         <button id="subs-list-btn" type="button">Fetch All</button>
                     </div>
                     <div id="subs-list-status" class="status"></div>
-                    <pre id="subs-list-raw">(none yet)</pre>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Subscription ID</th><th>Type</th><th>Record Type</th><th>Zone</th></tr>
+                            </thead>
+                            <tbody id="subs-list-tbody">
+                                <tr><td colspan="4" class="empty-state">No subscriptions loaded — click Fetch All.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <details class="raw-response">
+                        <summary>Last raw response</summary>
+                        <pre id="subs-list-raw">(none yet)</pre>
+                    </details>
                 </section>
                 <section>
                     <h3>Lookup <span class="endpoint-label">subscriptions/lookup</span></h3>
@@ -262,6 +288,53 @@
                     </div>
                     <div id="subs-lookup-status" class="status"></div>
                     <pre id="subs-lookup-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Create <span class="endpoint-label">subscriptions/modify <em>(MistKit pending #51 — CloudKit JS direct)</em></span></h3>
+                    <div class="panel-row">
+                        <select id="subs-create-type">
+                            <option value="query">query</option>
+                            <option value="zone">zone</option>
+                        </select>
+                        <input id="subs-create-id" type="text" placeholder="subscription ID (optional)">
+                    </div>
+                    <div class="panel-row" id="subs-create-query-fields">
+                        <label class="field-label">Record type
+                            <select id="subs-create-record-type">
+                                <option value="Note">Note</option>
+                            </select>
+                        </label>
+                        <fieldset class="fires-on">
+                            <legend>Fires on</legend>
+                            <label><input type="checkbox" class="subs-fires-on" value="create" checked> create</label>
+                            <label><input type="checkbox" class="subs-fires-on" value="update" checked> update</label>
+                            <label><input type="checkbox" class="subs-fires-on" value="delete" checked> delete</label>
+                        </fieldset>
+                    </div>
+                    <div class="panel-row" id="subs-create-zone-fields" style="display: none;">
+                        <input id="subs-create-zone" type="text" placeholder="zone name (e.g. Articles)">
+                    </div>
+                    <div class="panel-row">
+                        <button id="subs-create-btn" type="button">Create Subscription</button>
+                    </div>
+                    <div id="subs-create-status" class="status"></div>
+                    <pre id="subs-create-raw">(none yet)</pre>
+                    <details class="composition">
+                        <summary>📎 CloudKit JS shape</summary>
+                        <ol>
+                            <li>query → <code>{ subscriptionType: 'query', firesOn, query: { recordType } }</code></li>
+                            <li>zone → <code>{ subscriptionType: 'zone', zoneID: { zoneName } }</code></li>
+                        </ol>
+                    </details>
+                </section>
+                <section>
+                    <h3>Delete <span class="endpoint-label">subscriptions/modify <em>(MistKit pending #51 — CloudKit JS direct)</em></span></h3>
+                    <div class="panel-row">
+                        <input id="subs-delete-input" type="text" placeholder="subscription ID(s), comma-separated">
+                        <button id="subs-delete-btn" class="danger" type="button">Delete Subscription</button>
+                    </div>
+                    <div id="subs-delete-status" class="status"></div>
+                    <pre id="subs-delete-raw">(none yet)</pre>
                 </section>
             </div>
         </div>

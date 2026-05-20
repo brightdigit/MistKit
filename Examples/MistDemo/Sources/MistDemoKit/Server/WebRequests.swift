@@ -169,6 +169,42 @@ internal enum WebRequests {
     }
   }
 
+  /// `POST /api/zones/modify`
+  ///
+  /// Mirrors CloudKit Web Services `zones/modify`: a batch of create and/or
+  /// delete operations against the target database. The browser sends each
+  /// zone as `{ "zoneName": "X" }` (matching the CloudKit JS `RecordZone`
+  /// shape), so both arrays decode through `ZoneRef`.
+  ///
+  /// `zones/modify` is unsupported on `.public` (it has only `_defaultZone`);
+  /// the MistKit wrapper rejects that case, surfacing as a `500` error body.
+  internal struct ModifyZones: Decodable {
+    internal struct ZoneRef: Decodable, Sendable {
+      internal let zoneName: String
+    }
+
+    private enum CodingKeys: String, CodingKey {
+      case create
+      case delete
+      case database
+    }
+
+    internal let create: [ZoneRef]
+    internal let delete: [ZoneRef]
+    internal let database: MistKit.Database
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.create =
+        try container.decodeIfPresent([ZoneRef].self, forKey: .create) ?? []
+      self.delete =
+        try container.decodeIfPresent([ZoneRef].self, forKey: .delete) ?? []
+      self.database = try WebRequests.decodeDatabase(
+        from: container, forKey: .database
+      )
+    }
+  }
+
   /// CloudKit database targeted by a request. Defaults to `.private` when
   /// the field is omitted so legacy clients (pre-database-picker) keep
   /// working.

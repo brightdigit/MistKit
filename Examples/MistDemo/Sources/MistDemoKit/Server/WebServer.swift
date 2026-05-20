@@ -127,6 +127,7 @@
       addCreateEndpoint(api: api)
       addUpdateEndpoint(api: api)
       addDeleteEndpoint(api: api)
+      addZonesModifyEndpoint(api: api)
       addPendingEndpoints(api: api)
 
       return router

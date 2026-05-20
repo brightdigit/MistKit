@@ -21,7 +21,7 @@ document.getElementById('users-caller-btn').addEventListener('click', async () =
             if (currentMode === 'mistkit') {
                 return await fetchJSON('/api/users/caller');
             }
-            return await ckJsContainer().fetchUserIdentityMe();
+            return await ckJsContainer().fetchCurrentUserIdentity();
         },
     });
 });
@@ -40,7 +40,7 @@ document.getElementById('users-email-btn').addEventListener('click', async () =>
             if (currentMode === 'mistkit') {
                 return await postJSON('/api/users/lookup/email', { emails: [email] });
             }
-            return await ckJsContainer().discoverUserIdentity({ emailAddress: email });
+            return await ckJsContainer().discoverUserIdentityWithEmailAddress(email);
         },
     });
 });
@@ -59,7 +59,7 @@ document.getElementById('users-id-btn').addEventListener('click', async () => {
             if (currentMode === 'mistkit') {
                 return await postJSON('/api/users/lookup/id', { userRecordNames: [recordName] });
             }
-            return await ckJsContainer().discoverUserIdentity({ userRecordName: recordName });
+            return await ckJsContainer().discoverUserIdentityWithUserRecordName(recordName);
         },
     });
 });
@@ -83,7 +83,7 @@ document.getElementById('users-discover-btn').addEventListener('click', async ()
             const results = [];
             for (const email of emails) {
                 try {
-                    const identity = await ckJsContainer().discoverUserIdentity({ emailAddress: email });
+                    const identity = await ckJsContainer().discoverUserIdentityWithEmailAddress(email);
                     results.push({ email, identity });
                 } catch (error) {
                     results.push({ email, error: error.message });

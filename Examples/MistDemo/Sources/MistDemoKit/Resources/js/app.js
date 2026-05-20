@@ -60,8 +60,24 @@ function clearStatus(el) {
     el.style.display = 'none';
 }
 
+// JSON.stringify replacer that renders Dates as ISO strings and drops
+// circular references. Some CloudKit JS results (e.g. the value resolved
+// by `registerForNotifications`) hold cyclic structures that would
+// otherwise throw "JSON.stringify cannot serialize cyclic structures".
+function safeReplacer() {
+    const seen = new WeakSet();
+    return (_key, value) => {
+        if (value instanceof Date) return value.toISOString();
+        if (value && typeof value === 'object') {
+            if (seen.has(value)) return '[Circular]';
+            seen.add(value);
+        }
+        return value;
+    };
+}
+
 function showRaw(value) {
-    rawResponseEl.textContent = value == null ? '(none)' : JSON.stringify(value, null, 2);
+    rawResponseEl.textContent = value == null ? '(none)' : JSON.stringify(value, safeReplacer(), 2);
 }
 
 // Render an arbitrary payload to a specific <pre> element (used by all
@@ -71,7 +87,36 @@ function renderRaw(el, value) {
     if (!el) return;
     el.textContent = value == null
         ? '(none)'
-        : JSON.stringify(value, (_k, v) => (v instanceof Date ? v.toISOString() : v), 2);
+        : JSON.stringify(value, safeReplacer(), 2);
+}
+
+// Render a simple read-only table of `items` into `tbody`. `getters` is an
+// array of `item => cellValue` functions, one per column — its length must
+// match the table's column count. Used by the Zones and Subscriptions list
+// panels to present results as a table instead of raw JSON.
+function renderListTable(tbody, getters, items, emptyMessage) {
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (!items || items.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = getters.length;
+        td.className = 'empty-state';
+        td.textContent = emptyMessage;
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+    for (const item of items) {
+        const tr = document.createElement('tr');
+        for (const get of getters) {
+            const td = document.createElement('td');
+            const value = get(item);
+            td.textContent = (value == null || value === '') ? '—' : String(value);
+            tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+    }
 }
 
 // Run an operation and pipe its progress through the panel's status div
