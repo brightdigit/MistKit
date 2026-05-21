@@ -146,69 +146,28 @@
       api: RouterGroup<BasicRequestContext>
     ) {
       let routeWiringIssue = 370
-      Self.registerPending(
-        api: api,
-        verb: .post,
-        path: "records/lookup",
-        endpoint: "records/lookup",
-        trackingIssue: routeWiringIssue
-      )
-      Self.registerPending(
-        api: api,
-        verb: .post,
-        path: "records/changes",
-        endpoint: "records/changes",
-        trackingIssue: routeWiringIssue
-      )
-      Self.registerPending(
-        api: api,
-        verb: .post,
-        path: "zones/list",
-        endpoint: "zones/list",
-        trackingIssue: routeWiringIssue
-      )
-      Self.registerPending(
-        api: api,
-        verb: .post,
-        path: "zones/lookup",
-        endpoint: "zones/lookup",
-        trackingIssue: routeWiringIssue
-      )
-      Self.registerPending(
-        api: api,
-        verb: .post,
-        path: "zones/changes",
-        endpoint: "zones/changes",
-        trackingIssue: routeWiringIssue
-      )
-      Self.registerPending(
-        api: api,
-        verb: .get,
-        path: "users/caller",
-        endpoint: "users/caller",
-        trackingIssue: routeWiringIssue
-      )
-      Self.registerPending(
-        api: api,
-        verb: .post,
-        path: "users/discover",
-        endpoint: "users/discover",
-        trackingIssue: routeWiringIssue
-      )
-      Self.registerPending(
-        api: api,
-        verb: .post,
-        path: "users/lookup/email",
-        endpoint: "users/lookup/email",
-        trackingIssue: routeWiringIssue
-      )
-      Self.registerPending(
-        api: api,
-        verb: .post,
-        path: "users/lookup/id",
-        endpoint: "users/lookup/id",
-        trackingIssue: routeWiringIssue
-      )
+      // Each route's `endpoint` label equals its path here, so a flat list of
+      // (verb, path) pairs drives registration without per-route boilerplate.
+      let routes: [(verb: PendingVerb, path: String)] = [
+        (.post, "records/lookup"),
+        (.post, "records/changes"),
+        (.post, "zones/list"),
+        (.post, "zones/lookup"),
+        (.post, "zones/changes"),
+        (.get, "users/caller"),
+        (.post, "users/discover"),
+        (.post, "users/lookup/email"),
+        (.post, "users/lookup/id"),
+      ]
+      for route in routes {
+        Self.registerPending(
+          api: api,
+          verb: route.verb,
+          path: route.path,
+          endpoint: route.path,
+          trackingIssue: routeWiringIssue
+        )
+      }
     }
   }
 #endif

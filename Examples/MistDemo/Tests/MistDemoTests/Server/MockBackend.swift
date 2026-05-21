@@ -36,40 +36,6 @@
   /// In-memory `WebBackend` for routing-level tests. Records the last
   /// call to each operation and returns deterministic stub records.
   internal final actor MockBackend: WebBackend {
-    internal struct QueryCall: Sendable {
-      internal let recordType: String
-      internal let limit: Int?
-      internal let sortBy: [WebRequests.QuerySortField]?
-      internal let database: MistKit.Database
-    }
-
-    internal struct CreateCall: Sendable {
-      internal let recordType: String
-      internal let fields: [String: String]
-      internal let database: MistKit.Database
-    }
-
-    internal struct UpdateCall: Sendable {
-      internal let recordType: String
-      internal let recordName: String
-      internal let fields: [String: String]
-      internal let recordChangeTag: String?
-      internal let database: MistKit.Database
-    }
-
-    internal struct DeleteCall: Sendable {
-      internal let recordType: String
-      internal let recordName: String
-      internal let recordChangeTag: String?
-      internal let database: MistKit.Database
-    }
-
-    internal struct ModifyZonesCall: Sendable {
-      internal let create: [String]
-      internal let delete: [String]
-      internal let database: MistKit.Database
-    }
-
     internal private(set) var lastQuery: QueryCall?
     internal private(set) var lastCreate: CreateCall?
     internal private(set) var lastUpdate: UpdateCall?

@@ -30,6 +30,12 @@
 #if canImport(SwiftUI)
   public import SwiftUI
 
+  // The filename-matching `PlatformApplication` typealias necessarily sits
+  // beside the other per-platform typealiases (a `#if` ladder can't be
+  // reordered to satisfy file_types_order), so the rule is disabled for the
+  // typealias/protocol region and re-enabled at the end of the file.
+  // swiftlint:disable file_types_order
+
   #if canImport(AppKit) && !targetEnvironment(macCatalyst)
     public import AppKit
 
