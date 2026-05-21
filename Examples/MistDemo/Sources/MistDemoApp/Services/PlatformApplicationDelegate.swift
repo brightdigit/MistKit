@@ -31,7 +31,8 @@
 // Linux/Windows. This delegate protocol exists only to bridge APNs callbacks
 // on Apple platforms, so gate it on Objective-C interop availability.
 #if canImport(ObjectiveC)
-  public import Foundation
+  // `@objc` requires the Objective-C runtime, surfaced here via Foundation.
+  internal import Foundation
 
   /// App-level delegate behavior that funnels APNs callbacks to a
   /// ``PushTokenReceiver``. Deliberately independent of the system delegate
@@ -43,34 +44,5 @@
   @objc
   public protocol PlatformApplicationDelegate: AnyObject {
     static var receiver: (any PushTokenReceiver)? { get }
-  }
-#endif
-
-// The `application(_:didRegister…)` / `didFail…` selectors are identical on
-// AppKit and UIKit (both take the unified ``PlatformApplication``), so they
-// share one extension here. watchOS's `WKApplicationDelegate` uses
-// parameter-less selectors, so its variants live in
-// `PlatformApplicationDelegate+WKApplicationDelegate.swift` instead.
-#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
-  extension PlatformApplicationDelegate {
-    /// APNs delivered a device token — forward it to the registered receiver.
-    ///
-    /// `public` because, when adopted by a `public` class, this satisfies the
-    /// matching requirement in the `public` system delegate protocol.
-    public func application(
-      _ application: PlatformApplication,
-      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
-    ) {
-      Self.receiver?.didRegisterForRemoteNotifications(deviceToken: deviceToken)
-    }
-
-    /// APNs refused registration — forward the error to the receiver so it
-    /// can surface in the UI.
-    public func application(
-      _ application: PlatformApplication,
-      didFailToRegisterForRemoteNotificationsWithError error: any Error
-    ) {
-      Self.receiver?.didFailToRegisterForRemoteNotifications(error: error)
-    }
   }
 #endif

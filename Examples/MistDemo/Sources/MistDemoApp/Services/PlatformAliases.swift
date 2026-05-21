@@ -1,5 +1,5 @@
 //
-//  PlatformApplication.swift
+//  PlatformAliases.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,14 +27,15 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+// The per-platform aliases live together (rather than one type per file)
+// because each is a thin, `#if`-selected typealias. The file is deliberately
+// not named after any one alias — in project-mode lint SwiftLint parses every
+// `#if` branch, so a filename-matching typealias ladder would be misread as a
+// `main_type` sitting amongst `supporting_type`s (`file_types_order`). Naming
+// the file neutrally keeps every alias a plain supporting type; the resulting
+// `file_name` mismatch is waived for this file in `.swiftlint.yml`.
 #if canImport(SwiftUI)
   public import SwiftUI
-
-  // The filename-matching `PlatformApplication` typealias necessarily sits
-  // beside the other per-platform typealiases (a `#if` ladder can't be
-  // reordered to satisfy file_types_order), so the rule is disabled for the
-  // typealias/protocol region and re-enabled at the end of the file.
-  // swiftlint:disable file_types_order
 
   #if canImport(AppKit) && !targetEnvironment(macCatalyst)
     public import AppKit
@@ -80,39 +81,4 @@
     /// ``ApplicationDelegate``.
     public typealias PlatformApplicationDelegateAdaptor = UIApplicationDelegateAdaptor
   #endif
-
-  /// Unifies the per-platform "register for remote notifications" entry point
-  /// so push code can call it through ``PlatformApplication`` without
-  /// branching. The accessor is named `sharedApplication` rather than `shared`
-  /// because `WKApplication.shared()` is a method, not a property — reusing the
-  /// `shared` name would collide with it.
-  @MainActor
-  internal protocol RemoteNotificationRegistering {
-    static var sharedApplication: PlatformApplication { get }
-    func registerForRemoteNotifications()
-  }
-
-  extension RemoteNotificationRegistering {
-    /// Registers the shared platform application for remote notifications —
-    /// the single cross-platform entry point push code calls.
-    internal static func registerSharedForRemoteNotifications() {
-      sharedApplication.registerForRemoteNotifications()
-    }
-  }
-
-  #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-    extension NSApplication: RemoteNotificationRegistering {
-      internal static var sharedApplication: NSApplication { shared }
-    }
-  #elseif canImport(WatchKit)
-    extension WKApplication: RemoteNotificationRegistering {
-      internal static var sharedApplication: WKApplication { shared() }
-    }
-  #elseif canImport(UIKit)
-    extension UIApplication: RemoteNotificationRegistering {
-      internal static var sharedApplication: UIApplication { shared }
-    }
-  #endif
 #endif
-
-// swiftlint:enable file_types_order

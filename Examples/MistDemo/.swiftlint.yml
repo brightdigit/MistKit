@@ -126,6 +126,10 @@ indentation_width:
 file_name:
     severity: error
     excluded:
+      # Holds only the per-platform `#if`-selected typealiases; named neutrally
+      # so no alias is misread as a `main_type` by `file_types_order` (see the
+      # file's header comment). The resulting `file_name` mismatch is expected.
+      - PlatformAliases.swift
       - Package.swift
       - AsyncHelpers.swift
       - UserInfoTestExtension.swift
