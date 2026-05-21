@@ -1584,13 +1584,50 @@ public enum Components {
         }
         /// - Remark: Generated from `#/components/schemas/ModifyResponse`.
         public struct ModifyResponse: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ModifyResponse/recordsPayload`.
+            @frozen public enum recordsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/ModifyResponse/recordsPayload/case1`.
+                case RecordOperationFailure(Components.Schemas.RecordOperationFailure)
+                /// - Remark: Generated from `#/components/schemas/ModifyResponse/recordsPayload/case2`.
+                case RecordResponse(Components.Schemas.RecordResponse)
+                public init(from decoder: any Decoder) throws {
+                    var errors: [any Error] = []
+                    do {
+                        self = .RecordOperationFailure(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .RecordResponse(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    throw Swift.DecodingError.failedToDecodeOneOfSchema(
+                        type: Self.self,
+                        codingPath: decoder.codingPath,
+                        errors: errors
+                    )
+                }
+                public func encode(to encoder: any Encoder) throws {
+                    switch self {
+                    case let .RecordOperationFailure(value):
+                        try value.encode(to: encoder)
+                    case let .RecordResponse(value):
+                        try value.encode(to: encoder)
+                    }
+                }
+            }
             /// - Remark: Generated from `#/components/schemas/ModifyResponse/records`.
-            public var records: [Components.Schemas.RecordResponse]?
+            public typealias recordsPayload = [Components.Schemas.ModifyResponse.recordsPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/ModifyResponse/records`.
+            public var records: Components.Schemas.ModifyResponse.recordsPayload?
             /// Creates a new `ModifyResponse`.
             ///
             /// - Parameters:
             ///   - records:
-            public init(records: [Components.Schemas.RecordResponse]? = nil) {
+            public init(records: Components.Schemas.ModifyResponse.recordsPayload? = nil) {
                 self.records = records
             }
             public enum CodingKeys: String, CodingKey {
@@ -1599,13 +1636,50 @@ public enum Components {
         }
         /// - Remark: Generated from `#/components/schemas/LookupResponse`.
         public struct LookupResponse: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/LookupResponse/recordsPayload`.
+            @frozen public enum recordsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/LookupResponse/recordsPayload/case1`.
+                case RecordOperationFailure(Components.Schemas.RecordOperationFailure)
+                /// - Remark: Generated from `#/components/schemas/LookupResponse/recordsPayload/case2`.
+                case RecordResponse(Components.Schemas.RecordResponse)
+                public init(from decoder: any Decoder) throws {
+                    var errors: [any Error] = []
+                    do {
+                        self = .RecordOperationFailure(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .RecordResponse(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    throw Swift.DecodingError.failedToDecodeOneOfSchema(
+                        type: Self.self,
+                        codingPath: decoder.codingPath,
+                        errors: errors
+                    )
+                }
+                public func encode(to encoder: any Encoder) throws {
+                    switch self {
+                    case let .RecordOperationFailure(value):
+                        try value.encode(to: encoder)
+                    case let .RecordResponse(value):
+                        try value.encode(to: encoder)
+                    }
+                }
+            }
             /// - Remark: Generated from `#/components/schemas/LookupResponse/records`.
-            public var records: [Components.Schemas.RecordResponse]?
+            public typealias recordsPayload = [Components.Schemas.LookupResponse.recordsPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/LookupResponse/records`.
+            public var records: Components.Schemas.LookupResponse.recordsPayload?
             /// Creates a new `LookupResponse`.
             ///
             /// - Parameters:
             ///   - records:
-            public init(records: [Components.Schemas.RecordResponse]? = nil) {
+            public init(records: Components.Schemas.LookupResponse.recordsPayload? = nil) {
                 self.records = records
             }
             public enum CodingKeys: String, CodingKey {
@@ -2130,6 +2204,90 @@ public enum Components {
             public enum CodingKeys: String, CodingKey {
                 case apnsToken
                 case webcAuthToken
+            }
+        }
+        /// Per-record error returned inline in the `records` array of a 200
+        /// modify/lookup response. Identifies the record that failed and why.
+        /// Distinct from `ErrorResponse`, which is the body of a top-level 4xx/5xx
+        /// HTTP failure. Note CloudKit does not echo `recordType` on a record error.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/RecordOperationFailure`.
+        public struct RecordOperationFailure: Codable, Hashable, Sendable {
+            /// The name of the record that the operation failed on.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/recordName`.
+            public var recordName: Swift.String
+            /// The code for the error that occurred.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/serverErrorCode`.
+            @frozen public enum serverErrorCodePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case ACCESS_DENIED = "ACCESS_DENIED"
+                case ATOMIC_ERROR = "ATOMIC_ERROR"
+                case AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
+                case AUTHENTICATION_REQUIRED = "AUTHENTICATION_REQUIRED"
+                case BAD_REQUEST = "BAD_REQUEST"
+                case CONFLICT = "CONFLICT"
+                case EXISTS = "EXISTS"
+                case INTERNAL_ERROR = "INTERNAL_ERROR"
+                case NOT_FOUND = "NOT_FOUND"
+                case QUOTA_EXCEEDED = "QUOTA_EXCEEDED"
+                case THROTTLED = "THROTTLED"
+                case TRY_AGAIN_LATER = "TRY_AGAIN_LATER"
+                case VALIDATING_REFERENCE_ERROR = "VALIDATING_REFERENCE_ERROR"
+                case ZONE_NOT_FOUND = "ZONE_NOT_FOUND"
+            }
+            /// The code for the error that occurred.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/serverErrorCode`.
+            public var serverErrorCode: Components.Schemas.RecordOperationFailure.serverErrorCodePayload
+            /// A string indicating the reason for the error.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/reason`.
+            public var reason: Swift.String?
+            /// Suggested seconds to wait before retrying. Absent if not retryable.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/retryAfter`.
+            public var retryAfter: Swift.Int?
+            /// A unique identifier for this error.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/uuid`.
+            public var uuid: Swift.String?
+            /// Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/redirectURL`.
+            public var redirectURL: Swift.String?
+            /// Creates a new `RecordOperationFailure`.
+            ///
+            /// - Parameters:
+            ///   - recordName: The name of the record that the operation failed on.
+            ///   - serverErrorCode: The code for the error that occurred.
+            ///   - reason: A string indicating the reason for the error.
+            ///   - retryAfter: Suggested seconds to wait before retrying. Absent if not retryable.
+            ///   - uuid: A unique identifier for this error.
+            ///   - redirectURL: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+            public init(
+                recordName: Swift.String,
+                serverErrorCode: Components.Schemas.RecordOperationFailure.serverErrorCodePayload,
+                reason: Swift.String? = nil,
+                retryAfter: Swift.Int? = nil,
+                uuid: Swift.String? = nil,
+                redirectURL: Swift.String? = nil
+            ) {
+                self.recordName = recordName
+                self.serverErrorCode = serverErrorCode
+                self.reason = reason
+                self.retryAfter = retryAfter
+                self.uuid = uuid
+                self.redirectURL = redirectURL
+            }
+            public enum CodingKeys: String, CodingKey {
+                case recordName
+                case serverErrorCode
+                case reason
+                case retryAfter
+                case uuid
+                case redirectURL
             }
         }
         /// Error response object. For a full list of error codes and meanings, see:

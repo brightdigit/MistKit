@@ -62,16 +62,7 @@ extension CloudKitService {
 
       let zonesData: Components.Schemas.ZonesListResponse =
         try await responseProcessor.processListZonesResponse(response)
-      return zonesData.zones?.compactMap { zone in
-        guard let zoneID = zone.zoneID, let zoneName = zoneID.zoneName else {
-          return nil
-        }
-        return ZoneInfo(
-          zoneName: zoneName,
-          ownerRecordName: zoneID.ownerName,
-          capabilities: []
-        )
-      } ?? []
+      return try (zonesData.zones ?? []).map { try ZoneInfo(fromZoneID: $0.zoneID) }
     } catch {
       throw mapToCloudKitError(error, context: "listZones")
     }
@@ -122,16 +113,7 @@ extension CloudKitService {
       let zonesData: Components.Schemas.ZonesLookupResponse =
         try await responseProcessor.processLookupZonesResponse(response)
 
-      return zonesData.zones?.compactMap { zone in
-        guard let zoneID = zone.zoneID, let zoneName = zoneID.zoneName else {
-          return nil
-        }
-        return ZoneInfo(
-          zoneName: zoneName,
-          ownerRecordName: zoneID.ownerName,
-          capabilities: []
-        )
-      } ?? []
+      return try (zonesData.zones ?? []).map { try ZoneInfo(fromZoneID: $0.zoneID) }
     } catch {
       throw mapToCloudKitError(error, context: "lookupZones")
     }
@@ -185,7 +167,7 @@ extension CloudKitService {
       let changesData: Components.Schemas.ZoneChangesResponse =
         try await responseProcessor.processFetchZoneChangesResponse(response)
 
-      return ZoneChangesResult(from: changesData)
+      return try ZoneChangesResult(from: changesData)
     } catch {
       throw mapToCloudKitError(error, context: "fetchZoneChanges")
     }

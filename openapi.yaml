@@ -1220,7 +1220,9 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/RecordResponse'
+            oneOf:
+              - $ref: '#/components/schemas/RecordOperationFailure'
+              - $ref: '#/components/schemas/RecordResponse'
 
     LookupResponse:
       type: object
@@ -1228,7 +1230,9 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/RecordResponse'
+            oneOf:
+              - $ref: '#/components/schemas/RecordOperationFailure'
+              - $ref: '#/components/schemas/RecordResponse'
 
     ChangesResponse:
       type: object
@@ -1428,6 +1432,51 @@ components:
           type: string
         webcAuthToken:
           type: string
+
+    RecordOperationFailure:
+      type: object
+      description: |
+        Per-record error returned inline in the `records` array of a 200
+        modify/lookup response. Identifies the record that failed and why.
+        Distinct from `ErrorResponse`, which is the body of a top-level 4xx/5xx
+        HTTP failure. Note CloudKit does not echo `recordType` on a record error.
+      properties:
+        recordName:
+          type: string
+          description: The name of the record that the operation failed on.
+        serverErrorCode:
+          type: string
+          enum:
+            - ACCESS_DENIED
+            - ATOMIC_ERROR
+            - AUTHENTICATION_FAILED
+            - AUTHENTICATION_REQUIRED
+            - BAD_REQUEST
+            - CONFLICT
+            - EXISTS
+            - INTERNAL_ERROR
+            - NOT_FOUND
+            - QUOTA_EXCEEDED
+            - THROTTLED
+            - TRY_AGAIN_LATER
+            - VALIDATING_REFERENCE_ERROR
+            - ZONE_NOT_FOUND
+          description: The code for the error that occurred.
+        reason:
+          type: string
+          description: A string indicating the reason for the error.
+        retryAfter:
+          type: integer
+          description: Suggested seconds to wait before retrying. Absent if not retryable.
+        uuid:
+          type: string
+          description: A unique identifier for this error.
+        redirectURL:
+          type: string
+          description: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+      required:
+        - recordName
+        - serverErrorCode
 
     ErrorResponse:
       type: object

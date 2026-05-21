@@ -7,14 +7,33 @@ internal import Testing
 @Suite("Record Info")
 /// Tests for RecordInfo functionality
 internal struct RecordInfoTests {
-  /// Tests RecordInfo initialization with empty record data
-  @Test("RecordInfo initialization with empty record data")
-  internal func recordInfoWithUnknownRecord() {
+  /// A response with no identifiers is a conversion failure, not an "Unknown"
+  /// record. The assertion handler is suppressed so the throw is observable in
+  /// DEBUG instead of trapping the test process.
+  @Test("RecordInfo throws when the response is missing identifiers")
+  internal func recordInfoMissingIdentifiersThrows() {
     let mockRecord = Components.Schemas.RecordResponse()
-    let recordInfo = RecordInfo(from: mockRecord)
+    ConversionFailureReporter.$assertionHandler.withValue(
+      { _, _, _ in },
+      operation: {
+        #expect(throws: ConversionError.self) {
+          _ = try RecordInfo(from: mockRecord)
+        }
+      }
+    )
+  }
 
-    #expect(recordInfo.recordName == "Unknown")
-    #expect(recordInfo.recordType == "Unknown")
+  /// A well-formed response converts to a RecordInfo with its identifiers.
+  @Test("RecordInfo converts a well-formed response")
+  internal func recordInfoFromValidRecord() throws {
+    let mockRecord = Components.Schemas.RecordResponse(
+      recordName: "rec-1",
+      recordType: "Article"
+    )
+    let recordInfo = try RecordInfo(from: mockRecord)
+
+    #expect(recordInfo.recordName == "rec-1")
+    #expect(recordInfo.recordType == "Article")
     #expect(recordInfo.fields.isEmpty)
   }
 }

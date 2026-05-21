@@ -40,8 +40,33 @@ public struct UserInfo: Encodable, Sendable {
   /// The user's email address
   public let emailAddress: String?
 
-  internal init(from cloudKitUser: Components.Schemas.UserResponse) {
-    self.userRecordName = cloudKitUser.userRecordName ?? "Unknown"
+  /// Create a `UserInfo` directly.
+  ///
+  /// Primarily for testing and manual construction; instances returned by
+  /// CloudKit operations are built from the response internally.
+  ///
+  /// - Parameters:
+  ///   - userRecordName: The user's record name.
+  ///   - firstName: The user's first name, if known.
+  ///   - lastName: The user's last name, if known.
+  ///   - emailAddress: The user's email address, if known.
+  public init(
+    userRecordName: String,
+    firstName: String? = nil,
+    lastName: String? = nil,
+    emailAddress: String? = nil
+  ) {
+    self.userRecordName = userRecordName
+    self.firstName = firstName
+    self.lastName = lastName
+    self.emailAddress = emailAddress
+  }
+
+  internal init(from cloudKitUser: Components.Schemas.UserResponse) throws(ConversionError) {
+    guard let userRecordName = cloudKitUser.userRecordName else {
+      try ConversionError.userMissingRecordName.reportAndThrow()
+    }
+    self.userRecordName = userRecordName
     self.firstName = cloudKitUser.firstName
     self.lastName = cloudKitUser.lastName
     self.emailAddress = cloudKitUser.emailAddress

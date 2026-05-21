@@ -37,7 +37,7 @@ internal import Foundation
 ///
 /// - `created`: results whose record name was classified as a create
 /// - `updated`: results whose record name was classified as an update
-/// - `failed`: results that came back as errors (`RecordInfo.isError == true`)
+/// - `failed`: per-record errors (``RecordResult/failure(_:)``) returned by CloudKit
 /// - `unclassified`: successful results whose record name was in neither
 ///   the creates nor updates sets — for example, anonymous creates where
 ///   CloudKit assigned the record name server-side, or records whose name
@@ -51,8 +51,8 @@ public struct BatchSyncResult: Sendable {
   /// Records classified as updates to existing records.
   public let updated: [RecordInfo]
 
-  /// Records that came back as errors.
-  public let failed: [RecordInfo]
+  /// Per-record errors returned by CloudKit for operations that failed.
+  public let failed: [RecordOperationFailure]
 
   /// Successful records that could not be classified as either a create or update.
   ///
@@ -90,7 +90,7 @@ public struct BatchSyncResult: Sendable {
   internal init(
     created: [RecordInfo],
     updated: [RecordInfo],
-    failed: [RecordInfo],
+    failed: [RecordOperationFailure],
     unclassified: [RecordInfo] = []
   ) {
     self.created = created
@@ -102,8 +102,8 @@ public struct BatchSyncResult: Sendable {
   /// Partition a flat array of `RecordInfo` results into a `BatchSyncResult`
   /// using a pre-computed classification.
   ///
-  /// Each record is sorted as follows:
-  /// 1. If `record.isError` is `true`, it is added to `failed`.
+  /// Each result is sorted as follows:
+  /// 1. If the result is a `.failure`, its `RecordOperationFailure` is added to `failed`.
   /// 2. Else if `record.recordName` is in `classification.creates`, it is added
   ///    to `created`.
   /// 3. Else if `record.recordName` is in `classification.updates`, it is added
@@ -111,26 +111,29 @@ public struct BatchSyncResult: Sendable {
   /// 4. Otherwise it is added to `unclassified`.
   ///
   /// - Parameters:
-  ///   - records: The records returned by `modifyRecords`.
+  ///   - results: The per-record results returned by `modifyRecords`.
   ///   - classification: The classification used to partition the records.
   internal init(
-    records: [RecordInfo],
+    results: [RecordResult],
     classification: OperationClassification
   ) {
     var created: [RecordInfo] = []
     var updated: [RecordInfo] = []
-    var failed: [RecordInfo] = []
+    var failed: [RecordOperationFailure] = []
     var unclassified: [RecordInfo] = []
 
-    for record in records {
-      if record.isError {
-        failed.append(record)
-      } else if classification.creates.contains(record.recordName) {
-        created.append(record)
-      } else if classification.updates.contains(record.recordName) {
-        updated.append(record)
-      } else {
-        unclassified.append(record)
+    for result in results {
+      switch result {
+      case .failure(let error):
+        failed.append(error)
+      case .success(let record):
+        if classification.creates.contains(record.recordName) {
+          created.append(record)
+        } else if classification.updates.contains(record.recordName) {
+          updated.append(record)
+        } else {
+          unclassified.append(record)
+        }
       }
     }
 

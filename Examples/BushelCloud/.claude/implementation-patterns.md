@@ -275,8 +275,8 @@ for (index, batch) in batches.enumerated() {
 
     // Process results immediately
     for result in results {
-        if result.recordType == "Unknown" {
-            // Handle error
+        if case .failure(let error) = result {
+            // Handle error (error.serverErrorCode, error.reason, ...)
         }
     }
 }
@@ -313,11 +313,12 @@ try await syncXcodeVersions()  // References uploaded records
 **Check for partial failures:**
 ```swift
 let results = try await service.modifyRecords(batch)
-let errors = results.filter { $0.recordType == "Unknown" }
+let errors = results.compactMap(\.error)
 
 if !errors.isEmpty {
     for error in errors {
-        print("Failed: \(error.recordName ?? "unknown")")
+        print("Failed: \(error.recordName)")
+        print("Code: \(error.serverErrorCode.rawValue)")
         print("Reason: \(error.reason ?? "N/A")")
     }
 }

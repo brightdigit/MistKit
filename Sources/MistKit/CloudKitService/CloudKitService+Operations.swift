@@ -189,7 +189,7 @@ extension CloudKitService {
 
       let recordsData: Components.Schemas.QueryResponse =
         try await responseProcessor.processQueryRecordsResponse(response)
-      return QueryResult(from: recordsData)
+      return try QueryResult(from: recordsData)
     } catch {
       throw mapToCloudKitError(error, context: "queryRecords")
     }

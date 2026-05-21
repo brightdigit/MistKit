@@ -76,14 +76,19 @@ public struct LookupCommand: MistDemoCommand, OutputFormatting {
     do {
       let client = try MistKitClientFactory.create(for: config.base)
 
-      let records = try await client.lookupRecords(
+      let results = try await client.lookupRecords(
         recordNames: config.recordNames,
         desiredKeys: config.fields,
         database: config.base.database
       )
 
+      // A per-record lookup failure (e.g. NOT_FOUND) comes back as `.failure`.
+      let records = results.compactMap { result in
+        if case .success(let record) = result { record } else { nil }
+      }
+
       // Report missing names to stderr so a JSON/CSV/etc. stdout stream stays parseable
-      let foundNames = Set(records.compactMap { $0.recordName })
+      let foundNames = Set(records.map(\.recordName))
       let missing = config.recordNames.filter { !foundNames.contains($0) }
       if !missing.isEmpty {
         let line =

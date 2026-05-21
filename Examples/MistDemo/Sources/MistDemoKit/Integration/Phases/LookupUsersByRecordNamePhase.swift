@@ -55,7 +55,7 @@ internal struct LookupUsersByRecordNamePhase: IntegrationPhase {
 
     if context.verbose {
       for identity in identities {
-        if let name = identity.userRecordName { print("   - \(name)") }
+        if case .recordName(let name) = identity.userRecordName { print("   - \(name)") }
       }
     }
 

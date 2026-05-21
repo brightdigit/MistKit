@@ -242,8 +242,8 @@ func syncRecords(_ records: [RestoreImageRecord]) async throws {
         let results = try await service.modifyRecords(batch)
 
         // Check for partial failures
-        let failures = results.filter { $0.recordType == "Unknown" }
-        let successes = results.filter { $0.recordType != "Unknown" }
+        let failures = results.compactMap(\.error)
+        let successes = results.compactMap(\.record)
 
         print("✓ \(successes.count) succeeded, ❌ \(failures.count) failed")
     }
@@ -258,14 +258,13 @@ CloudKit returns **partial success** - some operations may succeed while others 
 let results = try await service.modifyRecords(batch)
 
 for result in results {
-    if result.recordType == "Unknown" {
-        // This is an error response
-        print("❌ Error for \(result.recordName ?? "unknown")")
-        print("   Code: \(result.serverErrorCode ?? "N/A")")
-        print("   Reason: \(result.reason ?? "N/A")")
-    } else {
-        // Successfully created/updated
-        print("✓ Success: \(result.recordName ?? "unknown")")
+    switch result {
+    case .failure(let error):
+        print("❌ Error for \(error.recordName)")
+        print("   Code: \(error.serverErrorCode.rawValue)")
+        print("   Reason: \(error.reason ?? "N/A")")
+    case .success(let record):
+        print("✓ Success: \(record.recordName)")
     }
 }
 ```
@@ -333,10 +332,13 @@ let operation = RecordOperation.create(
 
 let results = try await service.modifyRecords([operation])
 
-if results.first?.recordType == "Unknown" {
-    print("❌ Failed: \(results.first?.reason ?? "unknown")")
-} else {
-    print("✓ Success! Record created: \(results.first?.recordName ?? "")")
+switch results.first {
+case .failure(let error):
+    print("❌ Failed: \(error.reason ?? error.serverErrorCode.rawValue)")
+case .success(let record):
+    print("✓ Success! Record created: \(record.recordName)")
+case nil:
+    print("❌ No result returned")
 }
 ```
 

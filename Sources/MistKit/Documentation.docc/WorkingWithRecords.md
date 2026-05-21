@@ -114,6 +114,17 @@ let results = try await service.modifyRecords(
 )
 ```
 
+`modifyRecords` returns a ``RecordResult`` per operation — switch over each to handle per-record outcomes:
+
+```swift
+for result in results {
+  switch result {
+  case .success(let record): print("saved \(record.recordName)")
+  case .failure(let error):  print("failed \(error.recordName): \(error.serverErrorCode.rawValue)")
+  }
+}
+```
+
 | `atomic:` | Behavior |
 | --- | --- |
 | `false` (default) | Per-operation success/failure. Successful ops commit; failed ops surface in the response. |
@@ -128,11 +139,13 @@ Choose `atomic: true` when the operations are semantically linked (paired update
 Use ``CloudKitService/lookupRecords(recordNames:desiredKeys:database:)`` to fetch known records by name:
 
 ```swift
-let articles = try await service.lookupRecords(
+let results = try await service.lookupRecords(
   recordNames: ["article-001", "article-002", "article-003"],
   desiredKeys: ["title", "publishedDate"],
   database: .private
 )
+// Each entry is a `RecordResult`; a not-found name comes back as `.failure`.
+let articles = results.compactMap(\.record)
 ```
 
 Pass `desiredKeys` to limit which fields come back — useful for list views that only need a subset.

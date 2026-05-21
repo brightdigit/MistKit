@@ -50,7 +50,7 @@ extension CloudKitServiceTests.DiscoverUserIdentities {
       )
 
       #expect(identities.count == 1)
-      #expect(identities.first?.userRecordName == "_user-0")
+      #expect(identities.first?.userRecordName == .recordName("_user-0"))
     }
 
     @Test("discoverUserIdentities() returns multiple identities")
@@ -72,9 +72,9 @@ extension CloudKitServiceTests.DiscoverUserIdentities {
       )
 
       #expect(identities.count == 3)
-      #expect(identities[0].userRecordName == "_user-0")
-      #expect(identities[1].userRecordName == "_user-1")
-      #expect(identities[2].userRecordName == "_user-2")
+      #expect(identities[0].userRecordName == .recordName("_user-0"))
+      #expect(identities[1].userRecordName == .recordName("_user-1"))
+      #expect(identities[2].userRecordName == .recordName("_user-2"))
     }
 
     @Test("discoverUserIdentities() returns empty array when no matches")

@@ -144,8 +144,11 @@ public enum CelestraError: LocalizedError {
     case .decodingError:
       // Decoding errors are not retriable (data format issue)
       return false
-    case .unsupportedOperationType, .paginationLimitExceeded:
+    case .unsupportedOperationType, .paginationLimitExceeded, .zonePaginationLimitExceeded:
       // Programmer/configuration issues — not retriable
+      return false
+    case .conversionFailed, .recordOperationFailed:
+      // Response could not be mapped, or a per-record operation failed — not retriable
       return false
     case .missingCredentials, .invalidPrivateKey:
       // Credential/configuration issues — not retriable

@@ -47,7 +47,7 @@ extension CloudKitServiceTests.LookupUsersByEmail {
       let identities = try await service.lookupUsersByEmail(["user@example.com"])
 
       #expect(identities.count == 1)
-      #expect(identities.first?.userRecordName == "_user-0")
+      #expect(identities.first?.userRecordName == .recordName("_user-0"))
     }
 
     @Test("lookupUsersByEmail() returns multiple identities")

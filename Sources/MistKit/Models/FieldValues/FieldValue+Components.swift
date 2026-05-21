@@ -32,31 +32,51 @@ internal import MistKitOpenAPI
 
 /// Extension to convert OpenAPI Components.Schemas.FieldValueResponse to MistKit FieldValue
 extension FieldValue {
-  /// Initialize from OpenAPI Components.Schemas.FieldValueResponse (from API responses)
-  internal init?(_ fieldData: Components.Schemas.FieldValueResponse) {
-    self.init(valuePayload: fieldData.value, typePayload: fieldData._type)
+  /// Initialize from OpenAPI Components.Schemas.FieldValueResponse (from API responses).
+  ///
+  /// - Parameters:
+  ///   - fieldData: The decoded CloudKit field value to convert.
+  ///   - fieldName: The name of the field being converted, used to give
+  ///     conversion-failure diagnostics meaningful context.
+  /// - Throws: ``ConversionError`` if the value can't be mapped to a `FieldValue`.
+  internal init(
+    _ fieldData: Components.Schemas.FieldValueResponse,
+    fieldName: String
+  ) throws(ConversionError) {
+    try self.init(valuePayload: fieldData.value, typePayload: fieldData._type, fieldName: fieldName)
   }
 
   /// Initialize from field value and type
-  private init?(
+  private init(
     valuePayload: Components.Schemas.FieldValueResponse.valuePayload,
-    typePayload: Components.Schemas.FieldValueResponse._typePayload?
-  ) {
+    typePayload: Components.Schemas.FieldValueResponse._typePayload?,
+    fieldName: String
+  ) throws(ConversionError) {
     if let simpleValue = Self.makeSimpleFieldValue(from: valuePayload, type: typePayload) {
       self = simpleValue
-    } else if let complexValue = Self.makeComplexFieldValue(from: valuePayload) {
+    } else if let complexValue =
+      try Self.makeComplexFieldValue(from: valuePayload, fieldName: fieldName)
+    {
       self = complexValue
     } else {
-      return nil
+      let failure = ConversionError.unmappableFieldValue(
+        fieldName: fieldName,
+        value: "\(valuePayload)",
+        type: typePayload.map { "\($0)" }
+      )
+      try failure.reportAndThrow()
     }
   }
 
   /// Initialize from location field value
-  private init?(locationValue: Components.Schemas.LocationValue) {
+  internal init(
+    locationValue: Components.Schemas.LocationValue,
+    fieldName: String
+  ) throws(ConversionError) {
     guard let latitude = locationValue.latitude,
       let longitude = locationValue.longitude
     else {
-      return nil
+      try ConversionError.locationMissingCoordinates(fieldName: fieldName).reportAndThrow()
     }
 
     let location = Location(
@@ -73,7 +93,13 @@ extension FieldValue {
   }
 
   /// Initialize from reference field value
-  private init(referenceValue: Components.Schemas.ReferenceValue) {
+  internal init(
+    referenceValue: Components.Schemas.ReferenceValue,
+    fieldName: String
+  ) throws(ConversionError) {
+    guard let recordName = referenceValue.recordName else {
+      try ConversionError.referenceMissingRecordName(fieldName: fieldName).reportAndThrow()
+    }
     let action: Reference.Action?
     switch referenceValue.action {
     case .DELETE_SELF:
@@ -84,14 +110,14 @@ extension FieldValue {
       action = nil
     }
     let reference = Reference(
-      recordName: referenceValue.recordName ?? "",
+      recordName: recordName,
       action: action
     )
     self = .reference(reference)
   }
 
   /// Initialize from asset field value
-  private init(assetValue: Components.Schemas.AssetValue) {
+  internal init(assetValue: Components.Schemas.AssetValue) {
     let asset = Asset(
       fileChecksum: assetValue.fileChecksum,
       size: assetValue.size,
@@ -101,45 +127,6 @@ extension FieldValue {
       downloadURL: assetValue.downloadURL
     )
     self = .asset(asset)
-  }
-
-  /// Initialize from list field value
-  private init(listValue: [Components.Schemas.ListValuePayload]) {
-    let convertedList = listValue.compactMap { Self(listItem: $0) }
-    self = .list(convertedList)
-  }
-
-  /// Initialize from individual list item
-  private init?(listItem: Components.Schemas.ListValuePayload) {
-    if let simpleValue = Self.makeSimpleListItem(from: listItem) {
-      self = simpleValue
-    } else if let complexValue = Self.makeComplexListItem(from: listItem) {
-      self = complexValue
-    } else {
-      return nil
-    }
-  }
-
-  /// Initialize from nested list value (simplified for basic types)
-  private init(nestedListValue: [Components.Schemas.ListValuePayload]) {
-    let convertedNestedList = nestedListValue.compactMap { Self(basicListItem: $0) }
-    self = .list(convertedNestedList)
-  }
-
-  /// Initialize from basic list item types only
-  private init?(basicListItem: Components.Schemas.ListValuePayload) {
-    switch basicListItem {
-    case .StringValue(let stringValue):
-      self = .string(stringValue)
-    case .Int64Value(let intValue):
-      self = .int64(Int(intValue))
-    case .DoubleValue(let doubleValue):
-      self = .double(doubleValue)
-    case .BytesValue(let bytesValue):
-      self = .bytes(bytesValue)
-    default:
-      return nil
-    }
   }
 
   private static func makeSimpleFieldValue(
@@ -167,58 +154,20 @@ extension FieldValue {
   }
 
   private static func makeComplexFieldValue(
-    from value: Components.Schemas.FieldValueResponse.valuePayload
-  ) -> FieldValue? {
+    from value: Components.Schemas.FieldValueResponse.valuePayload,
+    fieldName: String
+  ) throws(ConversionError) -> FieldValue? {
     if case .LocationValue(let locationValue) = value {
-      return Self(locationValue: locationValue)
+      return try Self(locationValue: locationValue, fieldName: fieldName)
     }
     if case .ReferenceValue(let referenceValue) = value {
-      return Self(referenceValue: referenceValue)
+      return try Self(referenceValue: referenceValue, fieldName: fieldName)
     }
     if case .AssetValue(let assetValue) = value {
       return Self(assetValue: assetValue)
     }
     if case .ListValue(let listValue) = value {
-      return Self(listValue: listValue)
-    }
-    return nil
-  }
-
-  private static func makeSimpleListItem(
-    from listItem: Components.Schemas.ListValuePayload
-  ) -> FieldValue? {
-    if case .StringValue(let strVal) = listItem {
-      return .string(strVal)
-    }
-    if case .Int64Value(let intVal) = listItem {
-      return .int64(Int(intVal))
-    }
-    if case .DoubleValue(let dblVal) = listItem {
-      return .double(dblVal)
-    }
-    if case .BytesValue(let bytesVal) = listItem {
-      return .bytes(bytesVal)
-    }
-    if case .DateValue(let dateVal) = listItem {
-      return .date(Date(timeIntervalSince1970: dateVal / 1_000))
-    }
-    return nil
-  }
-
-  private static func makeComplexListItem(
-    from listItem: Components.Schemas.ListValuePayload
-  ) -> FieldValue? {
-    if case .LocationValue(let locationValue) = listItem {
-      return Self(locationValue: locationValue)
-    }
-    if case .ReferenceValue(let referenceValue) = listItem {
-      return Self(referenceValue: referenceValue)
-    }
-    if case .AssetValue(let assetValue) = listItem {
-      return Self(assetValue: assetValue)
-    }
-    if case .ListValue(let nestedList) = listItem {
-      return Self(nestedListValue: nestedList)
+      return try Self(listValue: listValue, fieldName: fieldName)
     }
     return nil
   }

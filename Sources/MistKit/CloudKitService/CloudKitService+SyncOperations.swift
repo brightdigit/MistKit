@@ -110,7 +110,7 @@ extension CloudKitService {
           response
         )
 
-      return RecordChangesResult(from: changesData)
+      return try RecordChangesResult(from: changesData)
     } catch {
       throw mapToCloudKitError(error, context: "fetchRecordChanges")
     }

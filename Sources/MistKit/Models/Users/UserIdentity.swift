@@ -31,26 +31,30 @@ internal import MistKitOpenAPI
 
 /// A user identity returned by CloudKit discover endpoints (`users/discover`, `users/caller`).
 public struct UserIdentity: Codable, Sendable {
-  /// The record name of the user in the Users zone
-  public let userRecordName: String?
+  /// Whether the user is discoverable and, if so, their record name in the
+  /// Users zone. A non-discoverable user reports ``UserRecordName/nonDiscoverable``.
+  public let userRecordName: UserRecordName
   /// The user's name components (given name, family name, etc.)
   public let nameComponents: NameComponents?
   /// Lookup information used to discover this identity
   public let lookupInfo: UserIdentityLookupInfo?
 
   internal init(from schema: Components.Schemas.UserIdentity) {
-    self.userRecordName = schema.userRecordName
+    // CloudKit returns an identity with only `lookupInfo` for a
+    // non-discoverable user, so a missing record name is a valid response —
+    // not a conversion failure.
+    self.userRecordName = UserRecordName(schema.userRecordName)
     self.nameComponents = schema.nameComponents.map(NameComponents.init(from:))
     self.lookupInfo = schema.lookupInfo.map(UserIdentityLookupInfo.init(from:))
   }
 
   /// Initialize a user identity
   /// - Parameters:
-  ///   - userRecordName: The record name of the user
+  ///   - userRecordName: Whether the user is discoverable and their record name
   ///   - nameComponents: The user's name components
   ///   - lookupInfo: Lookup information for this identity
   public init(
-    userRecordName: String? = nil,
+    userRecordName: UserRecordName = .nonDiscoverable,
     nameComponents: NameComponents? = nil,
     lookupInfo: UserIdentityLookupInfo? = nil
   ) {

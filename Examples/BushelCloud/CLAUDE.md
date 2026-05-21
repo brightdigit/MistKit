@@ -452,7 +452,7 @@ See `.claude/s2s-auth-details.md` for detailed batch operation examples and erro
 
 - `BushelCloudKitError` enum defines project-specific errors
 - MistKit operations throw `CloudKitError` for API failures
-- Use `RecordInfo.isError` to detect partial batch failures
+- `modifyRecords` returns `[RecordResult]`; switch over each (`.success` / `.failure`) to detect partial batch failures
 - Verbose mode logs error details (serverErrorCode, reason)
 
 **Common error codes**:

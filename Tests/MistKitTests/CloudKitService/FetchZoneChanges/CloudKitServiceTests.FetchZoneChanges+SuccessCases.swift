@@ -103,8 +103,8 @@ extension CloudKitServiceTests.FetchZoneChanges {
       #expect(result.syncToken == "new-token")
     }
 
-    @Test("fetchZoneChanges() filters out zones with nil zoneID from server response")
-    internal func fetchZoneChangesFiltersNilZoneID() async throws {
+    @Test("fetchZoneChanges() throws when the server returns a zone with nil zoneID")
+    internal func fetchZoneChangesThrowsOnNilZoneID() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
@@ -119,10 +119,15 @@ extension CloudKitServiceTests.FetchZoneChanges {
         transport: transport
       )
 
-      let result = try await service.fetchZoneChanges(database: .public(.prefers(.serverToServer)))
-
-      #expect(result.zones.count == 1, "Zone with nil zoneID should be filtered out")
-      #expect(result.zones.first?.zoneName == "valid-zone")
+      // Suppress the DEBUG assertion trap so the thrown error is observable.
+      await ConversionFailureReporter.$assertionHandler.withValue(
+        { _, _, _ in },
+        operation: {
+          await #expect(throws: CloudKitError.self) {
+            _ = try await service.fetchZoneChanges(database: .public(.prefers(.serverToServer)))
+          }
+        }
+      )
     }
   }
 }

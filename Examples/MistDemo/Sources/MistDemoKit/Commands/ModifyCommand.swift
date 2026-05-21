@@ -85,7 +85,14 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
         database: config.base.database
       )
 
-      let rows = results.map { record in
+      let succeeded = results.compactMap { result in
+        if case .success(let record) = result { record } else { nil }
+      }
+      let failures = results.compactMap { result in
+        if case .failure(let error) = result { error } else { nil }
+      }
+
+      let rows = succeeded.map { record in
         ModifyResultRow(
           operation: "applied",
           recordType: record.recordType,
@@ -94,25 +101,22 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
         )
       }
 
-      let recordReturningOpsCount =
-        config.operations
-        .filter { $0.operation != .delete }.count
-      let partialFailure =
-        !config.atomic
-        && results.count < recordReturningOpsCount
+      let partialFailure = !config.atomic && !failures.isEmpty
 
-      if partialFailure {
-        let missing = recordReturningOpsCount - results.count
-        let line =
-          "Warning: \(missing) of \(recordReturningOpsCount)"
-          + " create/update op(s) did not return a record.\n"
-        FileHandle.standardError.write(Data(line.utf8))
+      if !failures.isEmpty {
+        for failure in failures {
+          let line =
+            "Warning: operation on '\(failure.recordName)' failed"
+            + " (\(failure.serverErrorCode.rawValue))"
+            + (failure.reason.map { ": \($0)" } ?? "") + "\n"
+          FileHandle.standardError.write(Data(line.utf8))
+        }
       }
 
       let envelope = ModifyOutput(
         results: rows,
         attempted: config.operations.count,
-        succeeded: results.count,
+        succeeded: succeeded.count,
         partialFailure: partialFailure
       )
       try await outputResult(envelope, format: config.output)

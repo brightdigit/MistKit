@@ -30,20 +30,14 @@
 internal import Foundation
 internal import MistKitOpenAPI
 
-/// Record information from CloudKit
+/// Record information from CloudKit.
 ///
-/// ## Error Detection Pattern
-/// CloudKit Web Services returns error responses as records with nil `recordType` and `recordName`.
-/// This implementation uses "Unknown" as a sentinel value for error responses, which can be detected
-/// using the `isError` property. While this is a fragile pattern, it matches CloudKit's API behavior
-/// where failed operations in a batch return incomplete record data.
-///
-/// Example:
-/// ```swift
-/// let results = try await service.modifyRecords(operations)
-/// let successfulRecords = results.filter { !$0.isError }
-/// let failedRecords = results.filter { $0.isError }
-/// ```
+/// A `RecordInfo` always represents a successfully-returned record: it carries a
+/// non-optional `recordName` and `recordType`. Per-record failures from
+/// `modifyRecords` / `lookupRecords` are surfaced separately as
+/// ``RecordResult/failure(_:)`` (a ``RecordOperationFailure``) and never become a
+/// `RecordInfo`. A response record missing its identifiers is treated as a
+/// conversion failure (logged, asserted in DEBUG, and thrown).
 public struct RecordInfo: Codable, Sendable {
   /// The record name
   public let recordName: String
@@ -61,21 +55,27 @@ public struct RecordInfo: Codable, Sendable {
   /// the record was deleted and should be removed from local storage.
   public let deleted: Bool
 
-  /// Indicates whether this RecordInfo represents an error response
-  ///
-  /// CloudKit returns error responses with nil recordType/recordName, which are converted
-  /// to "Unknown" during initialization. Use this property to detect failed operations
-  /// in batch modify responses.
-  public var isError: Bool {
-    recordType == "Unknown"
-  }
-
-  internal init(from record: Components.Schemas.RecordResponse) {
-    self.recordName = record.recordName ?? "Unknown"
-    self.recordType = record.recordType ?? "Unknown"
+  internal init(from record: Components.Schemas.RecordResponse) throws(ConversionError) {
+    guard let recordName = record.recordName, let recordType = record.recordType else {
+      let failure = ConversionError.recordMissingIdentifier(
+        recordName: record.recordName,
+        recordType: record.recordType
+      )
+      try failure.reportAndThrow()
+    }
+    self.recordName = recordName
+    self.recordType = recordType
     self.recordChangeTag = record.recordChangeTag
-    self.created = record.created.map(RecordTimestamp.init(from:))
-    self.modified = record.modified.map(RecordTimestamp.init(from:))
+    if let created = record.created {
+      self.created = try RecordTimestamp(from: created)
+    } else {
+      self.created = nil
+    }
+    if let modified = record.modified {
+      self.modified = try RecordTimestamp(from: modified)
+    } else {
+      self.modified = nil
+    }
     self.deleted = record.deleted ?? false
 
     // Convert fields to FieldValue representation
@@ -83,9 +83,7 @@ public struct RecordInfo: Codable, Sendable {
 
     if let fieldsPayload = record.fields {
       for (fieldName, fieldData) in fieldsPayload.additionalProperties {
-        if let fieldValue = FieldValue(fieldData) {
-          convertedFields[fieldName] = fieldValue
-        }
+        convertedFields[fieldName] = try FieldValue(fieldData, fieldName: fieldName)
       }
     }
 

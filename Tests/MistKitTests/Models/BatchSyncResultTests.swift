@@ -28,7 +28,6 @@
 //
 
 internal import Foundation
-internal import MistKitOpenAPI
 internal import Testing
 
 @testable import MistKit
@@ -49,12 +48,22 @@ internal struct BatchSyncResultTests {
     )
   }
 
-  /// Builds an error `RecordInfo` via the same response-decoding path used in
-  /// production (`RecordInfo.init(from:)` with an empty `RecordResponse`),
-  /// rather than hardcoding the "Unknown" sentinel string in the test.
-  /// This matches the pattern in `RecordInfoTests.recordInfoWithUnknownRecord`.
-  internal static func makeErrorRecord() -> RecordInfo {
-    RecordInfo(from: Components.Schemas.RecordResponse())
+  /// A successful per-record result wrapping a plain record.
+  internal static func makeSuccess(name: String) -> RecordResult {
+    .success(makeRecord(name: name))
+  }
+
+  /// A per-record error payload, as CloudKit returns inline in a batch.
+  internal static func makeError(
+    name: String,
+    code: RecordOperationFailure.ServerErrorCode = .badRequest
+  ) -> RecordOperationFailure {
+    RecordOperationFailure(recordName: name, serverErrorCode: code)
+  }
+
+  /// A failed per-record result.
+  internal static func makeFailure(name: String) -> RecordResult {
+    .failure(makeError(name: name))
   }
 
   // MARK: - Tests
@@ -65,15 +74,15 @@ internal struct BatchSyncResultTests {
       creates: ["new-1", "new-2"],
       updates: ["existing-1"]
     )
-    let records: [RecordInfo] = [
-      Self.makeRecord(name: "new-1"),
-      Self.makeRecord(name: "existing-1"),
-      Self.makeRecord(name: "new-2"),
-      Self.makeRecord(name: "server-assigned-name"),
-      Self.makeErrorRecord(),
+    let results: [RecordResult] = [
+      Self.makeSuccess(name: "new-1"),
+      Self.makeSuccess(name: "existing-1"),
+      Self.makeSuccess(name: "new-2"),
+      Self.makeSuccess(name: "server-assigned-name"),
+      Self.makeFailure(name: "err-1"),
     ]
 
-    let result = BatchSyncResult(records: records, classification: classification)
+    let result = BatchSyncResult(results: results, classification: classification)
 
     #expect(result.createdCount == 2)
     #expect(result.updatedCount == 1)
@@ -90,14 +99,14 @@ internal struct BatchSyncResultTests {
       creates: ["a"],
       updates: ["b"]
     )
-    let records: [RecordInfo] = [
-      Self.makeRecord(name: "a"),
-      Self.makeRecord(name: "b"),
-      Self.makeRecord(name: "c"),
-      Self.makeErrorRecord(),
+    let results: [RecordResult] = [
+      Self.makeSuccess(name: "a"),
+      Self.makeSuccess(name: "b"),
+      Self.makeSuccess(name: "c"),
+      Self.makeFailure(name: "err-1"),
     ]
 
-    let result = BatchSyncResult(records: records, classification: classification)
+    let result = BatchSyncResult(results: results, classification: classification)
 
     #expect(result.totalCount == 4)
     #expect(result.succeededCount == 3)
@@ -106,18 +115,17 @@ internal struct BatchSyncResultTests {
         + result.failedCount + result.unclassifiedCount)
   }
 
-  @Test("treats error records as failures regardless of classification")
+  @Test("treats error results as failures regardless of classification")
   internal func treatsErrorRecordsAsFailures() {
-    // Build a classification that *would* claim the error record as a create
-    // by reading its actual recordName, then verify the failure check wins.
-    let errorRecord = Self.makeErrorRecord()
+    // A classification that *would* claim the failed record's name as a create
+    // must not pull a `.failure` out of the `failed` bucket.
     let classification = OperationClassification(
-      creates: [errorRecord.recordName],
+      creates: ["err-1"],
       updates: []
     )
 
     let result = BatchSyncResult(
-      records: [errorRecord],
+      results: [Self.makeFailure(name: "err-1")],
       classification: classification
     )
 
@@ -128,7 +136,7 @@ internal struct BatchSyncResultTests {
   @Test("returns empty buckets for empty inputs")
   internal func returnsEmptyBucketsForEmptyInputs() {
     let classification = OperationClassification(creates: [], updates: [])
-    let result = BatchSyncResult(records: [], classification: classification)
+    let result = BatchSyncResult(results: [], classification: classification)
 
     #expect(result.totalCount == 0)
     #expect(result.succeededCount == 0)
@@ -143,7 +151,7 @@ internal struct BatchSyncResultTests {
     let result = BatchSyncResult(
       created: [Self.makeRecord(name: "a")],
       updated: [Self.makeRecord(name: "b"), Self.makeRecord(name: "c")],
-      failed: [Self.makeErrorRecord()]
+      failed: [Self.makeError(name: "err-1")]
     )
 
     #expect(result.createdCount == 1)

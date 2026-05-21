@@ -239,28 +239,29 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
       )
 
       Self.logger.debug(
-        "Received \(results.count) RecordInfo responses from CloudKit"
+        "Received \(results.count) per-record results from CloudKit"
       )
 
       // Track results based on classification
       for result in results {
-        if result.isError {
+        switch result {
+        case .failure(let error):
           totalFailed += 1
-          failedRecordNames.append(result.recordName)
+          failedRecordNames.append(error.recordName)
           Self.logger.debug(
-            "Error: recordName=\(result.recordName)"
+            "Error: recordName=\(error.recordName), code=\(error.serverErrorCode.rawValue)"
           )
-        } else {
+        case .success(let record):
           // Classify as create or update based on pre-fetch
-          if classification.creates.contains(result.recordName) {
+          if classification.creates.contains(record.recordName) {
             totalCreated += 1
-          } else if classification.updates.contains(result.recordName) {
+          } else if classification.updates.contains(record.recordName) {
             totalUpdated += 1
           }
         }
       }
 
-      let batchSucceeded = results.filter { !$0.isError }.count
+      let batchSucceeded = results.filter { $0.record != nil }.count
       let batchFailed = results.count - batchSucceeded
 
       if batchFailed > 0 {

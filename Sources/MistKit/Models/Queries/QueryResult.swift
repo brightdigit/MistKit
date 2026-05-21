@@ -48,8 +48,12 @@ public struct QueryResult: Codable, Sendable {
     self.continuationMarker = continuationMarker
   }
 
-  internal init(from response: Components.Schemas.QueryResponse) {
-    self.records = response.records?.compactMap { RecordInfo(from: $0) } ?? []
+  internal init(from response: Components.Schemas.QueryResponse) throws(ConversionError) {
+    var records: [RecordInfo] = []
+    for record in response.records ?? [] {
+      records.append(try RecordInfo(from: record))
+    }
+    self.records = records
     self.continuationMarker = response.continuationMarker
   }
 }

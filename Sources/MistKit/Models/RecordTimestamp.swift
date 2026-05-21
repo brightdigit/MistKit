@@ -28,7 +28,6 @@
 //
 
 public import Foundation
-internal import Logging
 internal import MistKitOpenAPI
 
 /// Timestamp information for record creation or modification
@@ -38,15 +37,14 @@ public struct RecordTimestamp: Codable, Sendable {
   /// The record name of the user who performed the action
   public let userRecordName: String?
 
-  internal init(from schema: Components.Schemas.RecordTimestamp) {
-    self.timestamp = schema.timestamp.flatMap { millis in
+  internal init(from schema: Components.Schemas.RecordTimestamp) throws(ConversionError) {
+    if let millis = schema.timestamp {
       guard millis >= 0 else {
-        Logger(subsystem: .api).warning(
-          "Invalid negative timestamp (\(millis) ms) — returning nil"
-        )
-        return nil
+        try ConversionError.negativeTimestamp(milliseconds: millis).reportAndThrow()
       }
-      return Date(timeIntervalSince1970: millis / 1_000.0)
+      self.timestamp = Date(timeIntervalSince1970: millis / 1_000.0)
+    } else {
+      self.timestamp = nil
     }
     self.userRecordName = schema.userRecordName
   }
