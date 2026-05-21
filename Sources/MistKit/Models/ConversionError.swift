@@ -42,10 +42,6 @@ public import Foundation
 public enum ConversionError: LocalizedError, Sendable, Equatable {
   /// A field value's structure matched no known `FieldValue` case.
   case unmappableFieldValue(fieldName: String, value: String, type: String?)
-  /// A location field was missing its latitude and/or longitude.
-  case locationMissingCoordinates(fieldName: String)
-  /// A reference field was missing its `recordName`.
-  case referenceMissingRecordName(fieldName: String)
   /// A list element matched no known `FieldValue` case.
   case unmappableListItem(fieldName: String, item: String)
   /// A nested-list element was not one of the supported basic types.
@@ -73,10 +69,6 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
     case .unmappableFieldValue(let fieldName, let value, let type):
       return "Unmappable FieldValue for field '\(fieldName)' "
         + "(value: \(value), type: \(type ?? "nil"))"
-    case .locationMissingCoordinates(let fieldName):
-      return "Location field '\(fieldName)' missing latitude/longitude"
-    case .referenceMissingRecordName(let fieldName):
-      return "Reference field '\(fieldName)' missing recordName"
     case .unmappableListItem(let fieldName, let item):
       return "Unmappable list item for field '\(fieldName)' (\(item))"
     case .unmappableNestedListItem(let fieldName, let item):

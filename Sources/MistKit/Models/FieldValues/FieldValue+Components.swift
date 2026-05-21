@@ -70,18 +70,11 @@ extension FieldValue {
 
   /// Initialize from location field value
   internal init(
-    locationValue: Components.Schemas.LocationValue,
-    fieldName: String
-  ) throws(ConversionError) {
-    guard let latitude = locationValue.latitude,
-      let longitude = locationValue.longitude
-    else {
-      try ConversionError.locationMissingCoordinates(fieldName: fieldName).reportAndThrow()
-    }
-
+    locationValue: Components.Schemas.LocationValue
+  ) {
     let location = Location(
-      latitude: latitude,
-      longitude: longitude,
+      latitude: locationValue.latitude,
+      longitude: locationValue.longitude,
       horizontalAccuracy: locationValue.horizontalAccuracy,
       verticalAccuracy: locationValue.verticalAccuracy,
       altitude: locationValue.altitude,
@@ -94,12 +87,9 @@ extension FieldValue {
 
   /// Initialize from reference field value
   internal init(
-    referenceValue: Components.Schemas.ReferenceValue,
-    fieldName: String
-  ) throws(ConversionError) {
-    guard let recordName = referenceValue.recordName else {
-      try ConversionError.referenceMissingRecordName(fieldName: fieldName).reportAndThrow()
-    }
+    referenceValue: Components.Schemas.ReferenceValue
+  ) {
+    let recordName = referenceValue.recordName
     let action: Reference.Action?
     switch referenceValue.action {
     case .DELETE_SELF:
@@ -158,10 +148,10 @@ extension FieldValue {
     fieldName: String
   ) throws(ConversionError) -> FieldValue? {
     if case .LocationValue(let locationValue) = value {
-      return try Self(locationValue: locationValue, fieldName: fieldName)
+      return Self(locationValue: locationValue)
     }
     if case .ReferenceValue(let referenceValue) = value {
-      return try Self(referenceValue: referenceValue, fieldName: fieldName)
+      return Self(referenceValue: referenceValue)
     }
     if case .AssetValue(let assetValue) = value {
       return Self(assetValue: assetValue)

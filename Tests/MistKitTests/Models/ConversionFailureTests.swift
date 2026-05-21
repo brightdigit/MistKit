@@ -53,28 +53,27 @@ internal struct ConversionFailureTests {
     )
   }
 
-  @Test("FieldValue throws on a reference field missing recordName")
-  internal func referenceMissingRecordNameThrows() {
-    let response = Components.Schemas.FieldValueResponse(
-      value: .ReferenceValue(.init(recordName: nil))
+  @Test("An asset field value converts to .asset rather than a mis-typed location")
+  internal func assetFieldValueConvertsToAsset() throws {
+    // Regression: an asset value object carries no latitude/longitude, but while
+    // LocationValue's coordinates were optional the oneOf decoder greedily
+    // matched assets as locations, so conversion failed on a missing coordinate.
+    let json = Data(
+      #"{"value":{"fileChecksum":"chk","size":51200,"downloadURL":"https://example.com/a.bin"}}"#
+        .utf8
     )
-    expectConversionThrow {
-      _ = try FieldValue(response, fieldName: "owner")
-    }
-  }
+    let response = try JSONDecoder().decode(
+      Components.Schemas.FieldValueResponse.self,
+      from: json
+    )
 
-  @Test("RecordInfo throws on a field that cannot be mapped")
-  internal func recordInfoThrowsOnReferenceWithoutRecordName() {
-    let record = Components.Schemas.RecordResponse(
-      recordName: "rec-1",
-      recordType: "Article",
-      fields: .init(additionalProperties: [
-        "owner": .init(value: .ReferenceValue(.init(recordName: nil)))
-      ])
-    )
-    expectConversionThrow {
-      _ = try RecordInfo(from: record)
+    let field = try FieldValue(response, fieldName: "image")
+
+    guard case .asset(let asset) = field else {
+      Issue.record("Expected .asset, got \(field)")
+      return
     }
+    #expect(asset.fileChecksum == "chk")
   }
 
   @Test("UserIdentity faithfully converts a non-discoverable user (nil userRecordName)")
