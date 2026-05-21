@@ -31,6 +31,7 @@ on:
     branches:
       - main
       - 'v*.*.*'
+      - 'claude/**'
   workflow_dispatch:
 
 concurrency:
