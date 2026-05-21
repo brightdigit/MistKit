@@ -27,16 +27,21 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+// `@objc` requires the Objective-C runtime, which is absent on
+// Linux/Windows. The push-notification bridge is Apple-only, so gate the
+// whole protocol on Objective-C interop availability.
+#if canImport(ObjectiveC)
+  public import Foundation
 
-/// Receiver side of the platform push-notification bridge. The
-/// `PushNotificationDelegate` (AppKit / UIKit) forwards OS callbacks
-/// to whatever object is currently registered as
-/// `PushNotificationDelegate.receiver`.
-@MainActor
-@objc
-public protocol PushTokenReceiver: AnyObject {
-  func didRegisterForRemoteNotifications(deviceToken: Data)
-  func didFailToRegisterForRemoteNotifications(error: any Error)
-  func didReceiveRemoteNotification(userInfo: [AnyHashable: Any])
-}
+  /// Receiver side of the platform push-notification bridge. The
+  /// `PushNotificationDelegate` (AppKit / UIKit) forwards OS callbacks
+  /// to whatever object is currently registered as
+  /// `PushNotificationDelegate.receiver`.
+  @MainActor
+  @objc
+  public protocol PushTokenReceiver: AnyObject {
+    func didRegisterForRemoteNotifications(deviceToken: Data)
+    func didFailToRegisterForRemoteNotifications(error: any Error)
+    func didReceiveRemoteNotification(userInfo: [AnyHashable: Any])
+  }
+#endif

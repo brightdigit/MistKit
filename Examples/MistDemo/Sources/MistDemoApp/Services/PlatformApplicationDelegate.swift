@@ -27,19 +27,24 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+// `@objc` requires the Objective-C runtime, which is absent on
+// Linux/Windows. This delegate protocol exists only to bridge APNs callbacks
+// on Apple platforms, so gate it on Objective-C interop availability.
+#if canImport(ObjectiveC)
+  public import Foundation
 
-/// App-level delegate behavior that funnels APNs callbacks to a
-/// ``PushTokenReceiver``. Deliberately independent of the system delegate
-/// protocol (``ApplicationDelegate``) and of the concrete
-/// ``PushNotificationDelegate`` class — it only knows about the receiver. The
-/// shared callbacks are supplied by the extensions below (and the per-platform
-/// extension files), keyed off the static `receiver`.
-@MainActor
-@objc
-public protocol PlatformApplicationDelegate: AnyObject {
-  static var receiver: (any PushTokenReceiver)? { get }
-}
+  /// App-level delegate behavior that funnels APNs callbacks to a
+  /// ``PushTokenReceiver``. Deliberately independent of the system delegate
+  /// protocol (``ApplicationDelegate``) and of the concrete
+  /// ``PushNotificationDelegate`` class — it only knows about the receiver. The
+  /// shared callbacks are supplied by the extensions below (and the
+  /// per-platform extension files), keyed off the static `receiver`.
+  @MainActor
+  @objc
+  public protocol PlatformApplicationDelegate: AnyObject {
+    static var receiver: (any PushTokenReceiver)? { get }
+  }
+#endif
 
 // The `application(_:didRegister…)` / `didFail…` selectors are identical on
 // AppKit and UIKit (both take the unified ``PlatformApplication``), so they

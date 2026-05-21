@@ -27,38 +27,43 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+// Conforms to the SwiftUI-defined ``ApplicationDelegate`` typealias and uses
+// `NSObject`/`@objc` machinery, so gate on SwiftUI (which implies an Apple
+// platform with Objective-C interop) to keep Linux/Windows builds clean.
+#if canImport(SwiftUI)
+  public import Foundation
 
-#if canImport(AppKit) && !targetEnvironment(macCatalyst)
-  public import AppKit
-#elseif canImport(WatchKit)
-  public import WatchKit
-#elseif canImport(UIKit) && !os(watchOS)
-  public import UIKit
-#endif
+  #if canImport(AppKit) && !targetEnvironment(macCatalyst)
+    public import AppKit
+  #elseif canImport(WatchKit)
+    public import WatchKit
+  #elseif canImport(UIKit) && !os(watchOS)
+    public import UIKit
+  #endif
 
-/// Universal AppKit/UIKit/watchOS delegate that catches APNs callbacks
-/// SwiftUI can't observe directly. SwiftUI's `@NSApplicationDelegateAdaptor`
-/// / `@UIApplicationDelegateAdaptor` / `@WKApplicationDelegateAdaptor`
-/// instantiates this with the parameterless `NSObject` init, so the receiver
-/// is wired via a `static weak` set by `CloudKitStore.init` rather than
-/// passed in.
-///
-/// The APNs callbacks themselves are supplied by ``PlatformApplicationDelegate``
-/// and its per-platform extensions; conforming to both that protocol and the
-/// system ``ApplicationDelegate`` (required by the SwiftUI adaptor) is all
-/// this class needs to declare.
-@MainActor
-public final class PushNotificationDelegate:
-  NSObject, ApplicationDelegate, PlatformApplicationDelegate
-{
-  /// The object the platform delegate forwards APNs callbacks to. Set by
-  /// `CloudKitStore.init`; held weakly so the store's lifetime governs it.
-  public static weak var receiver: (any PushTokenReceiver)?
+  /// Universal AppKit/UIKit/watchOS delegate that catches APNs callbacks
+  /// SwiftUI can't observe directly. SwiftUI's `@NSApplicationDelegateAdaptor`
+  /// / `@UIApplicationDelegateAdaptor` / `@WKApplicationDelegateAdaptor`
+  /// instantiates this with the parameterless `NSObject` init, so the receiver
+  /// is wired via a `static weak` set by `CloudKitStore.init` rather than
+  /// passed in.
+  ///
+  /// The APNs callbacks themselves are supplied by
+  /// ``PlatformApplicationDelegate`` and its per-platform extensions;
+  /// conforming to both that protocol and the system ``ApplicationDelegate``
+  /// (required by the SwiftUI adaptor) is all this class needs to declare.
+  @MainActor
+  public final class PushNotificationDelegate:
+    NSObject, ApplicationDelegate, PlatformApplicationDelegate
+  {
+    /// The object the platform delegate forwards APNs callbacks to. Set by
+    /// `CloudKitStore.init`; held weakly so the store's lifetime governs it.
+    public static weak var receiver: (any PushTokenReceiver)?
 
-  /// Required by SwiftUI's delegate adaptor, which constructs the
-  /// delegate with no arguments at app launch.
-  override public init() {
-    super.init()
+    /// Required by SwiftUI's delegate adaptor, which constructs the
+    /// delegate with no arguments at app launch.
+    override public init() {
+      super.init()
+    }
   }
-}
+#endif
