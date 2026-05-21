@@ -32,7 +32,7 @@ internal import Foundation
 /// Test data generation utilities for integration tests.
 internal enum IntegrationTestData {
   /// CloudKit record type for integration tests.
-  internal static let recordType = "MistKitIntegrationTest"
+  internal static let recordType = "Note"
 
   /// Generate minimal PNG-like binary data for upload testing.
   ///
