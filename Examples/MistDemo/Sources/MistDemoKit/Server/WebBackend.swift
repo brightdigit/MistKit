@@ -66,6 +66,12 @@ internal protocol WebBackend: Sendable {
     recordChangeTag: String?,
     database: MistKit.Database
   ) async throws
+
+  func webModifyZones(
+    create: [String],
+    delete: [String],
+    database: MistKit.Database
+  ) async throws -> [ZoneInfo]
 }
 
 extension CloudKitService: WebBackend {
@@ -130,5 +136,16 @@ extension CloudKitService: WebBackend {
       recordChangeTag: recordChangeTag,
       database: database
     )
+  }
+
+  internal func webModifyZones(
+    create: [String],
+    delete: [String],
+    database: MistKit.Database
+  ) async throws -> [ZoneInfo] {
+    let operations =
+      create.map { ZoneOperation.create(ZoneID(zoneName: $0)) }
+      + delete.map { ZoneOperation.delete(ZoneID(zoneName: $0)) }
+    return try await modifyZones(operations, database: database)
   }
 }

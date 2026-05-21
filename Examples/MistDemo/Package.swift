@@ -156,6 +156,8 @@ let package = Package(
       ],
       resources: [
         .copy("Resources/index.html"),
+        .copy("Resources/styles.css"),
+        .copy("Resources/js"),
       ],
       swiftSettings: swiftSettings
     ),

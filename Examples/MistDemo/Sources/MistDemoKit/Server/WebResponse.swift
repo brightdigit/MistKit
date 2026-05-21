@@ -43,6 +43,13 @@ internal enum WebResponse {
     internal let deleted: Bool
   }
 
+  /// Body returned by zone routes (`zones/modify`). `ZoneInfo` encodes to
+  /// `{ zoneName, ownerRecordName, capabilities }`, which the browser's
+  /// zone table reads directly.
+  internal struct Zones: Encodable {
+    internal let zones: [ZoneInfo]
+  }
+
   /// Body returned for any handled CloudKit/MistKit error so the UI can
   /// surface the message without parsing transport-level failures.
   internal struct Error: Encodable {

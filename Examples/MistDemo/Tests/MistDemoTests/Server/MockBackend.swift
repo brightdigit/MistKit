@@ -36,38 +36,11 @@
   /// In-memory `WebBackend` for routing-level tests. Records the last
   /// call to each operation and returns deterministic stub records.
   internal final actor MockBackend: WebBackend {
-    internal struct QueryCall: Sendable {
-      internal let recordType: String
-      internal let limit: Int?
-      internal let sortBy: [WebRequests.QuerySortField]?
-      internal let database: MistKit.Database
-    }
-
-    internal struct CreateCall: Sendable {
-      internal let recordType: String
-      internal let fields: [String: String]
-      internal let database: MistKit.Database
-    }
-
-    internal struct UpdateCall: Sendable {
-      internal let recordType: String
-      internal let recordName: String
-      internal let fields: [String: String]
-      internal let recordChangeTag: String?
-      internal let database: MistKit.Database
-    }
-
-    internal struct DeleteCall: Sendable {
-      internal let recordType: String
-      internal let recordName: String
-      internal let recordChangeTag: String?
-      internal let database: MistKit.Database
-    }
-
     internal private(set) var lastQuery: QueryCall?
     internal private(set) var lastCreate: CreateCall?
     internal private(set) var lastUpdate: UpdateCall?
     internal private(set) var lastDelete: DeleteCall?
+    internal private(set) var lastModifyZones: ModifyZonesCall?
     private var pendingError: String?
 
     private static func stubRecord(
@@ -194,6 +167,22 @@
         database: database
       )
       try consumePendingError()
+    }
+
+    internal func webModifyZones(
+      create: [String],
+      delete: [String],
+      database: MistKit.Database
+    ) async throws -> [ZoneInfo] {
+      lastModifyZones = ModifyZonesCall(
+        create: create,
+        delete: delete,
+        database: database
+      )
+      try consumePendingError()
+      return create.map { name in
+        ZoneInfo(zoneName: name, ownerRecordName: nil, capabilities: [])
+      }
     }
 
     private func consumePendingError() throws {

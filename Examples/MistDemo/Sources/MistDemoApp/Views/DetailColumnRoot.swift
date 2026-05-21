@@ -42,11 +42,21 @@
         ZoneListView()
       case .query:
         QueryView()
+      case .records:
+        RecordsView()
+      case .subscriptions:
+        SubscriptionsView()
+      case .pushTokens:
+        PushTokensView()
+      case .assets:
+        AssetsView()
+      case .users:
+        UsersView()
       case nil:
         ContentUnavailableView(
           "Pick a section from the sidebar",
           systemImage: "sidebar.left",
-          description: Text("Account, Zones, or Query Records")
+          description: Text("Account, Zones, Records, Subscriptions, …")
         )
       }
     }

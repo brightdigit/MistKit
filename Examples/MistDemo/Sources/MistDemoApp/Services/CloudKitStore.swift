@@ -48,6 +48,15 @@
     internal var lastError: String?
     internal var databaseScope: CKDatabase.Scope = .private
 
+    /// Latest APNs registration state. Driven by
+    /// `CloudKitStore+PushTokens.swift`; the SwiftUI Push Tokens view
+    /// observes this for live status updates.
+    internal var pushTokenStatus: PushTokenStatus = .idle
+
+    /// Pretty-printed payload of the most recent remote notification
+    /// delivered while the app was running. Cleared on launch.
+    internal var lastReceivedNotification: String?
+
     /// The signed-in iCloud user's record name. Mirrors `currentUserRecordName`
     /// in the web demo and is used to flag the "You" badge on notes the
     /// current user created.
@@ -64,6 +73,10 @@
     public init(containerIdentifier: String) {
       self.containerIdentifier = containerIdentifier
       self.container = CKContainer(identifier: containerIdentifier)
+
+      // The platform AppDelegate is owned by SwiftUI; weak-link this store
+      // as the sink for its APNs callbacks.
+      PushNotificationDelegate.receiver = self
     }
 
     /// Apply the editable fields onto a CKRecord. CloudKit's system metadata

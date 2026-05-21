@@ -65,6 +65,15 @@ public enum MistDemoRunner {
     await registry.register(TestPrivateCommand.self)
     await registry.register(DemoErrorsCommand.self)
 
+    // Pending MistKit wrappers — print "pending #N" and exit 0. Each
+    // command flips to a real implementation when its tracking issue lands.
+    await registry.register(ResolveCommand.self)
+    await registry.register(RereferenceAssetCommand.self)
+    await registry.register(ListSubscriptionsCommand.self)
+    await registry.register(LookupSubscriptionCommand.self)
+    await registry.register(CreateTokenCommand.self)
+    await registry.register(RegisterTokenCommand.self)
+
     // Parse command line arguments
     let parser = CommandLineParser()
 

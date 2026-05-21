@@ -1,0 +1,75 @@
+//
+//  MockBackend+Calls.swift
+//  MistDemoTests
+//
+//  Created by Leo Dion.
+//  Copyright © 2026 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+#if canImport(Hummingbird)
+  internal import MistKit
+
+  @testable import MistDemoKit
+
+  extension MockBackend {
+    /// Captured arguments from the most recent `webQuery` call.
+    internal struct QueryCall: Sendable {
+      internal let recordType: String
+      internal let limit: Int?
+      internal let sortBy: [WebRequests.QuerySortField]?
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webCreate` call.
+    internal struct CreateCall: Sendable {
+      internal let recordType: String
+      internal let fields: [String: String]
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webUpdate` call.
+    internal struct UpdateCall: Sendable {
+      internal let recordType: String
+      internal let recordName: String
+      internal let fields: [String: String]
+      internal let recordChangeTag: String?
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webDelete` call.
+    internal struct DeleteCall: Sendable {
+      internal let recordType: String
+      internal let recordName: String
+      internal let recordChangeTag: String?
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webModifyZones` call.
+    internal struct ModifyZonesCall: Sendable {
+      internal let create: [String]
+      internal let delete: [String]
+      internal let database: MistKit.Database
+    }
+  }
+#endif

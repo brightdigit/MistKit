@@ -32,12 +32,22 @@ internal enum SidebarItem: Hashable, CaseIterable {
   case account
   case zones
   case query
+  case records
+  case subscriptions
+  case pushTokens
+  case assets
+  case users
 
   internal var label: String {
     switch self {
     case .account: return "iCloud Account"
     case .zones: return "Zones"
     case .query: return "Query Records"
+    case .records: return "Records"
+    case .subscriptions: return "Subscriptions"
+    case .pushTokens: return "Push Tokens"
+    case .assets: return "Assets"
+    case .users: return "Users"
     }
   }
 
@@ -46,6 +56,11 @@ internal enum SidebarItem: Hashable, CaseIterable {
     case .account: return "person.crop.circle"
     case .zones: return "tray.full"
     case .query: return "magnifyingglass"
+    case .records: return "doc.text"
+    case .subscriptions: return "bell"
+    case .pushTokens: return "key.radiowaves.forward"
+    case .assets: return "photo"
+    case .users: return "person.2"
     }
   }
 }

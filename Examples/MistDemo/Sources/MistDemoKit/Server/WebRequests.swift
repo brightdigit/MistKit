@@ -177,7 +177,7 @@ internal enum WebRequests {
   /// Decode `database` (string raw-value) from a keyed container. Falls back
   /// to `defaultDatabase` when the key is absent and throws when present but
   /// unrecognized so a typo surfaces as a `400` rather than a silent default.
-  fileprivate static func decodeDatabase<Key: CodingKey>(
+  internal static func decodeDatabase<Key: CodingKey>(
     from container: KeyedDecodingContainer<Key>,
     forKey key: Key
   ) throws -> MistKit.Database {
