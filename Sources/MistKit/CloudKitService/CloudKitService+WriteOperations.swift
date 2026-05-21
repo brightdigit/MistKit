@@ -217,9 +217,8 @@ extension CloudKitService {
 
     let results = try await modifyRecords([operation], database: database)
     for result in results {
-      if let error = result.error {
-        throw CloudKitError.recordOperationFailed(error)
-      }
+      // `get()` rethrows a per-record failure as `recordOperationFailed`.
+      _ = try result.get()
     }
   }
 }

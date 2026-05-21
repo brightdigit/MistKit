@@ -40,12 +40,10 @@ public enum UserRecordName: Codable, Sendable, Hashable {
   /// The user is not discoverable, so CloudKit returned no record name.
   case nonDiscoverable
 
-  /// The record name when discoverable, otherwise `nil`.
-  public var value: String? {
-    switch self {
-    case .recordName(let name): name
-    case .nonDiscoverable: nil
-    }
+  /// Maps CloudKit's optional record-name string onto the two-state enum: a
+  /// present value is ``recordName(_:)``, a missing one is ``nonDiscoverable``.
+  internal init(_ recordName: String?) {
+    self = recordName.map(Self.recordName) ?? .nonDiscoverable
   }
 
   /// Decodes a record name from a single string value, treating `null` as

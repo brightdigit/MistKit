@@ -43,7 +43,7 @@ public struct UserIdentity: Codable, Sendable {
     // CloudKit returns an identity with only `lookupInfo` for a
     // non-discoverable user, so a missing record name is a valid response —
     // not a conversion failure.
-    self.userRecordName = schema.userRecordName.map(UserRecordName.recordName) ?? .nonDiscoverable
+    self.userRecordName = UserRecordName(schema.userRecordName)
     self.nameComponents = schema.nameComponents.map(NameComponents.init(from:))
     self.lookupInfo = schema.lookupInfo.map(UserIdentityLookupInfo.init(from:))
   }

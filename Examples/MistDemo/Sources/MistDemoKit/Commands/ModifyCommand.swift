@@ -85,8 +85,12 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
         database: config.base.database
       )
 
-      let succeeded = results.compactMap(\.record)
-      let failures = results.compactMap(\.error)
+      let succeeded = results.compactMap { result in
+        if case .success(let record) = result { record } else { nil }
+      }
+      let failures = results.compactMap { result in
+        if case .failure(let error) = result { error } else { nil }
+      }
 
       let rows = succeeded.map { record in
         ModifyResultRow(

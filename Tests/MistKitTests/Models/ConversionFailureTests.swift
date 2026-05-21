@@ -110,9 +110,12 @@ internal struct ConversionFailureTests {
     )
     let result = try RecordResult(from: item)
 
-    #expect(result.record == nil)
-    #expect(result.error?.recordName == "rec-1")
-    #expect(result.error?.serverErrorCode == .notFound)
+    guard case .failure(let error) = result else {
+      Issue.record("Expected .failure, got \(result)")
+      return
+    }
+    #expect(error.recordName == "rec-1")
+    #expect(error.serverErrorCode == .notFound)
   }
 
   @Test("RecordResult maps a record item to .success")
@@ -122,8 +125,11 @@ internal struct ConversionFailureTests {
     )
     let result = try RecordResult(from: item)
 
-    #expect(result.error == nil)
-    #expect(result.record?.recordName == "rec-1")
+    guard case .success(let record) = result else {
+      Issue.record("Expected .success, got \(result)")
+      return
+    }
+    #expect(record.recordName == "rec-1")
   }
 
   @Test("RecordResult.get() rethrows a failure as recordOperationFailed")
@@ -134,5 +140,65 @@ internal struct ConversionFailureTests {
     #expect(throws: CloudKitError.self) {
       _ = try result.get()
     }
+  }
+
+  @Test("BatchSyncResult partitions a mixed success/failure batch by classification")
+  internal func batchSyncResultPartitionsMixedResults() throws {
+    func successResult(_ recordName: String) throws -> RecordResult {
+      try RecordResult(
+        from: Components.Schemas.ModifyResponse.recordsPayloadPayload.RecordResponse(
+          .init(recordName: recordName, recordType: "Article")
+        )
+      )
+    }
+    let createdRecord = try successResult("new-1")
+    let updatedRecord = try successResult("existing-1")
+    let anonymousRecord = try successResult("server-assigned")
+    let failure = RecordResult.failure(
+      RecordOperationFailure(recordName: "bad-1", serverErrorCode: .notFound)
+    )
+
+    let classification = OperationClassification(
+      creates: ["new-1"],
+      updates: ["existing-1"]
+    )
+    let batch = BatchSyncResult(
+      results: [createdRecord, updatedRecord, anonymousRecord, failure],
+      classification: classification
+    )
+
+    #expect(batch.created.map(\.recordName) == ["new-1"])
+    #expect(batch.updated.map(\.recordName) == ["existing-1"])
+    #expect(batch.unclassified.map(\.recordName) == ["server-assigned"])
+    #expect(batch.failed.map(\.recordName) == ["bad-1"])
+    // Every input result lands in exactly one bucket.
+    #expect(batch.totalCount == 4)
+    #expect(batch.succeededCount == 3)
+    #expect(batch.failedCount == 1)
+  }
+
+  @Test("mapToCloudKitError promotes a thrown ConversionError to .conversionFailed")
+  internal func mapToCloudKitErrorPromotesConversionError() throws {
+    let service = try CloudKitService(
+      containerIdentifier: TestConstants.serviceContainerIdentifier,
+      credentials: Credentials(
+        apiAuth: APICredentials(
+          apiToken: TestConstants.apiToken,
+          webAuthToken: TestConstants.webAuthToken
+        )
+      ),
+      transport: MockTransport()
+    )
+
+    let mapped = service.mapToCloudKitError(
+      ConversionError.zoneMissingName,
+      context: "test"
+    )
+
+    guard case .conversionFailed(let conversionError) = mapped else {
+      Issue.record("Expected .conversionFailed, got \(mapped)")
+      return
+    }
+    #expect(conversionError == .zoneMissingName)
   }
 }

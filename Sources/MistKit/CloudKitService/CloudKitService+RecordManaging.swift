@@ -65,9 +65,8 @@ extension CloudKitService: RecordManaging {
       database: .public(.prefers(.serverToServer))
     )
     for result in results {
-      if let error = result.error {
-        throw CloudKitError.recordOperationFailed(error)
-      }
+      // `get()` rethrows a per-record failure as `recordOperationFailed`.
+      _ = try result.get()
     }
   }
 

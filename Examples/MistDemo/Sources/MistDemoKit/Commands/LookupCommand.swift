@@ -83,7 +83,9 @@ public struct LookupCommand: MistDemoCommand, OutputFormatting {
       )
 
       // A per-record lookup failure (e.g. NOT_FOUND) comes back as `.failure`.
-      let records = results.compactMap(\.record)
+      let records = results.compactMap { result in
+        if case .success(let record) = result { record } else { nil }
+      }
 
       // Report missing names to stderr so a JSON/CSV/etc. stdout stream stays parseable
       let foundNames = Set(records.map(\.recordName))

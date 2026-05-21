@@ -1,6 +1,6 @@
 //
-//  LookupRecordsPhase.swift
-//  MistDemo
+//  CloudKitErrorConvertible.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,43 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
-
-internal struct LookupRecordsPhase: IntegrationPhase {
-  internal typealias Input = CreatedRecordNames
-  internal typealias Output = NoState
-
-  internal static let title = "Lookup records by name"
-  internal static let emoji = "🔍"
-  internal static let apiName = "lookupRecords"
-
-  internal func run(
-    input: CreatedRecordNames, context: PhaseContext
-  ) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-
-    let lookupNames = Array(input.names.prefix(min(3, input.names.count)))
-    if context.verbose {
-      print("   Looking up \(lookupNames.count) of \(input.names.count) record(s) by name")
-    }
-
-    let results = try await context.service.lookupRecords(
-      recordNames: lookupNames,
-      database: context.database
-    )
-    let records = results.compactMap { result in
-      if case .success(let record) = result { record } else { nil }
-    }
-
-    print("✅ Looked up \(records.count) record(s)")
-
-    if context.verbose {
-      for record in records {
-        print("   - \(record.recordName)")
-      }
-    }
-
-    return NoState()
-  }
+/// An internal error type that knows how to represent itself as a
+/// ``CloudKitError`` at the `CloudKitService` boundary (which throws
+/// `CloudKitError`).
+///
+/// `mapToCloudKitError(_:context:)` dispatches through this protocol so any
+/// MistKit error carrying a structured cause — currently ``ConversionError`` —
+/// is promoted without the boundary having to know each concrete type.
+internal protocol CloudKitErrorConvertible: Error {
+  /// The ``CloudKitError`` this error maps to at the service boundary.
+  var asCloudKitError: CloudKitError { get }
 }
+
+extension ConversionError: CloudKitErrorConvertible {}

@@ -146,8 +146,20 @@ public struct RecordOperationFailure: Codable, Hashable, Sendable {
   }
 
   internal init(from schema: Components.Schemas.RecordOperationFailure) {
+    let serverErrorCode = ServerErrorCode(rawValue: schema.serverErrorCode.rawValue)
+    // The generated `serverErrorCodePayload` is a closed enum mirroring the
+    // schema, so a `.unknown` here means our `knownPairs` table drifted from
+    // the regenerated schema — assert loudly (test-overridable) while still
+    // preserving the raw code for forward-compatibility in release.
+    if case .unknown(let raw) = serverErrorCode {
+      ConversionFailureReporter.assertionHandler(
+        "Unmapped CloudKit serverErrorCode \"\(raw)\" — update ServerErrorCode.knownPairs",
+        #fileID,
+        #line
+      )
+    }
     self.recordName = schema.recordName
-    self.serverErrorCode = ServerErrorCode(rawValue: schema.serverErrorCode.rawValue)
+    self.serverErrorCode = serverErrorCode
     self.reason = schema.reason
     self.retryAfter = schema.retryAfter
     self.uuid = schema.uuid

@@ -53,22 +53,6 @@ public enum RecordResult: Sendable {
   /// the failure.
   case failure(RecordOperationFailure)
 
-  /// The record for a successful result, or `nil` for a failure.
-  public var record: RecordInfo? {
-    guard case .success(let record) = self else {
-      return nil
-    }
-    return record
-  }
-
-  /// The error for a failed result, or `nil` for a success.
-  public var error: RecordOperationFailure? {
-    guard case .failure(let error) = self else {
-      return nil
-    }
-    return error
-  }
-
   internal init(
     from item: Components.Schemas.ModifyResponse.recordsPayloadPayload
   ) throws(ConversionError) {
