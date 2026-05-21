@@ -35,35 +35,40 @@ internal import Testing
 /// Simulator test processes don't inherit the runner's shell environment, so
 /// CI-detection flags like `CI` / `GITHUB_ACTIONS` may not survive into the
 /// process that evaluates `TestPlatform.isFlakyTimeoutSimulator`. This test
-/// prints every environment variable (one per line, prefixed `ENV_DUMP:`) so
-/// the CI logs reveal exactly which CI markers — if any — are actually present
-/// inside iOS / watchOS / visionOS simulators. Grep the job log for `ENV_DUMP:`.
+/// surfaces the relevant variables so CI logs reveal exactly which CI markers —
+/// if any — are actually present inside iOS / watchOS / visionOS simulators.
+///
+/// `print()` from inside the simulator test process is dropped by xcodebuild's
+/// console capture, so the dump is routed through Swift Testing's issue
+/// reporting (which *is* captured) via `Issue.record` inside `withKnownIssue` —
+/// the comment lands in the log while the recorded issue stays "known" so the
+/// build stays green. Grep the job log for `ENV_DUMP:`.
 @Suite("Environment Diagnostic")
 internal struct EnvironmentDiagnosticTests {
-  @Test("Dump all environment variables visible to the test process")
+  @Test("Dump CI-relevant environment variables visible to the test process")
   internal func dumpEnvironment() {
     let environment = ProcessInfo.processInfo.environment
-    let names = environment.keys.sorted()
 
-    print("ENV_DUMP: \(names.count) variables visible to the test process")
-    for name in names {
-      // Print only the names and the values of common CI markers — names alone
-      // tell us which detection variable to key off without leaking secrets
-      // (tokens/keys live in values, so we don't print arbitrary values).
-      let isCIMarker = ["CI", "GITHUB_ACTIONS", "GITHUB_RUN_ID", "RUNNER_OS"]
-        .contains(name)
-      if isCIMarker {
-        print("ENV_DUMP: \(name)=\(environment[name] ?? "")")
-      } else {
-        print("ENV_DUMP: \(name)")
-      }
+    // CI markers we'd consider keying the flake gate off of — print their
+    // values explicitly (these aren't secrets). Everything else is reported by
+    // name only so we don't leak token/key values.
+    let markerNames = [
+      "CI", "GITHUB_ACTIONS", "GITHUB_RUN_ID", "GITHUB_WORKFLOW",
+      "RUNNER_OS", "TERM", "SIMULATOR_UDID",
+    ]
+    let markers =
+      markerNames
+      .map { "\($0)=\(environment[$0] ?? "<nil>")" }
+      .joined(separator: " ")
+    let allNames = environment.keys.sorted().joined(separator: ",")
+
+    withKnownIssue("ENV_DUMP diagnostic (always recorded; surfaces env in CI)") {
+      Issue.record(
+        Comment(
+          rawValue: "ENV_DUMP: count=\(environment.count) | markers: \(markers)"
+            + " | names=[\(allNames)]"
+        )
+      )
     }
-
-    // Surface the values our gate cares about directly, even when absent.
-    print("ENV_DUMP: ProcessInfo CI=\(environment["CI"] ?? "<nil>")")
-    print(
-      "ENV_DUMP: ProcessInfo GITHUB_ACTIONS="
-        + "\(environment["GITHUB_ACTIONS"] ?? "<nil>")"
-    )
   }
 }
