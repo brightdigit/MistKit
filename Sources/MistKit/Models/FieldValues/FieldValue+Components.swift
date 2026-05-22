@@ -52,7 +52,9 @@ extension FieldValue {
     typePayload: Components.Schemas.FieldValueResponse._typePayload?,
     fieldName: String
   ) throws(ConversionError) {
-    if let simpleValue = Self.makeSimpleFieldValue(from: valuePayload, type: typePayload) {
+    if let simpleValue =
+      try Self.makeSimpleFieldValue(from: valuePayload, type: typePayload, fieldName: fieldName)
+    {
       self = simpleValue
     } else if let complexValue =
       try Self.makeComplexFieldValue(from: valuePayload, fieldName: fieldName)
@@ -117,30 +119,6 @@ extension FieldValue {
       downloadURL: assetValue.downloadURL
     )
     self = .asset(asset)
-  }
-
-  private static func makeSimpleFieldValue(
-    from value: Components.Schemas.FieldValueResponse.valuePayload,
-    type fieldType: Components.Schemas.FieldValueResponse._typePayload?
-  ) -> FieldValue? {
-    if case .StringValue(let strVal) = value {
-      return .string(strVal)
-    }
-    if case .Int64Value(let intVal) = value {
-      return .int64(Int(intVal))
-    }
-    if case .DoubleValue(let dblVal) = value {
-      return fieldType == .TIMESTAMP
-        ? .date(Date(timeIntervalSince1970: dblVal / 1_000))
-        : .double(dblVal)
-    }
-    if case .BytesValue(let bytesVal) = value {
-      return .bytes(bytesVal)
-    }
-    if case .DateValue(let dateVal) = value {
-      return .date(Date(timeIntervalSince1970: dateVal / 1_000))
-    }
-    return nil
   }
 
   private static func makeComplexFieldValue(

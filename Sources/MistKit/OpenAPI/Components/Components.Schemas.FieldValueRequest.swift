@@ -34,7 +34,12 @@ internal import MistKitOpenAPI
 extension Components.Schemas.FieldValueRequest {
   /// Initialize from MistKit FieldValue for CloudKit API requests.
   ///
-  /// CloudKit infers field types from the value structure, so no type field is sent.
+  /// CloudKit infers a field's type from the value structure, so most values are sent
+  /// without an explicit `type`. The exceptions are scalars whose JSON form is ambiguous —
+  /// a `TIMESTAMP`, `BYTES`, or `DOUBLE` is indistinguishable on the wire from an
+  /// `INT64`/`DOUBLE` number or a `STRING`. For those we tag `type` so CloudKit doesn't
+  /// infer the wrong type and reject the write with `BAD_REQUEST`. Object/array-shaped
+  /// values (reference, asset, location, list) are unambiguous and stay untagged.
   internal init(from fieldValue: FieldValue) {
     if let scalar = Self.makeScalarRequest(from: fieldValue) {
       self = scalar
@@ -103,13 +108,16 @@ extension Components.Schemas.FieldValueRequest {
       return Self(value: .Int64Value(Int64(value)))
     }
     if case .double(let value) = fieldValue {
-      return Self(value: .DoubleValue(value))
+      // Whole-valued doubles serialize without a fraction and would be read as INT64.
+      return Self(value: .DoubleValue(value), _type: .DOUBLE)
     }
     if case .bytes(let value) = fieldValue {
-      return Self(value: .BytesValue(value))
+      // A base64 string is otherwise indistinguishable from a STRING.
+      return Self(value: .BytesValue(value), _type: .BYTES)
     }
     if case .date(let value) = fieldValue {
-      return Self(value: .DateValue(value.timeIntervalSince1970 * 1_000))
+      // A millisecond number is otherwise inferred as INT64/DOUBLE, not TIMESTAMP.
+      return Self(value: .DateValue(value.timeIntervalSince1970 * 1_000), _type: .TIMESTAMP)
     }
     return nil
   }

@@ -21,6 +21,8 @@ extension FieldValueConversionTests {
       } else {
         Issue.record("Expected stringValue")
       }
+      // A string is unambiguous on the wire, so no type tag is sent.
+      #expect(components._type == nil)
     }
 
     @Test("Convert int64 FieldValue to Components.FieldValue")
@@ -37,6 +39,8 @@ extension FieldValueConversionTests {
       } else {
         Issue.record("Expected int64Value")
       }
+      // An integer is the default inference for a whole number, so no type tag is sent.
+      #expect(components._type == nil)
     }
 
     @Test("Convert double FieldValue to Components.FieldValue")
@@ -53,6 +57,8 @@ extension FieldValueConversionTests {
       } else {
         Issue.record("Expected doubleValue")
       }
+      // A whole-valued double would otherwise be inferred as INT64, so DOUBLE is tagged.
+      #expect(components._type == .DOUBLE)
     }
 
     @Test("Convert boolean FieldValue to Components.FieldValue")
@@ -93,6 +99,8 @@ extension FieldValueConversionTests {
       } else {
         Issue.record("Expected bytesValue")
       }
+      // A base64 string would otherwise be inferred as STRING, so BYTES is tagged.
+      #expect(components._type == .BYTES)
     }
 
     @Test("Convert date FieldValue to Components.FieldValue")
@@ -110,6 +118,8 @@ extension FieldValueConversionTests {
       } else {
         Issue.record("Expected dateValue")
       }
+      // Without TIMESTAMP, CloudKit infers INT64 and rejects the write (issue #375).
+      #expect(components._type == .TIMESTAMP)
     }
   }
 }

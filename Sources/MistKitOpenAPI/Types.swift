@@ -834,7 +834,9 @@ public enum Components {
             }
         }
         /// A CloudKit field value for API requests.
-        /// The type field is optional and used for IN/NOT_IN list filters to specify the list element type.
+        /// The type field is optional. It is required for the scalar types whose JSON
+        /// representation is otherwise ambiguous (TIMESTAMP, BYTES, DOUBLE) and for the
+        /// IN/NOT_IN list filters (the *_LIST types specify the list element type).
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/FieldValueRequest`.
@@ -946,10 +948,23 @@ public enum Components {
             }
             /// - Remark: Generated from `#/components/schemas/FieldValueRequest/value`.
             public var value: Components.Schemas.FieldValueRequest.valuePayload
-            /// Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
+            /// Optional CloudKit field type. Sent for scalar values whose JSON form is
+            /// ambiguous (e.g. "TIMESTAMP", "BYTES", "DOUBLE") so CloudKit does not infer the
+            /// wrong type, and for IN/NOT_IN list filters (e.g. "INT64_LIST").
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/FieldValueRequest/type`.
             @frozen public enum _typePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case STRING = "STRING"
+                case INT64 = "INT64"
+                case DOUBLE = "DOUBLE"
+                case BYTES = "BYTES"
+                case TIMESTAMP = "TIMESTAMP"
+                case REFERENCE = "REFERENCE"
+                case ASSET = "ASSET"
+                case ASSETID = "ASSETID"
+                case LOCATION = "LOCATION"
+                case LIST = "LIST"
                 case STRING_LIST = "STRING_LIST"
                 case INT64_LIST = "INT64_LIST"
                 case DOUBLE_LIST = "DOUBLE_LIST"
@@ -958,9 +973,11 @@ public enum Components {
                 case REFERENCE_LIST = "REFERENCE_LIST"
                 case LOCATION_LIST = "LOCATION_LIST"
                 case ASSET_LIST = "ASSET_LIST"
-                case LIST = "LIST"
             }
-            /// Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
+            /// Optional CloudKit field type. Sent for scalar values whose JSON form is
+            /// ambiguous (e.g. "TIMESTAMP", "BYTES", "DOUBLE") so CloudKit does not infer the
+            /// wrong type, and for IN/NOT_IN list filters (e.g. "INT64_LIST").
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/FieldValueRequest/type`.
             public var _type: Components.Schemas.FieldValueRequest._typePayload?
@@ -968,7 +985,7 @@ public enum Components {
             ///
             /// - Parameters:
             ///   - value:
-            ///   - _type: Optional CloudKit list type for IN/NOT_IN filters (e.g. "INT64_LIST").
+            ///   - _type: Optional CloudKit field type. Sent for scalar values whose JSON form is
             public init(
                 value: Components.Schemas.FieldValueRequest.valuePayload,
                 _type: Components.Schemas.FieldValueRequest._typePayload? = nil
