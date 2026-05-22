@@ -42,18 +42,18 @@ public import Foundation
 public enum ConversionError: LocalizedError, Sendable, Equatable {
   /// A field value's structure matched no known `FieldValue` case.
   case unmappableFieldValue(fieldName: String, value: String, type: String?)
-  /// A location field was missing its latitude and/or longitude.
-  case locationMissingCoordinates(fieldName: String)
-  /// A reference field was missing its `recordName`.
-  case referenceMissingRecordName(fieldName: String)
   /// A list element matched no known `FieldValue` case.
   case unmappableListItem(fieldName: String, item: String)
   /// A nested-list element was not one of the supported basic types.
   case unmappableNestedListItem(fieldName: String, item: String)
   /// A record timestamp was negative.
   case negativeTimestamp(milliseconds: Double)
-  /// A record response was missing `recordName` and/or `recordType`.
-  case recordMissingIdentifier(recordName: String?, recordType: String?)
+  /// A record response was missing its `recordName`.
+  ///
+  /// `recordType` is intentionally *not* required: CloudKit's Record Dictionary
+  /// only guarantees `recordName` in a response, and omits `recordType` for
+  /// tombstones (deleted records) and other typeless results.
+  case recordMissingRecordName
   /// A zone response was missing its `zoneID`.
   case zoneMissingID
   /// A zone response was missing its `zoneName`.
@@ -73,19 +73,14 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
     case .unmappableFieldValue(let fieldName, let value, let type):
       return "Unmappable FieldValue for field '\(fieldName)' "
         + "(value: \(value), type: \(type ?? "nil"))"
-    case .locationMissingCoordinates(let fieldName):
-      return "Location field '\(fieldName)' missing latitude/longitude"
-    case .referenceMissingRecordName(let fieldName):
-      return "Reference field '\(fieldName)' missing recordName"
     case .unmappableListItem(let fieldName, let item):
       return "Unmappable list item for field '\(fieldName)' (\(item))"
     case .unmappableNestedListItem(let fieldName, let item):
       return "Unmappable nested list item for field '\(fieldName)' (\(item))"
     case .negativeTimestamp(let milliseconds):
       return "Invalid negative timestamp (\(milliseconds) ms)"
-    case .recordMissingIdentifier(let recordName, let recordType):
-      return "RecordResponse missing required identifier(s) "
-        + "(recordName: \(recordName ?? "nil"), recordType: \(recordType ?? "nil"))"
+    case .recordMissingRecordName:
+      return "RecordResponse missing required recordName"
     case .zoneMissingID:
       return "Zone entry missing zoneID"
     case .zoneMissingName:

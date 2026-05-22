@@ -27,13 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// The per-platform aliases live together (rather than one type per file)
-// because each is a thin, `#if`-selected typealias. The file is deliberately
-// not named after any one alias — in project-mode lint SwiftLint parses every
-// `#if` branch, so a filename-matching typealias ladder would be misread as a
-// `main_type` sitting amongst `supporting_type`s (`file_types_order`). Naming
-// the file neutrally keeps every alias a plain supporting type; the resulting
-// `file_name` mismatch is waived for this file in `.swiftlint.yml`.
 #if canImport(SwiftUI)
   public import SwiftUI
 

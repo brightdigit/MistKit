@@ -32,17 +32,19 @@ internal import MistKitOpenAPI
 
 /// Record information from CloudKit.
 ///
-/// A `RecordInfo` always represents a successfully-returned record: it carries a
-/// non-optional `recordName` and `recordType`. Per-record failures from
-/// `modifyRecords` / `lookupRecords` are surfaced separately as
+/// A `RecordInfo` always carries a non-optional `recordName` (CloudKit's Record
+/// Dictionary guarantees it in every response). `recordType`, by contrast, is
+/// *optional*: CloudKit omits it for tombstones (deleted records, `deleted ==
+/// true`) and other typeless results, so it is `nil` in those cases. Per-record
+/// failures from `modifyRecords` / `lookupRecords` are surfaced separately as
 /// ``RecordResult/failure(_:)`` (a ``RecordOperationFailure``) and never become a
-/// `RecordInfo`. A response record missing its identifiers is treated as a
+/// `RecordInfo`. A response record missing its `recordName` is treated as a
 /// conversion failure (logged, asserted in DEBUG, and thrown).
 public struct RecordInfo: Codable, Sendable {
   /// The record name
   public let recordName: String
-  /// The record type
-  public let recordType: String
+  /// The record type, or `nil` for tombstones and other typeless responses
+  public let recordType: String?
   /// The record change tag for optimistic locking
   public let recordChangeTag: String?
   /// The record fields
@@ -56,15 +58,11 @@ public struct RecordInfo: Codable, Sendable {
   public let deleted: Bool
 
   internal init(from record: Components.Schemas.RecordResponse) throws(ConversionError) {
-    guard let recordName = record.recordName, let recordType = record.recordType else {
-      let failure = ConversionError.recordMissingIdentifier(
-        recordName: record.recordName,
-        recordType: record.recordType
-      )
-      try failure.reportAndThrow()
+    guard let recordName = record.recordName else {
+      try ConversionError.recordMissingRecordName.reportAndThrow()
     }
     self.recordName = recordName
-    self.recordType = recordType
+    self.recordType = record.recordType
     self.recordChangeTag = record.recordChangeTag
     if let created = record.created {
       self.created = try RecordTimestamp(from: created)
@@ -97,7 +95,7 @@ public struct RecordInfo: Codable, Sendable {
   ///
   /// - Parameters:
   ///   - recordName: The unique record name
-  ///   - recordType: The CloudKit record type
+  ///   - recordType: The CloudKit record type, or `nil` for a tombstone
   ///   - recordChangeTag: Optional change tag for optimistic locking
   ///   - fields: Dictionary of field names to their values
   ///   - created: Optional timestamp when the record was created
@@ -105,7 +103,7 @@ public struct RecordInfo: Codable, Sendable {
   ///   - deleted: Whether the record has been deleted
   public init(
     recordName: String,
-    recordType: String,
+    recordType: String?,
     recordChangeTag: String? = nil,
     fields: [String: FieldValue],
     created: RecordTimestamp? = nil,

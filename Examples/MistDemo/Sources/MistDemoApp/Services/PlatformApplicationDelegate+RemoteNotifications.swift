@@ -27,11 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// The `application(_:didRegister…)` / `didFail…` selectors are identical on
-// AppKit and UIKit (both take the unified ``PlatformApplication``), so they
-// share one extension here. watchOS's `WKApplicationDelegate` uses
-// parameter-less selectors, so its variants live in
-// `PlatformApplicationDelegate+WKApplicationDelegate.swift` instead.
 #if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
   public import Foundation
 

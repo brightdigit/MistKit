@@ -27,9 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// `@objc` requires the Objective-C runtime, which is absent on
-// Linux/Windows. This delegate protocol exists only to bridge APNs callbacks
-// on Apple platforms, so gate it on Objective-C interop availability.
 #if canImport(ObjectiveC)
   // `@objc` requires the Objective-C runtime, surfaced here via Foundation.
   internal import Foundation

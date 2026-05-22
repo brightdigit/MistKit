@@ -27,9 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// Conforms to the SwiftUI-defined ``ApplicationDelegate`` typealias and uses
-// `NSObject`/`@objc` machinery, so gate on SwiftUI (which implies an Apple
-// platform with Objective-C interop) to keep Linux/Windows builds clean.
 #if canImport(SwiftUI)
   public import Foundation
 

@@ -1157,11 +1157,11 @@ public enum Components {
             /// Latitude in degrees
             ///
             /// - Remark: Generated from `#/components/schemas/LocationValue/latitude`.
-            public var latitude: Swift.Double?
+            public var latitude: Swift.Double
             /// Longitude in degrees
             ///
             /// - Remark: Generated from `#/components/schemas/LocationValue/longitude`.
-            public var longitude: Swift.Double?
+            public var longitude: Swift.Double
             /// Horizontal accuracy in meters
             ///
             /// - Remark: Generated from `#/components/schemas/LocationValue/horizontalAccuracy`.
@@ -1198,8 +1198,8 @@ public enum Components {
             ///   - course: Course in degrees
             ///   - timestamp: Timestamp in milliseconds since epoch
             public init(
-                latitude: Swift.Double? = nil,
-                longitude: Swift.Double? = nil,
+                latitude: Swift.Double,
+                longitude: Swift.Double,
                 horizontalAccuracy: Swift.Double? = nil,
                 verticalAccuracy: Swift.Double? = nil,
                 altitude: Swift.Double? = nil,
@@ -1234,7 +1234,7 @@ public enum Components {
             /// The record name being referenced
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/recordName`.
-            public var recordName: Swift.String?
+            public var recordName: Swift.String
             /// Action to perform on the referenced record
             ///
             /// - Remark: Generated from `#/components/schemas/ReferenceValue/action`.
@@ -1252,7 +1252,7 @@ public enum Components {
             ///   - recordName: The record name being referenced
             ///   - action: Action to perform on the referenced record
             public init(
-                recordName: Swift.String? = nil,
+                recordName: Swift.String,
                 action: Components.Schemas.ReferenceValue.actionPayload? = nil
             ) {
                 self.recordName = recordName

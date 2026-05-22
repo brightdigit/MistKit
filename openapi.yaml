@@ -1079,6 +1079,9 @@ components:
     LocationValue:
       type: object
       description: Location dictionary as defined in CloudKit Web Services
+      required:
+        - latitude
+        - longitude
       properties:
         latitude:
           type: number
@@ -1116,6 +1119,8 @@ components:
     ReferenceValue:
       type: object
       description: Reference dictionary as defined in CloudKit Web Services
+      required:
+        - recordName
       properties:
         recordName:
           type: string

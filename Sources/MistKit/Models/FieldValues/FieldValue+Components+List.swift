@@ -121,10 +121,10 @@ extension FieldValue {
     fieldName: String
   ) throws(ConversionError) -> FieldValue? {
     if case .LocationValue(let locationValue) = listItem {
-      return try Self(locationValue: locationValue, fieldName: fieldName)
+      return Self(locationValue: locationValue)
     }
     if case .ReferenceValue(let referenceValue) = listItem {
-      return try Self(referenceValue: referenceValue, fieldName: fieldName)
+      return Self(referenceValue: referenceValue)
     }
     if case .AssetValue(let assetValue) = listItem {
       return Self(assetValue: assetValue)

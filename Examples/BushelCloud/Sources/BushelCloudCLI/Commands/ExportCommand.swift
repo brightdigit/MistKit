@@ -43,7 +43,7 @@ internal enum ExportCommand {
 
   private struct RecordExport: Codable {
     let recordName: String
-    let recordType: String
+    let recordType: String?
     let fields: [String: String]
 
     init(from recordInfo: RecordInfo) {

@@ -27,9 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// `@objc` requires the Objective-C runtime, which is absent on
-// Linux/Windows. The push-notification bridge is Apple-only, so gate the
-// whole protocol on Objective-C interop availability.
 #if canImport(ObjectiveC)
   public import Foundation
 
