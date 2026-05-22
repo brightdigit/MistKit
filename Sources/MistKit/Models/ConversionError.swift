@@ -48,8 +48,12 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   case unmappableNestedListItem(fieldName: String, item: String)
   /// A record timestamp was negative.
   case negativeTimestamp(milliseconds: Double)
-  /// A record response was missing `recordName` and/or `recordType`.
-  case recordMissingIdentifier(recordName: String?, recordType: String?)
+  /// A record response was missing its `recordName`.
+  ///
+  /// `recordType` is intentionally *not* required: CloudKit's Record Dictionary
+  /// only guarantees `recordName` in a response, and omits `recordType` for
+  /// tombstones (deleted records) and other typeless results.
+  case recordMissingRecordName
   /// A zone response was missing its `zoneID`.
   case zoneMissingID
   /// A zone response was missing its `zoneName`.
@@ -75,9 +79,8 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
       return "Unmappable nested list item for field '\(fieldName)' (\(item))"
     case .negativeTimestamp(let milliseconds):
       return "Invalid negative timestamp (\(milliseconds) ms)"
-    case .recordMissingIdentifier(let recordName, let recordType):
-      return "RecordResponse missing required identifier(s) "
-        + "(recordName: \(recordName ?? "nil"), recordType: \(recordType ?? "nil"))"
+    case .recordMissingRecordName:
+      return "RecordResponse missing required recordName"
     case .zoneMissingID:
       return "Zone entry missing zoneID"
     case .zoneMissingName:

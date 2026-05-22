@@ -46,7 +46,7 @@ extension OutputFormatting {
       let record = records[0]
       print(MistDemoConstants.Messages.recordCreated)
       print("├─ Name: \(record.recordName)")
-      print("├─ Type: \(record.recordType)")
+      print("├─ Type: \(record.recordType ?? "")")
       if let changeTag = record.recordChangeTag {
         print("├─ Change Tag: \(changeTag)")
       }
@@ -64,7 +64,7 @@ extension OutputFormatting {
 
       for (index, record) in records.enumerated() {
         print("\n[\(index + 1)] Record: \(record.recordName)")
-        print("    Type: \(record.recordType)")
+        print("    Type: \(record.recordType ?? "")")
         if let changeTag = record.recordChangeTag {
           print("    Change Tag: \(changeTag)")
         }
@@ -110,7 +110,7 @@ extension OutputFormatting {
         case MistDemoConstants.FieldNames.recordName:
           values.append(csvEscaper.escape(record.recordName))
         case MistDemoConstants.FieldNames.recordType:
-          values.append(csvEscaper.escape(record.recordType))
+          values.append(csvEscaper.escape(record.recordType ?? ""))
         case MistDemoConstants.FieldNames.recordChangeTag:
           values.append(csvEscaper.escape(record.recordChangeTag ?? ""))
         default:
@@ -139,7 +139,7 @@ extension OutputFormatting {
       print("record:")
       let name = yamlEscaper.escape(record.recordName)
       print("  \(recordNameKey): \(name)")
-      let rtype = yamlEscaper.escape(record.recordType)
+      let rtype = yamlEscaper.escape(record.recordType ?? "")
       print("  \(recordTypeKey): \(rtype)")
       if let changeTag = record.recordChangeTag {
         let tag = yamlEscaper.escape(changeTag)
@@ -157,7 +157,7 @@ extension OutputFormatting {
       for record in records {
         let name = yamlEscaper.escape(record.recordName)
         print("  - \(recordNameKey): \(name)")
-        let rtype = yamlEscaper.escape(record.recordType)
+        let rtype = yamlEscaper.escape(record.recordType ?? "")
         print("    \(recordTypeKey): \(rtype)")
         if let changeTag = record.recordChangeTag {
           let tag = yamlEscaper.escape(changeTag)

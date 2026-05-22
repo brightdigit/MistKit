@@ -145,7 +145,7 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
   private func displayRecords(_ records: [RecordInfo], limit: Int) {
     let displayed = records.prefix(limit)
     for record in displayed {
-      print("   📝 \(record.recordType) - \(record.recordName)")
+      print("   📝 \(record.recordType ?? "(deleted)") - \(record.recordName)")
       if !record.fields.isEmpty {
         print("      Fields: \(record.fields.keys.joined(separator: ", "))")
       }
