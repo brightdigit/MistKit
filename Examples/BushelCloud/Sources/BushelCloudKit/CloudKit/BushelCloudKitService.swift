@@ -261,7 +261,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
         }
       }
 
-      let batchSucceeded = results.filter { $0.record != nil }.count
+      let batchSucceeded = results.filter { result in
+        if case .success = result { return true }
+        return false
+      }.count
       let batchFailed = results.count - batchSucceeded
 
       if batchFailed > 0 {
