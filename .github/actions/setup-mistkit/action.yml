@@ -1,5 +1,5 @@
 name: Setup MistKit
-description: Replaces the local MistKit path dependency with a remote branch reference
+description: Replaces the local MistKit path dependency with a remote reference, pinned to the branch's current commit
 
 inputs:
   branch:
@@ -8,19 +8,43 @@ inputs:
 runs:
   using: composite
   steps:
+    # Resolve the branch to its current HEAD commit and pin the dependency by
+    # `revision:` rather than `branch:`. This makes the dependency content-addressed,
+    # so `swift package dump-package` (which swift-build@v1 hashes for its cache key)
+    # changes whenever the MistKit branch advances — otherwise a new MistKit commit on
+    # the same branch yields a stale cache hit and is never rebuilt. Falls back to a
+    # `branch:` pin if the ref can't be resolved (e.g. offline).
     - name: Update Package.swift (Unix)
       if: inputs.branch != '' && runner.os != 'Windows'
       shell: bash
       run: |
-        if [ "$RUNNER_OS" = "macOS" ]; then
-          sed -i '' 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "'"${{ inputs.branch }}"'")|g' Package.swift
+        BRANCH='${{ inputs.branch }}'
+        REF=$(git ls-remote https://github.com/brightdigit/MistKit.git "$BRANCH" | head -n1 | cut -f1)
+        if [ -n "$REF" ]; then
+          REQ='revision: "'"$REF"'"'
+          echo "Pinning MistKit to $BRANCH @ $REF"
         else
-          sed -i 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", branch: "'"${{ inputs.branch }}"'")|g' Package.swift
+          REQ='branch: "'"$BRANCH"'"'
+          echo "Could not resolve $BRANCH to a commit; pinning by branch"
+        fi
+        if [ "$RUNNER_OS" = "macOS" ]; then
+          sed -i '' 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", '"$REQ"')|g' Package.swift
+        else
+          sed -i 's|\.package(name: "MistKit", path: "\.\./\.\.")|.package(url: "https://github.com/brightdigit/MistKit.git", '"$REQ"')|g' Package.swift
         fi
         rm -f Package.resolved
     - name: Update Package.swift (Windows)
       if: inputs.branch != '' && runner.os == 'Windows'
       shell: pwsh
       run: |
-        (Get-Content Package.swift) -replace '\.package\(name: "MistKit", path: "\.\./\.\."\)', ".package(url: `"https://github.com/brightdigit/MistKit.git`", branch: `"${{ inputs.branch }}`")" | Set-Content Package.swift
+        $branch = '${{ inputs.branch }}'
+        $ref = (git ls-remote https://github.com/brightdigit/MistKit.git $branch | Select-Object -First 1) -split "`t" | Select-Object -First 1
+        if ($ref) {
+          $req = "revision: `"$ref`""
+          Write-Host "Pinning MistKit to $branch @ $ref"
+        } else {
+          $req = "branch: `"$branch`""
+          Write-Host "Could not resolve $branch to a commit; pinning by branch"
+        }
+        (Get-Content Package.swift) -replace '\.package\(name: "MistKit", path: "\.\./\.\."\)', ".package(url: `"https://github.com/brightdigit/MistKit.git`", $req)" | Set-Content Package.swift
         Remove-Item -Path Package.resolved -Force -ErrorAction SilentlyContinue
