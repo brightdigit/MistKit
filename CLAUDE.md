@@ -116,11 +116,22 @@ MistKit uses separate types for requests and responses at the OpenAPI schema lev
 
 **Type Layers:**
 1. **Domain Layer**: `FieldValue` enum - Pure Swift types, no API metadata (`Sources/MistKit/Models/FieldValues/FieldValue.swift`)
-2. **API Request Layer**: `FieldValueRequest` - No type field, CloudKit infers type from value structure
+2. **API Request Layer**: `FieldValueRequest` - Optional type field; CloudKit infers type from value structure, except for ambiguous scalars (see below) and IN/NOT_IN list filters, which are tagged explicitly
 3. **API Response Layer**: `FieldValueResponse` - Optional type field for explicit type information
 
+**Request type tagging (issue #375):** Most request values omit `type` and let CloudKit infer it from the value structure. Three scalar types are ambiguous on the wire and **must** carry an explicit `type`, otherwise CloudKit infers the wrong type and rejects the write with `BAD_REQUEST`:
+- `TIMESTAMP` (`.date`) — a millisecond number, otherwise read as `INT64`/`DOUBLE`
+- `BYTES` (`.bytes`) — a base64 string, otherwise read as `STRING`
+- `DOUBLE` (`.double`) — a whole-valued double serializes without a fraction, otherwise read as `INT64`
+
+Object/array-shaped values (`REFERENCE`, `ASSET`, `LOCATION`, `LIST`) and `STRING`/`INT64` are unambiguous and stay untagged. Tagging happens in `makeScalarRequest` (`Components.Schemas.FieldValueRequest.swift`). `type` is *not* required globally because CloudKit documents it as optional.
+
+**Response type recovery (issue #375):** The generated `value` `oneOf` is *undiscriminated* — the decoder tries cases first-match-wins (`String → Int64 → Double → Bytes → Date`), so a whole-millisecond `TIMESTAMP` decodes as `Int64Value` and a base64 `BYTES` string decodes as `StringValue`. The response conversion therefore honors an explicit `type` *over* the decoded case (`makeTypedScalar` in `FieldValue+Components+Scalar.swift`). For the genuinely-ambiguous scalars whose correct interpretation differs from inference it produces the typed value directly: `TIMESTAMP`/`DOUBLE` from any numeric case, `BYTES` from any string case. `INT64`/`STRING` validate the category then defer to inference (which already yields them, and for `INT64` avoids truncating a fractional number). When `type` is absent it falls back to first-match-wins inference (`makeInferredScalar`), which is lossy for the ambiguous scalars (BYTES→`.string`, whole-number TIMESTAMP→`.int64`).
+
+When a scalar `type` *contradicts* the value's category — a numeric type (`TIMESTAMP`/`DOUBLE`/`INT64`) over a non-number, or a string type (`STRING`/`BYTES`) over a non-string — the response is internally inconsistent and the conversion **throws** `ConversionError.typeValueMismatch` (via `requireNumeric`/`requireString`) rather than coercing to the value's shape. This matches the codebase's existing fail-loud `unmappableFieldValue` philosophy. The strict check is scoped to **scalar** type tags; complex/list declared types (`REFERENCE`/`ASSET`/`LOCATION`/`LIST`) are left to the value's self-describing structure and are not validated against the tag.
+
 **Why Separate Request/Response Types?**
-- CloudKit API has asymmetric behavior: requests omit type field, responses may include it
+- CloudKit API has asymmetric behavior: requests tag type only when ambiguous, responses may always include it
 - OpenAPI schema accurately models this asymmetry (openapi.yaml:867-920)
 - Swift code generation produces type-safe request/response types
 - Compiler prevents accidentally using response types in requests
@@ -134,7 +145,7 @@ MistKit uses separate types for requests and responses at the OpenAPI schema lev
 
 **Conversion:**
 - Request conversion: `Sources/MistKit/OpenAPI/Components/Components.Schemas.FieldValueRequest.swift` converts domain `FieldValue` → `FieldValueRequest`
-- Response conversion: `Sources/MistKit/Models/FieldValues/FieldValue+Components.swift` converts `FieldValueResponse` → domain `FieldValue`
+- Response conversion: `Sources/MistKit/Models/FieldValues/FieldValue+Components.swift` (entry point + complex types) and `FieldValue+Components+Scalar.swift` (scalar type recovery) convert `FieldValueResponse` → domain `FieldValue`
 
 ### Modern Swift Features to Utilize
 - Swift Concurrency (async/await) for all network operations
