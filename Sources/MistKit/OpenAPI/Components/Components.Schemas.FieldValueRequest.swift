@@ -58,7 +58,7 @@ extension Components.Schemas.FieldValueRequest {
       altitude: location.altitude,
       speed: location.speed,
       course: location.course,
-      timestamp: location.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
+      timestamp: location.timestamp.map { ($0.timeIntervalSince1970 * 1_000).rounded() }
     )
     self.init(value: .LocationValue(locationValue))
   }
@@ -116,8 +116,13 @@ extension Components.Schemas.FieldValueRequest {
       return Self(value: .BytesValue(value), _type: .BYTES)
     }
     if case .date(let value) = fieldValue {
-      // A millisecond number is otherwise inferred as INT64/DOUBLE, not TIMESTAMP.
-      return Self(value: .DateValue(value.timeIntervalSince1970 * 1_000), _type: .TIMESTAMP)
+      // Tag TIMESTAMP (else inferred as INT64/DOUBLE) and round to whole milliseconds:
+      // CloudKit rejects a fractional TIMESTAMP value (e.g. 1747999812347.89) with
+      // BAD_REQUEST "expected type TIMESTAMP", and Date carries sub-millisecond precision.
+      return Self(
+        value: .DateValue((value.timeIntervalSince1970 * 1_000).rounded()),
+        _type: .TIMESTAMP
+      )
     }
     return nil
   }

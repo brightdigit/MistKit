@@ -121,5 +121,25 @@ extension FieldValueConversionTests {
       // Without TIMESTAMP, CloudKit infers INT64 and rejects the write (issue #375).
       #expect(components._type == .TIMESTAMP)
     }
+
+    @Test("Convert fractional date rounds to whole milliseconds")
+    internal func convertFractionalDate() {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("FieldValue is not available on this operating system.")
+        return
+      }
+      // Date carries sub-millisecond precision; CloudKit rejects a fractional TIMESTAMP
+      // value with BAD_REQUEST, so the millisecond value must be a whole number.
+      let date = Date(timeIntervalSince1970: 1_747_999_812.3478923)
+      let components = Components.Schemas.FieldValueRequest(from: .date(date))
+
+      if case .DateValue(let value) = components.value {
+        #expect(value == 1_747_999_812_348)
+        #expect(value == value.rounded())
+      } else {
+        Issue.record("Expected dateValue")
+      }
+      #expect(components._type == .TIMESTAMP)
+    }
   }
 }
