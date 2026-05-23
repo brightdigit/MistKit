@@ -141,12 +141,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Resolve MISTKIT_BRANCH to its current HEAD commit so the cache key below
+      # changes whenever MistKit is updated. Without this the binary cache keys only
+      # on CelestraCloud's own sources, so a new MistKit commit on the same branch
+      # produces a stale cache hit and the fix under test is never rebuilt.
+      - name: Resolve MistKit branch SHA
+        id: mistkit-sha
+        run: |
+          SHA=$(git ls-remote https://github.com/brightdigit/MistKit.git "$MISTKIT_BRANCH" | head -n1 | cut -f1)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Resolved MISTKIT_BRANCH=$MISTKIT_BRANCH to ${SHA:-<unresolved>}"
+
       - name: Cache compiled binary
         id: cache-binary
         uses: actions/cache@v4
         with:
           path: .build/release/celestra-cloud
-          key: celestra-cloud-${{ runner.os }}-${{ hashFiles('Sources/**/*.swift', 'Package.swift') }}-${{ github.event.inputs.force_rebuild || 'false' }}
+          key: celestra-cloud-${{ runner.os }}-${{ hashFiles('Sources/**/*.swift', 'Package.swift') }}-${{ steps.mistkit-sha.outputs.sha }}-${{ github.event.inputs.force_rebuild || 'false' }}
 
       - name: Setup MistKit
         if: steps.cache-binary.outputs.cache-hit != 'true'
