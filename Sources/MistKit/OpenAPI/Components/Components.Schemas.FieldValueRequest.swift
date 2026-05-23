@@ -58,6 +58,8 @@ extension Components.Schemas.FieldValueRequest {
       altitude: location.altitude,
       speed: location.speed,
       course: location.course,
+      // CloudKit rejects a fractional TIMESTAMP on LocationValue.timestamp with BAD_REQUEST,
+      // same wire-type constraint as the scalar .date case; Date carries sub-millisecond precision.
       timestamp: location.timestamp.map { ($0.timeIntervalSince1970 * 1_000).rounded() }
     )
     self.init(value: .LocationValue(locationValue))

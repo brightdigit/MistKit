@@ -64,19 +64,24 @@ extension FieldValue {
     type fieldType: Components.Schemas.FieldValueResponse._typePayload?,
     fieldName: String
   ) throws(ConversionError) -> FieldValue? {
+    guard let fieldType else { return nil }
     switch fieldType {
     case .TIMESTAMP:
-      let millis = try requireNumeric(value, fieldName: fieldName, declaredType: "TIMESTAMP")
+      let millis = try requireNumeric(value, fieldName: fieldName, declaredType: fieldType.rawValue)
       return .date(Date(timeIntervalSince1970: millis / 1_000))
     case .DOUBLE:
-      return .double(try requireNumeric(value, fieldName: fieldName, declaredType: "DOUBLE"))
+      return .double(
+        try requireNumeric(value, fieldName: fieldName, declaredType: fieldType.rawValue)
+      )
     case .INT64:
-      _ = try requireNumeric(value, fieldName: fieldName, declaredType: "INT64")
+      _ = try requireNumeric(value, fieldName: fieldName, declaredType: fieldType.rawValue)
       return nil
     case .BYTES:
-      return .bytes(try requireString(value, fieldName: fieldName, declaredType: "BYTES"))
+      return .bytes(
+        try requireString(value, fieldName: fieldName, declaredType: fieldType.rawValue)
+      )
     case .STRING:
-      _ = try requireString(value, fieldName: fieldName, declaredType: "STRING")
+      _ = try requireString(value, fieldName: fieldName, declaredType: fieldType.rawValue)
       return nil
     default:
       return nil

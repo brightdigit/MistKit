@@ -205,6 +205,8 @@ internal struct FilterBuilder {
     if case .asset = first {
       return .ASSET_LIST
     }
-    return .LIST
+    // Nested lists aren't valid in IN/NOT_IN; omit the type and let CloudKit reject
+    // rather than emit an undocumented bare "LIST" tag.
+    return nil
   }
 }

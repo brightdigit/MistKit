@@ -964,7 +964,6 @@ public enum Components {
                 case ASSET = "ASSET"
                 case ASSETID = "ASSETID"
                 case LOCATION = "LOCATION"
-                case LIST = "LIST"
                 case STRING_LIST = "STRING_LIST"
                 case INT64_LIST = "INT64_LIST"
                 case DOUBLE_LIST = "DOUBLE_LIST"

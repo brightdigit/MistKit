@@ -1026,7 +1026,7 @@ components:
             - $ref: '#/components/schemas/ListValue'
         type:
           type: string
-          enum: [STRING, INT64, DOUBLE, BYTES, TIMESTAMP, REFERENCE, ASSET, ASSETID, LOCATION, LIST, STRING_LIST, INT64_LIST, DOUBLE_LIST, BYTES_LIST, TIMESTAMP_LIST, REFERENCE_LIST, LOCATION_LIST, ASSET_LIST]
+          enum: [STRING, INT64, DOUBLE, BYTES, TIMESTAMP, REFERENCE, ASSET, ASSETID, LOCATION, STRING_LIST, INT64_LIST, DOUBLE_LIST, BYTES_LIST, TIMESTAMP_LIST, REFERENCE_LIST, LOCATION_LIST, ASSET_LIST]
           description: |
             Optional CloudKit field type. Sent for scalar values whose JSON form is
             ambiguous (e.g. "TIMESTAMP", "BYTES", "DOUBLE") so CloudKit does not infer the
