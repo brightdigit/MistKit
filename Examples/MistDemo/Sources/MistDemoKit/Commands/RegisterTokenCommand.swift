@@ -31,8 +31,9 @@ internal import Foundation
 internal import MistKit
 
 /// Command for `tokens/register`. Registers a device's APNs token so CloudKit
-/// delivers subscription-triggered pushes to it. The token itself is captured
-/// from a real iOS/macOS device; `/tokens/register` takes only that token.
+/// delivers subscription-triggered pushes to it. Per Apple's `RegisterTokens.html`
+/// REST reference, the request requires both the hex token and the APNs
+/// environment it targets.
 public struct RegisterTokenCommand: MistDemoCommand {
   /// The configuration type.
   public typealias Config = RegisterTokenConfig
@@ -45,14 +46,16 @@ public struct RegisterTokenCommand: MistDemoCommand {
     REGISTER-TOKEN - Register a device APNs token with CloudKit
 
     USAGE:
-      mistdemo register-token --apns-token <hex>
+      mistdemo register-token --apns-token <hex> [--apns-environment <env>]
 
     OPTIONS:
       --apns-token <hex>             APNs device token (hex string) from a device
+      --apns-environment <env>       APNs environment, default development
       --database <type>              Database to target
 
     EXAMPLES:
-      mistdemo register-token --apns-token 0a1b2c3d... --database private
+      mistdemo register-token --apns-token 0a1b2c3d... \
+        --apns-environment development --database private
     """
 
   private let config: RegisterTokenConfig
@@ -67,8 +70,23 @@ public struct RegisterTokenCommand: MistDemoCommand {
     guard let apnsToken = config.apnsToken, !apnsToken.isEmpty else {
       throw TokenCommandError.missingAPNsToken
     }
+    let environment = try resolveEnvironment()
     let service = try MistKitClientFactory.create(for: config.base)
-    try await service.registerAPNsToken(apnsToken, database: config.base.database)
+    try await service.registerAPNsToken(
+      apnsToken,
+      environment: environment,
+      database: config.base.database
+    )
     print("✅ Registered APNs token with CloudKit.")
+  }
+
+  private func resolveEnvironment() throws -> APNsEnvironment {
+    guard let raw = config.apnsEnvironment else {
+      return .development
+    }
+    guard let environment = APNsEnvironment(rawValue: raw) else {
+      throw TokenCommandError.invalidEnvironment(raw)
+    }
+    return environment
   }
 }

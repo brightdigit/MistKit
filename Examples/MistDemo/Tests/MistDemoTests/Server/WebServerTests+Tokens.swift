@@ -39,8 +39,9 @@
 
   extension WebServerTests {
     private struct TokenPayload: Decodable {
+      let apnsEnvironment: String
       let apnsToken: String
-      let webcAuthToken: String
+      let webcourierURL: URL
     }
 
     @Test("POST /api/tokens mints a token via the backend")
@@ -61,8 +62,9 @@
             TokenPayload.self,
             from: Data(response.body.readableBytesView)
           )
+          #expect(payload.apnsEnvironment == "production")
           #expect(payload.apnsToken == "stub-apns")
-          #expect(payload.webcAuthToken == "stub-webauth")
+          #expect(payload.webcourierURL == URL(string: "https://stub.example/webcourier"))
         }
       }
 
@@ -70,11 +72,11 @@
       #expect(captured?.environment == .production)
     }
 
-    @Test("POST /api/tokens/register forwards the token to the backend")
+    @Test("POST /api/tokens/register forwards the token + environment to the backend")
     internal func registerToken() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
-      let jsonBody = #"{"apnsToken":"0a1b2c3d"}"#
+      let jsonBody = #"{"apnsToken":"0a1b2c3d","apnsEnvironment":"production"}"#
 
       try await app.test(.router) { client in
         try await client.execute(
@@ -89,6 +91,7 @@
 
       let captured = await fixture.backend.lastRegisterToken
       #expect(captured?.apnsToken == "0a1b2c3d")
+      #expect(captured?.environment == .production)
     }
 
     @Test("token routes return 401 without a captured auth token")

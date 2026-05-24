@@ -68,7 +68,8 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   case subscriptionMissingID
   /// A subscription response was missing its `subscriptionType`.
   case subscriptionMissingType
-  /// A token response was missing a required field (`apnsToken`/`webcAuthToken`).
+  /// A token response was missing or malformed a required field
+  /// (`apnsEnvironment`/`apnsToken`/`webcourierURL`).
   case tokenMissingField(fieldName: String)
 
   /// A human-readable description of what failed during conversion.

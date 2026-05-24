@@ -22,9 +22,13 @@ document.getElementById('tokens-register-btn').addEventListener('click', async (
         // the created token forward so the two-step REST flow is exercised
         // end-to-end (CloudKit JS rolls both into registerForNotifications()).
         const createdToken = result.create && result.create.apnsToken;
+        const createdEnvironment =
+            (result.create && result.create.apnsEnvironment) || 'development';
         try {
             result.register = await postJSON('/api/tokens/register',
-                createdToken ? { apnsToken: createdToken } : {});
+                createdToken
+                    ? { apnsToken: createdToken, apnsEnvironment: createdEnvironment }
+                    : {});
         } catch (error) { result.register = error.payload || { message: error.message }; }
         renderRaw(tokensRaw, result);
         if (isPendingPayload(result.create) || isPendingPayload(result.register)) {

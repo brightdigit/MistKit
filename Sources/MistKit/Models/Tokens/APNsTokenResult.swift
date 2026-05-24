@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public import Foundation
 internal import MistKitOpenAPI
 
 /// A CloudKit-minted APNs token, returned by
@@ -34,32 +35,40 @@ internal import MistKitOpenAPI
 ///
 /// Used by non-device callers (CloudKit JS in a browser, server processes) that
 /// have no device APNs token to register. The `apnsToken` becomes the push
-/// destination for subscription-triggered notifications; the `webAuthToken` is
-/// the web-push auth secret handed to a browser's web-push registration.
+/// destination for subscription-triggered notifications. `webcourierURL` is the
+/// long-poll endpoint browser / Service-Worker clients use to receive those
+/// notifications; server callers receive pushes via APNs proper and can usually
+/// ignore it.
 public struct APNsTokenResult: Codable, Sendable, Equatable {
+  /// The APNs environment the token targets (echoes the request).
+  public let environment: APNsEnvironment
   /// The CloudKit-managed APNs token to use as a push destination.
   public let apnsToken: String
-  /// The web-push auth secret (the API spells this `webcAuthToken`).
-  public let webAuthToken: String
+  /// Long-poll URL that browser / Service-Worker callers use to receive
+  /// CloudKit-triggered push notifications.
+  public let webcourierURL: URL
 
   /// Initialize an APNs token result.
-  public init(apnsToken: String, webAuthToken: String) {
+  public init(environment: APNsEnvironment, apnsToken: String, webcourierURL: URL) {
+    self.environment = environment
     self.apnsToken = apnsToken
-    self.webAuthToken = webAuthToken
+    self.webcourierURL = webcourierURL
   }
 
   /// Convert a decoded `TokenResponse` into an `APNsTokenResult`.
   ///
-  /// Both fields are optional in the OpenAPI schema but required in a successful
-  /// response; a missing field is a conversion failure (logged, asserted in
-  /// DEBUG, and thrown) rather than a silently-empty token.
+  /// The OpenAPI schema makes all three fields required, so missing or
+  /// malformed values represent server-side misbehavior rather than absence —
+  /// conversion fails loudly (logged, asserted in DEBUG, and thrown) rather
+  /// than silently producing an empty token or junk URL.
   internal init(from response: Components.Schemas.TokenResponse) throws(ConversionError) {
-    guard let apnsToken = response.apnsToken else {
-      try ConversionError.tokenMissingField(fieldName: "apnsToken").reportAndThrow()
+    guard let webcourierURL = URL(string: response.webcourierURL) else {
+      try ConversionError.tokenMissingField(fieldName: "webcourierURL").reportAndThrow()
     }
-    guard let webcAuthToken = response.webcAuthToken else {
-      try ConversionError.tokenMissingField(fieldName: "webcAuthToken").reportAndThrow()
-    }
-    self.init(apnsToken: apnsToken, webAuthToken: webcAuthToken)
+    self.init(
+      environment: APNsEnvironment(from: response.apnsEnvironment),
+      apnsToken: response.apnsToken,
+      webcourierURL: webcourierURL
+    )
   }
 }

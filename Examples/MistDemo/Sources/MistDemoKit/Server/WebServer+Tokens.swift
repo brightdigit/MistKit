@@ -71,6 +71,7 @@
           let backend = try backendFactory.make(token)
           try await backend.webRegisterToken(
             apnsToken: body.apnsToken,
+            environment: body.environment,
             database: body.database
           )
           return try WebJSON.encoder().encode(

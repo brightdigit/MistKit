@@ -57,19 +57,28 @@ extension WebRequests {
   }
 
   /// `POST /api/tokens/register` — register a device APNs token.
+  ///
+  /// `apnsEnvironment` defaults to `development`; an unrecognized value falls
+  /// back to `development` to keep the demo lenient.
   internal struct RegisterToken: Decodable {
     private enum CodingKeys: String, CodingKey {
       case apnsToken
+      case apnsEnvironment
       case database
     }
 
     internal let apnsToken: String
+    internal let environment: APNsEnvironment
     internal let database: MistKit.Database
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
       self.apnsToken =
         try container.decodeIfPresent(String.self, forKey: .apnsToken) ?? ""
+      let raw =
+        try container.decodeIfPresent(String.self, forKey: .apnsEnvironment)
+        ?? "development"
+      self.environment = APNsEnvironment(rawValue: raw) ?? .development
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )

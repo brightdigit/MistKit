@@ -58,15 +58,18 @@ internal enum WebResponse {
     internal let subscriptions: [SubscriptionInfo]
   }
 
-  /// Body returned by `tokens/create`. Uses CloudKit's `webcAuthToken` wire
-  /// name so the panel shows the canonical field.
+  /// Body returned by `tokens/create`. Echoes CloudKit's wire field names so
+  /// the demo panel shows the canonical shape per Apple's `CreateTokens.html`
+  /// REST reference: `apnsEnvironment`, `apnsToken`, `webcourierURL`.
   internal struct Token: Encodable {
+    internal let apnsEnvironment: APNsEnvironment
     internal let apnsToken: String
-    internal let webcAuthToken: String
+    internal let webcourierURL: URL
 
     internal init(from result: APNsTokenResult) {
+      self.apnsEnvironment = result.environment
       self.apnsToken = result.apnsToken
-      self.webcAuthToken = result.webAuthToken
+      self.webcourierURL = result.webcourierURL
     }
   }
 

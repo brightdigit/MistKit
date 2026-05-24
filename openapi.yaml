@@ -818,6 +818,8 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - apnsEnvironment
               properties:
                 apnsEnvironment:
                   type: string
@@ -851,7 +853,14 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - apnsEnvironment
+                - apnsToken
               properties:
+                apnsEnvironment:
+                  type: string
+                  enum: [development, production]
+                  description: The APNs environment the token targets.
                 apnsToken:
                   type: string
                   description: The APNs token to register
@@ -1439,11 +1448,30 @@ components:
 
     TokenResponse:
       type: object
+      description: |
+        Response body for `tokens/create`. Per Apple's archived REST reference,
+        the server returns the echoed environment, the minted APNs token, and a
+        long-poll URL that browser/Service-Worker callers use to receive push
+        notifications. Server-side callers typically only need `apnsToken`.
+      required:
+        - apnsEnvironment
+        - apnsToken
+        - webcourierURL
       properties:
+        apnsEnvironment:
+          type: string
+          enum: [development, production]
+          description: The APNs environment the token targets (echoes the request).
         apnsToken:
           type: string
-        webcAuthToken:
+          description: The CloudKit-minted APNs token to use as a push destination.
+        webcourierURL:
           type: string
+          format: uri
+          description: |
+            Long-poll endpoint URL that browser / Service-Worker clients use to
+            receive push notifications. Not relevant for server callers, which
+            receive pushes via APNs proper.
 
     RecordOperationFailure:
       type: object

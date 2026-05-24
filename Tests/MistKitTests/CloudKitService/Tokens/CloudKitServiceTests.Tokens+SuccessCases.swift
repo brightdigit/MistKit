@@ -37,21 +37,28 @@ extension CloudKitServiceTests.Tokens {
   internal struct SuccessCases {
     private static let database: Database = .public(.prefers(.serverToServer))
 
-    @Test("createAPNsToken() decodes apnsToken and renamed webcAuthToken")
+    @Test("createAPNsToken() decodes apnsEnvironment, apnsToken, webcourierURL")
     internal func createDecodesTokens() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let json = #"{ "apnsToken": "apns-123", "webcAuthToken": "web-456" }"#
+      let json = #"""
+        {
+          "apnsEnvironment": "development",
+          "apnsToken": "apns-123",
+          "webcourierURL": "https://webcourier.icloud.com/abc"
+        }
+        """#
       let service = try CloudKitServiceTests.Tokens.makeService(json: json)
 
       let result = try await service.createAPNsToken(
         environment: .development,
         database: Self.database
       )
+      #expect(result.environment == .development)
       #expect(result.apnsToken == "apns-123")
-      #expect(result.webAuthToken == "web-456")
+      #expect(result.webcourierURL == URL(string: "https://webcourier.icloud.com/abc"))
     }
 
     @Test("registerAPNsToken() completes against an empty 200")
@@ -61,7 +68,11 @@ extension CloudKitServiceTests.Tokens {
         return
       }
       let service = try CloudKitServiceTests.Tokens.makeService()
-      try await service.registerAPNsToken("abcdef0123456789", database: Self.database)
+      try await service.registerAPNsToken(
+        "abcdef0123456789",
+        environment: .development,
+        database: Self.database
+      )
     }
 
     @Test("registerAPNsToken() rejects an empty token before dispatching")
@@ -72,7 +83,11 @@ extension CloudKitServiceTests.Tokens {
       }
       let service = try CloudKitServiceTests.Tokens.makeService()
       await #expect(throws: CloudKitError.self) {
-        try await service.registerAPNsToken("   ", database: Self.database)
+        try await service.registerAPNsToken(
+          "   ",
+          environment: .development,
+          database: Self.database
+        )
       }
     }
   }

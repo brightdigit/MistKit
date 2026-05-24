@@ -51,34 +51,43 @@ internal struct APNsTokenResultTests {
     )
   }
 
-  @Test("maps TokenResponse fields, renaming webcAuthToken")
+  @Test("maps TokenResponse fields including environment and webcourierURL")
   internal func mapsFields() throws {
     let response = Components.Schemas.TokenResponse(
+      apnsEnvironment: .development,
       apnsToken: "apns-abc",
-      webcAuthToken: "web-xyz"
+      webcourierURL: "https://webcourier.icloud.com/abc"
     )
     let result = try APNsTokenResult(from: response)
+    #expect(result.environment == .development)
     #expect(result.apnsToken == "apns-abc")
-    #expect(result.webAuthToken == "web-xyz")
+    #expect(result.webcourierURL == URL(string: "https://webcourier.icloud.com/abc"))
   }
 
-  @Test("missing apnsToken is a conversion failure")
-  internal func missingAPNsTokenThrows() throws {
-    let response = Components.Schemas.TokenResponse(webcAuthToken: "web-xyz")
-    expectThrow(ConversionError.tokenMissingField(fieldName: "apnsToken")) {
+  @Test("production environment round-trips")
+  internal func productionEnvironment() throws {
+    let response = Components.Schemas.TokenResponse(
+      apnsEnvironment: .production,
+      apnsToken: "apns-prod",
+      webcourierURL: "https://webcourier.icloud.com/prod"
+    )
+    let result = try APNsTokenResult(from: response)
+    #expect(result.environment == .production)
+  }
+
+  @Test("malformed webcourierURL is a conversion failure")
+  internal func malformedURLThrows() throws {
+    let response = Components.Schemas.TokenResponse(
+      apnsEnvironment: .development,
+      apnsToken: "apns-abc",
+      webcourierURL: ""
+    )
+    expectThrow(ConversionError.tokenMissingField(fieldName: "webcourierURL")) {
       _ = try APNsTokenResult(from: response)
     }
   }
 
-  @Test("missing webcAuthToken is a conversion failure")
-  internal func missingWebAuthTokenThrows() throws {
-    let response = Components.Schemas.TokenResponse(apnsToken: "apns-abc")
-    expectThrow(ConversionError.tokenMissingField(fieldName: "webcAuthToken")) {
-      _ = try APNsTokenResult(from: response)
-    }
-  }
-
-  @Test("APNsEnvironment maps to the createToken payload")
+  @Test("APNsEnvironment maps to both request payloads and back from response")
   internal func environmentMapping() {
     #expect(
       Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload(from: .development)
@@ -88,5 +97,15 @@ internal struct APNsTokenResultTests {
       Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload(from: .production)
         == .production
     )
+    #expect(
+      Operations.registerToken.Input.Body.jsonPayload.apnsEnvironmentPayload(from: .development)
+        == .development
+    )
+    #expect(
+      Operations.registerToken.Input.Body.jsonPayload.apnsEnvironmentPayload(from: .production)
+        == .production
+    )
+    #expect(APNsEnvironment(from: .development) == .development)
+    #expect(APNsEnvironment(from: .production) == .production)
   }
 }

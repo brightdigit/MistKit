@@ -2232,27 +2232,55 @@ public enum Components {
                 case tokens
             }
         }
+        /// Response body for `tokens/create`. Per Apple's archived REST reference,
+        /// the server returns the echoed environment, the minted APNs token, and a
+        /// long-poll URL that browser/Service-Worker callers use to receive push
+        /// notifications. Server-side callers typically only need `apnsToken`.
+        ///
+        ///
         /// - Remark: Generated from `#/components/schemas/TokenResponse`.
         public struct TokenResponse: Codable, Hashable, Sendable {
+            /// The APNs environment the token targets (echoes the request).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TokenResponse/apnsEnvironment`.
+            @frozen public enum apnsEnvironmentPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case development = "development"
+                case production = "production"
+            }
+            /// The APNs environment the token targets (echoes the request).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TokenResponse/apnsEnvironment`.
+            public var apnsEnvironment: Components.Schemas.TokenResponse.apnsEnvironmentPayload
+            /// The CloudKit-minted APNs token to use as a push destination.
+            ///
             /// - Remark: Generated from `#/components/schemas/TokenResponse/apnsToken`.
-            public var apnsToken: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/TokenResponse/webcAuthToken`.
-            public var webcAuthToken: Swift.String?
+            public var apnsToken: Swift.String
+            /// Long-poll endpoint URL that browser / Service-Worker clients use to
+            /// receive push notifications. Not relevant for server callers, which
+            /// receive pushes via APNs proper.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/TokenResponse/webcourierURL`.
+            public var webcourierURL: Swift.String
             /// Creates a new `TokenResponse`.
             ///
             /// - Parameters:
-            ///   - apnsToken:
-            ///   - webcAuthToken:
+            ///   - apnsEnvironment: The APNs environment the token targets (echoes the request).
+            ///   - apnsToken: The CloudKit-minted APNs token to use as a push destination.
+            ///   - webcourierURL: Long-poll endpoint URL that browser / Service-Worker clients use to
             public init(
-                apnsToken: Swift.String? = nil,
-                webcAuthToken: Swift.String? = nil
+                apnsEnvironment: Components.Schemas.TokenResponse.apnsEnvironmentPayload,
+                apnsToken: Swift.String,
+                webcourierURL: Swift.String
             ) {
+                self.apnsEnvironment = apnsEnvironment
                 self.apnsToken = apnsToken
-                self.webcAuthToken = webcAuthToken
+                self.webcourierURL = webcourierURL
             }
             public enum CodingKeys: String, CodingKey {
+                case apnsEnvironment
                 case apnsToken
-                case webcAuthToken
+                case webcourierURL
             }
         }
         /// Per-record error returned inline in the `records` array of a 200
@@ -9449,12 +9477,12 @@ public enum Operations {
                         case production = "production"
                     }
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody/json/apnsEnvironment`.
-                    public var apnsEnvironment: Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload?
+                    public var apnsEnvironment: Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - apnsEnvironment:
-                    public init(apnsEnvironment: Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload? = nil) {
+                    public init(apnsEnvironment: Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload) {
                         self.apnsEnvironment = apnsEnvironment
                     }
                     public enum CodingKeys: String, CodingKey {
@@ -9697,18 +9725,35 @@ public enum Operations {
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
+                    /// The APNs environment the token targets.
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/apnsEnvironment`.
+                    @frozen public enum apnsEnvironmentPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                        case development = "development"
+                        case production = "production"
+                    }
+                    /// The APNs environment the token targets.
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/apnsEnvironment`.
+                    public var apnsEnvironment: Operations.registerToken.Input.Body.jsonPayload.apnsEnvironmentPayload
                     /// The APNs token to register
                     ///
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/apnsToken`.
-                    public var apnsToken: Swift.String?
+                    public var apnsToken: Swift.String
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
+                    ///   - apnsEnvironment: The APNs environment the token targets.
                     ///   - apnsToken: The APNs token to register
-                    public init(apnsToken: Swift.String? = nil) {
+                    public init(
+                        apnsEnvironment: Operations.registerToken.Input.Body.jsonPayload.apnsEnvironmentPayload,
+                        apnsToken: Swift.String
+                    ) {
+                        self.apnsEnvironment = apnsEnvironment
                         self.apnsToken = apnsToken
                     }
                     public enum CodingKeys: String, CodingKey {
+                        case apnsEnvironment
                         case apnsToken
                     }
                 }

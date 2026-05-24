@@ -53,3 +53,25 @@ extension Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload {
     }
   }
 }
+
+extension Operations.registerToken.Input.Body.jsonPayload.apnsEnvironmentPayload {
+  internal init(from environment: APNsEnvironment) {
+    switch environment {
+    case .development:
+      self = .development
+    case .production:
+      self = .production
+    }
+  }
+}
+
+extension APNsEnvironment {
+  internal init(from payload: Components.Schemas.TokenResponse.apnsEnvironmentPayload) {
+    switch payload {
+    case .development:
+      self = .development
+    case .production:
+      self = .production
+    }
+  }
+}

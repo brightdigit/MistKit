@@ -93,6 +93,7 @@
     /// Captured arguments from the most recent `webRegisterToken` call.
     internal struct RegisterTokenCall: Sendable {
       internal let apnsToken: String
+      internal let environment: APNsEnvironment
       internal let database: MistKit.Database
     }
   }

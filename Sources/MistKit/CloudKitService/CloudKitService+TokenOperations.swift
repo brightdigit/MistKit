@@ -45,8 +45,9 @@ extension CloudKitService {
   ///     request. The `tokens/create` endpoint is container-scoped — the
   ///     database is not part of its path — but still needs credentials, so the
   ///     caller picks which database's auth to present.
-  /// - Returns: The minted ``APNsTokenResult`` (`apnsToken` + web-push auth
-  ///   secret).
+  /// - Returns: The minted ``APNsTokenResult`` (`apnsToken`, echoed
+  ///   `environment`, and `webcourierURL` for browser/Service-Worker push
+  ///   delivery).
   /// - Throws: ``CloudKitError`` if the request fails.
   public func createAPNsToken(
     environment: APNsEnvironment,
@@ -83,8 +84,14 @@ extension CloudKitService {
   /// and the backend registers it here so CloudKit subscriptions in this
   /// container deliver to that token.
   ///
+  /// Per Apple's `RegisterTokens.html` REST reference, both `apnsEnvironment`
+  /// and `apnsToken` are required in the request body — the environment is not
+  /// inferred from the URL.
+  ///
   /// - Parameters:
   ///   - apnsToken: The device's APNs token, as a hex string.
+  ///   - environment: The APNs environment the token targets (must match the
+  ///     environment under which the device registered with APNs).
   ///   - database: The CloudKit database whose credentials authenticate the
   ///     request. The `tokens/register` endpoint is container-scoped — the
   ///     database is not part of its path — but still needs credentials, so the
@@ -93,6 +100,7 @@ extension CloudKitService {
   ///   any error surfaced by the API.
   public func registerAPNsToken(
     _ apnsToken: String,
+    environment: APNsEnvironment,
     database: Database
   ) async throws(CloudKitError) {
     let trimmed = apnsToken.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -106,10 +114,13 @@ extension CloudKitService {
         .init(
           path: Operations.registerToken.Input.Path(
             containerIdentifier: containerIdentifier,
-            environment: environment
+            environment: self.environment
           ),
           body: .json(
-            .init(apnsToken: trimmed)
+            .init(
+              apnsEnvironment: .init(from: environment),
+              apnsToken: trimmed
+            )
           )
         )
       )

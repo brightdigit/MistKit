@@ -94,6 +94,7 @@ internal protocol WebBackend: Sendable {
 
   func webRegisterToken(
     apnsToken: String,
+    environment: APNsEnvironment,
     database: MistKit.Database
   ) async throws
 }
@@ -202,8 +203,13 @@ extension CloudKitService: WebBackend {
 
   internal func webRegisterToken(
     apnsToken: String,
+    environment: APNsEnvironment,
     database: MistKit.Database
   ) async throws {
-    try await registerAPNsToken(apnsToken, database: database)
+    try await registerAPNsToken(
+      apnsToken,
+      environment: environment,
+      database: database
+    )
   }
 }

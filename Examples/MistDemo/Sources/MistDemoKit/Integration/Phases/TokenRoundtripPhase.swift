@@ -52,7 +52,11 @@ internal struct TokenRoundtripPhase: IntegrationPhase {
       print("   ✅ Created APNs token (\(token.apnsToken.prefix(8))…)")
     }
 
-    try await context.service.registerAPNsToken(token.apnsToken, database: context.database)
+    try await context.service.registerAPNsToken(
+      token.apnsToken,
+      environment: token.environment,
+      database: context.database
+    )
     print("✅ Created and registered an APNs token")
 
     return NoState()

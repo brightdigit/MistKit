@@ -41,6 +41,10 @@ public struct RegisterTokenConfig: Sendable, ConfigurationParseable {
   public let base: MistDemoConfig
   /// APNs device token (hex string) captured from a real device.
   public let apnsToken: String?
+  /// APNs environment (development, production). Required by CloudKit per
+  /// Apple's `RegisterTokens.html` REST reference — defaults to `development`
+  /// when unset.
+  public let apnsEnvironment: String?
   /// The output format.
   public let output: OutputFormat
 
@@ -48,10 +52,12 @@ public struct RegisterTokenConfig: Sendable, ConfigurationParseable {
   public init(
     base: MistDemoConfig,
     apnsToken: String? = nil,
+    apnsEnvironment: String? = nil,
     output: OutputFormat = .json
   ) {
     self.base = base
     self.apnsToken = apnsToken
+    self.apnsEnvironment = apnsEnvironment
     self.output = output
   }
 
@@ -80,6 +86,7 @@ public struct RegisterTokenConfig: Sendable, ConfigurationParseable {
     self.init(
       base: baseConfig,
       apnsToken: configuration.string(forKey: "apns-token"),
+      apnsEnvironment: configuration.string(forKey: "apns-environment"),
       output: output
     )
   }

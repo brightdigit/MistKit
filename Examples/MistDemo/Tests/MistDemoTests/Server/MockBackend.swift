@@ -233,14 +233,23 @@
     ) async throws -> APNsTokenResult {
       lastCreateToken = CreateTokenCall(environment: environment, database: database)
       try consumePendingError()
-      return APNsTokenResult(apnsToken: "stub-apns", webAuthToken: "stub-webauth")
+      return APNsTokenResult(
+        environment: environment,
+        apnsToken: "stub-apns",
+        webcourierURL: URL(string: "https://stub.example/webcourier")!
+      )
     }
 
     internal func webRegisterToken(
       apnsToken: String,
+      environment: APNsEnvironment,
       database: MistKit.Database
     ) async throws {
-      lastRegisterToken = RegisterTokenCall(apnsToken: apnsToken, database: database)
+      lastRegisterToken = RegisterTokenCall(
+        apnsToken: apnsToken,
+        environment: environment,
+        database: database
+      )
       try consumePendingError()
     }
 
