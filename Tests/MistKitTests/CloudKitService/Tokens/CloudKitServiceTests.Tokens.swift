@@ -1,6 +1,6 @@
 //
-//  RegisterTokenPhase.swift
-//  MistDemo
+//  CloudKitServiceTests.Tokens.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,21 +28,32 @@
 //
 
 internal import Foundation
+internal import HTTPTypes
+internal import Testing
 
-/// Stub phase for `tokens/register`. Not wired into the public/private
-/// pipelines yet; `#53` flips this into a real run when the MistKit Swift
-/// wrapper lands.
-internal struct RegisterTokenPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = NoState
+@testable import MistKit
 
-  internal static let title = "Register token (pending #53)"
-  internal static let emoji = "📨"
-  internal static let apiName = "registerToken"
-
-  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-    PendingStub.printPending(endpoint: "tokens/register", trackingIssue: 53)
-    return NoState()
+extension CloudKitServiceTests {
+  @Suite("CloudKitService Token Operations", .enabled(if: Platform.isCryptoAvailable))
+  internal enum Tokens {
+    internal static func makeService(
+      statusCode: Int = 200,
+      json: String = ""
+    ) throws -> CloudKitService {
+      var headers = HTTPFields()
+      headers[.contentType] = "application/json"
+      let response = ResponseConfig(
+        statusCode: statusCode,
+        headers: headers,
+        body: Data(json.utf8),
+        error: nil
+      )
+      let transport = MockTransport(responseProvider: ResponseProvider(defaultResponse: response))
+      return try CloudKitService(
+        containerIdentifier: TestConstants.serviceContainerIdentifier,
+        credentials: Credentials(apiAuth: APICredentials(apiToken: TestConstants.apiToken)),
+        transport: transport
+      )
+    }
   }
 }

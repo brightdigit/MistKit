@@ -1,6 +1,6 @@
 //
-//  PrivateDatabaseTest.swift
-//  MistDemo
+//  APNsEnvironment.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,35 +27,29 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+internal import MistKitOpenAPI
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// The APNs environment a CloudKit-minted token targets.
+///
+/// Passed to ``CloudKitService/createAPNsToken(environment:database:)`` to mint a
+/// token for either the sandbox or production Apple Push Notification service.
+public enum APNsEnvironment: String, Codable, Sendable, CaseIterable {
+  /// The APNs sandbox environment, paired with the CloudKit `development`
+  /// container environment.
+  case development
+  /// The APNs production environment, paired with the CloudKit `production`
+  /// container environment.
+  case production
+}
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    SubscriptionRoundtripPhase(),
-    TokenRoundtripPhase(),
-    CleanupPhase(),
-  ]
+// MARK: - Internal Conversion
+extension Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload {
+  internal init(from environment: APNsEnvironment) {
+    switch environment {
+    case .development:
+      self = .development
+    case .production:
+      self = .production
+    }
+  }
 }

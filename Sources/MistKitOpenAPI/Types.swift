@@ -650,6 +650,39 @@ public enum Components {
                 case ascending
             }
         }
+        /// A record query, shared by records/query and query subscriptions
+        ///
+        /// - Remark: Generated from `#/components/schemas/Query`.
+        public struct Query: Codable, Hashable, Sendable {
+            /// The record type to query
+            ///
+            /// - Remark: Generated from `#/components/schemas/Query/recordType`.
+            public var recordType: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/Query/filterBy`.
+            public var filterBy: [Components.Schemas.Filter]?
+            /// - Remark: Generated from `#/components/schemas/Query/sortBy`.
+            public var sortBy: [Components.Schemas.Sort]?
+            /// Creates a new `Query`.
+            ///
+            /// - Parameters:
+            ///   - recordType: The record type to query
+            ///   - filterBy:
+            ///   - sortBy:
+            public init(
+                recordType: Swift.String? = nil,
+                filterBy: [Components.Schemas.Filter]? = nil,
+                sortBy: [Components.Schemas.Sort]? = nil
+            ) {
+                self.recordType = recordType
+                self.filterBy = filterBy
+                self.sortBy = sortBy
+            }
+            public enum CodingKeys: String, CodingKey {
+                case recordType
+                case filterBy
+                case sortBy
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/RecordOperation`.
         public struct RecordOperation: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/RecordOperation/operationType`.
@@ -1533,7 +1566,7 @@ public enum Components {
             /// - Remark: Generated from `#/components/schemas/Subscription/subscriptionType`.
             public var subscriptionType: Components.Schemas.Subscription.subscriptionTypePayload?
             /// - Remark: Generated from `#/components/schemas/Subscription/query`.
-            public var query: OpenAPIRuntime.OpenAPIObjectContainer?
+            public var query: Components.Schemas.Query?
             /// - Remark: Generated from `#/components/schemas/Subscription/zoneID`.
             public var zoneID: Components.Schemas.ZoneID?
             /// - Remark: Generated from `#/components/schemas/Subscription/firesOnPayload`.
@@ -1557,7 +1590,7 @@ public enum Components {
             public init(
                 subscriptionID: Swift.String? = nil,
                 subscriptionType: Components.Schemas.Subscription.subscriptionTypePayload? = nil,
-                query: OpenAPIRuntime.OpenAPIObjectContainer? = nil,
+                query: Components.Schemas.Query? = nil,
                 zoneID: Components.Schemas.ZoneID? = nil,
                 firesOn: Components.Schemas.Subscription.firesOnPayload? = nil
             ) {
@@ -2524,38 +2557,7 @@ public enum Operations {
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/resultsLimit`.
                     public var resultsLimit: Swift.Int?
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/query`.
-                    public struct queryPayload: Codable, Hashable, Sendable {
-                        /// The record type to query
-                        ///
-                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/query/recordType`.
-                        public var recordType: Swift.String?
-                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/query/filterBy`.
-                        public var filterBy: [Components.Schemas.Filter]?
-                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/query/sortBy`.
-                        public var sortBy: [Components.Schemas.Sort]?
-                        /// Creates a new `queryPayload`.
-                        ///
-                        /// - Parameters:
-                        ///   - recordType: The record type to query
-                        ///   - filterBy:
-                        ///   - sortBy:
-                        public init(
-                            recordType: Swift.String? = nil,
-                            filterBy: [Components.Schemas.Filter]? = nil,
-                            sortBy: [Components.Schemas.Sort]? = nil
-                        ) {
-                            self.recordType = recordType
-                            self.filterBy = filterBy
-                            self.sortBy = sortBy
-                        }
-                        public enum CodingKeys: String, CodingKey {
-                            case recordType
-                            case filterBy
-                            case sortBy
-                        }
-                    }
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/query`.
-                    public var query: Operations.queryRecords.Input.Body.jsonPayload.queryPayload?
+                    public var query: Components.Schemas.Query?
                     /// List of field names to return
                     ///
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/desiredKeys`.
@@ -2575,7 +2577,7 @@ public enum Operations {
                     public init(
                         zoneID: Components.Schemas.ZoneID? = nil,
                         resultsLimit: Swift.Int? = nil,
-                        query: Operations.queryRecords.Input.Body.jsonPayload.queryPayload? = nil,
+                        query: Components.Schemas.Query? = nil,
                         desiredKeys: [Swift.String]? = nil,
                         continuationMarker: Swift.String? = nil
                     ) {

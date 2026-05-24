@@ -50,6 +50,31 @@ internal enum WebResponse {
     internal let zones: [ZoneInfo]
   }
 
+  /// Body returned by subscription routes (`list` / `lookup` / `modify`).
+  /// `SubscriptionInfo` encodes to `{ subscriptionID, subscriptionType, query,
+  /// zoneID, firesOn }`, matching the browser's subscription table and the
+  /// CloudKit JS `{ subscriptions: [...] }` shape.
+  internal struct Subscriptions: Encodable {
+    internal let subscriptions: [SubscriptionInfo]
+  }
+
+  /// Body returned by `tokens/create`. Uses CloudKit's `webcAuthToken` wire
+  /// name so the panel shows the canonical field.
+  internal struct Token: Encodable {
+    internal let apnsToken: String
+    internal let webcAuthToken: String
+
+    internal init(from result: APNsTokenResult) {
+      self.apnsToken = result.apnsToken
+      self.webcAuthToken = result.webAuthToken
+    }
+  }
+
+  /// Body returned by `tokens/register` (no payload from CloudKit).
+  internal struct TokenRegistration: Encodable {
+    internal let registered: Bool
+  }
+
   /// Body returned for any handled CloudKit/MistKit error so the UI can
   /// surface the message without parsing transport-level failures.
   internal struct Error: Encodable {

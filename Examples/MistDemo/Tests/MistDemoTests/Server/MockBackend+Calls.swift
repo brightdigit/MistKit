@@ -71,5 +71,29 @@
       internal let delete: [String]
       internal let database: MistKit.Database
     }
+
+    /// Captured arguments from the most recent `webLookupSubscriptions` call.
+    internal struct LookupSubscriptionsCall: Sendable {
+      internal let ids: [String]
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webModifySubscriptions` call.
+    internal struct ModifySubscriptionsCall: Sendable {
+      internal let operations: [SubscriptionOperation]
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webCreateToken` call.
+    internal struct CreateTokenCall: Sendable {
+      internal let environment: APNsEnvironment
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webRegisterToken` call.
+    internal struct RegisterTokenCall: Sendable {
+      internal let apnsToken: String
+      internal let database: MistKit.Database
+    }
   }
 #endif

@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  TokenRoundtripPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,32 +30,31 @@
 internal import Foundation
 internal import MistKit
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// Mint an APNs token via `tokens/create`, then register it via
+/// `tokens/register` — exercising both token endpoints in one phase (per #53,
+/// register is seeded with the token returned by create).
+internal struct TokenRoundtripPhase: IntegrationPhase {
+  internal typealias Input = NoState
+  internal typealias Output = NoState
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    SubscriptionRoundtripPhase(),
-    TokenRoundtripPhase(),
-    CleanupPhase(),
-  ]
+  internal static let title = "Create and register an APNs token"
+  internal static let emoji = "🎟️"
+  internal static let apiName = "createToken+registerToken"
+
+  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
+    print("\n\(Self.emoji) \(Self.title)")
+
+    let token = try await context.service.createAPNsToken(
+      environment: .development,
+      database: context.database
+    )
+    if context.verbose {
+      print("   ✅ Created APNs token (\(token.apnsToken.prefix(8))…)")
+    }
+
+    try await context.service.registerAPNsToken(token.apnsToken, database: context.database)
+    print("✅ Created and registered an APNs token")
+
+    return NoState()
+  }
 }

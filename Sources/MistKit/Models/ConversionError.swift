@@ -64,6 +64,12 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   case zoneMissingName
   /// A user response was missing its `userRecordName`.
   case userMissingRecordName
+  /// A subscription response was missing its `subscriptionID`.
+  case subscriptionMissingID
+  /// A subscription response was missing its `subscriptionType`.
+  case subscriptionMissingType
+  /// A token response was missing a required field (`apnsToken`/`webcAuthToken`).
+  case tokenMissingField(fieldName: String)
 
   /// A human-readable description of what failed during conversion.
   public var errorDescription: String? {
@@ -94,6 +100,12 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
       return "Zone entry missing zoneName"
     case .userMissingRecordName:
       return "UserResponse missing userRecordName"
+    case .subscriptionMissingID:
+      return "Subscription entry missing subscriptionID"
+    case .subscriptionMissingType:
+      return "Subscription entry missing subscriptionType"
+    case .tokenMissingField(let fieldName):
+      return "TokenResponse missing required field '\(fieldName)'"
     }
   }
 }

@@ -1,6 +1,6 @@
 //
-//  CreateTokenPhase.swift
-//  MistDemo
+//  CloudKitResponseProcessor+Tokens.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,22 +27,36 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import MistKitOpenAPI
 
-/// Stub phase for `tokens/create`. Not wired into the public/private
-/// pipelines yet; `#52` flips this into a real run when the MistKit Swift
-/// wrapper lands.
-internal struct CreateTokenPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = NoState
+extension CloudKitResponseProcessor {
+  /// Process createToken response.
+  internal func processCreateTokenResponse(
+    _ response: Operations.createToken.Output
+  ) async throws(CloudKitError) -> Components.Schemas.TokenResponse {
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let tokenData):
+        return tokenData
+      }
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
+    }
+  }
 
-  internal static let title = "Create token (pending #52)"
-  internal static let emoji = "🎟️"
-  internal static let apiName = "createToken"
-
-  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-    PendingStub.printPending(endpoint: "tokens/create", trackingIssue: 52)
-    return NoState()
+  /// Process registerToken response.
+  ///
+  /// A successful registration returns an empty `200`; there is no body to
+  /// extract, so this validates the response and returns `Void`.
+  internal func processRegisterTokenResponse(
+    _ response: Operations.registerToken.Output
+  ) async throws(CloudKitError) {
+    switch response {
+    case .ok:
+      return
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
+    }
   }
 }

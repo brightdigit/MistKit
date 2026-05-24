@@ -1,6 +1,7 @@
-// subscriptions/list · subscriptions/lookup panel handlers. MistKit
-// side returns 501 (pending #49 / #50); CloudKit JS side hits the real
-// browser SDK primitives.
+// subscriptions/list · subscriptions/lookup · subscriptions/modify panel
+// handlers. MistKit side hits the real /api/subscriptions* routes
+// (#49/#50/#51); CloudKit JS side hits the browser SDK primitives. The
+// pending-banner branches remain as a defensive fallback.
 
 const subsListStatus = document.getElementById('subs-list-status');
 const subsListRaw = document.getElementById('subs-list-raw');

@@ -28,32 +28,31 @@
 //
 
 internal import Foundation
+internal import MistKit
 
-/// Stub command for `tokens/register`. Wires an APNs token into a CloudKit
-/// subscription so push notifications get delivered. MistKit Swift wrapper
-/// tracked in #53.
+/// Command for `tokens/register`. Registers a device's APNs token so CloudKit
+/// delivers subscription-triggered pushes to it. The token itself is captured
+/// from a real iOS/macOS device; `/tokens/register` takes only that token.
 public struct RegisterTokenCommand: MistDemoCommand {
   /// The configuration type.
   public typealias Config = RegisterTokenConfig
   /// The command name.
   public static let commandName = "register-token"
   /// The command abstract.
-  public static let abstract = "Register an APNs token with a subscription (pending #53)"
+  public static let abstract = "Register a device APNs token with CloudKit"
   /// The command help text.
   public static let helpText = """
-    REGISTER-TOKEN - Register an APNs token with a CloudKit subscription
+    REGISTER-TOKEN - Register a device APNs token with CloudKit
 
     USAGE:
-      mistdemo register-token --apns-token <hex> --subscription-id <id>
+      mistdemo register-token --apns-token <hex>
 
     OPTIONS:
-      --apns-token <hex>             APNs device token (hex string)
-      --subscription-id <id>         CloudKit subscription ID
+      --apns-token <hex>             APNs device token (hex string) from a device
       --database <type>              Database to target
-      --output-format <format>       Output format (json, table, csv, yaml)
 
-    STATUS:
-      Not yet implemented — pending MistKit support, tracked in #53.
+    EXAMPLES:
+      mistdemo register-token --apns-token 0a1b2c3d... --database private
     """
 
   private let config: RegisterTokenConfig
@@ -65,6 +64,11 @@ public struct RegisterTokenCommand: MistDemoCommand {
 
   /// Executes the command.
   public func execute() async throws {
-    PendingStub.printPending(endpoint: "tokens/register", trackingIssue: 53)
+    guard let apnsToken = config.apnsToken, !apnsToken.isEmpty else {
+      throw TokenCommandError.missingAPNsToken
+    }
+    let service = try MistKitClientFactory.create(for: config.base)
+    try await service.registerAPNsToken(apnsToken, database: config.base.database)
+    print("✅ Registered APNs token with CloudKit.")
   }
 }

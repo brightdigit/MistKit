@@ -1,6 +1,6 @@
 //
-//  PrivateDatabaseTest.swift
-//  MistDemo
+//  SubscriptionType.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,35 +27,33 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+internal import MistKitOpenAPI
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// The kind of change a CloudKit subscription watches for.
+public enum SubscriptionType: String, Codable, Sendable, CaseIterable {
+  /// Fires when records matching a query change (see ``SubscriptionQuery``).
+  case query
+  /// Fires when any record in a record zone changes (see `zoneID`).
+  case zone
+}
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    SubscriptionRoundtripPhase(),
-    TokenRoundtripPhase(),
-    CleanupPhase(),
-  ]
+// MARK: - Internal Conversion
+extension SubscriptionType {
+  internal var schemaValue: Components.Schemas.Subscription.subscriptionTypePayload {
+    switch self {
+    case .query:
+      return .query
+    case .zone:
+      return .zone
+    }
+  }
+
+  internal init(from payload: Components.Schemas.Subscription.subscriptionTypePayload) {
+    switch payload {
+    case .query:
+      self = .query
+    case .zone:
+      self = .zone
+    }
+  }
 }

@@ -128,6 +128,8 @@
       addUpdateEndpoint(api: api)
       addDeleteEndpoint(api: api)
       addZonesModifyEndpoint(api: api)
+      addSubscriptionEndpoints(api: api)
+      addTokenEndpoints(api: api)
       addPendingEndpoints(api: api)
 
       return router

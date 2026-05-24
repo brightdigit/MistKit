@@ -1,6 +1,6 @@
 //
-//  LookupSubscriptionPhase.swift
-//  MistDemo
+//  Operations.createToken.Output.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,22 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import MistKitOpenAPI
 
-/// Stub phase for `subscriptions/lookup`. Not wired into the public/private
-/// pipelines yet; `#50` flips this into a real run when the MistKit Swift
-/// wrapper lands.
-internal struct LookupSubscriptionPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = NoState
-
-  internal static let title = "Lookup subscription (pending #50)"
-  internal static let emoji = "🔍"
-  internal static let apiName = "lookupSubscription"
-
-  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-    PendingStub.printPending(endpoint: "subscriptions/lookup", trackingIssue: 50)
-    return NoState()
+extension Operations.createToken.Output: CloudKitResponseType {
+  internal func toCloudKitError() -> CloudKitError? {
+    switch self {
+    case .ok: return nil
+    case .badRequest(let response): return .init(response, statusCode: 400)
+    case .unauthorized(let response): return .init(response, statusCode: 401)
+    case .undocumented(let statusCode, _):
+      return .undocumented(statusCode: statusCode, response: self)
+    }
   }
 }

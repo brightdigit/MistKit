@@ -56,19 +56,7 @@ paths:
                   type: integer
                   description: Maximum number of records to return
                 query:
-                  type: object
-                  properties:
-                    recordType:
-                      type: string
-                      description: The record type to query
-                    filterBy:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/Filter'
-                    sortBy:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/Sort'
+                  $ref: '#/components/schemas/Query'
                 desiredKeys:
                   type: array
                   items:
@@ -951,6 +939,22 @@ components:
         ascending:
           type: boolean
 
+    Query:
+      type: object
+      description: A record query, shared by records/query and query subscriptions
+      properties:
+        recordType:
+          type: string
+          description: The record type to query
+        filterBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/Filter'
+        sortBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sort'
+
     RecordOperation:
       type: object
       properties:
@@ -1205,7 +1209,7 @@ components:
           type: string
           enum: [query, zone]
         query:
-          type: object
+          $ref: '#/components/schemas/Query'
         zoneID:
           $ref: '#/components/schemas/ZoneID'
         firesOn:

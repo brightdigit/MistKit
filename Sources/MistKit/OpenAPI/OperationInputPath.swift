@@ -86,3 +86,13 @@ extension Operations.modifyZones.Input.Path: OperationInputPath {}
 extension Operations.queryRecords.Input.Path: OperationInputPath {}
 
 extension Operations.uploadAssets.Input.Path: OperationInputPath {}
+
+extension Operations.listSubscriptions.Input.Path: OperationInputPath {}
+
+extension Operations.lookupSubscriptions.Input.Path: OperationInputPath {}
+
+extension Operations.modifySubscriptions.Input.Path: OperationInputPath {}
+
+extension Operations.createToken.Input.Path: OperationInputPath {}
+
+extension Operations.registerToken.Input.Path: OperationInputPath {}

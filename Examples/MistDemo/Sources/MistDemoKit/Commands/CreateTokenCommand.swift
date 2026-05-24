@@ -28,31 +28,31 @@
 //
 
 internal import Foundation
+internal import MistKit
 
-/// Stub command for `tokens/create`. Creates an APNs token CloudKit can use
-/// to deliver push notifications to a registered subscription. MistKit
-/// Swift wrapper tracked in #52.
-public struct CreateTokenCommand: MistDemoCommand {
+/// Command for `tokens/create`. Mints a CloudKit-managed APNs token that
+/// non-device callers use as the destination for subscription-triggered pushes.
+public struct CreateTokenCommand: MistDemoCommand, OutputFormatting {
   /// The configuration type.
   public typealias Config = CreateTokenConfig
   /// The command name.
   public static let commandName = "create-token"
   /// The command abstract.
-  public static let abstract = "Create an APNs token for CloudKit subscriptions (pending #52)"
+  public static let abstract = "Create an APNs token for CloudKit subscriptions"
   /// The command help text.
   public static let helpText = """
     CREATE-TOKEN - Create an APNs token for CloudKit subscriptions
 
     USAGE:
-      mistdemo create-token --apns-token <hex> [--apns-environment <env>]
+      mistdemo create-token [--apns-environment <env>]
 
     OPTIONS:
-      --apns-token <hex>             APNs device token (hex string)
-      --apns-environment <env>       APNs environment (development, production)
+      --apns-environment <env>       APNs environment, default development
+      --database <type>              Database to target
       --output-format <format>       Output format (json, table, csv, yaml)
 
-    STATUS:
-      Not yet implemented — pending MistKit support, tracked in #52.
+    EXAMPLES:
+      mistdemo create-token --apns-environment development
     """
 
   private let config: CreateTokenConfig
@@ -64,6 +64,22 @@ public struct CreateTokenCommand: MistDemoCommand {
 
   /// Executes the command.
   public func execute() async throws {
-    PendingStub.printPending(endpoint: "tokens/create", trackingIssue: 52)
+    let environment = try resolveEnvironment()
+    let service = try MistKitClientFactory.create(for: config.base)
+    let result = try await service.createAPNsToken(
+      environment: environment,
+      database: config.base.database
+    )
+    try await outputResult(result, format: config.output)
+  }
+
+  private func resolveEnvironment() throws -> APNsEnvironment {
+    guard let raw = config.apnsEnvironment else {
+      return .development
+    }
+    guard let environment = APNsEnvironment(rawValue: raw) else {
+      throw TokenCommandError.invalidEnvironment(raw)
+    }
+    return environment
   }
 }

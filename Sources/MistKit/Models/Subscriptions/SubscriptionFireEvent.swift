@@ -1,6 +1,6 @@
 //
-//  PrivateDatabaseTest.swift
-//  MistDemo
+//  SubscriptionFireEvent.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,35 +27,41 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+internal import MistKitOpenAPI
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// A record-change event that causes a subscription to fire a push.
+///
+/// A subscription's `firesOn` set selects which of these trigger a notification.
+public enum SubscriptionFireEvent: String, Codable, Sendable, CaseIterable {
+  /// Fire when a matching record is created.
+  case create
+  /// Fire when a matching record is updated.
+  case update
+  /// Fire when a matching record is deleted.
+  case delete
+}
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    SubscriptionRoundtripPhase(),
-    TokenRoundtripPhase(),
-    CleanupPhase(),
-  ]
+// MARK: - Internal Conversion
+extension SubscriptionFireEvent {
+  internal var schemaValue: Components.Schemas.Subscription.firesOnPayloadPayload {
+    switch self {
+    case .create:
+      return .create
+    case .update:
+      return .update
+    case .delete:
+      return .delete
+    }
+  }
+
+  internal init(from payload: Components.Schemas.Subscription.firesOnPayloadPayload) {
+    switch payload {
+    case .create:
+      self = .create
+    case .update:
+      self = .update
+    case .delete:
+      self = .delete
+    }
+  }
 }

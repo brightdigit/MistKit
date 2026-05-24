@@ -72,6 +72,30 @@ internal protocol WebBackend: Sendable {
     delete: [String],
     database: MistKit.Database
   ) async throws -> [ZoneInfo]
+
+  func webListSubscriptions(
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo]
+
+  func webLookupSubscriptions(
+    ids: [String],
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo]
+
+  func webModifySubscriptions(
+    operations: [SubscriptionOperation],
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo]
+
+  func webCreateToken(
+    environment: APNsEnvironment,
+    database: MistKit.Database
+  ) async throws -> APNsTokenResult
+
+  func webRegisterToken(
+    apnsToken: String,
+    database: MistKit.Database
+  ) async throws
 }
 
 extension CloudKitService: WebBackend {
@@ -147,5 +171,39 @@ extension CloudKitService: WebBackend {
       create.map { ZoneOperation.create(ZoneID(zoneName: $0)) }
       + delete.map { ZoneOperation.delete(ZoneID(zoneName: $0)) }
     return try await modifyZones(operations, database: database)
+  }
+
+  internal func webListSubscriptions(
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo] {
+    try await listSubscriptions(database: database)
+  }
+
+  internal func webLookupSubscriptions(
+    ids: [String],
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo] {
+    try await lookupSubscriptions(ids: ids, database: database)
+  }
+
+  internal func webModifySubscriptions(
+    operations: [SubscriptionOperation],
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo] {
+    try await modifySubscriptions(operations, database: database)
+  }
+
+  internal func webCreateToken(
+    environment: APNsEnvironment,
+    database: MistKit.Database
+  ) async throws -> APNsTokenResult {
+    try await createAPNsToken(environment: environment, database: database)
+  }
+
+  internal func webRegisterToken(
+    apnsToken: String,
+    database: MistKit.Database
+  ) async throws {
+    try await registerAPNsToken(apnsToken, database: database)
   }
 }

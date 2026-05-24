@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  TokenCommandError.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,35 +27,22 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+public import Foundation
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// Errors raised by the APNs token commands before a CloudKit call is made.
+public enum TokenCommandError: Error, LocalizedError {
+  /// An unrecognized `--apns-environment` value was supplied.
+  case invalidEnvironment(String)
+  /// No APNs token was supplied to the register command.
+  case missingAPNsToken
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    SubscriptionRoundtripPhase(),
-    TokenRoundtripPhase(),
-    CleanupPhase(),
-  ]
+  /// A localized description of the error.
+  public var errorDescription: String? {
+    switch self {
+    case .invalidEnvironment(let value):
+      return "Unknown APNs environment '\(value)'. Use 'development' or 'production'."
+    case .missingAPNsToken:
+      return "No APNs token supplied. Pass --apns-token <hex>."
+    }
+  }
 }

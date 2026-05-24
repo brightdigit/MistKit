@@ -1,6 +1,6 @@
 //
-//  ListSubscriptionsPhase.swift
-//  MistDemo
+//  CloudKitServiceTests.Subscriptions.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,21 +28,11 @@
 //
 
 internal import Foundation
+internal import Testing
 
-/// Stub phase for `subscriptions/list`. Not wired into the public/private
-/// pipelines yet; `#49` flips this into a real run when the MistKit Swift
-/// wrapper lands.
-internal struct ListSubscriptionsPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = NoState
+@testable import MistKit
 
-  internal static let title = "List subscriptions (pending #49)"
-  internal static let emoji = "🔔"
-  internal static let apiName = "listSubscriptions"
-
-  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-    PendingStub.printPending(endpoint: "subscriptions/list", trackingIssue: 49)
-    return NoState()
-  }
+extension CloudKitServiceTests {
+  @Suite("CloudKitService Subscription Operations", .enabled(if: Platform.isCryptoAvailable))
+  internal enum Subscriptions {}
 }

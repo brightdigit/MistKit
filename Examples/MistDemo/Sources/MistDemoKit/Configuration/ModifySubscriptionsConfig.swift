@@ -1,5 +1,5 @@
 //
-//  RegisterTokenConfig.swift
+//  ModifySubscriptionsConfig.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,8 +30,8 @@
 public import ConfigKeyKit
 internal import Foundation
 
-/// Configuration for the `register-token` command.
-public struct RegisterTokenConfig: Sendable, ConfigurationParseable {
+/// Configuration for the `modify-subscriptions` command.
+public struct ModifySubscriptionsConfig: Sendable, ConfigurationParseable {
   /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
   /// The base configuration type.
@@ -39,19 +39,31 @@ public struct RegisterTokenConfig: Sendable, ConfigurationParseable {
 
   /// The base MistDemo configuration.
   public let base: MistDemoConfig
-  /// APNs device token (hex string) captured from a real device.
-  public let apnsToken: String?
+  /// The operation to apply (`create` or `delete`). Defaults to `create`.
+  public let operation: String
+  /// The subscription ID to create or delete.
+  public let subscriptionID: String?
+  /// The record type for a `create` query subscription.
+  public let recordType: String?
+  /// Comma-separated fire events (`create`, `update`, `delete`).
+  public let firesOn: [String]
   /// The output format.
   public let output: OutputFormat
 
   /// Creates a new instance.
   public init(
     base: MistDemoConfig,
-    apnsToken: String? = nil,
+    operation: String = "create",
+    subscriptionID: String? = nil,
+    recordType: String? = nil,
+    firesOn: [String] = ["create", "update", "delete"],
     output: OutputFormat = .json
   ) {
     self.base = base
-    self.apnsToken = apnsToken
+    self.operation = operation
+    self.subscriptionID = subscriptionID
+    self.recordType = recordType
+    self.firesOn = firesOn
     self.output = output
   }
 
@@ -70,6 +82,13 @@ public struct RegisterTokenConfig: Sendable, ConfigurationParseable {
       )
     }
 
+    let firesOnString = configuration.string(forKey: "fires-on") ?? "create,update,delete"
+    let firesOn =
+      firesOnString
+      .split(separator: ",")
+      .map { String($0).trimmingCharacters(in: .whitespaces) }
+      .filter { !$0.isEmpty }
+
     let outputString =
       configuration.string(
         forKey: MistDemoConstants.ConfigKeys.outputFormat,
@@ -79,7 +98,10 @@ public struct RegisterTokenConfig: Sendable, ConfigurationParseable {
 
     self.init(
       base: baseConfig,
-      apnsToken: configuration.string(forKey: "apns-token"),
+      operation: configuration.string(forKey: "operation", default: "create") ?? "create",
+      subscriptionID: configuration.string(forKey: "subscription-id"),
+      recordType: configuration.string(forKey: "record-type"),
+      firesOn: firesOn,
       output: output
     )
   }

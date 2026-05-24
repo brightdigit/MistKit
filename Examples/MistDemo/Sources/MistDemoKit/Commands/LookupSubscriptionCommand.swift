@@ -28,16 +28,17 @@
 //
 
 internal import Foundation
+internal import MistKit
 
-/// Stub command for `subscriptions/lookup`. Looks up one or more
-/// CloudKit subscriptions by ID. MistKit Swift wrapper tracked in #50.
-public struct LookupSubscriptionCommand: MistDemoCommand {
+/// Command for `subscriptions/lookup`. Looks up one or more CloudKit
+/// subscriptions by ID.
+public struct LookupSubscriptionCommand: MistDemoCommand, OutputFormatting {
   /// The configuration type.
   public typealias Config = LookupSubscriptionConfig
   /// The command name.
   public static let commandName = "lookup-subscription"
   /// The command abstract.
-  public static let abstract = "Look up a CloudKit subscription by ID (pending #50)"
+  public static let abstract = "Look up a CloudKit subscription by ID"
   /// The command help text.
   public static let helpText = """
     LOOKUP-SUBSCRIPTION - Look up a CloudKit subscription by ID
@@ -50,8 +51,8 @@ public struct LookupSubscriptionCommand: MistDemoCommand {
       --database <type>          Database to target
       --output-format <format>   Output format (json, table, csv, yaml)
 
-    STATUS:
-      Not yet implemented — pending MistKit support, tracked in #50.
+    EXAMPLES:
+      mistdemo lookup-subscription --subscription-ids sub-1,sub-2 --database private
     """
 
   private let config: LookupSubscriptionConfig
@@ -63,6 +64,14 @@ public struct LookupSubscriptionCommand: MistDemoCommand {
 
   /// Executes the command.
   public func execute() async throws {
-    PendingStub.printPending(endpoint: "subscriptions/lookup", trackingIssue: 50)
+    guard !config.subscriptionIDs.isEmpty else {
+      throw SubscriptionCommandError.missingSubscriptionIDs
+    }
+    let service = try MistKitClientFactory.create(for: config.base)
+    let subscriptions = try await service.lookupSubscriptions(
+      ids: config.subscriptionIDs,
+      database: config.base.database
+    )
+    try await outputResults(subscriptions, format: config.output)
   }
 }

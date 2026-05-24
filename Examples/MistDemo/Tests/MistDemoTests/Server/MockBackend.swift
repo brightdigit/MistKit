@@ -41,7 +41,18 @@
     internal private(set) var lastUpdate: UpdateCall?
     internal private(set) var lastDelete: DeleteCall?
     internal private(set) var lastModifyZones: ModifyZonesCall?
+    internal private(set) var didListSubscriptions = false
+    internal private(set) var lastLookupSubscriptions: LookupSubscriptionsCall?
+    internal private(set) var lastModifySubscriptions: ModifySubscriptionsCall?
+    internal private(set) var lastCreateToken: CreateTokenCall?
+    internal private(set) var lastRegisterToken: RegisterTokenCall?
     private var pendingError: String?
+
+    /// Subscriptions returned by the list/lookup/modify stubs. Tests can seed
+    /// this; defaults to one query subscription.
+    private var stubSubscriptions: [SubscriptionInfo] = [
+      .query(subscriptionID: "stub-sub", recordType: "Note", firesOn: [.create])
+    ]
 
     private static func stubRecord(
       recordType: String, recordName: String
@@ -183,6 +194,54 @@
       return create.map { name in
         ZoneInfo(zoneName: name, ownerRecordName: nil, capabilities: [])
       }
+    }
+
+    internal func webListSubscriptions(
+      database: MistKit.Database
+    ) async throws -> [SubscriptionInfo] {
+      didListSubscriptions = true
+      try consumePendingError()
+      return stubSubscriptions
+    }
+
+    internal func webLookupSubscriptions(
+      ids: [String],
+      database: MistKit.Database
+    ) async throws -> [SubscriptionInfo] {
+      lastLookupSubscriptions = LookupSubscriptionsCall(ids: ids, database: database)
+      try consumePendingError()
+      return stubSubscriptions.filter { ids.contains($0.subscriptionID) }
+    }
+
+    internal func webModifySubscriptions(
+      operations: [SubscriptionOperation],
+      database: MistKit.Database
+    ) async throws -> [SubscriptionInfo] {
+      lastModifySubscriptions = ModifySubscriptionsCall(
+        operations: operations, database: database
+      )
+      try consumePendingError()
+      return operations.compactMap { operation in
+        if case .create(let info) = operation { return info }
+        return nil
+      }
+    }
+
+    internal func webCreateToken(
+      environment: APNsEnvironment,
+      database: MistKit.Database
+    ) async throws -> APNsTokenResult {
+      lastCreateToken = CreateTokenCall(environment: environment, database: database)
+      try consumePendingError()
+      return APNsTokenResult(apnsToken: "stub-apns", webAuthToken: "stub-webauth")
+    }
+
+    internal func webRegisterToken(
+      apnsToken: String,
+      database: MistKit.Database
+    ) async throws {
+      lastRegisterToken = RegisterTokenCall(apnsToken: apnsToken, database: database)
+      try consumePendingError()
     }
 
     private func consumePendingError() throws {

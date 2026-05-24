@@ -1,6 +1,6 @@
 //
-//  PrivateDatabaseTest.swift
-//  MistDemo
+//  SubscriptionOperation.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,35 +27,34 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+internal import MistKitOpenAPI
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// A create / update / delete operation against a CloudKit subscription, used by
+/// ``CloudKitService/modifySubscriptions(_:database:)``.
+public enum SubscriptionOperation: Sendable {
+  /// Create the given subscription.
+  case create(SubscriptionInfo)
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    SubscriptionRoundtripPhase(),
-    TokenRoundtripPhase(),
-    CleanupPhase(),
-  ]
+  /// Update the given subscription.
+  case update(SubscriptionInfo)
+
+  /// Delete the subscription with the given identifier.
+  case delete(subscriptionID: String)
+}
+
+// MARK: - Internal Conversion
+extension Components.Schemas.SubscriptionOperation {
+  internal init(from operation: SubscriptionOperation) {
+    switch operation {
+    case .create(let info):
+      self.init(operationType: .create, subscription: info.schema)
+    case .update(let info):
+      self.init(operationType: .update, subscription: info.schema)
+    case .delete(let subscriptionID):
+      self.init(
+        operationType: .delete,
+        subscription: Components.Schemas.Subscription(subscriptionID: subscriptionID)
+      )
+    }
+  }
 }
