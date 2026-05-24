@@ -41,7 +41,10 @@ extension CloudKitService {
   ///
   /// - Parameters:
   ///   - environment: The APNs environment the token targets.
-  ///   - database: The CloudKit database scope.
+  ///   - database: The CloudKit database whose credentials authenticate the
+  ///     request. The `tokens/create` endpoint is container-scoped — the
+  ///     database is not part of its path — but still needs credentials, so the
+  ///     caller picks which database's auth to present.
   /// - Returns: The minted ``APNsTokenResult`` (`apnsToken` + web-push auth
   ///   secret).
   /// - Throws: ``CloudKitError`` if the request fails.
@@ -55,8 +58,7 @@ extension CloudKitService {
         .init(
           path: Operations.createToken.Input.Path(
             containerIdentifier: containerIdentifier,
-            environment: self.environment,
-            database: database
+            environment: self.environment
           ),
           body: .json(
             .init(apnsEnvironment: .init(from: environment))
@@ -83,7 +85,10 @@ extension CloudKitService {
   ///
   /// - Parameters:
   ///   - apnsToken: The device's APNs token, as a hex string.
-  ///   - database: The CloudKit database scope.
+  ///   - database: The CloudKit database whose credentials authenticate the
+  ///     request. The `tokens/register` endpoint is container-scoped — the
+  ///     database is not part of its path — but still needs credentials, so the
+  ///     caller picks which database's auth to present.
   /// - Throws: ``CloudKitError/badRequest(reason:)`` if `apnsToken` is empty, or
   ///   any error surfaced by the API.
   public func registerAPNsToken(
@@ -101,8 +106,7 @@ extension CloudKitService {
         .init(
           path: Operations.registerToken.Input.Path(
             containerIdentifier: containerIdentifier,
-            environment: environment,
-            database: database
+            environment: environment
           ),
           body: .json(
             .init(apnsToken: trimmed)

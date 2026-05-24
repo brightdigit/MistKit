@@ -63,8 +63,16 @@ extension CloudKitService {
 
       let subscriptionsData: Components.Schemas.SubscriptionsModifyResponse =
         try await responseProcessor.processModifySubscriptionsResponse(response)
-      return try (subscriptionsData.subscriptions ?? []).map {
-        try SubscriptionInfo(from: $0)
+      return try (subscriptionsData.subscriptions ?? []).compactMap {
+        subscription -> SubscriptionInfo? in
+        // CloudKit echoes a deleted subscription as a bare `{ subscriptionID }`
+        // with no `subscriptionType`/`query`/`firesOn`. That's a deletion
+        // acknowledgement, not a subscription — skip it rather than treating
+        // the missing type as a conversion failure.
+        guard subscription.subscriptionType != nil else {
+          return nil
+        }
+        return try SubscriptionInfo(from: subscription)
       }
     } catch {
       throw mapToCloudKitError(error, context: "modifySubscriptions")

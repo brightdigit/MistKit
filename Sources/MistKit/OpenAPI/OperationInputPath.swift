@@ -92,7 +92,3 @@ extension Operations.listSubscriptions.Input.Path: OperationInputPath {}
 extension Operations.lookupSubscriptions.Input.Path: OperationInputPath {}
 
 extension Operations.modifySubscriptions.Input.Path: OperationInputPath {}
-
-extension Operations.createToken.Input.Path: OperationInputPath {}
-
-extension Operations.registerToken.Input.Path: OperationInputPath {}

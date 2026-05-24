@@ -162,15 +162,15 @@ public protocol APIProtocol: Sendable {
     ///
     /// Create an Apple Push Notification service (APNs) token
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/create`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)`.
     func createToken(_ input: Operations.createToken.Input) async throws -> Operations.createToken.Output
     /// Register Token
     ///
     /// Register a token for push notifications
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/register`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
     func registerToken(_ input: Operations.registerToken.Input) async throws -> Operations.registerToken.Output
 }
 
@@ -497,8 +497,8 @@ extension APIProtocol {
     ///
     /// Create an Apple Push Notification service (APNs) token
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/create`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)`.
     public func createToken(
         path: Operations.createToken.Input.Path,
         headers: Operations.createToken.Input.Headers = .init(),
@@ -514,8 +514,8 @@ extension APIProtocol {
     ///
     /// Register a token for push notifications
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/register`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
     public func registerToken(
         path: Operations.registerToken.Input.Path,
         headers: Operations.registerToken.Input.Headers = .init(),
@@ -9390,16 +9390,16 @@ public enum Operations {
     ///
     /// Create an Apple Push Notification service (APNs) token
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/create`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)`.
     public enum createToken {
         public static let id: Swift.String = "createToken"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/path`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/path`.
             public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/path/version`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/path/version`.
                 public var version: Components.Parameters.version
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/path/container`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/path/container`.
                 public var container: Components.Parameters.container
                 /// Container environment
                 ///
@@ -9408,39 +9408,26 @@ public enum Operations {
                     case development = "development"
                     case production = "production"
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/path/environment`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/path/environment`.
                 public var environment: Components.Parameters.environment
-                /// Database scope
-                ///
-                /// - Remark: Generated from `#/components/parameters/database`.
-                @frozen public enum database: String, Codable, Hashable, Sendable, CaseIterable {
-                    case _public = "public"
-                    case _private = "private"
-                    case shared = "shared"
-                }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/path/database`.
-                public var database: Components.Parameters.database
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - version:
                 ///   - container:
                 ///   - environment:
-                ///   - database:
                 public init(
                     version: Components.Parameters.version,
                     container: Components.Parameters.container,
-                    environment: Components.Parameters.environment,
-                    database: Components.Parameters.database
+                    environment: Components.Parameters.environment
                 ) {
                     self.version = version
                     self.container = container
                     self.environment = environment
-                    self.database = database
                 }
             }
             public var path: Operations.createToken.Input.Path
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/header`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/header`.
             public struct Headers: Sendable, Hashable {
                 public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.createToken.AcceptableContentType>]
                 /// Creates a new `Headers`.
@@ -9452,16 +9439,16 @@ public enum Operations {
                 }
             }
             public var headers: Operations.createToken.Input.Headers
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/requestBody`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/requestBody/json`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/requestBody/json/apnsEnvironment`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody/json/apnsEnvironment`.
                     @frozen public enum apnsEnvironmentPayload: String, Codable, Hashable, Sendable, CaseIterable {
                         case development = "development"
                         case production = "production"
                     }
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/requestBody/json/apnsEnvironment`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody/json/apnsEnvironment`.
                     public var apnsEnvironment: Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload?
                     /// Creates a new `jsonPayload`.
                     ///
@@ -9474,7 +9461,7 @@ public enum Operations {
                         case apnsEnvironment
                     }
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/requestBody/content/application\/json`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody/content/application\/json`.
                 case json(Operations.createToken.Input.Body.jsonPayload)
             }
             public var body: Operations.createToken.Input.Body
@@ -9496,9 +9483,9 @@ public enum Operations {
         }
         @frozen public enum Output: Sendable, Hashable {
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/responses/200/content`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/create/POST/responses/200/content/application\/json`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/responses/200/content/application\/json`.
                     case json(Components.Schemas.TokenResponse)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
@@ -9525,7 +9512,7 @@ public enum Operations {
             }
             /// Token created successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.createToken.Output.Ok)
@@ -9563,7 +9550,7 @@ public enum Operations {
             /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
             ///
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.Failure)
@@ -9601,7 +9588,7 @@ public enum Operations {
             /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
             ///
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Failure)
@@ -9657,16 +9644,16 @@ public enum Operations {
     ///
     /// Register a token for push notifications
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)`.
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/register`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
     public enum registerToken {
         public static let id: Swift.String = "registerToken"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/path`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/path`.
             public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/path/version`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/path/version`.
                 public var version: Components.Parameters.version
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/path/container`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/path/container`.
                 public var container: Components.Parameters.container
                 /// Container environment
                 ///
@@ -9675,39 +9662,26 @@ public enum Operations {
                     case development = "development"
                     case production = "production"
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/path/environment`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/path/environment`.
                 public var environment: Components.Parameters.environment
-                /// Database scope
-                ///
-                /// - Remark: Generated from `#/components/parameters/database`.
-                @frozen public enum database: String, Codable, Hashable, Sendable, CaseIterable {
-                    case _public = "public"
-                    case _private = "private"
-                    case shared = "shared"
-                }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/path/database`.
-                public var database: Components.Parameters.database
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - version:
                 ///   - container:
                 ///   - environment:
-                ///   - database:
                 public init(
                     version: Components.Parameters.version,
                     container: Components.Parameters.container,
-                    environment: Components.Parameters.environment,
-                    database: Components.Parameters.database
+                    environment: Components.Parameters.environment
                 ) {
                     self.version = version
                     self.container = container
                     self.environment = environment
-                    self.database = database
                 }
             }
             public var path: Operations.registerToken.Input.Path
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/header`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/header`.
             public struct Headers: Sendable, Hashable {
                 public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.registerToken.AcceptableContentType>]
                 /// Creates a new `Headers`.
@@ -9719,13 +9693,13 @@ public enum Operations {
                 }
             }
             public var headers: Operations.registerToken.Input.Headers
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/requestBody`.
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/requestBody/json`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
                     /// The APNs token to register
                     ///
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/requestBody/json/apnsToken`.
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/apnsToken`.
                     public var apnsToken: Swift.String?
                     /// Creates a new `jsonPayload`.
                     ///
@@ -9738,7 +9712,7 @@ public enum Operations {
                         case apnsToken
                     }
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/tokens/register/POST/requestBody/content/application\/json`.
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/content/application\/json`.
                 case json(Operations.registerToken.Input.Body.jsonPayload)
             }
             public var body: Operations.registerToken.Input.Body
@@ -9765,13 +9739,13 @@ public enum Operations {
             }
             /// Token registered successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.registerToken.Output.Ok)
             /// Token registered successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/200`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             public static var ok: Self {
@@ -9811,7 +9785,7 @@ public enum Operations {
             /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
             ///
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/400`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.Failure)
@@ -9849,7 +9823,7 @@ public enum Operations {
             /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
             ///
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)/responses/401`.
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Failure)

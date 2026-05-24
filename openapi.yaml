@@ -801,7 +801,7 @@ paths:
         '401':
           $ref: '#/components/responses/Failure'
 
-  /database/{version}/{container}/{environment}/{database}/tokens/create:
+  /database/{version}/{container}/{environment}/tokens/create:
     post:
       summary: Create APNs Token
       description: Create an Apple Push Notification service (APNs) token
@@ -812,7 +812,6 @@ paths:
         - $ref: '#/components/parameters/version'
         - $ref: '#/components/parameters/container'
         - $ref: '#/components/parameters/environment'
-        - $ref: '#/components/parameters/database'
       requestBody:
         required: true
         content:
@@ -835,7 +834,7 @@ paths:
         '401':
           $ref: '#/components/responses/Failure'
 
-  /database/{version}/{container}/{environment}/{database}/tokens/register:
+  /database/{version}/{container}/{environment}/tokens/register:
     post:
       summary: Register Token
       description: Register a token for push notifications
@@ -846,7 +845,6 @@ paths:
         - $ref: '#/components/parameters/version'
         - $ref: '#/components/parameters/container'
         - $ref: '#/components/parameters/environment'
-        - $ref: '#/components/parameters/database'
       requestBody:
         required: true
         content:
