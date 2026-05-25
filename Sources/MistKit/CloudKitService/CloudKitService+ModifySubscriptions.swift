@@ -41,7 +41,7 @@ extension CloudKitService {
   public func modifySubscriptions(
     _ operations: [SubscriptionOperation],
     database: Database
-  ) async throws(CloudKitError) -> [SubscriptionInfo] {
+  ) async throws(CloudKitError) -> [SubscriptionResult] {
     do {
       let client = try self.client(for: database)
       let response = try await client.modifySubscriptions(
@@ -64,15 +64,22 @@ extension CloudKitService {
       let subscriptionsData: Components.Schemas.SubscriptionsModifyResponse =
         try await responseProcessor.processModifySubscriptionsResponse(response)
       return try (subscriptionsData.subscriptions ?? []).compactMap {
-        subscription -> SubscriptionInfo? in
-        // CloudKit echoes a deleted subscription as a bare `{ subscriptionID }`
-        // with no `subscriptionType`/`query`/`firesOn`. That's a deletion
-        // acknowledgement, not a subscription — skip it rather than treating
-        // the missing type as a conversion failure.
-        guard subscription.subscriptionType != nil else {
-          return nil
+        item -> SubscriptionResult? in
+        switch item {
+        case .SubscriptionOperationFailure(let failure):
+          // A per-subscription error CloudKit returned inline in the 200 body
+          // (e.g. INTERNAL_ERROR on create). Surface it rather than dropping it.
+          return .failure(SubscriptionOperationFailure(from: failure))
+        case .Subscription(let subscription):
+          // CloudKit echoes a deleted subscription as a bare `{ subscriptionID }`
+          // with no `subscriptionType`/`query`/`firesOn`. That's a deletion
+          // acknowledgement, not a result — skip it rather than treating the
+          // missing type as a conversion failure.
+          guard subscription.subscriptionType != nil else {
+            return nil
+          }
+          return .success(try SubscriptionInfo(from: subscription))
         }
-        return try SubscriptionInfo(from: subscription)
       }
     } catch {
       throw mapToCloudKitError(error, context: "modifySubscriptions")
@@ -89,7 +96,10 @@ extension CloudKitService {
   ///   - subscription: The subscription to create.
   ///   - database: The CloudKit database scope to modify.
   /// - Returns: The created subscription as returned by CloudKit.
-  /// - Throws: ``CloudKitError`` if the request fails or the response is empty.
+  /// - Throws: ``CloudKitError/subscriptionOperationFailed(_:)`` if CloudKit
+  ///   rejected the create (e.g. `INTERNAL_ERROR`), ``CloudKitError`` if the
+  ///   request fails, or ``CloudKitError/invalidResponse`` if the response is
+  ///   empty.
   @discardableResult
   public func createSubscription(
     _ subscription: SubscriptionInfo,
@@ -99,7 +109,7 @@ extension CloudKitService {
     guard let created = results.first else {
       throw CloudKitError.invalidResponse
     }
-    return created
+    return try created.get()
   }
 
   /// Delete a single subscription by its identifier.
@@ -112,6 +122,11 @@ extension CloudKitService {
     id: String,
     database: Database
   ) async throws(CloudKitError) {
-    _ = try await modifySubscriptions([.delete(subscriptionID: id)], database: database)
+    let results = try await modifySubscriptions([.delete(subscriptionID: id)], database: database)
+    // A successful delete yields a (skipped) ack, so an empty result set means
+    // success; surface any per-subscription failure CloudKit returned instead.
+    for result in results {
+      _ = try result.get()
+    }
   }
 }

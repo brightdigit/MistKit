@@ -1357,13 +1357,60 @@ components:
           items:
             $ref: '#/components/schemas/Subscription'
 
+    SubscriptionOperationFailure:
+      type: object
+      description: |
+        Per-subscription error returned inline in the `subscriptions` array of a
+        200 modify response. Identifies the subscription that failed and why.
+        Mirrors `RecordOperationFailure` for records. Distinct from
+        `ErrorResponse`, which is the body of a top-level 4xx/5xx HTTP failure.
+      properties:
+        subscriptionID:
+          type: string
+          description: The identifier of the subscription the operation failed on.
+        serverErrorCode:
+          type: string
+          enum:
+            - ACCESS_DENIED
+            - ATOMIC_ERROR
+            - AUTHENTICATION_FAILED
+            - AUTHENTICATION_REQUIRED
+            - BAD_REQUEST
+            - CONFLICT
+            - EXISTS
+            - INTERNAL_ERROR
+            - NOT_FOUND
+            - QUOTA_EXCEEDED
+            - THROTTLED
+            - TRY_AGAIN_LATER
+            - VALIDATING_REFERENCE_ERROR
+            - ZONE_NOT_FOUND
+          description: The code for the error that occurred.
+        reason:
+          type: string
+          description: A string indicating the reason for the error.
+        retryAfter:
+          type: integer
+          description: Suggested seconds to wait before retrying. Absent if not retryable.
+        uuid:
+          type: string
+          description: A unique identifier for this error.
+        redirectURL:
+          type: string
+          description: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+      required:
+        - subscriptionID
+        - serverErrorCode
+
     SubscriptionsModifyResponse:
       type: object
       properties:
         subscriptions:
           type: array
           items:
-            $ref: '#/components/schemas/Subscription'
+            oneOf:
+              - $ref: '#/components/schemas/SubscriptionOperationFailure'
+              - $ref: '#/components/schemas/Subscription'
 
     RecordTimestamp:
       type: object

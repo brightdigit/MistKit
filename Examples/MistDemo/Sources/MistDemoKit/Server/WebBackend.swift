@@ -193,7 +193,11 @@ extension CloudKitService: WebBackend {
     operations: [SubscriptionOperation],
     database: MistKit.Database
   ) async throws -> [SubscriptionInfo] {
-    try await modifySubscriptions(operations, database: database)
+    let results = try await modifySubscriptions(operations, database: database)
+    // Surface any per-subscription failure (e.g. CloudKit's INTERNAL_ERROR on
+    // create) as a thrown error so the web panel shows it — matching what
+    // CloudKit JS reports — rather than silently returning fewer rows.
+    return try results.map { try $0.get() }
   }
 
   internal func webCreateToken(

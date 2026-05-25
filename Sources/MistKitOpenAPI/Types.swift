@@ -1958,15 +1958,136 @@ public enum Components {
                 case subscriptions
             }
         }
+        /// Per-subscription error returned inline in the `subscriptions` array of a
+        /// 200 modify response. Identifies the subscription that failed and why.
+        /// Mirrors `RecordOperationFailure` for records. Distinct from
+        /// `ErrorResponse`, which is the body of a top-level 4xx/5xx HTTP failure.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure`.
+        public struct SubscriptionOperationFailure: Codable, Hashable, Sendable {
+            /// The identifier of the subscription the operation failed on.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/subscriptionID`.
+            public var subscriptionID: Swift.String
+            /// The code for the error that occurred.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/serverErrorCode`.
+            @frozen public enum serverErrorCodePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case ACCESS_DENIED = "ACCESS_DENIED"
+                case ATOMIC_ERROR = "ATOMIC_ERROR"
+                case AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
+                case AUTHENTICATION_REQUIRED = "AUTHENTICATION_REQUIRED"
+                case BAD_REQUEST = "BAD_REQUEST"
+                case CONFLICT = "CONFLICT"
+                case EXISTS = "EXISTS"
+                case INTERNAL_ERROR = "INTERNAL_ERROR"
+                case NOT_FOUND = "NOT_FOUND"
+                case QUOTA_EXCEEDED = "QUOTA_EXCEEDED"
+                case THROTTLED = "THROTTLED"
+                case TRY_AGAIN_LATER = "TRY_AGAIN_LATER"
+                case VALIDATING_REFERENCE_ERROR = "VALIDATING_REFERENCE_ERROR"
+                case ZONE_NOT_FOUND = "ZONE_NOT_FOUND"
+            }
+            /// The code for the error that occurred.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/serverErrorCode`.
+            public var serverErrorCode: Components.Schemas.SubscriptionOperationFailure.serverErrorCodePayload
+            /// A string indicating the reason for the error.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/reason`.
+            public var reason: Swift.String?
+            /// Suggested seconds to wait before retrying. Absent if not retryable.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/retryAfter`.
+            public var retryAfter: Swift.Int?
+            /// A unique identifier for this error.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/uuid`.
+            public var uuid: Swift.String?
+            /// Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/redirectURL`.
+            public var redirectURL: Swift.String?
+            /// Creates a new `SubscriptionOperationFailure`.
+            ///
+            /// - Parameters:
+            ///   - subscriptionID: The identifier of the subscription the operation failed on.
+            ///   - serverErrorCode: The code for the error that occurred.
+            ///   - reason: A string indicating the reason for the error.
+            ///   - retryAfter: Suggested seconds to wait before retrying. Absent if not retryable.
+            ///   - uuid: A unique identifier for this error.
+            ///   - redirectURL: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+            public init(
+                subscriptionID: Swift.String,
+                serverErrorCode: Components.Schemas.SubscriptionOperationFailure.serverErrorCodePayload,
+                reason: Swift.String? = nil,
+                retryAfter: Swift.Int? = nil,
+                uuid: Swift.String? = nil,
+                redirectURL: Swift.String? = nil
+            ) {
+                self.subscriptionID = subscriptionID
+                self.serverErrorCode = serverErrorCode
+                self.reason = reason
+                self.retryAfter = retryAfter
+                self.uuid = uuid
+                self.redirectURL = redirectURL
+            }
+            public enum CodingKeys: String, CodingKey {
+                case subscriptionID
+                case serverErrorCode
+                case reason
+                case retryAfter
+                case uuid
+                case redirectURL
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/SubscriptionsModifyResponse`.
         public struct SubscriptionsModifyResponse: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/SubscriptionsModifyResponse/subscriptionsPayload`.
+            @frozen public enum subscriptionsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/SubscriptionsModifyResponse/subscriptionsPayload/case1`.
+                case SubscriptionOperationFailure(Components.Schemas.SubscriptionOperationFailure)
+                /// - Remark: Generated from `#/components/schemas/SubscriptionsModifyResponse/subscriptionsPayload/case2`.
+                case Subscription(Components.Schemas.Subscription)
+                public init(from decoder: any Decoder) throws {
+                    var errors: [any Error] = []
+                    do {
+                        self = .SubscriptionOperationFailure(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .Subscription(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    throw Swift.DecodingError.failedToDecodeOneOfSchema(
+                        type: Self.self,
+                        codingPath: decoder.codingPath,
+                        errors: errors
+                    )
+                }
+                public func encode(to encoder: any Encoder) throws {
+                    switch self {
+                    case let .SubscriptionOperationFailure(value):
+                        try value.encode(to: encoder)
+                    case let .Subscription(value):
+                        try value.encode(to: encoder)
+                    }
+                }
+            }
             /// - Remark: Generated from `#/components/schemas/SubscriptionsModifyResponse/subscriptions`.
-            public var subscriptions: [Components.Schemas.Subscription]?
+            public typealias subscriptionsPayload = [Components.Schemas.SubscriptionsModifyResponse.subscriptionsPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/SubscriptionsModifyResponse/subscriptions`.
+            public var subscriptions: Components.Schemas.SubscriptionsModifyResponse.subscriptionsPayload?
             /// Creates a new `SubscriptionsModifyResponse`.
             ///
             /// - Parameters:
             ///   - subscriptions:
-            public init(subscriptions: [Components.Schemas.Subscription]? = nil) {
+            public init(subscriptions: Components.Schemas.SubscriptionsModifyResponse.subscriptionsPayload? = nil) {
                 self.subscriptions = subscriptions
             }
             public enum CodingKeys: String, CodingKey {

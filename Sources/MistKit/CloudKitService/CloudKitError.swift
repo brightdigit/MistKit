@@ -63,6 +63,10 @@ public enum CloudKitError: LocalizedError, Sendable {
   /// back as a `RecordOperationFailure`, surfaced by a single-record
   /// convenience (`createRecord`/`updateRecord`/`deleteRecord`).
   case recordOperationFailed(RecordOperationFailure)
+  /// A per-subscription operation in a `modifySubscriptions` batch came back as
+  /// a `SubscriptionOperationFailure`, surfaced by the single-subscription
+  /// convenience (`createSubscription`).
+  case subscriptionOperationFailed(SubscriptionOperationFailure)
   case underlyingError(any Error)
   case decodingError(DecodingError)
   case networkError(URLError)
@@ -91,7 +95,7 @@ public enum CloudKitError: LocalizedError, Sendable {
     case .badRequest, .atomicFailure:
       return 400
     case .invalidResponse, .conversionFailed, .recordOperationFailed,
-      .underlyingError, .decodingError, .networkError,
+      .subscriptionOperationFailed, .underlyingError, .decodingError, .networkError,
       .unsupportedOperationType, .paginationLimitExceeded,
       .zonePaginationLimitExceeded, .missingCredentials, .invalidPrivateKey:
       return nil
@@ -124,6 +128,14 @@ public enum CloudKitError: LocalizedError, Sendable {
         "CloudKit record operation failed for '\(recordError.recordName)' "
         + "(\(recordError.serverErrorCode.rawValue))"
       if let reason = recordError.reason {
+        message += "\nReason: \(reason)"
+      }
+      return message
+    case .subscriptionOperationFailed(let subscriptionError):
+      var message =
+        "CloudKit subscription operation failed for '\(subscriptionError.subscriptionID)' "
+        + "(\(subscriptionError.serverErrorCode.rawValue))"
+      if let reason = subscriptionError.reason {
         message += "\nReason: \(reason)"
       }
       return message

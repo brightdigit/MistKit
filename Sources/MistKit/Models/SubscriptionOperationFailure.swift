@@ -1,5 +1,5 @@
 //
-//  RecordOperationFailure.swift
+//  SubscriptionOperationFailure.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,31 +29,27 @@
 
 internal import MistKitOpenAPI
 
-/// A per-record failure returned inline in a CloudKit `modifyRecords` or
-/// `lookupRecords` response.
+/// A per-subscription failure returned inline in a CloudKit
+/// `modifySubscriptions` response.
 ///
 /// CloudKit reports per-operation failures as error entries within the
-/// otherwise-successful (HTTP 200) `records` array, carrying the failed
-/// record's name, a server error code, and optional retry/redirect hints.
+/// otherwise-successful (HTTP 200) `subscriptions` array, carrying the failed
+/// subscription's identifier, a server error code, and optional retry/redirect
+/// hints. This is the subscriptions analogue of ``RecordOperationFailure`` —
+/// without it, a failed create (e.g. CloudKit's `INTERNAL_ERROR` /
+/// "could not find subscription we just created") would be silently dropped.
 ///
 /// This is a data payload describing a failure, **not** a Swift `Error` type;
-/// it is surfaced via ``RecordResult/failure(_:)`` from `modifyRecords` /
-/// `lookupRecords`, and wrapped in ``CloudKitError/recordOperationFailed(_:)``
-/// (which *is* an `Error`) when a single-record convenience
-/// (`createRecord`/`updateRecord`/`deleteRecord`) hits one.
-///
-/// `RecordOperationFailure` is a MistKit-owned value, so callers can inspect a
-/// failure with only `import MistKit` — no need to import the generated
-/// `MistKitOpenAPI` module.
-public struct RecordOperationFailure: Codable, Hashable, Sendable {
-  /// The CloudKit server error code for a per-record failure.
-  ///
-  /// Now the shared ``CloudKitServerErrorCode``; kept as a nested alias so
-  /// existing `RecordOperationFailure.ServerErrorCode` references compile.
+/// it is surfaced via ``SubscriptionResult/failure(_:)`` from
+/// `modifySubscriptions`, and wrapped in
+/// ``CloudKitError/subscriptionOperationFailed(_:)`` (which *is* an `Error`)
+/// when the single-subscription convenience (`createSubscription`) hits one.
+public struct SubscriptionOperationFailure: Codable, Hashable, Sendable {
+  /// The CloudKit server error code for a per-subscription failure.
   public typealias ServerErrorCode = CloudKitServerErrorCode
 
-  /// The name of the record the operation failed on.
-  public let recordName: String
+  /// The identifier of the subscription the operation failed on.
+  public let subscriptionID: String
   /// The CloudKit server error code for the failure.
   public let serverErrorCode: ServerErrorCode
   /// A human-readable reason for the failure, if provided.
@@ -63,19 +59,19 @@ public struct RecordOperationFailure: Codable, Hashable, Sendable {
   /// A unique identifier for this error.
   public let uuid: String?
   /// Redirect URL for sign-in; present when `serverErrorCode` is
-  /// ``ServerErrorCode/authenticationRequired``.
+  /// ``CloudKitServerErrorCode/authenticationRequired``.
   public let redirectURL: String?
 
-  /// Creates a per-record failure value.
+  /// Creates a per-subscription failure value.
   public init(
-    recordName: String,
+    subscriptionID: String,
     serverErrorCode: ServerErrorCode,
     reason: String? = nil,
     retryAfter: Int? = nil,
     uuid: String? = nil,
     redirectURL: String? = nil
   ) {
-    self.recordName = recordName
+    self.subscriptionID = subscriptionID
     self.serverErrorCode = serverErrorCode
     self.reason = reason
     self.retryAfter = retryAfter
@@ -83,7 +79,7 @@ public struct RecordOperationFailure: Codable, Hashable, Sendable {
     self.redirectURL = redirectURL
   }
 
-  internal init(from schema: Components.Schemas.RecordOperationFailure) {
+  internal init(from schema: Components.Schemas.SubscriptionOperationFailure) {
     let serverErrorCode = ServerErrorCode(rawValue: schema.serverErrorCode.rawValue)
     // The generated `serverErrorCodePayload` is a closed enum mirroring the
     // schema, so a `.unknown` here means our `knownPairs` table drifted from
@@ -91,12 +87,12 @@ public struct RecordOperationFailure: Codable, Hashable, Sendable {
     // preserving the raw code for forward-compatibility in release.
     if case .unknown(let raw) = serverErrorCode {
       ConversionFailureReporter.assertionHandler(
-        "Unmapped CloudKit serverErrorCode \"\(raw)\" — update ServerErrorCode.knownPairs",
+        "Unmapped CloudKit serverErrorCode \"\(raw)\" — update CloudKitServerErrorCode.knownPairs",
         #fileID,
         #line
       )
     }
-    self.recordName = schema.recordName
+    self.subscriptionID = schema.subscriptionID
     self.serverErrorCode = serverErrorCode
     self.reason = schema.reason
     self.retryAfter = schema.retryAfter
