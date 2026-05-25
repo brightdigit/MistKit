@@ -1,5 +1,5 @@
 //
-//  SubscriptionFireEvent.swift
+//  OperationFailureTarget.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,41 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistKitOpenAPI
-
-/// A record-change event that causes a subscription to fire a push.
+/// Identifies which kind of CloudKit batch a per-item failure came from.
 ///
-/// A subscription's `firesOn` set selects which of these trigger a notification.
-public enum SubscriptionFireEvent: String, Codable, Sendable, CaseIterable {
-  /// Fire when a matching record is created.
-  case create
-  /// Fire when a matching record is updated.
-  case update
-  /// Fire when a matching record is deleted.
-  case delete
-}
-
-// MARK: - Internal Conversion
-extension SubscriptionFireEvent {
-  internal var schemaValue: Components.Schemas.Subscription.firesOnPayloadPayload {
-    switch self {
-    case .create:
-      return .create
-    case .update:
-      return .update
-    case .delete:
-      return .delete
-    }
-  }
-
-  internal init(from payload: Components.Schemas.Subscription.firesOnPayloadPayload) {
-    switch payload {
-    case .create:
-      self = .create
-    case .update:
-      self = .update
-    case .delete:
-      self = .delete
-    }
-  }
+/// Each conforming target enum (``RecordTarget``, ``SubscriptionTarget``) names
+/// the family of operations the failure belongs to and knows how the failure
+/// should be lifted into the throwing API as a ``CloudKitError`` — letting
+/// ``OperationResult/get()`` and the single-item convenience wrappers
+/// (`createRecord`, `createSubscription`, …) throw the right case without the
+/// generic having to switch on the target itself.
+public protocol OperationFailureTarget: Sendable {
+  /// Lift a per-item failure into the corresponding ``CloudKitError`` case so
+  /// the throwing convenience APIs can rethrow without inspecting the target.
+  static func wrap(_ failure: OperationFailure<Self>) -> CloudKitError
 }

@@ -82,8 +82,7 @@ internal struct SubscriptionConversionTests {
   internal func zoneRoundTrip() throws {
     let info = SubscriptionInfo.zone(
       subscriptionID: "sub-zone",
-      zoneID: ZoneID(zoneName: "Photos", ownerName: "_owner"),
-      firesOn: [.delete]
+      zoneID: ZoneID(zoneName: "Photos", ownerName: "_owner")
     )
 
     let schema = info.schema
@@ -91,12 +90,15 @@ internal struct SubscriptionConversionTests {
     #expect(schema.zoneID?.zoneName == "Photos")
     #expect(schema.zoneID?.ownerName == "_owner")
     #expect(schema.query == nil)
+    // Zone subscriptions don't carry firesOn — only `.query` does.
+    #expect(schema.firesOn == nil)
 
     let recovered = try SubscriptionInfo(from: schema)
-    #expect(recovered.subscriptionType == .zone)
+    let recoveredType: SubscriptionType = recovered.subscriptionType
+    #expect(recoveredType == .zone)
     #expect(recovered.zoneID == ZoneID(zoneName: "Photos", ownerName: "_owner"))
     #expect(recovered.query == nil)
-    #expect(recovered.firesOn == [.delete])
+    #expect(recovered.firesOn.isEmpty)
   }
 
   @Test("missing subscriptionID is a conversion failure")
@@ -143,12 +145,31 @@ internal struct SubscriptionConversionTests {
     #expect(delete.subscription?.subscriptionID == "gone")
   }
 
-  @Test("firesOn defaults to empty when the payload omits it")
-  internal func firesOnDefaultsEmpty() throws {
+  @Test("query subscription without firesOn is a conversion failure")
+  internal func queryMissingFiresOnThrows() throws {
+    // A `query` subscription must declare at least one fire event — an
+    // empty `firesOn` would never trigger, so we surface it as a
+    // conversion failure rather than silently decoding into a useless
+    // subscription.
     let payload = Components.Schemas.Subscription(
       subscriptionID: "n", subscriptionType: .query
     )
+    expectThrow(ConversionError.subscriptionQueryMissingFiresOn) {
+      _ = try SubscriptionInfo(from: payload)
+    }
+  }
+
+  @Test("zone subscription without firesOn decodes fine")
+  internal func zoneFiresOnNotRequired() throws {
+    // Zone (and database) subscriptions don't carry firesOn — only
+    // `.query` does. A zone payload without firesOn must still decode.
+    let payload = Components.Schemas.Subscription(
+      subscriptionID: "n",
+      subscriptionType: .zone,
+      zoneID: Components.Schemas.ZoneID(zoneName: "MyZone")
+    )
     let recovered = try SubscriptionInfo(from: payload)
     #expect(recovered.firesOn.isEmpty)
+    #expect(recovered.zoneID?.zoneName == "MyZone")
   }
 }

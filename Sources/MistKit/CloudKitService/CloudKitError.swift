@@ -67,6 +67,14 @@ public enum CloudKitError: LocalizedError, Sendable {
   /// a `SubscriptionOperationFailure`, surfaced by the single-subscription
   /// convenience (`createSubscription`).
   case subscriptionOperationFailed(SubscriptionOperationFailure)
+  /// `createSubscription` failed with `INTERNAL_ERROR` and the exact reason
+  /// string CloudKit returns when a *semantically-matching* subscription
+  /// (same query + `firesOn`, regardless of `subscriptionID`) already
+  /// exists. **This is MistKit's inference, not a guaranteed cause** — the
+  /// underlying wire error is `INTERNAL_ERROR` with no formal "already
+  /// exists" code, and the original ``SubscriptionOperationFailure`` is
+  /// preserved so callers can inspect the raw signal.
+  case subscriptionLikelyDuplicate(SubscriptionOperationFailure)
   case underlyingError(any Error)
   case decodingError(DecodingError)
   case networkError(URLError)
@@ -95,7 +103,8 @@ public enum CloudKitError: LocalizedError, Sendable {
     case .badRequest, .atomicFailure:
       return 400
     case .invalidResponse, .conversionFailed, .recordOperationFailed,
-      .subscriptionOperationFailed, .underlyingError, .decodingError, .networkError,
+      .subscriptionOperationFailed, .subscriptionLikelyDuplicate,
+      .underlyingError, .decodingError, .networkError,
       .unsupportedOperationType, .paginationLimitExceeded,
       .zonePaginationLimitExceeded, .missingCredentials, .invalidPrivateKey:
       return nil
@@ -124,20 +133,36 @@ public enum CloudKitError: LocalizedError, Sendable {
       return "Failed to convert CloudKit response into a MistKit type: "
         + (conversionError.errorDescription ?? "\(conversionError)")
     case .recordOperationFailed(let recordError):
-      var message =
-        "CloudKit record operation failed for '\(recordError.recordName)' "
-        + "(\(recordError.serverErrorCode.rawValue))"
+      let identifier = recordError.identifier
+      let code = recordError.serverErrorCode.rawValue
+      var message = "CloudKit record operation failed for '\(identifier)' (\(code))"
       if let reason = recordError.reason {
         message += "\nReason: \(reason)"
       }
       return message
     case .subscriptionOperationFailed(let subscriptionError):
+      let identifier = subscriptionError.identifier
+      let code = subscriptionError.serverErrorCode.rawValue
       var message =
-        "CloudKit subscription operation failed for '\(subscriptionError.subscriptionID)' "
-        + "(\(subscriptionError.serverErrorCode.rawValue))"
+        "CloudKit subscription operation failed for '\(identifier)' (\(code))"
       if let reason = subscriptionError.reason {
         message += "\nReason: \(reason)"
       }
+      return message
+    case .subscriptionLikelyDuplicate(let subscriptionError):
+      let identifier = subscriptionError.identifier
+      let reasonFragment: String
+      if let reason = subscriptionError.reason {
+        reasonFragment = "\"\(reason)\")."
+      } else {
+        reasonFragment = "no reason)."
+      }
+      var message = "CloudKit subscription create returned INTERNAL_ERROR for '\(identifier)'."
+      message += "\nLikely cause: another subscription matching this query and firesOn"
+      message += " already exists (CloudKit reports semantically-duplicate"
+      message += " subscriptions as INTERNAL_ERROR / "
+      message += reasonFragment
+      message += "\nUse listSubscriptions to find and reuse or delete the existing one."
       return message
     case .underlyingError(let error):
       return "CloudKit operation failed with underlying error: \(String(reflecting: error))"

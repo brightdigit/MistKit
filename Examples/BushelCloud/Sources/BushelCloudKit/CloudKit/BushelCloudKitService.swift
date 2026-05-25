@@ -253,9 +253,9 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
         case .failure(let error):
           totalFailed += 1
           batchFailed += 1
-          failedRecordNames.append(error.recordName)
+          failedRecordNames.append(error.identifier)
           Self.logger.debug(
-            "Error: recordName=\(error.recordName), code=\(error.serverErrorCode.rawValue)"
+            "Error: recordName=\(error.identifier), code=\(error.serverErrorCode.rawValue)"
           )
         case .success(let record):
           batchSucceeded += 1

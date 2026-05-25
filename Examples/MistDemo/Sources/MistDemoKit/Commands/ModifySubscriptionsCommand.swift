@@ -82,7 +82,15 @@ public struct ModifySubscriptionsCommand: MistDemoCommand, OutputFormatting {
       guard let recordType = config.recordType, !recordType.isEmpty else {
         throw SubscriptionCommandError.missingRecordType
       }
-      let firesOn = config.firesOn.compactMap(SubscriptionFireEvent.init(rawValue:))
+      var firesOn: SubscriptionFireEvents = []
+      for raw in config.firesOn {
+        switch raw {
+        case "create": firesOn.insert(.create)
+        case "update": firesOn.insert(.update)
+        case "delete": firesOn.insert(.delete)
+        default: break
+        }
+      }
       let created = try await service.createSubscription(
         .query(
           subscriptionID: subscriptionID,

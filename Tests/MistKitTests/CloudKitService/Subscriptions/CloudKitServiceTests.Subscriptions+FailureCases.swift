@@ -55,6 +55,23 @@ extension CloudKitServiceTests.Subscriptions {
       }
       """
 
+    /// A non-duplicate `INTERNAL_ERROR` — same code as ``internalErrorJSON``
+    /// but a different `reason`, so `isLikelyDuplicate` returns `false` and
+    /// the convenience wrapper falls through to the generic
+    /// `subscriptionOperationFailed` path. Lets us cover that path
+    /// separately from the new `subscriptionLikelyDuplicate` path.
+    private static let nonDuplicateInternalErrorJSON = """
+      {
+        "subscriptions": [
+          {
+            "subscriptionID": "1CB64DC1-2423-486C-8C9F-4E064530FBEF",
+            "reason": "transient backend failure",
+            "serverErrorCode": "INTERNAL_ERROR"
+          }
+        ]
+      }
+      """
+
     private static func noteCreate(_ id: String) -> SubscriptionOperation {
       .create(.query(subscriptionID: id, recordType: "Note", firesOn: [.create]))
     }
@@ -79,19 +96,19 @@ extension CloudKitServiceTests.Subscriptions {
         Issue.record("expected a .failure result, got \(String(describing: results.first))")
         return
       }
-      #expect(failure.subscriptionID == Self.subID)
+      #expect(failure.identifier == Self.subID)
       #expect(failure.serverErrorCode == .internalError)
       #expect(failure.reason == "could not find subscription we just created")
     }
 
-    @Test("createSubscription() throws subscriptionOperationFailed on a failure entry")
+    @Test("createSubscription() throws subscriptionOperationFailed on a non-duplicate failure")
     internal func createThrowsOnFailure() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
       let service = try CloudKitServiceTests.Subscriptions.makeService(
-        returningJSON: Self.internalErrorJSON
+        returningJSON: Self.nonDuplicateInternalErrorJSON
       )
 
       do {
@@ -106,7 +123,8 @@ extension CloudKitServiceTests.Subscriptions {
           return
         }
         #expect(failure.serverErrorCode == .internalError)
-        #expect(failure.subscriptionID == Self.subID)
+        #expect(failure.identifier == Self.subID)
+        #expect(failure.isLikelyDuplicate == false)
       }
     }
 
@@ -141,7 +159,7 @@ extension CloudKitServiceTests.Subscriptions {
         Issue.record("expected results[0] to be .failure")
         return
       }
-      #expect(failure.subscriptionID == "bad")
+      #expect(failure.identifier == "bad")
       guard case .success(let subscription) = results[1] else {
         Issue.record("expected results[1] to be .success")
         return

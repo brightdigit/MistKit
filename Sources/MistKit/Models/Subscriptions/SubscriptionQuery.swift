@@ -27,54 +27,15 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistKitOpenAPI
-
-/// The query a `query`-type subscription watches.
-///
-/// This reuses the exact same query model as a record query — a `recordType`
-/// plus the same ``QueryFilter`` / ``QuerySort`` building blocks — so a
-/// subscription's predicate is expressed identically to a one-off query passed
-/// to `CloudKitService.queryRecords`.
-public struct SubscriptionQuery: Codable, Sendable {
-  // MARK: - Internal
-
-  internal let schema: Components.Schemas.Query
-
-  // MARK: - Public
-
-  /// The record type this query watches, as returned by CloudKit.
-  public var recordType: String? {
-    self.schema.recordType
-  }
-
-  // MARK: - Lifecycle
-
-  internal init(_ schema: Components.Schemas.Query) {
-    self.schema = schema
-  }
-
-  /// Build a subscription query.
-  /// - Parameters:
-  ///   - recordType: The record type the subscription watches.
-  ///   - filters: Optional predicate filters (reusing ``QueryFilter``).
-  ///   - sortBy: Optional sort descriptors (reusing ``QuerySort``).
-  public init(
-    recordType: String,
-    filters: [QueryFilter] = [],
-    sortBy: [QuerySort] = []
-  ) {
-    self.schema = Components.Schemas.Query(
-      recordType: recordType,
-      filterBy: filters.isEmpty ? nil : filters.map(\.filter),
-      sortBy: sortBy.isEmpty ? nil : sortBy.map(\.sort)
-    )
-  }
-
-  public init(from decoder: any Decoder) throws {
-    self.schema = try Components.Schemas.Query(from: decoder)
-  }
-
-  public func encode(to encoder: any Encoder) throws {
-    try self.schema.encode(to: encoder)
-  }
-}
+/// Deprecated alias for ``Query``. MistKit unified its query
+/// representation so the same value powers
+/// ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:database:)``
+/// and ``SubscriptionInfo/Kind/query(_:)``.
+@available(
+  *,
+  deprecated,
+  renamed: "Query",
+  message:
+    "MistKit unified its query type — use `Query` for both queryRecords and SubscriptionInfo.Kind.query."
+)
+public typealias SubscriptionQuery = Query

@@ -27,80 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistKitOpenAPI
-
 /// A per-record failure returned inline in a CloudKit `modifyRecords` or
 /// `lookupRecords` response.
 ///
-/// CloudKit reports per-operation failures as error entries within the
-/// otherwise-successful (HTTP 200) `records` array, carrying the failed
-/// record's name, a server error code, and optional retry/redirect hints.
-///
-/// This is a data payload describing a failure, **not** a Swift `Error` type;
-/// it is surfaced via ``RecordResult/failure(_:)`` from `modifyRecords` /
+/// Surfaced via ``RecordResult/failure(_:)`` from `modifyRecords` /
 /// `lookupRecords`, and wrapped in ``CloudKitError/recordOperationFailed(_:)``
-/// (which *is* an `Error`) when a single-record convenience
-/// (`createRecord`/`updateRecord`/`deleteRecord`) hits one.
-///
-/// `RecordOperationFailure` is a MistKit-owned value, so callers can inspect a
-/// failure with only `import MistKit` — no need to import the generated
-/// `MistKitOpenAPI` module.
-public struct RecordOperationFailure: Codable, Hashable, Sendable {
-  /// The CloudKit server error code for a per-record failure.
-  ///
-  /// Now the shared ``CloudKitServerErrorCode``; kept as a nested alias so
-  /// existing `RecordOperationFailure.ServerErrorCode` references compile.
-  public typealias ServerErrorCode = CloudKitServerErrorCode
-
-  /// The name of the record the operation failed on.
-  public let recordName: String
-  /// The CloudKit server error code for the failure.
-  public let serverErrorCode: ServerErrorCode
-  /// A human-readable reason for the failure, if provided.
-  public let reason: String?
-  /// Suggested seconds to wait before retrying. Absent if not retryable.
-  public let retryAfter: Int?
-  /// A unique identifier for this error.
-  public let uuid: String?
-  /// Redirect URL for sign-in; present when `serverErrorCode` is
-  /// ``ServerErrorCode/authenticationRequired``.
-  public let redirectURL: String?
-
-  /// Creates a per-record failure value.
-  public init(
-    recordName: String,
-    serverErrorCode: ServerErrorCode,
-    reason: String? = nil,
-    retryAfter: Int? = nil,
-    uuid: String? = nil,
-    redirectURL: String? = nil
-  ) {
-    self.recordName = recordName
-    self.serverErrorCode = serverErrorCode
-    self.reason = reason
-    self.retryAfter = retryAfter
-    self.uuid = uuid
-    self.redirectURL = redirectURL
-  }
-
-  internal init(from schema: Components.Schemas.RecordOperationFailure) {
-    let serverErrorCode = ServerErrorCode(rawValue: schema.serverErrorCode.rawValue)
-    // The generated `serverErrorCodePayload` is a closed enum mirroring the
-    // schema, so a `.unknown` here means our `knownPairs` table drifted from
-    // the regenerated schema — assert loudly (test-overridable) while still
-    // preserving the raw code for forward-compatibility in release.
-    if case .unknown(let raw) = serverErrorCode {
-      ConversionFailureReporter.assertionHandler(
-        "Unmapped CloudKit serverErrorCode \"\(raw)\" — update ServerErrorCode.knownPairs",
-        #fileID,
-        #line
-      )
-    }
-    self.recordName = schema.recordName
-    self.serverErrorCode = serverErrorCode
-    self.reason = schema.reason
-    self.retryAfter = schema.retryAfter
-    self.uuid = schema.uuid
-    self.redirectURL = schema.redirectURL
-  }
-}
+/// when a single-record convenience method (`createRecord`/`updateRecord`/
+/// `deleteRecord`) hits one.
+public typealias RecordOperationFailure = OperationFailure<RecordTarget>

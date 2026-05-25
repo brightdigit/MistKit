@@ -57,7 +57,9 @@ extension CloudKitServiceTests.Subscriptions {
 
       let zone = try #require(subscriptions.first { $0.subscriptionType == .zone })
       #expect(zone.zoneID == ZoneID(zoneName: "Photos", ownerName: "_defaultOwner"))
-      #expect(zone.firesOn == [.create, .update, .delete])
+      // Zone subscriptions don't carry firesOn — only query subscriptions
+      // do. The wire field is ignored for `.zone` / `.database` kinds.
+      #expect(zone.firesOn.isEmpty)
     }
 
     @Test("lookupSubscriptions() returns the matching subscriptions")

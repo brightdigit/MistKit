@@ -97,13 +97,23 @@ extension WebRequests {
     /// Collapse the decoded create/delete inputs into MistKit operations.
     internal func operations() -> [SubscriptionOperation] {
       var operations: [SubscriptionOperation] = create.map { input in
-        let firesOn = (input.firesOn ?? []).compactMap(SubscriptionFireEvent.init(rawValue:))
+        var firesOn: SubscriptionFireEvents = []
+        for raw in input.firesOn ?? [] {
+          switch raw {
+          case "create": firesOn.insert(.create)
+          case "update": firesOn.insert(.update)
+          case "delete": firesOn.insert(.delete)
+          default: break
+          }
+        }
         if input.subscriptionType == "zone" {
+          // Zone subscriptions no longer carry firesOn — only query
+          // subscriptions do. Ignore the inbound `firesOn` for zone
+          // create requests.
           return .create(
             .zone(
               subscriptionID: input.subscriptionID ?? "",
-              zoneID: ZoneID(zoneName: input.zoneID?.zoneName ?? ""),
-              firesOn: firesOn
+              zoneID: ZoneID(zoneName: input.zoneID?.zoneName ?? "")
             )
           )
         }

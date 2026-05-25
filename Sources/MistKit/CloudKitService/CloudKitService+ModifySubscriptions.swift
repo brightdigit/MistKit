@@ -64,22 +64,7 @@ extension CloudKitService {
       let subscriptionsData: Components.Schemas.SubscriptionsModifyResponse =
         try await responseProcessor.processModifySubscriptionsResponse(response)
       return try (subscriptionsData.subscriptions ?? []).compactMap {
-        item -> SubscriptionResult? in
-        switch item {
-        case .SubscriptionOperationFailure(let failure):
-          // A per-subscription error CloudKit returned inline in the 200 body
-          // (e.g. INTERNAL_ERROR on create). Surface it rather than dropping it.
-          return .failure(SubscriptionOperationFailure(from: failure))
-        case .Subscription(let subscription):
-          // CloudKit echoes a deleted subscription as a bare `{ subscriptionID }`
-          // with no `subscriptionType`/`query`/`firesOn`. That's a deletion
-          // acknowledgement, not a result — skip it rather than treating the
-          // missing type as a conversion failure.
-          guard subscription.subscriptionType != nil else {
-            return nil
-          }
-          return .success(try SubscriptionInfo(from: subscription))
-        }
+        try SubscriptionResult(from: $0)
       }
     } catch {
       throw mapToCloudKitError(error, context: "modifySubscriptions")
@@ -96,10 +81,12 @@ extension CloudKitService {
   ///   - subscription: The subscription to create.
   ///   - database: The CloudKit database scope to modify.
   /// - Returns: The created subscription as returned by CloudKit.
-  /// - Throws: ``CloudKitError/subscriptionOperationFailed(_:)`` if CloudKit
-  ///   rejected the create (e.g. `INTERNAL_ERROR`), ``CloudKitError`` if the
-  ///   request fails, or ``CloudKitError/invalidResponse`` if the response is
-  ///   empty.
+  /// - Throws: ``CloudKitError/subscriptionLikelyDuplicate(_:)`` when CloudKit
+  ///   returns `INTERNAL_ERROR` with its duplicate-subscription marker
+  ///   reason (a *hint*, not a confirmed cause — see the case docs),
+  ///   ``CloudKitError/subscriptionOperationFailed(_:)`` for any other
+  ///   per-subscription failure, ``CloudKitError`` if the request fails,
+  ///   or ``CloudKitError/invalidResponse`` if the response is empty.
   @discardableResult
   public func createSubscription(
     _ subscription: SubscriptionInfo,
@@ -108,6 +95,9 @@ extension CloudKitService {
     let results = try await modifySubscriptions([.create(subscription)], database: database)
     guard let created = results.first else {
       throw CloudKitError.invalidResponse
+    }
+    if case .failure(let failure) = created, failure.isLikelyDuplicate {
+      throw CloudKitError.subscriptionLikelyDuplicate(failure)
     }
     return try created.get()
   }

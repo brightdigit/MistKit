@@ -105,10 +105,10 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
 
       if !failures.isEmpty {
         for failure in failures {
-          let line =
-            "Warning: operation on '\(failure.recordName)' failed"
-            + " (\(failure.serverErrorCode.rawValue))"
-            + (failure.reason.map { ": \($0)" } ?? "") + "\n"
+          let identifier = failure.identifier
+          let code = failure.serverErrorCode.rawValue
+          let reasonFragment = failure.reason.map { ": \($0)" } ?? ""
+          let line = "Warning: operation on '\(identifier)' failed (\(code))\(reasonFragment)\n"
           FileHandle.standardError.write(Data(line.utf8))
         }
       }

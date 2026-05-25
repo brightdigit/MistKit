@@ -29,40 +29,8 @@
 
 /// The outcome of a single operation in a `modifySubscriptions` batch.
 ///
-/// CloudKit returns per-operation results inline in the response
-/// `subscriptions` array: a successful create/update yields a subscription,
-/// while a failed one yields an error describing what went wrong.
-/// `SubscriptionResult` models that union — the subscriptions analogue of
-/// ``RecordResult`` — so no per-subscription failure is silently dropped.
-///
-/// ```swift
-/// let results = try await service.modifySubscriptions(operations, database: .private)
-/// for result in results {
-///   switch result {
-///   case .success(let subscription): print("saved \(subscription.subscriptionID)")
-///   case .failure(let error):        print("failed: \(error.serverErrorCode.rawValue)")
-///   }
-/// }
-/// ```
-///
 /// - Note: A *deletion* acknowledgement (CloudKit echoes a bare
-///   `{ subscriptionID }` with no type) is neither a success subscription nor a
-///   failure, so it is omitted from the results rather than represented here.
-public enum SubscriptionResult: Sendable {
-  /// The operation succeeded and CloudKit returned the resulting subscription.
-  case success(SubscriptionInfo)
-  /// The operation failed; the associated ``SubscriptionOperationFailure``
-  /// describes the failure.
-  case failure(SubscriptionOperationFailure)
-
-  /// Returns the subscription for a successful result, or throws
-  /// ``CloudKitError/subscriptionOperationFailed(_:)`` for a failure.
-  public func get() throws(CloudKitError) -> SubscriptionInfo {
-    switch self {
-    case .success(let subscription):
-      return subscription
-    case .failure(let error):
-      throw CloudKitError.subscriptionOperationFailed(error)
-    }
-  }
-}
+///   `{ subscriptionID }` with no type) is neither a success subscription nor
+///   a failure, so it is omitted from `modifySubscriptions` results rather
+///   than represented here.
+public typealias SubscriptionResult = OperationResult<SubscriptionInfo, SubscriptionTarget>

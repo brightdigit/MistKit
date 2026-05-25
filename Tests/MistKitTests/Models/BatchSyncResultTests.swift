@@ -58,7 +58,7 @@ internal struct BatchSyncResultTests {
     name: String,
     code: RecordOperationFailure.ServerErrorCode = .badRequest
   ) -> RecordOperationFailure {
-    RecordOperationFailure(recordName: name, serverErrorCode: code)
+    RecordOperationFailure(identifier: name, serverErrorCode: code)
   }
 
   /// A failed per-record result.

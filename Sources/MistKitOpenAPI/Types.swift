@@ -1576,8 +1576,13 @@ public enum Components {
                 case subscription
             }
         }
+        /// A CloudKit subscription — a persistent server-side trigger that produces push notifications when matching changes occur. Mirrors `CloudKit.Subscription` from the CloudKit JS reference.
+        ///
+        ///
         /// - Remark: Generated from `#/components/schemas/Subscription`.
         public struct Subscription: Codable, Hashable, Sendable {
+            /// Caller-supplied unique identifier for the subscription.
+            ///
             /// - Remark: Generated from `#/components/schemas/Subscription/subscriptionID`.
             public var subscriptionID: Swift.String?
             /// - Remark: Generated from `#/components/schemas/Subscription/subscriptionType`.
@@ -1591,43 +1596,171 @@ public enum Components {
             public var query: Components.Schemas.Query?
             /// - Remark: Generated from `#/components/schemas/Subscription/zoneID`.
             public var zoneID: Components.Schemas.ZoneID?
+            /// Zone subscriptions only. If `true`, the subscription watches *every zone* in the database (the wire representation of a native `CKDatabaseSubscription`); if `false`/absent, only the zone identified by `zoneID` is watched. Only valid against private and shared databases. Default `false`.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/zoneWide`.
+            public var zoneWide: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/Subscription/firesOnPayload`.
             @frozen public enum firesOnPayloadPayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case create = "create"
                 case update = "update"
                 case delete = "delete"
             }
+            /// The record-change events that trigger a push (e.g. `[create, update]`). CloudKit treats the exact set as the subscription's uniqueness key — two subscriptions on the same `(recordType, firesOn)` tuple collide regardless of `subscriptionID`.
+            ///
+            ///
             /// - Remark: Generated from `#/components/schemas/Subscription/firesOn`.
             public typealias firesOnPayload = [Components.Schemas.Subscription.firesOnPayloadPayload]
+            /// The record-change events that trigger a push (e.g. `[create, update]`). CloudKit treats the exact set as the subscription's uniqueness key — two subscriptions on the same `(recordType, firesOn)` tuple collide regardless of `subscriptionID`.
+            ///
+            ///
             /// - Remark: Generated from `#/components/schemas/Subscription/firesOn`.
             public var firesOn: Components.Schemas.Subscription.firesOnPayload?
+            /// If `true`, the subscription is destroyed after producing its first notification. Default `false`.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Subscription/firesOnce`.
+            public var firesOnce: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/Subscription/notificationInfo`.
+            public var notificationInfo: Components.Schemas.NotificationInfo?
             /// Creates a new `Subscription`.
             ///
             /// - Parameters:
-            ///   - subscriptionID:
+            ///   - subscriptionID: Caller-supplied unique identifier for the subscription.
             ///   - subscriptionType:
             ///   - query:
             ///   - zoneID:
-            ///   - firesOn:
+            ///   - zoneWide: Zone subscriptions only. If `true`, the subscription watches *every zone* in the database (the wire representation of a native `CKDatabaseSubscription`); if `false`/absent, only the zone identified by `zoneID` is watched. Only valid against private and shared databases. Default `false`.
+            ///   - firesOn: The record-change events that trigger a push (e.g. `[create, update]`). CloudKit treats the exact set as the subscription's uniqueness key — two subscriptions on the same `(recordType, firesOn)` tuple collide regardless of `subscriptionID`.
+            ///   - firesOnce: If `true`, the subscription is destroyed after producing its first notification. Default `false`.
+            ///   - notificationInfo:
             public init(
                 subscriptionID: Swift.String? = nil,
                 subscriptionType: Components.Schemas.Subscription.subscriptionTypePayload? = nil,
                 query: Components.Schemas.Query? = nil,
                 zoneID: Components.Schemas.ZoneID? = nil,
-                firesOn: Components.Schemas.Subscription.firesOnPayload? = nil
+                zoneWide: Swift.Bool? = nil,
+                firesOn: Components.Schemas.Subscription.firesOnPayload? = nil,
+                firesOnce: Swift.Bool? = nil,
+                notificationInfo: Components.Schemas.NotificationInfo? = nil
             ) {
                 self.subscriptionID = subscriptionID
                 self.subscriptionType = subscriptionType
                 self.query = query
                 self.zoneID = zoneID
+                self.zoneWide = zoneWide
                 self.firesOn = firesOn
+                self.firesOnce = firesOnce
+                self.notificationInfo = notificationInfo
             }
             public enum CodingKeys: String, CodingKey {
                 case subscriptionID
                 case subscriptionType
                 case query
                 case zoneID
+                case zoneWide
                 case firesOn
+                case firesOnce
+                case notificationInfo
+            }
+        }
+        /// How CloudKit shapes the push notification produced by a subscription. Mirrors `CloudKit.NotificationInfo` from the CloudKit JS reference.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/NotificationInfo`.
+        public struct NotificationInfo: Codable, Hashable, Sendable {
+            /// The text of the alert message.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NotificationInfo/alertBody`.
+            public var alertBody: Swift.String?
+            /// A key to a localized alert message.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NotificationInfo/alertLocalizationKey`.
+            public var alertLocalizationKey: Swift.String?
+            /// Strings that appear as variables if `alertLocalizationKey` is a format specifier.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/NotificationInfo/alertLocalizationArgs`.
+            public var alertLocalizationArgs: [Swift.String]?
+            /// A key to the localized title of the alert's action button.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NotificationInfo/alertActionLocalizationKey`.
+            public var alertActionLocalizationKey: Swift.String?
+            /// The filename of the image to use as the launch image.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NotificationInfo/alertLaunchImage`.
+            public var alertLaunchImage: Swift.String?
+            /// The filename of the sound to play when the notification arrives.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NotificationInfo/soundName`.
+            public var soundName: Swift.String?
+            /// Whether the app icon's badge should be incremented. Default `false`.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/NotificationInfo/shouldBadge`.
+            public var shouldBadge: Swift.Bool?
+            /// Whether the notification should mark new content as available (silent background fetch). Default `false`.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/NotificationInfo/shouldSendContentAvailable`.
+            public var shouldSendContentAvailable: Swift.Bool?
+            /// Names of record fields whose values should be included in the notification payload.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/NotificationInfo/additionalFields`.
+            public var additionalFields: [Swift.String]?
+            /// The notification category (UN actionable category identifier).
+            ///
+            /// - Remark: Generated from `#/components/schemas/NotificationInfo/category`.
+            public var category: Swift.String?
+            /// Creates a new `NotificationInfo`.
+            ///
+            /// - Parameters:
+            ///   - alertBody: The text of the alert message.
+            ///   - alertLocalizationKey: A key to a localized alert message.
+            ///   - alertLocalizationArgs: Strings that appear as variables if `alertLocalizationKey` is a format specifier.
+            ///   - alertActionLocalizationKey: A key to the localized title of the alert's action button.
+            ///   - alertLaunchImage: The filename of the image to use as the launch image.
+            ///   - soundName: The filename of the sound to play when the notification arrives.
+            ///   - shouldBadge: Whether the app icon's badge should be incremented. Default `false`.
+            ///   - shouldSendContentAvailable: Whether the notification should mark new content as available (silent background fetch). Default `false`.
+            ///   - additionalFields: Names of record fields whose values should be included in the notification payload.
+            ///   - category: The notification category (UN actionable category identifier).
+            public init(
+                alertBody: Swift.String? = nil,
+                alertLocalizationKey: Swift.String? = nil,
+                alertLocalizationArgs: [Swift.String]? = nil,
+                alertActionLocalizationKey: Swift.String? = nil,
+                alertLaunchImage: Swift.String? = nil,
+                soundName: Swift.String? = nil,
+                shouldBadge: Swift.Bool? = nil,
+                shouldSendContentAvailable: Swift.Bool? = nil,
+                additionalFields: [Swift.String]? = nil,
+                category: Swift.String? = nil
+            ) {
+                self.alertBody = alertBody
+                self.alertLocalizationKey = alertLocalizationKey
+                self.alertLocalizationArgs = alertLocalizationArgs
+                self.alertActionLocalizationKey = alertActionLocalizationKey
+                self.alertLaunchImage = alertLaunchImage
+                self.soundName = soundName
+                self.shouldBadge = shouldBadge
+                self.shouldSendContentAvailable = shouldSendContentAvailable
+                self.additionalFields = additionalFields
+                self.category = category
+            }
+            public enum CodingKeys: String, CodingKey {
+                case alertBody
+                case alertLocalizationKey
+                case alertLocalizationArgs
+                case alertActionLocalizationKey
+                case alertLaunchImage
+                case soundName
+                case shouldBadge
+                case shouldSendContentAvailable
+                case additionalFields
+                case category
             }
         }
         /// - Remark: Generated from `#/components/schemas/QueryResponse`.
@@ -1966,80 +2099,46 @@ public enum Components {
         ///
         /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure`.
         public struct SubscriptionOperationFailure: Codable, Hashable, Sendable {
-            /// The identifier of the subscription the operation failed on.
-            ///
-            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/subscriptionID`.
-            public var subscriptionID: Swift.String
-            /// The code for the error that occurred.
-            ///
-            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/serverErrorCode`.
-            @frozen public enum serverErrorCodePayload: String, Codable, Hashable, Sendable, CaseIterable {
-                case ACCESS_DENIED = "ACCESS_DENIED"
-                case ATOMIC_ERROR = "ATOMIC_ERROR"
-                case AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
-                case AUTHENTICATION_REQUIRED = "AUTHENTICATION_REQUIRED"
-                case BAD_REQUEST = "BAD_REQUEST"
-                case CONFLICT = "CONFLICT"
-                case EXISTS = "EXISTS"
-                case INTERNAL_ERROR = "INTERNAL_ERROR"
-                case NOT_FOUND = "NOT_FOUND"
-                case QUOTA_EXCEEDED = "QUOTA_EXCEEDED"
-                case THROTTLED = "THROTTLED"
-                case TRY_AGAIN_LATER = "TRY_AGAIN_LATER"
-                case VALIDATING_REFERENCE_ERROR = "VALIDATING_REFERENCE_ERROR"
-                case ZONE_NOT_FOUND = "ZONE_NOT_FOUND"
+            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/value1`.
+            public var value1: Components.Schemas.OperationFailureCommon
+            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/value2`.
+            public struct Value2Payload: Codable, Hashable, Sendable {
+                /// The identifier of the subscription the operation failed on.
+                ///
+                /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/value2/subscriptionID`.
+                public var subscriptionID: Swift.String
+                /// Creates a new `Value2Payload`.
+                ///
+                /// - Parameters:
+                ///   - subscriptionID: The identifier of the subscription the operation failed on.
+                public init(subscriptionID: Swift.String) {
+                    self.subscriptionID = subscriptionID
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case subscriptionID
+                }
             }
-            /// The code for the error that occurred.
-            ///
-            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/serverErrorCode`.
-            public var serverErrorCode: Components.Schemas.SubscriptionOperationFailure.serverErrorCodePayload
-            /// A string indicating the reason for the error.
-            ///
-            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/reason`.
-            public var reason: Swift.String?
-            /// Suggested seconds to wait before retrying. Absent if not retryable.
-            ///
-            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/retryAfter`.
-            public var retryAfter: Swift.Int?
-            /// A unique identifier for this error.
-            ///
-            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/uuid`.
-            public var uuid: Swift.String?
-            /// Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
-            ///
-            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/redirectURL`.
-            public var redirectURL: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/SubscriptionOperationFailure/value2`.
+            public var value2: Components.Schemas.SubscriptionOperationFailure.Value2Payload
             /// Creates a new `SubscriptionOperationFailure`.
             ///
             /// - Parameters:
-            ///   - subscriptionID: The identifier of the subscription the operation failed on.
-            ///   - serverErrorCode: The code for the error that occurred.
-            ///   - reason: A string indicating the reason for the error.
-            ///   - retryAfter: Suggested seconds to wait before retrying. Absent if not retryable.
-            ///   - uuid: A unique identifier for this error.
-            ///   - redirectURL: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+            ///   - value1:
+            ///   - value2:
             public init(
-                subscriptionID: Swift.String,
-                serverErrorCode: Components.Schemas.SubscriptionOperationFailure.serverErrorCodePayload,
-                reason: Swift.String? = nil,
-                retryAfter: Swift.Int? = nil,
-                uuid: Swift.String? = nil,
-                redirectURL: Swift.String? = nil
+                value1: Components.Schemas.OperationFailureCommon,
+                value2: Components.Schemas.SubscriptionOperationFailure.Value2Payload
             ) {
-                self.subscriptionID = subscriptionID
-                self.serverErrorCode = serverErrorCode
-                self.reason = reason
-                self.retryAfter = retryAfter
-                self.uuid = uuid
-                self.redirectURL = redirectURL
+                self.value1 = value1
+                self.value2 = value2
             }
-            public enum CodingKeys: String, CodingKey {
-                case subscriptionID
-                case serverErrorCode
-                case reason
-                case retryAfter
-                case uuid
-                case redirectURL
+            public init(from decoder: any Decoder) throws {
+                self.value1 = try .init(from: decoder)
+                self.value2 = try .init(from: decoder)
+            }
+            public func encode(to encoder: any Encoder) throws {
+                try self.value1.encode(to: encoder)
+                try self.value2.encode(to: encoder)
             }
         }
         /// - Remark: Generated from `#/components/schemas/SubscriptionsModifyResponse`.
@@ -2426,6 +2525,86 @@ public enum Components {
                 case webcourierURL
             }
         }
+        /// The CloudKit server error code returned in a per-item failure entry
+        /// (record or subscription) inline in a 200 modify/lookup response.
+        /// Shared by `RecordOperationFailure` and `SubscriptionOperationFailure`
+        /// via `OperationFailureCommon`. Distinct from `ErrorResponse`'s
+        /// `serverErrorCode`, which carries a broader set of codes for top-level
+        /// 4xx/5xx HTTP failures.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/OperationFailureServerErrorCode`.
+        @frozen public enum OperationFailureServerErrorCode: String, Codable, Hashable, Sendable, CaseIterable {
+            case ACCESS_DENIED = "ACCESS_DENIED"
+            case ATOMIC_ERROR = "ATOMIC_ERROR"
+            case AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
+            case AUTHENTICATION_REQUIRED = "AUTHENTICATION_REQUIRED"
+            case BAD_REQUEST = "BAD_REQUEST"
+            case CONFLICT = "CONFLICT"
+            case EXISTS = "EXISTS"
+            case INTERNAL_ERROR = "INTERNAL_ERROR"
+            case NOT_FOUND = "NOT_FOUND"
+            case QUOTA_EXCEEDED = "QUOTA_EXCEEDED"
+            case THROTTLED = "THROTTLED"
+            case TRY_AGAIN_LATER = "TRY_AGAIN_LATER"
+            case VALIDATING_REFERENCE_ERROR = "VALIDATING_REFERENCE_ERROR"
+            case ZONE_NOT_FOUND = "ZONE_NOT_FOUND"
+        }
+        /// Shared fields of a per-item failure entry returned inline in a 200
+        /// modify/lookup response. Composed into `RecordOperationFailure` and
+        /// `SubscriptionOperationFailure` via `allOf`; each concrete failure
+        /// type adds its own wire identifier (`recordName` / `subscriptionID`).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/OperationFailureCommon`.
+        public struct OperationFailureCommon: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/OperationFailureCommon/serverErrorCode`.
+            public var serverErrorCode: Components.Schemas.OperationFailureServerErrorCode
+            /// A string indicating the reason for the error.
+            ///
+            /// - Remark: Generated from `#/components/schemas/OperationFailureCommon/reason`.
+            public var reason: Swift.String?
+            /// Suggested seconds to wait before retrying. Absent if not retryable.
+            ///
+            /// - Remark: Generated from `#/components/schemas/OperationFailureCommon/retryAfter`.
+            public var retryAfter: Swift.Int?
+            /// A unique identifier for this error.
+            ///
+            /// - Remark: Generated from `#/components/schemas/OperationFailureCommon/uuid`.
+            public var uuid: Swift.String?
+            /// Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+            ///
+            /// - Remark: Generated from `#/components/schemas/OperationFailureCommon/redirectURL`.
+            public var redirectURL: Swift.String?
+            /// Creates a new `OperationFailureCommon`.
+            ///
+            /// - Parameters:
+            ///   - serverErrorCode:
+            ///   - reason: A string indicating the reason for the error.
+            ///   - retryAfter: Suggested seconds to wait before retrying. Absent if not retryable.
+            ///   - uuid: A unique identifier for this error.
+            ///   - redirectURL: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+            public init(
+                serverErrorCode: Components.Schemas.OperationFailureServerErrorCode,
+                reason: Swift.String? = nil,
+                retryAfter: Swift.Int? = nil,
+                uuid: Swift.String? = nil,
+                redirectURL: Swift.String? = nil
+            ) {
+                self.serverErrorCode = serverErrorCode
+                self.reason = reason
+                self.retryAfter = retryAfter
+                self.uuid = uuid
+                self.redirectURL = redirectURL
+            }
+            public enum CodingKeys: String, CodingKey {
+                case serverErrorCode
+                case reason
+                case retryAfter
+                case uuid
+                case redirectURL
+            }
+        }
         /// Per-record error returned inline in the `records` array of a 200
         /// modify/lookup response. Identifies the record that failed and why.
         /// Distinct from `ErrorResponse`, which is the body of a top-level 4xx/5xx
@@ -2434,80 +2613,46 @@ public enum Components {
         ///
         /// - Remark: Generated from `#/components/schemas/RecordOperationFailure`.
         public struct RecordOperationFailure: Codable, Hashable, Sendable {
-            /// The name of the record that the operation failed on.
-            ///
-            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/recordName`.
-            public var recordName: Swift.String
-            /// The code for the error that occurred.
-            ///
-            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/serverErrorCode`.
-            @frozen public enum serverErrorCodePayload: String, Codable, Hashable, Sendable, CaseIterable {
-                case ACCESS_DENIED = "ACCESS_DENIED"
-                case ATOMIC_ERROR = "ATOMIC_ERROR"
-                case AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
-                case AUTHENTICATION_REQUIRED = "AUTHENTICATION_REQUIRED"
-                case BAD_REQUEST = "BAD_REQUEST"
-                case CONFLICT = "CONFLICT"
-                case EXISTS = "EXISTS"
-                case INTERNAL_ERROR = "INTERNAL_ERROR"
-                case NOT_FOUND = "NOT_FOUND"
-                case QUOTA_EXCEEDED = "QUOTA_EXCEEDED"
-                case THROTTLED = "THROTTLED"
-                case TRY_AGAIN_LATER = "TRY_AGAIN_LATER"
-                case VALIDATING_REFERENCE_ERROR = "VALIDATING_REFERENCE_ERROR"
-                case ZONE_NOT_FOUND = "ZONE_NOT_FOUND"
+            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/value1`.
+            public var value1: Components.Schemas.OperationFailureCommon
+            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/value2`.
+            public struct Value2Payload: Codable, Hashable, Sendable {
+                /// The name of the record that the operation failed on.
+                ///
+                /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/value2/recordName`.
+                public var recordName: Swift.String
+                /// Creates a new `Value2Payload`.
+                ///
+                /// - Parameters:
+                ///   - recordName: The name of the record that the operation failed on.
+                public init(recordName: Swift.String) {
+                    self.recordName = recordName
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case recordName
+                }
             }
-            /// The code for the error that occurred.
-            ///
-            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/serverErrorCode`.
-            public var serverErrorCode: Components.Schemas.RecordOperationFailure.serverErrorCodePayload
-            /// A string indicating the reason for the error.
-            ///
-            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/reason`.
-            public var reason: Swift.String?
-            /// Suggested seconds to wait before retrying. Absent if not retryable.
-            ///
-            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/retryAfter`.
-            public var retryAfter: Swift.Int?
-            /// A unique identifier for this error.
-            ///
-            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/uuid`.
-            public var uuid: Swift.String?
-            /// Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
-            ///
-            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/redirectURL`.
-            public var redirectURL: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/RecordOperationFailure/value2`.
+            public var value2: Components.Schemas.RecordOperationFailure.Value2Payload
             /// Creates a new `RecordOperationFailure`.
             ///
             /// - Parameters:
-            ///   - recordName: The name of the record that the operation failed on.
-            ///   - serverErrorCode: The code for the error that occurred.
-            ///   - reason: A string indicating the reason for the error.
-            ///   - retryAfter: Suggested seconds to wait before retrying. Absent if not retryable.
-            ///   - uuid: A unique identifier for this error.
-            ///   - redirectURL: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+            ///   - value1:
+            ///   - value2:
             public init(
-                recordName: Swift.String,
-                serverErrorCode: Components.Schemas.RecordOperationFailure.serverErrorCodePayload,
-                reason: Swift.String? = nil,
-                retryAfter: Swift.Int? = nil,
-                uuid: Swift.String? = nil,
-                redirectURL: Swift.String? = nil
+                value1: Components.Schemas.OperationFailureCommon,
+                value2: Components.Schemas.RecordOperationFailure.Value2Payload
             ) {
-                self.recordName = recordName
-                self.serverErrorCode = serverErrorCode
-                self.reason = reason
-                self.retryAfter = retryAfter
-                self.uuid = uuid
-                self.redirectURL = redirectURL
+                self.value1 = value1
+                self.value2 = value2
             }
-            public enum CodingKeys: String, CodingKey {
-                case recordName
-                case serverErrorCode
-                case reason
-                case retryAfter
-                case uuid
-                case redirectURL
+            public init(from decoder: any Decoder) throws {
+                self.value1 = try .init(from: decoder)
+                self.value2 = try .init(from: decoder)
+            }
+            public func encode(to encoder: any Encoder) throws {
+                try self.value1.encode(to: encoder)
+                try self.value2.encode(to: encoder)
             }
         }
         /// Error response object. For a full list of error codes and meanings, see:

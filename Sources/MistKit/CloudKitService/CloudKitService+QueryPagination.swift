@@ -83,9 +83,7 @@ extension CloudKitService {
       }
 
       let result: QueryResult = try await queryRecords(
-        recordType: recordType,
-        filters: filters,
-        sortBy: sortBy,
+        Query(recordType: recordType, filters: filters ?? [], sortBy: sortBy ?? []),
         limit: pageSize,
         desiredKeys: desiredKeys,
         continuationMarker: currentMarker,

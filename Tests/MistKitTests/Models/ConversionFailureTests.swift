@@ -105,7 +105,10 @@ internal struct ConversionFailureTests {
   @Test("RecordResult maps an error item to .failure with the server error code")
   internal func recordResultMapsErrorItem() throws {
     let item = Components.Schemas.ModifyResponse.recordsPayloadPayload.RecordOperationFailure(
-      .init(recordName: "rec-1", serverErrorCode: .NOT_FOUND)
+      .init(
+        value1: .init(serverErrorCode: .NOT_FOUND),
+        value2: .init(recordName: "rec-1")
+      )
     )
     let result = try RecordResult(from: item)
 
@@ -113,7 +116,7 @@ internal struct ConversionFailureTests {
       Issue.record("Expected .failure, got \(result)")
       return
     }
-    #expect(error.recordName == "rec-1")
+    #expect(error.identifier == "rec-1")
     #expect(error.serverErrorCode == .notFound)
   }
 
@@ -134,7 +137,7 @@ internal struct ConversionFailureTests {
   @Test("RecordResult.get() rethrows a failure as recordOperationFailed")
   internal func recordResultGetThrowsOnFailure() {
     let result = RecordResult.failure(
-      RecordOperationFailure(recordName: "rec-1", serverErrorCode: .badRequest)
+      RecordOperationFailure(identifier: "rec-1", serverErrorCode: .badRequest)
     )
     #expect(throws: CloudKitError.self) {
       _ = try result.get()
@@ -154,7 +157,7 @@ internal struct ConversionFailureTests {
     let updatedRecord = try successResult("existing-1")
     let anonymousRecord = try successResult("server-assigned")
     let failure = RecordResult.failure(
-      RecordOperationFailure(recordName: "bad-1", serverErrorCode: .notFound)
+      RecordOperationFailure(identifier: "bad-1", serverErrorCode: .notFound)
     )
 
     let classification = OperationClassification(
@@ -169,7 +172,7 @@ internal struct ConversionFailureTests {
     #expect(batch.created.map(\.recordName) == ["new-1"])
     #expect(batch.updated.map(\.recordName) == ["existing-1"])
     #expect(batch.unclassified.map(\.recordName) == ["server-assigned"])
-    #expect(batch.failed.map(\.recordName) == ["bad-1"])
+    #expect(batch.failed.map(\.identifier) == ["bad-1"])
     // Every input result lands in exactly one bucket.
     #expect(batch.totalCount == 4)
     #expect(batch.succeededCount == 3)
