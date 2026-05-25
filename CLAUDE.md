@@ -104,8 +104,18 @@ swift run mistdemo demo-errors
 swift run mistdemo test-public
 swift run mistdemo test-private
 
-# Run with specific configuration
-swift run mistdemo --config-file ~/.mistdemo/config.json query
+# Configuration (no config-file flag — MistDemo uses Swift Configuration):
+# highest priority first — (1) CLI args, (2) CLOUDKIT_-prefixed env vars,
+# (3) a .env file in the working dir (Examples/MistDemo/.env, CLOUDKIT_-prefixed),
+# (4) in-memory defaults. Provide credentials via env vars or .env, e.g.:
+#   CLOUDKIT_CONTAINER_ID=iCloud.com.yourorg.yourapp
+#   CLOUDKIT_ENVIRONMENT=development
+#   CLOUDKIT_API_TOKEN=…  CLOUDKIT_WEB_AUTH_TOKEN=…           # web-auth scopes
+#   CLOUDKIT_KEY_ID=…     CLOUDKIT_PRIVATE_KEY[_PATH]=…       # server-to-server
+# Recognized keys: CLOUDKIT_CONTAINER_ID, CLOUDKIT_DATABASE, CLOUDKIT_ENVIRONMENT,
+# CLOUDKIT_API_TOKEN, CLOUDKIT_WEB_AUTH_TOKEN, CLOUDKIT_KEY_ID, CLOUDKIT_PRIVATE_KEY,
+# CLOUDKIT_PRIVATE_KEY_PATH, CLOUDKIT_LOOKUP_EMAIL, CLOUDKIT_ERROR.
+swift run mistdemo query
 ```
 
 ## Architecture Considerations
