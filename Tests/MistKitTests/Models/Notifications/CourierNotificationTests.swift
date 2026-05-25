@@ -1,6 +1,6 @@
 //
 //  CourierNotificationTests.swift
-//  MistDemo
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -30,7 +30,7 @@
 internal import Foundation
 internal import Testing
 
-@testable import MistDemoKit
+@testable import MistKit
 
 // Raw-string JSON fixtures below intentionally use JSON-aligned indents that
 // don't match Swift source-indent steps; the rule isn't useful inside raw

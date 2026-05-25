@@ -39,6 +39,7 @@ extension SubscriptionInfo: Codable {
     case notificationInfo
   }
 
+  /// Decodes a subscription from the CloudKit wire format.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     self.subscriptionID = try container.decode(String.self, forKey: .subscriptionID)
@@ -90,6 +91,7 @@ extension SubscriptionInfo: Codable {
     return .zone(zoneID)
   }
 
+  /// Encodes the subscription to the CloudKit wire format.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(subscriptionID, forKey: .subscriptionID)

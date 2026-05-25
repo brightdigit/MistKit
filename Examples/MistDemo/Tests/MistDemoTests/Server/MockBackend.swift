@@ -187,8 +187,10 @@
         database: database
       )
       try consumePendingError()
-      // swiftlint:disable:next force_unwrapping
-      let stubURL = URL(string: "https://stub.example/webcourier")!
+      guard let stubURL = URL(string: "https://stub.example/webcourier") else {
+        struct InvalidStubURL: Error {}
+        throw InvalidStubURL()
+      }
       return APNsTokenResult(
         environment: environment,
         apnsToken: "stub-apns",

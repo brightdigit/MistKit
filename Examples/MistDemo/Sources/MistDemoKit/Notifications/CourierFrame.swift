@@ -29,13 +29,14 @@
 
 #if !os(WASI)
   internal import Foundation
+  internal import MistKit
 
   /// A single raw response from a CloudKit web-courier long-poll.
   ///
   /// The web-courier wire format is **not** documented in Apple's CloudKit Web
   /// Services REST reference — CloudKit JS consumes it internally — so this
-  /// frame preserves the unparsed bytes alongside a typed decode. See #379 /
-  /// `WEB_COURIER_SPIKE.md` for the verified payload shape.
+  /// frame preserves the unparsed bytes alongside a typed decode. See #379
+  /// for the verified payload shape.
   internal struct CourierFrame: Sendable {
     /// HTTP status returned by the courier endpoint, when available.
     internal let statusCode: Int?

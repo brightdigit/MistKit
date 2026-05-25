@@ -29,6 +29,7 @@
 
 #if !os(WASI)
   internal import Foundation
+  internal import MistKit
 
   #if canImport(FoundationNetworking)
     internal import FoundationNetworking
@@ -38,23 +39,41 @@
   /// notifications without a device or APNs entitlement — the only fully
   /// headless way to observe a push end-to-end.
   ///
-  /// - Important: This uses a **dedicated** ephemeral `URLSession`, never the
-  ///   CloudKit API `ClientTransport`. The courier host is distinct from
-  ///   `api.apple-cloudkit.com`; sharing an HTTP/2 connection across the two
-  ///   risks 421 Misdirected Request, the same hazard called out for asset
-  ///   uploads in CLAUDE.md.
+  /// - Important: The transport defaults to a **dedicated** ephemeral
+  ///   `URLSession`, and must **never** be the CloudKit API `ClientTransport`.
+  ///   The courier host is distinct from `api.apple-cloudkit.com`; reusing the
+  ///   CloudKit transport's HTTP/2 connection pool across the two hosts risks
+  ///   **421 Misdirected Request** — the same hazard that makes MistKit upload
+  ///   assets through a separate `AssetUploader` closure rather than the shared
+  ///   transport (see CLAUDE.md, "Asset Upload Transport Design"). The
+  ///   transport is injectable only so tests can drive the poller without a
+  ///   live courier, not to share it with the CloudKit client.
   internal struct WebCourierPoller {
+    /// A single courier long-poll round-trip: issue the request and return the
+    /// body plus response. Defaults to a dedicated ephemeral `URLSession`;
+    /// inject only to stub the courier in tests. See the type's 421 note —
+    /// never back this with the CloudKit `ClientTransport`.
+    internal typealias Transport = @Sendable (URLRequest) async throws -> (Data, URLResponse)
+
     private let courierURL: URL
     private let perPollTimeout: TimeInterval
+    private let transport: Transport?
     private let session: URLSession
 
     /// - Parameters:
     ///   - courierURL: The `webcourierURL` returned by `createAPNsToken`.
     ///   - perPollTimeout: How long a single long-poll request waits before
     ///     the server (or this client) gives up and the caller polls again.
-    internal init(courierURL: URL, perPollTimeout: TimeInterval = 30) {
+    ///   - transport: Optional injected round-trip used in place of the
+    ///     dedicated `URLSession`. Leave `nil` in production.
+    internal init(
+      courierURL: URL,
+      perPollTimeout: TimeInterval = 30,
+      transport: Transport? = nil
+    ) {
       self.courierURL = courierURL
       self.perPollTimeout = perPollTimeout
+      self.transport = transport
       let configuration = URLSessionConfiguration.ephemeral
       configuration.timeoutIntervalForRequest = perPollTimeout + 5
       configuration.waitsForConnectivity = false
@@ -68,7 +87,13 @@
       var request = URLRequest(url: courierURL)
       request.httpMethod = "GET"
       request.timeoutInterval = perPollTimeout
-      let (data, response) = try await session.data(for: request)
+      let data: Data
+      let response: URLResponse
+      if let transport {
+        (data, response) = try await transport(request)
+      } else {
+        (data, response) = try await session.data(for: request)
+      }
       let statusCode = (response as? HTTPURLResponse)?.statusCode
       return CourierFrame(statusCode: statusCode, raw: data)
     }
@@ -104,9 +129,14 @@
       // non-Sendable URLSession never crosses the concurrency boundary.
       let courierURL = self.courierURL
       let perPollTimeout = self.perPollTimeout
+      let transport = self.transport
       return AsyncThrowingStream { continuation in
         let task = Task {
-          let poller = WebCourierPoller(courierURL: courierURL, perPollTimeout: perPollTimeout)
+          let poller = WebCourierPoller(
+            courierURL: courierURL,
+            perPollTimeout: perPollTimeout,
+            transport: transport
+          )
           do {
             while !Task.isCancelled {
               let frame = try await poller.pollOnce()

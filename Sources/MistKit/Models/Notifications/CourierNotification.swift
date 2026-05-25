@@ -1,6 +1,6 @@
 //
 //  CourierNotification.swift
-//  MistDemo
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+public import Foundation
 
 /// A CloudKit notification decoded from a web-courier frame.
 ///
@@ -43,33 +43,36 @@ internal import Foundation
 /// Only query-notification fields are mapped today (the demo creates query
 /// subscriptions). Zone notifications would surface a sibling `ck` block; add
 /// them here when needed.
-internal struct CourierNotification: Sendable {
+public struct CourierNotification: Sendable {
   /// The event that fired the subscription — the `ck.qry.fo` code.
-  internal enum Reason: Int, Sendable {
+  public enum Reason: Int, Sendable {
+    /// A matching record was created (`fo` == 1).
     case recordCreated = 1
+    /// A matching record was updated (`fo` == 2).
     case recordUpdated = 2
+    /// A matching record was deleted (`fo` == 3).
     case recordDeleted = 3
   }
 
   /// `ck.nid` — unique id for this notification.
-  internal let notificationID: String?
+  public let notificationID: String?
   /// `ck.cid` — the container that generated the notification.
-  internal let containerIdentifier: String?
+  public let containerIdentifier: String?
   /// `ck.qry.sid` — the subscription that fired.
-  internal let subscriptionID: String?
+  public let subscriptionID: String?
   /// `ck.qry.rid` — the record that changed.
-  internal let recordName: String?
+  public let recordName: String?
   /// `ck.qry.zid` — the zone the record lives in.
-  internal let zoneID: String?
+  public let zoneID: String?
   /// `ck.qry.fo` — why the subscription fired.
-  internal let reason: Reason?
+  public let reason: Reason?
   /// `ck.qry.dbs` — database-scope code (kept raw; interpretation unconfirmed).
-  internal let databaseScope: Int?
+  public let databaseScope: Int?
   /// `aps.alert` — the alert text, when present.
-  internal let alertBody: String?
+  public let alertBody: String?
 
   /// Decode a notification from a raw courier frame body.
-  internal init(data: Data) throws {
+  public init(data: Data) throws {
     let wire = try JSONDecoder().decode(Wire.self, from: data)
     let cloudKit = wire.cloudKit
     let query = cloudKit?.qry

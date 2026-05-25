@@ -72,10 +72,12 @@ public struct Query: Codable, Sendable {
     )
   }
 
+  /// Decodes a query from the CloudKit wire format.
   public init(from decoder: any Decoder) throws {
     self.schema = try Components.Schemas.Query(from: decoder)
   }
 
+  /// Encodes the query to the CloudKit wire format.
   public func encode(to encoder: any Encoder) throws {
     try self.schema.encode(to: encoder)
   }

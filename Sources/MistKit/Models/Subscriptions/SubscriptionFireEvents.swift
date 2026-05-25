@@ -55,10 +55,12 @@ public struct SubscriptionFireEvents: OptionSet, Sendable, Hashable {
 
   // MARK: - Instance Properties
 
+  /// The underlying bitmask backing the option set.
   public let rawValue: Int
 
   // MARK: - Lifecycle
 
+  /// Creates an event set from a raw bitmask value.
   public init(rawValue: Int) {
     self.rawValue = rawValue
   }
@@ -71,6 +73,7 @@ extension SubscriptionFireEvents: Codable {
   private static let updateWire = "update"
   private static let deleteWire = "delete"
 
+  /// Decodes the event set from the CloudKit wire format (an array of strings).
   public init(from decoder: any Decoder) throws {
     let strings = try [String](from: decoder)
     var events: SubscriptionFireEvents = []
@@ -91,6 +94,7 @@ extension SubscriptionFireEvents: Codable {
     self = events
   }
 
+  /// Encodes the event set to the CloudKit wire format (an array of strings).
   public func encode(to encoder: any Encoder) throws {
     var strings: [String] = []
     if contains(.create) { strings.append(Self.createWire) }
