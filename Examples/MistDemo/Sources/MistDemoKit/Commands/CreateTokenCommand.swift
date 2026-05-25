@@ -30,6 +30,10 @@
 internal import Foundation
 internal import MistKit
 
+// `helpText` below is a multi-line string whose option column doesn't align
+// with Swift's indent steps; the rule isn't useful inside literal help text.
+// swiftlint:disable indentation_width
+
 /// Command for `tokens/create`. Mints a CloudKit-managed APNs token that
 /// non-device callers use as the destination for subscription-triggered pushes.
 public struct CreateTokenCommand: MistDemoCommand, OutputFormatting {
@@ -87,3 +91,5 @@ public struct CreateTokenCommand: MistDemoCommand, OutputFormatting {
     return environment
   }
 }
+
+// swiftlint:enable indentation_width

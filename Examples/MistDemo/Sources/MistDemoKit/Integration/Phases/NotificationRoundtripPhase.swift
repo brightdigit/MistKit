@@ -92,11 +92,16 @@ internal struct NotificationRoundtripPhase: IntegrationPhase {
         )
       } catch {
         await cleanup(
-          subscriptionID: subscriptionID, recordName: createdRecordName, context: context)
+          subscriptionID: subscriptionID,
+          recordName: createdRecordName,
+          context: context
+        )
         throw error
       }
 
-      await cleanup(subscriptionID: subscriptionID, recordName: createdRecordName, context: context)
+      await cleanup(
+        subscriptionID: subscriptionID, recordName: createdRecordName, context: context
+      )
       print("✅ Notification probe completed for subscription '\(subscriptionID)'")
       return NoState()
     #endif
@@ -121,7 +126,8 @@ internal struct NotificationRoundtripPhase: IntegrationPhase {
       )
       if context.verbose {
         print(
-          "   ✅ Minted + registered courier token; polling \(token.webcourierURL.absoluteString)")
+          "   ✅ Minted + registered courier token; polling \(token.webcourierURL.absoluteString)"
+        )
       }
       return token.webcourierURL
     }

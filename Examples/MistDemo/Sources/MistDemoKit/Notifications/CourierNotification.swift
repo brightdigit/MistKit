@@ -120,12 +120,6 @@ extension CourierNotification {
 
     fileprivate struct CloudKitPayload: Decodable {
       fileprivate struct Qry: Decodable {
-        fileprivate let sid: String?
-        fileprivate let rid: String?
-        fileprivate let zid: String?
-        fileprivate let firesOn: Int?
-        fileprivate let dbs: Int?
-
         private enum CodingKeys: String, CodingKey {
           case sid
           case rid
@@ -133,6 +127,12 @@ extension CourierNotification {
           case dbs
           case firesOn = "fo"
         }
+
+        fileprivate let sid: String?
+        fileprivate let rid: String?
+        fileprivate let zid: String?
+        fileprivate let firesOn: Int?
+        fileprivate let dbs: Int?
       }
 
       fileprivate let nid: String?
@@ -140,12 +140,12 @@ extension CourierNotification {
       fileprivate let qry: Qry?
     }
 
-    fileprivate let aps: APS?
-    fileprivate let cloudKit: CloudKitPayload?
-
     private enum CodingKeys: String, CodingKey {
       case aps
       case cloudKit = "ck"
     }
+
+    fileprivate let aps: APS?
+    fileprivate let cloudKit: CloudKitPayload?
   }
 }

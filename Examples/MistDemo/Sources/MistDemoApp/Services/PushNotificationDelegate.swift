@@ -62,5 +62,94 @@
     override public init() {
       super.init()
     }
+
+    // MARK: - Obj-C bridge for system-delegate optional selectors
+    //
+    // Swift forbids `@objc` on protocol extension members, so the
+    // ``PlatformApplicationDelegate`` defaults can't directly satisfy the
+    // optional `@objc` requirements on the system delegate protocols. These
+    // concrete shims expose the selectors to the Obj-C runtime so AppKit /
+    // UIKit / WatchKit dispatch lands on this class, and forward to the
+    // same `static weak receiver` the protocol extensions use.
+
+    #if canImport(AppKit) && !targetEnvironment(macCatalyst)
+      /// APNs delivered a device token (AppKit variant).
+      @objc
+      public func application(
+        _ application: NSApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+      ) {
+        Self.receiver?.didRegisterForRemoteNotifications(deviceToken: deviceToken)
+      }
+
+      /// APNs refused registration (AppKit variant).
+      @objc
+      public func application(
+        _ application: NSApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: any Error
+      ) {
+        Self.receiver?.didFailToRegisterForRemoteNotifications(error: error)
+      }
+
+      /// A remote notification arrived (AppKit variant).
+      @objc
+      public func application(
+        _ application: NSApplication,
+        didReceiveRemoteNotification userInfo: [String: Any]
+      ) {
+        Self.receiver?.didReceiveRemoteNotification(userInfo: userInfo)
+      }
+    #elseif canImport(UIKit) && !os(watchOS)
+      /// APNs delivered a device token (UIKit variant).
+      @objc
+      public func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+      ) {
+        Self.receiver?.didRegisterForRemoteNotifications(deviceToken: deviceToken)
+      }
+
+      /// APNs refused registration (UIKit variant).
+      @objc
+      public func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: any Error
+      ) {
+        Self.receiver?.didFailToRegisterForRemoteNotifications(error: error)
+      }
+
+      /// A remote notification arrived (UIKit variant).
+      @objc
+      public func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+        fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+      ) {
+        Self.receiver?.didReceiveRemoteNotification(userInfo: userInfo)
+        completionHandler(.newData)
+      }
+    #elseif canImport(WatchKit)
+      /// APNs delivered a device token (watchOS variant).
+      @objc
+      public func didRegisterForRemoteNotifications(withDeviceToken deviceToken: Data) {
+        Self.receiver?.didRegisterForRemoteNotifications(deviceToken: deviceToken)
+      }
+
+      /// APNs refused registration (watchOS variant).
+      @objc
+      public func didFailToRegisterForRemoteNotificationsWithError(_ error: any Error) {
+        Self.receiver?.didFailToRegisterForRemoteNotifications(error: error)
+      }
+
+      /// A remote notification arrived (watchOS variant).
+      @objc
+      public func didReceiveRemoteNotification(
+        _ userInfo: [AnyHashable: Any],
+        fetchCompletionHandler completionHandler: @escaping (WKBackgroundFetchResult) -> Void
+      ) {
+        Self.receiver?.didReceiveRemoteNotification(userInfo: userInfo)
+        completionHandler(.newData)
+      }
+    #endif
   }
 #endif

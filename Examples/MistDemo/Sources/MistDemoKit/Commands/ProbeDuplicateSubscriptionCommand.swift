@@ -30,6 +30,11 @@
 internal import Foundation
 internal import MistKit
 
+// `helpText` below is a multi-line string whose option column doesn't
+// align with Swift's indent steps; the rule isn't useful inside literal
+// help text.
+// swiftlint:disable indentation_width
+
 /// One-off diagnostic command: probes CloudKit's
 /// `subscriptions/modify` to pin down what triggers the
 /// `INTERNAL_ERROR` / "could not find subscription we just created"
@@ -37,6 +42,14 @@ internal import MistKit
 public struct ProbeDuplicateSubscriptionCommand: MistDemoCommand {
   /// The configuration type.
   public typealias Config = ProbeDuplicateSubscriptionConfig
+
+  /// One row of the end-of-run summary printed by ``execute()``.
+  internal struct ExperimentOutcome {
+    internal let index: Int
+    internal let label: String
+    internal let result: String
+  }
+
   /// The command name.
   public static let commandName = "probe-duplicate-subscription"
   /// The command abstract.
@@ -74,44 +87,7 @@ public struct ProbeDuplicateSubscriptionCommand: MistDemoCommand {
     self.config = config
   }
 
-  /// Executes the command.
-  public func execute() async throws {
-    let service = try MistKitClientFactory.create(for: config.base)
-    let database = config.base.database
-    let probeRun = UUID().uuidString.lowercased().prefix(8)
-
-    print("🧪 probe-duplicate-subscription (run=\(probeRun))")
-    print("   database=\(database.pathSegment) recordType=\(config.recordType)")
-    print(
-      "   Each experiment: seed one subscription, probe with a variation, "
-      + "report seed/probe outcomes, cleanup."
-    )
-
-    let experiments = Self.makeExperiments(
-      run: probeRun,
-      recordType: config.recordType,
-      alternateRecordType: config.alternateRecordType
-    )
-
-    var summary: [(Int, String, String)] = []
-    for experiment in experiments {
-      let outcome = await runExperiment(
-        experiment,
-        service: service,
-        database: database
-      )
-      summary.append((experiment.index, experiment.label, outcome))
-    }
-
-    print("")
-    print("📋 Summary")
-    for (index, label, outcome) in summary {
-      print("   #\(index) \(label)")
-      print("       → \(outcome)")
-    }
-  }
-
-  private static func makeExperiments(
+  internal static func makeExperiments(
     run: Substring,
     recordType: String,
     alternateRecordType: String
@@ -164,77 +140,50 @@ public struct ProbeDuplicateSubscriptionCommand: MistDemoCommand {
     ]
   }
 
-  private func runExperiment(
-    _ experiment: ProbeExperiment,
-    service: CloudKitService,
-    database: Database
-  ) async -> String {
-    let seedSub = experiment.seedSubscription()
-    let probeSub = experiment.probeSubscription()
+  /// Executes the command.
+  public func execute() async throws {
+    let service = try MistKitClientFactory.create(for: config.base)
+    let database = config.base.database
+    let probeRun = UUID().uuidString.lowercased().prefix(8)
+
+    print("🧪 probe-duplicate-subscription (run=\(probeRun))")
+    print("   database=\(database.pathSegment) recordType=\(config.recordType)")
+    print(
+      "   Each experiment: seed one subscription, probe with a variation, "
+        + "report seed/probe outcomes, cleanup."
+    )
+
+    let experiments = Self.makeExperiments(
+      run: probeRun,
+      recordType: config.recordType,
+      alternateRecordType: config.alternateRecordType
+    )
+
+    var summary: [ExperimentOutcome] = []
+    for experiment in experiments {
+      let outcome = await runExperiment(
+        experiment,
+        service: service,
+        database: database
+      )
+      summary.append(
+        ExperimentOutcome(
+          index: experiment.index,
+          label: experiment.label,
+          result: outcome
+        )
+      )
+    }
+
     print("")
-    print("▶︎ #\(experiment.index): \(experiment.label)")
-    print(
-      "   seed:  id=\(seedSub.subscriptionID) "
-      + describeSubscription(seedSub)
-    )
-    print(
-      "   probe: id=\(probeSub.subscriptionID) "
-      + describeSubscription(probeSub)
-    )
-
-    // Seed
-    let seedResult: SubscriptionResult?
-    do {
-      let seedResults = try await service.modifySubscriptions(
-        [.create(seedSub)],
-        database: database
-      )
-      seedResult = seedResults.first
-      print("   seed result:  \(formatResult(seedResults.first))")
-    } catch {
-      print("   seed result:  THREW \(error)")
-      return "seed threw — cannot probe"
+    print("📋 Summary")
+    for row in summary {
+      print("   #\(row.index) \(row.label)")
+      print("       → \(row.result)")
     }
-
-    var probeOutcome = "no probe result"
-    do {
-      let probeResults = try await service.modifySubscriptions(
-        [.create(probeSub)],
-        database: database
-      )
-      print("   probe result: \(formatResult(probeResults.first))")
-      probeOutcome = summarize(probeResults.first)
-    } catch {
-      print("   probe result: THREW \(error)")
-      probeOutcome = "threw: \(error)"
-    }
-
-    // Cleanup — best-effort, both IDs in case seed succeeded.
-    var idsToDelete: [String] = [seedSub.subscriptionID]
-    if probeSub.subscriptionID != seedSub.subscriptionID {
-      idsToDelete.append(probeSub.subscriptionID)
-    }
-    for id in idsToDelete {
-      do {
-        try await service.deleteSubscription(id: id, database: database)
-      } catch {
-        print("   cleanup warning for '\(id)': \(error)")
-      }
-    }
-    _ = seedResult
-    return probeOutcome
   }
 
-  private func describeSubscription(_ sub: SubscriptionInfo) -> String {
-    let recordType = sub.query?.recordType ?? "<nil>"
-    var names: [String] = []
-    if sub.firesOn.contains(.create) { names.append("create") }
-    if sub.firesOn.contains(.update) { names.append("update") }
-    if sub.firesOn.contains(.delete) { names.append("delete") }
-    return "recordType=\(recordType) firesOn=[\(names.joined(separator: ","))]"
-  }
-
-  private func formatResult(_ result: SubscriptionResult?) -> String {
+  internal func formatResult(_ result: SubscriptionResult?) -> String {
     guard let result else {
       return "nil"
     }
@@ -254,20 +203,11 @@ public struct ProbeDuplicateSubscriptionCommand: MistDemoCommand {
       return parts.joined(separator: " ")
     }
   }
-
-  private func summarize(_ result: SubscriptionResult?) -> String {
-    switch result {
-    case .none:
-      return "no result"
-    case .success:
-      return "SUCCESS"
-    case .failure(let failure):
-      return
-        "FAIL code=\(failure.serverErrorCode.rawValue) "
-        + "isLikelyDuplicate=\(failure.isLikelyDuplicate)"
-    }
-  }
 }
 
-// `ProbeExperiment` and `ProbeSubscriptionTemplate` live in
-// `ProbeExperiment.swift`.
+// swiftlint:enable indentation_width
+
+// The per-experiment runner lives in
+// `ProbeDuplicateSubscriptionCommand+Experiment.swift`;
+// `ProbeExperiment` lives in `ProbeExperiment.swift` and
+// `ProbeSubscriptionTemplate` in its own file.

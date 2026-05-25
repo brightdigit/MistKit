@@ -41,10 +41,6 @@
 /// ``database(subscriptionID:notificationInfo:)`` to build one;
 /// CloudKit Web Services requires the caller to supply the
 /// `subscriptionID`.
-// `Bool?` is used intentionally — `nil` means "don't set the field;
-// let CloudKit apply its server-side default" (e.g. `firesOnce`).
-// swiftlint:disable discouraged_optional_boolean
-
 public struct SubscriptionInfo: Sendable {
   /// The variant-specific data for a subscription. Mirrors the three
   /// native CloudKit subscription classes:
@@ -68,6 +64,9 @@ public struct SubscriptionInfo: Sendable {
     /// public factory and ``SubscriptionInfo/init(subscriptionID:kind:notificationInfo:)``
     /// `precondition`-trap empty sets, and the schema/Codable decoders
     /// throw on the same.
+    ///
+    /// `firesOnce` is `Bool?` intentionally — `nil` means "don't set;
+    /// let CloudKit apply its server-side default".
     case query(Query, firesOn: SubscriptionFireEvents, firesOnce: Bool? = nil)
 
     /// A zone subscription that fires when any record in the named
@@ -223,78 +222,3 @@ extension SubscriptionInfo {
     return nil
   }
 }
-
-// MARK: - Codable (wire-compatible flat encoding)
-
-extension SubscriptionInfo: Codable {
-  private enum CodingKeys: String, CodingKey {
-    case subscriptionID
-    case subscriptionType
-    case query
-    case zoneID
-    case zoneWide
-    case firesOn
-    case firesOnce
-    case notificationInfo
-  }
-
-  public init(from decoder: any Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    self.subscriptionID = try container.decode(String.self, forKey: .subscriptionID)
-    self.notificationInfo =
-      try container.decodeIfPresent(NotificationInfo.self, forKey: .notificationInfo)
-
-    let type = try container.decode(SubscriptionType.self, forKey: .subscriptionType)
-    switch type {
-    case .query:
-      let query = try container.decode(Query.self, forKey: .query)
-      let firesOn =
-        try container.decodeIfPresent(SubscriptionFireEvents.self, forKey: .firesOn) ?? []
-      guard !firesOn.isEmpty else {
-        throw DecodingError.dataCorrupted(
-          .init(
-            codingPath: decoder.codingPath + [CodingKeys.firesOn],
-            debugDescription:
-              "Query subscription missing or empty firesOn — must declare "
-              + "at least one of [create, update, delete]."
-          )
-        )
-      }
-      let firesOnce = try container.decodeIfPresent(Bool.self, forKey: .firesOnce)
-      self.kind = .query(query, firesOn: firesOn, firesOnce: firesOnce)
-    case .zone:
-      // CloudKit collapses both "watch one zone" and "watch the whole
-      // database" into `subscriptionType: zone`; `zoneWide: true` is
-      // the database-subscription marker. Read it as `.database` so the
-      // domain side preserves the native CKSubscription trichotomy.
-      let wide = try container.decodeIfPresent(Bool.self, forKey: .zoneWide) ?? false
-      if wide {
-        self.kind = .database
-      } else {
-        let zoneID = try container.decode(ZoneID.self, forKey: .zoneID)
-        self.kind = .zone(zoneID)
-      }
-    }
-  }
-
-  public func encode(to encoder: any Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(subscriptionID, forKey: .subscriptionID)
-    try container.encode(subscriptionType, forKey: .subscriptionType)
-    try container.encodeIfPresent(notificationInfo, forKey: .notificationInfo)
-    switch kind {
-    case .query(let query, let firesOn, let firesOnce):
-      try container.encode(query, forKey: .query)
-      try container.encode(firesOn, forKey: .firesOn)
-      try container.encodeIfPresent(firesOnce, forKey: .firesOnce)
-    case .zone(let zoneID):
-      try container.encode(zoneID, forKey: .zoneID)
-    case .database:
-      try container.encode(true, forKey: .zoneWide)
-    }
-  }
-}
-
-// swiftlint:enable discouraged_optional_boolean
-
-// The OpenAPI schema bridge lives in `SubscriptionInfo+Schema.swift`.

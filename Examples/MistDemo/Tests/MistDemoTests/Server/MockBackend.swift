@@ -54,59 +54,6 @@
       .query(subscriptionID: "stub-sub", recordType: "Note", firesOn: [.create])
     ]
 
-    private static func stubRecord(
-      recordType: String, recordName: String
-    ) -> RecordInfo {
-      let json = """
-        {
-          "recordName": "\(recordName)",
-          "recordType": "\(recordType)",
-          "recordChangeTag": null,
-          "fields": {},
-          "created": null,
-          "modified": null,
-          "deleted": false
-        }
-        """
-      // RecordInfo is Codable; round-trip through JSON keeps the stub
-      // independent of MistKit's internal initializer.
-      do {
-        return try JSONDecoder().decode(
-          RecordInfo.self, from: Data(json.utf8)
-        )
-      } catch {
-        fatalError("MockBackend stubRecord JSON failed to decode: \(error)")
-      }
-    }
-
-    /// Flatten FieldValue entries into a printable form so tests can write
-    /// `#expect(captured.fields["title"] == "Hi")` for strings or
-    /// `#expect(captured.fields["index"] == "5")` for numbers without
-    /// pattern-matching on FieldValue in every assertion.
-    ///
-    /// Non-primitive cases (asset, date, reference, location, list, bytes)
-    /// are intentionally dropped — they yield no useful String form for an
-    /// equality assertion. Tests that need to assert those types should
-    /// inspect the FieldValue directly rather than going through `flatten`.
-    private static func flatten(
-      _ fields: [String: FieldValue]
-    ) -> [String: String] {
-      var result: [String: String] = [:]
-      for (name, value) in fields {
-        switch value {
-        case .string(let string):
-          result[name] = string
-        case .int64(let int):
-          result[name] = String(int)
-        case .double(let double):
-          result[name] = String(double)
-        default:
-          continue
-        }
-      }
-      return result
-    }
-
     internal func failNext(message: String) {
       pendingError = message
     }
@@ -222,7 +169,9 @@
       )
       try consumePendingError()
       return operations.compactMap { operation in
-        if case .create(let info) = operation { return info }
+        if case .create(let info) = operation {
+          return info
+        }
         return nil
       }
     }
@@ -238,10 +187,12 @@
         database: database
       )
       try consumePendingError()
+      // swiftlint:disable:next force_unwrapping
+      let stubURL = URL(string: "https://stub.example/webcourier")!
       return APNsTokenResult(
         environment: environment,
         apnsToken: "stub-apns",
-        webcourierURL: URL(string: "https://stub.example/webcourier")!
+        webcourierURL: stubURL
       )
     }
 

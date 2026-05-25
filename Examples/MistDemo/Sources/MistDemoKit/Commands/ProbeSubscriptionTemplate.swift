@@ -1,5 +1,5 @@
 //
-//  PlatformApplicationDelegate+RemoteNotifications.swift
+//  ProbeSubscriptionTemplate.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,30 +27,21 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if (canImport(AppKit) && !targetEnvironment(macCatalyst)) || (canImport(UIKit) && !os(watchOS))
-  public import Foundation
+internal import MistKit
 
-  extension PlatformApplicationDelegate {
-    /// APNs delivered a device token — forward it to the registered receiver.
-    ///
-    /// Cannot be `@objc` (Swift forbids `@objc` on protocol extension
-    /// members); the optional system-delegate selector is bridged by a
-    /// concrete `@objc` shim on ``PushNotificationDelegate`` that
-    /// delegates here.
-    public func application(
-      _: PlatformApplication,
-      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
-    ) {
-      Self.receiver?.didRegisterForRemoteNotifications(deviceToken: deviceToken)
-    }
+/// A single `SubscriptionInfo` blueprint used by ``ProbeExperiment`` —
+/// captured separately so the experiment can materialize identical
+/// subscriptions across seed/probe/cleanup phases.
+internal struct ProbeSubscriptionTemplate {
+  internal let id: String
+  internal let recordType: String
+  internal let firesOn: SubscriptionFireEvents
 
-    /// APNs refused registration — forward the error to the receiver so it
-    /// can surface in the UI.
-    public func application(
-      _: PlatformApplication,
-      didFailToRegisterForRemoteNotificationsWithError error: any Error
-    ) {
-      Self.receiver?.didFailToRegisterForRemoteNotifications(error: error)
-    }
+  internal func materialize() -> SubscriptionInfo {
+    .query(
+      subscriptionID: id,
+      recordType: recordType,
+      firesOn: firesOn
+    )
   }
-#endif
+}

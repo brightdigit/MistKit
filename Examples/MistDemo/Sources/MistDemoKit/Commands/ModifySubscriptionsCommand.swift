@@ -70,6 +70,19 @@ public struct ModifySubscriptionsCommand: MistDemoCommand, OutputFormatting {
     self.config = config
   }
 
+  private static func parseFiresOn(_ raws: [String]) -> SubscriptionFireEvents {
+    var firesOn: SubscriptionFireEvents = []
+    for raw in raws {
+      switch raw {
+      case "create": firesOn.insert(.create)
+      case "update": firesOn.insert(.update)
+      case "delete": firesOn.insert(.delete)
+      default: break
+      }
+    }
+    return firesOn
+  }
+
   /// Executes the command.
   public func execute() async throws {
     guard let subscriptionID = config.subscriptionID, !subscriptionID.isEmpty else {
@@ -79,34 +92,31 @@ public struct ModifySubscriptionsCommand: MistDemoCommand, OutputFormatting {
 
     switch config.operation {
     case "create":
-      guard let recordType = config.recordType, !recordType.isEmpty else {
-        throw SubscriptionCommandError.missingRecordType
-      }
-      var firesOn: SubscriptionFireEvents = []
-      for raw in config.firesOn {
-        switch raw {
-        case "create": firesOn.insert(.create)
-        case "update": firesOn.insert(.update)
-        case "delete": firesOn.insert(.delete)
-        default: break
-        }
-      }
-      let created = try await service.createSubscription(
-        .query(
-          subscriptionID: subscriptionID,
-          recordType: recordType,
-          firesOn: firesOn
-        ),
-        database: config.base.database
-      )
-      try await outputResult(created, format: config.output)
-
+      try await runCreate(subscriptionID: subscriptionID, service: service)
     case "delete":
       try await service.deleteSubscription(id: subscriptionID, database: config.base.database)
       print("✅ Deleted subscription '\(subscriptionID)'.")
-
     default:
       throw SubscriptionCommandError.invalidOperation(config.operation)
     }
+  }
+
+  private func runCreate(
+    subscriptionID: String,
+    service: CloudKitService
+  ) async throws {
+    guard let recordType = config.recordType, !recordType.isEmpty else {
+      throw SubscriptionCommandError.missingRecordType
+    }
+    let firesOn = Self.parseFiresOn(config.firesOn)
+    let created = try await service.createSubscription(
+      .query(
+        subscriptionID: subscriptionID,
+        recordType: recordType,
+        firesOn: firesOn
+      ),
+      database: config.base.database
+    )
+    try await outputResult(created, format: config.output)
   }
 }

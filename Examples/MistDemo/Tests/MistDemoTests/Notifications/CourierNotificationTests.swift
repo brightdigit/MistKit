@@ -32,6 +32,11 @@ internal import Testing
 
 @testable import MistDemoKit
 
+// Raw-string JSON fixtures below intentionally use JSON-aligned indents that
+// don't match Swift source-indent steps; the rule isn't useful inside raw
+// payloads.
+// swiftlint:disable indentation_width
+
 /// Decoding regression tests pinned to the three real web-courier payload
 /// shapes captured against a live container (#379). One record change matching
 /// three subscriptions produced three frames sharing a `nid` but differing by
@@ -121,3 +126,5 @@ internal struct CourierNotificationTests {
     #expect(notification.reason == expected)
   }
 }
+
+// swiftlint:enable indentation_width

@@ -30,6 +30,10 @@
 internal import Foundation
 internal import MistKit
 
+// `helpText` below is a multi-line string whose option column doesn't align
+// with Swift's indent steps; the rule isn't useful inside literal help text.
+// swiftlint:disable indentation_width
+
 /// Command for `tokens/register`. Registers a device's APNs token so CloudKit
 /// delivers subscription-triggered pushes to it. Per Apple's `RegisterTokens.html`
 /// REST reference, the request requires both the hex token and the APNs
@@ -95,3 +99,5 @@ public struct RegisterTokenCommand: MistDemoCommand {
     return environment
   }
 }
+
+// swiftlint:enable indentation_width

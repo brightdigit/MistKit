@@ -33,8 +33,13 @@
 
   extension PlatformApplicationDelegate where Self: NSApplicationDelegate {
     /// A remote notification arrived (AppKit variant).
+    ///
+    /// Cannot be `@objc` because Swift forbids `@objc` on protocol extension
+    /// members; AppKit's optional `application(_:didReceiveRemoteNotification:)`
+    /// selector is bridged by a concrete `@objc` shim on
+    /// ``PushNotificationDelegate`` that delegates here.
     public func application(
-      _ application: NSApplication,
+      _: NSApplication,
       didReceiveRemoteNotification userInfo: [String: Any]
     ) {
       Self.receiver?.didReceiveRemoteNotification(userInfo: userInfo)

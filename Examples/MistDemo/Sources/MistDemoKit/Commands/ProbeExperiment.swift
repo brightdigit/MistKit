@@ -39,14 +39,6 @@ internal struct ProbeExperiment {
   internal let seed: ProbeSubscriptionTemplate
   internal let probe: ProbeSubscriptionTemplate
 
-  internal func seedSubscription() -> SubscriptionInfo {
-    seed.materialize()
-  }
-
-  internal func probeSubscription() -> SubscriptionInfo {
-    probe.materialize()
-  }
-
   internal static func same(
     index: Int,
     label: String,
@@ -97,18 +89,12 @@ internal struct ProbeExperiment {
       )
     )
   }
-}
 
-internal struct ProbeSubscriptionTemplate {
-  internal let id: String
-  internal let recordType: String
-  internal let firesOn: SubscriptionFireEvents
+  internal func seedSubscription() -> SubscriptionInfo {
+    seed.materialize()
+  }
 
-  internal func materialize() -> SubscriptionInfo {
-    .query(
-      subscriptionID: id,
-      recordType: recordType,
-      firesOn: firesOn
-    )
+  internal func probeSubscription() -> SubscriptionInfo {
+    probe.materialize()
   }
 }

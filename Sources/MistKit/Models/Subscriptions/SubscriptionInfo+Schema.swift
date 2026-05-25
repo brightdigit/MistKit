@@ -92,34 +92,9 @@ extension SubscriptionInfo {
     let kind: Kind
     switch SubscriptionType(from: subscriptionType) {
     case .query:
-      // Preserve prior behavior: a `query` subscription payload that
-      // omits the query body still decodes (callers can inspect the
-      // empty `Query` and decide whether to treat it as invalid).
-      let query = subscription.query.map(Query.init) ?? Query(Components.Schemas.Query())
-      let firesOn = SubscriptionFireEvents(schemaValues: subscription.firesOn ?? [])
-      guard !firesOn.isEmpty else {
-        try ConversionError.subscriptionQueryMissingFiresOn.reportAndThrow()
-      }
-      kind = .query(query, firesOn: firesOn, firesOnce: subscription.firesOnce)
+      kind = try Self.makeQueryKind(from: subscription)
     case .zone:
-      // CloudKit collapses zone- and database-scoped subscriptions into
-      // `subscriptionType: zone`; `zoneWide: true` is the
-      // database-subscription marker. Surface them as separate `Kind`
-      // cases so callers don't have to know about the wire collapse.
-      if subscription.zoneWide == true {
-        kind = .database
-      } else {
-        guard let payload = subscription.zoneID else {
-          // A non-wide zone subscription without a zoneID is invalid;
-          // surface as missing-zone-name failure for parity with
-          // existing behavior.
-          try ConversionError.zoneMissingName.reportAndThrow()
-        }
-        guard let zoneName = payload.zoneName else {
-          try ConversionError.zoneMissingName.reportAndThrow()
-        }
-        kind = .zone(ZoneID(zoneName: zoneName, ownerName: payload.ownerName))
-      }
+      kind = try Self.makeZoneOrDatabaseKind(from: subscription)
     }
 
     self.init(
@@ -127,5 +102,42 @@ extension SubscriptionInfo {
       kind: kind,
       notificationInfo: subscription.notificationInfo.map(NotificationInfo.init(from:))
     )
+  }
+
+  /// Build the `.query` ``Kind`` from a `Subscription` payload, throwing when
+  /// `firesOn` is empty (a query subscription with no triggers is invalid).
+  /// Preserves prior behavior: a missing `query` body still decodes — callers
+  /// inspect the empty `Query` and decide whether to treat it as invalid.
+  private static func makeQueryKind(
+    from subscription: Components.Schemas.Subscription
+  ) throws(ConversionError) -> Kind {
+    let query = subscription.query.map(Query.init) ?? Query(Components.Schemas.Query())
+    let firesOn = SubscriptionFireEvents(schemaValues: subscription.firesOn ?? [])
+    guard !firesOn.isEmpty else {
+      try ConversionError.subscriptionQueryMissingFiresOn.reportAndThrow()
+    }
+    return .query(query, firesOn: firesOn, firesOnce: subscription.firesOnce)
+  }
+
+  /// Build a `.zone`-or-`.database` ``Kind`` from a `Subscription` payload.
+  ///
+  /// CloudKit collapses zone- and database-scoped subscriptions into
+  /// `subscriptionType: zone`; `zoneWide: true` is the database-subscription
+  /// marker. This surfaces them as separate `Kind` cases so callers don't
+  /// have to know about the wire collapse. A non-wide zone subscription
+  /// without a zoneID/zoneName throws ``ConversionError/zoneMissingName``.
+  private static func makeZoneOrDatabaseKind(
+    from subscription: Components.Schemas.Subscription
+  ) throws(ConversionError) -> Kind {
+    if subscription.zoneWide == true {
+      return .database
+    }
+    guard let payload = subscription.zoneID else {
+      try ConversionError.zoneMissingName.reportAndThrow()
+    }
+    guard let zoneName = payload.zoneName else {
+      try ConversionError.zoneMissingName.reportAndThrow()
+    }
+    return .zone(ZoneID(zoneName: zoneName, ownerName: payload.ownerName))
   }
 }

@@ -41,9 +41,7 @@ internal import MistKitOpenAPI
 /// `subscriptionID` (see GH brightdigit/MistKit#387), and the wire
 /// format is JSON `["create","update","delete"]`.
 public struct SubscriptionFireEvents: OptionSet, Sendable, Hashable {
-  // MARK: - Public
-
-  public let rawValue: Int
+  // MARK: - Type Properties
 
   /// Fire when a matching record is created.
   public static let create = SubscriptionFireEvents(rawValue: 1 << 0)
@@ -54,6 +52,10 @@ public struct SubscriptionFireEvents: OptionSet, Sendable, Hashable {
 
   /// All three record-change events.
   public static let all: SubscriptionFireEvents = [.create, .update, .delete]
+
+  // MARK: - Instance Properties
+
+  public let rawValue: Int
 
   // MARK: - Lifecycle
 
