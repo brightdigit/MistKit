@@ -229,9 +229,14 @@
 
     internal func webCreateToken(
       environment: APNsEnvironment,
+      clientId: String?,
       database: MistKit.Database
     ) async throws -> APNsTokenResult {
-      lastCreateToken = CreateTokenCall(environment: environment, database: database)
+      lastCreateToken = CreateTokenCall(
+        environment: environment,
+        clientId: clientId,
+        database: database
+      )
       try consumePendingError()
       return APNsTokenResult(
         environment: environment,
@@ -243,11 +248,13 @@
     internal func webRegisterToken(
       apnsToken: String,
       environment: APNsEnvironment,
+      clientId: String?,
       database: MistKit.Database
     ) async throws {
       lastRegisterToken = RegisterTokenCall(
         apnsToken: apnsToken,
         environment: environment,
+        clientId: clientId,
         database: database
       )
       try consumePendingError()

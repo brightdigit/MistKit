@@ -54,6 +54,7 @@
           let backend = try backendFactory.make(token)
           let result = try await backend.webCreateToken(
             environment: body.environment,
+            clientId: body.clientId,
             database: body.database
           )
           return try WebJSON.encoder().encode(WebResponse.Token(from: result))
@@ -72,6 +73,7 @@
           try await backend.webRegisterToken(
             apnsToken: body.apnsToken,
             environment: body.environment,
+            clientId: body.clientId,
             database: body.database
           )
           return try WebJSON.encoder().encode(

@@ -160,17 +160,28 @@ public protocol APIProtocol: Sendable {
     func uploadAssets(_ input: Operations.uploadAssets.Input) async throws -> Operations.uploadAssets.Output
     /// Create APNs Token
     ///
-    /// Create an Apple Push Notification service (APNs) token
+    /// Create an Apple Push Notification service (APNs) token.
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)`.
+    /// Lives under the `/device/` API module (not `/database/`). CloudKit's
+    /// archived REST reference documents this under `/database/...`, but the
+    /// live service routes only OPTIONS to that path and returns
+    /// `405 Method Not Allowed` for POST. The working path is the one
+    /// CloudKit JS uses (`setApiModuleName("device")`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /device/{version}/{container}/{environment}/tokens/create`.
+    /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/create/post(createToken)`.
     func createToken(_ input: Operations.createToken.Input) async throws -> Operations.createToken.Output
     /// Register Token
     ///
-    /// Register a token for push notifications
+    /// Register an APNs device token for push notifications.
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
+    /// Lives under the `/device/` API module (not `/database/`) — same
+    /// rationale as `tokens/create`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /device/{version}/{container}/{environment}/tokens/register`.
+    /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
     func registerToken(_ input: Operations.registerToken.Input) async throws -> Operations.registerToken.Output
 }
 
@@ -495,10 +506,17 @@ extension APIProtocol {
     }
     /// Create APNs Token
     ///
-    /// Create an Apple Push Notification service (APNs) token
+    /// Create an Apple Push Notification service (APNs) token.
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)`.
+    /// Lives under the `/device/` API module (not `/database/`). CloudKit's
+    /// archived REST reference documents this under `/database/...`, but the
+    /// live service routes only OPTIONS to that path and returns
+    /// `405 Method Not Allowed` for POST. The working path is the one
+    /// CloudKit JS uses (`setApiModuleName("device")`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /device/{version}/{container}/{environment}/tokens/create`.
+    /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/create/post(createToken)`.
     public func createToken(
         path: Operations.createToken.Input.Path,
         headers: Operations.createToken.Input.Headers = .init(),
@@ -512,10 +530,14 @@ extension APIProtocol {
     }
     /// Register Token
     ///
-    /// Register a token for push notifications
+    /// Register an APNs device token for push notifications.
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
+    /// Lives under the `/device/` API module (not `/database/`) — same
+    /// rationale as `tokens/create`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /device/{version}/{container}/{environment}/tokens/register`.
+    /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
     public func registerToken(
         path: Operations.registerToken.Input.Path,
         headers: Operations.registerToken.Input.Headers = .init(),
@@ -9416,18 +9438,25 @@ public enum Operations {
     }
     /// Create APNs Token
     ///
-    /// Create an Apple Push Notification service (APNs) token
+    /// Create an Apple Push Notification service (APNs) token.
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)`.
+    /// Lives under the `/device/` API module (not `/database/`). CloudKit's
+    /// archived REST reference documents this under `/database/...`, but the
+    /// live service routes only OPTIONS to that path and returns
+    /// `405 Method Not Allowed` for POST. The working path is the one
+    /// CloudKit JS uses (`setApiModuleName("device")`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /device/{version}/{container}/{environment}/tokens/create`.
+    /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/create/post(createToken)`.
     public enum createToken {
         public static let id: Swift.String = "createToken"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/path`.
+            /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/path`.
             public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/path/version`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/path/version`.
                 public var version: Components.Parameters.version
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/path/container`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/path/container`.
                 public var container: Components.Parameters.container
                 /// Container environment
                 ///
@@ -9436,7 +9465,7 @@ public enum Operations {
                     case development = "development"
                     case production = "production"
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/path/environment`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/path/environment`.
                 public var environment: Components.Parameters.environment
                 /// Creates a new `Path`.
                 ///
@@ -9455,7 +9484,7 @@ public enum Operations {
                 }
             }
             public var path: Operations.createToken.Input.Path
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/header`.
+            /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/header`.
             public struct Headers: Sendable, Hashable {
                 public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.createToken.AcceptableContentType>]
                 /// Creates a new `Headers`.
@@ -9467,29 +9496,43 @@ public enum Operations {
                 }
             }
             public var headers: Operations.createToken.Input.Headers
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody`.
+            /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody/json`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody/json/apnsEnvironment`.
+                    /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/requestBody/json/apnsEnvironment`.
                     @frozen public enum apnsEnvironmentPayload: String, Codable, Hashable, Sendable, CaseIterable {
                         case development = "development"
                         case production = "production"
                     }
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody/json/apnsEnvironment`.
+                    /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/requestBody/json/apnsEnvironment`.
                     public var apnsEnvironment: Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload
+                    /// Logical CloudKit client identifier. CloudKit JS
+                    /// persists this across sessions for push de-dup; for
+                    /// server-side callers a fresh UUID per request is fine
+                    /// unless continuity matters.
+                    ///
+                    ///
+                    /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/requestBody/json/clientId`.
+                    public var clientId: Swift.String
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - apnsEnvironment:
-                    public init(apnsEnvironment: Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload) {
+                    ///   - clientId: Logical CloudKit client identifier. CloudKit JS
+                    public init(
+                        apnsEnvironment: Operations.createToken.Input.Body.jsonPayload.apnsEnvironmentPayload,
+                        clientId: Swift.String
+                    ) {
                         self.apnsEnvironment = apnsEnvironment
+                        self.clientId = clientId
                     }
                     public enum CodingKeys: String, CodingKey {
                         case apnsEnvironment
+                        case clientId
                     }
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/requestBody/content/application\/json`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/requestBody/content/application\/json`.
                 case json(Operations.createToken.Input.Body.jsonPayload)
             }
             public var body: Operations.createToken.Input.Body
@@ -9511,9 +9554,9 @@ public enum Operations {
         }
         @frozen public enum Output: Sendable, Hashable {
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/responses/200/content`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/create/POST/responses/200/content/application\/json`.
+                    /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/create/POST/responses/200/content/application\/json`.
                     case json(Components.Schemas.TokenResponse)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
@@ -9540,7 +9583,7 @@ public enum Operations {
             }
             /// Token created successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)/responses/200`.
+            /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/create/post(createToken)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.createToken.Output.Ok)
@@ -9578,7 +9621,7 @@ public enum Operations {
             /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
             ///
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)/responses/400`.
+            /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/create/post(createToken)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.Failure)
@@ -9616,7 +9659,7 @@ public enum Operations {
             /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
             ///
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/create/post(createToken)/responses/401`.
+            /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/create/post(createToken)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Failure)
@@ -9670,18 +9713,22 @@ public enum Operations {
     }
     /// Register Token
     ///
-    /// Register a token for push notifications
+    /// Register an APNs device token for push notifications.
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
+    /// Lives under the `/device/` API module (not `/database/`) — same
+    /// rationale as `tokens/create`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /device/{version}/{container}/{environment}/tokens/register`.
+    /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
     public enum registerToken {
         public static let id: Swift.String = "registerToken"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/path`.
+            /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/path`.
             public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/path/version`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/path/version`.
                 public var version: Components.Parameters.version
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/path/container`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/path/container`.
                 public var container: Components.Parameters.container
                 /// Container environment
                 ///
@@ -9690,7 +9737,7 @@ public enum Operations {
                     case development = "development"
                     case production = "production"
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/path/environment`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/path/environment`.
                 public var environment: Components.Parameters.environment
                 /// Creates a new `Path`.
                 ///
@@ -9709,7 +9756,7 @@ public enum Operations {
                 }
             }
             public var path: Operations.registerToken.Input.Path
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/header`.
+            /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/header`.
             public struct Headers: Sendable, Hashable {
                 public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.registerToken.AcceptableContentType>]
                 /// Creates a new `Headers`.
@@ -9721,43 +9768,54 @@ public enum Operations {
                 }
             }
             public var headers: Operations.registerToken.Input.Headers
-            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody`.
+            /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/json`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
                     /// The APNs environment the token targets.
                     ///
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/apnsEnvironment`.
+                    /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/apnsEnvironment`.
                     @frozen public enum apnsEnvironmentPayload: String, Codable, Hashable, Sendable, CaseIterable {
                         case development = "development"
                         case production = "production"
                     }
                     /// The APNs environment the token targets.
                     ///
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/apnsEnvironment`.
+                    /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/apnsEnvironment`.
                     public var apnsEnvironment: Operations.registerToken.Input.Body.jsonPayload.apnsEnvironmentPayload
                     /// The APNs token to register
                     ///
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/apnsToken`.
+                    /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/apnsToken`.
                     public var apnsToken: Swift.String
+                    /// Logical CloudKit client identifier. Reuse the value
+                    /// used with `tokens/create` to keep both calls tied to
+                    /// the same logical client.
+                    ///
+                    ///
+                    /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/requestBody/json/clientId`.
+                    public var clientId: Swift.String
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - apnsEnvironment: The APNs environment the token targets.
                     ///   - apnsToken: The APNs token to register
+                    ///   - clientId: Logical CloudKit client identifier. Reuse the value
                     public init(
                         apnsEnvironment: Operations.registerToken.Input.Body.jsonPayload.apnsEnvironmentPayload,
-                        apnsToken: Swift.String
+                        apnsToken: Swift.String,
+                        clientId: Swift.String
                     ) {
                         self.apnsEnvironment = apnsEnvironment
                         self.apnsToken = apnsToken
+                        self.clientId = clientId
                     }
                     public enum CodingKeys: String, CodingKey {
                         case apnsEnvironment
                         case apnsToken
+                        case clientId
                     }
                 }
-                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/tokens/register/POST/requestBody/content/application\/json`.
+                /// - Remark: Generated from `#/paths/device/{version}/{container}/{environment}/tokens/register/POST/requestBody/content/application\/json`.
                 case json(Operations.registerToken.Input.Body.jsonPayload)
             }
             public var body: Operations.registerToken.Input.Body
@@ -9784,13 +9842,13 @@ public enum Operations {
             }
             /// Token registered successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/200`.
+            /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.registerToken.Output.Ok)
             /// Token registered successfully
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/200`.
+            /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             public static var ok: Self {
@@ -9830,7 +9888,7 @@ public enum Operations {
             /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
             ///
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/400`.
+            /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.Failure)
@@ -9868,7 +9926,7 @@ public enum Operations {
             /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
             ///
             ///
-            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/401`.
+            /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/register/post(registerToken)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Failure)

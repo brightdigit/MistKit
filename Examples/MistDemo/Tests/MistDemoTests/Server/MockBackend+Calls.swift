@@ -87,6 +87,7 @@
     /// Captured arguments from the most recent `webCreateToken` call.
     internal struct CreateTokenCall: Sendable {
       internal let environment: APNsEnvironment
+      internal let clientId: String?
       internal let database: MistKit.Database
     }
 
@@ -94,6 +95,7 @@
     internal struct RegisterTokenCall: Sendable {
       internal let apnsToken: String
       internal let environment: APNsEnvironment
+      internal let clientId: String?
       internal let database: MistKit.Database
     }
   }

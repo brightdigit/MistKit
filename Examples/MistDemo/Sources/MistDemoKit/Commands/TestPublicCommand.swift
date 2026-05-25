@@ -28,6 +28,7 @@
 //
 
 internal import Foundation
+internal import Logging
 internal import MistKit
 
 /// Command to run comprehensive integration tests for all CloudKit operations
@@ -79,6 +80,9 @@ public struct TestPublicCommand: MistDemoCommand {
 
   /// Executes the command.
   public func execute() async throws {
+    if config.verbose {
+      MistDemoLoggingBootstrap.bootstrapOnce()
+    }
     let service = try MistKitClientFactory.create(for: config.base)
     // A single service handles every phase: server-to-server signing on
     // `.public` for record ops, plus web-auth for user-identity routes when

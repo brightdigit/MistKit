@@ -45,6 +45,10 @@ public struct RegisterTokenConfig: Sendable, ConfigurationParseable {
   /// Apple's `RegisterTokens.html` REST reference — defaults to `development`
   /// when unset.
   public let apnsEnvironment: String?
+  /// Optional logical CloudKit client identifier. When set, ties this
+  /// registration to a previously-minted `tokens/create` call sharing the
+  /// same `clientId`.
+  public let clientId: String?
   /// The output format.
   public let output: OutputFormat
 
@@ -53,11 +57,13 @@ public struct RegisterTokenConfig: Sendable, ConfigurationParseable {
     base: MistDemoConfig,
     apnsToken: String? = nil,
     apnsEnvironment: String? = nil,
+    clientId: String? = nil,
     output: OutputFormat = .json
   ) {
     self.base = base
     self.apnsToken = apnsToken
     self.apnsEnvironment = apnsEnvironment
+    self.clientId = clientId
     self.output = output
   }
 
@@ -87,6 +93,7 @@ public struct RegisterTokenConfig: Sendable, ConfigurationParseable {
       base: baseConfig,
       apnsToken: configuration.string(forKey: "apns-token"),
       apnsEnvironment: configuration.string(forKey: "apns-environment"),
+      clientId: configuration.string(forKey: "client-id"),
       output: output
     )
   }

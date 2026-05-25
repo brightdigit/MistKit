@@ -44,8 +44,13 @@ internal struct TokenRoundtripPhase: IntegrationPhase {
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
+    // Reuse one clientId across both halves so the round-trip exercises the
+    // CloudKit JS-style "single logical client" attribution path.
+    let clientId = UUID().uuidString
+
     let token = try await context.service.createAPNsToken(
       environment: .development,
+      clientId: clientId,
       database: context.database
     )
     if context.verbose {
@@ -55,6 +60,7 @@ internal struct TokenRoundtripPhase: IntegrationPhase {
     try await context.service.registerAPNsToken(
       token.apnsToken,
       environment: token.environment,
+      clientId: clientId,
       database: context.database
     )
     print("✅ Created and registered an APNs token")

@@ -34,14 +34,17 @@ extension WebRequests {
   /// `POST /api/tokens` — mint a CloudKit-managed APNs token.
   ///
   /// `apnsEnvironment` defaults to `development`; an unrecognized value falls
-  /// back to `development` rather than failing the demo request.
+  /// back to `development` rather than failing the demo request. `clientId`
+  /// is optional — when omitted the service generates a fresh UUID.
   internal struct CreateToken: Decodable {
     private enum CodingKeys: String, CodingKey {
       case apnsEnvironment
+      case clientId
       case database
     }
 
     internal let environment: APNsEnvironment
+    internal let clientId: String?
     internal let database: MistKit.Database
 
     internal init(from decoder: any Decoder) throws {
@@ -50,6 +53,8 @@ extension WebRequests {
         try container.decodeIfPresent(String.self, forKey: .apnsEnvironment)
         ?? "development"
       self.environment = APNsEnvironment(rawValue: raw) ?? .development
+      self.clientId =
+        try container.decodeIfPresent(String.self, forKey: .clientId)
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
@@ -59,16 +64,20 @@ extension WebRequests {
   /// `POST /api/tokens/register` — register a device APNs token.
   ///
   /// `apnsEnvironment` defaults to `development`; an unrecognized value falls
-  /// back to `development` to keep the demo lenient.
+  /// back to `development` to keep the demo lenient. `clientId` is optional —
+  /// reuse the value passed to `/api/tokens` to tie both calls to one
+  /// logical client.
   internal struct RegisterToken: Decodable {
     private enum CodingKeys: String, CodingKey {
       case apnsToken
       case apnsEnvironment
+      case clientId
       case database
     }
 
     internal let apnsToken: String
     internal let environment: APNsEnvironment
+    internal let clientId: String?
     internal let database: MistKit.Database
 
     internal init(from decoder: any Decoder) throws {
@@ -79,6 +88,8 @@ extension WebRequests {
         try container.decodeIfPresent(String.self, forKey: .apnsEnvironment)
         ?? "development"
       self.environment = APNsEnvironment(rawValue: raw) ?? .development
+      self.clientId =
+        try container.decodeIfPresent(String.self, forKey: .clientId)
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )

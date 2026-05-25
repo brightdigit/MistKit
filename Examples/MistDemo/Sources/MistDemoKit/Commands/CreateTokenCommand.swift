@@ -44,15 +44,18 @@ public struct CreateTokenCommand: MistDemoCommand, OutputFormatting {
     CREATE-TOKEN - Create an APNs token for CloudKit subscriptions
 
     USAGE:
-      mistdemo create-token [--apns-environment <env>]
+      mistdemo create-token [--apns-environment <env>] [--client-id <uuid>]
 
     OPTIONS:
       --apns-environment <env>       APNs environment, default development
+      --client-id <uuid>             Logical CloudKit client identifier
+                                     (default: fresh UUID per call)
       --database <type>              Database to target
       --output-format <format>       Output format (json, table, csv, yaml)
 
     EXAMPLES:
       mistdemo create-token --apns-environment development
+      mistdemo create-token --client-id 1A2B3C4D-...   # stable identity
     """
 
   private let config: CreateTokenConfig
@@ -68,6 +71,7 @@ public struct CreateTokenCommand: MistDemoCommand, OutputFormatting {
     let service = try MistKitClientFactory.create(for: config.base)
     let result = try await service.createAPNsToken(
       environment: environment,
+      clientId: config.clientId,
       database: config.base.database
     )
     try await outputResult(result, format: config.output)

@@ -28,6 +28,7 @@
 //
 
 internal import Foundation
+internal import Logging
 internal import MistKit
 
 /// Command to run comprehensive integration tests against the private database,
@@ -80,6 +81,9 @@ public struct TestPrivateCommand: MistDemoCommand {
 
   /// Executes the command.
   public func execute() async throws {
+    if config.verbose {
+      MistDemoLoggingBootstrap.bootstrapOnce()
+    }
     let service = try MistKitClientFactory.create(for: config.base)
     // Private-database flows always carry web-auth credentials, so the same
     // service can also serve user-identity routes when this command needs

@@ -46,11 +46,15 @@ public struct RegisterTokenCommand: MistDemoCommand {
     REGISTER-TOKEN - Register a device APNs token with CloudKit
 
     USAGE:
-      mistdemo register-token --apns-token <hex> [--apns-environment <env>]
+      mistdemo register-token --apns-token <hex> [--apns-environment <env>] \
+        [--client-id <uuid>]
 
     OPTIONS:
       --apns-token <hex>             APNs device token (hex string) from a device
       --apns-environment <env>       APNs environment, default development
+      --client-id <uuid>             Logical CloudKit client identifier — reuse
+                                     the value passed to create-token to tie the
+                                     two halves to the same logical client
       --database <type>              Database to target
 
     EXAMPLES:
@@ -75,6 +79,7 @@ public struct RegisterTokenCommand: MistDemoCommand {
     try await service.registerAPNsToken(
       apnsToken,
       environment: environment,
+      clientId: config.clientId,
       database: config.base.database
     )
     print("✅ Registered APNs token with CloudKit.")

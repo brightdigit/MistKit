@@ -48,7 +48,7 @@
     internal func createToken() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
-      let jsonBody = #"{"apnsEnvironment":"production"}"#
+      let jsonBody = #"{"apnsEnvironment":"production","clientId":"web-panel-1"}"#
 
       try await app.test(.router) { client in
         try await client.execute(
@@ -70,13 +70,15 @@
 
       let captured = await fixture.backend.lastCreateToken
       #expect(captured?.environment == .production)
+      #expect(captured?.clientId == "web-panel-1")
     }
 
     @Test("POST /api/tokens/register forwards the token + environment to the backend")
     internal func registerToken() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
-      let jsonBody = #"{"apnsToken":"0a1b2c3d","apnsEnvironment":"production"}"#
+      let jsonBody =
+        #"{"apnsToken":"0a1b2c3d","apnsEnvironment":"production","clientId":"web-panel-1"}"#
 
       try await app.test(.router) { client in
         try await client.execute(
@@ -92,6 +94,7 @@
       let captured = await fixture.backend.lastRegisterToken
       #expect(captured?.apnsToken == "0a1b2c3d")
       #expect(captured?.environment == .production)
+      #expect(captured?.clientId == "web-panel-1")
     }
 
     @Test("token routes return 401 without a captured auth token")

@@ -801,10 +801,17 @@ paths:
         '401':
           $ref: '#/components/responses/Failure'
 
-  /database/{version}/{container}/{environment}/tokens/create:
+  /device/{version}/{container}/{environment}/tokens/create:
     post:
       summary: Create APNs Token
-      description: Create an Apple Push Notification service (APNs) token
+      description: |
+        Create an Apple Push Notification service (APNs) token.
+
+        Lives under the `/device/` API module (not `/database/`). CloudKit's
+        archived REST reference documents this under `/database/...`, but the
+        live service routes only OPTIONS to that path and returns
+        `405 Method Not Allowed` for POST. The working path is the one
+        CloudKit JS uses (`setApiModuleName("device")`).
       operationId: createToken
       tags:
         - Tokens
@@ -820,10 +827,18 @@ paths:
               type: object
               required:
                 - apnsEnvironment
+                - clientId
               properties:
                 apnsEnvironment:
                   type: string
                   enum: [development, production]
+                clientId:
+                  type: string
+                  description: |
+                    Logical CloudKit client identifier. CloudKit JS
+                    persists this across sessions for push de-dup; for
+                    server-side callers a fresh UUID per request is fine
+                    unless continuity matters.
       responses:
         '200':
           description: Token created successfully
@@ -836,10 +851,14 @@ paths:
         '401':
           $ref: '#/components/responses/Failure'
 
-  /database/{version}/{container}/{environment}/tokens/register:
+  /device/{version}/{container}/{environment}/tokens/register:
     post:
       summary: Register Token
-      description: Register a token for push notifications
+      description: |
+        Register an APNs device token for push notifications.
+
+        Lives under the `/device/` API module (not `/database/`) — same
+        rationale as `tokens/create`.
       operationId: registerToken
       tags:
         - Tokens
@@ -856,6 +875,7 @@ paths:
               required:
                 - apnsEnvironment
                 - apnsToken
+                - clientId
               properties:
                 apnsEnvironment:
                   type: string
@@ -864,6 +884,12 @@ paths:
                 apnsToken:
                   type: string
                   description: The APNs token to register
+                clientId:
+                  type: string
+                  description: |
+                    Logical CloudKit client identifier. Reuse the value
+                    used with `tokens/create` to keep both calls tied to
+                    the same logical client.
       responses:
         '200':
           description: Token registered successfully
