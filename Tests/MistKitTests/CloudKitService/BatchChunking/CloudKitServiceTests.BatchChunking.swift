@@ -1,9 +1,9 @@
 //
-//  MockTransport.swift
+//  CloudKitServiceTests.BatchChunking.swift
 //  MistKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -28,33 +28,11 @@
 //
 
 internal import Foundation
-internal import HTTPTypes
-internal import OpenAPIRuntime
+internal import Testing
 
-/// Mock transport for testing that doesn't make actual network calls
-internal struct MockTransport: ClientTransport, Sendable {
-  internal let responseProvider: ResponseProvider
+@testable import MistKit
 
-  internal init(responseProvider: ResponseProvider = .default) {
-    self.responseProvider = responseProvider
-  }
-
-  internal func send(
-    _ request: HTTPRequest,
-    body: HTTPBody?,
-    baseURL: URL,
-    operationID: String
-  ) async throws -> (HTTPResponse, HTTPBody?) {
-    let bodyData: Data? =
-      if let body {
-        try await Data(collecting: body, upTo: 10 * 1_024 * 1_024)
-      } else {
-        nil
-      }
-    return try await responseProvider.response(
-      for: operationID,
-      request: request,
-      body: bodyData
-    )
-  }
+extension CloudKitServiceTests {
+  @Suite("CloudKitService Batch Chunking", .enabled(if: Platform.isCryptoAvailable))
+  internal enum BatchChunking {}
 }

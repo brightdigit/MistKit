@@ -50,6 +50,10 @@ extension CloudKitService {
   ///
   /// - Note: Pass `desiredKeys` to limit which fields come back. Useful
   ///   for list views that only need a projection.
+  /// - Note: This is the single-request primitive — CloudKit caps it at
+  ///   ``maxRecordsPerRequest`` record names. For larger inputs use
+  ///   ``lookupAllRecords(recordNames:desiredKeys:database:batchSize:)``, which
+  ///   chunks automatically.
   /// - Returns: A ``RecordResult`` per requested record — `.success` for a found
   ///   record, `.failure` (e.g. `NOT_FOUND`) for one CloudKit could not return.
   public func lookupRecords(

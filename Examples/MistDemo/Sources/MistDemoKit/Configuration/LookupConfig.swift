@@ -43,6 +43,9 @@ public struct LookupConfig: Sendable, ConfigurationParseable {
   public let recordNames: [String]
   /// The optional field names to include in the response.
   public let fields: [String]?
+  /// Maximum items per request for the auto-chunking `lookup-all` command
+  /// (the plain `lookup` command ignores it).
+  public let batchSize: Int
   /// The output format.
   public let output: OutputFormat
 
@@ -51,11 +54,13 @@ public struct LookupConfig: Sendable, ConfigurationParseable {
     base: MistDemoConfig,
     recordNames: [String],
     fields: [String]? = nil,
+    batchSize: Int = 200,
     output: OutputFormat = .json
   ) {
     self.base = base
     self.recordNames = recordNames
     self.fields = fields
+    self.batchSize = batchSize
     self.output = output
   }
 
@@ -111,10 +116,14 @@ public struct LookupConfig: Sendable, ConfigurationParseable {
       ) ?? MistDemoConstants.Defaults.outputFormat
     let output = OutputFormat(rawValue: outputString) ?? .json
 
+    let batchSize =
+      configReader.int(forKey: MistDemoConstants.ConfigKeys.batchSize, default: 200) ?? 200
+
     self.init(
       base: baseConfig,
       recordNames: recordNames,
       fields: fields,
+      batchSize: batchSize,
       output: output
     )
   }

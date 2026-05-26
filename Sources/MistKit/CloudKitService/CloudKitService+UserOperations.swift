@@ -143,6 +143,11 @@ extension CloudKitService {
   ///
   /// Hits CloudKit's POST `users/discover` endpoint. Routed against the public
   /// database with web-auth credentials.
+  ///
+  /// - Note: This is the single-request primitive — CloudKit caps it at
+  ///   ``maxRecordsPerRequest`` lookup infos. For larger inputs use
+  ///   ``discoverAllUserIdentities(lookupInfos:batchSize:)``, which chunks
+  ///   automatically.
   public func discoverUserIdentities(
     lookupInfos: [UserIdentityLookupInfo]
   ) async throws(CloudKitError) -> [UserIdentity] {
