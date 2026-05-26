@@ -29,7 +29,21 @@
 
 public import Foundation
 
-/// Errors that can occur during asset re-reference operations.
+/// CLI-layer errors for MistDemo's `rereference-asset` command.
+///
+/// This type lives in MistDemo, not MistKit, on purpose. MistKit's
+/// `CloudKitService.rereferenceAsset(...)` already `throws(CloudKitError)` for
+/// every domain/transport failure; this enum does not duplicate or replace it.
+/// Instead it covers concerns specific to the command-line front end:
+/// - `sourceRecordRequired` / `assetFieldRequired` / `targetRecordRequired`
+///   validate command-line arguments *before* MistKit is invoked.
+/// - `operationFailed` wraps a `CloudKitError`'s `localizedDescription` caught
+///   from `rereferenceAsset(...)` (see `RereferenceAssetCommand`), surfacing it
+///   as a flat user-facing message.
+///
+/// This mirrors the established demo pattern shared by `DeleteError`,
+/// `UploadAssetError`, etc. — "input-validation cases + `operationFailed(String)`
+/// wrapper" — which keeps CLI presentation concerns out of the library.
 public enum RereferenceAssetError: Error, LocalizedError {
   case sourceRecordRequired
   case assetFieldRequired
