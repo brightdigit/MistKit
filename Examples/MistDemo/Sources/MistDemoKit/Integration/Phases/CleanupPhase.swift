@@ -53,7 +53,7 @@ internal struct CleanupPhase: IntegrationPhase, CleanupPhaseMarker {
     let deleteOps = input.names.map { recordName in
       RecordOperation(
         operationType: .forceDelete,
-        recordType: IntegrationTestData.recordType,
+        recordType: MistDemoConfig.recordType,
         recordName: recordName
       )
     }

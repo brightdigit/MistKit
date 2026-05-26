@@ -68,7 +68,7 @@ internal struct NotificationRoundtripPhase: IntegrationPhase {
       _ = try await context.service.createSubscription(
         .query(
           subscriptionID: subscriptionID,
-          recordType: IntegrationTestData.recordType,
+          recordType: MistDemoConfig.recordType,
           firesOn: [.create, .update, .delete]
         ),
         database: context.database
@@ -140,7 +140,7 @@ internal struct NotificationRoundtripPhase: IntegrationPhase {
     /// (`invalid attempt to update record from type '_sub_trigger_sub_…'`).
     private func trigger(suffix: String, context: PhaseContext) async throws -> RecordInfo {
       let record = try await context.service.createRecord(
-        recordType: IntegrationTestData.recordType,
+        recordType: MistDemoConfig.recordType,
         recordName: "mistkit-notif-rec-\(suffix)",
         fields: ["title": .string("notification probe \(suffix)")],
         database: context.database
@@ -205,7 +205,7 @@ internal struct NotificationRoundtripPhase: IntegrationPhase {
   ) async {
     if let recordName {
       try? await context.service.deleteRecord(
-        recordType: IntegrationTestData.recordType,
+        recordType: MistDemoConfig.recordType,
         recordName: recordName,
         database: context.database
       )

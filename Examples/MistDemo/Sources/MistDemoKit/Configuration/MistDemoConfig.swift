@@ -39,6 +39,9 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
   /// The base configuration type.
   public typealias BaseConfig = Never
 
+  /// CloudKit record type for integration tests.
+  internal static let recordType = "Note"
+
   // MARK: - CloudKit Core Configuration
 
   /// CloudKit container identifier.

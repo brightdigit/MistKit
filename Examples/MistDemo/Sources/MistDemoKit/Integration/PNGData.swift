@@ -1,5 +1,5 @@
 //
-//  PNGEncoder.swift
+//  PNGData.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -36,7 +36,12 @@ internal import Foundation
 /// checksum — so the output renders in the CloudKit Dashboard and any standard
 /// PNG decoder. No CoreGraphics/ImageIO dependency, so it stays cross-platform
 /// (Linux/WASI).
-internal enum PNGEncoder {
+internal enum PNGData {
+  /// Solid fill color (RGB) for the generated test image.
+  private static let fillRed: UInt8 = 0x34
+  private static let fillGreen: UInt8 = 0x9F
+  private static let fillBlue: UInt8 = 0xE6
+
   /// Encode a solid-color RGB image as a valid PNG.
   ///
   /// - Parameters:
@@ -46,7 +51,7 @@ internal enum PNGEncoder {
   ///   - green: Green channel for every pixel.
   ///   - blue: Blue channel for every pixel.
   /// - Returns: Valid PNG image data.
-  internal static func encode(
+  private static func encode(
     width: Int,
     height: Int,
     red: UInt8,
@@ -153,5 +158,25 @@ internal enum PNGEncoder {
       highSum = (highSum + lowSum) % modulus
     }
     return (highSum << 16) | lowSum
+  }
+
+  /// Generate a real, decodable solid-color PNG for upload testing.
+  ///
+  /// Delegates the byte-level encoding to ``PNGEncoder``, which produces a
+  /// cross-platform (Linux/WASI), Dashboard-renderable PNG with no
+  /// CoreGraphics/ImageIO dependency.
+  ///
+  /// `sizeKB` is a size hint: the image is a square whose pixel dimensions are
+  /// scaled so the encoded PNG approximates the requested size.
+  ///
+  /// - Parameter sizeKB: Desired approximate size in kilobytes (default: 10)
+  /// - Returns: Valid PNG image data
+  internal static func generate(withSizeInKB sizeKB: Int = 10) -> Data {
+    let targetBytes = max(1, sizeKB) * 1_024
+    // Raw image bytes ≈ height * (1 + width * 3) ≈ 3 * side² for a square.
+    let side = max(1, Int((Double(targetBytes) / 3.0).squareRoot().rounded()))
+    return encode(
+      width: side, height: side, red: fillRed, green: fillGreen, blue: fillBlue
+    )
   }
 }

@@ -43,7 +43,7 @@ internal struct UploadAssetPhase: IntegrationPhase {
   ) async throws -> AssetUploadReceipt {
     print("\n\(Self.emoji) \(Self.title)")
 
-    let testData = IntegrationTestData.generateTestImage(sizeKB: context.assetSizeKB)
+    let testData = PNGData.generate(withSizeInKB: context.assetSizeKB)
     let sizeInMB = Double(testData.count) / 1_024 / 1_024
 
     if context.verbose {
@@ -52,7 +52,7 @@ internal struct UploadAssetPhase: IntegrationPhase {
 
     let receipt = try await context.service.uploadAssets(
       data: testData,
-      recordType: IntegrationTestData.recordType,
+      recordType: MistDemoConfig.recordType,
       fieldName: "image",
       database: context.database
     )

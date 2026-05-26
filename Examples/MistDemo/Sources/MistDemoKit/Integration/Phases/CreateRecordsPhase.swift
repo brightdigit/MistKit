@@ -53,7 +53,7 @@ internal struct CreateRecordsPhase: IntegrationPhase {
     for recordIndex in 1...context.recordCount {
       let recordName = "mistkit-test-\(UUID().uuidString.lowercased())"
       let record = try await context.service.createRecord(
-        recordType: IntegrationTestData.recordType,
+        recordType: MistDemoConfig.recordType,
         recordName: recordName,
         fields: [
           "title": .string("Test Record \(recordIndex)"),

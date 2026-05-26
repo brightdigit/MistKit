@@ -48,7 +48,7 @@ internal struct ModifyRecordsPhase: IntegrationPhase {
     let operations = recordsToUpdate.enumerated().map { offset, recordName in
       RecordOperation(
         operationType: .forceReplace,
-        recordType: IntegrationTestData.recordType,
+        recordType: MistDemoConfig.recordType,
         recordName: recordName,
         fields: [
           "title": .string("Updated Record \(offset + 1)")

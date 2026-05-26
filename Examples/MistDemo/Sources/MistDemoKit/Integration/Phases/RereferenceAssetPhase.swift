@@ -84,7 +84,7 @@ internal struct RereferenceAssetPhase: IntegrationPhase {
     // what attaches the asset.
     let targetRecordName = "mistkit-test-\(UUID().uuidString.lowercased())"
     _ = try await context.service.createRecord(
-      recordType: IntegrationTestData.recordType,
+      recordType: MistDemoConfig.recordType,
       recordName: targetRecordName,
       fields: [
         "title": .string("Rereference Target"),

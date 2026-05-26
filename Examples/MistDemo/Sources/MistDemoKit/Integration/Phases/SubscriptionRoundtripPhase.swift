@@ -57,7 +57,7 @@ internal struct SubscriptionRoundtripPhase: IntegrationPhase {
     let created = try await context.service.createSubscription(
       .query(
         subscriptionID: subscriptionID,
-        recordType: IntegrationTestData.recordType,
+        recordType: MistDemoConfig.recordType,
         firesOn: [.create, .update, .delete]
       ),
       database: context.database
