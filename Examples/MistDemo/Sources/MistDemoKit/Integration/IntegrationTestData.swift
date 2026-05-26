@@ -34,83 +34,140 @@ internal enum IntegrationTestData {
   /// CloudKit record type for integration tests.
   internal static let recordType = "Note"
 
-  /// Generate minimal PNG-like binary data for upload testing.
+  /// Solid fill color (RGB) for the generated test image.
+  private static let fillRed: UInt8 = 0x34
+  private static let fillGreen: UInt8 = 0x9F
+  private static let fillBlue: UInt8 = 0xE6
+
+  /// Generate a real, decodable solid-color PNG for upload testing.
   ///
-  /// Produces data with a valid PNG signature, IHDR, IDAT, and IEND structure,
-  /// but padding chunks use zeroed CRC32 values (invalid). Not standards-compliant
-  /// and will be rejected by PNG decoders; suitable only as raw binary test payloads.
-  /// - Parameter sizeKB: Desired size in kilobytes (default: 10)
-  /// - Returns: PNG-like binary data
+  /// Built entirely from `Data` — correct per-chunk CRC-32 and a valid zlib
+  /// stream using uncompressed ("stored") DEFLATE blocks plus an Adler-32
+  /// checksum — so it renders in the CloudKit Dashboard and any standard PNG
+  /// decoder. No CoreGraphics/ImageIO dependency, so it stays cross-platform
+  /// (Linux/WASI).
+  ///
+  /// `sizeKB` is a size hint: the image is a square whose pixel dimensions are
+  /// scaled so the encoded PNG approximates the requested size.
+  ///
+  /// - Parameter sizeKB: Desired approximate size in kilobytes (default: 10)
+  /// - Returns: Valid PNG image data
   internal static func generateTestImage(sizeKB: Int = 10) -> Data {
-    // Minimal valid 1x1 pixel PNG
-    // PNG signature
-    var data = Data([
-      0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-    ])
+    let targetBytes = max(1, sizeKB) * 1_024
+    // Raw image bytes ≈ height * (1 + width * 3) ≈ 3 * side² for a square.
+    let side = max(1, Int((Double(targetBytes) / 3.0).squareRoot().rounded()))
+    return encodePNG(
+      width: side, height: side, red: fillRed, green: fillGreen, blue: fillBlue
+    )
+  }
 
-    // IHDR chunk (image header) for 1x1 pixel RGBA image
-    let ihdrData: [UInt8] = [
-      0x00, 0x00, 0x00, 0x0D,  // Chunk length: 13 bytes
-      0x49, 0x48, 0x44, 0x52,  // Chunk type: "IHDR"
-      0x00, 0x00, 0x00, 0x01,  // Width: 1
-      0x00, 0x00, 0x00, 0x01,  // Height: 1
-      0x08,  // Bit depth: 8
-      0x06,  // Color type: RGBA
-      0x00,  // Compression: deflate
-      0x00,  // Filter: adaptive
-      0x00,  // Interlace: none
-      0x1F, 0x15, 0xC4, 0x89,  // CRC32 checksum
-    ]
-    data.append(contentsOf: ihdrData)
-
-    // IDAT chunk (image data) - minimal compressed pixel data
-    let idatData: [UInt8] = [
-      0x00, 0x00, 0x00, 0x0C,  // Chunk length: 12 bytes
-      0x49, 0x44, 0x41, 0x54,  // Chunk type: "IDAT"
-      0x08, 0x1D, 0x01, 0x02, 0x00, 0xFD, 0xFF,  // Compressed data
-      0x00, 0x00, 0x00, 0x02, 0x00, 0x01,
-      0xE2, 0x21, 0xBC, 0x33,  // CRC32 checksum
-    ]
-    data.append(contentsOf: idatData)
-
-    // IEND chunk (image trailer)
-    let iendData: [UInt8] = [
-      0x00, 0x00, 0x00, 0x00,  // Chunk length: 0
-      0x49, 0x45, 0x4E, 0x44,  // Chunk type: "IEND"
-      0xAE, 0x42, 0x60, 0x82,  // CRC32 checksum
-    ]
-    data.append(contentsOf: iendData)
-
-    // Pad to requested size with additional IDAT chunks if needed
-    let targetSize = sizeKB * 1_024
-    while data.count < targetSize {
-      // Add padding IDAT chunks
-      let remainingBytes = targetSize - data.count
-      let chunkSize = min(8_192, remainingBytes - 12)  // Leave room for chunk overhead
-
-      if chunkSize <= 0 {
-        break
+  /// Encode a solid-color RGB image as a valid PNG.
+  private static func encodePNG(
+    width: Int,
+    height: Int,
+    red: UInt8,
+    green: UInt8,
+    blue: UInt8
+  ) -> Data {
+    // Raw image data: each scanline is a filter-type byte (0 = None) followed
+    // by `width` RGB pixels.
+    var raw = [UInt8]()
+    raw.reserveCapacity(height * (1 + width * 3))
+    for _ in 0..<height {
+      raw.append(0x00)
+      for _ in 0..<width {
+        raw.append(red)
+        raw.append(green)
+        raw.append(blue)
       }
-
-      // Chunk length (4 bytes)
-      let lengthBytes: [UInt8] = [
-        UInt8((chunkSize >> 24) & 0xFF),
-        UInt8((chunkSize >> 16) & 0xFF),
-        UInt8((chunkSize >> 8) & 0xFF),
-        UInt8(chunkSize & 0xFF),
-      ]
-      data.append(contentsOf: lengthBytes)
-
-      // Chunk type: "IDAT"
-      data.append(contentsOf: [0x49, 0x44, 0x41, 0x54])
-
-      // Padding data
-      data.append(contentsOf: Array(repeating: UInt8(0x00), count: chunkSize))
-
-      // Simple CRC32 (not accurate, but sufficient for test data)
-      data.append(contentsOf: [0x00, 0x00, 0x00, 0x00])
     }
 
+    var png = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])  // signature
+
+    // IHDR: width, height, bit depth 8, color type 2 (RGB), no compression/
+    // filter/interlace metadata flags.
+    var ihdr = [UInt8]()
+    ihdr.append(contentsOf: bigEndianBytes(UInt32(width)))
+    ihdr.append(contentsOf: bigEndianBytes(UInt32(height)))
+    ihdr.append(contentsOf: [0x08, 0x02, 0x00, 0x00, 0x00])
+    png.append(chunk(type: "IHDR", payload: ihdr))
+
+    png.append(chunk(type: "IDAT", payload: zlibStored(raw)))
+    png.append(chunk(type: "IEND", payload: []))
+
+    return png
+  }
+
+  /// Build one PNG chunk: length, type, payload, and CRC-32 over type+payload.
+  private static func chunk(type: String, payload: [UInt8]) -> Data {
+    let typeBytes = Array(type.utf8)
+    var data = Data()
+    data.append(contentsOf: bigEndianBytes(UInt32(payload.count)))
+    data.append(contentsOf: typeBytes)
+    data.append(contentsOf: payload)
+    data.append(contentsOf: bigEndianBytes(crc32(typeBytes + payload)))
     return data
+  }
+
+  /// Wrap raw bytes in a zlib stream using uncompressed DEFLATE blocks.
+  private static func zlibStored(_ raw: [UInt8]) -> [UInt8] {
+    var out: [UInt8] = [0x78, 0x01]  // zlib header (CM=deflate, no preset dict)
+
+    let maxBlock = 0xFFFF
+    var offset = 0
+    if raw.isEmpty {
+      // A single empty, final stored block.
+      out.append(contentsOf: [0x01, 0x00, 0x00, 0xFF, 0xFF])
+    } else {
+      while offset < raw.count {
+        let len = min(maxBlock, raw.count - offset)
+        let isFinal = offset + len >= raw.count
+        out.append(isFinal ? 0x01 : 0x00)  // BFINAL + BTYPE=00 (stored)
+        let len16 = UInt16(len)
+        out.append(UInt8(len16 & 0xFF))  // LEN, little-endian
+        out.append(UInt8(len16 >> 8))
+        out.append(UInt8(~len16 & 0xFF))  // NLEN = ~LEN
+        out.append(UInt8(~len16 >> 8))
+        out.append(contentsOf: raw[offset..<(offset + len)])
+        offset += len
+      }
+    }
+
+    out.append(contentsOf: bigEndianBytes(adler32(raw)))  // zlib trailer
+    return out
+  }
+
+  /// Big-endian 4-byte representation of a `UInt32`.
+  private static func bigEndianBytes(_ value: UInt32) -> [UInt8] {
+    [
+      UInt8((value >> 24) & 0xFF),
+      UInt8((value >> 16) & 0xFF),
+      UInt8((value >> 8) & 0xFF),
+      UInt8(value & 0xFF),
+    ]
+  }
+
+  /// PNG CRC-32 (polynomial 0xEDB88320) over the given bytes.
+  private static func crc32(_ bytes: [UInt8]) -> UInt32 {
+    var crc: UInt32 = 0xFFFF_FFFF
+    for byte in bytes {
+      crc ^= UInt32(byte)
+      for _ in 0..<8 {
+        crc = (crc & 1) != 0 ? (crc >> 1) ^ 0xEDB8_8320 : (crc >> 1)
+      }
+    }
+    return crc ^ 0xFFFF_FFFF
+  }
+
+  /// Adler-32 checksum (the zlib stream trailer) over the given bytes.
+  private static func adler32(_ bytes: [UInt8]) -> UInt32 {
+    let modulus: UInt32 = 65_521
+    var lowSum: UInt32 = 1
+    var highSum: UInt32 = 0
+    for byte in bytes {
+      lowSum = (lowSum + UInt32(byte)) % modulus
+      highSum = (highSum + lowSum) % modulus
+    }
+    return (highSum << 16) | lowSum
   }
 }

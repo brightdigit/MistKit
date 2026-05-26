@@ -801,6 +801,65 @@ paths:
         '401':
           $ref: '#/components/responses/Failure'
 
+  /database/{version}/{container}/{environment}/{database}/assets/rereference:
+    post:
+      summary: Re-reference Existing Assets
+      description: |
+        Fetch reusable asset descriptors for assets that already live on other
+        records, without re-uploading the bytes. Each returned descriptor can be
+        set on another record's Asset field via `records/modify` to share the
+        same underlying asset. Assets are deleted only when all references to
+        them are removed.
+
+        Documented in Apple's archived CloudKit Web Services Reference
+        (`RereferenceAssets`); absent from the current online docs.
+      operationId: rereferenceAssets
+      tags:
+        - Assets
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                zoneID:
+                  $ref: '#/components/schemas/ZoneID'
+                  description: Optional zone ID. Defaults to default zone if not specified.
+                assets:
+                  type: array
+                  description: Array of source asset fields to re-reference.
+                  items:
+                    type: object
+                    required:
+                      - recordName
+                      - fieldName
+                    properties:
+                      recordName:
+                        type: string
+                        description: Name of the record holding the source asset.
+                      fieldName:
+                        type: string
+                        description: Name of the Asset field on the source record.
+              required:
+                - assets
+      responses:
+        '200':
+          description: Reusable asset descriptors returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetRereferenceResponse'
+        '400':
+          $ref: '#/components/responses/Failure'
+        '401':
+          $ref: '#/components/responses/Failure'
+
   /device/{version}/{container}/{environment}/tokens/create:
     post:
       summary: Create APNs Token
@@ -1573,6 +1632,22 @@ components:
                 type: string
               fieldName:
                 type: string
+
+    AssetRereferenceResponse:
+      type: object
+      description: |
+        Response body for `assets/rereference`: one reusable asset descriptor
+        per requested asset field, wrapped under `assets`.
+
+        Verified against the live service: the endpoint validates atomically —
+        a bad entry (e.g. a missing source record) fails the *whole* request
+        with a top-level HTTP 400, so there are no inline per-item failures
+        here (unlike `ModifyResponse`/`LookupResponse`).
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetValue'
 
     TokenResponse:
       type: object

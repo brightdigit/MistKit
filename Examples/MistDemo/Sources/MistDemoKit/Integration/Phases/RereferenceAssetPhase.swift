@@ -28,21 +28,89 @@
 //
 
 internal import Foundation
+internal import MistKit
 
-/// Stub phase for `assets/rereference`. Not wired into the public/private
-/// pipelines yet; `#31` flips this into a real run when the MistKit Swift
-/// wrapper lands.
+/// Re-references an existing asset from one record onto a freshly-created
+/// target record without re-uploading the bytes, then verifies the target
+/// resolves to the same asset (`assets/rereference`).
 internal struct RereferenceAssetPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = NoState
+  internal typealias Input = RereferenceAssetInput
+  internal typealias Output = CreatedRecordNames
 
-  internal static let title = "Rereference asset (pending #31)"
+  internal static let title = "Rereference asset"
   internal static let emoji = "📎"
-  internal static let apiName = "rereferenceAsset"
+  internal static let apiName = "rereferenceAssets"
 
-  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
+  /// Confirm the target record now references the same asset bytes.
+  private static func verify(
+    _ record: RecordInfo, expected: Asset, context: PhaseContext
+  ) throws {
+    guard case .asset(let targetAsset) = record.fields["image"] else {
+      throw IntegrationTestError.verificationFailed(
+        "Target record '\(record.recordName)' has no 'image' asset after re-reference"
+      )
+    }
+
+    // Match on whichever identifying field CloudKit echoes back: the file
+    // checksum is the strongest signal; a shared download URL also confirms it.
+    let checksumMatches =
+      expected.fileChecksum != nil && targetAsset.fileChecksum == expected.fileChecksum
+    let downloadURLMatches =
+      expected.downloadURL != nil && targetAsset.downloadURL == expected.downloadURL
+
+    guard checksumMatches || downloadURLMatches else {
+      throw IntegrationTestError.verificationFailed(
+        "Re-referenced asset on '\(record.recordName)' does not match the source "
+          + "(fileChecksum: \(targetAsset.fileChecksum ?? "nil") vs "
+          + "\(expected.fileChecksum ?? "nil"))"
+      )
+    }
+
+    if context.verbose {
+      print("   Verified fileChecksum: \(targetAsset.fileChecksum ?? "nil")")
+    }
+  }
+
+  internal func run(
+    input: RereferenceAssetInput, context: PhaseContext
+  ) async throws -> CreatedRecordNames {
     print("\n\(Self.emoji) \(Self.title)")
-    PendingStub.printPending(endpoint: "assets/rereference", trackingIssue: 31)
-    return NoState()
+
+    guard let sourceRecordName = input.recordNames.first else {
+      throw IntegrationTestError.missingPhaseState("createdRecordNames")
+    }
+
+    // A fresh target record with no image of its own, so the re-reference is
+    // what attaches the asset.
+    let targetRecordName = "mistkit-test-\(UUID().uuidString.lowercased())"
+    _ = try await context.service.createRecord(
+      recordType: IntegrationTestData.recordType,
+      recordName: targetRecordName,
+      fields: [
+        "title": .string("Rereference Target"),
+        "index": .int64(0),
+      ],
+      database: context.database
+    )
+
+    if context.verbose {
+      print("   Source: \(sourceRecordName)")
+      print("   Target: \(targetRecordName)")
+    }
+
+    let updated = try await context.service.rereferenceAsset(
+      fromRecord: sourceRecordName,
+      field: "image",
+      toRecord: targetRecordName,
+      field: "image",
+      database: context.database
+    )
+
+    try Self.verify(updated, expected: input.receipt.asset, context: context)
+
+    print("✅ Re-referenced asset onto \(targetRecordName)")
+
+    // Track the target so cleanup removes it alongside the other records.
+    return CreatedRecordNames(input.recordNames + [targetRecordName])
   }
 }

@@ -1,5 +1,5 @@
 //
-//  PrivateDatabaseTest.swift
+//  RereferenceAssetInput.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,34 +30,15 @@
 internal import Foundation
 internal import MistKit
 
-internal struct PrivateDatabaseTest: PhasedIntegrationTest {
-  internal let name = "Private Database"
-  internal let database: MistKit.Database = .private
+/// Phase input for ``RereferenceAssetPhase``: the uploaded asset receipt
+/// (expected checksum) plus the records created with that asset (the
+/// re-reference source).
+internal struct RereferenceAssetInput: PhaseStateDecodable, Sendable {
+  internal let receipt: AssetUploadReceipt
+  internal let recordNames: [String]
 
-  // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
-  internal let phases: [any IntegrationPhase] = [
-    ListZonesPhase(),
-    ModifyZonesPhase(),
-    LookupZonePhase(),
-    ZoneRoundtripPhase(),
-    FetchZoneChangesPhase(),
-    FetchAllZoneChangesPhase(),
-    UploadAssetPhase(),
-    CreateRecordsPhase(),
-    RereferenceAssetPhase(),
-    QueryRecordsPhase(),
-    LookupRecordsPhase(),
-    InitialSyncPhase(),
-    ModifyRecordsPhase(),
-    IncrementalSyncPhase(),
-    FinalVerificationPhase(),
-    SubscriptionRoundtripPhase(),
-    TokenRoundtripPhase(),
-    NotificationRoundtripPhase(),
-    CleanupPhase(),
-  ]
+  internal init(from state: PhaseState) throws {
+    self.receipt = try AssetUploadReceipt(from: state)
+    self.recordNames = try CreatedRecordNames(from: state).names
+  }
 }

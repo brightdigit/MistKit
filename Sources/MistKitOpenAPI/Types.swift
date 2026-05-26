@@ -158,6 +158,21 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/upload`.
     /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)`.
     func uploadAssets(_ input: Operations.uploadAssets.Input) async throws -> Operations.uploadAssets.Output
+    /// Re-reference Existing Assets
+    ///
+    /// Fetch reusable asset descriptors for assets that already live on other
+    /// records, without re-uploading the bytes. Each returned descriptor can be
+    /// set on another record's Asset field via `records/modify` to share the
+    /// same underlying asset. Assets are deleted only when all references to
+    /// them are removed.
+    ///
+    /// Documented in Apple's archived CloudKit Web Services Reference
+    /// (`RereferenceAssets`); absent from the current online docs.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/rereference`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/rereference/post(rereferenceAssets)`.
+    func rereferenceAssets(_ input: Operations.rereferenceAssets.Input) async throws -> Operations.rereferenceAssets.Output
     /// Create APNs Token
     ///
     /// Create an Apple Push Notification service (APNs) token.
@@ -499,6 +514,31 @@ extension APIProtocol {
         body: Operations.uploadAssets.Input.Body
     ) async throws -> Operations.uploadAssets.Output {
         try await uploadAssets(Operations.uploadAssets.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Re-reference Existing Assets
+    ///
+    /// Fetch reusable asset descriptors for assets that already live on other
+    /// records, without re-uploading the bytes. Each returned descriptor can be
+    /// set on another record's Asset field via `records/modify` to share the
+    /// same underlying asset. Assets are deleted only when all references to
+    /// them are removed.
+    ///
+    /// Documented in Apple's archived CloudKit Web Services Reference
+    /// (`RereferenceAssets`); absent from the current online docs.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/rereference`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/rereference/post(rereferenceAssets)`.
+    public func rereferenceAssets(
+        path: Operations.rereferenceAssets.Input.Path,
+        headers: Operations.rereferenceAssets.Input.Headers = .init(),
+        body: Operations.rereferenceAssets.Input.Body
+    ) async throws -> Operations.rereferenceAssets.Output {
+        try await rereferenceAssets(Operations.rereferenceAssets.Input(
             path: path,
             headers: headers,
             body: body
@@ -2472,6 +2512,30 @@ public enum Components {
             }
             public enum CodingKeys: String, CodingKey {
                 case tokens
+            }
+        }
+        /// Response body for `assets/rereference`: one reusable asset descriptor
+        /// per requested asset field, wrapped under `assets`.
+        ///
+        /// Verified against the live service: the endpoint validates atomically —
+        /// a bad entry (e.g. a missing source record) fails the *whole* request
+        /// with a top-level HTTP 400, so there are no inline per-item failures
+        /// here (unlike `ModifyResponse`/`LookupResponse`).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/AssetRereferenceResponse`.
+        public struct AssetRereferenceResponse: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/AssetRereferenceResponse/assets`.
+            public var assets: [Components.Schemas.AssetValue]?
+            /// Creates a new `AssetRereferenceResponse`.
+            ///
+            /// - Parameters:
+            ///   - assets:
+            public init(assets: [Components.Schemas.AssetValue]? = nil) {
+                self.assets = assets
+            }
+            public enum CodingKeys: String, CodingKey {
+                case assets
             }
         }
         /// Response body for `tokens/create`. Per Apple's archived REST reference,
@@ -9651,6 +9715,317 @@ public enum Operations {
             ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/upload/post(uploadAssets)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Re-reference Existing Assets
+    ///
+    /// Fetch reusable asset descriptors for assets that already live on other
+    /// records, without re-uploading the bytes. Each returned descriptor can be
+    /// set on another record's Asset field via `records/modify` to share the
+    /// same underlying asset. Assets are deleted only when all references to
+    /// them are removed.
+    ///
+    /// Documented in Apple's archived CloudKit Web Services Reference
+    /// (`RereferenceAssets`); absent from the current online docs.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/rereference`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/rereference/post(rereferenceAssets)`.
+    public enum rereferenceAssets {
+        public static let id: Swift.String = "rereferenceAssets"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/path/version`.
+                public var version: Components.Parameters.version
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/path/container`.
+                public var container: Components.Parameters.container
+                /// Container environment
+                ///
+                /// - Remark: Generated from `#/components/parameters/environment`.
+                @frozen public enum environment: String, Codable, Hashable, Sendable, CaseIterable {
+                    case development = "development"
+                    case production = "production"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/path/environment`.
+                public var environment: Components.Parameters.environment
+                /// Database scope
+                ///
+                /// - Remark: Generated from `#/components/parameters/database`.
+                @frozen public enum database: String, Codable, Hashable, Sendable, CaseIterable {
+                    case _public = "public"
+                    case _private = "private"
+                    case shared = "shared"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/path/database`.
+                public var database: Components.Parameters.database
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - version:
+                ///   - container:
+                ///   - environment:
+                ///   - database:
+                public init(
+                    version: Components.Parameters.version,
+                    container: Components.Parameters.container,
+                    environment: Components.Parameters.environment,
+                    database: Components.Parameters.database
+                ) {
+                    self.version = version
+                    self.container = container
+                    self.environment = environment
+                    self.database = database
+                }
+            }
+            public var path: Operations.rereferenceAssets.Input.Path
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.rereferenceAssets.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.rereferenceAssets.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.rereferenceAssets.Input.Headers
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/requestBody/json`.
+                public struct jsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/requestBody/json/zoneID`.
+                    public var zoneID: Components.Schemas.ZoneID?
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/requestBody/json/assetsPayload`.
+                    public struct assetsPayloadPayload: Codable, Hashable, Sendable {
+                        /// Name of the record holding the source asset.
+                        ///
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/requestBody/json/assetsPayload/recordName`.
+                        public var recordName: Swift.String
+                        /// Name of the Asset field on the source record.
+                        ///
+                        /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/requestBody/json/assetsPayload/fieldName`.
+                        public var fieldName: Swift.String
+                        /// Creates a new `assetsPayloadPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - recordName: Name of the record holding the source asset.
+                        ///   - fieldName: Name of the Asset field on the source record.
+                        public init(
+                            recordName: Swift.String,
+                            fieldName: Swift.String
+                        ) {
+                            self.recordName = recordName
+                            self.fieldName = fieldName
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case recordName
+                            case fieldName
+                        }
+                    }
+                    /// Array of source asset fields to re-reference.
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/requestBody/json/assets`.
+                    public typealias assetsPayload = [Operations.rereferenceAssets.Input.Body.jsonPayload.assetsPayloadPayload]
+                    /// Array of source asset fields to re-reference.
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/requestBody/json/assets`.
+                    public var assets: Operations.rereferenceAssets.Input.Body.jsonPayload.assetsPayload
+                    /// Creates a new `jsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - zoneID:
+                    ///   - assets: Array of source asset fields to re-reference.
+                    public init(
+                        zoneID: Components.Schemas.ZoneID? = nil,
+                        assets: Operations.rereferenceAssets.Input.Body.jsonPayload.assetsPayload
+                    ) {
+                        self.zoneID = zoneID
+                        self.assets = assets
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case zoneID
+                        case assets
+                    }
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/requestBody/content/application\/json`.
+                case json(Operations.rereferenceAssets.Input.Body.jsonPayload)
+            }
+            public var body: Operations.rereferenceAssets.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.rereferenceAssets.Input.Path,
+                headers: Operations.rereferenceAssets.Input.Headers = .init(),
+                body: Operations.rereferenceAssets.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/assets/rereference/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.AssetRereferenceResponse)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.AssetRereferenceResponse {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.rereferenceAssets.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.rereferenceAssets.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Reusable asset descriptors returned successfully.
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/rereference/post(rereferenceAssets)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.rereferenceAssets.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.rereferenceAssets.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/rereference/post(rereferenceAssets)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/rereference/post(rereferenceAssets)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Failure)
