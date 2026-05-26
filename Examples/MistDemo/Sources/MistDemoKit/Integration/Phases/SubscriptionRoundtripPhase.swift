@@ -45,6 +45,13 @@ internal struct SubscriptionRoundtripPhase: IntegrationPhase {
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
+    // CloudKit dedupes query subscriptions by their query + firesOn signature,
+    // not by subscriptionID, so a leftover subscription from an interrupted or
+    // failed prior run (same recordType + firesOn) makes `createSubscription`
+    // fail with `subscriptionLikelyDuplicate`. Sweep any stale test
+    // subscriptions first so this phase is self-healing across runs.
+    try await sweepStaleSubscriptions(context: context)
+
     let subscriptionID = "mistkit-itest-\(UUID().uuidString.lowercased())"
 
     let created = try await context.service.createSubscription(
@@ -80,6 +87,28 @@ internal struct SubscriptionRoundtripPhase: IntegrationPhase {
     print("✅ Roundtrip succeeded for subscription '\(subscriptionID)'")
 
     return NoState()
+  }
+
+  /// Delete leftover test subscriptions so a fresh create won't collide with
+  /// CloudKit's query-signature dedup. Matches both the `mistkit-itest-` ID
+  /// convention and the test's query signature (`recordType`), so the blocking
+  /// subscription is cleared even if its ID differs from the current prefix.
+  /// Best-effort: a failed delete shouldn't fail the phase.
+  private func sweepStaleSubscriptions(context: PhaseContext) async throws {
+    let existing = try await context.service.listSubscriptions(database: context.database)
+    let stale = existing.filter {
+      $0.subscriptionID.hasPrefix("mistkit-itest-")
+        || $0.query?.recordType == IntegrationTestData.recordType
+    }
+    for subscription in stale {
+      try? await context.service.deleteSubscription(
+        id: subscription.subscriptionID,
+        database: context.database
+      )
+      if context.verbose {
+        print("   🧹 Swept stale subscription: \(subscription.subscriptionID)")
+      }
+    }
   }
 
   /// Confirm the created subscription is visible via both `list` and `lookup`.
