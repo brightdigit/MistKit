@@ -33,11 +33,21 @@
   internal import MistKit
 
   extension WebServer {
+    /// Register every zone route: `modify`, `list`, `lookup`, and `changes`.
+    internal func addZonesEndpoints(
+      api: RouterGroup<BasicRequestContext>
+    ) {
+      addZonesModifyEndpoint(api: api)
+      addZonesListEndpoint(api: api)
+      addZonesLookupEndpoint(api: api)
+      addZonesChangesEndpoint(api: api)
+    }
+
     /// `POST /api/zones/modify` — create and/or delete zones in one batch,
     /// backing the demo's MistKit-mode "Create Zone" / "Delete Zone" buttons.
     /// CloudKit JS mode hits the browser SDK directly; this is the
     /// server-side counterpart.
-    internal func addZonesModifyEndpoint(
+    private func addZonesModifyEndpoint(
       api: RouterGroup<BasicRequestContext>
     ) {
       let tokenStore = self.tokenStore
@@ -58,6 +68,82 @@
           )
           return try WebJSON.encoder().encode(
             WebResponse.Zones(zones: zones)
+          )
+        }
+      }
+    }
+
+    /// `POST /api/zones/list` — every zone in the target database.
+    private func addZonesListEndpoint(
+      api: RouterGroup<BasicRequestContext>
+    ) {
+      let tokenStore = self.tokenStore
+      let backendFactory = self.backendFactory
+      api.post("zones/list") { request, context -> Response in
+        guard let token = await tokenStore.currentToken else {
+          return Response(status: .unauthorized)
+        }
+        let body = try await request.decode(
+          as: WebRequests.ListZones.self, context: context
+        )
+        return try await Self.runOperation { () -> Data in
+          let backend = try backendFactory.make(token)
+          let zones = try await backend.webListZones(database: body.database)
+          return try WebJSON.encoder().encode(
+            WebResponse.Zones(zones: zones)
+          )
+        }
+      }
+    }
+
+    /// `POST /api/zones/lookup` — resolve specific zones by name.
+    private func addZonesLookupEndpoint(
+      api: RouterGroup<BasicRequestContext>
+    ) {
+      let tokenStore = self.tokenStore
+      let backendFactory = self.backendFactory
+      api.post("zones/lookup") { request, context -> Response in
+        guard let token = await tokenStore.currentToken else {
+          return Response(status: .unauthorized)
+        }
+        let body = try await request.decode(
+          as: WebRequests.LookupZones.self, context: context
+        )
+        return try await Self.runOperation { () -> Data in
+          let backend = try backendFactory.make(token)
+          let zones = try await backend.webLookupZones(
+            zoneNames: body.zoneNames,
+            database: body.database
+          )
+          return try WebJSON.encoder().encode(
+            WebResponse.Zones(zones: zones)
+          )
+        }
+      }
+    }
+
+    /// `POST /api/zones/changes` — database-level zone changes since an
+    /// optional continuation `syncToken`.
+    private func addZonesChangesEndpoint(
+      api: RouterGroup<BasicRequestContext>
+    ) {
+      let tokenStore = self.tokenStore
+      let backendFactory = self.backendFactory
+      api.post("zones/changes") { request, context -> Response in
+        guard let token = await tokenStore.currentToken else {
+          return Response(status: .unauthorized)
+        }
+        let body = try await request.decode(
+          as: WebRequests.ZoneChanges.self, context: context
+        )
+        return try await Self.runOperation { () -> Data in
+          let backend = try backendFactory.make(token)
+          let result = try await backend.webZoneChanges(
+            syncToken: body.syncToken,
+            database: body.database
+          )
+          return try WebJSON.encoder().encode(
+            WebResponse.ZoneChanges(from: result)
           )
         }
       }

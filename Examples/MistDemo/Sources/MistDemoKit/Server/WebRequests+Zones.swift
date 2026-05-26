@@ -66,4 +66,65 @@ extension WebRequests {
       )
     }
   }
+
+  /// `POST /api/zones/list` — every zone in the target database. Carries only
+  /// the database selector; `zones/list` (GET in CloudKit Web Services) takes
+  /// no further input.
+  internal struct ListZones: Decodable {
+    private enum CodingKeys: String, CodingKey {
+      case database
+    }
+
+    internal let database: MistKit.Database
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.database = try WebRequests.decodeDatabase(
+        from: container, forKey: .database
+      )
+    }
+  }
+
+  /// `POST /api/zones/lookup` — resolve specific zones by name. The browser
+  /// sends bare zone names; the backend maps them to `ZoneID` values.
+  internal struct LookupZones: Decodable {
+    private enum CodingKeys: String, CodingKey {
+      case zoneNames
+      case database
+    }
+
+    internal let zoneNames: [String]
+    internal let database: MistKit.Database
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.zoneNames =
+        try container.decodeIfPresent([String].self, forKey: .zoneNames) ?? []
+      self.database = try WebRequests.decodeDatabase(
+        from: container, forKey: .database
+      )
+    }
+  }
+
+  /// `POST /api/zones/changes` — database-level zone changes since an optional
+  /// continuation `syncToken`.
+  internal struct ZoneChanges: Decodable {
+    private enum CodingKeys: String, CodingKey {
+      case syncToken
+      case database
+    }
+
+    internal let syncToken: String?
+    internal let database: MistKit.Database
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.syncToken = try container.decodeIfPresent(
+        String.self, forKey: .syncToken
+      )
+      self.database = try WebRequests.decodeDatabase(
+        from: container, forKey: .database
+      )
+    }
+  }
 }

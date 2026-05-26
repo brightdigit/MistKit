@@ -245,9 +245,9 @@
             </div>
         </div>
 
-        <!-- Users caller / discover / lookup -->
+        <!-- Users caller / discover -->
         <div class="card pre-auth">
-            <h2>Users <span class="endpoint-label">users/caller · users/discover · users/lookup/email · users/lookup/id</span></h2>
+            <h2>Users <span class="endpoint-label">users/caller · users/discover</span></h2>
             <div class="panel-grid">
                 <section>
                     <h3>Caller <span class="endpoint-label">users/caller</span></h3>
@@ -258,27 +258,12 @@
                     <pre id="users-caller-raw">(none yet)</pre>
                 </section>
                 <section>
-                    <h3>Lookup by Email <span class="endpoint-label">users/lookup/email</span></h3>
+                    <h3>Discover <span class="endpoint-label">users/discover (POST) <em>(CloudKit JS loops per-item)</em></span></h3>
                     <div class="panel-row">
-                        <input id="users-email-input" type="email" placeholder="user@example.com">
-                        <button id="users-email-btn" type="button">Lookup</button>
+                        <textarea id="users-discover-emails" placeholder="emails, comma-separated"></textarea>
                     </div>
-                    <div id="users-email-status" class="status"></div>
-                    <pre id="users-email-raw">(none yet)</pre>
-                </section>
-                <section>
-                    <h3>Lookup by Record Name <span class="endpoint-label">users/lookup/id</span></h3>
                     <div class="panel-row">
-                        <input id="users-id-input" type="text" placeholder="userRecordName">
-                        <button id="users-id-btn" type="button">Lookup</button>
-                    </div>
-                    <div id="users-id-status" class="status"></div>
-                    <pre id="users-id-raw">(none yet)</pre>
-                </section>
-                <section>
-                    <h3>Discover <span class="endpoint-label">users/discover (POST) <em>(CloudKit JS loops per-email)</em></span></h3>
-                    <div class="panel-row">
-                        <textarea id="users-discover-input" placeholder="one or more emails, comma-separated"></textarea>
+                        <textarea id="users-discover-record-names" placeholder="user record names, comma-separated"></textarea>
                         <button id="users-discover-btn" type="button">Discover</button>
                     </div>
                     <div id="users-discover-status" class="status"></div>
