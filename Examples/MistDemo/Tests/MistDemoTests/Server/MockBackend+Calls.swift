@@ -28,6 +28,7 @@
 //
 
 #if canImport(Hummingbird)
+  internal import Foundation
   internal import MistKit
 
   @testable import MistDemoKit
@@ -44,6 +45,7 @@
     /// Captured arguments from the most recent `webCreate` call.
     internal struct CreateCall: Sendable {
       internal let recordType: String
+      internal let recordName: String?
       internal let fields: [String: String]
       internal let database: MistKit.Database
     }
@@ -96,6 +98,24 @@
       internal let apnsToken: String
       internal let environment: APNsEnvironment
       internal let clientId: String?
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webRereferenceAsset` call.
+    internal struct RereferenceAssetCall: Sendable {
+      internal let sourceRecordName: String
+      internal let assetField: String
+      internal let targetRecordName: String
+      internal let targetAssetField: String?
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webUploadAsset` call.
+    internal struct UploadAssetCall: Sendable {
+      internal let data: Data
+      internal let recordType: String
+      internal let fieldName: String
+      internal let recordName: String?
       internal let database: MistKit.Database
     }
   }

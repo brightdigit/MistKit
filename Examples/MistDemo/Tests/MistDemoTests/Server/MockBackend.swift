@@ -46,6 +46,8 @@
     internal private(set) var lastModifySubscriptions: ModifySubscriptionsCall?
     internal private(set) var lastCreateToken: CreateTokenCall?
     internal private(set) var lastRegisterToken: RegisterTokenCall?
+    internal private(set) var lastRereferenceAsset: RereferenceAssetCall?
+    internal private(set) var lastUploadAsset: UploadAssetCall?
     private var pendingError: String?
 
     /// Stub subscriptions (tests can seed); defaults to one query subscription.
@@ -77,17 +79,19 @@
 
     internal func webCreate(
       recordType: String,
+      recordName: String?,
       fields: [String: FieldValue],
       database: MistKit.Database
     ) async throws -> RecordInfo {
       lastCreate = CreateCall(
         recordType: recordType,
+        recordName: recordName,
         fields: Self.flatten(fields),
         database: database
       )
       try consumePendingError()
       return Self.stubRecord(
-        recordType: recordType, recordName: "created-1"
+        recordType: recordType, recordName: recordName ?? "created-1"
       )
     }
 
@@ -210,6 +214,56 @@
         database: database
       )
       try consumePendingError()
+    }
+
+    internal func webRereferenceAsset(
+      sourceRecordName: String,
+      assetField: String,
+      targetRecordName: String,
+      targetAssetField: String?,
+      database: MistKit.Database
+    ) async throws -> RecordInfo {
+      lastRereferenceAsset = RereferenceAssetCall(
+        sourceRecordName: sourceRecordName,
+        assetField: assetField,
+        targetRecordName: targetRecordName,
+        targetAssetField: targetAssetField,
+        database: database
+      )
+      try consumePendingError()
+      return Self.stubRecord(
+        recordType: "Note", recordName: targetRecordName
+      )
+    }
+
+    internal func webUploadAsset(
+      data: Data,
+      recordType: String,
+      fieldName: String,
+      recordName: String?,
+      database: MistKit.Database
+    ) async throws -> AssetUploadReceipt {
+      lastUploadAsset = UploadAssetCall(
+        data: data,
+        recordType: recordType,
+        fieldName: fieldName,
+        recordName: recordName,
+        database: database
+      )
+      try consumePendingError()
+      let assignedName = recordName ?? "stub-upload-\(data.count)"
+      return AssetUploadReceipt(
+        asset: Asset(
+          fileChecksum: "stub-checksum",
+          size: Int64(data.count),
+          referenceChecksum: nil,
+          wrappingKey: nil,
+          receipt: "stub-receipt",
+          downloadURL: nil
+        ),
+        recordName: assignedName,
+        fieldName: fieldName
+      )
     }
 
     private func consumePendingError() throws {

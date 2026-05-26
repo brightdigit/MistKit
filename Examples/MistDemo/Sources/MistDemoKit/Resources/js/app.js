@@ -43,6 +43,15 @@ const refreshBtn = document.getElementById('refresh-btn');
 const recordTypeInput = document.getElementById('record-type');
 const queryLimitInput = document.getElementById('query-limit');
 const rawResponseEl = document.getElementById('raw-response');
+const formImageGenerateBtn = document.getElementById('form-image-generate');
+const formImageClearBtn = document.getElementById('form-image-clear');
+const formImageStatusEl = document.getElementById('form-image-status');
+const formImagePreviewImg = document.getElementById('form-image-preview');
+const assetsSourceInput = document.getElementById('assets-source');
+
+// Generated image staged for the next save, or null.
+//   { dataURL, base64, blob, byteLength }
+let pendingImage = null;
 
 // ---- shared helpers ----
 
@@ -192,6 +201,84 @@ function csv(value) {
         .filter(s => s.length > 0);
 }
 
+// ---- image generation (Note.image asset) ----
+
+// Generates a 96×96 PNG with a deterministic-per-call random background and
+// the title's first character — enough variety to verify uploads/rereferences
+// distinguish between notes, without needing the user to pick a file.
+function generateNoteImage(title) {
+    const size = 96;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const hue = Math.floor(Math.random() * 360);
+    ctx.fillStyle = `hsl(${hue}, 70%, 55%)`;
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 56px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const initial = ((title || '').trim()[0] || '?').toUpperCase();
+    ctx.fillText(initial, size / 2, size / 2 + 2);
+    const dataURL = canvas.toDataURL('image/png');
+    const base64 = dataURL.split(',', 2)[1];
+    const bin = atob(base64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'image/png' });
+    return { dataURL, base64, blob, byteLength: bytes.length };
+}
+
+// Returns the flat Asset descriptor from an image field, or null when the
+// field is missing/empty. MistKit returns `image` as a bare Asset shape;
+// CloudKit JS wraps it in `{ value: ... }`. Both formats are handled.
+function existingImageDescriptor(note) {
+    const field = note && note.raw && note.raw.fields && note.raw.fields.image;
+    if (!field) return null;
+    const value = (typeof field === 'object' && 'value' in field) ? field.value : field;
+    return (value && typeof value === 'object') ? value : null;
+}
+
+function refreshImageState() {
+    if (pendingImage) {
+        formImagePreviewImg.src = pendingImage.dataURL;
+        formImagePreviewImg.style.display = 'block';
+        formImageStatusEl.textContent =
+            `Generated (${pendingImage.byteLength} bytes) — save to upload.`;
+        formImageClearBtn.disabled = false;
+        return;
+    }
+    const existing = existingImageDescriptor(selectedNote());
+    if (existing) {
+        if (existing.downloadURL) {
+            formImagePreviewImg.src = existing.downloadURL;
+            formImagePreviewImg.style.display = 'block';
+        } else {
+            formImagePreviewImg.src = '';
+            formImagePreviewImg.style.display = 'none';
+        }
+        const sizeLabel = existing.size != null ? ` (${existing.size} bytes)` : '';
+        formImageStatusEl.textContent =
+            `Existing image attached${sizeLabel} — Generate to replace.`;
+        formImageClearBtn.disabled = true;
+        return;
+    }
+    formImagePreviewImg.style.display = 'none';
+    formImagePreviewImg.src = '';
+    formImageStatusEl.textContent = 'No image attached.';
+    formImageClearBtn.disabled = true;
+}
+
+formImageGenerateBtn.addEventListener('click', () => {
+    pendingImage = generateNoteImage(titleInput.value);
+    refreshImageState();
+});
+formImageClearBtn.addEventListener('click', () => {
+    pendingImage = null;
+    refreshImageState();
+});
+
 // ---- form state for Notes CRUD ----
 
 function selectedNote() {
@@ -217,8 +304,10 @@ function clearForm() {
     selectedRecordName = null;
     titleInput.value = '';
     indexInput.value = '';
+    pendingImage = null;
     clearStatus(formStatusEl);
     refreshFormState();
+    refreshImageState();
     renderRows();
 }
 
@@ -226,8 +315,11 @@ function loadNoteIntoForm(note) {
     selectedRecordName = note.recordName;
     titleInput.value = note.title ?? '';
     indexInput.value = note.index != null ? String(note.index) : '';
+    pendingImage = null;
+    if (assetsSourceInput) assetsSourceInput.value = note.recordName;
     clearStatus(formStatusEl);
     refreshFormState();
+    refreshImageState();
     renderRows();
 }
 
@@ -476,17 +568,36 @@ async function saveNote() {
         setStatus(formStatusEl, error.message, 'error');
         return;
     }
-    if (Object.keys(fields).length === 0) {
-        setStatus(formStatusEl, 'Provide a title or index.', 'error');
-        return;
-    }
     const recordType = recordTypeInput.value.trim();
     const note = selectedNote();
     const isUpdate = note != null;
+    const hasPendingImage = pendingImage != null;
+    if (Object.keys(fields).length === 0 && !hasPendingImage) {
+        setStatus(formStatusEl, 'Provide a title, index, or image.', 'error');
+        return;
+    }
     const label = isUpdate ? 'Update' : 'Create';
     clearStatus(formStatusEl);
     try {
         let payload;
+        // MistKit asset uploads are a two-step flow: POST bytes to
+        // /api/assets/upload, then create/update with the returned descriptor.
+        // CloudKit JS handles upload inline through saveRecords by passing a
+        // Blob in the field value.
+        let uploadedRecordName = null;
+        if (hasPendingImage && currentMode === 'mistkit') {
+            setStatus(formStatusEl, 'Uploading image…', 'loading');
+            const receipt = await postJSON('/api/assets/upload', {
+                recordType,
+                fieldName: 'image',
+                recordName: isUpdate ? note.recordName : undefined,
+                database: currentDatabase,
+                data: pendingImage.base64,
+            });
+            uploadedRecordName = receipt.recordName;
+            // FieldValue's Asset case decodes the bare Asset shape directly.
+            fields.image = receipt.asset;
+        }
         if (currentMode === 'mistkit') {
             if (isUpdate) {
                 payload = await postJSON('/api/records/update', {
@@ -500,11 +611,18 @@ async function saveNote() {
                 payload = await postJSON('/api/records/create', {
                     recordType,
                     database: currentDatabase,
+                    recordName: uploadedRecordName || undefined,
                     fields,
                 });
             }
         } else {
-            const record = { recordType, fields: ckJsFields(fields) };
+            const ckFields = ckJsFields(fields);
+            if (hasPendingImage) {
+                // CloudKit JS treats Blob/File values as asset uploads and
+                // attaches them inline during saveRecords.
+                ckFields.image = { value: pendingImage.blob };
+            }
+            const record = { recordType, fields: ckFields };
             if (isUpdate) {
                 record.recordName = note.recordName;
                 record.recordChangeTag = note.recordChangeTag;
@@ -514,6 +632,7 @@ async function saveNote() {
                 throw new Error(payload.errors[0].reason || 'CloudKit JS save failed');
             }
         }
+        pendingImage = null;
         showRaw(payload);
         setStatus(formStatusEl, `${label} succeeded.`, 'success');
         if (!isUpdate) clearForm();
@@ -569,3 +688,4 @@ refreshBtn.addEventListener('click', queryNotes);
 
 refreshFormState();
 refreshSortIndicators();
+refreshImageState();

@@ -130,6 +130,7 @@
       addZonesModifyEndpoint(api: api)
       addSubscriptionEndpoints(api: api)
       addTokenEndpoints(api: api)
+      addAssetEndpoints(api: api)
       addPendingEndpoints(api: api)
 
       return router

@@ -87,15 +87,9 @@
         endpoint: "records/resolve",
         trackingIssue: 41
       )
-      Self.registerPending(
-        api: api,
-        verb: .post,
-        path: "assets/rereference",
-        endpoint: "assets/rereference",
-        trackingIssue: 31
-      )
-      // subscriptions/* (#49/#50/#51) and tokens/* (#52/#53) are now wired to
-      // real MistKit handlers — see `WebServer+Subscriptions` / `WebServer+Tokens`.
+      // subscriptions/* (#49/#50/#51), tokens/* (#52/#53), and
+      // assets/rereference (#31) are now wired to real MistKit handlers —
+      // see `WebServer+Subscriptions` / `WebServer+Tokens` / `WebServer+Assets`.
 
       addUnwiredLandedEndpoints(api: api)
     }

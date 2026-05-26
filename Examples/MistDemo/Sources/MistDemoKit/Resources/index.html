@@ -91,26 +91,58 @@
                     <div id="table-status" class="status"></div>
                 </section>
 
-                <section>
-                    <h3>
-                        <span id="form-heading">New note</span>
-                        <span class="form-mode-label" id="form-record-name"></span>
-                    </h3>
-                    <label for="form-title">Title</label>
-                    <input id="form-title" type="text" placeholder="Hello from MistKit">
-                    <label for="form-index">Index</label>
-                    <input id="form-index" type="number" placeholder="0">
-                    <div class="form-actions">
-                        <button id="save-btn" type="button">Create</button>
-                        <button id="clear-btn" class="secondary" type="button">New</button>
-                        <button id="delete-btn" class="danger" type="button" disabled>Delete</button>
-                    </div>
-                    <div id="form-status" class="status"></div>
-                    <details class="raw-response">
-                        <summary>Last raw response</summary>
-                        <pre id="raw-response" style="display: block;">(none yet)</pre>
-                    </details>
-                </section>
+                <div class="notes-form-stack">
+                    <section>
+                        <h3>
+                            <span id="form-heading">New note</span>
+                            <span class="form-mode-label" id="form-record-name"></span>
+                        </h3>
+                        <label for="form-title">Title</label>
+                        <input id="form-title" type="text" placeholder="Hello from MistKit">
+                        <label for="form-index">Index</label>
+                        <input id="form-index" type="number" placeholder="0">
+                        <label>Image <span class="endpoint-label">assets/upload</span></label>
+                        <div class="image-controls">
+                            <button id="form-image-generate" type="button" class="secondary">Generate</button>
+                            <button id="form-image-clear" type="button" class="secondary" disabled>Clear</button>
+                            <span id="form-image-status" class="image-state">No image attached.</span>
+                        </div>
+                        <img id="form-image-preview" alt="" class="image-preview" style="display: none;">
+                        <div class="form-actions">
+                            <button id="save-btn" type="button">Create</button>
+                            <button id="clear-btn" class="secondary" type="button">New</button>
+                            <button id="delete-btn" class="danger" type="button" disabled>Delete</button>
+                        </div>
+                        <div id="form-status" class="status"></div>
+                        <details class="raw-response">
+                            <summary>Last raw response</summary>
+                            <pre id="raw-response" style="display: block;">(none yet)</pre>
+                        </details>
+                    </section>
+
+                    <section>
+                        <h3>Rereference asset <span class="endpoint-label">assets/rereference</span></h3>
+                        <p>Reuse another note's <code>image</code> on a target note — no re-upload. Click a row to prefill the source.</p>
+                        <div class="panel-row">
+                            <input id="assets-source" type="text" placeholder="source record name">
+                            <input id="assets-target" type="text" placeholder="target record name">
+                            <button id="assets-rereference-btn" type="button">Rereference</button>
+                        </div>
+                        <div id="assets-status" class="status"></div>
+                        <details class="raw-response">
+                            <summary>Last raw response</summary>
+                            <pre id="assets-raw">(none yet)</pre>
+                        </details>
+                        <details class="composition">
+                            <summary>📎 CloudKit JS composition</summary>
+                            <ol>
+                                <li><code>database.fetchRecords([sourceRecordName])</code> — pull source record</li>
+                                <li>Read CloudKit.Asset descriptor from source's <code>image</code> field</li>
+                                <li><code>database.saveRecords([target])</code> — save target with reused asset</li>
+                            </ol>
+                        </details>
+                    </section>
+                </div>
             </div>
         </div>
 
@@ -361,39 +393,6 @@
             </div>
         </div>
 
-        <!-- Assets upload / rereference -->
-        <div class="card pre-auth">
-            <h2>Assets <span class="endpoint-label">assets/upload · assets/rereference (MistKit pending #31 — CloudKit JS composed)</span></h2>
-            <div class="panel-grid">
-                <section>
-                    <h3>Upload <span class="endpoint-label">assets/upload</span></h3>
-                    <p>
-                        Upload via the Notes panel above — set a title, pick a file via the
-                        record's image field. Native CKAsset uploads inline as part of saveRecords.
-                    </p>
-                </section>
-                <section>
-                    <h3>Rereference <span class="endpoint-label">assets/rereference</span></h3>
-                    <div class="panel-row">
-                        <input id="assets-source" type="text" placeholder="source record name">
-                        <input id="assets-field" type="text" placeholder="asset field (e.g. image)">
-                        <input id="assets-target" type="text" placeholder="target record name">
-                        <input id="assets-target-field" type="text" placeholder="target field (optional)">
-                        <button id="assets-rereference-btn" type="button">Rereference</button>
-                    </div>
-                    <div id="assets-status" class="status"></div>
-                    <pre id="assets-raw">(none yet)</pre>
-                    <details class="composition">
-                        <summary>📎 CloudKit JS composition</summary>
-                        <ol>
-                            <li><code>database.fetchRecords([sourceRecordName])</code> — pull source record</li>
-                            <li>Read CloudKit.Asset descriptor from source's asset field</li>
-                            <li><code>database.saveRecords([target])</code> — save target with reused asset</li>
-                        </ol>
-                    </details>
-                </section>
-            </div>
-        </div>
     </div>
 
     <script src="js/app.js"></script>
