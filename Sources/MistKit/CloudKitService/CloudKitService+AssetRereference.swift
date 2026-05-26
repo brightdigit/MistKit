@@ -92,7 +92,9 @@ extension CloudKitService {
   /// Mirrors the native `CloudKitStore.rereferenceAsset` convenience.
   ///
   /// The target record's `recordType` and current change tag are discovered via
-  /// a `lookupRecords` call, so callers need only name the target record.
+  /// a `lookupRecords` call, so callers need only name the target record. Callers
+  /// that already hold the target's `recordType` and `recordChangeTag` can skip
+  /// that round trip with the overload below.
   ///
   /// - Parameters:
   ///   - sourceRecordName: The record holding the source asset.
@@ -105,11 +107,72 @@ extension CloudKitService {
   /// - Returns: The updated target ``RecordInfo``.
   /// - Throws: ``CloudKitError`` — a top-level failure (e.g.
   ///   ``CloudKitError/badRequest(reason:)``) if the source asset could not be
-  ///   re-referenced, or a record failure if the target update failed.
+  ///   re-referenced; ``CloudKitError/incompleteResponse(reason:)`` if the target
+  ///   record is not found or carries no `recordType`; or a record failure if the
+  ///   target lookup or update failed.
   public func rereferenceAsset(
     fromRecord sourceRecordName: String,
     field assetField: String,
     toRecord targetRecordName: String,
+    field targetField: String? = nil,
+    zoneID: ZoneID? = nil,
+    database: Database
+  ) async throws(CloudKitError) -> RecordInfo {
+    let lookups = try await lookupRecords(
+      recordNames: [targetRecordName],
+      database: database
+    )
+    guard let firstLookup = lookups.first else {
+      throw CloudKitError.incompleteResponse(
+        reason: "target record '\(targetRecordName)' was not found"
+      )
+    }
+    let targetInfo = try firstLookup.get()
+    guard let recordType = targetInfo.recordType else {
+      throw CloudKitError.incompleteResponse(
+        reason: "target record '\(targetRecordName)' returned no recordType"
+      )
+    }
+
+    return try await rereferenceAsset(
+      fromRecord: sourceRecordName,
+      field: assetField,
+      toRecord: targetRecordName,
+      recordType: recordType,
+      recordChangeTag: targetInfo.recordChangeTag,
+      field: targetField,
+      zoneID: zoneID,
+      database: database
+    )
+  }
+
+  /// Re-reference an asset onto a target whose `recordType` and change tag are
+  /// already known, skipping the `lookupRecords` round trip the other overload
+  /// performs.
+  ///
+  /// - Parameters:
+  ///   - sourceRecordName: The record holding the source asset.
+  ///   - assetField: The Asset field on the source record.
+  ///   - targetRecordName: The record that should reference the same asset.
+  ///   - recordType: The target record's type.
+  ///   - recordChangeTag: The target record's current change tag, or `nil` to
+  ///     write without optimistic-concurrency checking.
+  ///   - targetField: The Asset field on the target record. Defaults to
+  ///     `assetField` when `nil`.
+  ///   - zoneID: Optional zone ID; defaults to the default zone when `nil`.
+  ///   - database: The CloudKit database scope (`.public`, `.private`, `.shared`).
+  /// - Returns: The updated target ``RecordInfo``.
+  /// - Throws: ``CloudKitError`` — a top-level failure (e.g.
+  ///   ``CloudKitError/badRequest(reason:)``) if the source asset could not be
+  ///   re-referenced; ``CloudKitError/incompleteResponse(reason:)`` if
+  ///   `assets/rereference` returned no descriptor for the source field; or a
+  ///   record failure if the target update failed.
+  public func rereferenceAsset(
+    fromRecord sourceRecordName: String,
+    field assetField: String,
+    toRecord targetRecordName: String,
+    recordType: String,
+    recordChangeTag: String?,
     field targetField: String? = nil,
     zoneID: ZoneID? = nil,
     database: Database
@@ -122,25 +185,17 @@ extension CloudKitService {
       database: database
     )
     guard let asset = descriptors.first else {
-      throw CloudKitError.invalidResponse
-    }
-
-    let lookups = try await lookupRecords(
-      recordNames: [targetRecordName],
-      database: database
-    )
-    guard let targetInfo = try lookups.first?.get() else {
-      throw CloudKitError.invalidResponse
-    }
-    guard let recordType = targetInfo.recordType else {
-      throw CloudKitError.invalidResponse
+      throw CloudKitError.incompleteResponse(
+        reason: "assets/rereference returned no descriptor for record "
+          + "'\(sourceRecordName)' field '\(assetField)'"
+      )
     }
 
     return try await updateRecord(
       recordType: recordType,
       recordName: targetRecordName,
       fields: [resolvedTargetField: .asset(asset)],
-      recordChangeTag: targetInfo.recordChangeTag,
+      recordChangeTag: recordChangeTag,
       database: database
     )
   }

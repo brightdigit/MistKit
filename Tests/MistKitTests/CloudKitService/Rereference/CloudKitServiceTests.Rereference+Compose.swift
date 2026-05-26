@@ -74,5 +74,35 @@ extension CloudKitServiceTests.Rereference {
       }
       #expect(asset.fileChecksum == "shared-chk")
     }
+
+    @Test("rereferenceAsset overload skips the lookupRecords round trip")
+    internal func overloadSkipsLookup() async throws {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+
+      let (service, provider) = try Helper.makeServiceWithProvider(responsesByOperation: [
+        "rereferenceAssets": try Helper.rereferenceResponse(assets: [
+          Helper.assetDictionary(fileChecksum: "shared-chk")
+        ]),
+        "modifyRecords": try Helper.recordsResponse([
+          Helper.noteRecord(recordName: "note-b", changeTag: "tag-b2", imageChecksum: "shared-chk")
+        ]),
+      ])
+
+      let updated = try await service.rereferenceAsset(
+        fromRecord: "note-a",
+        field: "image",
+        toRecord: "note-b",
+        recordType: "Note",
+        recordChangeTag: "tag-b",
+        database: Helper.publicDatabase
+      )
+
+      #expect(updated.recordName == "note-b")
+      #expect(await provider.callCount(for: "lookupRecords") == 0)
+      #expect(await provider.callCount(for: "modifyRecords") == 1)
+    }
   }
 }

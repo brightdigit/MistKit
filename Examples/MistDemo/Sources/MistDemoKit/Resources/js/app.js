@@ -221,13 +221,12 @@ function generateNoteImage(title) {
     ctx.textBaseline = 'middle';
     const initial = ((title || '').trim()[0] || '?').toUpperCase();
     ctx.fillText(initial, size / 2, size / 2 + 2);
-    const dataURL = canvas.toDataURL('image/png');
-    const base64 = dataURL.split(',', 2)[1];
+    const base64 = canvas.toDataURL('image/png').split(',', 2)[1];
     const bin = atob(base64);
     const bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     const blob = new Blob([bytes], { type: 'image/png' });
-    return { dataURL, base64, blob, byteLength: bytes.length };
+    return { base64, blob, byteLength: bytes.length };
 }
 
 // Returns the flat Asset descriptor from an image field, or null when the
@@ -242,7 +241,7 @@ function existingImageDescriptor(note) {
 
 function refreshImageState() {
     if (pendingImage) {
-        formImagePreviewImg.src = pendingImage.dataURL;
+        formImagePreviewImg.src = 'data:image/png;base64,' + pendingImage.base64;
         formImagePreviewImg.style.display = 'block';
         formImageStatusEl.textContent =
             `Generated (${pendingImage.byteLength} bytes) — save to upload.`;

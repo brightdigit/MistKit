@@ -51,18 +51,26 @@ internal struct RereferenceAssetPhase: IntegrationPhase {
       )
     }
 
-    // Match on whichever identifying field CloudKit echoes back: the file
-    // checksum is the strongest signal; a shared download URL also confirms it.
-    let checksumMatches =
-      expected.fileChecksum != nil && targetAsset.fileChecksum == expected.fileChecksum
-    let downloadURLMatches =
-      expected.downloadURL != nil && targetAsset.downloadURL == expected.downloadURL
-
-    guard checksumMatches || downloadURLMatches else {
+    // Verify against the file checksum when available — it's the stable signal.
+    // Signed CDN download URLs carry an expiry and aren't stable across calls,
+    // so they're only a fallback when no checksum was echoed back.
+    if let expectedChecksum = expected.fileChecksum {
+      guard targetAsset.fileChecksum == expectedChecksum else {
+        throw IntegrationTestError.verificationFailed(
+          "Re-referenced asset on '\(record.recordName)' does not match the source "
+            + "(fileChecksum: \(targetAsset.fileChecksum ?? "nil") vs \(expectedChecksum))"
+        )
+      }
+    } else if let expectedURL = expected.downloadURL {
+      guard targetAsset.downloadURL == expectedURL else {
+        throw IntegrationTestError.verificationFailed(
+          "Re-referenced asset on '\(record.recordName)' does not match the source "
+            + "(downloadURL: \(targetAsset.downloadURL ?? "nil") vs \(expectedURL))"
+        )
+      }
+    } else {
       throw IntegrationTestError.verificationFailed(
-        "Re-referenced asset on '\(record.recordName)' does not match the source "
-          + "(fileChecksum: \(targetAsset.fileChecksum ?? "nil") vs "
-          + "\(expected.fileChecksum ?? "nil"))"
+        "Expected asset for '\(record.recordName)' has no identifying field to verify against"
       )
     }
 

@@ -11,7 +11,7 @@ const assetsRaw = document.getElementById('assets-raw');
 const ASSET_FIELD = 'image';
 
 document.getElementById('assets-rereference-btn').addEventListener('click', async () => {
-    const source = assetsSourceInput.value.trim();
+    const source = document.getElementById('assets-source')?.value.trim() ?? '';
     const target = assetsTargetInput.value.trim();
     if (!source || !target) {
         setStatus(assetsStatus, 'Provide both a source and a target record name.', 'error');

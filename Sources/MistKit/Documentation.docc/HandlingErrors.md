@@ -81,6 +81,7 @@ Every operation on ``CloudKitService`` throws ``CloudKitError``. The cases group
 | ``CloudKitError/httpErrorWithDetails(statusCode:serverErrorCode:reason:)`` | Depends on `serverErrorCode` | CloudKit returned a structured error |
 | ``CloudKitError/httpErrorWithRawResponse(statusCode:rawResponse:)`` | Sometimes | Validation rejection or unparseable error body |
 | ``CloudKitError/invalidResponse`` | No | Server returned 2xx but no payload |
+| ``CloudKitError/incompleteResponse(reason:)`` | No | A composed convenience got a valid response missing data it needed |
 | ``CloudKitError/networkError(_:)`` | Often | URLSession-level failure (timeout, DNS, TLS) |
 | ``CloudKitError/decodingError(_:)`` | No | Schema mismatch between OpenAPI client and CloudKit |
 | ``CloudKitError/underlyingError(_:)`` | Depends | Unclassified throw from the transport stack |

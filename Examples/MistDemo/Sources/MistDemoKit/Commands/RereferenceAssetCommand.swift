@@ -97,7 +97,6 @@ public struct RereferenceAssetCommand: MistDemoCommand, OutputFormatting {
         field: config.targetAssetField,
         database: config.base.database
       )
-      print("\n✅ Re-referenced asset onto \(record.recordName)")
       try await outputResult(record, format: config.output)
     } catch let error as CloudKitError {
       throw RereferenceAssetError.operationFailed(error.localizedDescription)

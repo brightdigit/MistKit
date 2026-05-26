@@ -45,16 +45,25 @@ extension CloudKitServiceTests.Rereference {
   internal static func makeService(
     responsesByOperation: [String: ResponseConfig]
   ) throws -> CloudKitService {
+    try makeServiceWithProvider(responsesByOperation: responsesByOperation).service
+  }
+
+  /// Like ``makeService(responsesByOperation:)`` but also returns the
+  /// `ResponseProvider` so tests can inspect recorded request bodies / call counts.
+  internal static func makeServiceWithProvider(
+    responsesByOperation: [String: ResponseConfig]
+  ) throws -> (service: CloudKitService, provider: ResponseProvider) {
     let provider = ResponseProvider(
       responses: responsesByOperation,
       defaultResponse: .success(body: Data("{}".utf8))
     )
     let transport = MockTransport(responseProvider: provider)
-    return try CloudKitService(
+    let service = try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
       credentials: Credentials(apiAuth: APICredentials(apiToken: TestConstants.apiToken)),
       transport: transport
     )
+    return (service, provider)
   }
 
   // MARK: - JSON builders
@@ -104,6 +113,19 @@ extension CloudKitServiceTests.Rereference {
       "recordType": "Note",
       "recordChangeTag": changeTag,
       "fields": fields,
+    ]
+  }
+
+  /// A record dictionary that omits `recordType` (e.g. a tombstone-shaped
+  /// response), used to exercise the missing-`recordType` guard.
+  internal static func recordWithoutType(
+    recordName: String,
+    changeTag: String = "tag-1"
+  ) -> [String: Any] {
+    [
+      "recordName": recordName,
+      "recordChangeTag": changeTag,
+      "fields": ["title": ["value": "Note", "type": "STRING"]],
     ]
   }
 

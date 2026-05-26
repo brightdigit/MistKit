@@ -98,7 +98,7 @@ internal struct SubscriptionRoundtripPhase: IntegrationPhase {
     let existing = try await context.service.listSubscriptions(database: context.database)
     let stale = existing.filter {
       $0.subscriptionID.hasPrefix("mistkit-itest-")
-        || $0.query?.recordType == IntegrationTestData.recordType
+        || $0.query?.recordType == MistDemoConfig.recordType
     }
     for subscription in stale {
       try? await context.service.deleteSubscription(

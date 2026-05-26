@@ -52,6 +52,10 @@ public enum CloudKitError: LocalizedError, Sendable {
   /// rolled back because at least one operation in the batch failed.
   case atomicFailure(reason: String?)
   case invalidResponse
+  /// A multi-step convenience (e.g. `rereferenceAsset`) received a structurally
+  /// valid CloudKit response that lacked data it needed to proceed. `reason`
+  /// names exactly what was missing.
+  case incompleteResponse(reason: String)
   /// A CloudKit response decoded at the transport layer but a specific value
   /// could not be mapped into a MistKit domain type — e.g. an unmappable field
   /// value, a record/zone/user missing a required identifier, or an unknown
@@ -101,7 +105,7 @@ public enum CloudKitError: LocalizedError, Sendable {
       return 413
     case .badRequest, .atomicFailure:
       return 400
-    case .invalidResponse, .conversionFailed, .recordOperationFailed,
+    case .invalidResponse, .incompleteResponse, .conversionFailed, .recordOperationFailed,
       .subscriptionOperationFailed, .subscriptionLikelyDuplicate,
       .underlyingError, .decodingError, .networkError,
       .unsupportedOperationType, .paginationLimitExceeded,
