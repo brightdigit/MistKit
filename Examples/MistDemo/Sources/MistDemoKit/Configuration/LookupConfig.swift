@@ -29,7 +29,7 @@
 
 public import ConfigKeyKit
 internal import Foundation
-internal import MistKit
+public import MistKit
 
 /// Configuration for lookup command.
 public struct LookupConfig: Sendable, ConfigurationParseable {
