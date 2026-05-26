@@ -45,35 +45,20 @@
     }
 
     internal func webDiscoverUsers(
-      emails: [String]
+      emails: [String],
+      userRecordNames: [String]
     ) async throws -> [UserIdentity] {
-      lastDiscoverUsers = DiscoverUsersCall(emails: emails)
-      try consumePendingError()
-      return emails.map { email in
-        UserIdentity(lookupInfo: UserIdentityLookupInfo(emailAddress: email))
-      }
-    }
-
-    internal func webLookupUsersByEmail(
-      emails: [String]
-    ) async throws -> [UserIdentity] {
-      lastLookupUsersByEmail = LookupUsersByEmailCall(emails: emails)
-      try consumePendingError()
-      return emails.map { email in
-        UserIdentity(lookupInfo: UserIdentityLookupInfo(emailAddress: email))
-      }
-    }
-
-    internal func webLookupUsersByRecordName(
-      recordNames: [String]
-    ) async throws -> [UserIdentity] {
-      lastLookupUsersByRecordName = LookupUsersByRecordNameCall(
-        recordNames: recordNames
+      lastDiscoverUsers = DiscoverUsersCall(
+        emails: emails,
+        userRecordNames: userRecordNames
       )
       try consumePendingError()
-      return recordNames.map { name in
-        UserIdentity(userRecordName: .recordName(name))
+      return emails.map { email in
+        UserIdentity(lookupInfo: UserIdentityLookupInfo(emailAddress: email))
       }
+        + userRecordNames.map { name in
+          UserIdentity(userRecordName: .recordName(name))
+        }
     }
   }
 #endif

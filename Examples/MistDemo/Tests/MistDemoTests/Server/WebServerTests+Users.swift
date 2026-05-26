@@ -90,11 +90,16 @@
       }
     }
 
-    @Test("POST /api/users/discover forwards emails to the backend")
+    @Test(
+      "POST /api/users/discover forwards emails and record names to the backend"
+    )
     internal func usersDiscoverForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
-      let jsonBody = #"{"emails":["a@example.com","b@example.com"]}"#
+      let jsonBody = """
+        {"emails":["a@example.com","b@example.com"],\
+        "userRecordNames":["_user-1"]}
+        """
 
       try await app.test(.router) { client in
         try await client.execute(
@@ -108,12 +113,13 @@
             UsersPayload.self,
             from: Data(response.body.readableBytesView)
           )
-          #expect(payload.users.count == 2)
+          #expect(payload.users.count == 3)
         }
       }
 
       let captured = await fixture.backend.lastDiscoverUsers
       #expect(captured?.emails == ["a@example.com", "b@example.com"])
+      #expect(captured?.userRecordNames == ["_user-1"])
     }
 
     @Test("POST /api/users/discover returns 401 without a captured auth token")
@@ -127,94 +133,6 @@
           method: .post,
           headers: [.contentType: "application/json"],
           body: ByteBuffer(string: #"{"emails":["a@example.com"]}"#)
-        ) { response in
-          #expect(response.status == .unauthorized)
-        }
-      }
-    }
-
-    @Test("POST /api/users/lookup/email forwards emails to the backend")
-    internal func usersLookupEmailForwards() async throws {
-      let fixture = Self.makeFixture(authenticated: true)
-      let app = Application(router: try fixture.server.makeRouter())
-      let jsonBody = #"{"emails":["a@example.com"]}"#
-
-      try await app.test(.router) { client in
-        try await client.execute(
-          uri: "/api/users/lookup/email",
-          method: .post,
-          headers: [.contentType: "application/json"],
-          body: ByteBuffer(string: jsonBody)
-        ) { response in
-          #expect(response.status == .ok)
-          let payload = try JSONDecoder().decode(
-            UsersPayload.self,
-            from: Data(response.body.readableBytesView)
-          )
-          #expect(payload.users.count == 1)
-        }
-      }
-
-      let captured = await fixture.backend.lastLookupUsersByEmail
-      #expect(captured?.emails == ["a@example.com"])
-    }
-
-    @Test(
-      "POST /api/users/lookup/email returns 401 without a captured auth token"
-    )
-    internal func usersLookupEmailRequiresAuth() async throws {
-      let fixture = Self.makeFixture(authenticated: false)
-      let app = Application(router: try fixture.server.makeRouter())
-
-      try await app.test(.router) { client in
-        try await client.execute(
-          uri: "/api/users/lookup/email",
-          method: .post,
-          headers: [.contentType: "application/json"],
-          body: ByteBuffer(string: #"{"emails":["a@example.com"]}"#)
-        ) { response in
-          #expect(response.status == .unauthorized)
-        }
-      }
-    }
-
-    @Test("POST /api/users/lookup/id forwards record names to the backend")
-    internal func usersLookupIdForwards() async throws {
-      let fixture = Self.makeFixture(authenticated: true)
-      let app = Application(router: try fixture.server.makeRouter())
-      let jsonBody = #"{"userRecordNames":["_user-1"]}"#
-
-      try await app.test(.router) { client in
-        try await client.execute(
-          uri: "/api/users/lookup/id",
-          method: .post,
-          headers: [.contentType: "application/json"],
-          body: ByteBuffer(string: jsonBody)
-        ) { response in
-          #expect(response.status == .ok)
-          let payload = try JSONDecoder().decode(
-            UsersPayload.self,
-            from: Data(response.body.readableBytesView)
-          )
-          #expect(payload.users.count == 1)
-        }
-      }
-
-      let captured = await fixture.backend.lastLookupUsersByRecordName
-      #expect(captured?.recordNames == ["_user-1"])
-    }
-
-    @Test("POST /api/users/lookup/id returns 401 without a captured auth token")
-    internal func usersLookupIdRequiresAuth() async throws {
-      let fixture = Self.makeFixture(authenticated: false)
-      let app = Application(router: try fixture.server.makeRouter())
-
-      try await app.test(.router) { client in
-        try await client.execute(
-          uri: "/api/users/lookup/id",
-          method: .post,
-          headers: [.contentType: "application/json"],
-          body: ByteBuffer(string: #"{"userRecordNames":["_user-1"]}"#)
         ) { response in
           #expect(response.status == .unauthorized)
         }

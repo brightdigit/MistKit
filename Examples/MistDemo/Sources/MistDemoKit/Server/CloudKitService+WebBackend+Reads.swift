@@ -43,9 +43,12 @@ extension CloudKitService {
       desiredKeys: nil,
       database: database
     )
-    // Surface any per-record failure (e.g. CloudKit's NOT_FOUND) as a thrown
-    // error so the web panel shows it — matching webModifySubscriptions —
-    // rather than silently returning fewer rows.
+    // All-or-nothing: `lookupRecords` returns a per-record `[RecordResult]`,
+    // but the demo collapses it — any single failure (e.g. CloudKit's
+    // NOT_FOUND) throws, so the web panel shows the error rather than
+    // silently returning fewer rows than were asked for. Surfacing partial
+    // results (found records alongside per-record failures) is a possible
+    // future enhancement.
     return try results.map { try $0.get() }
   }
 

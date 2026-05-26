@@ -107,17 +107,7 @@
     /// Captured arguments from the most recent `webDiscoverUsers` call.
     internal struct DiscoverUsersCall: Sendable {
       internal let emails: [String]
-    }
-
-    /// Captured arguments from the most recent `webLookupUsersByEmail` call.
-    internal struct LookupUsersByEmailCall: Sendable {
-      internal let emails: [String]
-    }
-
-    /// Captured arguments from the most recent `webLookupUsersByRecordName`
-    /// call.
-    internal struct LookupUsersByRecordNameCall: Sendable {
-      internal let recordNames: [String]
+      internal let userRecordNames: [String]
     }
 
     /// Captured arguments from the most recent `webLookupSubscriptions` call.

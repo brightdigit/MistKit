@@ -33,16 +33,16 @@
   internal import MistKit
 
   extension WebServer {
-    /// Register the user-identity routes: `caller`, `discover`,
-    /// `lookup/email`, and `lookup/id`. All operate on the public database
-    /// with web-auth credentials, so none carry a `database` selector.
+    /// Register the user-identity routes: `caller` and `discover`. Both
+    /// operate on the public database with web-auth credentials, so neither
+    /// carries a `database` selector. The deprecated `lookup/email` and
+    /// `lookup/id` primitives are intentionally not exposed — `discover` is
+    /// Apple's supported replacement and handles email + record-name lookups.
     internal func addUsersEndpoints(
       api: RouterGroup<BasicRequestContext>
     ) {
       addUsersCallerEndpoint(api: api)
       addUsersDiscoverEndpoint(api: api)
-      addUsersLookupEmailEndpoint(api: api)
-      addUsersLookupIdEndpoint(api: api)
     }
 
     /// `GET /api/users/caller` — the calling user's identity.
@@ -65,7 +65,8 @@
       }
     }
 
-    /// `POST /api/users/discover` — discover user identities by email.
+    /// `POST /api/users/discover` — discover user identities by email
+    /// address and/or user record name.
     private func addUsersDiscoverEndpoint(
       api: RouterGroup<BasicRequestContext>
     ) {
@@ -80,57 +81,9 @@
         )
         return try await Self.runOperation { () -> Data in
           let backend = try backendFactory.make(token)
-          let users = try await backend.webDiscoverUsers(emails: body.emails)
-          return try WebJSON.encoder().encode(
-            WebResponse.Users(users: users)
-          )
-        }
-      }
-    }
-
-    /// `POST /api/users/lookup/email` — look up user identities by email.
-    private func addUsersLookupEmailEndpoint(
-      api: RouterGroup<BasicRequestContext>
-    ) {
-      let tokenStore = self.tokenStore
-      let backendFactory = self.backendFactory
-      api.post("users/lookup/email") { request, context -> Response in
-        guard let token = await tokenStore.currentToken else {
-          return Response(status: .unauthorized)
-        }
-        let body = try await request.decode(
-          as: WebRequests.LookupUsersByEmail.self, context: context
-        )
-        return try await Self.runOperation { () -> Data in
-          let backend = try backendFactory.make(token)
-          let users = try await backend.webLookupUsersByEmail(
-            emails: body.emails
-          )
-          return try WebJSON.encoder().encode(
-            WebResponse.Users(users: users)
-          )
-        }
-      }
-    }
-
-    /// `POST /api/users/lookup/id` — look up user identities by user record
-    /// name.
-    private func addUsersLookupIdEndpoint(
-      api: RouterGroup<BasicRequestContext>
-    ) {
-      let tokenStore = self.tokenStore
-      let backendFactory = self.backendFactory
-      api.post("users/lookup/id") { request, context -> Response in
-        guard let token = await tokenStore.currentToken else {
-          return Response(status: .unauthorized)
-        }
-        let body = try await request.decode(
-          as: WebRequests.LookupUsersByRecordName.self, context: context
-        )
-        return try await Self.runOperation { () -> Data in
-          let backend = try backendFactory.make(token)
-          let users = try await backend.webLookupUsersByRecordName(
-            recordNames: body.userRecordNames
+          let users = try await backend.webDiscoverUsers(
+            emails: body.emails,
+            userRecordNames: body.userRecordNames
           )
           return try WebJSON.encoder().encode(
             WebResponse.Users(users: users)

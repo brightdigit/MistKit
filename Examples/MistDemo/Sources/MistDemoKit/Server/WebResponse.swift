@@ -77,8 +77,7 @@ internal enum WebResponse {
     internal let user: UserInfo
   }
 
-  /// Body returned by the user-identity routes (`users/discover`,
-  /// `users/lookup/email`, `users/lookup/id`).
+  /// Body returned by the user-identity discover route (`users/discover`).
   internal struct Users: Encodable {
     internal let users: [UserIdentity]
   }

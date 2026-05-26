@@ -30,22 +30,29 @@
 internal import Foundation
 
 // User-identity routes have no `database` field: the underlying MistKit
-// wrappers (`discoverUserIdentities`, `lookupUsersByEmail`,
-// `lookupUsersByRecordName`) operate on the public database with web-auth
-// credentials regardless of the request's selected database.
+// wrapper (`discoverUserIdentities`) operates on the public database with
+// web-auth credentials regardless of the request's selected database.
 extension WebRequests {
-  /// `POST /api/users/discover` — discover user identities by email address.
+  /// `POST /api/users/discover` — discover user identities by email address
+  /// and/or user record name. Either list may be omitted; an absent key
+  /// decodes to an empty array.
   internal struct DiscoverUsers: Decodable {
-    internal let emails: [String]
-  }
+    private enum CodingKeys: String, CodingKey {
+      case emails
+      case userRecordNames
+    }
 
-  /// `POST /api/users/lookup/email` — look up user identities by email.
-  internal struct LookupUsersByEmail: Decodable {
     internal let emails: [String]
-  }
-
-  /// `POST /api/users/lookup/id` — look up user identities by user record name.
-  internal struct LookupUsersByRecordName: Decodable {
     internal let userRecordNames: [String]
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.emails =
+        try container.decodeIfPresent([String].self, forKey: .emails) ?? []
+      self.userRecordNames =
+        try container.decodeIfPresent(
+          [String].self, forKey: .userRecordNames
+        ) ?? []
+    }
   }
 }

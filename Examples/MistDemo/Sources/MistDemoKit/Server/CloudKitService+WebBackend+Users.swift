@@ -40,22 +40,12 @@ extension CloudKitService {
   }
 
   internal func webDiscoverUsers(
-    emails: [String]
+    emails: [String],
+    userRecordNames: [String]
   ) async throws -> [UserIdentity] {
-    try await discoverUserIdentities(
-      lookupInfos: emails.map { UserIdentityLookupInfo(emailAddress: $0) }
-    )
-  }
-
-  internal func webLookupUsersByEmail(
-    emails: [String]
-  ) async throws -> [UserIdentity] {
-    try await lookupUsersByEmail(emails)
-  }
-
-  internal func webLookupUsersByRecordName(
-    recordNames: [String]
-  ) async throws -> [UserIdentity] {
-    try await lookupUsersByRecordName(recordNames)
+    let lookupInfos =
+      emails.map { UserIdentityLookupInfo(emailAddress: $0) }
+      + userRecordNames.map { UserIdentityLookupInfo(userRecordName: $0) }
+    return try await discoverUserIdentities(lookupInfos: lookupInfos)
   }
 }

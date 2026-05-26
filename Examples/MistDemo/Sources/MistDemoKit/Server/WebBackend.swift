@@ -102,15 +102,8 @@ internal protocol WebBackend: Sendable {
   func webFetchCaller() async throws -> UserInfo
 
   func webDiscoverUsers(
-    emails: [String]
-  ) async throws -> [UserIdentity]
-
-  func webLookupUsersByEmail(
-    emails: [String]
-  ) async throws -> [UserIdentity]
-
-  func webLookupUsersByRecordName(
-    recordNames: [String]
+    emails: [String],
+    userRecordNames: [String]
   ) async throws -> [UserIdentity]
 
   func webListSubscriptions(

@@ -92,6 +92,27 @@
       }
     }
 
+    @Test("POST /api/records/lookup surfaces a backend failure as an error")
+    internal func recordsLookupPropagatesBackendError() async throws {
+      // `webLookupRecords` is all-or-nothing: any per-record failure (e.g.
+      // CloudKit NOT_FOUND) throws rather than returning partial rows, so a
+      // backend error must surface as 500 — not a 200 with fewer records.
+      let fixture = Self.makeFixture(authenticated: true)
+      await fixture.backend.failNext(message: "record not found")
+      let app = Application(router: try fixture.server.makeRouter())
+
+      try await app.test(.router) { client in
+        try await client.execute(
+          uri: "/api/records/lookup",
+          method: .post,
+          headers: [.contentType: "application/json"],
+          body: ByteBuffer(string: #"{"recordNames":["missing"]}"#)
+        ) { response in
+          #expect(response.status == .internalServerError)
+        }
+      }
+    }
+
     @Test("POST /api/records/changes forwards zone and sync token to backend")
     internal func recordsChangesForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
