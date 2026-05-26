@@ -47,6 +47,8 @@ extension CloudKitError {
       return "CloudKit API error: HTTP \(statusCode)\nRaw Response: \(rawResponse)"
     case .invalidResponse:
       return "Invalid response from CloudKit"
+    case .incompleteResponse(let reason):
+      return Self.simpleReasonDescription(prefix: "Incomplete CloudKit response", reason: reason)
     case .conversionFailed(let conversionError):
       return "Failed to convert CloudKit response into a MistKit type: "
         + (conversionError.errorDescription ?? "\(conversionError)")

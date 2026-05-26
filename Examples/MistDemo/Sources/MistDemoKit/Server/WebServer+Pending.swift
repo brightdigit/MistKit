@@ -71,12 +71,29 @@
       }
     }
 
-    /// Register 501 stubs for every CloudKit Web Services endpoint whose
-    /// MistKit Swift wrapper hasn't landed yet. Each route returns the
-    /// shared `PendingStub.responseJSON` payload so the browser-side panel
-    /// renders a structured "pending #N" body. When a tracking issue lands,
-    /// flip the corresponding `api.<verb>(...)` registration here to the
-    /// real handler (or move it into a dedicated extension file).
+    /// Register 501 stubs for every CloudKit Web Services endpoint not yet
+    /// wired to a real handler. Each route returns the shared
+    /// `PendingStub.responseJSON` payload so the browser-side panel renders a
+    /// structured "pending #N" body. When a route is ready, flip the
+    /// corresponding `api.<verb>(...)` registration here to the real handler
+    /// (or move it into a dedicated extension file).
+    ///
+    /// Remaining pending calls fall into two groups:
+    ///
+    /// 1. **No MistKit wrapper yet** (registered below):
+    ///    - `POST records/resolve` (#41) — `CloudKitService` has no
+    ///      `resolveRecords`; `ResolveCommand` likewise only prints a stub.
+    ///
+    /// 2. **Wrapper landed, route wiring outstanding** (#394, registered in
+    ///    ``addUnwiredLandedEndpoints(api:)``): `records/lookup`,
+    ///    `records/changes`, `zones/list`, `zones/lookup`, `zones/changes`,
+    ///    `users/caller`, `users/discover`, `users/lookup/email`,
+    ///    `users/lookup/id`.
+    ///
+    /// Already moved off this list to real handlers: `subscriptions/*`
+    /// (#49/#50/#51 → `WebServer+Subscriptions`), `tokens/*`
+    /// (#52/#53 → `WebServer+Tokens`), and `assets/rereference`
+    /// (#31 → `WebServer+Assets`).
     internal func addPendingEndpoints(
       api: RouterGroup<BasicRequestContext>
     ) {
@@ -87,32 +104,24 @@
         endpoint: "records/resolve",
         trackingIssue: 41
       )
-      Self.registerPending(
-        api: api,
-        verb: .post,
-        path: "assets/rereference",
-        endpoint: "assets/rereference",
-        trackingIssue: 31
-      )
-      // subscriptions/* (#49/#50/#51) and tokens/* (#52/#53) are now wired to
-      // real MistKit handlers — see `WebServer+Subscriptions` / `WebServer+Tokens`.
 
       addUnwiredLandedEndpoints(api: api)
     }
 
     /// Register 501 stubs for endpoints whose MistKit Swift wrapper *has*
     /// already landed but isn't exposed on the demo server yet — only the
-    /// `/api/*` route wiring is outstanding, tracked by #370. These return
+    /// `/api/*` route wiring is outstanding, tracked by #394. These return
     /// the same structured pending body as `addPendingEndpoints`; replacing a
     /// stub here with a real handler (mirroring `WebServer+Zones`) is the
-    /// remaining work for #370's "exercisable in both modes" criterion.
+    /// remaining work for #394's "exercisable in both modes" criterion.
     ///
-    /// Note: #370 is the tracking issue for the *route wiring*, not for the
-    /// wrapper (which shipped under #215/#45/#47/#48/#367).
+    /// Note: #394 is the tracking issue for the *route wiring*, not for the
+    /// wrapper (which shipped under #215/#45/#47/#48/#367); #370 only
+    /// scaffolded these as stubs.
     internal func addUnwiredLandedEndpoints(
       api: RouterGroup<BasicRequestContext>
     ) {
-      let routeWiringIssue = 370
+      let routeWiringIssue = 394
       // Each route's `endpoint` label equals its path here, so a flat list of
       // (verb, path) pairs drives registration without per-route boilerplate.
       let routes: [(verb: PendingVerb, path: String)] = [

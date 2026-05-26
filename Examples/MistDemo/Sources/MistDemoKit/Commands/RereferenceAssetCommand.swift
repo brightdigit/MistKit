@@ -28,17 +28,18 @@
 //
 
 internal import Foundation
+internal import MistKit
 
-/// Stub command for `assets/rereference`. Reuses an existing CloudKit asset
-/// descriptor from one record on another, avoiding a second upload. The
-/// MistKit Swift wrapper is tracked in #31.
-public struct RereferenceAssetCommand: MistDemoCommand {
+/// Command for `assets/rereference`. Reuses an existing CloudKit asset
+/// descriptor from one record on another, avoiding a second upload of the
+/// bytes.
+public struct RereferenceAssetCommand: MistDemoCommand, OutputFormatting {
   /// The configuration type.
   public typealias Config = RereferenceAssetConfig
   /// The command name.
   public static let commandName = "rereference-asset"
   /// The command abstract.
-  public static let abstract = "Re-reference an asset across records (pending #31)"
+  public static let abstract = "Re-reference an asset across records"
   /// The command help text.
   public static let helpText = """
     REREFERENCE-ASSET - Re-reference an existing asset across records
@@ -56,8 +57,10 @@ public struct RereferenceAssetCommand: MistDemoCommand {
       --database <type>              Database to target
       --output-format <format>       Output format (json, table, csv, yaml)
 
-    STATUS:
-      Not yet implemented — pending MistKit support, tracked in #31.
+    EXAMPLES:
+      mistdemo rereference-asset \\
+        --source-record note-a --asset-field image \\
+        --target-record note-b
     """
 
   private let config: RereferenceAssetConfig
@@ -69,6 +72,38 @@ public struct RereferenceAssetCommand: MistDemoCommand {
 
   /// Executes the command.
   public func execute() async throws {
-    PendingStub.printPending(endpoint: "assets/rereference", trackingIssue: 31)
+    guard let sourceRecord = config.sourceRecord else {
+      throw RereferenceAssetError.sourceRecordRequired
+    }
+    guard let assetField = config.assetField else {
+      throw RereferenceAssetError.assetFieldRequired
+    }
+    guard let targetRecord = config.targetRecord else {
+      throw RereferenceAssetError.targetRecordRequired
+    }
+
+    print("\n" + String(repeating: "=", count: 60))
+    print("📎 Re-reference Asset")
+    print(String(repeating: "=", count: 60))
+    print("   Source: \(sourceRecord).\(assetField)")
+    print("   Target: \(targetRecord).\(config.targetAssetField ?? assetField)")
+
+    do {
+      let service = try MistKitClientFactory.create(for: config.base)
+      let record = try await service.rereferenceAsset(
+        fromRecord: sourceRecord,
+        field: assetField,
+        toRecord: targetRecord,
+        field: config.targetAssetField,
+        database: config.base.database
+      )
+      try await outputResult(record, format: config.output)
+    } catch let error as CloudKitError {
+      throw RereferenceAssetError.operationFailed(error.localizedDescription)
+    }
+
+    print("\n" + String(repeating: "=", count: 60))
+    print("✅ Re-reference completed!")
+    print(String(repeating: "=", count: 60))
   }
 }

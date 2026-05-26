@@ -110,15 +110,7 @@ extension FieldValue {
 
   /// Initialize from asset field value
   internal init(assetValue: Components.Schemas.AssetValue) {
-    let asset = Asset(
-      fileChecksum: assetValue.fileChecksum,
-      size: assetValue.size,
-      referenceChecksum: assetValue.referenceChecksum,
-      wrappingKey: assetValue.wrappingKey,
-      receipt: assetValue.receipt,
-      downloadURL: assetValue.downloadURL
-    )
-    self = .asset(asset)
+    self = .asset(Asset(from: assetValue))
   }
 
   private static func makeComplexFieldValue(

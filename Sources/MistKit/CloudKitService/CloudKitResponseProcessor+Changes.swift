@@ -115,6 +115,21 @@ extension CloudKitResponseProcessor {
     }
   }
 
+  /// Process rereferenceAssets response
+  internal func processRereferenceAssetsResponse(
+    _ response: Operations.rereferenceAssets.Output
+  ) async throws(CloudKitError) -> Components.Schemas.AssetRereferenceResponse {
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let rereferenceData):
+        return rereferenceData
+      }
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
+    }
+  }
+
   /// Process fetchZoneChanges response
   internal func processFetchZoneChangesResponse(_ response: Operations.fetchZoneChanges.Output)
     async throws(CloudKitError) -> Components.Schemas.ZoneChangesResponse

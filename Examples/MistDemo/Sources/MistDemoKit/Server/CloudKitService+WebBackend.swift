@@ -54,11 +54,13 @@ extension CloudKitService: WebBackend {
 
   internal func webCreate(
     recordType: String,
+    recordName: String?,
     fields: [String: FieldValue],
     database: MistKit.Database
   ) async throws -> RecordInfo {
     try await createRecord(
       recordType: recordType,
+      recordName: recordName,
       fields: fields,
       database: database
     )
@@ -151,6 +153,38 @@ extension CloudKitService: WebBackend {
       apnsToken,
       environment: environment,
       clientId: clientId,
+      database: database
+    )
+  }
+
+  internal func webRereferenceAsset(
+    sourceRecordName: String,
+    assetField: String,
+    targetRecordName: String,
+    targetAssetField: String?,
+    database: MistKit.Database
+  ) async throws -> RecordInfo {
+    try await rereferenceAsset(
+      fromRecord: sourceRecordName,
+      field: assetField,
+      toRecord: targetRecordName,
+      field: targetAssetField,
+      database: database
+    )
+  }
+
+  internal func webUploadAsset(
+    data: Data,
+    recordType: String,
+    fieldName: String,
+    recordName: String?,
+    database: MistKit.Database
+  ) async throws -> AssetUploadReceipt {
+    try await uploadAssets(
+      data: data,
+      recordType: recordType,
+      fieldName: fieldName,
+      recordName: recordName,
       database: database
     )
   }

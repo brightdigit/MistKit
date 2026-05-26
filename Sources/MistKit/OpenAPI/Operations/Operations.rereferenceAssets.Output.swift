@@ -1,6 +1,6 @@
 //
-//  UploadAssetPhase.swift
-//  MistDemo
+//  Operations.rereferenceAssets.Output.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,43 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+internal import MistKitOpenAPI
 
-internal struct UploadAssetPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = AssetUploadReceipt
-
-  internal static let title = "Upload test asset"
-  internal static let emoji = "📤"
-  internal static let apiName = "uploadAssets"
-
-  internal func run(
-    input: NoState, context: PhaseContext
-  ) async throws -> AssetUploadReceipt {
-    print("\n\(Self.emoji) \(Self.title)")
-
-    let testData = PNGData.generate(withSizeInKB: context.assetSizeKB)
-    let sizeInMB = Double(testData.count) / 1_024 / 1_024
-
-    if context.verbose {
-      print("   Uploading \(testData.count) bytes (\(String(format: "%.2f", sizeInMB)) MB)...")
+extension Operations.rereferenceAssets.Output: CloudKitResponseType {
+  internal func toCloudKitError() -> CloudKitError? {
+    switch self {
+    case .ok: return nil
+    case .badRequest(let response): return .init(response, statusCode: 400)
+    case .unauthorized(let response): return .init(response, statusCode: 401)
+    case .undocumented(let statusCode, _):
+      return .undocumented(statusCode: statusCode, response: self)
     }
-
-    let receipt = try await context.service.uploadAssets(
-      data: testData,
-      recordType: MistDemoConfig.recordType,
-      fieldName: "image",
-      database: context.database
-    )
-
-    print("✅ Uploaded asset: \(testData.count) bytes")
-
-    if context.verbose {
-      print("   Record: \(receipt.recordName)")
-      print("   Field: \(receipt.fieldName)")
-    }
-
-    return receipt
   }
 }

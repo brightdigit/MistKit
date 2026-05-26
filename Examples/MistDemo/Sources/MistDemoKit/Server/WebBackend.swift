@@ -48,6 +48,7 @@ internal protocol WebBackend: Sendable {
 
   func webCreate(
     recordType: String,
+    recordName: String?,
     fields: [String: FieldValue],
     database: MistKit.Database
   ) async throws -> RecordInfo
@@ -99,6 +100,22 @@ internal protocol WebBackend: Sendable {
     clientId: String?,
     database: MistKit.Database
   ) async throws
+
+  func webRereferenceAsset(
+    sourceRecordName: String,
+    assetField: String,
+    targetRecordName: String,
+    targetAssetField: String?,
+    database: MistKit.Database
+  ) async throws -> RecordInfo
+
+  func webUploadAsset(
+    data: Data,
+    recordType: String,
+    fieldName: String,
+    recordName: String?,
+    database: MistKit.Database
+  ) async throws -> AssetUploadReceipt
 }
 
 // The `CloudKitService: WebBackend` conformance lives in

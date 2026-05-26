@@ -1,5 +1,5 @@
 //
-//  ModifyRecordsPhase.swift
+//  RereferenceAssetInput.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,45 +30,15 @@
 internal import Foundation
 internal import MistKit
 
-internal struct ModifyRecordsPhase: IntegrationPhase {
-  internal typealias Input = CreatedRecordNames
-  internal typealias Output = NoState
+/// Phase input for ``RereferenceAssetPhase``: the uploaded asset receipt
+/// (expected checksum) plus the records created with that asset (the
+/// re-reference source).
+internal struct RereferenceAssetInput: PhaseStateDecodable, Sendable {
+  internal let receipt: AssetUploadReceipt
+  internal let recordNames: [String]
 
-  internal static let title = "Modify some records"
-  internal static let emoji = "\u{270F}\u{FE0F} "
-  internal static let apiName = "updateRecord"
-
-  internal func run(
-    input: CreatedRecordNames, context: PhaseContext
-  ) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-
-    let recordsToUpdate = Array(input.names.prefix(min(3, input.names.count)))
-
-    let operations = recordsToUpdate.enumerated().map { offset, recordName in
-      RecordOperation(
-        operationType: .forceReplace,
-        recordType: MistDemoConfig.recordType,
-        recordName: recordName,
-        fields: [
-          "title": .string("Updated Record \(offset + 1)")
-        ]
-      )
-    }
-
-    _ = try await context.service.modifyRecords(
-      operations,
-      database: context.database
-    )
-
-    if context.verbose {
-      for recordName in recordsToUpdate {
-        print("   ✅ Updated: \(recordName)")
-      }
-    }
-
-    print("✅ Updated \(recordsToUpdate.count) records")
-
-    return NoState()
+  internal init(from state: PhaseState) throws {
+    self.receipt = try AssetUploadReceipt(from: state)
+    self.recordNames = try CreatedRecordNames(from: state).names
   }
 }

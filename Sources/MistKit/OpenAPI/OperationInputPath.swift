@@ -87,6 +87,8 @@ extension Operations.queryRecords.Input.Path: OperationInputPath {}
 
 extension Operations.uploadAssets.Input.Path: OperationInputPath {}
 
+extension Operations.rereferenceAssets.Input.Path: OperationInputPath {}
+
 extension Operations.listSubscriptions.Input.Path: OperationInputPath {}
 
 extension Operations.lookupSubscriptions.Input.Path: OperationInputPath {}

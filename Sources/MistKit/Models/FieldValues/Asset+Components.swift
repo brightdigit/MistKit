@@ -1,6 +1,6 @@
 //
-//  UploadAssetPhase.swift
-//  MistDemo
+//  Asset+Components.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,43 +27,21 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+internal import MistKitOpenAPI
 
-internal struct UploadAssetPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = AssetUploadReceipt
-
-  internal static let title = "Upload test asset"
-  internal static let emoji = "📤"
-  internal static let apiName = "uploadAssets"
-
-  internal func run(
-    input: NoState, context: PhaseContext
-  ) async throws -> AssetUploadReceipt {
-    print("\n\(Self.emoji) \(Self.title)")
-
-    let testData = PNGData.generate(withSizeInKB: context.assetSizeKB)
-    let sizeInMB = Double(testData.count) / 1_024 / 1_024
-
-    if context.verbose {
-      print("   Uploading \(testData.count) bytes (\(String(format: "%.2f", sizeInMB)) MB)...")
-    }
-
-    let receipt = try await context.service.uploadAssets(
-      data: testData,
-      recordType: MistDemoConfig.recordType,
-      fieldName: "image",
-      database: context.database
+extension Asset {
+  /// Initialize a domain ``Asset`` from a generated CloudKit asset dictionary.
+  ///
+  /// Used by ``FieldValue`` response conversion and by `rereferenceAssets`,
+  /// which receives reusable asset descriptors as bare `AssetValue` entries.
+  internal init(from assetValue: Components.Schemas.AssetValue) {
+    self.init(
+      fileChecksum: assetValue.fileChecksum,
+      size: assetValue.size,
+      referenceChecksum: assetValue.referenceChecksum,
+      wrappingKey: assetValue.wrappingKey,
+      receipt: assetValue.receipt,
+      downloadURL: assetValue.downloadURL
     )
-
-    print("✅ Uploaded asset: \(testData.count) bytes")
-
-    if context.verbose {
-      print("   Record: \(receipt.recordName)")
-      print("   Field: \(receipt.fieldName)")
-    }
-
-    return receipt
   }
 }

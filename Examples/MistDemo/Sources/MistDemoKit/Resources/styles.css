@@ -155,6 +155,31 @@ pre {
 @media (max-width: 820px) {
   .notes-grid { grid-template-columns: 1fr; }
 }
+.notes-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+.notes-form-stack > section + section {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+.image-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 4px 0 8px;
+}
+.image-state { font-size: 12px; color: var(--muted); }
+.image-preview {
+  max-width: 96px;
+  max-height: 96px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
 .table-toolbar {
   display: flex;
   align-items: end;
