@@ -53,6 +53,12 @@ extension OperationFailure where Target == SubscriptionTarget {
     "could not find subscription we just created"
   }
 
+  /// The ID of the subscription the operation failed on.
+  ///
+  /// A named alias for ``OperationFailure/identifier`` scoped to the
+  /// subscription target, matching CloudKit's `subscriptionID` wire field.
+  public var subscriptionID: String { identifier }
+
   /// `true` when CloudKit returned `INTERNAL_ERROR` with the exact reason
   /// string that, in practice, signals another subscription with matching
   /// properties (query/`firesOn` — *not* `subscriptionID`) already exists.

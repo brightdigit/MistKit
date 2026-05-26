@@ -41,6 +41,12 @@ public enum RecordTarget: OperationFailureTarget {
 }
 
 extension OperationFailure where Target == RecordTarget {
+  /// The record name of the record the operation failed on.
+  ///
+  /// A named alias for ``OperationFailure/identifier`` scoped to the
+  /// record target, matching CloudKit's `recordName` wire field.
+  public var recordName: String { identifier }
+
   internal init(from schema: Components.Schemas.RecordOperationFailure) {
     self.init(identifier: schema.value2.recordName, common: schema.value1)
   }

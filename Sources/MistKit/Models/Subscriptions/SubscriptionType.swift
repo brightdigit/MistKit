@@ -31,7 +31,7 @@ internal import MistKitOpenAPI
 
 /// The kind of change a CloudKit subscription watches for.
 public enum SubscriptionType: String, Codable, Sendable, CaseIterable {
-  /// Fires when records matching a query change (see ``SubscriptionQuery``).
+  /// Fires when records matching a query change (see ``Query``).
   case query
   /// Fires when any record in a record zone changes (see `zoneID`).
   case zone
