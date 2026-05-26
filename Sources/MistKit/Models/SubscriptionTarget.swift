@@ -49,9 +49,7 @@ extension OperationFailure where Target == SubscriptionTarget {
   /// match risks false positives on unrelated future `INTERNAL_ERROR`
   /// variants. Revisit only if `mistdemo probe-duplicate-subscription`
   /// surfaces wording variants.
-  internal static var duplicateMarker: String {
-    "could not find subscription we just created"
-  }
+  internal static let duplicateMarker = "could not find subscription we just created"
 
   /// The ID of the subscription the operation failed on.
   ///

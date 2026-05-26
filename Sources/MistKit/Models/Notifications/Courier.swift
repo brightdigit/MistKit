@@ -30,10 +30,6 @@
 #if !os(WASI)
   public import Foundation
 
-  #if canImport(FoundationNetworking)
-    public import FoundationNetworking
-  #endif
-
   /// Long-polls a CloudKit `webcourierURL` to receive subscription-triggered
   /// notifications without a device or APNs entitlement — the only fully
   /// headless way to observe a push end-to-end.
@@ -41,10 +37,9 @@
   /// `Courier` is a namespace: ``pollOnce(courierURL:perPollTimeout:transport:)``
   /// performs a single long-poll and
   /// ``notifications(courierURL:perPollTimeout:transport:)`` streams them. Both
-  /// run their HTTP round-trip through a ``Transport`` closure that defaults to
-  /// `URLSession` (``Foundation/URLSession/pollCourier(_:timeout:)``); inject
-  /// your own to run the poll through a different client — e.g.
-  /// `AsyncHTTPClient` on a server — or to stub the courier in tests.
+  /// run their HTTP round-trip through a ``Transport``. For the common
+  /// `URLSession` case, build a ``WebCourierPoller`` instead — it binds the URL
+  /// and a session-backed transport for you.
   public enum Courier {
     /// Closure that performs a single CloudKit web-courier long-poll: issue a
     /// GET to the `webcourierURL` and return the raw HTTP response.
@@ -80,7 +75,6 @@
       )
   }
 
-  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
   extension Courier {
     /// Issue one long-poll request and decode the result.
     ///
@@ -92,19 +86,13 @@
     ///   - courierURL: The `webcourierURL` returned by `createAPNsToken`.
     ///   - perPollTimeout: How long the long-poll request waits before giving
     ///     up so the caller can poll again.
-    ///   - transport: The HTTP round-trip used for the poll. Defaults to a
-    ///     `URLSession`-backed implementation; inject your own to use a
-    ///     different client or to stub the courier in tests.
+    ///   - transport: The HTTP round-trip used for the poll.
     public static func pollOnce(
       courierURL: URL,
       perPollTimeout: TimeInterval = 30,
-      transport: Transport? = nil
+      transport: Transport
     ) async throws -> CourierNotification? {
-      let perform =
-        transport ?? { url, timeout in
-          try await URLSession.shared.pollCourier(url, timeout: timeout)
-        }
-      let (_, data) = try await perform(courierURL, perPollTimeout)
+      let (_, data) = try await transport(courierURL, perPollTimeout)
       return try? CourierNotification(data: data)
     }
 
@@ -123,13 +111,11 @@
     ///   - courierURL: The `webcourierURL` returned by `createAPNsToken`.
     ///   - perPollTimeout: How long each long-poll request waits before
     ///     re-polling.
-    ///   - transport: The HTTP round-trip used for each poll. Defaults to a
-    ///     `URLSession`-backed implementation; inject your own to use a
-    ///     different client or to stub the courier in tests.
+    ///   - transport: The HTTP round-trip used for each poll.
     public static func notifications(
       courierURL: URL,
       perPollTimeout: TimeInterval = 30,
-      transport: Transport? = nil
+      transport: @escaping Transport
     ) -> AsyncThrowingStream<CourierNotification, any Error> {
       AsyncThrowingStream { continuation in
         let task = Task {
