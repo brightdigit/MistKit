@@ -59,8 +59,11 @@ public struct CloudKitService: Sendable {
   public static let baseURL = URL(string: "https://api.apple-cloudkit.com")!
   // swiftlint:enable force_unwrapping
 
-  /// CloudKit's maximum number of records returned per query/modify request.
-  internal static let maxRecordsPerRequest: Int = 200
+  /// CloudKit's maximum number of items (records, lookups, or operations)
+  /// accepted or returned per batch request. The auto-chunking convenience
+  /// methods (e.g. ``lookupAllRecords(recordNames:desiredKeys:database:batchSize:)``)
+  /// default their `batchSize` to this value.
+  public static let maxRecordsPerRequest: Int = 200
 
   /// CloudKit's documented per-record field-data limit (1 MB). Assets travel
   /// via the CDN and don't count against this limit. MistKit does not

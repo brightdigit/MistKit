@@ -81,6 +81,8 @@ public enum MistDemoConstants {
     public static let operationsFile = "operations.file"
     /// Atomic configuration key.
     public static let atomic = "atomic"
+    /// Batch size configuration key for the auto-chunking `*-all` commands.
+    public static let batchSize = "batch.size"
   }
 
   // MARK: - Field Names

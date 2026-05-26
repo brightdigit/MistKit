@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import Foundation
 internal import HTTPTypes
 internal import OpenAPIRuntime
 
@@ -44,6 +45,9 @@ internal actor ResponseProvider {
   private var responses: [String: ResponseConfig]
   private var defaultResponse: ResponseConfig
   private var responseQueues: [String: [ResponseConfig]] = [:]
+
+  /// Every request received, in order, captured for test assertions.
+  private var requestLog: [(operationID: String, body: Data?)] = []
 
   // MARK: - Initializers
 
@@ -83,10 +87,25 @@ internal actor ResponseProvider {
     responseQueues[operationID, default: []].append(response)
   }
 
+  // MARK: - Request Inspection
+
+  /// Number of requests received for `operationID`.
+  internal func callCount(for operationID: String) -> Int {
+    requestLog.filter { $0.operationID == operationID }.count
+  }
+
+  /// The request bodies received for `operationID`, in order.
+  internal func bodies(for operationID: String) -> [Data?] {
+    requestLog.filter { $0.operationID == operationID }.map(\.body)
+  }
+
   internal func response(
     for operationID: String,
-    request _: HTTPRequest
+    request _: HTTPRequest,
+    body: Data? = nil
   ) throws -> (HTTPResponse, HTTPBody?) {
+    requestLog.append((operationID: operationID, body: body))
+
     let config: ResponseConfig
     if var queue = responseQueues[operationID], !queue.isEmpty {
       config = queue.removeFirst()

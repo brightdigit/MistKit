@@ -190,7 +190,10 @@ MistKit/
 | `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
 | `CloudKitService+ModifyZones.swift` | `modifyZones(_:database:)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
-| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(unavailable — pending #28)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)`, `fetchCurrentUser()` (deprecated, forwards to `fetchCaller`) |
+| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(no-arg address-book form — unavailable, pending #28; distinct from the available `discoverAllUserIdentities(lookupInfos:batchSize:)` chunking overload below)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)`, `fetchCurrentUser()` (deprecated, forwards to `fetchCaller`) |
+| `CloudKitService+LookupAllRecords.swift` | `lookupAllRecords(recordNames:desiredKeys:database:batchSize:)` — auto-chunking convenience over `lookupRecords` |
+| `CloudKitService+UserIdentityChunking.swift` | `discoverAllUserIdentities(lookupInfos:batchSize:)` — auto-chunking convenience over `discoverUserIdentities` |
+| `CloudKitService+BatchChunking.swift` | internal `chunkedBatches` helper backing the auto-chunking conveniences |
 | `CloudKitService+AssetOperations.swift` | `uploadAssets`, `requestAssetUploadURL` |
 | `CloudKitService+AssetUpload.swift` | `uploadAssetData` |
 | `CloudKitService+RecordManaging.swift` | record-managing convenience surface |
@@ -209,6 +212,17 @@ MistKit/
 - `discoverAllUserIdentities()` → GET `/users/discover` — returns `[UserIdentity]` for every discoverable user in the caller's address book.
 - `lookupUsersByEmail(_:)` → POST `/users/lookup/email` — returns `[UserIdentity]`.
 - `lookupUsersByRecordName(_:)` → POST `/users/lookup/id` — returns `[UserIdentity]`.
+
+**Batch chunking (issue #307):** the two non-deprecated operations capped at CloudKit's 200-item-per-request limit (`CloudKitService.maxRecordsPerRequest`) each pair a single-request primitive with an auto-chunking convenience that splits the input into ≤`batchSize` batches, calls the primitive per batch, and concatenates results in input order. This mirrors the `queryRecords`/`queryAllRecords` page-primitive + auto-paginating-extension pattern. Because chunk count is `ceil(input.count / batchSize)` — deterministic and finite — there is **no** `maxPages`-style throwing ceiling; `batchSize` (default `maxRecordsPerRequest`, clamped to `1...maxRecordsPerRequest`) is the only knob. The shared engine is `chunkedBatches` (`CloudKitService+BatchChunking.swift`).
+
+| Primitive (single request) | Auto-chunking convenience |
+|----------------------------|---------------------------|
+| `lookupRecords(recordNames:desiredKeys:database:)` | `lookupAllRecords(recordNames:desiredKeys:database:batchSize:)` |
+| `discoverUserIdentities(lookupInfos:)` | `discoverAllUserIdentities(lookupInfos:batchSize:)` *(overloads the no-arg address-book form)* |
+
+The `users/lookup/email` and `users/lookup/id` primitives (`lookupUsersByEmail` / `lookupUsersByRecordName`) are **deprecated by Apple** in favor of POST `users/discover` (verified against Apple's archived CloudKit Web Services reference), so they intentionally get **no** chunking convenience — callers needing >200 should use `discoverAllUserIdentities(lookupInfos:)`. `users/lookup/contacts` is likewise deprecated and unwrapped.
+
+`listZones` is **not** a pagination candidate — `zones/list` (GET) returns every zone in one response with no continuation marker. `modifyRecords`/`sync<T>` already chunk by 200 internally. The `fetchAllRecordChanges` / `fetchAllZoneChanges` paginators already implement the page-primitive pattern with `maxPages` + stuck-token detection.
 
 In MistDemo, integration runs targeting these endpoints use `PhaseContext.userContextService` (a public+web-auth `CloudKitService`) which is built from `CLOUDKIT_API_TOKEN` + `CLOUDKIT_WEB_AUTH_TOKEN` regardless of the primary `--database` selection. The `DatabaseConfiguration` / `AuthenticationCredentials` types in `Examples/MistDemo/Sources/MistDemoKit/Configuration/` enforce valid database+auth combinations at construction time.
 
