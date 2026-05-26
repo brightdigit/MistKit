@@ -41,7 +41,7 @@ extension CloudKitServiceTests.BatchChunking {
       let provider = ResponseProvider(
         defaultResponse: try .successfulLookupRecordsResponse(recordCount: recordsPerCall)
       )
-      let service = try CloudKitServiceTests.BatchChunking.makeLookupRecordsService(
+      let service = try CloudKitServiceTests.BatchChunking.makeUserService(
         provider: provider
       )
       return (service, provider)
@@ -68,6 +68,8 @@ extension CloudKitServiceTests.BatchChunking {
       )
       #expect(count == 1)
       #expect(sizes == [5])
+      // The mock returns `recordsPerCall` records per request regardless of
+      // input size, so the result count reflects the mock, not `names.count`.
       #expect(results.count == Self.recordsPerCall)
     }
 
@@ -179,6 +181,37 @@ extension CloudKitServiceTests.BatchChunking {
 
       #expect(results.isEmpty)
       #expect(await provider.callCount(for: "lookupRecords") == 0)
+    }
+
+    @Test("a failing batch throws and stops the loop")
+    internal func failingBatchPropagates() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let provider = ResponseProvider(
+        defaultResponse: try .successfulLookupRecordsResponse(recordCount: Self.recordsPerCall)
+      )
+      // First batch succeeds, second fails: the loop must stop on the error
+      // rather than issuing the remaining batch.
+      await provider.enqueue(
+        try .successfulLookupRecordsResponse(recordCount: Self.recordsPerCall),
+        for: "lookupRecords"
+      )
+      await provider.enqueue(.authenticationError(), for: "lookupRecords")
+      let service = try CloudKitServiceTests.BatchChunking.makeUserService(
+        provider: provider
+      )
+      let names = (0..<450).map { "rec-\($0)" }
+
+      await #expect(throws: CloudKitError.self) {
+        _ = try await service.lookupAllRecords(
+          recordNames: names,
+          database: .private
+        )
+      }
+      // Two batches issued (success then failure); the third is never sent.
+      #expect(await provider.callCount(for: "lookupRecords") == 2)
     }
   }
 }

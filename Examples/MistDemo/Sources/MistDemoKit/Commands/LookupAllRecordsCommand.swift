@@ -71,30 +71,29 @@ public struct LookupAllRecordsCommand: MistDemoCommand, OutputFormatting {
 
   /// Executes the command.
   public func execute() async throws {
-    do {
-      let client = try MistKitClientFactory.create(for: config.base)
+    let client = try MistKitClientFactory.create(for: config.base)
 
-      let batches = (config.recordNames.count + config.batchSize - 1) / config.batchSize
-      let note =
-        "lookup-all: \(config.recordNames.count) name(s), batchSize \(config.batchSize) "
-        + "→ \(batches) request(s)\n"
-      FileHandle.standardError.write(Data(note.utf8))
+    let effectiveBatchSize = min(
+      max(config.batchSize, 1),
+      CloudKitService.maxRecordsPerRequest
+    )
+    let batches =
+      (config.recordNames.count + effectiveBatchSize - 1) / effectiveBatchSize
+    let note =
+      "lookup-all: \(config.recordNames.count) name(s), batchSize \(config.batchSize) "
+      + "→ \(batches) request(s)\n"
+    FileHandle.standardError.write(Data(note.utf8))
 
-      let results = try await client.lookupAllRecords(
-        recordNames: config.recordNames,
-        desiredKeys: config.fields,
-        database: config.base.database,
-        batchSize: config.batchSize
-      )
+    let results = try await client.lookupAllRecords(
+      recordNames: config.recordNames,
+      desiredKeys: config.fields,
+      database: config.base.database,
+      batchSize: config.batchSize
+    )
 
-      let records = results.compactMap { result in
-        if case .success(let record) = result { record } else { nil }
-      }
-      try await outputResults(records, format: config.output)
-    } catch let error as LookupError {
-      throw error
-    } catch {
-      throw LookupError.operationFailed(error.localizedDescription)
+    let records = results.compactMap { result in
+      if case .success(let record) = result { record } else { nil }
     }
+    try await outputResults(records, format: config.output)
   }
 }

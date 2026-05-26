@@ -82,7 +82,11 @@ public struct DiscoverAllUserIdentitiesCommand: MistDemoCommand, OutputFormattin
 
     let service = try MistKitClientFactory.create(for: config.base)
 
-    let batches = (config.emails.count + config.batchSize - 1) / config.batchSize
+    let effectiveBatchSize = min(
+      max(config.batchSize, 1),
+      CloudKitService.maxRecordsPerRequest
+    )
+    let batches = (config.emails.count + effectiveBatchSize - 1) / effectiveBatchSize
     let note =
       "discover-all: \(config.emails.count) lookup(s), batchSize \(config.batchSize) "
       + "→ \(batches) request(s)\n"

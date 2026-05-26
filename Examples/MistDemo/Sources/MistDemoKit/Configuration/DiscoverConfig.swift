@@ -29,6 +29,7 @@
 
 public import ConfigKeyKit
 internal import Foundation
+internal import MistKit
 
 /// Configuration for the `discover` command (email lookup).
 public struct DiscoverConfig: Sendable, ConfigurationParseable {
@@ -51,7 +52,7 @@ public struct DiscoverConfig: Sendable, ConfigurationParseable {
   public init(
     base: MistDemoConfig,
     emails: [String],
-    batchSize: Int = 200,
+    batchSize: Int = CloudKitService.maxRecordsPerRequest,
     output: OutputFormat = .json
   ) {
     self.base = base
@@ -85,7 +86,10 @@ public struct DiscoverConfig: Sendable, ConfigurationParseable {
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     let batchSize =
-      configuration.int(forKey: MistDemoConstants.ConfigKeys.batchSize, default: 200) ?? 200
+      configuration.int(
+        forKey: MistDemoConstants.ConfigKeys.batchSize,
+        default: CloudKitService.maxRecordsPerRequest
+      ) ?? CloudKitService.maxRecordsPerRequest
 
     self.init(
       base: baseConfig,
