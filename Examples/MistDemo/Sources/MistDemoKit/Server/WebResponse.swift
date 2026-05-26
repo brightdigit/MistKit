@@ -43,6 +43,46 @@ internal enum WebResponse {
     internal let deleted: Bool
   }
 
+  /// Body returned by `records/changes`: the changed records plus the
+  /// continuation `syncToken` and `moreComing` flag from
+  /// `RecordChangesResult`.
+  internal struct RecordChanges: Encodable {
+    internal let records: [RecordInfo]
+    internal let syncToken: String?
+    internal let moreComing: Bool
+
+    internal init(from result: RecordChangesResult) {
+      self.records = result.records
+      self.syncToken = result.syncToken
+      self.moreComing = result.moreComing
+    }
+  }
+
+  /// Body returned by `zones/changes`: the changed zones plus the continuation
+  /// `syncToken` and `moreComing` flag from `ZoneChangesResult`.
+  internal struct ZoneChanges: Encodable {
+    internal let zones: [ZoneInfo]
+    internal let syncToken: String?
+    internal let moreComing: Bool
+
+    internal init(from result: ZoneChangesResult) {
+      self.zones = result.zones
+      self.syncToken = result.syncToken
+      self.moreComing = result.moreComing
+    }
+  }
+
+  /// Body returned by `users/caller`: the calling user's `UserInfo`.
+  internal struct Caller: Encodable {
+    internal let user: UserInfo
+  }
+
+  /// Body returned by the user-identity routes (`users/discover`,
+  /// `users/lookup/email`, `users/lookup/id`).
+  internal struct Users: Encodable {
+    internal let users: [UserIdentity]
+  }
+
   /// Body returned by zone routes (`zones/modify`). `ZoneInfo` encodes to
   /// `{ zoneName, ownerRecordName, capabilities }`, which the browser's
   /// zone table reads directly.

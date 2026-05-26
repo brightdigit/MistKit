@@ -46,7 +46,16 @@
     internal var lastCreate: CreateCall?
     internal var lastUpdate: UpdateCall?
     internal var lastDelete: DeleteCall?
+    internal var lastLookupRecords: LookupRecordsCall?
+    internal var lastRecordChanges: RecordChangesCall?
     internal var lastModifyZones: ModifyZonesCall?
+    internal var lastListZones: ListZonesCall?
+    internal var lastLookupZones: LookupZonesCall?
+    internal var lastZoneChanges: ZoneChangesCall?
+    internal var didFetchCaller = false
+    internal var lastDiscoverUsers: DiscoverUsersCall?
+    internal var lastLookupUsersByEmail: LookupUsersByEmailCall?
+    internal var lastLookupUsersByRecordName: LookupUsersByRecordNameCall?
     internal var didListSubscriptions = false
     internal var lastLookupSubscriptions: LookupSubscriptionsCall?
     internal var lastModifySubscriptions: ModifySubscriptionsCall?

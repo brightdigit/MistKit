@@ -104,6 +104,38 @@
       try consumePendingError()
     }
 
+    internal func webLookupRecords(
+      recordNames: [String],
+      database: MistKit.Database
+    ) async throws -> [RecordInfo] {
+      lastLookupRecords = LookupRecordsCall(
+        recordNames: recordNames,
+        database: database
+      )
+      try consumePendingError()
+      return recordNames.map { name in
+        Self.stubRecord(recordType: "Note", recordName: name)
+      }
+    }
+
+    internal func webRecordChanges(
+      zoneName: String?,
+      syncToken: String?,
+      database: MistKit.Database
+    ) async throws -> RecordChangesResult {
+      lastRecordChanges = RecordChangesCall(
+        zoneName: zoneName,
+        syncToken: syncToken,
+        database: database
+      )
+      try consumePendingError()
+      return RecordChangesResult(
+        records: [Self.stubRecord(recordType: "Note", recordName: "changed-1")],
+        syncToken: "stub-record-sync-token",
+        moreComing: false
+      )
+    }
+
     internal func webModifyZones(
       create: [String],
       delete: [String],
@@ -118,6 +150,52 @@
       return create.map { name in
         ZoneInfo(zoneName: name, ownerRecordName: nil, capabilities: [])
       }
+    }
+
+    internal func webListZones(
+      database: MistKit.Database
+    ) async throws -> [ZoneInfo] {
+      lastListZones = ListZonesCall(database: database)
+      try consumePendingError()
+      return [
+        ZoneInfo(
+          zoneName: "_defaultZone", ownerRecordName: nil, capabilities: []
+        )
+      ]
+    }
+
+    internal func webLookupZones(
+      zoneNames: [String],
+      database: MistKit.Database
+    ) async throws -> [ZoneInfo] {
+      lastLookupZones = LookupZonesCall(
+        zoneNames: zoneNames,
+        database: database
+      )
+      try consumePendingError()
+      return zoneNames.map { name in
+        ZoneInfo(zoneName: name, ownerRecordName: nil, capabilities: [])
+      }
+    }
+
+    internal func webZoneChanges(
+      syncToken: String?,
+      database: MistKit.Database
+    ) async throws -> ZoneChangesResult {
+      lastZoneChanges = ZoneChangesCall(
+        syncToken: syncToken,
+        database: database
+      )
+      try consumePendingError()
+      return ZoneChangesResult(
+        zones: [
+          ZoneInfo(
+            zoneName: "_defaultZone", ownerRecordName: nil, capabilities: []
+          )
+        ],
+        syncToken: "stub-zone-sync-token",
+        moreComing: false
+      )
     }
   }
 #endif

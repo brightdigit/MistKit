@@ -1,5 +1,5 @@
 //
-//  WebServer+Zones.swift
+//  WebServer+Users.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -33,117 +33,107 @@
   internal import MistKit
 
   extension WebServer {
-    /// Register every zone route: `modify`, `list`, `lookup`, and `changes`.
-    internal func addZonesEndpoints(
+    /// Register the user-identity routes: `caller`, `discover`,
+    /// `lookup/email`, and `lookup/id`. All operate on the public database
+    /// with web-auth credentials, so none carry a `database` selector.
+    internal func addUsersEndpoints(
       api: RouterGroup<BasicRequestContext>
     ) {
-      addZonesModifyEndpoint(api: api)
-      addZonesListEndpoint(api: api)
-      addZonesLookupEndpoint(api: api)
-      addZonesChangesEndpoint(api: api)
+      addUsersCallerEndpoint(api: api)
+      addUsersDiscoverEndpoint(api: api)
+      addUsersLookupEmailEndpoint(api: api)
+      addUsersLookupIdEndpoint(api: api)
     }
 
-    /// `POST /api/zones/modify` — create and/or delete zones in one batch,
-    /// backing the demo's MistKit-mode "Create Zone" / "Delete Zone" buttons.
-    /// CloudKit JS mode hits the browser SDK directly; this is the
-    /// server-side counterpart.
-    private func addZonesModifyEndpoint(
+    /// `GET /api/users/caller` — the calling user's identity.
+    private func addUsersCallerEndpoint(
       api: RouterGroup<BasicRequestContext>
     ) {
       let tokenStore = self.tokenStore
       let backendFactory = self.backendFactory
-      api.post("zones/modify") { request, context -> Response in
+      api.get("users/caller") { _, _ -> Response in
         guard let token = await tokenStore.currentToken else {
           return Response(status: .unauthorized)
         }
-        let body = try await request.decode(
-          as: WebRequests.ModifyZones.self, context: context
-        )
         return try await Self.runOperation { () -> Data in
           let backend = try backendFactory.make(token)
-          let zones = try await backend.webModifyZones(
-            create: body.create.map(\.zoneName),
-            delete: body.delete.map(\.zoneName),
-            database: body.database
-          )
+          let user = try await backend.webFetchCaller()
           return try WebJSON.encoder().encode(
-            WebResponse.Zones(zones: zones)
+            WebResponse.Caller(user: user)
           )
         }
       }
     }
 
-    /// `POST /api/zones/list` — every zone in the target database.
-    private func addZonesListEndpoint(
+    /// `POST /api/users/discover` — discover user identities by email.
+    private func addUsersDiscoverEndpoint(
       api: RouterGroup<BasicRequestContext>
     ) {
       let tokenStore = self.tokenStore
       let backendFactory = self.backendFactory
-      api.post("zones/list") { request, context -> Response in
+      api.post("users/discover") { request, context -> Response in
         guard let token = await tokenStore.currentToken else {
           return Response(status: .unauthorized)
         }
         let body = try await request.decode(
-          as: WebRequests.ListZones.self, context: context
+          as: WebRequests.DiscoverUsers.self, context: context
         )
         return try await Self.runOperation { () -> Data in
           let backend = try backendFactory.make(token)
-          let zones = try await backend.webListZones(database: body.database)
+          let users = try await backend.webDiscoverUsers(emails: body.emails)
           return try WebJSON.encoder().encode(
-            WebResponse.Zones(zones: zones)
+            WebResponse.Users(users: users)
           )
         }
       }
     }
 
-    /// `POST /api/zones/lookup` — resolve specific zones by name.
-    private func addZonesLookupEndpoint(
+    /// `POST /api/users/lookup/email` — look up user identities by email.
+    private func addUsersLookupEmailEndpoint(
       api: RouterGroup<BasicRequestContext>
     ) {
       let tokenStore = self.tokenStore
       let backendFactory = self.backendFactory
-      api.post("zones/lookup") { request, context -> Response in
+      api.post("users/lookup/email") { request, context -> Response in
         guard let token = await tokenStore.currentToken else {
           return Response(status: .unauthorized)
         }
         let body = try await request.decode(
-          as: WebRequests.LookupZones.self, context: context
+          as: WebRequests.LookupUsersByEmail.self, context: context
         )
         return try await Self.runOperation { () -> Data in
           let backend = try backendFactory.make(token)
-          let zones = try await backend.webLookupZones(
-            zoneNames: body.zoneNames,
-            database: body.database
+          let users = try await backend.webLookupUsersByEmail(
+            emails: body.emails
           )
           return try WebJSON.encoder().encode(
-            WebResponse.Zones(zones: zones)
+            WebResponse.Users(users: users)
           )
         }
       }
     }
 
-    /// `POST /api/zones/changes` — database-level zone changes since an
-    /// optional continuation `syncToken`.
-    private func addZonesChangesEndpoint(
+    /// `POST /api/users/lookup/id` — look up user identities by user record
+    /// name.
+    private func addUsersLookupIdEndpoint(
       api: RouterGroup<BasicRequestContext>
     ) {
       let tokenStore = self.tokenStore
       let backendFactory = self.backendFactory
-      api.post("zones/changes") { request, context -> Response in
+      api.post("users/lookup/id") { request, context -> Response in
         guard let token = await tokenStore.currentToken else {
           return Response(status: .unauthorized)
         }
         let body = try await request.decode(
-          as: WebRequests.ZoneChanges.self, context: context
+          as: WebRequests.LookupUsersByRecordName.self, context: context
         )
         return try await Self.runOperation { () -> Data in
           let backend = try backendFactory.make(token)
-          let result = try await backend.webZoneChanges(
-            syncToken: body.syncToken,
-            database: body.database
+          let users = try await backend.webLookupUsersByRecordName(
+            recordNames: body.userRecordNames
           )
           return try WebJSON.encoder().encode(
-            WebResponse.ZoneChanges(from: result)
+            WebResponse.Users(users: users)
           )
         }
       }

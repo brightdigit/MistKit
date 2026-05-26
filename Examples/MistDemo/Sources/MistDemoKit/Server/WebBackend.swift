@@ -68,11 +68,50 @@ internal protocol WebBackend: Sendable {
     database: MistKit.Database
   ) async throws
 
+  func webLookupRecords(
+    recordNames: [String],
+    database: MistKit.Database
+  ) async throws -> [RecordInfo]
+
+  func webRecordChanges(
+    zoneName: String?,
+    syncToken: String?,
+    database: MistKit.Database
+  ) async throws -> RecordChangesResult
+
   func webModifyZones(
     create: [String],
     delete: [String],
     database: MistKit.Database
   ) async throws -> [ZoneInfo]
+
+  func webListZones(
+    database: MistKit.Database
+  ) async throws -> [ZoneInfo]
+
+  func webLookupZones(
+    zoneNames: [String],
+    database: MistKit.Database
+  ) async throws -> [ZoneInfo]
+
+  func webZoneChanges(
+    syncToken: String?,
+    database: MistKit.Database
+  ) async throws -> ZoneChangesResult
+
+  func webFetchCaller() async throws -> UserInfo
+
+  func webDiscoverUsers(
+    emails: [String]
+  ) async throws -> [UserIdentity]
+
+  func webLookupUsersByEmail(
+    emails: [String]
+  ) async throws -> [UserIdentity]
+
+  func webLookupUsersByRecordName(
+    recordNames: [String]
+  ) async throws -> [UserIdentity]
 
   func webListSubscriptions(
     database: MistKit.Database

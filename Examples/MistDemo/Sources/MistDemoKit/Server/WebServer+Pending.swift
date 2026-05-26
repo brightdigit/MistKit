@@ -33,15 +33,8 @@
   internal import Hummingbird
 
   extension WebServer {
-    /// HTTP verbs the pending registrar supports — only the ones we need.
-    internal enum PendingVerb {
-      case get
-      case post
-    }
-
-    private static func registerPending(
+    private static func registerPendingPost(
       api: RouterGroup<BasicRequestContext>,
-      verb: PendingVerb,
       path: String,
       endpoint: String,
       trackingIssue: Int
@@ -59,15 +52,8 @@
           "Failed to encode pending-stub body for \(endpoint): \(error)"
         )
       }
-      let handler: @Sendable (Request, BasicRequestContext) async throws -> Response = {
-        _, _ -> Response in
+      api.post(RouterPath(path)) { _, _ -> Response in
         Self.jsonResponse(status: .notImplemented, bytes: bytes)
-      }
-      switch verb {
-      case .get:
-        api.get(RouterPath(path), use: handler)
-      case .post:
-        api.post(RouterPath(path), use: handler)
       }
     }
 
@@ -78,72 +64,24 @@
     /// corresponding `api.<verb>(...)` registration here to the real handler
     /// (or move it into a dedicated extension file).
     ///
-    /// Remaining pending calls fall into two groups:
-    ///
-    /// 1. **No MistKit wrapper yet** (registered below):
-    ///    - `POST records/resolve` (#41) — `CloudKitService` has no
-    ///      `resolveRecords`; `ResolveCommand` likewise only prints a stub.
-    ///
-    /// 2. **Wrapper landed, route wiring outstanding** (#394, registered in
-    ///    ``addUnwiredLandedEndpoints(api:)``): `records/lookup`,
-    ///    `records/changes`, `zones/list`, `zones/lookup`, `zones/changes`,
-    ///    `users/caller`, `users/discover`, `users/lookup/email`,
-    ///    `users/lookup/id`.
+    /// Only one endpoint remains pending — it has **no MistKit wrapper yet**:
+    /// - `POST records/resolve` (#41) — `CloudKitService` has no
+    ///   `resolveRecords`; `ResolveCommand` likewise only prints a stub.
     ///
     /// Already moved off this list to real handlers: `subscriptions/*`
     /// (#49/#50/#51 → `WebServer+Subscriptions`), `tokens/*`
-    /// (#52/#53 → `WebServer+Tokens`), and `assets/rereference`
-    /// (#31 → `WebServer+Assets`).
+    /// (#52/#53 → `WebServer+Tokens`), `assets/rereference`
+    /// (#31 → `WebServer+Assets`), and the records/zones/users endpoints
+    /// (#394 → `WebServer+Records` / `WebServer+Zones` / `WebServer+Users`).
     internal func addPendingEndpoints(
       api: RouterGroup<BasicRequestContext>
     ) {
-      Self.registerPending(
+      Self.registerPendingPost(
         api: api,
-        verb: .post,
         path: "records/resolve",
         endpoint: "records/resolve",
         trackingIssue: 41
       )
-
-      addUnwiredLandedEndpoints(api: api)
-    }
-
-    /// Register 501 stubs for endpoints whose MistKit Swift wrapper *has*
-    /// already landed but isn't exposed on the demo server yet — only the
-    /// `/api/*` route wiring is outstanding, tracked by #394. These return
-    /// the same structured pending body as `addPendingEndpoints`; replacing a
-    /// stub here with a real handler (mirroring `WebServer+Zones`) is the
-    /// remaining work for #394's "exercisable in both modes" criterion.
-    ///
-    /// Note: #394 is the tracking issue for the *route wiring*, not for the
-    /// wrapper (which shipped under #215/#45/#47/#48/#367); #370 only
-    /// scaffolded these as stubs.
-    internal func addUnwiredLandedEndpoints(
-      api: RouterGroup<BasicRequestContext>
-    ) {
-      let routeWiringIssue = 394
-      // Each route's `endpoint` label equals its path here, so a flat list of
-      // (verb, path) pairs drives registration without per-route boilerplate.
-      let routes: [(verb: PendingVerb, path: String)] = [
-        (.post, "records/lookup"),
-        (.post, "records/changes"),
-        (.post, "zones/list"),
-        (.post, "zones/lookup"),
-        (.post, "zones/changes"),
-        (.get, "users/caller"),
-        (.post, "users/discover"),
-        (.post, "users/lookup/email"),
-        (.post, "users/lookup/id"),
-      ]
-      for route in routes {
-        Self.registerPending(
-          api: api,
-          verb: route.verb,
-          path: route.path,
-          endpoint: route.path,
-          trackingIssue: routeWiringIssue
-        )
-      }
     }
   }
 #endif

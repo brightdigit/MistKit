@@ -67,11 +67,57 @@
       internal let database: MistKit.Database
     }
 
+    /// Captured arguments from the most recent `webLookupRecords` call.
+    internal struct LookupRecordsCall: Sendable {
+      internal let recordNames: [String]
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webRecordChanges` call.
+    internal struct RecordChangesCall: Sendable {
+      internal let zoneName: String?
+      internal let syncToken: String?
+      internal let database: MistKit.Database
+    }
+
     /// Captured arguments from the most recent `webModifyZones` call.
     internal struct ModifyZonesCall: Sendable {
       internal let create: [String]
       internal let delete: [String]
       internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webListZones` call.
+    internal struct ListZonesCall: Sendable {
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webLookupZones` call.
+    internal struct LookupZonesCall: Sendable {
+      internal let zoneNames: [String]
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webZoneChanges` call.
+    internal struct ZoneChangesCall: Sendable {
+      internal let syncToken: String?
+      internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webDiscoverUsers` call.
+    internal struct DiscoverUsersCall: Sendable {
+      internal let emails: [String]
+    }
+
+    /// Captured arguments from the most recent `webLookupUsersByEmail` call.
+    internal struct LookupUsersByEmailCall: Sendable {
+      internal let emails: [String]
+    }
+
+    /// Captured arguments from the most recent `webLookupUsersByRecordName`
+    /// call.
+    internal struct LookupUsersByRecordNameCall: Sendable {
+      internal let recordNames: [String]
     }
 
     /// Captured arguments from the most recent `webLookupSubscriptions` call.
