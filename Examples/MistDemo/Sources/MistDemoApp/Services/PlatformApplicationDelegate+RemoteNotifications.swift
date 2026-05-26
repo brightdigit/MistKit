@@ -33,10 +33,12 @@
   extension PlatformApplicationDelegate {
     /// APNs delivered a device token — forward it to the registered receiver.
     ///
-    /// `public` because, when adopted by a `public` class, this satisfies the
-    /// matching requirement in the `public` system delegate protocol.
+    /// Cannot be `@objc` (Swift forbids `@objc` on protocol extension
+    /// members); the optional system-delegate selector is bridged by a
+    /// concrete `@objc` shim on ``PushNotificationDelegate`` that
+    /// delegates here.
     public func application(
-      _ application: PlatformApplication,
+      _: PlatformApplication,
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
       Self.receiver?.didRegisterForRemoteNotifications(deviceToken: deviceToken)
@@ -45,7 +47,7 @@
     /// APNs refused registration — forward the error to the receiver so it
     /// can surface in the UI.
     public func application(
-      _ application: PlatformApplication,
+      _: PlatformApplication,
       didFailToRegisterForRemoteNotificationsWithError error: any Error
     ) {
       Self.receiver?.didFailToRegisterForRemoteNotifications(error: error)

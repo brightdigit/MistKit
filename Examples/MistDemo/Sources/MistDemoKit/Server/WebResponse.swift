@@ -50,6 +50,34 @@ internal enum WebResponse {
     internal let zones: [ZoneInfo]
   }
 
+  /// Body returned by subscription routes (`list` / `lookup` / `modify`).
+  /// `SubscriptionInfo` encodes to `{ subscriptionID, subscriptionType, query,
+  /// zoneID, firesOn }`, matching the browser's subscription table and the
+  /// CloudKit JS `{ subscriptions: [...] }` shape.
+  internal struct Subscriptions: Encodable {
+    internal let subscriptions: [SubscriptionInfo]
+  }
+
+  /// Body returned by `tokens/create`. Echoes CloudKit's wire field names so
+  /// the demo panel shows the canonical shape per Apple's `CreateTokens.html`
+  /// REST reference: `apnsEnvironment`, `apnsToken`, `webcourierURL`.
+  internal struct Token: Encodable {
+    internal let apnsEnvironment: APNsEnvironment
+    internal let apnsToken: String
+    internal let webcourierURL: URL
+
+    internal init(from result: APNsTokenResult) {
+      self.apnsEnvironment = result.environment
+      self.apnsToken = result.apnsToken
+      self.webcourierURL = result.webcourierURL
+    }
+  }
+
+  /// Body returned by `tokens/register` (no payload from CloudKit).
+  internal struct TokenRegistration: Encodable {
+    internal let registered: Bool
+  }
+
   /// Body returned for any handled CloudKit/MistKit error so the UI can
   /// surface the message without parsing transport-level failures.
   internal struct Error: Encodable {

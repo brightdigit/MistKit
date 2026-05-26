@@ -71,6 +71,8 @@ public enum MistDemoRunner {
     await registry.register(RereferenceAssetCommand.self)
     await registry.register(ListSubscriptionsCommand.self)
     await registry.register(LookupSubscriptionCommand.self)
+    await registry.register(ModifySubscriptionsCommand.self)
+    await registry.register(ProbeDuplicateSubscriptionCommand.self)
     await registry.register(CreateTokenCommand.self)
     await registry.register(RegisterTokenCommand.self)
 

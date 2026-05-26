@@ -68,7 +68,7 @@ extension CloudKitService {
     database: Database
   ) async throws(CloudKitError) -> Set<String> {
     let result: QueryResult = try await queryRecords(
-      recordType: recordType,
+      Query(recordType: recordType),
       limit: limit ?? Self.maxRecordsPerRequest,
       database: database
     )

@@ -56,19 +56,7 @@ paths:
                   type: integer
                   description: Maximum number of records to return
                 query:
-                  type: object
-                  properties:
-                    recordType:
-                      type: string
-                      description: The record type to query
-                    filterBy:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/Filter'
-                    sortBy:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/Sort'
+                  $ref: '#/components/schemas/Query'
                 desiredKeys:
                   type: array
                   items:
@@ -813,10 +801,17 @@ paths:
         '401':
           $ref: '#/components/responses/Failure'
 
-  /database/{version}/{container}/{environment}/{database}/tokens/create:
+  /device/{version}/{container}/{environment}/tokens/create:
     post:
       summary: Create APNs Token
-      description: Create an Apple Push Notification service (APNs) token
+      description: |
+        Create an Apple Push Notification service (APNs) token.
+
+        Lives under the `/device/` API module (not `/database/`). CloudKit's
+        archived REST reference documents this under `/database/...`, but the
+        live service routes only OPTIONS to that path and returns
+        `405 Method Not Allowed` for POST. The working path is the one
+        CloudKit JS uses (`setApiModuleName("device")`).
       operationId: createToken
       tags:
         - Tokens
@@ -824,17 +819,26 @@ paths:
         - $ref: '#/components/parameters/version'
         - $ref: '#/components/parameters/container'
         - $ref: '#/components/parameters/environment'
-        - $ref: '#/components/parameters/database'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - apnsEnvironment
+                - clientId
               properties:
                 apnsEnvironment:
                   type: string
                   enum: [development, production]
+                clientId:
+                  type: string
+                  description: |
+                    Logical CloudKit client identifier. CloudKit JS
+                    persists this across sessions for push de-dup; for
+                    server-side callers a fresh UUID per request is fine
+                    unless continuity matters.
       responses:
         '200':
           description: Token created successfully
@@ -847,10 +851,14 @@ paths:
         '401':
           $ref: '#/components/responses/Failure'
 
-  /database/{version}/{container}/{environment}/{database}/tokens/register:
+  /device/{version}/{container}/{environment}/tokens/register:
     post:
       summary: Register Token
-      description: Register a token for push notifications
+      description: |
+        Register an APNs device token for push notifications.
+
+        Lives under the `/device/` API module (not `/database/`) — same
+        rationale as `tokens/create`.
       operationId: registerToken
       tags:
         - Tokens
@@ -858,17 +866,30 @@ paths:
         - $ref: '#/components/parameters/version'
         - $ref: '#/components/parameters/container'
         - $ref: '#/components/parameters/environment'
-        - $ref: '#/components/parameters/database'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - apnsEnvironment
+                - apnsToken
+                - clientId
               properties:
+                apnsEnvironment:
+                  type: string
+                  enum: [development, production]
+                  description: The APNs environment the token targets.
                 apnsToken:
                   type: string
                   description: The APNs token to register
+                clientId:
+                  type: string
+                  description: |
+                    Logical CloudKit client identifier. Reuse the value
+                    used with `tokens/create` to keep both calls tied to
+                    the same logical client.
       responses:
         '200':
           description: Token registered successfully
@@ -950,6 +971,22 @@ components:
           type: string
         ascending:
           type: boolean
+
+    Query:
+      type: object
+      description: A record query, shared by records/query and query subscriptions
+      properties:
+        recordType:
+          type: string
+          description: The record type to query
+        filterBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/Filter'
+        sortBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sort'
 
     RecordOperation:
       type: object
@@ -1198,21 +1235,105 @@ components:
 
     Subscription:
       type: object
+      description: >
+        A CloudKit subscription — a persistent server-side trigger that
+        produces push notifications when matching changes occur.
+        Mirrors `CloudKit.Subscription` from the CloudKit JS reference.
       properties:
         subscriptionID:
           type: string
+          description: Caller-supplied unique identifier for the subscription.
         subscriptionType:
           type: string
           enum: [query, zone]
         query:
-          type: object
+          $ref: '#/components/schemas/Query'
+          description: >
+            For `subscriptionType: query`, the watched query
+            (`recordType` + filters + sort).
         zoneID:
           $ref: '#/components/schemas/ZoneID'
+          description: >
+            For `subscriptionType: zone`, the watched record zone.
+        zoneWide:
+          type: boolean
+          description: >
+            Zone subscriptions only. If `true`, the subscription watches
+            *every zone* in the database (the wire representation of a
+            native `CKDatabaseSubscription`); if `false`/absent, only the
+            zone identified by `zoneID` is watched. Only valid against
+            private and shared databases. Default `false`.
         firesOn:
           type: array
           items:
             type: string
             enum: [create, update, delete]
+          description: >
+            The record-change events that trigger a push (e.g.
+            `[create, update]`). CloudKit treats the exact set as the
+            subscription's uniqueness key — two subscriptions on the
+            same `(recordType, firesOn)` tuple collide regardless of
+            `subscriptionID`.
+        firesOnce:
+          type: boolean
+          description: >
+            If `true`, the subscription is destroyed after producing its
+            first notification. Default `false`.
+        notificationInfo:
+          $ref: '#/components/schemas/NotificationInfo'
+          description: >
+            How the system should alert the user when the subscription
+            fires. Optional.
+
+    NotificationInfo:
+      type: object
+      description: >
+        How CloudKit shapes the push notification produced by a
+        subscription. Mirrors `CloudKit.NotificationInfo` from the
+        CloudKit JS reference.
+      properties:
+        alertBody:
+          type: string
+          description: The text of the alert message.
+        alertLocalizationKey:
+          type: string
+          description: A key to a localized alert message.
+        alertLocalizationArgs:
+          type: array
+          items:
+            type: string
+          description: >
+            Strings that appear as variables if `alertLocalizationKey` is
+            a format specifier.
+        alertActionLocalizationKey:
+          type: string
+          description: A key to the localized title of the alert's action button.
+        alertLaunchImage:
+          type: string
+          description: The filename of the image to use as the launch image.
+        soundName:
+          type: string
+          description: The filename of the sound to play when the notification arrives.
+        shouldBadge:
+          type: boolean
+          description: >
+            Whether the app icon's badge should be incremented. Default
+            `false`.
+        shouldSendContentAvailable:
+          type: boolean
+          description: >
+            Whether the notification should mark new content as available
+            (silent background fetch). Default `false`.
+        additionalFields:
+          type: array
+          items:
+            type: string
+          description: >
+            Names of record fields whose values should be included in the
+            notification payload.
+        category:
+          type: string
+          description: The notification category (UN actionable category identifier).
 
     QueryResponse:
       type: object
@@ -1320,13 +1441,31 @@ components:
           items:
             $ref: '#/components/schemas/Subscription'
 
+    SubscriptionOperationFailure:
+      description: |
+        Per-subscription error returned inline in the `subscriptions` array of a
+        200 modify response. Identifies the subscription that failed and why.
+        Mirrors `RecordOperationFailure` for records. Distinct from
+        `ErrorResponse`, which is the body of a top-level 4xx/5xx HTTP failure.
+      allOf:
+        - $ref: '#/components/schemas/OperationFailureCommon'
+        - type: object
+          required:
+            - subscriptionID
+          properties:
+            subscriptionID:
+              type: string
+              description: The identifier of the subscription the operation failed on.
+
     SubscriptionsModifyResponse:
       type: object
       properties:
         subscriptions:
           type: array
           items:
-            $ref: '#/components/schemas/Subscription'
+            oneOf:
+              - $ref: '#/components/schemas/SubscriptionOperationFailure'
+              - $ref: '#/components/schemas/Subscription'
 
     RecordTimestamp:
       type: object
@@ -1437,41 +1576,68 @@ components:
 
     TokenResponse:
       type: object
+      description: |
+        Response body for `tokens/create`. Per Apple's archived REST reference,
+        the server returns the echoed environment, the minted APNs token, and a
+        long-poll URL that browser/Service-Worker callers use to receive push
+        notifications. Server-side callers typically only need `apnsToken`.
+      required:
+        - apnsEnvironment
+        - apnsToken
+        - webcourierURL
       properties:
+        apnsEnvironment:
+          type: string
+          enum: [development, production]
+          description: The APNs environment the token targets (echoes the request).
         apnsToken:
           type: string
-        webcAuthToken:
+          description: The CloudKit-minted APNs token to use as a push destination.
+        webcourierURL:
           type: string
+          format: uri
+          description: |
+            Long-poll endpoint URL that browser / Service-Worker clients use to
+            receive push notifications. Not relevant for server callers, which
+            receive pushes via APNs proper.
 
-    RecordOperationFailure:
+    OperationFailureServerErrorCode:
+      type: string
+      description: |
+        The CloudKit server error code returned in a per-item failure entry
+        (record or subscription) inline in a 200 modify/lookup response.
+        Shared by `RecordOperationFailure` and `SubscriptionOperationFailure`
+        via `OperationFailureCommon`. Distinct from `ErrorResponse`'s
+        `serverErrorCode`, which carries a broader set of codes for top-level
+        4xx/5xx HTTP failures.
+      enum:
+        - ACCESS_DENIED
+        - ATOMIC_ERROR
+        - AUTHENTICATION_FAILED
+        - AUTHENTICATION_REQUIRED
+        - BAD_REQUEST
+        - CONFLICT
+        - EXISTS
+        - INTERNAL_ERROR
+        - NOT_FOUND
+        - QUOTA_EXCEEDED
+        - THROTTLED
+        - TRY_AGAIN_LATER
+        - VALIDATING_REFERENCE_ERROR
+        - ZONE_NOT_FOUND
+
+    OperationFailureCommon:
       type: object
       description: |
-        Per-record error returned inline in the `records` array of a 200
-        modify/lookup response. Identifies the record that failed and why.
-        Distinct from `ErrorResponse`, which is the body of a top-level 4xx/5xx
-        HTTP failure. Note CloudKit does not echo `recordType` on a record error.
+        Shared fields of a per-item failure entry returned inline in a 200
+        modify/lookup response. Composed into `RecordOperationFailure` and
+        `SubscriptionOperationFailure` via `allOf`; each concrete failure
+        type adds its own wire identifier (`recordName` / `subscriptionID`).
+      required:
+        - serverErrorCode
       properties:
-        recordName:
-          type: string
-          description: The name of the record that the operation failed on.
         serverErrorCode:
-          type: string
-          enum:
-            - ACCESS_DENIED
-            - ATOMIC_ERROR
-            - AUTHENTICATION_FAILED
-            - AUTHENTICATION_REQUIRED
-            - BAD_REQUEST
-            - CONFLICT
-            - EXISTS
-            - INTERNAL_ERROR
-            - NOT_FOUND
-            - QUOTA_EXCEEDED
-            - THROTTLED
-            - TRY_AGAIN_LATER
-            - VALIDATING_REFERENCE_ERROR
-            - ZONE_NOT_FOUND
-          description: The code for the error that occurred.
+          $ref: '#/components/schemas/OperationFailureServerErrorCode'
         reason:
           type: string
           description: A string indicating the reason for the error.
@@ -1484,9 +1650,22 @@ components:
         redirectURL:
           type: string
           description: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
-      required:
-        - recordName
-        - serverErrorCode
+
+    RecordOperationFailure:
+      description: |
+        Per-record error returned inline in the `records` array of a 200
+        modify/lookup response. Identifies the record that failed and why.
+        Distinct from `ErrorResponse`, which is the body of a top-level 4xx/5xx
+        HTTP failure. Note CloudKit does not echo `recordType` on a record error.
+      allOf:
+        - $ref: '#/components/schemas/OperationFailureCommon'
+        - type: object
+          required:
+            - recordName
+          properties:
+            recordName:
+              type: string
+              description: The name of the record that the operation failed on.
 
     ErrorResponse:
       type: object

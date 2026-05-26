@@ -64,6 +64,17 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   case zoneMissingName
   /// A user response was missing its `userRecordName`.
   case userMissingRecordName
+  /// A subscription response was missing its `subscriptionID`.
+  case subscriptionMissingID
+  /// A subscription response was missing its `subscriptionType`.
+  case subscriptionMissingType
+  /// A `query` subscription response was missing or had an empty
+  /// `firesOn` array — a query subscription with no fire events would
+  /// never trigger and is invalid by construction.
+  case subscriptionQueryMissingFiresOn
+  /// A token response was missing or malformed a required field
+  /// (`apnsEnvironment`/`apnsToken`/`webcourierURL`).
+  case tokenMissingField(fieldName: String)
 
   /// A human-readable description of what failed during conversion.
   public var errorDescription: String? {
@@ -94,6 +105,15 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
       return "Zone entry missing zoneName"
     case .userMissingRecordName:
       return "UserResponse missing userRecordName"
+    case .subscriptionMissingID:
+      return "Subscription entry missing subscriptionID"
+    case .subscriptionMissingType:
+      return "Subscription entry missing subscriptionType"
+    case .subscriptionQueryMissingFiresOn:
+      return "Query subscription missing or empty firesOn — a query "
+        + "subscription must declare at least one of [create, update, delete]"
+    case .tokenMissingField(let fieldName):
+      return "TokenResponse missing required field '\(fieldName)'"
     }
   }
 }

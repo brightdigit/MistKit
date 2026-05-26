@@ -72,80 +72,34 @@ internal protocol WebBackend: Sendable {
     delete: [String],
     database: MistKit.Database
   ) async throws -> [ZoneInfo]
+
+  func webListSubscriptions(
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo]
+
+  func webLookupSubscriptions(
+    ids: [String],
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo]
+
+  func webModifySubscriptions(
+    operations: [SubscriptionOperation],
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo]
+
+  func webCreateToken(
+    environment: APNsEnvironment,
+    clientId: String?,
+    database: MistKit.Database
+  ) async throws -> APNsTokenResult
+
+  func webRegisterToken(
+    apnsToken: String,
+    environment: APNsEnvironment,
+    clientId: String?,
+    database: MistKit.Database
+  ) async throws
 }
 
-extension CloudKitService: WebBackend {
-  internal func webQuery(
-    recordType: String,
-    limit: Int?,
-    sortBy: [WebRequests.QuerySortField]?,
-    database: MistKit.Database
-  ) async throws -> [RecordInfo] {
-    let querySorts = sortBy?.map { sort in
-      QuerySort.sort(sort.field, ascending: sort.ascending)
-    }
-    let result = try await queryRecords(
-      recordType: recordType,
-      filters: nil,
-      sortBy: querySorts,
-      limit: limit,
-      desiredKeys: nil,
-      continuationMarker: nil,
-      database: database
-    )
-    return result.records
-  }
-
-  internal func webCreate(
-    recordType: String,
-    fields: [String: FieldValue],
-    database: MistKit.Database
-  ) async throws -> RecordInfo {
-    try await createRecord(
-      recordType: recordType,
-      fields: fields,
-      database: database
-    )
-  }
-
-  internal func webUpdate(
-    recordType: String,
-    recordName: String,
-    fields: [String: FieldValue],
-    recordChangeTag: String?,
-    database: MistKit.Database
-  ) async throws -> RecordInfo {
-    try await updateRecord(
-      recordType: recordType,
-      recordName: recordName,
-      fields: fields,
-      recordChangeTag: recordChangeTag,
-      database: database
-    )
-  }
-
-  internal func webDelete(
-    recordType: String,
-    recordName: String,
-    recordChangeTag: String?,
-    database: MistKit.Database
-  ) async throws {
-    try await deleteRecord(
-      recordType: recordType,
-      recordName: recordName,
-      recordChangeTag: recordChangeTag,
-      database: database
-    )
-  }
-
-  internal func webModifyZones(
-    create: [String],
-    delete: [String],
-    database: MistKit.Database
-  ) async throws -> [ZoneInfo] {
-    let operations =
-      create.map { ZoneOperation.create(ZoneID(zoneName: $0)) }
-      + delete.map { ZoneOperation.delete(ZoneID(zoneName: $0)) }
-    return try await modifyZones(operations, database: database)
-  }
-}
+// The `CloudKitService: WebBackend` conformance lives in
+// `CloudKitService+WebBackend.swift`.

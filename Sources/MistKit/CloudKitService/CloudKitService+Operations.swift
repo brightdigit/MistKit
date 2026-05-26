@@ -144,6 +144,11 @@ extension CloudKitService {
   ///   marker = result.continuationMarker
   /// } while marker != nil
   /// ```
+  @available(
+    *, deprecated,
+    message:
+      "Use queryRecords(_:limit:desiredKeys:continuationMarker:database:) — pass a Query value."
+  )
   public func queryRecords(
     recordType: String,
     filters: [QueryFilter]? = nil,
@@ -153,14 +158,40 @@ extension CloudKitService {
     continuationMarker: String? = nil,
     database: Database
   ) async throws(CloudKitError) -> QueryResult {
-    let effectiveLimit = limit ?? defaultQueryLimit
+    try await queryRecords(
+      Query(recordType: recordType, filters: filters ?? [], sortBy: sortBy ?? []),
+      limit: limit,
+      desiredKeys: desiredKeys,
+      continuationMarker: continuationMarker,
+      database: database
+    )
+  }
 
-    let componentsFilters = filters?.map {
-      Components.Schemas.Filter(from: $0)
-    }
-    let componentsSorts = sortBy?.map {
-      Components.Schemas.Sort(from: $0)
-    }
+  /// Query records from the default zone with pagination support.
+  ///
+  /// The unified ``Query`` value carries the `recordType` plus any
+  /// ``QueryFilter`` predicates and ``QuerySort`` descriptors. The same
+  /// value can be embedded in a subscription via
+  /// ``SubscriptionInfo/Kind/query(_:)``.
+  ///
+  /// - Parameters:
+  ///   - query: The query to execute.
+  ///   - limit: Maximum records to return (defaults to `defaultQueryLimit`).
+  ///   - desiredKeys: Optional list of field names to fetch.
+  ///   - continuationMarker: Marker from a previous ``QueryResult`` to
+  ///     fetch the next page.
+  ///   - database: The CloudKit database scope to query.
+  /// - Returns: A ``QueryResult`` with matching records and an optional
+  ///   continuation marker.
+  /// - Throws: ``CloudKitError`` if validation fails or the request fails.
+  public func queryRecords(
+    _ query: Query,
+    limit: Int? = nil,
+    desiredKeys: [String]? = nil,
+    continuationMarker: String? = nil,
+    database: Database
+  ) async throws(CloudKitError) -> QueryResult {
+    let effectiveLimit = limit ?? defaultQueryLimit
 
     do {
       let client = try self.client(for: database)
@@ -175,11 +206,7 @@ extension CloudKitService {
             .init(
               zoneID: .init(zoneName: "_defaultZone"),
               resultsLimit: effectiveLimit,
-              query: .init(
-                recordType: recordType,
-                filterBy: componentsFilters,
-                sortBy: componentsSorts
-              ),
+              query: query.schema,
               desiredKeys: desiredKeys,
               continuationMarker: continuationMarker
             )

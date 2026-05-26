@@ -3389,22 +3389,28 @@ public struct Client: APIProtocol {
     }
     /// Create APNs Token
     ///
-    /// Create an Apple Push Notification service (APNs) token
+    /// Create an Apple Push Notification service (APNs) token.
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)`.
+    /// Lives under the `/device/` API module (not `/database/`). CloudKit's
+    /// archived REST reference documents this under `/database/...`, but the
+    /// live service routes only OPTIONS to that path and returns
+    /// `405 Method Not Allowed` for POST. The working path is the one
+    /// CloudKit JS uses (`setApiModuleName("device")`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /device/{version}/{container}/{environment}/tokens/create`.
+    /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/create/post(createToken)`.
     public func createToken(_ input: Operations.createToken.Input) async throws -> Operations.createToken.Output {
         try await client.send(
             input: input,
             forOperation: Operations.createToken.id,
             serializer: { input in
                 let path = try converter.renderedPath(
-                    template: "/database/{}/{}/{}/{}/tokens/create",
+                    template: "/device/{}/{}/{}/tokens/create",
                     parameters: [
                         input.path.version,
                         input.path.container,
-                        input.path.environment,
-                        input.path.database
+                        input.path.environment
                     ]
                 )
                 var request: HTTPTypes.HTTPRequest = .init(
@@ -3509,22 +3515,25 @@ public struct Client: APIProtocol {
     }
     /// Register Token
     ///
-    /// Register a token for push notifications
+    /// Register an APNs device token for push notifications.
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)`.
+    /// Lives under the `/device/` API module (not `/database/`) — same
+    /// rationale as `tokens/create`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /device/{version}/{container}/{environment}/tokens/register`.
+    /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
     public func registerToken(_ input: Operations.registerToken.Input) async throws -> Operations.registerToken.Output {
         try await client.send(
             input: input,
             forOperation: Operations.registerToken.id,
             serializer: { input in
                 let path = try converter.renderedPath(
-                    template: "/database/{}/{}/{}/{}/tokens/register",
+                    template: "/device/{}/{}/{}/tokens/register",
                     parameters: [
                         input.path.version,
                         input.path.container,
-                        input.path.environment,
-                        input.path.database
+                        input.path.environment
                     ]
                 )
                 var request: HTTPTypes.HTTPRequest = .init(

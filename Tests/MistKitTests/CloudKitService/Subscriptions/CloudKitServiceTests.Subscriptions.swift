@@ -1,6 +1,6 @@
 //
-//  CreateTokenPhase.swift
-//  MistDemo
+//  CloudKitServiceTests.Subscriptions.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,21 +28,11 @@
 //
 
 internal import Foundation
+internal import Testing
 
-/// Stub phase for `tokens/create`. Not wired into the public/private
-/// pipelines yet; `#52` flips this into a real run when the MistKit Swift
-/// wrapper lands.
-internal struct CreateTokenPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = NoState
+@testable import MistKit
 
-  internal static let title = "Create token (pending #52)"
-  internal static let emoji = "🎟️"
-  internal static let apiName = "createToken"
-
-  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-    PendingStub.printPending(endpoint: "tokens/create", trackingIssue: 52)
-    return NoState()
-  }
+extension CloudKitServiceTests {
+  @Suite("CloudKitService Subscription Operations", .enabled(if: Platform.isCryptoAvailable))
+  internal enum Subscriptions {}
 }

@@ -54,6 +54,9 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
     ModifyRecordsPhase(),
     IncrementalSyncPhase(),
     FinalVerificationPhase(),
+    SubscriptionRoundtripPhase(),
+    TokenRoundtripPhase(),
+    NotificationRoundtripPhase(),
     CleanupPhase(),
   ]
 }

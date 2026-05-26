@@ -27,62 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistKitOpenAPI
-
 /// The outcome of a single operation in a `modifyRecords` or `lookupRecords`
 /// batch.
-///
-/// CloudKit returns per-operation results inline in the response `records`
-/// array: a successful operation yields a record, while a failed one yields an
-/// error describing what went wrong. `RecordResult` models that union so no
-/// per-record failure is silently dropped.
-///
-/// ```swift
-/// let results = try await service.modifyRecords(operations, database: .private)
-/// for result in results {
-///   switch result {
-///   case .success(let record): print("saved \(record.recordName)")
-///   case .failure(let error):  print("failed \(error.recordName): \(error.serverErrorCode.rawValue)")
-///   }
-/// }
-/// ```
-public enum RecordResult: Sendable {
-  /// The operation succeeded and CloudKit returned the resulting record.
-  case success(RecordInfo)
-  /// The operation failed; the associated ``RecordOperationFailure`` describes
-  /// the failure.
-  case failure(RecordOperationFailure)
-
-  internal init(
-    from item: Components.Schemas.ModifyResponse.recordsPayloadPayload
-  ) throws(ConversionError) {
-    switch item {
-    case .RecordOperationFailure(let error):
-      self = .failure(RecordOperationFailure(from: error))
-    case .RecordResponse(let record):
-      self = .success(try RecordInfo(from: record))
-    }
-  }
-
-  internal init(
-    from item: Components.Schemas.LookupResponse.recordsPayloadPayload
-  ) throws(ConversionError) {
-    switch item {
-    case .RecordOperationFailure(let error):
-      self = .failure(RecordOperationFailure(from: error))
-    case .RecordResponse(let record):
-      self = .success(try RecordInfo(from: record))
-    }
-  }
-
-  /// Returns the record for a successful result, or throws
-  /// ``CloudKitError/recordOperationFailed(_:)`` for a failure.
-  public func get() throws(CloudKitError) -> RecordInfo {
-    switch self {
-    case .success(let record):
-      return record
-    case .failure(let error):
-      throw CloudKitError.recordOperationFailed(error)
-    }
-  }
-}
+public typealias RecordResult = OperationResult<RecordInfo, RecordTarget>

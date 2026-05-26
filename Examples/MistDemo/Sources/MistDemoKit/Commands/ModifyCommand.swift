@@ -67,65 +67,59 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
     self.config = config
   }
 
+  private static func makeRows(from records: [RecordInfo]) -> [ModifyResultRow] {
+    records.map { record in
+      ModifyResultRow(
+        operation: "applied",
+        recordType: record.recordType,
+        recordName: record.recordName,
+        recordChangeTag: record.recordChangeTag
+      )
+    }
+  }
+
+  private static func reportFailures(_ failures: [RecordOperationFailure]) {
+    guard !failures.isEmpty else {
+      return
+    }
+    for failure in failures {
+      let identifier = failure.identifier
+      let code = failure.serverErrorCode.rawValue
+      let reasonFragment = failure.reason.map { ": \($0)" } ?? ""
+      let line = "Warning: operation on '\(identifier)' failed (\(code))\(reasonFragment)\n"
+      FileHandle.standardError.write(Data(line.utf8))
+    }
+  }
+
   /// Executes the command.
   public func execute() async throws {
     do {
-      let client = try MistKitClientFactory.create(
-        for: config.base
-      )
-
+      let client = try MistKitClientFactory.create(for: config.base)
       let operations = try config.operations.enumerated()
-        .map { index, input in
-          try input.toRecordOperation(index: index)
-        }
-
+        .map { index, input in try input.toRecordOperation(index: index) }
       let results = try await client.modifyRecords(
         operations,
         atomic: config.atomic,
         database: config.base.database
       )
-
       let succeeded = results.compactMap { result in
         if case .success(let record) = result { record } else { nil }
       }
       let failures = results.compactMap { result in
         if case .failure(let error) = result { error } else { nil }
       }
-
-      let rows = succeeded.map { record in
-        ModifyResultRow(
-          operation: "applied",
-          recordType: record.recordType,
-          recordName: record.recordName,
-          recordChangeTag: record.recordChangeTag
-        )
-      }
-
-      let partialFailure = !config.atomic && !failures.isEmpty
-
-      if !failures.isEmpty {
-        for failure in failures {
-          let line =
-            "Warning: operation on '\(failure.recordName)' failed"
-            + " (\(failure.serverErrorCode.rawValue))"
-            + (failure.reason.map { ": \($0)" } ?? "") + "\n"
-          FileHandle.standardError.write(Data(line.utf8))
-        }
-      }
-
+      Self.reportFailures(failures)
       let envelope = ModifyOutput(
-        results: rows,
+        results: Self.makeRows(from: succeeded),
         attempted: config.operations.count,
         succeeded: succeeded.count,
-        partialFailure: partialFailure
+        partialFailure: !config.atomic && !failures.isEmpty
       )
       try await outputResult(envelope, format: config.output)
     } catch let error as ModifyError {
       throw error
     } catch {
-      throw ModifyError.operationFailed(
-        error.localizedDescription
-      )
+      throw ModifyError.operationFailed(error.localizedDescription)
     }
   }
 }

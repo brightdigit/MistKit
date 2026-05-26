@@ -28,17 +28,17 @@
 //
 
 internal import Foundation
+internal import MistKit
 
-/// Stub command for `subscriptions/list`. Lists every CloudKit subscription
-/// registered against the selected database. MistKit Swift wrapper tracked
-/// in #49.
-public struct ListSubscriptionsCommand: MistDemoCommand {
+/// Command for `subscriptions/list`. Lists every CloudKit subscription
+/// registered against the selected database.
+public struct ListSubscriptionsCommand: MistDemoCommand, OutputFormatting {
   /// The configuration type.
   public typealias Config = ListSubscriptionsConfig
   /// The command name.
   public static let commandName = "list-subscriptions"
   /// The command abstract.
-  public static let abstract = "List CloudKit subscriptions (pending #49)"
+  public static let abstract = "List CloudKit subscriptions"
   /// The command help text.
   public static let helpText = """
     LIST-SUBSCRIPTIONS - List CloudKit subscriptions
@@ -50,8 +50,8 @@ public struct ListSubscriptionsCommand: MistDemoCommand {
       --database <type>          Database to target (private, shared, public)
       --output-format <format>   Output format (json, table, csv, yaml)
 
-    STATUS:
-      Not yet implemented — pending MistKit support, tracked in #49.
+    EXAMPLES:
+      mistdemo list-subscriptions --database private
     """
 
   private let config: ListSubscriptionsConfig
@@ -63,6 +63,8 @@ public struct ListSubscriptionsCommand: MistDemoCommand {
 
   /// Executes the command.
   public func execute() async throws {
-    PendingStub.printPending(endpoint: "subscriptions/list", trackingIssue: 49)
+    let service = try MistKitClientFactory.create(for: config.base)
+    let subscriptions = try await service.listSubscriptions(database: config.base.database)
+    try await outputResults(subscriptions, format: config.output)
   }
 }

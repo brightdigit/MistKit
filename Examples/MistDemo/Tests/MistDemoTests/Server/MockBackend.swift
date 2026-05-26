@@ -41,60 +41,17 @@
     internal private(set) var lastUpdate: UpdateCall?
     internal private(set) var lastDelete: DeleteCall?
     internal private(set) var lastModifyZones: ModifyZonesCall?
+    internal private(set) var didListSubscriptions = false
+    internal private(set) var lastLookupSubscriptions: LookupSubscriptionsCall?
+    internal private(set) var lastModifySubscriptions: ModifySubscriptionsCall?
+    internal private(set) var lastCreateToken: CreateTokenCall?
+    internal private(set) var lastRegisterToken: RegisterTokenCall?
     private var pendingError: String?
 
-    private static func stubRecord(
-      recordType: String, recordName: String
-    ) -> RecordInfo {
-      let json = """
-        {
-          "recordName": "\(recordName)",
-          "recordType": "\(recordType)",
-          "recordChangeTag": null,
-          "fields": {},
-          "created": null,
-          "modified": null,
-          "deleted": false
-        }
-        """
-      // RecordInfo is Codable; round-trip through JSON keeps the stub
-      // independent of MistKit's internal initializer.
-      do {
-        return try JSONDecoder().decode(
-          RecordInfo.self, from: Data(json.utf8)
-        )
-      } catch {
-        fatalError("MockBackend stubRecord JSON failed to decode: \(error)")
-      }
-    }
-
-    /// Flatten FieldValue entries into a printable form so tests can write
-    /// `#expect(captured.fields["title"] == "Hi")` for strings or
-    /// `#expect(captured.fields["index"] == "5")` for numbers without
-    /// pattern-matching on FieldValue in every assertion.
-    ///
-    /// Non-primitive cases (asset, date, reference, location, list, bytes)
-    /// are intentionally dropped — they yield no useful String form for an
-    /// equality assertion. Tests that need to assert those types should
-    /// inspect the FieldValue directly rather than going through `flatten`.
-    private static func flatten(
-      _ fields: [String: FieldValue]
-    ) -> [String: String] {
-      var result: [String: String] = [:]
-      for (name, value) in fields {
-        switch value {
-        case .string(let string):
-          result[name] = string
-        case .int64(let int):
-          result[name] = String(int)
-        case .double(let double):
-          result[name] = String(double)
-        default:
-          continue
-        }
-      }
-      return result
-    }
+    /// Stub subscriptions (tests can seed); defaults to one query subscription.
+    private var stubSubscriptions: [SubscriptionInfo] = [
+      .query(subscriptionID: "stub-sub", recordType: "Note", firesOn: [.create])
+    ]
 
     internal func failNext(message: String) {
       pendingError = message
@@ -183,6 +140,76 @@
       return create.map { name in
         ZoneInfo(zoneName: name, ownerRecordName: nil, capabilities: [])
       }
+    }
+
+    internal func webListSubscriptions(
+      database: MistKit.Database
+    ) async throws -> [SubscriptionInfo] {
+      didListSubscriptions = true
+      try consumePendingError()
+      return stubSubscriptions
+    }
+
+    internal func webLookupSubscriptions(
+      ids: [String],
+      database: MistKit.Database
+    ) async throws -> [SubscriptionInfo] {
+      lastLookupSubscriptions = LookupSubscriptionsCall(ids: ids, database: database)
+      try consumePendingError()
+      return stubSubscriptions.filter { ids.contains($0.subscriptionID) }
+    }
+
+    internal func webModifySubscriptions(
+      operations: [SubscriptionOperation],
+      database: MistKit.Database
+    ) async throws -> [SubscriptionInfo] {
+      lastModifySubscriptions = ModifySubscriptionsCall(
+        operations: operations, database: database
+      )
+      try consumePendingError()
+      return operations.compactMap { operation in
+        if case .create(let info) = operation {
+          return info
+        }
+        return nil
+      }
+    }
+
+    internal func webCreateToken(
+      environment: APNsEnvironment,
+      clientId: String?,
+      database: MistKit.Database
+    ) async throws -> APNsTokenResult {
+      lastCreateToken = CreateTokenCall(
+        environment: environment,
+        clientId: clientId,
+        database: database
+      )
+      try consumePendingError()
+      guard let stubURL = URL(string: "https://stub.example/webcourier") else {
+        struct InvalidStubURL: Error {}
+        throw InvalidStubURL()
+      }
+      return APNsTokenResult(
+        environment: environment,
+        apnsToken: "stub-apns",
+        webcourierURL: stubURL
+      )
+    }
+
+    internal func webRegisterToken(
+      apnsToken: String,
+      environment: APNsEnvironment,
+      clientId: String?,
+      database: MistKit.Database
+    ) async throws {
+      lastRegisterToken = RegisterTokenCall(
+        apnsToken: apnsToken,
+        environment: environment,
+        clientId: clientId,
+        database: database
+      )
+      try consumePendingError()
     }
 
     private func consumePendingError() throws {

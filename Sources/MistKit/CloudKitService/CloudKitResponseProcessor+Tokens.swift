@@ -1,6 +1,6 @@
 //
-//  LookupSubscriptionPhase.swift
-//  MistDemo
+//  CloudKitResponseProcessor+Tokens.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,22 +27,36 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import MistKitOpenAPI
 
-/// Stub phase for `subscriptions/lookup`. Not wired into the public/private
-/// pipelines yet; `#50` flips this into a real run when the MistKit Swift
-/// wrapper lands.
-internal struct LookupSubscriptionPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = NoState
+extension CloudKitResponseProcessor {
+  /// Process createToken response.
+  internal func processCreateTokenResponse(
+    _ response: Operations.createToken.Output
+  ) async throws(CloudKitError) -> Components.Schemas.TokenResponse {
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let tokenData):
+        return tokenData
+      }
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
+    }
+  }
 
-  internal static let title = "Lookup subscription (pending #50)"
-  internal static let emoji = "🔍"
-  internal static let apiName = "lookupSubscription"
-
-  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-    PendingStub.printPending(endpoint: "subscriptions/lookup", trackingIssue: 50)
-    return NoState()
+  /// Process registerToken response.
+  ///
+  /// A successful registration returns an empty `200`; there is no body to
+  /// extract, so this validates the response and returns `Void`.
+  internal func processRegisterTokenResponse(
+    _ response: Operations.registerToken.Output
+  ) async throws(CloudKitError) {
+    switch response {
+    case .ok:
+      return
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
+    }
   }
 }

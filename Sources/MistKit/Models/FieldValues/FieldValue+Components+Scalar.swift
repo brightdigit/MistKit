@@ -64,28 +64,55 @@ extension FieldValue {
     type fieldType: Components.Schemas.FieldValueResponse._typePayload?,
     fieldName: String
   ) throws(ConversionError) -> FieldValue? {
-    guard let fieldType else { return nil }
+    guard let fieldType else {
+      return nil
+    }
     switch fieldType {
-    case .TIMESTAMP:
-      let millis = try requireNumeric(value, fieldName: fieldName, declaredType: fieldType.rawValue)
-      return .date(Date(timeIntervalSince1970: millis / 1_000))
-    case .DOUBLE:
-      return .double(
-        try requireNumeric(value, fieldName: fieldName, declaredType: fieldType.rawValue)
-      )
-    case .INT64:
-      _ = try requireNumeric(value, fieldName: fieldName, declaredType: fieldType.rawValue)
-      return nil
-    case .BYTES:
-      return .bytes(
-        try requireString(value, fieldName: fieldName, declaredType: fieldType.rawValue)
-      )
-    case .STRING:
-      _ = try requireString(value, fieldName: fieldName, declaredType: fieldType.rawValue)
-      return nil
+    case .TIMESTAMP, .DOUBLE, .INT64:
+      return try makeTypedNumericScalar(from: value, type: fieldType, fieldName: fieldName)
+    case .BYTES, .STRING:
+      return try makeTypedStringScalar(from: value, type: fieldType, fieldName: fieldName)
     default:
       return nil
     }
+  }
+
+  /// Numeric branch of ``makeTypedScalar(from:type:fieldName:)`` — validates the value
+  /// is numeric, then returns a domain value for `TIMESTAMP`/`DOUBLE` or nil for `INT64`
+  /// (which defers to inference to avoid truncating a fractional number).
+  private static func makeTypedNumericScalar(
+    from value: Components.Schemas.FieldValueResponse.valuePayload,
+    type fieldType: Components.Schemas.FieldValueResponse._typePayload,
+    fieldName: String
+  ) throws(ConversionError) -> FieldValue? {
+    let number = try requireNumeric(
+      value, fieldName: fieldName, declaredType: fieldType.rawValue
+    )
+    switch fieldType {
+    case .TIMESTAMP:
+      return .date(Date(timeIntervalSince1970: number / 1_000))
+    case .DOUBLE:
+      return .double(number)
+    default:
+      return nil
+    }
+  }
+
+  /// String branch of ``makeTypedScalar(from:type:fieldName:)`` — validates the value
+  /// is a string, then returns a `.bytes` domain value for `BYTES` or nil for `STRING`
+  /// (which defers to inference, already producing `.string`).
+  private static func makeTypedStringScalar(
+    from value: Components.Schemas.FieldValueResponse.valuePayload,
+    type fieldType: Components.Schemas.FieldValueResponse._typePayload,
+    fieldName: String
+  ) throws(ConversionError) -> FieldValue? {
+    let string = try requireString(
+      value, fieldName: fieldName, declaredType: fieldType.rawValue
+    )
+    if case .BYTES = fieldType {
+      return .bytes(string)
+    }
+    return nil
   }
 
   /// Require that `value` carries a number, throwing ``ConversionError/typeValueMismatch``

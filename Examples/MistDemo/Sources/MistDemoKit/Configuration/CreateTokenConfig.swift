@@ -43,6 +43,10 @@ public struct CreateTokenConfig: Sendable, ConfigurationParseable {
   public let apnsToken: String?
   /// APNs environment (development, production).
   public let apnsEnvironment: String?
+  /// Optional logical CloudKit client identifier. Reuse the same value when
+  /// calling `register-token` later to tie the two halves to a single
+  /// logical client.
+  public let clientId: String?
   /// The output format.
   public let output: OutputFormat
 
@@ -51,11 +55,13 @@ public struct CreateTokenConfig: Sendable, ConfigurationParseable {
     base: MistDemoConfig,
     apnsToken: String? = nil,
     apnsEnvironment: String? = nil,
+    clientId: String? = nil,
     output: OutputFormat = .json
   ) {
     self.base = base
     self.apnsToken = apnsToken
     self.apnsEnvironment = apnsEnvironment
+    self.clientId = clientId
     self.output = output
   }
 
@@ -85,6 +91,7 @@ public struct CreateTokenConfig: Sendable, ConfigurationParseable {
       base: baseConfig,
       apnsToken: configuration.string(forKey: "apns-token"),
       apnsEnvironment: configuration.string(forKey: "apns-environment"),
+      clientId: configuration.string(forKey: "client-id"),
       output: output
     )
   }

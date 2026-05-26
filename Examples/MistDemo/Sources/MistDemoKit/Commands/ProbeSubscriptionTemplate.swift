@@ -1,5 +1,5 @@
 //
-//  ListSubscriptionsPhase.swift
+//  ProbeSubscriptionTemplate.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,22 +27,21 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import MistKit
 
-/// Stub phase for `subscriptions/list`. Not wired into the public/private
-/// pipelines yet; `#49` flips this into a real run when the MistKit Swift
-/// wrapper lands.
-internal struct ListSubscriptionsPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = NoState
+/// A single `SubscriptionInfo` blueprint used by ``ProbeExperiment`` —
+/// captured separately so the experiment can materialize identical
+/// subscriptions across seed/probe/cleanup phases.
+internal struct ProbeSubscriptionTemplate {
+  internal let id: String
+  internal let recordType: String
+  internal let firesOn: SubscriptionFireEvents
 
-  internal static let title = "List subscriptions (pending #49)"
-  internal static let emoji = "🔔"
-  internal static let apiName = "listSubscriptions"
-
-  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-    PendingStub.printPending(endpoint: "subscriptions/list", trackingIssue: 49)
-    return NoState()
+  internal func materialize() -> SubscriptionInfo {
+    .query(
+      subscriptionID: id,
+      recordType: recordType,
+      firesOn: firesOn
+    )
   }
 }
