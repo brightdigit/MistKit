@@ -36,8 +36,8 @@ internal import Testing
 extension CloudKitServiceTests.BatchChunking {
   private static let testAPIToken = TestConstants.apiToken
 
-  /// A service whose provider returns `identitiesPerCall` identities for every
-  /// `users/*` request, with web-auth credentials.
+  /// A `CloudKitService` backed by `provider`, configured with web-auth
+  /// credentials (so `.private` and `users/*` routes both work).
   internal static func makeUserService(
     provider: ResponseProvider
   ) throws -> CloudKitService {
@@ -52,14 +52,6 @@ extension CloudKitServiceTests.BatchChunking {
       ),
       transport: transport
     )
-  }
-
-  /// A service whose provider returns `recordsPerCall` records for every
-  /// `lookupRecords` request, with web-auth credentials (so `.private` works).
-  internal static func makeLookupRecordsService(
-    provider: ResponseProvider
-  ) throws -> CloudKitService {
-    try makeUserService(provider: provider)
   }
 
   // MARK: - Request body inspection

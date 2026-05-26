@@ -29,6 +29,7 @@
 
 public import ConfigKeyKit
 internal import Foundation
+internal import MistKit
 
 /// Configuration for lookup command.
 public struct LookupConfig: Sendable, ConfigurationParseable {
@@ -54,7 +55,7 @@ public struct LookupConfig: Sendable, ConfigurationParseable {
     base: MistDemoConfig,
     recordNames: [String],
     fields: [String]? = nil,
-    batchSize: Int = 200,
+    batchSize: Int = CloudKitService.maxRecordsPerRequest,
     output: OutputFormat = .json
   ) {
     self.base = base
@@ -117,7 +118,10 @@ public struct LookupConfig: Sendable, ConfigurationParseable {
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     let batchSize =
-      configReader.int(forKey: MistDemoConstants.ConfigKeys.batchSize, default: 200) ?? 200
+      configReader.int(
+        forKey: MistDemoConstants.ConfigKeys.batchSize,
+        default: CloudKitService.maxRecordsPerRequest
+      ) ?? CloudKitService.maxRecordsPerRequest
 
     self.init(
       base: baseConfig,
