@@ -101,6 +101,29 @@ internal struct SubscriptionConversionTests {
     #expect(recovered.firesOn.isEmpty)
   }
 
+  @Test("database SubscriptionInfo round-trips through the OpenAPI schema")
+  internal func databaseRoundTrip() throws {
+    let info = SubscriptionInfo.database(subscriptionID: "db-1")
+
+    let schema = info.schema
+    // A database-scoped subscription is a `zone` type with `zoneWide: true`
+    // and no `zoneID`.
+    #expect(schema.subscriptionType == .zone)
+    #expect(schema.zoneWide == true)
+    #expect(schema.zoneID == nil)
+    #expect(schema.query == nil)
+    #expect(schema.firesOn == nil)
+
+    let recovered = try SubscriptionInfo(from: schema)
+    #expect(recovered.subscriptionID == "db-1")
+    #expect(recovered.subscriptionType == .zone)
+    #expect(recovered.zoneID == nil)
+    guard case .database = recovered.kind else {
+      Issue.record("expected .database kind, got \(recovered.kind)")
+      return
+    }
+  }
+
   @Test("missing subscriptionID is a conversion failure")
   internal func missingIDThrows() throws {
     expectThrow(ConversionError.subscriptionMissingID) {

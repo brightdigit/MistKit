@@ -36,6 +36,17 @@ public import Foundation
 #if !os(WASI)
   @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
   extension URLSession {
+    /// A ``Courier/Transport`` backed by this session: each poll runs through
+    /// ``pollCourier(_:timeout:)``, so the session (and its connection pool) is
+    /// reused across polls. Pass it to
+    /// ``WebCourierPoller/init(courierURL:perPollTimeout:transport:)`` or the
+    /// `Courier` long-poll APIs.
+    public var courierTransport: Courier.Transport {
+      { url, timeout in
+        try await self.pollCourier(url, timeout: timeout)
+      }
+    }
+
     /// Long-poll a CloudKit `webcourierURL` for a single response.
     ///
     /// Issues a GET bounded by `timeout` and returns the raw HTTP response

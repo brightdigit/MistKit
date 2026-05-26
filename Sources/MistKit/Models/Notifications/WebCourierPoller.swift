@@ -60,7 +60,11 @@
     /// `ClientTransport`.
     public static var ephemeralConfiguration: URLSessionConfiguration {
       let configuration = URLSessionConfiguration.ephemeral
-      configuration.waitsForConnectivity = false
+      // `waitsForConnectivity` is get-only on swift-corelibs-foundation
+      // (FoundationNetworking); only Apple's Foundation allows setting it.
+      #if !canImport(FoundationNetworking)
+        configuration.waitsForConnectivity = false
+      #endif
       return configuration
     }
 
@@ -99,9 +103,11 @@
       perPollTimeout: TimeInterval = 30,
       session: URLSession
     ) {
-      self.init(courierURL: courierURL, perPollTimeout: perPollTimeout) { url, timeout in
-        try await session.pollCourier(url, timeout: timeout)
-      }
+      self.init(
+        courierURL: courierURL,
+        perPollTimeout: perPollTimeout,
+        transport: session.courierTransport
+      )
     }
 
     /// Build a poller backed by a dedicated `URLSession` created from

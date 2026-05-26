@@ -48,8 +48,7 @@
     internal private(set) var lastRegisterToken: RegisterTokenCall?
     private var pendingError: String?
 
-    /// Subscriptions returned by the list/lookup/modify stubs. Tests can seed
-    /// this; defaults to one query subscription.
+    /// Stub subscriptions (tests can seed); defaults to one query subscription.
     private var stubSubscriptions: [SubscriptionInfo] = [
       .query(subscriptionID: "stub-sub", recordType: "Note", firesOn: [.create])
     ]

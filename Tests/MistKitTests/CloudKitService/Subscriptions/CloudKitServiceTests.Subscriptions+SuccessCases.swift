@@ -111,16 +111,38 @@ extension CloudKitServiceTests.Subscriptions {
       #expect(created.query?.recordType == "Article")
     }
 
-    @Test("deleteSubscription() completes against an empty subscriptions response")
+    @Test("deleteSubscription() completes against a deletion-acknowledgement response")
     internal func deleteCompletes() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
+      // CloudKit echoes a deleted subscription as a bare `{ subscriptionID }`
+      // entry with no `subscriptionType` — the real deletion-ack shape.
       let service = try CloudKitServiceTests.Subscriptions.makeService(
-        returningJSON: #"{ "subscriptions": [] }"#
+        returningJSON: #"{ "subscriptions": [{ "subscriptionID": "query-sub" }] }"#
       )
       try await service.deleteSubscription(id: "query-sub", database: Self.database)
+    }
+
+    @Test("modifySubscriptions() filters deletion acknowledgements out of its results")
+    internal func modifyFiltersDeletionAcks() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      // A bare `{ subscriptionID }` ack (no `subscriptionType`) is a deletion
+      // acknowledgement, not a result, so it is dropped from the returned array.
+      let service = try CloudKitServiceTests.Subscriptions.makeService(
+        returningJSON: #"{ "subscriptions": [{ "subscriptionID": "query-sub" }] }"#
+      )
+
+      let results = try await service.modifySubscriptions(
+        [.delete(subscriptionID: "query-sub")],
+        database: Self.database
+      )
+
+      #expect(results.isEmpty)
     }
   }
 }

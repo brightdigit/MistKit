@@ -71,11 +71,16 @@ extension CloudKitService {
     }
   }
 
+  // The query factory's full DocC link can't wrap and exceeds the line limit;
+  // disabling here keeps it a single resolvable token.
+  // swiftlint:disable line_length
   /// Create a single subscription.
   ///
   /// Convenience wrapper over ``modifySubscriptions(_:database:)``. Build the
-  /// `subscription` with ``SubscriptionInfo/query(subscriptionID:recordType:filters:sortBy:firesOn:)``
-  /// or ``SubscriptionInfo/zone(subscriptionID:zoneID:firesOn:)``.
+  /// `subscription` with
+  /// ``SubscriptionInfo/query(subscriptionID:recordType:filters:sortBy:firesOn:firesOnce:notificationInfo:)``,
+  /// ``SubscriptionInfo/zone(subscriptionID:zoneID:notificationInfo:)``, or
+  /// ``SubscriptionInfo/database(subscriptionID:notificationInfo:)``.
   ///
   /// - Parameters:
   ///   - subscription: The subscription to create.
@@ -92,6 +97,7 @@ extension CloudKitService {
     _ subscription: SubscriptionInfo,
     database: Database
   ) async throws(CloudKitError) -> SubscriptionInfo {
+    // swiftlint:enable line_length
     let results = try await modifySubscriptions([.create(subscription)], database: database)
     guard let created = results.first else {
       throw CloudKitError.invalidResponse

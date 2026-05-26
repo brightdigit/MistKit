@@ -87,12 +87,21 @@
     ///   - perPollTimeout: How long the long-poll request waits before giving
     ///     up so the caller can poll again.
     ///   - transport: The HTTP round-trip used for the poll.
+    /// - Returns: The decoded notification, or `nil` for an empty/keepalive or
+    ///   unrecognizable body.
+    /// - Throws: ``CloudKitError/httpError(statusCode:)`` when the courier
+    ///   responds with a non-2xx status (e.g. an expired token), so a
+    ///   persistent failure surfaces instead of looping; otherwise any error
+    ///   thrown by `transport`.
     public static func pollOnce(
       courierURL: URL,
       perPollTimeout: TimeInterval = 30,
       transport: Transport
     ) async throws -> CourierNotification? {
-      let (_, data) = try await transport(courierURL, perPollTimeout)
+      let (statusCode, data) = try await transport(courierURL, perPollTimeout)
+      if let statusCode, !(200...299).contains(statusCode) {
+        throw CloudKitError.httpError(statusCode: statusCode)
+      }
       return try? CourierNotification(data: data)
     }
 
@@ -112,6 +121,8 @@
     ///   - perPollTimeout: How long each long-poll request waits before
     ///     re-polling.
     ///   - transport: The HTTP round-trip used for each poll.
+    /// - Returns: A stream that yields each decoded notification until the
+    ///   consuming task is cancelled or `transport` throws.
     public static func notifications(
       courierURL: URL,
       perPollTimeout: TimeInterval = 30,
