@@ -133,11 +133,15 @@ internal struct NotificationRoundtripPhase: IntegrationPhase {
     }
 
     /// Create a record that matches the subscription — the change that should
-    /// fire the push.
+    /// fire the push. The record name is deliberately distinct from the
+    /// subscription ID (`mistkit-notif-<suffix>`): CloudKit provisions an
+    /// internal `_sub_trigger_sub_<hash>` backing record named after the
+    /// subscription ID, so reusing that name here collides with it
+    /// (`invalid attempt to update record from type '_sub_trigger_sub_…'`).
     private func trigger(suffix: String, context: PhaseContext) async throws -> RecordInfo {
       let record = try await context.service.createRecord(
         recordType: IntegrationTestData.recordType,
-        recordName: "mistkit-notif-\(suffix)",
+        recordName: "mistkit-notif-rec-\(suffix)",
         fields: ["title": .string("notification probe \(suffix)")],
         database: context.database
       )
