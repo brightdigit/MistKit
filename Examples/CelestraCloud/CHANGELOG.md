@@ -70,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Details
 - **Platform**: macOS 26+ (Swift 6.2)
 - **Concurrency**: Full Swift 6 concurrency support with strict checking
-- **Dependencies**: MistKit v1.0.0-beta.2, SyndiKit 0.6.1, ArgumentParser, swift-log
+- **Dependencies**: MistKit 1.0.0-beta.2, SyndiKit 0.6.1, ArgumentParser, swift-log
 - **CloudKit**: Public database with Feed and Article record types
 - **Schema**: Text-based .ckdb schema with cktool deployment
 
