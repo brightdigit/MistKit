@@ -57,7 +57,7 @@ Add MistKit to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-beta.1")
+    .package(url: "https://github.com/brightdigit/MistKit.git", from: "1.0.0-beta.2")
 ]
 ```
 
@@ -290,6 +290,62 @@ do {
 
 ### Advanced Usage
 
+#### More Operations
+
+Beyond querying and CRUD, MistKit covers zones, subscriptions, push tokens, and
+asset re-referencing. Every call takes an explicit `database:`.
+
+```swift
+// Zones
+let zone = try await service.createZone(
+    zoneName: "Notes",
+    database: .private
+)
+try await service.deleteZone(zoneName: "Notes", database: .private)
+
+// Subscriptions
+let subs = try await service.listSubscriptions(database: .private)
+let one = try await service.lookupSubscriptions(ids: ["sub-1"], database: .private)
+// Create/update/delete via service.modifySubscriptions(_:database:)
+// (takes [SubscriptionOperation], returns [SubscriptionResult]).
+
+// APNs push tokens
+let token = try await service.createAPNsToken(
+    environment: .development,
+    database: .private
+)
+try await service.registerAPNsToken(
+    token.apnsToken,
+    environment: .development,
+    database: .private
+)
+
+// Re-reference existing CDN assets without re-uploading bytes
+let assets = try await service.rereferenceAssets(
+    [(recordName: "rec-1", fieldName: "photo")],
+    database: .private
+)
+```
+
+#### Auto-Chunking Conveniences
+
+CloudKit caps batch requests at 200 items. `lookupAllRecords` and the
+`lookupInfos:` form of `discoverAllUserIdentities` split oversized inputs into
+≤`maxRecordsPerRequest` (200) batches automatically and concatenate the results
+in input order — no manual chunking required.
+
+```swift
+let records = try await service.lookupAllRecords(
+    recordNames: thousandsOfNames,   // chunked into 200-item requests
+    database: .private
+)
+
+let identities = try await service.discoverAllUserIdentities(
+    lookupInfos: manyLookupInfos,
+    batchSize: 200
+)
+```
+
 #### HTTP Transport
 
 Non-WASI platforms default to `URLSessionTransport` — no transport plumbing is
@@ -424,23 +480,27 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] CI updates for May 2026 ([#277](https://github.com/brightdigit/MistKit/pull/277)) ✅
 - [x] Fail lint job when any command fails ([#303](https://github.com/brightdigit/MistKit/pull/303)) ✅
 
-### v1.0.0-alpha.X
+### v1.0.0-beta.2
+
+- [x] [Referencing Existing Assets (assets/rereference)](https://github.com/brightdigit/MistKit/issues/31) ✅
+- [x] [Modifying Zones (zones/modify)](https://github.com/brightdigit/MistKit/issues/45) ✅
+- [x] [Fetching Subscriptions (subscriptions/list)](https://github.com/brightdigit/MistKit/issues/49) ✅
+- [x] [Fetching Subscriptions by Identifier (subscriptions/lookup)](https://github.com/brightdigit/MistKit/issues/50) ✅
+- [x] [Modifying Subscriptions (subscriptions/modify)](https://github.com/brightdigit/MistKit/issues/51) ✅
+- [x] [Creating APNs Tokens (tokens/create)](https://github.com/brightdigit/MistKit/issues/52) ✅
+- [x] [Registering Tokens (tokens/register)](https://github.com/brightdigit/MistKit/issues/53) ✅
+- [x] [Fetching Users by Email (users/lookup/email)](https://github.com/brightdigit/MistKit/issues/34) ✅ *(Apple-deprecated — prefer `discoverAllUserIdentities`)*
+- [x] [Fetching Users by Record Name (users/lookup/id)](https://github.com/brightdigit/MistKit/issues/35) ✅ *(Apple-deprecated — prefer `discoverAllUserIdentities`)*
+- [x] Auto-chunking conveniences for batch operations ([#389](https://github.com/brightdigit/MistKit/pull/389)) ✅
+
+### Backlog / Post-beta
 
 - [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/28)
-- [ ] [Referencing Existing Assets (assets/rereference)](https://github.com/brightdigit/MistKit/issues/31)
 - [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/33)
-- [ ] [Fetching Users by Email (users/lookup/email)](https://github.com/brightdigit/MistKit/issues/34)
-- [ ] [Fetching Users by Record Name (users/lookup/id)](https://github.com/brightdigit/MistKit/issues/35)
 - [ ] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/41)
 - [ ] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/42)
 - [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46)
-- [ ] [Modifying Zones (zones/modify)](https://github.com/brightdigit/MistKit/issues/45)
 - [ ] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/47)
-- [ ] [Fetching Subscriptions (subscriptions/list)](https://github.com/brightdigit/MistKit/issues/49)
-- [ ] [Fetching Subscriptions by Identifier (subscriptions/lookup)](https://github.com/brightdigit/MistKit/issues/50)
-- [ ] [Modifying Subscriptions (subscriptions/modify)](https://github.com/brightdigit/MistKit/issues/51)
-- [ ] [Creating APNs Tokens (tokens/create)](https://github.com/brightdigit/MistKit/issues/52)
-- [ ] [Registering Tokens (tokens/register)](https://github.com/brightdigit/MistKit/issues/53)
 - [ ] [Feature: Add custom CloudKit zone support for queries](https://github.com/brightdigit/MistKit/issues/146)
 
 ### v1.0.0

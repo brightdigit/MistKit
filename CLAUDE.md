@@ -461,6 +461,28 @@ For detailed schema workflows and integration:
 - **AI Schema Workflow** (`Examples/CelestraCloud/.claude/AI_SCHEMA_WORKFLOW.md`) - Comprehensive guide for understanding, designing, modifying, and validating CloudKit schemas with text-based tools
 - **Quick Reference** (`Examples/SCHEMA_QUICK_REFERENCE.md`) - One-page cheat sheet with syntax, patterns, cktool commands, and troubleshooting
 
+## Examples
+
+The `Examples/` directory contains working applications that dogfood MistKit-under-development (see also the README "Examples" list). These are MistKit-dev test beds, not end-user deployment templates.
+
+### BushelCloud — the canonical MistKit pattern demonstration
+
+`Examples/BushelCloud/` is the most complete reference implementation of MistKit's core patterns — the backend that syncs macOS restore images, Xcode, and Swift versions for the [Bushel app](https://getbushel.app):
+
+- **Server-to-Server authentication** — loading an ECDSA `.pem` key and wiring `ServerToServerAuthManager` into `CloudKitService` (`Sources/BushelCloudKit/CloudKit/BushelCloudKitService.swift`, `PEMValidator.swift`).
+- **Batch / chunked record operations** — working within CloudKit's 200-operations-per-request limit and aggregating results across batches (`CloudKit/SyncEngine.swift`, `CloudKit/BushelCloudKitService.swift`).
+- **Multi-source data integration** — fetching and deduplicating from many upstream APIs (`DataSources/` — IPSW, MESU, AppleDB, XcodeReleases, SwiftVersion, …; `DataSourcePipeline+Deduplication.swift`).
+- **CloudKit reference usage** — creating and resolving reference fields between record types (`DataSources/DataSourcePipeline+ReferenceResolution.swift`, `Extensions/XcodeVersionRecord+CloudKit.swift`).
+- **Cross-platform logging** — swift-log with MistKit's subsystem organization (`Configuration/BushelConfiguration.swift`).
+
+### CelestraCloud — query filtering, sorting & web etiquette
+
+`Examples/CelestraCloud/` is a command-line RSS reader (backend for the [Celestra app](https://celestr.app)) demonstrating MistKit's `QueryFilter`/`QuerySort` APIs, GUID-based duplicate detection, and respectful HTTP client patterns. See its own `CLAUDE.md`.
+
+### MistDemo — interactive auth & endpoint demo
+
+`Examples/MistDemo/` is a CLI + App + Web demo exercising the beta.2 endpoint surface with web-auth token capture. See the project-level "MistDemo Commands" section above.
+
 ## Import Conventions
 
 Every `import` statement must carry an explicit access modifier — `internal import X` or `public import X`. Bare `import X` is forbidden. Default to `internal`; use `public import` only when the module's types appear in this file's `public` API (e.g. `public import HTTPTypes` where `HTTPRequest` is part of a `public` signature).

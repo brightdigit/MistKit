@@ -1,3 +1,32 @@
+## 1.0.0-beta.2
+
+### Subscriptions & Push Notifications
+* Push Notifications & Subscriptions epic — `listSubscriptions`, `lookupSubscriptions`, `modifySubscriptions`, `createAPNsToken`, `registerAPNsToken` by @leogdion in https://github.com/brightdigit/MistKit/pull/381
+
+### Zones
+* Zone API: `createZone`, `deleteZone`, `fetchAllZoneChanges` by @leogdion in https://github.com/brightdigit/MistKit/pull/367
+* `list-zones`, `modify-zones`, discover, and validate by @leogdion in https://github.com/brightdigit/MistKit/pull/368
+
+### Assets
+* Implement `assets/rereference` endpoint and API by @leogdion in https://github.com/brightdigit/MistKit/pull/393
+
+### Batch Conveniences
+* Auto-chunking conveniences for batch operations (`lookupAllRecords`, `discoverAllUserIdentities(lookupInfos:batchSize:)`) by @leogdion in https://github.com/brightdigit/MistKit/pull/389
+
+### Correctness & Safety
+* Tag and validate ambiguous `FieldValue` scalar types (`TIMESTAMP`, `BYTES`, `DOUBLE`) by @leogdion in https://github.com/brightdigit/MistKit/pull/377
+* Make response→domain conversion failures loud; add `RecordResult` by @leogdion in https://github.com/brightdigit/MistKit/pull/372
+* Pre-1.0.0 correctness & safety hardening by @leogdion in https://github.com/brightdigit/MistKit/pull/357
+* Style & error audit: explicit import access + scoped flake gates by @leogdion in https://github.com/brightdigit/MistKit/pull/363
+
+### Tooling, MistDemo & Docs
+* Scaffold MistDemo (CLI + App + Web) for v1.0.0-beta.2 endpoints by @leogdion in https://github.com/brightdigit/MistKit/pull/371
+* Wire landed MistKit endpoints into the MistDemo web app by @leogdion in https://github.com/brightdigit/MistKit/pull/396
+* `setup-mistkit`: pin to resolved revision by @leogdion in https://github.com/brightdigit/MistKit/pull/380
+* Enable MistDemo integration workflow on `claude/**` branches by @leogdion in https://github.com/brightdigit/MistKit/pull/374
+
+**Full Changelog**: https://github.com/brightdigit/MistKit/compare/1.0.0-beta.1...1.0.0-beta.2
+
 ## 1.0.0-beta.1
 
 ### Querying & Sync
