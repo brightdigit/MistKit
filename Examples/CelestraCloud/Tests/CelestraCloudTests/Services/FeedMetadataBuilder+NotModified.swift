@@ -3,7 +3,7 @@
 //  CelestraCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -58,19 +58,6 @@ extension FeedMetadataBuilder {
         etag: etag,
         lastModified: lastModified,
         failureCount: failureCount,
-        minUpdateInterval: minUpdateInterval
-      )
-    }
-
-    private func createFeedData(
-      title: String = "New Feed Title",
-      description: String? = "New Feed Description",
-      minUpdateInterval: TimeInterval? = 7_200
-    ) -> FeedData {
-      FeedData(
-        title: title,
-        description: description,
-        items: [],  // Not used in metadata building
         minUpdateInterval: minUpdateInterval
       )
     }

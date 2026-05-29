@@ -3,7 +3,7 @@
 //  CelestraCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -45,9 +45,7 @@ internal final class MockCloudKitRecordOperator: CloudKitRecordOperating, Sendab
   internal struct QueryCall: Sendable {
     internal let recordType: String
     internal let filters: [QueryFilter]?
-    internal let sortBy: [QuerySort]?
     internal let limit: Int?
-    internal let desiredKeys: [String]?
   }
 
   internal struct ModifyCall: Sendable {
@@ -97,9 +95,7 @@ internal final class MockCloudKitRecordOperator: CloudKitRecordOperating, Sendab
         QueryCall(
           recordType: recordType,
           filters: filters,
-          sortBy: sortBy,
-          limit: limit,
-          desiredKeys: desiredKeys
+          limit: limit
         )
       )
       return state.queryRecordsResult
@@ -130,9 +126,7 @@ internal final class MockCloudKitRecordOperator: CloudKitRecordOperating, Sendab
         QueryCall(
           recordType: recordType,
           filters: filters,
-          sortBy: sortBy,
-          limit: pageSize,
-          desiredKeys: desiredKeys
+          limit: pageSize
         )
       )
       return state.queryRecordsResult

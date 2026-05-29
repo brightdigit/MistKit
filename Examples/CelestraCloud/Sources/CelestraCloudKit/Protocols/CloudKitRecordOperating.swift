@@ -99,7 +99,8 @@ extension CloudKitService: CloudKitRecordOperating {
     return records
   }
 
-  /// Satisfy CloudKitRecordOperating's `queryRecords` (no database param) by forwarding to the public-database overload.
+  /// Satisfy CloudKitRecordOperating's `queryRecords` (no database param)
+  /// by forwarding to the public-database overload.
   public func queryRecords(
     recordType: String,
     filters: [QueryFilter]?,
@@ -119,7 +120,8 @@ extension CloudKitService: CloudKitRecordOperating {
     return result.records
   }
 
-  /// Satisfy CloudKitRecordOperating's `queryAllRecords` (no database param) by forwarding to the public-database overload.
+  /// Satisfy CloudKitRecordOperating's `queryAllRecords` (no database param)
+  /// by forwarding to the public-database overload.
   public func queryAllRecords(
     recordType: String,
     filters: [QueryFilter]?,

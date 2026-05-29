@@ -3,7 +3,7 @@
 //  CelestraCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -64,18 +64,6 @@ extension ArticleCloudKitService {
         fetchedAt: Date(timeIntervalSince1970: 1_000_000),
         ttlDays: 30
       )
-    }
-
-    private func createArticleRecordFields(guid: String = "test-guid") -> [String: FieldValue] {
-      [
-        "feedRecordName": .string("feed-123"),
-        "guid": .string(guid),
-        "title": .string("Test Article"),
-        "url": .string("https://example.com/article"),
-        "fetchedTimestamp": .date(Date(timeIntervalSince1970: 1_000_000)),
-        "expiresTimestamp": .date(Date(timeIntervalSince1970: 1_000_000 + 30 * 24 * 60 * 60)),
-        "contentHash": .string("abc123"),
-      ]
     }
 
     // MARK: - createArticles Tests

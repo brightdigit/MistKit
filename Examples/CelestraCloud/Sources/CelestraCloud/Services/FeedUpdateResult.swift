@@ -35,29 +35,4 @@ internal enum FeedUpdateResult: Sendable, Equatable {
   case notModified
   case skipped(reason: String)
   case error(message: String)
-
-  // MARK: - Subtypes
-
-  internal enum SimpleStatus {
-    case success
-    case notModified
-    case skipped
-    case error
-  }
-
-  // MARK: - Properties
-
-  /// Simple status for backward compatibility
-  internal var simpleStatus: SimpleStatus {
-    switch self {
-    case .success:
-      return .success
-    case .notModified:
-      return .notModified
-    case .skipped:
-      return .skipped
-    case .error:
-      return .error
-    }
-  }
 }
