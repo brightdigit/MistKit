@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 internal struct CleanupPhase: IntegrationPhase, CleanupPhaseMarker {
   internal typealias Input = CreatedRecordNames
@@ -53,7 +53,7 @@ internal struct CleanupPhase: IntegrationPhase, CleanupPhaseMarker {
     let deleteOps = input.names.map { recordName in
       RecordOperation(
         operationType: .forceDelete,
-        recordType: IntegrationTestData.recordType,
+        recordType: MistDemoConfig.recordType,
         recordName: recordName
       )
     }

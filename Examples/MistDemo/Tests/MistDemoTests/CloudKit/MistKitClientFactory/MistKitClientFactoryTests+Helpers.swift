@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 @testable import MistDemoKit
 
@@ -40,14 +40,6 @@ extension MistKitClientFactoryTests {
     BAsTJ0FwcGxlIFdvcmxkd2lkZSBEZXZlbG9wZXIgUmVsYXRpb25zMRQwEgYDVQQD
     -----END PRIVATE KEY-----
     """
-
-  internal static func isServerToServerSupported() -> Bool {
-    if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
-      return true
-    } else {
-      return false
-    }
-  }
 
   internal static func makeConfig(
     containerIdentifier: String = "iCloud.com.test.App",

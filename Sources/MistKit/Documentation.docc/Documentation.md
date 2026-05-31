@@ -76,6 +76,9 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. S
 ### Getting Started
 
 - <doc:AbstractionLayerArchitecture>
+- <doc:ConfiguringMistKit>
+- <doc:WorkingWithRecords>
+- <doc:CloudKitLimitsAndPerformance>
 - ``CloudKitService``
 - ``Database``
 - ``Environment``
@@ -129,6 +132,19 @@ MistKit runs on macOS, iOS, tvOS, watchOS, visionOS, Linux, WASI, and Windows. S
 - ``InternalErrorReason``
 - ``TokenManagerError``
 - ``TokenStorageError``
+
+### Error Handling
+
+- <doc:HandlingErrors>
+- ``CloudKitError``
+- ``TokenManagerError``
+- ``TokenStorageError``
+- ``CredentialsValidationError``
+- ``InvalidCredentialReason``
+- ``AuthenticationFailedReason``
+- ``NetworkErrorReason``
+- ``InternalErrorReason``
+- ``CredentialAvailability``
 
 ### Record management
 

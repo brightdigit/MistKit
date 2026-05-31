@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Response from GitHub API for commits
 internal struct GitHubCommitsResponse: Codable {

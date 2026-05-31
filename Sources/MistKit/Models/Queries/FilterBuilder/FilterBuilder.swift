@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 internal import MistKitOpenAPI
 
 /// A builder for constructing CloudKit query filters
@@ -205,6 +205,8 @@ internal struct FilterBuilder {
     if case .asset = first {
       return .ASSET_LIST
     }
-    return .LIST
+    // Nested lists aren't valid in IN/NOT_IN; omit the type and let CloudKit reject
+    // rather than emit an undocumented bare "LIST" tag.
+    return nil
   }
 }

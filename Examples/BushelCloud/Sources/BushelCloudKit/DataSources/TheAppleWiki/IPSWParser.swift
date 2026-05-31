@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 // MARK: - Errors
@@ -58,7 +58,6 @@ internal enum TheAppleWikiError: LocalizedError {
 // MARK: - Parser
 
 /// Fetches macOS IPSW metadata from TheAppleWiki.com
-@available(macOS 12.0, *)
 internal struct IPSWParser: Sendable {
   private let baseURL = "https://theapplewiki.com"
   private let apiEndpoint = "/api.php"

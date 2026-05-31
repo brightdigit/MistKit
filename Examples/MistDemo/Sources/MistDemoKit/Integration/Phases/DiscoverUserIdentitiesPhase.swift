@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Calls POST `/users/discover` to look up specific user identities.
 ///
@@ -57,7 +57,7 @@ internal struct DiscoverUserIdentitiesPhase: IntegrationPhase {
 
     if context.verbose {
       for identity in identities {
-        if let name = identity.userRecordName { print("   - \(name)") }
+        if case .recordName(let name) = identity.userRecordName { print("   - \(name)") }
       }
     }
 

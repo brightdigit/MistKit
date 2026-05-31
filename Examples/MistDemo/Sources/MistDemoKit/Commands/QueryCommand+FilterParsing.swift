@@ -27,12 +27,33 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 extension QueryCommand {
+  /// Comparison operators keyed by every spelling we accept, each mapped to
+  /// the matching ``QueryFilter`` case. A lookup table replaces a `switch`
+  /// that tripped `cyclomatic_complexity`.
+  private static let comparisonFilterBuilders:
+    [String: @Sendable (String, FieldValue) -> QueryFilter] = [
+      "eq": QueryFilter.equals,
+      "equals": QueryFilter.equals,
+      "==": QueryFilter.equals,
+      "=": QueryFilter.equals,
+      "ne": QueryFilter.notEquals,
+      "not_equals": QueryFilter.notEquals,
+      "!=": QueryFilter.notEquals,
+      "gt": QueryFilter.greaterThan,
+      ">": QueryFilter.greaterThan,
+      "gte": QueryFilter.greaterThanOrEquals,
+      ">=": QueryFilter.greaterThanOrEquals,
+      "lt": QueryFilter.lessThan,
+      "<": QueryFilter.lessThan,
+      "lte": QueryFilter.lessThanOrEquals,
+      "<=": QueryFilter.lessThanOrEquals,
+    ]
+
   /// Parse a single filter expression "field:operator:value" into a QueryFilter
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func parseFilter(_ filterString: String) throws -> QueryFilter {
     let components = filterString.split(
       separator: ":", maxSplits: 2, omittingEmptySubsequences: false
@@ -54,7 +75,6 @@ extension QueryCommand {
   }
 
   /// Build a QueryFilter from parsed components.
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func buildFilter(
     field: String,
     operatorString: String,
@@ -71,37 +91,19 @@ extension QueryCommand {
   }
 
   /// Build comparison-based filters (equals, not equals, greater/less than).
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-  // swiftlint:disable:next cyclomatic_complexity
   internal static func buildComparisonFilter(
     field: String,
     operatorString: String,
     value: String
   ) -> QueryFilter? {
-    switch operatorString.lowercased() {
-    case "eq", "equals", "==", "=":
-      return .equals(field, inferFieldValue(value))
-    case "ne", "not_equals", "!=":
-      return .notEquals(field, inferFieldValue(value))
-    case "gt", ">":
-      return .greaterThan(field, inferFieldValue(value))
-    case "gte", ">=":
-      return .greaterThanOrEquals(
-        field, inferFieldValue(value)
-      )
-    case "lt", "<":
-      return .lessThan(field, inferFieldValue(value))
-    case "lte", "<=":
-      return .lessThanOrEquals(
-        field, inferFieldValue(value)
-      )
-    default:
+    guard let makeFilter = comparisonFilterBuilders[operatorString.lowercased()]
+    else {
       return nil
     }
+    return makeFilter(field, inferFieldValue(value))
   }
 
   /// Build string and list-based filters.
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   internal static func buildSpecialFilter(
     field: String,
     operatorString: String,

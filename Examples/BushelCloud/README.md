@@ -40,6 +40,21 @@ In Apple's virtualization framework, **restore images** are used to boot virtual
 
 ## Architecture
 
+### Data Flow
+
+The sync pipeline moves version data from external APIs into CloudKit in three phases — **fetch** (parallel API calls), **transform** (deduplicate and resolve references), and **upload** (batched writes):
+
+```mermaid
+graph LR
+    A[External APIs<br/>IPSW · AppleDB · MESU<br/>XcodeReleases · Swift.org · VirtualBuddy] --> B[Fetchers]
+    B --> C[DataSourcePipeline]
+    C --> D[Deduplication<br/>and Merge]
+    D --> E[RecordBuilder]
+    E --> F[BushelCloudKitService]
+    F --> G[MistKit<br/>CloudKitService]
+    G --> H[(CloudKit<br/>Web Services)]
+```
+
 ### Data Sources
 
 The demo integrates with multiple data sources to gather comprehensive version information:
@@ -95,6 +110,33 @@ BushelCloud/
     ├── BushelCloudCLI.swift
     ├── SyncCommand.swift
     └── ExportCommand.swift
+```
+
+The modules interact as follows — the CLI drives `SyncEngine`, which fans out to the data pipeline for fetching and to the service layer for uploading:
+
+```mermaid
+graph TD
+    CLI[BushelCloudCLI<br/>sync · export · clear · list · status] --> SE[SyncEngine]
+    SE --> DSP[DataSourcePipeline]
+    SE --> SVC[BushelCloudKitService]
+    DSP --> FET[Fetchers<br/>IPSW · AppleDB · MESU<br/>XcodeReleases · SwiftVersion · VirtualBuddy]
+    SVC --> MK[MistKit<br/>CloudKitService]
+    MK --> CK[(CloudKit API)]
+```
+
+### MistKit Integration Pattern
+
+BushelCloud authenticates with **Server-to-Server** credentials (no signed-in iCloud user). An ECDSA P-256 `.pem` key and key ID build a `ServerToServerAuthManager`, which is injected into `CloudKitService`. The database scope is chosen per call (`.public(.prefers(.serverToServer))`), and writes are chunked to CloudKit's 200-operations-per-request limit:
+
+```mermaid
+graph TD
+    PEM[ECDSA P-256<br/>.pem private key] --> SAM[ServerToServerAuthManager]
+    KID[CLOUDKIT_KEY_ID] --> SAM
+    SAM --> CKS[CloudKitService]
+    CFG[Container ID<br/>+ environment] --> CKS
+    CKS --> OPS{Record operations}
+    OPS -->|chunk into ≤200| BATCH[modifyRecords<br/>per batch]
+    BATCH --> API[(CloudKit Web Services<br/>public DB · S2S-signed)]
 ```
 
 ### BushelKit Integration
@@ -315,18 +357,16 @@ For Xcode setup and debugging instructions, see the "Xcode Development Setup" se
 
 ## CloudKit Schema
 
-The demo uses three record types with relationships:
+The demo uses three related record types (plus a standalone `DataSourceMetadata`). `XcodeVersion` holds `CKReference` fields to the macOS restore image it requires and the Swift compiler it bundles:
 
-```text
-SwiftVersion
-    ↑
-    | (reference)
-    |
-RestoreImage ← XcodeVersion
-    ↑              ↑
-    | (reference)  |
-    |______________|
+```mermaid
+graph TD
+    XV[XcodeVersion] -->|minimumMacOS · CKReference| RI[RestoreImage]
+    XV -->|swiftVersion · CKReference| SV[SwiftVersion]
+    DSM[DataSourceMetadata<br/>no references]
 ```
+
+Because references must resolve at write time, the referenced records (`RestoreImage`, `SwiftVersion`) are uploaded before `XcodeVersion`.
 
 ### Record Relationships
 

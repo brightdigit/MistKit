@@ -32,7 +32,6 @@ public import Foundation
 
 /// Token manager for server-to-server authentication using ECDSA P-256 signing.
 /// Provides enterprise-level authentication for CloudKit Web Services.
-/// Available on macOS 11.0+, iOS 14.0+, tvOS 14.0+, watchOS 7.0+, and Linux.
 public final class ServerToServerAuthManager: TokenManager, Sendable {
   internal let keyID: String
   internal let privateKey: P256.Signing.PrivateKey
@@ -83,7 +82,6 @@ public final class ServerToServerAuthManager: TokenManager, Sendable {
   }
 
   /// Convenience initializer with PEM-formatted private key.
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public convenience init(
     keyID: String,
     pemString: String,

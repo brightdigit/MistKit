@@ -28,9 +28,9 @@
 //
 
 #if canImport(Hummingbird)
-  import Foundation
-  import MistKit
-  import Testing
+  internal import Foundation
+  internal import MistKit
+  internal import Testing
 
   @testable import MistDemoKit
 

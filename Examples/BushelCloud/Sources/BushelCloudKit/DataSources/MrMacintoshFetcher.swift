@@ -27,18 +27,18 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import BushelFoundation
+internal import BushelFoundation
 public import BushelLogging
-import Foundation
-import Logging
-import SwiftSoup
+internal import Foundation
+internal import Logging
+internal import SwiftSoup
 
 #if canImport(FelinePineSwift)
-  import FelinePineSwift
+  internal import FelinePineSwift
 #endif
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 /// Fetcher for macOS beta/RC restore images from Mr. Macintosh database

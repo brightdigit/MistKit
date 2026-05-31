@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Formatter for YAML output
 public struct YAMLFormatter: OutputFormatter {
@@ -61,7 +61,7 @@ public struct YAMLFormatter: OutputFormatter {
     var output = ""
 
     output += "recordName: \(escaper.escape(record.recordName))\n"
-    output += "recordType: \(escaper.escape(record.recordType))\n"
+    output += "recordType: \(escaper.escape(record.recordType ?? ""))\n"
 
     if !record.fields.isEmpty {
       output += "fields:\n"

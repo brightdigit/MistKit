@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// CloudKitService conformance to RecordManaging protocol
 ///
@@ -60,10 +60,14 @@ extension CloudKitService: RecordManaging {
 
   /// Execute a batch of record operations via modify
   public func executeBatchOperations(_ operations: [RecordOperation]) async throws {
-    _ = try await self.modifyRecords(
+    let results = try await self.modifyRecords(
       operations,
       database: .public(.prefers(.serverToServer))
     )
+    for result in results {
+      // `get()` rethrows a per-record failure as `recordOperationFailed`.
+      _ = try result.get()
+    }
   }
 
   /// Query all records of a specific type, automatically paginating

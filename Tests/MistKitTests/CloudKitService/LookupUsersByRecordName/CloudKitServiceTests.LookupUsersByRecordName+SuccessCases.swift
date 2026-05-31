@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+internal import Foundation
+internal import Testing
 
 @testable import MistKit
 
@@ -47,7 +47,7 @@ extension CloudKitServiceTests.LookupUsersByRecordName {
       let identities = try await service.lookupUsersByRecordName(["_user-0"])
 
       #expect(identities.count == 1)
-      #expect(identities.first?.userRecordName == "_user-0")
+      #expect(identities.first?.userRecordName == .recordName("_user-0"))
     }
 
     @Test("lookupUsersByRecordName() returns multiple identities")

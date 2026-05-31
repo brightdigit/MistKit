@@ -28,7 +28,7 @@
 //
 
 public import Foundation
-import UnixSignals
+internal import UnixSignals
 
 /// Timeout error for async operations
 public enum AsyncTimeoutError: Error, LocalizedError {

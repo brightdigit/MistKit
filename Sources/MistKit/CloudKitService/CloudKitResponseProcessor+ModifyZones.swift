@@ -37,19 +37,14 @@ extension CloudKitResponseProcessor {
   internal func processModifyZonesResponse(_ response: Operations.modifyZones.Output)
     async throws(CloudKitError) -> Components.Schemas.ZonesModifyResponse
   {
-    if let error = CloudKitError(response) {
-      throw error
-    }
-
     switch response {
     case .ok(let okResponse):
       switch okResponse.body {
       case .json(let zonesData):
         return zonesData
       }
-    default:
-      assertionFailure("Unexpected response case after error handling")
-      throw CloudKitError.invalidResponse
+    case .badRequest, .unauthorized, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
     }
   }
 }

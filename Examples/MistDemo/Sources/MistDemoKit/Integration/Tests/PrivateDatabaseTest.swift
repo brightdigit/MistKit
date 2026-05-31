@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 internal struct PrivateDatabaseTest: PhasedIntegrationTest {
   internal let name = "Private Database"
@@ -41,16 +41,23 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
   // pipeline; the service resolves web-auth credentials per call when needed.
   internal let phases: [any IntegrationPhase] = [
     ListZonesPhase(),
+    ModifyZonesPhase(),
     LookupZonePhase(),
+    ZoneRoundtripPhase(),
     FetchZoneChangesPhase(),
+    FetchAllZoneChangesPhase(),
     UploadAssetPhase(),
     CreateRecordsPhase(),
+    RereferenceAssetPhase(),
     QueryRecordsPhase(),
     LookupRecordsPhase(),
     InitialSyncPhase(),
     ModifyRecordsPhase(),
     IncrementalSyncPhase(),
     FinalVerificationPhase(),
+    SubscriptionRoundtripPhase(),
+    TokenRoundtripPhase(),
+    NotificationRoundtripPhase(),
     CleanupPhase(),
   ]
 }

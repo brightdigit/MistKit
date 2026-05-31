@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import HTTPTypes
+internal import Foundation
+internal import HTTPTypes
 
 /// Configuration for a mock HTTP response
 internal struct ResponseConfig: Sendable {
@@ -92,25 +92,6 @@ extension ResponseConfig {
       headers: headers,
       body: Data(errorJSON.utf8),
       error: nil
-    )
-  }
-
-  /// Creates a validation error response (400 Bad Request)
-  internal static func validationError(_ type: ValidationErrorType) -> ResponseConfig {
-    let reason: String
-    switch type {
-    case .emptyRecordType:
-      reason = "recordType cannot be empty"
-    case .limitTooSmall(let limit):
-      reason = "limit must be between 1 and 200, got \(limit)"
-    case .limitTooLarge(let limit):
-      reason = "limit must be between 1 and 200, got \(limit)"
-    }
-
-    return cloudKitError(
-      statusCode: 400,
-      serverErrorCode: "BAD_REQUEST",
-      reason: reason
     )
   }
 

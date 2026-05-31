@@ -118,7 +118,6 @@ public struct ServerToServerAuthenticator: Authenticator {
   }
 
   /// Convenience initializer with a PEM-encoded private key string.
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   public init(
     keyID: String,
     pemString: String,
@@ -142,7 +141,7 @@ public struct ServerToServerAuthenticator: Authenticator {
   /// produced by `encoded()`. Re-runs key parse + key-ID validation, so a
   /// corrupted payload throws `TokenManagerError.invalidCredentials`.
   public init(decoding data: Data) throws {
-    let wire = try JSONDecoder().decode(WireFormat.self, from: data)
+    let wire = try JSONDecoder.shared.decode(WireFormat.self, from: data)
     guard let keyData = Data(base64Encoded: wire.privateKey) else {
       throw TokenManagerError.invalidCredentials(.encodedPayloadInvalidBase64)
     }
@@ -192,6 +191,6 @@ public struct ServerToServerAuthenticator: Authenticator {
       privateKey: privateKey.rawRepresentation.base64EncodedString(),
       bodyBufferLimit: bodyBufferLimit
     )
-    return try JSONEncoder().encode(wire)
+    return try JSONEncoder.shared.encode(wire)
   }
 }

@@ -43,14 +43,33 @@ extension CloudKitError {
   /// Build a `CloudKitError` from any CloudKit failure response.
   /// The body schema is identical across status codes — only the code
   /// disambiguates which CloudKit failure occurred, so the caller supplies it.
+  ///
+  /// Three server codes are surfaced as dedicated cases:
+  /// - `QUOTA_EXCEEDED` → `.quotaExceeded(reason:, hint: nil)` — the catch
+  ///   block in the calling operation may enrich `hint` from local context.
+  /// - `BAD_REQUEST` → `.badRequest(reason:)`
+  /// - `ATOMIC_ERROR` → `.atomicFailure(reason:)`
+  ///
+  /// Every other server code lands in `.httpErrorWithDetails`.
   internal init(_ response: Components.Responses.Failure, statusCode: Int) {
     switch response.body {
     case .json(let errorResponse):
-      self = .httpErrorWithDetails(
-        statusCode: statusCode,
-        serverErrorCode: errorResponse.serverErrorCode?.rawValue,
-        reason: errorResponse.reason
-      )
+      let code = errorResponse.serverErrorCode?.rawValue
+      let reason = errorResponse.reason
+      switch code {
+      case "QUOTA_EXCEEDED":
+        self = .quotaExceeded(reason: reason, hint: nil)
+      case "BAD_REQUEST":
+        self = .badRequest(reason: reason)
+      case "ATOMIC_ERROR":
+        self = .atomicFailure(reason: reason)
+      default:
+        self = .httpErrorWithDetails(
+          statusCode: statusCode,
+          serverErrorCode: code,
+          reason: reason
+        )
+      }
     }
   }
 
@@ -65,5 +84,33 @@ extension CloudKitError {
       "Unhandled \(type(of: response)) (HTTP \(statusCode)) - treating as generic HTTP error"
     )
     return .httpError(statusCode: statusCode)
+  }
+
+  /// Returns a copy of this error with the given hint attached.
+  ///
+  /// If `self` is already `.quotaExceeded`, the existing reason is preserved
+  /// and the hint is replaced. If `self` is a bare 413 (`.httpError(413)` or
+  /// `.httpErrorWithDetails(413, …)`) — e.g., from the CDN asset-upload
+  /// endpoint, which returns raw HTTP errors rather than CloudKit JSON —
+  /// the error is upgraded to `.quotaExceeded` with the hint attached.
+  /// Other cases are returned unchanged. `nil` hint is always a no-op.
+  ///
+  /// Used by operation catch blocks to enrich a server-returned quota error
+  /// with information that can only be computed from the local request state
+  /// (e.g., the actual encoded record size, the asset byte count).
+  internal func addingQuotaHint(_ hint: QuotaHint?) -> CloudKitError {
+    guard let hint else {
+      return self
+    }
+    switch self {
+    case .quotaExceeded(let reason, _):
+      return .quotaExceeded(reason: reason, hint: hint)
+    case .httpError(let statusCode) where statusCode == 413:
+      return .quotaExceeded(reason: nil, hint: hint)
+    case .httpErrorWithDetails(let statusCode, _, let reason) where statusCode == 413:
+      return .quotaExceeded(reason: reason, hint: hint)
+    default:
+      return self
+    }
   }
 }

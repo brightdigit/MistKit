@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 internal struct ModifyRecordsPhase: IntegrationPhase {
   internal typealias Input = CreatedRecordNames
@@ -48,7 +48,7 @@ internal struct ModifyRecordsPhase: IntegrationPhase {
     let operations = recordsToUpdate.enumerated().map { offset, recordName in
       RecordOperation(
         operationType: .forceReplace,
-        recordType: IntegrationTestData.recordType,
+        recordType: MistDemoConfig.recordType,
         recordName: recordName,
         fields: [
           "title": .string("Updated Record \(offset + 1)")

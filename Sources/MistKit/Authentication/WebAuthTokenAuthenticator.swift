@@ -95,7 +95,7 @@ public struct WebAuthTokenAuthenticator: Authenticator {
   /// produced by `encoded()`. Re-runs format validation, so a corrupted
   /// or stale payload throws `TokenManagerError.invalidCredentials`.
   public init(decoding data: Data) throws {
-    let wire = try JSONDecoder().decode(WireFormat.self, from: data)
+    let wire = try JSONDecoder.shared.decode(WireFormat.self, from: data)
     try self.init(apiToken: wire.apiToken, webAuthToken: wire.webAuthToken)
   }
 
@@ -114,6 +114,6 @@ public struct WebAuthTokenAuthenticator: Authenticator {
 
   /// JSON-encodes both tokens for persistence by `TokenStorage`.
   public func encoded() throws -> Data {
-    try JSONEncoder().encode(WireFormat(apiToken: apiToken, webAuthToken: webAuthToken))
+    try JSONEncoder.shared.encode(WireFormat(apiToken: apiToken, webAuthToken: webAuthToken))
   }
 }

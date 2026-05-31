@@ -2,9 +2,13 @@
 title: Deploying MistKit - From Local CLI to a Scheduled CloudKit Job in CI
 date: 2026-06-01 00:00
 description: A practical walkthrough of running a MistKit-based service or scheduled job in production - how to build a static Linux binary, manage CloudKit credentials, and structure GitHub Actions workflows for tiered scheduled sync. Built around two real production deployments, BushelCloud and CelestraCloud.
+featuredImage: /media/tutorials/[VERIFY: path to hero image]
+subscriptionCTA: Subscribe for more deep dives on running Swift on the server.
 ---
 
 <!-- NOTE: Audience is backend/server-side Swift developers who already know how to wire MistKit up locally and now need to actually ship it - to a server, a container, or a scheduled CI job. This is a deployment guide, not a getting-started guide. -->
+
+<!-- DRAFT - not yet published. Verify all [VERIFY] markers and the dates/contents of the example repos before publishing. -->
 
 The hard part of using MistKit on a backend isn't writing the code - it's deciding where the code runs, how the credentials get there, and what happens when nobody's watching. Once you've got CloudKit working from a local CLI, the next question is: how do I run this on a schedule, on Linux, without a Mac in the loop?
 
@@ -14,8 +18,8 @@ This article is the deployment guide that picks up where the [authentication wal
 
 **In this series:**
 
-* [Rebuilding MistKit with Claude Code (Part 1)](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/)
-* [Rebuilding MistKit with Claude Code (Part 2)](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)
+* [Rebuilding MistKit with Claude Code (Part 1)](/tutorials/rebuilding-mistkit-claude-code-part-1/)
+* [Rebuilding MistKit with Claude Code (Part 2)](/tutorials/rebuilding-mistkit-claude-code-part-2/)
 * [Authenticating CloudKit from Backend Services](/tutorials/authenticating-cloudkit-backend-services/)
 * _Deploying MistKit: From Local CLI to a Scheduled CloudKit Job in CI_
 

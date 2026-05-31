@@ -27,36 +27,67 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 internal import MistKitOpenAPI
-import OpenAPIRuntime
+internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 #if !os(WASI)
-  import OpenAPIURLSession
+  internal import OpenAPIURLSession
 #endif
 
 extension CloudKitService {
+  /// Inspect a batch of API record operations and return a `QuotaHint` for
+  /// the first record whose JSON-encoded size exceeds CloudKit's per-record
+  /// limit. Returns `nil` if every record is within bounds — which is the
+  /// usual case when the server's `QUOTA_EXCEEDED` is caused by storage-quota
+  /// exhaustion rather than per-record size.
+  private static func recordSizeQuotaHint(
+    for apiOperations: [Components.Schemas.RecordOperation]
+  ) -> QuotaHint? {
+    for (index, operation) in apiOperations.enumerated() {
+      guard let record = operation.record,
+        let encoded = try? JSONEncoder.shared.encode(record),
+        encoded.count > maxRecordDataBytes
+      else { continue }
+      return .recordExceedsSizeLimit(
+        operationIndex: index,
+        encodedBytes: encoded.count,
+        maxBytes: maxRecordDataBytes
+      )
+    }
+    return nil
+  }
+
   /// Modify (create, update, or delete) CloudKit records
   /// - Parameters:
   ///   - operations: Array of record operations to perform
   ///   - atomic: When true, the entire batch fails if any single operation fails (default: false)
   ///   - database: The CloudKit database scope to modify (`.public`, `.private`, `.shared`)
-  /// - Returns: Array of RecordInfo for the modified records
+  /// - Returns: A ``RecordResult`` per operation — `.success` for a saved/deleted
+  ///   record, `.failure` (a ``RecordOperationFailure``) for one that CloudKit
+  ///   rejected.
   /// - Throws: CloudKitError if the operation fails
   public func modifyRecords(
     _ operations: [RecordOperation],
     atomic: Bool = false,
     database: Database
-  ) async throws(CloudKitError) -> [RecordInfo] {
+  ) async throws(CloudKitError) -> [RecordResult] {
+    let apiOperations: [Components.Schemas.RecordOperation]
     do {
-      let apiOperations = try operations.map {
+      apiOperations = try operations.map {
         try Components.Schemas.RecordOperation(from: $0)
       }
+    } catch let cloudKitError as CloudKitError {
+      throw cloudKitError
+    } catch {
+      throw CloudKitError.underlyingError(error)
+    }
 
+    do {
       let client = try self.client(for: database)
       let response = try await client.modifyRecords(
         .init(
@@ -78,10 +109,11 @@ extension CloudKitService {
       let modifyResponse: Components.Schemas.ModifyResponse =
         try await responseProcessor.processModifyRecordsResponse(response)
 
-      return modifyResponse.records?.compactMap { RecordInfo(from: $0) }
-        ?? []
+      return try (modifyResponse.records ?? []).map { try RecordResult(from: $0) }
     } catch let cloudKitError as CloudKitError {
-      throw cloudKitError
+      throw cloudKitError.addingQuotaHint(
+        Self.recordSizeQuotaHint(for: apiOperations)
+      )
     } catch {
       throw CloudKitError.underlyingError(error)
     }
@@ -95,6 +127,15 @@ extension CloudKitService {
   ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
   /// - Returns: RecordInfo for the created record
   /// - Throws: CloudKitError if the operation fails
+  ///
+  /// # Example
+  /// ```swift
+  /// let article = try await service.createRecord(
+  ///   recordType: "Article",
+  ///   fields: ["title": .string("Hello, CloudKit")],
+  ///   database: .private
+  /// )
+  /// ```
   public func createRecord(
     recordType: String,
     recordName: String? = nil,
@@ -108,10 +149,10 @@ extension CloudKitService {
     )
 
     let results = try await modifyRecords([operation], database: database)
-    guard let record = results.first else {
+    guard let result = results.first else {
       throw CloudKitError.invalidResponse
     }
-    return record
+    return try result.get()
   }
 
   /// Update a single record in CloudKit
@@ -123,6 +164,17 @@ extension CloudKitService {
   ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
   /// - Returns: RecordInfo for the updated record
   /// - Throws: CloudKitError if the operation fails
+  ///
+  /// # Example
+  /// ```swift
+  /// let updated = try await service.updateRecord(
+  ///   recordType: "Article",
+  ///   recordName: existing.recordName,
+  ///   fields: ["title": .string("Renamed")],
+  ///   recordChangeTag: existing.recordChangeTag,
+  ///   database: .private
+  /// )
+  /// ```
   public func updateRecord(
     recordType: String,
     recordName: String,
@@ -138,10 +190,10 @@ extension CloudKitService {
     )
 
     let results = try await modifyRecords([operation], database: database)
-    guard let record = results.first else {
+    guard let result = results.first else {
       throw CloudKitError.invalidResponse
     }
-    return record
+    return try result.get()
   }
 
   /// Delete a single record from CloudKit
@@ -163,6 +215,10 @@ extension CloudKitService {
       recordChangeTag: recordChangeTag
     )
 
-    _ = try await modifyRecords([operation], database: database)
+    let results = try await modifyRecords([operation], database: database)
+    for result in results {
+      // `get()` rethrows a per-record failure as `recordOperationFailed`.
+      _ = try result.get()
+    }
   }
 }

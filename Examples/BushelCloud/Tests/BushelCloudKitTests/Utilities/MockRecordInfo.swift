@@ -27,7 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
 public import MistKit
 
 /// Helper to create RecordInfo from field dictionaries for testing roundtrips
@@ -49,30 +48,6 @@ public enum MockRecordInfo: Sendable {
       recordType: recordType,
       recordChangeTag: nil,
       fields: fields
-    )
-  }
-
-  /// Creates a RecordInfo with an error for testing error handling
-  ///
-  /// - Parameters:
-  ///   - recordName: CloudKit record name
-  ///   - errorCode: Server error code (stored in fields for test verification)
-  ///   - reason: Error reason message (stored in fields for test verification)
-  /// - Returns: A RecordInfo marked as an error (isError == true)
-  public static func createError(
-    recordType _: String,
-    recordName: String,
-    errorCode: String,
-    reason: String
-  ) -> RecordInfo {
-    RecordInfo(
-      recordName: recordName,
-      recordType: "Unknown",  // Marks this as an error (isError will be true)
-      recordChangeTag: nil,
-      fields: [
-        "serverErrorCode": .string(errorCode),
-        "reason": .string(reason),
-      ]
     )
   }
 }

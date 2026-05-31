@@ -106,6 +106,7 @@ let package = Package(
   ],
   dependencies: [
     .package(name: "MistKit", path: "../.."),
+    .package(name: "ConfigKeyKit", path: "../../Packages/ConfigKeyKit"),
     .package(
       url: "https://github.com/hummingbird-project/hummingbird.git",
       from: "2.0.0"
@@ -126,11 +127,6 @@ let package = Package(
   ],
   targets: [
     .target(
-      name: "ConfigKeyKit",
-      dependencies: [],
-      swiftSettings: swiftSettings
-    ),
-    .target(
       name: "MistDemoApp",
       dependencies: ["MistDemoKit"],
       swiftSettings: swiftSettings
@@ -138,7 +134,7 @@ let package = Package(
     .target(
       name: "MistDemoKit",
       dependencies: [
-        "ConfigKeyKit",
+        .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
         .product(name: "MistKit", package: "MistKit"),
         .product(
           name: "Hummingbird",
@@ -160,6 +156,8 @@ let package = Package(
       ],
       resources: [
         .copy("Resources/index.html"),
+        .copy("Resources/styles.css"),
+        .copy("Resources/js"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -167,7 +165,7 @@ let package = Package(
       name: "MistDemo",
       dependencies: [
         "MistDemoKit",
-        "ConfigKeyKit",
+        .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
         .product(name: "MistKit", package: "MistKit"),
       ],
       swiftSettings: swiftSettings
@@ -176,9 +174,8 @@ let package = Package(
       name: "MistDemoTests",
       dependencies: [
         "MistDemoKit",
-        "ConfigKeyKit",
+        .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
         .product(name: "MistKit", package: "MistKit"),
-        .product(name: "MistKitOpenAPI", package: "MistKit"),
         .product(
           name: "Hummingbird",
           package: "hummingbird",

@@ -28,7 +28,7 @@
 //
 
 public import ConfigKeyKit
-import Foundation
+internal import Foundation
 
 // MARK: - MistDemo-Specific Config Key Helpers
 

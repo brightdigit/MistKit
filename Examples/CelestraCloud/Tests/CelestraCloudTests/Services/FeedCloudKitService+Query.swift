@@ -3,7 +3,7 @@
 //  CelestraCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import CelestraKit
-import Foundation
-import MistKit
-import Testing
+internal import CelestraKit
+internal import Foundation
+internal import MistKit
+internal import Testing
 
 @testable import CelestraCloudKit
 
@@ -48,26 +48,6 @@ extension FeedCloudKitService {
         recordType: "Feed",
         recordChangeTag: "tag-123",
         fields: fields
-      )
-    }
-
-    private func createTestFeed() -> Feed {
-      Feed(
-        recordName: nil,
-        feedURL: "https://example.com/feed.xml",
-        title: "Test Feed",
-        description: "A test feed",
-        isFeatured: false,
-        isVerified: true,
-        subscriberCount: 100,
-        totalAttempts: 5,
-        successfulAttempts: 4,
-        lastAttempted: Date(timeIntervalSince1970: 1_000_000),
-        isActive: true,
-        etag: "etag-123",
-        lastModified: "Mon, 01 Jan 2024 00:00:00 GMT",
-        failureCount: 1,
-        minUpdateInterval: 3_600
       )
     }
 

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Errors that can occur during authentication setup.
 internal enum AuthenticationError: LocalizedError, Sendable {

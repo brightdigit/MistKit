@@ -28,7 +28,7 @@
 //
 
 #if canImport(SwiftUI)
-  import SwiftUI
+  internal import SwiftUI
 
   /// Sidebar list of navigation items.
   internal struct SidebarView: View {

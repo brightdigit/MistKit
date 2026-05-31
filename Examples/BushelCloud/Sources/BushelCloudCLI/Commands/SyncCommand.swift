@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import BushelCloudKit
-import BushelFoundation
-import BushelUtilities
-import Foundation
+internal import BushelCloudKit
+internal import BushelFoundation
+internal import BushelUtilities
+internal import Foundation
 
 internal enum SyncCommand {
   internal static func run(_ args: [String]) async throws {

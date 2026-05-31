@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Formatter for table output
 public struct TableFormatter: OutputFormatter {
@@ -61,7 +61,7 @@ public struct TableFormatter: OutputFormatter {
     var output = ""
 
     output += "Record Name: \(escaper.escape(record.recordName))\n"
-    output += "Record Type: \(escaper.escape(record.recordType))\n"
+    output += "Record Type: \(escaper.escape(record.recordType ?? ""))\n"
 
     if !record.fields.isEmpty {
       output += "Fields:\n"

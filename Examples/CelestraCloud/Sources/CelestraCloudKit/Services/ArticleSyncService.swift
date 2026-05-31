@@ -31,7 +31,6 @@ public import CelestraKit
 public import MistKit
 
 /// Service for synchronizing articles: query existing, categorize, create/update
-@available(macOS 13.0, *)
 public struct ArticleSyncService: Sendable {
   private let articleService: ArticleCloudKitService
   private let categorizer: ArticleCategorizer

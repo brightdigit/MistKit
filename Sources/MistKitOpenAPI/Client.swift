@@ -3387,24 +3387,158 @@ public struct Client: APIProtocol {
             }
         )
     }
+    /// Re-reference Existing Assets
+    ///
+    /// Fetch reusable asset descriptors for assets that already live on other
+    /// records, without re-uploading the bytes. Each returned descriptor can be
+    /// set on another record's Asset field via `records/modify` to share the
+    /// same underlying asset. Assets are deleted only when all references to
+    /// them are removed.
+    ///
+    /// Documented in Apple's archived CloudKit Web Services Reference
+    /// (`RereferenceAssets`); absent from the current online docs.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/assets/rereference`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/assets/rereference/post(rereferenceAssets)`.
+    public func rereferenceAssets(_ input: Operations.rereferenceAssets.Input) async throws -> Operations.rereferenceAssets.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.rereferenceAssets.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/database/{}/{}/{}/{}/assets/rereference",
+                    parameters: [
+                        input.path.version,
+                        input.path.container,
+                        input.path.environment,
+                        input.path.database
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .post
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                let body: OpenAPIRuntime.HTTPBody?
+                switch input.body {
+                case let .json(value):
+                    body = try converter.setRequiredRequestBodyAsJSON(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "application/json; charset=utf-8"
+                    )
+                }
+                return (request, body)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.rereferenceAssets.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.AssetRereferenceResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                case 400:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Failure.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.ErrorResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .badRequest(.init(body: body))
+                case 401:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Failure.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.ErrorResponse.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .unauthorized(.init(body: body))
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
     /// Create APNs Token
     ///
-    /// Create an Apple Push Notification service (APNs) token
+    /// Create an Apple Push Notification service (APNs) token.
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/create`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/create/post(createToken)`.
+    /// Lives under the `/device/` API module (not `/database/`). CloudKit's
+    /// archived REST reference documents this under `/database/...`, but the
+    /// live service routes only OPTIONS to that path and returns
+    /// `405 Method Not Allowed` for POST. The working path is the one
+    /// CloudKit JS uses (`setApiModuleName("device")`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /device/{version}/{container}/{environment}/tokens/create`.
+    /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/create/post(createToken)`.
     public func createToken(_ input: Operations.createToken.Input) async throws -> Operations.createToken.Output {
         try await client.send(
             input: input,
             forOperation: Operations.createToken.id,
             serializer: { input in
                 let path = try converter.renderedPath(
-                    template: "/database/{}/{}/{}/{}/tokens/create",
+                    template: "/device/{}/{}/{}/tokens/create",
                     parameters: [
                         input.path.version,
                         input.path.container,
-                        input.path.environment,
-                        input.path.database
+                        input.path.environment
                     ]
                 )
                 var request: HTTPTypes.HTTPRequest = .init(
@@ -3509,22 +3643,25 @@ public struct Client: APIProtocol {
     }
     /// Register Token
     ///
-    /// Register a token for push notifications
+    /// Register an APNs device token for push notifications.
     ///
-    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/tokens/register`.
-    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/tokens/register/post(registerToken)`.
+    /// Lives under the `/device/` API module (not `/database/`) — same
+    /// rationale as `tokens/create`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /device/{version}/{container}/{environment}/tokens/register`.
+    /// - Remark: Generated from `#/paths//device/{version}/{container}/{environment}/tokens/register/post(registerToken)`.
     public func registerToken(_ input: Operations.registerToken.Input) async throws -> Operations.registerToken.Output {
         try await client.send(
             input: input,
             forOperation: Operations.registerToken.id,
             serializer: { input in
                 let path = try converter.renderedPath(
-                    template: "/database/{}/{}/{}/{}/tokens/register",
+                    template: "/device/{}/{}/{}/tokens/register",
                     parameters: [
                         input.path.version,
                         input.path.container,
-                        input.path.environment,
-                        input.path.database
+                        input.path.environment
                     ]
                 )
                 var request: HTTPTypes.HTTPRequest = .init(

@@ -34,7 +34,7 @@ internal import MistKitOpenAPI
 ///
 /// Zone IDs uniquely identify a record zone within a database.
 /// The _defaultZone is automatically available in all databases.
-public struct ZoneID: Sendable, Equatable, Hashable {
+public struct ZoneID: Codable, Sendable, Equatable, Hashable {
   /// The default zone present in all databases
   public static let defaultZone = ZoneID(zoneName: "_defaultZone", ownerName: nil)
 

@@ -29,7 +29,7 @@
 
 public import Foundation
 public import MistKit
-import Testing
+internal import Testing
 
 /// Custom assertions for FieldValue comparisons
 extension FieldValue {

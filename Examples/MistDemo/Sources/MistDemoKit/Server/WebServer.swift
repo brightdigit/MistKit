@@ -109,6 +109,7 @@
       router.middlewares.add(LogRequestsMiddleware(.info))
 
       addIndexEndpoint(router: router)
+      addStaticAssetEndpoints(router: router)
 
       let api = router.group("api")
         .add(middleware: LoopbackOnlyMiddleware<BasicRequestContext>())
@@ -126,6 +127,13 @@
       addCreateEndpoint(api: api)
       addUpdateEndpoint(api: api)
       addDeleteEndpoint(api: api)
+      addRecordsEndpoints(api: api)
+      addZonesEndpoints(api: api)
+      addUsersEndpoints(api: api)
+      addSubscriptionEndpoints(api: api)
+      addTokenEndpoints(api: api)
+      addAssetEndpoints(api: api)
+      addPendingEndpoints(api: api)
 
       return router
     }
@@ -147,6 +155,43 @@
       router.get("/") { _, _ -> Response in indexResponseBuilder() }
       router.get("/index.html") { _, _ -> Response in
         indexResponseBuilder()
+      }
+    }
+
+    /// Serve the extracted `styles.css` and `js/*.js` modules referenced
+    /// from `index.html`. Each file's bytes are read once at startup
+    /// (see `WebIndexHTML.stylesheet` / `.jsModules`) and re-served from
+    /// memory on every request — same pattern as the cached index page.
+    private func addStaticAssetEndpoints(
+      router: Router<BasicRequestContext>
+    ) {
+      let cssBytes = ByteBuffer(string: WebIndexHTML.stylesheet)
+      router.get("/styles.css") { _, _ -> Response in
+        Response(
+          status: .ok,
+          headers: [.contentType: "text/css; charset=utf-8"],
+          body: ResponseBody { writer in
+            try await writer.write(cssBytes)
+            try await writer.finish(nil)
+          }
+        )
+      }
+
+      // Register one route per known JS module rather than a wildcard
+      // handler, so unknown `js/*` requests return 404 — and we don't
+      // accidentally serve future-added files we haven't reviewed.
+      for (filename, body) in WebIndexHTML.jsModules {
+        let bytes = ByteBuffer(string: body)
+        router.get(RouterPath("/js/\(filename)")) { _, _ -> Response in
+          Response(
+            status: .ok,
+            headers: [.contentType: "application/javascript; charset=utf-8"],
+            body: ResponseBody { writer in
+              try await writer.write(bytes)
+              try await writer.finish(nil)
+            }
+          )
+        }
       }
     }
 

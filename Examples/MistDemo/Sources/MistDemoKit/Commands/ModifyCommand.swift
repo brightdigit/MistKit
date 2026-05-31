@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Command to perform batch create/update/delete operations.
 public struct ModifyCommand: MistDemoCommand, OutputFormatting {
@@ -67,61 +67,59 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
     self.config = config
   }
 
+  private static func makeRows(from records: [RecordInfo]) -> [ModifyResultRow] {
+    records.map { record in
+      ModifyResultRow(
+        operation: "applied",
+        recordType: record.recordType,
+        recordName: record.recordName,
+        recordChangeTag: record.recordChangeTag
+      )
+    }
+  }
+
+  private static func reportFailures(_ failures: [RecordOperationFailure]) {
+    guard !failures.isEmpty else {
+      return
+    }
+    for failure in failures {
+      let identifier = failure.identifier
+      let code = failure.serverErrorCode.rawValue
+      let reasonFragment = failure.reason.map { ": \($0)" } ?? ""
+      let line = "Warning: operation on '\(identifier)' failed (\(code))\(reasonFragment)\n"
+      FileHandle.standardError.write(Data(line.utf8))
+    }
+  }
+
   /// Executes the command.
   public func execute() async throws {
     do {
-      let client = try MistKitClientFactory.create(
-        for: config.base
-      )
-
+      let client = try MistKitClientFactory.create(for: config.base)
       let operations = try config.operations.enumerated()
-        .map { index, input in
-          try input.toRecordOperation(index: index)
-        }
-
+        .map { index, input in try input.toRecordOperation(index: index) }
       let results = try await client.modifyRecords(
         operations,
         atomic: config.atomic,
         database: config.base.database
       )
-
-      let rows = results.map { record in
-        ModifyResultRow(
-          operation: "applied",
-          recordType: record.recordType,
-          recordName: record.recordName,
-          recordChangeTag: record.recordChangeTag
-        )
+      let succeeded = results.compactMap { result in
+        if case .success(let record) = result { record } else { nil }
       }
-
-      let recordReturningOpsCount =
-        config.operations
-        .filter { $0.operation != .delete }.count
-      let partialFailure =
-        !config.atomic
-        && results.count < recordReturningOpsCount
-
-      if partialFailure {
-        let missing = recordReturningOpsCount - results.count
-        let line =
-          "Warning: \(missing) of \(recordReturningOpsCount)"
-          + " create/update op(s) did not return a record.\n"
-        FileHandle.standardError.write(Data(line.utf8))
+      let failures = results.compactMap { result in
+        if case .failure(let error) = result { error } else { nil }
       }
-
+      Self.reportFailures(failures)
       let envelope = ModifyOutput(
-        results: rows,
+        results: Self.makeRows(from: succeeded),
         attempted: config.operations.count,
-        succeeded: results.count,
-        partialFailure: partialFailure
+        succeeded: succeeded.count,
+        partialFailure: !config.atomic && !failures.isEmpty
       )
       try await outputResult(envelope, format: config.output)
     } catch let error as ModifyError {
       throw error
     } catch {
-      throw ModifyError.operationFailed(
-        error.localizedDescription
-      )
+      throw ModifyError.operationFailed(error.localizedDescription)
     }
   }
 }

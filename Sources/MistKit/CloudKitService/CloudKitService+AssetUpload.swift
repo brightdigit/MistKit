@@ -31,15 +31,29 @@ public import Foundation
 internal import Logging
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 #if !os(WASI)
-  import OpenAPIURLSession
+  internal import OpenAPIURLSession
 #endif
 
 @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 extension CloudKitService {
+  /// Returns a `.assetExceedsSizeLimit` hint when local `data` is over
+  /// CloudKit's per-asset upload limit. Returns `nil` otherwise (the
+  /// `QUOTA_EXCEEDED` is presumably caused by the user's iCloud storage
+  /// being full, not the asset size).
+  private static func assetSizeQuotaHint(for data: Data) -> QuotaHint? {
+    guard data.count > maxAssetUploadBytes else {
+      return nil
+    }
+    return .assetExceedsSizeLimit(
+      dataBytes: data.count,
+      maxBytes: maxAssetUploadBytes
+    )
+  }
+
   /// Upload binary data to a CloudKit asset upload URL
   ///
   /// This is step 2 of the two-step asset upload process.
@@ -84,7 +98,7 @@ extension CloudKitService {
         Logger(subsystem: .api).debug("Asset upload response: \(responseString)")
       }
 
-      let uploadResponse = try JSONDecoder().decode(
+      let uploadResponse = try JSONDecoder.shared.decode(
         AssetUploadResponse.self, from: responseData
       )
 
@@ -98,6 +112,7 @@ extension CloudKitService {
       )
     } catch {
       throw mapToCloudKitError(error, context: "uploadAssetData")
+        .addingQuotaHint(Self.assetSizeQuotaHint(for: data))
     }
   }
 }

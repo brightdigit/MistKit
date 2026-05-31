@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 extension CloudKitService {
   /// Query all records, handling pagination automatically
@@ -83,9 +83,7 @@ extension CloudKitService {
       }
 
       let result: QueryResult = try await queryRecords(
-        recordType: recordType,
-        filters: filters,
-        sortBy: sortBy,
+        Query(recordType: recordType, filters: filters ?? [], sortBy: sortBy ?? []),
         limit: pageSize,
         desiredKeys: desiredKeys,
         continuationMarker: currentMarker,

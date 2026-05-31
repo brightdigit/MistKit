@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import HTTPTypes
-import Testing
+internal import Foundation
+internal import HTTPTypes
+internal import Testing
 
 @testable import MistKit
 
@@ -42,6 +42,31 @@ extension CloudKitServiceTests.LookupZones {
   ) async throws -> CloudKitService {
     let responseProvider = try ResponseProvider.successfulLookupZones(zoneCount: zoneCount)
     let transport = MockTransport(responseProvider: responseProvider)
+    return try CloudKitService(
+      containerIdentifier: TestConstants.serviceContainerIdentifier,
+      credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),
+      transport: transport
+    )
+  }
+
+  internal static func makeServiceReturningZoneWithoutName() async throws -> CloudKitService {
+    let responseJSON = """
+      {
+        "zones": [
+          { "zoneID": { "zoneName": "valid-zone", "ownerName": "_defaultOwner" } },
+          { "zoneID": { "ownerName": "_defaultOwner" } }
+        ]
+      }
+      """
+    var headers = HTTPFields()
+    headers[.contentType] = "application/json"
+    let response = ResponseConfig(
+      statusCode: 200,
+      headers: headers,
+      body: Data(responseJSON.utf8),
+      error: nil
+    )
+    let transport = MockTransport(responseProvider: ResponseProvider(defaultResponse: response))
     return try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
       credentials: Credentials(apiAuth: APICredentials(apiToken: testAPIToken)),

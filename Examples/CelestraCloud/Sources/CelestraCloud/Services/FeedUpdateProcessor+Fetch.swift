@@ -27,12 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import CelestraCloudKit
-import CelestraKit
-import Foundation
-import MistKit
+internal import CelestraCloudKit
+internal import CelestraKit
+internal import Foundation
+internal import MistKit
 
-@available(macOS 13.0, *)
 extension FeedUpdateProcessor {
   internal func processSuccessfulFetch(
     feed: Feed,

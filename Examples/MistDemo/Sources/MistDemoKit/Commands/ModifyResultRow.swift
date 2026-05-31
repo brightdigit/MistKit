@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// One row in the modify command's output.
 public struct ModifyResultRow: Encodable, Sendable {
@@ -40,8 +40,8 @@ public struct ModifyResultRow: Encodable, Sendable {
 
   /// The operation type applied.
   public let operation: String
-  /// The record type.
-  public let recordType: String
+  /// The record type, or `nil` for a deleted (typeless) record.
+  public let recordType: String?
   /// The record name.
   public let recordName: String?
   /// The record change tag.
@@ -50,7 +50,7 @@ public struct ModifyResultRow: Encodable, Sendable {
   /// Creates a new instance.
   public init(
     operation: String,
-    recordType: String,
+    recordType: String?,
     recordName: String?,
     recordChangeTag: String?
   ) {

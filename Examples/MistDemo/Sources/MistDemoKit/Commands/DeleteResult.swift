@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Result of a successful delete, formatted as command output.
 public struct DeleteResult: Encodable, Sendable {

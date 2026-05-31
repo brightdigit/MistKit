@@ -28,175 +28,53 @@
 //
 
 #if canImport(Hummingbird)
-  import Foundation
-  import MistKit
+  internal import Foundation
+  internal import MistKit
 
   @testable import MistDemoKit
 
   /// In-memory `WebBackend` for routing-level tests. Records the last
   /// call to each operation and returns deterministic stub records.
+  ///
+  /// The `WebBackend` conformance is split across extension files —
+  /// `MockBackend+RecordOperations` (records/zones) and
+  /// `MockBackend+ServiceOperations` (subscriptions/tokens/assets) — so the
+  /// recorded-call properties below are `internal` (rather than
+  /// `private(set)`) to let those extensions record into them.
   internal final actor MockBackend: WebBackend {
-    internal struct QueryCall: Sendable {
-      internal let recordType: String
-      internal let limit: Int?
-      internal let sortBy: [WebRequests.QuerySortField]?
-      internal let database: MistKit.Database
-    }
-
-    internal struct CreateCall: Sendable {
-      internal let recordType: String
-      internal let fields: [String: String]
-      internal let database: MistKit.Database
-    }
-
-    internal struct UpdateCall: Sendable {
-      internal let recordType: String
-      internal let recordName: String
-      internal let fields: [String: String]
-      internal let recordChangeTag: String?
-      internal let database: MistKit.Database
-    }
-
-    internal struct DeleteCall: Sendable {
-      internal let recordType: String
-      internal let recordName: String
-      internal let recordChangeTag: String?
-      internal let database: MistKit.Database
-    }
-
-    internal private(set) var lastQuery: QueryCall?
-    internal private(set) var lastCreate: CreateCall?
-    internal private(set) var lastUpdate: UpdateCall?
-    internal private(set) var lastDelete: DeleteCall?
+    internal var lastQuery: QueryCall?
+    internal var lastCreate: CreateCall?
+    internal var lastUpdate: UpdateCall?
+    internal var lastDelete: DeleteCall?
+    internal var lastLookupRecords: LookupRecordsCall?
+    internal var lastRecordChanges: RecordChangesCall?
+    internal var lastModifyZones: ModifyZonesCall?
+    internal var lastListZones: ListZonesCall?
+    internal var lastLookupZones: LookupZonesCall?
+    internal var lastZoneChanges: ZoneChangesCall?
+    internal var didFetchCaller = false
+    internal var lastDiscoverUsers: DiscoverUsersCall?
+    internal var didListSubscriptions = false
+    internal var lastLookupSubscriptions: LookupSubscriptionsCall?
+    internal var lastModifySubscriptions: ModifySubscriptionsCall?
+    internal var lastCreateToken: CreateTokenCall?
+    internal var lastRegisterToken: RegisterTokenCall?
+    internal var lastRereferenceAsset: RereferenceAssetCall?
+    internal var lastUploadAsset: UploadAssetCall?
     private var pendingError: String?
 
-    private static func stubRecord(
-      recordType: String, recordName: String
-    ) -> RecordInfo {
-      let json = """
-        {
-          "recordName": "\(recordName)",
-          "recordType": "\(recordType)",
-          "recordChangeTag": null,
-          "fields": {},
-          "created": null,
-          "modified": null,
-          "deleted": false
-        }
-        """
-      // RecordInfo is Codable; round-trip through JSON keeps the stub
-      // independent of MistKit's internal initializer.
-      do {
-        return try JSONDecoder().decode(
-          RecordInfo.self, from: Data(json.utf8)
-        )
-      } catch {
-        fatalError("MockBackend stubRecord JSON failed to decode: \(error)")
-      }
-    }
-
-    /// Flatten FieldValue entries into a printable form so tests can write
-    /// `#expect(captured.fields["title"] == "Hi")` for strings or
-    /// `#expect(captured.fields["index"] == "5")` for numbers without
-    /// pattern-matching on FieldValue in every assertion.
-    ///
-    /// Non-primitive cases (asset, date, reference, location, list, bytes)
-    /// are intentionally dropped — they yield no useful String form for an
-    /// equality assertion. Tests that need to assert those types should
-    /// inspect the FieldValue directly rather than going through `flatten`.
-    private static func flatten(
-      _ fields: [String: FieldValue]
-    ) -> [String: String] {
-      var result: [String: String] = [:]
-      for (name, value) in fields {
-        switch value {
-        case .string(let string):
-          result[name] = string
-        case .int64(let int):
-          result[name] = String(int)
-        case .double(let double):
-          result[name] = String(double)
-        default:
-          continue
-        }
-      }
-      return result
-    }
+    /// Stub subscriptions (tests can seed); defaults to one query subscription.
+    internal var stubSubscriptions: [SubscriptionInfo] = [
+      .query(subscriptionID: "stub-sub", recordType: "Note", firesOn: [.create])
+    ]
 
     internal func failNext(message: String) {
       pendingError = message
     }
 
-    internal func webQuery(
-      recordType: String,
-      limit: Int?,
-      sortBy: [WebRequests.QuerySortField]?,
-      database: MistKit.Database
-    ) async throws -> [RecordInfo] {
-      lastQuery = QueryCall(
-        recordType: recordType,
-        limit: limit,
-        sortBy: sortBy,
-        database: database
-      )
-      try consumePendingError()
-      return [
-        Self.stubRecord(recordType: recordType, recordName: "stub-1")
-      ]
-    }
-
-    internal func webCreate(
-      recordType: String,
-      fields: [String: FieldValue],
-      database: MistKit.Database
-    ) async throws -> RecordInfo {
-      lastCreate = CreateCall(
-        recordType: recordType,
-        fields: Self.flatten(fields),
-        database: database
-      )
-      try consumePendingError()
-      return Self.stubRecord(
-        recordType: recordType, recordName: "created-1"
-      )
-    }
-
-    internal func webUpdate(
-      recordType: String,
-      recordName: String,
-      fields: [String: FieldValue],
-      recordChangeTag: String?,
-      database: MistKit.Database
-    ) async throws -> RecordInfo {
-      lastUpdate = UpdateCall(
-        recordType: recordType,
-        recordName: recordName,
-        fields: Self.flatten(fields),
-        recordChangeTag: recordChangeTag,
-        database: database
-      )
-      try consumePendingError()
-      return Self.stubRecord(
-        recordType: recordType, recordName: recordName
-      )
-    }
-
-    internal func webDelete(
-      recordType: String,
-      recordName: String,
-      recordChangeTag: String?,
-      database: MistKit.Database
-    ) async throws {
-      lastDelete = DeleteCall(
-        recordType: recordType,
-        recordName: recordName,
-        recordChangeTag: recordChangeTag,
-        database: database
-      )
-      try consumePendingError()
-    }
-
-    private func consumePendingError() throws {
+    /// Throw the seeded error (if any) once, then clear it. Called at the top
+    /// of every conformance method in the operation extensions.
+    internal func consumePendingError() throws {
       if let message = pendingError {
         pendingError = nil
         struct StubError: LocalizedError {

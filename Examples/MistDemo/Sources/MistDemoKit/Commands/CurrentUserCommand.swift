@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Command to get information about the authenticated user
 public struct CurrentUserCommand: MistDemoCommand, OutputFormatting {

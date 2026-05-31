@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import MistDemoKit
+internal import MistDemoKit
 
 @main
 internal enum MistDemo {

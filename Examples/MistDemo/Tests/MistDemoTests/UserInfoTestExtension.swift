@@ -27,9 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-internal import MistKitOpenAPI
-
 @testable import MistKit
 
 /// Test extension for UserInfo to enable test instance creation
@@ -51,15 +48,11 @@ extension UserInfo {
     lastName: String? = nil,
     emailAddress: String? = nil
   ) -> UserInfo {
-    // Create a mock UserResponse to initialize UserInfo
-    // Using @testable import allows access to internal types
-    let userResponse = Components.Schemas.UserResponse(
+    UserInfo(
       userRecordName: userRecordName,
       firstName: firstName,
       lastName: lastName,
       emailAddress: emailAddress
     )
-
-    return UserInfo(from: userResponse)
   }
 }

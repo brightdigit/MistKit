@@ -27,16 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 internal import MistKitOpenAPI
-import OpenAPIRuntime
+internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 #if !os(WASI)
-  import OpenAPIURLSession
+  internal import OpenAPIURLSession
 #endif
 
 extension CloudKitService {
@@ -62,16 +62,7 @@ extension CloudKitService {
 
       let zonesData: Components.Schemas.ZonesListResponse =
         try await responseProcessor.processListZonesResponse(response)
-      return zonesData.zones?.compactMap { zone in
-        guard let zoneID = zone.zoneID else {
-          return nil
-        }
-        return ZoneInfo(
-          zoneName: zoneID.zoneName ?? "Unknown",
-          ownerRecordName: zoneID.ownerName,
-          capabilities: []
-        )
-      } ?? []
+      return try (zonesData.zones ?? []).map { try ZoneInfo(fromZoneID: $0.zoneID) }
     } catch {
       throw mapToCloudKitError(error, context: "listZones")
     }
@@ -102,19 +93,6 @@ extension CloudKitService {
     zoneIDs: [ZoneID],
     database: Database = .private
   ) async throws(CloudKitError) -> [ZoneInfo] {
-    guard !zoneIDs.isEmpty else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 400,
-        rawResponse: "zoneIDs cannot be empty"
-      )
-    }
-    guard zoneIDs.allSatisfy({ !$0.zoneName.isEmpty }) else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 400,
-        rawResponse: "zoneIDs contains a zone with an empty zoneName"
-      )
-    }
-
     do {
       let client = try self.client(for: database)
       let response = try await client.lookupZones(
@@ -135,16 +113,7 @@ extension CloudKitService {
       let zonesData: Components.Schemas.ZonesLookupResponse =
         try await responseProcessor.processLookupZonesResponse(response)
 
-      return zonesData.zones?.compactMap { zone in
-        guard let zoneID = zone.zoneID else {
-          return nil
-        }
-        return ZoneInfo(
-          zoneName: zoneID.zoneName ?? "Unknown",
-          ownerRecordName: zoneID.ownerName,
-          capabilities: []
-        )
-      } ?? []
+      return try (zonesData.zones ?? []).map { try ZoneInfo(fromZoneID: $0.zoneID) }
     } catch {
       throw mapToCloudKitError(error, context: "lookupZones")
     }
@@ -198,7 +167,7 @@ extension CloudKitService {
       let changesData: Components.Schemas.ZoneChangesResponse =
         try await responseProcessor.processFetchZoneChangesResponse(response)
 
-      return ZoneChangesResult(from: changesData)
+      return try ZoneChangesResult(from: changesData)
     } catch {
       throw mapToCloudKitError(error, context: "fetchZoneChanges")
     }

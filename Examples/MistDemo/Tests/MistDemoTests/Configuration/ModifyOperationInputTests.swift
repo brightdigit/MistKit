@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import MistKit
-import Testing
+internal import MistKit
+internal import Testing
 
 @testable import MistDemoKit
 

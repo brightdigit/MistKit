@@ -27,16 +27,40 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 internal import MistKitOpenAPI
 
 extension CloudKitService {
   /// Lookup records by record names
+  /// - Parameters:
+  ///   - recordNames: Record names to fetch
+  ///   - desiredKeys: Optional array of field names to fetch
+  ///   - database: The CloudKit database scope to read from (`.public`, `.private`, `.shared`)
+  /// - Returns: Array of RecordInfo for the matched records
+  /// - Throws: CloudKitError if the operation fails
+  ///
+  /// # Example: Bulk lookup with field projection
+  /// ```swift
+  /// let articles = try await service.lookupRecords(
+  ///   recordNames: ["article-001", "article-002", "article-003"],
+  ///   desiredKeys: ["title", "publishedDate"],
+  ///   database: .private
+  /// )
+  /// ```
+  ///
+  /// - Note: Pass `desiredKeys` to limit which fields come back. Useful
+  ///   for list views that only need a projection.
+  /// - Note: This is the single-request primitive — CloudKit caps it at
+  ///   ``maxRecordsPerRequest`` record names. For larger inputs use
+  ///   ``lookupAllRecords(recordNames:desiredKeys:database:batchSize:)``, which
+  ///   chunks automatically.
+  /// - Returns: A ``RecordResult`` per requested record — `.success` for a found
+  ///   record, `.failure` (e.g. `NOT_FOUND`) for one CloudKit could not return.
   public func lookupRecords(
     recordNames: [String],
     desiredKeys: [String]? = nil,
     database: Database
-  ) async throws(CloudKitError) -> [RecordInfo] {
+  ) async throws(CloudKitError) -> [RecordResult] {
     do {
       let client = try self.client(for: database)
       let response = try await client.lookupRecords(
@@ -61,7 +85,7 @@ extension CloudKitService {
 
       let lookupData: Components.Schemas.LookupResponse =
         try await responseProcessor.processLookupRecordsResponse(response)
-      return lookupData.records?.compactMap { RecordInfo(from: $0) } ?? []
+      return try (lookupData.records ?? []).map { try RecordResult(from: $0) }
     } catch {
       throw mapToCloudKitError(error, context: "lookupRecords")
     }

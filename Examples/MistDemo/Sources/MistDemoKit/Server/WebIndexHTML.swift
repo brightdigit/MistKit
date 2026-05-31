@@ -32,26 +32,63 @@
 
   /// Loader for the web command's interactive page served by `WebServer`.
   ///
-  /// The HTML+JS lives in `Resources/index.html` and is read from
-  /// `Bundle.module` on first access. The mode toggle in this page lets
-  /// users compare MistKit (server-side) and CloudKit JS (browser-side)
-  /// against the same CloudKit container; the CloudKit JS side is wired
-  /// in by #329.
+  /// The HTML, CSS, and JS modules live under `Resources/` and are read
+  /// from `Bundle.module` on first access, then cached in memory so each
+  /// request serves the same `ByteBuffer`. The mode toggle in `index.html`
+  /// lets users compare MistKit (server-side) and CloudKit JS (browser-
+  /// side) against the same CloudKit container.
   internal enum WebIndexHTML {
     internal static let content: String = loadContent()
+    /// Cached extracted CSS file body served at `GET /styles.css`.
+    internal static let stylesheet: String = loadResource(
+      name: "styles", extension: "css"
+    )
+
+    /// Cached JS module bodies, keyed by the path the browser requests
+    /// (e.g. `"app.js"`). Populated once from the bundled `js/`
+    /// subdirectory; missing files surface as a preconditionFailure on
+    /// boot so a typo'd `<script src>` doesn't masquerade as a 404 in
+    /// production.
+    internal static let jsModules: [String: String] = loadJSModules()
 
     private static func loadContent() -> String {
+      loadResource(name: "index", extension: "html")
+    }
+
+    private static func loadResource(name: String, extension ext: String) -> String {
       guard
-        let url = Bundle.module.url(
-          forResource: "index", withExtension: "html"
-        ),
-        let html = try? String(contentsOf: url, encoding: .utf8)
+        let url = Bundle.module.url(forResource: name, withExtension: ext),
+        let content = try? String(contentsOf: url, encoding: .utf8)
       else {
         preconditionFailure(
-          "Resources/index.html missing from MistDemoKit bundle"
+          "Resources/\(name).\(ext) missing from MistDemoKit bundle"
         )
       }
-      return html
+      return content
+    }
+
+    private static func loadJSModules() -> [String: String] {
+      let names = [
+        "app", "mode", "pending", "auth",
+        "records", "zones", "subscriptions",
+        "tokens", "assets", "users",
+      ]
+      var modules: [String: String] = [:]
+      modules.reserveCapacity(names.count)
+      for name in names {
+        guard
+          let url = Bundle.module.url(
+            forResource: name, withExtension: "js", subdirectory: "js"
+          ),
+          let body = try? String(contentsOf: url, encoding: .utf8)
+        else {
+          preconditionFailure(
+            "Resources/js/\(name).js missing from MistDemoKit bundle"
+          )
+        }
+        modules["\(name).js"] = body
+      }
+      return modules
     }
   }
 #endif

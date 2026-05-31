@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Represents the signing status for a build
 /// Can be: array of device IDs, boolean true (all signed), or empty array (none signed)

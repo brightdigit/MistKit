@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Demonstrates the IN/NOT_IN QueryFilter fix (issue #192) end-to-end.
 ///
@@ -115,7 +115,6 @@ public struct DemoInFilterCommand: MistDemoCommand {
     return createdNames
   }
 
-  @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
   private func verifyAndQueryRecords(
     client: CloudKitService,
     recordType: String,

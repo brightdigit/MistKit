@@ -2,6 +2,8 @@
 title: Beyond the MistKit Tutorials: Authenticating CloudKit from Backend Services
 date: 2026-01-01 00:00
 description: A practical walkthrough of the three CloudKit Web Services authentication methods — API tokens, web auth tokens, and server-to-server signing — and how to wire them up from a backend Swift service using MistKit.
+featuredImage: /media/tutorials/[VERIFY: path to hero image]
+subscriptionCTA: Subscribe for more deep dives on running Swift on the server.
 ---
 
 <!-- NOTE: Audience is backend/server-side Swift developers who already know MistKit exists (from Part 1/2) and now need to actually wire up auth in their own project. This is a practical setup guide, not a library-building story. -->
@@ -14,8 +16,8 @@ This article is the guide I wish I'd had: a practical walkthrough of the three a
 
 **In this series:**
 
-* [Rebuilding MistKit with Claude Code (Part 1)](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-1/)
-* [Rebuilding MistKit with Claude Code (Part 2)](https://brightdigit.com/tutorials/rebuilding-mistkit-claude-code-part-2/)
+* [Rebuilding MistKit with Claude Code (Part 1)](/tutorials/rebuilding-mistkit-claude-code-part-1/)
+* [Rebuilding MistKit with Claude Code (Part 2)](/tutorials/rebuilding-mistkit-claude-code-part-2/)
 * _Beyond the MistKit Tutorials: Authenticating CloudKit from Backend Services_
 
 ---

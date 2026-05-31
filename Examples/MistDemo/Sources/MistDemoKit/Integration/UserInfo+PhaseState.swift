@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 extension UserInfo: PhaseStateDecodable, PhaseStateEncodable {
   internal init(from state: PhaseState) throws {

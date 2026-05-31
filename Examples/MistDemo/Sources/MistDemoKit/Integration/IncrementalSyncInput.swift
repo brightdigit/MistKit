@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Composite input read by `IncrementalSyncPhase`.
 internal struct IncrementalSyncInput: PhaseStateDecodable, Sendable {

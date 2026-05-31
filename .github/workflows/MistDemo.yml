@@ -201,6 +201,11 @@ jobs:
     name: Build on macOS
     runs-on: macos-26
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    # Forward CI=true into the iOS simulator's test-runner process so
+    # `TestPlatform.isFlakyTimeoutSimulator` tolerates the cooperative-executor
+    # timeout flakes on the iOS sim. See the matching env on build-macos-platforms.
+    env:
+      TEST_RUNNER_CI: "true"
     strategy:
       fail-fast: false
       matrix:
@@ -248,6 +253,17 @@ jobs:
     needs: configure
     runs-on: macos-26
     if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+    # Forward CI=true into the simulator's test-runner process. `xcodebuild
+    # test` re-exports any host env var prefixed `TEST_RUNNER_` to the test
+    # runner with the prefix stripped, so `TEST_RUNNER_CI` arrives as `CI`
+    # inside the sim. An env dump (EnvironmentDiagnosticTests) confirmed the
+    # earlier `SIMCTL_CHILD_CI` approach never reached the runner — those vars
+    # only apply to `simctl spawn`/`launch`, not xctest — which is why the
+    # cooperative-executor flake gates in #334 still surfaced as real failures.
+    # With `CI` now visible, `TestPlatform.isFlakyTimeoutSimulator` tolerates
+    # the iOS/watchOS/visionOS sim flakes instead.
+    env:
+      TEST_RUNNER_CI: "true"
     strategy:
       fail-fast: false
       matrix:

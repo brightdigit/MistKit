@@ -27,14 +27,14 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+internal import Foundation
+internal import Testing
 
 @testable import BushelCloudKit
 @testable import BushelFoundation
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 /// All VirtualBuddy tests wrapped in a serialized suite to prevent mock handler conflicts

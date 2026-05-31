@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+internal import Foundation
+internal import Testing
 
 @testable import MistDemoKit
 @testable import MistKit
@@ -37,7 +37,6 @@ extension AuthenticationHelperTests {
   @Suite("Authentication Method Priority")
   internal struct AuthenticationMethodPriority {
     @Test("Server-to-server takes precedence over web auth")
-    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     internal func serverToServerTakesPrecedence() async throws {
       let privateKeyPEM = AuthenticationHelperTests.testPrivateKeyPEM
 

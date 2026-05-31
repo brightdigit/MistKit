@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 internal struct QueryRecordsPhase: IntegrationPhase {
   internal typealias Input = CreatedRecordNames
@@ -45,9 +45,9 @@ internal struct QueryRecordsPhase: IntegrationPhase {
 
     do {
       let records = try await context.service.queryRecords(
-        recordType: IntegrationTestData.recordType
+        recordType: MistDemoConfig.recordType
       )
-      print("✅ Queried \(records.count) record(s) of type '\(IntegrationTestData.recordType)'")
+      print("✅ Queried \(records.count) record(s) of type '\(MistDemoConfig.recordType)'")
       if context.verbose {
         let ours = records.filter { input.names.contains($0.recordName) }
         print("   Found \(ours.count) of our \(input.names.count) test records")

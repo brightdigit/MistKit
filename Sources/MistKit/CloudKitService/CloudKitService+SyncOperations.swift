@@ -27,16 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 internal import MistKitOpenAPI
-import OpenAPIRuntime
+internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 #if !os(WASI)
-  import OpenAPIURLSession
+  internal import OpenAPIURLSession
 #endif
 
 extension CloudKitService {
@@ -84,16 +84,6 @@ extension CloudKitService {
     resultsLimit: Int? = nil,
     database: Database
   ) async throws(CloudKitError) -> RecordChangesResult {
-    if let limit = resultsLimit {
-      guard limit > 0 && limit <= 200 else {
-        throw CloudKitError.httpErrorWithRawResponse(
-          statusCode: 400,
-          rawResponse:
-            "resultsLimit must be between 1 and 200, got \(limit)"
-        )
-      }
-    }
-
     let effectiveZoneID = zoneID ?? .defaultZone
 
     do {
@@ -120,7 +110,7 @@ extension CloudKitService {
           response
         )
 
-      return RecordChangesResult(from: changesData)
+      return try RecordChangesResult(from: changesData)
     } catch {
       throw mapToCloudKitError(error, context: "fetchRecordChanges")
     }

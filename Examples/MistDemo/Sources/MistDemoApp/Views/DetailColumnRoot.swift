@@ -28,7 +28,7 @@
 //
 
 #if canImport(SwiftUI)
-  import SwiftUI
+  internal import SwiftUI
 
   /// Routes the sidebar selection to the appropriate detail view.
   internal struct DetailColumnRoot: View {
@@ -42,11 +42,21 @@
         ZoneListView()
       case .query:
         QueryView()
+      case .records:
+        RecordsView()
+      case .subscriptions:
+        SubscriptionsView()
+      case .pushTokens:
+        PushTokensView()
+      case .assets:
+        AssetsView()
+      case .users:
+        UsersView()
       case nil:
         ContentUnavailableView(
           "Pick a section from the sidebar",
           systemImage: "sidebar.left",
-          description: Text("Account, Zones, or Query Records")
+          description: Text("Account, Zones, Records, Subscriptions, …")
         )
       }
     }

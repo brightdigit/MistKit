@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ConfigKeyKit
-import Foundation
+internal import ConfigKeyKit
+internal import Foundation
 
 /// Top-level driver for the `mistdemo` CLI. Registers all available commands,
 /// parses arguments, and dispatches to the matching command — the executable
@@ -54,10 +54,29 @@ public enum MistDemoRunner {
     await registry.register(UploadAssetCommand.self)
     await registry.register(DemoInFilterCommand.self)
     await registry.register(LookupZonesCommand.self)
+    await registry.register(CreateZoneCommand.self)
+    await registry.register(ListZonesCommand.self)
+    await registry.register(ModifyZonesCommand.self)
+    await registry.register(DiscoverCommand.self)
+    await registry.register(LookupAllRecordsCommand.self)
+    await registry.register(DiscoverAllUserIdentitiesCommand.self)
+    await registry.register(ValidateCommand.self)
+    await registry.register(DeleteZoneCommand.self)
     await registry.register(FetchChangesCommand.self)
     await registry.register(TestPublicCommand.self)
     await registry.register(TestPrivateCommand.self)
     await registry.register(DemoErrorsCommand.self)
+
+    // Pending MistKit wrappers — print "pending #N" and exit 0. Each
+    // command flips to a real implementation when its tracking issue lands.
+    await registry.register(ResolveCommand.self)
+    await registry.register(RereferenceAssetCommand.self)
+    await registry.register(ListSubscriptionsCommand.self)
+    await registry.register(LookupSubscriptionCommand.self)
+    await registry.register(ModifySubscriptionsCommand.self)
+    await registry.register(ProbeDuplicateSubscriptionCommand.self)
+    await registry.register(CreateTokenCommand.self)
+    await registry.register(RegisterTokenCommand.self)
 
     // Parse command line arguments
     let parser = CommandLineParser()

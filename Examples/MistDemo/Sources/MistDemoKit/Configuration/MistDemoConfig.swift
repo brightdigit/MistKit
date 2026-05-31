@@ -28,8 +28,8 @@
 //
 
 public import ConfigKeyKit
-import Configuration
-import Foundation
+internal import Configuration
+internal import Foundation
 public import MistKit
 
 /// Centralized configuration for MistDemo.
@@ -38,6 +38,9 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
   public typealias ConfigReader = MistDemoConfiguration
   /// The base configuration type.
   public typealias BaseConfig = Never
+
+  /// CloudKit record type for integration tests.
+  internal static let recordType = "Note"
 
   // MARK: - CloudKit Core Configuration
 

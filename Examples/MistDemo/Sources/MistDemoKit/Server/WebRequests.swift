@@ -79,20 +79,29 @@ internal enum WebRequests {
   }
 
   /// `POST /api/records/create`
+  ///
+  /// `recordName` is optional. When the create follows an `/api/assets/upload`
+  /// the browser forwards the receipt's recordName here so CloudKit attaches
+  /// the just-uploaded bytes; otherwise CloudKit assigns a fresh name.
   internal struct Create: Decodable {
     private enum CodingKeys: String, CodingKey {
       case recordType
+      case recordName
       case fields
       case database
     }
 
     internal let recordType: String
+    internal let recordName: String?
     internal let fields: [String: FieldValue]
     internal let database: MistKit.Database
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
       self.recordType = try container.decode(String.self, forKey: .recordType)
+      self.recordName = try container.decodeIfPresent(
+        String.self, forKey: .recordName
+      )
       self.fields = try container.decode(
         [String: FieldValue].self, forKey: .fields
       )
@@ -177,7 +186,7 @@ internal enum WebRequests {
   /// Decode `database` (string raw-value) from a keyed container. Falls back
   /// to `defaultDatabase` when the key is absent and throws when present but
   /// unrecognized so a typo surfaces as a `400` rather than a silent default.
-  fileprivate static func decodeDatabase<Key: CodingKey>(
+  internal static func decodeDatabase<Key: CodingKey>(
     from container: KeyedDecodingContainer<Key>,
     forKey key: Key
   ) throws -> MistKit.Database {

@@ -28,7 +28,7 @@
 //
 
 public import Foundation
-import MistKit
+internal import MistKit
 
 /// Errors that can occur during field conversion
 public enum FieldConversionError: Error, LocalizedError {

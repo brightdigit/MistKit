@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import HTTPTypes
-import Testing
+internal import Foundation
+internal import HTTPTypes
+internal import Testing
 
 @testable import MistKit
 
@@ -39,10 +39,12 @@ extension CloudKitServiceTests.FetchZoneChanges {
 
   internal static func makeSuccessfulService(
     zoneCount: Int = 1,
+    moreComing: Bool = false,
     syncToken: String = "zone-sync-token-abc"
   ) async throws -> CloudKitService {
     let responseProvider = try ResponseProvider.successfulFetchZoneChanges(
       zoneCount: zoneCount,
+      moreComing: moreComing,
       syncToken: syncToken
     )
     let transport = MockTransport(responseProvider: responseProvider)
@@ -69,11 +71,13 @@ extension CloudKitServiceTests.FetchZoneChanges {
 extension ResponseProvider {
   internal static func successfulFetchZoneChanges(
     zoneCount: Int = 1,
+    moreComing: Bool = false,
     syncToken: String = "zone-sync-token-abc"
   ) throws -> ResponseProvider {
     ResponseProvider(
       defaultResponse: try .successfulFetchZoneChangesResponse(
         zoneCount: zoneCount,
+        moreComing: moreComing,
         syncToken: syncToken
       )
     )
@@ -83,6 +87,7 @@ extension ResponseProvider {
 extension ResponseConfig {
   internal static func successfulFetchZoneChangesResponse(
     zoneCount: Int = 1,
+    moreComing: Bool = false,
     syncToken: String = "zone-sync-token-abc"
   ) throws -> ResponseConfig {
     var zones: [[String: Any]] = []
@@ -101,7 +106,8 @@ extension ResponseConfig {
     let responseJSON = """
       {
         "zones": \(zonesString),
-        "syncToken": "\(syncToken)"
+        "syncToken": "\(syncToken)",
+        "moreComing": \(moreComing)
       }
       """
 

@@ -31,7 +31,6 @@ public import CelestraKit
 internal import Foundation
 
 /// Pure function type for categorizing feed items into new vs modified articles
-@available(macOS 13.0, *)
 public struct ArticleCategorizer: Sendable {
   /// Result of article categorization
   public struct Result: Sendable, Equatable {

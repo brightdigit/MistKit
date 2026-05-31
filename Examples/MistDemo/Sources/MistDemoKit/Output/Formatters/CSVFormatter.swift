@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Formatter for CSV output
 public struct CSVFormatter: OutputFormatter {
@@ -65,7 +65,7 @@ public struct CSVFormatter: OutputFormatter {
 
     // Basic fields
     output += "recordName,\(escaper.escape(record.recordName))\n"
-    output += "recordType,\(escaper.escape(record.recordType))\n"
+    output += "recordType,\(escaper.escape(record.recordType ?? ""))\n"
 
     // Custom fields
     for (fieldName, fieldValue) in record.fields.sorted(by: { $0.key < $1.key }) {

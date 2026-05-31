@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 internal struct PublicDatabaseTest: PhasedIntegrationTest {
   internal let name = "Public Database"
@@ -56,6 +56,7 @@ internal struct PublicDatabaseTest: PhasedIntegrationTest {
       LookupZonePhase(),
       UploadAssetPhase(),
       CreateRecordsPhase(),
+      RereferenceAssetPhase(),
       QueryRecordsPhase(),
       LookupRecordsPhase(),
       ModifyRecordsPhase(),

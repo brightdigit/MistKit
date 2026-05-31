@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Supported field types for CloudKit records.
 public enum FieldType: String, CaseIterable, Sendable {

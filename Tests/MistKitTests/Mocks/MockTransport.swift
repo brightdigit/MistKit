@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import HTTPTypes
-import OpenAPIRuntime
+internal import Foundation
+internal import HTTPTypes
+internal import OpenAPIRuntime
 
 /// Mock transport for testing that doesn't make actual network calls
 internal struct MockTransport: ClientTransport, Sendable {
@@ -45,6 +45,16 @@ internal struct MockTransport: ClientTransport, Sendable {
     baseURL: URL,
     operationID: String
   ) async throws -> (HTTPResponse, HTTPBody?) {
-    try await responseProvider.response(for: operationID, request: request)
+    let bodyData: Data? =
+      if let body {
+        try await Data(collecting: body, upTo: 10 * 1_024 * 1_024)
+      } else {
+        nil
+      }
+    return try await responseProvider.response(
+      for: operationID,
+      request: request,
+      body: bodyData
+    )
   }
 }

@@ -58,7 +58,9 @@ jobs:
         swift package --version
 
     - name: Setup MistKit
-      uses: ./.github/actions/setup-mistkit
+      uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
+      with:
+        branch: v1.0.0-beta.2
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL

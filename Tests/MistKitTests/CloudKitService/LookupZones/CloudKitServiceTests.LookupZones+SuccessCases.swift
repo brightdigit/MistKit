@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+internal import Foundation
+internal import Testing
 
 @testable import MistKit
 
@@ -89,6 +89,29 @@ extension CloudKitServiceTests.LookupZones {
       )
 
       #expect(zones.isEmpty)
+    }
+
+    @Test("lookupZones() throws when a returned zone is missing its zoneName")
+    internal func lookupZonesThrowsOnZoneWithoutName() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service =
+        try await CloudKitServiceTests.LookupZones.makeServiceReturningZoneWithoutName()
+
+      // Suppress the DEBUG assertion trap so the thrown error is observable.
+      await ConversionFailureReporter.$assertionHandler.withValue(
+        { _, _, _ in },
+        operation: {
+          await #expect(throws: CloudKitError.self) {
+            _ = try await service.lookupZones(
+              zoneIDs: [ZoneID(zoneName: "valid-zone", ownerName: nil)],
+              database: .public(.prefers(.serverToServer))
+            )
+          }
+        }
+      )
     }
   }
 }

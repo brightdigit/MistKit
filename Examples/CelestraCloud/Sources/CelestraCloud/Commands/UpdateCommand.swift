@@ -27,13 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import CelestraCloudKit
-import CelestraKit
-import Foundation
-import MistKit
+internal import CelestraCloudKit
+internal import CelestraKit
+internal import Foundation
+internal import MistKit
 
 internal enum UpdateCommand {
-  @available(macOS 13.0, *)
   internal static func run() async throws {
     let startTime = Date()
     let loader = ConfigurationLoader()
@@ -91,7 +90,6 @@ internal enum UpdateCommand {
     }
   }
 
-  @available(macOS 13.0, *)
   private static func createProcessor(
     config: CelestraConfiguration
   ) throws -> FeedUpdateProcessor {
@@ -115,7 +113,6 @@ internal enum UpdateCommand {
     )
   }
 
-  @available(macOS 13.0, *)
   private static func queryFeeds(
     config: CelestraConfiguration,
     processor: FeedUpdateProcessor
@@ -138,7 +135,6 @@ internal enum UpdateCommand {
     return feeds
   }
 
-  @available(macOS 13.0, *)
   private static func processFeeds(
     _ feeds: [Feed],
     processor: FeedUpdateProcessor

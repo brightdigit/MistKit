@@ -28,94 +28,84 @@
 //
 
 #if canImport(Hummingbird)
-  import Foundation
-  import HTTPTypes
-  import Hummingbird
-  import HummingbirdTesting
-  import MistKit
-  import Testing
+  internal import Foundation
+  internal import HTTPTypes
+  internal import Hummingbird
+  internal import HummingbirdTesting
+  internal import MistKit
+  internal import Testing
 
   @testable import MistDemoKit
 
   extension WebServerTests {
-    @Test("GET / returns the web demo HTML")
-    internal func indexReturnsHtml() async throws {
-      let fixture = Self.makeFixture()
-      let app = Application(router: try fixture.server.makeRouter())
-
-      try await app.test(.router) { client in
-        try await client.execute(uri: "/", method: .get) { response in
+    /// Fetch a served document body as a string, asserting a 200.
+    ///
+    /// The web demo's CSS and JS were extracted out of `index.html` into
+    /// `/styles.css` and `/js/*.js` static assets, so the structural HTML,
+    /// behavior (JS), and styling (CSS) each live at a distinct URI now.
+    private func body(at uri: String) async throws -> String {
+      let app = Application(router: try Self.makeFixture().server.makeRouter())
+      return try await app.test(.router) { client in
+        try await client.execute(uri: uri, method: .get) { response in
           #expect(response.status == .ok)
-          let body = String(buffer: response.body)
-          #expect(body.contains("MistKit Web Demo"))
+          return String(buffer: response.body)
         }
       }
+    }
+
+    @Test("GET / returns the web demo HTML")
+    internal func indexReturnsHtml() async throws {
+      let html = try await body(at: "/")
+      #expect(html.contains("MistKit Web Demo"))
     }
 
     @Test("Index HTML wires CloudKit JS as an alternate backend")
     internal func indexExposesCloudKitJsHandlers() async throws {
-      let fixture = Self.makeFixture()
-      let app = Application(router: try fixture.server.makeRouter())
+      let html = try await body(at: "/")
+      #expect(html.contains("cdn.apple-cloudkit.com/ck/2/cloudkit.js"))
+      #expect(!html.contains("id=\"mode-cloudkitjs\" type=\"button\" disabled"))
 
-      try await app.test(.router) { client in
-        try await client.execute(uri: "/", method: .get) { response in
-          #expect(response.status == .ok)
-          let body = String(buffer: response.body)
-          #expect(body.contains("cdn.apple-cloudkit.com/ck/2/cloudkit.js"))
-          #expect(!body.contains("id=\"mode-cloudkitjs\" type=\"button\" disabled"))
-          #expect(body.contains("performQuery"))
-          #expect(body.contains("saveRecords"))
-          #expect(body.contains("deleteRecords"))
-          #expect(!body.contains("cloudKitJsNotWired"))
-        }
-      }
+      // CloudKit JS primitives now live in the extracted app module.
+      let appJs = try await body(at: "/js/app.js")
+      #expect(appJs.contains("performQuery"))
+      #expect(appJs.contains("saveRecords"))
+      #expect(appJs.contains("deleteRecords"))
+      #expect(!appJs.contains("cloudKitJsNotWired"))
     }
 
     @Test("Index HTML exposes a public/private database picker")
     internal func indexExposesDatabasePicker() async throws {
-      let fixture = Self.makeFixture()
-      let app = Application(router: try fixture.server.makeRouter())
+      let html = try await body(at: "/")
+      #expect(html.contains(#"id="db-private""#))
+      #expect(html.contains(#"id="db-public""#))
 
-      try await app.test(.router) { client in
-        try await client.execute(uri: "/", method: .get) { response in
-          #expect(response.status == .ok)
-          let body = String(buffer: response.body)
-          #expect(body.contains(#"id="db-private""#))
-          #expect(body.contains(#"id="db-public""#))
-          #expect(body.contains("publicCloudDatabase"))
-          #expect(body.contains("privateCloudDatabase"))
-        }
-      }
+      // The picker's wiring to the CloudKit JS database handles is in app.js.
+      let appJs = try await body(at: "/js/app.js")
+      #expect(appJs.contains("publicCloudDatabase"))
+      #expect(appJs.contains("privateCloudDatabase"))
     }
 
-    @Test("Index HTML carries the post-database-picker UX additions")
+    @Test("Web demo carries the post-database-picker UX additions")
     internal func indexCarriesUxPolish() async throws {
-      let fixture = Self.makeFixture()
-      let app = Application(router: try fixture.server.makeRouter())
-
-      try await app.test(.router) { client in
-        try await client.execute(uri: "/", method: .get) { response in
-          #expect(response.status == .ok)
-          let body = String(buffer: response.body)
-          // 1. Loading state
-          #expect(body.contains(".status.loading"))
-          #expect(body.contains("queryInFlight"))
-          #expect(body.contains("setQueryControlsDisabled"))
-          // 2. Post-create delay
-          #expect(body.contains("REFRESH_DELAY_MS"))
-          #expect(body.contains("waiting"))
-          // 3. "You" badge wired to the captured user identity
-          #expect(body.contains("currentUserRecordName"))
-          #expect(body.contains("badge-you"))
-          #expect(body.contains("extractUserRecordName"))
-          // 4. Default sort = ___createTime descending
-          #expect(
-            body.contains(
-              "currentSort = { field: '___createTime', ascending: false }"
-            )
-          )
-        }
-      }
+      let css = try await body(at: "/styles.css")
+      let appJs = try await body(at: "/js/app.js")
+      // 1. Loading state
+      #expect(css.contains(".status.loading"))
+      #expect(appJs.contains("queryInFlight"))
+      #expect(appJs.contains("setQueryControlsDisabled"))
+      // 2. Post-create delay
+      #expect(appJs.contains("REFRESH_DELAY_MS"))
+      #expect(appJs.contains("waiting"))
+      // 3. "You" badge wired to the captured user identity
+      #expect(appJs.contains("currentUserRecordName"))
+      #expect(css.contains("badge-you"))
+      #expect(appJs.contains("extractUserRecordName"))
+      // 4. Default sort = ___createTime descending
+      #expect(
+        appJs.contains(
+          "currentSort = { field: '___createTime', ascending: false }"
+        )
+      )
     }
   }
 #endif

@@ -3,7 +3,7 @@
 //  CelestraCloud
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import CelestraKit
-import Foundation
-import MistKit
-import Testing
+internal import CelestraKit
+internal import Foundation
+internal import MistKit
+internal import Testing
 
 @testable import CelestraCloudKit
 
@@ -48,21 +48,6 @@ extension ArticleCloudKitService {
         recordType: "Article",
         recordChangeTag: "tag-123",
         fields: fields
-      )
-    }
-
-    private func createTestArticle(
-      recordName: String? = nil,
-      guid: String = "test-guid"
-    ) -> Article {
-      Article(
-        recordName: recordName,
-        feedRecordName: "feed-123",
-        guid: guid,
-        title: "Test Article",
-        url: "https://example.com/article",
-        fetchedAt: Date(timeIntervalSince1970: 1_000_000),
-        ttlDays: 30
       )
     }
 

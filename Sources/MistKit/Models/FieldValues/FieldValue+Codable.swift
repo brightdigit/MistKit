@@ -86,10 +86,11 @@ extension FieldValue {
     if let value = try? container.decode(Asset.self) {
       return .asset(value)
     }
-    // Try to decode as date (milliseconds since epoch)
-    if let value = try? container.decode(Double.self) {
-      return .date(Date(timeIntervalSince1970: value / Self.millisecondsPerSecond))
-    }
+    // No `.date` branch here on purpose: a CloudKit timestamp arrives as a bare
+    // millisecond `Double`, which `decodeBasicTypes` (run first) already claims
+    // as `.double`. A date fallback at this point was therefore unreachable —
+    // it never ran, so removing it changes no behavior. Encoding still emits
+    // `.date` values as milliseconds (see `encode(to:)`).
     return nil
   }
 

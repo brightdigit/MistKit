@@ -1,5 +1,5 @@
-import Foundation
-import Testing
+internal import Foundation
+internal import Testing
 
 /// Platform detection utilities for testing
 internal enum Platform {

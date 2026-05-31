@@ -27,10 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 #if canImport(AppKit)
-  import AppKit
+  internal import AppKit
 #endif
 
 /// Utility for opening URLs in the default browser.

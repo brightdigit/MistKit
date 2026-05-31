@@ -27,16 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 internal import MistKitOpenAPI
-import OpenAPIRuntime
+internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 #if !os(WASI)
-  import OpenAPIURLSession
+  internal import OpenAPIURLSession
 #endif
 
 extension CloudKitService {
@@ -63,7 +63,7 @@ extension CloudKitService {
 
       let userData: Components.Schemas.UserResponse =
         try await responseProcessor.processGetCallerResponse(response)
-      return UserInfo(from: userData)
+      return try UserInfo(from: userData)
     } catch {
       throw mapToCloudKitError(error, context: "fetchCaller")
     }
@@ -143,6 +143,11 @@ extension CloudKitService {
   ///
   /// Hits CloudKit's POST `users/discover` endpoint. Routed against the public
   /// database with web-auth credentials.
+  ///
+  /// - Note: This is the single-request primitive — CloudKit caps it at
+  ///   ``maxRecordsPerRequest`` lookup infos. For larger inputs use
+  ///   ``discoverAllUserIdentities(lookupInfos:batchSize:)``, which chunks
+  ///   automatically.
   public func discoverUserIdentities(
     lookupInfos: [UserIdentityLookupInfo]
   ) async throws(CloudKitError) -> [UserIdentity] {

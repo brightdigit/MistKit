@@ -28,8 +28,8 @@
 //
 
 #if canImport(CloudKit)
-  import Foundation
-  import MistDemoKit
+  internal import Foundation
+  internal import MistDemoKit
 
   /// Errors specific to `CloudKitStore` operations.
   internal enum CloudKitStoreError: Error, LocalizedError {

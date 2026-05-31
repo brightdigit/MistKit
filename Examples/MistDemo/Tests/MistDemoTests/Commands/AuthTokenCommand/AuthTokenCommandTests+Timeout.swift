@@ -28,8 +28,8 @@
 //
 
 #if canImport(Hummingbird)
-  import Foundation
-  import Testing
+  internal import Foundation
+  internal import Testing
 
   @testable import MistDemoKit
 
@@ -44,11 +44,13 @@
         )
       )
       internal func timeoutHelperThrowsOnTimeout() async {
-        // Mirrors AsyncHelpersTests+Timeout's gate: on simulator cooperative
-        // executors (notably visionOS / watchOS under CI load) the operation's
-        // single long Task.sleep can complete before the polling timeout
-        // task's many short sleeps detect the deadline.
-        await withKnownIssue(isIntermittent: true) {
+        // Mirrors AsyncHelpersTests+Timeout's gate: intermittent only on
+        // `TestPlatform.isFlakyTimeoutSimulator` (CI visionOS / watchOS sim),
+        // strict everywhere else. See #334.
+        await withKnownIssue(
+          isIntermittent: true,
+          when: TestPlatform.isFlakyTimeoutSimulator
+        ) {
           await #expect(throws: AsyncTimeoutError.self) {
             try await withTimeoutAndSignals(seconds: 0.1) {
               try await Task.sleep(nanoseconds: 1_000_000_000)

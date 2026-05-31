@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+internal import Foundation
+internal import Testing
 
 @testable import BushelFoundation
 

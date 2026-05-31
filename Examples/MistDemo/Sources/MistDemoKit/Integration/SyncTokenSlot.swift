@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Wraps the `syncToken` slot of `PhaseState`.
 internal struct SyncTokenSlot: PhaseStateDecodable,

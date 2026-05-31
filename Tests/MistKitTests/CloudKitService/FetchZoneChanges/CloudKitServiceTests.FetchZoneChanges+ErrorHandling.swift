@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+internal import Foundation
+internal import Testing
 
 @testable import MistKit
 
@@ -54,11 +54,9 @@ extension CloudKitServiceTests.FetchZoneChanges {
         _ = try await service.fetchZoneChanges(syncToken: "garbage-token")
       } throws: { error in
         guard let ckError = error as? CloudKitError,
-          case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason) = ckError
+          case .badRequest(let reason) = ckError
         else { return false }
-        return statusCode == 400
-          && serverErrorCode == "BAD_REQUEST"
-          && reason?.contains("Invalid syncToken") == true
+        return reason?.contains("Invalid syncToken") == true
       }
     }
 
@@ -83,11 +81,9 @@ extension CloudKitServiceTests.FetchZoneChanges {
         _ = try await service.fetchZoneChanges(syncToken: "expired-token")
       } throws: { error in
         guard let ckError = error as? CloudKitError,
-          case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason) = ckError
+          case .badRequest(let reason) = ckError
         else { return false }
-        return statusCode == 400
-          && serverErrorCode == "BAD_REQUEST"
-          && reason?.contains("expired") == true
+        return reason?.contains("expired") == true
       }
     }
 

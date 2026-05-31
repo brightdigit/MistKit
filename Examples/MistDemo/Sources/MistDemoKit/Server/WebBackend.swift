@@ -48,6 +48,7 @@ internal protocol WebBackend: Sendable {
 
   func webCreate(
     recordType: String,
+    recordName: String?,
     fields: [String: FieldValue],
     database: MistKit.Database
   ) async throws -> RecordInfo
@@ -66,70 +67,88 @@ internal protocol WebBackend: Sendable {
     recordChangeTag: String?,
     database: MistKit.Database
   ) async throws
+
+  func webLookupRecords(
+    recordNames: [String],
+    database: MistKit.Database
+  ) async throws -> [RecordInfo]
+
+  func webRecordChanges(
+    zoneName: String?,
+    syncToken: String?,
+    database: MistKit.Database
+  ) async throws -> RecordChangesResult
+
+  func webModifyZones(
+    create: [String],
+    delete: [String],
+    database: MistKit.Database
+  ) async throws -> [ZoneInfo]
+
+  func webListZones(
+    database: MistKit.Database
+  ) async throws -> [ZoneInfo]
+
+  func webLookupZones(
+    zoneNames: [String],
+    database: MistKit.Database
+  ) async throws -> [ZoneInfo]
+
+  func webZoneChanges(
+    syncToken: String?,
+    database: MistKit.Database
+  ) async throws -> ZoneChangesResult
+
+  func webFetchCaller() async throws -> UserInfo
+
+  func webDiscoverUsers(
+    emails: [String],
+    userRecordNames: [String]
+  ) async throws -> [UserIdentity]
+
+  func webListSubscriptions(
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo]
+
+  func webLookupSubscriptions(
+    ids: [String],
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo]
+
+  func webModifySubscriptions(
+    operations: [SubscriptionOperation],
+    database: MistKit.Database
+  ) async throws -> [SubscriptionInfo]
+
+  func webCreateToken(
+    environment: APNsEnvironment,
+    clientId: String?,
+    database: MistKit.Database
+  ) async throws -> APNsTokenResult
+
+  func webRegisterToken(
+    apnsToken: String,
+    environment: APNsEnvironment,
+    clientId: String?,
+    database: MistKit.Database
+  ) async throws
+
+  func webRereferenceAsset(
+    sourceRecordName: String,
+    assetField: String,
+    targetRecordName: String,
+    targetAssetField: String?,
+    database: MistKit.Database
+  ) async throws -> RecordInfo
+
+  func webUploadAsset(
+    data: Data,
+    recordType: String,
+    fieldName: String,
+    recordName: String?,
+    database: MistKit.Database
+  ) async throws -> AssetUploadReceipt
 }
 
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
-extension CloudKitService: WebBackend {
-  internal func webQuery(
-    recordType: String,
-    limit: Int?,
-    sortBy: [WebRequests.QuerySortField]?,
-    database: MistKit.Database
-  ) async throws -> [RecordInfo] {
-    let querySorts = sortBy?.map { sort in
-      QuerySort.sort(sort.field, ascending: sort.ascending)
-    }
-    let result = try await queryRecords(
-      recordType: recordType,
-      filters: nil,
-      sortBy: querySorts,
-      limit: limit,
-      desiredKeys: nil,
-      continuationMarker: nil,
-      database: database
-    )
-    return result.records
-  }
-
-  internal func webCreate(
-    recordType: String,
-    fields: [String: FieldValue],
-    database: MistKit.Database
-  ) async throws -> RecordInfo {
-    try await createRecord(
-      recordType: recordType,
-      fields: fields,
-      database: database
-    )
-  }
-
-  internal func webUpdate(
-    recordType: String,
-    recordName: String,
-    fields: [String: FieldValue],
-    recordChangeTag: String?,
-    database: MistKit.Database
-  ) async throws -> RecordInfo {
-    try await updateRecord(
-      recordType: recordType,
-      recordName: recordName,
-      fields: fields,
-      recordChangeTag: recordChangeTag,
-      database: database
-    )
-  }
-
-  internal func webDelete(
-    recordType: String,
-    recordName: String,
-    recordChangeTag: String?,
-    database: MistKit.Database
-  ) async throws {
-    try await deleteRecord(
-      recordType: recordType,
-      recordName: recordName,
-      recordChangeTag: recordChangeTag,
-      database: database
-    )
-  }
-}
+// The `CloudKitService: WebBackend` conformance lives in
+// `CloudKitService+WebBackend.swift`.

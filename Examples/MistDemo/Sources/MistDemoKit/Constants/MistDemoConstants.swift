@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Central constants for MistDemo application.
 public enum MistDemoConstants {
@@ -81,6 +81,8 @@ public enum MistDemoConstants {
     public static let operationsFile = "operations.file"
     /// Atomic configuration key.
     public static let atomic = "atomic"
+    /// Batch size configuration key for the auto-chunking `*-all` commands.
+    public static let batchSize = "batch.size"
   }
 
   // MARK: - Field Names

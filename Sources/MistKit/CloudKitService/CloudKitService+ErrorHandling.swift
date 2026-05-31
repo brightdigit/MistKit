@@ -27,12 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 internal import Logging
-import OpenAPIRuntime
+internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 extension CloudKitService {
@@ -49,6 +49,12 @@ extension CloudKitService {
   ) -> CloudKitError {
     if let cloudKitError = error as? CloudKitError {
       return cloudKitError
+    }
+
+    // A response→domain conversion (or other convertible error) failed;
+    // preserve the structured cause via its own mapping.
+    if let convertible = error as? any CloudKitErrorConvertible {
+      return convertible.asCloudKitError
     }
 
     // OpenAPIRuntime wraps transport-level errors in ClientError; unwrap to inspect the cause.

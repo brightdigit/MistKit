@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Command to upload binary assets to CloudKit
 public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
@@ -202,7 +202,9 @@ public struct UploadAssetCommand: MistDemoCommand, OutputFormatting {
       recordNames: [recordName],
       database: config.base.database
     )
-    guard let existingRecord = existingRecords.first else {
+    guard let firstResult = existingRecords.first,
+      case .success(let existingRecord) = firstResult
+    else {
       throw UploadAssetError.operationFailed(
         "Record '\(recordName)' not found"
       )

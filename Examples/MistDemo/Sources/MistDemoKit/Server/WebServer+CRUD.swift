@@ -76,6 +76,7 @@
           let backend = try backendFactory.make(token)
           let record = try await backend.webCreate(
             recordType: body.recordType,
+            recordName: body.recordName,
             fields: body.fields,
             database: body.database
           )

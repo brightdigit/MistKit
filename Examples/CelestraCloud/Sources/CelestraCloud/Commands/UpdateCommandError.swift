@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Errors specific to feed update operations
 internal struct UpdateCommandError: LocalizedError {

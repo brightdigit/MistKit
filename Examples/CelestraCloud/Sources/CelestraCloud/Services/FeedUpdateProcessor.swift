@@ -27,13 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import CelestraCloudKit
-import CelestraKit
-import Foundation
-import MistKit
+internal import CelestraCloudKit
+internal import CelestraKit
+internal import Foundation
+internal import MistKit
 
 /// Processes individual feed updates
-@available(macOS 13.0, *)
 internal struct FeedUpdateProcessor {
   internal let service: CloudKitService
   internal let fetcher: RSSFetcherService

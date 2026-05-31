@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// Command to delete an existing record from CloudKit
 public struct DeleteCommand: MistDemoCommand, OutputFormatting {

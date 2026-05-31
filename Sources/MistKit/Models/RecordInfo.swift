@@ -30,25 +30,21 @@
 internal import Foundation
 internal import MistKitOpenAPI
 
-/// Record information from CloudKit
+/// Record information from CloudKit.
 ///
-/// ## Error Detection Pattern
-/// CloudKit Web Services returns error responses as records with nil `recordType` and `recordName`.
-/// This implementation uses "Unknown" as a sentinel value for error responses, which can be detected
-/// using the `isError` property. While this is a fragile pattern, it matches CloudKit's API behavior
-/// where failed operations in a batch return incomplete record data.
-///
-/// Example:
-/// ```swift
-/// let results = try await service.modifyRecords(operations)
-/// let successfulRecords = results.filter { !$0.isError }
-/// let failedRecords = results.filter { $0.isError }
-/// ```
+/// A `RecordInfo` always carries a non-optional `recordName` (CloudKit's Record
+/// Dictionary guarantees it in every response). `recordType`, by contrast, is
+/// *optional*: CloudKit omits it for tombstones (deleted records, `deleted ==
+/// true`) and other typeless results, so it is `nil` in those cases. Per-record
+/// failures from `modifyRecords` / `lookupRecords` are surfaced separately as
+/// ``RecordResult/failure(_:)`` (a ``RecordOperationFailure``) and never become a
+/// `RecordInfo`. A response record missing its `recordName` is treated as a
+/// conversion failure (logged, asserted in DEBUG, and thrown).
 public struct RecordInfo: Codable, Sendable {
   /// The record name
   public let recordName: String
-  /// The record type
-  public let recordType: String
+  /// The record type, or `nil` for tombstones and other typeless responses
+  public let recordType: String?
   /// The record change tag for optimistic locking
   public let recordChangeTag: String?
   /// The record fields
@@ -61,21 +57,23 @@ public struct RecordInfo: Codable, Sendable {
   /// the record was deleted and should be removed from local storage.
   public let deleted: Bool
 
-  /// Indicates whether this RecordInfo represents an error response
-  ///
-  /// CloudKit returns error responses with nil recordType/recordName, which are converted
-  /// to "Unknown" during initialization. Use this property to detect failed operations
-  /// in batch modify responses.
-  public var isError: Bool {
-    recordType == "Unknown"
-  }
-
-  internal init(from record: Components.Schemas.RecordResponse) {
-    self.recordName = record.recordName ?? "Unknown"
-    self.recordType = record.recordType ?? "Unknown"
+  internal init(from record: Components.Schemas.RecordResponse) throws(ConversionError) {
+    guard let recordName = record.recordName else {
+      try ConversionError.recordMissingRecordName.reportAndThrow()
+    }
+    self.recordName = recordName
+    self.recordType = record.recordType
     self.recordChangeTag = record.recordChangeTag
-    self.created = record.created.map(RecordTimestamp.init(from:))
-    self.modified = record.modified.map(RecordTimestamp.init(from:))
+    if let created = record.created {
+      self.created = try RecordTimestamp(from: created)
+    } else {
+      self.created = nil
+    }
+    if let modified = record.modified {
+      self.modified = try RecordTimestamp(from: modified)
+    } else {
+      self.modified = nil
+    }
     self.deleted = record.deleted ?? false
 
     // Convert fields to FieldValue representation
@@ -83,9 +81,7 @@ public struct RecordInfo: Codable, Sendable {
 
     if let fieldsPayload = record.fields {
       for (fieldName, fieldData) in fieldsPayload.additionalProperties {
-        if let fieldValue = FieldValue(fieldData) {
-          convertedFields[fieldName] = fieldValue
-        }
+        convertedFields[fieldName] = try FieldValue(fieldData, fieldName: fieldName)
       }
     }
 
@@ -99,7 +95,7 @@ public struct RecordInfo: Codable, Sendable {
   ///
   /// - Parameters:
   ///   - recordName: The unique record name
-  ///   - recordType: The CloudKit record type
+  ///   - recordType: The CloudKit record type, or `nil` for a tombstone
   ///   - recordChangeTag: Optional change tag for optimistic locking
   ///   - fields: Dictionary of field names to their values
   ///   - created: Optional timestamp when the record was created
@@ -107,7 +103,7 @@ public struct RecordInfo: Codable, Sendable {
   ///   - deleted: Whether the record has been deleted
   public init(
     recordName: String,
-    recordType: String,
+    recordType: String?,
     recordChangeTag: String? = nil,
     fields: [String: FieldValue],
     created: RecordTimestamp? = nil,

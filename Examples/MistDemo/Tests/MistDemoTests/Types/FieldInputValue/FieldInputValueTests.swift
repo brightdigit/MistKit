@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Testing
+internal import Testing
 
 @Suite("FieldInputValue Conversion")
 internal enum FieldInputValueTests {}

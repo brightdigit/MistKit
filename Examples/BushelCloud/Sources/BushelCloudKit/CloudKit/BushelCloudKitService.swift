@@ -30,11 +30,11 @@
 public import BushelFoundation
 public import BushelLogging
 public import Foundation
-import Logging
+internal import Logging
 public import MistKit
 
 #if canImport(FelinePineSwift)
-  import FelinePineSwift
+  internal import FelinePineSwift
 #endif
 
 /// CloudKit service wrapper for Bushel demo operations
@@ -233,35 +233,40 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
         "Calling MistKit service.modifyRecords() with \(batch.count) RecordOperation objects"
       )
 
-      let results = try await service.modifyRecords(
+      // Annotate the element type explicitly: the Linux Swift compiler otherwise
+      // infers `[RecordInfo]` for this call, breaking the .success/.failure switch
+      // below (see brightdigit/BushelCloud CI on Ubuntu).
+      let results: [RecordResult] = try await service.modifyRecords(
         batch,
         database: .public(.prefers(.serverToServer))
       )
 
       Self.logger.debug(
-        "Received \(results.count) RecordInfo responses from CloudKit"
+        "Received \(results.count) per-record results from CloudKit"
       )
 
       // Track results based on classification
+      var batchSucceeded = 0
+      var batchFailed = 0
       for result in results {
-        if result.isError {
+        switch result {
+        case .failure(let error):
           totalFailed += 1
-          failedRecordNames.append(result.recordName)
+          batchFailed += 1
+          failedRecordNames.append(error.identifier)
           Self.logger.debug(
-            "Error: recordName=\(result.recordName)"
+            "Error: recordName=\(error.identifier), code=\(error.serverErrorCode.rawValue)"
           )
-        } else {
+        case .success(let record):
+          batchSucceeded += 1
           // Classify as create or update based on pre-fetch
-          if classification.creates.contains(result.recordName) {
+          if classification.creates.contains(record.recordName) {
             totalCreated += 1
-          } else if classification.updates.contains(result.recordName) {
+          } else if classification.updates.contains(record.recordName) {
             totalUpdated += 1
           }
         }
       }
-
-      let batchSucceeded = results.filter { !$0.isError }.count
-      let batchFailed = results.count - batchSucceeded
 
       if batchFailed > 0 {
         print("   ⚠️  \(batchFailed) operations failed (see verbose logs for details)")

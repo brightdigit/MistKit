@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import Testing
+internal import Foundation
+internal import Testing
 
 @testable import MistDemoKit
 
@@ -52,10 +52,13 @@ extension AsyncHelpersTests {
       )
     )
     internal func throwsOnTimeout() async {
-      // Intermittent: simulator cooperative executors (notably watchOS) can let the
-      // operation's single long Task.sleep complete before the polling timeout task's
-      // many short sleeps detect the deadline — same root cause as the wasm32 gate.
-      await withKnownIssue(isIntermittent: true) {
+      // Intermittent only on `TestPlatform.isFlakyTimeoutSimulator` (visionOS /
+      // watchOS sim under CI) — same root cause as the wasm32 gate; strict
+      // everywhere else so a regression in the helper fails loudly. See #334.
+      await withKnownIssue(
+        isIntermittent: true,
+        when: TestPlatform.isFlakyTimeoutSimulator
+      ) {
         await #expect(throws: AsyncTimeoutError.self) {
           try await withTimeout(seconds: 0.1) {
             try await Task.sleep(nanoseconds: 500_000_000)  // 500ms
@@ -74,13 +77,15 @@ extension AsyncHelpersTests {
     )
     internal func returnsAsyncValue() async {
       // The 30 s budget (vs. the operation's 50 ms inner sleep) is intentionally
-      // generous: under iOS-simulator CI load the operation task's single long
+      // generous: under CI simulator load the operation task's single long
       // Task.sleep can be scheduled behind the polling timeout task's many short
-      // sleeps, so a tighter budget produced flaky timeouts (#283).
-      // Even at 30s the iOS simulator under heavy CI load can exceed the budget
-      // (observed wall times of 48-50s for ostensibly trivial operations), so
-      // mark as intermittent rather than chasing the budget upward indefinitely.
-      await withKnownIssue(isIntermittent: true) {
+      // sleeps, so a tighter budget produced flaky timeouts (#283). Intermittent
+      // only on `TestPlatform.isFlakyTimeoutSimulator` — strict everywhere else
+      // so a regression in the helper fails loudly. See #334.
+      await withKnownIssue(
+        isIntermittent: true,
+        when: TestPlatform.isFlakyTimeoutSimulator
+      ) {
         let result = try await withTimeout(seconds: 30.0) {
           try await Task.sleep(nanoseconds: 50_000_000)  // 50ms
           return 42
@@ -109,11 +114,15 @@ extension AsyncHelpersTests {
       )
     )
     internal func veryShortTimeout() async {
-      // Same root cause as `throwsOnTimeout` / `returnsAsyncValue`: under
-      // simulator load (observed on visionOS, run #25990091951) the
-      // operation's single 100ms Task.sleep can finish before the polling
-      // timeout task's many short sleeps detect the 1ms deadline.
-      await withKnownIssue(isIntermittent: true) {
+      // Same root cause as `throwsOnTimeout` / `returnsAsyncValue`: under CI
+      // simulator load (observed on visionOS, run #25990091951) the operation's
+      // single 100ms Task.sleep can finish before the polling timeout task's
+      // many short sleeps detect the 1ms deadline. Intermittent only on
+      // `TestPlatform.isFlakyTimeoutSimulator`; strict elsewhere. See #334.
+      await withKnownIssue(
+        isIntermittent: true,
+        when: TestPlatform.isFlakyTimeoutSimulator
+      ) {
         await #expect(throws: AsyncTimeoutError.self) {
           try await withTimeout(seconds: 0.001) {
             try await Task.sleep(nanoseconds: 100_000_000)  // 100ms

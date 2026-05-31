@@ -54,12 +54,29 @@ internal import OpenAPIRuntime
 /// `fetchCaller` via web-auth from one fully-populated `Credentials`.
 public struct CloudKitService: Sendable {
   // swiftlint:disable force_unwrapping
+  // swift-format-ignore: NeverForceUnwrap
   /// The base URL for CloudKit Web Services.
   public static let baseURL = URL(string: "https://api.apple-cloudkit.com")!
   // swiftlint:enable force_unwrapping
 
-  /// CloudKit's maximum number of records returned per query/modify request.
-  internal static let maxRecordsPerRequest: Int = 200
+  /// CloudKit's maximum number of items (records, lookups, or operations)
+  /// accepted or returned per batch request. The auto-chunking convenience
+  /// methods (e.g. ``lookupAllRecords(recordNames:desiredKeys:database:batchSize:)``)
+  /// default their `batchSize` to this value.
+  public static let maxRecordsPerRequest: Int = 200
+
+  /// CloudKit's documented per-record field-data limit (1 MB). Assets travel
+  /// via the CDN and don't count against this limit. MistKit does not
+  /// pre-flight this — `modifyRecords` lets CloudKit reject oversized records
+  /// — but callers who want to check ahead can compare
+  /// `RecordOperation.encodedRecordSize()` against this constant.
+  public static let maxRecordDataBytes: Int = 1_024 * 1_024
+
+  /// CloudKit's documented per-asset upload limit (15 MB). MistKit does not
+  /// pre-flight this — `uploadAssets`/`uploadAssetData` let the CDN reject —
+  /// but callers who want to check ahead can compare `data.count` against
+  /// this constant.
+  public static let maxAssetUploadBytes: Int = 15 * 1_024 * 1_024
 
   /// The CloudKit container identifier
   public let containerIdentifier: String

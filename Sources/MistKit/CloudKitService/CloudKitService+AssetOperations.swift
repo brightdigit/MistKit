@@ -28,16 +28,16 @@
 //
 
 public import Foundation
-import HTTPTypes
+internal import HTTPTypes
 internal import MistKitOpenAPI
-import OpenAPIRuntime
+internal import OpenAPIRuntime
 
 #if canImport(FoundationNetworking)
-  import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 #if !os(WASI)
-  import OpenAPIURLSession
+  internal import OpenAPIURLSession
 #endif
 
 @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
@@ -79,22 +79,6 @@ extension CloudKitService {
     using uploader: AssetUploader? = nil,
     database: Database
   ) async throws(CloudKitError) -> AssetUploadReceipt {
-    let maxSize: Int = 15 * 1_024 * 1_024
-    guard data.count <= maxSize else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 413,
-        rawResponse:
-          "Asset size \(data.count) exceeds maximum of \(maxSize) bytes"
-      )
-    }
-
-    guard !data.isEmpty else {
-      throw CloudKitError.httpErrorWithRawResponse(
-        statusCode: 400,
-        rawResponse: "Asset data cannot be empty"
-      )
-    }
-
     do {
       let urlToken = try await requestAssetUploadURL(
         recordType: recordType,

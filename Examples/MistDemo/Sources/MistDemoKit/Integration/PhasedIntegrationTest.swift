@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 /// An integration test composed of an ordered list of phases.
 ///
@@ -122,7 +122,7 @@ extension PhasedIntegrationTest {
     print(
       "   3. Navigate to \(dbName) Database \u{2192} Records"
     )
-    let recType = IntegrationTestData.recordType
+    let recType = MistDemoConfig.recordType
     print("   4. Search for record type: \(recType)")
   }
 

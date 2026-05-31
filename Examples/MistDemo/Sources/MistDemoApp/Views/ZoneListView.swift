@@ -28,15 +28,20 @@
 //
 
 #if canImport(SwiftUI) && canImport(CloudKit)
-  import MistDemoKit
-  import SwiftUI
+  internal import MistDemoKit
+  internal import SwiftUI
 
-  /// View listing all CloudKit record zones.
+  /// View listing all CloudKit record zones, with modify (create/delete)
+  /// and changes (database-scope sync token) actions. Covers `zones/list`,
+  /// `zones/lookup`, `zones/modify`, and `zones/changes` in one place.
   internal struct ZoneListView: View {
     @Environment(CloudKitStore.self) private var service
     @State private var zones: [ZoneRow] = []
     @State private var loading = false
     @State private var loadError: String?
+    @State private var newZoneName: String = ""
+    @State private var changesSnapshot: DatabaseChangesSnapshot?
+    @State private var changesError: String?
 
     internal var body: some View {
       Group {
@@ -65,13 +70,20 @@
                 .foregroundStyle(.secondary)
             }
             .padding(.vertical, 2)
+            .deleteSwipeAction {
+              Task { await deleteZone(named: zone.zoneName) }
+            }
           }
         }
       }
+      .safeAreaInset(edge: .bottom) { actionBar }
       .navigationTitle(service.databaseScope.label.map { "Zones — \($0)" } ?? "Zones")
       .toolbar {
         ToolbarItem {
           Button("Refresh") { Task { await refresh() } }
+        }
+        ToolbarItem {
+          Button("Fetch Changes") { Task { await fetchChanges() } }
         }
       }
       .task { await refresh() }
@@ -79,6 +91,39 @@
         zones = []
         Task { await refresh() }
       }
+    }
+
+    private var actionBar: some View {
+      VStack(spacing: 4) {
+        HStack {
+          TextField(
+            "New zone name", text: $newZoneName
+          )
+          .font(.body.monospaced())
+          Button("Create") {
+            Task { await createZone() }
+          }
+          .disabled(newZoneName.isEmpty)
+        }
+        if let snapshot = changesSnapshot {
+          HStack {
+            Text(
+              "Changed \(snapshot.changedZoneIDs.count), "
+                + "deleted \(snapshot.deletedZoneIDs.count)"
+            )
+            .font(.caption)
+            Spacer()
+            Text(snapshot.moreComing ? "more coming" : "in-sync")
+              .font(.caption)
+              .foregroundStyle(.secondary)
+          }
+        }
+        if let changesError {
+          Text(changesError).font(.caption).foregroundStyle(.red)
+        }
+      }
+      .padding(8)
+      .background(.thinMaterial)
     }
 
     private func refresh() async {
@@ -89,6 +134,36 @@
         zones = try await service.loadZones()
       } catch {
         loadError = error.localizedDescription
+      }
+    }
+
+    private func createZone() async {
+      do {
+        _ = try await service.createZone(named: newZoneName)
+        newZoneName = ""
+        await refresh()
+      } catch {
+        loadError = error.localizedDescription
+      }
+    }
+
+    private func deleteZone(named name: String) async {
+      do {
+        try await service.deleteZone(named: name)
+        await refresh()
+      } catch {
+        loadError = error.localizedDescription
+      }
+    }
+
+    private func fetchChanges() async {
+      changesError = nil
+      do {
+        changesSnapshot = try await service.fetchDatabaseChanges(
+          since: changesSnapshot?.serverChangeToken
+        )
+      } catch {
+        changesError = error.localizedDescription
       }
     }
   }

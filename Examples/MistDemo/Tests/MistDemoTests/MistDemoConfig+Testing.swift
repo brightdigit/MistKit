@@ -27,9 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Configuration
-import Foundation
-import MistKit
+internal import Configuration
+internal import Foundation
+internal import MistKit
 
 @testable import MistDemoKit
 

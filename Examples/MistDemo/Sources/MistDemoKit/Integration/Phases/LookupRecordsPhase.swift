@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import MistKit
+internal import Foundation
+internal import MistKit
 
 internal struct LookupRecordsPhase: IntegrationPhase {
   internal typealias Input = CreatedRecordNames
@@ -48,10 +48,13 @@ internal struct LookupRecordsPhase: IntegrationPhase {
       print("   Looking up \(lookupNames.count) of \(input.names.count) record(s) by name")
     }
 
-    let records = try await context.service.lookupRecords(
+    let results = try await context.service.lookupRecords(
       recordNames: lookupNames,
       database: context.database
     )
+    let records = results.compactMap { result in
+      if case .success(let record) = result { record } else { nil }
+    }
 
     print("✅ Looked up \(records.count) record(s)")
 

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Factory for creating output formatters based on output format
 public enum OutputFormatterFactory {

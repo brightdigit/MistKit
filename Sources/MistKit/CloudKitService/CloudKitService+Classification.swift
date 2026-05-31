@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+internal import Foundation
 
 /// Helpers for tracking creates vs updates in `modifyRecords` responses.
 ///
@@ -68,7 +68,7 @@ extension CloudKitService {
     database: Database
   ) async throws(CloudKitError) -> Set<String> {
     let result: QueryResult = try await queryRecords(
-      recordType: recordType,
+      Query(recordType: recordType),
       limit: limit ?? Self.maxRecordsPerRequest,
       database: database
     )
@@ -114,11 +114,11 @@ extension CloudKitService {
     atomic: Bool = false,
     database: Database
   ) async throws(CloudKitError) -> BatchSyncResult {
-    let records = try await modifyRecords(
+    let results = try await modifyRecords(
       operations,
       atomic: atomic,
       database: database
     )
-    return BatchSyncResult(records: records, classification: classification)
+    return BatchSyncResult(results: results, classification: classification)
   }
 }
