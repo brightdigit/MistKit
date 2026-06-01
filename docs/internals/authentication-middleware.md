@@ -257,7 +257,7 @@ public enum Database {
 
 There is **no default** — every public-database call picks explicitly. User-context routes (`/users/*`) pass `.public(.requires(.webAuth))` directly because CloudKit only accepts web-auth on those endpoints. Private and shared databases ignore this — they always require web-auth, since CloudKit rejects S2S on those scopes.
 
-See `Sources/MistKit/Authentication/PublicAuthPreference.swift` and `Sources/MistKit/Authentication/Credentials+TokenManager.swift` for the resolution logic.
+See `Sources/MistKit/Authentication/PublicAuthPreference.swift` and `Sources/MistKit/Authentication/Credentials/Credentials+TokenManager.swift` for the resolution logic.
 
 ## Complete Authentication Flow
 
