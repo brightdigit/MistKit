@@ -91,6 +91,7 @@ let package = Package(
   ],
   dependencies: [
     .package(name: "MistKit", path: "../.."),
+    .package(name: "ConfigKeyKit", path: "../../Packages/ConfigKeyKit"),
     .package(url: "https://github.com/brightdigit/CelestraKit.git", branch: "v0.0.3"),
     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     .package(
@@ -104,6 +105,7 @@ let package = Package(
       name: "CelestraCloudKit",
       dependencies: [
         .product(name: "MistKit", package: "MistKit"),
+        .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
         .product(name: "CelestraKit", package: "CelestraKit"),
         .product(name: "Logging", package: "swift-log"),
         .product(name: "Configuration", package: "swift-configuration")

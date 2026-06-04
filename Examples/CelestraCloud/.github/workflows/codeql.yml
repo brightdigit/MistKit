@@ -60,7 +60,12 @@ jobs:
     - name: Setup MistKit
       uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
       with:
-        branch: v1.0.0-beta.2
+        branch: 1.0.0-beta.2
+
+    - name: Setup ConfigKeyKit
+      uses: brightdigit/ConfigKeyKit/.github/actions/setup-configkeykit@main
+      with:
+        branch: main
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
