@@ -139,6 +139,18 @@ jobs:
             build: 6.2-RELEASE
           - version: swift-6.3-release
             build: 6.3-RELEASE
+        exclude:
+          # windows-2025's default MSVC 14.51 STL requires Clang 20+, but Swift 6.1/6.2
+          # ship Clang 19 (STL1000 error via swift-crypto's CCryptoBoringSSL). Those run on
+          # windows-2022 (older 14.4x toolset); only Swift 6.3 (Clang 20) builds on windows-2025.
+          - runs-on: windows-2025
+            swift:
+              version: swift-6.1-release
+              build: 6.1-RELEASE
+          - runs-on: windows-2025
+            swift:
+              version: swift-6.2-release
+              build: 6.2-RELEASE
     steps:
       - uses: actions/checkout@v6
       - uses: brightdigit/swift-build@v1
