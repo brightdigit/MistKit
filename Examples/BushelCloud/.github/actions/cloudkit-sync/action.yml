@@ -134,10 +134,6 @@ inputs:
     description: 'MistKit ref to check out when falling back to a fresh build'
     required: false
     default: 'v1.0.0-beta.2'
-  configkeykit-branch:
-    description: 'ConfigKeyKit ref to check out when falling back to a fresh build'
-    required: false
-    default: 'main'
 
 runs:
   using: "composite"
@@ -158,12 +154,6 @@ runs:
       uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
       with:
         branch: ${{ inputs.mistkit-branch }}
-
-    - name: Setup ConfigKeyKit
-      if: steps.download-binary.outcome != 'success'
-      uses: brightdigit/ConfigKeyKit/.github/actions/setup-configkeykit@main
-      with:
-        branch: ${{ inputs.configkeykit-branch }}
 
     - name: Build binary (fallback if artifact unavailable)
       if: steps.download-binary.outcome != 'success'

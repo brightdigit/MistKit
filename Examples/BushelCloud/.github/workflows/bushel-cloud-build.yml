@@ -42,11 +42,6 @@ jobs:
         with:
           branch: v1.0.0-beta.2
 
-      - name: Setup ConfigKeyKit
-        uses: brightdigit/ConfigKeyKit/.github/actions/setup-configkeykit@main
-        with:
-          branch: main
-
       - name: Verify Swift version
         run: |
           swift --version
