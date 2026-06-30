@@ -2946,6 +2946,14 @@ public enum Operations {
                     ///
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/continuationMarker`.
                     public var continuationMarker: Swift.String?
+                    /// If true, query across all zones rather than a single zone.
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/zoneWide`.
+                    public var zoneWide: Swift.Bool?
+                    /// If true, return numeric field values as strings to avoid JavaScript precision loss (relevant for INT64).
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/json/numbersAsStrings`.
+                    public var numbersAsStrings: Swift.Bool?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
@@ -2954,18 +2962,24 @@ public enum Operations {
                     ///   - query:
                     ///   - desiredKeys: List of field names to return
                     ///   - continuationMarker: Marker for pagination
+                    ///   - zoneWide: If true, query across all zones rather than a single zone.
+                    ///   - numbersAsStrings: If true, return numeric field values as strings to avoid JavaScript precision loss (relevant for INT64).
                     public init(
                         zoneID: Components.Schemas.ZoneID? = nil,
                         resultsLimit: Swift.Int? = nil,
                         query: Components.Schemas.Query? = nil,
                         desiredKeys: [Swift.String]? = nil,
-                        continuationMarker: Swift.String? = nil
+                        continuationMarker: Swift.String? = nil,
+                        zoneWide: Swift.Bool? = nil,
+                        numbersAsStrings: Swift.Bool? = nil
                     ) {
                         self.zoneID = zoneID
                         self.resultsLimit = resultsLimit
                         self.query = query
                         self.desiredKeys = desiredKeys
                         self.continuationMarker = continuationMarker
+                        self.zoneWide = zoneWide
+                        self.numbersAsStrings = numbersAsStrings
                     }
                     public enum CodingKeys: String, CodingKey {
                         case zoneID
@@ -2973,6 +2987,8 @@ public enum Operations {
                         case query
                         case desiredKeys
                         case continuationMarker
+                        case zoneWide
+                        case numbersAsStrings
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/query/POST/requestBody/content/application\/json`.
@@ -3572,21 +3588,43 @@ public enum Operations {
                     ///
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/modify/POST/requestBody/json/atomic`.
                     public var atomic: Swift.Bool?
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/modify/POST/requestBody/json/zoneID`.
+                    public var zoneID: Components.Schemas.ZoneID?
+                    /// List of field names to limit the fields returned in the modify response.
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/modify/POST/requestBody/json/desiredKeys`.
+                    public var desiredKeys: [Swift.String]?
+                    /// If true, return numeric field values as strings to avoid JavaScript precision loss (relevant for INT64).
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/modify/POST/requestBody/json/numbersAsStrings`.
+                    public var numbersAsStrings: Swift.Bool?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - operations:
                     ///   - atomic: If true, all operations must succeed or all fail
+                    ///   - zoneID:
+                    ///   - desiredKeys: List of field names to limit the fields returned in the modify response.
+                    ///   - numbersAsStrings: If true, return numeric field values as strings to avoid JavaScript precision loss (relevant for INT64).
                     public init(
                         operations: [Components.Schemas.RecordOperation]? = nil,
-                        atomic: Swift.Bool? = nil
+                        atomic: Swift.Bool? = nil,
+                        zoneID: Components.Schemas.ZoneID? = nil,
+                        desiredKeys: [Swift.String]? = nil,
+                        numbersAsStrings: Swift.Bool? = nil
                     ) {
                         self.operations = operations
                         self.atomic = atomic
+                        self.zoneID = zoneID
+                        self.desiredKeys = desiredKeys
+                        self.numbersAsStrings = numbersAsStrings
                     }
                     public enum CodingKeys: String, CodingKey {
                         case operations
                         case atomic
+                        case zoneID
+                        case desiredKeys
+                        case numbersAsStrings
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/modify/POST/requestBody/content/application\/json`.
@@ -4817,25 +4855,41 @@ public enum Operations {
                     public var syncToken: Swift.String?
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/changes/POST/requestBody/json/resultsLimit`.
                     public var resultsLimit: Swift.Int?
+                    /// List of field names to limit the fields returned per changed record.
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/changes/POST/requestBody/json/desiredKeys`.
+                    public var desiredKeys: [Swift.String]?
+                    /// List of record-type names to limit the change feed to specific record types.
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/changes/POST/requestBody/json/desiredRecordTypes`.
+                    public var desiredRecordTypes: [Swift.String]?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - zoneID:
                     ///   - syncToken: Token from previous sync operation
                     ///   - resultsLimit:
+                    ///   - desiredKeys: List of field names to limit the fields returned per changed record.
+                    ///   - desiredRecordTypes: List of record-type names to limit the change feed to specific record types.
                     public init(
                         zoneID: Components.Schemas.ZoneID? = nil,
                         syncToken: Swift.String? = nil,
-                        resultsLimit: Swift.Int? = nil
+                        resultsLimit: Swift.Int? = nil,
+                        desiredKeys: [Swift.String]? = nil,
+                        desiredRecordTypes: [Swift.String]? = nil
                     ) {
                         self.zoneID = zoneID
                         self.syncToken = syncToken
                         self.resultsLimit = resultsLimit
+                        self.desiredKeys = desiredKeys
+                        self.desiredRecordTypes = desiredRecordTypes
                     }
                     public enum CodingKeys: String, CodingKey {
                         case zoneID
                         case syncToken
                         case resultsLimit
+                        case desiredKeys
+                        case desiredRecordTypes
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/changes/POST/requestBody/content/application\/json`.
