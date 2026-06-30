@@ -75,11 +75,6 @@ jobs:
       with:
         branch: v1.0.0-beta.2
 
-    - name: Setup ConfigKeyKit
-      uses: brightdigit/ConfigKeyKit/.github/actions/setup-configkeykit@main
-      with:
-        branch: main
-
     # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
     # If this step fails, then you should remove it and run the build manually (see below)
     - run: |

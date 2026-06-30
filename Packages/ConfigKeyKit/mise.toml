@@ -1,7 +1,0 @@
-[settings]
-experimental = true
-
-[tools]
-"spm:swiftlang/swift-format" = "602.0.0"
-"aqua:realm/SwiftLint" = "0.62.2"
-"spm:peripheryapp/periphery" = "3.7.4"

@@ -22,7 +22,6 @@ concurrency:
 env:
   PACKAGE_NAME: BushelCloud
   MISTKIT_BRANCH: v1.0.0-beta.2
-  CONFIGKEYKIT_BRANCH: main
 
 jobs:
   configure:
@@ -89,11 +88,6 @@ jobs:
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
         with:
           branch: ${{ env.MISTKIT_BRANCH }}
-
-      - name: Setup ConfigKeyKit
-        uses: brightdigit/ConfigKeyKit/.github/actions/setup-configkeykit@main
-        with:
-          branch: ${{ env.CONFIGKEYKIT_BRANCH }}
 
       - uses: brightdigit/swift-build@v1
         id: build
@@ -184,11 +178,6 @@ jobs:
         with:
           branch: ${{ env.MISTKIT_BRANCH }}
 
-      - name: Setup ConfigKeyKit
-        uses: brightdigit/ConfigKeyKit/.github/actions/setup-configkeykit@main
-        with:
-          branch: ${{ env.CONFIGKEYKIT_BRANCH }}
-
       - name: Build and Test
         id: build
         uses: brightdigit/swift-build@v1
@@ -253,11 +242,6 @@ jobs:
         uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
         with:
           branch: ${{ env.MISTKIT_BRANCH }}
-
-      - name: Setup ConfigKeyKit
-        uses: brightdigit/ConfigKeyKit/.github/actions/setup-configkeykit@main
-        with:
-          branch: ${{ env.CONFIGKEYKIT_BRANCH }}
 
       - name: Build and Test
         id: build

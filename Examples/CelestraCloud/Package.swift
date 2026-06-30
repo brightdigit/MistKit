@@ -91,7 +91,7 @@ let package = Package(
   ],
   dependencies: [
     .package(name: "MistKit", path: "../.."),
-    .package(name: "ConfigKeyKit", path: "../../Packages/ConfigKeyKit"),
+    .package(url: "https://github.com/brightdigit/ConfigKeyKit.git", from: "1.0.0-beta.2"),
     .package(url: "https://github.com/brightdigit/CelestraKit.git", branch: "v0.0.3"),
     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     .package(
