@@ -32,6 +32,39 @@ internal import MistKitOpenAPI
 
 /// Extension to convert OpenAPI Components.Schemas.FieldValueResponse to MistKit FieldValue
 extension FieldValue {
+  /// The decoded `value` case a complex/list `FieldValueResponse` `type` tag requires (#376).
+  private enum ExpectedComplexValue {
+    case reference
+    case asset
+    case location
+    case list
+
+    /// Maps a complex/list response `type` tag to its expected value case; `nil` for a scalar
+    /// tag (handled by `makeTypedScalar`). `ASSETID` shares `AssetValue` with `ASSET`.
+    fileprivate init?(_ fieldType: Components.Schemas.FieldValueResponse._typePayload) {
+      switch fieldType {
+      case .REFERENCE: self = .reference
+      case .ASSET, .ASSETID: self = .asset
+      case .LOCATION: self = .location
+      case .LIST: self = .list
+      default: return nil
+      }
+    }
+
+    /// Whether `value`'s decoded `oneOf` case satisfies this declared complex/list tag.
+    fileprivate func matches(
+      _ value: Components.Schemas.FieldValueResponse.valuePayload
+    ) -> Bool {
+      switch (self, value) {
+      case (.reference, .ReferenceValue), (.asset, .AssetValue),
+        (.location, .LocationValue), (.list, .ListValue):
+        return true
+      default:
+        return false
+      }
+    }
+  }
+
   /// Initialize from OpenAPI Components.Schemas.FieldValueResponse (from API responses).
   ///
   /// - Parameters:
@@ -52,7 +85,11 @@ extension FieldValue {
     typePayload: Components.Schemas.FieldValueResponse._typePayload?,
     fieldName: String
   ) throws(ConversionError) {
-    if let simpleValue =
+    if let complexTyped =
+      try Self.makeTypedComplex(from: valuePayload, type: typePayload, fieldName: fieldName)
+    {
+      self = complexTyped
+    } else if let simpleValue =
       try Self.makeSimpleFieldValue(from: valuePayload, type: typePayload, fieldName: fieldName)
     {
       self = simpleValue
@@ -130,5 +167,54 @@ extension FieldValue {
       return try Self(listValue: listValue, fieldName: fieldName)
     }
     return nil
+  }
+
+  /// Build a complex/list `FieldValue` from an explicit CloudKit `type`, validating that the
+  /// decoded value's structure satisfies the declared tag (issue #376).
+  ///
+  /// The `value` `oneOf` is undiscriminated, so — just as a scalar `type` is honored over the
+  /// decoded case in ``makeTypedScalar(from:type:fieldName:)`` — a complex/list `type` that
+  /// contradicts the value is an internally inconsistent response. Rather than silently
+  /// coercing to the value's self-describing structure (a declared `REFERENCE` reading back as
+  /// `.int64`), conversion throws ``ConversionError/typeValueMismatch``, matching the fail-loud
+  /// treatment of scalar contradictions.
+  ///
+  /// `ASSETID` maps to the same `AssetValue` as `ASSET` (there is no distinct domain case).
+  /// The `LIST` tag is validated only at the container level — the value must be a `ListValue`
+  /// — leaving element types to the existing lenient list conversion (the response `type` enum
+  /// carries a single `LIST`, unlike the request's granular `*_LIST` family). A `nil` or scalar
+  /// `type` returns nil so the caller falls through to scalar typing / inference, leaving
+  /// untagged responses on the value-shape path unchanged.
+  private static func makeTypedComplex(
+    from value: Components.Schemas.FieldValueResponse.valuePayload,
+    type fieldType: Components.Schemas.FieldValueResponse._typePayload?,
+    fieldName: String
+  ) throws(ConversionError) -> FieldValue? {
+    // A nil or scalar `type` is not our concern — defer to scalar typing / inference.
+    guard let fieldType, let expected = ExpectedComplexValue(fieldType) else {
+      return nil
+    }
+    // The value's decoded shape must satisfy the declared complex/list tag; a contradiction
+    // is a fail-loud `typeValueMismatch`. A match reuses the value-shape conversion so a
+    // tagged value converts identically to the same value untagged.
+    guard expected.matches(value) else {
+      try reportComplexMismatch(value, fieldName: fieldName, declaredType: fieldType.rawValue)
+    }
+    return try makeComplexFieldValue(from: value, fieldName: fieldName)
+  }
+
+  /// Throw ``ConversionError/typeValueMismatch`` for a complex/list `type` declared over a
+  /// value whose structure can't satisfy it.
+  private static func reportComplexMismatch(
+    _ value: Components.Schemas.FieldValueResponse.valuePayload,
+    fieldName: String,
+    declaredType: String
+  ) throws(ConversionError) -> Never {
+    let failure = ConversionError.typeValueMismatch(
+      fieldName: fieldName,
+      declaredType: declaredType,
+      value: "\(value)"
+    )
+    try failure.reportAndThrow()
   }
 }

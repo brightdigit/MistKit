@@ -111,15 +111,55 @@ extension FieldValueConversionTests {
       #expect(try Self.decode(#"{"value": 3.5, "type": "INT64"}"#) == .double(3.5))
     }
 
-    @Test("A complex declared type over a scalar value is left to inference, not validated")
-    internal func complexTypeContradictionStaysLenient() throws {
+    @Test("A complex or list declared type that contradicts the value's shape throws")
+    internal func complexTypeContradictionThrows() {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("FieldValue is not available on this operating system.")
         return
       }
-      // Only scalar type tags are strictly validated; complex/list types defer to the
-      // value's self-describing structure, so this reads back from the value shape.
-      #expect(try Self.decode(#"{"value": 42, "type": "REFERENCE"}"#) == .int64(42))
+      // Issue #376: complex/list tags are now validated against the decoded value the same
+      // way scalar tags are. A REFERENCE/ASSET/LOCATION/*_LIST over an incompatible value is
+      // an internally inconsistent response and must throw, not silently coerce to the shape.
+      expectThrows(#"{"value": 42, "type": "REFERENCE"}"#)
+      expectThrows(#"{"value": "text", "type": "ASSET"}"#)
+      expectThrows(#"{"value": 42, "type": "LOCATION"}"#)
+      expectThrows(#"{"value": 42, "type": "LIST"}"#)
+      // A complex tag over the *wrong* complex value (LOCATION shape under a REFERENCE tag)
+      // is likewise a contradiction.
+      expectThrows(#"{"value": {"latitude": 1, "longitude": 2}, "type": "REFERENCE"}"#)
+    }
+
+    @Test("A complex or list declared type matching its value converts faithfully")
+    internal func complexTypeMatchingValueConverts() throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("FieldValue is not available on this operating system.")
+        return
+      }
+      // A declared complex/list type whose value satisfies it round-trips unchanged —
+      // the validation only rejects contradictions, never well-formed responses.
+      let reference = try Self.decode(#"{"value": {"recordName": "rec1"}, "type": "REFERENCE"}"#)
+      #expect(reference == .reference(Reference(recordName: "rec1")))
+
+      let locationJSON = #"{"value": {"latitude": 37.3, "longitude": -122}, "type": "LOCATION"}"#
+      let location = try Self.decode(locationJSON)
+      guard case .location(let loc) = location else {
+        Issue.record("Expected .location, got \(location)")
+        return
+      }
+      #expect(loc.latitude == 37.3)
+      #expect(loc.longitude == -122)
+
+      // ASSETID maps to the same AssetValue as ASSET.
+      let assetJSON = #"{"value": {"fileChecksum": "chk"}, "type": "ASSETID"}"#
+      let asset = try Self.decode(assetJSON)
+      guard case .asset(let assetValue) = asset else {
+        Issue.record("Expected .asset, got \(asset)")
+        return
+      }
+      #expect(assetValue.fileChecksum == "chk")
+
+      let list = try Self.decode(#"{"value": ["a", "b"], "type": "LIST"}"#)
+      #expect(list == .list([.string("a"), .string("b")]))
     }
 
     @Test("Without a type, scalars fall back to first-match-wins inference")
