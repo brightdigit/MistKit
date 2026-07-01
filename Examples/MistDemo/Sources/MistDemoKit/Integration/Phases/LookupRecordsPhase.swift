@@ -38,6 +38,32 @@ internal struct LookupRecordsPhase: IntegrationPhase {
   internal static let emoji = "🔍"
   internal static let apiName = "lookupRecords"
 
+  /// Verifies the seeded `timestamp` field comes back as `.date` with its
+  /// original value.
+  ///
+  /// This exercises MistKit's response TIMESTAMP recovery (issue #376)
+  /// end-to-end: a whole-millisecond CloudKit timestamp is ambiguous on the
+  /// wire and would decode as `.int64` unless the response's `TIMESTAMP` type
+  /// tag is honored. Failing loud here catches a regression in that recovery.
+  private static func verifyTimestampRoundTrip(in records: [RecordInfo]) throws {
+    let expected = CreateRecordsPhase.verificationTimestamp.timeIntervalSince1970
+    for record in records {
+      guard case .date(let value)? = record.fields["timestamp"] else {
+        throw IntegrationTestError.verificationFailed(
+          "Record \(record.recordName) timestamp did not round-trip as a date"
+        )
+      }
+      guard value.timeIntervalSince1970 == expected else {
+        throw IntegrationTestError.verificationFailed(
+          """
+          Record \(record.recordName) timestamp mismatch: \
+          expected \(expected), got \(value.timeIntervalSince1970)
+          """
+        )
+      }
+    }
+  }
+
   internal func run(
     input: CreatedRecordNames, context: PhaseContext
   ) async throws -> NoState {
@@ -57,6 +83,8 @@ internal struct LookupRecordsPhase: IntegrationPhase {
     }
 
     print("✅ Looked up \(records.count) record(s)")
+
+    try Self.verifyTimestampRoundTrip(in: records)
 
     if context.verbose {
       for record in records {
