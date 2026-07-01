@@ -163,6 +163,32 @@ Tests are under `Tests/MistDemoTests/Server/`.
 - Never commit your CloudKit API token; prefer `CLOUDKIT_API_TOKEN` or a
   config file outside the repo.
 
+### Troubleshooting
+
+**The "Allow" notification appears but no code shows up.** When you sign in,
+Apple sends a *trusted-device* two-factor prompt ("Apple Account Sign In
+Requested … used to sign in on the web"). Clicking **Allow** is supposed to
+display a 6-digit code to type into the `idmsa.apple.com` window, but macOS
+sometimes fails to show that code modal — so the six boxes stay empty and
+sign-in stalls.
+
+This is Apple/macOS behavior, not a MistDemo or MistKit bug: the sign-in page
+is served by `idmsa.apple.com` and driven by Apple's CloudKit JS widget, which
+owns the entire Apple ID + two-factor challenge. MistDemo only captures the
+resulting web-auth token after you succeed.
+
+Reliable workaround — generate the code yourself instead of waiting for the
+popup:
+
+- **On the Mac:** System Settings → *[your name]* → **Sign-In & Security** →
+  **Get Verification Code**.
+- **On iPhone / iPad:** Settings → *[your name]* → **Sign-In & Security** →
+  **Get Verification Code**.
+
+Type the six digits into the sign-in window. (Requesting the code via SMS also
+works, but "Get Verification Code" is faster and doesn't depend on your
+carrier.)
+
 ---
 
 ## Native app — `MistDemoApp`
