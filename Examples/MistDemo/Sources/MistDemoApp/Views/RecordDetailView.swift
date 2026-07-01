@@ -146,6 +146,11 @@
       }
     }
 
+    internal init(note: Note, onChange: @escaping () -> Void) {
+      self._note = State(initialValue: note)
+      self.onChange = onChange
+    }
+
     private func delete() async {
       deleting = true
       actionError = nil
