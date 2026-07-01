@@ -100,8 +100,18 @@ extension FieldValue {
     try encodeValue(to: &container)
   }
 
-  // swiftlint:disable:next cyclomatic_complexity
   private func encodeValue(to container: inout any SingleValueEncodingContainer) throws {
+    if try encodeScalar(to: &container) {
+      return
+    }
+    try encodeComplex(to: &container)
+  }
+
+  /// Encode the scalar cases (string, bytes, int64, double, date).
+  ///
+  /// - Returns: `true` when `self` was a scalar case and has been encoded;
+  ///   `false` when `self` is a complex case that this method did not handle.
+  private func encodeScalar(to container: inout any SingleValueEncodingContainer) throws -> Bool {
     switch self {
     case .string(let val), .bytes(let val):
       try container.encode(val)
@@ -111,6 +121,15 @@ extension FieldValue {
       try container.encode(val)
     case .date(let val):
       try container.encode(val.timeIntervalSince1970 * Self.millisecondsPerSecond)
+    default:
+      return false
+    }
+    return true
+  }
+
+  /// Encode the complex cases (location, reference, asset, list).
+  private func encodeComplex(to container: inout any SingleValueEncodingContainer) throws {
+    switch self {
     case .location(let val):
       try container.encode(val)
     case .reference(let val):
@@ -119,6 +138,17 @@ extension FieldValue {
       try container.encode(val)
     case .list(let val):
       try container.encode(val)
+    default:
+      // Scalar cases are handled by `encodeScalar(to:)`, which is always
+      // called first; reaching here would mean a new case was added without
+      // routing, so fail loudly rather than silently emit nothing.
+      throw EncodingError.invalidValue(
+        self,
+        EncodingError.Context(
+          codingPath: container.codingPath,
+          debugDescription: "Unhandled FieldValue case in encodeComplex(to:)"
+        )
+      )
     }
   }
 }
