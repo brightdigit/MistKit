@@ -46,6 +46,10 @@ public struct FetchChangesConfig: Sendable, ConfigurationParseable {
   public let fetchAll: Bool
   /// The optional limit on number of changes to fetch.
   public let limit: Int?
+  /// The optional field names limiting the fields returned per record.
+  public let desiredKeys: [String]?
+  /// The optional record-type names limiting the change feed.
+  public let desiredRecordTypes: [String]?
   /// The output format.
   public let output: OutputFormat
 
@@ -56,6 +60,8 @@ public struct FetchChangesConfig: Sendable, ConfigurationParseable {
     zone: String = "_defaultZone",
     fetchAll: Bool = false,
     limit: Int? = nil,
+    desiredKeys: [String]? = nil,
+    desiredRecordTypes: [String]? = nil,
     output: OutputFormat = .table
   ) {
     self.base = base
@@ -63,6 +69,8 @@ public struct FetchChangesConfig: Sendable, ConfigurationParseable {
     self.zone = zone
     self.fetchAll = fetchAll
     self.limit = limit
+    self.desiredKeys = desiredKeys
+    self.desiredRecordTypes = desiredRecordTypes
     self.output = output
   }
 
@@ -88,6 +96,12 @@ public struct FetchChangesConfig: Sendable, ConfigurationParseable {
     let fetchAll =
       configuration.bool(forKey: "fetch.all", default: false)
     let limit = configuration.int(forKey: "limit")
+    let desiredKeys = configuration.commaSeparatedList(
+      forKey: MistDemoConstants.ConfigKeys.fields
+    )
+    let desiredRecordTypes = configuration.commaSeparatedList(
+      forKey: MistDemoConstants.ConfigKeys.desiredRecordTypes
+    )
     let outputString =
       configuration.string(forKey: "output.format", default: "table")
       ?? "table"
@@ -99,6 +113,8 @@ public struct FetchChangesConfig: Sendable, ConfigurationParseable {
       zone: zone,
       fetchAll: fetchAll,
       limit: limit,
+      desiredKeys: desiredKeys,
+      desiredRecordTypes: desiredRecordTypes,
       output: output
     )
   }

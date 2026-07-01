@@ -51,7 +51,9 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
       --filter <filter>        Filter: field:operator:value
       --sort <field:order>     Sort (asc/desc)
       --limit <count>          Max records (1-200)
-      --fields <fields>        Comma-separated fields
+      --fields <fields>        Comma-separated fields (desiredKeys)
+      --zone-wide              Query across all zones
+      --numbers-as-strings     Return numeric fields as strings
       --output-format <format> Output format
     """
 
@@ -71,20 +73,26 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
       // Build filters
       // NOTE: Zone, offset, and continuation marker support require
       // enhancements to CloudKitService.queryRecords method (GitHub issues #145, #146)
-      let filters: [QueryFilter]? =
+      let filters: [QueryFilter] =
         config.filters.isEmpty
-        ? nil
+        ? []
         : try config.filters.map { try Self.parseFilter($0) }
-      let recordInfos = try await client.queryRecords(
+      let query = Query(
         recordType: config.recordType,
         filters: filters,
-        sortBy: nil,
+        sortBy: []
+      )
+      let result = try await client.queryRecords(
+        query,
         limit: config.limit,
+        desiredKeys: config.fields,
+        zoneWide: config.zoneWide,
+        numbersAsStrings: config.numbersAsStrings,
         database: config.base.database
       )
 
       // Format and output results
-      try await outputResults(recordInfos, format: config.output)
+      try await outputResults(result.records, format: config.output)
     } catch {
       throw QueryError.operationFailed(error.localizedDescription)
     }

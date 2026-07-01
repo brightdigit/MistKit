@@ -44,6 +44,12 @@ public struct ModifyConfig: Sendable, ConfigurationParseable {
   public let operations: [ModifyOperationInput]
   /// Whether to perform operations atomically.
   public let atomic: Bool
+  /// The optional target zone for the operations.
+  public let zone: String?
+  /// The optional field names limiting the fields returned in the response.
+  public let desiredKeys: [String]?
+  /// Whether numeric field values are returned as strings.
+  public let numbersAsStrings: Bool?
   /// The output format.
   public let output: OutputFormat
 
@@ -52,11 +58,17 @@ public struct ModifyConfig: Sendable, ConfigurationParseable {
     base: MistDemoConfig,
     operations: [ModifyOperationInput],
     atomic: Bool = false,
+    zone: String? = nil,
+    desiredKeys: [String]? = nil,
+    numbersAsStrings: Bool? = nil,
     output: OutputFormat = .json
   ) {
     self.base = base
     self.operations = operations
     self.atomic = atomic
+    self.zone = zone
+    self.desiredKeys = desiredKeys
+    self.numbersAsStrings = numbersAsStrings
     self.output = output
   }
 
@@ -85,6 +97,16 @@ public struct ModifyConfig: Sendable, ConfigurationParseable {
       default: false
     )
 
+    let zone = configReader.string(
+      forKey: MistDemoConstants.ConfigKeys.zone
+    )
+    let desiredKeys = configReader.commaSeparatedList(
+      forKey: MistDemoConstants.ConfigKeys.fields
+    )
+    let numbersAsStrings = configReader.optionalBool(
+      forKey: MistDemoConstants.ConfigKeys.numbersAsStrings
+    )
+
     let outputString =
       configReader.string(
         forKey: MistDemoConstants.ConfigKeys.outputFormat,
@@ -96,6 +118,9 @@ public struct ModifyConfig: Sendable, ConfigurationParseable {
       base: baseConfig,
       operations: operations,
       atomic: atomic,
+      zone: zone,
+      desiredKeys: desiredKeys,
+      numbersAsStrings: numbersAsStrings,
       output: output
     )
   }

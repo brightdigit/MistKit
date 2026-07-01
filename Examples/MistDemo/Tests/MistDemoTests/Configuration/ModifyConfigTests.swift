@@ -67,4 +67,30 @@ internal struct ModifyConfigTests {
 
     #expect(config.output == format)
   }
+
+  @Test("ModifyConfig defaults zone, desiredKeys and numbersAsStrings to nil")
+  internal func requestOptionsDefaultToNil() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = ModifyConfig(base: baseConfig, operations: [])
+
+    #expect(config.zone == nil)
+    #expect(config.desiredKeys == nil)
+    #expect(config.numbersAsStrings == nil)
+  }
+
+  @Test("ModifyConfig carries explicit zone, desiredKeys and numbersAsStrings")
+  internal func carriesRequestOptions() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = ModifyConfig(
+      base: baseConfig,
+      operations: [],
+      zone: "myZone",
+      desiredKeys: ["title"],
+      numbersAsStrings: true
+    )
+
+    #expect(config.zone == "myZone")
+    #expect(config.desiredKeys == ["title"])
+    #expect(config.numbersAsStrings == true)
+  }
 }
