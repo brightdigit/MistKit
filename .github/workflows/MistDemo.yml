@@ -92,6 +92,7 @@ jobs:
           type: ${{ matrix.type }}
           wasmtime-version: "40.0.2"
           wasm-swift-flags: >-
+            -Xswiftc -disable-batch-mode
             -Xcc -D_WASI_EMULATED_SIGNAL
             -Xcc -D_WASI_EMULATED_MMAN
             -Xlinker -lwasi-emulated-signal
