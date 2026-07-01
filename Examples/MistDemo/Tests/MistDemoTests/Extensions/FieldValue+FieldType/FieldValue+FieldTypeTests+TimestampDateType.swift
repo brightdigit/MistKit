@@ -121,7 +121,13 @@ extension FieldValueFieldTypeTests {
       let data = try JSONEncoder().encode(fieldValue)
       let milliseconds = try JSONDecoder().decode(Double.self, from: data)
 
-      #expect(milliseconds == 1_705_315_800 * 1_000)
+      #if arch(wasm32)
+        // On wasm32, Int is 32-bit; the Int product overflows at compile time,
+        // so compute the expected milliseconds as a Double.
+        #expect(milliseconds == 1_705_315_800.0 * 1_000)
+      #else
+        #expect(milliseconds == 1_705_315_800 * 1_000)
+      #endif
     }
   }
 }
