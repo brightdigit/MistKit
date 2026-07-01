@@ -56,6 +56,10 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
   public let fields: [String]?
   /// The optional continuation marker for pagination.
   public let continuationMarker: String?
+  /// Whether to query across all zones rather than a single zone.
+  public let zoneWide: Bool?
+  /// Whether numeric field values are returned as strings.
+  public let numbersAsStrings: Bool?
   /// The output format.
   public let output: OutputFormat
 
@@ -70,6 +74,8 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
     offset: Int = 0,
     fields: [String]? = nil,
     continuationMarker: String? = nil,
+    zoneWide: Bool? = nil,
+    numbersAsStrings: Bool? = nil,
     output: OutputFormat = .json
   ) {
     self.base = base
@@ -81,6 +87,8 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
     self.offset = offset
     self.fields = fields
     self.continuationMarker = continuationMarker
+    self.zoneWide = zoneWide
+    self.numbersAsStrings = numbersAsStrings
     self.output = output
   }
 
@@ -112,6 +120,12 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
       offset: parsed.pagination.offset,
       fields: parsed.pagination.fields,
       continuationMarker: parsed.pagination.continuationMarker,
+      zoneWide: configReader.optionalBool(
+        forKey: MistDemoConstants.ConfigKeys.zoneWide
+      ),
+      numbersAsStrings: configReader.optionalBool(
+        forKey: MistDemoConstants.ConfigKeys.numbersAsStrings
+      ),
       output: parsed.pagination.output
     )
   }

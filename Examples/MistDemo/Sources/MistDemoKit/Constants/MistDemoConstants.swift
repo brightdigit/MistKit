@@ -83,6 +83,12 @@ public enum MistDemoConstants {
     public static let atomic = "atomic"
     /// Batch size configuration key for the auto-chunking `*-all` commands.
     public static let batchSize = "batch.size"
+    /// Zone-wide query configuration key (query across all zones).
+    public static let zoneWide = "zone.wide"
+    /// Numbers-as-strings configuration key (return numeric fields as strings).
+    public static let numbersAsStrings = "numbers.as.strings"
+    /// Desired record types configuration key (limits the change feed).
+    public static let desiredRecordTypes = "record.types"
   }
 
   // MARK: - Field Names

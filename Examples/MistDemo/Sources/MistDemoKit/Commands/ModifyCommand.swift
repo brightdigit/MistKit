@@ -53,6 +53,9 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
 
     OPTIONS:
       --atomic                   Reject batch if any fails
+      --zone <name>              Target zone for the operations
+      --fields <fields>          Comma-separated fields (desiredKeys)
+      --numbers-as-strings       Return numeric fields as strings
       --output-format <format>   Output format
 
     NOTES:
@@ -100,6 +103,9 @@ public struct ModifyCommand: MistDemoCommand, OutputFormatting {
       let results = try await client.modifyRecords(
         operations,
         atomic: config.atomic,
+        zoneID: config.zone.map { ZoneID(zoneName: $0, ownerName: nil) },
+        desiredKeys: config.desiredKeys,
+        numbersAsStrings: config.numbersAsStrings,
         database: config.base.database
       )
       let succeeded = results.compactMap { result in

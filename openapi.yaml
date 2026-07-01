@@ -65,6 +65,15 @@ paths:
                 continuationMarker:
                   type: string
                   description: Marker for pagination
+                zoneWide:
+                  type: boolean
+                  description: >-
+                    If true, query across all zones rather than a single zone.
+                numbersAsStrings:
+                  type: boolean
+                  description: >-
+                    If true, return numeric field values as strings to avoid
+                    JavaScript precision loss (relevant for INT64).
       responses:
         '200':
           description: Successful query
@@ -121,6 +130,20 @@ paths:
                 atomic:
                   type: boolean
                   description: If true, all operations must succeed or all fail
+                zoneID:
+                  $ref: '#/components/schemas/ZoneID'
+                desiredKeys:
+                  type: array
+                  items:
+                    type: string
+                  description: >-
+                    List of field names to limit the fields returned in the
+                    modify response.
+                numbersAsStrings:
+                  type: boolean
+                  description: >-
+                    If true, return numeric field values as strings to avoid
+                    JavaScript precision loss (relevant for INT64).
       responses:
         '200':
           description: Records modified successfully
@@ -237,6 +260,20 @@ paths:
                   description: Token from previous sync operation
                 resultsLimit:
                   type: integer
+                desiredKeys:
+                  type: array
+                  items:
+                    type: string
+                  description: >-
+                    List of field names to limit the fields returned per
+                    changed record.
+                desiredRecordTypes:
+                  type: array
+                  items:
+                    type: string
+                  description: >-
+                    List of record-type names to limit the change feed to
+                    specific record types.
       responses:
         '200':
           description: Changes retrieved successfully
