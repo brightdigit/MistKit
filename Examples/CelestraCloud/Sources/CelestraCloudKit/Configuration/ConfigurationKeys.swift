@@ -27,33 +27,39 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Configuration keys for reading from providers
+internal import ConfigKeyKit
+internal import Foundation
+
+/// Configuration keys for reading from providers.
+///
+/// Each option is a single typed `ConfigKey`/`OptionalConfigKey`. ConfigKeyKit's
+/// `StandardNamingStyle` derives both spellings from one dash-separated base:
+/// the CLI flag (dash-case, e.g. `--cloudkit-container-id`) and the environment
+/// variable (`SCREAMING_SNAKE_CASE`, e.g. `CLOUDKIT_CONTAINER_ID`). Bases use
+/// dashes throughout for consistency and conventional kebab-case CLI flags.
 internal enum ConfigurationKeys {
   internal enum CloudKit {
-    internal static let containerID = "cloudkit.container_id"
-    internal static let containerIDEnv = "CLOUDKIT_CONTAINER_ID"
-    internal static let keyID = "cloudkit.key_id"
-    internal static let keyIDEnv = "CLOUDKIT_KEY_ID"
-    internal static let privateKeyPath = "cloudkit.private_key_path"
-    internal static let privateKeyPathEnv = "CLOUDKIT_PRIVATE_KEY_PATH"
-    internal static let environment = "cloudkit.environment"
-    internal static let environmentEnv = "CLOUDKIT_ENVIRONMENT"
+    internal static let containerID = ConfigKey<String>(
+      "cloudkit.container-id",
+      default: CloudKitConfiguration.defaultContainerID
+    )
+    internal static let keyID = OptionalConfigKey<String>("cloudkit.key-id")
+    internal static let privateKeyPath = OptionalConfigKey<String>("cloudkit.private-key-path")
+    internal static let environment = OptionalConfigKey<String>("cloudkit.environment")
   }
 
   internal enum Update {
-    internal static let delay = "update.delay"
-    internal static let delayEnv = "UPDATE_DELAY"
-    internal static let skipRobotsCheck = "update.skip_robots_check"
-    internal static let skipRobotsCheckEnv = "UPDATE_SKIP_ROBOTS_CHECK"
-    internal static let maxFailures = "update.max_failures"
-    internal static let maxFailuresEnv = "UPDATE_MAX_FAILURES"
-    internal static let minPopularity = "update.min_popularity"
-    internal static let minPopularityEnv = "UPDATE_MIN_POPULARITY"
-    internal static let lastAttemptedBefore = "update.last_attempted_before"
-    internal static let lastAttemptedBeforeEnv = "UPDATE_LAST_ATTEMPTED_BEFORE"
-    internal static let limit = "update.limit"
-    internal static let limitEnv = "UPDATE_LIMIT"
-    internal static let jsonOutputPath = "update.json-output-path"
-    internal static let jsonOutputPathEnv = "UPDATE_JSON_OUTPUT_PATH"
+    internal static let delay = ConfigKey<Double>("update.delay", default: 2.0)
+    internal static let skipRobotsCheck = ConfigKey<Bool>(
+      "update.skip-robots-check",
+      default: false
+    )
+    internal static let maxFailures = OptionalConfigKey<Int>("update.max-failures")
+    internal static let minPopularity = OptionalConfigKey<Int>("update.min-popularity")
+    internal static let lastAttemptedBefore = OptionalConfigKey<Date>(
+      "update.last-attempted-before"
+    )
+    internal static let limit = OptionalConfigKey<Int>("update.limit")
+    internal static let jsonOutputPath = OptionalConfigKey<String>("update.json-output-path")
   }
 }

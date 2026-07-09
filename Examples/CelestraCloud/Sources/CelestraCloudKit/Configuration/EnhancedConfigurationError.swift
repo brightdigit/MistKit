@@ -37,17 +37,11 @@ public struct EnhancedConfigurationError: LocalizedError {
   /// The configuration key that caused the error, if applicable.
   public let key: String?
 
-  /// The source of the configuration value, if applicable.
-  public let source: ConfigSource?
-
   /// A localized description of the error.
   public var errorDescription: String? {
     var parts = [message]
     if let key = key {
       parts.append("(key: \(key))")
-    }
-    if let source = source {
-      parts.append("(source: \(source.rawValue))")
     }
     return parts.joined(separator: " ")
   }
@@ -57,10 +51,8 @@ public struct EnhancedConfigurationError: LocalizedError {
   /// - Parameters:
   ///   - message: The error message describing what went wrong.
   ///   - key: The configuration key that caused the error, if applicable.
-  ///   - source: The source of the configuration value, if applicable.
-  public init(_ message: String, key: String? = nil, source: ConfigSource? = nil) {
+  public init(_ message: String, key: String? = nil) {
     self.message = message
     self.key = key
-    self.source = source
   }
 }

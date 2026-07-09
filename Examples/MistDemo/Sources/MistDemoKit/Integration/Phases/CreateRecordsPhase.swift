@@ -38,6 +38,12 @@ internal struct CreateRecordsPhase: IntegrationPhase {
   internal static let emoji = "📝"
   internal static let apiName = "createRecord"
 
+  /// A fixed, whole-second timestamp seeded into every created record so the
+  /// lookup phase can assert it round-trips back as `.date` — exercising
+  /// MistKit's response TIMESTAMP recovery (issue #376) end-to-end. Whole
+  /// seconds keep the millisecond wire round-trip exact.
+  internal static let verificationTimestamp = Date(timeIntervalSince1970: 1_705_315_800)
+
   internal func run(
     input: AssetUploadReceipt,
     context: PhaseContext
@@ -58,6 +64,7 @@ internal struct CreateRecordsPhase: IntegrationPhase {
         fields: [
           "title": .string("Test Record \(recordIndex)"),
           "index": .int64(recordIndex),
+          "timestamp": .date(Self.verificationTimestamp),
           "image": .asset(input.asset),
         ],
         database: context.database

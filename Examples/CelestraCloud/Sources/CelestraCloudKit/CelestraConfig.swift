@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 public import MistKit
 
 // MARK: - Shared Configuration
@@ -52,48 +52,6 @@ public enum CelestraConfig {
       containerIdentifier: config.containerID,
       tokenManager: tokenManager,
       environment: config.environment
-    )
-  }
-
-  /// Create CloudKit service from environment variables
-  @available(
-    *, deprecated, message: "Use ConfigurationLoader with createCloudKitService(from:) instead"
-  )
-  public static func createCloudKitService() throws -> CloudKitService {
-    // Validate required environment variables
-    guard let containerID = ProcessInfo.processInfo.environment["CLOUDKIT_CONTAINER_ID"] else {
-      throw ConfigurationError("CLOUDKIT_CONTAINER_ID environment variable required")
-    }
-
-    guard let keyID = ProcessInfo.processInfo.environment["CLOUDKIT_KEY_ID"] else {
-      throw ConfigurationError("CLOUDKIT_KEY_ID environment variable required")
-    }
-
-    guard let privateKeyPath = ProcessInfo.processInfo.environment["CLOUDKIT_PRIVATE_KEY_PATH"]
-    else {
-      throw ConfigurationError("CLOUDKIT_PRIVATE_KEY_PATH environment variable required")
-    }
-
-    // Read private key from file
-    let privateKeyPEM = try String(contentsOfFile: privateKeyPath, encoding: .utf8)
-
-    // Determine environment (development or production)
-    let environment: MistKit.Environment =
-      ProcessInfo.processInfo.environment["CLOUDKIT_ENVIRONMENT"] == "production"
-      ? .production
-      : .development
-
-    // Create token manager for server-to-server authentication
-    let tokenManager = try ServerToServerAuthManager(
-      keyID: keyID,
-      pemString: privateKeyPEM
-    )
-
-    // Create and return CloudKit service
-    return CloudKitService(
-      containerIdentifier: containerID,
-      tokenManager: tokenManager,
-      environment: environment
     )
   }
 }

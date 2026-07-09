@@ -66,6 +66,10 @@ extension CloudKitService {
   /// - Parameters:
   ///   - operations: Array of record operations to perform
   ///   - atomic: When true, the entire batch fails if any single operation fails (default: false)
+  ///   - zoneID: Optional target zone for the operations (defaults to the request's zone).
+  ///   - desiredKeys: Optional list of field names limiting the fields returned in the response.
+  ///   - numbersAsStrings: When true, numeric field values are returned as strings (avoids
+  ///     JavaScript precision loss for `INT64`).
   ///   - database: The CloudKit database scope to modify (`.public`, `.private`, `.shared`)
   /// - Returns: A ``RecordResult`` per operation — `.success` for a saved/deleted
   ///   record, `.failure` (a ``RecordOperationFailure``) for one that CloudKit
@@ -74,6 +78,9 @@ extension CloudKitService {
   public func modifyRecords(
     _ operations: [RecordOperation],
     atomic: Bool = false,
+    zoneID: ZoneID? = nil,
+    desiredKeys: [String]? = nil,
+    numbersAsStrings: Bool? = nil,
     database: Database
   ) async throws(CloudKitError) -> [RecordResult] {
     let apiOperations: [Components.Schemas.RecordOperation]
@@ -100,7 +107,10 @@ extension CloudKitService {
           body: .json(
             .init(
               operations: apiOperations,
-              atomic: atomic
+              atomic: atomic,
+              zoneID: zoneID.map { Components.Schemas.ZoneID(from: $0) },
+              desiredKeys: desiredKeys,
+              numbersAsStrings: numbersAsStrings
             )
           )
         )
@@ -116,109 +126,6 @@ extension CloudKitService {
       )
     } catch {
       throw CloudKitError.underlyingError(error)
-    }
-  }
-
-  /// Create a single record in CloudKit
-  /// - Parameters:
-  ///   - recordType: The type of record to create
-  ///   - recordName: Optional unique record name
-  ///   - fields: Dictionary of field names to FieldValue
-  ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
-  /// - Returns: RecordInfo for the created record
-  /// - Throws: CloudKitError if the operation fails
-  ///
-  /// # Example
-  /// ```swift
-  /// let article = try await service.createRecord(
-  ///   recordType: "Article",
-  ///   fields: ["title": .string("Hello, CloudKit")],
-  ///   database: .private
-  /// )
-  /// ```
-  public func createRecord(
-    recordType: String,
-    recordName: String? = nil,
-    fields: [String: FieldValue],
-    database: Database
-  ) async throws(CloudKitError) -> RecordInfo {
-    let operation = RecordOperation.create(
-      recordType: recordType,
-      recordName: recordName,
-      fields: fields
-    )
-
-    let results = try await modifyRecords([operation], database: database)
-    guard let result = results.first else {
-      throw CloudKitError.invalidResponse
-    }
-    return try result.get()
-  }
-
-  /// Update a single record in CloudKit
-  /// - Parameters:
-  ///   - recordType: The type of record to update
-  ///   - recordName: The unique record name
-  ///   - fields: Dictionary of field names to FieldValue
-  ///   - recordChangeTag: Optional change tag for optimistic locking
-  ///   - database: The CloudKit database scope to write to (`.public`, `.private`, `.shared`)
-  /// - Returns: RecordInfo for the updated record
-  /// - Throws: CloudKitError if the operation fails
-  ///
-  /// # Example
-  /// ```swift
-  /// let updated = try await service.updateRecord(
-  ///   recordType: "Article",
-  ///   recordName: existing.recordName,
-  ///   fields: ["title": .string("Renamed")],
-  ///   recordChangeTag: existing.recordChangeTag,
-  ///   database: .private
-  /// )
-  /// ```
-  public func updateRecord(
-    recordType: String,
-    recordName: String,
-    fields: [String: FieldValue],
-    recordChangeTag: String? = nil,
-    database: Database
-  ) async throws(CloudKitError) -> RecordInfo {
-    let operation = RecordOperation.update(
-      recordType: recordType,
-      recordName: recordName,
-      fields: fields,
-      recordChangeTag: recordChangeTag
-    )
-
-    let results = try await modifyRecords([operation], database: database)
-    guard let result = results.first else {
-      throw CloudKitError.invalidResponse
-    }
-    return try result.get()
-  }
-
-  /// Delete a single record from CloudKit
-  /// - Parameters:
-  ///   - recordType: The type of record to delete
-  ///   - recordName: The unique record name
-  ///   - recordChangeTag: Optional change tag for optimistic locking
-  ///   - database: The CloudKit database scope to delete from (`.public`, `.private`, `.shared`)
-  /// - Throws: CloudKitError if the operation fails
-  public func deleteRecord(
-    recordType: String,
-    recordName: String,
-    recordChangeTag: String? = nil,
-    database: Database
-  ) async throws(CloudKitError) {
-    let operation = RecordOperation.delete(
-      recordType: recordType,
-      recordName: recordName,
-      recordChangeTag: recordChangeTag
-    )
-
-    let results = try await modifyRecords([operation], database: database)
-    for result in results {
-      // `get()` rethrows a per-record failure as `recordOperationFailed`.
-      _ = try result.get()
     }
   }
 }

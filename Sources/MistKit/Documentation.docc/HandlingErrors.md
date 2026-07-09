@@ -124,6 +124,30 @@ do {
 }
 ```
 
+### Subscription duplicates surface as `INTERNAL_ERROR`
+
+CloudKit Web Services enforces subscription uniqueness on the **`(recordType, firesOn)`** tuple, *not* on `subscriptionID`. A second subscription that repeats an existing `(recordType, firesOn)` pair under a *different* ID is rejected — but the rejection arrives as a generic ``CloudKitError/httpErrorWithDetails(statusCode:serverErrorCode:reason:)`` carrying `serverErrorCode` `INTERNAL_ERROR` and the misleading reason `"could not find subscription we just created"`. There is no formal `CONFLICT`/`EXISTS` server code for this case.
+
+MistKit infers the duplicate from that reason string and surfaces it through two hedged hints:
+
+- ``OperationFailure/isLikelyDuplicate`` — opt-in `Bool` on a ``SubscriptionOperationFailure``, an exact-match on the marker reason.
+- ``CloudKitError/subscriptionLikelyDuplicate(_:)`` — thrown from the single-subscription ``CloudKitService/createSubscription(_:database:)`` convenience when the hint matches.
+
+Both are intentionally hedged (`isLikely…`) because the wire-level code is just `INTERNAL_ERROR` — the duplicate interpretation is MistKit's inference from the reason string, not a confirmed server signal. Batch ``CloudKitService/modifySubscriptions(_:database:)`` is unchanged: per-subscription failures still flow through ``SubscriptionResult/failure(_:)`` with the raw `serverErrorCode` and reason intact, so callers that want the unhedged result can inspect them directly.
+
+```swift
+do {
+  try await service.createSubscription(subscription, database: .public(.requires(.webAuth)))
+} catch CloudKitError.subscriptionLikelyDuplicate(let failure) {
+  // Likely a pre-existing subscription with the same (recordType, firesOn).
+  // Reconcile by that identity via listSubscriptions — not by subscriptionID,
+  // since an existing subscription under a different ID still collides.
+  logger.warning("Subscription likely duplicate: \(failure.reason ?? "")")
+}
+```
+
+> Note: Empirical probing (2026-05-25, public DB) confirmed the uniqueness key is `(recordType, firesOn)` with **exact-set** match on `firesOn` (a superset or disjoint fire-event set does *not* collide), and that re-creating with the *same* `subscriptionID` succeeds idempotently rather than erroring. CloudKit is silent on which subscription collided; reconcile client-side by `(recordType, firesOn)`, not by ID.
+
 ## Retry and recovery
 
 Recoverable failures fall into three buckets:
@@ -182,3 +206,8 @@ func isTransient(_ error: CloudKitError) -> Bool {
 - ``NetworkErrorReason``
 - ``InternalErrorReason``
 - ``CredentialAvailability``
+
+### Per-operation failures
+
+- ``SubscriptionOperationFailure``
+- ``SubscriptionResult``

@@ -59,6 +59,7 @@ if [ -z "$FORMAT_ONLY" ]; then
 fi
 
 $PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "BushelCloud"
+$PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Tests -c "Leo Dion" -o "BrightDigit" -p "BushelCloud"
 
 # Generated files now automatically include ignore directives via OpenAPI generator configuration
 

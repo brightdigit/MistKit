@@ -51,6 +51,10 @@ extension CloudKitService {
   ///     (defaults to _defaultZone)
   ///   - syncToken: Optional token from previous fetch (nil = initial fetch)
   ///   - resultsLimit: Optional maximum number of records (1-200)
+  ///   - desiredKeys: Optional list of field names limiting the fields returned per
+  ///     changed record.
+  ///   - desiredRecordTypes: Optional list of record-type names limiting the change feed
+  ///     to specific record types.
   ///   - database: The CloudKit database scope to query (`.public`, `.private`, `.shared`)
   /// - Returns: RecordChangesResult containing changed records
   ///   and new sync token
@@ -82,6 +86,8 @@ extension CloudKitService {
     zoneID: ZoneID? = nil,
     syncToken: String? = nil,
     resultsLimit: Int? = nil,
+    desiredKeys: [String]? = nil,
+    desiredRecordTypes: [String]? = nil,
     database: Database
   ) async throws(CloudKitError) -> RecordChangesResult {
     let effectiveZoneID = zoneID ?? .defaultZone
@@ -99,7 +105,9 @@ extension CloudKitService {
             .init(
               zoneID: Components.Schemas.ZoneID(from: effectiveZoneID),
               syncToken: syncToken,
-              resultsLimit: resultsLimit
+              resultsLimit: resultsLimit,
+              desiredKeys: desiredKeys,
+              desiredRecordTypes: desiredRecordTypes
             )
           )
         )
@@ -126,6 +134,10 @@ extension CloudKitService {
   ///     (defaults to _defaultZone)
   ///   - syncToken: Optional token from previous fetch (nil = initial fetch)
   ///   - resultsLimit: Optional maximum records per request (1-200)
+  ///   - desiredKeys: Optional list of field names limiting the fields returned per
+  ///     changed record.
+  ///   - desiredRecordTypes: Optional list of record-type names limiting the change feed
+  ///     to specific record types.
   ///   - maxPages: Maximum number of pages to fetch before throwing
   ///     `CloudKitError.paginationLimitExceeded` (defaults to 1,000)
   ///   - database: The CloudKit database scope to query (`.public`, `.private`, `.shared`)
@@ -157,6 +169,8 @@ extension CloudKitService {
     zoneID: ZoneID? = nil,
     syncToken: String? = nil,
     resultsLimit: Int? = nil,
+    desiredKeys: [String]? = nil,
+    desiredRecordTypes: [String]? = nil,
     maxPages: Int = 1_000,
     database: Database
   ) async throws(CloudKitError) -> (records: [RecordInfo], syncToken: String?) {
@@ -183,6 +197,8 @@ extension CloudKitService {
         zoneID: zoneID,
         syncToken: currentToken,
         resultsLimit: resultsLimit,
+        desiredKeys: desiredKeys,
+        desiredRecordTypes: desiredRecordTypes,
         database: database
       )
 

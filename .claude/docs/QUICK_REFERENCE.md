@@ -300,6 +300,35 @@ for try await record in database.records(matching: query) {
 
 ---
 
+## Known Endpoint Discrepancies
+
+### APNs token endpoints route under `/device/`, not `/database/` (#382)
+
+Apple's archived CloudKit Web Services REST reference
+([CreateTokens](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/CreateTokens.html) /
+[RegisterTokens](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/RegisterTokens.html))
+documents the APNs token endpoints under the `/database/` path. **The live
+service does not route them there** — only `OPTIONS` is allowed and a `POST`
+returns `405 Method Not Allowed` (`Allow: OPTIONS`).
+
+| | Path |
+|--|------|
+| **Documented (archived REST reference)** | `POST /database/{version}/{container}/{environment}/{database}/tokens/{create,register}` |
+| **What actually works (matches CloudKit JS)** | `POST /device/{version}/{container}/{environment}/tokens/{create,register}` |
+
+CloudKit JS calls `setApiModuleName("device")` for token requests, producing
+the `/device/...` path, which returns `200` with the expected
+`{ apnsEnvironment, apnsToken, webcourierURL }` body. Note the `/device/` path
+is **container-scoped** — there is **no `{database}` segment**, unlike most
+other endpoints.
+
+MistKit deliberately diverges from Apple's published REST docs here:
+`openapi.yaml` already documents the working `/device/...` paths and rationale.
+This note exists so the divergence isn't re-discovered. See issue
+[#382](https://github.com/brightdigit/MistKit/issues/382) for the canonical record.
+
+---
+
 ## Development Checklist
 
 ### Before implementing an endpoint:

@@ -143,6 +143,21 @@ public struct MistDemoConfiguration: Sendable {
     )
   }
 
+  /// Read an optional bool: `nil` when the key is absent, else its parsed value.
+  ///
+  /// Distinguishes "flag not provided" (`nil` → omit from the request) from an
+  /// explicit `false`, unlike `bool(forKey:default:)` which collapses both.
+  public func optionalBool(forKey key: String) -> Bool? {
+    string(forKey: key) != nil ? bool(forKey: key) : nil
+  }
+
+  /// Read a comma-separated list of strings, or `nil` when the key is absent.
+  public func commaSeparatedList(forKey key: String) -> [String]? {
+    string(forKey: key)?
+      .split(separator: ",")
+      .map { String($0).trimmingCharacters(in: .whitespaces) }
+  }
+
   /// Read a pipe-separated list of strings from configuration.
   public func filterStrings(forKey key: String) -> [String] {
     string(forKey: key)?

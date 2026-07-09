@@ -60,6 +60,8 @@ internal struct PublicDatabaseTest: PhasedIntegrationTest {
       QueryRecordsPhase(),
       LookupRecordsPhase(),
       ModifyRecordsPhase(),
+      QueryRequestOptionsPhase(),
+      ModifyRequestOptionsPhase(),
       FinalVerificationPhase(),
       CleanupPhase(),
     ]

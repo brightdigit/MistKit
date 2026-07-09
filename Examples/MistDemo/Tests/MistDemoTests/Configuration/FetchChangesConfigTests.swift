@@ -90,4 +90,26 @@ internal struct FetchChangesConfigTests {
 
     #expect(config.limit == nil)
   }
+
+  @Test("FetchChangesConfig defaults desiredKeys and desiredRecordTypes to nil")
+  internal func changeFeedOptionsDefaultToNil() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = FetchChangesConfig(base: baseConfig)
+
+    #expect(config.desiredKeys == nil)
+    #expect(config.desiredRecordTypes == nil)
+  }
+
+  @Test("FetchChangesConfig carries explicit desiredKeys and desiredRecordTypes")
+  internal func carriesChangeFeedOptions() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = FetchChangesConfig(
+      base: baseConfig,
+      desiredKeys: ["title", "body"],
+      desiredRecordTypes: ["Note", "Comment"]
+    )
+
+    #expect(config.desiredKeys == ["title", "body"])
+    #expect(config.desiredRecordTypes == ["Note", "Comment"])
+  }
 }

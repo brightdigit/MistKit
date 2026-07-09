@@ -51,6 +51,8 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
       --zone <name>            Zone name (default: _defaultZone)
       --fetch-all              Auto-paginate all changes
       --limit <count>          Max results per page (1-200)
+      --fields <fields>        Comma-separated fields (desiredKeys)
+      --record-types <types>   Comma-separated record types to include
       --database <type>        Database to target
       --output-format <format> Output format
 
@@ -109,6 +111,8 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
     let (records, newToken) = try await service.fetchAllRecordChanges(
       zoneID: zoneID,
       syncToken: config.syncToken,
+      desiredKeys: config.desiredKeys,
+      desiredRecordTypes: config.desiredRecordTypes,
       database: config.base.database
     )
     print("\n✅ Fetched \(records.count) record(s)")
@@ -127,6 +131,8 @@ public struct FetchChangesCommand: MistDemoCommand, OutputFormatting {
       zoneID: zoneID,
       syncToken: config.syncToken,
       resultsLimit: config.limit ?? 10,
+      desiredKeys: config.desiredKeys,
+      desiredRecordTypes: config.desiredRecordTypes,
       database: config.base.database
     )
     print("\n✅ Fetched \(result.records.count) record(s)")
