@@ -263,16 +263,16 @@ public struct SyncEngine: Sendable {
 
       // Classify operations for each type
       let swiftClassification = OperationClassification(
-        proposedRecords: fetchResult.swiftVersions.map(\.recordName),
-        existingRecords: swiftNames
+        proposedRecordNames: fetchResult.swiftVersions.map(\.recordName),
+        existingRecordNames: swiftNames
       )
       let restoreClassification = OperationClassification(
-        proposedRecords: fetchResult.restoreImages.map(\.recordName),
-        existingRecords: restoreNames
+        proposedRecordNames: fetchResult.restoreImages.map(\.recordName),
+        existingRecordNames: restoreNames
       )
       let xcodeClassification = OperationClassification(
-        proposedRecords: fetchResult.xcodeVersions.map(\.recordName),
-        existingRecords: xcodeNames
+        proposedRecordNames: fetchResult.xcodeVersions.map(\.recordName),
+        existingRecordNames: xcodeNames
       )
 
       Self.logger.debug(

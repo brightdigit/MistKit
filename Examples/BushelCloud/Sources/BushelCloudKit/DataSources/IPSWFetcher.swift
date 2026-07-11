@@ -31,8 +31,8 @@ internal import BushelFoundation
 internal import BushelUtilities
 internal import Foundation
 internal import IPSWDownloads
-internal import OpenAPIURLSession
 internal import OSVer
+internal import OpenAPIURLSession
 
 #if canImport(FoundationNetworking)
   internal import FoundationNetworking

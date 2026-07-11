@@ -70,11 +70,6 @@ jobs:
         # queries: security-extended,security-and-quality
 
 
-    - name: Setup MistKit
-      uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
-      with:
-        branch: v1.0.0-beta.2
-
     # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
     # If this step fails, then you should remove it and run the build manually (see below)
     - run: |

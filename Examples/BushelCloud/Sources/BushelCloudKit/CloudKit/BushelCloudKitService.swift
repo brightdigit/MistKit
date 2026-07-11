@@ -154,7 +154,10 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
 
   /// Query all records of a given type, automatically paginating
   public func queryRecords(recordType: String) async throws -> [RecordInfo] {
-    try await service.queryAllRecords(recordType: recordType)
+    try await service.queryAllRecords(
+      recordType: recordType,
+      database: .public(.prefers(.serverToServer))
+    )
   }
 
   /// Fetch existing record names for create/update classification
@@ -183,8 +186,11 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   /// This is the protocol-conforming version that doesn't track create vs update.
   /// For detailed tracking, use the overload with `classification` parameter.
   public func executeBatchOperations(_ operations: [RecordOperation]) async throws {
-    guard let recordType = operations.first?.recordType else { return }
-    let classification = OperationClassification(proposedRecords: [], existingRecords: [])
+    guard let recordType = operations.first?.recordType else {
+      Self.logger.debug("executeBatchOperations called with no operations; nothing to do")
+      return
+    }
+    let classification = OperationClassification(proposedRecordNames: [], existingRecordNames: [])
     _ = try await executeBatchOperations(
       operations, recordType: recordType, classification: classification
     )
@@ -233,39 +239,44 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
         "Calling MistKit service.modifyRecords() with \(batch.count) RecordOperation objects"
       )
 
-      // Annotate the element type explicitly: the Linux Swift compiler otherwise
-      // infers `[RecordInfo]` for this call, breaking the .success/.failure switch
-      // below (see brightdigit/BushelCloud CI on Ubuntu).
-      let results: [RecordResult] = try await service.modifyRecords(
+      // MistKit partitions the results into created/updated/failed for us based on
+      // the pre-computed classification. Note: it does NOT chunk, so we keep our own
+      // 200-op batching above and hand it one batch at a time.
+      let batchResult = try await service.modifyRecords(
         batch,
+        classification: classification,
         database: .public(.prefers(.serverToServer))
       )
 
       Self.logger.debug(
-        "Received \(results.count) per-record results from CloudKit"
+        "Received \(batchResult.totalCount) per-record results from CloudKit"
       )
 
-      // Track results based on classification
-      var batchSucceeded = 0
-      var batchFailed = 0
-      for result in results {
-        switch result {
-        case .failure(let error):
-          totalFailed += 1
-          batchFailed += 1
-          failedRecordNames.append(error.identifier)
-          Self.logger.debug(
-            "Error: recordName=\(error.identifier), code=\(error.serverErrorCode.rawValue)"
-          )
-        case .success(let record):
-          batchSucceeded += 1
-          // Classify as create or update based on pre-fetch
-          if classification.creates.contains(record.recordName) {
-            totalCreated += 1
-          } else if classification.updates.contains(record.recordName) {
-            totalUpdated += 1
-          }
-        }
+      // Accumulate totals. We intentionally ignore MistKit's `unclassified` bucket
+      // (successes whose record name is in neither set) to preserve the historical
+      // created + updated == succeeded semantics of TypeSyncResult.
+      let batchFailed = batchResult.failedCount
+      let batchSucceeded = batchResult.createdCount + batchResult.updatedCount
+      totalCreated += batchResult.createdCount
+      totalUpdated += batchResult.updatedCount
+      totalFailed += batchFailed
+
+      // The counts above deliberately drop MistKit's `unclassified` bucket, so
+      // created + updated + failed can be < totalCount. Log when that happens so
+      // the summary totals don't look like silent data loss while debugging.
+      let batchUnclassified =
+        batchResult.totalCount - batchResult.createdCount - batchResult.updatedCount - batchFailed
+      if batchUnclassified > 0 {
+        Self.logger.debug(
+          "\(batchUnclassified) record(s) in MistKit's 'unclassified' bucket; excluded from totals."
+        )
+      }
+
+      for failure in batchResult.failed {
+        failedRecordNames.append(failure.identifier)
+        Self.logger.debug(
+          "Error: recordName=\(failure.identifier), code=\(failure.serverErrorCode.rawValue)"
+        )
       }
 
       if batchFailed > 0 {

@@ -21,7 +21,6 @@ concurrency:
 
 env:
   PACKAGE_NAME: BushelCloud
-  MISTKIT_BRANCH: v1.0.0-beta.2
 
 jobs:
   configure:
@@ -84,11 +83,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup MistKit
-        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
-        with:
-          branch: ${{ env.MISTKIT_BRANCH }}
-
       - uses: brightdigit/swift-build@v1
         id: build
         with:
@@ -131,10 +125,6 @@ jobs:
   #           build: 6.3-RELEASE
   #   steps:
   #     - uses: actions/checkout@v6
-  #     - name: Setup MistKit
-  #       uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
-  #       with:
-  #         branch: ${{ env.MISTKIT_BRANCH }}
   #     - uses: brightdigit/swift-build@v1
   #       id: build
   #       with:
@@ -173,15 +163,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup MistKit
-        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
-        with:
-          branch: ${{ env.MISTKIT_BRANCH }}
-
       - name: Build and Test
         id: build
         uses: brightdigit/swift-build@v1
         with:
+          scheme: ${{ env.PACKAGE_NAME }}-Package
           type: ${{ matrix.type }}
           xcode: ${{ matrix.xcode }}
           deviceName: ${{ matrix.deviceName }}
@@ -237,15 +223,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup MistKit
-        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
-        with:
-          branch: ${{ env.MISTKIT_BRANCH }}
-
       - name: Build and Test
         id: build
         uses: brightdigit/swift-build@v1
         with:
+          scheme: ${{ env.PACKAGE_NAME }}-Package
           type: ${{ matrix.type }}
           xcode: ${{ matrix.xcode }}
           deviceName: ${{ matrix.deviceName }}
