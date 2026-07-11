@@ -343,12 +343,15 @@ let concurrency = config.update.concurrency
 ## Swift 6.2 Features
 
 Package.swift enables extensive Swift 6.2 upcoming and experimental features:
-- Strict concurrency checking (`-strict-concurrency=complete`)
 - Existential `any` keyword
 - Typed throws
 - Noncopyable generics
 - Move-only types
 - Variadic generics
+
+Strict concurrency checking comes from the Swift 6.2 language mode default
+(`swift-tools-version: 6.2`); the explicit `-strict-concurrency=complete` flag
+in `Package.swift` is currently commented out.
 
 Code must be concurrency-safe with proper actor isolation.
 

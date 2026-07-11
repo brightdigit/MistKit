@@ -1,0 +1,42 @@
+name: Dependency Policy
+
+# Gate for PRs targeting `main`: Package.swift may only use tagged (version)
+# dependencies. Branch, revision, or local-path dependencies are integration-only
+# and must be bumped to a released tag before merging into `main`.
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tagged-dependencies:
+    name: Verify tagged dependencies
+    runs-on: ubuntu-latest
+    container: swift:6.2-noble
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Package.swift uses only tagged dependencies
+        run: |
+          swift package dump-package > package.json
+
+          bad=$(jq -r '
+            ([ .dependencies[] | (.sourceControl // [])[]
+               | select((.requirement | keys[0]) as $k | $k == "branch" or $k == "revision")
+               | "\(.identity): \(.requirement | keys[0]) \(.requirement | to_entries[0].value)" ]
+             + [ .dependencies[] | (.fileSystem // [])[]
+               | "\(.identity): local path (\(.path))" ])[]' package.json)
+
+          if [ -n "$bad" ]; then
+            echo "::error::Package.swift must use only tagged (version) dependencies on PRs targeting main."
+            echo "Non-tagged dependencies found:"
+            echo "$bad"
+            exit 1
+          fi
+
+          echo "✅ All dependencies use tagged (version) requirements."

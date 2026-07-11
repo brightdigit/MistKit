@@ -21,7 +21,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --help, -h   Show this help message"
       echo ""
       echo "Environment variables:"
-      echo "  CLOUDKIT_CONTAINER_ID   CloudKit container ID (default: iCloud.com.brightdigit.Bushel)"
+      echo "  CLOUDKIT_CONTAINER_ID   CloudKit container ID (default: iCloud.com.brightdigit.Celestra)"
       echo "  CLOUDKIT_TEAM_ID        Apple Developer Team ID (10-character)"
       echo "  CLOUDKIT_ENVIRONMENT    Environment (development or production, default: development)"
       exit 0
@@ -181,7 +181,7 @@ if xcrun cktool import-schema \
     echo "     a. Go to: https://icloud.developer.apple.com/dashboard/"
     echo "     b. Navigate to: API Access → Server-to-Server Keys"
     echo "     c. Create a new key and download the private key .pem file"
-    echo "     d. Store it securely (e.g., ~/.cloudkit/bushel-private-key.pem)"
+    echo "     d. Store it securely (e.g., ~/.cloudkit/celestra-private-key.pem)"
     echo ""
     echo "  2. Configure your .env file with CloudKit credentials"
     echo "  3. Run 'swift run celestra add-feed <url>' to add an RSS feed"

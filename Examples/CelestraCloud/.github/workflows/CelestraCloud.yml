@@ -108,7 +108,7 @@ jobs:
         if: steps.build.outputs.contains-code-coverage == 'true'
         uses: codecov/codecov-action@v6
         with:
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           flags: swift-${{ matrix.swift }}-${{ matrix.os }}
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -145,7 +145,7 @@ jobs:
         if: steps.build.outputs.contains-code-coverage == 'true'
         uses: codecov/codecov-action@v6
         with:
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           flags: swift-${{ matrix.swift.version }},windows
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -161,13 +161,13 @@ jobs:
       matrix:
         include:
           # SPM build
-          - xcode: "/Applications/Xcode_26.4.app"
+          - xcode: "/Applications/Xcode_26.6.app"
 
           # iOS build
           - type: ios
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "iPhone 17 Pro"
-            osVersion: "26.4.1"
+            osVersion: "26.5"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -209,27 +209,27 @@ jobs:
         include:
           # macOS
           - type: macos
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
 
           # watchOS
           - type: watchos
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "26.4"
+            osVersion: "26.5"
             download-platform: true
 
           # tvOS
           - type: tvos
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "Apple TV"
-            osVersion: "26.4"
+            osVersion: "26.5"
             download-platform: true
 
           # visionOS
           - type: visionos
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.4.1"
+            osVersion: "26.5"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
