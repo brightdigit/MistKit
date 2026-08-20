@@ -11,8 +11,12 @@ set -uo pipefail
 
 [ "${CLAUDE_CODE_REMOTE:-}" = "true" ] || exit 0
 
-# Matches Package.swift's swift-tools-version.
-readonly SWIFT_VERSION="6.1"
+# The root Package.swift declares swift-tools-version 6.1, but
+# Examples/MistDemo declares 6.2 — installing 6.1 makes the example packages
+# unbuildable ("package is using Swift tools version 6.2.0 but the installed
+# version is 6.1.0"). Install the highest tools-version any package in the
+# repo requires; a newer toolchain still builds the older manifests.
+readonly SWIFT_VERSION="6.2"
 readonly SWIFT_RELEASE="swift-${SWIFT_VERSION}-RELEASE"
 # download.swift.org spells the platform two different ways: the URL path
 # segment is dotless ("ubuntu2404") while the archive/extracted directory name
