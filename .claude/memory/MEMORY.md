@@ -33,3 +33,5 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [macOS APNs entitlement key](project_macos_aps_entitlement_key.md) — macOS needs `com.apple.developer.aps-environment`; iOS uses `aps-environment`. codesign silently strips the wrong-platform key.
 - [RecordResult pattern throughout API](feedback_record_result_pattern_throughout.md) — Surface per-item modify failures with the RecordResult success-or-failure pattern everywhere (subscriptions, zones…), not just records
 - [Subrepo-local fixes belong in the subrepo](feedback_subrepo_fixes_belong_in_subrepo.md) — Changes isolated to an Example subrepo (e.g. CelestraCloud copyright headers) go in that subrepo's own repo, not a parent MistKit branch
+- [beta.4 worktree layout](project_beta4_worktree_layout.md) — Remaining v1.0.0-beta.4 issues are developed in parallel worktrees under MistKit.git/wt-<branch>, PR'd to the v1.0.0-beta.4 base
+- [#419 already fixed in beta.3](project_419_fixed_in_beta3.md) — MistDemoApp view inits shipped in 5a58120; verified building on macOS Swift 6.3.2, do not re-implement
