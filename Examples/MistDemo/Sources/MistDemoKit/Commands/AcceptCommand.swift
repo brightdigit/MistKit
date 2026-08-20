@@ -1,5 +1,5 @@
 //
-//  ResolveCommand.swift
+//  AcceptCommand.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,23 +30,22 @@
 internal import Foundation
 internal import MistKit
 
-/// Command for `records/resolve`. Resolves share short GUIDs — the handle
-/// carried by CloudKit share URLs — into the root record, the governing
-/// `cloudKit.share` record, and the caller's participation in each share.
-public struct ResolveCommand: MistDemoCommand, OutputFormatting {
+/// Command for `records/accept`. Accepts shares identified by short GUID on
+/// behalf of the current user, adding the caller as a participant.
+public struct AcceptCommand: MistDemoCommand, OutputFormatting {
   /// The configuration type.
-  public typealias Config = ResolveConfig
+  public typealias Config = AcceptConfig
   /// The command name.
-  public static let commandName = "resolve"
+  public static let commandName = "accept"
   /// The command abstract.
-  public static let abstract = "Resolve share short GUIDs (records/resolve)"
+  public static let abstract = "Accept shares by short GUID (records/accept)"
   /// The command help text.
   public static let helpText = """
-    RESOLVE - Resolve share short GUIDs
+    ACCEPT - Accept shares by short GUID
 
     USAGE:
-      mistdemo resolve --short-guid <guid>[,<guid>...] [options]
-      mistdemo resolve --share-url <url>[,<url>...] [options]
+      mistdemo accept --short-guid <guid>[,<guid>...] [options]
+      mistdemo accept --share-url <url>[,<url>...] [options]
 
     INPUT (choose one):
       --short-guid <list>          Comma-separated short GUIDs
@@ -60,26 +59,27 @@ public struct ResolveCommand: MistDemoCommand, OutputFormatting {
       --output-format <format>     Output format (json, table, csv, yaml)
 
     EXAMPLES:
-      mistdemo resolve --short-guid abc123
-      mistdemo resolve --short-guid abc123,def456 --fetch-root-record
-      mistdemo resolve --share-url https://www.icloud.com/share/abc123
+      mistdemo accept --short-guid abc123
+      mistdemo accept --share-url https://www.icloud.com/share/abc123
 
     NOTES:
-      Requires API + web-auth credentials — CloudKit pins records/resolve
+      Requires API + web-auth credentials — CloudKit pins records/accept
       to the public database with web-auth regardless of --database.
+      Accepting an already-accepted or invalid short GUID fails the
+      entire request.
     """
 
-  private let config: ResolveConfig
+  private let config: AcceptConfig
 
   /// Creates a new instance.
-  public init(config: ResolveConfig) {
+  public init(config: AcceptConfig) {
     self.config = config
   }
 
   /// Executes the command.
   public func execute() async throws {
     guard config.base.hasUserContextCredentials else {
-      throw ResolveError.webAuthRequired
+      throw AcceptError.webAuthRequired
     }
 
     let service = try MistKitClientFactory.create(for: config.base)
@@ -92,19 +92,19 @@ public struct ResolveCommand: MistDemoCommand, OutputFormatting {
     }
 
     do {
-      let results = try await service.resolveShares(shortGUIDs)
+      let results = try await service.acceptShares(shortGUIDs)
       printSummary(results)
       try await outputResults(results, format: config.output)
-    } catch let error as ResolveError {
+    } catch let error as AcceptError {
       throw error
     } catch {
-      throw ResolveError.operationFailed(error.localizedDescription)
+      throw AcceptError.operationFailed(error.localizedDescription)
     }
   }
 
   private func printSummary(_ results: [ShareRecordInfo]) {
     print(
-      "✅ Resolved \(results.count) share\(results.count == 1 ? "" : "s")"
+      "✅ Accepted \(results.count) share\(results.count == 1 ? "" : "s")"
     )
     for result in results {
       print("   - shortGUID: \(result.shortGUID?.value ?? "-")")

@@ -1,5 +1,5 @@
 //
-//  PhaseContext.swift
+//  WebRequests+Shares.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,26 +28,34 @@
 //
 
 internal import Foundation
-internal import MistKit
 
-/// Shared dependencies and configuration available to every phase.
-internal struct PhaseContext: Sendable {
-  internal let service: CloudKitService
-  internal let containerIdentifier: String
-  internal let database: MistKit.Database
-  internal let recordCount: Int
-  internal let assetSizeKB: Int
-  internal let skipCleanup: Bool
-  internal let verbose: Bool
-  /// Optional email address used by `LookupUsersByEmailPhase` to exercise
-  /// `users/lookup/email` against a known-discoverable iCloud account. When
-  /// nil, the phase falls back to the caller's own email (often unavailable)
-  /// and skips otherwise.
-  internal let lookupEmail: String?
-  /// Optional share short GUID used by `ResolveRecordsPhase` and
-  /// `AcceptSharesPhase` to exercise `records/resolve` / `records/accept`
-  /// against a known share. There is no way to mint a short GUID from
-  /// within this pipeline — it must come from a share created out of band
-  /// — so both phases skip when this is `nil`.
-  internal let shareShortGUID: String?
+// Sharing routes have no `database` field: `resolveShares` / `acceptShares`
+// operate on the public database with web-auth credentials regardless of
+// the request's selected database.
+extension WebRequests {
+  /// `POST /api/records/resolve` and `POST /api/records/accept` — resolve or
+  /// accept shares identified by short GUID.
+  internal struct ResolveOrAcceptShares: Decodable {
+    private enum CodingKeys: String, CodingKey {
+      case shortGUIDs
+      case fetchRootRecord
+      case fields
+    }
+
+    internal let shortGUIDs: [String]
+    internal let fetchRootRecord: Bool?
+    internal let fields: [String]?
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.shortGUIDs =
+        try container.decodeIfPresent([String].self, forKey: .shortGUIDs) ?? []
+      self.fetchRootRecord = try container.decodeIfPresent(
+        Bool.self, forKey: .fetchRootRecord
+      )
+      self.fields = try container.decodeIfPresent(
+        [String].self, forKey: .fields
+      )
+    }
+  }
 }

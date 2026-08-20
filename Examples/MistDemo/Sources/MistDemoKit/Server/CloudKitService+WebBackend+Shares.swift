@@ -1,5 +1,5 @@
 //
-//  PhaseContext.swift
+//  CloudKitService+WebBackend+Shares.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,24 +30,40 @@
 internal import Foundation
 internal import MistKit
 
-/// Shared dependencies and configuration available to every phase.
-internal struct PhaseContext: Sendable {
-  internal let service: CloudKitService
-  internal let containerIdentifier: String
-  internal let database: MistKit.Database
-  internal let recordCount: Int
-  internal let assetSizeKB: Int
-  internal let skipCleanup: Bool
-  internal let verbose: Bool
-  /// Optional email address used by `LookupUsersByEmailPhase` to exercise
-  /// `users/lookup/email` against a known-discoverable iCloud account. When
-  /// nil, the phase falls back to the caller's own email (often unavailable)
-  /// and skips otherwise.
-  internal let lookupEmail: String?
-  /// Optional share short GUID used by `ResolveRecordsPhase` and
-  /// `AcceptSharesPhase` to exercise `records/resolve` / `records/accept`
-  /// against a known share. There is no way to mint a short GUID from
-  /// within this pipeline — it must come from a share created out of band
-  /// — so both phases skip when this is `nil`.
-  internal let shareShortGUID: String?
+// Sharing `WebBackend` conformance. Like the user-identity routes, these
+// operate on the public database with web-auth credentials, so neither
+// takes a `database` argument. The primary conformance declaration lives in
+// `CloudKitService+WebBackend.swift`.
+extension CloudKitService {
+  internal func webResolveShares(
+    shortGUIDs: [String],
+    fetchRootRecord: Bool?,
+    fields: [String]?
+  ) async throws -> [ShareRecordInfo] {
+    try await resolveShares(
+      shortGUIDs.map {
+        ShortGUID(
+          value: $0,
+          shouldFetchRootRecord: fetchRootRecord,
+          rootRecordDesiredKeys: fields
+        )
+      }
+    )
+  }
+
+  internal func webAcceptShares(
+    shortGUIDs: [String],
+    fetchRootRecord: Bool?,
+    fields: [String]?
+  ) async throws -> [ShareRecordInfo] {
+    try await acceptShares(
+      shortGUIDs.map {
+        ShortGUID(
+          value: $0,
+          shouldFetchRootRecord: fetchRootRecord,
+          rootRecordDesiredKeys: fields
+        )
+      }
+    )
+  }
 }

@@ -61,6 +61,8 @@
     internal var lastRegisterToken: RegisterTokenCall?
     internal var lastRereferenceAsset: RereferenceAssetCall?
     internal var lastUploadAsset: UploadAssetCall?
+    internal var lastResolveShares: ResolveOrAcceptSharesCall?
+    internal var lastAcceptShares: ResolveOrAcceptSharesCall?
     private var pendingError: String?
 
     /// Stub subscriptions (tests can seed); defaults to one query subscription.

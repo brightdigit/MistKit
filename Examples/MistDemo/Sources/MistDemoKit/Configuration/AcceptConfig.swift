@@ -1,5 +1,5 @@
 //
-//  TestPublicConfig.swift
+//  AcceptConfig.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -28,9 +28,10 @@
 //
 
 public import ConfigKeyKit
+internal import Foundation
 
-/// Configuration for test-public command.
-public struct TestPublicConfig: Sendable, ConfigurationParseable {
+/// Configuration for the `accept` command (`records/accept`).
+public struct AcceptConfig: Sendable, ConfigurationParseable {
   /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
   /// The base configuration type.
@@ -38,38 +39,29 @@ public struct TestPublicConfig: Sendable, ConfigurationParseable {
 
   /// The base MistDemo configuration.
   public let base: MistDemoConfig
-  /// The number of records to create during testing.
-  public let recordCount: Int
-  /// The asset size in kilobytes for upload testing.
-  public let assetSizeKB: Int
-  /// Whether to skip cleanup after testing.
-  public let skipCleanup: Bool
-  /// Whether to enable verbose output.
-  public let verbose: Bool
-  /// Optional email used by the lookup-users-by-email phase. Must belong to
-  /// an iCloud account discoverable to the caller; otherwise the phase skips.
-  public let lookupEmail: String?
-  /// Optional share short GUID used by the resolve/accept sharing phases.
-  /// Must identify an existing share; otherwise both phases skip.
-  public let shareShortGUID: String?
+  /// The short GUIDs to accept, in request order.
+  public let shortGUIDs: [String]
+  /// Whether to ask CloudKit to include the root record alongside each
+  /// accepted share. When `nil`, CloudKit applies its own default.
+  public let fetchRootRecord: Bool?
+  /// Field names limiting the root record payload, when fetched.
+  public let fields: [String]?
+  /// The output format.
+  public let output: OutputFormat
 
   /// Creates a new instance.
   public init(
     base: MistDemoConfig,
-    recordCount: Int = 10,
-    assetSizeKB: Int = 100,
-    skipCleanup: Bool = false,
-    verbose: Bool = false,
-    lookupEmail: String? = nil,
-    shareShortGUID: String? = nil
+    shortGUIDs: [String],
+    fetchRootRecord: Bool? = nil,
+    fields: [String]? = nil,
+    output: OutputFormat = .json
   ) {
     self.base = base
-    self.recordCount = recordCount
-    self.assetSizeKB = assetSizeKB
-    self.skipCleanup = skipCleanup
-    self.verbose = verbose
-    self.lookupEmail = lookupEmail
-    self.shareShortGUID = shareShortGUID
+    self.shortGUIDs = shortGUIDs
+    self.fetchRootRecord = fetchRootRecord
+    self.fields = fields
+    self.output = output
   }
 
   /// Parse configuration from command line arguments.
@@ -87,25 +79,31 @@ public struct TestPublicConfig: Sendable, ConfigurationParseable {
       )
     }
 
-    let recordCount =
-      configuration.int(forKey: "record.count", default: 10) ?? 10
-    let assetSizeKB =
-      configuration.int(forKey: "asset.size", default: 100) ?? 100
-    let skipCleanup =
-      configuration.bool(forKey: "skip.cleanup", default: false)
-    let verbose =
-      configuration.bool(forKey: "verbose", default: false)
-    let lookupEmail = configuration.string(forKey: "lookup.email")
-    let shareShortGUID = configuration.string(forKey: "share.short.guid")
+    let outputString =
+      configuration.string(
+        forKey: MistDemoConstants.ConfigKeys.outputFormat,
+        default: "json"
+      ) ?? "json"
+    let output = OutputFormat(rawValue: outputString) ?? .json
+
+    let fetchRootRecord = configuration.optionalBool(
+      forKey: "fetch.root.record"
+    )
+    let fields = configuration.commaSeparatedList(
+      forKey: MistDemoConstants.ConfigKeys.fields
+    )
+
+    let shortGUIDs = ResolveConfig.parseShortGUIDs(from: configuration)
+    guard !shortGUIDs.isEmpty else {
+      throw AcceptError.shortGUIDRequired
+    }
 
     self.init(
       base: baseConfig,
-      recordCount: recordCount,
-      assetSizeKB: assetSizeKB,
-      skipCleanup: skipCleanup,
-      verbose: verbose,
-      lookupEmail: lookupEmail,
-      shareShortGUID: shareShortGUID
+      shortGUIDs: shortGUIDs,
+      fetchRootRecord: fetchRootRecord,
+      fields: fields,
+      output: output
     )
   }
 }

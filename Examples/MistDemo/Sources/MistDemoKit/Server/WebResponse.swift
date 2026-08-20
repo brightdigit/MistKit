@@ -117,6 +117,13 @@ internal enum WebResponse {
     internal let registered: Bool
   }
 
+  /// Body returned by `records/resolve` and `records/accept`. `ShareRecordInfo`
+  /// already encodes to the wire shape the browser panel wants, so this is a
+  /// thin wrapper.
+  internal struct Shares: Encodable {
+    internal let results: [ShareRecordInfo]
+  }
+
   /// Body returned for any handled CloudKit/MistKit error so the UI can
   /// surface the message without parsing transport-level failures.
   internal struct Error: Encodable {

@@ -1,6 +1,6 @@
 //
-//  PhaseContext.swift
-//  MistDemo
+//  ResolveConfigTests.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,26 +28,34 @@
 //
 
 internal import Foundation
-internal import MistKit
+internal import Testing
 
-/// Shared dependencies and configuration available to every phase.
-internal struct PhaseContext: Sendable {
-  internal let service: CloudKitService
-  internal let containerIdentifier: String
-  internal let database: MistKit.Database
-  internal let recordCount: Int
-  internal let assetSizeKB: Int
-  internal let skipCleanup: Bool
-  internal let verbose: Bool
-  /// Optional email address used by `LookupUsersByEmailPhase` to exercise
-  /// `users/lookup/email` against a known-discoverable iCloud account. When
-  /// nil, the phase falls back to the caller's own email (often unavailable)
-  /// and skips otherwise.
-  internal let lookupEmail: String?
-  /// Optional share short GUID used by `ResolveRecordsPhase` and
-  /// `AcceptSharesPhase` to exercise `records/resolve` / `records/accept`
-  /// against a known share. There is no way to mint a short GUID from
-  /// within this pipeline — it must come from a share created out of band
-  /// — so both phases skip when this is `nil`.
-  internal let shareShortGUID: String?
+@testable import MistDemoKit
+
+@Suite("ResolveConfig Tests")
+internal struct ResolveConfigTests {
+  @Test("ResolveConfig stores short GUIDs and defaults")
+  internal func defaults() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = ResolveConfig(base: baseConfig, shortGUIDs: ["abc123"])
+
+    #expect(config.shortGUIDs == ["abc123"])
+    #expect(config.fetchRootRecord == nil)
+    #expect(config.fields == nil)
+    #expect(config.output == .json)
+  }
+
+  @Test("ResolveConfig parses short GUID from share URL path")
+  internal func parseShareURL() {
+    let guid = ResolveConfig.parseShortGUID(
+      fromShareURL: "https://www.icloud.com/share/abc123"
+    )
+    #expect(guid == "abc123")
+  }
+
+  @Test("ResolveCommand has correct static properties")
+  internal func commandMetadata() {
+    #expect(ResolveCommand.commandName == "resolve")
+    #expect(ResolveCommand.abstract.contains("resolve"))
+  }
 }

@@ -99,7 +99,8 @@ public struct TestPrivateCommand: MistDemoCommand {
       assetSizeKB: config.assetSizeKB,
       skipCleanup: config.skipCleanup,
       verbose: config.verbose,
-      lookupEmail: config.lookupEmail
+      lookupEmail: config.lookupEmail,
+      shareShortGUID: config.shareShortGUID
     )
 
     try await runner.runPrivateWorkflow()

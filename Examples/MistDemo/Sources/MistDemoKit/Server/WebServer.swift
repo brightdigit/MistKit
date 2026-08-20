@@ -133,7 +133,7 @@
       addSubscriptionEndpoints(api: api)
       addTokenEndpoints(api: api)
       addAssetEndpoints(api: api)
-      addPendingEndpoints(api: api)
+      addSharesEndpoints(api: api)
 
       return router
     }

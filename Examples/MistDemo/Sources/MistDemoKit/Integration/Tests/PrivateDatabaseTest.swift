@@ -35,10 +35,12 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
   internal let database: MistKit.Database = .private
 
   // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) are intentionally absent: CloudKit Web Services rejects
-  // these endpoints on the private database with "endpoint not applicable in
-  // the database type 'privatedb'". They only belong in the public-database
-  // pipeline; the service resolves web-auth credentials per call when needed.
+  // `users/lookup/*`) and the sharing phases (`ResolveRecordsPhase`,
+  // `AcceptSharesPhase`) are intentionally absent: CloudKit Web Services
+  // rejects these endpoints on the private database with "endpoint not
+  // applicable in the database type 'privatedb'". They only belong in the
+  // public-database pipeline; the service resolves web-auth credentials per
+  // call when needed.
   internal let phases: [any IntegrationPhase] = [
     ListZonesPhase(),
     ModifyZonesPhase(),

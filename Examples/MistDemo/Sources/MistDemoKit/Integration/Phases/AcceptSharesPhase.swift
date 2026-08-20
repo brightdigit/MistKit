@@ -1,5 +1,5 @@
 //
-//  ResolveRecordsPhase.swift
+//  AcceptSharesPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,20 +30,20 @@
 internal import Foundation
 internal import MistKit
 
-/// Calls POST `records/resolve`.
+/// Calls POST `records/accept`.
 ///
-/// Prefers the short GUID supplied via `PhaseContext.shareShortGUID`
-/// (`--share-short-guid` / `CLOUDKIT_SHARE_SHORT_GUID`) since resolving a
-/// share requires a short GUID that already exists — one isn't produced by
-/// any other phase in this pipeline. Skips (non-fatally) when no fixture
-/// short GUID is configured.
-internal struct ResolveRecordsPhase: IntegrationPhase {
+/// Like `ResolveRecordsPhase`, prefers the short GUID supplied via
+/// `PhaseContext.shareShortGUID` (`--share-short-guid` /
+/// `CLOUDKIT_SHARE_SHORT_GUID`) and skips (non-fatally) when it isn't
+/// configured. Accepting an already-accepted share fails the request, so
+/// this phase is only useful against a freshly-invited fixture share.
+internal struct AcceptSharesPhase: IntegrationPhase {
   internal typealias Input = NoState
   internal typealias Output = NoState
 
-  internal static let title = "Resolve shares"
-  internal static let emoji = "🔗"
-  internal static let apiName = "resolveShares"
+  internal static let title = "Accept shares"
+  internal static let emoji = "🤝"
+  internal static let apiName = "acceptShares"
 
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
@@ -59,12 +59,12 @@ internal struct ResolveRecordsPhase: IntegrationPhase {
       return NoState()
     }
 
-    let results = try await context.service.resolveShares([
+    let results = try await context.service.acceptShares([
       ShortGUID(value: shortGUID)
     ])
 
     print(
-      "✅ Resolved \(results.count) share\(results.count == 1 ? "" : "s")"
+      "✅ Accepted \(results.count) share\(results.count == 1 ? "" : "s")"
     )
 
     if context.verbose {

@@ -47,6 +47,8 @@ internal struct IntegrationTestRunner {
   internal let verbose: Bool
   /// Optional email forwarded to `PhaseContext.lookupEmail`.
   internal let lookupEmail: String?
+  /// Optional share short GUID forwarded to `PhaseContext.shareShortGUID`.
+  internal let shareShortGUID: String?
 
   /// Run the public-database workflow.
   internal func runBasicWorkflow() async throws {
@@ -71,7 +73,8 @@ internal struct IntegrationTestRunner {
       assetSizeKB: assetSizeKB,
       skipCleanup: skipCleanup,
       verbose: verbose,
-      lookupEmail: lookupEmail
+      lookupEmail: lookupEmail,
+      shareShortGUID: shareShortGUID
     )
   }
 }

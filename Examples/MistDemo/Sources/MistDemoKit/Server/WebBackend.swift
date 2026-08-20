@@ -148,6 +148,18 @@ internal protocol WebBackend: Sendable {
     recordName: String?,
     database: MistKit.Database
   ) async throws -> AssetUploadReceipt
+
+  func webResolveShares(
+    shortGUIDs: [String],
+    fetchRootRecord: Bool?,
+    fields: [String]?
+  ) async throws -> [ShareRecordInfo]
+
+  func webAcceptShares(
+    shortGUIDs: [String],
+    fetchRootRecord: Bool?,
+    fields: [String]?
+  ) async throws -> [ShareRecordInfo]
 }
 
 // The `CloudKitService: WebBackend` conformance lives in

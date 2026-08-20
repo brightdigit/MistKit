@@ -60,11 +60,16 @@ public struct TestPublicCommand: MistDemoCommand {
         Email for users/lookup/email phase (CLOUDKIT_LOOKUP_EMAIL).
         Must belong to an iCloud account discoverable to the caller,
         otherwise the phase skips.
+      --share-short-guid <guid>
+        Short GUID for records/resolve + records/accept phases
+        (CLOUDKIT_SHARE_SHORT_GUID). Must identify an existing share,
+        otherwise both phases skip.
 
     EXAMPLES:
       mistdemo test-public --verbose
       mistdemo test-public --skip-cleanup --verbose
       mistdemo test-public --lookup-email me@example.com
+      mistdemo test-public --share-short-guid abc123
 
     NOTES:
       - Requires CLOUDKIT_KEY_ID and CLOUDKIT_PRIVATE_KEY
@@ -99,7 +104,8 @@ public struct TestPublicCommand: MistDemoCommand {
       assetSizeKB: config.assetSizeKB,
       skipCleanup: config.skipCleanup,
       verbose: config.verbose,
-      lookupEmail: config.lookupEmail
+      lookupEmail: config.lookupEmail,
+      shareShortGUID: config.shareShortGUID
     )
 
     try await runner.runBasicWorkflow()
