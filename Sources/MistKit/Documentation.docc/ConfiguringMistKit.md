@@ -55,7 +55,7 @@ let environment: Environment = ProcessInfo.processInfo
 ``CloudKitService`` itself is database-agnostic — there is no `database:` parameter on the initializer. You pick the scope at each call site:
 
 ```swift
-try await service.queryRecords(recordType: "Note", database: .private)
+try await service.queryRecords(Query(recordType: "Note"), database: .private)
 try await service.createRecord(
   recordType: "FeaturedPost",
   fields: fields,

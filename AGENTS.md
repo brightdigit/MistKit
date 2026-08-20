@@ -192,7 +192,7 @@ MistKit/
 | `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
 | `CloudKitService+ModifyZones.swift` | `modifyZones(_:database:)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
-| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(no-arg address-book form — unavailable, pending #28; distinct from the available `discoverAllUserIdentities(lookupInfos:batchSize:)` chunking overload below)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)`, `fetchCurrentUser()` (deprecated, forwards to `fetchCaller`) |
+| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(no-arg address-book form — unavailable, pending #28; distinct from the available `discoverAllUserIdentities(lookupInfos:batchSize:)` chunking overload below)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)` |
 | `CloudKitService+LookupAllRecords.swift` | `lookupAllRecords(recordNames:desiredKeys:database:batchSize:)` — auto-chunking convenience over `lookupRecords` |
 | `CloudKitService+UserIdentityChunking.swift` | `discoverAllUserIdentities(lookupInfos:batchSize:)` — auto-chunking convenience over `discoverUserIdentities` |
 | `CloudKitService+BatchChunking.swift` | internal `chunkedBatches` helper backing the auto-chunking conveniences |
@@ -210,7 +210,7 @@ MistKit/
 - `discoverUserIdentities(lookupInfos:)` → POST `/users/discover` — takes `[UserIdentityLookupInfo]`, returns `[UserIdentity]`
 
 **User-Identity Operations (public DB + web-auth required):**
-- `fetchCaller()` → `/users/caller` — returns `UserInfo`. Replaces deprecated `fetchCurrentUser()` / `users/current`. Only valid against the public database with web-auth credentials.
+- `fetchCaller()` → `/users/caller` — returns `UserInfo`. Replaces Apple's deprecated `users/current` endpoint (the `fetchCurrentUser()` wrapper was removed in #421). Only valid against the public database with web-auth credentials.
 - `discoverAllUserIdentities()` → GET `/users/discover` — returns `[UserIdentity]` for every discoverable user in the caller's address book.
 - `lookupUsersByEmail(_:)` → POST `/users/lookup/email` — returns `[UserIdentity]`.
 - `lookupUsersByRecordName(_:)` → POST `/users/lookup/id` — returns `[UserIdentity]`.

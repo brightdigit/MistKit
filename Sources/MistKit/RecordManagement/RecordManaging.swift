@@ -35,17 +35,6 @@ internal import Foundation
 /// Conforming types must implement the two core operations, while all other
 /// functionality (listing, syncing, deleting) is provided through protocol extensions.
 public protocol RecordManaging {
-  /// Query records of a specific type from CloudKit
-  ///
-  /// - Parameter recordType: The CloudKit record type to query
-  /// - Returns: Array of record information for all matching records
-  /// - Throws: CloudKit errors if the query fails
-  @available(
-    *, deprecated,
-    message: "Silently truncates at one page. Use queryAllRecords or queryRecords -> QueryResult."
-  )
-  func queryRecords(recordType: String) async throws -> [RecordInfo]
-
   /// Execute a batch of record operations
   ///
   /// Handles batching operations to respect CloudKit's 200 operations/request limit.
@@ -62,17 +51,4 @@ public protocol RecordManaging {
   /// - Returns: Array of all matching records across all pages
   /// - Throws: CloudKit errors if the query fails
   func queryAllRecords(recordType: String) async throws -> [RecordInfo]
-}
-
-extension RecordManaging {
-  /// Default implementation delegates to the deprecated `queryRecords(recordType:)`,
-  /// which only returns one page. Conformers should override this with a real
-  /// auto-paginating implementation (e.g. `CloudKitService.queryAllRecords`).
-  @available(
-    *, deprecated,
-    message: "Default returns one page. Override with a real auto-paginating implementation."
-  )
-  public func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
-    try await queryRecords(recordType: recordType)
-  }
 }

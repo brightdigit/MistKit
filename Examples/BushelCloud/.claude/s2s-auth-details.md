@@ -305,7 +305,7 @@ fields["swiftVersion"] = .reference(
 
 **1. Test authentication:**
 ```swift
-let records = try await service.queryRecords(recordType: "RestoreImage", limit: 1)
+let records = try await service.queryRecords(Query(recordType: "RestoreImage"), limit: 1)
 print("✓ Authentication successful, found \(records.count) records")
 ```
 

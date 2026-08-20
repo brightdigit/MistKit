@@ -44,8 +44,9 @@ internal struct QueryRecordsPhase: IntegrationPhase {
     print("\n\(Self.emoji) \(Self.title)")
 
     do {
-      let records = try await context.service.queryRecords(
-        recordType: MistDemoConfig.recordType
+      let records = try await context.service.queryAllRecords(
+        recordType: MistDemoConfig.recordType,
+        database: context.database
       )
       print("✅ Queried \(records.count) record(s) of type '\(MistDemoConfig.recordType)'")
       if context.verbose {

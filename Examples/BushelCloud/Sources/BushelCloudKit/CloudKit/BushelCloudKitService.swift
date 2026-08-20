@@ -153,7 +153,7 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   // MARK: - RecordManaging Protocol Requirements
 
   /// Query all records of a given type, automatically paginating
-  public func queryRecords(recordType: String) async throws -> [RecordInfo] {
+  public func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
     try await service.queryAllRecords(
       recordType: recordType,
       database: .public(.prefers(.serverToServer))

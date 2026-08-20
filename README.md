@@ -146,10 +146,11 @@ routes via web-auth — MistKit picks the appropriate token manager per call.
 #### 2. Call an Operation (database chosen per call)
 
 ```swift
-let records = try await service.queryRecords(
-    recordType: "Post",
+let result = try await service.queryRecords(
+    Query(recordType: "Post"),
     database: .public(.prefers(.serverToServer))
 )
+let records = result.records
 ```
 
 `Database.public` carries a `PublicAuthPreference`:
@@ -231,9 +232,9 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
 
    // Each call selects its database scope explicitly:
    let records = try await service.queryRecords(
-       recordType: "Post",
+       Query(recordType: "Post"),
        database: .public(.requires(.serverToServer))
-   )
+   ).records
    ```
 
    To plug in a custom `TokenManager` (e.g. with shared connection pooling),
@@ -267,9 +268,9 @@ do {
     )
     // Perform operations — each call picks its database, e.g.:
     let posts = try await service.queryRecords(
-        recordType: "Post",
+        Query(recordType: "Post"),
         database: .public(.prefers(.serverToServer))
-    )
+    ).records
 } catch let error as CloudKitError {
     print("CloudKit error: \\(error.localizedDescription)")
 } catch let error as TokenManagerError {

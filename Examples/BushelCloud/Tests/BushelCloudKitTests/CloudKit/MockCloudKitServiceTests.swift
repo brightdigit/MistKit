@@ -42,7 +42,7 @@ internal struct MockCloudKitServiceTests {
   internal func testQueryEmptyInitially() async throws {
     let service = MockCloudKitService()
 
-    let results = try await service.queryRecords(recordType: "RestoreImage")
+    let results = try await service.queryAllRecords(recordType: "RestoreImage")
 
     #expect(results.isEmpty)
   }
@@ -187,7 +187,7 @@ internal struct MockCloudKitServiceTests {
     await service.setQueryError(MockCloudKitError.networkError)
 
     do {
-      _ = try await service.queryRecords(recordType: "RestoreImage")
+      _ = try await service.queryAllRecords(recordType: "RestoreImage")
       Issue.record("Expected error to be thrown")
     } catch is MockCloudKitError {
       // Success - error was thrown as expected
