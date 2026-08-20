@@ -365,7 +365,7 @@ case .undocumented(let code, _):
 }
 ```
 
-That's correct but tedious for every call site. ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneWide:numbersAsStrings:database:)`` collapses it to one async call returning ``QueryResult``. The generated layer still does the type-safe HTTP work; the wrapper handles the call-site ergonomics, error mapping, and conversion between generated and domain types.
+That's correct but tedious for every call site. ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)`` collapses it to one async call returning ``QueryResult``. The generated layer still does the type-safe HTTP work; the wrapper handles the call-site ergonomics, error mapping, and conversion between generated and domain types.
 
 ## Integration with the wrapper
 

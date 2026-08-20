@@ -164,7 +164,7 @@ logging; use the cases themselves for control flow.
 
 ### `paginationLimitExceeded` carries partial results
 
-``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:database:)`` walks the continuation marker for you and stops at `maxPages` (default `1_000`) as a runaway guard. When it trips, the records collected so far are attached to the error so the caller can decide:
+``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:zoneID:database:)`` walks the continuation marker for you and stops at `maxPages` (default `1_000`) as a runaway guard. When it trips, the records collected so far are attached to the error so the caller can decide:
 
 ```swift
 do {
