@@ -234,6 +234,140 @@ paths:
         '503':
           $ref: '#/components/responses/Failure'
 
+  /database/{version}/{container}/{environment}/{database}/records/resolve:
+    post:
+      summary: Fetch Record Information
+      description: |
+        Resolve one or more share short GUIDs into information about the shared
+        records they identify — the root record, the `cloudKit.share` record,
+        the owner identity, and the caller's participation in each share.
+
+        Routed against the public database with web-auth credentials
+        (user-context auth): Apple's reference documents the path with a fixed
+        `public` database scope, and the operation resolves shares on behalf of
+        the *current* user.
+
+        Documented in Apple's archived CloudKit Web Services Reference
+        (`FetchingRecordInformation`); absent from the current online docs.
+      operationId: resolveShortGUIDs
+      tags:
+        - Records
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shortGUIDs:
+                  type: array
+                  description: The short GUIDs identifying the shares to resolve.
+                  items:
+                    $ref: '#/components/schemas/ShortGUID'
+              required:
+                - shortGUIDs
+      responses:
+        '200':
+          description: Short GUIDs resolved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortGUIDResultResponse'
+        '400':
+          $ref: '#/components/responses/Failure'
+        '401':
+          $ref: '#/components/responses/Failure'
+        '403':
+          $ref: '#/components/responses/Failure'
+        '404':
+          $ref: '#/components/responses/Failure'
+        '409':
+          $ref: '#/components/responses/Failure'
+        '412':
+          $ref: '#/components/responses/Failure'
+        '413':
+          $ref: '#/components/responses/Failure'
+        '429':
+          $ref: '#/components/responses/Failure'
+        '421':
+          $ref: '#/components/responses/Failure'
+        '500':
+          $ref: '#/components/responses/Failure'
+        '503':
+          $ref: '#/components/responses/Failure'
+
+  /database/{version}/{container}/{environment}/{database}/records/accept:
+    post:
+      summary: Accept Share Records
+      description: |
+        Accept one or more shares — each identified by a short GUID — on behalf
+        of the current user. The response mirrors `records/resolve`, reporting
+        the caller's participation status for each accepted share.
+
+        Routed against the public database with web-auth credentials
+        (user-context auth): Apple's reference documents the path with a fixed
+        `public` database scope, and there is no current user to accept on
+        behalf of without web-auth.
+
+        Documented in Apple's archived CloudKit Web Services Reference
+        (`AcceptingShareRecords`); absent from the current online docs.
+      operationId: acceptShares
+      tags:
+        - Records
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shortGUIDs:
+                  type: array
+                  description: The short GUIDs identifying the shares to accept.
+                  items:
+                    $ref: '#/components/schemas/ShortGUID'
+              required:
+                - shortGUIDs
+      responses:
+        '200':
+          description: Shares accepted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortGUIDResultResponse'
+        '400':
+          $ref: '#/components/responses/Failure'
+        '401':
+          $ref: '#/components/responses/Failure'
+        '403':
+          $ref: '#/components/responses/Failure'
+        '404':
+          $ref: '#/components/responses/Failure'
+        '409':
+          $ref: '#/components/responses/Failure'
+        '412':
+          $ref: '#/components/responses/Failure'
+        '413':
+          $ref: '#/components/responses/Failure'
+        '429':
+          $ref: '#/components/responses/Failure'
+        '421':
+          $ref: '#/components/responses/Failure'
+        '500':
+          $ref: '#/components/responses/Failure'
+        '503':
+          $ref: '#/components/responses/Failure'
+
   /database/{version}/{container}/{environment}/{database}/records/changes:
     post:
       summary: Fetch Record Changes
@@ -1111,6 +1245,39 @@ components:
           description: Record fields with their values (no type metadata)
           additionalProperties:
             $ref: '#/components/schemas/FieldValueRequest'
+        createShortGUID:
+          type: boolean
+          description: |
+            Whether to create a short GUID so this record can be shared. The
+            response echoes the generated GUID back as `shortGUID`.
+        forRecord:
+          $ref: '#/components/schemas/ShareTargetReference'
+        publicPermission:
+          type: string
+          enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
+          description: |
+            The public read/write permissions to apply. Set when creating a
+            `cloudKit.share` record.
+        participants:
+          type: array
+          description: |
+            The participants to invite. Set when creating a `cloudKit.share`
+            record.
+          items:
+            $ref: '#/components/schemas/ShareParticipant'
+
+    ShareTargetReference:
+      type: object
+      description: |
+        Identifies the record being shared when creating a `cloudKit.share`
+        record (the `forRecord` key).
+      properties:
+        recordName:
+          type: string
+        recordChangeTag:
+          type: string
+      required:
+        - recordName
 
     RecordResponse:
       type: object
@@ -1137,6 +1304,38 @@ components:
         deleted:
           type: boolean
           description: Whether the record was deleted
+        shortGUID:
+          type: string
+          description: |
+            The short GUID of a shared record. Present only on records that
+            have been shared (see `createShortGUID` on the request side).
+        share:
+          $ref: '#/components/schemas/ShareReference'
+        publicPermission:
+          type: string
+          enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
+          description: |
+            The public read/write permissions of a shared record. Present on
+            `cloudKit.share` records.
+        participants:
+          type: array
+          description: |
+            The participants in a shared record. Present on `cloudKit.share`
+            records.
+          items:
+            $ref: '#/components/schemas/ShareParticipant'
+        owner:
+          $ref: '#/components/schemas/ShareParticipant'
+        currentUserParticipant:
+          $ref: '#/components/schemas/ShareParticipant'
+
+    ShareReference:
+      type: object
+      description: |
+        A reference to the `cloudKit.share` record governing a shared record.
+      properties:
+        recordName:
+          type: string
 
     FieldValueRequest:
       type: object
@@ -1646,6 +1845,123 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserIdentity'
+
+    ShortGUID:
+      type: object
+      description: |
+        A short global identifier for a shared record, used to resolve
+        (`records/resolve`) and accept (`records/accept`) shares.
+      properties:
+        value:
+          type: string
+          description: The value of the short global ID.
+        shouldFetchRootRecord:
+          type: boolean
+          description: |
+            Whether the root record should be fetched alongside the share.
+        rootRecordDesiredKeys:
+          type: array
+          description: |
+            Field names limiting the data returned in the root record. When
+            omitted, every field of the root record is returned.
+          items:
+            type: string
+      required:
+        - value
+
+    ShareParticipant:
+      type: object
+      description: A participant in a shared record.
+      properties:
+        userIdentity:
+          $ref: '#/components/schemas/UserIdentity'
+        permission:
+          type: string
+          enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
+          description: The participant's read and write permissions.
+        type:
+          type: string
+          enum: [OWNER, ADMINISTRATOR, USER, PUBLIC_USER, UNKNOWN]
+          description: The type of participant.
+        acceptanceStatus:
+          type: string
+          enum: [INVITED, ACCEPTED, REMOVED, UNKNOWN]
+          description: The status of the participant accepting the shared record.
+
+    ShortGUIDResult:
+      type: object
+      description: |
+        The result of resolving or accepting a single share, as returned by
+        `records/resolve` and `records/accept`.
+      properties:
+        shortGUID:
+          $ref: '#/components/schemas/ShortGUID'
+        containerIdentifier:
+          type: string
+          description: The container holding the shared record.
+        databaseScope:
+          type: string
+          enum: [PUBLIC, PRIVATE, SHARED]
+          description: The database scope holding the shared record.
+        environment:
+          type: string
+          enum: [development, production]
+          description: The container environment holding the shared record.
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        rootRecordName:
+          type: string
+          description: The name of the root record that was shared.
+        rootRecord:
+          $ref: '#/components/schemas/RecordResponse'
+        share:
+          $ref: '#/components/schemas/RecordResponse'
+        ownerIdentity:
+          $ref: '#/components/schemas/UserIdentity'
+        participantPermission:
+          type: string
+          enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
+          description: The caller's read and write permissions on the share.
+        participantStatus:
+          type: string
+          enum: [INVITED, ACCEPTED, REMOVED, UNKNOWN]
+          description: The caller's acceptance status for the share.
+        participantType:
+          type: string
+          enum: [OWNER, ADMINISTRATOR, USER, PUBLIC_USER, UNKNOWN]
+          description: The caller's participant type for the share.
+        webpageURL:
+          type: string
+          description: |
+            The fallback webpage configured in CloudKit Dashboard, used to
+            direct users somewhere when the operation fails.
+        potentialMatchList:
+          type: array
+          description: |
+            When the participant is not identifiable, the potential
+            participants the user can choose from.
+          items:
+            type: object
+            properties:
+              participantId:
+                type: string
+              contactInformation:
+                type: object
+                properties:
+                  emailAddress:
+                    type: string
+                  phoneNumber:
+                    type: string
+
+    ShortGUIDResultResponse:
+      type: object
+      description: |
+        The response body for `records/resolve` and `records/accept`.
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShortGUIDResult'
 
     ContactsResponse:
       type: object

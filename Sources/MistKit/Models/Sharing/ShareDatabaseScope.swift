@@ -1,5 +1,5 @@
 //
-//  Environment.swift
+//  ShareDatabaseScope.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,17 +27,30 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import MistKitOpenAPI
 
-/// CloudKit environment types
-public enum Environment: String, Codable, Sendable {
-  case development
-  case production
+/// The database scope that holds a shared record, as reported by
+/// `records/resolve` and `records/accept`.
+///
+/// Distinct from ``Database``: this is a plain descriptor CloudKit returns
+/// about where the shared record lives, carrying no per-call
+/// ``PublicAuthPreference``.
+public enum ShareDatabaseScope: String, Codable, Sendable, Equatable, Hashable, CaseIterable {
+  /// The public database.
+  case `public` = "PUBLIC"
+  /// The owner's private database.
+  case `private` = "PRIVATE"
+  /// The caller's shared database.
+  case shared = "SHARED"
+}
 
-  /// Initialize from a string by matching the raw value
-  /// case-insensitively. Returns `nil` if the input does not match
-  /// one of the canonical raw values (`"development"`, `"production"`).
-  public init?(caseInsensitive raw: String) {
-    self.init(rawValue: raw.lowercased())
+// MARK: - Internal Conversion
+extension ShareDatabaseScope {
+  internal init(from payload: Components.Schemas.ShortGUIDResult.databaseScopePayload) {
+    switch payload {
+    case .PUBLIC: self = .public
+    case .PRIVATE: self = .private
+    case .SHARED: self = .shared
+    }
   }
 }

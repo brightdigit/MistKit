@@ -1,5 +1,5 @@
 //
-//  Environment.swift
+//  ShareAcceptanceStatus.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,17 +27,37 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import MistKitOpenAPI
 
-/// CloudKit environment types
-public enum Environment: String, Codable, Sendable {
-  case development
-  case production
+/// Whether a participant has accepted a shared record.
+public enum ShareAcceptanceStatus: String, Codable, Sendable, Equatable, Hashable, CaseIterable {
+  /// The participant has been invited but has not yet accepted.
+  case invited = "INVITED"
+  /// The participant accepted the share.
+  case accepted = "ACCEPTED"
+  /// The participant was removed from the share.
+  case removed = "REMOVED"
+  /// CloudKit did not report a known acceptance status.
+  case unknown = "UNKNOWN"
+}
 
-  /// Initialize from a string by matching the raw value
-  /// case-insensitively. Returns `nil` if the input does not match
-  /// one of the canonical raw values (`"development"`, `"production"`).
-  public init?(caseInsensitive raw: String) {
-    self.init(rawValue: raw.lowercased())
+// MARK: - Internal Conversion
+extension ShareAcceptanceStatus {
+  internal init(from payload: Components.Schemas.ShareParticipant.acceptanceStatusPayload) {
+    switch payload {
+    case .INVITED: self = .invited
+    case .ACCEPTED: self = .accepted
+    case .REMOVED: self = .removed
+    case .UNKNOWN: self = .unknown
+    }
+  }
+
+  internal init(from payload: Components.Schemas.ShortGUIDResult.participantStatusPayload) {
+    switch payload {
+    case .INVITED: self = .invited
+    case .ACCEPTED: self = .accepted
+    case .REMOVED: self = .removed
+    case .UNKNOWN: self = .unknown
+    }
   }
 }

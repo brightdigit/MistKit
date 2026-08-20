@@ -34,6 +34,42 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/lookup`.
     /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)`.
     func lookupRecords(_ input: Operations.lookupRecords.Input) async throws -> Operations.lookupRecords.Output
+    /// Fetch Record Information
+    ///
+    /// Resolve one or more share short GUIDs into information about the shared
+    /// records they identify — the root record, the `cloudKit.share` record,
+    /// the owner identity, and the caller's participation in each share.
+    ///
+    /// Routed against the public database with web-auth credentials
+    /// (user-context auth): Apple's reference documents the path with a fixed
+    /// `public` database scope, and the operation resolves shares on behalf of
+    /// the *current* user.
+    ///
+    /// Documented in Apple's archived CloudKit Web Services Reference
+    /// (`FetchingRecordInformation`); absent from the current online docs.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/resolve`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)`.
+    func resolveShortGUIDs(_ input: Operations.resolveShortGUIDs.Input) async throws -> Operations.resolveShortGUIDs.Output
+    /// Accept Share Records
+    ///
+    /// Accept one or more shares — each identified by a short GUID — on behalf
+    /// of the current user. The response mirrors `records/resolve`, reporting
+    /// the caller's participation status for each accepted share.
+    ///
+    /// Routed against the public database with web-auth credentials
+    /// (user-context auth): Apple's reference documents the path with a fixed
+    /// `public` database scope, and there is no current user to accept on
+    /// behalf of without web-auth.
+    ///
+    /// Documented in Apple's archived CloudKit Web Services Reference
+    /// (`AcceptingShareRecords`); absent from the current online docs.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/accept`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)`.
+    func acceptShares(_ input: Operations.acceptShares.Input) async throws -> Operations.acceptShares.Output
     /// Fetch Record Changes
     ///
     /// Get all record changes relative to a sync token
@@ -248,6 +284,62 @@ extension APIProtocol {
         body: Operations.lookupRecords.Input.Body
     ) async throws -> Operations.lookupRecords.Output {
         try await lookupRecords(Operations.lookupRecords.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Fetch Record Information
+    ///
+    /// Resolve one or more share short GUIDs into information about the shared
+    /// records they identify — the root record, the `cloudKit.share` record,
+    /// the owner identity, and the caller's participation in each share.
+    ///
+    /// Routed against the public database with web-auth credentials
+    /// (user-context auth): Apple's reference documents the path with a fixed
+    /// `public` database scope, and the operation resolves shares on behalf of
+    /// the *current* user.
+    ///
+    /// Documented in Apple's archived CloudKit Web Services Reference
+    /// (`FetchingRecordInformation`); absent from the current online docs.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/resolve`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)`.
+    public func resolveShortGUIDs(
+        path: Operations.resolveShortGUIDs.Input.Path,
+        headers: Operations.resolveShortGUIDs.Input.Headers = .init(),
+        body: Operations.resolveShortGUIDs.Input.Body
+    ) async throws -> Operations.resolveShortGUIDs.Output {
+        try await resolveShortGUIDs(Operations.resolveShortGUIDs.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Accept Share Records
+    ///
+    /// Accept one or more shares — each identified by a short GUID — on behalf
+    /// of the current user. The response mirrors `records/resolve`, reporting
+    /// the caller's participation status for each accepted share.
+    ///
+    /// Routed against the public database with web-auth credentials
+    /// (user-context auth): Apple's reference documents the path with a fixed
+    /// `public` database scope, and there is no current user to accept on
+    /// behalf of without web-auth.
+    ///
+    /// Documented in Apple's archived CloudKit Web Services Reference
+    /// (`AcceptingShareRecords`); absent from the current online docs.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/accept`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)`.
+    public func acceptShares(
+        path: Operations.acceptShares.Input.Path,
+        headers: Operations.acceptShares.Input.Headers = .init(),
+        body: Operations.acceptShares.Input.Body
+    ) async throws -> Operations.acceptShares.Output {
+        try await acceptShares(Operations.acceptShares.Input(
             path: path,
             headers: headers,
             body: body
@@ -818,6 +910,37 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/RecordRequest/fields`.
             public var fields: Components.Schemas.RecordRequest.fieldsPayload?
+            /// Whether to create a short GUID so this record can be shared. The
+            /// response echoes the generated GUID back as `shortGUID`.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordRequest/createShortGUID`.
+            public var createShortGUID: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/RecordRequest/forRecord`.
+            public var forRecord: Components.Schemas.ShareTargetReference?
+            /// The public read/write permissions to apply. Set when creating a
+            /// `cloudKit.share` record.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordRequest/publicPermission`.
+            @frozen public enum publicPermissionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case NONE = "NONE"
+                case READ_ONLY = "READ_ONLY"
+                case READ_WRITE = "READ_WRITE"
+                case UNKNOWN = "UNKNOWN"
+            }
+            /// The public read/write permissions to apply. Set when creating a
+            /// `cloudKit.share` record.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordRequest/publicPermission`.
+            public var publicPermission: Components.Schemas.RecordRequest.publicPermissionPayload?
+            /// The participants to invite. Set when creating a `cloudKit.share`
+            /// record.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordRequest/participants`.
+            public var participants: [Components.Schemas.ShareParticipant]?
             /// Creates a new `RecordRequest`.
             ///
             /// - Parameters:
@@ -825,22 +948,65 @@ public enum Components {
             ///   - recordType: The record type (schema name)
             ///   - recordChangeTag: Change tag for optimistic concurrency control
             ///   - fields: Record fields with their values (no type metadata)
+            ///   - createShortGUID: Whether to create a short GUID so this record can be shared. The
+            ///   - forRecord:
+            ///   - publicPermission: The public read/write permissions to apply. Set when creating a
+            ///   - participants: The participants to invite. Set when creating a `cloudKit.share`
             public init(
                 recordName: Swift.String? = nil,
                 recordType: Swift.String? = nil,
                 recordChangeTag: Swift.String? = nil,
-                fields: Components.Schemas.RecordRequest.fieldsPayload? = nil
+                fields: Components.Schemas.RecordRequest.fieldsPayload? = nil,
+                createShortGUID: Swift.Bool? = nil,
+                forRecord: Components.Schemas.ShareTargetReference? = nil,
+                publicPermission: Components.Schemas.RecordRequest.publicPermissionPayload? = nil,
+                participants: [Components.Schemas.ShareParticipant]? = nil
             ) {
                 self.recordName = recordName
                 self.recordType = recordType
                 self.recordChangeTag = recordChangeTag
                 self.fields = fields
+                self.createShortGUID = createShortGUID
+                self.forRecord = forRecord
+                self.publicPermission = publicPermission
+                self.participants = participants
             }
             public enum CodingKeys: String, CodingKey {
                 case recordName
                 case recordType
                 case recordChangeTag
                 case fields
+                case createShortGUID
+                case forRecord
+                case publicPermission
+                case participants
+            }
+        }
+        /// Identifies the record being shared when creating a `cloudKit.share`
+        /// record (the `forRecord` key).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/ShareTargetReference`.
+        public struct ShareTargetReference: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShareTargetReference/recordName`.
+            public var recordName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShareTargetReference/recordChangeTag`.
+            public var recordChangeTag: Swift.String?
+            /// Creates a new `ShareTargetReference`.
+            ///
+            /// - Parameters:
+            ///   - recordName:
+            ///   - recordChangeTag:
+            public init(
+                recordName: Swift.String,
+                recordChangeTag: Swift.String? = nil
+            ) {
+                self.recordName = recordName
+                self.recordChangeTag = recordChangeTag
+            }
+            public enum CodingKeys: String, CodingKey {
+                case recordName
+                case recordChangeTag
             }
         }
         /// Record schema for API responses (fields use FieldValueResponse)
@@ -891,6 +1057,41 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/RecordResponse/deleted`.
             public var deleted: Swift.Bool?
+            /// The short GUID of a shared record. Present only on records that
+            /// have been shared (see `createShortGUID` on the request side).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/shortGUID`.
+            public var shortGUID: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/share`.
+            public var share: Components.Schemas.ShareReference?
+            /// The public read/write permissions of a shared record. Present on
+            /// `cloudKit.share` records.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/publicPermission`.
+            @frozen public enum publicPermissionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case NONE = "NONE"
+                case READ_ONLY = "READ_ONLY"
+                case READ_WRITE = "READ_WRITE"
+                case UNKNOWN = "UNKNOWN"
+            }
+            /// The public read/write permissions of a shared record. Present on
+            /// `cloudKit.share` records.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/publicPermission`.
+            public var publicPermission: Components.Schemas.RecordResponse.publicPermissionPayload?
+            /// The participants in a shared record. Present on `cloudKit.share`
+            /// records.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/participants`.
+            public var participants: [Components.Schemas.ShareParticipant]?
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/owner`.
+            public var owner: Components.Schemas.ShareParticipant?
+            /// - Remark: Generated from `#/components/schemas/RecordResponse/currentUserParticipant`.
+            public var currentUserParticipant: Components.Schemas.ShareParticipant?
             /// Creates a new `RecordResponse`.
             ///
             /// - Parameters:
@@ -901,6 +1102,12 @@ public enum Components {
             ///   - created:
             ///   - modified:
             ///   - deleted: Whether the record was deleted
+            ///   - shortGUID: The short GUID of a shared record. Present only on records that
+            ///   - share:
+            ///   - publicPermission: The public read/write permissions of a shared record. Present on
+            ///   - participants: The participants in a shared record. Present on `cloudKit.share`
+            ///   - owner:
+            ///   - currentUserParticipant:
             public init(
                 recordName: Swift.String? = nil,
                 recordType: Swift.String? = nil,
@@ -908,7 +1115,13 @@ public enum Components {
                 fields: Components.Schemas.RecordResponse.fieldsPayload? = nil,
                 created: Components.Schemas.RecordTimestamp? = nil,
                 modified: Components.Schemas.RecordTimestamp? = nil,
-                deleted: Swift.Bool? = nil
+                deleted: Swift.Bool? = nil,
+                shortGUID: Swift.String? = nil,
+                share: Components.Schemas.ShareReference? = nil,
+                publicPermission: Components.Schemas.RecordResponse.publicPermissionPayload? = nil,
+                participants: [Components.Schemas.ShareParticipant]? = nil,
+                owner: Components.Schemas.ShareParticipant? = nil,
+                currentUserParticipant: Components.Schemas.ShareParticipant? = nil
             ) {
                 self.recordName = recordName
                 self.recordType = recordType
@@ -917,6 +1130,12 @@ public enum Components {
                 self.created = created
                 self.modified = modified
                 self.deleted = deleted
+                self.shortGUID = shortGUID
+                self.share = share
+                self.publicPermission = publicPermission
+                self.participants = participants
+                self.owner = owner
+                self.currentUserParticipant = currentUserParticipant
             }
             public enum CodingKeys: String, CodingKey {
                 case recordName
@@ -926,6 +1145,30 @@ public enum Components {
                 case created
                 case modified
                 case deleted
+                case shortGUID
+                case share
+                case publicPermission
+                case participants
+                case owner
+                case currentUserParticipant
+            }
+        }
+        /// A reference to the `cloudKit.share` record governing a shared record.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/ShareReference`.
+        public struct ShareReference: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShareReference/recordName`.
+            public var recordName: Swift.String?
+            /// Creates a new `ShareReference`.
+            ///
+            /// - Parameters:
+            ///   - recordName:
+            public init(recordName: Swift.String? = nil) {
+                self.recordName = recordName
+            }
+            public enum CodingKeys: String, CodingKey {
+                case recordName
             }
         }
         /// A CloudKit field value for API requests.
@@ -2451,6 +2694,353 @@ public enum Components {
             }
             public enum CodingKeys: String, CodingKey {
                 case users
+            }
+        }
+        /// A short global identifier for a shared record, used to resolve
+        /// (`records/resolve`) and accept (`records/accept`) shares.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/ShortGUID`.
+        public struct ShortGUID: Codable, Hashable, Sendable {
+            /// The value of the short global ID.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUID/value`.
+            public var value: Swift.String
+            /// Whether the root record should be fetched alongside the share.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUID/shouldFetchRootRecord`.
+            public var shouldFetchRootRecord: Swift.Bool?
+            /// Field names limiting the data returned in the root record. When
+            /// omitted, every field of the root record is returned.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUID/rootRecordDesiredKeys`.
+            public var rootRecordDesiredKeys: [Swift.String]?
+            /// Creates a new `ShortGUID`.
+            ///
+            /// - Parameters:
+            ///   - value: The value of the short global ID.
+            ///   - shouldFetchRootRecord: Whether the root record should be fetched alongside the share.
+            ///   - rootRecordDesiredKeys: Field names limiting the data returned in the root record. When
+            public init(
+                value: Swift.String,
+                shouldFetchRootRecord: Swift.Bool? = nil,
+                rootRecordDesiredKeys: [Swift.String]? = nil
+            ) {
+                self.value = value
+                self.shouldFetchRootRecord = shouldFetchRootRecord
+                self.rootRecordDesiredKeys = rootRecordDesiredKeys
+            }
+            public enum CodingKeys: String, CodingKey {
+                case value
+                case shouldFetchRootRecord
+                case rootRecordDesiredKeys
+            }
+        }
+        /// A participant in a shared record.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ShareParticipant`.
+        public struct ShareParticipant: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShareParticipant/userIdentity`.
+            public var userIdentity: Components.Schemas.UserIdentity?
+            /// The participant's read and write permissions.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShareParticipant/permission`.
+            @frozen public enum permissionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case NONE = "NONE"
+                case READ_ONLY = "READ_ONLY"
+                case READ_WRITE = "READ_WRITE"
+                case UNKNOWN = "UNKNOWN"
+            }
+            /// The participant's read and write permissions.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShareParticipant/permission`.
+            public var permission: Components.Schemas.ShareParticipant.permissionPayload?
+            /// The type of participant.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShareParticipant/type`.
+            @frozen public enum _typePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case OWNER = "OWNER"
+                case ADMINISTRATOR = "ADMINISTRATOR"
+                case USER = "USER"
+                case PUBLIC_USER = "PUBLIC_USER"
+                case UNKNOWN = "UNKNOWN"
+            }
+            /// The type of participant.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShareParticipant/type`.
+            public var _type: Components.Schemas.ShareParticipant._typePayload?
+            /// The status of the participant accepting the shared record.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShareParticipant/acceptanceStatus`.
+            @frozen public enum acceptanceStatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case INVITED = "INVITED"
+                case ACCEPTED = "ACCEPTED"
+                case REMOVED = "REMOVED"
+                case UNKNOWN = "UNKNOWN"
+            }
+            /// The status of the participant accepting the shared record.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShareParticipant/acceptanceStatus`.
+            public var acceptanceStatus: Components.Schemas.ShareParticipant.acceptanceStatusPayload?
+            /// Creates a new `ShareParticipant`.
+            ///
+            /// - Parameters:
+            ///   - userIdentity:
+            ///   - permission: The participant's read and write permissions.
+            ///   - _type: The type of participant.
+            ///   - acceptanceStatus: The status of the participant accepting the shared record.
+            public init(
+                userIdentity: Components.Schemas.UserIdentity? = nil,
+                permission: Components.Schemas.ShareParticipant.permissionPayload? = nil,
+                _type: Components.Schemas.ShareParticipant._typePayload? = nil,
+                acceptanceStatus: Components.Schemas.ShareParticipant.acceptanceStatusPayload? = nil
+            ) {
+                self.userIdentity = userIdentity
+                self.permission = permission
+                self._type = _type
+                self.acceptanceStatus = acceptanceStatus
+            }
+            public enum CodingKeys: String, CodingKey {
+                case userIdentity
+                case permission
+                case _type = "type"
+                case acceptanceStatus
+            }
+        }
+        /// The result of resolving or accepting a single share, as returned by
+        /// `records/resolve` and `records/accept`.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/ShortGUIDResult`.
+        public struct ShortGUIDResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/shortGUID`.
+            public var shortGUID: Components.Schemas.ShortGUID?
+            /// The container holding the shared record.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/containerIdentifier`.
+            public var containerIdentifier: Swift.String?
+            /// The database scope holding the shared record.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/databaseScope`.
+            @frozen public enum databaseScopePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case PUBLIC = "PUBLIC"
+                case PRIVATE = "PRIVATE"
+                case SHARED = "SHARED"
+            }
+            /// The database scope holding the shared record.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/databaseScope`.
+            public var databaseScope: Components.Schemas.ShortGUIDResult.databaseScopePayload?
+            /// The container environment holding the shared record.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/environment`.
+            @frozen public enum environmentPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case development = "development"
+                case production = "production"
+            }
+            /// The container environment holding the shared record.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/environment`.
+            public var environment: Components.Schemas.ShortGUIDResult.environmentPayload?
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/zoneID`.
+            public var zoneID: Components.Schemas.ZoneID?
+            /// The name of the root record that was shared.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/rootRecordName`.
+            public var rootRecordName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/rootRecord`.
+            public var rootRecord: Components.Schemas.RecordResponse?
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/share`.
+            public var share: Components.Schemas.RecordResponse?
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/ownerIdentity`.
+            public var ownerIdentity: Components.Schemas.UserIdentity?
+            /// The caller's read and write permissions on the share.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/participantPermission`.
+            @frozen public enum participantPermissionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case NONE = "NONE"
+                case READ_ONLY = "READ_ONLY"
+                case READ_WRITE = "READ_WRITE"
+                case UNKNOWN = "UNKNOWN"
+            }
+            /// The caller's read and write permissions on the share.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/participantPermission`.
+            public var participantPermission: Components.Schemas.ShortGUIDResult.participantPermissionPayload?
+            /// The caller's acceptance status for the share.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/participantStatus`.
+            @frozen public enum participantStatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case INVITED = "INVITED"
+                case ACCEPTED = "ACCEPTED"
+                case REMOVED = "REMOVED"
+                case UNKNOWN = "UNKNOWN"
+            }
+            /// The caller's acceptance status for the share.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/participantStatus`.
+            public var participantStatus: Components.Schemas.ShortGUIDResult.participantStatusPayload?
+            /// The caller's participant type for the share.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/participantType`.
+            @frozen public enum participantTypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case OWNER = "OWNER"
+                case ADMINISTRATOR = "ADMINISTRATOR"
+                case USER = "USER"
+                case PUBLIC_USER = "PUBLIC_USER"
+                case UNKNOWN = "UNKNOWN"
+            }
+            /// The caller's participant type for the share.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/participantType`.
+            public var participantType: Components.Schemas.ShortGUIDResult.participantTypePayload?
+            /// The fallback webpage configured in CloudKit Dashboard, used to
+            /// direct users somewhere when the operation fails.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/webpageURL`.
+            public var webpageURL: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/potentialMatchListPayload`.
+            public struct potentialMatchListPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/potentialMatchListPayload/participantId`.
+                public var participantId: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/potentialMatchListPayload/contactInformation`.
+                public struct contactInformationPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/potentialMatchListPayload/contactInformation/emailAddress`.
+                    public var emailAddress: Swift.String?
+                    /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/potentialMatchListPayload/contactInformation/phoneNumber`.
+                    public var phoneNumber: Swift.String?
+                    /// Creates a new `contactInformationPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - emailAddress:
+                    ///   - phoneNumber:
+                    public init(
+                        emailAddress: Swift.String? = nil,
+                        phoneNumber: Swift.String? = nil
+                    ) {
+                        self.emailAddress = emailAddress
+                        self.phoneNumber = phoneNumber
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case emailAddress
+                        case phoneNumber
+                    }
+                }
+                /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/potentialMatchListPayload/contactInformation`.
+                public var contactInformation: Components.Schemas.ShortGUIDResult.potentialMatchListPayloadPayload.contactInformationPayload?
+                /// Creates a new `potentialMatchListPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - participantId:
+                ///   - contactInformation:
+                public init(
+                    participantId: Swift.String? = nil,
+                    contactInformation: Components.Schemas.ShortGUIDResult.potentialMatchListPayloadPayload.contactInformationPayload? = nil
+                ) {
+                    self.participantId = participantId
+                    self.contactInformation = contactInformation
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case participantId
+                    case contactInformation
+                }
+            }
+            /// When the participant is not identifiable, the potential
+            /// participants the user can choose from.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/potentialMatchList`.
+            public typealias potentialMatchListPayload = [Components.Schemas.ShortGUIDResult.potentialMatchListPayloadPayload]
+            /// When the participant is not identifiable, the potential
+            /// participants the user can choose from.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResult/potentialMatchList`.
+            public var potentialMatchList: Components.Schemas.ShortGUIDResult.potentialMatchListPayload?
+            /// Creates a new `ShortGUIDResult`.
+            ///
+            /// - Parameters:
+            ///   - shortGUID:
+            ///   - containerIdentifier: The container holding the shared record.
+            ///   - databaseScope: The database scope holding the shared record.
+            ///   - environment: The container environment holding the shared record.
+            ///   - zoneID:
+            ///   - rootRecordName: The name of the root record that was shared.
+            ///   - rootRecord:
+            ///   - share:
+            ///   - ownerIdentity:
+            ///   - participantPermission: The caller's read and write permissions on the share.
+            ///   - participantStatus: The caller's acceptance status for the share.
+            ///   - participantType: The caller's participant type for the share.
+            ///   - webpageURL: The fallback webpage configured in CloudKit Dashboard, used to
+            ///   - potentialMatchList: When the participant is not identifiable, the potential
+            public init(
+                shortGUID: Components.Schemas.ShortGUID? = nil,
+                containerIdentifier: Swift.String? = nil,
+                databaseScope: Components.Schemas.ShortGUIDResult.databaseScopePayload? = nil,
+                environment: Components.Schemas.ShortGUIDResult.environmentPayload? = nil,
+                zoneID: Components.Schemas.ZoneID? = nil,
+                rootRecordName: Swift.String? = nil,
+                rootRecord: Components.Schemas.RecordResponse? = nil,
+                share: Components.Schemas.RecordResponse? = nil,
+                ownerIdentity: Components.Schemas.UserIdentity? = nil,
+                participantPermission: Components.Schemas.ShortGUIDResult.participantPermissionPayload? = nil,
+                participantStatus: Components.Schemas.ShortGUIDResult.participantStatusPayload? = nil,
+                participantType: Components.Schemas.ShortGUIDResult.participantTypePayload? = nil,
+                webpageURL: Swift.String? = nil,
+                potentialMatchList: Components.Schemas.ShortGUIDResult.potentialMatchListPayload? = nil
+            ) {
+                self.shortGUID = shortGUID
+                self.containerIdentifier = containerIdentifier
+                self.databaseScope = databaseScope
+                self.environment = environment
+                self.zoneID = zoneID
+                self.rootRecordName = rootRecordName
+                self.rootRecord = rootRecord
+                self.share = share
+                self.ownerIdentity = ownerIdentity
+                self.participantPermission = participantPermission
+                self.participantStatus = participantStatus
+                self.participantType = participantType
+                self.webpageURL = webpageURL
+                self.potentialMatchList = potentialMatchList
+            }
+            public enum CodingKeys: String, CodingKey {
+                case shortGUID
+                case containerIdentifier
+                case databaseScope
+                case environment
+                case zoneID
+                case rootRecordName
+                case rootRecord
+                case share
+                case ownerIdentity
+                case participantPermission
+                case participantStatus
+                case participantType
+                case webpageURL
+                case potentialMatchList
+            }
+        }
+        /// The response body for `records/resolve` and `records/accept`.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/ShortGUIDResultResponse`.
+        public struct ShortGUIDResultResponse: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShortGUIDResultResponse/results`.
+            public var results: [Components.Schemas.ShortGUIDResult]?
+            /// Creates a new `ShortGUIDResultResponse`.
+            ///
+            /// - Parameters:
+            ///   - results:
+            public init(results: [Components.Schemas.ShortGUIDResult]? = nil) {
+                self.results = results
+            }
+            public enum CodingKeys: String, CodingKey {
+                case results
             }
         }
         /// - Remark: Generated from `#/components/schemas/ContactsResponse`.
@@ -4726,6 +5316,1240 @@ public enum Operations {
             ///
             ///
             /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/lookup/post(lookupRecords)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Fetch Record Information
+    ///
+    /// Resolve one or more share short GUIDs into information about the shared
+    /// records they identify — the root record, the `cloudKit.share` record,
+    /// the owner identity, and the caller's participation in each share.
+    ///
+    /// Routed against the public database with web-auth credentials
+    /// (user-context auth): Apple's reference documents the path with a fixed
+    /// `public` database scope, and the operation resolves shares on behalf of
+    /// the *current* user.
+    ///
+    /// Documented in Apple's archived CloudKit Web Services Reference
+    /// (`FetchingRecordInformation`); absent from the current online docs.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/resolve`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)`.
+    public enum resolveShortGUIDs {
+        public static let id: Swift.String = "resolveShortGUIDs"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/path/version`.
+                public var version: Components.Parameters.version
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/path/container`.
+                public var container: Components.Parameters.container
+                /// Container environment
+                ///
+                /// - Remark: Generated from `#/components/parameters/environment`.
+                @frozen public enum environment: String, Codable, Hashable, Sendable, CaseIterable {
+                    case development = "development"
+                    case production = "production"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/path/environment`.
+                public var environment: Components.Parameters.environment
+                /// Database scope
+                ///
+                /// - Remark: Generated from `#/components/parameters/database`.
+                @frozen public enum database: String, Codable, Hashable, Sendable, CaseIterable {
+                    case _public = "public"
+                    case _private = "private"
+                    case shared = "shared"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/path/database`.
+                public var database: Components.Parameters.database
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - version:
+                ///   - container:
+                ///   - environment:
+                ///   - database:
+                public init(
+                    version: Components.Parameters.version,
+                    container: Components.Parameters.container,
+                    environment: Components.Parameters.environment,
+                    database: Components.Parameters.database
+                ) {
+                    self.version = version
+                    self.container = container
+                    self.environment = environment
+                    self.database = database
+                }
+            }
+            public var path: Operations.resolveShortGUIDs.Input.Path
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.resolveShortGUIDs.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.resolveShortGUIDs.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.resolveShortGUIDs.Input.Headers
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/requestBody/json`.
+                public struct jsonPayload: Codable, Hashable, Sendable {
+                    /// The short GUIDs identifying the shares to resolve.
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/requestBody/json/shortGUIDs`.
+                    public var shortGUIDs: [Components.Schemas.ShortGUID]
+                    /// Creates a new `jsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - shortGUIDs: The short GUIDs identifying the shares to resolve.
+                    public init(shortGUIDs: [Components.Schemas.ShortGUID]) {
+                        self.shortGUIDs = shortGUIDs
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case shortGUIDs
+                    }
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/requestBody/content/application\/json`.
+                case json(Operations.resolveShortGUIDs.Input.Body.jsonPayload)
+            }
+            public var body: Operations.resolveShortGUIDs.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.resolveShortGUIDs.Input.Path,
+                headers: Operations.resolveShortGUIDs.Input.Headers = .init(),
+                body: Operations.resolveShortGUIDs.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/resolve/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.ShortGUIDResultResponse)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.ShortGUIDResultResponse {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.resolveShortGUIDs.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.resolveShortGUIDs.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Short GUIDs resolved successfully.
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.resolveShortGUIDs.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.resolveShortGUIDs.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/412`.
+            ///
+            /// HTTP response code: `412 preconditionFailed`.
+            case preconditionFailed(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.preconditionFailed`.
+            ///
+            /// - Throws: An error if `self` is not `.preconditionFailed`.
+            /// - SeeAlso: `.preconditionFailed`.
+            public var preconditionFailed: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .preconditionFailed(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "preconditionFailed",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            case contentTooLarge(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.contentTooLarge`.
+            ///
+            /// - Throws: An error if `self` is not `.contentTooLarge`.
+            /// - SeeAlso: `.contentTooLarge`.
+            public var contentTooLarge: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .contentTooLarge(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "contentTooLarge",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/421`.
+            ///
+            /// HTTP response code: `421 misdirectedRequest`.
+            case misdirectedRequest(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.misdirectedRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.misdirectedRequest`.
+            /// - SeeAlso: `.misdirectedRequest`.
+            public var misdirectedRequest: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .misdirectedRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "misdirectedRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/resolve/post(resolveShortGUIDs)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Accept Share Records
+    ///
+    /// Accept one or more shares — each identified by a short GUID — on behalf
+    /// of the current user. The response mirrors `records/resolve`, reporting
+    /// the caller's participation status for each accepted share.
+    ///
+    /// Routed against the public database with web-auth credentials
+    /// (user-context auth): Apple's reference documents the path with a fixed
+    /// `public` database scope, and there is no current user to accept on
+    /// behalf of without web-auth.
+    ///
+    /// Documented in Apple's archived CloudKit Web Services Reference
+    /// (`AcceptingShareRecords`); absent from the current online docs.
+    ///
+    ///
+    /// - Remark: HTTP `POST /database/{version}/{container}/{environment}/{database}/records/accept`.
+    /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)`.
+    public enum acceptShares {
+        public static let id: Swift.String = "acceptShares"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/path/version`.
+                public var version: Components.Parameters.version
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/path/container`.
+                public var container: Components.Parameters.container
+                /// Container environment
+                ///
+                /// - Remark: Generated from `#/components/parameters/environment`.
+                @frozen public enum environment: String, Codable, Hashable, Sendable, CaseIterable {
+                    case development = "development"
+                    case production = "production"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/path/environment`.
+                public var environment: Components.Parameters.environment
+                /// Database scope
+                ///
+                /// - Remark: Generated from `#/components/parameters/database`.
+                @frozen public enum database: String, Codable, Hashable, Sendable, CaseIterable {
+                    case _public = "public"
+                    case _private = "private"
+                    case shared = "shared"
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/path/database`.
+                public var database: Components.Parameters.database
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - version:
+                ///   - container:
+                ///   - environment:
+                ///   - database:
+                public init(
+                    version: Components.Parameters.version,
+                    container: Components.Parameters.container,
+                    environment: Components.Parameters.environment,
+                    database: Components.Parameters.database
+                ) {
+                    self.version = version
+                    self.container = container
+                    self.environment = environment
+                    self.database = database
+                }
+            }
+            public var path: Operations.acceptShares.Input.Path
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.acceptShares.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.acceptShares.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.acceptShares.Input.Headers
+            /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/requestBody/json`.
+                public struct jsonPayload: Codable, Hashable, Sendable {
+                    /// The short GUIDs identifying the shares to accept.
+                    ///
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/requestBody/json/shortGUIDs`.
+                    public var shortGUIDs: [Components.Schemas.ShortGUID]
+                    /// Creates a new `jsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - shortGUIDs: The short GUIDs identifying the shares to accept.
+                    public init(shortGUIDs: [Components.Schemas.ShortGUID]) {
+                        self.shortGUIDs = shortGUIDs
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case shortGUIDs
+                    }
+                }
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/requestBody/content/application\/json`.
+                case json(Operations.acceptShares.Input.Body.jsonPayload)
+            }
+            public var body: Operations.acceptShares.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.acceptShares.Input.Path,
+                headers: Operations.acceptShares.Input.Headers = .init(),
+                body: Operations.acceptShares.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/records/accept/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.ShortGUIDResultResponse)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.ShortGUIDResultResponse {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.acceptShares.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.acceptShares.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Shares accepted successfully.
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.acceptShares.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.acceptShares.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/412`.
+            ///
+            /// HTTP response code: `412 preconditionFailed`.
+            case preconditionFailed(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.preconditionFailed`.
+            ///
+            /// - Throws: An error if `self` is not `.preconditionFailed`.
+            /// - SeeAlso: `.preconditionFailed`.
+            public var preconditionFailed: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .preconditionFailed(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "preconditionFailed",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            case contentTooLarge(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.contentTooLarge`.
+            ///
+            /// - Throws: An error if `self` is not `.contentTooLarge`.
+            /// - SeeAlso: `.contentTooLarge`.
+            public var contentTooLarge: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .contentTooLarge(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "contentTooLarge",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/421`.
+            ///
+            /// HTTP response code: `421 misdirectedRequest`.
+            case misdirectedRequest(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.misdirectedRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.misdirectedRequest`.
+            /// - SeeAlso: `.misdirectedRequest`.
+            public var misdirectedRequest: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .misdirectedRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "misdirectedRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.Failure)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.Failure {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error response shared by all endpoints. The body schema is the same for
+            /// every 4xx/5xx status code; the HTTP status code itself disambiguates
+            /// which CloudKit failure occurred. See Apple's CloudKit Web Services
+            /// Error Codes documentation for the full code → status mapping:
+            /// - 400 BadRequest (BAD_REQUEST, ATOMIC_ERROR)
+            /// - 401 Unauthorized (AUTHENTICATION_FAILED)
+            /// - 403 Forbidden (ACCESS_DENIED)
+            /// - 404 NotFound (NOT_FOUND, ZONE_NOT_FOUND)
+            /// - 409 Conflict (CONFLICT, EXISTS)
+            /// - 412 PreconditionFailed (VALIDATING_REFERENCE_ERROR)
+            /// - 413 RequestEntityTooLarge (QUOTA_EXCEEDED)
+            /// - 421 UnprocessableEntity (AUTHENTICATION_REQUIRED)
+            /// - 429 TooManyRequests (THROTTLED)
+            /// - 500 InternalServerError (INTERNAL_ERROR)
+            /// - 503 ServiceUnavailable (TRY_AGAIN_LATER)
+            ///
+            ///
+            /// - Remark: Generated from `#/paths//database/{version}/{container}/{environment}/{database}/records/accept/post(acceptShares)/responses/503`.
             ///
             /// HTTP response code: `503 serviceUnavailable`.
             case serviceUnavailable(Components.Responses.Failure)
