@@ -14,3 +14,4 @@ Standing always/never directives and corrections from the human. Agents must rea
 - ALWAYS read `.claude/agent-notes.md` and `.claude/memory/MEMORY.md` at the start of every session before doing work.
 - ALWAYS append corrections and always/never directives to `.claude/agent-notes.md` proactively; ALWAYS write project-scoped facts to `.claude/memory/` (with an index line in `MEMORY.md`).
 - NEVER store project-scoped memories in a native or global memory system (Claude Code `~/.claude/projects/*/memory/`, Cursor memories, etc.) — use `.claude/memory/` in this repo instead.
+- NEVER run bare `git stash`/`git stash pop`/`git stash drop` in this repo — the stash stack is shared across ALL worktrees, so a pop in one worktree can bury or restore another branch's WIP; commit to your own branch instead.
