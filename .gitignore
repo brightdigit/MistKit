@@ -193,3 +193,6 @@ dev-debug.log
 # tasks/ 
 .claude/scheduled_tasks.lock
 build
+
+# Git worktrees created for parallel agent runs
+.claude/worktrees/
