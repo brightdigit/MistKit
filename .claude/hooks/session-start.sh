@@ -1,128 +1,127 @@
-#!/usr/bin/env bash
+#!/bin/bash
+set -euo pipefail
+
+# SessionStart hook: install a Swift toolchain for Claude Code on the web
+# (Linux). Only runs in remote sessions; local sessions are untouched. Runs
+# async so the session starts immediately: progress lands in
+# ~/.claude-session-setup.log and ~/.claude-session-setup.done marks the end.
 #
-# SessionStart hook — provision the Swift toolchain and the pinned project
-# tooling so Claude Code on the web sessions can run swift build / swift test /
-# swift-format / swiftlint / periphery without manual setup.
+# The toolchain is all this installs. Lint tooling is deliberately left out to
+# keep cold start short: swift-format ships inside the toolchain, and both
+# SwiftLint and periphery are skipped in web sessions (Scripts/lint.sh omits
+# them when CLAUDE_CODE_REMOTE is set). Run `make lint` locally, where mise
+# provides the pinned versions, to get full coverage.
 #
-# No-op for local sessions (CLAUDE_CODE_REMOTE unset). Idempotent: a warm
-# container re-runs this in seconds.
-
-set -uo pipefail
-
-[ "${CLAUDE_CODE_REMOTE:-}" = "true" ] || exit 0
-
-# The root Package.swift declares swift-tools-version 6.1, but
-# Examples/MistDemo declares 6.2 — installing 6.1 makes the example packages
-# unbuildable ("package is using Swift tools version 6.2.0 but the installed
-# version is 6.1.0"). Install the highest tools-version any package in the
-# repo requires; a newer toolchain still builds the older manifests.
-readonly SWIFT_VERSION="6.2"
-readonly SWIFT_RELEASE="swift-${SWIFT_VERSION}-RELEASE"
-# download.swift.org spells the platform two different ways: the URL path
-# segment is dotless ("ubuntu2404") while the archive/extracted directory name
-# keeps the dot ("ubuntu24.04"). Using one for both yields a 404.
-readonly SWIFT_PLATFORM="ubuntu24.04"
-readonly SWIFT_PLATFORM_PATH="ubuntu2404"
-readonly SWIFT_DIR="${HOME}/.swift"
-readonly SWIFT_ROOT="${SWIFT_DIR}/${SWIFT_RELEASE}-${SWIFT_PLATFORM}"
-readonly SWIFT_URL="https://download.swift.org/swift-${SWIFT_VERSION}-release/${SWIFT_PLATFORM_PATH}/${SWIFT_RELEASE}/${SWIFT_RELEASE}-${SWIFT_PLATFORM}.tar.gz"
-
-log() { printf '[session-start] %s\n' "$*" >&2; }
-
-SUDO=""
-if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
-  SUDO="sudo"
+# This hook is the second tier of a two-tier setup. The first tier is
+# Scripts/cloud-setup.sh, pasted into the cloud environment's "Setup script"
+# field: it runs once, then the filesystem is snapshotted and later sessions
+# reuse it, so the ~1 GB toolchain download happens once per environment
+# instead of once per container. When that snapshot exists, the `command -v
+# swift` check below short-circuits and this hook finishes in about a second.
+#
+# The hook is still required on every session for two reasons: a snapshot
+# restores files but not environment variables, so PATH has to be re-exported
+# into CLAUDE_ENV_FILE each time; and an environment with no setup script
+# configured (a fresh clone, another contributor) still needs the toolchain
+# installed from here.
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
 fi
 
-# 1. Swift runtime dependencies. Third-party PPAs in the base image can fail
-#    `apt-get update`; that must not abort provisioning, hence the `|| true`.
-install_apt_dependencies() {
-  if [ -f "${SWIFT_DIR}/.apt-done" ]; then
-    log "apt dependencies already installed, skipping"
-    return 0
-  fi
-  log "installing Swift runtime apt dependencies"
-  export DEBIAN_FRONTEND=noninteractive
-  $SUDO apt-get update -qq || true
-  $SUDO apt-get install -y -qq --no-install-recommends \
-    binutils git gnupg2 libc6-dev libcurl4-openssl-dev libedit2 libgcc-13-dev \
-    libncurses-dev libpython3-dev libsqlite3-0 libstdc++-13-dev libxml2-dev \
-    libz3-dev pkg-config tzdata unzip zlib1g-dev curl ca-certificates ||
-    log "WARNING: some apt packages failed to install; continuing"
-  mkdir -p "${SWIFT_DIR}" && touch "${SWIFT_DIR}/.apt-done"
-}
+echo '{"async": true, "asyncTimeout": 2400000}'
 
-# 2. Swift toolchain.
+SETUP_LOG="$HOME/.claude-session-setup.log"
+SETUP_DONE="$HOME/.claude-session-setup.done"
+rm -f "$SETUP_DONE"
+exec >> "$SETUP_LOG" 2>&1
+
+SWIFTLY_ENV="$HOME/.local/share/swiftly/env.sh"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+
+# Make swift reachable for the session up front; an entry pointing at a
+# not-yet-populated directory is harmless.
+if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+  {
+    echo "export SWIFTLY_HOME_DIR=\"$HOME/.local/share/swiftly\""
+    echo "export SWIFTLY_BIN_DIR=\"$HOME/.local/share/swiftly/bin\""
+    echo "export PATH=\"$HOME/.local/share/swiftly/bin:\$PATH\""
+  } >> "$CLAUDE_ENV_FILE"
+fi
+
 install_swift() {
-  if [ -x "${SWIFT_ROOT}/usr/bin/swift" ]; then
-    log "Swift ${SWIFT_VERSION} already present at ${SWIFT_ROOT}"
-    return 0
-  fi
-  log "downloading Swift ${SWIFT_VERSION}"
-  mkdir -p "${SWIFT_DIR}"
-  local archive="${SWIFT_DIR}/${SWIFT_RELEASE}-${SWIFT_PLATFORM}.tar.gz"
-  if ! curl -fsSL --retry 3 --retry-delay 2 -o "${archive}" "${SWIFT_URL}"; then
-    log "ERROR: failed to download Swift toolchain"
-    return 1
-  fi
-  log "extracting toolchain"
-  if ! tar -xzf "${archive}" -C "${SWIFT_DIR}"; then
-    log "ERROR: extraction failed"
-    return 1
-  fi
-  rm -f "${archive}"
-  if [ ! -x "${SWIFT_ROOT}/usr/bin/swift" ]; then
-    log "ERROR: swift binary missing after extract"
-    return 1
-  fi
-}
-
-# 3. mise + the tools pinned in mise.toml (swift-format, swiftlint, periphery,
-#    swift-openapi-generator). The spm: backends build from source, so the
-#    toolchain has to be on PATH before this runs.
-install_mise() {
-  if ! command -v mise >/dev/null 2>&1 && [ ! -x "${HOME}/.local/bin/mise" ]; then
-    log "installing mise"
-    curl -fsSL https://mise.run | sh || {
-      log "WARNING: mise install failed"
-      return 0
-    }
-  else
-    log "mise already installed"
-  fi
-  export PATH="${HOME}/.local/bin:${SWIFT_ROOT}/usr/bin:${PATH}"
-  if [ -f "${CLAUDE_PROJECT_DIR:-.}/mise.toml" ]; then
-    log "running mise install (the slow step on a cold container)"
-    (cd "${CLAUDE_PROJECT_DIR:-.}" && mise install -y) ||
-      log "WARNING: mise install reported errors"
-  fi
-}
-
-# 4. Persist PATH for the rest of the session.
-persist_environment() {
-  local path_line="export PATH=\"${SWIFT_ROOT}/usr/bin:${HOME}/.local/bin:\${PATH}\""
-  if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-    if ! grep -qF "${SWIFT_ROOT}/usr/bin" "${CLAUDE_ENV_FILE}" 2>/dev/null; then
-      printf '%s\n' "${path_line}" >>"${CLAUDE_ENV_FILE}"
-    fi
-    log "persisted PATH to CLAUDE_ENV_FILE"
-  fi
-  # Also land it in the shell profile so plain non-login shells inherit it.
-  for profile in "${HOME}/.bashrc" "${HOME}/.profile"; do
-    [ -f "${profile}" ] || continue
-    if ! grep -qF "${SWIFT_ROOT}/usr/bin" "${profile}" 2>/dev/null; then
-      printf '%s\n' "${path_line}" >>"${profile}"
+  # System dependencies for Swift on Ubuntu 24.04 (per swift.org Linux
+  # instructions), plus curl for fetching swiftly. Most are already in the
+  # base image, so only reach for apt when something is genuinely missing --
+  # `apt-get update` alone costs ~10s.
+  local packages missing pkg
+  packages=(
+    binutils
+    curl
+    git
+    gnupg2
+    libc6-dev
+    libcurl4-openssl-dev
+    libedit2
+    libgcc-13-dev
+    libncurses-dev
+    libpython3-dev
+    libsqlite3-0
+    libstdc++-13-dev
+    libxml2-dev
+    libz3-dev
+    pkg-config
+    tzdata
+    zlib1g-dev
+  )
+  missing=()
+  for pkg in "${packages[@]}"; do
+    if [ "$(dpkg-query -W -f='${db:Status-Status}' "$pkg" 2> /dev/null)" != "installed" ]; then
+      missing+=("$pkg")
     fi
   done
+
+  if [ "${#missing[@]}" -gt 0 ]; then
+    echo "Installing missing system packages: ${missing[*]}"
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq
+    apt-get install -y -qq --no-install-recommends "${missing[@]}"
+  else
+    echo "All system packages already present; skipping apt."
+  fi
+
+  # Install swiftly non-interactively, then the toolchain pinned by the
+  # repo's .swift-version (falling back to latest if no pin resolves).
+  local workdir
+  workdir="$(mktemp -d)"
+  pushd "$workdir" > /dev/null
+  curl -fsSLO "https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz"
+  tar zxf "swiftly-$(uname -m).tar.gz"
+  ./swiftly init -y --skip-install
+  popd > /dev/null
+  rm -rf "$workdir"
+
+  # shellcheck disable=SC1090
+  . "$SWIFTLY_ENV"
+
+  cd "$PROJECT_DIR"
+  if ! swiftly install -y; then
+    echo "Pinned toolchain install failed; falling back to latest." >&2
+    swiftly install -y latest
+    swiftly use -y latest
+  fi
 }
 
-install_apt_dependencies
-# Never block the session on a provisioning failure — the agent can still read
-# and edit code, it just cannot build.
-install_swift || exit 0
-install_mise
-persist_environment
+# Pick up a swiftly install from a previous (cached) hook run.
+if [ -f "$SWIFTLY_ENV" ]; then
+  # shellcheck disable=SC1090
+  . "$SWIFTLY_ENV"
+fi
 
-export PATH="${SWIFT_ROOT}/usr/bin:${HOME}/.local/bin:${PATH}"
-log "provisioning complete: $(swift --version 2>&1 | head -1)"
-exit 0
+if command -v swift > /dev/null 2>&1; then
+  echo "Swift already installed: $(swift --version 2>&1 | head -1)"
+else
+  install_swift
+fi
+
+swift --version
+touch "$SETUP_DONE"

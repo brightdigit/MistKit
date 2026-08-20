@@ -196,3 +196,7 @@ build
 
 # Git worktrees created for parallel agent runs
 .claude/worktrees/
+
+# Standalone openapi generator tools package build products
+Scripts/OpenAPITools/.build/
+Scripts/OpenAPITools/.swiftpm/
