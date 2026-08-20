@@ -47,6 +47,7 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
     ZoneRoundtripPhase(),
     FetchZoneChangesPhase(),
     FetchAllZoneChangesPhase(),
+    FetchRecordZoneChangesPhase(),
     UploadAssetPhase(),
     CreateRecordsPhase(),
     RereferenceAssetPhase(),

@@ -48,6 +48,16 @@
       let moreComing: Bool
     }
 
+    private struct ZoneRecordChangesPayload: Decodable {
+      struct Zone: Decodable {
+        let zone: ZoneInfo
+        let syncToken: String?
+        let moreComing: Bool
+      }
+
+      let zones: [Zone]
+    }
+
     @Test("POST /api/zones/list forwards the database to the backend")
     internal func zonesListForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
@@ -173,6 +183,57 @@
           method: .post,
           headers: [.contentType: "application/json"],
           body: ByteBuffer(string: #"{"syncToken":"t"}"#)
+        ) { response in
+          #expect(response.status == .unauthorized)
+        }
+      }
+    }
+
+    @Test("POST /api/changes/zone forwards zones and sync tokens to the backend")
+    internal func changesZoneForwards() async throws {
+      let fixture = Self.makeFixture(authenticated: true)
+      let app = Application(router: try fixture.server.makeRouter())
+      let jsonBody = #"""
+        {"database":"private","zones":[
+          {"zoneName":"Articles","syncToken":"token-a"},
+          {"zoneName":"Photos"}
+        ]}
+        """#
+
+      try await app.test(.router) { client in
+        try await client.execute(
+          uri: "/api/changes/zone",
+          method: .post,
+          headers: [.contentType: "application/json"],
+          body: ByteBuffer(string: jsonBody)
+        ) { response in
+          #expect(response.status == .ok)
+          let payload = try JSONDecoder().decode(
+            ZoneRecordChangesPayload.self,
+            from: Data(response.body.readableBytesView)
+          )
+          #expect(payload.zones.map(\.zone.zoneName) == ["Articles", "Photos"])
+          #expect(payload.zones.allSatisfy { $0.syncToken != nil })
+        }
+      }
+
+      let captured = await fixture.backend.lastZoneRecordChanges
+      #expect(captured?.zones.map(\.zoneID.zoneName) == ["Articles", "Photos"])
+      #expect(captured?.zones.map(\.syncToken) == ["token-a", nil])
+      #expect(captured?.database == .private)
+    }
+
+    @Test("POST /api/changes/zone returns 401 without a captured auth token")
+    internal func changesZoneRequiresAuth() async throws {
+      let fixture = Self.makeFixture(authenticated: false)
+      let app = Application(router: try fixture.server.makeRouter())
+
+      try await app.test(.router) { client in
+        try await client.execute(
+          uri: "/api/changes/zone",
+          method: .post,
+          headers: [.contentType: "application/json"],
+          body: ByteBuffer(string: #"{"zones":[{"zoneName":"Articles"}]}"#)
         ) { response in
           #expect(response.status == .unauthorized)
         }

@@ -52,6 +52,7 @@
     internal var lastListZones: ListZonesCall?
     internal var lastLookupZones: LookupZonesCall?
     internal var lastZoneChanges: ZoneChangesCall?
+    internal var lastZoneRecordChanges: ZoneRecordChangesCall?
     internal var didFetchCaller = false
     internal var lastDiscoverUsers: DiscoverUsersCall?
     internal var didListSubscriptions = false

@@ -1,5 +1,5 @@
 //
-//  FetchZoneChangesPhase.swift
+//  FetchRecordZoneChangesPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,30 +30,39 @@
 internal import Foundation
 internal import MistKit
 
-internal struct FetchZoneChangesPhase: IntegrationPhase {
+/// Exercises
+/// ``CloudKitService/fetchRecordZoneChanges(zones:reverse:desiredKeys:resultsLimit:desiredRecordTypes:database:)``
+/// against a live container. Follows up on ``FetchZoneChangesPhase``, which
+/// reports *which* zones changed; this phase fetches the record changes
+/// inside `_defaultZone`. Failures are non-fatal, matching the sibling
+/// database-changes phases.
+internal struct FetchRecordZoneChangesPhase: IntegrationPhase {
   internal typealias Input = NoState
   internal typealias Output = NoState
 
-  internal static let title = "Fetch database changes"
-  internal static let emoji = "🔄"
-  internal static let apiName = "fetchDatabaseChanges"
+  internal static let title = "Fetch record zone changes"
+  internal static let emoji = "📁"
+  internal static let apiName = "fetchRecordZoneChanges"
 
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     do {
-      let result = try await context.service.fetchDatabaseChanges(database: context.database)
-      print("✅ Fetched \(result.changedZones.count) changed zone(s)")
+      let result = try await context.service.fetchRecordZoneChanges(
+        zones: [ZoneChangesRequest(zoneID: ZoneID.defaultZone)],
+        database: context.database
+      )
+      print("✅ Fetched changes for \(result.changes.count) zone(s)")
       if context.verbose {
-        for zone in result.changedZones {
-          print("   - \(zone.zoneName)")
+        for change in result.changes {
+          print("   - \(change.zone.zoneName): \(change.records.count) record(s)")
         }
-        if let token = result.syncToken {
-          print("   Sync token: \(token.prefix(30))...")
+        for failure in result.failures {
+          print("   ⚠️  \(failure.zoneName): \(failure.serverErrorCode)")
         }
       }
     } catch {
-      print("⚠️  fetchDatabaseChanges failed (non-fatal): \(error)")
+      print("⚠️  fetchRecordZoneChanges failed (non-fatal): \(error)")
     }
 
     return NoState()

@@ -106,6 +106,12 @@
       internal let database: MistKit.Database
     }
 
+    /// Captured arguments from the most recent `webRecordZoneChanges` call.
+    internal struct ZoneRecordChangesCall: Sendable {
+      internal let zones: [ZoneChangesRequest]
+      internal let database: MistKit.Database
+    }
+
     /// Captured arguments from the most recent `webDiscoverUsers` call.
     internal struct DiscoverUsersCall: Sendable {
       internal let emails: [String]

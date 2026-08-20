@@ -30,7 +30,8 @@
 internal import Foundation
 internal import MistKit
 
-/// Exercises ``CloudKitService/fetchAllZoneChanges(syncToken:maxPages:database:)``
+/// Exercises
+/// ``CloudKitService/fetchAllDatabaseChanges(syncToken:resultsLimit:maxPages:database:)``
 /// against a live container. Failures are non-fatal (matching
 /// ``FetchZoneChangesPhase``) so test pipelines with empty zone change feeds
 /// don't fail the whole suite.
@@ -38,20 +39,24 @@ internal struct FetchAllZoneChangesPhase: IntegrationPhase {
   internal typealias Input = NoState
   internal typealias Output = NoState
 
-  internal static let title = "Fetch all zone changes"
+  internal static let title = "Fetch all database changes"
   internal static let emoji = "🔁"
-  internal static let apiName = "fetchAllZoneChanges"
+  internal static let apiName = "fetchAllDatabaseChanges"
 
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
     do {
-      let (zones, token) = try await context.service.fetchAllZoneChanges(
+      let (zones, token) = try await context.service.fetchAllDatabaseChanges(
         database: context.database
       )
-      print("✅ Fetched \(zones.count) zone(s) across all pages")
+      let changedZones = zones.compactMap { result in
+        if case .success(let zone) = result { return zone }
+        return nil
+      }
+      print("✅ Fetched \(changedZones.count) changed zone(s) across all pages")
       if context.verbose {
-        for zone in zones {
+        for zone in changedZones {
           print("   - \(zone.zoneName)")
         }
         if let token {
@@ -59,7 +64,7 @@ internal struct FetchAllZoneChangesPhase: IntegrationPhase {
         }
       }
     } catch {
-      print("⚠️  fetchAllZoneChanges failed (non-fatal): \(error)")
+      print("⚠️  fetchAllDatabaseChanges failed (non-fatal): \(error)")
     }
 
     return NoState()

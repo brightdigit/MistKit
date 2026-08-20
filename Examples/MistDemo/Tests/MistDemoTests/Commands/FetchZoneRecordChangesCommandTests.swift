@@ -1,6 +1,6 @@
 //
-//  FetchZoneChangesPhase.swift
-//  MistDemo
+//  FetchZoneRecordChangesCommandTests.swift
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,34 +28,30 @@
 //
 
 internal import Foundation
-internal import MistKit
+internal import Testing
 
-internal struct FetchZoneChangesPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = NoState
+@testable import MistDemoKit
 
-  internal static let title = "Fetch database changes"
-  internal static let emoji = "🔄"
-  internal static let apiName = "fetchDatabaseChanges"
+@Suite("FetchZoneRecordChangesCommand Tests")
+internal struct FetchZoneRecordChangesCommandTests {
+  @Test("Command has correct static properties")
+  internal func staticProperties() {
+    #expect(FetchZoneRecordChangesCommand.commandName == "fetch-zone-record-changes")
+    #expect(
+      FetchZoneRecordChangesCommand.abstract
+        == "Fetch record changes within one or more CloudKit zones"
+    )
+    #expect(
+      FetchZoneRecordChangesCommand.helpText.contains("FETCH-ZONE-RECORD-CHANGES")
+    )
+  }
 
-  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-
-    do {
-      let result = try await context.service.fetchDatabaseChanges(database: context.database)
-      print("✅ Fetched \(result.changedZones.count) changed zone(s)")
-      if context.verbose {
-        for zone in result.changedZones {
-          print("   - \(zone.zoneName)")
-        }
-        if let token = result.syncToken {
-          print("   Sync token: \(token.prefix(30))...")
-        }
-      }
-    } catch {
-      print("⚠️  fetchDatabaseChanges failed (non-fatal): \(error)")
-    }
-
-    return NoState()
+  @Test("Config defaults")
+  internal func configDefaults() async throws {
+    let baseConfig = try await MistDemoConfig()
+    let config = FetchZoneRecordChangesConfig(base: baseConfig)
+    #expect(config.zones == ["_defaultZone"])
+    #expect(config.fetchAll == false)
+    #expect(config.output == .table)
   }
 }

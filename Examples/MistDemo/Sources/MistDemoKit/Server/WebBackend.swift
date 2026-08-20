@@ -99,7 +99,12 @@ internal protocol WebBackend: Sendable {
   func webZoneChanges(
     syncToken: String?,
     database: MistKit.Database
-  ) async throws -> ZoneChangesResult
+  ) async throws -> DatabaseChangesResult
+
+  func webRecordZoneChanges(
+    zones: [ZoneChangesRequest],
+    database: MistKit.Database
+  ) async throws -> RecordZoneChangesResult
 
   func webFetchCaller() async throws -> UserInfo
 
