@@ -39,6 +39,8 @@
       internal let recordType: String
       internal let limit: Int?
       internal let sortBy: [WebRequests.QuerySortField]?
+      internal let zoneName: String?
+      internal let zoneOwner: String?
       internal let database: MistKit.Database
     }
 

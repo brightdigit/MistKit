@@ -43,6 +43,8 @@ internal protocol WebBackend: Sendable {
     recordType: String,
     limit: Int?,
     sortBy: [WebRequests.QuerySortField]?,
+    zoneName: String?,
+    zoneOwner: String?,
     database: MistKit.Database
   ) async throws -> [RecordInfo]
 

@@ -51,6 +51,8 @@ public enum MistDemoConstants {
     public static let recordName = "record.name"
     /// Zone configuration key.
     public static let zone = "zone"
+    /// Zone owner configuration key (ownerName for shared zones).
+    public static let zoneOwner = "zone.owner"
     /// Limit configuration key.
     public static let limit = "limit"
     /// Fields configuration key.

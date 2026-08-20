@@ -42,6 +42,7 @@ extension QueryConfigTests {
       let config = QueryConfig(base: baseConfig)
 
       #expect(config.zone == "_defaultZone")
+      #expect(config.zoneOwner == nil)
       #expect(config.recordType == "Note")
       #expect(config.filters.isEmpty)
       #expect(config.sort == nil)
@@ -62,6 +63,19 @@ extension QueryConfigTests {
 
       #expect(config.zone == "customZone")
       #expect(config.recordType == "Note")
+    }
+
+    @Test("QueryConfig initializes with custom zone owner")
+    internal func initializeWithCustomZoneOwner() async throws {
+      let baseConfig = try await MistDemoConfig()
+      let config = QueryConfig(
+        base: baseConfig,
+        zone: "SharedZone",
+        zoneOwner: "_ownerRecordName"
+      )
+
+      #expect(config.zone == "SharedZone")
+      #expect(config.zoneOwner == "_ownerRecordName")
     }
 
     @Test("QueryConfig initializes with custom record type")

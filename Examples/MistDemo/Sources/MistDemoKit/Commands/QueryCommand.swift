@@ -48,6 +48,8 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
 
     OPTIONS:
       --record-type <type>     Record type (default: Note)
+      --zone <name>            Zone to query (default: _defaultZone)
+      --zone-owner <owner>     Owner record name for shared zones
       --filter <filter>        Filter: field:operator:value
       --sort <field:order>     Sort (asc/desc)
       --limit <count>          Max records (1-200)
@@ -71,8 +73,6 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
       let client = try MistKitClientFactory.create(for: config.base)
 
       // Build filters
-      // NOTE: Zone, offset, and continuation marker support require
-      // enhancements to CloudKitService.queryRecords method (GitHub issues #145, #146)
       let filters: [QueryFilter] =
         config.filters.isEmpty
         ? []
@@ -82,10 +82,13 @@ public struct QueryCommand: MistDemoCommand, OutputFormatting {
         filters: filters,
         sortBy: []
       )
+      let zoneID = ZoneID(zoneName: config.zone, ownerName: config.zoneOwner)
       let result = try await client.queryRecords(
         query,
         limit: config.limit,
         desiredKeys: config.fields,
+        continuationMarker: config.continuationMarker,
+        zoneID: zoneID,
         zoneWide: config.zoneWide,
         numbersAsStrings: config.numbersAsStrings,
         database: config.base.database

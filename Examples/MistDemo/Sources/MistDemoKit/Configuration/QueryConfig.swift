@@ -42,6 +42,8 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
   public let base: MistDemoConfig
   /// The CloudKit zone name.
   public let zone: String
+  /// The optional zone owner (ownerName for shared zones).
+  public let zoneOwner: String?
   /// The CloudKit record type.
   public let recordType: String
   /// The filter expressions.
@@ -67,6 +69,7 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
   public init(
     base: MistDemoConfig,
     zone: String = "_defaultZone",
+    zoneOwner: String? = nil,
     recordType: String = "Note",
     filters: [String] = [],
     sort: (field: String, order: SortOrder)? = nil,
@@ -80,6 +83,7 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
   ) {
     self.base = base
     self.zone = zone
+    self.zoneOwner = zoneOwner
     self.recordType = recordType
     self.filters = filters
     self.sort = sort
@@ -113,6 +117,7 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
     self.init(
       base: baseConfig,
       zone: parsed.zone,
+      zoneOwner: parsed.zoneOwner,
       recordType: parsed.recordType,
       filters: parsed.filters,
       sort: parsed.sort,
