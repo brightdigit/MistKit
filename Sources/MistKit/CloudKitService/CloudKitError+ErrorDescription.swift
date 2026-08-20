@@ -73,9 +73,7 @@ extension CloudKitError {
         "CloudKit query exceeded pagination limit of \(maxPages) pages "
         + "(collected \(records.count) records)"
     case .zonePaginationLimitExceeded(let maxPages, let zones):
-      return
-        "CloudKit zone-changes exceeded pagination limit of \(maxPages) pages "
-        + "(collected \(zones.count) zones)"
+      return Self.zonePaginationDescription(maxPages: maxPages, zoneCount: zones.count)
     case .missingCredentials(let database, let availability, let reason):
       return Self.missingCredentialsDescription(
         database: database, availability: availability, reason: reason
@@ -113,16 +111,6 @@ extension CloudKitError {
     let code = recordError.serverErrorCode.rawValue
     var message = "CloudKit record operation failed for '\(identifier)' (\(code))"
     if let reason = recordError.reason {
-      message += "\nReason: \(reason)"
-    }
-    return message
-  }
-
-  private static func zoneOperationDescription(_ zoneError: ZoneOperationFailure) -> String {
-    let identifier = zoneError.identifier
-    let code = zoneError.serverErrorCode.rawValue
-    var message = "CloudKit zone operation failed for '\(identifier)' (\(code))"
-    if let reason = zoneError.reason {
       message += "\nReason: \(reason)"
     }
     return message

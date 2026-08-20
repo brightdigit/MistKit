@@ -52,7 +52,9 @@ public struct DatabaseChangesResult: Sendable {
   /// Use ``zones`` directly when the failures matter.
   public var changedZones: [ZoneInfo] {
     zones.compactMap { result in
-      guard case .success(let zone) = result else { return nil }
+      guard case .success(let zone) = result else {
+        return nil
+      }
       return zone
     }
   }
@@ -60,7 +62,9 @@ public struct DatabaseChangesResult: Sendable {
   /// The per-zone failures, dropping the successes.
   public var failures: [ZoneOperationFailure] {
     zones.compactMap { result in
-      guard case .failure(let failure) = result else { return nil }
+      guard case .failure(let failure) = result else {
+        return nil
+      }
       return failure
     }
   }

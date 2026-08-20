@@ -29,6 +29,7 @@
 
 internal import MistKitOpenAPI
 
+// swiftlint:disable line_length - DocC symbol links cannot be wrapped
 /// A per-zone entry in a `changes/zone` request.
 ///
 /// Identifies the zone to fetch record changes from and, optionally, overrides
@@ -37,6 +38,7 @@ internal import MistKitOpenAPI
 /// ``CloudKitService/fetchRecordZoneChanges(zones:reverse:desiredKeys:resultsLimit:desiredRecordTypes:database:)``
 /// call specified.
 public struct ZoneChangesRequest: Sendable {
+  // swiftlint:enable line_length
   /// The zone to fetch record changes from.
   public let zoneID: ZoneID
   /// Token from a previous fetch of this zone (`nil` = initial fetch).

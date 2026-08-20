@@ -28,7 +28,6 @@
 //
 
 internal import Foundation
-internal import MistKitOpenAPI
 
 extension CloudKitService {
   /// Fetch all record zone changes, handling per-zone pagination automatically.
@@ -97,9 +96,13 @@ extension CloudKitService {
       )
 
       pending = accumulator.merge(
-        result, pending: pending, reverse: reverse,
-        desiredKeys: desiredKeys, resultsLimit: resultsLimit,
-        desiredRecordTypes: desiredRecordTypes)
+        result,
+        pending: pending,
+        reverse: reverse,
+        desiredKeys: desiredKeys,
+        resultsLimit: resultsLimit,
+        desiredRecordTypes: desiredRecordTypes
+      )
       pageCount += 1
     }
 

@@ -139,7 +139,9 @@ extension CloudKitService {
         throw CloudKitError.zonePaginationLimitExceeded(
           maxPages: maxPages,
           zones: allZones.compactMap { result in
-            guard case .success(let zone) = result else { return nil }
+            guard case .success(let zone) = result else {
+              return nil
+            }
             return zone
           }
         )

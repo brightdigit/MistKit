@@ -124,11 +124,15 @@ internal struct ZoneChangesAccumulator {
   /// Zones the server never reported on are omitted rather than fabricated.
   internal func finish() -> RecordZoneChangesResult {
     let zones: [ZoneRecordChangesResult] = order.compactMap { name in
-      guard let entry = entries[name] else { return nil }
+      guard let entry = entries[name] else {
+        return nil
+      }
       if let failure = entry.failure {
         return .failure(failure)
       }
-      guard let zone = entry.zone else { return nil }
+      guard let zone = entry.zone else {
+        return nil
+      }
       return .success(
         ZoneRecordChanges(
           zone: zone,

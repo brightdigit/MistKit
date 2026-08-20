@@ -42,7 +42,9 @@ public struct RecordZoneChangesResult: Sendable {
   /// The zones whose changes were fetched successfully.
   public var changes: [ZoneRecordChanges] {
     zones.compactMap { result in
-      guard case .success(let changes) = result else { return nil }
+      guard case .success(let changes) = result else {
+        return nil
+      }
       return changes
     }
   }
@@ -50,7 +52,9 @@ public struct RecordZoneChangesResult: Sendable {
   /// The per-zone failures, dropping the successes.
   public var failures: [ZoneOperationFailure] {
     zones.compactMap { result in
-      guard case .failure(let failure) = result else { return nil }
+      guard case .failure(let failure) = result else {
+        return nil
+      }
       return failure
     }
   }
