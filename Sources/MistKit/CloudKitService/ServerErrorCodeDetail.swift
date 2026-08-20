@@ -31,8 +31,12 @@
 ///
 /// Produced by `CloudKitError.serverErrorDetail` so that a code, the HTTP
 /// status Apple documents for it, and the human summary used in error
-/// descriptions all live in exactly one place.
+/// descriptions all live in exactly one place — ``CloudKitServerErrorCode``'s
+/// catalog.
 internal struct ServerErrorCodeDetail: Sendable {
+  /// Summary used when the failure carried an unrecognized `serverErrorCode`.
+  internal static let unrecognizedSummary = "unrecognized server error"
+
   /// The raw CloudKit `serverErrorCode` string, e.g. `"ACCESS_DENIED"`.
   internal let code: String
   /// The HTTP status Apple documents for `code`.
@@ -48,5 +52,21 @@ internal struct ServerErrorCodeDetail: Sendable {
     self.statusCode = statusCode
     self.summary = summary
     self.reason = reason
+  }
+
+  /// Builds a detail from a known catalog entry, storing catalog constants at
+  /// initialization and attaching the server-supplied `reason`.
+  ///
+  /// Returns `nil` when `code` is ``CloudKitServerErrorCode/unknown(_:)``.
+  internal init?(code: CloudKitServerErrorCode, reason: String?) {
+    guard let entry = code.catalogEntry else {
+      return nil
+    }
+    self.init(
+      code: entry.raw,
+      statusCode: entry.statusCode,
+      summary: entry.summary,
+      reason: reason
+    )
   }
 }

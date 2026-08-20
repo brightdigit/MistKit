@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import Foundation
 internal import Testing
 
 @testable import MistKit

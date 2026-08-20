@@ -42,40 +42,47 @@ extension CloudKitError {
   /// models a CloudKit `serverErrorCode`; `nil` for all other cases.
   ///
   /// The switch is deliberately exhaustive: adding a case to ``CloudKitError``
-  /// stops compiling here until the new case is classified.
-  // swiftlint:disable:next cyclomatic_complexity function_body_length
+  /// stops compiling here until the new case is classified. Wire strings and
+  /// status numbers come from ``CloudKitServerErrorCode``'s catalog — never
+  /// inlined here.
+  // swiftlint:disable:next cyclomatic_complexity
   internal var serverErrorDetail: ServerErrorCodeDetail? {
     switch self {
     case .accessDenied(let reason):
-      return Self.detail("ACCESS_DENIED", 403, "access denied", reason)
+      return ServerErrorCodeDetail(code: .accessDenied, reason: reason)
     case .atomicFailure(let reason):
-      return Self.detail("ATOMIC_ERROR", 400, "atomic batch failure", reason)
+      return ServerErrorCodeDetail(code: .atomicError, reason: reason)
     case .authenticationFailed(let reason):
-      return Self.detail("AUTHENTICATION_FAILED", 401, "authentication failed", reason)
+      return ServerErrorCodeDetail(code: .authenticationFailed, reason: reason)
     case .authenticationRequired(let reason):
-      return Self.detail("AUTHENTICATION_REQUIRED", 421, "authentication required", reason)
+      return ServerErrorCodeDetail(code: .authenticationRequired, reason: reason)
     case .badRequest(let reason):
-      return Self.detail("BAD_REQUEST", 400, "bad request", reason)
+      return ServerErrorCodeDetail(code: .badRequest, reason: reason)
     case .conflict(let reason):
-      return Self.detail("CONFLICT", 409, "conflict", reason)
+      return ServerErrorCodeDetail(code: .conflict, reason: reason)
     case .exists(let reason):
-      return Self.detail("EXISTS", 409, "already exists", reason)
+      return ServerErrorCodeDetail(code: .exists, reason: reason)
     case .internalServerError(let reason):
-      return Self.detail("INTERNAL_ERROR", 500, "internal server error", reason)
+      return ServerErrorCodeDetail(code: .internalError, reason: reason)
     case .notFound(let reason):
-      return Self.detail("NOT_FOUND", 404, "not found", reason)
+      return ServerErrorCodeDetail(code: .notFound, reason: reason)
     case .quotaExceeded(let reason, _):
-      return Self.detail("QUOTA_EXCEEDED", 413, "quota exceeded", reason)
+      return ServerErrorCodeDetail(code: .quotaExceeded, reason: reason)
     case .throttled(let reason):
-      return Self.detail("THROTTLED", 429, "throttled", reason)
+      return ServerErrorCodeDetail(code: .throttled, reason: reason)
     case .tryAgainLater(let reason):
-      return Self.detail("TRY_AGAIN_LATER", 503, "try again later", reason)
+      return ServerErrorCodeDetail(code: .tryAgainLater, reason: reason)
     case .validatingReferenceError(let reason):
-      return Self.detail("VALIDATING_REFERENCE_ERROR", 412, "reference validation error", reason)
+      return ServerErrorCodeDetail(code: .validatingReferenceError, reason: reason)
     case .zoneNotFound(let reason):
-      return Self.detail("ZONE_NOT_FOUND", 404, "zone not found", reason)
+      return ServerErrorCodeDetail(code: .zoneNotFound, reason: reason)
     case .unknownServerError(let code, let statusCode, let reason):
-      return Self.detail(code, statusCode, "unrecognized server error", reason)
+      return ServerErrorCodeDetail(
+        code: code,
+        statusCode: statusCode,
+        summary: ServerErrorCodeDetail.unrecognizedSummary,
+        reason: reason
+      )
     case .httpError, .httpErrorWithDetails, .httpErrorWithRawResponse, .invalidResponse,
       .incompleteResponse, .conversionFailed, .recordOperationFailed,
       .subscriptionOperationFailed, .subscriptionLikelyDuplicate, .underlyingError,
@@ -92,7 +99,7 @@ extension CloudKitError {
   ///   ``CloudKitError/httpErrorWithDetails(statusCode:reason:)``, preserving
   ///   the server `reason`.
   /// - Each of the fourteen codes documented in `openapi.yaml` becomes its own
-  ///   dedicated case.
+  ///   dedicated case, looked up via ``CloudKitServerErrorCode``'s dictionary.
   /// - Anything else becomes
   ///   ``CloudKitError/unknownServerError(code:statusCode:reason:)`` so a code
   ///   Apple adds after this release still reaches the caller intact.
@@ -101,56 +108,62 @@ extension CloudKitError {
   ///   - code: The raw `serverErrorCode` string from the failure body.
   ///   - statusCode: The HTTP status the failure arrived with.
   ///   - reason: The server-supplied `reason`, when present.
-  // swiftlint:disable:next cyclomatic_complexity
   internal init(serverErrorCode code: String?, statusCode: Int, reason: String?) {
     guard let code else {
       self = .httpErrorWithDetails(statusCode: statusCode, reason: reason)
       return
     }
-    switch code {
-    case "ACCESS_DENIED":
-      self = .accessDenied(reason: reason)
-    case "ATOMIC_ERROR":
-      self = .atomicFailure(reason: reason)
-    case "AUTHENTICATION_FAILED":
-      self = .authenticationFailed(reason: reason)
-    case "AUTHENTICATION_REQUIRED":
-      self = .authenticationRequired(reason: reason)
-    case "BAD_REQUEST":
-      self = .badRequest(reason: reason)
-    case "CONFLICT":
-      self = .conflict(reason: reason)
-    case "EXISTS":
-      self = .exists(reason: reason)
-    case "INTERNAL_ERROR":
-      self = .internalServerError(reason: reason)
-    case "NOT_FOUND":
-      self = .notFound(reason: reason)
-    case "QUOTA_EXCEEDED":
-      // `hint` is enriched later by the calling operation's catch block, which
-      // is the only place that can see the local request state.
-      self = .quotaExceeded(reason: reason, hint: nil)
-    case "THROTTLED":
-      self = .throttled(reason: reason)
-    case "TRY_AGAIN_LATER":
-      self = .tryAgainLater(reason: reason)
-    case "VALIDATING_REFERENCE_ERROR":
-      self = .validatingReferenceError(reason: reason)
-    case "ZONE_NOT_FOUND":
-      self = .zoneNotFound(reason: reason)
-    default:
-      self = .unknownServerError(code: code, statusCode: statusCode, reason: reason)
-    }
+    // Dictionary lookup in `CloudKitServerErrorCode.init(rawValue:)` — no
+    // string switch here. Map the typed enum onto the dedicated case.
+    self = Self.make(
+      from: CloudKitServerErrorCode(rawValue: code),
+      statusCode: statusCode,
+      reason: reason
+    )
   }
 
-  private static func detail(
-    _ code: String,
-    _ statusCode: Int,
-    _ summary: String,
-    _ reason: String?
-  ) -> ServerErrorCodeDetail {
-    ServerErrorCodeDetail(
-      code: code, statusCode: statusCode, summary: summary, reason: reason
-    )
+  /// Builds the dedicated case for a typed ``CloudKitServerErrorCode``.
+  ///
+  /// `hint` for ``CloudKitError/quotaExceeded(reason:hint:)`` is enriched later
+  /// by the calling operation's catch block, which is the only place that can
+  /// see the local request state.
+  // swiftlint:disable:next cyclomatic_complexity
+  private static func make(
+    from code: CloudKitServerErrorCode,
+    statusCode: Int,
+    reason: String?
+  ) -> CloudKitError {
+    switch code {
+    case .accessDenied:
+      return .accessDenied(reason: reason)
+    case .atomicError:
+      return .atomicFailure(reason: reason)
+    case .authenticationFailed:
+      return .authenticationFailed(reason: reason)
+    case .authenticationRequired:
+      return .authenticationRequired(reason: reason)
+    case .badRequest:
+      return .badRequest(reason: reason)
+    case .conflict:
+      return .conflict(reason: reason)
+    case .exists:
+      return .exists(reason: reason)
+    case .internalError:
+      return .internalServerError(reason: reason)
+    case .notFound:
+      return .notFound(reason: reason)
+    case .quotaExceeded:
+      return .quotaExceeded(reason: reason, hint: nil)
+    case .throttled:
+      return .throttled(reason: reason)
+    case .tryAgainLater:
+      return .tryAgainLater(reason: reason)
+    case .validatingReferenceError:
+      return .validatingReferenceError(reason: reason)
+    case .zoneNotFound:
+      return .zoneNotFound(reason: reason)
+    case .unknown(let raw):
+      return .unknownServerError(code: raw, statusCode: statusCode, reason: reason)
+    }
   }
 }
