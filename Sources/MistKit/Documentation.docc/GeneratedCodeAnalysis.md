@@ -356,11 +356,9 @@ case .ok(let ok):
   for record in body.records ?? [] { /* read record */ }
 case .badRequest(let resp):
   let err = try resp.body.json
-  throw CloudKitError.httpErrorWithDetails(
-    statusCode: 400,
-    serverErrorCode: err.serverErrorCode?.rawValue,
-    reason: err.reason
-  )
+  // …and now switch over err.serverErrorCode yourself to decide
+  // which failure this actually was.
+  throw CloudKitError.badRequest(reason: err.reason)
 case .undocumented(let code, _):
   throw CloudKitError.httpError(statusCode: code)
 // … five more cases …

@@ -54,10 +54,10 @@ internal struct QueryRecordsPhase: IntegrationPhase {
         print("   Found \(ours.count) of our \(input.names.count) test records")
       }
     } catch {
-      // Workaround for Swift 6.3 SIL miscompile (MandatoryAllocBoxToStack) —
-      // a literal in a destructured-enum `catch` pattern crashes the pass on
-      // this branch. See SWIFT_COMPILER_BUG.md. Match via `guard case` instead.
-      guard case CloudKitError.httpErrorWithDetails(statusCode: 404, _, _) = error else {
+      // `NOT_FOUND` now has its own case, so no enum destructuring with a
+      // literal is needed here — which also sidesteps the Swift 6.3 SIL
+      // miscompile (MandatoryAllocBoxToStack) noted in SWIFT_COMPILER_BUG.md.
+      guard case CloudKitError.notFound = error else {
         throw error
       }
       // Schema propagation in development can lag behind the first write.

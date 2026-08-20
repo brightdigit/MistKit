@@ -48,7 +48,7 @@ let environment: Environment = ProcessInfo.processInfo
 
 ``Environment/init(caseInsensitive:)`` accepts `"development"` / `"production"` regardless of letter case and returns `nil` on anything else, so a misspelled env var fails closed at startup rather than silently shipping a dev build to prod.
 
-> Warning: CloudKit promotes schema from `development` to `production` explicitly via the Dashboard. Code referencing fields that exist only in dev will succeed against `.development` and fail against `.production` with ``CloudKitError/httpErrorWithDetails(statusCode:serverErrorCode:reason:)``.
+> Warning: CloudKit promotes schema from `development` to `production` explicitly via the Dashboard. Code referencing fields that exist only in dev will succeed against `.development` and fail against `.production` with ``CloudKitError/badRequest(reason:)`` or ``CloudKitError/notFound(reason:)``, depending on which lookup misses.
 
 ## Database scope at configuration time
 

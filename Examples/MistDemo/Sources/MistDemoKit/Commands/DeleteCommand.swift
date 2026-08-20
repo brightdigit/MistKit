@@ -72,10 +72,14 @@ public struct DeleteCommand: MistDemoCommand, OutputFormatting {
     guard error.httpStatusCode == 409 else {
       return nil
     }
-    if case .httpErrorWithDetails(_, _, let reason) = error {
+    switch error {
+    case .conflict(let reason), .exists(let reason):
       return .conflict(reason: reason)
+    case .httpErrorWithDetails(_, let reason):
+      return .conflict(reason: reason)
+    default:
+      return .conflict(reason: nil)
     }
-    return .conflict(reason: nil)
   }
 
   /// Executes the command.
