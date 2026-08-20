@@ -106,7 +106,7 @@ extension CloudKitServiceTests.ServerErrorCodes {
 
       do {
         _ = try await service.queryRecords(
-          recordType: "Note",
+          Query(recordType: "Note"),
           database: .public(.prefers(.serverToServer))
         )
         Issue.record("expected queryRecords to throw")
