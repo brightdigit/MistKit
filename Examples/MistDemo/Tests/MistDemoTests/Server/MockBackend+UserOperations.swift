@@ -46,16 +46,23 @@
 
     internal func webDiscoverUsers(
       emails: [String],
+      phoneNumbers: [String],
       userRecordNames: [String]
     ) async throws -> [UserIdentity] {
       lastDiscoverUsers = DiscoverUsersCall(
         emails: emails,
+        phoneNumbers: phoneNumbers,
         userRecordNames: userRecordNames
       )
       try consumePendingError()
       return emails.map { email in
         UserIdentity(lookupInfo: UserIdentityLookupInfo(emailAddress: email))
       }
+        + phoneNumbers.map { phoneNumber in
+          UserIdentity(
+            lookupInfo: UserIdentityLookupInfo(phoneNumber: phoneNumber)
+          )
+        }
         + userRecordNames.map { name in
           UserIdentity(userRecordName: .recordName(name))
         }
