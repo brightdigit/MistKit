@@ -1,5 +1,5 @@
 //
-//  ZoneChangesResult.swift
+//  ZoneMetadataTests.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,38 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistKitOpenAPI
+internal import Testing
 
-/// Result from fetching zone changes.
+/// Coverage for the zone metadata added in issue #386.
 ///
-/// Contains zones that have changed since the provided sync token,
-/// along with a new sync token for subsequent fetches.
-public struct ZoneChangesResult: Codable, Sendable {
-  /// Zones that have changed
-  public let zones: [ZoneInfo]
-  /// Token to use for next fetch to get incremental changes
-  public let syncToken: String?
-  /// Whether more changes are available (for large zone change sets)
-  public let moreComing: Bool
-
-  /// Initialize a zone changes result
-  public init(
-    zones: [ZoneInfo],
-    syncToken: String?,
-    moreComing: Bool = false
-  ) {
-    self.zones = zones
-    self.syncToken = syncToken
-    self.moreComing = moreComing
-  }
-
-  internal init(from response: Components.Schemas.ZoneChangesResponse) throws(ConversionError) {
-    var zones: [ZoneInfo] = []
-    for zone in response.zones ?? [] {
-      zones.append(try ZoneInfo(from: zone))
-    }
-    self.zones = zones
-    self.syncToken = response.syncToken
-    self.moreComing = response.moreComing ?? false
-  }
-}
+/// Apple's archived "Zone Dictionary" documents exactly three keys —
+/// `zoneID`, `syncToken`, and `atomic` — and these suites pin the decode
+/// path for the latter two across every zone response shape.
+@Suite("Zone Metadata")
+internal enum ZoneMetadataTests {}
