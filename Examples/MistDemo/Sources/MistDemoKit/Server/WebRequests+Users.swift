@@ -33,22 +33,28 @@ internal import Foundation
 // wrapper (`discoverUserIdentities`) operates on the public database with
 // web-auth credentials regardless of the request's selected database.
 extension WebRequests {
-  /// `POST /api/users/discover` — discover user identities by email address
-  /// and/or user record name. Either list may be omitted; an absent key
-  /// decodes to an empty array.
+  /// `POST /api/users/discover` — discover user identities by email address,
+  /// phone number, and/or user record name. Any list may be omitted; an
+  /// absent key decodes to an empty array.
   internal struct DiscoverUsers: Decodable {
     private enum CodingKeys: String, CodingKey {
       case emails
+      case phoneNumbers
       case userRecordNames
     }
 
     internal let emails: [String]
+    internal let phoneNumbers: [String]
     internal let userRecordNames: [String]
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
       self.emails =
         try container.decodeIfPresent([String].self, forKey: .emails) ?? []
+      self.phoneNumbers =
+        try container.decodeIfPresent(
+          [String].self, forKey: .phoneNumbers
+        ) ?? []
       self.userRecordNames =
         try container.decodeIfPresent(
           [String].self, forKey: .userRecordNames

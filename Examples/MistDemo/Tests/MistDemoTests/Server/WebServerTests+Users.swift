@@ -91,13 +91,17 @@
     }
 
     @Test(
-      "POST /api/users/discover forwards emails and record names to the backend"
+      """
+      POST /api/users/discover forwards emails, phone numbers, \
+      and record names to the backend
+      """
     )
     internal func usersDiscoverForwards() async throws {
       let fixture = Self.makeFixture(authenticated: true)
       let app = Application(router: try fixture.server.makeRouter())
       let jsonBody = """
         {"emails":["a@example.com","b@example.com"],\
+        "phoneNumbers":["+15555550123"],\
         "userRecordNames":["_user-1"]}
         """
 
@@ -113,12 +117,13 @@
             UsersPayload.self,
             from: Data(response.body.readableBytesView)
           )
-          #expect(payload.users.count == 3)
+          #expect(payload.users.count == 4)
         }
       }
 
       let captured = await fixture.backend.lastDiscoverUsers
       #expect(captured?.emails == ["a@example.com", "b@example.com"])
+      #expect(captured?.phoneNumbers == ["+15555550123"])
       #expect(captured?.userRecordNames == ["_user-1"])
     }
 

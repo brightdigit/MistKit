@@ -107,6 +107,7 @@
     /// Captured arguments from the most recent `webDiscoverUsers` call.
     internal struct DiscoverUsersCall: Sendable {
       internal let emails: [String]
+      internal let phoneNumbers: [String]
       internal let userRecordNames: [String]
     }
 
