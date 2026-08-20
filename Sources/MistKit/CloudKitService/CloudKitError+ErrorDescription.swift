@@ -54,6 +54,8 @@ extension CloudKitError {
         + (conversionError.errorDescription ?? "\(conversionError)")
     case .recordOperationFailed(let recordError):
       return Self.recordOperationDescription(recordError)
+    case .zoneOperationFailed(let zoneError):
+      return Self.zoneOperationDescription(zoneError)
     case .subscriptionOperationFailed(let subscriptionError):
       return Self.subscriptionOperationDescription(subscriptionError)
     case .subscriptionLikelyDuplicate(let subscriptionError):
@@ -111,6 +113,16 @@ extension CloudKitError {
     let code = recordError.serverErrorCode.rawValue
     var message = "CloudKit record operation failed for '\(identifier)' (\(code))"
     if let reason = recordError.reason {
+      message += "\nReason: \(reason)"
+    }
+    return message
+  }
+
+  private static func zoneOperationDescription(_ zoneError: ZoneOperationFailure) -> String {
+    let identifier = zoneError.identifier
+    let code = zoneError.serverErrorCode.rawValue
+    var message = "CloudKit zone operation failed for '\(identifier)' (\(code))"
+    if let reason = zoneError.reason {
       message += "\nReason: \(reason)"
     }
     return message

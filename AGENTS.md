@@ -189,7 +189,10 @@ MistKit/
 | `CloudKitService+Initialization.swift` | initializer overloads (API token, web auth token, server-to-server) |
 | `CloudKitService+Operations.swift` | `queryRecords`, `queryAllRecords`, `lookupRecords` |
 | `CloudKitService+WriteOperations.swift` | `modifyRecords`, `createRecord`, `updateRecord`, `deleteRecord` |
-| `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
+| `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` *(deprecated — see `CloudKitService+DatabaseChanges.swift`)* |
+| `CloudKitService+DatabaseChanges.swift` | `fetchDatabaseChanges(syncToken:resultsLimit:)`, `fetchAllDatabaseChanges(...)` — `changes/database` |
+| `CloudKitService+RecordZoneChanges.swift` | `fetchRecordZoneChanges(zones:...)` — `changes/zone` |
+| `CloudKitService+RecordZoneChangesPagination.swift` | `fetchAllRecordZoneChanges(zones:...)` — per-zone auto-pagination |
 | `CloudKitService+ModifyZones.swift` | `modifyZones(_:database:)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
 | `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(no-arg address-book form — unavailable, pending #28; distinct from the available `discoverAllUserIdentities(lookupInfos:batchSize:)` chunking overload below)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)` |
@@ -213,7 +216,9 @@ MistKit/
 **Sync/Change Operations:**
 - `fetchRecordChanges(recordType:syncToken:)` → `/records/changes` — returns `RecordChangesResult` with `records`, `syncToken`, `moreComing`
 - `fetchAllRecordChanges(recordType:syncToken:)` — convenience wrapper that auto-paginates using `moreComing`
-- `fetchZoneChanges(syncToken:)` → `/zones/changes` — returns `ZoneChangesResult`
+- `fetchZoneChanges(syncToken:)` → `/zones/changes` — returns `ZoneChangesResult`. **Deprecated** (`@available(*, deprecated)`): Apple deprecated `zones/changes` in favor of `changes/database`. Same for `fetchAllZoneChanges`.
+- `fetchDatabaseChanges(syncToken:resultsLimit:)` → `/changes/database` — returns `DatabaseChangesResult` (*which zones* changed). Replacement for `fetchZoneChanges`. `fetchAllDatabaseChanges(...)` auto-paginates with `maxPages` + stuck-token detection.
+- `fetchRecordZoneChanges(zones:...)` → `/changes/zone` — returns `RecordZoneChangesResult` (records *within* zones). Each zone carries its **own** `syncToken`/`moreComing`, so `fetchAllRecordZoneChanges(...)` re-requests only the zones still reporting `moreComing` and merges each zone's records across rounds (`ZoneChangesAccumulator`).
 - `lookupZones(zoneIDs:)` → `/zones/lookup` — returns `[ZoneInfo]`
 - `discoverUserIdentities(lookupInfos:)` → POST `/users/discover` — takes `[UserIdentityLookupInfo]`, returns `[UserIdentity]`
 
@@ -248,8 +253,14 @@ In MistDemo, integration runs targeting these endpoints use `PhaseContext.userCo
 **Result Types (Sources/MistKit/Models/ and Sources/MistKit/Models/Zones/):**
 - `QueryResult` — `records: [RecordInfo]`, `continuationMarker: String?`
 - `RecordChangesResult` — `records: [RecordInfo]`, `syncToken: String?`, `moreComing: Bool`
-- `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`, `moreComing: Bool`
+- `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`, `moreComing: Bool` *(deprecated `zones/changes`)*
 - `ZoneInfo` — `zoneName: String`, `ownerRecordName: String?`, `capabilities: [String]`, `syncToken: String?`, `atomic: Bool?`
+- `DatabaseChangesResult` — `zones: [ZoneChangeResult]`, `syncToken: String?`, `moreComing: Bool`, plus `changedZones`/`failures` conveniences
+- `RecordZoneChangesResult` — `zones: [ZoneRecordChangesResult]`, plus `changes`/`failures`/`moreComing` conveniences (no top-level sync token — `changes/zone` paginates per zone)
+- `ZoneRecordChanges` — one zone's `records: [RecordInfo]` + that zone's own `syncToken`/`moreComing`
+- `ZoneChangesRequest` — a per-zone entry in a `changes/zone` request (`zoneID` + optional per-zone overrides)
+
+**Per-zone failures (RecordResult pattern):** `changes/database` and `changes/zone` return an entry per zone that is *either* a success payload or a zone fetch error, modeled in `openapi.yaml` as `oneOf: [ZoneFetchFailure, <Success>]`. These surface as `OperationResult<_, ZoneTarget>` (`ZoneChangeResult` / `ZoneRecordChangesResult`) so a failure on one zone never discards the zones that succeeded — matching the `RecordResult` pattern. `ZoneOperationFailure` is keyed by `zoneName` (CloudKit identifies the failed item by `zoneID`, not a flat string), and `.get()` throws `CloudKitError.zoneOperationFailed`.
 - `UserIdentity` — `userRecordName: String?`, `nameComponents: NameComponents?`, `lookupInfo: UserIdentityLookupInfo?`
 - `UserIdentityLookupInfo` — `emailAddress: String?`, `phoneNumber: String?`, `userRecordName: String?`
 - `NameComponents` — full personal name parts (givenName, familyName, nickname, etc.)

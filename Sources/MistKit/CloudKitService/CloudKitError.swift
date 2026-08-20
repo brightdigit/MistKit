@@ -104,6 +104,10 @@ public enum CloudKitError: LocalizedError, Sendable {
   /// back as a `RecordOperationFailure`, surfaced by a single-record
   /// convenience (`createRecord`/`updateRecord`/`deleteRecord`).
   case recordOperationFailed(RecordOperationFailure)
+  /// A per-zone entry in a `changes/database` / `changes/zone` response came
+  /// back as a zone fetch error, surfaced by ``OperationResult/get()`` on a
+  /// ``ZoneChangeResult``.
+  case zoneOperationFailed(ZoneOperationFailure)
   /// A per-subscription operation in a `modifySubscriptions` batch came back as
   /// a `SubscriptionOperationFailure`, surfaced by the single-subscription
   /// convenience (`createSubscription`).

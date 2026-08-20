@@ -130,6 +130,40 @@ extension CloudKitResponseProcessor {
     }
   }
 
+  /// Process fetchDatabaseChanges response
+  internal func processFetchDatabaseChangesResponse(
+    _ response: Operations.fetchDatabaseChanges.Output
+  ) async throws(CloudKitError) -> Components.Schemas.DatabaseChangesResponse {
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let changesData):
+        return changesData
+      }
+    case .badRequest, .unauthorized, .forbidden, .notFound, .conflict,
+      .preconditionFailed, .contentTooLarge, .misdirectedRequest,
+      .tooManyRequests, .internalServerError, .serviceUnavailable, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
+    }
+  }
+
+  /// Process fetchRecordZoneChanges response
+  internal func processFetchRecordZoneChangesResponse(
+    _ response: Operations.fetchRecordZoneChanges.Output
+  ) async throws(CloudKitError) -> Components.Schemas.RecordZoneChangesResponse {
+    switch response {
+    case .ok(let okResponse):
+      switch okResponse.body {
+      case .json(let changesData):
+        return changesData
+      }
+    case .badRequest, .unauthorized, .forbidden, .notFound, .conflict,
+      .preconditionFailed, .contentTooLarge, .misdirectedRequest,
+      .tooManyRequests, .internalServerError, .serviceUnavailable, .undocumented:
+      throw CloudKitError(response) ?? .invalidResponse
+    }
+  }
+
   /// Process fetchZoneChanges response
   internal func processFetchZoneChangesResponse(_ response: Operations.fetchZoneChanges.Output)
     async throws(CloudKitError) -> Components.Schemas.ZoneChangesResponse

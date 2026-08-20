@@ -552,9 +552,15 @@ paths:
 
   /database/{version}/{container}/{environment}/{database}/zones/changes:
     post:
-      summary: Fetch Zone Changes
-      description: Get all changed zones relative to a meta-sync token
+      summary: Fetch Zone Changes (deprecated)
+      description: >-
+        Get all changed zones relative to a meta-sync token.
+
+        **Deprecated by Apple** in favor of `changes/database`
+        (`fetchDatabaseChanges`), which returns the same "which zones changed"
+        information. New code should use `changes/database`.
       operationId: fetchZoneChanges
+      deprecated: true
       tags:
         - Zones
       parameters:
@@ -582,6 +588,160 @@ paths:
         '400':
           $ref: '#/components/responses/Failure'
         '401':
+          $ref: '#/components/responses/Failure'
+
+  /database/{version}/{container}/{environment}/{database}/changes/database:
+    post:
+      summary: Fetch Database Changes
+      description: >-
+        Get the record zones in the database that have changed relative to a
+        sync token. This is the current replacement for the deprecated
+        `zones/changes` operation. Follow up with `changes/zone` to fetch the
+        record changes within each returned zone.
+      operationId: fetchDatabaseChanges
+      tags:
+        - Zones
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                syncToken:
+                  type: string
+                  description: >-
+                    Identifies a point in the database's change history. Omit
+                    on the initial fetch to start from the beginning.
+                resultsLimit:
+                  type: integer
+                  description: >-
+                    The maximum number of zone changes to fetch. Defaults to
+                    the maximum allowed in a request.
+      responses:
+        '200':
+          description: Database changes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseChangesResponse'
+        '400':
+          $ref: '#/components/responses/Failure'
+        '401':
+          $ref: '#/components/responses/Failure'
+        '403':
+          $ref: '#/components/responses/Failure'
+        '404':
+          $ref: '#/components/responses/Failure'
+        '409':
+          $ref: '#/components/responses/Failure'
+        '412':
+          $ref: '#/components/responses/Failure'
+        '413':
+          $ref: '#/components/responses/Failure'
+        '429':
+          $ref: '#/components/responses/Failure'
+        '421':
+          $ref: '#/components/responses/Failure'
+        '500':
+          $ref: '#/components/responses/Failure'
+        '503':
+          $ref: '#/components/responses/Failure'
+
+  /database/{version}/{container}/{environment}/{database}/changes/zone:
+    post:
+      summary: Fetch Record Zone Changes
+      description: >-
+        Get the records that changed within one or more record zones relative
+        to each zone's sync token. Intended for custom zones. Each entry in the
+        response `zones` array is either a per-zone success result or a per-zone
+        error.
+      operationId: fetchRecordZoneChanges
+      tags:
+        - Zones
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - zones
+              properties:
+                zones:
+                  type: array
+                  description: >-
+                    A zone request dictionary for each zone to fetch record
+                    changes from. Per-zone values override the top-level values
+                    in this request.
+                  items:
+                    $ref: '#/components/schemas/RecordZoneChangesRequestZone'
+                reverse:
+                  type: boolean
+                  description: >-
+                    Whether the changes are returned in reverse order.
+                desiredKeys:
+                  type: array
+                  items:
+                    type: string
+                  description: >-
+                    Record field names limiting the fields returned per changed
+                    record. Omit to fetch all fields.
+                numberAsStrings:
+                  type: boolean
+                  description: >-
+                    Whether number fields should be represented as strings.
+                    Defaults to `false`.
+                resultsLimit:
+                  type: integer
+                  description: >-
+                    The maximum number of records to fetch. Defaults to the
+                    maximum allowed in a request.
+                desiredRecordTypes:
+                  type: array
+                  items:
+                    type: string
+                  description: >-
+                    Record-type names limiting the change feed to specific
+                    record types. Omit to fetch changes from all record types.
+      responses:
+        '200':
+          description: Record zone changes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordZoneChangesResponse'
+        '400':
+          $ref: '#/components/responses/Failure'
+        '401':
+          $ref: '#/components/responses/Failure'
+        '403':
+          $ref: '#/components/responses/Failure'
+        '404':
+          $ref: '#/components/responses/Failure'
+        '409':
+          $ref: '#/components/responses/Failure'
+        '412':
+          $ref: '#/components/responses/Failure'
+        '413':
+          $ref: '#/components/responses/Failure'
+        '429':
+          $ref: '#/components/responses/Failure'
+        '421':
+          $ref: '#/components/responses/Failure'
+        '500':
+          $ref: '#/components/responses/Failure'
+        '503':
           $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/subscriptions/list:
@@ -1728,6 +1888,135 @@ components:
           type: string
         moreComing:
           type: boolean
+
+    DatabaseChangesResponse:
+      type: object
+      description: |
+        Response body of `changes/database` (Fetching Database Changes). Each
+        entry in `zones` is either a Zone dictionary (success) or a Zone Fetch
+        Error dictionary (failure), per Apple's reference.
+      properties:
+        zones:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/ZoneFetchFailure'
+              - $ref: '#/components/schemas/DatabaseChangedZone'
+        syncToken:
+          type: string
+          description: >-
+            Identifies a point in the database's change history. Pass this in
+            the next request to fetch only newer changes.
+        moreComing:
+          type: boolean
+          description: >-
+            Whether there are more changes to request using the returned
+            `syncToken`.
+
+    DatabaseChangedZone:
+      type: object
+      description: A zone that changed, as returned by `changes/database`.
+      properties:
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+
+    ZoneFetchFailure:
+      type: object
+      description: |
+        Per-zone error returned inline in the `zones` array of a 200 zone-fetch
+        response (`changes/database`, `changes/zone`). Mirrors
+        `RecordOperationFailure` for records, but keyed by `zoneID`.
+      required:
+        - serverErrorCode
+      properties:
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        serverErrorCode:
+          $ref: '#/components/schemas/OperationFailureServerErrorCode'
+        reason:
+          type: string
+          description: A string indicating the reason for the error.
+        retryAfter:
+          type: integer
+          description: Suggested seconds to wait before retrying. Absent if not retryable.
+        uuid:
+          type: string
+          description: A unique identifier for this error.
+        redirectURL:
+          type: string
+          description: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+
+    RecordZoneChangesRequestZone:
+      type: object
+      description: |
+        A per-zone request entry in the `zones` array of a `changes/zone`
+        request. Carries the same tuning keys as the enclosing request; values
+        set here override the top-level values for this zone.
+      required:
+        - zoneID
+      properties:
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        syncToken:
+          type: string
+          description: >-
+            Identifies a point in this zone's change history. Omit on the
+            initial fetch.
+        reverse:
+          type: boolean
+          description: Whether the changes are returned in reverse order.
+        desiredKeys:
+          type: array
+          items:
+            type: string
+          description: Record field names limiting the fields returned per changed record.
+        numberAsStrings:
+          type: boolean
+          description: Whether number fields should be represented as strings.
+        resultsLimit:
+          type: integer
+          description: The maximum number of records to fetch for this zone.
+        desiredRecordTypes:
+          type: array
+          items:
+            type: string
+          description: Record-type names limiting the change feed for this zone.
+
+    RecordZoneChangesResponse:
+      type: object
+      description: |
+        Response body of `changes/zone` (Fetching Record Zone Changes). Each
+        entry in `zones` is either a Zone Record Fetch dictionary (success) or a
+        Zone Record Fetch Error dictionary (failure), per Apple's reference.
+      properties:
+        zones:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/ZoneFetchFailure'
+              - $ref: '#/components/schemas/RecordZoneChangesZoneResult'
+
+    RecordZoneChangesZoneResult:
+      type: object
+      description: >-
+        A successful per-zone result of `changes/zone`: the records that
+        changed in that zone plus that zone's own sync token and `moreComing`
+        flag.
+      properties:
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecordResponse'
+        syncToken:
+          type: string
+          description: Identifies a point in this zone's change history.
+        moreComing:
+          type: boolean
+          description: >-
+            Whether there are more changes to request for this zone using the
+            returned `syncToken`.
 
     SubscriptionsListResponse:
       type: object
