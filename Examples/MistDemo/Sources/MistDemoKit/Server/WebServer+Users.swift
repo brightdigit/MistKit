@@ -37,7 +37,8 @@
     /// operate on the public database with web-auth credentials, so neither
     /// carries a `database` selector. The deprecated `lookup/email` and
     /// `lookup/id` primitives are intentionally not exposed — `discover` is
-    /// Apple's supported replacement and handles email + record-name lookups.
+    /// Apple's supported replacement and handles email, phone-number, and
+    /// record-name lookups.
     internal func addUsersEndpoints(
       api: RouterGroup<BasicRequestContext>
     ) {
@@ -66,7 +67,7 @@
     }
 
     /// `POST /api/users/discover` — discover user identities by email
-    /// address and/or user record name.
+    /// address, phone number, and/or user record name.
     private func addUsersDiscoverEndpoint(
       api: RouterGroup<BasicRequestContext>
     ) {
@@ -83,6 +84,7 @@
           let backend = try backendFactory.make(token)
           let users = try await backend.webDiscoverUsers(
             emails: body.emails,
+            phoneNumbers: body.phoneNumbers,
             userRecordNames: body.userRecordNames
           )
           return try WebJSON.encoder().encode(

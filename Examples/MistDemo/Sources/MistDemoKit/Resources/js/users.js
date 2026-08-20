@@ -1,7 +1,7 @@
 // users/caller · users/discover panel handlers. The deprecated
 // users/lookup/email and users/lookup/id primitives are not exposed —
-// users/discover is Apple's supported replacement and handles both email
-// and record-name lookups (phone-number support tracked in #398).
+// users/discover is Apple's supported replacement and handles email,
+// phone-number, and record-name lookups.
 
 const usersCallerStatus = document.getElementById('users-caller-status');
 const usersCallerRaw = document.getElementById('users-caller-raw');
@@ -24,9 +24,10 @@ document.getElementById('users-caller-btn').addEventListener('click', async () =
 
 document.getElementById('users-discover-btn').addEventListener('click', async () => {
     const emails = csv(document.getElementById('users-discover-emails').value);
+    const phoneNumbers = csv(document.getElementById('users-discover-phone-numbers').value);
     const userRecordNames = csv(document.getElementById('users-discover-record-names').value);
-    if (emails.length === 0 && userRecordNames.length === 0) {
-        setStatus(usersDiscoverStatus, 'Provide at least one email or record name.', 'error');
+    if (emails.length === 0 && phoneNumbers.length === 0 && userRecordNames.length === 0) {
+        setStatus(usersDiscoverStatus, 'Provide at least one email, phone number, or record name.', 'error');
         return;
     }
     await runPanelOperation({
@@ -35,7 +36,7 @@ document.getElementById('users-discover-btn').addEventListener('click', async ()
         label: 'Discover users',
         fn: async () => {
             if (currentMode === 'mistkit') {
-                return await postJSON('/api/users/discover', { emails, userRecordNames });
+                return await postJSON('/api/users/discover', { emails, phoneNumbers, userRecordNames });
             }
             // CloudKit JS exposes per-item primitives — loop and aggregate
             // to match the REST endpoint's batch shape.
@@ -46,6 +47,14 @@ document.getElementById('users-discover-btn').addEventListener('click', async ()
                     results.push({ email, identity });
                 } catch (error) {
                     results.push({ email, error: error.message });
+                }
+            }
+            for (const phoneNumber of phoneNumbers) {
+                try {
+                    const identity = await ckJsContainer().discoverUserIdentityWithPhoneNumber(phoneNumber);
+                    results.push({ phoneNumber, identity });
+                } catch (error) {
+                    results.push({ phoneNumber, error: error.message });
                 }
             }
             for (const recordName of userRecordNames) {

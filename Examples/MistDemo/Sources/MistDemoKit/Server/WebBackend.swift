@@ -103,6 +103,7 @@ internal protocol WebBackend: Sendable {
 
   func webDiscoverUsers(
     emails: [String],
+    phoneNumbers: [String],
     userRecordNames: [String]
   ) async throws -> [UserIdentity]
 
