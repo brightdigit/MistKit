@@ -21,6 +21,13 @@ on:
   schedule:
     - cron: '20 11 * * 3'
 
+concurrency:
+  # event_name is part of the key so the weekly scheduled scan and a push scan of
+  # the same branch never cancel each other; within one event type, only the
+  # newest run of a branch survives.
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
     name: Analyze
