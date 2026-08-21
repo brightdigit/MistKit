@@ -1,6 +1,6 @@
 {
-  "name": "Swift 6.2",
-  "image": "swift:6.2",
+  "name": "Swift 6.3",
+  "image": "swift:6.3",
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": "false",
@@ -29,4 +29,4 @@
     }
   },
   "remoteUser": "root"
-} 
+}

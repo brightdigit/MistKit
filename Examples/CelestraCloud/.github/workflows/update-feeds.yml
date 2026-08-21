@@ -49,7 +49,7 @@ env:
   CLOUDKIT_KEY_ID: ${{ secrets.CLOUDKIT_KEY_ID }}
   CLOUDKIT_ENVIRONMENT: ${{ (github.event_name == 'pull_request' || github.event_name == 'push') && 'development' || github.event.inputs.environment || 'production' }}
   CLOUDKIT_PRIVATE_KEY_PATH: /tmp/cloudkit_key.pem
-  MISTKIT_BRANCH: 1.0.0-beta.2
+  MISTKIT_BRANCH: 1.0.0-beta.3
 
 jobs:
   # Determine which tier to run based on schedule or manual input
@@ -133,7 +133,7 @@ jobs:
   # Build the binary (cached based on code changes)
   build:
     runs-on: ubuntu-latest
-    container: swift:6.2-noble
+    container: swift:6.3-noble
     outputs:
       cache-hit: ${{ steps.cache-binary.outputs.cache-hit }}
 
@@ -158,6 +158,7 @@ jobs:
         with:
           path: .build/release/celestra-cloud
           key: celestra-cloud-${{ runner.os }}-${{ hashFiles('Sources/**/*.swift', 'Package.swift') }}-${{ steps.mistkit-sha.outputs.sha }}-${{ github.event.inputs.force_rebuild || 'false' }}
+
 
       - name: Setup MistKit
         if: steps.cache-binary.outputs.cache-hit != 'true'
