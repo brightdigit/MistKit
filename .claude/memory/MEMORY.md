@@ -15,7 +15,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [wasm CI failure signatures](reference_wasm_ci_signatures.md) — Two distinct wasm failures: silent exit-1 (OOM on big test target) vs curl exit-7 (SDK download flake, just re-run)
 - [Swift Testing availability guard](feedback_swift_testing_availability.md) — Never annotate @Suite types with @available; use guard #available inside @Test functions instead
 - [GitHub Action pinning preference](feedback_action_pinning.md) — Use @v<major> for brightdigit-owned actions; pin third-party actions explicitly
-- [CI Swift matrix preferences](feedback_ci_swift_matrix.md) — Keep Swift 6.1 in full matrix; no nightly toolchains in CI
+- [CI Swift matrix preferences](feedback_ci_swift_matrix.md) — Keep Swift 6.1 in full matrix; in-dev Swift branches (6.4 snapshots) ride in the build-ubuntu matrix via an `image` override (ConfigKeyKit pattern), never a separate job
 - [Test parent type — enum vs struct](feedback_test_parent_enum_vs_struct.md) — Use enum only when the type-under-test has multiple test files; otherwise simple struct
 - [Explicit access modifier on every import](feedback_explicit_import_access.md) — Always write `internal import Foo` etc.; never bare `import Foo`
 - [Capture follow-up findings in issues, not code](feedback_findings_to_issues_not_code.md) — When verification surfaces an out-of-scope fix, write it up on the relevant GitHub issue and stop; don't expand the current PR

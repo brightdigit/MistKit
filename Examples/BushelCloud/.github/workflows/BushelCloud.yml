@@ -62,17 +62,17 @@ jobs:
           # so Swift 6.1 is not supported.
           if [[ "${{ steps.check.outputs.full }}" == "true" ]]; then
             echo 'ubuntu-os=["noble","jammy"]' >> "$GITHUB_OUTPUT"
-            echo 'ubuntu-swift=["6.2","6.3"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-swift=[{"version":"6.2"},{"version":"6.3"},{"version":"6.4","image":"swiftlang/swift:nightly-6.4.x"}]' >> "$GITHUB_OUTPUT"
           else
             echo 'ubuntu-os=["noble"]' >> "$GITHUB_OUTPUT"
-            echo 'ubuntu-swift=["6.3"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-swift=[{"version":"6.3"}]' >> "$GITHUB_OUTPUT"
           fi
 
   build-ubuntu:
     name: Build on Ubuntu
     needs: configure
     runs-on: ubuntu-latest
-    container: swift:${{ matrix.swift }}-${{ matrix.os }}
+    container: ${{ matrix.swift.image && format('{0}-{1}', matrix.swift.image, matrix.os) || format('swift:{0}-{1}', matrix.swift.version, matrix.os) }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
@@ -104,7 +104,7 @@ jobs:
         uses: codecov/codecov-action@v6
         with:
           fail_ci_if_error: true
-          flags: swift-${{ matrix.swift }}-${{ matrix.os }}
+          flags: swift-${{ matrix.swift.version }}-${{ matrix.os }}
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
@@ -152,13 +152,13 @@ jobs:
       matrix:
         include:
           # SPM build
-          - xcode: "/Applications/Xcode_26.4.app"
+          - xcode: "/Applications/Xcode_26.6.app"
 
           # iOS build
           - type: ios
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "iPhone 17 Pro"
-            osVersion: "26.4.1"
+            osVersion: "26.5"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -198,27 +198,27 @@ jobs:
         include:
           # macOS
           - type: macos
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
 
           # watchOS
           - type: watchos
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "26.4"
+            osVersion: "26.5"
             download-platform: true
 
           # tvOS
           - type: tvos
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "Apple TV"
-            osVersion: "26.4"
+            osVersion: "26.5"
             download-platform: true
 
           # visionOS
           - type: visionos
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.4.1"
+            osVersion: "26.5"
             download-platform: true
     steps:
       - uses: actions/checkout@v6

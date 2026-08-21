@@ -15,3 +15,6 @@ Standing always/never directives and corrections from the human. Agents must rea
 - ALWAYS append corrections and always/never directives to `.claude/agent-notes.md` proactively; ALWAYS write project-scoped facts to `.claude/memory/` (with an index line in `MEMORY.md`).
 - NEVER store project-scoped memories in a native or global memory system (Claude Code `~/.claude/projects/*/memory/`, Cursor memories, etc.) — use `.claude/memory/` in this repo instead.
 - NEVER run bare `git stash`/`git stash pop`/`git stash drop` in this repo — the stash stack is shared across ALL worktrees, so a pop in one worktree can bury or restore another branch's WIP; commit to your own branch instead.
+- CI: in-development Swift branches (e.g. 6.4 snapshots) belong IN the `build-ubuntu` matrix as a swift entry carrying an `image` override (ConfigKeyKit pattern: `{"version":"6.4","image":"swiftlang/swift:nightly-6.4.x"}` plus a `container:` fallback expression) — NEVER as a separate job. Supersedes the earlier "no nightly toolchains" directive.
+- Repo-wide CI version bumps (Xcode/simulator/toolchain) DO extend into the `Examples/` subrepos — update BushelCloud and CelestraCloud in the same pass rather than deferring them to their own repos.
+- Follow sibling brightdigit repos (e.g. ConfigKeyKit) for current CI workflow shape before inventing a new one.
