@@ -303,6 +303,50 @@ jobs:
             deviceName: "Apple Vision Pro"
             osVersion: "26.5"
             download-platform: true
+
+          # ── Xcode 27 (preview image, beta toolchain) ─────────────────────
+          # `runs-on: xcode-27` is its own image label, not a macos-NN one, and
+          # is marked Preview in actions/runner-images. It ships exactly one
+          # Xcode — 27.0 beta — so there is no 26.x fallback on this runner.
+          #
+          # Pin the /Applications/Xcode_27.0.app symlink, NOT the real
+          # Xcode_27_beta_4.app path: the beta number changes on every image
+          # refresh and would silently break these lanes.
+          #
+          # tvOS uses "Apple TV 4K (3rd generation)" — this image has no plain
+          # "Apple TV" device, unlike macos-26 above. A wrong device name fails
+          # the simulator boot outright.
+          - type: macos
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
+
+          - type: ios
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
+            deviceName: "iPhone 17 Pro"
+            osVersion: "27.0"
+            download-platform: true
+
+          - type: watchos
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
+            deviceName: "Apple Watch Ultra 3 (49mm)"
+            osVersion: "27.0"
+            download-platform: true
+
+          - type: tvos
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
+            deviceName: "Apple TV 4K (3rd generation)"
+            osVersion: "27.0"
+            download-platform: true
+
+          - type: visionos
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
+            deviceName: "Apple Vision Pro"
+            osVersion: "27.0"
+            download-platform: true
     steps:
       - uses: actions/checkout@v6
       - name: Build and Test
