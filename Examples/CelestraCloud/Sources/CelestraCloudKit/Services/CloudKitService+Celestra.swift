@@ -113,7 +113,7 @@ extension CloudKitService {
 
     repeat {
       let result: QueryResult = try await queryRecords(
-        recordType: "Feed",
+        Query(recordType: "Feed"),
         limit: 200,
         desiredKeys: ["___recordID"],
         continuationMarker: continuationMarker,

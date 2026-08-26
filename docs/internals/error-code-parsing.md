@@ -119,8 +119,28 @@ extension Operations.queryRecords.Output: CloudKitResponseType {
 ```swift
 public enum CloudKitError: LocalizedError, Sendable {
     case httpError(statusCode: Int)
-    case httpErrorWithDetails(statusCode: Int, serverErrorCode: String?, reason: String?)
+    // A CloudKit failure body that carried *no* serverErrorCode.
+    case httpErrorWithDetails(statusCode: Int, reason: String?)
     case httpErrorWithRawResponse(statusCode: Int, rawResponse: String)
+
+    // One case per documented serverErrorCode…
+    case accessDenied(reason: String?)
+    case atomicFailure(reason: String?)
+    case authenticationFailed(reason: String?)
+    case authenticationRequired(reason: String?)
+    case badRequest(reason: String?)
+    case conflict(reason: String?)
+    case exists(reason: String?)
+    case internalServerError(reason: String?)
+    case notFound(reason: String?)
+    case quotaExceeded(reason: String?, hint: QuotaHint?)
+    case throttled(reason: String?)
+    case tryAgainLater(reason: String?)
+    case validatingReferenceError(reason: String?)
+    case zoneNotFound(reason: String?)
+    // …plus a forward-compatible catch-all for codes added later.
+    case unknownServerError(code: String, statusCode: Int, reason: String?)
+
     case invalidResponse
     case underlyingError(any Error)
     case decodingError(DecodingError)
@@ -128,7 +148,11 @@ public enum CloudKitError: LocalizedError, Sendable {
 }
 ```
 
-The primary case is `httpErrorWithDetails` — it carries both the HTTP status and the CloudKit-specific error code and reason string.
+Each of the 14 codes above gets its own case so callers pattern-match by intent
+rather than string-matching a `serverErrorCode`. `unknownServerError` preserves
+a code MistKit does not yet model, and `httpErrorWithDetails` is reserved for a
+failure body that carried no code at all. `CloudKitError.serverErrorCode` reads
+the raw string back off any of the coded cases for logging.
 
 ## The Parsing Pipeline
 
@@ -178,9 +202,11 @@ Each status code has a private initializer that extracts the JSON body:
 ```swift
 private init(badRequest response: Components.Responses.BadRequest) {
     if case .json(let errorResponse) = response.body {
-        self = .httpErrorWithDetails(
-            statusCode: 400,
+        // Dispatches on the code: BAD_REQUEST → .badRequest, an unmodelled
+        // code → .unknownServerError, no code → .httpErrorWithDetails.
+        self.init(
             serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+            statusCode: 400,
             reason: errorResponse.reason
         )
     } else {
@@ -190,6 +216,12 @@ private init(badRequest response: Components.Responses.BadRequest) {
 ```
 
 If the body isn't JSON (rare), it falls back to a plain `httpError` without details.
+
+The code → case dispatch lives in one place,
+`CloudKitError.init(serverErrorCode:statusCode:reason:)`
+(`Sources/MistKit/CloudKitService/CloudKitError+ServerErrorCode.swift`), and its
+inverse — case → code, documented HTTP status, and description summary — lives
+next to it as `CloudKitError.serverErrorDetail`.
 
 ## Response Processing Pattern
 
@@ -251,10 +283,8 @@ Generic initializer: response.isOk == false
     → tries errorExtractors[0]: badRequestResponse != nil ✓
         │
         ▼
-Private init(badRequest:): extracts JSON body
-    → .httpErrorWithDetails(statusCode: 400,
-                            serverErrorCode: "BAD_REQUEST",
-                            reason: "Invalid filter")
+Private init(badRequest:): extracts JSON body, dispatches on the code
+    → .badRequest(reason: "Invalid filter")
         │
         ▼
 Thrown as CloudKitError — caller can switch on case

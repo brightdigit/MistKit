@@ -8,16 +8,18 @@ CRUD, batch, and lookup against CloudKit records — the operations you'll reach
 
 ## Querying
 
-Use ``CloudKitService/queryRecords(recordType:filters:sortBy:limit:desiredKeys:continuationMarker:database:)`` for a single page of results. Filters are built with ``QueryFilter`` factories, sorts with ``QuerySort/ascending(_:)`` / ``QuerySort/descending(_:)``:
+Use ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneWide:numbersAsStrings:database:)`` for a single page of results. Filters are built with ``QueryFilter`` factories, sorts with ``QuerySort/ascending(_:)`` / ``QuerySort/descending(_:)``:
 
 ```swift
 let result = try await service.queryRecords(
-  recordType: "Article",
-  filters: [
-    .greaterThan("publishedDate", .date(oneWeekAgo)),
-    .equals("status", .string("published"))
-  ],
-  sortBy: [.descending("publishedDate")],
+  Query(
+    recordType: "Article",
+    filters: [
+      .greaterThan("publishedDate", .date(oneWeekAgo)),
+      .equals("status", .string("published"))
+    ],
+    sortBy: [.descending("publishedDate")]
+  ),
   limit: 50,
   database: .private
 )
@@ -173,7 +175,7 @@ The inline DocC on these methods carries fuller examples for initial-vs-incremen
 
 ### Read operations
 
-- ``CloudKitService/queryRecords(recordType:filters:sortBy:limit:desiredKeys:continuationMarker:database:)``
+- ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneWide:numbersAsStrings:database:)``
 - ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:database:)``
 - ``CloudKitService/lookupRecords(recordNames:desiredKeys:database:)``
 

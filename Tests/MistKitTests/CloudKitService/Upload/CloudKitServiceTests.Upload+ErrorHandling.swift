@@ -53,12 +53,12 @@ extension CloudKitServiceTests.Upload {
         )
         Issue.record("Expected authentication error")
       } catch let error as CloudKitError {
-        if case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason) = error {
-          #expect(statusCode == 401, "Should return 401 Unauthorized")
-          #expect(serverErrorCode == "AUTHENTICATION_FAILED")
+        if case .authenticationFailed(let reason) = error {
+          #expect(error.httpStatusCode == 401, "Should return 401 Unauthorized")
+          #expect(error.serverErrorCode == "AUTHENTICATION_FAILED")
           #expect(reason == "Authentication failed")
         } else {
-          Issue.record("Expected httpErrorWithDetails error, got \(error)")
+          Issue.record("Expected authenticationFailed error, got \(error)")
         }
       } catch {
         Issue.record("Expected CloudKitError, got \(type(of: error))")

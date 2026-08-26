@@ -109,9 +109,11 @@ extension CloudKitService: CloudKitRecordOperating {
     desiredKeys: [String]?
   ) async throws(CloudKitError) -> [RecordInfo] {
     let result: QueryResult = try await queryRecords(
-      recordType: recordType,
-      filters: filters,
-      sortBy: sortBy,
+      Query(
+        recordType: recordType,
+        filters: filters ?? [],
+        sortBy: sortBy ?? []
+      ),
       limit: limit,
       desiredKeys: desiredKeys,
       continuationMarker: nil,

@@ -41,7 +41,7 @@ internal struct AuthenticationErrorHandlingTests {
     await service.setQueryError(MockCloudKitError.authenticationFailed)
 
     do {
-      _ = try await service.queryRecords(recordType: "RestoreImage")
+      _ = try await service.queryAllRecords(recordType: "RestoreImage")
       Issue.record("Expected authentication error to be thrown")
     } catch let error as MockCloudKitError {
       if case .authenticationFailed = error {
@@ -61,7 +61,7 @@ internal struct AuthenticationErrorHandlingTests {
     await service.setQueryError(MockCloudKitError.accessDenied)
 
     do {
-      _ = try await service.queryRecords(recordType: "RestoreImage")
+      _ = try await service.queryAllRecords(recordType: "RestoreImage")
       Issue.record("Expected access denied error to be thrown")
     } catch let error as MockCloudKitError {
       if case .accessDenied = error {

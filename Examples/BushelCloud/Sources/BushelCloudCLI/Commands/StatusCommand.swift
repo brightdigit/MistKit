@@ -97,7 +97,7 @@ internal enum StatusCommand {
   private static func fetchAllMetadata(cloudKitService: BushelCloudKitService) async throws
     -> [DataSourceMetadata]
   {
-    let records = try await cloudKitService.queryRecords(recordType: "DataSourceMetadata")
+    let records = try await cloudKitService.queryAllRecords(recordType: "DataSourceMetadata")
 
     var metadataList: [DataSourceMetadata] = []
 

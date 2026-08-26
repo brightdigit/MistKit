@@ -77,10 +77,12 @@ public struct UpdateCommand: MistDemoCommand, OutputFormatting {
     _ error: CloudKitError
   ) -> UpdateError? {
     switch error {
+    case .conflict(let reason), .exists(let reason):
+      return .conflict(reason: reason)
     case .httpError(let statusCode) where statusCode == 409:
       return .conflict(reason: nil)
     case .httpErrorWithDetails(
-      let statusCode, _, let reason
+      let statusCode, let reason
     ) where statusCode == 409:
       return .conflict(reason: reason)
     case .httpErrorWithRawResponse(

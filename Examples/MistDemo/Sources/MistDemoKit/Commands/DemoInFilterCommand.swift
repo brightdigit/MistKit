@@ -122,10 +122,10 @@ public struct DemoInFilterCommand: MistDemoCommand {
   ) async throws {
     print("\nVerifying records are queryable...")
     let allRecords = try await client.queryRecords(
-      recordType: recordType,
+      Query(recordType: recordType),
       limit: 200,
       database: config.database
-    )
+    ).records
     let visible = allRecords.filter {
       createdNames.contains($0.recordName)
     }
@@ -136,11 +136,13 @@ public struct DemoInFilterCommand: MistDemoCommand {
 
     print("\nQuerying with IN filter for [10, 30]...")
     let results = try await client.queryRecords(
-      recordType: recordType,
-      filters: [.in("index", [.int64(10), .int64(30)])],
+      Query(
+        recordType: recordType,
+        filters: [.in("index", [.int64(10), .int64(30)])]
+      ),
       limit: 200,
       database: config.database
-    )
+    ).records
 
     let matching = results.filter {
       createdNames.contains($0.recordName)

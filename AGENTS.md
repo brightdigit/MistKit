@@ -134,7 +134,7 @@ MistKit uses separate types for requests and responses at the OpenAPI schema lev
 - `BYTES` (`.bytes`) — a base64 string, otherwise read as `STRING`
 - `DOUBLE` (`.double`) — a whole-valued double serializes without a fraction, otherwise read as `INT64`
 
-Object/array-shaped values (`REFERENCE`, `ASSET`, `LOCATION`, `LIST`) and `STRING`/`INT64` are unambiguous and stay untagged. Tagging happens in `makeScalarRequest` (`Components.Schemas.FieldValueRequest.swift`). `type` is *not* required globally because CloudKit documents it as optional.
+Object/array-shaped values (`REFERENCE`, `ASSET`, `LOCATION`, `LIST`) and `STRING`/`INT64` are unambiguous and stay untagged. Tagging happens in the exhaustive `init(from:)` switch (`Components.Schemas.FieldValueRequest.swift`). `type` is *not* required globally because CloudKit documents it as optional.
 
 **Response type recovery (issue #375):** The generated `value` `oneOf` is *undiscriminated* — the decoder tries cases first-match-wins (`String → Int64 → Double → Bytes → Date`), so a whole-millisecond `TIMESTAMP` decodes as `Int64Value` and a base64 `BYTES` string decodes as `StringValue`. The response conversion therefore honors an explicit `type` *over* the decoded case (`makeTypedScalar` in `FieldValue+Components+Scalar.swift`). For the genuinely-ambiguous scalars whose correct interpretation differs from inference it produces the typed value directly: `TIMESTAMP`/`DOUBLE` from any numeric case, `BYTES` from any string case. `INT64`/`STRING` validate the category then defer to inference (which already yields them, and for `INT64` avoids truncating a fractional number). When `type` is absent it falls back to first-match-wins inference (`makeInferredScalar`), which is lossy for the ambiguous scalars (BYTES→`.string`, whole-number TIMESTAMP→`.int64`).
 
@@ -192,7 +192,7 @@ MistKit/
 | `CloudKitService+ZoneOperations.swift` | `listZones`, `lookupZones(zoneIDs:)`, `fetchZoneChanges(syncToken:)` |
 | `CloudKitService+ModifyZones.swift` | `modifyZones(_:database:)` |
 | `CloudKitService+SyncOperations.swift` | `fetchRecordChanges(recordType:syncToken:)`, `fetchAllRecordChanges(recordType:syncToken:)` |
-| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(no-arg address-book form — unavailable, pending #28; distinct from the available `discoverAllUserIdentities(lookupInfos:batchSize:)` chunking overload below)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)`, `fetchCurrentUser()` (deprecated, forwards to `fetchCaller`) |
+| `CloudKitService+UserOperations.swift` | `fetchCaller()`, `discoverUserIdentities(lookupInfos:)`, `discoverAllUserIdentities()` *(no-arg address-book form — unavailable, pending #28; distinct from the available `discoverAllUserIdentities(lookupInfos:batchSize:)` chunking overload below)*, `lookupUsersByEmail(_:)`, `lookupUsersByRecordName(_:)` |
 | `CloudKitService+LookupAllRecords.swift` | `lookupAllRecords(recordNames:desiredKeys:database:batchSize:)` — auto-chunking convenience over `lookupRecords` |
 | `CloudKitService+UserIdentityChunking.swift` | `discoverAllUserIdentities(lookupInfos:batchSize:)` — auto-chunking convenience over `discoverUserIdentities` |
 | `CloudKitService+BatchChunking.swift` | internal `chunkedBatches` helper backing the auto-chunking conveniences |
@@ -210,7 +210,7 @@ MistKit/
 - `discoverUserIdentities(lookupInfos:)` → POST `/users/discover` — takes `[UserIdentityLookupInfo]`, returns `[UserIdentity]`
 
 **User-Identity Operations (public DB + web-auth required):**
-- `fetchCaller()` → `/users/caller` — returns `UserInfo`. Replaces deprecated `fetchCurrentUser()` / `users/current`. Only valid against the public database with web-auth credentials.
+- `fetchCaller()` → `/users/caller` — returns `UserInfo`. Replaces Apple's deprecated `users/current` endpoint (the `fetchCurrentUser()` wrapper was removed in #421). Only valid against the public database with web-auth credentials.
 - `discoverAllUserIdentities()` → GET `/users/discover` — returns `[UserIdentity]` for every discoverable user in the caller's address book.
 - `lookupUsersByEmail(_:)` → POST `/users/lookup/email` — returns `[UserIdentity]`.
 - `lookupUsersByRecordName(_:)` → POST `/users/lookup/id` — returns `[UserIdentity]`.

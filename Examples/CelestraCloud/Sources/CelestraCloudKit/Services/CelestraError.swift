@@ -138,19 +138,22 @@ public enum CelestraError: LocalizedError {
 
   /// Determines if a CloudKit error is retriable based on error type
   private func isCloudKitErrorRetriable(_ error: CloudKitError) -> Bool {
-    switch error {
-    case .httpError(let statusCode),
-      .httpErrorWithDetails(let statusCode, _, _),
-      .httpErrorWithRawResponse(let statusCode, _):
+    // `httpStatusCode` covers the raw HTTP cases *and* every case that models a
+    // CloudKit `serverErrorCode` (`.throttled`, `.tryAgainLater`,
+    // `.internalServerError`, …), each reporting its documented status.
+    if let statusCode = error.httpStatusCode {
       // Retry on server errors (5xx) and rate limiting (429)
       // Don't retry on client errors (4xx) except 429
       return statusCode >= 500 || statusCode == 429
+    }
+
+    switch error {
     // Network-related/transient errors are retriable
     case .invalidResponse, .underlyingError, .networkError:
       return true
 
-    // Everything else (decoding, configuration, credential, malformed-request,
-    // and quota errors) is not retriable.
+    // Everything else (decoding, configuration, and credential errors) is not
+    // retriable.
     default:
       return false
     }

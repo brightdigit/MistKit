@@ -40,11 +40,38 @@ extension Components.Schemas.FieldValueRequest {
   /// `INT64`/`DOUBLE` number or a `STRING`. For those we tag `type` so CloudKit doesn't
   /// infer the wrong type and reject the write with `BAD_REQUEST`. Object/array-shaped
   /// values (reference, asset, location, list) are unambiguous and stay untagged.
+  ///
+  /// The `switch` is deliberately `default`-free: it is the single dispatch point from the
+  /// domain enum to the wire representation, so a new `FieldValue` case breaks the build here
+  /// instead of silently falling into a catch-all.
   internal init(from fieldValue: FieldValue) {
-    if let scalar = Self.makeScalarRequest(from: fieldValue) {
-      self = scalar
-    } else {
-      self = Self.makeComplexRequest(from: fieldValue)
+    switch fieldValue {
+    case .string(let value):
+      self.init(value: .StringValue(value))
+    case .int64(let value):
+      self.init(value: .Int64Value(Int64(value)))
+    case .double(let value):
+      // Whole-valued doubles serialize without a fraction and would be read as INT64.
+      self.init(value: .DoubleValue(value), _type: .DOUBLE)
+    case .bytes(let value):
+      // A base64 string is otherwise indistinguishable from a STRING.
+      self.init(value: .BytesValue(value), _type: .BYTES)
+    case .date(let value):
+      // Tag TIMESTAMP (else inferred as INT64/DOUBLE) and round to whole milliseconds:
+      // CloudKit rejects a fractional TIMESTAMP value (e.g. 1747999812347.89) with
+      // BAD_REQUEST "expected type TIMESTAMP", and Date carries sub-millisecond precision.
+      self.init(
+        value: .DateValue((value.timeIntervalSince1970 * 1_000).rounded()),
+        _type: .TIMESTAMP
+      )
+    case .location(let location):
+      self.init(location: location)
+    case .reference(let reference):
+      self.init(reference: reference)
+    case .asset(let asset):
+      self.init(asset: asset)
+    case .list(let list):
+      self.init(list: list)
     }
   }
 
@@ -100,47 +127,5 @@ extension Components.Schemas.FieldValueRequest {
   private init(list: [FieldValue]) {
     let listValues = list.map { Components.Schemas.ListValuePayload(from: $0) }
     self.init(value: .ListValue(listValues))
-  }
-
-  private static func makeScalarRequest(from fieldValue: FieldValue) -> Self? {
-    if case .string(let value) = fieldValue {
-      return Self(value: .StringValue(value))
-    }
-    if case .int64(let value) = fieldValue {
-      return Self(value: .Int64Value(Int64(value)))
-    }
-    if case .double(let value) = fieldValue {
-      // Whole-valued doubles serialize without a fraction and would be read as INT64.
-      return Self(value: .DoubleValue(value), _type: .DOUBLE)
-    }
-    if case .bytes(let value) = fieldValue {
-      // A base64 string is otherwise indistinguishable from a STRING.
-      return Self(value: .BytesValue(value), _type: .BYTES)
-    }
-    if case .date(let value) = fieldValue {
-      // Tag TIMESTAMP (else inferred as INT64/DOUBLE) and round to whole milliseconds:
-      // CloudKit rejects a fractional TIMESTAMP value (e.g. 1747999812347.89) with
-      // BAD_REQUEST "expected type TIMESTAMP", and Date carries sub-millisecond precision.
-      return Self(
-        value: .DateValue((value.timeIntervalSince1970 * 1_000).rounded()),
-        _type: .TIMESTAMP
-      )
-    }
-    return nil
-  }
-
-  private static func makeComplexRequest(from fieldValue: FieldValue) -> Self {
-    switch fieldValue {
-    case .location(let location):
-      return Self(location: location)
-    case .reference(let reference):
-      return Self(reference: reference)
-    case .asset(let asset):
-      return Self(asset: asset)
-    case .list(let list):
-      return Self(list: list)
-    default:
-      return Self(value: .ListValue([]))
-    }
   }
 }

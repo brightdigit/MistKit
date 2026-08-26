@@ -41,9 +41,7 @@ extension CloudKitService: WebBackend {
       QuerySort.sort(sort.field, ascending: sort.ascending)
     }
     let result = try await queryRecords(
-      recordType: recordType,
-      filters: nil,
-      sortBy: querySorts,
+      Query(recordType: recordType, sortBy: querySorts ?? []),
       limit: limit,
       desiredKeys: nil,
       continuationMarker: nil,

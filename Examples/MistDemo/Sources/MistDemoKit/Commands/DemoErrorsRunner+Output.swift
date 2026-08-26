@@ -56,25 +56,10 @@ extension DemoErrorsRunner {
     let status = error.httpStatusCode.map(String.init) ?? "n/a"
     let prefix = error.httpStatusCode == expectedStatus ? "✅" : "❌"
     print("\(prefix) Caught CloudKitError — status: \(status)")
-    switch error {
-    case .httpErrorWithDetails(_, let serverErrorCode, let reason):
-      print("   serverErrorCode: \(serverErrorCode ?? "<none>")")
-      print("   reason:          \(reason ?? "<none>")")
-    case .badRequest(let reason):
-      print("   serverErrorCode: BAD_REQUEST")
-      print("   reason:          \(reason ?? "<none>")")
-    case .quotaExceeded(let reason, let hint):
-      print("   serverErrorCode: QUOTA_EXCEEDED")
-      print("   reason:          \(reason ?? "<none>")")
-      if let hint {
-        print("   hint:            \(hint.description)")
-      }
-    case .atomicFailure(let reason):
-      print("   serverErrorCode: ATOMIC_ERROR")
-      print("   reason:          \(reason ?? "<none>")")
-    default:
-      print("   detail: \(error.localizedDescription)")
-    }
+    // Every documented serverErrorCode now has its own CloudKitError case, so
+    // the code is read off the error rather than pattern-matched per case.
+    print("   serverErrorCode: \(error.serverErrorCode ?? "<none>")")
+    print("   detail: \(error.localizedDescription)")
   }
 
   internal func describe(_ tag: String?) -> String {

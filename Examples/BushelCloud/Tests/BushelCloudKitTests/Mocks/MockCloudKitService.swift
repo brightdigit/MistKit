@@ -75,7 +75,7 @@ internal actor MockCloudKitService: RecordManaging {
 
   // MARK: - RecordManaging Protocol
 
-  internal func queryRecords(recordType: String) async throws -> [RecordInfo] {
+  internal func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
     if shouldFailQuery {
       throw queryError ?? MockCloudKitError.networkError
     }

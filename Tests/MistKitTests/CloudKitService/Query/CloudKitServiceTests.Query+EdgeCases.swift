@@ -47,7 +47,7 @@ extension CloudKitServiceTests.Query {
       // This test verifies the parameter handling - actual call will fail without auth
       do {
         _ = try await service.queryRecords(
-          recordType: "Article",
+          Query(recordType: "Article"),
           limit: nil as Int?,
           database: .public(.prefers(.serverToServer))
         )
@@ -69,8 +69,7 @@ extension CloudKitServiceTests.Query {
 
       do {
         _ = try await service.queryRecords(
-          recordType: "Article",
-          filters: [],
+          Query(recordType: "Article", filters: []),
           limit: 10,
           database: .public(.prefers(.serverToServer))
         )
@@ -92,8 +91,7 @@ extension CloudKitServiceTests.Query {
 
       do {
         _ = try await service.queryRecords(
-          recordType: "Article",
-          sortBy: [],
+          Query(recordType: "Article", sortBy: []),
           limit: 10,
           database: .public(.prefers(.serverToServer))
         )
