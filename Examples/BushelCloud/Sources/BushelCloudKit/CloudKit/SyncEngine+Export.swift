@@ -63,14 +63,14 @@ extension SyncEngine {
     Self.logger.info("Exporting CloudKit data")
 
     Self.logger.debug(
-      "Using MistKit queryRecords() to fetch all records of each type from the public database"
+      "Using MistKit queryAllRecords() to fetch all records of each type from the public database"
     )
 
     ConsoleOutput.print("\n📥 Fetching RestoreImage records...")
     Self.logger.debug(
       "Querying CloudKit for recordType: 'RestoreImage' with limit: 200"
     )
-    let restoreImages = try await cloudKitService.queryRecords(recordType: "RestoreImage")
+    let restoreImages = try await cloudKitService.queryAllRecords(recordType: "RestoreImage")
     Self.logger.debug(
       "Retrieved \(restoreImages.count) RestoreImage records"
     )
@@ -79,7 +79,7 @@ extension SyncEngine {
     Self.logger.debug(
       "Querying CloudKit for recordType: 'XcodeVersion' with limit: 200"
     )
-    let xcodeVersions = try await cloudKitService.queryRecords(recordType: "XcodeVersion")
+    let xcodeVersions = try await cloudKitService.queryAllRecords(recordType: "XcodeVersion")
     Self.logger.debug(
       "Retrieved \(xcodeVersions.count) XcodeVersion records"
     )
@@ -88,7 +88,7 @@ extension SyncEngine {
     Self.logger.debug(
       "Querying CloudKit for recordType: 'SwiftVersion' with limit: 200"
     )
-    let swiftVersions = try await cloudKitService.queryRecords(recordType: "SwiftVersion")
+    let swiftVersions = try await cloudKitService.queryAllRecords(recordType: "SwiftVersion")
     Self.logger.debug(
       "Retrieved \(swiftVersions.count) SwiftVersion records"
     )

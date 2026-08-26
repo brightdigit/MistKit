@@ -39,11 +39,6 @@ internal actor MockRecordManagingService: RecordManaging {
   internal var batchSizes: [Int] = []
   internal var recordsToReturn: [RecordInfo] = []
 
-  internal func queryRecords(recordType: String) async throws -> [RecordInfo] {
-    queryCallCount += 1
-    return recordsToReturn
-  }
-
   internal func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
     queryCallCount += 1
     return recordsToReturn

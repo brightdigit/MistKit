@@ -92,13 +92,13 @@ public struct OperationFailure<Target: OperationFailureTarget>:
   ) {
     let serverErrorCode = ServerErrorCode(rawValue: common.serverErrorCode.rawValue)
     // The generated `OperationFailureServerErrorCode` is a closed enum mirroring
-    // the schema, so a `.unknown` here means our `knownPairs` table drifted
+    // the schema, so a `.unknown` here means our `knownCatalog` drifted
     // from the regenerated schema — assert loudly (test-overridable) while
     // still preserving the raw code for forward-compatibility in release.
     if case .unknown(let raw) = serverErrorCode {
       ConversionFailureReporter.assertionHandler(
         "Unmapped CloudKit serverErrorCode \"\(raw)\""
-          + " — update CloudKitServerErrorCode.knownPairs",
+          + " — update CloudKitServerErrorCode.knownCatalog",
         #fileID,
         #line
       )

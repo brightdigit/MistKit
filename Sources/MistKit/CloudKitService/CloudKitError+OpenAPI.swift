@@ -44,32 +44,18 @@ extension CloudKitError {
   /// The body schema is identical across status codes — only the code
   /// disambiguates which CloudKit failure occurred, so the caller supplies it.
   ///
-  /// Three server codes are surfaced as dedicated cases:
-  /// - `QUOTA_EXCEEDED` → `.quotaExceeded(reason:, hint: nil)` — the catch
-  ///   block in the calling operation may enrich `hint` from local context.
-  /// - `BAD_REQUEST` → `.badRequest(reason:)`
-  /// - `ATOMIC_ERROR` → `.atomicFailure(reason:)`
-  ///
-  /// Every other server code lands in `.httpErrorWithDetails`.
+  /// Every documented `serverErrorCode` gets its own case, an unrecognized code
+  /// becomes `.unknownServerError`, and a body with no code at all becomes
+  /// `.httpErrorWithDetails`. See
+  /// `CloudKitError.init(serverErrorCode:statusCode:reason:)`.
   internal init(_ response: Components.Responses.Failure, statusCode: Int) {
     switch response.body {
     case .json(let errorResponse):
-      let code = errorResponse.serverErrorCode?.rawValue
-      let reason = errorResponse.reason
-      switch code {
-      case "QUOTA_EXCEEDED":
-        self = .quotaExceeded(reason: reason, hint: nil)
-      case "BAD_REQUEST":
-        self = .badRequest(reason: reason)
-      case "ATOMIC_ERROR":
-        self = .atomicFailure(reason: reason)
-      default:
-        self = .httpErrorWithDetails(
-          statusCode: statusCode,
-          serverErrorCode: code,
-          reason: reason
-        )
-      }
+      self.init(
+        serverErrorCode: errorResponse.serverErrorCode?.rawValue,
+        statusCode: statusCode,
+        reason: errorResponse.reason
+      )
     }
   }
 
@@ -107,7 +93,7 @@ extension CloudKitError {
       return .quotaExceeded(reason: reason, hint: hint)
     case .httpError(let statusCode) where statusCode == 413:
       return .quotaExceeded(reason: nil, hint: hint)
-    case .httpErrorWithDetails(let statusCode, _, let reason) where statusCode == 413:
+    case .httpErrorWithDetails(let statusCode, let reason) where statusCode == 413:
       return .quotaExceeded(reason: reason, hint: hint)
     default:
       return self

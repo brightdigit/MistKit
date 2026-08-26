@@ -78,7 +78,7 @@ Every operation on ``CloudKitService`` throws ``CloudKitError``. The cases group
 | Case | Recoverable? | When it fires |
 | --- | --- | --- |
 | ``CloudKitError/httpError(statusCode:)`` | Depends on status code | HTTP non-2xx without parseable body |
-| ``CloudKitError/httpErrorWithDetails(statusCode:serverErrorCode:reason:)`` | Depends on `serverErrorCode` | CloudKit returned a structured error |
+| ``CloudKitError/httpErrorWithDetails(statusCode:reason:)`` | Depends on status code | CloudKit failure body that carried **no** `serverErrorCode` |
 | ``CloudKitError/httpErrorWithRawResponse(statusCode:rawResponse:)`` | Sometimes | Validation rejection or unparseable error body |
 | ``CloudKitError/invalidResponse`` | No | Server returned 2xx but no payload |
 | ``CloudKitError/incompleteResponse(reason:)`` | No | A composed convenience got a valid response missing data it needed |
@@ -107,6 +107,61 @@ do {
 }
 ```
 
+### Every documented `serverErrorCode` has its own case
+
+CloudKit's top-level failure body carries a `serverErrorCode`. Rather than hand
+callers that string to match on, MistKit maps each of the fourteen codes the
+OpenAPI spec enumerates onto a dedicated case:
+
+| `serverErrorCode` | HTTP | Case |
+| --- | --- | --- |
+| `ACCESS_DENIED` | 403 | ``CloudKitError/accessDenied(reason:)`` |
+| `ATOMIC_ERROR` | 400 | ``CloudKitError/atomicFailure(reason:)`` |
+| `AUTHENTICATION_FAILED` | 401 | ``CloudKitError/authenticationFailed(reason:)`` |
+| `AUTHENTICATION_REQUIRED` | 421 | ``CloudKitError/authenticationRequired(reason:)`` |
+| `BAD_REQUEST` | 400 | ``CloudKitError/badRequest(reason:)`` |
+| `CONFLICT` | 409 | ``CloudKitError/conflict(reason:)`` |
+| `EXISTS` | 409 | ``CloudKitError/exists(reason:)`` |
+| `INTERNAL_ERROR` | 500 | ``CloudKitError/internalServerError(reason:)`` |
+| `NOT_FOUND` | 404 | ``CloudKitError/notFound(reason:)`` |
+| `QUOTA_EXCEEDED` | 413 | ``CloudKitError/quotaExceeded(reason:hint:)`` |
+| `THROTTLED` | 429 | ``CloudKitError/throttled(reason:)`` |
+| `TRY_AGAIN_LATER` | 503 | ``CloudKitError/tryAgainLater(reason:)`` |
+| `VALIDATING_REFERENCE_ERROR` | 412 | ``CloudKitError/validatingReferenceError(reason:)`` |
+| `ZONE_NOT_FOUND` | 404 | ``CloudKitError/zoneNotFound(reason:)`` |
+
+```swift
+do {
+  try await service.deleteRecord(
+    recordType: "Note",
+    recordName: name,
+    recordChangeTag: tag,
+    database: .private
+  )
+} catch CloudKitError.conflict(let reason) {
+  // Someone else changed the record — refetch and merge.
+  logger.warning("Change tag stale: \(reason ?? "")")
+} catch CloudKitError.throttled, CloudKitError.tryAgainLater {
+  // Back off and retry.
+}
+```
+
+A code MistKit does not model — one Apple adds in a later spec revision —
+becomes ``CloudKitError/unknownServerError(code:statusCode:reason:)`` with the
+raw string and the status it arrived with, so nothing is lost. A failure body
+with no `serverErrorCode` at all becomes
+``CloudKitError/httpErrorWithDetails(statusCode:reason:)``, which keeps the
+server `reason` but never carries a code.
+
+``CloudKitError/serverErrorCode`` reads the code back off any of these cases for
+logging; use the cases themselves for control flow.
+
+> Note: ``CloudKitError/httpStatusCode`` reports the status Apple *documents*
+> for a given code, not necessarily the status observed on the wire. The one
+> exception is ``CloudKitError/unknownServerError(code:statusCode:reason:)``,
+> which reports the observed status because there is nothing documented to
+> report.
+
 ### `paginationLimitExceeded` carries partial results
 
 ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:database:)`` walks the continuation marker for you and stops at `maxPages` (default `1_000`) as a runaway guard. When it trips, the records collected so far are attached to the error so the caller can decide:
@@ -126,7 +181,7 @@ do {
 
 ### Subscription duplicates surface as `INTERNAL_ERROR`
 
-CloudKit Web Services enforces subscription uniqueness on the **`(recordType, firesOn)`** tuple, *not* on `subscriptionID`. A second subscription that repeats an existing `(recordType, firesOn)` pair under a *different* ID is rejected — but the rejection arrives as a generic ``CloudKitError/httpErrorWithDetails(statusCode:serverErrorCode:reason:)`` carrying `serverErrorCode` `INTERNAL_ERROR` and the misleading reason `"could not find subscription we just created"`. There is no formal `CONFLICT`/`EXISTS` server code for this case.
+CloudKit Web Services enforces subscription uniqueness on the **`(recordType, firesOn)`** tuple, *not* on `subscriptionID`. A second subscription that repeats an existing `(recordType, firesOn)` pair under a *different* ID is rejected — but the rejection arrives as a generic ``CloudKitError/internalServerError(reason:)`` (`serverErrorCode` `INTERNAL_ERROR`) with the misleading reason `"could not find subscription we just created"`. CloudKit does not use its `CONFLICT`/`EXISTS` server codes for this case.
 
 MistKit infers the duplicate from that reason string and surfaces it through two hedged hints:
 

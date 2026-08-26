@@ -82,7 +82,7 @@ internal struct QueryRequestOptionsPhase: IntegrationPhase {
       // Schema propagation in development can lag behind the first write, so a
       // freshly-created record type may still 404. LookupRecordsPhase already
       // proves the records exist by name; treat the lag as non-fatal here.
-      guard case CloudKitError.httpErrorWithDetails(statusCode: 404, _, _) = error else {
+      guard case CloudKitError.notFound = error else {
         throw error
       }
       print("⚠️  queryRecords returned NOT_FOUND — schema may not be indexed yet (non-fatal)")

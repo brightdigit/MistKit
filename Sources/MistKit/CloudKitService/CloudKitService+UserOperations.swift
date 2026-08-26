@@ -69,15 +69,6 @@ extension CloudKitService {
     }
   }
 
-  /// Fetch the current authenticated user's information.
-  @available(
-    *, deprecated, renamed: "fetchCaller",
-    message: "users/current is deprecated by Apple. Use fetchCaller() instead."
-  )
-  public func fetchCurrentUser() async throws(CloudKitError) -> UserInfo {
-    try await fetchCaller()
-  }
-
   /// Look up user identities by email address.
   ///
   /// Hits CloudKit's POST `users/lookup/email` endpoint. Each requested email

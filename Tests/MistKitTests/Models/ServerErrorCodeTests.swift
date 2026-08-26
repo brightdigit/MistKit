@@ -48,7 +48,7 @@ internal struct ServerErrorCodeTests {
     let code = RecordOperationFailure.ServerErrorCode(rawValue: rawValue)
     // A known raw must map to a concrete case, not the forward-compat fallback…
     if case .unknown = code {
-      Issue.record("\(rawValue) decoded as .unknown; missing from knownPairs")
+      Issue.record("\(rawValue) decoded as .unknown; missing from knownCatalog")
     }
     // …and re-encode back to the identical raw string.
     #expect(code.rawValue == rawValue)
@@ -59,5 +59,16 @@ internal struct ServerErrorCodeTests {
     let code = RecordOperationFailure.ServerErrorCode(rawValue: "FUTURE_CODE")
     #expect(code == .unknown("FUTURE_CODE"))
     #expect(code.rawValue == "FUTURE_CODE")
+    #expect(code.statusCode == nil)
+    #expect(code.summary == nil)
+  }
+
+  @Test("exposes catalog status and summary for every known code")
+  internal func knownCodesExposeCatalogMetadata() {
+    for entry in CloudKitServerErrorCode.knownCatalog {
+      #expect(entry.code.statusCode == entry.statusCode)
+      #expect(entry.code.summary == entry.summary)
+      #expect(entry.code.rawValue == entry.raw)
+    }
   }
 }

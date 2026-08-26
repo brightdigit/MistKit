@@ -32,39 +32,6 @@ internal import MistKitOpenAPI
 
 /// Extension to convert OpenAPI Components.Schemas.FieldValueResponse to MistKit FieldValue
 extension FieldValue {
-  /// The decoded `value` case a complex/list `FieldValueResponse` `type` tag requires (#376).
-  private enum ExpectedComplexValue {
-    case reference
-    case asset
-    case location
-    case list
-
-    /// Maps a complex/list response `type` tag to its expected value case; `nil` for a scalar
-    /// tag (handled by `makeTypedScalar`). `ASSETID` shares `AssetValue` with `ASSET`.
-    fileprivate init?(_ fieldType: Components.Schemas.FieldValueResponse._typePayload) {
-      switch fieldType {
-      case .REFERENCE: self = .reference
-      case .ASSET, .ASSETID: self = .asset
-      case .LOCATION: self = .location
-      case .LIST: self = .list
-      default: return nil
-      }
-    }
-
-    /// Whether `value`'s decoded `oneOf` case satisfies this declared complex/list tag.
-    fileprivate func matches(
-      _ value: Components.Schemas.FieldValueResponse.valuePayload
-    ) -> Bool {
-      switch (self, value) {
-      case (.reference, .ReferenceValue), (.asset, .AssetValue),
-        (.location, .LocationValue), (.list, .ListValue):
-        return true
-      default:
-        return false
-      }
-    }
-  }
-
   /// Initialize from OpenAPI Components.Schemas.FieldValueResponse (from API responses).
   ///
   /// - Parameters:
@@ -191,7 +158,7 @@ extension FieldValue {
     fieldName: String
   ) throws(ConversionError) -> FieldValue? {
     // A nil or scalar `type` is not our concern — defer to scalar typing / inference.
-    guard let fieldType, let expected = ExpectedComplexValue(fieldType) else {
+    guard let fieldType, case .complex(let expected) = ResponseTypeTag(fieldType) else {
       return nil
     }
     // The value's decoded shape must satisfy the declared complex/list tag; a contradiction

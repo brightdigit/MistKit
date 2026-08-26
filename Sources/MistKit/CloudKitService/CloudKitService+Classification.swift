@@ -48,7 +48,7 @@ extension CloudKitService {
   ///
   /// Used as the first step of the pre-fetch + classify pattern for tracking
   /// creates vs updates in batch modify operations. Internally this calls
-  /// `queryRecords(recordType:limit:)` and projects the results down to a
+  /// `queryRecords(_:limit:database:)` and projects the results down to a
   /// `Set<String>` of record names.
   ///
   /// - Important: This issues a single `queryRecords` call. CloudKit caps a

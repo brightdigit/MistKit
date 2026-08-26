@@ -99,15 +99,17 @@ No discriminator field is needed in the JSON — the generator relies on structu
 
 ```swift
 internal init(from fieldValue: FieldValue) {
-    if let scalar = Self.makeScalarRequest(from: fieldValue) {
-        self = scalar
-    } else {
-        self = Self.makeComplexRequest(from: fieldValue)
+    switch fieldValue {
+    case .string(let value): self.init(value: .StringValue(value))
+    // ... one case per FieldValue case, no `default`
+    case .list(let list): self.init(list: list)
     }
 }
 ```
 
-Scalar conversion handles the simple cases (string, int64, double, bytes, date). Complex conversion handles location, reference, asset, and list. Date values are converted from `Date` to milliseconds:
+A single `default`-free switch covers the simple cases (string, int64, double, bytes, date) and
+the complex ones (location, reference, asset, list), so a new `FieldValue` case is a compile
+error rather than a silent fallback. Date values are converted from `Date` to milliseconds:
 
 ```swift
 case .date(let value):

@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceTests.Query+ExistingRecordNames.swift
+//  CloudKitServiceTests.ServerErrorCodes+Roundtrip.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -32,26 +32,43 @@ internal import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceTests.Query {
-  @Suite("fetchExistingRecordNames", .enabled(if: Platform.isCryptoAvailable))
-  internal struct ExistingRecordNames {
-    @Test("fetchExistingRecordNames returns the set of existing record names")
-    internal func fetchExistingRecordNamesReturnsExistingNames() async throws {
+extension CloudKitServiceTests.ServerErrorCodes {
+  @Suite("Roundtrip")
+  internal struct Roundtrip {
+    @Test(
+      "Each documented serverErrorCode surfaces as its dedicated case",
+      arguments: CloudKitServiceTests.ServerErrorCodes.expectations
+    )
+    internal func documentedCodeMapsToDedicatedCase(
+      _ expectation: CloudKitServiceTests.ServerErrorCodes.Expectation
+    ) async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try CloudKitServiceTests.QueryPagination.makeSuccessfulService(
-        recordCount: 3,
-        continuationMarker: nil
+      let reason = "reason for \(expectation.code)"
+      let service = try CloudKitServiceTests.ServerErrorCodes.makeService(
+        statusCode: expectation.statusCode,
+        serverErrorCode: expectation.code,
+        reason: reason
       )
 
-      let existing = try await service.fetchExistingRecordNames(
-        recordType: "TestRecord",
-        database: .public(.prefers(.serverToServer))
-      )
-
-      #expect(existing == Set(["record-0", "record-1", "record-2"]))
+      do {
+        _ = try await service.queryRecords(
+          Query(recordType: "Note"),
+          database: .public(.prefers(.serverToServer))
+        )
+        Issue.record("expected queryRecords to throw for \(expectation.code)")
+      } catch let error as CloudKitError {
+        #expect(
+          CloudKitServiceTests.ServerErrorCodes.caseLabel(of: error) == expectation.caseLabel
+        )
+        #expect(error.serverErrorCode == expectation.code)
+        #expect(error.httpStatusCode == expectation.statusCode)
+        let description = try #require(error.errorDescription)
+        #expect(description.contains(expectation.code))
+        #expect(description.contains(reason))
+      }
     }
   }
 }
