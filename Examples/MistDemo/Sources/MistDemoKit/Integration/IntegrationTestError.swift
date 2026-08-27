@@ -40,6 +40,12 @@ internal enum IntegrationTestError: LocalizedError, Sendable {
   case noRecordsCreated
   case missingWebAuthToken
   case missingPhaseState(String)
+  case shareResolveEmpty
+  case shareAcceptEmpty
+  case shareStillInvited
+  /// `CLOUDKIT_WEB_AUTH_TOKEN` and `CLOUDKIT_SHAREE_WEB_AUTH_TOKEN` resolve
+  /// to the same CloudKit user (`users/caller` record name).
+  case shareeSameAsSharer(userRecordName: String)
 
   internal var errorDescription: String? {
     switch self {
@@ -62,6 +68,18 @@ internal enum IntegrationTestError: LocalizedError, Sendable {
         "Web auth token is required for private database tests. Run 'mistdemo auth-token' first."
     case .missingPhaseState(let key):
       return "Required phase state '\(key)' is missing — preceding phase did not run"
+    case .shareResolveEmpty:
+      return "records/resolve returned no results for the created share"
+    case .shareAcceptEmpty:
+      return "records/accept returned no results for the created share"
+    case .shareStillInvited:
+      return "records/accept left the sharee in INVITED status"
+    case .shareeSameAsSharer(let userRecordName):
+      return """
+        CLOUDKIT_WEB_AUTH_TOKEN and CLOUDKIT_SHAREE_WEB_AUTH_TOKEN point to \
+        the same user (\(userRecordName)). Capture a second token with \
+        `mistdemo auth-token` while signed into a different Apple ID.
+        """
     }
   }
 }

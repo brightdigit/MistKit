@@ -37,3 +37,4 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [beta.4 worktree layout](project_beta4_worktree_layout.md) — Remaining v1.0.0-beta.4 issues are developed in parallel worktrees under MistKit.git/wt-<branch>, PR'd to the v1.0.0-beta.4 base
 - [#419 already fixed in beta.3](project_419_fixed_in_beta3.md) — MistDemoApp view inits shipped in 5a58120; verified building on macOS Swift 6.3.2, do not re-implement
 - [Never git stash in this multi-worktree repo](feedback_never_git_stash_multiworktree.md) — The stash stack is shared across worktrees; a pop in one can bury a sibling branch's WIP. Commit instead.
+- [cloudkit.share wire casing](project_cloudkit_share_record_type_casing.md) — Live API wants `cloudkit.share` (lowercase k); archived docs' `cloudKit.share` yields "Cannot share - no such record exists to share"

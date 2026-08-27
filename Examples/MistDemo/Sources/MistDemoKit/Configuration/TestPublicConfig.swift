@@ -49,6 +49,9 @@ public struct TestPublicConfig: Sendable, ConfigurationParseable {
   /// Optional email used by the lookup-users-by-email phase. Must belong to
   /// an iCloud account discoverable to the caller; otherwise the phase skips.
   public let lookupEmail: String?
+  /// Optional share short GUID used by the resolve/accept sharing phases.
+  /// Must identify an existing share; otherwise both phases skip.
+  public let shareShortGUID: String?
 
   /// Creates a new instance.
   public init(
@@ -57,7 +60,8 @@ public struct TestPublicConfig: Sendable, ConfigurationParseable {
     assetSizeKB: Int = 100,
     skipCleanup: Bool = false,
     verbose: Bool = false,
-    lookupEmail: String? = nil
+    lookupEmail: String? = nil,
+    shareShortGUID: String? = nil
   ) {
     self.base = base
     self.recordCount = recordCount
@@ -65,6 +69,7 @@ public struct TestPublicConfig: Sendable, ConfigurationParseable {
     self.skipCleanup = skipCleanup
     self.verbose = verbose
     self.lookupEmail = lookupEmail
+    self.shareShortGUID = shareShortGUID
   }
 
   /// Parse configuration from command line arguments.
@@ -91,6 +96,7 @@ public struct TestPublicConfig: Sendable, ConfigurationParseable {
     let verbose =
       configuration.bool(forKey: "verbose", default: false)
     let lookupEmail = configuration.string(forKey: "lookup.email")
+    let shareShortGUID = configuration.string(forKey: "share.short.guid")
 
     self.init(
       base: baseConfig,
@@ -98,7 +104,8 @@ public struct TestPublicConfig: Sendable, ConfigurationParseable {
       assetSizeKB: assetSizeKB,
       skipCleanup: skipCleanup,
       verbose: verbose,
-      lookupEmail: lookupEmail
+      lookupEmail: lookupEmail,
+      shareShortGUID: shareShortGUID
     )
   }
 }

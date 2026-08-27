@@ -28,9 +28,10 @@
 //
 
 internal import Foundation
+internal import MistKitOpenAPI
 
 /// CloudKit environment types
-public enum Environment: String, Sendable {
+public enum Environment: String, Codable, Sendable {
   case development
   case production
 
@@ -39,5 +40,13 @@ public enum Environment: String, Sendable {
   /// one of the canonical raw values (`"development"`, `"production"`).
   public init?(caseInsensitive raw: String) {
     self.init(rawValue: raw.lowercased())
+  }
+
+  /// Lift an environment from a ShortGUID Result payload.
+  internal init(from payload: Components.Schemas.ShortGUIDResult.environmentPayload) {
+    switch payload {
+    case .development: self = .development
+    case .production: self = .production
+    }
   }
 }

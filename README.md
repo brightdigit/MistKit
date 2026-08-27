@@ -494,12 +494,16 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [Fetching Users by Record Name (users/lookup/id)](https://github.com/brightdigit/MistKit/issues/35) ✅ *(Apple-deprecated — prefer `discoverAllUserIdentities`)*
 - [x] Auto-chunking conveniences for batch operations ([#389](https://github.com/brightdigit/MistKit/pull/389)) ✅
 
+### v1.0.0-beta.4
+
+- [x] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/41) ✅
+- [x] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/42) ✅
+- [x] [Curated createShare for share URL creation](https://github.com/brightdigit/MistKit/issues/437) ✅
+
 ### Backlog / Post-beta
 
 - [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/28)
 - [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/33)
-- [ ] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/41)
-- [ ] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/42)
 - [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46)
 - [ ] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/47)
 - [ ] [Feature: Add custom CloudKit zone support for queries](https://github.com/brightdigit/MistKit/issues/146)

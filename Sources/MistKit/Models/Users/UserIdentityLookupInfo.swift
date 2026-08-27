@@ -27,21 +27,50 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import Foundation
 internal import MistKitOpenAPI
 
 /// Information used to look up a user identity from CloudKit.
+///
+/// Composes ``ContactInformation`` (email / phone) with an optional user
+/// record name. Codable keeps the CloudKit wire shape flat —
+/// `emailAddress`, `phoneNumber`, and `userRecordName` at the top level —
+/// rather than nesting contact fields.
 public struct UserIdentityLookupInfo: Codable, Sendable {
-  /// The email address to look up
-  public let emailAddress: String?
-  /// The phone number to look up
-  public let phoneNumber: String?
+  private enum CodingKeys: String, CodingKey {
+    case emailAddress
+    case phoneNumber
+    case userRecordName
+  }
+
+  /// Contact details used to look up the user.
+  public let contactInformation: ContactInformation?
   /// The user record name to look up
   public let userRecordName: String?
 
+  /// The email address to look up
+  public var emailAddress: String? { contactInformation?.emailAddress }
+  /// The phone number to look up
+  public var phoneNumber: String? { contactInformation?.phoneNumber }
+
   internal init(from schema: Components.Schemas.UserIdentityLookupInfo) {
-    self.emailAddress = schema.emailAddress
-    self.phoneNumber = schema.phoneNumber
-    self.userRecordName = schema.userRecordName
+    self.init(
+      emailAddress: schema.emailAddress,
+      phoneNumber: schema.phoneNumber,
+      userRecordName: schema.userRecordName
+    )
+  }
+
+  /// Initialize lookup info from contact details and an optional record name.
+  /// - Parameters:
+  ///   - contactInformation: Email and/or phone for the lookup.
+  ///   - userRecordName: The user record name to look up.
+  public init(
+    contactInformation: ContactInformation?,
+    userRecordName: String? = nil
+  ) {
+    self.contactInformation = contactInformation
+    self.userRecordName = userRecordName
   }
 
   /// Initialize lookup info with optional identifiers
@@ -54,8 +83,43 @@ public struct UserIdentityLookupInfo: Codable, Sendable {
     phoneNumber: String? = nil,
     userRecordName: String? = nil
   ) {
-    self.emailAddress = emailAddress
-    self.phoneNumber = phoneNumber
+    if emailAddress != nil || phoneNumber != nil {
+      self.contactInformation = ContactInformation(
+        emailAddress: emailAddress,
+        phoneNumber: phoneNumber
+      )
+    } else {
+      self.contactInformation = nil
+    }
     self.userRecordName = userRecordName
+  }
+
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let emailAddress = try container.decodeIfPresent(String.self, forKey: .emailAddress)
+    let phoneNumber = try container.decodeIfPresent(String.self, forKey: .phoneNumber)
+    let userRecordName = try container.decodeIfPresent(String.self, forKey: .userRecordName)
+    self.init(
+      emailAddress: emailAddress,
+      phoneNumber: phoneNumber,
+      userRecordName: userRecordName
+    )
+  }
+
+  public func encode(to encoder: any Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encodeIfPresent(emailAddress, forKey: .emailAddress)
+    try container.encodeIfPresent(phoneNumber, forKey: .phoneNumber)
+    try container.encodeIfPresent(userRecordName, forKey: .userRecordName)
+  }
+}
+
+extension Components.Schemas.UserIdentityLookupInfo {
+  internal init(from lookupInfo: UserIdentityLookupInfo) {
+    self.init(
+      emailAddress: lookupInfo.emailAddress,
+      phoneNumber: lookupInfo.phoneNumber,
+      userRecordName: lookupInfo.userRecordName
+    )
   }
 }

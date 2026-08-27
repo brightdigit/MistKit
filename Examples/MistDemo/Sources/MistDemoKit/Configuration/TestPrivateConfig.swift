@@ -50,6 +50,18 @@ public struct TestPrivateConfig: Sendable, ConfigurationParseable {
   /// Optional email used by the lookup-users-by-email phase. Must belong to
   /// an iCloud account discoverable to the caller; otherwise the phase skips.
   public let lookupEmail: String?
+  /// Optional share short GUID used by the resolve/accept sharing phases.
+  /// Unused by `PrivateDatabaseTest` today (those phases are public-DB-only)
+  /// but kept for symmetry with `TestPublicConfig`.
+  public let shareShortGUID: String?
+  /// Optional web-auth token for the **sharee** account
+  /// (`CLOUDKIT_SHAREE_WEB_AUTH_TOKEN`). Together with ``shareeEmail``, enables
+  /// the create→accept share roundtrip phase. The primary
+  /// `CLOUDKIT_WEB_AUTH_TOKEN` remains the **sharer**.
+  public let shareeWebAuthToken: String?
+  /// Optional iCloud email of the sharee (`CLOUDKIT_SHAREE_EMAIL`), used as
+  /// the invitee lookup info when creating the share.
+  public let shareeEmail: String?
 
   /// Creates a new instance.
   public init(
@@ -58,7 +70,10 @@ public struct TestPrivateConfig: Sendable, ConfigurationParseable {
     assetSizeKB: Int = 100,
     skipCleanup: Bool = false,
     verbose: Bool = false,
-    lookupEmail: String? = nil
+    lookupEmail: String? = nil,
+    shareShortGUID: String? = nil,
+    shareeWebAuthToken: String? = nil,
+    shareeEmail: String? = nil
   ) {
     self.base = base
     self.recordCount = recordCount
@@ -66,6 +81,9 @@ public struct TestPrivateConfig: Sendable, ConfigurationParseable {
     self.skipCleanup = skipCleanup
     self.verbose = verbose
     self.lookupEmail = lookupEmail
+    self.shareShortGUID = shareShortGUID
+    self.shareeWebAuthToken = shareeWebAuthToken
+    self.shareeEmail = shareeEmail
   }
 
   /// Parse configuration from command line arguments.
@@ -106,6 +124,9 @@ public struct TestPrivateConfig: Sendable, ConfigurationParseable {
     let verbose =
       configuration.bool(forKey: "verbose", default: false)
     let lookupEmail = configuration.string(forKey: "lookup.email")
+    let shareShortGUID = configuration.string(forKey: "share.short.guid")
+    let shareeWebAuthToken = configuration.string(forKey: "sharee.web.auth.token")
+    let shareeEmail = configuration.string(forKey: "sharee.email")
 
     self.init(
       base: baseConfig,
@@ -113,7 +134,10 @@ public struct TestPrivateConfig: Sendable, ConfigurationParseable {
       assetSizeKB: assetSizeKB,
       skipCleanup: skipCleanup,
       verbose: verbose,
-      lookupEmail: lookupEmail
+      lookupEmail: lookupEmail,
+      shareShortGUID: shareShortGUID,
+      shareeWebAuthToken: shareeWebAuthToken,
+      shareeEmail: shareeEmail
     )
   }
 }

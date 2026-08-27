@@ -53,6 +53,10 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
   /// command's whole reason for existing, so a hands-off flow is the
   /// expected UX.
   public let openBrowser: Bool
+  /// When `true`, the browser flow signs out any persisted CloudKit JS
+  /// session before `setUpAuth`, so the user must pick an Apple ID again
+  /// (`--reset-auth` / `CLOUDKIT_RESET_AUTH`).
+  public let resetAuth: Bool
 
   /// Creates a new instance.
   public init(
@@ -62,7 +66,8 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     environment: MistKit.Environment = .development,
     port: Int = 8_080,
     host: String = "127.0.0.1",
-    openBrowser: Bool = true
+    openBrowser: Bool = true,
+    resetAuth: Bool = false
   ) {
     self.apiToken = apiToken
     self.containerIdentifier = containerIdentifier
@@ -70,6 +75,7 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     self.port = port
     self.host = host
     self.openBrowser = openBrowser
+    self.resetAuth = resetAuth
   }
 
   /// Parse configuration from command line arguments.
@@ -114,6 +120,8 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
       configReader: configReader,
       default: true
     )
+    let resetAuth =
+      configReader.bool(forKey: "reset.auth", default: false)
 
     self.init(
       apiToken: apiToken,
@@ -121,7 +129,8 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
       environment: environment,
       port: port,
       host: host,
-      openBrowser: openBrowser
+      openBrowser: openBrowser,
+      resetAuth: resetAuth
     )
   }
 }

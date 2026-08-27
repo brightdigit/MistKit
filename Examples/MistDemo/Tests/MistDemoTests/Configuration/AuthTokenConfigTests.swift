@@ -61,6 +61,7 @@ internal struct AuthTokenConfigTests {
     #expect(config.host == "127.0.0.1")
     // auth-token defaults to opening the browser.
     #expect(config.openBrowser == true)
+    #expect(config.resetAuth == false)
   }
 
   @Test("Memberwise init accepts custom values for every field")
@@ -71,7 +72,8 @@ internal struct AuthTokenConfigTests {
       environment: .production,
       port: 9_000,
       host: "0.0.0.0",
-      openBrowser: false
+      openBrowser: false,
+      resetAuth: true
     )
 
     #expect(config.apiToken == "tok")
@@ -80,6 +82,7 @@ internal struct AuthTokenConfigTests {
     #expect(config.port == 9_000)
     #expect(config.host == "0.0.0.0")
     #expect(config.openBrowser == false)
+    #expect(config.resetAuth == true)
   }
 
   @Test("Configuration init throws missingRequired when api.token is absent")
@@ -116,6 +119,7 @@ internal struct AuthTokenConfigTests {
     #expect(config.port == 8_080)
     #expect(config.host == "127.0.0.1")
     #expect(config.openBrowser == true)
+    #expect(config.resetAuth == false)
   }
 
   @Test("Configuration init honors every override key")
@@ -127,6 +131,7 @@ internal struct AuthTokenConfigTests {
       "port": .init(integerLiteral: 9_090),
       "host": .init(stringLiteral: "192.168.1.10"),
       "no.browser": .init(booleanLiteral: true),
+      "reset.auth": .init(booleanLiteral: true),
     ])
 
     let config = try await AuthTokenConfig(configuration: configuration)
@@ -137,6 +142,7 @@ internal struct AuthTokenConfigTests {
     #expect(config.port == 9_090)
     #expect(config.host == "192.168.1.10")
     #expect(config.openBrowser == false)
+    #expect(config.resetAuth == true)
   }
 
   @Test("--no-browser wins when both browser flags are set")

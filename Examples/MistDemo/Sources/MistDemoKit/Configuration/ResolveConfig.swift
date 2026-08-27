@@ -30,10 +30,7 @@
 public import ConfigKeyKit
 internal import Foundation
 
-/// Configuration for the `resolve` command. Parses the future argument shape
-/// even though `ResolveCommand.execute()` is currently a `PendingStub`
-/// — the `--help` text and argument names stabilize here so callers can
-/// integrate against the real surface when #41 lands.
+/// Configuration for the `resolve` command (`records/resolve`).
 public struct ResolveConfig: Sendable, ConfigurationParseable {
   /// The configuration reader type.
   public typealias ConfigReader = MistDemoConfiguration
@@ -42,23 +39,28 @@ public struct ResolveConfig: Sendable, ConfigurationParseable {
 
   /// The base MistDemo configuration.
   public let base: MistDemoConfig
-  /// Optional share URL to resolve.
-  public let shareURL: String?
-  /// Optional record name to resolve.
-  public let recordName: String?
+  /// The short GUIDs to resolve, in request order.
+  public let shortGUIDs: [String]
+  /// Whether to ask CloudKit to include the root record alongside each
+  /// share. When `nil`, CloudKit applies its own default.
+  public let fetchRootRecord: Bool?
+  /// Field names limiting the root record payload, when fetched.
+  public let fields: [String]?
   /// The output format.
   public let output: OutputFormat
 
   /// Creates a new instance.
   public init(
     base: MistDemoConfig,
-    shareURL: String? = nil,
-    recordName: String? = nil,
+    shortGUIDs: [String],
+    fetchRootRecord: Bool? = nil,
+    fields: [String]? = nil,
     output: OutputFormat = .json
   ) {
     self.base = base
-    self.shareURL = shareURL
-    self.recordName = recordName
+    self.shortGUIDs = shortGUIDs
+    self.fetchRootRecord = fetchRootRecord
+    self.fields = fields
     self.output = output
   }
 
@@ -84,11 +86,51 @@ public struct ResolveConfig: Sendable, ConfigurationParseable {
       ) ?? "json"
     let output = OutputFormat(rawValue: outputString) ?? .json
 
+    let fetchRootRecord = configuration.optionalBool(
+      forKey: "fetch.root.record"
+    )
+    let fields = configuration.commaSeparatedList(
+      forKey: MistDemoConstants.ConfigKeys.fields
+    )
+
+    let shortGUIDs = Self.parseShortGUIDs(from: configuration)
+    guard !shortGUIDs.isEmpty else {
+      throw ResolveError.shortGUIDRequired
+    }
+
     self.init(
       base: baseConfig,
-      shareURL: configuration.string(forKey: "share-url"),
-      recordName: configuration.string(forKey: "record-name"),
+      shortGUIDs: shortGUIDs,
+      fetchRootRecord: fetchRootRecord,
+      fields: fields,
       output: output
     )
+  }
+
+  /// Parse short GUIDs from `--short-guid` (preferred, comma-separated) or
+  /// `--share-url` (comma-separated share URLs, each reduced to its last
+  /// path component — the short GUID value CloudKit's share webpage URLs
+  /// carry, e.g. `https://www.icloud.com/share/abc123` → `abc123`).
+  internal static func parseShortGUIDs(
+    from configuration: MistDemoConfiguration
+  ) -> [String] {
+    if let fromGUIDs = configuration.commaSeparatedList(forKey: "short.guid"),
+      !fromGUIDs.isEmpty
+    {
+      return fromGUIDs
+    }
+
+    guard let shareURLs = configuration.commaSeparatedList(forKey: "share.url")
+    else {
+      return []
+    }
+    return shareURLs.compactMap(parseShortGUID(fromShareURL:))
+  }
+
+  /// Extract the short GUID value from a share URL's last path component.
+  internal static func parseShortGUID(fromShareURL shareURL: String) -> String? {
+    guard let url = URL(string: shareURL) else { return nil }
+    let value = url.lastPathComponent
+    return value.isEmpty ? nil : value
   }
 }

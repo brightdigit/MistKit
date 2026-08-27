@@ -38,8 +38,9 @@ internal struct PublicDatabaseTest: PhasedIntegrationTest {
   /// - Parameters:
   ///   - database: must be `.public`. Defaults to `.public`.
   ///   - includeUserContextPhases: when `true`, appends user-identity phases
-  ///     (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`, `users/lookup/*`).
-  ///     Those phases need web-auth credentials, which the resolver picks per
+  ///     (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`, `users/lookup/*`)
+  ///     plus the sharing phases (`ResolveRecordsPhase`, `AcceptSharesPhase`).
+  ///     All of these need web-auth credentials, which the resolver picks per
   ///     call from the service's `Credentials`. The runner sets this based on
   ///     whether web-auth credentials are configured.
   internal init(
@@ -70,6 +71,8 @@ internal struct PublicDatabaseTest: PhasedIntegrationTest {
       phases.append(DiscoverUserIdentitiesPhase())
       phases.append(LookupUsersByEmailPhase())
       phases.append(LookupUsersByRecordNamePhase())
+      phases.append(ResolveRecordsPhase())
+      phases.append(AcceptSharesPhase())
     }
     self.phases = phases
   }

@@ -117,13 +117,21 @@ async function initializeCloudKit() {
                 containerIdentifier: serverConfig.containerIdentifier,
                 apiTokenAuth: {
                     apiToken: serverConfig.apiToken,
-                    persist: true,
+                    persist: !serverConfig.resetAuth,
                     signInButton: { id: 'signin-button', theme: 'black' },
                 },
                 environment: serverConfig.environment || 'development',
             }],
         });
         container = CloudKit.getDefaultContainer();
+        if (serverConfig.resetAuth) {
+            setStatus(authStatusDiv, 'Resetting persisted Apple ID session...', 'success');
+            try {
+                await container.signOut();
+            } catch (_) {
+                // No active session — proceed to sign-in.
+            }
+        }
         const userIdentity = await container.setUpAuth();
         if (userIdentity) {
             setStatus(authStatusDiv, 'Already signed in. Capturing token...', 'success');
