@@ -35,8 +35,16 @@ public import Foundation
 /// and share-specific metadata. Share keys stay here (and on ``ShareInfo``)
 /// rather than on ``RecordInfo``, which models a plain record.
 public struct CreatedShare: Sendable {
+  // swiftlint:disable force_unwrapping
+  // swift-format-ignore: NeverForceUnwrap
+  /// Base URL for iCloud share invite links (`https://www.icloud.com/share`).
+  ///
+  /// Append a ``ShortGUID/Value`` path component to build a full invite URL.
+  public static let shareURLBase = URL(string: "https://www.icloud.com/share")!
+  // swiftlint:enable force_unwrapping
+
   /// The short GUID CloudKit assigned to the share (and shared root).
-  public let shortGUID: String
+  public let shortGUID: ShortGUID.Value
   /// The iCloud share invite URL (`https://www.icloud.com/share/{shortGUID}`).
   public let shareURL: URL
   /// Share-specific keys lifted from the `cloudkit.share` record.
@@ -54,7 +62,7 @@ public struct CreatedShare: Sendable {
   ///   - rootRecord: The root record that was shared.
   ///   - shareRecordName: The `cloudkit.share` record name.
   public init(
-    shortGUID: String,
+    shortGUID: ShortGUID.Value,
     shareURL: URL,
     share: ShareInfo,
     rootRecord: RecordInfo,
@@ -68,9 +76,7 @@ public struct CreatedShare: Sendable {
   }
 
   /// Build the standard iCloud share invite URL for a short GUID value.
-  public static func shareURL(forShortGUID shortGUID: String) -> URL {
-    // swiftlint:disable:next force_unwrapping
-    // swift-format-ignore: NeverForceUnwrap
-    URL(string: "https://www.icloud.com/share/\(shortGUID)")!
+  public static func shareURL(forShortGUID shortGUID: ShortGUID.Value) -> URL {
+    shareURLBase.appendingPathComponent(shortGUID)
   }
 }

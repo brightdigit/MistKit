@@ -1,5 +1,5 @@
 //
-//  Environment.swift
+//  ContactInformation.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,26 +27,24 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKitOpenAPI
+/// Contact details CloudKit associates with a person — email and/or phone.
+///
+/// Used by share potential-match disambiguation (``SharePotentialMatch``) and
+/// composed into ``UserIdentityLookupInfo`` (which also carries a user record
+/// name). On the wire, lookup info stays flat; share potential matches nest
+/// these keys under `contactInformation`.
+public struct ContactInformation: Codable, Sendable, Equatable, Hashable {
+  /// The email address, when known.
+  public let emailAddress: String?
+  /// The phone number, when known.
+  public let phoneNumber: String?
 
-/// CloudKit environment types
-public enum Environment: String, Codable, Sendable {
-  case development
-  case production
-
-  /// Initialize from a string by matching the raw value
-  /// case-insensitively. Returns `nil` if the input does not match
-  /// one of the canonical raw values (`"development"`, `"production"`).
-  public init?(caseInsensitive raw: String) {
-    self.init(rawValue: raw.lowercased())
-  }
-
-  /// Lift an environment from a ShortGUID Result payload.
-  internal init(from payload: Components.Schemas.ShortGUIDResult.environmentPayload) {
-    switch payload {
-    case .development: self = .development
-    case .production: self = .production
-    }
+  /// Initialize contact information.
+  /// - Parameters:
+  ///   - emailAddress: The email address.
+  ///   - phoneNumber: The phone number.
+  public init(emailAddress: String? = nil, phoneNumber: String? = nil) {
+    self.emailAddress = emailAddress
+    self.phoneNumber = phoneNumber
   }
 }

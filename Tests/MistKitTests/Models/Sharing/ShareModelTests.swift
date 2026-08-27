@@ -140,11 +140,43 @@ internal struct ShareModelTests {
   internal func potentialMatchPartialContact() {
     let emailOnly = SharePotentialMatch(
       participantId: "c1",
-      contactInformation: .init(emailAddress: "a@example.com")
+      contactInformation: ContactInformation(emailAddress: "a@example.com")
     )
     #expect(emailOnly.participantId == "c1")
     #expect(emailOnly.contactInformation?.emailAddress == "a@example.com")
     #expect(emailOnly.contactInformation?.phoneNumber == nil)
+  }
+
+  @Test("CreatedShare builds invite URLs from shareURLBase")
+  internal func createdShareURLUsesBase() {
+    let url = CreatedShare.shareURL(forShortGUID: "guid-1")
+    #expect(url.absoluteString == "https://www.icloud.com/share/guid-1")
+    #expect(url.absoluteString.hasPrefix(CreatedShare.shareURLBase.absoluteString))
+  }
+
+  @Test("UserIdentityLookupInfo Codable stays flat on the wire")
+  internal func lookupInfoCodableIsFlat() throws {
+    let original = UserIdentityLookupInfo(
+      contactInformation: ContactInformation(
+        emailAddress: "a@example.com",
+        phoneNumber: "+15550100"
+      ),
+      userRecordName: "_user-1"
+    )
+    let data = try JSONEncoder().encode(original)
+    let json = try #require(
+      JSONSerialization.jsonObject(with: data) as? [String: Any]
+    )
+    #expect(json["emailAddress"] as? String == "a@example.com")
+    #expect(json["phoneNumber"] as? String == "+15550100")
+    #expect(json["userRecordName"] as? String == "_user-1")
+    #expect(json["contactInformation"] == nil)
+
+    let decoded = try JSONDecoder().decode(UserIdentityLookupInfo.self, from: data)
+    #expect(decoded.emailAddress == "a@example.com")
+    #expect(decoded.phoneNumber == "+15550100")
+    #expect(decoded.userRecordName == "_user-1")
+    #expect(decoded.contactInformation?.emailAddress == "a@example.com")
   }
 
   @Test("ShareInfo requires the share key set")

@@ -36,23 +36,6 @@ internal import MistKitOpenAPI
 /// choose which invitation they are claiming before the share can be accepted.
 /// ``participantId`` is required — without it there is nothing to claim.
 public struct SharePotentialMatch: Codable, Sendable, Equatable, Hashable {
-  /// Contact details CloudKit holds for a potential participant.
-  public struct ContactInformation: Codable, Sendable, Equatable, Hashable {
-    /// The candidate's email address, when known.
-    public let emailAddress: String?
-    /// The candidate's phone number, when known.
-    public let phoneNumber: String?
-
-    /// Initialize contact information.
-    /// - Parameters:
-    ///   - emailAddress: The candidate's email address.
-    ///   - phoneNumber: The candidate's phone number.
-    public init(emailAddress: String? = nil, phoneNumber: String? = nil) {
-      self.emailAddress = emailAddress
-      self.phoneNumber = phoneNumber
-    }
-  }
-
   /// The identifier to send back when claiming this invitation.
   public let participantId: String
   /// Contact details CloudKit holds for this candidate.
@@ -77,5 +60,26 @@ public struct SharePotentialMatch: Codable, Sendable, Equatable, Hashable {
     self.contactInformation = schema.contactInformation.map {
       ContactInformation(emailAddress: $0.emailAddress, phoneNumber: $0.phoneNumber)
     }
+  }
+}
+
+extension [SharePotentialMatch] {
+  /// Lift a potential-match list from the wire schema.
+  ///
+  /// - Parameter schemas: The optional wire list (treated as empty when `nil`).
+  /// - Throws: ``ConversionError/sharePotentialMatchMissingParticipantId`` when
+  ///   any entry omits `participantId`.
+  internal init(
+    from schemas: Components.Schemas.ShortGUIDResult.potentialMatchListPayload?
+  ) throws(ConversionError) {
+    let wireMatches = schemas ?? []
+    var matches: [SharePotentialMatch] = []
+    for matchSchema in wireMatches {
+      guard let match = SharePotentialMatch(from: matchSchema) else {
+        try ConversionError.sharePotentialMatchMissingParticipantId.reportAndThrow()
+      }
+      matches.append(match)
+    }
+    self = matches
   }
 }

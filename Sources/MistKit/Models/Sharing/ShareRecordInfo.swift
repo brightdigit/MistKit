@@ -84,63 +84,28 @@ public struct ShareRecordInfo: Codable, Sendable {
     self.shortGUID = ShortGUID(from: shortGUIDSchema)
     self.containerIdentifier = schema.containerIdentifier
     self.databaseScope = schema.databaseScope.map(ShareDatabaseScope.init(from:))
-    self.environment = schema.environment.map(Self.environment(from:))
-    self.zoneID = schema.zoneID.map(Self.zoneID(from:))
+    self.environment = schema.environment.map(Environment.init(from:))
+    self.zoneID = schema.zoneID.map(ZoneID.init(from:))
     self.rootRecordName = schema.rootRecordName
     if let rootRecord = schema.rootRecord {
       self.rootRecord = try RecordInfo(from: rootRecord)
     } else {
       self.rootRecord = nil
     }
-    (self.share, self.shareInfo) = try Self.sharePair(from: schema.share)
+    if let shareSchema = schema.share {
+      let pair = try ShareRecordPair(from: shareSchema)
+      self.share = pair.record
+      self.shareInfo = pair.info
+    } else {
+      self.share = nil
+      self.shareInfo = nil
+    }
     self.ownerIdentity = schema.ownerIdentity.map(UserIdentity.init(from:))
     self.participantPermission = schema.participantPermission.map(SharePermission.init(from:))
     self.participantStatus = schema.participantStatus.map(ShareAcceptanceStatus.init(from:))
     self.participantType = schema.participantType.map(ShareParticipantType.init(from:))
     self.webpageURL = schema.webpageURL
-    self.potentialMatchList = try Self.potentialMatches(from: schema.potentialMatchList)
-  }
-
-  private static func environment(
-    from payload: Components.Schemas.ShortGUIDResult.environmentPayload
-  ) -> Environment {
-    switch payload {
-    case .development: .development
-    case .production: .production
-    }
-  }
-
-  private static func zoneID(from schema: Components.Schemas.ZoneID) -> ZoneID {
-    ZoneID(
-      zoneName: schema.zoneName ?? ZoneID.defaultZone.zoneName,
-      ownerName: schema.ownerName
-    )
-  }
-
-  private static func sharePair(
-    from schema: Components.Schemas.RecordResponse?
-  ) throws(ConversionError) -> (RecordInfo?, ShareInfo?) {
-    guard let schema else { return (nil, nil) }
-    let share = try RecordInfo(from: schema)
-    guard let shareInfo = ShareInfo(from: schema) else {
-      try ConversionError.shareIncomplete.reportAndThrow()
-    }
-    return (share, shareInfo)
-  }
-
-  private static func potentialMatches(
-    from schemas: Components.Schemas.ShortGUIDResult.potentialMatchListPayload?
-  ) throws(ConversionError) -> [SharePotentialMatch] {
-    let wireMatches = schemas ?? []
-    var matches: [SharePotentialMatch] = []
-    matches.reserveCapacity(wireMatches.count)
-    for matchSchema in wireMatches {
-      guard let match = SharePotentialMatch(from: matchSchema) else {
-        try ConversionError.sharePotentialMatchMissingParticipantId.reportAndThrow()
-      }
-      matches.append(match)
-    }
-    return matches
+    self.potentialMatchList = try [SharePotentialMatch](from: schema.potentialMatchList)
   }
 
   /// Initialize share record information.

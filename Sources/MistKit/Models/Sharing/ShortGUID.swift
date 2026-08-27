@@ -38,8 +38,11 @@ internal import MistKitOpenAPI
 /// (``CloudKitService/resolveShares(_:)``) and accept
 /// (``CloudKitService/acceptShares(_:)``) a share.
 public struct ShortGUID: Codable, Sendable, Equatable, Hashable {
+  /// Opaque short-GUID token string as returned by CloudKit.
+  public typealias Value = String
+
   /// The value of the short global ID.
-  public let value: String
+  public let value: Value
   /// Whether the root record should be fetched alongside the share.
   ///
   /// When `nil`, CloudKit applies its own default.
@@ -56,7 +59,7 @@ public struct ShortGUID: Codable, Sendable, Equatable, Hashable {
   ///     the share.
   ///   - rootRecordDesiredKeys: Field names limiting the root record payload.
   public init(
-    value: String,
+    value: Value,
     shouldFetchRootRecord: Bool? = nil,
     rootRecordDesiredKeys: [String]? = nil
   ) {
