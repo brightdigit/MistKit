@@ -44,4 +44,19 @@ internal struct PhaseContext: Sendable {
   /// nil, the phase falls back to the caller's own email (often unavailable)
   /// and skips otherwise.
   internal let lookupEmail: String?
+  /// Optional share short GUID used by `ResolveRecordsPhase` and
+  /// `AcceptSharesPhase` to exercise `records/resolve` / `records/accept`
+  /// against a known share. There is no way to mint a short GUID from
+  /// within the public pipeline — it must come from a share created out of
+  /// band — so both phases skip when this is `nil`. The private pipeline
+  /// instead uses ``shareeService`` + ``shareeEmail`` to create and accept.
+  internal let shareShortGUID: String?
+  /// Optional service authenticated as the **sharee** (same API token /
+  /// container, `CLOUDKIT_SHAREE_WEB_AUTH_TOKEN`). When set with
+  /// ``shareeEmail``, `ShareCreateAndAcceptPhase` creates a share as the
+  /// sharer (`service`) and accepts it as this sharee.
+  internal let shareeService: CloudKitService?
+  /// Optional iCloud email of the sharee (`CLOUDKIT_SHAREE_EMAIL`), used as
+  /// the invite lookup info when creating the share.
+  internal let shareeEmail: String?
 }

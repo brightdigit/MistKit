@@ -50,12 +50,14 @@
       let containerIdentifier: String
       let environment: String
       let publicDatabaseAvailable: Bool
+      let resetAuth: Bool
     }
 
     internal static func makeFixture(
       authenticated: Bool = false,
       terminatesAfterAuth: Bool = false,
-      publicDatabaseAvailable: Bool = false
+      publicDatabaseAvailable: Bool = false,
+      resetAuth: Bool = false
     ) -> Fixture {
       let backend = MockBackend()
       let store = WebAuthTokenStore(
@@ -69,7 +71,8 @@
         publicDatabaseAvailable: publicDatabaseAvailable,
         tokenStore: store,
         backendFactory: factory,
-        terminatesAfterAuth: terminatesAfterAuth
+        terminatesAfterAuth: terminatesAfterAuth,
+        resetAuth: resetAuth
       )
       return Fixture(server: server, tokenStore: store, backend: backend)
     }
@@ -91,6 +94,7 @@
           #expect(payload.containerIdentifier == "iCloud.test.container")
           #expect(payload.environment == "development")
           #expect(payload.publicDatabaseAvailable == false)
+          #expect(payload.resetAuth == false)
         }
       }
     }

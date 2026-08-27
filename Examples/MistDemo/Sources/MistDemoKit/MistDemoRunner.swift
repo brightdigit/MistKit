@@ -66,10 +66,11 @@ public enum MistDemoRunner {
     await registry.register(TestPublicCommand.self)
     await registry.register(TestPrivateCommand.self)
     await registry.register(DemoErrorsCommand.self)
+    await registry.register(ResolveCommand.self)
+    await registry.register(AcceptCommand.self)
 
     // Pending MistKit wrappers — print "pending #N" and exit 0. Each
     // command flips to a real implementation when its tracking issue lands.
-    await registry.register(ResolveCommand.self)
     await registry.register(RereferenceAssetCommand.self)
     await registry.register(ListSubscriptionsCommand.self)
     await registry.register(LookupSubscriptionCommand.self)

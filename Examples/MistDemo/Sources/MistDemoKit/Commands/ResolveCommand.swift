@@ -28,36 +28,45 @@
 //
 
 internal import Foundation
+internal import MistKit
 
-/// Stub command for `records/resolve`. Resolves a share URL or record
-/// reference to a CloudKit record. The MistKit Swift wrapper is tracked
-/// in #41; until that lands, this command prints the standard pending
-/// banner and exits 0 so the `--help` shape is discoverable today.
-public struct ResolveCommand: MistDemoCommand {
+/// Command for `records/resolve`. Resolves share short GUIDs — the handle
+/// carried by CloudKit share URLs — into the root record, the governing
+/// `cloudKit.share` record, and the caller's participation in each share.
+public struct ResolveCommand: MistDemoCommand, OutputFormatting {
   /// The configuration type.
   public typealias Config = ResolveConfig
   /// The command name.
   public static let commandName = "resolve"
   /// The command abstract.
-  public static let abstract = "Resolve a share URL or record reference (pending #41)"
+  public static let abstract = "Resolve share short GUIDs (records/resolve)"
   /// The command help text.
   public static let helpText = """
-    RESOLVE - Resolve a share URL or record reference
+    RESOLVE - Resolve share short GUIDs
 
     USAGE:
-      mistdemo resolve --share-url <url> [options]
-      mistdemo resolve --record-name <name> [options]
+      mistdemo resolve --short-guid <guid>[,<guid>...] [options]
+      mistdemo resolve --share-url <url>[,<url>...] [options]
 
     INPUT (choose one):
-      --share-url <url>          Share URL to resolve
-      --record-name <name>       Record name to resolve
+      --short-guid <list>          Comma-separated short GUIDs
+      --share-url <list>           Comma-separated share URLs — the short
+                                    GUID is parsed from each URL's last path
+                                    component (e.g. .../share/abc123 → abc123)
 
     OPTIONS:
-      --database <type>          Database to target
-      --output-format <format>   Output format (json, table, csv, yaml)
+      --fetch-root-record          Ask CloudKit to include the root record
+      --fields <field1,field2,...> Restrict the root record's fields
+      --output-format <format>     Output format (json, table, csv, yaml)
 
-    STATUS:
-      Not yet implemented — pending MistKit support, tracked in #41.
+    EXAMPLES:
+      mistdemo resolve --short-guid abc123
+      mistdemo resolve --short-guid abc123,def456 --fetch-root-record
+      mistdemo resolve --share-url https://www.icloud.com/share/abc123
+
+    NOTES:
+      Requires API + web-auth credentials — CloudKit pins records/resolve
+      to the public database with web-auth regardless of --database.
     """
 
   private let config: ResolveConfig
@@ -69,6 +78,47 @@ public struct ResolveCommand: MistDemoCommand {
 
   /// Executes the command.
   public func execute() async throws {
-    PendingStub.printPending(endpoint: "records/resolve", trackingIssue: 41)
+    guard config.base.hasUserContextCredentials else {
+      throw ResolveError.webAuthRequired
+    }
+
+    let service = try MistKitClientFactory.create(for: config.base)
+    let shortGUIDs = config.shortGUIDs.map {
+      ShortGUIDDictionary(
+        value: $0,
+        shouldFetchRootRecord: config.fetchRootRecord,
+        rootRecordDesiredKeys: config.fields
+      )
+    }
+
+    do {
+      let results = try await service.resolveShares(shortGUIDs)
+      printSummary(results)
+      try await outputResults(results, format: config.output)
+    } catch let error as ResolveError {
+      throw error
+    } catch {
+      throw ResolveError.operationFailed(error.localizedDescription)
+    }
+  }
+
+  private func printSummary(_ results: [ShareRecordInfo]) {
+    print(
+      "✅ Resolved \(results.count) share\(results.count == 1 ? "" : "s")"
+    )
+    for result in results {
+      print("   - shortGUID: \(result.shortGUID.value)")
+      print("     rootRecordName: \(result.rootRecordName ?? "-")")
+      print(
+        "     participantStatus: \(result.participantStatus?.rawValue ?? "-")"
+      )
+      print(
+        "     participantPermission: "
+          + "\(result.participantPermission?.rawValue ?? "-")"
+      )
+      if let zoneID = result.zoneID {
+        print("     zoneID: \(zoneID.zoneName)")
+      }
+    }
   }
 }

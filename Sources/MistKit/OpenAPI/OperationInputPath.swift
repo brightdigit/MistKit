@@ -94,3 +94,7 @@ extension Operations.listSubscriptions.Input.Path: OperationInputPath {}
 extension Operations.lookupSubscriptions.Input.Path: OperationInputPath {}
 
 extension Operations.modifySubscriptions.Input.Path: OperationInputPath {}
+
+extension Operations.resolveShortGUIDs.Input.Path: OperationInputPath {}
+
+extension Operations.acceptShares.Input.Path: OperationInputPath {}

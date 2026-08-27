@@ -51,6 +51,17 @@ public struct ZoneID: Codable, Sendable, Equatable, Hashable {
     self.zoneName = zoneName
     self.ownerName = ownerName
   }
+
+  /// Lift a zone identifier from the wire schema.
+  ///
+  /// A missing `zoneName` falls back to ``defaultZone``'s name — share
+  /// results may omit it when CloudKit only returns an owner.
+  internal init(from schema: Components.Schemas.ZoneID) {
+    self.init(
+      zoneName: schema.zoneName ?? ZoneID.defaultZone.zoneName,
+      ownerName: schema.ownerName
+    )
+  }
 }
 
 // MARK: - Internal Conversion

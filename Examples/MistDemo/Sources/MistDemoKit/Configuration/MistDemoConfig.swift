@@ -195,6 +195,22 @@ public struct MistDemoConfig: Sendable, ConfigurationParseable {
   internal func with(
     database: MistKit.Database
   ) -> MistDemoConfig {
+    with(database: database, webAuthToken: webAuthToken)
+  }
+
+  /// Returns a copy with the given web-auth token override (same API token /
+  /// container / environment). Used to build a sharee `CloudKitService` while
+  /// the primary config remains the sharer.
+  internal func with(
+    webAuthToken: String?
+  ) -> MistDemoConfig {
+    with(database: database, webAuthToken: webAuthToken)
+  }
+
+  private func with(
+    database: MistKit.Database,
+    webAuthToken: String?
+  ) -> MistDemoConfig {
     MistDemoConfig(
       containerIdentifier: containerIdentifier,
       apiToken: apiToken,
