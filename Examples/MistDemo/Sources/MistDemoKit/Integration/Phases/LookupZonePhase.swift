@@ -62,6 +62,12 @@ internal struct LookupZonePhase: IntegrationPhase {
       if !zone.capabilities.isEmpty {
         print("   Capabilities: \(zone.capabilities.joined(separator: ", "))")
       }
+      if let syncToken = zone.syncToken {
+        print("   Sync Token: \(syncToken)")
+      }
+      if let atomic = zone.atomic {
+        print("   Atomic: \(atomic)")
+      }
     }
 
     return NoState()

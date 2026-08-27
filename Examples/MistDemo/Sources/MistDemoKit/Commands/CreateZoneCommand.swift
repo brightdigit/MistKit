@@ -97,6 +97,12 @@ public struct CreateZoneCommand: MistDemoCommand, OutputFormatting {
     if !zone.capabilities.isEmpty {
       print("     Capabilities: \(zone.capabilities.joined(separator: ", "))")
     }
+    if let syncToken = zone.syncToken {
+      print("     Sync Token: \(syncToken)")
+    }
+    if let atomic = zone.atomic {
+      print("     Atomic: \(atomic)")
+    }
 
     print("\n" + String(repeating: "=", count: 60))
     print("✅ Zone creation completed!")

@@ -1959,32 +1959,52 @@ public enum Components {
                 case moreComing
             }
         }
+        /// A record zone as returned by the zone endpoints (`zones/list`, `zones/lookup`, `zones/modify`, `zones/changes`). Matches the "Zone Dictionary" in Apple's archived CloudKit Web Services Reference, which documents exactly three keys: `zoneID`, `syncToken`, and `atomic`. `isEager` is deliberately absent — it appears in no primary Apple source (see issue #386).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/Zone`.
+        public struct Zone: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Zone/zoneID`.
+            public var zoneID: Components.Schemas.ZoneID?
+            /// The current point in the zone's change history.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Zone/syncToken`.
+            public var syncToken: Swift.String?
+            /// A Boolean value indicating whether this zone supports atomic operations.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Zone/atomic`.
+            public var atomic: Swift.Bool?
+            /// Creates a new `Zone`.
+            ///
+            /// - Parameters:
+            ///   - zoneID:
+            ///   - syncToken: The current point in the zone's change history.
+            ///   - atomic: A Boolean value indicating whether this zone supports atomic operations.
+            public init(
+                zoneID: Components.Schemas.ZoneID? = nil,
+                syncToken: Swift.String? = nil,
+                atomic: Swift.Bool? = nil
+            ) {
+                self.zoneID = zoneID
+                self.syncToken = syncToken
+                self.atomic = atomic
+            }
+            public enum CodingKeys: String, CodingKey {
+                case zoneID
+                case syncToken
+                case atomic
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/ZonesListResponse`.
         public struct ZonesListResponse: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/ZonesListResponse/zonesPayload`.
-            public struct zonesPayloadPayload: Codable, Hashable, Sendable {
-                /// - Remark: Generated from `#/components/schemas/ZonesListResponse/zonesPayload/zoneID`.
-                public var zoneID: Components.Schemas.ZoneID?
-                /// Creates a new `zonesPayloadPayload`.
-                ///
-                /// - Parameters:
-                ///   - zoneID:
-                public init(zoneID: Components.Schemas.ZoneID? = nil) {
-                    self.zoneID = zoneID
-                }
-                public enum CodingKeys: String, CodingKey {
-                    case zoneID
-                }
-            }
             /// - Remark: Generated from `#/components/schemas/ZonesListResponse/zones`.
-            public typealias zonesPayload = [Components.Schemas.ZonesListResponse.zonesPayloadPayload]
-            /// - Remark: Generated from `#/components/schemas/ZonesListResponse/zones`.
-            public var zones: Components.Schemas.ZonesListResponse.zonesPayload?
+            public var zones: [Components.Schemas.Zone]?
             /// Creates a new `ZonesListResponse`.
             ///
             /// - Parameters:
             ///   - zones:
-            public init(zones: Components.Schemas.ZonesListResponse.zonesPayload? = nil) {
+            public init(zones: [Components.Schemas.Zone]? = nil) {
                 self.zones = zones
             }
             public enum CodingKeys: String, CodingKey {
@@ -1993,30 +2013,13 @@ public enum Components {
         }
         /// - Remark: Generated from `#/components/schemas/ZonesLookupResponse`.
         public struct ZonesLookupResponse: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/ZonesLookupResponse/zonesPayload`.
-            public struct zonesPayloadPayload: Codable, Hashable, Sendable {
-                /// - Remark: Generated from `#/components/schemas/ZonesLookupResponse/zonesPayload/zoneID`.
-                public var zoneID: Components.Schemas.ZoneID?
-                /// Creates a new `zonesPayloadPayload`.
-                ///
-                /// - Parameters:
-                ///   - zoneID:
-                public init(zoneID: Components.Schemas.ZoneID? = nil) {
-                    self.zoneID = zoneID
-                }
-                public enum CodingKeys: String, CodingKey {
-                    case zoneID
-                }
-            }
             /// - Remark: Generated from `#/components/schemas/ZonesLookupResponse/zones`.
-            public typealias zonesPayload = [Components.Schemas.ZonesLookupResponse.zonesPayloadPayload]
-            /// - Remark: Generated from `#/components/schemas/ZonesLookupResponse/zones`.
-            public var zones: Components.Schemas.ZonesLookupResponse.zonesPayload?
+            public var zones: [Components.Schemas.Zone]?
             /// Creates a new `ZonesLookupResponse`.
             ///
             /// - Parameters:
             ///   - zones:
-            public init(zones: Components.Schemas.ZonesLookupResponse.zonesPayload? = nil) {
+            public init(zones: [Components.Schemas.Zone]? = nil) {
                 self.zones = zones
             }
             public enum CodingKeys: String, CodingKey {
@@ -2025,30 +2028,13 @@ public enum Components {
         }
         /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse`.
         public struct ZonesModifyResponse: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zonesPayload`.
-            public struct zonesPayloadPayload: Codable, Hashable, Sendable {
-                /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zonesPayload/zoneID`.
-                public var zoneID: Components.Schemas.ZoneID?
-                /// Creates a new `zonesPayloadPayload`.
-                ///
-                /// - Parameters:
-                ///   - zoneID:
-                public init(zoneID: Components.Schemas.ZoneID? = nil) {
-                    self.zoneID = zoneID
-                }
-                public enum CodingKeys: String, CodingKey {
-                    case zoneID
-                }
-            }
             /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zones`.
-            public typealias zonesPayload = [Components.Schemas.ZonesModifyResponse.zonesPayloadPayload]
-            /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zones`.
-            public var zones: Components.Schemas.ZonesModifyResponse.zonesPayload?
+            public var zones: [Components.Schemas.Zone]?
             /// Creates a new `ZonesModifyResponse`.
             ///
             /// - Parameters:
             ///   - zones:
-            public init(zones: Components.Schemas.ZonesModifyResponse.zonesPayload? = nil) {
+            public init(zones: [Components.Schemas.Zone]? = nil) {
                 self.zones = zones
             }
             public enum CodingKeys: String, CodingKey {
@@ -2057,25 +2043,8 @@ public enum Components {
         }
         /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse`.
         public struct ZoneChangesResponse: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/zonesPayload`.
-            public struct zonesPayloadPayload: Codable, Hashable, Sendable {
-                /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/zonesPayload/zoneID`.
-                public var zoneID: Components.Schemas.ZoneID?
-                /// Creates a new `zonesPayloadPayload`.
-                ///
-                /// - Parameters:
-                ///   - zoneID:
-                public init(zoneID: Components.Schemas.ZoneID? = nil) {
-                    self.zoneID = zoneID
-                }
-                public enum CodingKeys: String, CodingKey {
-                    case zoneID
-                }
-            }
             /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/zones`.
-            public typealias zonesPayload = [Components.Schemas.ZoneChangesResponse.zonesPayloadPayload]
-            /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/zones`.
-            public var zones: Components.Schemas.ZoneChangesResponse.zonesPayload?
+            public var zones: [Components.Schemas.Zone]?
             /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/syncToken`.
             public var syncToken: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/moreComing`.
@@ -2087,7 +2056,7 @@ public enum Components {
             ///   - syncToken:
             ///   - moreComing:
             public init(
-                zones: Components.Schemas.ZoneChangesResponse.zonesPayload? = nil,
+                zones: [Components.Schemas.Zone]? = nil,
                 syncToken: Swift.String? = nil,
                 moreComing: Swift.Bool? = nil
             ) {

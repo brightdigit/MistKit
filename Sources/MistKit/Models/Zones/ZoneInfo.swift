@@ -39,12 +39,30 @@ public struct ZoneInfo: Codable, Sendable {
   /// Note: always empty — CloudKit Web Services zone responses do not include
   /// capabilities in the current OpenAPI schema.
   public let capabilities: [String]
+  /// The current point in the zone's change history.
+  ///
+  /// Present on zone responses that carry Apple's "Zone Dictionary" payload;
+  /// `nil` when the server omits it.
+  public let syncToken: String?
+  /// Whether this zone supports atomic operations.
+  ///
+  /// `nil` when the server omits the key — deliberately *not* defaulted to
+  /// `false`, so "absent" stays distinguishable from "explicitly not atomic".
+  public let atomic: Bool?
 
   /// Initialize zone information
-  public init(zoneName: String, ownerRecordName: String?, capabilities: [String]) {
+  public init(
+    zoneName: String,
+    ownerRecordName: String?,
+    capabilities: [String],
+    syncToken: String? = nil,
+    atomic: Bool? = nil
+  ) {
     self.zoneName = zoneName
     self.ownerRecordName = ownerRecordName
     self.capabilities = capabilities
+    self.syncToken = syncToken
+    self.atomic = atomic
   }
 
   /// Convert a CloudKit zone payload's `zoneID` into a `ZoneInfo`.
@@ -60,7 +78,11 @@ public struct ZoneInfo: Codable, Sendable {
   /// and make the generated decoder reject otherwise-valid payloads, so the
   /// response-side "must be present" rule is enforced here at the domain
   /// boundary instead.
-  internal init(fromZoneID zoneID: Components.Schemas.ZoneID?) throws(ConversionError) {
+  internal init(
+    fromZoneID zoneID: Components.Schemas.ZoneID?,
+    syncToken: String? = nil,
+    atomic: Bool? = nil
+  ) throws(ConversionError) {
     guard let zoneID else {
       try ConversionError.zoneMissingID.reportAndThrow()
     }
@@ -70,7 +92,19 @@ public struct ZoneInfo: Codable, Sendable {
     self.init(
       zoneName: zoneName,
       ownerRecordName: zoneID.ownerName,
-      capabilities: []
+      capabilities: [],
+      syncToken: syncToken,
+      atomic: atomic
+    )
+  }
+
+  /// Convert a CloudKit `Zone` payload into a `ZoneInfo`, carrying the
+  /// zone-level metadata (`syncToken`, `atomic`) alongside the identity.
+  internal init(from zone: Components.Schemas.Zone) throws(ConversionError) {
+    try self.init(
+      fromZoneID: zone.zoneID,
+      syncToken: zone.syncToken,
+      atomic: zone.atomic
     )
   }
 }

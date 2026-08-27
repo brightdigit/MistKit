@@ -1473,16 +1473,34 @@ components:
         moreComing:
           type: boolean
 
+    Zone:
+      type: object
+      description: >
+        A record zone as returned by the zone endpoints (`zones/list`,
+        `zones/lookup`, `zones/modify`, `zones/changes`). Matches the
+        "Zone Dictionary" in Apple's archived CloudKit Web Services
+        Reference, which documents exactly three keys: `zoneID`,
+        `syncToken`, and `atomic`. `isEager` is deliberately absent — it
+        appears in no primary Apple source (see issue #386).
+      properties:
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        syncToken:
+          type: string
+          description: The current point in the zone's change history.
+        atomic:
+          type: boolean
+          description: >
+            A Boolean value indicating whether this zone supports atomic
+            operations.
+
     ZonesListResponse:
       type: object
       properties:
         zones:
           type: array
           items:
-            type: object
-            properties:
-              zoneID:
-                $ref: '#/components/schemas/ZoneID'
+            $ref: '#/components/schemas/Zone'
 
     ZonesLookupResponse:
       type: object
@@ -1490,10 +1508,7 @@ components:
         zones:
           type: array
           items:
-            type: object
-            properties:
-              zoneID:
-                $ref: '#/components/schemas/ZoneID'
+            $ref: '#/components/schemas/Zone'
 
     ZonesModifyResponse:
       type: object
@@ -1501,10 +1516,7 @@ components:
         zones:
           type: array
           items:
-            type: object
-            properties:
-              zoneID:
-                $ref: '#/components/schemas/ZoneID'
+            $ref: '#/components/schemas/Zone'
 
     ZoneChangesResponse:
       type: object
@@ -1512,10 +1524,7 @@ components:
         zones:
           type: array
           items:
-            type: object
-            properties:
-              zoneID:
-                $ref: '#/components/schemas/ZoneID'
+            $ref: '#/components/schemas/Zone'
         syncToken:
           type: string
         moreComing:

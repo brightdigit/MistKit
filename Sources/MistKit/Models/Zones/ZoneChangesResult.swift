@@ -55,7 +55,7 @@ public struct ZoneChangesResult: Codable, Sendable {
   internal init(from response: Components.Schemas.ZoneChangesResponse) throws(ConversionError) {
     var zones: [ZoneInfo] = []
     for zone in response.zones ?? [] {
-      zones.append(try ZoneInfo(fromZoneID: zone.zoneID))
+      zones.append(try ZoneInfo(from: zone))
     }
     self.zones = zones
     self.syncToken = response.syncToken

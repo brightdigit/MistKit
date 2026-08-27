@@ -87,7 +87,7 @@ extension CloudKitService {
       let zonesData: Components.Schemas.ZonesModifyResponse =
         try await responseProcessor.processModifyZonesResponse(response)
 
-      return try (zonesData.zones ?? []).map { try ZoneInfo(fromZoneID: $0.zoneID) }
+      return try (zonesData.zones ?? []).map { try ZoneInfo(from: $0) }
     } catch {
       throw mapToCloudKitError(error, context: "modifyZones")
     }

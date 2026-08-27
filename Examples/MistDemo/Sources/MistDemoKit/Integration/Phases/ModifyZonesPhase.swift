@@ -64,7 +64,7 @@ internal struct ModifyZonesPhase: IntegrationPhase {
         zoneIDs: [zoneID],
         database: context.database
       )
-      guard lookedUp.contains(where: { $0.zoneName == zoneName }) else {
+      guard let verifiedZone = lookedUp.first(where: { $0.zoneName == zoneName }) else {
         try await cleanup(zoneID: zoneID, context: context)
         throw IntegrationTestError.verificationFailed(
           "created zone '\(zoneName)' not returned by lookupZones"
@@ -72,6 +72,12 @@ internal struct ModifyZonesPhase: IntegrationPhase {
       }
       if context.verbose {
         print("   ✅ Verified zone via lookupZones")
+        if let syncToken = verifiedZone.syncToken {
+          print("     Sync Token: \(syncToken)")
+        }
+        if let atomic = verifiedZone.atomic {
+          print("     Atomic: \(atomic)")
+        }
       }
 
       try await cleanup(zoneID: zoneID, context: context)
