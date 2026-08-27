@@ -56,6 +56,8 @@
         --host <host>            Server host (default: 127.0.0.1)
         --browser                Open browser on startup (default for auth-token)
         --no-browser             Don't open browser on startup (overrides --browser)
+        --reset-auth             Sign out any persisted CloudKit JS session before
+                                 capturing (force Apple ID picker)
       """
 
     internal let config: AuthTokenConfig
@@ -110,6 +112,9 @@
     /// Executes the command.
     public func execute() async throws {
       print("📍 Server URL: http://\(config.host):\(config.port)")
+      if config.resetAuth {
+        print("🔄 Reset auth — browser will clear any persisted Apple ID session.")
+      }
 
       let tokenStore = WebAuthTokenStore()
       let server = WebServer(
@@ -123,7 +128,8 @@
           containerIdentifier: config.containerIdentifier,
           environment: config.environment
         ),
-        terminatesAfterAuth: true
+        terminatesAfterAuth: true,
+        resetAuth: config.resetAuth
       )
       let app = Application(
         router: try server.makeRouter(),

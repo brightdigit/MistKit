@@ -197,6 +197,7 @@ MistKit/
 | `CloudKitService+UserIdentityChunking.swift` | `discoverAllUserIdentities(lookupInfos:batchSize:)` — auto-chunking convenience over `discoverUserIdentities` |
 | `CloudKitService+BatchChunking.swift` | internal `chunkedBatches` helper backing the auto-chunking conveniences |
 | `CloudKitService+ShareOperations.swift` | `resolveShares(_:)`, `acceptShares(_:)` *(public DB + web-auth, fixed — no `database:` parameter)* |
+| `CloudKitService+CreateShare.swift` | `createShare(...)` *(private custom zone + web-auth; returns ``CreatedShare``)* |
 | `CloudKitService+AssetOperations.swift` | `uploadAssets`, `requestAssetUploadURL` |
 | `CloudKitService+AssetUpload.swift` | `uploadAssetData` |
 | `CloudKitService+RecordManaging.swift` | record-managing convenience surface |
@@ -216,11 +217,12 @@ MistKit/
 - `lookupUsersByEmail(_:)` → POST `/users/lookup/email` — returns `[UserIdentity]`.
 - `lookupUsersByRecordName(_:)` → POST `/users/lookup/id` — returns `[UserIdentity]`.
 
-**Share Operations (issues #41 / #42 — public DB + web-auth required):**
-- `resolveShares(_:)` → POST `/records/resolve` — resolves `[ShortGUID]` into `[ShareRecordInfo]` (root record, `cloudKit.share` record, owner identity, the caller's participation).
+**Share Operations (issues #41 / #42 / #437 — create needs private custom zone + web-auth; resolve/accept are public DB + web-auth):**
+- `createShare(...)` → `records/modify` — creates a root (`createShortGUID`) plus `cloudkit.share`, returns ``CreatedShare`` (`shortGUID`, share URL, ``ShareInfo``, root ``RecordInfo``).
+- `resolveShares(_:)` → POST `/records/resolve` — resolves `[ShortGUID]` into `[ShareRecordInfo]` (root record, `cloudkit.share` record, owner identity, the caller's participation).
 - `acceptShares(_:)` → POST `/records/accept` — accepts `[ShortGUID]` on behalf of the current user; returns the same `[ShareRecordInfo]` shape reporting the caller's resulting participation.
 
-Both endpoints are documented **only** in Apple's archived CloudKit Web Services Reference (`FetchingRecordInformation` / `AcceptingShareRecords`), which fixes the path's database scope to `public`; they act on behalf of the *current* user, so — like `fetchCaller()` — they hard-code `.public(.requires(.webAuth))` and expose **no** `database:` parameter. Both validate the request as a whole: a bad short GUID fails the entire call rather than producing a per-item failure, so there is no `RecordResult`-style failure variant.
+`createShare` writes against the caller's `database:` (typically `.private`) in a custom `zoneID`. Resolve/accept are documented **only** in Apple's archived CloudKit Web Services Reference (`FetchingRecordInformation` / `AcceptingShareRecords`), which fixes the path's database scope to `public`; they act on behalf of the *current* user, so — like `fetchCaller()` — they hard-code `.public(.requires(.webAuth))` and expose **no** `database:` parameter. Both validate the request as a whole: a bad short GUID fails the entire call rather than producing a per-item failure, so there is no `RecordResult`-style failure variant.
 
 Set `ShortGUID.shouldFetchRootRecord` to have CloudKit include the shared root record, optionally narrowed by `rootRecordDesiredKeys`. When CloudKit cannot match the caller to exactly one invited participant, `ShareRecordInfo.potentialMatchList` is non-empty and the user must choose which invitation they are claiming. Domain models live in `Sources/MistKit/Models/Sharing/`.
 

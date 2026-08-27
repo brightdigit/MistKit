@@ -39,7 +39,7 @@ extension CloudKitServiceTests.Sharing {
   internal struct ShareInfoMapping {
     private typealias Helper = CloudKitServiceTests.Sharing
 
-    @Test("resolveShares lifts share keys off the cloudKit.share record")
+    @Test("resolveShares lifts share keys off the cloudkit.share record")
     internal func resolveLiftsShareInfo() async throws {
       guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
@@ -62,34 +62,37 @@ extension CloudKitServiceTests.Sharing {
       #expect(participant.permission == .readWrite)
       #expect(participant.type == .owner)
       #expect(participant.acceptanceStatus == .accepted)
-      #expect(participant.userIdentity?.userRecordName == .recordName("_owner"))
+      #expect(participant.userIdentity.userRecordName == .recordName("_owner"))
     }
 
-    @Test("shareInfo is nil for a record carrying no share keys")
-    internal func shareInfoNilForPlainRecord() async throws {
+    @Test("incomplete share record fails conversion with shareIncomplete")
+    internal func incompleteShareThrows() async throws {
       guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      // A `share` entry that is a plain record dictionary — no share keys.
+      // A `share` entry that looks like a share type but omits required keys.
       let service = try Helper.makeService(responsesByOperation: [
         "resolveShortGUIDs": try Helper.shortGUIDResponse(results: [
           [
             "shortGUID": ["value": "guid-1"],
             "share": [
               "recordName": "share-guid-1",
-              "recordType": "cloudKit.share",
+              "recordType": ShareInfo.recordType,
               "fields": [:],
             ],
           ]
         ])
       ])
 
-      let result = try #require(
-        try await service.resolveShares([ShortGUID(value: "guid-1")]).first
+      await ConversionFailureReporter.$assertionHandler.withValue(
+        { _, _, _ in },
+        operation: {
+          await #expect(throws: CloudKitError.self) {
+            _ = try await service.resolveShares([ShortGUID(value: "guid-1")])
+          }
+        }
       )
-      #expect(result.share?.recordName == "share-guid-1")
-      #expect(result.shareInfo == nil)
     }
   }
 }

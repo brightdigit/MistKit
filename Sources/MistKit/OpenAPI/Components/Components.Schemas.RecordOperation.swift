@@ -64,7 +64,17 @@ extension Components.Schemas.RecordOperation {
         recordName: recordOperation.recordName,
         recordType: recordOperation.recordType,
         recordChangeTag: recordOperation.recordChangeTag,
-        fields: .init(additionalProperties: apiFields)
+        fields: .init(additionalProperties: apiFields),
+        createShortGUID: recordOperation.createShortGUID,
+        forRecord: recordOperation.forRecord.map(
+          Components.Schemas.ShareTargetReference.init(from:)
+        ),
+        publicPermission: recordOperation.publicPermission.map {
+          Components.Schemas.RecordRequest.publicPermissionPayload(from: $0)
+        },
+        participants: recordOperation.participants?.map(
+          Components.Schemas.ShareParticipant.init(from:)
+        )
       )
     )
   }

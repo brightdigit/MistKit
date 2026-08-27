@@ -497,6 +497,7 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 
 - [x] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/41) ✅
 - [x] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/42) ✅
+- [x] [Curated createShare for share URL creation](https://github.com/brightdigit/MistKit/issues/437) ✅
 
 ### Backlog / Post-beta
 

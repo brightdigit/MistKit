@@ -105,7 +105,9 @@ public struct TestPublicCommand: MistDemoCommand {
       skipCleanup: config.skipCleanup,
       verbose: config.verbose,
       lookupEmail: config.lookupEmail,
-      shareShortGUID: config.shareShortGUID
+      shareShortGUID: config.shareShortGUID,
+      shareeService: nil,
+      shareeEmail: nil
     )
 
     try await runner.runBasicWorkflow()

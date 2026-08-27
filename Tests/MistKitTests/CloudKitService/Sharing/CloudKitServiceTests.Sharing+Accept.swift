@@ -56,7 +56,7 @@ extension CloudKitServiceTests.Sharing {
       )
       #expect(result.participantStatus == .accepted)
       #expect(result.participantPermission == .readWrite)
-      #expect(result.share?.recordType == "cloudKit.share")
+      #expect(result.share?.recordType == ShareInfo.recordType)
 
       let bodies = await provider.bodies(for: "acceptShares").compactMap { $0 }
       let body = try #require(bodies.first)
@@ -82,7 +82,7 @@ extension CloudKitServiceTests.Sharing {
         ShortGUID(value: "guid-1"),
         ShortGUID(value: "guid-2"),
       ])
-      #expect(results.map(\.shortGUID?.value) == ["guid-1", "guid-2"])
+      #expect(results.map(\.shortGUID.value) == ["guid-1", "guid-2"])
     }
 
     @Test("acceptShares throws on a top-level BAD_REQUEST")

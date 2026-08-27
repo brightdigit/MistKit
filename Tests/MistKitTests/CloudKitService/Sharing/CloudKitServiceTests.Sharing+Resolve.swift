@@ -55,8 +55,8 @@ extension CloudKitServiceTests.Sharing {
 
       #expect(results.count == 1)
       let result = try #require(results.first)
-      #expect(result.shortGUID?.value == "guid-1")
-      #expect(result.shortGUID?.shouldFetchRootRecord == true)
+      #expect(result.shortGUID.value == "guid-1")
+      #expect(result.shortGUID.shouldFetchRootRecord == true)
       #expect(result.containerIdentifier == TestConstants.serviceContainerIdentifier)
       #expect(result.databaseScope == .shared)
       #expect(result.environment == .development)
@@ -65,7 +65,7 @@ extension CloudKitServiceTests.Sharing {
       #expect(result.rootRecordName == "root-guid-1")
       #expect(result.rootRecord?.recordName == "root-guid-1")
       #expect(result.rootRecord?.recordType == "Note")
-      #expect(result.share?.recordType == "cloudKit.share")
+      #expect(result.share?.recordType == ShareInfo.recordType)
       #expect(result.ownerIdentity?.userRecordName == .recordName("_owner"))
       #expect(result.participantPermission == .readWrite)
       #expect(result.participantStatus == .accepted)
@@ -96,7 +96,7 @@ extension CloudKitServiceTests.Sharing {
         ShortGUID(value: "guid-2"),
       ])
 
-      #expect(results.map(\.shortGUID?.value) == ["guid-1", "guid-2"])
+      #expect(results.map(\.shortGUID.value) == ["guid-1", "guid-2"])
 
       let bodies = await provider.bodies(for: "resolveShortGUIDs").compactMap { $0 }
       let body = try #require(bodies.first)

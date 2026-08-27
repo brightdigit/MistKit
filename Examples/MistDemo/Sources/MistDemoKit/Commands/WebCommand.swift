@@ -103,7 +103,8 @@
           environment: config.environment,
           serverToServer: try makeServerToServerCredentials()
         ),
-        terminatesAfterAuth: false
+        terminatesAfterAuth: false,
+        resetAuth: false
       )
       let router = try server.makeRouter()
 

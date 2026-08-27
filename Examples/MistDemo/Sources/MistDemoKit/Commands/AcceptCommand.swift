@@ -107,7 +107,7 @@ public struct AcceptCommand: MistDemoCommand, OutputFormatting {
       "✅ Accepted \(results.count) share\(results.count == 1 ? "" : "s")"
     )
     for result in results {
-      print("   - shortGUID: \(result.shortGUID?.value ?? "-")")
+      print("   - shortGUID: \(result.shortGUID.value)")
       print("     rootRecordName: \(result.rootRecordName ?? "-")")
       print(
         "     participantStatus: \(result.participantStatus?.rawValue ?? "-")"

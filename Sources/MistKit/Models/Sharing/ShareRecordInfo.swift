@@ -33,16 +33,17 @@ internal import MistKitOpenAPI
 /// `records/accept`.
 ///
 /// One `ShareRecordInfo` is produced per requested ``ShortGUID``, in request
-/// order. Every field is optional because CloudKit populates the result
-/// differently depending on the operation and on whether the caller asked for
-/// the root record (``ShortGUID/shouldFetchRootRecord``).
+/// order. ``shortGUID`` is always present; other fields stay optional because
+/// CloudKit populates the result differently depending on the operation and
+/// on whether the caller asked for the root record
+/// (``ShortGUID/shouldFetchRootRecord``).
 ///
 /// When ``potentialMatchList`` is non-empty CloudKit could not identify the
 /// caller against a single invited participant; the user must pick which
 /// invitation they are claiming before the share can be accepted.
 public struct ShareRecordInfo: Codable, Sendable {
   /// The short GUID this result was resolved from.
-  public let shortGUID: ShortGUID?
+  public let shortGUID: ShortGUID
   /// The container holding the shared record.
   public let containerIdentifier: String?
   /// The database scope holding the shared record.
@@ -56,7 +57,7 @@ public struct ShareRecordInfo: Codable, Sendable {
   /// The shared root record, when ``ShortGUID/shouldFetchRootRecord`` asked
   /// for it.
   public let rootRecord: RecordInfo?
-  /// The `cloudKit.share` record governing the share.
+  /// The `cloudkit.share` record governing the share.
   public let share: RecordInfo?
   /// The share-specific keys lifted out of ``share`` — participants, the
   /// owner, the public permission, and the caller's own participation.
@@ -77,38 +78,69 @@ public struct ShareRecordInfo: Codable, Sendable {
   public let potentialMatchList: [SharePotentialMatch]
 
   internal init(from schema: Components.Schemas.ShortGUIDResult) throws(ConversionError) {
-    self.shortGUID = schema.shortGUID.map(ShortGUID.init(from:))
+    guard let shortGUIDSchema = schema.shortGUID else {
+      try ConversionError.shareResultMissingShortGUID.reportAndThrow()
+    }
+    self.shortGUID = ShortGUID(from: shortGUIDSchema)
     self.containerIdentifier = schema.containerIdentifier
     self.databaseScope = schema.databaseScope.map(ShareDatabaseScope.init(from:))
-    self.environment = schema.environment.map {
-      switch $0 {
-      case .development: Environment.development
-      case .production: Environment.production
-      }
-    }
-    self.zoneID = schema.zoneID.map {
-      ZoneID(zoneName: $0.zoneName ?? ZoneID.defaultZone.zoneName, ownerName: $0.ownerName)
-    }
+    self.environment = schema.environment.map(Self.environment(from:))
+    self.zoneID = schema.zoneID.map(Self.zoneID(from:))
     self.rootRecordName = schema.rootRecordName
     if let rootRecord = schema.rootRecord {
       self.rootRecord = try RecordInfo(from: rootRecord)
     } else {
       self.rootRecord = nil
     }
-    if let share = schema.share {
-      self.share = try RecordInfo(from: share)
-      self.shareInfo = ShareInfo(from: share)
-    } else {
-      self.share = nil
-      self.shareInfo = nil
-    }
+    (self.share, self.shareInfo) = try Self.sharePair(from: schema.share)
     self.ownerIdentity = schema.ownerIdentity.map(UserIdentity.init(from:))
     self.participantPermission = schema.participantPermission.map(SharePermission.init(from:))
     self.participantStatus = schema.participantStatus.map(ShareAcceptanceStatus.init(from:))
     self.participantType = schema.participantType.map(ShareParticipantType.init(from:))
     self.webpageURL = schema.webpageURL
-    self.potentialMatchList =
-      schema.potentialMatchList?.map(SharePotentialMatch.init(from:)) ?? []
+    self.potentialMatchList = try Self.potentialMatches(from: schema.potentialMatchList)
+  }
+
+  private static func environment(
+    from payload: Components.Schemas.ShortGUIDResult.environmentPayload
+  ) -> Environment {
+    switch payload {
+    case .development: .development
+    case .production: .production
+    }
+  }
+
+  private static func zoneID(from schema: Components.Schemas.ZoneID) -> ZoneID {
+    ZoneID(
+      zoneName: schema.zoneName ?? ZoneID.defaultZone.zoneName,
+      ownerName: schema.ownerName
+    )
+  }
+
+  private static func sharePair(
+    from schema: Components.Schemas.RecordResponse?
+  ) throws(ConversionError) -> (RecordInfo?, ShareInfo?) {
+    guard let schema else { return (nil, nil) }
+    let share = try RecordInfo(from: schema)
+    guard let shareInfo = ShareInfo(from: schema) else {
+      try ConversionError.shareIncomplete.reportAndThrow()
+    }
+    return (share, shareInfo)
+  }
+
+  private static func potentialMatches(
+    from schemas: Components.Schemas.ShortGUIDResult.potentialMatchListPayload?
+  ) throws(ConversionError) -> [SharePotentialMatch] {
+    let wireMatches = schemas ?? []
+    var matches: [SharePotentialMatch] = []
+    matches.reserveCapacity(wireMatches.count)
+    for matchSchema in wireMatches {
+      guard let match = SharePotentialMatch(from: matchSchema) else {
+        try ConversionError.sharePotentialMatchMissingParticipantId.reportAndThrow()
+      }
+      matches.append(match)
+    }
+    return matches
   }
 
   /// Initialize share record information.
@@ -124,7 +156,7 @@ public struct ShareRecordInfo: Codable, Sendable {
   ///   - zoneID: The zone holding the shared record.
   ///   - rootRecordName: The name of the shared root record.
   ///   - rootRecord: The shared root record.
-  ///   - share: The `cloudKit.share` record governing the share.
+  ///   - share: The `cloudkit.share` record governing the share.
   ///   - shareInfo: The share-specific keys lifted out of `share`.
   ///   - ownerIdentity: The identity of the share's owner.
   ///   - participantPermission: The caller's permissions on the share.
@@ -133,7 +165,7 @@ public struct ShareRecordInfo: Codable, Sendable {
   ///   - webpageURL: The dashboard-configured fallback webpage.
   ///   - potentialMatchList: Candidate participants to disambiguate the caller.
   public init(
-    shortGUID: ShortGUID? = nil,
+    shortGUID: ShortGUID,
     containerIdentifier: String? = nil,
     databaseScope: ShareDatabaseScope? = nil,
     environment: Environment? = nil,

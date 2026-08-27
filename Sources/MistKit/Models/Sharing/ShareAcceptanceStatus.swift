@@ -60,4 +60,15 @@ extension ShareAcceptanceStatus {
     case .UNKNOWN: self = .unknown
     }
   }
+
+  internal var asShareParticipantPayload:
+    Components.Schemas.ShareParticipant.acceptanceStatusPayload
+  {
+    switch self {
+    case .invited: .INVITED
+    case .accepted: .ACCEPTED
+    case .removed: .REMOVED
+    case .unknown: .UNKNOWN
+    }
+  }
 }

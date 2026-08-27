@@ -70,4 +70,30 @@ extension SharePermission {
     case .UNKNOWN: self = .unknown
     }
   }
+
+  internal var asShareParticipantPayload: Components.Schemas.ShareParticipant.permissionPayload {
+    switch self {
+    case .none: .NONE
+    case .readOnly: .READ_ONLY
+    case .readWrite: .READ_WRITE
+    case .unknown: .UNKNOWN
+    }
+  }
+
+  internal var asRecordRequestPublicPermissionPayload:
+    Components.Schemas.RecordRequest.publicPermissionPayload
+  {
+    switch self {
+    case .none: .NONE
+    case .readOnly: .READ_ONLY
+    case .readWrite: .READ_WRITE
+    case .unknown: .UNKNOWN
+    }
+  }
+}
+
+extension Components.Schemas.RecordRequest.publicPermissionPayload {
+  internal init(from permission: SharePermission) {
+    self = permission.asRecordRequestPublicPermissionPayload
+  }
 }

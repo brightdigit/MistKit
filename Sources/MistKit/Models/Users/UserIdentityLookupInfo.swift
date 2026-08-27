@@ -59,3 +59,13 @@ public struct UserIdentityLookupInfo: Codable, Sendable {
     self.userRecordName = userRecordName
   }
 }
+
+extension Components.Schemas.UserIdentityLookupInfo {
+  internal init(from lookupInfo: UserIdentityLookupInfo) {
+    self.init(
+      emailAddress: lookupInfo.emailAddress,
+      phoneNumber: lookupInfo.phoneNumber,
+      userRecordName: lookupInfo.userRecordName
+    )
+  }
+}

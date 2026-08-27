@@ -34,6 +34,13 @@ internal import Testing
 
 @Suite("Sharing Models")
 internal struct ShareModelTests {
+  private static let owner = ShareParticipant(
+    userIdentity: UserIdentity(userRecordName: .recordName("_owner")),
+    permission: .readWrite,
+    type: .owner,
+    acceptanceStatus: .accepted
+  )
+
   @Test("ShortGUID round-trips through Codable")
   internal func shortGUIDRoundTrips() throws {
     let original = ShortGUID(
@@ -110,16 +117,17 @@ internal struct ShareModelTests {
     #expect(expected.rawValue == raw)
   }
 
-  @Test("ShareRecordInfo defaults every field when constructed empty")
+  @Test("ShareRecordInfo requires shortGUID and defaults the rest")
   internal func shareRecordInfoDefaults() {
-    let info = ShareRecordInfo()
-    #expect(info.shortGUID == nil)
+    let info = ShareRecordInfo(shortGUID: ShortGUID(value: "guid-1"))
+    #expect(info.shortGUID.value == "guid-1")
     #expect(info.containerIdentifier == nil)
     #expect(info.databaseScope == nil)
     #expect(info.environment == nil)
     #expect(info.zoneID == nil)
     #expect(info.rootRecord == nil)
     #expect(info.share == nil)
+    #expect(info.shareInfo == nil)
     #expect(info.ownerIdentity == nil)
     #expect(info.participantPermission == nil)
     #expect(info.participantStatus == nil)
@@ -134,27 +142,40 @@ internal struct ShareModelTests {
       participantId: "c1",
       contactInformation: .init(emailAddress: "a@example.com")
     )
+    #expect(emailOnly.participantId == "c1")
     #expect(emailOnly.contactInformation?.emailAddress == "a@example.com")
     #expect(emailOnly.contactInformation?.phoneNumber == nil)
   }
 
-  @Test("ShareInfo defaults every field when constructed empty")
-  internal func shareInfoDefaults() {
-    let info = ShareInfo()
-    #expect(info.shortGUID == nil)
-    #expect(info.sharedRecordName == nil)
-    #expect(info.publicPermission == nil)
-    #expect(info.participants.isEmpty)
-    #expect(info.owner == nil)
-    #expect(info.currentUserParticipant == nil)
+  @Test("ShareInfo requires the share key set")
+  internal func shareInfoRequiresKeys() {
+    let info = ShareInfo(
+      shortGUID: "guid-1",
+      publicPermission: .none,
+      participants: [Self.owner],
+      owner: Self.owner,
+      currentUserParticipant: Self.owner
+    )
+    #expect(info.shortGUID == "guid-1")
+    #expect(info.publicPermission == .none)
+    #expect(info.participants.count == 1)
+    #expect(info.owner.type == .owner)
+    #expect(info.currentUserParticipant.type == .owner)
   }
 
-  @Test("ShareParticipant defaults every field to nil")
-  internal func shareParticipantDefaults() {
-    let participant = ShareParticipant()
-    #expect(participant.userIdentity == nil)
-    #expect(participant.permission == nil)
-    #expect(participant.type == nil)
-    #expect(participant.acceptanceStatus == nil)
+  @Test("ShareParticipant requires identity, permission, type, and status")
+  internal func shareParticipantRequiresFields() {
+    let participant = ShareParticipant(
+      userIdentity: UserIdentity(
+        lookupInfo: UserIdentityLookupInfo(emailAddress: "a@example.com")
+      ),
+      permission: .readWrite,
+      type: .user,
+      acceptanceStatus: .invited
+    )
+    #expect(participant.userIdentity.userRecordName == .nonDiscoverable)
+    #expect(participant.permission == .readWrite)
+    #expect(participant.type == .user)
+    #expect(participant.acceptanceStatus == .invited)
   }
 }

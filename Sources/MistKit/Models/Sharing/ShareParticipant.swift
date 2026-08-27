@@ -31,18 +31,23 @@ internal import MistKitOpenAPI
 
 /// A participant in a shared record.
 ///
-/// Participants appear on `cloudKit.share` records — as the `participants`
+/// Participants appear on `cloudkit.share` records — as the `participants`
 /// list, the share's `owner`, and the caller's own `currentUserParticipant`
-/// entry.
+/// entry. Every field is required: a participant without identity, permission,
+/// type, or acceptance status is not useful to callers. Wire responses that
+/// omit any of those keys fail conversion (`init?(from:)` returns `nil`).
+///
+/// Invitees may still carry a sparse ``UserIdentity`` (lookup email only,
+/// ``UserRecordName/nonDiscoverable``) — that is identity present, not absent.
 public struct ShareParticipant: Codable, Sendable {
-  /// The identity of the participant, when CloudKit could resolve one.
-  public let userIdentity: UserIdentity?
+  /// The identity of the participant.
+  public let userIdentity: UserIdentity
   /// The participant's read and write permissions.
-  public let permission: SharePermission?
+  public let permission: SharePermission
   /// The kind of participant.
-  public let type: ShareParticipantType?
+  public let type: ShareParticipantType
   /// Whether the participant has accepted the share.
-  public let acceptanceStatus: ShareAcceptanceStatus?
+  public let acceptanceStatus: ShareAcceptanceStatus
 
   /// Initialize a share participant.
   /// - Parameters:
@@ -51,10 +56,10 @@ public struct ShareParticipant: Codable, Sendable {
   ///   - type: The kind of participant.
   ///   - acceptanceStatus: Whether the participant accepted the share.
   public init(
-    userIdentity: UserIdentity? = nil,
-    permission: SharePermission? = nil,
-    type: ShareParticipantType? = nil,
-    acceptanceStatus: ShareAcceptanceStatus? = nil
+    userIdentity: UserIdentity,
+    permission: SharePermission,
+    type: ShareParticipantType,
+    acceptanceStatus: ShareAcceptanceStatus
   ) {
     self.userIdentity = userIdentity
     self.permission = permission
@@ -62,10 +67,30 @@ public struct ShareParticipant: Codable, Sendable {
     self.acceptanceStatus = acceptanceStatus
   }
 
-  internal init(from schema: Components.Schemas.ShareParticipant) {
-    self.userIdentity = schema.userIdentity.map(UserIdentity.init(from:))
-    self.permission = schema.permission.map(SharePermission.init(from:))
-    self.type = schema._type.map(ShareParticipantType.init(from:))
-    self.acceptanceStatus = schema.acceptanceStatus.map(ShareAcceptanceStatus.init(from:))
+  /// Lift a participant from the wire schema, or return `nil` when any
+  /// required field is missing.
+  internal init?(from schema: Components.Schemas.ShareParticipant) {
+    guard let userIdentity = schema.userIdentity.map(UserIdentity.init(from:)),
+      let permission = schema.permission.map(SharePermission.init(from:)),
+      let type = schema._type.map(ShareParticipantType.init(from:)),
+      let acceptanceStatus = schema.acceptanceStatus.map(ShareAcceptanceStatus.init(from:))
+    else {
+      return nil
+    }
+    self.userIdentity = userIdentity
+    self.permission = permission
+    self.type = type
+    self.acceptanceStatus = acceptanceStatus
+  }
+}
+
+extension Components.Schemas.ShareParticipant {
+  internal init(from participant: ShareParticipant) {
+    self.init(
+      userIdentity: Components.Schemas.UserIdentity(from: participant.userIdentity),
+      permission: participant.permission.asShareParticipantPayload,
+      _type: participant.type.asShareParticipantPayload,
+      acceptanceStatus: participant.acceptanceStatus.asShareParticipantPayload
+    )
   }
 }

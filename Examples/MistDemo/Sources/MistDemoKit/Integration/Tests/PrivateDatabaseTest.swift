@@ -35,12 +35,11 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
   internal let database: MistKit.Database = .private
 
   // User-identity phases (`FetchCallerPhase`, `DiscoverUserIdentitiesPhase`,
-  // `users/lookup/*`) and the sharing phases (`ResolveRecordsPhase`,
-  // `AcceptSharesPhase`) are intentionally absent: CloudKit Web Services
-  // rejects these endpoints on the private database with "endpoint not
-  // applicable in the database type 'privatedb'". They only belong in the
-  // public-database pipeline; the service resolves web-auth credentials per
-  // call when needed.
+  // `users/lookup/*`) stay on the public pipeline: CloudKit rejects those
+  // endpoints on private with "endpoint not applicable". Share create uses the
+  // private sharer service; resolve/accept are public-scoped calls run from
+  // the sharee service (`ShareCreateAndAcceptPhase`) when
+  // CLOUDKIT_SHAREE_WEB_AUTH_TOKEN + CLOUDKIT_SHAREE_EMAIL are set.
   internal let phases: [any IntegrationPhase] = [
     ListZonesPhase(),
     ModifyZonesPhase(),
@@ -63,6 +62,7 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
     SubscriptionRoundtripPhase(),
     TokenRoundtripPhase(),
     NotificationRoundtripPhase(),
+    ShareCreateAndAcceptPhase(),
     CleanupPhase(),
   ]
 }

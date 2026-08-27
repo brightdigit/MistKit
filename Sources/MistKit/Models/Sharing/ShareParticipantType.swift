@@ -64,4 +64,14 @@ extension ShareParticipantType {
     case .UNKNOWN: self = .unknown
     }
   }
+
+  internal var asShareParticipantPayload: Components.Schemas.ShareParticipant._typePayload {
+    switch self {
+    case .owner: .OWNER
+    case .administrator: .ADMINISTRATOR
+    case .user: .USER
+    case .publicUser: .PUBLIC_USER
+    case .unknown: .UNKNOWN
+    }
+  }
 }

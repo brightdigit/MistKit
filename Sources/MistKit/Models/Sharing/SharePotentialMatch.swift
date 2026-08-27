@@ -34,6 +34,7 @@ internal import MistKitOpenAPI
 ///
 /// When ``ShareRecordInfo/potentialMatchList`` is non-empty the user must
 /// choose which invitation they are claiming before the share can be accepted.
+/// ``participantId`` is required — without it there is nothing to claim.
 public struct SharePotentialMatch: Codable, Sendable, Equatable, Hashable {
   /// Contact details CloudKit holds for a potential participant.
   public struct ContactInformation: Codable, Sendable, Equatable, Hashable {
@@ -53,7 +54,7 @@ public struct SharePotentialMatch: Codable, Sendable, Equatable, Hashable {
   }
 
   /// The identifier to send back when claiming this invitation.
-  public let participantId: String?
+  public let participantId: String
   /// Contact details CloudKit holds for this candidate.
   public let contactInformation: ContactInformation?
 
@@ -61,13 +62,18 @@ public struct SharePotentialMatch: Codable, Sendable, Equatable, Hashable {
   /// - Parameters:
   ///   - participantId: The identifier of the candidate participant.
   ///   - contactInformation: Contact details for the candidate.
-  public init(participantId: String? = nil, contactInformation: ContactInformation? = nil) {
+  public init(participantId: String, contactInformation: ContactInformation? = nil) {
     self.participantId = participantId
     self.contactInformation = contactInformation
   }
 
-  internal init(from schema: Components.Schemas.ShortGUIDResult.potentialMatchListPayloadPayload) {
-    self.participantId = schema.participantId
+  /// Lift a potential match from the wire schema, or return `nil` when
+  /// `participantId` is missing.
+  internal init?(from schema: Components.Schemas.ShortGUIDResult.potentialMatchListPayloadPayload) {
+    guard let participantId = schema.participantId else {
+      return nil
+    }
+    self.participantId = participantId
     self.contactInformation = schema.contactInformation.map {
       ContactInformation(emailAddress: $0.emailAddress, phoneNumber: $0.phoneNumber)
     }

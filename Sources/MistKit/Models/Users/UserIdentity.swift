@@ -63,3 +63,22 @@ public struct UserIdentity: Codable, Sendable {
     self.lookupInfo = lookupInfo
   }
 }
+
+extension Components.Schemas.UserIdentity {
+  /// Build a request-side identity. Only `userRecordName` and `lookupInfo` are
+  /// forwarded — name components are response-only for share invitations.
+  internal init(from identity: UserIdentity) {
+    let recordName: String? =
+      switch identity.userRecordName {
+      case .recordName(let name): name
+      case .nonDiscoverable: nil
+      }
+    self.init(
+      userRecordName: recordName,
+      nameComponents: nil,
+      lookupInfo: identity.lookupInfo.map(
+        Components.Schemas.UserIdentityLookupInfo.init(from:)
+      )
+    )
+  }
+}

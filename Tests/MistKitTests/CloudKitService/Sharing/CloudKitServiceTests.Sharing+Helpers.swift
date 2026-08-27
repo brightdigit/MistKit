@@ -111,23 +111,24 @@ extension CloudKitServiceTests.Sharing {
     return result
   }
 
-  /// A `cloudKit.share` record dictionary carrying share response keys.
+  /// A `cloudkit.share` record dictionary carrying share response keys.
   internal static func shareRecord(for value: String) -> [String: Any] {
-    [
+    let owner: [String: Any] = [
+      "permission": "READ_WRITE",
+      "type": "OWNER",
+      "acceptanceStatus": "ACCEPTED",
+      "userIdentity": ["userRecordName": "_owner"],
+    ]
+    return [
       "recordName": "share-\(value)",
-      "recordType": "cloudKit.share",
+      "recordType": ShareInfo.recordType,
       "recordChangeTag": "share-tag-1",
       "fields": [:],
       "shortGUID": value,
       "publicPermission": "READ_ONLY",
-      "participants": [
-        [
-          "permission": "READ_WRITE",
-          "type": "OWNER",
-          "acceptanceStatus": "ACCEPTED",
-          "userIdentity": ["userRecordName": "_owner"],
-        ]
-      ],
+      "participants": [owner],
+      "owner": owner,
+      "currentUserParticipant": owner,
     ]
   }
 
@@ -146,6 +147,60 @@ extension CloudKitServiceTests.Sharing {
           "contactInformation": ["phoneNumber": "+15550100"],
         ],
       ],
+    ]
+  }
+
+  /// A `records/modify` 200 body wrapping the given records.
+  internal static func recordsResponse(_ records: [[String: Any]]) throws -> ResponseConfig {
+    try jsonResponse(["records": records])
+  }
+
+  /// A root record created with a short GUID for share tests.
+  internal static func shareableRootRecord(
+    recordName: String = "root-1",
+    changeTag: String = "tag-1",
+    shortGUID: String = "guid-share-1"
+  ) -> [String: Any] {
+    [
+      "recordName": recordName,
+      "recordType": "Note",
+      "recordChangeTag": changeTag,
+      "fields": ["title": ["value": "Shared Note", "type": "STRING"]],
+      "shortGUID": shortGUID,
+    ]
+  }
+
+  /// A `cloudkit.share` record response carrying share-create keys.
+  internal static func createdShareRecord(
+    recordName: String = "share-1",
+    changeTag: String = "share-tag-1",
+    shortGUID: String = "guid-share-1"
+  ) -> [String: Any] {
+    let owner: [String: Any] = [
+      "permission": "READ_WRITE",
+      "type": "OWNER",
+      "acceptanceStatus": "ACCEPTED",
+      "userIdentity": ["userRecordName": "_owner"],
+    ]
+    let invitee: [String: Any] = [
+      "permission": "READ_WRITE",
+      "type": "USER",
+      "acceptanceStatus": "INVITED",
+      "userIdentity": [
+        "lookupInfo": ["emailAddress": "sharee@example.com"]
+      ],
+    ]
+    return [
+      "recordName": recordName,
+      "recordType": ShareInfo.recordType,
+      "recordChangeTag": changeTag,
+      "fields": [:],
+      "shortGUID": shortGUID,
+      "share": ["recordName": recordName],
+      "publicPermission": "NONE",
+      "participants": [owner, invitee],
+      "owner": owner,
+      "currentUserParticipant": owner,
     ]
   }
 

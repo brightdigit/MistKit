@@ -60,6 +60,15 @@ public struct TestPrivateCommand: MistDemoCommand {
         Email for users/lookup/email phase (CLOUDKIT_LOOKUP_EMAIL).
         Must belong to an iCloud account discoverable to the caller,
         otherwise the phase skips.
+      --sharee-web-auth-token <token>
+        Web-auth token for the sharee account
+        (CLOUDKIT_SHAREE_WEB_AUTH_TOKEN). Obtain via `mistdemo auth-token`
+        while signed in as the sharee. Primary CLOUDKIT_WEB_AUTH_TOKEN
+        remains the sharer.
+      --sharee-email <email>
+        iCloud email of the sharee (CLOUDKIT_SHAREE_EMAIL), used as the
+        invite lookup info when creating the share. Both sharee options
+        are required for the create→accept phase; otherwise it skips.
 
     EXAMPLES:
       mistdemo test-private --verbose
@@ -68,7 +77,9 @@ public struct TestPrivateCommand: MistDemoCommand {
 
     NOTES:
       - Requires CLOUDKIT_API_TOKEN and
-        CLOUDKIT_WEB_AUTH_TOKEN
+        CLOUDKIT_WEB_AUTH_TOKEN (sharer)
+      - Optional sharee: CLOUDKIT_SHAREE_WEB_AUTH_TOKEN +
+        CLOUDKIT_SHAREE_EMAIL
       - Use 'test-public' for public-database tests
     """
 
@@ -90,6 +101,15 @@ public struct TestPrivateCommand: MistDemoCommand {
     // them. Per-call resolution picks the right token manager.
     let supportsUserContextPhases = config.base.hasUserContextCredentials
 
+    let shareeService: CloudKitService?
+    if let shareeToken = config.shareeWebAuthToken, !shareeToken.isEmpty {
+      shareeService = try MistKitClientFactory.create(
+        for: config.base.with(webAuthToken: shareeToken)
+      )
+    } else {
+      shareeService = nil
+    }
+
     let runner = IntegrationTestRunner(
       service: service,
       supportsUserContextPhases: supportsUserContextPhases,
@@ -100,7 +120,9 @@ public struct TestPrivateCommand: MistDemoCommand {
       skipCleanup: config.skipCleanup,
       verbose: config.verbose,
       lookupEmail: config.lookupEmail,
-      shareShortGUID: config.shareShortGUID
+      shareShortGUID: config.shareShortGUID,
+      shareeService: shareeService,
+      shareeEmail: config.shareeEmail
     )
 
     try await runner.runPrivateWorkflow()

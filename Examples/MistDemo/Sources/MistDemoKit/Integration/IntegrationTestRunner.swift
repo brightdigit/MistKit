@@ -49,6 +49,10 @@ internal struct IntegrationTestRunner {
   internal let lookupEmail: String?
   /// Optional share short GUID forwarded to `PhaseContext.shareShortGUID`.
   internal let shareShortGUID: String?
+  /// Optional sharee service forwarded to `PhaseContext.shareeService`.
+  internal let shareeService: CloudKitService?
+  /// Optional sharee email forwarded to `PhaseContext.shareeEmail`.
+  internal let shareeEmail: String?
 
   /// Run the public-database workflow.
   internal func runBasicWorkflow() async throws {
@@ -74,7 +78,9 @@ internal struct IntegrationTestRunner {
       skipCleanup: skipCleanup,
       verbose: verbose,
       lookupEmail: lookupEmail,
-      shareShortGUID: shareShortGUID
+      shareShortGUID: shareShortGUID,
+      shareeService: shareeService,
+      shareeEmail: shareeEmail
     )
   }
 }

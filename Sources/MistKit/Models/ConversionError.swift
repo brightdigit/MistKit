@@ -75,6 +75,16 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   /// A token response was missing or malformed a required field
   /// (`apnsEnvironment`/`apnsToken`/`webcourierURL`).
   case tokenMissingField(fieldName: String)
+  /// A `cloudkit.share` create response was missing its `shortGUID`.
+  case shareMissingShortGUID
+  /// A resolve/accept result was missing its `shortGUID`.
+  case shareResultMissingShortGUID
+  /// A `cloudkit.share` record was present but missing required share keys
+  /// (`shortGUID`, `publicPermission`, `owner`, `currentUserParticipant`, or
+  /// a convertible `participants` entry).
+  case shareIncomplete
+  /// A `potentialMatchList` entry was missing its `participantId`.
+  case sharePotentialMatchMissingParticipantId
 
   /// A human-readable description of what failed during conversion.
   public var errorDescription: String? {
@@ -114,6 +124,16 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
         + "subscription must declare at least one of [create, update, delete]"
     case .tokenMissingField(let fieldName):
       return "TokenResponse missing required field '\(fieldName)'"
+    case .shareMissingShortGUID:
+      return "cloudkit.share create response missing required shortGUID"
+    case .shareResultMissingShortGUID:
+      return "ShortGUIDResult missing required shortGUID"
+    case .shareIncomplete:
+      return "cloudkit.share record missing required share keys "
+        + "(shortGUID, publicPermission, owner, currentUserParticipant, "
+        + "or convertible participants)"
+    case .sharePotentialMatchMissingParticipantId:
+      return "potentialMatchList entry missing required participantId"
     }
   }
 }
