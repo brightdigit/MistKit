@@ -52,7 +52,7 @@ extension CloudKitServiceTests.Sharing {
       ])
 
       let result = try #require(
-        try await service.acceptShares([ShortGUID(value: "guid-1")]).first
+        try await service.acceptShares([ShortGUIDDictionary(value: "guid-1")]).first
       )
       #expect(result.participantStatus == .accepted)
       #expect(result.participantPermission == .readWrite)
@@ -79,8 +79,8 @@ extension CloudKitServiceTests.Sharing {
       ])
 
       let results = try await service.acceptShares([
-        ShortGUID(value: "guid-1"),
-        ShortGUID(value: "guid-2"),
+        ShortGUIDDictionary(value: "guid-1"),
+        ShortGUIDDictionary(value: "guid-2"),
       ])
       #expect(results.map(\.shortGUID.value) == ["guid-1", "guid-2"])
     }
@@ -100,7 +100,7 @@ extension CloudKitServiceTests.Sharing {
       ])
 
       let error = await #expect(throws: CloudKitError.self) {
-        _ = try await service.acceptShares([ShortGUID(value: "guid-1")])
+        _ = try await service.acceptShares([ShortGUIDDictionary(value: "guid-1")])
       }
       guard case .badRequest(let reason) = error else {
         Issue.record("Expected .badRequest, got \(String(describing: error))")

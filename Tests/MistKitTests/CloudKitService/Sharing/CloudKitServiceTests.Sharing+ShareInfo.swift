@@ -52,7 +52,7 @@ extension CloudKitServiceTests.Sharing {
       ])
 
       let result = try #require(
-        try await service.resolveShares([ShortGUID(value: "guid-1")]).first
+        try await service.resolveShares([ShortGUIDDictionary(value: "guid-1")]).first
       )
       let shareInfo = try #require(result.shareInfo)
       #expect(shareInfo.shortGUID == "guid-1")
@@ -89,7 +89,7 @@ extension CloudKitServiceTests.Sharing {
         { _, _, _ in },
         operation: {
           await #expect(throws: CloudKitError.self) {
-            _ = try await service.resolveShares([ShortGUID(value: "guid-1")])
+            _ = try await service.resolveShares([ShortGUIDDictionary(value: "guid-1")])
           }
         }
       )

@@ -36,9 +36,9 @@ extension CloudKitService {
   /// Given the short GUIDs carried by share URLs, returns the root record,
   /// the governing `cloudKit.share` record, the owner's identity, and the
   /// caller's participation in each share. Set
-  /// ``ShortGUID/shouldFetchRootRecord`` to have CloudKit include the root
+  /// ``ShortGUIDDictionary/shouldFetchRootRecord`` to have CloudKit include the root
   /// record itself, optionally narrowed by
-  /// ``ShortGUID/rootRecordDesiredKeys``.
+  /// ``ShortGUIDDictionary/rootRecordDesiredKeys``.
   ///
   /// Routed against the public database with web-auth credentials — Apple's
   /// reference fixes the path's database scope to `public`, and resolution is
@@ -53,7 +53,7 @@ extension CloudKitService {
   ///   a bad short GUID fails the entire call rather than producing a per-item
   ///   failure.
   public func resolveShares(
-    _ shortGUIDs: [ShortGUID]
+    _ shortGUIDs: [ShortGUIDDictionary]
   ) async throws(CloudKitError) -> [ShareRecordInfo] {
     do {
       let client = try self.client(for: .public(.requires(.webAuth)))
@@ -97,7 +97,7 @@ extension CloudKitService {
   ///   a bad or already-accepted short GUID fails the entire call rather than
   ///   producing a per-item failure.
   public func acceptShares(
-    _ shortGUIDs: [ShortGUID]
+    _ shortGUIDs: [ShortGUIDDictionary]
   ) async throws(CloudKitError) -> [ShareRecordInfo] {
     do {
       let client = try self.client(for: .public(.requires(.webAuth)))

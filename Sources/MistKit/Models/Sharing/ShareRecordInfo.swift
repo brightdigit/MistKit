@@ -32,18 +32,18 @@ internal import MistKitOpenAPI
 /// Information about a shared record, returned by `records/resolve` and
 /// `records/accept`.
 ///
-/// One `ShareRecordInfo` is produced per requested ``ShortGUID``, in request
-/// order. ``shortGUID`` is always present; other fields stay optional because
-/// CloudKit populates the result differently depending on the operation and
-/// on whether the caller asked for the root record
-/// (``ShortGUID/shouldFetchRootRecord``).
+/// One `ShareRecordInfo` is produced per requested ``ShortGUIDDictionary``, in
+/// request order. ``shortGUID`` is always present; other fields stay optional
+/// because CloudKit populates the result differently depending on the
+/// operation and on whether the caller asked for the root record
+/// (``ShortGUIDDictionary/shouldFetchRootRecord``).
 ///
 /// When ``potentialMatchList`` is non-empty CloudKit could not identify the
 /// caller against a single invited participant; the user must pick which
 /// invitation they are claiming before the share can be accepted.
 public struct ShareRecordInfo: Codable, Sendable {
   /// The short GUID this result was resolved from.
-  public let shortGUID: ShortGUID
+  public let shortGUID: ShortGUIDDictionary
   /// The container holding the shared record.
   public let containerIdentifier: String?
   /// The database scope holding the shared record.
@@ -54,8 +54,8 @@ public struct ShareRecordInfo: Codable, Sendable {
   public let zoneID: ZoneID?
   /// The name of the root record that was shared.
   public let rootRecordName: String?
-  /// The shared root record, when ``ShortGUID/shouldFetchRootRecord`` asked
-  /// for it.
+  /// The shared root record, when ``ShortGUIDDictionary/shouldFetchRootRecord``
+  /// asked for it.
   public let rootRecord: RecordInfo?
   /// The `cloudkit.share` record governing the share.
   public let share: RecordInfo?
@@ -81,7 +81,7 @@ public struct ShareRecordInfo: Codable, Sendable {
     guard let shortGUIDSchema = schema.shortGUID else {
       try ConversionError.shareResultMissingShortGUID.reportAndThrow()
     }
-    self.shortGUID = ShortGUID(from: shortGUIDSchema)
+    self.shortGUID = ShortGUIDDictionary(from: shortGUIDSchema)
     self.containerIdentifier = schema.containerIdentifier
     self.databaseScope = schema.databaseScope.map(ShareDatabaseScope.init(from:))
     self.environment = schema.environment.map(Environment.init(from:))
@@ -130,7 +130,7 @@ public struct ShareRecordInfo: Codable, Sendable {
   ///   - webpageURL: The dashboard-configured fallback webpage.
   ///   - potentialMatchList: Candidate participants to disambiguate the caller.
   public init(
-    shortGUID: ShortGUID,
+    shortGUID: ShortGUIDDictionary,
     containerIdentifier: String? = nil,
     databaseScope: ShareDatabaseScope? = nil,
     environment: Environment? = nil,

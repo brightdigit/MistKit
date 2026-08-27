@@ -1,5 +1,5 @@
 //
-//  ShortGUID.swift
+//  ShortGUIDDictionary.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,20 +29,23 @@
 
 internal import MistKitOpenAPI
 
-/// A short global identifier for a shared record.
+/// Opaque short-GUID token string as returned by CloudKit.
+///
+/// Appears as a bare string on record / share payloads. The resolve and
+/// accept request/result dictionary shape is ``ShortGUIDDictionary``.
+public typealias ShortGUID = String
+
+/// CloudKit's ShortGUID Dictionary — a short GUID plus optional root-fetch
+/// options used by `records/resolve` and `records/accept`.
 ///
 /// CloudKit assigns a short GUID to a record when it is shared — either
 /// explicitly, by setting `createShortGUID` when creating the record, or
-/// implicitly, when a `cloudKit.share` record is created for it. The GUID is
-/// what a share URL carries, and it is the handle used to resolve
-/// (``CloudKitService/resolveShares(_:)``) and accept
-/// (``CloudKitService/acceptShares(_:)``) a share.
-public struct ShortGUID: Codable, Sendable, Equatable, Hashable {
-  /// Opaque short-GUID token string as returned by CloudKit.
-  public typealias Value = String
-
+/// implicitly, when a `cloudkit.share` record is created for it. The GUID
+/// value is what a share URL carries; this dictionary wraps that value with
+/// knobs for resolve/accept.
+public struct ShortGUIDDictionary: Codable, Sendable, Equatable, Hashable {
   /// The value of the short global ID.
-  public let value: Value
+  public let value: ShortGUID
   /// Whether the root record should be fetched alongside the share.
   ///
   /// When `nil`, CloudKit applies its own default.
@@ -52,14 +55,14 @@ public struct ShortGUID: Codable, Sendable, Equatable, Hashable {
   /// When `nil`, every field of the root record is returned.
   public let rootRecordDesiredKeys: [String]?
 
-  /// Initialize a short GUID.
+  /// Initialize a short GUID dictionary.
   /// - Parameters:
   ///   - value: The value of the short global ID.
   ///   - shouldFetchRootRecord: Whether to fetch the root record alongside
   ///     the share.
   ///   - rootRecordDesiredKeys: Field names limiting the root record payload.
   public init(
-    value: Value,
+    value: ShortGUID,
     shouldFetchRootRecord: Bool? = nil,
     rootRecordDesiredKeys: [String]? = nil
   ) {
@@ -77,11 +80,11 @@ public struct ShortGUID: Codable, Sendable, Equatable, Hashable {
 
 // MARK: - Internal Conversion
 extension Components.Schemas.ShortGUID {
-  internal init(from shortGUID: ShortGUID) {
+  internal init(from dictionary: ShortGUIDDictionary) {
     self.init(
-      value: shortGUID.value,
-      shouldFetchRootRecord: shortGUID.shouldFetchRootRecord,
-      rootRecordDesiredKeys: shortGUID.rootRecordDesiredKeys
+      value: dictionary.value,
+      shouldFetchRootRecord: dictionary.shouldFetchRootRecord,
+      rootRecordDesiredKeys: dictionary.rootRecordDesiredKeys
     )
   }
 }

@@ -42,7 +42,7 @@ extension CloudKitService {
   ) async throws -> [ShareRecordInfo] {
     try await resolveShares(
       shortGUIDs.map {
-        ShortGUID(
+        ShortGUIDDictionary(
           value: $0,
           shouldFetchRootRecord: fetchRootRecord,
           rootRecordDesiredKeys: fields
@@ -58,7 +58,7 @@ extension CloudKitService {
   ) async throws -> [ShareRecordInfo] {
     try await acceptShares(
       shortGUIDs.map {
-        ShortGUID(
+        ShortGUIDDictionary(
           value: $0,
           shouldFetchRootRecord: fetchRootRecord,
           rootRecordDesiredKeys: fields

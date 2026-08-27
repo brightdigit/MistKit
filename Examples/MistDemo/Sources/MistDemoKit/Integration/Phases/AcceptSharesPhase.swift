@@ -60,7 +60,7 @@ internal struct AcceptSharesPhase: IntegrationPhase {
     }
 
     let results = try await context.service.acceptShares([
-      ShortGUID(value: shortGUID)
+      ShortGUIDDictionary(value: shortGUID)
     ])
 
     print(

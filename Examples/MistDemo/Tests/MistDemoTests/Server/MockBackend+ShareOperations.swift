@@ -46,7 +46,7 @@
       try consumePendingError()
       return shortGUIDs.map { guid in
         ShareRecordInfo(
-          shortGUID: ShortGUID(value: guid),
+          shortGUID: ShortGUIDDictionary(value: guid),
           rootRecordName: "stub-root-\(guid)",
           participantPermission: .readWrite,
           participantStatus: .accepted
@@ -67,7 +67,7 @@
       try consumePendingError()
       return shortGUIDs.map { guid in
         ShareRecordInfo(
-          shortGUID: ShortGUID(value: guid),
+          shortGUID: ShortGUIDDictionary(value: guid),
           rootRecordName: "stub-root-\(guid)",
           participantPermission: .readWrite,
           participantStatus: .accepted

@@ -41,21 +41,21 @@ internal struct ShareModelTests {
     acceptanceStatus: .accepted
   )
 
-  @Test("ShortGUID round-trips through Codable")
-  internal func shortGUIDRoundTrips() throws {
-    let original = ShortGUID(
+  @Test("ShortGUIDDictionary round-trips through Codable")
+  internal func shortGUIDDictionaryRoundTrips() throws {
+    let original = ShortGUIDDictionary(
       value: "guid-1",
       shouldFetchRootRecord: true,
       rootRecordDesiredKeys: ["title", "body"]
     )
     let data = try JSONEncoder().encode(original)
-    let decoded = try JSONDecoder().decode(ShortGUID.self, from: data)
+    let decoded = try JSONDecoder().decode(ShortGUIDDictionary.self, from: data)
     #expect(decoded == original)
   }
 
-  @Test("ShortGUID defaults the optional knobs to nil")
-  internal func shortGUIDDefaults() {
-    let shortGUID = ShortGUID(value: "guid-1")
+  @Test("ShortGUIDDictionary defaults the optional knobs to nil")
+  internal func shortGUIDDictionaryDefaults() {
+    let shortGUID = ShortGUIDDictionary(value: "guid-1")
     #expect(shortGUID.value == "guid-1")
     #expect(shortGUID.shouldFetchRootRecord == nil)
     #expect(shortGUID.rootRecordDesiredKeys == nil)
@@ -119,7 +119,7 @@ internal struct ShareModelTests {
 
   @Test("ShareRecordInfo requires shortGUID and defaults the rest")
   internal func shareRecordInfoDefaults() {
-    let info = ShareRecordInfo(shortGUID: ShortGUID(value: "guid-1"))
+    let info = ShareRecordInfo(shortGUID: ShortGUIDDictionary(value: "guid-1"))
     #expect(info.shortGUID.value == "guid-1")
     #expect(info.containerIdentifier == nil)
     #expect(info.databaseScope == nil)

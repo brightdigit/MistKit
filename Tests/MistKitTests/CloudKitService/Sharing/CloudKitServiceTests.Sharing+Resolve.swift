@@ -51,7 +51,7 @@ extension CloudKitServiceTests.Sharing {
         ])
       ])
 
-      let results = try await service.resolveShares([ShortGUID(value: "guid-1")])
+      let results = try await service.resolveShares([ShortGUIDDictionary(value: "guid-1")])
 
       #expect(results.count == 1)
       let result = try #require(results.first)
@@ -88,12 +88,12 @@ extension CloudKitServiceTests.Sharing {
       ])
 
       let results = try await service.resolveShares([
-        ShortGUID(
+        ShortGUIDDictionary(
           value: "guid-1",
           shouldFetchRootRecord: true,
           rootRecordDesiredKeys: ["title"]
         ),
-        ShortGUID(value: "guid-2"),
+        ShortGUIDDictionary(value: "guid-2"),
       ])
 
       #expect(results.map(\.shortGUID.value) == ["guid-1", "guid-2"])
@@ -124,7 +124,7 @@ extension CloudKitServiceTests.Sharing {
       ])
 
       let result = try #require(
-        try await service.resolveShares([ShortGUID(value: "guid-1")]).first
+        try await service.resolveShares([ShortGUIDDictionary(value: "guid-1")]).first
       )
       #expect(result.rootRecord == nil)
       // The root record *name* is still reported.
@@ -144,7 +144,7 @@ extension CloudKitServiceTests.Sharing {
       ])
 
       let result = try #require(
-        try await service.resolveShares([ShortGUID(value: "guid-amb")]).first
+        try await service.resolveShares([ShortGUIDDictionary(value: "guid-amb")]).first
       )
       #expect(result.participantStatus == .invited)
       #expect(result.potentialMatchList.count == 2)
@@ -168,7 +168,7 @@ extension CloudKitServiceTests.Sharing {
         "resolveShortGUIDs": try Helper.shortGUIDResponse(results: [])
       ])
 
-      let results = try await service.resolveShares([ShortGUID(value: "guid-1")])
+      let results = try await service.resolveShares([ShortGUIDDictionary(value: "guid-1")])
       #expect(results.isEmpty)
     }
 
@@ -187,7 +187,7 @@ extension CloudKitServiceTests.Sharing {
       ])
 
       let error = await #expect(throws: CloudKitError.self) {
-        _ = try await service.resolveShares([ShortGUID(value: "nope")])
+        _ = try await service.resolveShares([ShortGUIDDictionary(value: "nope")])
       }
       guard case .badRequest(let reason) = error else {
         Issue.record("Expected .badRequest, got \(String(describing: error))")

@@ -116,7 +116,7 @@ internal struct ShareCreateAndAcceptPhase: IntegrationPhase {
         print("   Share URL: \(created.shareURL.absoluteString)")
       }
 
-      let shortGUID = ShortGUID(
+      let shortGUID = ShortGUIDDictionary(
         value: created.shortGUID,
         shouldFetchRootRecord: true
       )

@@ -60,7 +60,7 @@ internal struct ResolveRecordsPhase: IntegrationPhase {
     }
 
     let results = try await context.service.resolveShares([
-      ShortGUID(value: shortGUID)
+      ShortGUIDDictionary(value: shortGUID)
     ])
 
     print(

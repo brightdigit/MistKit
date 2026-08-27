@@ -51,7 +51,7 @@ public struct ShareInfo: Codable, Sendable {
   public static let recordType = "cloudkit.share"
 
   /// The short GUID identifying this share.
-  public let shortGUID: ShortGUID.Value
+  public let shortGUID: ShortGUID
   /// The public's read and write permissions on the shared record.
   public let publicPermission: SharePermission
   /// The participants in the share.
@@ -69,7 +69,7 @@ public struct ShareInfo: Codable, Sendable {
   ///   - owner: The owner of the shared record.
   ///   - currentUserParticipant: The current user's participation.
   public init(
-    shortGUID: ShortGUID.Value,
+    shortGUID: ShortGUID,
     publicPermission: SharePermission,
     participants: [ShareParticipant] = [],
     owner: ShareParticipant,

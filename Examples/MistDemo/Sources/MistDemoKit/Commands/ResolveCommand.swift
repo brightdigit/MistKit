@@ -84,7 +84,7 @@ public struct ResolveCommand: MistDemoCommand, OutputFormatting {
 
     let service = try MistKitClientFactory.create(for: config.base)
     let shortGUIDs = config.shortGUIDs.map {
-      ShortGUID(
+      ShortGUIDDictionary(
         value: $0,
         shouldFetchRootRecord: config.fetchRootRecord,
         rootRecordDesiredKeys: config.fields
