@@ -62,7 +62,7 @@ extension CloudKitService {
 
       let zonesData: Components.Schemas.ZonesListResponse =
         try await responseProcessor.processListZonesResponse(response)
-      return try (zonesData.zones ?? []).map { try ZoneInfo(fromZoneID: $0.zoneID) }
+      return try (zonesData.zones ?? []).map { try ZoneInfo(from: $0) }
     } catch {
       throw mapToCloudKitError(error, context: "listZones")
     }
@@ -113,7 +113,7 @@ extension CloudKitService {
       let zonesData: Components.Schemas.ZonesLookupResponse =
         try await responseProcessor.processLookupZonesResponse(response)
 
-      return try (zonesData.zones ?? []).map { try ZoneInfo(fromZoneID: $0.zoneID) }
+      return try (zonesData.zones ?? []).map { try ZoneInfo(from: $0) }
     } catch {
       throw mapToCloudKitError(error, context: "lookupZones")
     }

@@ -232,9 +232,25 @@ In MistDemo, integration runs targeting these endpoints use `PhaseContext.userCo
 - `QueryResult` — `records: [RecordInfo]`, `continuationMarker: String?`
 - `RecordChangesResult` — `records: [RecordInfo]`, `syncToken: String?`, `moreComing: Bool`
 - `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`, `moreComing: Bool`
+- `ZoneInfo` — `zoneName: String`, `ownerRecordName: String?`, `capabilities: [String]`, `syncToken: String?`, `atomic: Bool?`
 - `UserIdentity` — `userRecordName: String?`, `nameComponents: NameComponents?`, `lookupInfo: UserIdentityLookupInfo?`
 - `UserIdentityLookupInfo` — `emailAddress: String?`, `phoneNumber: String?`, `userRecordName: String?`
 - `NameComponents` — full personal name parts (givenName, familyName, nickname, etc.)
+
+**Zone metadata (issue #386):** all four zone responses (`zones/list`, `zones/lookup`,
+`zones/modify`, `zones/changes`) share one `Zone` schema in `openapi.yaml` carrying the
+three keys Apple's archived ["Zone Dictionary"](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/Types.html)
+documents: `zoneID`, `syncToken`, and `atomic`. These surface on `ZoneInfo` as
+`syncToken`/`atomic`, both optional — `atomic` is **not** defaulted to `false`, so an
+absent key stays distinguishable from an explicit `false`. Note the zone-level
+`syncToken` is distinct from the response-level `syncToken` on `ZoneChangesResult`.
+
+`isEager` is **deliberately not modeled**: it appears in no primary Apple source
+(neither the archived Web Services reference nor `.claude/docs/cloudkitjs.md`).
+Likewise `zones/modify` takes **no** `atomic` request flag and `ZoneOperation` has
+**no** create options — Apple documents the request body as `operations` only, and each
+operation's `zone` as having "a single `zoneID` key". Do not add these speculatively;
+confirm against a live response first.
 
 **Protocols:**
 - `RecordTypeIterating` (`Sources/MistKit/RecordManagement/RecordTypeIterating.swift`) — `forEach(_ action:)` to iterate over CloudKit record types; used by `fetchAllRecordChanges`

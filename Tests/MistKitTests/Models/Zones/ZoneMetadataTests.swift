@@ -1,6 +1,6 @@
 //
-//  ListZonesPhase.swift
-//  MistDemo
+//  ZoneMetadataTests.swift
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,40 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-internal import MistKit
+internal import Testing
 
-internal struct ListZonesPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = NoState
-
-  internal static let title = "List all zones"
-  internal static let emoji = "📋"
-  internal static let apiName = "listZones"
-
-  internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
-    print("\n\(Self.emoji) \(Self.title)")
-
-    let zones = try await context.service.listZones(database: context.database)
-
-    guard !zones.isEmpty else {
-      throw IntegrationTestError.zoneNotFound("(any zone)")
-    }
-
-    print("✅ Found \(zones.count) zone(s)")
-
-    if context.verbose {
-      for zone in zones {
-        print("   - \(zone.zoneName)")
-        if let syncToken = zone.syncToken {
-          print("     Sync Token: \(syncToken)")
-        }
-        if let atomic = zone.atomic {
-          print("     Atomic: \(atomic)")
-        }
-      }
-    }
-
-    return NoState()
-  }
-}
+/// Coverage for the zone metadata added in issue #386.
+///
+/// Apple's archived "Zone Dictionary" documents exactly three keys —
+/// `zoneID`, `syncToken`, and `atomic` — and these suites pin the decode
+/// path for the latter two across every zone response shape.
+@Suite("Zone Metadata")
+internal enum ZoneMetadataTests {}
