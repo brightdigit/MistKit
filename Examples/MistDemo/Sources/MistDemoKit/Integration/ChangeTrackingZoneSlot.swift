@@ -1,5 +1,5 @@
 //
-//  PhaseState.swift
+//  ChangeTrackingZoneSlot.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -30,19 +30,30 @@
 internal import Foundation
 internal import MistKit
 
-/// Mutable state that flows between phases as the test progresses.
+/// A custom zone plus records written for `changes/zone` integration phases.
 ///
-/// Each phase reads the slice it needs by initializing its `Input` type
-/// via `PhaseStateDecodable.init(from:)` and writes its results back
-/// through `PhaseStateEncodable.encode(to:)`. The runner threads a single
-/// `PhaseState` value through the pipeline via
-/// `IntegrationPhase.runErased(context:state:)`.
-internal struct PhaseState: Sendable {
-  internal var assetReceipt: AssetUploadReceipt?
-  internal var createdRecordNames: [String] = []
-  internal var syncToken: String?
-  internal var currentUser: UserInfo?
-  /// Custom zone provisioned by ``FetchRecordZoneChangesPhase`` for
-  /// ``FetchAllRecordZoneChangesPhase`` to exercise and tear down.
-  internal var changeTrackingZone: ChangeTrackingZoneSlot?
+/// CloudKit rejects change tracking in `_defaultZone`; phases thread this slot
+/// through ``PhaseState`` so ``FetchAllRecordZoneChangesPhase`` can tear the
+/// zone down after exercising auto-pagination.
+internal struct ChangeTrackingZoneSlot: PhaseStateDecodable,
+  PhaseStateEncodable, Sendable
+{
+  internal let zoneID: ZoneID
+  internal let recordNames: [String]
+
+  internal init(zoneID: ZoneID, recordNames: [String]) {
+    self.zoneID = zoneID
+    self.recordNames = recordNames
+  }
+
+  internal init(from state: PhaseState) throws {
+    guard let slot = state.changeTrackingZone else {
+      throw IntegrationTestError.missingPhaseState("changeTrackingZone")
+    }
+    self = slot
+  }
+
+  internal func encode(to state: inout PhaseState) {
+    state.changeTrackingZone = self
+  }
 }

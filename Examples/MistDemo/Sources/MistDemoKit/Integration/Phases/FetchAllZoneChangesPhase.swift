@@ -32,9 +32,8 @@ internal import MistKit
 
 /// Exercises
 /// ``CloudKitService/fetchAllDatabaseChanges(syncToken:resultsLimit:maxPages:database:)``
-/// against a live container. Failures are non-fatal (matching
-/// ``FetchZoneChangesPhase``) so test pipelines with empty zone change feeds
-/// don't fail the whole suite.
+/// against a live container, asserting the auto-paginator completes without
+/// per-zone failures and returns a continuation token.
 internal struct FetchAllZoneChangesPhase: IntegrationPhase {
   internal typealias Input = NoState
   internal typealias Output = NoState
@@ -46,25 +45,35 @@ internal struct FetchAllZoneChangesPhase: IntegrationPhase {
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
-    do {
-      let (zones, token) = try await context.service.fetchAllDatabaseChanges(
-        database: context.database
-      )
-      let changedZones = zones.compactMap { result in
-        if case .success(let zone) = result { return zone }
-        return nil
+    let (zoneResults, token) = try await context.service.fetchAllDatabaseChanges(
+      database: context.database
+    )
+
+    let failures = zoneResults.compactMap { result -> ZoneOperationFailure? in
+      if case .failure(let failure) = result { return failure }
+      return nil
+    }
+    try ChangeTrackingVerification.requireNoZoneFailures(
+      failures,
+      operation: Self.apiName
+    )
+    try ChangeTrackingVerification.requireDatabaseSyncToken(
+      token,
+      operation: Self.apiName
+    )
+
+    let changedZones = zoneResults.compactMap { result -> ZoneInfo? in
+      if case .success(let zone) = result { return zone }
+      return nil
+    }
+    print("✅ Fetched \(changedZones.count) changed zone(s) across all pages")
+    if context.verbose {
+      for zone in changedZones {
+        print("   - \(zone.zoneName)")
       }
-      print("✅ Fetched \(changedZones.count) changed zone(s) across all pages")
-      if context.verbose {
-        for zone in changedZones {
-          print("   - \(zone.zoneName)")
-        }
-        if let token {
-          print("   Sync token: \(token.prefix(30))...")
-        }
+      if let token {
+        print("   Sync token: \(token.prefix(30))...")
       }
-    } catch {
-      print("⚠️  fetchAllDatabaseChanges failed (non-fatal): \(error)")
     }
 
     return NoState()

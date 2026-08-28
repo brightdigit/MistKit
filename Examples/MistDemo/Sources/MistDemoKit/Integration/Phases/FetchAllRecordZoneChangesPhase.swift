@@ -1,5 +1,5 @@
 //
-//  FetchRecordZoneChangesPhase.swift
+//  FetchAllRecordZoneChangesPhase.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -31,31 +31,26 @@ internal import Foundation
 internal import MistKit
 
 /// Exercises
-/// ``CloudKitService/fetchRecordZoneChanges(zones:reverse:desiredKeys:resultsLimit:desiredRecordTypes:database:)``
-/// against a live custom zone. CloudKit rejects `changes/zone` on
-/// `_defaultZone`, so this phase provisions its own zone and records rather
-/// than reusing the default-zone records created earlier in the pipeline.
-internal struct FetchRecordZoneChangesPhase: IntegrationPhase {
-  internal typealias Input = NoState
-  internal typealias Output = ChangeTrackingZoneSlot
+/// ``CloudKitService/fetchAllRecordZoneChanges(zones:reverse:desiredKeys:resultsLimit:desiredRecordTypes:maxPages:database:)``
+/// on the custom zone provisioned by ``FetchRecordZoneChangesPhase``, then
+/// tears the zone down.
+internal struct FetchAllRecordZoneChangesPhase: IntegrationPhase {
+  internal typealias Input = ChangeTrackingZoneSlot
+  internal typealias Output = NoState
 
-  internal static let title = "Fetch record zone changes"
-  internal static let emoji = "📁"
-  internal static let apiName = "fetchRecordZoneChanges"
+  internal static let title = "Fetch all record zone changes"
+  internal static let emoji = "📚"
+  internal static let apiName = "fetchAllRecordZoneChanges"
 
   internal func run(
-    input: NoState,
+    input: ChangeTrackingZoneSlot,
     context: PhaseContext
-  ) async throws -> ChangeTrackingZoneSlot {
+  ) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
-    let slot = try await ChangeTrackingVerification.provisionCustomZone(
-      context: context
-    )
-
     do {
-      let result = try await context.service.fetchRecordZoneChanges(
-        zones: [ZoneChangesRequest(zoneID: slot.zoneID)],
+      let result = try await context.service.fetchAllRecordZoneChanges(
+        zones: [ZoneChangesRequest(zoneID: input.zoneID)],
         database: context.database
       )
 
@@ -64,7 +59,7 @@ internal struct FetchRecordZoneChangesPhase: IntegrationPhase {
         operation: Self.apiName
       )
 
-      let expectedNames = Set(slot.recordNames)
+      let expectedNames = Set(input.recordNames)
       let foundNames = ChangeTrackingVerification.recordNames(in: result.changes)
       print(
         "✅ Fetched changes for \(result.changes.count) zone(s), \(foundNames.count) record(s)"
@@ -77,12 +72,18 @@ internal struct FetchRecordZoneChangesPhase: IntegrationPhase {
         let matched = expectedNames.intersection(foundNames)
         if context.verbose {
           print("   Found \(matched.count) of \(expectedNames.count) zone record(s)")
+          for zone in result.changes where zone.moreComing {
+            print(
+              "   ⚠️  Zone '\(zone.zone.zoneName)' still reports moreComing after fetch-all"
+            )
+          }
         }
       }
 
-      return slot
+      try await ChangeTrackingVerification.deleteCustomZone(input, context: context)
+      return NoState()
     } catch {
-      try? await ChangeTrackingVerification.deleteCustomZone(slot, context: context)
+      try? await ChangeTrackingVerification.deleteCustomZone(input, context: context)
       throw error
     }
   }
