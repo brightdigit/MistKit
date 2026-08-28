@@ -32,8 +32,18 @@ internal import Testing
 
 @testable import MistKit
 
+#if canImport(FoundationNetworking)
+  internal import FoundationNetworking
+#endif
+
 @Suite("CloudKitError")
 internal struct CloudKitErrorTests {
+  /// Raw value of Foundation's `NSURLErrorFailingURLStringErrorKey`. Spelled
+  /// literally rather than named because the constant is deprecated on
+  /// swift-corelibs-foundation; hard-coding it here also keeps this test
+  /// independent of the production constant it exercises.
+  private static let failingURLStringKey = "NSErrorFailingURLStringKey"
+
   @Test(".missingCredentials with .notConfigured describes as not configured")
   internal func missingCredentialsNotConfiguredDescribesAsNotConfigured() throws {
     let error = CloudKitError.missingCredentials(
@@ -61,5 +71,60 @@ internal struct CloudKitErrorTests {
     #expect(description.contains("public"))
     #expect(description.contains("required by preference but not configured"))
     #expect(description.contains("web-auth preference required"))
+  }
+
+  @Test(".networkError reports the failed URL from the string userInfo key")
+  internal func networkErrorReportsFailedURLFromStringKey() throws {
+    let error = CloudKitError.networkError(
+      URLError(
+        .timedOut,
+        userInfo: [Self.failingURLStringKey: "https://api.apple-cloudkit.com/string"]
+      )
+    )
+
+    let description = try #require(error.errorDescription)
+    #expect(description.contains("Network error occurred"))
+    #expect(description.contains("Error code: \(URLError.Code.timedOut.rawValue)"))
+    #expect(description.contains("Failed URL: https://api.apple-cloudkit.com/string"))
+  }
+
+  @Test(".networkError reports the failed URL from the URL userInfo key")
+  internal func networkErrorReportsFailedURLFromURLKey() throws {
+    let url = try #require(URL(string: "https://api.apple-cloudkit.com/url"))
+    let error = CloudKitError.networkError(
+      URLError(.cannotConnectToHost, userInfo: [NSURLErrorFailingURLErrorKey: url])
+    )
+
+    let description = try #require(error.errorDescription)
+    #expect(description.contains("Error code: \(URLError.Code.cannotConnectToHost.rawValue)"))
+    #expect(description.contains("Failed URL: https://api.apple-cloudkit.com/url"))
+  }
+
+  @Test(".networkError prefers the URL userInfo key when both are present")
+  internal func networkErrorPrefersURLKeyWhenBothPresent() throws {
+    let url = try #require(URL(string: "https://api.apple-cloudkit.com/url"))
+    let error = CloudKitError.networkError(
+      URLError(
+        .networkConnectionLost,
+        userInfo: [
+          NSURLErrorFailingURLErrorKey: url,
+          Self.failingURLStringKey: "https://api.apple-cloudkit.com/string",
+        ]
+      )
+    )
+
+    let description = try #require(error.errorDescription)
+    #expect(description.contains("Failed URL: https://api.apple-cloudkit.com/url"))
+    #expect(!description.contains("https://api.apple-cloudkit.com/string"))
+  }
+
+  @Test(".networkError omits the failed URL when neither userInfo key is present")
+  internal func networkErrorOmitsFailedURLWhenNoKeysPresent() throws {
+    let error = CloudKitError.networkError(URLError(.notConnectedToInternet))
+
+    let description = try #require(error.errorDescription)
+    #expect(description.contains("Network error occurred"))
+    #expect(description.contains("Error code: \(URLError.Code.notConnectedToInternet.rawValue)"))
+    #expect(!description.contains("Failed URL:"))
   }
 }
