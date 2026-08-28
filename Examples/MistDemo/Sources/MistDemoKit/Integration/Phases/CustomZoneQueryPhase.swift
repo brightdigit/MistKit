@@ -32,7 +32,7 @@ internal import MistKit
 
 /// Exercises `queryRecords` with an explicit `zoneID` against a live custom
 /// zone: create the zone, write records into it, query them back, and verify
-/// the default-zone path does not see them. Owns zone teardown because
+/// ``ZoneID/defaultZone`` does not see them. Owns zone teardown because
 /// ``CleanupPhase`` issues deletes without a `zoneID`.
 internal struct CustomZoneQueryPhase: IntegrationPhase {
   internal typealias Input = NoState
@@ -108,6 +108,7 @@ internal struct CustomZoneQueryPhase: IntegrationPhase {
 
         let defaultResult = try await context.service.queryRecords(
           query,
+          zoneID: .defaultZone,
           database: context.database
         )
         let defaultNames = Set(defaultResult.records.map(\.recordName))
