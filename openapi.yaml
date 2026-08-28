@@ -577,7 +577,14 @@ paths:
               properties:
                 syncToken:
                   type: string
-                  description: Meta-sync token from previous operation
+                  description: >-
+                    Sync token returned by a previous `zones/changes` call.
+                    Omit it to fetch every zone. Apple's archived reference
+                    names this key `metaSyncToken`; MistKit sends `syncToken`,
+                    which is also the name Apple's own `moreComing` prose uses.
+                    The key is deliberately left as `syncToken` (see issue
+                    #430) — only this description is corrected, so the spec no
+                    longer describes the field by a name it does not use.
       responses:
         '200':
           description: Zone changes retrieved successfully
@@ -1871,11 +1878,20 @@ components:
 
     ZonesModifyResponse:
       type: object
+      description: |
+        Response body of `zones/modify`. Each entry in `zones` is either a Zone
+        dictionary (success) or a Zone Fetch Error dictionary (failure), per
+        Apple's archived reference. `zones/modify` is a batch endpoint whose
+        realistic failure mode is partial — creating a zone that already exists
+        alongside zones that create cleanly — so a failed entry must not
+        discard the entries that succeeded (see issue #431).
       properties:
         zones:
           type: array
           items:
-            $ref: '#/components/schemas/Zone'
+            oneOf:
+              - $ref: '#/components/schemas/ZoneFetchFailure'
+              - $ref: '#/components/schemas/Zone'
 
     ZoneChangesResponse:
       type: object
@@ -1923,8 +1939,8 @@ components:
     ZoneFetchFailure:
       type: object
       description: |
-        Per-zone error returned inline in the `zones` array of a 200 zone-fetch
-        response (`changes/database`, `changes/zone`). Mirrors
+        Per-zone error returned inline in the `zones` array of a 200 zone
+        response (`changes/database`, `changes/zone`, `zones/modify`). Mirrors
         `RecordOperationFailure` for records, but keyed by `zoneID`.
       required:
         - serverErrorCode

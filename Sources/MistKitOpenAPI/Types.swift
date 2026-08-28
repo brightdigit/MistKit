@@ -3,13 +3,13 @@
 // swift-format-ignore-file
 @_spi(Generated) import OpenAPIRuntime
 #if os(Linux)
+@preconcurrency import struct Foundation.URL
 @preconcurrency import struct Foundation.Data
 @preconcurrency import struct Foundation.Date
-@preconcurrency import struct Foundation.URL
 #else
+import struct Foundation.URL
 import struct Foundation.Data
 import struct Foundation.Date
-import struct Foundation.URL
 #endif
 /// A type that performs HTTP operations defined by the OpenAPI document.
 public protocol APIProtocol: Sendable {
@@ -2321,15 +2321,60 @@ public enum Components {
                 case zones
             }
         }
+        /// Response body of `zones/modify`. Each entry in `zones` is either a Zone
+        /// dictionary (success) or a Zone Fetch Error dictionary (failure), per
+        /// Apple's archived reference. `zones/modify` is a batch endpoint whose
+        /// realistic failure mode is partial — creating a zone that already exists
+        /// alongside zones that create cleanly — so a failed entry must not
+        /// discard the entries that succeeded (see issue #431).
+        ///
+        ///
         /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse`.
         public struct ZonesModifyResponse: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zonesPayload`.
+            @frozen public enum zonesPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zonesPayload/case1`.
+                case ZoneFetchFailure(Components.Schemas.ZoneFetchFailure)
+                /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zonesPayload/case2`.
+                case Zone(Components.Schemas.Zone)
+                public init(from decoder: any Decoder) throws {
+                    var errors: [any Error] = []
+                    do {
+                        self = .ZoneFetchFailure(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .Zone(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    throw Swift.DecodingError.failedToDecodeOneOfSchema(
+                        type: Self.self,
+                        codingPath: decoder.codingPath,
+                        errors: errors
+                    )
+                }
+                public func encode(to encoder: any Encoder) throws {
+                    switch self {
+                    case let .ZoneFetchFailure(value):
+                        try value.encode(to: encoder)
+                    case let .Zone(value):
+                        try value.encode(to: encoder)
+                    }
+                }
+            }
             /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zones`.
-            public var zones: [Components.Schemas.Zone]?
+            public typealias zonesPayload = [Components.Schemas.ZonesModifyResponse.zonesPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zones`.
+            public var zones: Components.Schemas.ZonesModifyResponse.zonesPayload?
             /// Creates a new `ZonesModifyResponse`.
             ///
             /// - Parameters:
             ///   - zones:
-            public init(zones: [Components.Schemas.Zone]? = nil) {
+            public init(zones: Components.Schemas.ZonesModifyResponse.zonesPayload? = nil) {
                 self.zones = zones
             }
             public enum CodingKeys: String, CodingKey {
@@ -2457,8 +2502,8 @@ public enum Components {
                 case zoneID
             }
         }
-        /// Per-zone error returned inline in the `zones` array of a 200 zone-fetch
-        /// response (`changes/database`, `changes/zone`). Mirrors
+        /// Per-zone error returned inline in the `zones` array of a 200 zone
+        /// response (`changes/database`, `changes/zone`, `zones/modify`). Mirrors
         /// `RecordOperationFailure` for records, but keyed by `zoneID`.
         ///
         ///
@@ -8753,14 +8798,14 @@ public enum Operations {
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
-                    /// Meta-sync token from previous operation
+                    /// Sync token returned by a previous `zones/changes` call. Omit it to fetch every zone. Apple's archived reference names this key `metaSyncToken`; MistKit sends `syncToken`, which is also the name Apple's own `moreComing` prose uses. The key is deliberately left as `syncToken` (see issue #430) — only this description is corrected, so the spec no longer describes the field by a name it does not use.
                     ///
                     /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/json/syncToken`.
                     public var syncToken: Swift.String?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
-                    ///   - syncToken: Meta-sync token from previous operation
+                    ///   - syncToken: Sync token returned by a previous `zones/changes` call. Omit it to fetch every zone. Apple's archived reference names this key `metaSyncToken`; MistKit sends `syncToken`, which is also the name Apple's own `moreComing` prose uses. The key is deliberately left as `syncToken` (see issue #430) — only this description is corrected, so the spec no longer describes the field by a name it does not use.
                     public init(syncToken: Swift.String? = nil) {
                         self.syncToken = syncToken
                     }
