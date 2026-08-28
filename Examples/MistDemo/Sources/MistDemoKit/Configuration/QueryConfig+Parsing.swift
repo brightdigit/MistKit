@@ -40,6 +40,7 @@ extension QueryConfig {
 
   internal struct ParsedOptions {
     internal let zone: String
+    internal let zoneOwner: String?
     internal let recordType: String
     internal let filters: [String]
     internal let sort: (field: String, order: SortOrder)?
@@ -54,6 +55,9 @@ extension QueryConfig {
         forKey: MistDemoConstants.ConfigKeys.zone,
         default: MistDemoConstants.Defaults.zone
       ) ?? MistDemoConstants.Defaults.zone
+    let zoneOwner = configReader.string(
+      forKey: MistDemoConstants.ConfigKeys.zoneOwner
+    )
     let recordType =
       configReader.string(
         forKey: MistDemoConstants.ConfigKeys.recordType,
@@ -73,6 +77,7 @@ extension QueryConfig {
 
     return ParsedOptions(
       zone: zone,
+      zoneOwner: zoneOwner,
       recordType: recordType,
       filters: filters,
       sort: sort,

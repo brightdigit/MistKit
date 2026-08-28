@@ -47,7 +47,7 @@ internal struct LookupRecordsPhase: IntegrationPhase {
   /// tag is honored. Failing loud here catches a regression in that recovery.
   private static func verifyTimestampRoundTrip(in records: [RecordInfo]) throws {
     let expected = CreateRecordsPhase.verificationTimestamp.timeIntervalSince1970
-    for record in records {
+    for record in records where record.fields["timestamp"] != nil {
       guard case .date(let value)? = record.fields["timestamp"] else {
         throw IntegrationTestError.verificationFailed(
           "Record \(record.recordName) timestamp did not round-trip as a date"

@@ -40,7 +40,7 @@ internal import OpenAPIRuntime
 #endif
 
 extension CloudKitService {
-  /// Query records from the default zone with pagination support.
+  /// Query records from a CloudKit zone with pagination support.
   ///
   /// The unified ``Query`` value carries the `recordType` plus any
   /// ``QueryFilter`` predicates and ``QuerySort`` descriptors. The same
@@ -53,6 +53,10 @@ extension CloudKitService {
   ///   - desiredKeys: Optional list of field names to fetch.
   ///   - continuationMarker: Marker from a previous ``QueryResult`` to
   ///     fetch the next page.
+  ///   - zoneID: Optional zone to query. When `nil` (the default) the `zoneID`
+  ///     key is omitted from the request and CloudKit resolves the database's
+  ///     default zone (`_defaultZone`). Pass a ``ZoneID`` to target a custom
+  ///     zone, including a shared zone via ``ZoneID/ownerName``.
   ///   - zoneWide: When true, query across all zones rather than a single zone.
   ///   - numbersAsStrings: When true, numeric field values are returned as strings (avoids
   ///     JavaScript precision loss for `INT64`).
@@ -65,6 +69,7 @@ extension CloudKitService {
     limit: Int? = nil,
     desiredKeys: [String]? = nil,
     continuationMarker: String? = nil,
+    zoneID: ZoneID? = nil,
     zoneWide: Bool? = nil,
     numbersAsStrings: Bool? = nil,
     database: Database
@@ -82,7 +87,7 @@ extension CloudKitService {
           ),
           body: .json(
             .init(
-              zoneID: .init(zoneName: "_defaultZone"),
+              zoneID: zoneID.map { Components.Schemas.ZoneID(from: $0) },
               resultsLimit: effectiveLimit,
               query: query.schema,
               desiredKeys: desiredKeys,

@@ -59,17 +59,23 @@ extension CloudKitService {
   ///   - recordType: The CloudKit record type to scan.
   ///   - limit: Optional maximum number of records to fetch (1-200). Defaults
   ///     to CloudKit's per-request maximum.
+  ///   - zoneID: Optional zone to scan. When `nil` (the default) CloudKit
+  ///     resolves the database's default zone. Pass the same ``ZoneID`` you
+  ///     intend to hand `modifyRecords(_:zoneID:)` so the pre-fetch and the
+  ///     modify target the same zone.
   ///   - database: The CloudKit database scope to query (`.public`, `.private`, `.shared`).
   /// - Returns: Set of existing record names.
   /// - Throws: `CloudKitError` if the underlying query fails.
   public func fetchExistingRecordNames(
     recordType: String,
     limit: Int? = nil,
+    zoneID: ZoneID? = nil,
     database: Database
   ) async throws(CloudKitError) -> Set<String> {
     let result: QueryResult = try await queryRecords(
       Query(recordType: recordType),
       limit: limit ?? Self.maxRecordsPerRequest,
+      zoneID: zoneID,
       database: database
     )
     return Set(result.records.map(\.recordName))

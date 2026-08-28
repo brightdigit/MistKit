@@ -56,6 +56,7 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
     ModifyRecordsPhase(),
     IncrementalSyncPhase(),
     QueryRequestOptionsPhase(),
+    CustomZoneQueryPhase(),
     ModifyRequestOptionsPhase(),
     ChangesRequestOptionsPhase(),
     FinalVerificationPhase(),

@@ -37,12 +37,16 @@
       recordType: String,
       limit: Int?,
       sortBy: [WebRequests.QuerySortField]?,
+      zoneName: String?,
+      zoneOwner: String?,
       database: MistKit.Database
     ) async throws -> [RecordInfo] {
       lastQuery = QueryCall(
         recordType: recordType,
         limit: limit,
         sortBy: sortBy,
+        zoneName: zoneName,
+        zoneOwner: zoneOwner,
         database: database
       )
       try consumePendingError()

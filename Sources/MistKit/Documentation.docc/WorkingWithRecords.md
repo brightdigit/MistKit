@@ -8,7 +8,7 @@ CRUD, batch, and lookup against CloudKit records — the operations you'll reach
 
 ## Querying
 
-Use ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneWide:numbersAsStrings:database:)`` for a single page of results. Filters are built with ``QueryFilter`` factories, sorts with ``QuerySort/ascending(_:)`` / ``QuerySort/descending(_:)``:
+Use ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)`` for a single page of results. Filters are built with ``QueryFilter`` factories, sorts with ``QuerySort/ascending(_:)`` / ``QuerySort/descending(_:)``:
 
 ```swift
 let result = try await service.queryRecords(
@@ -28,7 +28,7 @@ for record in result.records {
 }
 ```
 
-For unbounded iteration, ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:database:)`` walks the continuation marker for you with a safety guard at `maxPages` (default `1_000`):
+For unbounded iteration, ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:zoneID:database:)`` walks the continuation marker for you with a safety guard at `maxPages` (default `1_000`):
 
 ```swift
 let allArticles = try await service.queryAllRecords(
@@ -39,6 +39,34 @@ let allArticles = try await service.queryAllRecords(
 ```
 
 > Warning: If `queryAllRecords` hits its page cap, it throws ``CloudKitError/paginationLimitExceeded(maxPages:records:)`` with the records collected so far. See <doc:HandlingErrors> for the recovery pattern.
+
+### Querying a custom or shared zone
+
+Both query methods accept an optional `zoneID`. When you omit it, the `zoneID` key is left out of the request entirely and CloudKit resolves the database's default zone (`_defaultZone`) — which is the only zone the public database has.
+
+To read from a custom zone in the private database, pass a ``ZoneID``:
+
+```swift
+let notes = try await service.queryAllRecords(
+  recordType: "Note",
+  zoneID: ZoneID(zoneName: "NotesZone"),
+  database: .private
+)
+```
+
+A shared zone additionally needs the owner's record name, because the zone lives in *their* database:
+
+```swift
+let shared = try await service.queryRecords(
+  Query(recordType: "Note"),
+  zoneID: ZoneID(zoneName: "NotesZone", ownerName: "_abc123…"),
+  database: .shared
+)
+```
+
+Use ``CloudKitService/listZones(database:)`` to discover which zones a database has, and ``ZoneID/defaultZone`` when you want to name the default zone explicitly.
+
+> Note: `zoneID` and `zoneWide` pull in opposite directions — `zoneWide: true` queries across *every* zone in the database, which makes `zoneID` moot. `zoneWide` is only valid against the private and shared databases.
 
 ## Creating
 
@@ -175,8 +203,8 @@ The inline DocC on these methods carries fuller examples for initial-vs-incremen
 
 ### Read operations
 
-- ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneWide:numbersAsStrings:database:)``
-- ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:database:)``
+- ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)``
+- ``CloudKitService/queryAllRecords(recordType:filters:sortBy:pageSize:desiredKeys:maxPages:zoneID:database:)``
 - ``CloudKitService/lookupRecords(recordNames:desiredKeys:database:)``
 
 ### Write operations
