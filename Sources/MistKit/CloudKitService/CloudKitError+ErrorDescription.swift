@@ -54,6 +54,8 @@ extension CloudKitError {
         + (conversionError.errorDescription ?? "\(conversionError)")
     case .recordOperationFailed(let recordError):
       return Self.recordOperationDescription(recordError)
+    case .zoneOperationFailed(let zoneError):
+      return Self.zoneOperationDescription(zoneError)
     case .subscriptionOperationFailed(let subscriptionError):
       return Self.subscriptionOperationDescription(subscriptionError)
     case .subscriptionLikelyDuplicate(let subscriptionError):
@@ -71,9 +73,7 @@ extension CloudKitError {
         "CloudKit query exceeded pagination limit of \(maxPages) pages "
         + "(collected \(records.count) records)"
     case .zonePaginationLimitExceeded(let maxPages, let zones):
-      return
-        "CloudKit zone-changes exceeded pagination limit of \(maxPages) pages "
-        + "(collected \(zones.count) zones)"
+      return Self.zonePaginationDescription(maxPages: maxPages, zoneCount: zones.count)
     case .missingCredentials(let database, let availability, let reason):
       return Self.missingCredentialsDescription(
         database: database, availability: availability, reason: reason

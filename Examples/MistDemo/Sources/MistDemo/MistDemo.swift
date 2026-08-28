@@ -39,6 +39,9 @@ internal enum MistDemo {
     } catch {
       // PhasedIntegrationTest prints a copy-friendly message before rethrowing;
       // exit cleanly instead of trapping on an uncaught top-level throw.
+      let message = (error as? any LocalizedError)?.errorDescription
+        ?? String(describing: error)
+      fputs("❌ \(message)\n", stderr)
       exit(1)
     }
   }

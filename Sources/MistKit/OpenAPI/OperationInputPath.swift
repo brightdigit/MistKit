@@ -65,7 +65,11 @@ extension OperationInputPath {
 
 extension Operations.discoverUserIdentities.Input.Path: OperationInputPath {}
 
+extension Operations.fetchDatabaseChanges.Input.Path: OperationInputPath {}
+
 extension Operations.fetchRecordChanges.Input.Path: OperationInputPath {}
+
+extension Operations.fetchRecordZoneChanges.Input.Path: OperationInputPath {}
 
 extension Operations.fetchZoneChanges.Input.Path: OperationInputPath {}
 

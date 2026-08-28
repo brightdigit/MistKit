@@ -42,4 +42,7 @@ internal struct PhaseState: Sendable {
   internal var createdRecordNames: [String] = []
   internal var syncToken: String?
   internal var currentUser: UserInfo?
+  /// Custom zone provisioned by ``FetchRecordZoneChangesPhase`` for
+  /// ``FetchAllRecordZoneChangesPhase`` to exercise and tear down.
+  internal var changeTrackingZone: ChangeTrackingZoneSlot?
 }

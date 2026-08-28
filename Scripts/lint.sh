@@ -78,13 +78,17 @@ $PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "Bright
 
 # Generated files now automatically include ignore directives via OpenAPI generator configuration
 
-# Periphery does not run in Claude Code web sessions: it would have to be built
-# from source there (no Linux binaries, and the session's GitHub gateway rules
-# out mise), which is not worth the cold-start cost.
-if [ -z "$CI" ] && [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+# Periphery is temporarily skipped: Swift PM now writes the index store under a
+# triple-specific path (e.g. `.build/arm64-apple-macosx/debug/index/store`) and
+# periphery still looks for `.build/debug/index/store`. Re-enable once periphery
+# or this script resolves the path. Also skipped in Claude Code web sessions
+# (no Linux binaries; mise unreachable there).
+if [ "${RUN_PERIPHERY:-}" = "1" ] \
+	&& [ -z "$CI" ] \
+	&& [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
 	run_command periphery scan $PERIPHERY_OPTIONS --disable-update-check
-elif [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
-	echo "Skipping periphery scan (Claude Code web session)."
+else
+	echo "Skipping periphery scan (set RUN_PERIPHERY=1 to opt in)."
 fi
 
 popd

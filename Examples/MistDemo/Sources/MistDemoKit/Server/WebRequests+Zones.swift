@@ -107,7 +107,8 @@ extension WebRequests {
   }
 
   /// `POST /api/zones/changes` — database-level zone changes since an optional
-  /// continuation `syncToken`.
+  /// continuation `syncToken`. Backed by `changes/database`, the current
+  /// replacement for the deprecated `zones/changes` operation.
   internal struct ZoneChanges: Decodable {
     private enum CodingKeys: String, CodingKey {
       case syncToken
@@ -122,6 +123,34 @@ extension WebRequests {
       self.syncToken = try container.decodeIfPresent(
         String.self, forKey: .syncToken
       )
+      self.database = try WebRequests.decodeDatabase(
+        from: container, forKey: .database
+      )
+    }
+  }
+
+  /// `POST /api/changes/zone` — record changes within one or more zones.
+  /// Each entry may carry its own continuation `syncToken`; a bare zone name
+  /// defaults to an initial fetch of that zone.
+  internal struct ZoneRecordChanges: Decodable {
+    /// A single requested zone, with its own optional `syncToken`.
+    internal struct ZoneRequest: Decodable, Sendable {
+      internal let zoneName: String
+      internal let syncToken: String?
+    }
+
+    private enum CodingKeys: String, CodingKey {
+      case zones
+      case database
+    }
+
+    internal let zones: [ZoneRequest]
+    internal let database: MistKit.Database
+
+    internal init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.zones =
+        try container.decodeIfPresent([ZoneRequest].self, forKey: .zones) ?? []
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )

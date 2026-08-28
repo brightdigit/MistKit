@@ -122,27 +122,25 @@ extension CloudKitService {
   /// Fetch zone changes since a sync token
   ///
   /// Retrieves all zones that have changed since the provided sync token.
-  /// Use this for efficient incremental sync at the zone level.
+  ///
+  /// > Deprecated: This wraps CloudKit's `zones/changes` operation, which
+  /// > Apple deprecated in favor of `changes/database`. Use
+  /// > ``fetchDatabaseChanges(syncToken:resultsLimit:database:)`` instead — it
+  /// > returns the same "which zones changed" information, plus per-zone
+  /// > failures and a `resultsLimit` knob.
   ///
   /// - Parameters:
   ///   - syncToken: Optional token from previous fetch (nil = initial fetch)
   ///   - database: The CloudKit database scope to query (defaults to `.private`)
   /// - Returns: ZoneChangesResult containing changed zones and new sync token
   /// - Throws: CloudKitError if the fetch fails
-  ///
-  /// Example - Initial Sync:
-  /// ```swift
-  /// let result = try await service.fetchZoneChanges()
-  /// // Store result.syncToken for next fetch
-  /// processZones(result.zones)
-  /// ```
-  ///
-  /// Example - Incremental Sync:
-  /// ```swift
-  /// let result = try await service.fetchZoneChanges(
-  ///   syncToken: previousToken
-  /// )
-  /// ```
+  @available(
+    *, deprecated,
+    message: """
+      CloudKit deprecated `zones/changes` in favor of `changes/database`. \
+      Use fetchDatabaseChanges(syncToken:resultsLimit:database:) instead.
+      """
+  )
   public func fetchZoneChanges(
     syncToken: String? = nil,
     database: Database = .private

@@ -65,6 +65,17 @@ extension CloudKitService {
   /// - Note: Makes sequential requests with no backoff or cooperative
   ///   cancellation between pages. For fine-grained control, use
   ///   ``fetchZoneChanges(syncToken:database:)`` directly.
+  ///
+  /// > Deprecated: Wraps the deprecated `zones/changes` operation. Use
+  /// > ``fetchAllDatabaseChanges(syncToken:resultsLimit:maxPages:database:)``
+  /// > instead.
+  @available(
+    *, deprecated,
+    message: """
+      CloudKit deprecated `zones/changes` in favor of `changes/database`. \
+      Use fetchAllDatabaseChanges(syncToken:resultsLimit:maxPages:database:) instead.
+      """
+  )
   public func fetchAllZoneChanges(
     syncToken: String? = nil,
     maxPages: Int = 1_000,
