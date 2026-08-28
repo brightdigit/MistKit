@@ -74,6 +74,15 @@ public struct ModifyZonesCommand: MistDemoCommand, OutputFormatting {
     self.config = config
   }
 
+  private static func reportFailures(_ failures: [ZoneOperationFailure]) {
+    for failure in failures {
+      let code = failure.serverErrorCode.rawValue
+      let reasonFragment = failure.reason.map { ": \($0)" } ?? ""
+      let line = "Warning: zone '\(failure.zoneName)' failed (\(code))\(reasonFragment)\n"
+      FileHandle.standardError.write(Data(line.utf8))
+    }
+  }
+
   /// Executes the command.
   public func execute() async throws {
     if case .public = config.base.database {
@@ -96,6 +105,11 @@ public struct ModifyZonesCommand: MistDemoCommand, OutputFormatting {
       database: config.base.database
     )
 
-    try await outputResults(results, format: config.output)
+    // `modifyZones` is a batch: CloudKit can reject individual zones while
+    // applying the rest. Announce the rejections on stderr — matching how
+    // `modify` reports per-record failures — and keep stdout to the zones
+    // that were actually modified so the output stays machine-parseable.
+    Self.reportFailures(results.failures)
+    try await outputResults(results.zones, format: config.output)
   }
 }
