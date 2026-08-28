@@ -303,6 +303,9 @@ let zone = try await service.createZone(
     database: .private
 )
 try await service.deleteZone(zoneName: "Notes", database: .private)
+// Batch create/delete via service.modifyZones(_:database:)
+// (takes [ZoneOperation], returns [ZoneChangeResult] — inspect
+// `.zones` and `.failures` for per-zone outcomes).
 
 // Subscriptions
 let subs = try await service.listSubscriptions(database: .private)

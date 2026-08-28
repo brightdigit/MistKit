@@ -1,0 +1,49 @@
+name: Check generated OpenAPI output
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate-and-diff:
+    name: Regenerate Sources/MistKitOpenAPI and diff
+    runs-on: ubuntu-latest
+    container:
+      image: swift:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # Scripts/generate-openapi.sh prefers a `swift-openapi-generator` on
+      # PATH and otherwise builds the version pinned in
+      # Scripts/OpenAPITools/Package.swift, which is kept in sync with
+      # mise.toml. Neither mise nor the mise-provisioned binary is installed
+      # here, so the standalone manifest is what runs — deterministic and
+      # self-contained.
+      - name: Regenerate OpenAPI code
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          ./Scripts/generate-openapi.sh
+
+      # Guards against hand-edits and against automated formatters (CodeFactor
+      # has committed import reordering here before, despite
+      # Sources/MistKitOpenAPI/** being listed in .codefactor.yml's excludes).
+      - name: Fail if the committed output does not match
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git diff --exit-code Sources/MistKitOpenAPI/; then
+            echo ""
+            echo "::error::Sources/MistKitOpenAPI/ does not match the output of ./Scripts/generate-openapi.sh."
+            echo "Never hand-edit generated code. Change openapi.yaml, run"
+            echo "./Scripts/generate-openapi.sh, and commit the regenerated files."
+            exit 1
+          fi
+          echo "Generated OpenAPI output is reproducible."
