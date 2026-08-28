@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Darwin
+internal import Foundation
 internal import MistDemoKit
 
 @main
