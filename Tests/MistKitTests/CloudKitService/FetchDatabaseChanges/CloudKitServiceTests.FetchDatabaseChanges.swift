@@ -35,7 +35,8 @@ internal import Testing
 extension CloudKitServiceTests {
   @Suite(
     "CloudKitService FetchDatabaseChanges Operations",
-    .enabled(if: Platform.isCryptoAvailable)
+    .enabled(if: Platform.isCryptoAvailable),
+    .disabled(if: Platform.isWasm)
   )
   internal enum FetchDatabaseChanges {}
 }
