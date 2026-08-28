@@ -328,6 +328,55 @@ let assets = try await service.rereferenceAssets(
 )
 ```
 
+#### Change Tracking
+
+CloudKit exposes four change-tracking endpoints. MistKit wraps all four; each
+single-request primitive has an auto-paginating `fetchAll…` companion.
+
+| Apple endpoint | Purpose | MistKit method | Auto-paginating |
+|---|---|---|---|
+| `records/changes` | Fetching Record Changes | `fetchRecordChanges` | `fetchAllRecordChanges` |
+| `changes/database` | Fetching Database Changes — *which zones* changed | `fetchDatabaseChanges` | `fetchAllDatabaseChanges` |
+| `changes/zone` | Fetching Record Zone Changes — records *within* zones | `fetchRecordZoneChanges` | `fetchAllRecordZoneChanges` |
+| `zones/changes` | Fetching Zone Changes — **deprecated by Apple** | ~~`fetchZoneChanges`~~ | ~~`fetchAllZoneChanges`~~ |
+
+> `zones/changes` is deprecated by Apple in favor of `changes/database`, so
+> `fetchZoneChanges` / `fetchAllZoneChanges` are marked `@available(*, deprecated)`.
+> Use `fetchDatabaseChanges` instead.
+
+The typical database-sync flow asks *which zones changed*, then fetches the
+records inside them:
+
+```swift
+// 1. Which zones changed?
+let database = try await service.fetchDatabaseChanges(
+    syncToken: lastDatabaseToken,
+    database: .private
+)
+
+// 2. What changed inside them?
+let result = try await service.fetchAllRecordZoneChanges(
+    zones: database.changedZones.map {
+        ZoneChangesRequest(zoneID: ZoneID(zoneName: $0.zoneName))
+    },
+    database: .private
+)
+
+for change in result.changes {
+    print("\(change.zone.zoneName): \(change.records.count) changed")
+    // Persist change.syncToken per zone — each zone paginates independently.
+}
+```
+
+Both operations report per-zone problems as data rather than throwing, so one
+bad zone never discards the zones that succeeded:
+
+```swift
+for failure in result.failures {
+    print("\(failure.zoneName) failed: \(failure.serverErrorCode.rawValue)")
+}
+```
+
 #### Auto-Chunking Conveniences
 
 CloudKit caps batch requests at 200 items. `lookupAllRecords` and the
@@ -451,7 +500,7 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [Discovering User Identities (POST users/discover)](https://github.com/brightdigit/MistKit/issues/27) ✅
 - [x] [Fetching Record Changes (records/changes)](https://github.com/brightdigit/MistKit/issues/40) ✅
 - [x] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/44) ✅
-- [x] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/48) ✅
+- [x] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/48) ✅ *(Apple-deprecated — prefer `fetchDatabaseChanges`)*
 - [x] [Fix QueryFilter IN/NOT_IN serialization](https://github.com/brightdigit/MistKit/issues/192)  ✅
 
 ### v1.0.0-beta.1
@@ -499,13 +548,14 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/41) ✅
 - [x] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/42) ✅
 - [x] [Curated createShare for share URL creation](https://github.com/brightdigit/MistKit/issues/437) ✅
+- [x] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46) ✅
+- [x] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/47) ✅
+- [x] [Clarify change-tracking endpoint coverage](https://github.com/brightdigit/MistKit/issues/401) ✅ *(deprecates `zones/changes` in favor of `changes/database`)*
 
 ### Backlog / Post-beta
 
 - [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/28)
 - [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/33)
-- [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46)
-- [ ] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/47)
 - [ ] [Feature: Add custom CloudKit zone support for queries](https://github.com/brightdigit/MistKit/issues/146)
 
 ### v1.0.0

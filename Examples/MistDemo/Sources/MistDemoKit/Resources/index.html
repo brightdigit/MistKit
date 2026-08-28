@@ -188,9 +188,9 @@
             </div>
         </div>
 
-        <!-- Zones list / lookup / modify / changes -->
+        <!-- Zones list / lookup / modify / change tracking -->
         <div class="card pre-auth">
-            <h2>Zones <span class="endpoint-label">zones/list · zones/lookup · zones/modify · zones/changes</span></h2>
+            <h2>Zones <span class="endpoint-label">zones/list · zones/lookup · zones/modify · changes/database · changes/zone</span></h2>
             <div class="panel-grid">
                 <section>
                     <h3>List <span class="endpoint-label">zones/list</span></h3>
@@ -234,13 +234,26 @@
                     <pre id="zones-modify-raw">(none yet)</pre>
                 </section>
                 <section>
-                    <h3>Changes <span class="endpoint-label">zones/changes</span></h3>
+                    <h3>Database changes <span class="endpoint-label">changes/database</span></h3>
                     <div class="panel-row">
                         <input id="zones-changes-token" type="text" placeholder="sync token (optional)">
-                        <button id="zones-changes-btn" type="button">Fetch Changes</button>
+                        <button id="zones-changes-btn" type="button">Fetch Database Changes</button>
+                    </div>
+                    <div class="panel-row">
+                        <button id="zones-changes-use-zones-btn" type="button" class="secondary" disabled>Use changed zones →</button>
                     </div>
                     <div id="zones-changes-status" class="status"></div>
                     <pre id="zones-changes-raw">(none yet)</pre>
+                </section>
+                <section>
+                    <h3>Zone record changes <span class="endpoint-label">changes/zone</span></h3>
+                    <div class="panel-row">
+                        <input id="zones-record-changes-zones" type="text" placeholder="zone name(s), comma-separated">
+                        <input id="zones-record-changes-token" type="text" placeholder="sync token (optional)">
+                        <button id="zones-record-changes-btn" type="button">Fetch Zone Record Changes</button>
+                    </div>
+                    <div id="zones-record-changes-status" class="status"></div>
+                    <pre id="zones-record-changes-raw">(none yet)</pre>
                 </section>
             </div>
         </div>

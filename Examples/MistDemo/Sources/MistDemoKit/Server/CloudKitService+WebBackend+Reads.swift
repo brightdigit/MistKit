@@ -83,7 +83,14 @@ extension CloudKitService {
   internal func webZoneChanges(
     syncToken: String?,
     database: MistKit.Database
-  ) async throws -> ZoneChangesResult {
-    try await fetchZoneChanges(syncToken: syncToken, database: database)
+  ) async throws -> DatabaseChangesResult {
+    try await fetchDatabaseChanges(syncToken: syncToken, database: database)
+  }
+
+  internal func webRecordZoneChanges(
+    zones: [ZoneChangesRequest],
+    database: MistKit.Database
+  ) async throws -> RecordZoneChangesResult {
+    try await fetchRecordZoneChanges(zones: zones, database: database)
   }
 }

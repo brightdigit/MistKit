@@ -34,26 +34,53 @@ internal struct FetchZoneChangesPhase: IntegrationPhase {
   internal typealias Input = NoState
   internal typealias Output = NoState
 
-  internal static let title = "Fetch zone changes"
+  internal static let title = "Fetch database changes"
   internal static let emoji = "🔄"
-  internal static let apiName = "fetchZoneChanges"
+  internal static let apiName = "fetchDatabaseChanges"
 
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
-    do {
-      let result = try await context.service.fetchZoneChanges(database: context.database)
-      print("✅ Fetched \(result.zones.count) zone(s)")
-      if context.verbose {
-        for zone in result.zones {
-          print("   - \(zone.zoneName)")
-        }
-        if let token = result.syncToken {
-          print("   Sync token: \(token.prefix(30))...")
-        }
+    let initial = try await context.service.fetchDatabaseChanges(
+      database: context.database
+    )
+    try ChangeTrackingVerification.requireNoZoneFailures(
+      initial.failures,
+      operation: Self.apiName
+    )
+    try ChangeTrackingVerification.requireDatabaseSyncToken(
+      initial.syncToken,
+      operation: Self.apiName
+    )
+
+    print("✅ Fetched \(initial.changedZones.count) changed zone(s)")
+    if context.verbose {
+      for zone in initial.changedZones {
+        print("   - \(zone.zoneName)")
       }
-    } catch {
-      print("⚠️  fetchZoneChanges failed (non-fatal): \(error)")
+      if let token = initial.syncToken {
+        print("   Sync token: \(token.prefix(30))...")
+      }
+      print("   More coming: \(initial.moreComing)")
+    }
+
+    let incremental = try await context.service.fetchDatabaseChanges(
+      syncToken: initial.syncToken,
+      database: context.database
+    )
+    try ChangeTrackingVerification.requireNoZoneFailures(
+      incremental.failures,
+      operation: "\(Self.apiName) (incremental)"
+    )
+    try ChangeTrackingVerification.requireDatabaseSyncToken(
+      incremental.syncToken,
+      operation: "\(Self.apiName) (incremental)"
+    )
+
+    if context.verbose {
+      print(
+        "   ✅ Incremental fetch returned \(incremental.changedZones.count) changed zone(s)"
+      )
     }
 
     return NoState()

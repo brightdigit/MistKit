@@ -84,7 +84,7 @@ extension CloudKitError {
         reason: reason
       )
     case .httpError, .httpErrorWithDetails, .httpErrorWithRawResponse, .invalidResponse,
-      .incompleteResponse, .conversionFailed, .recordOperationFailed,
+      .incompleteResponse, .conversionFailed, .recordOperationFailed, .zoneOperationFailed,
       .subscriptionOperationFailed, .subscriptionLikelyDuplicate, .underlyingError,
       .decodingError, .networkError, .unsupportedOperationType, .paginationLimitExceeded,
       .zonePaginationLimitExceeded, .missingCredentials, .invalidPrivateKey:
