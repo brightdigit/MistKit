@@ -204,6 +204,12 @@ MistKit/
 | `CloudKitService+Classification.swift` | operation classification (batch sync result tracking) |
 | `CloudKitService+ErrorHandling.swift` | error mapping helpers |
 
+**Zone selection on queries (issue #146):** `queryRecords` previously hard-coded `zoneID: .init(zoneName: "_defaultZone")` into the `records/query` body, making custom and shared zones unqueryable. The query path now takes an optional `zoneID: ZoneID? = nil`, threaded through the `Query` primitive, `queryAllRecords` (forwarded on every page), and `fetchExistingRecordNames`. This mirrors the existing `modifyRecords(_:atomic:zoneID:…)` parameter, and uses `ZoneID` rather than a bare `zoneName` string so shared zones can carry `ownerName`.
+
+`nil` means **omit the `zoneID` key entirely** and let CloudKit resolve the database's default zone — it is not a silent policy default in the sense of `.claude/memory/feedback_no_silent_policy_defaults.md` (no credential or attribution semantics ride on it), and it matches the `zoneID`/`desiredKeys`/`numbersAsStrings` request-option convention already used by `modifyRecords`. The `database:` parameter deliberately still has **no** default.
+
+`RecordManaging` declares only `queryAllRecords(recordType:)` (`Sources/MistKit/RecordManagement/RecordManaging.swift`) and stays zone-unaware — callers needing a specific zone should call `CloudKitService` directly.
+
 **Sync/Change Operations:**
 - `fetchRecordChanges(recordType:syncToken:)` → `/records/changes` — returns `RecordChangesResult` with `records`, `syncToken`, `moreComing`
 - `fetchAllRecordChanges(recordType:syncToken:)` — convenience wrapper that auto-paginates using `moreComing`

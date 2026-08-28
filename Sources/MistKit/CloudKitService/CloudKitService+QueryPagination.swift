@@ -45,6 +45,9 @@ extension CloudKitService {
   ///   - desiredKeys: Optional array of field names to fetch
   ///   - maxPages: Maximum number of pages to fetch before throwing
   ///     `CloudKitError.paginationLimitExceeded` (defaults to 1,000)
+  ///   - zoneID: Optional zone to query. When `nil` (the default) CloudKit
+  ///     resolves the database's default zone (`_defaultZone`). Pass a
+  ///     ``ZoneID`` to target a custom or shared zone.
   ///   - database: The CloudKit database scope to query (`.public`, `.private`, `.shared`)
   /// - Returns: Array of all matching records across all pages
   /// - Throws: `CloudKitError`. When `maxPages` is exceeded, throws
@@ -62,6 +65,7 @@ extension CloudKitService {
     pageSize: Int? = nil,
     desiredKeys: [String]? = nil,
     maxPages: Int = 1_000,
+    zoneID: ZoneID? = nil,
     database: Database
   ) async throws(CloudKitError) -> [RecordInfo] {
     var allRecords: [RecordInfo] = []
@@ -87,6 +91,7 @@ extension CloudKitService {
         limit: pageSize,
         desiredKeys: desiredKeys,
         continuationMarker: currentMarker,
+        zoneID: zoneID,
         database: database
       )
 

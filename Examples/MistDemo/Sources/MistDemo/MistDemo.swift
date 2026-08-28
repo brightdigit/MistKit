@@ -27,12 +27,19 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import Foundation
 internal import MistDemoKit
 
 @main
 internal enum MistDemo {
   @MainActor
-  internal static func main() async throws {
-    try await MistDemoRunner.run()
+  internal static func main() async {
+    do {
+      try await MistDemoRunner.run()
+    } catch {
+      // PhasedIntegrationTest prints a copy-friendly message before rethrowing;
+      // exit cleanly instead of trapping on an uncaught top-level throw.
+      exit(1)
+    }
   }
 }

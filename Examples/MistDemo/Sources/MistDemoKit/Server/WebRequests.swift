@@ -58,12 +58,18 @@ internal enum WebRequests {
       case limit
       case sortBy
       case database
+      case zoneName
+      case zoneOwner
     }
 
     internal let recordType: String
     internal let limit: Int?
     internal let sortBy: [QuerySortField]?
     internal let database: MistKit.Database
+    /// Optional zone name for custom/shared zone queries.
+    internal let zoneName: String?
+    /// Optional zone owner (ownerName) for shared zones.
+    internal let zoneOwner: String?
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -75,6 +81,19 @@ internal enum WebRequests {
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
+      self.zoneName = try container.decodeIfPresent(
+        String.self, forKey: .zoneName
+      )
+      self.zoneOwner = try container.decodeIfPresent(
+        String.self, forKey: .zoneOwner
+      )
+      if self.zoneOwner != nil, self.zoneName == nil {
+        throw DecodingError.dataCorruptedError(
+          forKey: .zoneOwner,
+          in: container,
+          debugDescription: "zoneOwner requires zoneName"
+        )
+      }
     }
   }
 
