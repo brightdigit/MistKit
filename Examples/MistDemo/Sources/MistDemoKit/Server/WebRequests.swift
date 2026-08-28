@@ -87,6 +87,13 @@ internal enum WebRequests {
       self.zoneOwner = try container.decodeIfPresent(
         String.self, forKey: .zoneOwner
       )
+      if self.zoneOwner != nil, self.zoneName == nil {
+        throw DecodingError.dataCorruptedError(
+          forKey: .zoneOwner,
+          in: container,
+          debugDescription: "zoneOwner requires zoneName"
+        )
+      }
     }
   }
 

@@ -33,7 +33,7 @@ internal import MistKitOpenAPI
 /// predicates and ``QuerySort`` descriptors.
 ///
 /// The same value can be passed to
-/// ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:database:)``
+/// ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)``
 /// for a one-off query and embedded in
 /// ``SubscriptionInfo/Kind/query(_:)`` to describe a query
 /// subscription's predicate — they share this single representation.
