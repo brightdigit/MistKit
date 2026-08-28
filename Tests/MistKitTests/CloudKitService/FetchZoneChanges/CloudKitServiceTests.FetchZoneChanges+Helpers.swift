@@ -106,7 +106,7 @@ extension ResponseConfig {
     let responseJSON = """
       {
         "zones": \(zonesString),
-        "syncToken": "\(syncToken)",
+        "metaSyncToken": "\(syncToken)",
         "moreComing": \(moreComing)
       }
       """
@@ -118,6 +118,20 @@ extension ResponseConfig {
       statusCode: 200,
       headers: headers,
       body: responseJSON.data(using: .utf8),
+      error: nil
+    )
+  }
+
+  /// Builds a `zones/changes` response from a literal JSON body, so tests can
+  /// pin exactly which token key the decoder reads.
+  internal static func zoneChangesRawResponse(body: String) -> ResponseConfig {
+    var headers = HTTPFields()
+    headers[.contentType] = "application/json"
+
+    return ResponseConfig(
+      statusCode: 200,
+      headers: headers,
+      body: Data(body.utf8),
       error: nil
     )
   }
@@ -134,7 +148,7 @@ extension ResponseConfig {
           },
           {}
         ],
-        "syncToken": "token-with-nil-zone"
+        "metaSyncToken": "token-with-nil-zone"
       }
       """
 

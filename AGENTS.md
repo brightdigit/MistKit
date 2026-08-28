@@ -217,6 +217,8 @@ MistKit/
 - `fetchRecordChanges(recordType:syncToken:)` → `/records/changes` — returns `RecordChangesResult` with `records`, `syncToken`, `moreComing`
 - `fetchAllRecordChanges(recordType:syncToken:)` — convenience wrapper that auto-paginates using `moreComing`
 - `fetchZoneChanges(syncToken:)` → `/zones/changes` — returns `ZoneChangesResult`. **Deprecated** (`@available(*, deprecated)`): Apple deprecated `zones/changes` in favor of `changes/database`. Same for `fetchAllZoneChanges`.
+
+  **Wire key is `metaSyncToken`, not `syncToken` (issue #430).** Verified against a live container (`iCloud.com.brightdigit.MistDemo`/`development`/private, web-auth): the response's top-level keys are exactly `[moreComing, metaSyncToken, zones]`, and a request sending `syncToken` is *silently ignored* — CloudKit replays page one instead of advancing, so `fetchZoneChanges`/`fetchAllZoneChanges` pagination never actually worked. Only `zones/changes` is affected; `changes/database`, `changes/zone` and `records/changes` all genuinely use `syncToken` — **do not rename those**. The rename is confined to `openapi.yaml`; every Swift-facing name (`ZoneChangesResult.syncToken`, its `init(syncToken:)` label, the `fetchZoneChanges(syncToken:)`/`fetchAllZoneChanges(syncToken:)` argument labels) is deliberately unchanged, so this is not source-breaking — `MistKitOpenAPI` is an `internal import`. `Tests/.../FetchZoneChanges/CloudKitServiceTests.FetchZoneChanges+WireFormat.swift` pins the sent and read keys.
 - `fetchDatabaseChanges(syncToken:resultsLimit:)` → `/changes/database` — returns `DatabaseChangesResult` (*which zones* changed). Replacement for `fetchZoneChanges`. `fetchAllDatabaseChanges(...)` auto-paginates with `maxPages` + stuck-token detection.
 - `fetchRecordZoneChanges(zones:...)` → `/changes/zone` — returns `RecordZoneChangesResult` (records *within* zones). Each zone carries its **own** `syncToken`/`moreComing`, so `fetchAllRecordZoneChanges(...)` re-requests only the zones still reporting `moreComing` and merges each zone's records across rounds (`ZoneChangesAccumulator`).
 - `lookupZones(zoneIDs:)` → `/zones/lookup` — returns `[ZoneInfo]`
@@ -253,7 +255,7 @@ In MistDemo, integration runs targeting these endpoints use `PhaseContext.userCo
 **Result Types (Sources/MistKit/Models/ and Sources/MistKit/Models/Zones/):**
 - `QueryResult` — `records: [RecordInfo]`, `continuationMarker: String?`
 - `RecordChangesResult` — `records: [RecordInfo]`, `syncToken: String?`, `moreComing: Bool`
-- `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`, `moreComing: Bool` *(deprecated `zones/changes`)*
+- `ZoneChangesResult` — `zones: [ZoneInfo]`, `syncToken: String?`, `moreComing: Bool` *(deprecated `zones/changes`; `syncToken` rides the wire as `metaSyncToken` — see #430 above)*
 - `ZoneInfo` — `zoneName: String`, `ownerRecordName: String?`, `capabilities: [String]`, `syncToken: String?`, `atomic: Bool?`
 - `ZoneChangeResult` — `OperationResult<ZoneInfo, ZoneTarget>`; the element type of `modifyZones` and of `DatabaseChangesResult.zones`
 - `DatabaseChangesResult` — `zones: [ZoneChangeResult]`, `syncToken: String?`, `moreComing: Bool`, plus `changedZones`/`failures` conveniences
@@ -274,7 +276,8 @@ three keys Apple's archived ["Zone Dictionary"](https://developer.apple.com/libr
 documents: `zoneID`, `syncToken`, and `atomic`. These surface on `ZoneInfo` as
 `syncToken`/`atomic`, both optional — `atomic` is **not** defaulted to `false`, so an
 absent key stays distinguishable from an explicit `false`. Note the zone-level
-`syncToken` is distinct from the response-level `syncToken` on `ZoneChangesResult`.
+`syncToken` is distinct from the response-level token on `ZoneChangesResult` (which
+is `metaSyncToken` on the wire).
 
 `isEager` is **deliberately not modeled**: it appears in no primary Apple source
 (neither the archived Web Services reference nor `.claude/docs/cloudkitjs.md`).

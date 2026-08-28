@@ -103,7 +103,7 @@ extension ZoneMetadataTests {
                 "atomic": true
               }
             ],
-            "syncToken": "top-level-token",
+            "metaSyncToken": "top-level-token",
             "moreComing": true
           }
           """.utf8

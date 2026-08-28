@@ -2381,32 +2381,42 @@ public enum Components {
                 case zones
             }
         }
+        /// Response body of the deprecated `zones/changes` operation. Its token
+        /// key is `metaSyncToken`: a live container returned exactly
+        /// `[moreComing, metaSyncToken, zones]` at the top level, with no
+        /// `syncToken` (issue #430). The other change-tracking operations
+        /// (`changes/database`, `changes/zone`, `records/changes`) use
+        /// `syncToken`.
+        ///
+        ///
         /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse`.
         public struct ZoneChangesResponse: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/zones`.
             public var zones: [Components.Schemas.Zone]?
-            /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/syncToken`.
-            public var syncToken: Swift.String?
+            /// Identifies a point in the database's change history. Send it back as `metaSyncToken` on the next request to fetch only newer changes.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/metaSyncToken`.
+            public var metaSyncToken: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/moreComing`.
             public var moreComing: Swift.Bool?
             /// Creates a new `ZoneChangesResponse`.
             ///
             /// - Parameters:
             ///   - zones:
-            ///   - syncToken:
+            ///   - metaSyncToken: Identifies a point in the database's change history. Send it back as `metaSyncToken` on the next request to fetch only newer changes.
             ///   - moreComing:
             public init(
                 zones: [Components.Schemas.Zone]? = nil,
-                syncToken: Swift.String? = nil,
+                metaSyncToken: Swift.String? = nil,
                 moreComing: Swift.Bool? = nil
             ) {
                 self.zones = zones
-                self.syncToken = syncToken
+                self.metaSyncToken = metaSyncToken
                 self.moreComing = moreComing
             }
             public enum CodingKeys: String, CodingKey {
                 case zones
-                case syncToken
+                case metaSyncToken
                 case moreComing
             }
         }
@@ -8798,19 +8808,21 @@ public enum Operations {
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
-                    /// Sync token returned by a previous `zones/changes` call. Omit it to fetch every zone. Apple's archived reference names this key `metaSyncToken`; MistKit sends `syncToken`, which is also the name Apple's own `moreComing` prose uses. The key is deliberately left as `syncToken` (see issue #430) — only this description is corrected, so the spec no longer describes the field by a name it does not use.
+                    /// The `metaSyncToken` returned by a previous `zones/changes` response. Omit it to fetch every zone.
+                    /// Verified against a live container (issue #430): this operation reads and returns `metaSyncToken`, not `syncToken`. A request sending `syncToken` is silently ignored and replays the first page. Apple's archived reference names the key `metaSyncToken` as well; only one line of its `moreComing` prose calls it `syncToken`.
+                    /// This is specific to `zones/changes` — `changes/database`, `changes/zone` and `records/changes` all use `syncToken`.
                     ///
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/json/syncToken`.
-                    public var syncToken: Swift.String?
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/json/metaSyncToken`.
+                    public var metaSyncToken: Swift.String?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
-                    ///   - syncToken: Sync token returned by a previous `zones/changes` call. Omit it to fetch every zone. Apple's archived reference names this key `metaSyncToken`; MistKit sends `syncToken`, which is also the name Apple's own `moreComing` prose uses. The key is deliberately left as `syncToken` (see issue #430) — only this description is corrected, so the spec no longer describes the field by a name it does not use.
-                    public init(syncToken: Swift.String? = nil) {
-                        self.syncToken = syncToken
+                    ///   - metaSyncToken: The `metaSyncToken` returned by a previous `zones/changes` response. Omit it to fetch every zone.
+                    public init(metaSyncToken: Swift.String? = nil) {
+                        self.metaSyncToken = metaSyncToken
                     }
                     public enum CodingKeys: String, CodingKey {
-                        case syncToken
+                        case metaSyncToken
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/content/application\/json`.
