@@ -177,16 +177,6 @@ extension CloudKitError {
     return fragment
   }
 
-  private static func networkErrorDescription(_ error: URLError) -> String {
-    var message = "Network error occurred"
-    message += "\nError code: \(error.code.rawValue)"
-    if let url = error.failureURLString {
-      message += "\nFailed URL: \(url)"
-    }
-    message += "\nDescription: \(error.localizedDescription)"
-    return message
-  }
-
   private static func missingCredentialsDescription(
     database: Database, availability: CredentialAvailability, reason: String
   ) -> String {
