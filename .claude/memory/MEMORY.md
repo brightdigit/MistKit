@@ -27,6 +27,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [Sendable API fallback over @available bump](feedback_sendable_api_fallback.md) — Prefer dual-path #available + nonisolated(unsafe) cached fallback over bumping @available when cascade is wide
 - [Examples/ dir is MistKit-dev dogfooding](project_examples_dir_is_for_mistkit_dev.md) — Bushel/CelestraCloud Examples test MistKit-under-development; their MISTKIT_BRANCH pin & setup-mistkit wiring aren't end-user deployment patterns
 - [Check merge strategy before release deletions](feedback_check_merge_strategy_before_release_deletions.md) — Squash/rebase merge means git history alone won't preserve removed files; archive branch+tag is load-bearing, not optional
+- [Feature PRs: squash or rebase, never merge](feedback_feature_pr_merge_squash_or_rebase.md) — 1 commit → rebase; multiple commits → squash; never `gh pr merge --merge` for feature branches
 - [CI-only flake gate](feedback_ci_only_flake_gate.md) — Gate cooperative-executor flake helpers (e.g. isFlakyTimeoutSimulator) on ProcessInfo CI env AND platform, so local sim runs stay strict
 - [Conditional withKnownIssue overload](feedback_conditional_known_issue_overload.md) — Prefer a `withKnownIssue(when:isIntermittent:_:)` overload over duplicating bodies in if/else around the wrap
 - [setup-X action lives in repo X](feedback_setup_action_lives_in_owned_repo.md) — A `setup-<package>` composite action belongs in the package's own repo (like setup-mistkit lives in MistKit), referenced remotely by consumers

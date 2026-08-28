@@ -18,3 +18,4 @@ Standing always/never directives and corrections from the human. Agents must rea
 - CI: in-development Swift branches (e.g. 6.4 snapshots) belong IN the `build-ubuntu` matrix as a swift entry carrying an `image` override (ConfigKeyKit pattern: `{"version":"6.4","image":"swiftlang/swift:nightly-6.4.x"}` plus a `container:` fallback expression) — NEVER as a separate job. Supersedes the earlier "no nightly toolchains" directive.
 - Repo-wide CI version bumps (Xcode/simulator/toolchain) DO extend into the `Examples/` subrepos — update BushelCloud and CelestraCloud in the same pass rather than deferring them to their own repos.
 - Follow sibling brightdigit repos (e.g. ConfigKeyKit) for current CI workflow shape before inventing a new one.
+- Feature-branch PRs: NEVER merge-commit. ALWAYS rebase if the PR has exactly 1 commit (`gh pr merge --rebase`); ALWAYS squash if it has 2+ commits (`gh pr merge --squash`). Count commits before merging.
