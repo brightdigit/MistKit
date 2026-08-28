@@ -80,7 +80,11 @@ extension ZoneMetadataTests {
         )
       )
 
-      let zone = try #require(response.zones?.first)
+      let entry = try #require(response.zones?.first)
+      guard case .Zone(let zone) = entry else {
+        Issue.record("expected the success variant, got \(entry)")
+        return
+      }
       #expect(zone.syncToken == "modify-token")
       #expect(zone.atomic == false)
     }

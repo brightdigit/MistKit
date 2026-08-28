@@ -39,9 +39,21 @@ extension CloudKitServiceTests.ModifyZones {
   internal static func makeSuccessfulService(
     zoneCount: Int = 1
   ) async throws -> CloudKitService {
-    let responseProvider = try ResponseProvider.successfulModifyZones(zoneCount: zoneCount)
-    let transport = MockTransport(responseProvider: responseProvider)
-    return try CloudKitService(
+    try makeService(responseProvider: .successfulModifyZones(zoneCount: zoneCount))
+  }
+
+  /// Builds a service whose `zones/modify` response is the supplied raw zone
+  /// dictionaries, so tests can mix success and per-zone error entries.
+  internal static func makeService(zones: [[String: Any]]) throws -> CloudKitService {
+    try makeService(
+      responseProvider: ResponseProvider(defaultResponse: .modifyZonesResponse(zones: zones))
+    )
+  }
+
+  internal static func makeService(
+    responseProvider: ResponseProvider
+  ) throws -> CloudKitService {
+    try CloudKitService(
       containerIdentifier: TestConstants.serviceContainerIdentifier,
       credentials: Credentials(
         apiAuth: APICredentials(
@@ -49,7 +61,7 @@ extension CloudKitServiceTests.ModifyZones {
           webAuthToken: TestConstants.webAuthToken
         )
       ),
-      transport: transport
+      transport: MockTransport(responseProvider: responseProvider)
     )
   }
 }
@@ -64,32 +76,28 @@ extension ResponseProvider {
 
 extension ResponseConfig {
   internal static func successfulModifyZonesResponse(zoneCount: Int = 1) throws -> ResponseConfig {
-    var zones: [[String: Any]] = []
-    for index in 0..<zoneCount {
-      zones.append([
-        "zoneID": [
-          "zoneName": "modified-zone-\(index)",
-          "ownerName": "_defaultOwner",
+    try .modifyZonesResponse(
+      zones: (0..<zoneCount).map { index in
+        [
+          "zoneID": [
+            "zoneName": "modified-zone-\(index)",
+            "ownerName": "_defaultOwner",
+          ]
         ]
-      ])
-    }
-
-    let zonesJSON = try JSONSerialization.data(withJSONObject: zones)
-    let zonesString = String(decoding: zonesJSON, as: UTF8.self)
-
-    let responseJSON = """
-      {
-        "zones": \(zonesString)
       }
-      """
+    )
+  }
 
+  /// Builds a `zones/modify` body from raw zone dictionaries so tests can mix
+  /// success entries and per-zone error entries in one response.
+  internal static func modifyZonesResponse(zones: [[String: Any]]) throws -> ResponseConfig {
     var headers = HTTPFields()
     headers[.contentType] = "application/json"
 
     return ResponseConfig(
       statusCode: 200,
       headers: headers,
-      body: responseJSON.data(using: .utf8),
+      body: try JSONSerialization.data(withJSONObject: ["zones": zones]),
       error: nil
     )
   }

@@ -43,13 +43,14 @@ extension CloudKitServiceTests.ModifyZones {
       }
       let service = try await CloudKitServiceTests.ModifyZones.makeSuccessfulService(zoneCount: 1)
 
-      let zones = try await service.modifyZones(
+      let results = try await service.modifyZones(
         [.create(ZoneID(zoneName: "Articles", ownerName: nil))],
         database: .private
       )
 
-      #expect(zones.count == 1)
-      #expect(zones.first?.zoneName == "modified-zone-0")
+      #expect(results.count == 1)
+      #expect(results.failures.isEmpty)
+      #expect(results.zones.map(\.zoneName) == ["modified-zone-0"])
     }
 
     @Test("modifyZones() returns zone for delete-only batch")
@@ -60,12 +61,13 @@ extension CloudKitServiceTests.ModifyZones {
       }
       let service = try await CloudKitServiceTests.ModifyZones.makeSuccessfulService(zoneCount: 1)
 
-      let zones = try await service.modifyZones(
+      let results = try await service.modifyZones(
         [.delete(ZoneID(zoneName: "Archive", ownerName: nil))],
         database: .private
       )
 
-      #expect(zones.count == 1)
+      #expect(results.count == 1)
+      #expect(results.failures.isEmpty)
     }
 
     @Test("modifyZones() returns zones for mixed create+delete batch")
@@ -76,7 +78,7 @@ extension CloudKitServiceTests.ModifyZones {
       }
       let service = try await CloudKitServiceTests.ModifyZones.makeSuccessfulService(zoneCount: 2)
 
-      let zones = try await service.modifyZones(
+      let results = try await service.modifyZones(
         [
           .create(ZoneID(zoneName: "NewZone", ownerName: nil)),
           .delete(ZoneID(zoneName: "OldZone", ownerName: nil)),
@@ -84,9 +86,8 @@ extension CloudKitServiceTests.ModifyZones {
         database: .private
       )
 
-      #expect(zones.count == 2)
-      #expect(zones[0].zoneName == "modified-zone-0")
-      #expect(zones[1].zoneName == "modified-zone-1")
+      #expect(results.count == 2)
+      #expect(results.zones.map(\.zoneName) == ["modified-zone-0", "modified-zone-1"])
     }
 
     @Test("modifyZones() works against shared database")
@@ -97,12 +98,13 @@ extension CloudKitServiceTests.ModifyZones {
       }
       let service = try await CloudKitServiceTests.ModifyZones.makeSuccessfulService(zoneCount: 1)
 
-      let zones = try await service.modifyZones(
+      let results = try await service.modifyZones(
         [.create(ZoneID(zoneName: "Shared", ownerName: "other-user"))],
         database: .shared
       )
 
-      #expect(zones.count == 1)
+      #expect(results.count == 1)
+      #expect(results.failures.isEmpty)
     }
   }
 }
