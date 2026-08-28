@@ -39,9 +39,12 @@ internal enum MistDemo {
     } catch {
       // PhasedIntegrationTest prints a copy-friendly message before rethrowing;
       // exit cleanly instead of trapping on an uncaught top-level throw.
-      let message = (error as? any LocalizedError)?.errorDescription
+      let message =
+        (error as? any LocalizedError)?.errorDescription
         ?? String(describing: error)
-      fputs("❌ \(message)\n", stderr)
+      // Glibc exposes `stderr` as a mutable global, which Swift 6 strict
+      // concurrency rejects; FileHandle keeps this portable to Linux.
+      FileHandle.standardError.write(Data("❌ \(message)\n".utf8))
       exit(1)
     }
   }
