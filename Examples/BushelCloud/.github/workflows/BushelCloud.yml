@@ -59,20 +59,25 @@ jobs:
       - id: matrix
         name: Build matrix values
         run: |
-          # BushelCloud's Package.swift declares swift-tools-version: 6.2,
-          # so Swift 6.1 is not supported.
+          # BushelCloud's Package.swift declares swift-tools-version: 6.4.
+          # Swift 6.4 has no release toolchain yet, so the nightly image is the
+          # only Linux toolchain that can parse the manifest — no 6.2/6.3 lanes.
+          SWIFT='[{"version":"6.4","image":"swiftlang/swift:nightly-6.4.x"}]'
           if [[ "${{ steps.check.outputs.full }}" == "true" ]]; then
             echo 'ubuntu-os=["noble","jammy"]' >> "$GITHUB_OUTPUT"
-            echo 'ubuntu-swift=[{"version":"6.2"},{"version":"6.3"},{"version":"6.4","image":"swiftlang/swift:nightly-6.4.x"}]' >> "$GITHUB_OUTPUT"
           else
             echo 'ubuntu-os=["noble"]' >> "$GITHUB_OUTPUT"
-            echo 'ubuntu-swift=[{"version":"6.3"}]' >> "$GITHUB_OUTPUT"
           fi
+          echo "ubuntu-swift=$SWIFT" >> "$GITHUB_OUTPUT"
 
   build-ubuntu:
     name: Build on Ubuntu
     needs: configure
     runs-on: ubuntu-latest
+    # The `||` branch (a plain swift:<version>-<os> image) is unreachable while
+    # the matrix emits only the 6.4 nightly entry, which always sets `image`.
+    # Kept deliberately: it is what a release-toolchain lane would use once
+    # Swift 6.4 ships and can be added back to the matrix.
     container: ${{ matrix.swift.image && format('{0}-{1}', matrix.swift.image, matrix.os) || format('swift:{0}-{1}', matrix.swift.version, matrix.os) }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
@@ -150,20 +155,25 @@ jobs:
   # Minimal macOS builds — always runs (SPM + iOS)
   build-macos:
     name: Build on macOS
-    runs-on: macos-26
+    runs-on: ${{ matrix.runs-on }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
         include:
+          # A swift-tools-version: 6.4 manifest needs a Swift 6.4 toolchain, so
+          # these lanes run on the xcode-27 image (Xcode 27.0) rather than
+          # macos-26 / Xcode 26.6, which cannot parse the manifest.
           # SPM build
-          - xcode: "/Applications/Xcode_26.6.app"
+          - runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
 
           # iOS build
           - type: ios
-            xcode: "/Applications/Xcode_26.6.app"
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
             deviceName: "iPhone 17 Pro"
-            osVersion: "26.5"
+            osVersion: "27.0"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -205,36 +215,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macOS
-          - type: macos
-            runs-on: macos-26
-            xcode: "/Applications/Xcode_26.6.app"
-
-          # watchOS
-          - type: watchos
-            runs-on: macos-26
-            xcode: "/Applications/Xcode_26.6.app"
-            deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "26.5"
-            download-platform: true
-
-          # tvOS
-          - type: tvos
-            runs-on: macos-26
-            xcode: "/Applications/Xcode_26.6.app"
-            deviceName: "Apple TV"
-            osVersion: "26.5"
-            download-platform: true
-
-          # visionOS
-          - type: visionos
-            runs-on: macos-26
-            xcode: "/Applications/Xcode_26.6.app"
-            deviceName: "Apple Vision Pro"
-            osVersion: "26.5"
-            download-platform: true
-
           # ── Xcode 27 (preview image, beta toolchain) ─────────────────────
+          # A swift-tools-version: 6.4 manifest needs a Swift 6.4 toolchain, so
+          # every Apple lane runs here; the macos-26 / Xcode 26.6 lanes cannot
+          # parse the manifest and are gone.
+          #
           # `runs-on: xcode-27` is its own image label, not a macos-NN one, and
           # is marked Preview in actions/runner-images. It ships exactly one
           # Xcode — 27.0 beta — so there is no 26.x fallback on this runner.
@@ -244,8 +229,8 @@ jobs:
           # refresh and would silently break these lanes.
           #
           # tvOS uses "Apple TV 4K (3rd generation)" — this image has no plain
-          # "Apple TV" device, unlike macos-26 above. A wrong device name fails
-          # the simulator boot outright.
+          # "Apple TV" device. A wrong device name fails the simulator boot
+          # outright.
           - type: macos
             runs-on: xcode-27
             xcode: "/Applications/Xcode_27.0.app"

@@ -27,7 +27,7 @@ jobs:
   build:
     name: Build bushel-cloud
     runs-on: ubuntu-latest
-    container: swift:6.2-noble
+    container: swiftlang/swift:nightly-6.4.x-noble
     timeout-minutes: 20
 
     permissions:

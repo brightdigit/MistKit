@@ -7,7 +7,7 @@
 EXECUTABLE_NAME = bushel-cloud
 INSTALL_PATH = /usr/local/bin
 BUILD_PATH = .build/release/$(EXECUTABLE_NAME)
-DOCKER_IMAGE = swift:6.2-noble
+DOCKER_IMAGE = swiftlang/swift:nightly-6.4.x-noble
 
 ## build: Build the project in release mode
 build:

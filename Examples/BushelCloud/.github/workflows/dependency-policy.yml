@@ -17,7 +17,7 @@ jobs:
   tagged-dependencies:
     name: Verify tagged dependencies
     runs-on: ubuntu-latest
-    container: swift:6.2-noble
+    container: swiftlang/swift:nightly-6.4.x-noble
     steps:
       - uses: actions/checkout@v4
 

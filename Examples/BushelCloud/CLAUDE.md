@@ -305,7 +305,10 @@ git subrepo pull Packages/BushelKit
 
 ### Swift 6 Configuration
 
-The project uses strict Swift 6 concurrency checking (see `Package.swift:10-78`):
+The package declares `swift-tools-version: 6.4`, so a Swift 6.4 toolchain
+(nightly on Linux, Xcode 27.0 on Apple platforms) is required to build it.
+
+The project uses strict Swift 6 concurrency checking (see `Package.swift`):
 - Full typed throws
 - Complete strict concurrency checking
 - Noncopyable generics, variadic generics

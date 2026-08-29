@@ -43,7 +43,7 @@ public import MistKit
 /// 1. Load ECDSA private key from .pem file
 /// 2. Create ServerToServerAuthManager with key ID and PEM string
 /// 3. Initialize CloudKitService with the auth manager
-/// 4. Use service.modifyRecords() and service.queryRecords() for operations
+/// 4. Use service.modifyRecords() and service.queryAllRecords() for operations
 ///
 /// This pattern allows command-line tools and servers to access CloudKit without user authentication.
 public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCollection {

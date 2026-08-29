@@ -33,7 +33,7 @@
 # **Binary Caching Strategy**:
 # - Pre-building saves ~2 minutes per sync (important for 3x daily schedule)
 # - Fallback ensures robustness when artifacts expire
-# - Both paths use identical Swift 6.2 toolchain for consistency
+# - Both paths use identical Swift 6.4 toolchain for consistency
 #
 # **PEM Validation**:
 # - Early validation prevents cryptic authentication errors during sync
@@ -152,8 +152,9 @@ runs:
         echo "⚠️  Pre-built binary not available (may have expired after retention period)"
         echo "Building fresh binary as fallback..."
 
-        # Build using Swift 6.2 (matches build workflow)
-        docker run --rm -v "$PWD:/workspace" -w /workspace swift:6.2-noble \
+        # Build using Swift 6.4 nightly (matches build workflow; the manifest
+        # declares swift-tools-version: 6.4 and 6.4 has no release toolchain yet)
+        docker run --rm -v "$PWD:/workspace" -w /workspace swiftlang/swift:nightly-6.4.x-noble \
           swift build -c release --static-swift-stdlib
 
         # Copy binary to expected location
