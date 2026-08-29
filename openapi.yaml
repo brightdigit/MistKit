@@ -575,9 +575,21 @@ paths:
             schema:
               type: object
               properties:
-                syncToken:
+                metaSyncToken:
                   type: string
-                  description: Meta-sync token from previous operation
+                  description: >-
+                    The `metaSyncToken` returned by a previous `zones/changes`
+                    response. Omit it to fetch every zone.
+
+                    Verified against a live container (issue #430): this
+                    operation reads and returns `metaSyncToken`, not
+                    `syncToken`. A request sending `syncToken` is silently
+                    ignored and replays the first page. Apple's archived
+                    reference names the key `metaSyncToken` as well; only one
+                    line of its `moreComing` prose calls it `syncToken`.
+
+                    This is specific to `zones/changes` — `changes/database`,
+                    `changes/zone` and `records/changes` all use `syncToken`.
       responses:
         '200':
           description: Zone changes retrieved successfully
@@ -1871,21 +1883,40 @@ components:
 
     ZonesModifyResponse:
       type: object
+      description: |
+        Response body of `zones/modify`. Each entry in `zones` is either a Zone
+        dictionary (success) or a Zone Fetch Error dictionary (failure), per
+        Apple's archived reference. `zones/modify` is a batch endpoint whose
+        realistic failure mode is partial — creating a zone that already exists
+        alongside zones that create cleanly — so a failed entry must not
+        discard the entries that succeeded (see issue #431).
       properties:
         zones:
           type: array
           items:
-            $ref: '#/components/schemas/Zone'
+            oneOf:
+              - $ref: '#/components/schemas/ZoneFetchFailure'
+              - $ref: '#/components/schemas/Zone'
 
     ZoneChangesResponse:
       type: object
+      description: |
+        Response body of the deprecated `zones/changes` operation. Its token
+        key is `metaSyncToken`: a live container returned exactly
+        `[moreComing, metaSyncToken, zones]` at the top level, with no
+        `syncToken` (issue #430). The other change-tracking operations
+        (`changes/database`, `changes/zone`, `records/changes`) use
+        `syncToken`.
       properties:
         zones:
           type: array
           items:
             $ref: '#/components/schemas/Zone'
-        syncToken:
+        metaSyncToken:
           type: string
+          description: >-
+            Identifies a point in the database's change history. Send it back
+            as `metaSyncToken` on the next request to fetch only newer changes.
         moreComing:
           type: boolean
 
@@ -1923,8 +1954,8 @@ components:
     ZoneFetchFailure:
       type: object
       description: |
-        Per-zone error returned inline in the `zones` array of a 200 zone-fetch
-        response (`changes/database`, `changes/zone`). Mirrors
+        Per-zone error returned inline in the `zones` array of a 200 zone
+        response (`changes/database`, `changes/zone`, `zones/modify`). Mirrors
         `RecordOperationFailure` for records, but keyed by `zoneID`.
       required:
         - serverErrorCode

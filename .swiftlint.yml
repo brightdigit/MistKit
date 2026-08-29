@@ -119,6 +119,11 @@ identifier_name:
 excluded:
   - DerivedData
   - .build
+  # Scripts/generate-openapi.sh falls back to building the generator here when
+  # the mise-pinned binary is unavailable (CI, Claude Code web), leaving its
+  # SwiftPM checkouts on disk; the bare `.build` entry above only matches the
+  # repo-root one.
+  - Scripts/OpenAPITools/.build
   - Mint
   - Examples
   - Packages

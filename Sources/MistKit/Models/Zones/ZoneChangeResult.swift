@@ -29,11 +29,11 @@
 
 internal import MistKitOpenAPI
 
-/// The outcome for a single zone in a `changes/database` response.
+/// The outcome for a single zone in a `changes/database` or `zones/modify`
+/// response.
 ///
-/// Each entry in the response's `zones` array is either a changed zone or a
-/// zone fetch error, so a failure on one zone never discards the zones that
-/// succeeded.
+/// Each entry in the response's `zones` array is either a zone or a zone fetch
+/// error, so a failure on one zone never discards the zones that succeeded.
 public typealias ZoneChangeResult = OperationResult<ZoneInfo, ZoneTarget>
 
 extension OperationResult where Success == ZoneInfo, Target == ZoneTarget {
@@ -46,6 +46,22 @@ extension OperationResult where Success == ZoneInfo, Target == ZoneTarget {
       self = .failure(try ZoneOperationFailure(from: failure))
     case .DatabaseChangedZone(let zone):
       self = .success(try ZoneInfo(fromZoneID: zone.zoneID))
+    }
+  }
+
+  /// Converts a per-zone entry from a `zones/modify` response.
+  ///
+  /// `zones/modify` returns the full Zone dictionary on success — unlike
+  /// `changes/database`, which returns only the `zoneID` — so the zone-level
+  /// `syncToken`/`atomic` metadata carries through.
+  internal init(
+    from item: Components.Schemas.ZonesModifyResponse.zonesPayloadPayload
+  ) throws(ConversionError) {
+    switch item {
+    case .ZoneFetchFailure(let failure):
+      self = .failure(try ZoneOperationFailure(from: failure))
+    case .Zone(let zone):
+      self = .success(try ZoneInfo(from: zone))
     }
   }
 }

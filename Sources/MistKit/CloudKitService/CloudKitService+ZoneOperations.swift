@@ -129,8 +129,14 @@ extension CloudKitService {
   /// > returns the same "which zones changed" information, plus per-zone
   /// > failures and a `resultsLimit` knob.
   ///
+  /// The wire key for this operation's token is `metaSyncToken`, not
+  /// `syncToken` — verified against a live container (issue #430); a request
+  /// sending `syncToken` is silently ignored and replays the first page. The
+  /// Swift-facing name stays `syncToken` to match the rest of the API.
+  ///
   /// - Parameters:
-  ///   - syncToken: Optional token from previous fetch (nil = initial fetch)
+  ///   - syncToken: Optional token from previous fetch (nil = initial fetch).
+  ///     Sent on the wire as `metaSyncToken`.
   ///   - database: The CloudKit database scope to query (defaults to `.private`)
   /// - Returns: ZoneChangesResult containing changed zones and new sync token
   /// - Throws: CloudKitError if the fetch fails
@@ -156,7 +162,7 @@ extension CloudKitService {
           ),
           body: .json(
             .init(
-              syncToken: syncToken
+              metaSyncToken: syncToken
             )
           )
         )

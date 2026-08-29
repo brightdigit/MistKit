@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceTests.CreateZone+ErrorHandling.swift
+//  CloudKitServiceTests.DeleteZone+ErrorHandling.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -32,50 +32,33 @@ internal import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceTests.CreateZone {
+extension CloudKitServiceTests.DeleteZone {
   @Suite("Error Handling")
   internal struct ErrorHandling {
-    @Test("createZone() throws .invalidResponse when server returns no zones")
-    internal func createZoneEmptyResponseThrows() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let service = try await CloudKitServiceTests.CreateZone.makeEmptyResponseService()
-
-      await #expect(throws: CloudKitError.self) {
-        _ = try await service.createZone(
-          zoneName: "Articles",
-          database: .private
-        )
-      }
-    }
-
-    @Test("createZone() surfaces the per-zone failure rather than .invalidResponse")
-    internal func createZoneSurfacesZoneOperationFailure() async throws {
+    @Test("deleteZone() throws when CloudKit reports the zone was not found")
+    internal func deleteZoneReportsPerZoneFailure() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
       let service = try CloudKitServiceTests.ModifyZones.makeService(zones: [
         [
-          "zoneID": ["zoneName": "Articles", "ownerName": "_defaultOwner"],
-          "serverErrorCode": "EXISTS",
-          "reason": "Zone already exists",
+          "zoneID": ["zoneName": "Missing", "ownerName": "_defaultOwner"],
+          "serverErrorCode": "ZONE_NOT_FOUND",
+          "reason": "Zone does not exist",
         ]
       ])
 
       do {
-        _ = try await service.createZone(zoneName: "Articles", database: .private)
+        try await service.deleteZone(zoneName: "Missing", database: .private)
         Issue.record("expected .zoneOperationFailed")
       } catch let error as CloudKitError {
         guard case .zoneOperationFailed(let failure) = error else {
           Issue.record("expected .zoneOperationFailed, got \(error)")
           return
         }
-        #expect(failure.zoneName == "Articles")
-        #expect(failure.serverErrorCode == .exists)
-        #expect(failure.reason == "Zone already exists")
+        #expect(failure.zoneName == "Missing")
+        #expect(failure.serverErrorCode == .zoneNotFound)
       }
     }
   }

@@ -3,13 +3,13 @@
 // swift-format-ignore-file
 @_spi(Generated) import OpenAPIRuntime
 #if os(Linux)
+@preconcurrency import struct Foundation.URL
 @preconcurrency import struct Foundation.Data
 @preconcurrency import struct Foundation.Date
-@preconcurrency import struct Foundation.URL
 #else
+import struct Foundation.URL
 import struct Foundation.Data
 import struct Foundation.Date
-import struct Foundation.URL
 #endif
 /// A type that performs HTTP operations defined by the OpenAPI document.
 public protocol APIProtocol: Sendable {
@@ -2321,47 +2321,102 @@ public enum Components {
                 case zones
             }
         }
+        /// Response body of `zones/modify`. Each entry in `zones` is either a Zone
+        /// dictionary (success) or a Zone Fetch Error dictionary (failure), per
+        /// Apple's archived reference. `zones/modify` is a batch endpoint whose
+        /// realistic failure mode is partial — creating a zone that already exists
+        /// alongside zones that create cleanly — so a failed entry must not
+        /// discard the entries that succeeded (see issue #431).
+        ///
+        ///
         /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse`.
         public struct ZonesModifyResponse: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zonesPayload`.
+            @frozen public enum zonesPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zonesPayload/case1`.
+                case ZoneFetchFailure(Components.Schemas.ZoneFetchFailure)
+                /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zonesPayload/case2`.
+                case Zone(Components.Schemas.Zone)
+                public init(from decoder: any Decoder) throws {
+                    var errors: [any Error] = []
+                    do {
+                        self = .ZoneFetchFailure(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    do {
+                        self = .Zone(try .init(from: decoder))
+                        return
+                    } catch {
+                        errors.append(error)
+                    }
+                    throw Swift.DecodingError.failedToDecodeOneOfSchema(
+                        type: Self.self,
+                        codingPath: decoder.codingPath,
+                        errors: errors
+                    )
+                }
+                public func encode(to encoder: any Encoder) throws {
+                    switch self {
+                    case let .ZoneFetchFailure(value):
+                        try value.encode(to: encoder)
+                    case let .Zone(value):
+                        try value.encode(to: encoder)
+                    }
+                }
+            }
             /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zones`.
-            public var zones: [Components.Schemas.Zone]?
+            public typealias zonesPayload = [Components.Schemas.ZonesModifyResponse.zonesPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/ZonesModifyResponse/zones`.
+            public var zones: Components.Schemas.ZonesModifyResponse.zonesPayload?
             /// Creates a new `ZonesModifyResponse`.
             ///
             /// - Parameters:
             ///   - zones:
-            public init(zones: [Components.Schemas.Zone]? = nil) {
+            public init(zones: Components.Schemas.ZonesModifyResponse.zonesPayload? = nil) {
                 self.zones = zones
             }
             public enum CodingKeys: String, CodingKey {
                 case zones
             }
         }
+        /// Response body of the deprecated `zones/changes` operation. Its token
+        /// key is `metaSyncToken`: a live container returned exactly
+        /// `[moreComing, metaSyncToken, zones]` at the top level, with no
+        /// `syncToken` (issue #430). The other change-tracking operations
+        /// (`changes/database`, `changes/zone`, `records/changes`) use
+        /// `syncToken`.
+        ///
+        ///
         /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse`.
         public struct ZoneChangesResponse: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/zones`.
             public var zones: [Components.Schemas.Zone]?
-            /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/syncToken`.
-            public var syncToken: Swift.String?
+            /// Identifies a point in the database's change history. Send it back as `metaSyncToken` on the next request to fetch only newer changes.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/metaSyncToken`.
+            public var metaSyncToken: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ZoneChangesResponse/moreComing`.
             public var moreComing: Swift.Bool?
             /// Creates a new `ZoneChangesResponse`.
             ///
             /// - Parameters:
             ///   - zones:
-            ///   - syncToken:
+            ///   - metaSyncToken: Identifies a point in the database's change history. Send it back as `metaSyncToken` on the next request to fetch only newer changes.
             ///   - moreComing:
             public init(
                 zones: [Components.Schemas.Zone]? = nil,
-                syncToken: Swift.String? = nil,
+                metaSyncToken: Swift.String? = nil,
                 moreComing: Swift.Bool? = nil
             ) {
                 self.zones = zones
-                self.syncToken = syncToken
+                self.metaSyncToken = metaSyncToken
                 self.moreComing = moreComing
             }
             public enum CodingKeys: String, CodingKey {
                 case zones
-                case syncToken
+                case metaSyncToken
                 case moreComing
             }
         }
@@ -2457,8 +2512,8 @@ public enum Components {
                 case zoneID
             }
         }
-        /// Per-zone error returned inline in the `zones` array of a 200 zone-fetch
-        /// response (`changes/database`, `changes/zone`). Mirrors
+        /// Per-zone error returned inline in the `zones` array of a 200 zone
+        /// response (`changes/database`, `changes/zone`, `zones/modify`). Mirrors
         /// `RecordOperationFailure` for records, but keyed by `zoneID`.
         ///
         ///
@@ -8753,19 +8808,21 @@ public enum Operations {
             @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/json`.
                 public struct jsonPayload: Codable, Hashable, Sendable {
-                    /// Meta-sync token from previous operation
+                    /// The `metaSyncToken` returned by a previous `zones/changes` response. Omit it to fetch every zone.
+                    /// Verified against a live container (issue #430): this operation reads and returns `metaSyncToken`, not `syncToken`. A request sending `syncToken` is silently ignored and replays the first page. Apple's archived reference names the key `metaSyncToken` as well; only one line of its `moreComing` prose calls it `syncToken`.
+                    /// This is specific to `zones/changes` — `changes/database`, `changes/zone` and `records/changes` all use `syncToken`.
                     ///
-                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/json/syncToken`.
-                    public var syncToken: Swift.String?
+                    /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/json/metaSyncToken`.
+                    public var metaSyncToken: Swift.String?
                     /// Creates a new `jsonPayload`.
                     ///
                     /// - Parameters:
-                    ///   - syncToken: Meta-sync token from previous operation
-                    public init(syncToken: Swift.String? = nil) {
-                        self.syncToken = syncToken
+                    ///   - metaSyncToken: The `metaSyncToken` returned by a previous `zones/changes` response. Omit it to fetch every zone.
+                    public init(metaSyncToken: Swift.String? = nil) {
+                        self.metaSyncToken = metaSyncToken
                     }
                     public enum CodingKeys: String, CodingKey {
-                        case syncToken
+                        case metaSyncToken
                     }
                 }
                 /// - Remark: Generated from `#/paths/database/{version}/{container}/{environment}/{database}/zones/changes/POST/requestBody/content/application\/json`.

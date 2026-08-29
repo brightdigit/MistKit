@@ -108,7 +108,12 @@ extension CloudKitService: WebBackend {
     let operations =
       create.map { ZoneOperation.create(ZoneID(zoneName: $0)) }
       + delete.map { ZoneOperation.delete(ZoneID(zoneName: $0)) }
-    return try await modifyZones(operations, database: database)
+    let results = try await modifyZones(operations, database: database)
+    // All-or-nothing, matching `webLookupRecords`: `modifyZones` returns a
+    // per-zone `[ZoneChangeResult]`, but the demo collapses it so any single
+    // rejection (e.g. ZONE_NOT_FOUND on a delete) surfaces in the web panel
+    // instead of silently returning fewer zones than were asked for.
+    return try results.map { try $0.get() }
   }
 
   internal func webListSubscriptions(
