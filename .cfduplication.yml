@@ -1,0 +1,4 @@
+# CodeFactor duplication checker ignores generated OpenAPI output.
+# .codefactor.yml exclude alone did not stop Types.swift from grading F (1,680 issues).
+IgnorePatterns:
+  - "Sources/MistKitOpenAPI/**"
