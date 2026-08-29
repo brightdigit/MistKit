@@ -18,7 +18,7 @@ if command -v mise >/dev/null 2>&1 && [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; t
 	eval "$(mise -C "$PACKAGE_DIR" env -s bash)"
 fi
 
-pushd $PACKAGE_DIR
+pushd "$PACKAGE_DIR" || exit
 
 # Prefer the mise-pinned binary. Where it is unavailable — Claude Code web
 # sessions, or any checkout without mise — fall back to Scripts/OpenAPITools,

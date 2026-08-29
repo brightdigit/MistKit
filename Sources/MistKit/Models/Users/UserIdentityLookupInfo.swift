@@ -94,6 +94,9 @@ public struct UserIdentityLookupInfo: Codable, Sendable {
     self.userRecordName = userRecordName
   }
 
+  /// Creates an instance by decoding from the given decoder.
+  /// - Parameter decoder: The decoder to read data from.
+  /// - Throws: `DecodingError` if the wire payload is invalid.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let emailAddress = try container.decodeIfPresent(String.self, forKey: .emailAddress)
@@ -106,6 +109,9 @@ public struct UserIdentityLookupInfo: Codable, Sendable {
     )
   }
 
+  /// Encodes this value into the given encoder.
+  /// - Parameter encoder: The encoder to write data to.
+  /// - Throws: `EncodingError` if the value cannot be encoded.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encodeIfPresent(emailAddress, forKey: .emailAddress)

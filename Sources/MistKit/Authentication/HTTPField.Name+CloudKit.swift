@@ -29,7 +29,6 @@
 
 internal import HTTPTypes
 
-// swiftlint:disable force_unwrapping
 // swift-format-ignore: NeverForceUnwrap
 /// Extension providing static properties for CloudKit-specific HTTP header field names
 extension HTTPField.Name {
@@ -51,4 +50,3 @@ extension HTTPField.Name {
     "X-Apple-CloudKit-Request-SignatureV1"
   )!
 }
-// swiftlint:enable force_unwrapping

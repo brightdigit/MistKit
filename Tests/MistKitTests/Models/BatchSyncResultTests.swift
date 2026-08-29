@@ -160,7 +160,7 @@ internal struct BatchSyncResultTests {
     #expect(result.unclassifiedCount == 0)
     #expect(result.totalCount == 4)
     #expect(result.succeededCount == 3)
-    }
+  }
 
   @Test("[RecordResult].records and .failures partition mixed batches")
   internal func recordResultArrayAccessors() {
