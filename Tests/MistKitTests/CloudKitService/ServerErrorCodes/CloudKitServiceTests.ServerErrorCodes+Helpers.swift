@@ -53,10 +53,12 @@ extension CloudKitServiceTests.ServerErrorCodes {
     )
   }
 
-  /// Payload-free label for the case `error` actually landed in, so a test can
-  /// assert on case identity without requiring `CloudKitError: Equatable`.
+  // Payload-free label for the case `error` actually landed in, so a test can
+  // assert on case identity without requiring `CloudKitError: Equatable`.
   // swiftlint:disable:next cyclomatic_complexity
-  internal static func caseLabel(of error: CloudKitError) -> String {
+  internal static func caseLabel(
+    of error: CloudKitError
+  ) -> String {
     switch error {
     case .accessDenied: return "accessDenied"
     case .atomicFailure: return "atomicFailure"

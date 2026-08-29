@@ -44,6 +44,26 @@ public enum SharePermission: String, Codable, Sendable, Equatable, Hashable, Cas
 
 // MARK: - Internal Conversion
 extension SharePermission {
+  internal var asShareParticipantPayload: Components.Schemas.ShareParticipant.permissionPayload {
+    switch self {
+    case .none: .NONE
+    case .readOnly: .READ_ONLY
+    case .readWrite: .READ_WRITE
+    case .unknown: .UNKNOWN
+    }
+  }
+
+  internal var asRecordRequestPublicPermissionPayload:
+    Components.Schemas.RecordRequest.publicPermissionPayload
+  {
+    switch self {
+    case .none: .NONE
+    case .readOnly: .READ_ONLY
+    case .readWrite: .READ_WRITE
+    case .unknown: .UNKNOWN
+    }
+  }
+
   internal init(from payload: Components.Schemas.ShareParticipant.permissionPayload) {
     switch payload {
     case .NONE: self = .none
@@ -68,26 +88,6 @@ extension SharePermission {
     case .READ_ONLY: self = .readOnly
     case .READ_WRITE: self = .readWrite
     case .UNKNOWN: self = .unknown
-    }
-  }
-
-  internal var asShareParticipantPayload: Components.Schemas.ShareParticipant.permissionPayload {
-    switch self {
-    case .none: .NONE
-    case .readOnly: .READ_ONLY
-    case .readWrite: .READ_WRITE
-    case .unknown: .UNKNOWN
-    }
-  }
-
-  internal var asRecordRequestPublicPermissionPayload:
-    Components.Schemas.RecordRequest.publicPermissionPayload
-  {
-    switch self {
-    case .none: .NONE
-    case .readOnly: .READ_ONLY
-    case .readWrite: .READ_WRITE
-    case .unknown: .UNKNOWN
     }
   }
 }

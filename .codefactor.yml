@@ -1,5 +1,4 @@
 exclude:
   - "Scripts/**/*.py"
-  - "Examples/MistDemo/Sources/MistDemoKit/Resources/js/**"
-  - "Sources/MistKitOpenAPI/Types.swift"
-  - "Sources/MistKitOpenAPI/Client.swift"
+  - "Examples/**"
+  - "Sources/MistKitOpenAPI/**"

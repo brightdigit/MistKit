@@ -32,18 +32,19 @@ internal import MistKitOpenAPI
 
 /// Extension to convert MistKit FieldValue to OpenAPI FieldValueRequest for API requests
 extension Components.Schemas.FieldValueRequest {
-  /// Initialize from MistKit FieldValue for CloudKit API requests.
-  ///
-  /// CloudKit infers a field's type from the value structure, so most values are sent
-  /// without an explicit `type`. The exceptions are scalars whose JSON form is ambiguous —
-  /// a `TIMESTAMP`, `BYTES`, or `DOUBLE` is indistinguishable on the wire from an
-  /// `INT64`/`DOUBLE` number or a `STRING`. For those we tag `type` so CloudKit doesn't
-  /// infer the wrong type and reject the write with `BAD_REQUEST`. Object/array-shaped
-  /// values (reference, asset, location, list) are unambiguous and stay untagged.
-  ///
-  /// The `switch` is deliberately `default`-free: it is the single dispatch point from the
-  /// domain enum to the wire representation, so a new `FieldValue` case breaks the build here
-  /// instead of silently falling into a catch-all.
+  // Initialize from MistKit FieldValue for CloudKit API requests.
+  //
+  // CloudKit infers a field's type from the value structure, so most values are sent
+  // without an explicit `type`. The exceptions are scalars whose JSON form is ambiguous —
+  // a `TIMESTAMP`, `BYTES`, or `DOUBLE` is indistinguishable on the wire from an
+  // `INT64`/`DOUBLE` number or a `STRING`. For those we tag `type` so CloudKit doesn't
+  // infer the wrong type and reject the write with `BAD_REQUEST`. Object/array-shaped
+  // values (reference, asset, location, list) are unambiguous and stay untagged.
+  //
+  // The `switch` is deliberately `default`-free: it is the single dispatch point from the
+  // domain enum to the wire representation, so a new `FieldValue` case breaks the build here
+  // instead of silently falling into a catch-all.
+  // swiftlint:disable:next cyclomatic_complexity
   internal init(from fieldValue: FieldValue) {
     switch fieldValue {
     case .string(let value):

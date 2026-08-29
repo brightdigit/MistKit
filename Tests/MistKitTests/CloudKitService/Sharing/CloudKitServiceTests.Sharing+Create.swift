@@ -50,6 +50,46 @@ extension CloudKitServiceTests.Sharing {
       acceptanceStatus: .invited
     )
 
+    private static func expectRootCreateBody(_ body: Data) throws {
+      let rootJSON = try #require(
+        try JSONSerialization.jsonObject(with: body) as? [String: Any]
+      )
+      #expect(rootJSON["atomic"] as? Bool == false)
+      let rootZone = try #require(rootJSON["zoneID"] as? [String: Any])
+      #expect(rootZone["zoneName"] as? String == "ShareZone")
+      let rootOps = try #require(rootJSON["operations"] as? [[String: Any]])
+      #expect(rootOps.count == 1)
+      let rootRecord = try #require(rootOps[0]["record"] as? [String: Any])
+      #expect(rootRecord["createShortGUID"] as? Bool == true)
+      #expect(rootRecord["recordType"] as? String == "Note")
+      #expect(rootRecord["recordName"] as? String == "root-1")
+      #expect(rootRecord["forRecord"] == nil)
+    }
+
+    private static func expectShareCreateBody(_ body: Data) throws {
+      let shareJSON = try #require(
+        try JSONSerialization.jsonObject(with: body) as? [String: Any]
+      )
+      #expect(shareJSON["atomic"] as? Bool == true)
+      let shareOps = try #require(shareJSON["operations"] as? [[String: Any]])
+      #expect(shareOps.count == 1)
+      let shareRecord = try #require(shareOps[0]["record"] as? [String: Any])
+      #expect(shareRecord["recordType"] as? String == ShareInfo.recordType)
+      #expect(shareRecord["publicPermission"] as? String == "NONE")
+      let forRecord = try #require(shareRecord["forRecord"] as? [String: Any])
+      #expect(forRecord["recordName"] as? String == "root-1")
+      #expect(forRecord["recordChangeTag"] as? String == "tag-1")
+      let participants = try #require(shareRecord["participants"] as? [[String: Any]])
+      #expect(participants.count == 1)
+      #expect(participants[0]["permission"] as? String == "READ_WRITE")
+      #expect(participants[0]["type"] as? String == "USER")
+      #expect(participants[0]["acceptanceStatus"] as? String == "INVITED")
+      let identity = try #require(participants[0]["userIdentity"] as? [String: Any])
+      let lookup = try #require(identity["lookupInfo"] as? [String: Any])
+      #expect(lookup["emailAddress"] as? String == "sharee@example.com")
+      #expect(shareRecord["createShortGUID"] == nil)
+    }
+
     @Test("createShare returns shortGUID, share URL, and root record")
     internal func createShareMapsResult() async throws {
       guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
@@ -159,46 +199,6 @@ extension CloudKitServiceTests.Sharing {
           }
         }
       )
-    }
-
-    private static func expectRootCreateBody(_ body: Data) throws {
-      let rootJSON = try #require(
-        try JSONSerialization.jsonObject(with: body) as? [String: Any]
-      )
-      #expect(rootJSON["atomic"] as? Bool == false)
-      let rootZone = try #require(rootJSON["zoneID"] as? [String: Any])
-      #expect(rootZone["zoneName"] as? String == "ShareZone")
-      let rootOps = try #require(rootJSON["operations"] as? [[String: Any]])
-      #expect(rootOps.count == 1)
-      let rootRecord = try #require(rootOps[0]["record"] as? [String: Any])
-      #expect(rootRecord["createShortGUID"] as? Bool == true)
-      #expect(rootRecord["recordType"] as? String == "Note")
-      #expect(rootRecord["recordName"] as? String == "root-1")
-      #expect(rootRecord["forRecord"] == nil)
-    }
-
-    private static func expectShareCreateBody(_ body: Data) throws {
-      let shareJSON = try #require(
-        try JSONSerialization.jsonObject(with: body) as? [String: Any]
-      )
-      #expect(shareJSON["atomic"] as? Bool == true)
-      let shareOps = try #require(shareJSON["operations"] as? [[String: Any]])
-      #expect(shareOps.count == 1)
-      let shareRecord = try #require(shareOps[0]["record"] as? [String: Any])
-      #expect(shareRecord["recordType"] as? String == ShareInfo.recordType)
-      #expect(shareRecord["publicPermission"] as? String == "NONE")
-      let forRecord = try #require(shareRecord["forRecord"] as? [String: Any])
-      #expect(forRecord["recordName"] as? String == "root-1")
-      #expect(forRecord["recordChangeTag"] as? String == "tag-1")
-      let participants = try #require(shareRecord["participants"] as? [[String: Any]])
-      #expect(participants.count == 1)
-      #expect(participants[0]["permission"] as? String == "READ_WRITE")
-      #expect(participants[0]["type"] as? String == "USER")
-      #expect(participants[0]["acceptanceStatus"] as? String == "INVITED")
-      let identity = try #require(participants[0]["userIdentity"] as? [String: Any])
-      let lookup = try #require(identity["lookupInfo"] as? [String: Any])
-      #expect(lookup["emailAddress"] as? String == "sharee@example.com")
-      #expect(shareRecord["createShortGUID"] == nil)
     }
   }
 }

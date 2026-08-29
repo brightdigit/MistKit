@@ -29,24 +29,30 @@
 
 internal import HTTPTypes
 
-// swift-format-ignore: NeverForceUnwrap
 /// Extension providing static properties for CloudKit-specific HTTP header field names
 extension HTTPField.Name {
   /// CloudKit request key ID header field name
   /// Used for server-to-server authentication to identify the key used for signing
-  internal static let cloudKitRequestKeyID = HTTPField.Name(
+  internal static let cloudKitRequestKeyID = Self.knownFieldName(
     "X-Apple-CloudKit-Request-KeyID"
-  )!
+  )
 
   /// CloudKit request ISO8601 date header field name
   /// Used for server-to-server authentication to provide the timestamp for the request
-  internal static let cloudKitRequestISO8601Date = HTTPField.Name(
+  internal static let cloudKitRequestISO8601Date = Self.knownFieldName(
     "X-Apple-CloudKit-Request-ISO8601Date"
-  )!
+  )
 
   /// CloudKit request signature V1 header field name
   /// Used for server-to-server authentication to provide the ECDSA P-256 signature
-  internal static let cloudKitRequestSignatureV1 = HTTPField.Name(
+  internal static let cloudKitRequestSignatureV1 = Self.knownFieldName(
     "X-Apple-CloudKit-Request-SignatureV1"
-  )!
+  )
+
+  private static func knownFieldName(_ name: String) -> HTTPField.Name {
+    guard let fieldName = HTTPField.Name(name) else {
+      preconditionFailure("Invalid HTTP field name: \(name)")
+    }
+    return fieldName
+  }
 }

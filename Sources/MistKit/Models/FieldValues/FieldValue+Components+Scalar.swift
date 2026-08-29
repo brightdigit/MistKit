@@ -127,18 +127,19 @@ extension FieldValue {
     return makeInferredScalar(from: value)
   }
 
-  /// Build a scalar `FieldValue` from an explicit CloudKit `type`, recovering the value
-  /// from whichever undiscriminated `oneOf` case it happened to decode into.
-  ///
-  /// All five scalar types are validated against the value's category (numeric vs. string)
-  /// by ``FieldValue/ResponseTypeTag``. A declared scalar type whose value can't satisfy it
-  /// (e.g. `TIMESTAMP` over a string) is an internally inconsistent response and throws
-  /// ``ConversionError/typeValueMismatch`` rather than silently coercing to the value's
-  /// shape. Only the genuinely ambiguous scalars (`TIMESTAMP`/`DOUBLE`/`BYTES`) produce a
-  /// value here; `INT64`/`STRING` validate the category then return nil to defer to
-  /// inference — which already yields the right case and, for `INT64`, avoids truncating a
-  /// fractional number. A `nil` or complex/list `type` returns nil and is handled by
-  /// inference or `makeComplexFieldValue`.
+  // Build a scalar `FieldValue` from an explicit CloudKit `type`, recovering the value
+  // from whichever undiscriminated `oneOf` case it happened to decode into.
+  //
+  // All five scalar types are validated against the value's category (numeric vs. string)
+  // by ``FieldValue/ResponseTypeTag``. A declared scalar type whose value can't satisfy it
+  // (e.g. `TIMESTAMP` over a string) is an internally inconsistent response and throws
+  // ``ConversionError/typeValueMismatch`` rather than silently coercing to the value's
+  // shape. Only the genuinely ambiguous scalars (`TIMESTAMP`/`DOUBLE`/`BYTES`) produce a
+  // value here; `INT64`/`STRING` validate the category then return nil to defer to
+  // inference — which already yields the right case and, for `INT64`, avoids truncating a
+  // fractional number. A `nil` or complex/list `type` returns nil and is handled by
+  // inference or `makeComplexFieldValue`.
+  // swiftlint:disable:next cyclomatic_complexity
   private static func makeTypedScalar(
     from value: Components.Schemas.FieldValueResponse.valuePayload,
     type fieldType: Components.Schemas.FieldValueResponse._typePayload?,
