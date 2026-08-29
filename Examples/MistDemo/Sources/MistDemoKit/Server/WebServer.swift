@@ -56,6 +56,9 @@
       internal let containerIdentifier: String
       internal let environment: String
       internal let publicDatabaseAvailable: Bool
+      /// When `true`, the browser signs out any persisted CloudKit JS session
+      /// before `setUpAuth` (auth-token `--reset-auth`).
+      internal let resetAuth: Bool
     }
 
     internal let apiToken: String
@@ -68,6 +71,9 @@
     /// signal the browser that the server is about to shut down (auth-token
     /// flow). When `false`, returns `204 No Content` (web flow stays up).
     internal let terminatesAfterAuth: Bool
+    /// Forwarded to `GET /api/config` so the browser can clear a persisted
+    /// Apple ID session before capturing a new token.
+    internal let resetAuth: Bool
 
     internal static func jsonResponse(
       status: HTTPResponse.Status, bytes: Data
@@ -118,7 +124,8 @@
           apiToken: apiToken,
           containerIdentifier: containerIdentifier,
           environment: environment.rawValue,
-          publicDatabaseAvailable: publicDatabaseAvailable
+          publicDatabaseAvailable: publicDatabaseAvailable,
+          resetAuth: resetAuth
         )
       )
       addConfigEndpoint(api: api, configData: configData)
@@ -133,7 +140,7 @@
       addSubscriptionEndpoints(api: api)
       addTokenEndpoints(api: api)
       addAssetEndpoints(api: api)
-      addPendingEndpoints(api: api)
+      addSharesEndpoints(api: api)
 
       return router
     }

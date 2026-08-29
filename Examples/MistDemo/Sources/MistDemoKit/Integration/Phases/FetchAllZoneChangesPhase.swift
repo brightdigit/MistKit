@@ -30,36 +30,50 @@
 internal import Foundation
 internal import MistKit
 
-/// Exercises ``CloudKitService/fetchAllZoneChanges(syncToken:maxPages:database:)``
-/// against a live container. Failures are non-fatal (matching
-/// ``FetchZoneChangesPhase``) so test pipelines with empty zone change feeds
-/// don't fail the whole suite.
+/// Exercises
+/// ``CloudKitService/fetchAllDatabaseChanges(syncToken:resultsLimit:maxPages:database:)``
+/// against a live container, asserting the auto-paginator completes without
+/// per-zone failures and returns a continuation token.
 internal struct FetchAllZoneChangesPhase: IntegrationPhase {
   internal typealias Input = NoState
   internal typealias Output = NoState
 
-  internal static let title = "Fetch all zone changes"
+  internal static let title = "Fetch all database changes"
   internal static let emoji = "🔁"
-  internal static let apiName = "fetchAllZoneChanges"
+  internal static let apiName = "fetchAllDatabaseChanges"
 
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
 
-    do {
-      let (zones, token) = try await context.service.fetchAllZoneChanges(
-        database: context.database
-      )
-      print("✅ Fetched \(zones.count) zone(s) across all pages")
-      if context.verbose {
-        for zone in zones {
-          print("   - \(zone.zoneName)")
-        }
-        if let token {
-          print("   Sync token: \(token.prefix(30))...")
-        }
+    let (zoneResults, token) = try await context.service.fetchAllDatabaseChanges(
+      database: context.database
+    )
+
+    let failures = zoneResults.compactMap { result -> ZoneOperationFailure? in
+      if case .failure(let failure) = result { return failure }
+      return nil
+    }
+    try ChangeTrackingVerification.requireNoZoneFailures(
+      failures,
+      operation: Self.apiName
+    )
+    try ChangeTrackingVerification.requireDatabaseSyncToken(
+      token,
+      operation: Self.apiName
+    )
+
+    let changedZones = zoneResults.compactMap { result -> ZoneInfo? in
+      if case .success(let zone) = result { return zone }
+      return nil
+    }
+    print("✅ Fetched \(changedZones.count) changed zone(s) across all pages")
+    if context.verbose {
+      for zone in changedZones {
+        print("   - \(zone.zoneName)")
       }
-    } catch {
-      print("⚠️  fetchAllZoneChanges failed (non-fatal): \(error)")
+      if let token {
+        print("   Sync token: \(token.prefix(30))...")
+      }
     }
 
     return NoState()

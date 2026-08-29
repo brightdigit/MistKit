@@ -3,15 +3,20 @@
 # Live end-to-end runs against the real CloudKit container
 # (iCloud.com.brightdigit.MistDemo). Triggered on push to main and
 # release branches, and via manual workflow_dispatch (used to re-run
-# after rotating CLOUDKIT_WEB_AUTH_TOKEN).
+# after rotating CLOUDKIT_WEB_AUTH_TOKEN / CLOUDKIT_SHAREE_WEB_AUTH_TOKEN).
 #
 # Required repo secrets:
-#   CLOUDKIT_API_TOKEN          - Web Services API token
-#   CLOUDKIT_WEB_AUTH_TOKEN     - Web-auth token (rotate when stale; manual)
-#   CLOUDKIT_KEY_ID             - Server-to-server key ID
-#   CLOUDKIT_PRIVATE_KEY_BASE64 - Server-to-server PEM, base64-encoded
-#                                 (base64 -w0 key.pem)
-#   CLOUDKIT_CONTAINER_ID       - iCloud.com.brightdigit.MistDemo
+#   CLOUDKIT_API_TOKEN              - Web Services API token
+#   CLOUDKIT_WEB_AUTH_TOKEN         - Sharer web-auth token (rotate when stale)
+#   CLOUDKIT_SHAREE_WEB_AUTH_TOKEN  - Sharee web-auth token (different Apple ID)
+#   CLOUDKIT_SHAREE_EMAIL           - Sharee iCloud email (invite lookup)
+#   CLOUDKIT_KEY_ID                 - Server-to-server key ID
+#   CLOUDKIT_PRIVATE_KEY_BASE64     - Server-to-server PEM, base64-encoded
+#                                     (base64 -w0 key.pem)
+#   CLOUDKIT_CONTAINER_ID           - iCloud.com.brightdigit.MistDemo
+#
+# Capture both web-auth tokens with `mistdemo auth-tokens --sharee-email …`
+# after rotating, then re-run via workflow_dispatch.
 #
 # Two-job design:
 #   1) `build` runs in `swift:6.3-noble`, installs the Swift Static
@@ -143,6 +148,8 @@ jobs:
         env:
           CLOUDKIT_API_TOKEN: ${{ secrets.CLOUDKIT_API_TOKEN }}
           CLOUDKIT_WEB_AUTH_TOKEN: ${{ secrets.CLOUDKIT_WEB_AUTH_TOKEN }}
+          CLOUDKIT_SHAREE_WEB_AUTH_TOKEN: ${{ secrets.CLOUDKIT_SHAREE_WEB_AUTH_TOKEN }}
+          CLOUDKIT_SHAREE_EMAIL: ${{ secrets.CLOUDKIT_SHAREE_EMAIL }}
           CLOUDKIT_CONTAINER_ID: ${{ secrets.CLOUDKIT_CONTAINER_ID }}
           CLOUDKIT_ENVIRONMENT: development
         run: |

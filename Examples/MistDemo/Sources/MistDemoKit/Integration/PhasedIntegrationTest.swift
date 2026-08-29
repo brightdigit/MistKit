@@ -57,7 +57,8 @@ extension PhasedIntegrationTest {
         completed.append(index)
       }
     } catch {
-      print("\n\u{274C} Error: \(error)")
+      let message = Self.failureMessage(for: error)
+      print("\n\u{274C} Error: \(message)")
       let cleanupAlreadyRan = phases.enumerated().contains { index, phase in
         phase is any CleanupPhaseMarker && completed.contains(index)
       }
@@ -74,7 +75,8 @@ extension PhasedIntegrationTest {
         )
       }
       printSummary(
-        completed: completed, skipped: skipped, errored: true
+        completed: completed, skipped: skipped, errored: true,
+        failureMessage: message
       )
       throw error
     }
@@ -127,7 +129,8 @@ extension PhasedIntegrationTest {
   }
 
   private func printSummary(
-    completed: [Int], skipped: [Int], errored: Bool
+    completed: [Int], skipped: [Int], errored: Bool,
+    failureMessage: String? = nil
   ) {
     print("\n" + String(repeating: "=", count: 80))
     let header =
@@ -164,5 +167,18 @@ extension PhasedIntegrationTest {
     print("  \u{2022} Run with --verbose for detailed output")
     let tip = "  \u{2022} Use --skip-cleanup to inspect records"
     print("\(tip) in CloudKit Console")
+    if let failureMessage {
+      print("\nFailure message (copy):")
+      print(failureMessage)
+    }
+  }
+
+  private static func failureMessage(for error: any Error) -> String {
+    if let localized = error as? any LocalizedError,
+      let description = localized.errorDescription
+    {
+      return description
+    }
+    return String(describing: error)
   }
 }

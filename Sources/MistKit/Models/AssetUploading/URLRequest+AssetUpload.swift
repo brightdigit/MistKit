@@ -30,7 +30,7 @@
 internal import Foundation
 
 #if canImport(FoundationNetworking)
-  public import FoundationNetworking
+  internal import FoundationNetworking
 #endif
 
 #if !os(WASI)

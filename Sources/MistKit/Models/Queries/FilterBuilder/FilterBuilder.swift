@@ -172,41 +172,35 @@ internal struct FilterBuilder {
     return cloudKitListType(for: first)
   }
 
+  // Maps a single element to the `*_LIST` request type its list requires.
+  //
+  // The `switch` is `default`-free so a new `FieldValue` case has to be classified here
+  // rather than silently emitting no `type` tag.
+  // swiftlint:disable:next cyclomatic_complexity
   private static func cloudKitListType(
     for first: FieldValue
   ) -> Components.Schemas.FieldValueRequest._typePayload? {
-    if case .string = first {
+    switch first {
+    case .string:
       return .STRING_LIST
-    }
-    if case .int64 = first {
+    case .int64:
       return .INT64_LIST
-    }
-    if case .double = first {
+    case .double:
       return .DOUBLE_LIST
-    }
-    if case .bytes = first {
+    case .bytes:
       return .BYTES_LIST
-    }
-    if case .date = first {
+    case .date:
       return .TIMESTAMP_LIST
-    }
-    return cloudKitComplexListType(for: first)
-  }
-
-  private static func cloudKitComplexListType(
-    for first: FieldValue
-  ) -> Components.Schemas.FieldValueRequest._typePayload? {
-    if case .reference = first {
+    case .reference:
       return .REFERENCE_LIST
-    }
-    if case .location = first {
+    case .location:
       return .LOCATION_LIST
-    }
-    if case .asset = first {
+    case .asset:
       return .ASSET_LIST
+    case .list:
+      // Nested lists aren't valid in IN/NOT_IN; omit the type and let CloudKit reject
+      // rather than emit an undocumented bare "LIST" tag.
+      return nil
     }
-    // Nested lists aren't valid in IN/NOT_IN; omit the type and let CloudKit reject
-    // rather than emit an undocumented bare "LIST" tag.
-    return nil
   }
 }

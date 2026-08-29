@@ -46,27 +46,40 @@ extension CloudKitService {
   /// and `.shared` databases — `.public` has only `_defaultZone`, so any
   /// modify against it is rejected here without a network round-trip.
   ///
+  /// `zones/modify` is a batch endpoint whose realistic failure mode is
+  /// *partial* — creating five zones where one already exists, or deleting
+  /// zones where one is missing. CloudKit reports those inline in the 200
+  /// response, so each entry is a ``ZoneChangeResult``: `.success` for a zone
+  /// the server returned, `.failure` (a ``ZoneOperationFailure`` carrying the
+  /// zone name, `serverErrorCode` and `reason`) for one it rejected. Use the
+  /// `zones` / `failures` array conveniences to split them, or
+  /// ``OperationResult/get()`` to rethrow a failure.
+  ///
   /// - Parameters:
   ///   - operations: Non-empty array of create/delete operations. Each
   ///     operation's `ZoneID` must have a non-empty `zoneName`.
   ///   - database: Target database. Must not be `.public`.
-  /// - Returns: Array of `ZoneInfo` for the zones returned by the server.
+  /// - Returns: A ``ZoneChangeResult`` per entry the server returned, in
+  ///   response order.
   /// - Throws: `CloudKitError` if validation fails or the request fails.
   ///
   /// Example - Create and delete in one batch:
   /// ```swift
-  /// let zones = try await service.modifyZones(
+  /// let results = try await service.modifyZones(
   ///   [
   ///     .create(ZoneID(zoneName: "Articles")),
   ///     .delete(ZoneID(zoneName: "Archive"))
   ///   ],
   ///   database: .private
   /// )
+  /// for failure in results.failures {
+  ///   print("\(failure.zoneName): \(failure.serverErrorCode.rawValue)")
+  /// }
   /// ```
   public func modifyZones(
     _ operations: [ZoneOperation],
     database: Database
-  ) async throws(CloudKitError) -> [ZoneInfo] {
+  ) async throws(CloudKitError) -> [ZoneChangeResult] {
     do {
       let client = try self.client(for: database)
       let response = try await client.modifyZones(
@@ -87,7 +100,7 @@ extension CloudKitService {
       let zonesData: Components.Schemas.ZonesModifyResponse =
         try await responseProcessor.processModifyZonesResponse(response)
 
-      return try (zonesData.zones ?? []).map { try ZoneInfo(fromZoneID: $0.zoneID) }
+      return try (zonesData.zones ?? []).map { try ZoneChangeResult(from: $0) }
     } catch {
       throw mapToCloudKitError(error, context: "modifyZones")
     }
@@ -105,8 +118,10 @@ extension CloudKitService {
   ///     caller's own zones (typical).
   ///   - database: Target database. Must not be `.public`.
   /// - Returns: `ZoneInfo` for the created zone.
-  /// - Throws: `CloudKitError`. ``CloudKitError/invalidResponse`` if the
-  ///   server returns no zone in its response.
+  /// - Throws: `CloudKitError`. ``CloudKitError/zoneOperationFailed(_:)`` when
+  ///   CloudKit rejects the zone — carrying the zone name, `serverErrorCode`
+  ///   and `reason` — or ``CloudKitError/invalidResponse`` if the server
+  ///   returns no entry at all.
   ///
   /// # Example
   /// ```swift
@@ -125,10 +140,10 @@ extension CloudKitService {
     )
 
     let results = try await modifyZones([operation], database: database)
-    guard let zone = results.first else {
+    guard let result = results.first else {
       throw CloudKitError.invalidResponse
     }
-    return zone
+    return try result.get()
   }
 
   /// Delete a single zone from the target database.
@@ -142,7 +157,9 @@ extension CloudKitService {
   ///   - ownerRecordName: Optional owner record name. Pass `nil` for the
   ///     caller's own zones (typical).
   ///   - database: Target database. Must not be `.public`.
-  /// - Throws: `CloudKitError` if validation fails or the request fails.
+  /// - Throws: `CloudKitError` if validation fails or the request fails, or
+  ///   ``CloudKitError/zoneOperationFailed(_:)`` when CloudKit rejects the
+  ///   delete — for example `ZONE_NOT_FOUND`.
   ///
   /// # Example
   /// ```swift
@@ -160,6 +177,9 @@ extension CloudKitService {
       ZoneID(zoneName: zoneName, ownerName: ownerRecordName)
     )
 
-    _ = try await modifyZones([operation], database: database)
+    let results = try await modifyZones([operation], database: database)
+    for result in results {
+      _ = try result.get()
+    }
   }
 }

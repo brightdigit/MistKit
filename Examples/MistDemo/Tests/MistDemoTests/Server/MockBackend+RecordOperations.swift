@@ -37,12 +37,16 @@
       recordType: String,
       limit: Int?,
       sortBy: [WebRequests.QuerySortField]?,
+      zoneName: String?,
+      zoneOwner: String?,
       database: MistKit.Database
     ) async throws -> [RecordInfo] {
       lastQuery = QueryCall(
         recordType: recordType,
         limit: limit,
         sortBy: sortBy,
+        zoneName: zoneName,
+        zoneOwner: zoneOwner,
         database: database
       )
       try consumePendingError()
@@ -181,20 +185,51 @@
     internal func webZoneChanges(
       syncToken: String?,
       database: MistKit.Database
-    ) async throws -> ZoneChangesResult {
+    ) async throws -> DatabaseChangesResult {
       lastZoneChanges = ZoneChangesCall(
         syncToken: syncToken,
         database: database
       )
       try consumePendingError()
-      return ZoneChangesResult(
+      return DatabaseChangesResult(
         zones: [
-          ZoneInfo(
-            zoneName: "_defaultZone", ownerRecordName: nil, capabilities: []
+          .success(
+            ZoneInfo(
+              zoneName: "_defaultZone", ownerRecordName: nil, capabilities: []
+            )
           )
         ],
         syncToken: "stub-zone-sync-token",
         moreComing: false
+      )
+    }
+
+    internal func webRecordZoneChanges(
+      zones: [ZoneChangesRequest],
+      database: MistKit.Database
+    ) async throws -> RecordZoneChangesResult {
+      lastZoneRecordChanges = ZoneRecordChangesCall(
+        zones: zones,
+        database: database
+      )
+      try consumePendingError()
+      return RecordZoneChangesResult(
+        zones: zones.map { request in
+          .success(
+            ZoneRecordChanges(
+              zone: ZoneInfo(
+                zoneName: request.zoneID.zoneName,
+                ownerRecordName: nil,
+                capabilities: []
+              ),
+              records: [
+                Self.stubRecord(recordType: "Note", recordName: "changed-1")
+              ],
+              syncToken: "stub-zone-record-sync-token",
+              moreComing: false
+            )
+          )
+        }
       )
     }
   }

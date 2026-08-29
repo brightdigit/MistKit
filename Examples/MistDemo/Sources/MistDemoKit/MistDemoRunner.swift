@@ -42,6 +42,7 @@ public enum MistDemoRunner {
     // Register available commands
     #if canImport(Hummingbird)
       await registry.register(AuthTokenCommand.self)
+      await registry.register(AuthTokensCommand.self)
       await registry.register(WebCommand.self)
     #endif
     await registry.register(CurrentUserCommand.self)
@@ -63,13 +64,16 @@ public enum MistDemoRunner {
     await registry.register(ValidateCommand.self)
     await registry.register(DeleteZoneCommand.self)
     await registry.register(FetchChangesCommand.self)
+    await registry.register(FetchDatabaseChangesCommand.self)
+    await registry.register(FetchZoneRecordChangesCommand.self)
     await registry.register(TestPublicCommand.self)
     await registry.register(TestPrivateCommand.self)
     await registry.register(DemoErrorsCommand.self)
+    await registry.register(ResolveCommand.self)
+    await registry.register(AcceptCommand.self)
 
     // Pending MistKit wrappers — print "pending #N" and exit 0. Each
     // command flips to a real implementation when its tracking issue lands.
-    await registry.register(ResolveCommand.self)
     await registry.register(RereferenceAssetCommand.self)
     await registry.register(ListSubscriptionsCommand.self)
     await registry.register(LookupSubscriptionCommand.self)

@@ -37,11 +37,9 @@ if [ "$LINT_MODE" = "NONE" ]; then
 elif [ "$LINT_MODE" = "STRICT" ]; then
 	SWIFTFORMAT_OPTIONS="--configuration .swift-format"
 	SWIFTLINT_OPTIONS="--strict"
-	STRINGSLINT_OPTIONS="--config .strict.stringslint.yml"
 else
 	SWIFTFORMAT_OPTIONS="--configuration .swift-format"
 	SWIFTLINT_OPTIONS=""
-	STRINGSLINT_OPTIONS="--config .stringslint.yml"
 fi
 
 pushd $PACKAGE_DIR

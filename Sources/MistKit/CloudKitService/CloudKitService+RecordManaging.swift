@@ -34,31 +34,13 @@ internal import Foundation
 /// This extension makes CloudKitService compatible with the generic RecordManaging
 /// operations, enabling protocol-oriented patterns for CloudKit operations.
 extension CloudKitService: RecordManaging {
-  /// Query records of a specific type from CloudKit (deprecated single-page form)
+  /// Execute a batch of record operations via modify
   ///
   /// `RecordManaging` is a database-agnostic abstraction predating per-call
   /// `PublicAuthPreference`; this conformance targets the public database
-  /// with `.requires(.serverToServer)` to preserve the previous "S2S when
+  /// with `.prefers(.serverToServer)` to preserve the previous "S2S when
   /// configured" behavior. Callers who need different attribution should
   /// call `CloudKitService` directly with an explicit `Database` value.
-  @available(
-    *, deprecated,
-    message: "Silently truncates at one page. Use queryAllRecords or queryRecords -> QueryResult."
-  )
-  public func queryRecords(recordType: String) async throws -> [RecordInfo] {
-    let result: QueryResult = try await self.queryRecords(
-      recordType: recordType,
-      filters: nil,
-      sortBy: nil,
-      limit: 200,
-      desiredKeys: nil,
-      continuationMarker: nil,
-      database: .public(.prefers(.serverToServer))
-    )
-    return result.records
-  }
-
-  /// Execute a batch of record operations via modify
   public func executeBatchOperations(_ operations: [RecordOperation]) async throws {
     let results = try await self.modifyRecords(
       operations,

@@ -161,4 +161,15 @@ internal struct BatchSyncResultTests {
     #expect(result.totalCount == 4)
     #expect(result.succeededCount == 3)
   }
+
+  @Test("[RecordResult].records and .failures partition mixed batches")
+  internal func recordResultArrayAccessors() {
+    let results: [RecordResult] = [
+      Self.makeSuccess(name: "good"),
+      Self.makeFailure(name: "bad"),
+    ]
+
+    #expect(results.records.map(\.recordName) == ["good"])
+    #expect(results.failures.map(\.identifier) == ["bad"])
+  }
 }

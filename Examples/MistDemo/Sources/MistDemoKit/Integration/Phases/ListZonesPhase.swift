@@ -52,6 +52,12 @@ internal struct ListZonesPhase: IntegrationPhase {
     if context.verbose {
       for zone in zones {
         print("   - \(zone.zoneName)")
+        if let syncToken = zone.syncToken {
+          print("     Sync Token: \(syncToken)")
+        }
+        if let atomic = zone.atomic {
+          print("     Atomic: \(atomic)")
+        }
       }
     }
 

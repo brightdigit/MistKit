@@ -1,10 +1,9 @@
 # Bushel Demo - CloudKit Data Synchronization
 
 [![CI](https://github.com/brightdigit/BushelCloud/actions/workflows/BushelCloud.yml/badge.svg)](https://github.com/brightdigit/BushelCloud/actions/workflows/BushelCloud.yml)
-[![CodeQL](https://github.com/brightdigit/BushelCloud/actions/workflows/codeql.yml/badge.svg)](https://github.com/brightdigit/BushelCloud/actions/workflows/codeql.yml)
 [![codecov](https://codecov.io/gh/brightdigit/BushelCloud/branch/main/graph/badge.svg)](https://codecov.io/gh/brightdigit/BushelCloud)
 [![SwiftLint](https://img.shields.io/badge/SwiftLint-passing-success.svg)](https://github.com/realm/SwiftLint)
-[![Swift 6.2+](https://img.shields.io/badge/Swift-6.2%2B-orange.svg)](https://swift.org)
+[![Swift 6.4+](https://img.shields.io/badge/Swift-6.4%2B-orange.svg)](https://swift.org)
 [![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Windows-blue.svg)](https://swift.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -452,8 +451,8 @@ struct DataSourcePipeline: Sendable {
 ## Requirements
 
 - macOS 14.0+ (for demonstration purposes; MistKit supports macOS 11.0+)
-- Swift 6.2+
-- Xcode 16.2+ (for development)
+- Swift 6.4+ (the package declares `swift-tools-version: 6.4`)
+- Xcode 27.0+ (for development)
 - CloudKit container with appropriate schema (see setup below)
 - CloudKit Server-to-Server Key (Key ID + private .pem file)
 
@@ -545,7 +544,7 @@ bushel-cloud sync
 
 ### Prerequisites
 
-- Swift 6.1 or later
+- Swift 6.4 or later
 - macOS 14.0+ (for full CloudKit functionality)
 - Mint (for linting tools): `brew install mint`
 
@@ -554,9 +553,10 @@ bushel-cloud sync
 Develop with Linux and test multiple Swift versions using VS Code Dev Containers:
 
 **Available configurations:**
-- Swift 6.1 (Ubuntu Jammy)
-- Swift 6.2 (Ubuntu Jammy)
-- Swift 6.2 (Ubuntu Noble) - Default
+- Swift 6.4 nightly (Ubuntu Noble) - Default
+
+Swift 6.4 has no release toolchain yet, so the nightly image is the only one
+that can build a `swift-tools-version: 6.4` manifest.
 
 **Usage:**
 1. Install [VS Code Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
@@ -566,11 +566,11 @@ Develop with Linux and test multiple Swift versions using VS Code Dev Containers
 
 **Or use directly with Docker:**
 ```bash
-# Swift 6.2 on Ubuntu Noble
-docker run -it -v $PWD:/workspace -w /workspace swift:6.2-noble bash
+# Swift 6.4 nightly on Ubuntu Noble
+docker run -it -v $PWD:/workspace -w /workspace swiftlang/swift:nightly-6.4.x-noble bash
 
 # Run tests
-docker run -v $PWD:/workspace -w /workspace swift:6.2-noble swift test
+docker run -v $PWD:/workspace -w /workspace swiftlang/swift:nightly-6.4.x-noble swift test
 ```
 
 ### Quick Start with Make
@@ -644,11 +644,10 @@ This creates `BushelCloud.xcodeproj` from `project.yml`. The project file is git
 
 This project uses GitHub Actions for continuous integration:
 
-- **Multi-platform builds**: Ubuntu (Noble, Jammy), Windows (2022, 2025), macOS 15
-- **Swift versions**: 6.1, 6.2, 6.2-nightly
-- **Xcode versions**: 16.3, 16.4, 26.0
+- **Multi-platform builds**: Ubuntu (Noble, Jammy), macOS + iOS/watchOS/tvOS/visionOS
+- **Swift versions**: 6.4 (nightly toolchain)
+- **Xcode versions**: 27.0
 - **Linting**: SwiftLint, swift-format, periphery
-- **Security**: CodeQL static analysis
 - **Coverage**: Codecov integration
 - **AI Review**: Claude Code for automated PR reviews
 

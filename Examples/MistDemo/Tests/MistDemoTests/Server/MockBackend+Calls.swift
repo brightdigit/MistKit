@@ -39,6 +39,8 @@
       internal let recordType: String
       internal let limit: Int?
       internal let sortBy: [WebRequests.QuerySortField]?
+      internal let zoneName: String?
+      internal let zoneOwner: String?
       internal let database: MistKit.Database
     }
 
@@ -104,9 +106,16 @@
       internal let database: MistKit.Database
     }
 
+    /// Captured arguments from the most recent `webRecordZoneChanges` call.
+    internal struct ZoneRecordChangesCall: Sendable {
+      internal let zones: [ZoneChangesRequest]
+      internal let database: MistKit.Database
+    }
+
     /// Captured arguments from the most recent `webDiscoverUsers` call.
     internal struct DiscoverUsersCall: Sendable {
       internal let emails: [String]
+      internal let phoneNumbers: [String]
       internal let userRecordNames: [String]
     }
 
@@ -153,6 +162,14 @@
       internal let fieldName: String
       internal let recordName: String?
       internal let database: MistKit.Database
+    }
+
+    /// Captured arguments from the most recent `webResolveShares` /
+    /// `webAcceptShares` call.
+    internal struct ResolveOrAcceptSharesCall: Sendable {
+      internal let shortGUIDs: [String]
+      internal let fetchRootRecord: Bool?
+      internal let fields: [String]?
     }
   }
 #endif

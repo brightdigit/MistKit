@@ -27,63 +27,103 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import Configuration
 internal import Foundation
-internal import MistKit
 internal import Testing
 
 @testable import MistDemoKit
 
 @Suite("TestPrivateConfig Tests")
 internal struct TestPrivateConfigTests {
-  @Test("Memberwise defaults: recordCount=10, assetSizeKB=100, flags false, lookupEmail nil")
-  internal func defaults() async throws {
-    let baseConfig = try await MistDemoConfig()
-    let config = TestPrivateConfig(base: baseConfig)
-
-    #expect(config.recordCount == 10)
-    #expect(config.assetSizeKB == 100)
-    #expect(config.skipCleanup == false)
-    #expect(config.verbose == false)
-    #expect(config.lookupEmail == nil)
+  private static func key(_ path: String) -> AbsoluteConfigKey {
+    AbsoluteConfigKey(path.split(separator: ".").map(String.init), context: [:])
   }
 
-  @Test("Memberwise init accepts every custom value")
-  internal func customValues() async throws {
-    let baseConfig = try await MistDemoConfig()
+  private static func configuration(
+    values: [String: ConfigValue]
+  ) -> MistDemoConfiguration {
+    var mapped: [AbsoluteConfigKey: ConfigValue] = [:]
+    for (path, value) in values {
+      mapped[key(path)] = value
+    }
+    return MistDemoConfiguration(testProvider: InMemoryProvider(values: mapped))
+  }
+
+  @Test("TestPrivateConfig retains sharee credentials")
+  internal func retainsShareeCredentials() async throws {
+    let base = try await MistDemoConfig()
     let config = TestPrivateConfig(
-      base: baseConfig,
-      recordCount: 42,
-      assetSizeKB: 2_048,
-      skipCleanup: true,
-      verbose: true,
-      lookupEmail: "user@example.com"
+      base: base,
+      shareeWebAuthToken: "sharee-token-value",
+      shareeEmail: "sharee@example.com"
     )
-
-    #expect(config.recordCount == 42)
-    #expect(config.assetSizeKB == 2_048)
-    #expect(config.skipCleanup == true)
-    #expect(config.verbose == true)
-    #expect(config.lookupEmail == "user@example.com")
+    #expect(config.shareeWebAuthToken == "sharee-token-value")
+    #expect(config.shareeEmail == "sharee@example.com")
   }
 
-  @Test("Configuration init pins database to private regardless of input")
-  internal func pinsDatabaseToPrivate() async throws {
-    // Even though we configure the base for the public DB, TestPrivateConfig
-    // must override to `.private`. The init also requires web-auth credentials.
-    let baseConfig = try await MistDemoConfig(
-      database: .public(.prefers(.serverToServer)),
-      webAuthToken: "wat-xyz"
+  @Test("Configuration init throws when sharee.web.auth.token is missing")
+  internal func missingShareeTokenThrows() async throws {
+    let base = try await MistDemoConfig(
+      configuration: Self.configuration(values: [
+        "api.token": .init(stringLiteral: "api-tok"),
+        "web.auth.token": .init(stringLiteral: "sharer-tok"),
+        "sharee.email": .init(stringLiteral: "sharee@example.com"),
+      ]),
+      base: nil
     )
-    let config = TestPrivateConfig(base: baseConfig.with(database: .private))
+    let configuration = Self.configuration(values: [
+      "api.token": .init(stringLiteral: "api-tok"),
+      "web.auth.token": .init(stringLiteral: "sharer-tok"),
+      "sharee.email": .init(stringLiteral: "sharee@example.com"),
+    ])
 
-    #expect(config.base.database == MistKit.Database.private)
+    await #expect(throws: ConfigurationError.self) {
+      _ = try await TestPrivateConfig(configuration: configuration, base: base)
+    }
   }
 
-  @Test("Memberwise init preserves base configuration values")
-  internal func preservesBase() async throws {
-    let baseConfig = try await MistDemoConfig(containerIdentifier: "iCloud.private.test")
-    let config = TestPrivateConfig(base: baseConfig)
+  @Test("Configuration init throws when sharee.email is missing")
+  internal func missingShareeEmailThrows() async throws {
+    let base = try await MistDemoConfig(
+      configuration: Self.configuration(values: [
+        "api.token": .init(stringLiteral: "api-tok"),
+        "web.auth.token": .init(stringLiteral: "sharer-tok"),
+        "sharee.web.auth.token": .init(stringLiteral: "sharee-tok"),
+      ]),
+      base: nil
+    )
+    let configuration = Self.configuration(values: [
+      "api.token": .init(stringLiteral: "api-tok"),
+      "web.auth.token": .init(stringLiteral: "sharer-tok"),
+      "sharee.web.auth.token": .init(stringLiteral: "sharee-tok"),
+    ])
 
-    #expect(config.base.containerIdentifier == "iCloud.private.test")
+    await #expect(throws: ConfigurationError.self) {
+      _ = try await TestPrivateConfig(configuration: configuration, base: base)
+    }
+  }
+
+  @Test("Configuration init parses required sharee credentials")
+  internal func parsesShareeCredentials() async throws {
+    let base = try await MistDemoConfig(
+      configuration: Self.configuration(values: [
+        "api.token": .init(stringLiteral: "api-tok"),
+        "web.auth.token": .init(stringLiteral: "sharer-tok"),
+      ]),
+      base: nil
+    )
+    let configuration = Self.configuration(values: [
+      "api.token": .init(stringLiteral: "api-tok"),
+      "web.auth.token": .init(stringLiteral: "sharer-tok"),
+      "sharee.web.auth.token": .init(stringLiteral: "sharee-tok"),
+      "sharee.email": .init(stringLiteral: "sharee@example.com"),
+    ])
+
+    let config = try await TestPrivateConfig(
+      configuration: configuration,
+      base: base
+    )
+    #expect(config.shareeWebAuthToken == "sharee-tok")
+    #expect(config.shareeEmail == "sharee@example.com")
   }
 }

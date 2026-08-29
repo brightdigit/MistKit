@@ -203,7 +203,7 @@ GRANT READ, CREATE, WRITE TO "_icloud",
 CloudKit operations have different permission requirements:
 
 **READ operations:**
-- `queryRecords()` - Requires READ permission
+- `queryAllRecords()` - Requires READ permission
 - `fetchRecords()` - Requires READ permission
 
 **CREATE operations:**
@@ -305,7 +305,7 @@ fields["swiftVersion"] = .reference(
 
 **1. Test authentication:**
 ```swift
-let records = try await service.queryRecords(recordType: "RestoreImage", limit: 1)
+let records = try await service.queryAllRecords(recordType: "RestoreImage")
 print("✓ Authentication successful, found \(records.count) records")
 ```
 

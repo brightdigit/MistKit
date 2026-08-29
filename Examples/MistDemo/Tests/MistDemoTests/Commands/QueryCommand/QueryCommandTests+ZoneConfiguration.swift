@@ -51,5 +51,26 @@ extension QueryCommandTests {
 
       #expect(config.zone == "customZone")
     }
+
+    @Test("Default zoneOwner is nil")
+    internal func defaultZoneOwnerIsNil() async throws {
+      let baseConfig = try await MistDemoConfig()
+      let config = QueryConfig(base: baseConfig)
+
+      #expect(config.zoneOwner == nil)
+    }
+
+    @Test("Custom zoneOwner is preserved")
+    internal func customZoneOwnerIsPreserved() async throws {
+      let baseConfig = try await MistDemoConfig()
+      let config = QueryConfig(
+        base: baseConfig,
+        zone: "SharedZone",
+        zoneOwner: "_abc123"
+      )
+
+      #expect(config.zone == "SharedZone")
+      #expect(config.zoneOwner == "_abc123")
+    }
   }
 }

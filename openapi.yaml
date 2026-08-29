@@ -234,6 +234,140 @@ paths:
         '503':
           $ref: '#/components/responses/Failure'
 
+  /database/{version}/{container}/{environment}/{database}/records/resolve:
+    post:
+      summary: Fetch Record Information
+      description: |
+        Resolve one or more share short GUIDs into information about the shared
+        records they identify — the root record, the `cloudKit.share` record,
+        the owner identity, and the caller's participation in each share.
+
+        Routed against the public database with web-auth credentials
+        (user-context auth): Apple's reference documents the path with a fixed
+        `public` database scope, and the operation resolves shares on behalf of
+        the *current* user.
+
+        Documented in Apple's archived CloudKit Web Services Reference
+        (`FetchingRecordInformation`); absent from the current online docs.
+      operationId: resolveShortGUIDs
+      tags:
+        - Records
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shortGUIDs:
+                  type: array
+                  description: The short GUIDs identifying the shares to resolve.
+                  items:
+                    $ref: '#/components/schemas/ShortGUID'
+              required:
+                - shortGUIDs
+      responses:
+        '200':
+          description: Short GUIDs resolved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortGUIDResultResponse'
+        '400':
+          $ref: '#/components/responses/Failure'
+        '401':
+          $ref: '#/components/responses/Failure'
+        '403':
+          $ref: '#/components/responses/Failure'
+        '404':
+          $ref: '#/components/responses/Failure'
+        '409':
+          $ref: '#/components/responses/Failure'
+        '412':
+          $ref: '#/components/responses/Failure'
+        '413':
+          $ref: '#/components/responses/Failure'
+        '429':
+          $ref: '#/components/responses/Failure'
+        '421':
+          $ref: '#/components/responses/Failure'
+        '500':
+          $ref: '#/components/responses/Failure'
+        '503':
+          $ref: '#/components/responses/Failure'
+
+  /database/{version}/{container}/{environment}/{database}/records/accept:
+    post:
+      summary: Accept Share Records
+      description: |
+        Accept one or more shares — each identified by a short GUID — on behalf
+        of the current user. The response mirrors `records/resolve`, reporting
+        the caller's participation status for each accepted share.
+
+        Routed against the public database with web-auth credentials
+        (user-context auth): Apple's reference documents the path with a fixed
+        `public` database scope, and there is no current user to accept on
+        behalf of without web-auth.
+
+        Documented in Apple's archived CloudKit Web Services Reference
+        (`AcceptingShareRecords`); absent from the current online docs.
+      operationId: acceptShares
+      tags:
+        - Records
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shortGUIDs:
+                  type: array
+                  description: The short GUIDs identifying the shares to accept.
+                  items:
+                    $ref: '#/components/schemas/ShortGUID'
+              required:
+                - shortGUIDs
+      responses:
+        '200':
+          description: Shares accepted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortGUIDResultResponse'
+        '400':
+          $ref: '#/components/responses/Failure'
+        '401':
+          $ref: '#/components/responses/Failure'
+        '403':
+          $ref: '#/components/responses/Failure'
+        '404':
+          $ref: '#/components/responses/Failure'
+        '409':
+          $ref: '#/components/responses/Failure'
+        '412':
+          $ref: '#/components/responses/Failure'
+        '413':
+          $ref: '#/components/responses/Failure'
+        '429':
+          $ref: '#/components/responses/Failure'
+        '421':
+          $ref: '#/components/responses/Failure'
+        '500':
+          $ref: '#/components/responses/Failure'
+        '503':
+          $ref: '#/components/responses/Failure'
+
   /database/{version}/{container}/{environment}/{database}/records/changes:
     post:
       summary: Fetch Record Changes
@@ -418,9 +552,65 @@ paths:
 
   /database/{version}/{container}/{environment}/{database}/zones/changes:
     post:
-      summary: Fetch Zone Changes
-      description: Get all changed zones relative to a meta-sync token
+      summary: Fetch Zone Changes (deprecated)
+      description: >-
+        Get all changed zones relative to a meta-sync token.
+
+        **Deprecated by Apple** in favor of `changes/database`
+        (`fetchDatabaseChanges`), which returns the same "which zones changed"
+        information. New code should use `changes/database`.
       operationId: fetchZoneChanges
+      deprecated: true
+      tags:
+        - Zones
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metaSyncToken:
+                  type: string
+                  description: >-
+                    The `metaSyncToken` returned by a previous `zones/changes`
+                    response. Omit it to fetch every zone.
+
+                    Verified against a live container (issue #430): this
+                    operation reads and returns `metaSyncToken`, not
+                    `syncToken`. A request sending `syncToken` is silently
+                    ignored and replays the first page. Apple's archived
+                    reference names the key `metaSyncToken` as well; only one
+                    line of its `moreComing` prose calls it `syncToken`.
+
+                    This is specific to `zones/changes` — `changes/database`,
+                    `changes/zone` and `records/changes` all use `syncToken`.
+      responses:
+        '200':
+          description: Zone changes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneChangesResponse'
+        '400':
+          $ref: '#/components/responses/Failure'
+        '401':
+          $ref: '#/components/responses/Failure'
+
+  /database/{version}/{container}/{environment}/{database}/changes/database:
+    post:
+      summary: Fetch Database Changes
+      description: >-
+        Get the record zones in the database that have changed relative to a
+        sync token. This is the current replacement for the deprecated
+        `zones/changes` operation. Follow up with `changes/zone` to fetch the
+        record changes within each returned zone.
+      operationId: fetchDatabaseChanges
       tags:
         - Zones
       parameters:
@@ -437,17 +627,133 @@ paths:
               properties:
                 syncToken:
                   type: string
-                  description: Meta-sync token from previous operation
+                  description: >-
+                    Identifies a point in the database's change history. Omit
+                    on the initial fetch to start from the beginning.
+                resultsLimit:
+                  type: integer
+                  description: >-
+                    The maximum number of zone changes to fetch. Defaults to
+                    the maximum allowed in a request.
       responses:
         '200':
-          description: Zone changes retrieved successfully
+          description: Database changes retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ZoneChangesResponse'
+                $ref: '#/components/schemas/DatabaseChangesResponse'
         '400':
           $ref: '#/components/responses/Failure'
         '401':
+          $ref: '#/components/responses/Failure'
+        '403':
+          $ref: '#/components/responses/Failure'
+        '404':
+          $ref: '#/components/responses/Failure'
+        '409':
+          $ref: '#/components/responses/Failure'
+        '412':
+          $ref: '#/components/responses/Failure'
+        '413':
+          $ref: '#/components/responses/Failure'
+        '429':
+          $ref: '#/components/responses/Failure'
+        '421':
+          $ref: '#/components/responses/Failure'
+        '500':
+          $ref: '#/components/responses/Failure'
+        '503':
+          $ref: '#/components/responses/Failure'
+
+  /database/{version}/{container}/{environment}/{database}/changes/zone:
+    post:
+      summary: Fetch Record Zone Changes
+      description: >-
+        Get the records that changed within one or more record zones relative
+        to each zone's sync token. Intended for custom zones. Each entry in the
+        response `zones` array is either a per-zone success result or a per-zone
+        error.
+      operationId: fetchRecordZoneChanges
+      tags:
+        - Zones
+      parameters:
+        - $ref: '#/components/parameters/version'
+        - $ref: '#/components/parameters/container'
+        - $ref: '#/components/parameters/environment'
+        - $ref: '#/components/parameters/database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - zones
+              properties:
+                zones:
+                  type: array
+                  description: >-
+                    A zone request dictionary for each zone to fetch record
+                    changes from. Per-zone values override the top-level values
+                    in this request.
+                  items:
+                    $ref: '#/components/schemas/RecordZoneChangesRequestZone'
+                reverse:
+                  type: boolean
+                  description: >-
+                    Whether the changes are returned in reverse order.
+                desiredKeys:
+                  type: array
+                  items:
+                    type: string
+                  description: >-
+                    Record field names limiting the fields returned per changed
+                    record. Omit to fetch all fields.
+                numberAsStrings:
+                  type: boolean
+                  description: >-
+                    Whether number fields should be represented as strings.
+                    Defaults to `false`.
+                resultsLimit:
+                  type: integer
+                  description: >-
+                    The maximum number of records to fetch. Defaults to the
+                    maximum allowed in a request.
+                desiredRecordTypes:
+                  type: array
+                  items:
+                    type: string
+                  description: >-
+                    Record-type names limiting the change feed to specific
+                    record types. Omit to fetch changes from all record types.
+      responses:
+        '200':
+          description: Record zone changes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordZoneChangesResponse'
+        '400':
+          $ref: '#/components/responses/Failure'
+        '401':
+          $ref: '#/components/responses/Failure'
+        '403':
+          $ref: '#/components/responses/Failure'
+        '404':
+          $ref: '#/components/responses/Failure'
+        '409':
+          $ref: '#/components/responses/Failure'
+        '412':
+          $ref: '#/components/responses/Failure'
+        '413':
+          $ref: '#/components/responses/Failure'
+        '429':
+          $ref: '#/components/responses/Failure'
+        '421':
+          $ref: '#/components/responses/Failure'
+        '500':
+          $ref: '#/components/responses/Failure'
+        '503':
           $ref: '#/components/responses/Failure'
 
   /database/{version}/{container}/{environment}/{database}/subscriptions/list:
@@ -1111,6 +1417,39 @@ components:
           description: Record fields with their values (no type metadata)
           additionalProperties:
             $ref: '#/components/schemas/FieldValueRequest'
+        createShortGUID:
+          type: boolean
+          description: |
+            Whether to create a short GUID so this record can be shared. The
+            response echoes the generated GUID back as `shortGUID`.
+        forRecord:
+          $ref: '#/components/schemas/ShareTargetReference'
+        publicPermission:
+          type: string
+          enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
+          description: |
+            The public read/write permissions to apply. Set when creating a
+            `cloudKit.share` record.
+        participants:
+          type: array
+          description: |
+            The participants to invite. Set when creating a `cloudKit.share`
+            record.
+          items:
+            $ref: '#/components/schemas/ShareParticipant'
+
+    ShareTargetReference:
+      type: object
+      description: |
+        Identifies the record being shared when creating a `cloudKit.share`
+        record (the `forRecord` key).
+      properties:
+        recordName:
+          type: string
+        recordChangeTag:
+          type: string
+      required:
+        - recordName
 
     RecordResponse:
       type: object
@@ -1137,6 +1476,38 @@ components:
         deleted:
           type: boolean
           description: Whether the record was deleted
+        shortGUID:
+          type: string
+          description: |
+            The short GUID of a shared record. Present only on records that
+            have been shared (see `createShortGUID` on the request side).
+        share:
+          $ref: '#/components/schemas/ShareReference'
+        publicPermission:
+          type: string
+          enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
+          description: |
+            The public read/write permissions of a shared record. Present on
+            `cloudKit.share` records.
+        participants:
+          type: array
+          description: |
+            The participants in a shared record. Present on `cloudKit.share`
+            records.
+          items:
+            $ref: '#/components/schemas/ShareParticipant'
+        owner:
+          $ref: '#/components/schemas/ShareParticipant'
+        currentUserParticipant:
+          $ref: '#/components/schemas/ShareParticipant'
+
+    ShareReference:
+      type: object
+      description: |
+        A reference to the `cloudKit.share` record governing a shared record.
+      properties:
+        recordName:
+          type: string
 
     FieldValueRequest:
       type: object
@@ -1473,16 +1844,34 @@ components:
         moreComing:
           type: boolean
 
+    Zone:
+      type: object
+      description: >
+        A record zone as returned by the zone endpoints (`zones/list`,
+        `zones/lookup`, `zones/modify`, `zones/changes`). Matches the
+        "Zone Dictionary" in Apple's archived CloudKit Web Services
+        Reference, which documents exactly three keys: `zoneID`,
+        `syncToken`, and `atomic`. `isEager` is deliberately absent — it
+        appears in no primary Apple source (see issue #386).
+      properties:
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        syncToken:
+          type: string
+          description: The current point in the zone's change history.
+        atomic:
+          type: boolean
+          description: >
+            A Boolean value indicating whether this zone supports atomic
+            operations.
+
     ZonesListResponse:
       type: object
       properties:
         zones:
           type: array
           items:
-            type: object
-            properties:
-              zoneID:
-                $ref: '#/components/schemas/ZoneID'
+            $ref: '#/components/schemas/Zone'
 
     ZonesLookupResponse:
       type: object
@@ -1490,36 +1879,175 @@ components:
         zones:
           type: array
           items:
-            type: object
-            properties:
-              zoneID:
-                $ref: '#/components/schemas/ZoneID'
+            $ref: '#/components/schemas/Zone'
 
     ZonesModifyResponse:
       type: object
+      description: |
+        Response body of `zones/modify`. Each entry in `zones` is either a Zone
+        dictionary (success) or a Zone Fetch Error dictionary (failure), per
+        Apple's archived reference. `zones/modify` is a batch endpoint whose
+        realistic failure mode is partial — creating a zone that already exists
+        alongside zones that create cleanly — so a failed entry must not
+        discard the entries that succeeded (see issue #431).
       properties:
         zones:
           type: array
           items:
-            type: object
-            properties:
-              zoneID:
-                $ref: '#/components/schemas/ZoneID'
+            oneOf:
+              - $ref: '#/components/schemas/ZoneFetchFailure'
+              - $ref: '#/components/schemas/Zone'
 
     ZoneChangesResponse:
       type: object
+      description: |
+        Response body of the deprecated `zones/changes` operation. Its token
+        key is `metaSyncToken`: a live container returned exactly
+        `[moreComing, metaSyncToken, zones]` at the top level, with no
+        `syncToken` (issue #430). The other change-tracking operations
+        (`changes/database`, `changes/zone`, `records/changes`) use
+        `syncToken`.
       properties:
         zones:
           type: array
           items:
-            type: object
-            properties:
-              zoneID:
-                $ref: '#/components/schemas/ZoneID'
-        syncToken:
+            $ref: '#/components/schemas/Zone'
+        metaSyncToken:
           type: string
+          description: >-
+            Identifies a point in the database's change history. Send it back
+            as `metaSyncToken` on the next request to fetch only newer changes.
         moreComing:
           type: boolean
+
+    DatabaseChangesResponse:
+      type: object
+      description: |
+        Response body of `changes/database` (Fetching Database Changes). Each
+        entry in `zones` is either a Zone dictionary (success) or a Zone Fetch
+        Error dictionary (failure), per Apple's reference.
+      properties:
+        zones:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/ZoneFetchFailure'
+              - $ref: '#/components/schemas/DatabaseChangedZone'
+        syncToken:
+          type: string
+          description: >-
+            Identifies a point in the database's change history. Pass this in
+            the next request to fetch only newer changes.
+        moreComing:
+          type: boolean
+          description: >-
+            Whether there are more changes to request using the returned
+            `syncToken`.
+
+    DatabaseChangedZone:
+      type: object
+      description: A zone that changed, as returned by `changes/database`.
+      properties:
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+
+    ZoneFetchFailure:
+      type: object
+      description: |
+        Per-zone error returned inline in the `zones` array of a 200 zone
+        response (`changes/database`, `changes/zone`, `zones/modify`). Mirrors
+        `RecordOperationFailure` for records, but keyed by `zoneID`.
+      required:
+        - serverErrorCode
+      properties:
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        serverErrorCode:
+          $ref: '#/components/schemas/OperationFailureServerErrorCode'
+        reason:
+          type: string
+          description: A string indicating the reason for the error.
+        retryAfter:
+          type: integer
+          description: Suggested seconds to wait before retrying. Absent if not retryable.
+        uuid:
+          type: string
+          description: A unique identifier for this error.
+        redirectURL:
+          type: string
+          description: Redirect URL for sign-in; present when serverErrorCode is AUTHENTICATION_REQUIRED.
+
+    RecordZoneChangesRequestZone:
+      type: object
+      description: |
+        A per-zone request entry in the `zones` array of a `changes/zone`
+        request. Carries the same tuning keys as the enclosing request; values
+        set here override the top-level values for this zone.
+      required:
+        - zoneID
+      properties:
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        syncToken:
+          type: string
+          description: >-
+            Identifies a point in this zone's change history. Omit on the
+            initial fetch.
+        reverse:
+          type: boolean
+          description: Whether the changes are returned in reverse order.
+        desiredKeys:
+          type: array
+          items:
+            type: string
+          description: Record field names limiting the fields returned per changed record.
+        numberAsStrings:
+          type: boolean
+          description: Whether number fields should be represented as strings.
+        resultsLimit:
+          type: integer
+          description: The maximum number of records to fetch for this zone.
+        desiredRecordTypes:
+          type: array
+          items:
+            type: string
+          description: Record-type names limiting the change feed for this zone.
+
+    RecordZoneChangesResponse:
+      type: object
+      description: |
+        Response body of `changes/zone` (Fetching Record Zone Changes). Each
+        entry in `zones` is either a Zone Record Fetch dictionary (success) or a
+        Zone Record Fetch Error dictionary (failure), per Apple's reference.
+      properties:
+        zones:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/ZoneFetchFailure'
+              - $ref: '#/components/schemas/RecordZoneChangesZoneResult'
+
+    RecordZoneChangesZoneResult:
+      type: object
+      description: >-
+        A successful per-zone result of `changes/zone`: the records that
+        changed in that zone plus that zone's own sync token and `moreComing`
+        flag.
+      properties:
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecordResponse'
+        syncToken:
+          type: string
+          description: Identifies a point in this zone's change history.
+        moreComing:
+          type: boolean
+          description: >-
+            Whether there are more changes to request for this zone using the
+            returned `syncToken`.
 
     SubscriptionsListResponse:
       type: object
@@ -1646,6 +2174,123 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserIdentity'
+
+    ShortGUID:
+      type: object
+      description: |
+        A short global identifier for a shared record, used to resolve
+        (`records/resolve`) and accept (`records/accept`) shares.
+      properties:
+        value:
+          type: string
+          description: The value of the short global ID.
+        shouldFetchRootRecord:
+          type: boolean
+          description: |
+            Whether the root record should be fetched alongside the share.
+        rootRecordDesiredKeys:
+          type: array
+          description: |
+            Field names limiting the data returned in the root record. When
+            omitted, every field of the root record is returned.
+          items:
+            type: string
+      required:
+        - value
+
+    ShareParticipant:
+      type: object
+      description: A participant in a shared record.
+      properties:
+        userIdentity:
+          $ref: '#/components/schemas/UserIdentity'
+        permission:
+          type: string
+          enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
+          description: The participant's read and write permissions.
+        type:
+          type: string
+          enum: [OWNER, ADMINISTRATOR, USER, PUBLIC_USER, UNKNOWN]
+          description: The type of participant.
+        acceptanceStatus:
+          type: string
+          enum: [INVITED, ACCEPTED, REMOVED, UNKNOWN]
+          description: The status of the participant accepting the shared record.
+
+    ShortGUIDResult:
+      type: object
+      description: |
+        The result of resolving or accepting a single share, as returned by
+        `records/resolve` and `records/accept`.
+      properties:
+        shortGUID:
+          $ref: '#/components/schemas/ShortGUID'
+        containerIdentifier:
+          type: string
+          description: The container holding the shared record.
+        databaseScope:
+          type: string
+          enum: [PUBLIC, PRIVATE, SHARED]
+          description: The database scope holding the shared record.
+        environment:
+          type: string
+          enum: [development, production]
+          description: The container environment holding the shared record.
+        zoneID:
+          $ref: '#/components/schemas/ZoneID'
+        rootRecordName:
+          type: string
+          description: The name of the root record that was shared.
+        rootRecord:
+          $ref: '#/components/schemas/RecordResponse'
+        share:
+          $ref: '#/components/schemas/RecordResponse'
+        ownerIdentity:
+          $ref: '#/components/schemas/UserIdentity'
+        participantPermission:
+          type: string
+          enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
+          description: The caller's read and write permissions on the share.
+        participantStatus:
+          type: string
+          enum: [INVITED, ACCEPTED, REMOVED, UNKNOWN]
+          description: The caller's acceptance status for the share.
+        participantType:
+          type: string
+          enum: [OWNER, ADMINISTRATOR, USER, PUBLIC_USER, UNKNOWN]
+          description: The caller's participant type for the share.
+        webpageURL:
+          type: string
+          description: |
+            The fallback webpage configured in CloudKit Dashboard, used to
+            direct users somewhere when the operation fails.
+        potentialMatchList:
+          type: array
+          description: |
+            When the participant is not identifiable, the potential
+            participants the user can choose from.
+          items:
+            type: object
+            properties:
+              participantId:
+                type: string
+              contactInformation:
+                type: object
+                properties:
+                  emailAddress:
+                    type: string
+                  phoneNumber:
+                    type: string
+
+    ShortGUIDResultResponse:
+      type: object
+      description: |
+        The response body for `records/resolve` and `records/accept`.
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShortGUIDResult'
 
     ContactsResponse:
       type: object

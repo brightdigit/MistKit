@@ -37,13 +37,17 @@ cd Examples/MistDemo
 swift run mistdemo query --record-type Note
 swift run mistdemo create --record-type Note --fields '{"title":"Hi"}'
 swift run mistdemo auth-token              # capture a web-auth token
+swift run mistdemo auth-tokens             # capture sharer + sharee tokens
 swift run mistdemo test-public             # integration suite, public DB
 swift run mistdemo test-private            # integration suite, private DB
 ```
 
 Configuration comes from `MistDemoConfiguration` — flags,
 `CLOUDKIT_*` env vars, or `--config-file ~/.mistdemo/config.json` all
-work.
+work. `test-private` requires both a sharer and a sharee web-auth
+token (`CLOUDKIT_WEB_AUTH_TOKEN` + `CLOUDKIT_SHAREE_WEB_AUTH_TOKEN`) and
+the sharee's iCloud email (`CLOUDKIT_SHAREE_EMAIL`); capture them with
+`mistdemo auth-tokens --sharee-email sharee@example.com`.
 
 ---
 
@@ -70,10 +74,12 @@ CLOUDKIT_API_TOKEN=… swift run mistdemo web
 
 The CLI prints the server URL. The `web` command does **not** open the
 browser by default (the server is long-running and often driven from a
-different machine); pass `--browser` to opt in. The `auth-token` command
-**does** open the browser by default — the captured token is the whole
-point of running it. Sign in with your Apple ID; the server captures the
-web-auth token and the CRUD UI on the page becomes live.
+different machine); pass `--browser` to opt in. The `auth-token` and
+`auth-tokens` commands **do** open the browser by default — the captured
+token(s) are the whole point of running them. Sign in with your Apple ID;
+the server captures the web-auth token and (for `web`) the CRUD UI on the
+page becomes live. Use `auth-tokens` when you need distinct sharer and
+sharee credentials for `test-private`.
 
 ### Options
 
@@ -84,7 +90,7 @@ web-auth token and the CRUD UI on the page becomes live.
 | `--environment <env>` | `development` | `development` or `production` |
 | `--host <host>` | `127.0.0.1` | Bind address |
 | `--port <port>` | `8080` | Server port |
-| `--browser` | on for `auth-token`, off for `web` | Open browser on startup |
+| `--browser` | on for `auth-token` / `auth-tokens`, off for `web` | Open browser on startup |
 | `--no-browser` | — | Suppress the open (wins if both flags set) |
 
 Configuration is read via `MistDemoConfiguration`, so the same keys

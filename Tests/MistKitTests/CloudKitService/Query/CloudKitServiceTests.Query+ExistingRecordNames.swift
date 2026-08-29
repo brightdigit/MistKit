@@ -53,49 +53,5 @@ extension CloudKitServiceTests.Query {
 
       #expect(existing == Set(["record-0", "record-1", "record-2"]))
     }
-
-    @Test("deprecated RecordManaging.queryRecords(recordType:) returns parsed records")
-    @available(
-      *, deprecated,
-      message: "Exercises the deprecated single-page RecordManaging wrapper."
-    )
-    internal func deprecatedQueryRecordsReturnsRecords() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let service = try CloudKitServiceTests.QueryPagination.makeSuccessfulService(
-        recordCount: 2,
-        continuationMarker: nil
-      )
-
-      let records = try await service.queryRecords(recordType: "TestRecord")
-
-      #expect(records.count == 2)
-      #expect(records.map(\.recordName) == ["record-0", "record-1"])
-    }
-
-    @Test("deprecated queryRecords(recordType:database:) returns the records array")
-    @available(
-      *, deprecated,
-      message: "Exercises the deprecated [RecordInfo] query overload."
-    )
-    internal func deprecatedQueryRecordsArrayOverload() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let service = try CloudKitServiceTests.QueryPagination.makeSuccessfulService(
-        recordCount: 2,
-        continuationMarker: nil
-      )
-
-      let records = try await service.queryRecords(
-        recordType: "TestRecord",
-        database: .public(.prefers(.serverToServer))
-      )
-
-      #expect(records.map(\.recordName) == ["record-0", "record-1"])
-    }
   }
 }

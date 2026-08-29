@@ -39,6 +39,10 @@ public enum MistDemoConstants {
     public static let apiToken = "api.token"
     /// Web auth token configuration key.
     public static let webAuthToken = "web.auth.token"
+    /// Sharee web auth token configuration key.
+    public static let shareeWebAuthToken = "sharee.web.auth.token"
+    /// Sharee iCloud email configuration key.
+    public static let shareeEmail = "sharee.email"
     /// Container ID configuration key.
     public static let containerID = "container.id"
     /// Environment configuration key.
@@ -51,6 +55,8 @@ public enum MistDemoConstants {
     public static let recordName = "record.name"
     /// Zone configuration key.
     public static let zone = "zone"
+    /// Zone owner configuration key (ownerName for shared zones).
+    public static let zoneOwner = "zone.owner"
     /// Limit configuration key.
     public static let limit = "limit"
     /// Fields configuration key.
@@ -189,6 +195,8 @@ public enum MistDemoConstants {
     public static let currentUser = "current-user"
     /// Auth-token command name.
     public static let authToken = "auth-token"
+    /// Auth-tokens (sharer + sharee) command name.
+    public static let authTokens = "auth-tokens"
   }
 
   // MARK: - Environment Variables
@@ -200,6 +208,11 @@ public enum MistDemoConstants {
     /// CloudKit web auth token environment variable.
     public static let cloudKitWebAuthToken =
       "CLOUDKIT_WEB_AUTH_TOKEN"
+    /// CloudKit sharee web auth token environment variable.
+    public static let cloudKitShareeWebAuthToken =
+      "CLOUDKIT_SHAREE_WEB_AUTH_TOKEN"
+    /// CloudKit sharee iCloud email environment variable.
+    public static let cloudKitShareeEmail = "CLOUDKIT_SHAREE_EMAIL"
     /// CloudKit container ID environment variable.
     public static let cloudKitContainerID =
       "CLOUDKIT_CONTAINER_ID"

@@ -28,21 +28,52 @@
 //
 
 internal import Foundation
+internal import MistKit
 
-/// Stub phase for `records/resolve`. The pipeline does not wire this phase
-/// into `PublicDatabaseTest` / `PrivateDatabaseTest` yet — it stays available
-/// for `#41` to flip into a real run when the MistKit Swift wrapper lands.
+/// Calls POST `records/resolve`.
+///
+/// Prefers the short GUID supplied via `PhaseContext.shareShortGUID`
+/// (`--share-short-guid` / `CLOUDKIT_SHARE_SHORT_GUID`) since resolving a
+/// share requires a short GUID that already exists — one isn't produced by
+/// any other phase in this pipeline. Skips (non-fatally) when no fixture
+/// short GUID is configured.
 internal struct ResolveRecordsPhase: IntegrationPhase {
   internal typealias Input = NoState
   internal typealias Output = NoState
 
-  internal static let title = "Resolve records (pending #41)"
+  internal static let title = "Resolve shares"
   internal static let emoji = "🔗"
-  internal static let apiName = "resolveRecords"
+  internal static let apiName = "resolveShares"
 
   internal func run(input: NoState, context: PhaseContext) async throws -> NoState {
     print("\n\(Self.emoji) \(Self.title)")
-    PendingStub.printPending(endpoint: "records/resolve", trackingIssue: 41)
+
+    guard let shortGUID = context.shareShortGUID, !shortGUID.isEmpty else {
+      print(
+        """
+        ⏭️  Skipping — no share short GUID available. Set \
+        --share-short-guid or CLOUDKIT_SHARE_SHORT_GUID to exercise \
+        this phase.
+        """
+      )
+      return NoState()
+    }
+
+    let results = try await context.service.resolveShares([
+      ShortGUIDDictionary(value: shortGUID)
+    ])
+
+    print(
+      "✅ Resolved \(results.count) share\(results.count == 1 ? "" : "s")"
+    )
+
+    if context.verbose {
+      for result in results {
+        print("   Root record: \(result.rootRecordName ?? "-")")
+        print("   Participant status: \(result.participantStatus?.rawValue ?? "-")")
+      }
+    }
+
     return NoState()
   }
 }

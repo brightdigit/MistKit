@@ -1,3 +1,30 @@
+## 1.0.0-beta.3
+
+### API & Request Options
+* Add documented request options to query/modify/changes (#383 #384 #385) by @leogdion in https://github.com/brightdigit/MistKit/pull/412
+* Validate complex/list response type tags against value shape (#376) by @leogdion in https://github.com/brightdigit/MistKit/pull/411
+
+### Correctness & Safety
+* Reduce cyclomatic complexity in `FieldValue+Codable`, drop lint disable (#154) by @leogdion in https://github.com/brightdigit/MistKit/pull/414
+
+### Dependencies
+* Remove vendored ConfigKeyKit subrepo; depend on it remotely by @leogdion in https://github.com/brightdigit/MistKit/pull/417
+* Adopt configkeykit in CelestraCloud by @leogdion in https://github.com/brightdigit/MistKit/pull/406
+
+### Tooling & CI
+* Skip windows-2025 Swift 6.1/6.2 in CI matrix (MSVC 14.51 STL needs Clang 20) by @leogdion in https://github.com/brightdigit/MistKit/pull/418
+* Drop obsolete scheme input from example workflows (#403) by @leogdion in https://github.com/brightdigit/MistKit/pull/413
+* Removing Scheme from Workflow by @leogdion in https://github.com/brightdigit/MistKit/pull/404
+
+### MistDemo & Docs
+* Fix MistDemoApp build: explicit inits for `NoteEditView` & `RecordDetailView` by @leogdion in https://github.com/brightdigit/MistKit/pull/420
+* docs(mistdemo): note Apple 2FA "Allow shows no code" workaround by @leogdion in https://github.com/brightdigit/MistKit/pull/422
+* Docs: record content-based CloudKit subscription uniqueness finding (#387) by @leogdion in https://github.com/brightdigit/MistKit/pull/416
+* Docs: APNs token endpoints route under `/device/` not `/database/` (#382) by @leogdion in https://github.com/brightdigit/MistKit/pull/415
+* Small Correction by @leogdion in https://github.com/brightdigit/MistKit/pull/355
+
+**Full Changelog**: https://github.com/brightdigit/MistKit/compare/1.0.0-beta.2...1.0.0-beta.3
+
 ## 1.0.0-beta.2
 
 ### Subscriptions & Push Notifications

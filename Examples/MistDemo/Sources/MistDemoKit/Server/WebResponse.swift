@@ -58,17 +58,51 @@ internal enum WebResponse {
     }
   }
 
-  /// Body returned by `zones/changes`: the changed zones plus the continuation
-  /// `syncToken` and `moreComing` flag from `ZoneChangesResult`.
+  /// Body returned by `zones/changes` (backed by `changes/database`, the
+  /// current replacement for the deprecated `zones/changes` operation): the
+  /// changed zones plus any per-zone failures and the continuation
+  /// `syncToken` / `moreComing` flag from `DatabaseChangesResult`.
   internal struct ZoneChanges: Encodable {
     internal let zones: [ZoneInfo]
+    internal let failures: [ZoneOperationFailure]
     internal let syncToken: String?
     internal let moreComing: Bool
 
-    internal init(from result: ZoneChangesResult) {
-      self.zones = result.zones
+    internal init(from result: DatabaseChangesResult) {
+      self.zones = result.changedZones
+      self.failures = result.failures
       self.syncToken = result.syncToken
       self.moreComing = result.moreComing
+    }
+  }
+
+  /// Body returned by `POST /api/changes/zone`: per-zone record changes,
+  /// mirroring `RecordZoneChangesResult`. `changes/zone` paginates
+  /// independently per zone, so there is no top-level `syncToken` — each
+  /// zone entry carries its own.
+  internal struct ZoneRecordChanges: Encodable {
+    /// One requested zone's outcome: its record changes plus its own
+    /// continuation `syncToken` and `moreComing` flag.
+    internal struct Zone: Encodable {
+      internal let zone: ZoneInfo
+      internal let records: [RecordInfo]
+      internal let syncToken: String?
+      internal let moreComing: Bool
+
+      internal init(from changes: MistKit.ZoneRecordChanges) {
+        self.zone = changes.zone
+        self.records = changes.records
+        self.syncToken = changes.syncToken
+        self.moreComing = changes.moreComing
+      }
+    }
+
+    internal let zones: [Zone]
+    internal let failures: [ZoneOperationFailure]
+
+    internal init(from result: RecordZoneChangesResult) {
+      self.zones = result.changes.map(Zone.init(from:))
+      self.failures = result.failures
     }
   }
 
@@ -115,6 +149,13 @@ internal enum WebResponse {
   /// Body returned by `tokens/register` (no payload from CloudKit).
   internal struct TokenRegistration: Encodable {
     internal let registered: Bool
+  }
+
+  /// Body returned by `records/resolve` and `records/accept`. `ShareRecordInfo`
+  /// already encodes to the wire shape the browser panel wants, so this is a
+  /// thin wrapper.
+  internal struct Shares: Encodable {
+    internal let results: [ShareRecordInfo]
   }
 
   /// Body returned for any handled CloudKit/MistKit error so the UI can

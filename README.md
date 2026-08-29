@@ -9,7 +9,6 @@
 [![License](https://img.shields.io/github/license/brightdigit/MistKit)](LICENSE)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/brightdigit/MistKit/MistKit.yml?label=actions&logo=github&?branch=main)](https://github.com/brightdigit/MistKit/actions)
 [![Codecov](https://img.shields.io/codecov/c/github/brightdigit/MistKit)](https://codecov.io/gh/brightdigit/MistKit)
-[![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/brightdigit/MistKit)](https://www.codefactor.io/repository/github/brightdigit/MistKit)
 [![Maintainability](https://qlty.sh/badges/55637213-d307-477e-a710-f9dba332d955/maintainability.svg)](https://qlty.sh/gh/brightdigit/projects/MistKit)
 [![Documentation](https://img.shields.io/badge/docc-read_documentation-blue)](https://swiftpackageindex.com/brightdigit/MistKit/documentation)
 
@@ -146,10 +145,11 @@ routes via web-auth — MistKit picks the appropriate token manager per call.
 #### 2. Call an Operation (database chosen per call)
 
 ```swift
-let records = try await service.queryRecords(
-    recordType: "Post",
+let result = try await service.queryRecords(
+    Query(recordType: "Post"),
     database: .public(.prefers(.serverToServer))
 )
+let records = result.records
 ```
 
 `Database.public` carries a `PublicAuthPreference`:
@@ -231,9 +231,9 @@ Server-to-server authentication provides enterprise-level access using ECDSA P-2
 
    // Each call selects its database scope explicitly:
    let records = try await service.queryRecords(
-       recordType: "Post",
+       Query(recordType: "Post"),
        database: .public(.requires(.serverToServer))
-   )
+   ).records
    ```
 
    To plug in a custom `TokenManager` (e.g. with shared connection pooling),
@@ -267,9 +267,9 @@ do {
     )
     // Perform operations — each call picks its database, e.g.:
     let posts = try await service.queryRecords(
-        recordType: "Post",
+        Query(recordType: "Post"),
         database: .public(.prefers(.serverToServer))
-    )
+    ).records
 } catch let error as CloudKitError {
     print("CloudKit error: \\(error.localizedDescription)")
 } catch let error as TokenManagerError {
@@ -302,6 +302,9 @@ let zone = try await service.createZone(
     database: .private
 )
 try await service.deleteZone(zoneName: "Notes", database: .private)
+// Batch create/delete via service.modifyZones(_:database:)
+// (takes [ZoneOperation], returns [ZoneChangeResult] — inspect
+// `.zones` and `.failures` for per-zone outcomes).
 
 // Subscriptions
 let subs = try await service.listSubscriptions(database: .private)
@@ -325,6 +328,55 @@ let assets = try await service.rereferenceAssets(
     [(recordName: "rec-1", fieldName: "photo")],
     database: .private
 )
+```
+
+#### Change Tracking
+
+CloudKit exposes four change-tracking endpoints. MistKit wraps all four; each
+single-request primitive has an auto-paginating `fetchAll…` companion.
+
+| Apple endpoint | Purpose | MistKit method | Auto-paginating |
+|---|---|---|---|
+| `records/changes` | Fetching Record Changes | `fetchRecordChanges` | `fetchAllRecordChanges` |
+| `changes/database` | Fetching Database Changes — *which zones* changed | `fetchDatabaseChanges` | `fetchAllDatabaseChanges` |
+| `changes/zone` | Fetching Record Zone Changes — records *within* zones | `fetchRecordZoneChanges` | `fetchAllRecordZoneChanges` |
+| `zones/changes` | Fetching Zone Changes — **deprecated by Apple** | ~~`fetchZoneChanges`~~ | ~~`fetchAllZoneChanges`~~ |
+
+> `zones/changes` is deprecated by Apple in favor of `changes/database`, so
+> `fetchZoneChanges` / `fetchAllZoneChanges` are marked `@available(*, deprecated)`.
+> Use `fetchDatabaseChanges` instead.
+
+The typical database-sync flow asks *which zones changed*, then fetches the
+records inside them:
+
+```swift
+// 1. Which zones changed?
+let database = try await service.fetchDatabaseChanges(
+    syncToken: lastDatabaseToken,
+    database: .private
+)
+
+// 2. What changed inside them?
+let result = try await service.fetchAllRecordZoneChanges(
+    zones: database.changedZones.map {
+        ZoneChangesRequest(zoneID: ZoneID(zoneName: $0.zoneName))
+    },
+    database: .private
+)
+
+for change in result.changes {
+    print("\(change.zone.zoneName): \(change.records.count) changed")
+    // Persist change.syncToken per zone — each zone paginates independently.
+}
+```
+
+Both operations report per-zone problems as data rather than throwing, so one
+bad zone never discards the zones that succeeded:
+
+```swift
+for failure in result.failures {
+    print("\(failure.zoneName) failed: \(failure.serverErrorCode.rawValue)")
+}
 ```
 
 #### Auto-Chunking Conveniences
@@ -450,7 +502,7 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [Discovering User Identities (POST users/discover)](https://github.com/brightdigit/MistKit/issues/27) ✅
 - [x] [Fetching Record Changes (records/changes)](https://github.com/brightdigit/MistKit/issues/40) ✅
 - [x] [Fetching Zones by Identifier (zones/lookup)](https://github.com/brightdigit/MistKit/issues/44) ✅
-- [x] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/48) ✅
+- [x] [Fetching Zone Changes (zones/changes)](https://github.com/brightdigit/MistKit/issues/48) ✅ *(Apple-deprecated — prefer `fetchDatabaseChanges`)*
 - [x] [Fix QueryFilter IN/NOT_IN serialization](https://github.com/brightdigit/MistKit/issues/192)  ✅
 
 ### v1.0.0-beta.1
@@ -493,14 +545,19 @@ MistKit is released under the MIT License. See [LICENSE](LICENSE) for details.
 - [x] [Fetching Users by Record Name (users/lookup/id)](https://github.com/brightdigit/MistKit/issues/35) ✅ *(Apple-deprecated — prefer `discoverAllUserIdentities`)*
 - [x] Auto-chunking conveniences for batch operations ([#389](https://github.com/brightdigit/MistKit/pull/389)) ✅
 
+### v1.0.0-beta.4
+
+- [x] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/41) ✅
+- [x] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/42) ✅
+- [x] [Curated createShare for share URL creation](https://github.com/brightdigit/MistKit/issues/437) ✅
+- [x] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46) ✅
+- [x] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/47) ✅
+- [x] [Clarify change-tracking endpoint coverage](https://github.com/brightdigit/MistKit/issues/401) ✅ *(deprecates `zones/changes` in favor of `changes/database`)*
+
 ### Backlog / Post-beta
 
 - [ ] [Discovering All User Identities (GET users/discover)](https://github.com/brightdigit/MistKit/issues/28)
 - [ ] [Fetching Contacts (users/lookup/contacts)](https://github.com/brightdigit/MistKit/issues/33)
-- [ ] [Fetching Record Information (records/resolve)](https://github.com/brightdigit/MistKit/issues/41)
-- [ ] [Accepting Share Records (records/accept)](https://github.com/brightdigit/MistKit/issues/42)
-- [ ] [Fetching Database Changes (changes/database)](https://github.com/brightdigit/MistKit/issues/46)
-- [ ] [Fetching Record Zone Changes (changes/zone)](https://github.com/brightdigit/MistKit/issues/47)
 - [ ] [Feature: Add custom CloudKit zone support for queries](https://github.com/brightdigit/MistKit/issues/146)
 
 ### v1.0.0

@@ -39,9 +39,9 @@ extension CloudKitError {
     switch self {
     case .httpError(let statusCode):
       return "CloudKit API error: HTTP \(statusCode)"
-    case .httpErrorWithDetails(let statusCode, let serverErrorCode, let reason):
-      return Self.httpDetailsDescription(
-        statusCode: statusCode, serverErrorCode: serverErrorCode, reason: reason
+    case .httpErrorWithDetails(let statusCode, let reason):
+      return Self.simpleReasonDescription(
+        prefix: "CloudKit API error: HTTP \(statusCode)", reason: reason
       )
     case .httpErrorWithRawResponse(let statusCode, let rawResponse):
       return "CloudKit API error: HTTP \(statusCode)\nRaw Response: \(rawResponse)"
@@ -54,6 +54,8 @@ extension CloudKitError {
         + (conversionError.errorDescription ?? "\(conversionError)")
     case .recordOperationFailed(let recordError):
       return Self.recordOperationDescription(recordError)
+    case .zoneOperationFailed(let zoneError):
+      return Self.zoneOperationDescription(zoneError)
     case .subscriptionOperationFailed(let subscriptionError):
       return Self.subscriptionOperationDescription(subscriptionError)
     case .subscriptionLikelyDuplicate(let subscriptionError):
@@ -71,9 +73,7 @@ extension CloudKitError {
         "CloudKit query exceeded pagination limit of \(maxPages) pages "
         + "(collected \(records.count) records)"
     case .zonePaginationLimitExceeded(let maxPages, let zones):
-      return
-        "CloudKit zone-changes exceeded pagination limit of \(maxPages) pages "
-        + "(collected \(zones.count) zones)"
+      return Self.zonePaginationDescription(maxPages: maxPages, zoneCount: zones.count)
     case .missingCredentials(let database, let availability, let reason):
       return Self.missingCredentialsDescription(
         database: database, availability: availability, reason: reason
@@ -82,28 +82,26 @@ extension CloudKitError {
       let location = path.map { "from '\($0)'" } ?? "from inline material"
       return
         "Failed to load CloudKit private key \(location): \(underlying.localizedDescription)"
-    case .quotaExceeded(let reason, let hint):
-      return Self.quotaExceededDescription(reason: reason, hint: hint)
-    case .badRequest(let reason):
-      return Self.simpleReasonDescription(
-        prefix: "CloudKit bad request (HTTP 400 / BAD_REQUEST)", reason: reason
-      )
-    case .atomicFailure(let reason):
-      return Self.simpleReasonDescription(
-        prefix: "CloudKit atomic batch failure (HTTP 400 / ATOMIC_ERROR)", reason: reason
-      )
+    case .accessDenied, .atomicFailure, .authenticationFailed, .authenticationRequired,
+      .badRequest, .conflict, .exists, .internalServerError, .notFound, .quotaExceeded,
+      .throttled, .tryAgainLater, .validatingReferenceError, .zoneNotFound,
+      .unknownServerError:
+      return serverErrorCodeDescription
     }
   }
 
-  private static func httpDetailsDescription(
-    statusCode: Int, serverErrorCode: String?, reason: String?
-  ) -> String {
-    var message = "CloudKit API error: HTTP \(statusCode)"
-    if let serverErrorCode {
-      message += "\nServer Error Code: \(serverErrorCode)"
+  /// Uniform description for every case that models a CloudKit
+  /// `serverErrorCode`, built from ``CloudKitError/serverErrorDetail``.
+  private var serverErrorCodeDescription: String? {
+    guard let detail = serverErrorDetail else {
+      return nil
     }
-    if let reason {
+    var message = "CloudKit \(detail.summary) (HTTP \(detail.statusCode) / \(detail.code))"
+    if let reason = detail.reason {
       message += "\nReason: \(reason)"
+    }
+    if case .quotaExceeded(_, let hint) = self, let hint {
+      message += "\nHint: \(hint.description)"
     }
     return message
   }
@@ -179,16 +177,6 @@ extension CloudKitError {
     return fragment
   }
 
-  private static func networkErrorDescription(_ error: URLError) -> String {
-    var message = "Network error occurred"
-    message += "\nError code: \(error.code.rawValue)"
-    if let url = error.failureURLString {
-      message += "\nFailed URL: \(url)"
-    }
-    message += "\nDescription: \(error.localizedDescription)"
-    return message
-  }
-
   private static func missingCredentialsDescription(
     database: Database, availability: CredentialAvailability, reason: String
   ) -> String {
@@ -202,17 +190,6 @@ extension CloudKitError {
     return
       "Missing credentials for database '\(database.pathSegment)' "
       + "(\(availabilityLabel)): \(reason)"
-  }
-
-  private static func quotaExceededDescription(reason: String?, hint: QuotaHint?) -> String {
-    var message = "CloudKit quota exceeded (HTTP 413 / QUOTA_EXCEEDED)"
-    if let reason {
-      message += "\nReason: \(reason)"
-    }
-    if let hint {
-      message += "\nHint: \(hint.description)"
-    }
-    return message
   }
 
   private static func simpleReasonDescription(prefix: String, reason: String?) -> String {

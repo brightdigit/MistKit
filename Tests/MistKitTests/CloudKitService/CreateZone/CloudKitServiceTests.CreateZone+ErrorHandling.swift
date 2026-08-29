@@ -50,5 +50,33 @@ extension CloudKitServiceTests.CreateZone {
         )
       }
     }
+
+    @Test("createZone() surfaces the per-zone failure rather than .invalidResponse")
+    internal func createZoneSurfacesZoneOperationFailure() async throws {
+      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let service = try CloudKitServiceTests.ModifyZones.makeService(zones: [
+        [
+          "zoneID": ["zoneName": "Articles", "ownerName": "_defaultOwner"],
+          "serverErrorCode": "EXISTS",
+          "reason": "Zone already exists",
+        ]
+      ])
+
+      do {
+        _ = try await service.createZone(zoneName: "Articles", database: .private)
+        Issue.record("expected .zoneOperationFailed")
+      } catch let error as CloudKitError {
+        guard case .zoneOperationFailed(let failure) = error else {
+          Issue.record("expected .zoneOperationFailed, got \(error)")
+          return
+        }
+        #expect(failure.zoneName == "Articles")
+        #expect(failure.serverErrorCode == .exists)
+        #expect(failure.reason == "Zone already exists")
+      }
+    }
   }
 }

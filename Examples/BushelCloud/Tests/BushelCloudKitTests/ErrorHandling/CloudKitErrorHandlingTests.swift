@@ -125,7 +125,7 @@ internal struct CloudKitErrorHandlingTests {
     await service.setQueryError(MockCloudKitError.unknownError("Something went wrong"))
 
     do {
-      _ = try await service.queryRecords(recordType: "RestoreImage")
+      _ = try await service.queryAllRecords(recordType: "RestoreImage")
       Issue.record("Expected unknown error to be thrown")
     } catch let error as MockCloudKitError {
       if case .unknownError(let message) = error {

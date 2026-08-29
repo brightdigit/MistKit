@@ -222,7 +222,7 @@ public struct QueryResult: Codable, Sendable {
 
 Two iteration helpers cover the common cases:
 
-- ``CloudKitService/queryRecords(recordType:filters:sortBy:limit:desiredKeys:continuationMarker:database:)`` — single page.
+- ``CloudKitService/queryRecords(_:limit:desiredKeys:continuationMarker:zoneID:zoneWide:numbersAsStrings:database:)`` — single page.
 - `queryAllRecords(...)` — auto-pagination with an enforced maximum, surfacing ``CloudKitError/paginationLimitExceeded(maxPages:records:)`` with the already-fetched records when the cap is reached.
 
 Sync endpoints follow the same shape: ``RecordChangesResult`` and ``ZoneChangesResult`` carry `syncToken` and `moreComing`. `fetchAllRecordChanges(recordType:syncToken:)` walks the cursor automatically.

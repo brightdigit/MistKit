@@ -35,18 +35,22 @@ extension CloudKitService: WebBackend {
     recordType: String,
     limit: Int?,
     sortBy: [WebRequests.QuerySortField]?,
+    zoneName: String?,
+    zoneOwner: String?,
     database: MistKit.Database
   ) async throws -> [RecordInfo] {
     let querySorts = sortBy?.map { sort in
       QuerySort.sort(sort.field, ascending: sort.ascending)
     }
+    let zoneID = zoneName.map {
+      ZoneID(zoneName: $0, ownerName: zoneOwner)
+    }
     let result = try await queryRecords(
-      recordType: recordType,
-      filters: nil,
-      sortBy: querySorts,
+      Query(recordType: recordType, sortBy: querySorts ?? []),
       limit: limit,
       desiredKeys: nil,
       continuationMarker: nil,
+      zoneID: zoneID,
       database: database
     )
     return result.records
@@ -104,7 +108,12 @@ extension CloudKitService: WebBackend {
     let operations =
       create.map { ZoneOperation.create(ZoneID(zoneName: $0)) }
       + delete.map { ZoneOperation.delete(ZoneID(zoneName: $0)) }
-    return try await modifyZones(operations, database: database)
+    let results = try await modifyZones(operations, database: database)
+    // All-or-nothing, matching `webLookupRecords`: `modifyZones` returns a
+    // per-zone `[ZoneChangeResult]`, but the demo collapses it so any single
+    // rejection (e.g. ZONE_NOT_FOUND on a delete) surfaces in the web panel
+    // instead of silently returning fewer zones than were asked for.
+    return try results.map { try $0.get() }
   }
 
   internal func webListSubscriptions(

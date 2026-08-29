@@ -109,7 +109,8 @@ public func withSignalHandling<T: Sendable>(
 ///
 /// Pass `seconds: nil` to run until a signal (Ctrl+C / SIGTERM) arrives —
 /// used by long-running commands like `mistdemo web`. Pass a positive value
-/// to cap the wait — used by one-shot commands like `mistdemo auth-token`.
+/// to cap the wait — used by one-shot commands like `mistdemo auth-token`
+/// and `mistdemo auth-tokens`.
 public func withTimeoutAndSignals<T: Sendable>(
   seconds: Double?,
   operation: @escaping @Sendable () async throws -> T

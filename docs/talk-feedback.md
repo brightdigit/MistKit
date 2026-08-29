@@ -5,6 +5,7 @@ Notes from the Riverside dry run with Evan and Josh. The Keynote deck lives outs
 ## Source
 
 - Riverside dry run with Evan + Josh
+- Raw transcript: [`docs/transcriptions/transcript.txt`](https://github.com/brightdigit/MistKit/blob/archive/talk-prep-2026-05-17/docs/transcriptions/transcript.txt) (archived at the `archive/talk-prep-2026-05-17` tag; removed from the working tree)
 - Self-reported deck completeness during the run: ~60%
 
 ## What's Working

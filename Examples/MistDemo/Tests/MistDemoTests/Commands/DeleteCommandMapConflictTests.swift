@@ -44,12 +44,30 @@ internal struct DeleteCommandMapConflictTests {
     #expect(reason == nil)
   }
 
-  @Test("Maps httpErrorWithDetails 409 to .conflict including the reason")
+  @Test("Maps the CONFLICT server code to .conflict including the reason")
+  internal func conflictServerCode() {
+    let result = DeleteCommand.mapConflict(.conflict(reason: "Change tag mismatch"))
+    guard case .conflict(let reason) = result else {
+      Issue.record("Expected .conflict, got \(String(describing: result))")
+      return
+    }
+    #expect(reason == "Change tag mismatch")
+  }
+
+  @Test("Maps the EXISTS server code to .conflict including the reason")
+  internal func existsServerCode() {
+    let result = DeleteCommand.mapConflict(.exists(reason: "record already exists"))
+    guard case .conflict(let reason) = result else {
+      Issue.record("Expected .conflict, got \(String(describing: result))")
+      return
+    }
+    #expect(reason == "record already exists")
+  }
+
+  @Test("Maps a codeless httpErrorWithDetails 409 to .conflict including the reason")
   internal func httpErrorWithDetails409() {
     let result = DeleteCommand.mapConflict(
-      .httpErrorWithDetails(
-        statusCode: 409, serverErrorCode: "ATOMIC_ERROR", reason: "Change tag mismatch"
-      )
+      .httpErrorWithDetails(statusCode: 409, reason: "Change tag mismatch")
     )
     guard case .conflict(let reason) = result else {
       Issue.record("Expected .conflict, got \(String(describing: result))")

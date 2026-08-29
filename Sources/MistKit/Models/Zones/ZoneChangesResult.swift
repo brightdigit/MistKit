@@ -36,7 +36,11 @@ internal import MistKitOpenAPI
 public struct ZoneChangesResult: Codable, Sendable {
   /// Zones that have changed
   public let zones: [ZoneInfo]
-  /// Token to use for next fetch to get incremental changes
+  /// Token to use for next fetch to get incremental changes.
+  ///
+  /// Carried on the wire as `metaSyncToken` — `zones/changes` is the one
+  /// change-tracking operation that does not name its token `syncToken`
+  /// (issue #430). The Swift name is unchanged.
   public let syncToken: String?
   /// Whether more changes are available (for large zone change sets)
   public let moreComing: Bool
@@ -55,10 +59,10 @@ public struct ZoneChangesResult: Codable, Sendable {
   internal init(from response: Components.Schemas.ZoneChangesResponse) throws(ConversionError) {
     var zones: [ZoneInfo] = []
     for zone in response.zones ?? [] {
-      zones.append(try ZoneInfo(fromZoneID: zone.zoneID))
+      zones.append(try ZoneInfo(from: zone))
     }
     self.zones = zones
-    self.syncToken = response.syncToken
+    self.syncToken = response.metaSyncToken
     self.moreComing = response.moreComing ?? false
   }
 }

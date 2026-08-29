@@ -43,6 +43,8 @@ internal protocol WebBackend: Sendable {
     recordType: String,
     limit: Int?,
     sortBy: [WebRequests.QuerySortField]?,
+    zoneName: String?,
+    zoneOwner: String?,
     database: MistKit.Database
   ) async throws -> [RecordInfo]
 
@@ -97,12 +99,18 @@ internal protocol WebBackend: Sendable {
   func webZoneChanges(
     syncToken: String?,
     database: MistKit.Database
-  ) async throws -> ZoneChangesResult
+  ) async throws -> DatabaseChangesResult
+
+  func webRecordZoneChanges(
+    zones: [ZoneChangesRequest],
+    database: MistKit.Database
+  ) async throws -> RecordZoneChangesResult
 
   func webFetchCaller() async throws -> UserInfo
 
   func webDiscoverUsers(
     emails: [String],
+    phoneNumbers: [String],
     userRecordNames: [String]
   ) async throws -> [UserIdentity]
 
@@ -148,6 +156,18 @@ internal protocol WebBackend: Sendable {
     recordName: String?,
     database: MistKit.Database
   ) async throws -> AssetUploadReceipt
+
+  func webResolveShares(
+    shortGUIDs: [String],
+    fetchRootRecord: Bool?,
+    fields: [String]?
+  ) async throws -> [ShareRecordInfo]
+
+  func webAcceptShares(
+    shortGUIDs: [String],
+    fetchRootRecord: Bool?,
+    fields: [String]?
+  ) async throws -> [ShareRecordInfo]
 }
 
 // The `CloudKitService: WebBackend` conformance lives in

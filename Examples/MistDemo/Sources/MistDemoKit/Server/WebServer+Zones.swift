@@ -33,7 +33,8 @@
   internal import MistKit
 
   extension WebServer {
-    /// Register every zone route: `modify`, `list`, `lookup`, and `changes`.
+    /// Register every zone route: `modify`, `list`, `lookup`, `changes`, and
+    /// the follow-up `changes/zone` record-level route.
     internal func addZonesEndpoints(
       api: RouterGroup<BasicRequestContext>
     ) {
@@ -41,6 +42,7 @@
       addZonesListEndpoint(api: api)
       addZonesLookupEndpoint(api: api)
       addZonesChangesEndpoint(api: api)
+      addZoneRecordChangesEndpoint(api: api)
     }
 
     /// `POST /api/zones/modify` — create and/or delete zones in one batch,
@@ -123,7 +125,11 @@
     }
 
     /// `POST /api/zones/changes` — database-level zone changes since an
-    /// optional continuation `syncToken`.
+    /// optional continuation `syncToken`. Backed by `changes/database`, the
+    /// current replacement for the deprecated `zones/changes` operation;
+    /// reports *which* zones changed. Follow up with `changes/zone`
+    /// (``addZoneRecordChangesEndpoint(api:)``) to fetch the record changes
+    /// inside them.
     private func addZonesChangesEndpoint(
       api: RouterGroup<BasicRequestContext>
     ) {
@@ -144,6 +150,40 @@
           )
           return try WebJSON.encoder().encode(
             WebResponse.ZoneChanges(from: result)
+          )
+        }
+      }
+    }
+
+    /// `POST /api/changes/zone` — record changes within one or more zones,
+    /// mirroring CloudKit Web Services `changes/zone`. Each zone paginates
+    /// independently, carrying its own `syncToken` and `moreComing` flag.
+    private func addZoneRecordChangesEndpoint(
+      api: RouterGroup<BasicRequestContext>
+    ) {
+      let tokenStore = self.tokenStore
+      let backendFactory = self.backendFactory
+      api.post("changes/zone") { request, context -> Response in
+        guard let token = await tokenStore.currentToken else {
+          return Response(status: .unauthorized)
+        }
+        let body = try await request.decode(
+          as: WebRequests.ZoneRecordChanges.self, context: context
+        )
+        return try await Self.runOperation { () -> Data in
+          let backend = try backendFactory.make(token)
+          let zones = body.zones.map {
+            ZoneChangesRequest(
+              zoneID: ZoneID(zoneName: $0.zoneName),
+              syncToken: $0.syncToken
+            )
+          }
+          let result = try await backend.webRecordZoneChanges(
+            zones: zones,
+            database: body.database
+          )
+          return try WebJSON.encoder().encode(
+            WebResponse.ZoneRecordChanges(from: result)
           )
         }
       }

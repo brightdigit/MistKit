@@ -71,7 +71,7 @@ extension CloudKitServiceTests.Tokens {
       }
     }
 
-    @Test("createAPNsToken() maps a 401 to .httpErrorWithDetails")
+    @Test("createAPNsToken() maps a 401 AUTHENTICATION_FAILED to .authenticationFailed")
     internal func createMapsUnauthorized() async throws {
       guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
@@ -89,12 +89,12 @@ extension CloudKitServiceTests.Tokens {
         )
         Issue.record("expected createAPNsToken to throw")
       } catch let error as CloudKitError {
-        guard case .httpErrorWithDetails(let statusCode, let serverErrorCode, _) = error else {
-          Issue.record("expected .httpErrorWithDetails, got \(error)")
+        guard case .authenticationFailed = error else {
+          Issue.record("expected .authenticationFailed, got \(error)")
           return
         }
-        #expect(statusCode == 401)
-        #expect(serverErrorCode == "AUTHENTICATION_FAILED")
+        #expect(error.httpStatusCode == 401)
+        #expect(error.serverErrorCode == "AUTHENTICATION_FAILED")
       }
     }
 

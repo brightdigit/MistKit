@@ -1,7 +1,7 @@
 // swift-tools-version: 6.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
-// swiftlint:disable explicit_acl explicit_top_level_acl
+// swiftlint:disable explicit_acl explicit_top_level_acl file_name
 
 import PackageDescription
 
