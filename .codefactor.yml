@@ -1,5 +1,5 @@
 exclude:
-  - "Scripts/mermaid-to-pptx.py"
+  - "Scripts/**/*.py"
   - "Examples/MistDemo/Sources/MistDemoKit/Resources/js/**"
   - "Sources/MistKitOpenAPI/Types.swift"
   - "Sources/MistKitOpenAPI/Client.swift"
