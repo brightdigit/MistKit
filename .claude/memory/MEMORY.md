@@ -39,3 +39,4 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [#419 already fixed in beta.3](project_419_fixed_in_beta3.md) — MistDemoApp view inits shipped in 5a58120; verified building on macOS Swift 6.3.2, do not re-implement
 - [Never git stash in this multi-worktree repo](feedback_never_git_stash_multiworktree.md) — The stash stack is shared across worktrees; a pop in one can bury a sibling branch's WIP. Commit instead.
 - [cloudkit.share wire casing](project_cloudkit_share_record_type_casing.md) — Live API wants `cloudkit.share` (lowercase k); archived docs' `cloudKit.share` yields "Cannot share - no such record exists to share"
+- [MISTKIT_BRANCH pin resolves tags too](project_mistkit_branch_pin_resolves_tags.md) — `git ls-remote` matches tags; a tag value silently pins the old release and greens example CI without testing the branch
