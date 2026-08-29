@@ -654,14 +654,13 @@ Note: Currently only placeholder tests exist (demo project focused on CloudKit p
 ### GitHub Actions Workflows
 
 - **BushelCloud.yml** - Main CI with multi-platform testing (Ubuntu, Windows, macOS)
-- **codeql.yml** - Security analysis
 - **claude.yml** - Claude Code integration for issues/PRs
 - **claude-code-review.yml** - Automated PR reviews
 
 ### Branch Protection
 
 The `main` branch requires:
-- All 14 status checks passing (multi-platform builds + lint + CodeQL)
+- Multi-platform builds + lint status checks passing
 - Pull request reviews
 - Conversation resolution
 
