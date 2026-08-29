@@ -1,3 +1,31 @@
+## 1.0.0-beta.4
+
+### Change Tracking
+* Add changes/database and changes/zone endpoints; deprecate zones/changes (#401, #47, #46) by @leogdion in https://github.com/brightdigit/MistKit/pull/429
+* modifyZones per-zone failures (#431) + zones/changes metaSyncToken (#430) by @leogdion in https://github.com/brightdigit/MistKit/pull/443
+
+### Zones & Queries
+* Add confirmed zone metadata (syncToken, atomic) to zone schemas (#386) by @leogdion in https://github.com/brightdigit/MistKit/pull/427
+* Add custom/shared zone support to the query path (#146) by @leogdion in https://github.com/brightdigit/MistKit/pull/426
+
+### Sharing
+* Add records/resolve and records/accept share operations (#41, #42) by @leogdion in https://github.com/brightdigit/MistKit/pull/428
+
+### API Cleanup
+* Remove deprecated API, model server error codes, refactor FieldValue conversion, add cloud toolchain (#424, #421, #378, #358, #295) by @leogdion in https://github.com/brightdigit/MistKit/pull/424
+
+### MistDemo & Tooling
+* Add phone-number support to MistDemo web users/discover (#398, #399) by @leogdion in https://github.com/brightdigit/MistKit/pull/425
+* Clear two Linux build warnings (#433) by @leogdion in https://github.com/brightdigit/MistKit/pull/442
+
+### Tooling & CI
+* Xcode 26.6 / simulator 26.5, and Swift 6.4 in the ubuntu matrix by @leogdion in https://github.com/brightdigit/MistKit/pull/432
+* Add Xcode 27 / OS 27.0 platform lanes alongside the 26.x lanes by @leogdion in https://github.com/brightdigit/MistKit/pull/434
+* Cancel superseded runs on the five unguarded workflows by @leogdion in https://github.com/brightdigit/MistKit/pull/435
+* Beta.4 housekeeping: CodeFactor removal, example subrepo/CI pins (Swift 6.4 nightly), sharee auth-tokens, custom-zone query hardening (#445), CelestraCloud Swift 6.4 migration, and BushelCloud CodeQL drop by @leogdion in https://github.com/brightdigit/MistKit/commit/c5a4cd04f9512964596411c80589984d24b4e1b8
+
+**Full Changelog**: https://github.com/brightdigit/MistKit/compare/1.0.0-beta.3...1.0.0-beta.4
+
 ## 1.0.0-beta.3
 
 ### API & Request Options
