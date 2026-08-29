@@ -47,10 +47,11 @@ extension FieldValue {
     /// `LIST`).
     case complex(ExpectedComplexValue)
 
-    /// Classify a declared response `type`.
-    ///
-    /// `ASSETID` shares `AssetValue` — and therefore the `.asset` classification — with
-    /// `ASSET`; there is no distinct domain case for it.
+    // Classify a declared response `type`.
+    //
+    // `ASSETID` shares `AssetValue` — and therefore the `.asset` classification — with
+    // `ASSET`; there is no distinct domain case for it.
+    // swiftlint:disable:next cyclomatic_complexity
     internal init(_ fieldType: Components.Schemas.FieldValueResponse._typePayload) {
       switch fieldType {
       case .TIMESTAMP: self = .numeric(.timestamp)

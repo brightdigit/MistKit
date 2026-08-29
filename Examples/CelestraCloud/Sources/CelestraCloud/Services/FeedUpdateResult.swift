@@ -27,6 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import CelestraCloudKit
+internal import Foundation
+
 /// Result of processing a single feed update
 internal enum FeedUpdateResult: Sendable, Equatable {
   // MARK: - Cases
@@ -35,4 +38,27 @@ internal enum FeedUpdateResult: Sendable, Equatable {
   case notModified
   case skipped(reason: String)
   case error(message: String)
+
+  // MARK: - Resolving
+
+  /// Combines article-sync outcomes with the feed-metadata write result.
+  ///
+  /// Feed-level metadata may still record an RSS fetch as successful
+  /// (`failureCount: 0`) even when some article creates/updates failed.
+  /// Any article-batch failure turns the overall feed update into `.error`
+  /// so callers (and CI with `--update-max-failures 0`) see the outage.
+  internal static func resolving(
+    syncResult: ArticleSyncResult,
+    metadataResult: FeedUpdateResult
+  ) -> FeedUpdateResult {
+    if syncResult.failureCount > 0 {
+      return .error(
+        message:
+          "Article sync had \(syncResult.failureCount) failures "
+          + "(created: \(syncResult.created.failureCount), "
+          + "updated: \(syncResult.updated.failureCount))"
+      )
+    }
+    return metadataResult
+  }
 }

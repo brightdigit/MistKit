@@ -1,0 +1,10 @@
+---
+description: Project memories live in-repo at .claude/memory/ — do not use Cursor native memories for project facts
+alwaysApply: true
+---
+
+# In-repo agent memory
+
+This project's memories live in-repo at `.claude/memory/` (index: `.claude/memory/MEMORY.md`). Corrections and always/never directives live in `.claude/agent-notes.md`.
+
+Read both at the start of every session. Write new project-scoped facts only under `.claude/memory/`. Do **not** save project-scoped memories to Cursor's native/global memory feature — this rule is the sole Cursor-side pointer to the in-repo store.

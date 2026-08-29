@@ -43,6 +43,17 @@ public enum ShareAcceptanceStatus: String, Codable, Sendable, Equatable, Hashabl
 
 // MARK: - Internal Conversion
 extension ShareAcceptanceStatus {
+  internal var asShareParticipantPayload:
+    Components.Schemas.ShareParticipant.acceptanceStatusPayload
+  {
+    switch self {
+    case .invited: .INVITED
+    case .accepted: .ACCEPTED
+    case .removed: .REMOVED
+    case .unknown: .UNKNOWN
+    }
+  }
+
   internal init(from payload: Components.Schemas.ShareParticipant.acceptanceStatusPayload) {
     switch payload {
     case .INVITED: self = .invited
@@ -58,17 +69,6 @@ extension ShareAcceptanceStatus {
     case .ACCEPTED: self = .accepted
     case .REMOVED: self = .removed
     case .UNKNOWN: self = .unknown
-    }
-  }
-
-  internal var asShareParticipantPayload:
-    Components.Schemas.ShareParticipant.acceptanceStatusPayload
-  {
-    switch self {
-    case .invited: .INVITED
-    case .accepted: .ACCEPTED
-    case .removed: .REMOVED
-    case .unknown: .UNKNOWN
     }
   }
 }

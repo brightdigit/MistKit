@@ -45,6 +45,16 @@ public enum ShareParticipantType: String, Codable, Sendable, Equatable, Hashable
 
 // MARK: - Internal Conversion
 extension ShareParticipantType {
+  internal var asShareParticipantPayload: Components.Schemas.ShareParticipant._typePayload {
+    switch self {
+    case .owner: .OWNER
+    case .administrator: .ADMINISTRATOR
+    case .user: .USER
+    case .publicUser: .PUBLIC_USER
+    case .unknown: .UNKNOWN
+    }
+  }
+
   internal init(from payload: Components.Schemas.ShareParticipant._typePayload) {
     switch payload {
     case .OWNER: self = .owner
@@ -62,16 +72,6 @@ extension ShareParticipantType {
     case .USER: self = .user
     case .PUBLIC_USER: self = .publicUser
     case .UNKNOWN: self = .unknown
-    }
-  }
-
-  internal var asShareParticipantPayload: Components.Schemas.ShareParticipant._typePayload {
-    switch self {
-    case .owner: .OWNER
-    case .administrator: .ADMINISTRATOR
-    case .user: .USER
-    case .publicUser: .PUBLIC_USER
-    case .unknown: .UNKNOWN
     }
   }
 }

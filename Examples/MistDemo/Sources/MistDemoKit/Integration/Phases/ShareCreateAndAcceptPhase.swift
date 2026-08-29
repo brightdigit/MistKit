@@ -33,10 +33,10 @@ internal import MistKit
 /// Creates a share as the sharer (private DB), then resolves and accepts it
 /// as the sharee (public + web-auth).
 ///
-/// Skips when `PhaseContext.shareeService` or `PhaseContext.shareeEmail` is
-/// missing (`CLOUDKIT_SHAREE_WEB_AUTH_TOKEN` / `CLOUDKIT_SHAREE_EMAIL`). Fails
-/// early when both web-auth tokens resolve to the same `users/caller` record
-/// name. Self-cleaning: deletes the share root and zone afterward.
+/// Requires `PhaseContext.shareeService` and `PhaseContext.shareeEmail`
+/// (`CLOUDKIT_SHAREE_WEB_AUTH_TOKEN` / `CLOUDKIT_SHAREE_EMAIL`). Fails early
+/// when both web-auth tokens resolve to the same `users/caller` record name.
+/// Self-cleaning: deletes the share root and zone afterward.
 internal struct ShareCreateAndAcceptPhase: IntegrationPhase {
   internal typealias Input = NoState
   internal typealias Output = NoState
@@ -52,14 +52,7 @@ internal struct ShareCreateAndAcceptPhase: IntegrationPhase {
       let shareeEmail = context.shareeEmail,
       !shareeEmail.isEmpty
     else {
-      print(
-        """
-        ⏭️  Skipping — set CLOUDKIT_SHAREE_WEB_AUTH_TOKEN and \
-        CLOUDKIT_SHAREE_EMAIL to exercise create→accept. \
-        CLOUDKIT_WEB_AUTH_TOKEN remains the sharer.
-        """
-      )
-      return NoState()
+      throw IntegrationTestError.missingShareeCredentials
     }
 
     // Distinct Apple IDs are required: inviting yourself is not a useful

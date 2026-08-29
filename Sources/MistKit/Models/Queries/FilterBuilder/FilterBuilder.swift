@@ -172,10 +172,11 @@ internal struct FilterBuilder {
     return cloudKitListType(for: first)
   }
 
-  /// Maps a single element to the `*_LIST` request type its list requires.
-  ///
-  /// The `switch` is `default`-free so a new `FieldValue` case has to be classified here
-  /// rather than silently emitting no `type` tag.
+  // Maps a single element to the `*_LIST` request type its list requires.
+  //
+  // The `switch` is `default`-free so a new `FieldValue` case has to be classified here
+  // rather than silently emitting no `type` tag.
+  // swiftlint:disable:next cyclomatic_complexity
   private static func cloudKitListType(
     for first: FieldValue
   ) -> Components.Schemas.FieldValueRequest._typePayload? {

@@ -1,6 +1,6 @@
 //
 //  TestPrivateConfigTests.swift
-//  MistDemo
+//  MistDemoTests
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import Configuration
 internal import Foundation
 internal import Testing
 
@@ -34,6 +35,20 @@ internal import Testing
 
 @Suite("TestPrivateConfig Tests")
 internal struct TestPrivateConfigTests {
+  private static func key(_ path: String) -> AbsoluteConfigKey {
+    AbsoluteConfigKey(path.split(separator: ".").map(String.init), context: [:])
+  }
+
+  private static func configuration(
+    values: [String: ConfigValue]
+  ) -> MistDemoConfiguration {
+    var mapped: [AbsoluteConfigKey: ConfigValue] = [:]
+    for (path, value) in values {
+      mapped[key(path)] = value
+    }
+    return MistDemoConfiguration(testProvider: InMemoryProvider(values: mapped))
+  }
+
   @Test("TestPrivateConfig retains sharee credentials")
   internal func retainsShareeCredentials() async throws {
     let base = try await MistDemoConfig()
@@ -43,6 +58,72 @@ internal struct TestPrivateConfigTests {
       shareeEmail: "sharee@example.com"
     )
     #expect(config.shareeWebAuthToken == "sharee-token-value")
+    #expect(config.shareeEmail == "sharee@example.com")
+  }
+
+  @Test("Configuration init throws when sharee.web.auth.token is missing")
+  internal func missingShareeTokenThrows() async throws {
+    let base = try await MistDemoConfig(
+      configuration: Self.configuration(values: [
+        "api.token": .init(stringLiteral: "api-tok"),
+        "web.auth.token": .init(stringLiteral: "sharer-tok"),
+        "sharee.email": .init(stringLiteral: "sharee@example.com"),
+      ]),
+      base: nil
+    )
+    let configuration = Self.configuration(values: [
+      "api.token": .init(stringLiteral: "api-tok"),
+      "web.auth.token": .init(stringLiteral: "sharer-tok"),
+      "sharee.email": .init(stringLiteral: "sharee@example.com"),
+    ])
+
+    await #expect(throws: ConfigurationError.self) {
+      _ = try await TestPrivateConfig(configuration: configuration, base: base)
+    }
+  }
+
+  @Test("Configuration init throws when sharee.email is missing")
+  internal func missingShareeEmailThrows() async throws {
+    let base = try await MistDemoConfig(
+      configuration: Self.configuration(values: [
+        "api.token": .init(stringLiteral: "api-tok"),
+        "web.auth.token": .init(stringLiteral: "sharer-tok"),
+        "sharee.web.auth.token": .init(stringLiteral: "sharee-tok"),
+      ]),
+      base: nil
+    )
+    let configuration = Self.configuration(values: [
+      "api.token": .init(stringLiteral: "api-tok"),
+      "web.auth.token": .init(stringLiteral: "sharer-tok"),
+      "sharee.web.auth.token": .init(stringLiteral: "sharee-tok"),
+    ])
+
+    await #expect(throws: ConfigurationError.self) {
+      _ = try await TestPrivateConfig(configuration: configuration, base: base)
+    }
+  }
+
+  @Test("Configuration init parses required sharee credentials")
+  internal func parsesShareeCredentials() async throws {
+    let base = try await MistDemoConfig(
+      configuration: Self.configuration(values: [
+        "api.token": .init(stringLiteral: "api-tok"),
+        "web.auth.token": .init(stringLiteral: "sharer-tok"),
+      ]),
+      base: nil
+    )
+    let configuration = Self.configuration(values: [
+      "api.token": .init(stringLiteral: "api-tok"),
+      "web.auth.token": .init(stringLiteral: "sharer-tok"),
+      "sharee.web.auth.token": .init(stringLiteral: "sharee-tok"),
+      "sharee.email": .init(stringLiteral: "sharee@example.com"),
+    ])
+
+    let config = try await TestPrivateConfig(
+      configuration: configuration,
+      base: base
+    )
+    #expect(config.shareeWebAuthToken == "sharee-tok")
     #expect(config.shareeEmail == "sharee@example.com")
   }
 }

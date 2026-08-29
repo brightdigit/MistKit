@@ -51,6 +51,8 @@ extension CloudKitService {
   ///   - perBatch: Performs one batch (a single CloudKit request) and returns
   ///     that batch's results.
   /// - Returns: Every batch's results concatenated in input order.
+  /// - Throws: ``CloudKitError`` from `perBatch`, or when cancellation is
+  ///   mapped via ``mapToCloudKitError(_:context:)``.
   internal func chunkedBatches<Input, Output>(
     _ items: [Input],
     batchSize: Int,

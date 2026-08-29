@@ -104,24 +104,16 @@ internal struct FieldValueURLTests {
     #expect(url?.absoluteString == "https://downloads.apple.com/restore/macOS/23C71.ipsw")
   }
 
-  @Test("Extract nil from invalid URL string")
-  internal func testExtractNilFromInvalidURLString() throws {
-    // URL(string:) is lenient - even "not a valid url" parses successfully
-    // as a relative URL with no scheme. Test actual parsing behavior:
-    let fieldValue: FieldValue = .string("not a valid url")
-    let url = fieldValue.urlValue
-
-    // This actually succeeds - URL is lenient and creates a relative URL
-    #expect(url != nil)
-    #expect(url?.scheme == nil)  // No scheme for this "URL"
-
-    // Test a URL with invalid characters
-    let malformedFieldValue: FieldValue = .string("ht!tp://invalid")
-    let malformedURL = malformedFieldValue.urlValue
-
-    // URLs with certain invalid characters DO fail to parse
-    // This demonstrates that URL(string:) has some limits
-    #expect(malformedURL == nil)
+  @Test("Malformed strings never yield an absolute URL")
+  internal func testMalformedStringsYieldNoScheme() throws {
+    // `urlValue` adds no validation of its own - it hands the string to
+    // URL(string:). Swift 6.4's parser accepts some strings that earlier
+    // toolchains rejected outright, so assert the property that holds either
+    // way: no scheme, hence no usable absolute URL.
+    for raw in ["not a valid url", "ht!tp://invalid"] {
+      let fieldValue: FieldValue = .string(raw)
+      #expect(fieldValue.urlValue?.scheme == nil)
+    }
   }
 
   @Test("Extract nil from empty string")

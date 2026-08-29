@@ -63,12 +63,16 @@ extension FeedUpdateProcessor {
       feed: feed,
       totalAttempts: totalAttempts
     )
-    return await updateFeedMetadata(
+    let metadataResult = await updateFeedMetadata(
       feed: feed,
       recordName: recordName,
       metadata: metadata,
       articlesCreated: syncResult.created.successCount,
       articlesUpdated: syncResult.updated.successCount
+    )
+    return FeedUpdateResult.resolving(
+      syncResult: syncResult,
+      metadataResult: metadataResult
     )
   }
 

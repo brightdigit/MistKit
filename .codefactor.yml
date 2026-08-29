@@ -1,4 +1,0 @@
-exclude:
-  - "Scripts/mermaid-to-pptx.py"
-  - "Examples/MistDemo/Sources/MistDemoKit/Resources/js/**"
-  - "Sources/MistKitOpenAPI/**"

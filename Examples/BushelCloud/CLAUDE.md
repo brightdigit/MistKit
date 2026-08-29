@@ -305,7 +305,10 @@ git subrepo pull Packages/BushelKit
 
 ### Swift 6 Configuration
 
-The project uses strict Swift 6 concurrency checking (see `Package.swift:10-78`):
+The package declares `swift-tools-version: 6.4`, so a Swift 6.4 toolchain
+(nightly on Linux, Xcode 27.0 on Apple platforms) is required to build it.
+
+The project uses strict Swift 6 concurrency checking (see `Package.swift`):
 - Full typed throws
 - Complete strict concurrency checking
 - Noncopyable generics, variadic generics
@@ -437,12 +440,18 @@ CloudKit enforces a **200 operations per request** limit. Operations are automat
 
 ```swift
 let batchSize = 200
-let batches = operations.chunked(into: batchSize)
-for batch in batches {
-    let results = try await service.modifyRecords(
+for start in stride(from: 0, to: operations.count, by: batchSize) {
+    let batch = Array(operations[start ..< min(start + batchSize, operations.count)])
+    // MistKit (beta.3+) partitions results using a pre-computed classification and
+    // returns a structured batch result — no manual .success/.failure switching.
+    let batchResult = try await service.modifyRecords(
         batch,
+        classification: classification,
         database: .public(.prefers(.serverToServer))
     )
+    // batchResult.createdCount / .updatedCount / .failedCount / .failed / .totalCount
+    // Note: successes in MistKit's `unclassified` bucket are excluded from
+    // createdCount/updatedCount, so those totals can be < totalCount.
 }
 ```
 
@@ -452,7 +461,7 @@ See `.claude/s2s-auth-details.md` for detailed batch operation examples and erro
 
 - `BushelCloudKitError` enum defines project-specific errors
 - MistKit operations throw `CloudKitError` for API failures
-- `modifyRecords` returns `[RecordResult]`; switch over each (`.success` / `.failure`) to detect partial batch failures
+- `modifyRecords(_:classification:database:)` returns a structured batch result (`createdCount`/`updatedCount`/`failedCount`/`failed`); inspect `.failed` for partial batch failures
 - Verbose mode logs error details (serverErrorCode, reason)
 
 **Common error codes**:
@@ -645,14 +654,13 @@ Note: Currently only placeholder tests exist (demo project focused on CloudKit p
 ### GitHub Actions Workflows
 
 - **BushelCloud.yml** - Main CI with multi-platform testing (Ubuntu, Windows, macOS)
-- **codeql.yml** - Security analysis
 - **claude.yml** - Claude Code integration for issues/PRs
 - **claude-code-review.yml** - Automated PR reviews
 
 ### Branch Protection
 
 The `main` branch requires:
-- All 14 status checks passing (multi-platform builds + lint + CodeQL)
+- Multi-platform builds + lint status checks passing
 - Pull request reviews
 - Conversation resolution
 

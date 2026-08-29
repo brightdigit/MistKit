@@ -62,8 +62,34 @@ $PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "Bright
 
 # Generated files now automatically include ignore directives via OpenAPI generator configuration
 
+# Periphery cannot find the index store on its own: its location depends on the
+# build system. swiftbuild (the SwiftPM default since Swift 6.2) writes
+# `.build/out`, the native build system writes
+# `.build/<triple>/debug/index/store`, and older toolchains wrote
+# `.build/debug/index/store`. Resolve it here and hand it over explicitly;
+# `--index-store-path` implies `--skip-build`, which is what we want because
+# `swift build --build-tests` already ran above.
+periphery_index_store() {
+	local candidate
+	for candidate in "$PACKAGE_DIR"/.build/*/debug/index/store \
+		"$PACKAGE_DIR"/.build/debug/index/store \
+		"$PACKAGE_DIR"/.build/out; do
+		if [ -d "$candidate/v5/units" ]; then
+			printf '%s\n' "$candidate"
+			return 0
+		fi
+	done
+	return 1
+}
+
 if [ -z "$CI" ]; then
-	run_command periphery scan $PERIPHERY_OPTIONS --disable-update-check
+	if INDEX_STORE_PATH=$(periphery_index_store); then
+		run_command periphery scan $PERIPHERY_OPTIONS \
+			--index-store-path "$INDEX_STORE_PATH" --skip-build \
+			--disable-update-check
+	else
+		echo "Skipping periphery scan (no index store under .build; run swift build first)."
+	fi
 fi
 
 popd

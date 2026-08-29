@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 env:
   PACKAGE_NAME: MistKit
 
@@ -11,12 +15,20 @@ jobs:
   test-examples:
     name: Test ${{ matrix.example }} on Ubuntu
     runs-on: ubuntu-latest
-    container: swift:6.3
+    # BushelCloud / CelestraCloud declare swift-tools-version: 6.4; MistDemo is 6.2.
+    # Swift 6.4 has no release image yet — use the nightly (same pin as the subrepos).
+    container: ${{ matrix.container }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
-        example: [MistDemo, BushelCloud, CelestraCloud]
+        include:
+          - example: MistDemo
+            container: swift:6.3
+          - example: BushelCloud
+            container: swiftlang/swift:nightly-6.4.x-noble
+          - example: CelestraCloud
+            container: swiftlang/swift:nightly-6.4.x-noble
 
     steps:
       - name: Checkout

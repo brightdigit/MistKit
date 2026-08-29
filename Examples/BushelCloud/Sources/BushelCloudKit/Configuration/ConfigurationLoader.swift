@@ -45,6 +45,7 @@ public actor ConfigurationLoader {
         secretsSpecifier: .specific([
           "--cloudkit-key-id",
           "--cloudkit-private-key-path",
+          "--cloudkit-private-key",
           "--virtualbuddy-api-key",
         ])
       )

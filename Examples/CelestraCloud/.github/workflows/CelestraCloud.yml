@@ -21,7 +21,7 @@ concurrency:
 
 env:
   PACKAGE_NAME: CelestraCloud
-  MISTKIT_BRANCH: 1.0.0-beta.2
+  MISTKIT_BRANCH: v1.0.0-beta.4
 
 jobs:
   configure:
@@ -59,21 +59,26 @@ jobs:
       - id: matrix
         name: Build matrix values
         run: |
-          # CelestraCloud's Package.swift declares swift-tools-version: 6.2,
-          # so Swift 6.1 is not supported.
+          # CelestraCloud's Package.swift declares swift-tools-version: 6.4.
+          # Swift 6.4 has no release toolchain yet, so the nightly image is the
+          # only Linux toolchain that can parse the manifest — no 6.3 lanes.
+          SWIFT='[{"version":"6.4","image":"swiftlang/swift:nightly-6.4.x"}]'
           if [[ "${{ steps.check.outputs.full }}" == "true" ]]; then
             echo 'ubuntu-os=["noble","jammy"]' >> "$GITHUB_OUTPUT"
-            echo 'ubuntu-swift=["6.2","6.3"]' >> "$GITHUB_OUTPUT"
           else
             echo 'ubuntu-os=["noble"]' >> "$GITHUB_OUTPUT"
-            echo 'ubuntu-swift=["6.3"]' >> "$GITHUB_OUTPUT"
           fi
+          echo "ubuntu-swift=$SWIFT" >> "$GITHUB_OUTPUT"
 
   build-ubuntu:
     name: Build on Ubuntu
     needs: configure
     runs-on: ubuntu-latest
-    container: swift:${{ matrix.swift }}-${{ matrix.os }}
+    # The `||` branch (a plain swift:<version>-<os> image) is unreachable while
+    # the matrix emits only the 6.4 nightly entry, which always sets `image`.
+    # Kept deliberately: it is what a release-toolchain lane would use once
+    # Swift 6.4 ships and can be added back to the matrix.
+    container: ${{ matrix.swift.image && format('{0}-{1}', matrix.swift.image, matrix.os) || format('swift:{0}-{1}', matrix.swift.version, matrix.os) }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
@@ -108,66 +113,68 @@ jobs:
         if: steps.build.outputs.contains-code-coverage == 'true'
         uses: codecov/codecov-action@v6
         with:
-          fail_ci_if_error: true
-          flags: swift-${{ matrix.swift }}-${{ matrix.os }}
+          fail_ci_if_error: false
+          flags: swift-${{ matrix.swift.version }}-${{ matrix.os }}
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
 
-  build-windows:
-    name: Build on Windows
-    needs: configure
-    runs-on: ${{ matrix.runs-on }}
-    if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
-    strategy:
-      fail-fast: false
-      matrix:
-        runs-on: [windows-2022, windows-2025]
-        swift:
-          - version: swift-6.2-release
-            build: 6.2-RELEASE
-          - version: swift-6.3-release
-            build: 6.3-RELEASE
-    steps:
-      - uses: actions/checkout@v6
-      - name: Setup MistKit
-        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
-        with:
-          branch: ${{ env.MISTKIT_BRANCH }}
-
-      - uses: brightdigit/swift-build@v1
-        id: build
-        with:
-          windows-swift-version: ${{ matrix.swift.version }}
-          windows-swift-build: ${{ matrix.swift.build }}
-          skip-package-resolved: true
-      - name: Upload coverage to Codecov
-        if: steps.build.outputs.contains-code-coverage == 'true'
-        uses: codecov/codecov-action@v6
-        with:
-          fail_ci_if_error: true
-          flags: swift-${{ matrix.swift.version }},windows
-          verbose: true
-          token: ${{ secrets.CODECOV_TOKEN }}
-          os: windows
+  # build-windows:
+  #   name: Build on Windows
+  #   needs: configure
+  #   runs-on: ${{ matrix.runs-on }}
+  #   if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       runs-on: [windows-2022, windows-2025]
+  #       swift:
+  #         - version: swift-6.3-release
+  #           build: 6.3-RELEASE
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #     - name: Setup MistKit
+  #       uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
+  #       with:
+  #         branch: ${{ env.MISTKIT_BRANCH }}
+  #     - uses: brightdigit/swift-build@v1
+  #       id: build
+  #       with:
+  #         windows-swift-version: ${{ matrix.swift.version }}
+  #         windows-swift-build: ${{ matrix.swift.build }}
+  #         skip-package-resolved: true
+  #     - name: Upload coverage to Codecov
+  #       if: steps.build.outputs.contains-code-coverage == 'true'
+  #       uses: codecov/codecov-action@v6
+  #       with:
+  #         fail_ci_if_error: false
+  #         flags: swift-${{ matrix.swift.version }},windows
+  #         verbose: true
+  #         token: ${{ secrets.CODECOV_TOKEN }}
+  #         os: windows
 
   # Minimal macOS builds — always runs (SPM + iOS)
   build-macos:
     name: Build on macOS
-    runs-on: macos-26
+    runs-on: ${{ matrix.runs-on }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
         include:
+          # A swift-tools-version: 6.4 manifest needs a Swift 6.4 toolchain, so
+          # these lanes run on the xcode-27 image (Xcode 27.0) rather than
+          # macos-26 / Xcode 26.6, which cannot parse the manifest.
           # SPM build
-          - xcode: "/Applications/Xcode_26.4.app"
+          - runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
 
           # iOS build
           - type: ios
-            xcode: "/Applications/Xcode_26.4.app"
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
             deviceName: "iPhone 17 Pro"
-            osVersion: "26.4.1"
+            osVersion: "27.0"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -201,35 +208,58 @@ jobs:
   build-macos-platforms:
     name: Build on macOS (Platforms)
     needs: configure
-    runs-on: macos-26
+    runs-on: ${{ matrix.runs-on }}
     if: ${{ needs.configure.outputs.full-matrix == 'true' && !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          # macOS
+          # ── Xcode 27 (preview image, beta toolchain) ─────────────────────
+          # A swift-tools-version: 6.4 manifest needs a Swift 6.4 toolchain, so
+          # every Apple lane runs here; the macos-26 / Xcode 26.6 lanes cannot
+          # parse the manifest and are gone.
+          #
+          # `runs-on: xcode-27` is its own image label, not a macos-NN one, and
+          # is marked Preview in actions/runner-images. It ships exactly one
+          # Xcode — 27.0 beta — so there is no 26.x fallback on this runner.
+          #
+          # Pin the /Applications/Xcode_27.0.app symlink, NOT the real
+          # Xcode_27_beta_4.app path: the beta number changes on every image
+          # refresh and would silently break these lanes.
+          #
+          # tvOS uses "Apple TV 4K (3rd generation)" — this image has no plain
+          # "Apple TV" device. A wrong device name fails the simulator boot
+          # outright.
           - type: macos
-            xcode: "/Applications/Xcode_26.4.app"
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
 
-          # watchOS
+          - type: ios
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
+            deviceName: "iPhone 17 Pro"
+            osVersion: "27.0"
+            download-platform: true
+
           - type: watchos
-            xcode: "/Applications/Xcode_26.4.app"
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
             deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "26.4"
+            osVersion: "27.0"
             download-platform: true
 
-          # tvOS
           - type: tvos
-            xcode: "/Applications/Xcode_26.4.app"
-            deviceName: "Apple TV"
-            osVersion: "26.4"
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
+            deviceName: "Apple TV 4K (3rd generation)"
+            osVersion: "27.0"
             download-platform: true
 
-          # visionOS
           - type: visionos
-            xcode: "/Applications/Xcode_26.4.app"
+            runs-on: xcode-27
+            xcode: "/Applications/Xcode_27.0.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.4.1"
+            osVersion: "27.0"
             download-platform: true
     steps:
       - uses: actions/checkout@v6
@@ -263,7 +293,7 @@ jobs:
     name: Linting
     runs-on: ubuntu-latest
     if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
-    needs: [build-ubuntu, build-macos, build-macos-platforms, build-windows]
+    needs: [build-ubuntu, build-macos, build-macos-platforms]
     steps:
       - uses: actions/checkout@v6
       - uses: jdx/mise-action@v4

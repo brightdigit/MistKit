@@ -1,7 +1,7 @@
 # CelestraCloud - RSS Reader with CloudKit Sync
 
 [![CelestraCloud](https://github.com/brightdigit/CelestraCloud/actions/workflows/CelestraCloud.yml/badge.svg)](https://github.com/brightdigit/CelestraCloud/actions/workflows/CelestraCloud.yml)
-[![Swift 6.2](https://img.shields.io/badge/Swift-6.2-orange.svg)](https://swift.org)
+[![Swift 6.4+](https://img.shields.io/badge/Swift-6.4%2B-orange.svg)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-macOS%20Linux-lightgrey.svg)](https://www.apple.com/macos/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 

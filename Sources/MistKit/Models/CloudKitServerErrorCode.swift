@@ -78,11 +78,15 @@ public enum CloudKitServerErrorCode: Codable, Hashable, Sendable {
       code: .atomicError, raw: "ATOMIC_ERROR", statusCode: 400, summary: "atomic batch failure"
     ),
     CatalogEntry(
-      code: .authenticationFailed, raw: "AUTHENTICATION_FAILED", statusCode: 401,
+      code: .authenticationFailed,
+      raw: "AUTHENTICATION_FAILED",
+      statusCode: 401,
       summary: "authentication failed"
     ),
     CatalogEntry(
-      code: .authenticationRequired, raw: "AUTHENTICATION_REQUIRED", statusCode: 421,
+      code: .authenticationRequired,
+      raw: "AUTHENTICATION_REQUIRED",
+      statusCode: 421,
       summary: "authentication required"
     ),
     CatalogEntry(
@@ -110,7 +114,9 @@ public enum CloudKitServerErrorCode: Codable, Hashable, Sendable {
       code: .tryAgainLater, raw: "TRY_AGAIN_LATER", statusCode: 503, summary: "try again later"
     ),
     CatalogEntry(
-      code: .validatingReferenceError, raw: "VALIDATING_REFERENCE_ERROR", statusCode: 412,
+      code: .validatingReferenceError,
+      raw: "VALIDATING_REFERENCE_ERROR",
+      statusCode: 412,
       summary: "reference validation error"
     ),
     CatalogEntry(

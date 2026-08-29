@@ -38,8 +38,8 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
   // `users/lookup/*`) stay on the public pipeline: CloudKit rejects those
   // endpoints on private with "endpoint not applicable". Share create uses the
   // private sharer service; resolve/accept are public-scoped calls run from
-  // the sharee service (`ShareCreateAndAcceptPhase`) when
-  // CLOUDKIT_SHAREE_WEB_AUTH_TOKEN + CLOUDKIT_SHAREE_EMAIL are set.
+  // the sharee service (`ShareCreateAndAcceptPhase`). Requires
+  // CLOUDKIT_SHAREE_WEB_AUTH_TOKEN + CLOUDKIT_SHAREE_EMAIL.
   internal let phases: [any IntegrationPhase] = [
     ListZonesPhase(),
     ModifyZonesPhase(),

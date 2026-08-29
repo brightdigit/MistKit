@@ -21,7 +21,7 @@ echo ""
 echo "Checking Swift version..."
 if ! command -v swift &> /dev/null; then
     echo -e "${RED}ERROR: Swift is not installed.${NC}"
-    echo "Please install Swift 6.2 or later from https://swift.org"
+    echo "Please install Swift 6.4 or later from https://swift.org"
     exit 1
 fi
 

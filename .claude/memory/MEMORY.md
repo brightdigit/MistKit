@@ -27,6 +27,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [Sendable API fallback over @available bump](feedback_sendable_api_fallback.md) — Prefer dual-path #available + nonisolated(unsafe) cached fallback over bumping @available when cascade is wide
 - [Examples/ dir is MistKit-dev dogfooding](project_examples_dir_is_for_mistkit_dev.md) — Bushel/CelestraCloud Examples test MistKit-under-development; their MISTKIT_BRANCH pin & setup-mistkit wiring aren't end-user deployment patterns
 - [Check merge strategy before release deletions](feedback_check_merge_strategy_before_release_deletions.md) — Squash/rebase merge means git history alone won't preserve removed files; archive branch+tag is load-bearing, not optional
+- [Feature PRs: squash or rebase, never merge](feedback_feature_pr_merge_squash_or_rebase.md) — 1 commit → rebase; multiple commits → squash; never `gh pr merge --merge` for feature branches
 - [CI-only flake gate](feedback_ci_only_flake_gate.md) — Gate cooperative-executor flake helpers (e.g. isFlakyTimeoutSimulator) on ProcessInfo CI env AND platform, so local sim runs stay strict
 - [Conditional withKnownIssue overload](feedback_conditional_known_issue_overload.md) — Prefer a `withKnownIssue(when:isIntermittent:_:)` overload over duplicating bodies in if/else around the wrap
 - [setup-X action lives in repo X](feedback_setup_action_lives_in_owned_repo.md) — A `setup-<package>` composite action belongs in the package's own repo (like setup-mistkit lives in MistKit), referenced remotely by consumers
@@ -38,3 +39,5 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [#419 already fixed in beta.3](project_419_fixed_in_beta3.md) — MistDemoApp view inits shipped in 5a58120; verified building on macOS Swift 6.3.2, do not re-implement
 - [Never git stash in this multi-worktree repo](feedback_never_git_stash_multiworktree.md) — The stash stack is shared across worktrees; a pop in one can bury a sibling branch's WIP. Commit instead.
 - [cloudkit.share wire casing](project_cloudkit_share_record_type_casing.md) — Live API wants `cloudkit.share` (lowercase k); archived docs' `cloudKit.share` yields "Cannot share - no such record exists to share"
+- [MISTKIT_BRANCH pin resolves tags too](project_mistkit_branch_pin_resolves_tags.md) — `git ls-remote` matches tags; a tag value silently pins the old release and greens example CI without testing the branch
+- [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — `examples.yml` must use a Swift container that can parse each example's Package.swift (6.4 nightly for Bushel/Celestra; 6.3 for MistDemo)

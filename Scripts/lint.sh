@@ -47,14 +47,12 @@ if [ "$LINT_MODE" = "NONE" ]; then
 elif [ "$LINT_MODE" = "STRICT" ]; then
 	SWIFTFORMAT_OPTIONS="--configuration .swift-format"
 	SWIFTLINT_OPTIONS="--strict"
-	STRINGSLINT_OPTIONS="--config .strict.stringslint.yml"
 else
 	SWIFTFORMAT_OPTIONS="--configuration .swift-format"
 	SWIFTLINT_OPTIONS=""
-	STRINGSLINT_OPTIONS="--config .stringslint.yml"
 fi
 
-pushd $PACKAGE_DIR
+pushd "$PACKAGE_DIR" || exit
 
 if [ -z "$CI" ]; then
 	run_command swift-format format $SWIFTFORMAT_OPTIONS  --recursive --parallel --in-place Sources Tests
@@ -78,17 +76,38 @@ $PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "Bright
 
 # Generated files now automatically include ignore directives via OpenAPI generator configuration
 
-# Periphery is temporarily skipped: Swift PM now writes the index store under a
-# triple-specific path (e.g. `.build/arm64-apple-macosx/debug/index/store`) and
-# periphery still looks for `.build/debug/index/store`. Re-enable once periphery
-# or this script resolves the path. Also skipped in Claude Code web sessions
-# (no Linux binaries; mise unreachable there).
-if [ "${RUN_PERIPHERY:-}" = "1" ] \
-	&& [ -z "$CI" ] \
-	&& [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
-	run_command periphery scan $PERIPHERY_OPTIONS --disable-update-check
+# Periphery cannot find the index store on its own: its location depends on the
+# build system. swiftbuild (the SwiftPM default since Swift 6.2) writes
+# `.build/out`, the native build system writes
+# `.build/<triple>/debug/index/store`, and older toolchains wrote
+# `.build/debug/index/store`. Resolve it here and hand it over explicitly;
+# `--index-store-path` implies `--skip-build`, which is what we want because
+# `swift build --build-tests` already ran above. Skipped in CI (periphery has
+# never run there) and in Claude Code web sessions (no Linux binaries; mise
+# unreachable per above).
+periphery_index_store() {
+	local candidate
+	for candidate in "$PACKAGE_DIR"/.build/*/debug/index/store \
+		"$PACKAGE_DIR"/.build/debug/index/store \
+		"$PACKAGE_DIR"/.build/out; do
+		if [ -d "$candidate/v5/units" ]; then
+			printf '%s\n' "$candidate"
+			return 0
+		fi
+	done
+	return 1
+}
+
+if [ -z "$CI" ] && [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+	if INDEX_STORE_PATH=$(periphery_index_store); then
+		run_command periphery scan $PERIPHERY_OPTIONS \
+			--index-store-path "$INDEX_STORE_PATH" --skip-build \
+			--disable-update-check
+	else
+		echo "Skipping periphery scan (no index store under .build; run swift build first)."
+	fi
 else
-	echo "Skipping periphery scan (set RUN_PERIPHERY=1 to opt in)."
+	echo "Skipping periphery scan (CI or Claude Code web session)."
 fi
 
 popd

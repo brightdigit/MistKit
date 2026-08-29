@@ -46,7 +46,8 @@ public struct TestPrivateCommand: MistDemoCommand {
     TEST-PRIVATE - Integration tests (private database)
 
     Tests all CloudKit API methods including user-identity
-    endpoints requiring private database access.
+    endpoints requiring private database access, plus the
+    create→accept share roundtrip (sharer + sharee).
 
     USAGE:
       mistdemo test-private [options]
@@ -62,13 +63,12 @@ public struct TestPrivateCommand: MistDemoCommand {
         otherwise the phase skips.
       --sharee-web-auth-token <token>
         Web-auth token for the sharee account
-        (CLOUDKIT_SHAREE_WEB_AUTH_TOKEN). Obtain via `mistdemo auth-token`
-        while signed in as the sharee. Primary CLOUDKIT_WEB_AUTH_TOKEN
+        (CLOUDKIT_SHAREE_WEB_AUTH_TOKEN). Required. Capture both tokens
+        with `mistdemo auth-tokens`. Primary CLOUDKIT_WEB_AUTH_TOKEN
         remains the sharer.
       --sharee-email <email>
-        iCloud email of the sharee (CLOUDKIT_SHAREE_EMAIL), used as the
-        invite lookup info when creating the share. Both sharee options
-        are required for the create→accept phase; otherwise it skips.
+        iCloud email of the sharee (CLOUDKIT_SHAREE_EMAIL). Required;
+        used as the invite lookup info when creating the share.
 
     EXAMPLES:
       mistdemo test-private --verbose
@@ -76,10 +76,9 @@ public struct TestPrivateCommand: MistDemoCommand {
       mistdemo test-private --lookup-email me@example.com
 
     NOTES:
-      - Requires CLOUDKIT_API_TOKEN and
-        CLOUDKIT_WEB_AUTH_TOKEN (sharer)
-      - Optional sharee: CLOUDKIT_SHAREE_WEB_AUTH_TOKEN +
-        CLOUDKIT_SHAREE_EMAIL
+      - Requires CLOUDKIT_API_TOKEN, CLOUDKIT_WEB_AUTH_TOKEN (sharer),
+        CLOUDKIT_SHAREE_WEB_AUTH_TOKEN, and CLOUDKIT_SHAREE_EMAIL
+      - Capture tokens with `mistdemo auth-tokens --sharee-email …`
       - Use 'test-public' for public-database tests
     """
 
@@ -101,14 +100,9 @@ public struct TestPrivateCommand: MistDemoCommand {
     // them. Per-call resolution picks the right token manager.
     let supportsUserContextPhases = config.base.hasUserContextCredentials
 
-    let shareeService: CloudKitService?
-    if let shareeToken = config.shareeWebAuthToken, !shareeToken.isEmpty {
-      shareeService = try MistKitClientFactory.create(
-        for: config.base.with(webAuthToken: shareeToken)
-      )
-    } else {
-      shareeService = nil
-    }
+    let shareeService = try MistKitClientFactory.create(
+      for: config.base.with(webAuthToken: config.shareeWebAuthToken)
+    )
 
     let runner = IntegrationTestRunner(
       service: service,

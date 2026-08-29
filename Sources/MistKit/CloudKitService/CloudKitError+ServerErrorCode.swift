@@ -45,7 +45,6 @@ extension CloudKitError {
   /// stops compiling here until the new case is classified. Wire strings and
   /// status numbers come from ``CloudKitServerErrorCode``'s catalog — never
   /// inlined here.
-  // swiftlint:disable:next cyclomatic_complexity
   internal var serverErrorDetail: ServerErrorCodeDetail? {
     switch self {
     case .accessDenied(let reason):
@@ -122,11 +121,11 @@ extension CloudKitError {
     )
   }
 
-  /// Builds the dedicated case for a typed ``CloudKitServerErrorCode``.
-  ///
-  /// `hint` for ``CloudKitError/quotaExceeded(reason:hint:)`` is enriched later
-  /// by the calling operation's catch block, which is the only place that can
-  /// see the local request state.
+  // Builds the dedicated case for a typed ``CloudKitServerErrorCode``.
+  //
+  // `hint` for ``CloudKitError/quotaExceeded(reason:hint:)`` is enriched later
+  // by the calling operation's catch block, which is the only place that can
+  // see the local request state.
   // swiftlint:disable:next cyclomatic_complexity
   private static func make(
     from code: CloudKitServerErrorCode,
