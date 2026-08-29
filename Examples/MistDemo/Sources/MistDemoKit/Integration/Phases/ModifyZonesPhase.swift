@@ -41,6 +41,20 @@ internal struct ModifyZonesPhase: IntegrationPhase {
   internal static let emoji = "🧱"
   internal static let apiName = "modifyZones"
 
+  private static func reportVerifiedZone(_ zone: ZoneInfo) {
+    print("   ✅ Verified zone via lookupZones")
+    if let syncToken = zone.syncToken {
+      print("     Sync Token: \(syncToken)")
+    }
+    if let atomic = zone.atomic {
+      print("     Atomic: \(atomic)")
+    }
+  }
+
+  private static func describe(_ failure: ZoneOperationFailure) -> String {
+    "(\(failure.serverErrorCode.rawValue))" + (failure.reason.map { ": \($0)" } ?? "")
+  }
+
   internal func run(
     input: NoState,
     context: PhaseContext
@@ -52,34 +66,7 @@ internal struct ModifyZonesPhase: IntegrationPhase {
     let zoneID = ZoneID(zoneName: zoneName, ownerName: nil)
 
     do {
-      _ = try await context.service.modifyZones(
-        [.create(zoneID)],
-        database: context.database
-      )
-      if context.verbose {
-        print("   ✅ Created zone: \(zoneName)")
-      }
-
-      let lookedUp = try await context.service.lookupZones(
-        zoneIDs: [zoneID],
-        database: context.database
-      )
-      guard let verifiedZone = lookedUp.first(where: { $0.zoneName == zoneName }) else {
-        try await cleanup(zoneID: zoneID, context: context)
-        throw IntegrationTestError.verificationFailed(
-          "created zone '\(zoneName)' not returned by lookupZones"
-        )
-      }
-      if context.verbose {
-        print("   ✅ Verified zone via lookupZones")
-        if let syncToken = verifiedZone.syncToken {
-          print("     Sync Token: \(syncToken)")
-        }
-        if let atomic = verifiedZone.atomic {
-          print("     Atomic: \(atomic)")
-        }
-      }
-
+      try await createAndVerify(zoneID: zoneID, zoneName: zoneName, context: context)
       try await cleanup(zoneID: zoneID, context: context)
       if context.verbose {
         print("   ✅ Deleted zone: \(zoneName)")
@@ -97,13 +84,54 @@ internal struct ModifyZonesPhase: IntegrationPhase {
     return NoState()
   }
 
+  /// Creates the zone and confirms `lookupZones` reports it back.
+  ///
+  /// `modifyZones` returns a per-zone `[ZoneChangeResult]`, so a rejected
+  /// create is reported inline in a 200 response rather than thrown — check
+  /// `failures` explicitly instead of discarding the results.
+  private func createAndVerify(
+    zoneID: ZoneID,
+    zoneName: String,
+    context: PhaseContext
+  ) async throws {
+    let created = try await context.service.modifyZones(
+      [.create(zoneID)],
+      database: context.database
+    )
+    if let failure = created.failures.first {
+      throw IntegrationTestError.verificationFailed(
+        "creating zone '\(zoneName)' failed \(Self.describe(failure))"
+      )
+    }
+    if context.verbose {
+      print("   ✅ Created zone: \(zoneName)")
+    }
+
+    let lookedUp = try await context.service.lookupZones(
+      zoneIDs: [zoneID],
+      database: context.database
+    )
+    guard let verifiedZone = lookedUp.first(where: { $0.zoneName == zoneName }) else {
+      try await cleanup(zoneID: zoneID, context: context)
+      throw IntegrationTestError.verificationFailed(
+        "created zone '\(zoneName)' not returned by lookupZones"
+      )
+    }
+    if context.verbose {
+      Self.reportVerifiedZone(verifiedZone)
+    }
+  }
+
   private func cleanup(
     zoneID: ZoneID,
     context: PhaseContext
   ) async throws {
-    _ = try await context.service.modifyZones(
+    let results = try await context.service.modifyZones(
       [.delete(zoneID)],
       database: context.database
     )
+    for result in results {
+      _ = try result.get()
+    }
   }
 }
