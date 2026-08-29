@@ -32,9 +32,8 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           ./Scripts/generate-openapi.sh
 
-      # Guards against hand-edits and against automated formatters (CodeFactor
-      # has committed import reordering here before, despite
-      # Sources/MistKitOpenAPI/** being listed in .codefactor.yml's excludes).
+      # Guards against hand-edits and against automated formatters touching
+      # the committed generated output.
       - name: Fail if the committed output does not match
         shell: bash
         run: |
