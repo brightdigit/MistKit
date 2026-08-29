@@ -1,6 +1,6 @@
 {
-  "name": "Swift 6.3",
-  "image": "swift:6.3",
+  "name": "Swift 6.4 Nightly",
+  "image": "swiftlang/swift:nightly-6.4.x-noble",
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": "false",

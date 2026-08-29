@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3
+// swift-tools-version: 6.4
 
 // swiftlint:disable explicit_acl explicit_top_level_acl
 
@@ -7,7 +7,7 @@ import PackageDescription
 // MARK: - Swift Settings Configuration
 
 let swiftSettings: [SwiftSetting] = [
-  // Swift 6.3 Upcoming Features (not yet enabled by default)
+  // Swift 6.4 Upcoming Features (not yet enabled by default)
   // SE-0335: Introduce existential `any`
   .enableUpcomingFeature("ExistentialAny"),
   // SE-0409: Access-level modifiers on import declarations
@@ -122,6 +122,7 @@ let package = Package(
     .testTarget(
       name: "CelestraCloudTests",
       dependencies: [
+        .target(name: "CelestraCloud"),
         .target(name: "CelestraCloudKit"),
         .product(name: "MistKit", package: "MistKit"),
         .product(name: "CelestraKit", package: "CelestraKit")

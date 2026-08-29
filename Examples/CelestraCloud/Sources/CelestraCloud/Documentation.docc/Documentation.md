@@ -47,7 +47,7 @@ CelestraCloud uses `RateLimiter` and `RobotsTxtService` from the CelestraKit pac
 1. **Apple Developer Account** with CloudKit access
 2. **CloudKit Container** configured in Apple Developer Console
 3. **Server-to-Server Key** generated for CloudKit access
-4. **Swift 6.3+** and **macOS 26+**
+4. **Swift 6.4+** and **macOS 26+**
 
 ### Installation
 

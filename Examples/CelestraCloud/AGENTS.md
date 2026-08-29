@@ -20,7 +20,7 @@ Two versioned, in-repo files are the source of truth for how to work in this rep
 
 Celestra is a command-line RSS reader that demonstrates MistKit's CloudKit integration capabilities. It fetches RSS feeds, stores them in CloudKit's public database, and implements comprehensive web etiquette best practices including rate limiting, robots.txt checking, and conditional HTTP requests.
 
-**Tech Stack**: Swift 6.3, MistKit (CloudKit wrapper), CelestraKit (shared models & services), SyndiKit (RSS parsing), Swift Configuration (configuration management)
+**Tech Stack**: Swift 6.4, MistKit (CloudKit wrapper), CelestraKit (shared models & services), SyndiKit (RSS parsing), Swift Configuration (configuration management)
 
 ## Common Commands
 
@@ -354,9 +354,9 @@ let concurrency = config.update.concurrency
 - See `.claude/https_-swiftpackageindex.com-apple-swift-configuration-1.0.0-documentation-configuration.md` for complete Swift Configuration API reference
 - Provider hierarchy documentation: Configuration providers are queried in order, first non-nil value wins
 
-## Swift 6.3 Features
+## Swift 6.4 Features
 
-Package.swift enables extensive Swift 6.3 upcoming and experimental features:
+Package.swift enables extensive Swift 6.4 upcoming and experimental features:
 - Strict concurrency checking (`-strict-concurrency=complete`)
 - Existential `any` keyword
 - Typed throws
