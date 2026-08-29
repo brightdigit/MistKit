@@ -49,6 +49,12 @@ extension CommandIntegrationTests {
           openBrowser: false
         )
         _ = AuthTokenCommand(config: authConfig)
+        let authTokensConfig = AuthTokensConfig(
+          apiToken: "mock-api-token-for-test",
+          openBrowser: false,
+          shareeEmail: "sharee@example.com"
+        )
+        _ = AuthTokensCommand(config: authTokensConfig)
       #endif
 
       // 2. Current user check
@@ -77,6 +83,7 @@ extension CommandIntegrationTests {
       // Verify all commands are properly configured
       #if canImport(Hummingbird)
         #expect(AuthTokenCommand.commandName == "auth-token")
+        #expect(AuthTokensCommand.commandName == "auth-tokens")
       #endif
       #expect(CurrentUserCommand.commandName == "current-user")
       #expect(QueryCommand.commandName == "query")

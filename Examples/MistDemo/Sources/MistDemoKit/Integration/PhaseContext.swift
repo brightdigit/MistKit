@@ -51,12 +51,14 @@ internal struct PhaseContext: Sendable {
   /// band — so both phases skip when this is `nil`. The private pipeline
   /// instead uses ``shareeService`` + ``shareeEmail`` to create and accept.
   internal let shareShortGUID: String?
-  /// Optional service authenticated as the **sharee** (same API token /
-  /// container, `CLOUDKIT_SHAREE_WEB_AUTH_TOKEN`). When set with
-  /// ``shareeEmail``, `ShareCreateAndAcceptPhase` creates a share as the
-  /// sharer (`service`) and accepts it as this sharee.
+  /// Service authenticated as the **sharee** (same API token / container,
+  /// `CLOUDKIT_SHAREE_WEB_AUTH_TOKEN`). Required by
+  /// `ShareCreateAndAcceptPhase` together with ``shareeEmail``: creates a
+  /// share as the sharer (`service`) and accepts it as this sharee.
+  /// `nil` only for pipelines that omit that phase (e.g. public).
   internal let shareeService: CloudKitService?
-  /// Optional iCloud email of the sharee (`CLOUDKIT_SHAREE_EMAIL`), used as
-  /// the invite lookup info when creating the share.
+  /// iCloud email of the sharee (`CLOUDKIT_SHAREE_EMAIL`), used as the
+  /// invite lookup info when creating the share. Required with
+  /// ``shareeService`` for the private share phase.
   internal let shareeEmail: String?
 }

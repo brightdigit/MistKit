@@ -63,5 +63,22 @@
         #expect(AuthTokenCommand.commandName == "auth-token")
       }
     }
+
+    @Suite("AuthTokensCommand Integration")
+    internal struct AuthTokensCommandIntegration {
+      @Test("AuthTokensCommand configuration validation")
+      internal func authTokensCommandConfigValidation() async throws {
+        let config = AuthTokensConfig(
+          apiToken: "test-api-token-123",
+          openBrowser: false,
+          shareeEmail: "sharee@example.com"
+        )
+
+        _ = AuthTokensCommand(config: config)
+
+        #expect(AuthTokensCommand.commandName == "auth-tokens")
+        #expect(AuthTokensCommand.abstract.contains("sharee"))
+      }
+    }
   }
 #endif

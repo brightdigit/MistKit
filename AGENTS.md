@@ -89,6 +89,7 @@ swift build
 # Run MistDemo commands
 swift run mistdemo --help
 swift run mistdemo auth-token
+swift run mistdemo auth-tokens
 swift run mistdemo current-user
 swift run mistdemo query
 swift run mistdemo lookup
@@ -111,10 +112,13 @@ swift run mistdemo test-private
 #   CLOUDKIT_CONTAINER_ID=iCloud.com.yourorg.yourapp
 #   CLOUDKIT_ENVIRONMENT=development
 #   CLOUDKIT_API_TOKEN=…  CLOUDKIT_WEB_AUTH_TOKEN=…           # web-auth scopes
+#   CLOUDKIT_SHAREE_WEB_AUTH_TOKEN=…  CLOUDKIT_SHAREE_EMAIL=… # test-private share
 #   CLOUDKIT_KEY_ID=…     CLOUDKIT_PRIVATE_KEY[_PATH]=…       # server-to-server
 # Recognized keys: CLOUDKIT_CONTAINER_ID, CLOUDKIT_DATABASE, CLOUDKIT_ENVIRONMENT,
-# CLOUDKIT_API_TOKEN, CLOUDKIT_WEB_AUTH_TOKEN, CLOUDKIT_KEY_ID, CLOUDKIT_PRIVATE_KEY,
+# CLOUDKIT_API_TOKEN, CLOUDKIT_WEB_AUTH_TOKEN, CLOUDKIT_SHAREE_WEB_AUTH_TOKEN,
+# CLOUDKIT_SHAREE_EMAIL, CLOUDKIT_KEY_ID, CLOUDKIT_PRIVATE_KEY,
 # CLOUDKIT_PRIVATE_KEY_PATH, CLOUDKIT_LOOKUP_EMAIL, CLOUDKIT_ERROR.
+# Capture sharer+sharee tokens: swift run mistdemo auth-tokens --sharee-email …
 swift run mistdemo query
 ```
 
