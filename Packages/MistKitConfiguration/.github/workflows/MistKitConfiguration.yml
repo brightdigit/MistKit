@@ -291,11 +291,19 @@ jobs:
 
   lint:
     name: Linting
+    # lint.sh ends with `swift build --build-tests`; the manifest is
+    # swift-tools-version: 6.4, so this must run on a 6.4 toolchain (ubuntu-latest
+    # ships 6.3 via mise and fails to parse Package.swift).
     runs-on: ubuntu-latest
+    container: swiftlang/swift:nightly-6.4.x-noble
     if: ${{ !cancelled() && !failure() && !contains(github.event.head_commit.message, 'ci skip') }}
     needs: [build-ubuntu, build-macos, build-macos-platforms]
     steps:
       - uses: actions/checkout@v6
+      - name: Install mise tooling deps
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends curl ca-certificates git
       - uses: jdx/mise-action@v4
         with:
           cache: true
