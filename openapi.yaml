@@ -1352,8 +1352,16 @@ components:
       properties:
         zoneName:
           type: string
-        ownerName:
+        ownerRecordName:
           type: string
+          description: >
+            The zone owner's user record name. Use this key to identify a zone
+            owned by another user (e.g. a shared zone).
+        zoneType:
+          type: string
+          description: >
+            The zone's type. Live responses carry values such as
+            `REGULAR_CUSTOM_ZONE` and `DEFAULT_ZONE`.
 
     Filter:
       type: object
@@ -1848,11 +1856,11 @@ components:
       type: object
       description: >
         A record zone as returned by the zone endpoints (`zones/list`,
-        `zones/lookup`, `zones/modify`, `zones/changes`). Matches the
-        "Zone Dictionary" in Apple's archived CloudKit Web Services
-        Reference, which documents exactly three keys: `zoneID`,
-        `syncToken`, and `atomic`. `isEager` is deliberately absent — it
-        appears in no primary Apple source (see issue #386).
+        `zones/lookup`, `zones/modify`, `zones/changes`). The archived
+        "Zone Dictionary" documents `zoneID`, `syncToken`, and `atomic`;
+        live change feeds also carry `deleted` (issue #444). `isEager` is
+        deliberately absent — it appears in no primary Apple source (see
+        issue #386).
       properties:
         zoneID:
           $ref: '#/components/schemas/ZoneID'
@@ -1864,6 +1872,12 @@ components:
           description: >
             A Boolean value indicating whether this zone supports atomic
             operations.
+        deleted:
+          type: boolean
+          description: >
+            When `true`, the zone was deleted. Present on change-feed
+            responses (`zones/changes`); absent on list/lookup/modify
+            success payloads.
 
     ZonesListResponse:
       type: object
@@ -1946,10 +1960,18 @@ components:
 
     DatabaseChangedZone:
       type: object
-      description: A zone that changed, as returned by `changes/database`.
+      description: >
+        A zone that changed, as returned by `changes/database`. Carries the
+        same tombstone shape as `zones/changes` — `deleted: true` when the
+        zone was removed (issue #444).
       properties:
         zoneID:
           $ref: '#/components/schemas/ZoneID'
+        deleted:
+          type: boolean
+          description: >
+            When `true`, the zone was deleted and should be removed from
+            local storage.
 
     ZoneFetchFailure:
       type: object

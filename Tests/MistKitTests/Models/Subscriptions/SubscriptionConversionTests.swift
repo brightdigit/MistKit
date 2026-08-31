@@ -88,7 +88,7 @@ internal struct SubscriptionConversionTests {
     let schema = info.schema
     #expect(schema.subscriptionType == .zone)
     #expect(schema.zoneID?.zoneName == "Photos")
-    #expect(schema.zoneID?.ownerName == "_owner")
+    #expect(schema.zoneID?.ownerRecordName == "_owner")
     #expect(schema.query == nil)
     // Zone subscriptions don't carry firesOn — only `.query` does.
     #expect(schema.firesOn == nil)
@@ -143,7 +143,7 @@ internal struct SubscriptionConversionTests {
     let payload = Components.Schemas.Subscription(
       subscriptionID: "z",
       subscriptionType: .zone,
-      zoneID: Components.Schemas.ZoneID(ownerName: "_owner")
+      zoneID: Components.Schemas.ZoneID(ownerRecordName: "_owner")
     )
     expectThrow(ConversionError.zoneMissingName) {
       _ = try SubscriptionInfo(from: payload)

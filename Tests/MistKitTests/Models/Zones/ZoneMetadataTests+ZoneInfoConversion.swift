@@ -47,7 +47,7 @@ extension ZoneMetadataTests {
       let zone = try Self.decodeZone(
         """
         {
-          "zoneID": { "zoneName": "Articles", "ownerName": "_defaultOwner" },
+          "zoneID": { "zoneName": "Articles", "ownerRecordName": "_defaultOwner" },
           "syncToken": "AQAAAAAAAAAB",
           "atomic": true
         }
@@ -64,7 +64,7 @@ extension ZoneMetadataTests {
       let zone = try Self.decodeZone(
         """
         {
-          "zoneID": { "zoneName": "Articles", "ownerName": "_defaultOwner" },
+          "zoneID": { "zoneName": "Articles", "ownerRecordName": "_defaultOwner" },
           "syncToken": "AQAAAAAAAAAB",
           "atomic": true
         }
@@ -77,6 +77,74 @@ extension ZoneMetadataTests {
       #expect(info.ownerRecordName == "_defaultOwner")
       #expect(info.syncToken == "AQAAAAAAAAAB")
       #expect(info.atomic == true)
+      #expect(info.deleted == false)
+    }
+
+    @Test(
+      "ZoneInfo decodes live-shaped change-feed payload with ownerRecordName, zoneType, and deleted"
+    )
+    internal func zoneInfoDecodesLiveChangeFeedShape() throws {
+      let zone = try Self.decodeZone(
+        """
+        {
+          "zoneID": {
+            "zoneName": "WebChangeTest",
+            "ownerRecordName": "_aca0fa3547ae9f9cd1f7e25fed948a20",
+            "zoneType": "REGULAR_CUSTOM_ZONE"
+          },
+          "deleted": true
+        }
+        """
+      )
+
+      let info = try ZoneInfo(from: zone)
+
+      #expect(info.zoneName == "WebChangeTest")
+      #expect(info.ownerRecordName == "_aca0fa3547ae9f9cd1f7e25fed948a20")
+      #expect(info.zoneType == "REGULAR_CUSTOM_ZONE")
+      #expect(info.deleted == true)
+    }
+
+    @Test("Absent deleted defaults to false rather than collapsing into nil")
+    internal func absentDeletedDefaultsFalse() throws {
+      let zone = try Self.decodeZone(
+        """
+        {
+          "zoneID": { "zoneName": "Articles", "ownerRecordName": "_defaultOwner" }
+        }
+        """
+      )
+
+      let info = try ZoneInfo(from: zone)
+
+      #expect(info.deleted == false)
+    }
+
+    @Test("DatabaseChangedZone tombstone surfaces deleted on ZoneInfo")
+    internal func databaseChangedZoneDeletedSurfaces() throws {
+      let item = try JSONDecoder().decode(
+        Components.Schemas.DatabaseChangesResponse.zonesPayloadPayload.self,
+        from: Data(
+          """
+          {
+            "zoneID": {
+              "zoneName": "WebChangeTest",
+              "ownerRecordName": "_aca0fa3547ae9f9cd1f7e25fed948a20",
+              "zoneType": "REGULAR_CUSTOM_ZONE"
+            },
+            "deleted": true
+          }
+          """.utf8
+        )
+      )
+
+      let result = try ZoneChangeResult(from: item)
+      let zone = try result.get()
+
+      #expect(zone.zoneName == "WebChangeTest")
+      #expect(zone.ownerRecordName == "_aca0fa3547ae9f9cd1f7e25fed948a20")
+      #expect(zone.zoneType == "REGULAR_CUSTOM_ZONE")
+      #expect(zone.deleted == true)
     }
 
     @Test("Absent metadata stays nil rather than defaulting")
@@ -113,7 +181,7 @@ extension ZoneMetadataTests {
     internal func missingZoneNameThrows() throws {
       let zone = try Self.decodeZone(
         """
-        { "zoneID": { "ownerName": "_defaultOwner" }, "atomic": true }
+        { "zoneID": { "ownerRecordName": "_defaultOwner" }, "atomic": true }
         """
       )
 

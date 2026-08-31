@@ -94,7 +94,7 @@ extension CloudKitServiceTests.Query {
       let body = try await Self.sentBody(for: "queryRecords", from: provider)
       let zoneID = try #require(body["zoneID"] as? [String: Any])
       #expect(zoneID["zoneName"] as? String == "CustomZone")
-      #expect(zoneID["ownerName"] == nil)
+      #expect(zoneID["ownerRecordName"] == nil)
     }
 
     @Test("queryRecords() forwards a shared zone's ownerName")
@@ -111,7 +111,7 @@ extension CloudKitServiceTests.Query {
       let body = try await Self.sentBody(for: "queryRecords", from: provider)
       let zoneID = try #require(body["zoneID"] as? [String: Any])
       #expect(zoneID["zoneName"] as? String == "SharedZone")
-      #expect(zoneID["ownerName"] as? String == "_owner-record-name")
+      #expect(zoneID["ownerRecordName"] as? String == "_owner-record-name")
     }
 
     @Test("queryRecords() forwards ZoneID.defaultZone explicitly when asked")
@@ -156,7 +156,7 @@ extension CloudKitServiceTests.Query {
         let body = try await Self.sentBody(for: "queryRecords", from: provider, at: index)
         let zoneID = try #require(body["zoneID"] as? [String: Any])
         #expect(zoneID["zoneName"] as? String == "CustomZone")
-        #expect(zoneID["ownerName"] as? String == "_owner-record-name")
+        #expect(zoneID["ownerRecordName"] as? String == "_owner-record-name")
       }
     }
 

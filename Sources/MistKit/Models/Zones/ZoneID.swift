@@ -42,14 +42,20 @@ public struct ZoneID: Codable, Sendable, Equatable, Hashable {
   public let zoneName: String
   /// The owner's record name (optional, nil for current user)
   public let ownerName: String?
+  /// The zone's type (e.g. `REGULAR_CUSTOM_ZONE`, `DEFAULT_ZONE`).
+  ///
+  /// `nil` when the server omits the key.
+  public let zoneType: String?
 
   /// Initialize a zone identifier
   /// - Parameters:
   ///   - zoneName: The zone name
   ///   - ownerName: Optional owner record name (nil = current user)
-  public init(zoneName: String, ownerName: String? = nil) {
+  ///   - zoneType: Optional zone type from the wire payload
+  public init(zoneName: String, ownerName: String? = nil, zoneType: String? = nil) {
     self.zoneName = zoneName
     self.ownerName = ownerName
+    self.zoneType = zoneType
   }
 
   /// Lift a zone identifier from the wire schema.
@@ -59,7 +65,8 @@ public struct ZoneID: Codable, Sendable, Equatable, Hashable {
   internal init(from schema: Components.Schemas.ZoneID) {
     self.init(
       zoneName: schema.zoneName ?? ZoneID.defaultZone.zoneName,
-      ownerName: schema.ownerName
+      ownerName: schema.ownerRecordName,
+      zoneType: schema.zoneType
     )
   }
 }
@@ -69,7 +76,8 @@ extension Components.Schemas.ZoneID {
   internal init(from zoneID: ZoneID) {
     self.init(
       zoneName: zoneID.zoneName,
-      ownerName: zoneID.ownerName
+      ownerRecordName: zoneID.ownerName,
+      zoneType: zoneID.zoneType
     )
   }
 }
