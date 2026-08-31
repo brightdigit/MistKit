@@ -75,8 +75,8 @@
       }
 
       let captured = await fixture.backend.lastQuery
-      #expect(captured?.zoneName == "Articles")
-      #expect(captured?.zoneOwner == "_abc123")
+      #expect(captured?.zone?.zoneName == "Articles")
+      #expect(captured?.zone?.zoneOwner == "_abc123")
     }
   }
 #endif

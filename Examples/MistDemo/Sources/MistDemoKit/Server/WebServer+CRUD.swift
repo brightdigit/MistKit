@@ -51,8 +51,7 @@
             recordType: body.recordType,
             limit: body.limit,
             sortBy: body.sortBy,
-            zoneName: body.zoneName,
-            zoneOwner: body.zoneOwner,
+            zone: body.zone,
             database: body.database
           )
           return try WebJSON.encoder().encode(
