@@ -25,9 +25,19 @@ to `main`, which is the guard. The branch exists so MistKitConfiguration can be
 exercised against MistKit features that have not shipped (#444's `ZoneType` /
 `ZoneInfo.deleted`).
 
-**Retirement:** once MistKit `1.0.0-beta.5` is tagged, bump `main` to
-`from: "1.0.0-beta.5"`, cut MistKitConfiguration `1.0.0-beta.2`, repoint `.gitrepo`,
-and delete the branch.
+**`Packages/MistKitConfiguration` is scaffolding for the beta.5 line and must be
+removed before `main`.** It rides the `v1.0.0-beta.5` release branch so MistKit and
+MistKitConfiguration can be developed together, but it is deliberately **not** part of
+the shipped MistKit repo: the release PR `v1.0.0-beta.5` → `main` deletes the subrepo,
+and anything still needing the package consumes it as a normal tagged dependency.
+
+Leaving it in would be circular — a MistKit release carrying a package whose `.gitrepo`
+tracks a branch pinning that same unreleased release.
+
+**Retirement order:** merge feature PRs into `v1.0.0-beta.5` with the subrepo intact →
+before the `→ main` release PR, delete `Packages/MistKitConfiguration` and drop its
+`examples.yml` lane → tag MistKit `1.0.0-beta.5` → bump MistKitConfiguration `main` to
+`from: "1.0.0-beta.5"`, cut `1.0.0-beta.2`, delete the `mistkit-beta.5` branch.
 
 Note this is the *standalone* repo's wiring. It does not change how the monorepo
 builds: `Examples/` and `Packages/` still reach MistKit by `path: "../.."` — see
