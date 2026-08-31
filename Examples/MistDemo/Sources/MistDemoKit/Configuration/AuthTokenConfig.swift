@@ -28,6 +28,7 @@
 //
 
 public import ConfigKeyKit
+internal import MistKitConfiguration
 internal import Foundation
 public import MistKit
 
@@ -99,10 +100,10 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     // Demo default — override via --container-identifier
     // or config key "container.identifier"
     let containerIdentifier =
-      configReader.read(MistDemoKeys.CloudKit.containerID)
+      configReader.read(MistDemoKeys.cloudKit.containerID)
 
     let envString =
-      configReader.read(MistDemoKeys.CloudKit.environment)
+      configReader.read(MistDemoKeys.cloudKit.environment) ?? MistDemoConstants.Defaults.environment
     guard let environment = MistKit.Environment(caseInsensitive: envString) else {
       throw ConfigurationError.invalidEnvironment(envString)
     }

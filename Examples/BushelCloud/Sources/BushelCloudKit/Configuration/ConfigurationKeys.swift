@@ -29,37 +29,17 @@
 
 internal import ConfigKeyKit
 internal import Foundation
+internal import MistKitConfiguration
 
 /// Configuration keys for reading from providers
 internal enum ConfigurationKeys {
-  // MARK: - CloudKit Configuration
+  /// Default CloudKit container for Bushel.
+  internal static let defaultContainerID = "iCloud.com.brightdigit.Bushel"
 
-  /// CloudKit configuration keys
-  ///
-  /// Auto-generates environment variable names from the key path.
-  /// Example: "cloudkit.container-id" → ENV: CLOUDKIT_CONTAINER_ID
-  internal enum CloudKit {
-    internal static let containerID = ConfigKey<String>(
-      "cloudkit.container-id",
-      default: "iCloud.com.brightdigit.Bushel"
-    )
-
-    internal static let keyID = OptionalConfigKey<String>(
-      "cloudkit.key-id"
-    )
-
-    internal static let privateKeyPath = OptionalConfigKey<String>(
-      "cloudkit.private-key-path"
-    )
-
-    internal static let privateKey = OptionalConfigKey<String>(
-      "cloudkit.private-key"
-    )
-
-    internal static let environment = OptionalConfigKey<String>(
-      "cloudkit.environment"
-    )
-  }
+  /// CloudKit credential keys with Bushel's container default.
+  internal static let cloudKit = CloudKitConfigurationKeys(
+    defaultContainerID: defaultContainerID
+  )
 
   // MARK: - VirtualBuddy Configuration
 

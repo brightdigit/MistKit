@@ -30,6 +30,7 @@
 internal import Configuration
 internal import Foundation
 internal import MistKit
+internal import MistKitConfiguration
 internal import Testing
 
 @testable import BushelCloudKit
@@ -148,15 +149,17 @@ internal struct ConfigurationLoaderTests {
       #expect(config.sync?.verbose == false)  // Default
     }
 
-    @Test("ENV var with whitespace is trimmed and parsed")
+    @Test("ENV var with surrounding whitespace is ignored (falls to default)")
     internal func testEnvWhitespace() async throws {
+      // ConfigKeyKit#8: only exact "true"/"1"/"yes" (case-insensitive) are truthy;
+      // padded values are unrecognized and fall through to the key's default.
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [],
         env: ["BUSHEL_SYNC_VERBOSE": "  true  "]
       )
 
       let config = try await loader.loadConfiguration()
-      #expect(config.sync?.verbose == true)
+      #expect(config.sync?.verbose == false)
     }
   }
 

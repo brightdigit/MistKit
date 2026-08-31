@@ -31,6 +31,7 @@ internal import CelestraCloudKit
 internal import CelestraKit
 internal import Foundation
 internal import MistKit
+internal import MistKitConfiguration
 
 internal enum ClearCommand {
   internal static func run(args: [String]) async throws {
@@ -50,7 +51,7 @@ internal enum ClearCommand {
     // Load configuration and create CloudKit service
     let loader = ConfigurationLoader()
     let config = try await loader.loadConfiguration()
-    let validatedCloudKit = try config.cloudkit.validated()
+    let validatedCloudKit = try config.cloudkit.validatedForCelestra()
     let service = try validatedCloudKit.makeCloudKitService()
 
     // Delete articles first (to avoid orphans)

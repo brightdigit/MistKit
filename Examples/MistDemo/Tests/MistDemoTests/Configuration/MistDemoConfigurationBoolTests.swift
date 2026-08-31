@@ -28,6 +28,7 @@
 //
 
 internal import ConfigKeyKit
+internal import MistKitConfiguration
 internal import Configuration
 import Testing
 
@@ -86,8 +87,8 @@ internal struct MistDemoConfigurationBoolTests {
       "--cloudkit-key-id", "abc123",
       "--cloudkit-environment", "production",
     ])
-    #expect(config.read(MistDemoKeys.CloudKit.containerID) == "iCloud.com.example.Renamed")
-    #expect(config.read(MistDemoKeys.CloudKit.keyID) == "abc123")
-    #expect(config.read(MistDemoKeys.CloudKit.environment) == "production")
+    #expect(config.read(MistDemoKeys.cloudKit.containerID) == "iCloud.com.example.Renamed")
+    #expect(config.read(MistDemoKeys.cloudKit.keyID) == "abc123")
+    #expect(config.read(MistDemoKeys.cloudKit.environment) == "production")
   }
 }

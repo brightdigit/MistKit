@@ -28,6 +28,7 @@
 //
 
 internal import ConfigKeyKit
+internal import MistKitConfiguration
 internal import Configuration
 internal import Foundation
 internal import MistKit
@@ -82,7 +83,7 @@ internal struct AuthTokenConfigTests {
   internal func missingApiTokenThrows() async {
     let configuration = Self.configuration(values: [])
 
-    await #expect(throws: ConfigurationError.self) {
+    await #expect(throws: MistDemoKit.ConfigurationError.self) {
       _ = try await AuthTokenConfig(configuration: configuration)
     }
   }
@@ -93,7 +94,7 @@ internal struct AuthTokenConfigTests {
       (MistDemoKeys.Auth.apiToken, "")
     ])
 
-    await #expect(throws: ConfigurationError.self) {
+    await #expect(throws: MistDemoKit.ConfigurationError.self) {
       _ = try await AuthTokenConfig(configuration: configuration)
     }
   }
@@ -119,8 +120,8 @@ internal struct AuthTokenConfigTests {
   internal func parsedOverrides() async throws {
     let configuration = Self.configuration(values: [
       (MistDemoKeys.Auth.apiToken, "tok-xyz"),
-      (MistDemoKeys.CloudKit.containerID, "iCloud.custom.id"),
-      (MistDemoKeys.CloudKit.environment, "production"),
+      (MistDemoKeys.cloudKit.containerID, "iCloud.custom.id"),
+      (MistDemoKeys.cloudKit.environment, "production"),
       (MistDemoKeys.Server.port, String(9_090)),
       (MistDemoKeys.Server.host, "192.168.1.10"),
       (MistDemoKeys.Server.noBrowser, String(true)),
@@ -155,10 +156,10 @@ internal struct AuthTokenConfigTests {
   internal func invalidEnvironmentThrows() async {
     let configuration = Self.configuration(values: [
       (MistDemoKeys.Auth.apiToken, "tok-xyz"),
-      (MistDemoKeys.CloudKit.environment, "staging"),
+      (MistDemoKeys.cloudKit.environment, "staging"),
     ])
 
-    await #expect(throws: ConfigurationError.self) {
+    await #expect(throws: MistDemoKit.ConfigurationError.self) {
       _ = try await AuthTokenConfig(configuration: configuration)
     }
   }

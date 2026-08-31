@@ -91,6 +91,9 @@ let package = Package(
   ],
   dependencies: [
     .package(name: "MistKit", path: "../.."),
+    // Monorepo dogfood overlay — publishable consumers use a tagged `from:` once
+    // MistKitConfiguration is released. Same never-merged discipline as the MistKit line.
+    .package(path: "../../Packages/MistKitConfiguration"),
     .package(url: "https://github.com/brightdigit/ConfigKeyKit.git", from: "1.0.0-beta.2"),
     .package(url: "https://github.com/brightdigit/CelestraKit.git", from: "0.0.3"),
     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
@@ -105,6 +108,7 @@ let package = Package(
       name: "CelestraCloudKit",
       dependencies: [
         .product(name: "MistKit", package: "MistKit"),
+        .product(name: "MistKitConfiguration", package: "MistKitConfiguration"),
         .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
         .product(name: "CelestraKit", package: "CelestraKit"),
         .product(name: "Logging", package: "swift-log"),
@@ -115,7 +119,8 @@ let package = Package(
     .executableTarget(
       name: "CelestraCloud",
       dependencies: [
-        .target(name: "CelestraCloudKit")
+        .target(name: "CelestraCloudKit"),
+        .product(name: "MistKitConfiguration", package: "MistKitConfiguration"),
       ],
       swiftSettings: swiftSettings
     ),

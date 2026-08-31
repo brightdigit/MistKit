@@ -28,14 +28,14 @@
 //
 
 internal import ConfigKeyKit
+internal import MistKitConfiguration
 
 /// Typed configuration keys for MistDemo.
 ///
 /// Every key resolves to a command-line flag and an environment variable:
 ///
-/// - **CloudKit credential keys** carry a `cloudkit.` base and therefore need no
-///   `envPrefix` — the base already yields `CLOUDKIT_*`. These five names are shared
-///   with `MistKitConfiguration`, BushelCloud and CelestraCloud.
+/// - **CloudKit credential keys** come from ``CloudKitConfigurationKeys`` (shared with
+///   MistKitConfiguration, BushelCloud and CelestraCloud).
 /// - **Every other key** keeps its historical base and passes ``envPrefix``, faithfully
 ///   reproducing the blanket `prefixKeys(with: "cloudkit")` the provider stack used to
 ///   apply to the whole key space. Bases stay unchanged so no flag or variable moves.
@@ -46,4 +46,12 @@ internal import ConfigKeyKit
 internal enum MistDemoKeys {
   /// Environment-variable prefix applied to every non-CloudKit key.
   internal static let envPrefix = "CLOUDKIT"
+
+  /// CloudKit credential keys with MistDemo's container default.
+  ///
+  /// `environment` is optional on the package key; callers apply
+  /// ``MistDemoConstants/Defaults/environment`` when the value is absent.
+  internal static let cloudKit = CloudKitConfigurationKeys(
+    defaultContainerID: MistDemoConstants.Defaults.containerIdentifier
+  )
 }

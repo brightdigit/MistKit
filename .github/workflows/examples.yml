@@ -15,7 +15,8 @@ jobs:
   test-examples:
     name: Test ${{ matrix.example }} on Ubuntu
     runs-on: ubuntu-latest
-    # BushelCloud / CelestraCloud declare swift-tools-version: 6.4; MistDemo is 6.2.
+    # BushelCloud / CelestraCloud / MistKitConfiguration declare swift-tools-version: 6.4;
+    # MistDemo is 6.2 but needs a 6.4 toolchain to resolve MistKitConfiguration.
     # Swift 6.4 has no release image yet — use the nightly (same pin as the subrepos).
     container: ${{ matrix.container }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
@@ -24,10 +25,16 @@ jobs:
       matrix:
         include:
           - example: MistDemo
-            container: swift:6.3
+            path: Examples/MistDemo
+            container: swiftlang/swift:nightly-6.4.x-noble
           - example: BushelCloud
+            path: Examples/BushelCloud
             container: swiftlang/swift:nightly-6.4.x-noble
           - example: CelestraCloud
+            path: Examples/CelestraCloud
+            container: swiftlang/swift:nightly-6.4.x-noble
+          - example: MistKitConfiguration
+            path: Packages/MistKitConfiguration
             container: swiftlang/swift:nightly-6.4.x-noble
 
     steps:
@@ -37,4 +44,4 @@ jobs:
       - name: Build and Test ${{ matrix.example }}
         uses: brightdigit/swift-build@v1
         with:
-          working-directory: Examples/${{ matrix.example }}
+          working-directory: ${{ matrix.path }}

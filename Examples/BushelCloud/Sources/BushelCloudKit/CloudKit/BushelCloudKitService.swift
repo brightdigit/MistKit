@@ -32,6 +32,7 @@ public import BushelLogging
 public import Foundation
 internal import Logging
 public import MistKit
+public import MistKitConfiguration
 
 #if canImport(FelinePineSwift)
   internal import FelinePineSwift
@@ -63,45 +64,15 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
 
   // MARK: - Initialization
 
-  /// Initialize CloudKit service with Server-to-Server authentication
+  /// Initialize from already-validated CloudKit credentials.
   ///
-  /// **MistKit Pattern**: Server-to-Server authentication requires:
-  /// 1. Key ID from CloudKit Dashboard → API Access → Server-to-Server Keys
-  /// 2. A private key, either the downloaded `.pem` file or its contents
-  /// 3. Container identifier (begins with "iCloud.")
+  /// Validation (presence + key ID / PEM format) happens in
+  /// ``ValidatedCloudKitConfiguration``; this wrapper only builds the MistKit service.
   ///
-  /// `PrivateKeyMaterial` covers both the local-development case
-  /// (`.file(path:)`) and the CI case (`.raw`, from a secret), so no temporary
-  /// file is needed in GitHub Actions. MistKit defers reading a `.file(path:)`
-  /// key until the credentials are consumed, so this initializer does no file
-  /// IO and a missing file surfaces on first use.
-  ///
-  /// - Parameters:
-  ///   - containerIdentifier: CloudKit container ID (e.g., "iCloud.com.company.App")
-  ///   - keyID: Server-to-Server Key ID from CloudKit Dashboard
-  ///   - privateKey: Signing key, inline PEM or a path to a `.pem` file
-  ///   - environment: CloudKit environment (.development or .production, defaults to .development)
-  /// - Throws: ``CredentialValidationError`` if the key ID or inline PEM is malformed.
-  public init(
-    containerIdentifier: String,
-    keyID: String,
-    privateKey: PrivateKeyMaterial,
-    environment: Environment = .development
-  ) throws {
-    // Validate before MistKit sees them: these produce far better messages
-    // than a downstream signing failure.
-    try KeyIDValidator.validate(keyID)
-    if case .raw(let pem) = privateKey {
-      try PEMValidator.validate(pem)
-    }
-
-    self.service = CloudKitService(
-      containerIdentifier: containerIdentifier,
-      credentials: try Credentials(
-        serverToServer: ServerToServerCredentials(keyID: keyID, privateKey: privateKey)
-      ),
-      environment: environment
-    )
+  /// - Parameter cloudKit: Validated server-to-server credentials.
+  /// - Throws: `CredentialsValidationError` if MistKit rejects the credentials.
+  public init(_ cloudKit: ValidatedCloudKitConfiguration) throws {
+    self.service = try cloudKit.makeCloudKitService()
   }
 
   // MARK: - RecordManaging Protocol Requirements

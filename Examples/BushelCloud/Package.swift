@@ -96,6 +96,9 @@ let package = Package(
         // this is a tagged remote release; this one-line overlay is reapplied when
         // the branch is recreated from main (never merged, so it never conflicts).
         .package(name: "MistKit", path: "../.."),
+        // Monorepo dogfood overlay — publishable consumers use a tagged `from:` once
+        // MistKitConfiguration is released.
+        .package(path: "../../Packages/MistKitConfiguration"),
         .package(url: "https://github.com/brightdigit/ConfigKeyKit.git", from: "1.0.0-beta.2"),
         .package(url: "https://github.com/brightdigit/BushelKit.git", from: "3.0.0-alpha.4"),
         .package(url: "https://github.com/brightdigit/IPSWDownloads.git", from: "1.0.0"),
@@ -112,6 +115,7 @@ let package = Package(
             dependencies: [
                 .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
                 .product(name: "MistKit", package: "MistKit"),
+                .product(name: "MistKitConfiguration", package: "MistKitConfiguration"),
                 .product(name: "BushelLogging", package: "BushelKit"),
                 .product(name: "BushelFoundation", package: "BushelKit"),
                 .product(name: "BushelUtilities", package: "BushelKit"),
@@ -125,14 +129,16 @@ let package = Package(
         .executableTarget(
             name: "BushelCloudCLI",
             dependencies: [
-                .target(name: "BushelCloudKit")
+                .target(name: "BushelCloudKit"),
+                .product(name: "MistKitConfiguration", package: "MistKitConfiguration"),
             ],
             swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "BushelCloudKitTests",
             dependencies: [
-                .target(name: "BushelCloudKit")
+                .target(name: "BushelCloudKit"),
+                .product(name: "MistKitConfiguration", package: "MistKitConfiguration"),
             ],
             swiftSettings: swiftSettings
         )

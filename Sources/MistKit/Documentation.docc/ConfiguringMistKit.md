@@ -1,6 +1,6 @@
 # Configuring MistKit
 
-There is no single `MistKitConfiguration` type — configuration is what you pass to ``CloudKitService``: a container identifier, an ``Environment``, ``Credentials``, and (optionally) a custom transport.
+MistKit itself has no configuration package dependency — you pass a container identifier, an ``Environment``, ``Credentials``, and (optionally) a custom transport to ``CloudKitService``. For reading CloudKit credentials from CLI / environment / `.env`, validating them, and building a service, use the separate [MistKitConfiguration](https://github.com/brightdigit/MistKitConfiguration) package (`CloudKitConfigurationKeys` → `validated()` → `makeCloudKitService()`).
 
 ## Overview
 
@@ -12,6 +12,18 @@ let service = CloudKitService(
   credentials: credentials,
   environment: .production
 )
+```
+
+Or, with MistKitConfiguration:
+
+```swift
+let keys = CloudKitConfigurationKeys(defaultContainerID: "iCloud.com.example.MyApp")
+let service = try ConfigurationSources.makeConfigReader(
+  secretCommandLineFlags: keys.secretCommandLineFlags
+)
+.readCloudKitConfiguration(keys: keys)
+.validated()
+.makeCloudKitService()
 ```
 
 Everything else — which ``Database`` to use, which signing method on the public database, which token to refresh — is decided per call. This article covers the construction-time inputs (container, environment, transport, logging). For credentials and per-call database selection, see <doc:AuthenticationAndDatabases>.

@@ -33,6 +33,7 @@ public import BushelUtilities
 public import Foundation
 internal import Logging
 public import MistKit
+public import MistKitConfiguration
 
 #if canImport(FelinePineSwift)
   internal import FelinePineSwift
@@ -128,38 +129,17 @@ public struct SyncEngine: Sendable {
 
   // MARK: - Initialization
 
-  /// Initialize sync engine with CloudKit credentials
-  ///
-  /// **Flexible Authentication**: Supports both file-based and string-based PEM content:
-  /// - `.pemString`: For CI/CD environments (GitHub Actions secrets)
-  /// - `.pemFile`: For local development (file on disk)
-  ///
-  /// **Environment Separation**: Use separate keys for development and production:
-  /// - Development: Safe for testing, free API calls, can clear data freely
-  /// - Production: Real user data, requires careful key management
+  /// Initialize sync engine with validated CloudKit credentials.
   ///
   /// - Parameters:
-  ///   - containerIdentifier: CloudKit container ID
-  ///   - keyID: Server-to-Server Key ID
-  ///   - privateKey: Signing key, inline PEM or a path to a `.pem` file
-  ///   - environment: CloudKit environment (.development or .production, defaults to .development)
-  ///   - configuration: Fetch configuration for data sources
-  /// - Throws: Error if authentication credentials are invalid or missing
+  ///   - cloudKit: Validated server-to-server credentials.
+  ///   - configuration: Fetch configuration for data sources.
+  /// - Throws: Error if MistKit rejects the credentials.
   public init(
-    containerIdentifier: String,
-    keyID: String,
-    privateKey: PrivateKeyMaterial,
-    environment: Environment = .development,
+    cloudKit: ValidatedCloudKitConfiguration,
     configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
   ) throws {
-    let service = try BushelCloudKitService(
-      containerIdentifier: containerIdentifier,
-      keyID: keyID,
-      privateKey: privateKey,
-      environment: environment
-    )
-
-    self.cloudKitService = service
+    self.cloudKitService = try BushelCloudKitService(cloudKit)
     self.pipeline = DataSourcePipeline(
       configuration: configuration
     )

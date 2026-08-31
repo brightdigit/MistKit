@@ -28,6 +28,7 @@
 //
 
 internal import ConfigKeyKit
+internal import MistKitConfiguration
 internal import Configuration
 internal import Foundation
 internal import MistKit
@@ -52,9 +53,9 @@ extension MistDemoConfig {
   internal init(rawEnvironment: String) async throws {
     self = try await MistDemoConfig(
       configuration: Self.makeConfiguration([
-        (MistDemoKeys.CloudKit.containerID, "iCloud.com.test.App"),
+        (MistDemoKeys.cloudKit.containerID, "iCloud.com.test.App"),
         (MistDemoKeys.Auth.apiToken, "test-api-token"),
-        (MistDemoKeys.CloudKit.environment, rawEnvironment),
+        (MistDemoKeys.cloudKit.environment, rawEnvironment),
       ])
     )
   }
@@ -80,10 +81,10 @@ extension MistDemoConfig {
     badCredentials: Bool = false
   ) async throws {
     var values: [(key: any ConfigurationKey, value: String)] = [
-      (MistDemoKeys.CloudKit.containerID, containerIdentifier),
+      (MistDemoKeys.cloudKit.containerID, containerIdentifier),
       (MistDemoKeys.Auth.apiToken, apiToken),
       (
-        MistDemoKeys.CloudKit.environment,
+        MistDemoKeys.cloudKit.environment,
         environment == .production ? "production" : "development"
       ),
       (MistDemoKeys.Server.database, database.pathSegment),
@@ -99,12 +100,12 @@ extension MistDemoConfig {
     ]
 
     if let webAuthToken { values.append((MistDemoKeys.Auth.webAuthToken, webAuthToken)) }
-    if let keyID { values.append((MistDemoKeys.CloudKit.keyID, keyID)) }
-    if let privateKey { values.append((MistDemoKeys.CloudKit.privateKey, privateKey)) }
+    if let keyID { values.append((MistDemoKeys.cloudKit.keyID, keyID)) }
+    if let privateKey { values.append((MistDemoKeys.cloudKit.privateKey, privateKey)) }
     // Previously seeded `private.key.file`, a key production never read, so the
     // `privateKeyFile:` argument silently did nothing.
     if let privateKeyFile {
-      values.append((MistDemoKeys.CloudKit.privateKeyPath, privateKeyFile))
+      values.append((MistDemoKeys.cloudKit.privateKeyPath, privateKeyFile))
     }
 
     self = try await MistDemoConfig(configuration: Self.makeConfiguration(values))

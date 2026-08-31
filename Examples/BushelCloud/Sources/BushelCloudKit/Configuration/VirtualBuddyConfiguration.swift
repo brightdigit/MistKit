@@ -1,6 +1,6 @@
 //
-//  ConfigReader+ConfigValueReading.swift
-//  CelestraCloud
+//  VirtualBuddyConfiguration.swift
+//  BushelCloud
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -25,20 +25,13 @@
 //  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 //  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //  OTHER DEALINGS IN THE SOFTWARE.
+//
 
-public import ConfigKeyKit
-public import Configuration
+/// VirtualBuddy TSS API configuration
+public struct VirtualBuddyConfiguration: Sendable {
+  public var apiKey: String?
 
-/// Bridges swift-configuration's `ConfigReader` to ConfigKeyKit's
-/// ``ConfigValueReading``, which supplies the CLI → ENV → default resolution
-/// for every `ConfigKey` / `OptionalConfigKey` overload.
-///
-/// Before ConfigKeyKit 1.0.0-beta.2 each consumer hand-wrote those overloads;
-/// they now live on the protocol extension in ConfigKeyKit's dependency-free
-/// core, so this conformance is the only glue required.
-extension ConfigReader: @retroactive ConfigValueReading {
-  /// Wraps a resolved per-source key string in swift-configuration's own key type.
-  public func makeConfigKey(_ string: String) -> Configuration.ConfigKey {
-    .init(string)
+  public init(apiKey: String? = nil) {
+    self.apiKey = apiKey
   }
 }

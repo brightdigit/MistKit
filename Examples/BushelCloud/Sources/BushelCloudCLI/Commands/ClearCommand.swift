@@ -31,6 +31,7 @@ internal import BushelCloudKit
 internal import BushelFoundation
 internal import BushelUtilities
 internal import Foundation
+internal import MistKitConfiguration
 
 internal enum ClearCommand {
   internal static func run(_ args: [String]) async throws {
@@ -60,12 +61,7 @@ internal enum ClearCommand {
     }
 
     // Create sync engine
-    let syncEngine = try SyncEngine(
-      containerIdentifier: config.cloudKit.containerID,
-      keyID: config.cloudKit.keyID,
-      privateKey: config.cloudKit.privateKey,
-      environment: config.cloudKit.environment
-    )
+    let syncEngine = try SyncEngine(cloudKit: config.cloudKit)
 
     // Execute clear
     do {

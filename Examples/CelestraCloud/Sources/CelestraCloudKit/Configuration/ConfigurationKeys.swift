@@ -29,28 +29,20 @@
 
 internal import ConfigKeyKit
 internal import Foundation
+internal import MistKitConfiguration
 
 /// Configuration keys for reading from providers.
 ///
-/// Each option is a single typed `ConfigKey`/`OptionalConfigKey`. ConfigKeyKit's
-/// `StandardNamingStyle` derives both spellings from one dash-separated base:
-/// the CLI flag (dash-case, e.g. `--cloudkit-container-id`) and the environment
-/// variable (`SCREAMING_SNAKE_CASE`, e.g. `CLOUDKIT_CONTAINER_ID`). Bases use
-/// dashes throughout for consistency and conventional kebab-case CLI flags.
+/// CloudKit credentials come from ``CloudKitConfigurationKeys``; Celestra-only update
+/// options stay here as typed `ConfigKey`/`OptionalConfigKey` values.
 internal enum ConfigurationKeys {
-  internal enum CloudKit {
-    internal static let containerID = ConfigKey<String>(
-      "cloudkit.container-id",
-      default: CloudKitConfiguration.defaultContainerID
-    )
-    internal static let keyID = OptionalConfigKey<String>("cloudkit.key-id")
-    internal static let privateKeyPath = OptionalConfigKey<String>("cloudkit.private-key-path")
-    internal static let privateKey = OptionalConfigKey<String>(
-      "cloudkit.private-key",
-      isSecret: true
-    )
-    internal static let environment = OptionalConfigKey<String>("cloudkit.environment")
-  }
+  /// Default CloudKit container for Celestra.
+  internal static let defaultContainerID = "iCloud.com.brightdigit.Celestra"
+
+  /// CloudKit credential keys with Celestra's container default.
+  internal static let cloudKit = CloudKitConfigurationKeys(
+    defaultContainerID: defaultContainerID
+  )
 
   internal enum Update {
     internal static let delay = ConfigKey<Double>("update.delay", default: 2.0)

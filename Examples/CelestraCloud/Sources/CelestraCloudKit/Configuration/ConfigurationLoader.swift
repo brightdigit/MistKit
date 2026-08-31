@@ -30,7 +30,7 @@
 internal import ConfigKeyKit
 internal import Configuration
 internal import Foundation
-internal import MistKit
+internal import MistKitConfiguration
 
 /// Loads and merges configuration from multiple sources
 public actor ConfigurationLoader {
@@ -38,25 +38,9 @@ public actor ConfigurationLoader {
 
   /// Creates a new configuration loader with default providers.
   public init() {
-    var providers: [any ConfigProvider] = []
-
-    // Priority 1: Command-line arguments (highest)
-    providers.append(
-      CommandLineArgumentsProvider(
-        secretsSpecifier: .specific(
-          [
-            "--cloudkit-key-id",
-            "--cloudkit-private-key-path",
-            "--cloudkit-private-key",
-          ]
-        )
-      )
+    self.configReader = ConfigurationSources.makeConfigReader(
+      secretCommandLineFlags: ConfigurationKeys.cloudKit.secretCommandLineFlags
     )
-
-    // Priority 2: Environment variables
-    providers.append(EnvironmentVariablesProvider())
-
-    self.configReader = ConfigReader(providers: providers)
   }
 
   /// Creates a loader over a pre-configured reader.
@@ -68,40 +52,10 @@ public actor ConfigurationLoader {
     self.configReader = configReader
   }
 
-  /// Parses a CloudKit environment string, defaulting to `.development` when absent.
-  ///
-  /// An unrecognized value throws rather than silently degrading — a typo'd
-  /// `CLOUDKIT_ENVIRONMENT` must not quietly run against the development
-  /// container.
-  private static func parseEnvironment(
-    _ value: String?
-  ) throws -> MistKit.Environment {
-    guard let value else {
-      return .development
-    }
-    guard let environment = MistKit.Environment(caseInsensitive: value) else {
-      throw ConfigurationError(
-        "Invalid CLOUDKIT_ENVIRONMENT: '\(value)'. Must be 'development' or 'production'",
-        key: "cloudkit.environment"
-      )
-    }
-    return environment
-  }
-
   /// Load complete configuration with all defaults applied
   public func loadConfiguration() async throws -> CelestraConfiguration {
-    // CloudKit configuration (automatic CLI → ENV → default fallback)
-    let cloudkit = CloudKitConfiguration(
-      containerID: configReader.read(ConfigurationKeys.CloudKit.containerID),
-      keyID: configReader.read(ConfigurationKeys.CloudKit.keyID),
-      privateKeyPath: configReader.read(ConfigurationKeys.CloudKit.privateKeyPath),
-      privateKey: configReader.read(ConfigurationKeys.CloudKit.privateKey),
-      environment: try Self.parseEnvironment(
-        configReader.read(ConfigurationKeys.CloudKit.environment)
-      )
-    )
+    let cloudkit = configReader.readCloudKitConfiguration(keys: ConfigurationKeys.cloudKit)
 
-    // Update command configuration
     let update = UpdateCommandConfiguration(
       delay: configReader.read(ConfigurationKeys.Update.delay),
       skipRobotsCheck: configReader.read(ConfigurationKeys.Update.skipRobotsCheck),

@@ -29,37 +29,7 @@
 
 public import BushelFoundation
 public import Foundation
-internal import MistKit
-
-// MARK: - Configuration Error
-
-/// A missing or malformed configuration value, naming the key at fault.
-public struct ConfigurationError: LocalizedError, Sendable {
-  /// The error message describing what went wrong.
-  public let message: String
-
-  /// The configuration key that caused the error, if applicable.
-  public let key: String?
-
-  /// A localized description of the error.
-  public var errorDescription: String? {
-    var parts = [message]
-    if let key {
-      parts.append("(key: \(key))")
-    }
-    return parts.joined(separator: " ")
-  }
-
-  /// Creates a new configuration error.
-  ///
-  /// - Parameters:
-  ///   - message: The error message describing what went wrong.
-  ///   - key: The configuration key that caused the error, if applicable.
-  public init(_ message: String, key: String? = nil) {
-    self.message = message
-    self.key = key
-  }
-}
+public import MistKitConfiguration
 
 // MARK: - Root Configuration
 
@@ -96,11 +66,17 @@ public struct BushelConfiguration: Sendable {
 
   /// Validate that all required fields are present
   public func validated() throws -> ValidatedBushelConfiguration {
-    guard let cloudKit = cloudKit else {
+    guard let cloudKit else {
       throw ConfigurationError("CloudKit configuration required", key: "cloudkit")
     }
+    let validatedCloudKit: ValidatedCloudKitConfiguration
+    do {
+      validatedCloudKit = try cloudKit.validated()
+    } catch let error as CloudKitConfigurationError {
+      throw error.map(keys: ConfigurationKeys.cloudKit)
+    }
     return ValidatedBushelConfiguration(
-      cloudKit: try cloudKit.validated(),
+      cloudKit: validatedCloudKit,
       virtualBuddy: virtualBuddy,
       fetch: fetch,
       sync: sync,

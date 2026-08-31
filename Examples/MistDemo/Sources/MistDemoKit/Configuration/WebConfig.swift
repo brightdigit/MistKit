@@ -28,6 +28,7 @@
 //
 
 public import ConfigKeyKit
+internal import MistKitConfiguration
 internal import Foundation
 public import MistKit
 
@@ -120,10 +121,10 @@ public struct WebConfig: Sendable, ConfigurationParseable {
     }
 
     let containerIdentifier =
-      configReader.read(MistDemoKeys.CloudKit.containerID)
+      configReader.read(MistDemoKeys.cloudKit.containerID)
 
     let envString =
-      configReader.read(MistDemoKeys.CloudKit.environment)
+      configReader.read(MistDemoKeys.cloudKit.environment) ?? MistDemoConstants.Defaults.environment
     guard let environment = MistKit.Environment(caseInsensitive: envString) else {
       throw ConfigurationError.invalidEnvironment(envString)
     }
@@ -137,9 +138,9 @@ public struct WebConfig: Sendable, ConfigurationParseable {
       default: false
     )
 
-    let keyID = configReader.read(MistDemoKeys.CloudKit.keyID)
-    let privateKey = configReader.read(MistDemoKeys.CloudKit.privateKey)
-    let privateKeyFile = configReader.read(MistDemoKeys.CloudKit.privateKeyPath)
+    let keyID = configReader.read(MistDemoKeys.cloudKit.keyID)
+    let privateKey = configReader.read(MistDemoKeys.cloudKit.privateKey)
+    let privateKeyFile = configReader.read(MistDemoKeys.cloudKit.privateKeyPath)
 
     self.init(
       apiToken: apiToken,

@@ -19,3 +19,5 @@ Standing always/never directives and corrections from the human. Agents must rea
 - Repo-wide CI version bumps (Xcode/simulator/toolchain) DO extend into the `Examples/` subrepos — update BushelCloud and CelestraCloud in the same pass rather than deferring them to their own repos.
 - Follow sibling brightdigit repos (e.g. ConfigKeyKit) for current CI workflow shape before inventing a new one.
 - Feature-branch PRs: NEVER merge-commit. ALWAYS rebase if the PR has exactly 1 commit (`gh pr merge --rebase`); ALWAYS squash if it has 2+ commits (`gh pr merge --squash`). Count commits before merging.
+- ConfigKeyKit#8 is merged to main but not tagged: MistKitConfiguration may pin `branch: "main"` for draft integration only. NEVER mark MistKitConfiguration#1 or MistKit#455 merge-ready until ConfigKeyKit is tagged and MistKitConfiguration's published Package.swift uses only `from:` tags (no branch/revision/path).
+- MistDemo keeps its own `resolveBool` over `ConfigReader.bool` until ConfigKeyKit's boolean fix is tagged *and* re-verified — do not "simplify" it into ConfigKeyKit `read(_:)`.

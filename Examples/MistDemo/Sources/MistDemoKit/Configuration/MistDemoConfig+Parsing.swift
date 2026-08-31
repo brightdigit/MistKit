@@ -28,6 +28,7 @@
 //
 
 internal import MistKit
+internal import MistKitConfiguration
 
 extension MistDemoConfig {
   internal struct CoreConfig {
@@ -62,14 +63,14 @@ extension MistDemoConfig {
     _ config: MistDemoConfiguration
   ) throws -> CoreConfig {
     let containerIdentifier =
-      config.read(MistDemoKeys.CloudKit.containerID)
+      config.read(MistDemoKeys.cloudKit.containerID)
 
     let apiToken =
       config.read(MistDemoKeys.Auth.apiToken)
 
-    let defaultEnv = MistKit.Environment.development.rawValue
+    let defaultEnv = MistDemoConstants.Defaults.environment
     let envString =
-      config.read(MistDemoKeys.CloudKit.environment)
+      config.read(MistDemoKeys.cloudKit.environment) ?? defaultEnv
     guard let environment = MistKit.Environment(caseInsensitive: envString) else {
       throw ConfigurationError.invalidEnvironment(envString)
     }
@@ -86,9 +87,9 @@ extension MistDemoConfig {
   ) -> AuthConfig {
     AuthConfig(
       webAuthToken: config.read(MistDemoKeys.Auth.webAuthToken),
-      keyID: config.read(MistDemoKeys.CloudKit.keyID),
-      privateKey: config.read(MistDemoKeys.CloudKit.privateKey),
-      privateKeyFile: config.read(MistDemoKeys.CloudKit.privateKeyPath)
+      keyID: config.read(MistDemoKeys.cloudKit.keyID),
+      privateKey: config.read(MistDemoKeys.cloudKit.privateKey),
+      privateKeyFile: config.read(MistDemoKeys.cloudKit.privateKeyPath)
     )
   }
 

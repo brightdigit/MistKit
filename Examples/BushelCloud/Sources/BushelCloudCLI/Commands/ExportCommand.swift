@@ -30,6 +30,7 @@
 internal import BushelCloudKit
 internal import BushelFoundation
 internal import Foundation
+internal import MistKitConfiguration
 internal import MistKit
 
 internal enum ExportCommand {
@@ -71,12 +72,7 @@ internal enum ExportCommand {
     ConsoleOutput.isVerbose = config.export?.verbose ?? false
 
     // Create sync engine
-    let syncEngine = try SyncEngine(
-      containerIdentifier: config.cloudKit.containerID,
-      keyID: config.cloudKit.keyID,
-      privateKey: config.cloudKit.privateKey,
-      environment: config.cloudKit.environment
-    )
+    let syncEngine = try SyncEngine(cloudKit: config.cloudKit)
 
     // Execute export
     do {

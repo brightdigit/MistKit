@@ -28,6 +28,7 @@
 //
 
 internal import ConfigKeyKit
+internal import MistKitConfiguration
 internal import Configuration
 import Testing
 
@@ -45,11 +46,11 @@ internal struct MistDemoKeysTests {
   @Test(
     "Deployment environment variables resolve",
     arguments: [
-      (MistDemoKeys.CloudKit.containerID as any ConfigurationKey, "CLOUDKIT_CONTAINER_ID"),
-      (MistDemoKeys.CloudKit.keyID, "CLOUDKIT_KEY_ID"),
-      (MistDemoKeys.CloudKit.privateKey, "CLOUDKIT_PRIVATE_KEY"),
-      (MistDemoKeys.CloudKit.privateKeyPath, "CLOUDKIT_PRIVATE_KEY_PATH"),
-      (MistDemoKeys.CloudKit.environment, "CLOUDKIT_ENVIRONMENT"),
+      (MistDemoKeys.cloudKit.containerID as any ConfigurationKey, "CLOUDKIT_CONTAINER_ID"),
+      (MistDemoKeys.cloudKit.keyID, "CLOUDKIT_KEY_ID"),
+      (MistDemoKeys.cloudKit.privateKey, "CLOUDKIT_PRIVATE_KEY"),
+      (MistDemoKeys.cloudKit.privateKeyPath, "CLOUDKIT_PRIVATE_KEY_PATH"),
+      (MistDemoKeys.cloudKit.environment, "CLOUDKIT_ENVIRONMENT"),
       (MistDemoKeys.Auth.apiToken, "CLOUDKIT_API_TOKEN"),
       (MistDemoKeys.Auth.webAuthToken, "CLOUDKIT_WEB_AUTH_TOKEN"),
       (MistDemoKeys.Auth.shareeWebAuthToken, "CLOUDKIT_SHAREE_WEB_AUTH_TOKEN"),
@@ -68,11 +69,11 @@ internal struct MistDemoKeysTests {
   @Test("Credential key bases are dash-case")
   internal func basesAreDashCase() {
     let bases = [
-      MistDemoKeys.CloudKit.containerID.base,
-      MistDemoKeys.CloudKit.keyID.base,
-      MistDemoKeys.CloudKit.privateKey.base,
-      MistDemoKeys.CloudKit.privateKeyPath.base,
-      MistDemoKeys.CloudKit.environment.base,
+      MistDemoKeys.cloudKit.containerID.base,
+      MistDemoKeys.cloudKit.keyID.base,
+      MistDemoKeys.cloudKit.privateKey.base,
+      MistDemoKeys.cloudKit.privateKeyPath.base,
+      MistDemoKeys.cloudKit.environment.base,
     ]
     for base in bases {
       let unwrapped = base ?? ""
@@ -84,9 +85,9 @@ internal struct MistDemoKeysTests {
   /// The three credential keys carry `isSecret`, so a value passed by flag is redacted.
   @Test("Credential keys are marked secret")
   internal func credentialKeysAreSecret() {
-    #expect(MistDemoKeys.CloudKit.keyID.isSecret)
-    #expect(MistDemoKeys.CloudKit.privateKey.isSecret)
-    #expect(MistDemoKeys.CloudKit.privateKeyPath.isSecret)
+    #expect(MistDemoKeys.cloudKit.keyID.isSecret)
+    #expect(MistDemoKeys.cloudKit.privateKey.isSecret)
+    #expect(MistDemoKeys.cloudKit.privateKeyPath.isSecret)
     #expect(MistDemoKeys.Auth.apiToken.isSecret)
     #expect(MistDemoKeys.Auth.webAuthToken.isSecret)
   }

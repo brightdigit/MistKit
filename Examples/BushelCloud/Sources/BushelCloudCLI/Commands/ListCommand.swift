@@ -30,6 +30,7 @@
 internal import BushelCloudKit
 internal import BushelFoundation
 internal import Foundation
+internal import MistKitConfiguration
 internal import MistKit
 
 internal enum ListCommand {
@@ -40,12 +41,7 @@ internal enum ListCommand {
     let config = try rawConfig.validated()
 
     // Create CloudKit service
-    let cloudKitService = try BushelCloudKitService(
-      containerIdentifier: config.cloudKit.containerID,
-      keyID: config.cloudKit.keyID,
-      privateKey: config.cloudKit.privateKey,
-      environment: config.cloudKit.environment
-    )
+    let cloudKitService = try BushelCloudKitService(config.cloudKit)
 
     // Determine what to list based on flags
     let listConfig = config.list

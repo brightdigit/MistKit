@@ -44,14 +44,12 @@ let package = Package(
     // tag of this package usable downstream. Re-apply the swap after every push, the same
     // never-merged-overlay discipline `Examples/BushelCloud/Package.swift` documents.
     .package(name: "MistKit", path: "../.."),
-    // Pinned to the fix for brightdigit/ConfigKeyKit#8: booleans resolved through
-    // `string(forKey:)` could not see a valueless command-line flag, so `--flag` read as
-    // its default and `--flag false` read as true, while an unrecognized environment
-    // value collapsed to false instead of being ignored. Move back to a version range
-    // once a release carrying that fix is tagged.
+    // Temporary: ConfigKeyKit#8 (boolean resolution) is on main but not yet tagged.
+    // Swap to `from: "<tag>"` once a release carrying that fix exists — MistKitConfiguration
+    // PRs targeting main must use only tagged dependencies (`dependency-policy.yml`).
     .package(
       url: "https://github.com/brightdigit/ConfigKeyKit.git",
-      revision: "90110faa06f7666a0d58d224c92da976fff5d930"
+      branch: "main"
     ),
     .package(
       url: "https://github.com/apple/swift-configuration.git",

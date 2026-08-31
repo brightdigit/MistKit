@@ -30,6 +30,7 @@
 internal import ConfigKeyKit
 internal import Configuration
 internal import Foundation
+internal import MistKitConfiguration
 
 /// Actor responsible for loading configuration from CLI arguments and environment variables
 public actor ConfigurationLoader {
@@ -37,24 +38,11 @@ public actor ConfigurationLoader {
 
   /// Initialize the configuration loader with command-line and environment providers
   public init() {
-    var providers: [any ConfigProvider] = []
-
-    // Priority 1: Command-line arguments (automatically parses all --key value and --flag arguments)
-    providers.append(
-      CommandLineArgumentsProvider(
-        secretsSpecifier: .specific([
-          "--cloudkit-key-id",
-          "--cloudkit-private-key-path",
-          "--cloudkit-private-key",
-          "--virtualbuddy-api-key",
-        ])
-      )
+    self.configReader = ConfigurationSources.makeConfigReader(
+      secretCommandLineFlags: ConfigurationKeys.cloudKit.secretCommandLineFlags.union([
+        "--virtualbuddy-api-key"
+      ])
     )
-
-    // Priority 2: Environment variables
-    providers.append(EnvironmentVariablesProvider())
-
-    self.configReader = ConfigReader(providers: providers)
   }
 
   /// Creates a loader over a pre-configured reader.
@@ -65,5 +53,4 @@ public actor ConfigurationLoader {
   internal init(configReader: ConfigReader) {
     self.configReader = configReader
   }
-
 }

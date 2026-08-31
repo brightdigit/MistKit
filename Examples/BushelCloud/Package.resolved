@@ -1,5 +1,5 @@
 {
-  "originHash" : "a54730827c3e3ca47018c9b427835bd627e21338b440ba0d3f3defc4f44ff94f",
+  "originHash" : "3737436ec2bd2a700ba3495851f0e3b74e7f8287010a198b01dc65c24ad1bab4",
   "pins" : [
     {
       "identity" : "bushelkit",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/brightdigit/ConfigKeyKit.git",
       "state" : {
-        "revision" : "6949abb4b7f3e50f7f81d668e6c11aa4721e97fd",
-        "version" : "1.0.0-beta.2"
+        "branch" : "main",
+        "revision" : "3c8ae3825b4cdcbf60fb1adeaaaf324557e7fd41"
       }
     },
     {

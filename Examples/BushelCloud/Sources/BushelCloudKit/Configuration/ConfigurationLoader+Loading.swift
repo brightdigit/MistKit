@@ -30,21 +30,14 @@
 internal import BushelFoundation
 internal import ConfigKeyKit
 internal import Foundation
+internal import MistKitConfiguration
 
 // MARK: - Configuration Loading
 
 extension ConfigurationLoader {
   /// Load the complete configuration from all providers
   public func loadConfiguration() async throws -> BushelConfiguration {
-    // CloudKit configuration (automatic CLI → ENV → default fallback)
-    let cloudKit = CloudKitConfiguration(
-      containerID: configReader.read(ConfigurationKeys.CloudKit.containerID),
-      keyID: configReader.read(ConfigurationKeys.CloudKit.keyID),
-      privateKeyPath: configReader.read(ConfigurationKeys.CloudKit.privateKeyPath),
-      privateKey: configReader.read(ConfigurationKeys.CloudKit.privateKey),
-      // Default to development
-      environment: configReader.read(ConfigurationKeys.CloudKit.environment) ?? "development"
-    )
+    let cloudKit = configReader.readCloudKitConfiguration(keys: ConfigurationKeys.cloudKit)
 
     // VirtualBuddy configuration
     let virtualBuddy = VirtualBuddyConfiguration(
