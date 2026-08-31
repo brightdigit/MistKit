@@ -765,23 +765,35 @@ public enum Components {
         public struct ZoneID: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ZoneID/zoneName`.
             public var zoneName: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/ZoneID/ownerName`.
-            public var ownerName: Swift.String?
+            /// The zone owner's user record name. Use this key to identify a zone owned by another user (e.g. a shared zone).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ZoneID/ownerRecordName`.
+            public var ownerRecordName: Swift.String?
+            /// The zone's type. Live responses carry values such as `REGULAR_CUSTOM_ZONE` and `DEFAULT_ZONE`.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ZoneID/zoneType`.
+            public var zoneType: Swift.String?
             /// Creates a new `ZoneID`.
             ///
             /// - Parameters:
             ///   - zoneName:
-            ///   - ownerName:
+            ///   - ownerRecordName: The zone owner's user record name. Use this key to identify a zone owned by another user (e.g. a shared zone).
+            ///   - zoneType: The zone's type. Live responses carry values such as `REGULAR_CUSTOM_ZONE` and `DEFAULT_ZONE`.
             public init(
                 zoneName: Swift.String? = nil,
-                ownerName: Swift.String? = nil
+                ownerRecordName: Swift.String? = nil,
+                zoneType: Swift.String? = nil
             ) {
                 self.zoneName = zoneName
-                self.ownerName = ownerName
+                self.ownerRecordName = ownerRecordName
+                self.zoneType = zoneType
             }
             public enum CodingKeys: String, CodingKey {
                 case zoneName
-                case ownerName
+                case ownerRecordName
+                case zoneType
             }
         }
         /// - Remark: Generated from `#/components/schemas/Filter`.
@@ -2254,7 +2266,7 @@ public enum Components {
                 case moreComing
             }
         }
-        /// A record zone as returned by the zone endpoints (`zones/list`, `zones/lookup`, `zones/modify`, `zones/changes`). Matches the "Zone Dictionary" in Apple's archived CloudKit Web Services Reference, which documents exactly three keys: `zoneID`, `syncToken`, and `atomic`. `isEager` is deliberately absent — it appears in no primary Apple source (see issue #386).
+        /// A record zone as returned by the zone endpoints (`zones/list`, `zones/lookup`, `zones/modify`, `zones/changes`). The archived "Zone Dictionary" documents `zoneID`, `syncToken`, and `atomic`; live change feeds also carry `deleted` (issue #444). `isEager` is deliberately absent — it appears in no primary Apple source (see issue #386).
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/Zone`.
@@ -2270,25 +2282,34 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Zone/atomic`.
             public var atomic: Swift.Bool?
+            /// When `true`, the zone was deleted. Present on change-feed responses (`zones/changes`); absent on list/lookup/modify success payloads.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Zone/deleted`.
+            public var deleted: Swift.Bool?
             /// Creates a new `Zone`.
             ///
             /// - Parameters:
             ///   - zoneID:
             ///   - syncToken: The current point in the zone's change history.
             ///   - atomic: A Boolean value indicating whether this zone supports atomic operations.
+            ///   - deleted: When `true`, the zone was deleted. Present on change-feed responses (`zones/changes`); absent on list/lookup/modify success payloads.
             public init(
                 zoneID: Components.Schemas.ZoneID? = nil,
                 syncToken: Swift.String? = nil,
-                atomic: Swift.Bool? = nil
+                atomic: Swift.Bool? = nil,
+                deleted: Swift.Bool? = nil
             ) {
                 self.zoneID = zoneID
                 self.syncToken = syncToken
                 self.atomic = atomic
+                self.deleted = deleted
             }
             public enum CodingKeys: String, CodingKey {
                 case zoneID
                 case syncToken
                 case atomic
+                case deleted
             }
         }
         /// - Remark: Generated from `#/components/schemas/ZonesListResponse`.
@@ -2495,21 +2516,33 @@ public enum Components {
                 case moreComing
             }
         }
-        /// A zone that changed, as returned by `changes/database`.
+        /// A zone that changed, as returned by `changes/database`. Carries the same tombstone shape as `zones/changes` — `deleted: true` when the zone was removed (issue #444).
+        ///
         ///
         /// - Remark: Generated from `#/components/schemas/DatabaseChangedZone`.
         public struct DatabaseChangedZone: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/DatabaseChangedZone/zoneID`.
             public var zoneID: Components.Schemas.ZoneID?
+            /// When `true`, the zone was deleted and should be removed from local storage.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/DatabaseChangedZone/deleted`.
+            public var deleted: Swift.Bool?
             /// Creates a new `DatabaseChangedZone`.
             ///
             /// - Parameters:
             ///   - zoneID:
-            public init(zoneID: Components.Schemas.ZoneID? = nil) {
+            ///   - deleted: When `true`, the zone was deleted and should be removed from local storage.
+            public init(
+                zoneID: Components.Schemas.ZoneID? = nil,
+                deleted: Swift.Bool? = nil
+            ) {
                 self.zoneID = zoneID
+                self.deleted = deleted
             }
             public enum CodingKeys: String, CodingKey {
                 case zoneID
+                case deleted
             }
         }
         /// Per-zone error returned inline in the `zones` array of a 200 zone

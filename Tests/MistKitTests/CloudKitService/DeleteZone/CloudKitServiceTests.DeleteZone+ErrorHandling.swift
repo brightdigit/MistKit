@@ -43,7 +43,7 @@ extension CloudKitServiceTests.DeleteZone {
       }
       let service = try CloudKitServiceTests.ModifyZones.makeService(zones: [
         [
-          "zoneID": ["zoneName": "Missing", "ownerName": "_defaultOwner"],
+          "zoneID": ["zoneName": "Missing", "ownerRecordName": "_defaultOwner"],
           "serverErrorCode": "ZONE_NOT_FOUND",
           "reason": "Zone does not exist",
         ]

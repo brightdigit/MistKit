@@ -107,5 +107,22 @@
         )
       )
     }
+
+    @Test("Query panel exposes zone name and owner inputs")
+    internal func indexExposesQueryZoneInputs() async throws {
+      let html = try await body(at: "/")
+      #expect(html.contains(#"id="query-zone""#))
+      #expect(html.contains(#"id="query-zone-owner""#))
+
+      let appJs = try await body(at: "/js/app.js")
+      // Both backends read the same two inputs...
+      #expect(appJs.contains("queryZoneInput"))
+      #expect(appJs.contains("queryZoneOwnerInput"))
+      // ...the MistKit path forwards them as-is on the query body,
+      // and the CloudKit JS path maps the owner to `ownerRecordName`.
+      #expect(appJs.contains("ownerRecordName: zoneOwner"))
+      // The inputs join the controls disabled while a query is in flight.
+      #expect(appJs.contains("'query-zone', 'query-zone-owner'"))
+    }
   }
 #endif

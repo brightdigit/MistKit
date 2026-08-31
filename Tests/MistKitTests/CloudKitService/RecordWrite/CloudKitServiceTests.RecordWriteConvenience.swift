@@ -146,5 +146,35 @@ extension CloudKitServiceTests {
 
       #expect(await provider.callCount(for: "modifyRecords") == 1)
     }
+
+    @Test("createRecord forwards zoneID into the modifyRecords request body")
+    internal func createForwardsZoneID() async throws {
+      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
+        Issue.record("CloudKitService is not available on this operating system.")
+        return
+      }
+      let (service, provider) = try Helper.makeServiceWithProvider(responsesByOperation: [
+        "modifyRecords": try Helper.recordsResponse([
+          Helper.noteRecord(recordName: "note-1", changeTag: "tag-1")
+        ])
+      ])
+
+      _ = try await service.createRecord(
+        recordType: "Note",
+        recordName: "note-1",
+        fields: ["title": .string("Hello")],
+        zoneID: ZoneID(zoneName: "Articles", ownerName: "_abc123"),
+        database: Helper.publicDatabase
+      )
+
+      let bodies = await provider.bodies(for: "modifyRecords").compactMap { $0 }
+      let data = try #require(bodies.first)
+      let body = try #require(
+        try JSONSerialization.jsonObject(with: data) as? [String: Any]
+      )
+      let zoneID = try #require(body["zoneID"] as? [String: Any])
+      #expect(zoneID["zoneName"] as? String == "Articles")
+      #expect(zoneID["ownerRecordName"] as? String == "_abc123")
+    }
   }
 }

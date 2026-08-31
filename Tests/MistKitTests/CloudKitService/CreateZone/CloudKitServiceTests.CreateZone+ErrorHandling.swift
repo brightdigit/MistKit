@@ -59,7 +59,7 @@ extension CloudKitServiceTests.CreateZone {
       }
       let service = try CloudKitServiceTests.ModifyZones.makeService(zones: [
         [
-          "zoneID": ["zoneName": "Articles", "ownerName": "_defaultOwner"],
+          "zoneID": ["zoneName": "Articles", "ownerRecordName": "_defaultOwner"],
           "serverErrorCode": "EXISTS",
           "reason": "Zone already exists",
         ]

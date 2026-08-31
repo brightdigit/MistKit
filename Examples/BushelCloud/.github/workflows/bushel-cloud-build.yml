@@ -37,6 +37,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup MistKit
+        uses: brightdigit/MistKit/.github/actions/setup-mistkit@main
+        with:
+          branch: v1.0.0-beta.4
+
       - name: Verify Swift version
         run: |
           swift --version

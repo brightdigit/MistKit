@@ -35,22 +35,18 @@ extension CloudKitService: WebBackend {
     recordType: String,
     limit: Int?,
     sortBy: [WebRequests.QuerySortField]?,
-    zoneName: String?,
-    zoneOwner: String?,
+    zone: WebRequests.ZoneSelector?,
     database: MistKit.Database
   ) async throws -> [RecordInfo] {
     let querySorts = sortBy?.map { sort in
       QuerySort.sort(sort.field, ascending: sort.ascending)
-    }
-    let zoneID = zoneName.map {
-      ZoneID(zoneName: $0, ownerName: zoneOwner)
     }
     let result = try await queryRecords(
       Query(recordType: recordType, sortBy: querySorts ?? []),
       limit: limit,
       desiredKeys: nil,
       continuationMarker: nil,
-      zoneID: zoneID,
+      zoneID: zone?.zoneID,
       database: database
     )
     return result.records
