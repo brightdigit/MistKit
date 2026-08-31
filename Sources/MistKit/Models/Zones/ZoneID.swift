@@ -42,17 +42,17 @@ public struct ZoneID: Codable, Sendable, Equatable, Hashable {
   public let zoneName: String
   /// The owner's record name (optional, nil for current user)
   public let ownerName: String?
-  /// The zone's type (e.g. `REGULAR_CUSTOM_ZONE`, `DEFAULT_ZONE`).
+  /// The zone's type.
   ///
   /// `nil` when the server omits the key.
-  public let zoneType: String?
+  public let zoneType: ZoneType?
 
   /// Initialize a zone identifier
   /// - Parameters:
   ///   - zoneName: The zone name
   ///   - ownerName: Optional owner record name (nil = current user)
   ///   - zoneType: Optional zone type from the wire payload
-  public init(zoneName: String, ownerName: String? = nil, zoneType: String? = nil) {
+  public init(zoneName: String, ownerName: String? = nil, zoneType: ZoneType? = nil) {
     self.zoneName = zoneName
     self.ownerName = ownerName
     self.zoneType = zoneType
@@ -62,11 +62,11 @@ public struct ZoneID: Codable, Sendable, Equatable, Hashable {
   ///
   /// A missing `zoneName` falls back to ``defaultZone``'s name — share
   /// results may omit it when CloudKit only returns an owner.
-  internal init(from schema: Components.Schemas.ZoneID) {
+  internal init(from schema: Components.Schemas.ZoneID) throws(ConversionError) {
     self.init(
       zoneName: schema.zoneName ?? ZoneID.defaultZone.zoneName,
       ownerName: schema.ownerRecordName,
-      zoneType: schema.zoneType
+      zoneType: try ZoneType.fromWire(schema.zoneType)
     )
   }
 }
@@ -77,7 +77,7 @@ extension Components.Schemas.ZoneID {
     self.init(
       zoneName: zoneID.zoneName,
       ownerRecordName: zoneID.ownerName,
-      zoneType: zoneID.zoneType
+      zoneType: zoneID.zoneType?.rawValue
     )
   }
 }

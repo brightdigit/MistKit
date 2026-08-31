@@ -39,10 +39,10 @@ public struct ZoneInfo: Codable, Sendable {
   /// Note: always empty — CloudKit Web Services zone responses do not include
   /// capabilities in the current OpenAPI schema.
   public let capabilities: [String]
-  /// The zone's type (e.g. `REGULAR_CUSTOM_ZONE`, `DEFAULT_ZONE`).
+  /// The zone's type.
   ///
   /// `nil` when the server omits the key.
-  public let zoneType: String?
+  public let zoneType: ZoneType?
   /// The current point in the zone's change history.
   ///
   /// Present on zone responses that carry Apple's "Zone Dictionary" payload;
@@ -62,7 +62,7 @@ public struct ZoneInfo: Codable, Sendable {
     zoneName: String,
     ownerRecordName: String?,
     capabilities: [String],
-    zoneType: String? = nil,
+    zoneType: ZoneType? = nil,
     syncToken: String? = nil,
     atomic: Bool? = nil,
     deleted: Bool = false
@@ -105,7 +105,7 @@ public struct ZoneInfo: Codable, Sendable {
       zoneName: zoneName,
       ownerRecordName: zoneID.ownerRecordName,
       capabilities: [],
-      zoneType: zoneID.zoneType,
+      zoneType: try ZoneType.fromWire(zoneID.zoneType),
       syncToken: syncToken,
       atomic: atomic,
       deleted: deleted

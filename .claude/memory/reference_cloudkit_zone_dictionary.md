@@ -21,7 +21,7 @@ Verified against Apple's archived CloudKit Web Services Reference during issue #
 | Key | Location | Notes |
 |-----|----------|-------|
 | `deleted` | Zone object (not inside `zoneID`) | `true` = tombstone; sync clients must observe this |
-| `zoneType` | Inside `zoneID` | Observed values: `REGULAR_CUSTOM_ZONE`, `DEFAULT_ZONE` |
+| `zoneType` | Inside `zoneID` | ``ZoneType`` — `DEFAULT_ZONE` or `REGULAR_CUSTOM_ZONE`; key optional |
 
 **Zone ID Dictionary** — wire key is `ownerRecordName`, **not** `ownerName`:
 
@@ -29,7 +29,7 @@ Verified against Apple's archived CloudKit Web Services Reference during issue #
 |-----|-------------|
 | `zoneName` | Required. Default `_defaultZone`. |
 | `ownerRecordName` | Zone owner's user record name (shared zones). |
-| `zoneType` | Optional. `REGULAR_CUSTOM_ZONE` or `DEFAULT_ZONE` on live responses. |
+| `zoneType` | Optional. ``ZoneType`` (`DEFAULT_ZONE` / `REGULAR_CUSTOM_ZONE`); unrecognized values throw at conversion. |
 
 MistKit's domain `ZoneID` keeps the Swift property name `ownerName`; only the wire key is `ownerRecordName`.
 

@@ -101,7 +101,7 @@ extension ZoneMetadataTests {
 
       #expect(info.zoneName == "WebChangeTest")
       #expect(info.ownerRecordName == "_aca0fa3547ae9f9cd1f7e25fed948a20")
-      #expect(info.zoneType == "REGULAR_CUSTOM_ZONE")
+      #expect(info.zoneType == .regularCustom)
       #expect(info.deleted == true)
     }
 
@@ -143,8 +143,49 @@ extension ZoneMetadataTests {
 
       #expect(zone.zoneName == "WebChangeTest")
       #expect(zone.ownerRecordName == "_aca0fa3547ae9f9cd1f7e25fed948a20")
-      #expect(zone.zoneType == "REGULAR_CUSTOM_ZONE")
+      #expect(zone.zoneType == .regularCustom)
       #expect(zone.deleted == true)
+    }
+
+    @Test("Unrecognized zoneType throws ConversionError")
+    internal func unrecognizedZoneTypeThrows() throws {
+      let zone = try Self.decodeZone(
+        """
+        {
+          "zoneID": {
+            "zoneName": "Articles",
+            "zoneType": "SHARED_ZONE"
+          }
+        }
+        """
+      )
+
+      ConversionFailureReporter.$assertionHandler.withValue(
+        { _, _, _ in },
+        operation: {
+          #expect(throws: ConversionError.unrecognizedZoneType("SHARED_ZONE")) {
+            _ = try ZoneInfo(from: zone)
+          }
+        }
+      )
+    }
+
+    @Test("DEFAULT_ZONE decodes to ZoneType.defaultZone")
+    internal func defaultZoneTypeDecodes() throws {
+      let zone = try Self.decodeZone(
+        """
+        {
+          "zoneID": {
+            "zoneName": "_defaultZone",
+            "zoneType": "DEFAULT_ZONE"
+          }
+        }
+        """
+      )
+
+      let info = try ZoneInfo(from: zone)
+
+      #expect(info.zoneType == .defaultZone)
     }
 
     @Test("Absent metadata stays nil rather than defaulting")

@@ -45,7 +45,7 @@ internal struct ZonePayloadMetadataPhase: IntegrationPhase {
   internal static let emoji = "🏷️"
   internal static let apiName = "zonePayloadMetadata"
 
-  private static let customZoneType = "REGULAR_CUSTOM_ZONE"
+  private static let customZoneType: ZoneType = .regularCustom
   private static let changeFeedPollAttempts = 5
   private static let changeFeedPollDelay: Duration = .seconds(2)
 
@@ -152,8 +152,8 @@ internal struct ZonePayloadMetadataPhase: IntegrationPhase {
     }
     guard zone.zoneType == customZoneType else {
       throw IntegrationTestError.verificationFailed(
-        "\(source) reported zoneType '\(zone.zoneType ?? "nil")' for '\(zone.zoneName)' "
-          + "(expected \(customZoneType))"
+        "\(source) reported zoneType '\(zone.zoneType?.rawValue ?? "nil")' for '\(zone.zoneName)' "
+          + "(expected \(customZoneType.rawValue))"
       )
     }
     guard !zone.deleted else {
