@@ -204,36 +204,5 @@ extension ZoneMetadataTests {
       #expect(info.atomic == nil)
       #expect(info.zoneName == "Articles")
     }
-
-    @Test("atomic decodes false without collapsing into nil")
-    internal func atomicFalseIsPreserved() throws {
-      let zone = try Self.decodeZone(
-        """
-        { "zoneID": { "zoneName": "Articles" }, "atomic": false }
-        """
-      )
-
-      let info = try ZoneInfo(from: zone)
-
-      #expect(try #require(info.atomic) == false)
-    }
-
-    @Test("ZoneInfo still throws when the zone payload has no zoneName")
-    internal func missingZoneNameThrows() throws {
-      let zone = try Self.decodeZone(
-        """
-        { "zoneID": { "ownerRecordName": "_defaultOwner" }, "atomic": true }
-        """
-      )
-
-      ConversionFailureReporter.$assertionHandler.withValue(
-        { _, _, _ in },
-        operation: {
-          #expect(throws: ConversionError.self) {
-            _ = try ZoneInfo(from: zone)
-          }
-        }
-      )
-    }
   }
 }

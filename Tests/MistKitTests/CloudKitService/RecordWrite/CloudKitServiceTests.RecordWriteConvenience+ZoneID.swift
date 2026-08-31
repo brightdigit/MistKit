@@ -1,5 +1,5 @@
 //
-//  CloudKitServiceTests.RecordWriteConvenience.swift
+//  CloudKitServiceTests.RecordWriteConvenience+ZoneID.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -32,101 +32,75 @@ internal import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceTests {
-  /// Covers the single-record write conveniences (`createRecord`,
-  /// `updateRecord`, `deleteRecord`) which delegate to `modifyRecords`.
-  @Suite("Record Write Convenience")
-  internal struct RecordWriteConvenience {
-    /// Reuse the shared mock-transport builders and JSON record fixtures.
+extension CloudKitServiceTests.RecordWriteConvenience {
+  /// Pins zoneID forwarding on the single-record write conveniences (#454).
+  @Suite("Record Write Convenience ZoneID")
+  internal struct ZoneIDForwarding {
     private typealias Helper = CloudKitServiceTests.Rereference
 
-    @Test("createRecord returns the saved record")
-    internal func createReturnsRecord() async throws {
+    @Test("createRecord forwards zoneID into the modifyRecords request body")
+    internal func createForwardsZoneID() async throws {
       guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try Helper.makeService(responsesByOperation: [
+      let (service, provider) = try Helper.makeServiceWithProvider(responsesByOperation: [
         "modifyRecords": try Helper.recordsResponse([
           Helper.noteRecord(recordName: "note-1", changeTag: "tag-1")
         ])
       ])
 
-      let record = try await service.createRecord(
+      _ = try await service.createRecord(
         recordType: "Note",
         recordName: "note-1",
         fields: ["title": .string("Hello")],
+        zoneID: ZoneID(zoneName: "Articles", ownerName: "_abc123"),
         database: Helper.publicDatabase
       )
 
-      #expect(record.recordName == "note-1")
+      let bodies = await provider.bodies(for: "modifyRecords").compactMap { $0 }
+      let data = try #require(bodies.first)
+      let body = try #require(
+        try JSONSerialization.jsonObject(with: data) as? [String: Any]
+      )
+      let zoneID = try #require(body["zoneID"] as? [String: Any])
+      #expect(zoneID["zoneName"] as? String == "Articles")
+      #expect(zoneID["ownerRecordName"] as? String == "_abc123")
     }
 
-    @Test("createRecord throws invalidResponse when the server returns no records")
-    internal func createThrowsOnEmptyResponse() async throws {
+    @Test("updateRecord forwards zoneID into the modifyRecords request body")
+    internal func updateForwardsZoneID() async throws {
       guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
       }
-      let service = try Helper.makeService(responsesByOperation: [
-        "modifyRecords": try Helper.recordsResponse([])
-      ])
-
-      await #expect(throws: CloudKitError.self) {
-        _ = try await service.createRecord(
-          recordType: "Note",
-          fields: ["title": .string("Hello")],
-          database: Helper.publicDatabase
-        )
-      }
-    }
-
-    @Test("updateRecord returns the saved record")
-    internal func updateReturnsRecord() async throws {
-      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let service = try Helper.makeService(responsesByOperation: [
+      let (service, provider) = try Helper.makeServiceWithProvider(responsesByOperation: [
         "modifyRecords": try Helper.recordsResponse([
           Helper.noteRecord(recordName: "note-1", changeTag: "tag-2")
         ])
       ])
 
-      let record = try await service.updateRecord(
+      _ = try await service.updateRecord(
         recordType: "Note",
         recordName: "note-1",
         fields: ["title": .string("Renamed")],
         recordChangeTag: "tag-1",
+        zoneID: ZoneID(zoneName: "Articles", ownerName: "_abc123"),
         database: Helper.publicDatabase
       )
 
-      #expect(record.recordName == "note-1")
-      #expect(record.recordChangeTag == "tag-2")
+      let bodies = await provider.bodies(for: "modifyRecords").compactMap { $0 }
+      let data = try #require(bodies.first)
+      let body = try #require(
+        try JSONSerialization.jsonObject(with: data) as? [String: Any]
+      )
+      let zoneID = try #require(body["zoneID"] as? [String: Any])
+      #expect(zoneID["zoneName"] as? String == "Articles")
+      #expect(zoneID["ownerRecordName"] as? String == "_abc123")
     }
 
-    @Test("updateRecord throws invalidResponse when the server returns no records")
-    internal func updateThrowsOnEmptyResponse() async throws {
-      guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let service = try Helper.makeService(responsesByOperation: [
-        "modifyRecords": try Helper.recordsResponse([])
-      ])
-
-      await #expect(throws: CloudKitError.self) {
-        _ = try await service.updateRecord(
-          recordType: "Note",
-          recordName: "note-1",
-          fields: ["title": .string("Renamed")],
-          database: Helper.publicDatabase
-        )
-      }
-    }
-
-    @Test("deleteRecord completes when the server acknowledges the delete")
-    internal func deleteCompletes() async throws {
+    @Test("deleteRecord forwards zoneID into the modifyRecords request body")
+    internal func deleteForwardsZoneID() async throws {
       guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
         Issue.record("CloudKitService is not available on this operating system.")
         return
@@ -141,10 +115,18 @@ extension CloudKitServiceTests {
         recordType: "Note",
         recordName: "note-1",
         recordChangeTag: "tag-1",
+        zoneID: ZoneID(zoneName: "Articles", ownerName: "_abc123"),
         database: Helper.publicDatabase
       )
 
-      #expect(await provider.callCount(for: "modifyRecords") == 1)
+      let bodies = await provider.bodies(for: "modifyRecords").compactMap { $0 }
+      let data = try #require(bodies.first)
+      let body = try #require(
+        try JSONSerialization.jsonObject(with: data) as? [String: Any]
+      )
+      let zoneID = try #require(body["zoneID"] as? [String: Any])
+      #expect(zoneID["zoneName"] as? String == "Articles")
+      #expect(zoneID["ownerRecordName"] as? String == "_abc123")
     }
   }
 }

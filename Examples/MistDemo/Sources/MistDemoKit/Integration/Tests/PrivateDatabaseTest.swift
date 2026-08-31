@@ -67,6 +67,7 @@ internal struct PrivateDatabaseTest: PhasedIntegrationTest {
     TokenRoundtripPhase(),
     NotificationRoundtripPhase(),
     ShareCreateAndAcceptPhase(),
+    SharedZoneRoundtripPhase(),
     CleanupPhase(),
   ]
 }

@@ -56,12 +56,14 @@ extension CloudKitService: WebBackend {
     recordType: String,
     recordName: String?,
     fields: [String: FieldValue],
+    zone: WebRequests.ZoneSelector?,
     database: MistKit.Database
   ) async throws -> RecordInfo {
     try await createRecord(
       recordType: recordType,
       recordName: recordName,
       fields: fields,
+      zoneID: zone?.zoneID,
       database: database
     )
   }
@@ -71,6 +73,7 @@ extension CloudKitService: WebBackend {
     recordName: String,
     fields: [String: FieldValue],
     recordChangeTag: String?,
+    zone: WebRequests.ZoneSelector?,
     database: MistKit.Database
   ) async throws -> RecordInfo {
     try await updateRecord(
@@ -78,6 +81,7 @@ extension CloudKitService: WebBackend {
       recordName: recordName,
       fields: fields,
       recordChangeTag: recordChangeTag,
+      zoneID: zone?.zoneID,
       database: database
     )
   }
@@ -86,12 +90,14 @@ extension CloudKitService: WebBackend {
     recordType: String,
     recordName: String,
     recordChangeTag: String?,
+    zone: WebRequests.ZoneSelector?,
     database: MistKit.Database
   ) async throws {
     try await deleteRecord(
       recordType: recordType,
       recordName: recordName,
       recordChangeTag: recordChangeTag,
+      zoneID: zone?.zoneID,
       database: database
     )
   }
@@ -183,6 +189,7 @@ extension CloudKitService: WebBackend {
     recordType: String,
     fieldName: String,
     recordName: String?,
+    zone: WebRequests.ZoneSelector?,
     database: MistKit.Database
   ) async throws -> AssetUploadReceipt {
     try await uploadAssets(
@@ -190,6 +197,7 @@ extension CloudKitService: WebBackend {
       recordType: recordType,
       fieldName: fieldName,
       recordName: recordName,
+      zoneID: zone?.zoneID,
       database: database
     )
   }

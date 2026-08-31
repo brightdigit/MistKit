@@ -48,6 +48,7 @@
       internal let recordType: String
       internal let recordName: String?
       internal let fields: [String: String]
+      internal let zone: WebRequests.ZoneSelector?
       internal let database: MistKit.Database
     }
 
@@ -57,6 +58,7 @@
       internal let recordName: String
       internal let fields: [String: String]
       internal let recordChangeTag: String?
+      internal let zone: WebRequests.ZoneSelector?
       internal let database: MistKit.Database
     }
 
@@ -65,6 +67,7 @@
       internal let recordType: String
       internal let recordName: String
       internal let recordChangeTag: String?
+      internal let zone: WebRequests.ZoneSelector?
       internal let database: MistKit.Database
     }
 
@@ -160,6 +163,7 @@
       internal let recordType: String
       internal let fieldName: String
       internal let recordName: String?
+      internal let zone: WebRequests.ZoneSelector?
       internal let database: MistKit.Database
     }
 

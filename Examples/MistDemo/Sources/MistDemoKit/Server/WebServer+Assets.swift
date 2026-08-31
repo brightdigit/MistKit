@@ -58,6 +58,7 @@
             recordType: body.recordType,
             fieldName: body.fieldName,
             recordName: body.recordName,
+            zone: body.zone,
             database: body.database
           )
           return try WebJSON.encoder().encode(receipt)
