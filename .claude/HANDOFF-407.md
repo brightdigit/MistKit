@@ -1,198 +1,274 @@
 # Handoff — Issue #407 (MistKitConfiguration)
 
 **Worktree:** `~/Documents/Projects/MistKit/407-mistkitconfiguration`
-**Branch:** `407-mistkitconfiguration` → `origin/407-mistkitconfiguration` (3 ahead, 0 behind — clean fast-forward)
-**PR base:** `v1.0.0-beta.5` (not `main` — milestone base, per `project_beta4_worktree_layout`)
-**Status:** PR 1 (unify) complete and committed locally, **nothing pushed**. PR 2 (extract) not started.
+**Branch:** `407-mistkitconfiguration`, pushed, in sync with origin (0/0)
+**Status:** Parts 0–2 + subrepo wiring done and pushed. **Parts 3–5 remain.**
+
+## Open PRs
+
+| Repo | PR | Base | State |
+|---|---|---|---|
+| MistKit | [#455](https://github.com/brightdigit/MistKit/pull/455) | `v1.0.0-beta.5` | **draft** |
+| MistKitConfiguration | [#1](https://github.com/brightdigit/MistKitConfiguration/pull/1) | `main` | **draft** |
+| ConfigKeyKit | [#8](https://github.com/brightdigit/ConfigKeyKit/pull/8) | `main` | ready for review |
+
+**Neither draft can merge until ConfigKeyKit#8 merges and is tagged**, and that is by
+design — both pin ConfigKeyKit by revision, and `dependency-policy.yml` rejects
+non-tagged dependencies on PRs to `main`. Merge order is ConfigKeyKit → tag → swap both
+pins → MistKitConfiguration#1 → tag → MistKit#455.
+
+Full plan: `~/.claude/plans/continue-with-claude-handoff-407-md-proud-turing.md`
 
 ---
 
-## TL;DR — what to do next
+## Commits on the branch
 
-1. Push the branch and open PR 1 (commands in [Commit & push](#commit--push)).
-2. Push the two subrepos (`git subrepo push` — outward-facing, deliberately left to you).
-3. When ready for PR 2: create the `brightdigit/MistKitConfiguration` repo, then see [PR 2](#pr-2--extraction-not-started).
+```
+fbb6d3a build(packages): wire MistKitConfiguration as a subrepo
+92c45f7 git subrepo init … Packages/MistKitConfiguration
+cc8743f build(packages): pin ConfigKeyKit to the boolean-resolution fix
+8603e60 feat(packages): add MistKitConfiguration package
+5338914 refactor(mistdemo): migrate configuration onto typed ConfigKeys
+bf952c6 docs: add handoff for #407
+88d9f0b docs(memory): record ConfigKeyKit findings from #407 verification   ┐
+15329ff refactor(examples): unify credential model on Credentials API       ├ the original "PR 1"
+914ac2e refactor(examples): adopt ConfigValueReading; fix Bushel CLI flags   ┘
+```
 
-Nothing is blocked on me. The working tree is clean and all tests pass.
+`bf952c6` and earlier are the pre-existing unify work; everything above it is new.
+**MistKit core is untouched** — `git diff origin/v1.0.0-beta.5...HEAD -- Sources/ Package.swift`
+is empty.
 
 ---
 
-## Why the issue changed shape
+## Decisions taken (all confirmed by the user)
 
-#407 as written proposes extracting five things into a new package. Verifying each against the code showed most no longer hold:
-
-| #407 claim | Reality |
+| Decision | Value |
 |---|---|
-| Blocked by ConfigKeyKit#1 shipping a `ConfigKeyKitConfiguration` package | Closed 2026-06-20 — the bridge shipped **in dep-free core** as `ConfigValueReading` (tag `1.0.0-beta.2`). That package never existed. |
-| `Environment` parsing duplicated in all three examples | MistKit already ships `Environment.init?(caseInsensitive:)`; MistDemo already used it. The three differed on **policy** (Celestra degraded silently; the others threw), not spelling. |
-| `Database` parsing to extract "from MistDemo" | Exists in exactly one place, and encodes *MistDemo's* credential policy (`"public"` → `.prefers(.serverToServer)`). Sharing it would violate `feedback_no_silent_policy_defaults`. |
-| Credential types to "generalize from MistDemo" | `ServerToServerCredentials`, `APICredentials`, `PrivateKeyMaterial` are **already public MistKit types**. |
-| A `CloudKitService`-from-config factory | MistKit already ships `CloudKitService(containerIdentifier:credentials:environment:)`. Both examples were just on the legacy path. |
-
-**So the order was inverted:** delete what already exists upstream and converge the survivors *first* (PR 1), then extract what's genuinely identical (PR 2). Extracting first would have packaged the code PR 1 deletes.
-
-**Decisions you made along the way:** separate `brightdigit/MistKitConfiguration` repo (not a MistKit product); 2 stacked PRs; 64-hex `KeyIDValidator` is authoritative; dash-case key bases.
-
-> ⚠️ I reversed one of my own findings mid-flight. I first reported Celestra's env vars as broken, reasoning from `StandardNamingStyle` without testing the provider consuming it. Testing showed the opposite — **Bushel** was broken. Your original "match Bushel exactly" answer was based on my incorrect report, which is why I re-asked before coding. The final direction is dash-case.
+| Delivery | One draft PR onto `v1.0.0-beta.5`; the original PR 1 was never opened separately |
+| New repo | `brightdigit/MistKitConfiguration`, public; dev branch `initial-extraction` → PR to `main` |
+| Structure | **One** target / product |
+| tools-version | **6.4** |
+| MistDemo | **Full** key convergence, done first, folded into this branch |
+| `output.format` | One key, default **`table`** everywhere |
+| Errors | Generic identifiable enums, **no prose**, no `LocalizedError` |
+| `ConfigurationError` struct | Kept in the package as a presentation convenience it never throws |
 
 ---
 
-## PR 1 — unify (done, unpushed)
+## Part 0 — MistDemo onto typed keys (`5338914`, 67 files)
 
-Three commits:
+MistDemo had **zero** typed keys (Bushel 32, Celestra 12) and read config through an
+untyped façade at ~160 call sites. Keys now live in
+`Sources/MistDemoKit/Configuration/Keys/` (13 files, `MistDemoKeys`).
+
+**Naming rule.** `prefixKeys(with: "cloudkit")` turned out to be a blanket namespace over
+the *entire* key space (`port` → `CLOUDKIT_PORT`), not a CloudKit qualifier. So the five
+CloudKit credential keys took the package's `cloudkit.…` bases, and **every other key kept
+its base and gained `envPrefix: "CLOUDKIT"`** — reproducing the old behaviour exactly. Net
+effect: 4 env vars unchanged, 1 repaired, 0 broken; only 5 CLI flags renamed. CI passes
+credentials by env, not flags, so no workflow needed editing.
+
+### Bugs fixed here
+
+1. **`CLOUDKIT_CONTAINER_ID` never worked.** `MistDemo-Integration.yml` sets it on all four
+   jobs (L137/153/168/189) and `docs/cloudkit-guide/` documents it, but the code read
+   `container.identifier` → `CLOUDKIT_CONTAINER_IDENTIFIER`. Every integration run silently
+   fell back to the built-in default, masked only because that default equals the secret's
+   value.
+2. **`MistDemoConfig+Testing` seeded `private.key.file`**, which production never reads
+   (`private.key.path`), so `privateKeyFile:` silently did nothing in every test using it.
+3. Deleted the 30-constant dead `ConfigKeys` enum and `Defaults.database` (said `private`
+   while the runtime default was `public`; never read).
+
+### ⚠️ The boolean correction — read before touching `MistDemoConfiguration`
+
+My first analysis said typed keys *fix* bare boolean flags. **That was wrong**, and the
+correction is load-bearing. Measured against real providers:
 
 ```
-88d9f0b docs(memory): record ConfigKeyKit findings from #407 verification
-15329ff refactor(examples): unify credential model on MistKit's Credentials API
-914ac2e refactor(examples): adopt ConfigKeyKit ConfigValueReading; fix Bushel CLI flags
+string(forKey: "verbose")                  -> nil     (bare flag invisible)
+bool(forKey: "verbose", default: false)    -> true
+ConfigKeyKit read(ConfigKey<Bool>)         -> false   ← bug
+ConfigKeyKit read(OptionalConfigKey<Bool>) -> nil     ← bug
 ```
 
-40 files, +842 / −623 (CelestraCloud 13, BushelCloud 23, `.claude/` 4).
+ConfigKeyKit's `resolvedBool` probes `string(forKey:)`, so it has the same flaw. Only the
+three `optionalBool` sites were broken; the ~12 `bool(forKey:default:)` sites **worked**.
+A naive migration to ConfigKeyKit's `read` would have **regressed those twelve**.
 
-### What changed
-
-- **~180 lines of duplicated `read(_:)` glue deleted** from both loaders, replaced by ConfigKeyKit's `ConfigValueReading` + a 3-line retroactive conformance. Four overloads were character-for-character identical between the two examples.
-- **`CloudKitAuthMethod` deleted** — it re-declared MistKit's `PrivateKeyMaterial`. Its two-branch resolution was duplicated across **five** Bushel command sites (`Sync`/`Export`/`Clear`/`List`/`Status`); now resolved once at load time.
-- **`CelestraConfig` deleted** — both examples moved off the legacy `ServerToServerAuthManager` path onto `CloudKitService(containerIdentifier:credentials:environment:)`. Construction no longer does file IO (MistKit defers reading `.file(path:)` keys).
-- **`ValidatedCloudKitConfiguration`** now carries one `privateKey: PrivateKeyMaterial` instead of `privateKeyPath` + optional `privateKey` + an empty-string sentinel. **Breaking** for both subrepos, as agreed.
-- **Validators shared with Celestra** (it had none), throwing a new app-neutral `CredentialValidationError`.
-- **`ConfigurationError` unified** on one `LocalizedError` shape (Bushel's was a bare `Error`, so its messages never reached users). Celestra's `EnhancedConfigurationError` renamed to match.
-- **Celestra fails closed** on an unparseable `CLOUDKIT_ENVIRONMENT` instead of silently using `.development`.
-- **Loader test seam** exposed unconditionally in both (Celestra had none; Bushel's was `#if DEBUG`).
-
-### Two real bugs fixed
-
-1. **Bushel's documented CLI flags never worked.** `CLIKeyEncoder` joins key components verbatim, so snake_case bases generated `--cloudkit-key_id`, while its own error text, `secretsSpecifier` and docs all advertise `--cloudkit-key-id`. Consequence beyond the flags: **secret redaction never matched**, so a private key passed by flag was logged unredacted. Fixed by moving Bushel to dash-case bases.
-   **ENV names are byte-identical before and after** (the env provider normalizes `-` and `.` to `_`), so there is no deployment or CI impact — verified programmatically.
-2. **Stale docs:** `.env.example`, `SECRETS_SETUP.md`, `CLOUDKIT_SYNC_SETUP.md` claimed a 32-char key ID; the validator requires 64. Corrected per your ruling.
-
-### Test-double rebuild — read this before reviewing
-
-Bushel's `createLoader` helper used `InMemoryProvider`, which matches keys **literally** and serves **only the stored type**. It diverged from production on key normalization and numeric coercion, and it was **masking a real gap**: a bare `--flag` (no value) never resolves through the real CLI provider, because ConfigKeyKit detects flag presence via `string(forKey:)` and `CommandLineArgumentsProvider` reports a valueless flag only through `bool(forKey:)`.
-
-**That gap predates this work** — the hand-rolled `read(ConfigKey<Bool>)` these tests previously exercised used the same string-based check. The old double hid it by storing flags as `.string("true")`.
-
-I rebuilt the double on the real providers (`CommandLineArgumentsProvider` / `EnvironmentVariablesProvider` with injected inputs) and the harness now passes `--flag true` explicitly. **The valueless-flag gap is now visible and unfixed** — it deserves its own issue rather than scope creep here (`feedback_findings_to_issues_not_code`).
-
-### Verification (all green, re-runnable)
-
-Celestra and Bushel need **Swift 6.4** (`swift-tools-version: 6.4`); the system toolchain is 6.3.2. `TOOLCHAINS=` is not honored in this shell — invoke the binary directly:
-
-```bash
-SWIFT64=~/Library/Developer/Toolchains/swift-6.4.x-DEVELOPMENT-SNAPSHOT-2026-06-15-a.xctoolchain/usr/bin/swift
-
-(cd Examples/CelestraCloud && $SWIFT64 test)   # 122 tests, 28 suites — passing
-(cd Examples/BushelCloud   && $SWIFT64 test)   # 213 tests, 39 suites — passing
-swift build && swift test                       # MistKit: 631 tests — passing, untouched
-```
-
-Lint: `mise` configs in this worktree needed `mise trust` (checked-in configs, this worktree only). Remaining warnings in both examples are pre-existing — verified by diffing against a stashed baseline with line numbers normalized. The one genuinely new entry is an **improvement**: `BushelCloudKitService.swift` went 314 → 268 lines, downgrading a `file_length` **error** (>300) to a warning.
-
-MistKit itself is untouched — confirmed via `git status`; its `Package.swift` gains no dependencies.
+So `MistDemoConfiguration` keeps its **own** Bool path over `ConfigReader.bool(forKey:)`
+(`resolveBool`). Do not "simplify" it into ConfigKeyKit's `read(_:)` until ConfigKeyKit#8
+is released — and even then, verify. `MistDemoConfigurationBoolTests` pins the behaviour.
 
 ---
 
-## Commit & push
+## Parts 1–2 — the package (`8603e60`, 44 files)
 
-Working tree is clean; the three commits are ready.
+`Packages/MistKitConfiguration/`, scaffolded from the ConfigKeyKit repo template.
+
+- **Errors carry no prose.** `CloudKitConfigurationError` / `KeyIDValidationFailure` /
+  `PEMValidationFailure` are `Equatable` enums, deliberately **not** `LocalizedError`.
+  Errors name a `CloudKitConfigurationField`, not a key string, because the three
+  consumers spell the same field differently. This **retires `CredentialValidationError`**.
+- **`ValidatedCloudKitConfiguration.init` is throwing** and runs both validators, so no
+  value of that type can exist whose credentials skipped format checking. Do not add a
+  non-throwing initializer.
+- **`secretCommandLineFlags` is derived** from `isSecret`, not hand-listed.
+- **No shared `ConfigurationLoader`** — a cross-module extension cannot add stored
+  properties, so a shared base could never gain a dependency. `ConfigurationSources`
+  captures the genuinely shared part (provider order + redaction list).
+
+### CI shape
+
+Follows **CelestraCloud.yml, not ConfigKeyKit.yml**. `swift-tools-version: 6.4` has no
+Linux/Windows release toolchain — verified on Docker Hub: 88 `swift:6.2` tags, 83
+`swift:6.3`, **zero** `swift:6.4`. So Ubuntu runs the single `swiftlang/swift:nightly-6.4.x`
+entry, Windows is commented out, Android is omitted, macOS is `runs-on: xcode-27` (tvOS
+must use `"Apple TV 4K (3rd generation)"`). `swift-source-compat.yml` was dropped.
+
+---
+
+## ConfigKeyKit#8 — the boolean fix
+
+Worktree: `~/Documents/Projects/ConfigKeyKit/wt-fix-bool-resolution`, branch
+`fix-bool-resolution`, commit `90110faa06f7666a0d58d224c92da976fff5d930`.
+
+`resolvedBool` read every source through `string(forKey:)`, so the
+`if source == .commandLine { return true }` branch was unreachable for the very case its
+comment described. The env path was wrong **independently**: truthiness was
+`== "true" || "1" || "yes"`, so any unrecognized value collapsed to `false` rather than
+`nil` — a typo'd `FLAG=ture` silently *disabled* a flag whose default was `true`.
+
+| input | before | after |
+|---|---|---|
+| `--verbose` (bare) | `false` ❌ | `true` |
+| `--verbose false` | `true` ❌ | `false` |
+| `FLAG=banana` / `FLAG=on` | `false` ❌ | ignored → default |
+
+Fix adds `bool(forKey:isSecret:fileID:line:)` as a fourth protocol primitive **with a
+default implementation**, so existing conformers keep compiling. `ConfigReader.bool` has
+the same signature shape as `ConfigReader.string`, so it witnesses automatically — the
+retroactive conformance is unchanged.
+
+**Why it escaped:** `MockConfigValueReader` modelled a bare flag as an empty *string*,
+which the old code read as presence; the real provider returns `nil` there. Same failure
+mode as `InMemoryProvider` in Bushel. Mock now has a native `bools` dict, plus a new
+`StringOnlyConfigValueReader` for the parsing default.
+
+**Blast radius:** BushelCloud has ~14 affected `ConfigKey<Bool>` values
+(`sync.dry-run`, `sync.force`, `export.pretty`, …) — `--bushel-sync-dry-run` did not
+enable dry-run, and `--bushel-sync-dry-run false` did.
+
+---
+
+## ⚠️ Two hazards that will bite silently
+
+### 1. The subrepo overlay clobbers the published package
+
+`Packages/MistKitConfiguration/Package.swift` **must** differ from the standalone repo on
+one line:
+
+| Where | MistKit dependency |
+|---|---|
+| Monorepo | `.package(name: "MistKit", path: "../..")` |
+| Standalone | `.package(url: …MistKit.git, from: "1.0.0-beta.4")` |
+
+Both are required — see hazard 2 for why `path:` is forced here, and a tag carrying
+`path: "../.."` resolves nowhere. **`git subrepo push` copies the subdir verbatim and will
+overwrite the standalone `url:` line.** `.gitrepo` also records an empty `commit =` (the
+repo was seeded by hand, see below), so the first push believes nothing was ever pushed.
+Re-apply the swap after every push. Documented at the site in `Package.swift` + `CLAUDE.md`
+and in `.claude/memory/project_mistkitconfiguration_subrepo_overlay.md`.
+
+**The repo was not seeded with `git subrepo push`.** It was empty, and GitHub refuses a PR
+between unrelated histories, so `main` got a LICENSE-only initial commit (`86dd5cf`) to
+give `initial-extraction` a merge base; the 44 files were then pushed as `04c0c4c`.
+
+### 2. A `path:` MistKit and a `url:` MistKit cannot coexist
+
+A `path:` package takes its identity from the **directory name**
+(`407-mistkitconfiguration`), not from `name:`. Pair it with a sibling depending on MistKit
+by `url:` and SwiftPM resolves two packages and fails:
+
+```
+error: multiple similar targets 'MistKit', 'MistKitOpenAPI' appear in package
+'mistkit' and '407-mistkitconfiguration'
+```
+
+**`swift package resolve` still succeeds — only `swift build` catches it.** Every package
+in this monorepo must reach MistKit the same way. See
+`.claude/memory/project_path_package_identity_collision.md`.
+
+**Useful corollary, verified:** a `revision:` pin on ConfigKeyKit *does* coexist with the
+`from: "1.0.0-beta.2"` the three examples declare — SwiftPM resolves the revision for the
+whole graph. So Parts 3–4 give all three the ConfigKeyKit fix **without editing their own
+ConfigKeyKit lines**.
+
+---
+
+## Remaining work
+
+### Part 3 — rewire CelestraCloud, then BushelCloud
+Delete their `KeyIDValidator` / `PEMValidator` / `CredentialValidationError` /
+`ConfigurationError` **and** the `@retroactive ConfigValueReading` conformance (two modules
+declaring it is a duplicate-conformance error — must land in the same commit). Add a small
+`map(_: CloudKitConfigurationError) -> ConfigurationError` carrying each app's own wording.
+Replace `ConfigurationKeys.CloudKit` with `CloudKitConfigurationKeys(defaultContainerID:)`.
+Expect a broad but mechanical wave of missing-import errors (`MemberImportVisibility`).
+
+Bushel-specific: cut `ConfigurationError` out of `BushelConfiguration.swift`; cut the two
+config types out of `CloudKitConfiguration.swift` and **rename that file to
+`VirtualBuddyConfiguration.swift`** (`file_name` is severity *error*); collapse
+`BushelCloudKitService.swift:85-105` onto `makeCloudKitService()`; update
+`ListCommand.swift:43` / `StatusCommand.swift:43`.
+
+### Part 4 — MistDemo adopts the package
+Swap its five CloudKit keys for `CloudKitConfigurationKeys`, delete the local
+`ConfigReader+ConfigValueReading.swift` (the package's wins), and map
+`CloudKitConfigurationError` into MistDemo's **unchanged** `ConfigurationError` enum — no
+rename needed, which is the payoff of the identifiable-error design. Move `examples.yml`'s
+MistDemo container to `swiftlang/swift:nightly-6.4.x-noble`.
+
+### Part 5 — close-out
+`examples.yml` lane for `Packages/MistKitConfiguration`; `setup-mistkitconfiguration`
+action in the new repo (needed after all — standalone example CI must rewrite *both* path
+deps); amend `Sources/MistKit/Documentation.docc/ConfiguringMistKit.md:3`; close #407.
+
+---
+
+## Verification (all re-runnable; system Swift is 6.4 — no toolchain override)
 
 ```bash
 cd ~/Documents/Projects/MistKit/407-mistkitconfiguration
-
-# 1. Push the branch (fast-forward, no force needed)
-git push origin 407-mistkitconfiguration
-
-# 2. Open PR 1 against the milestone base
-gh pr create --base v1.0.0-beta.5 --head 407-mistkitconfiguration \
-  --title "Unify BushelCloud + CelestraCloud CloudKit configuration" \
-  --body "See .claude/HANDOFF-407.md. Breaking for both subrepos, as agreed on #407."
+(cd Examples/MistDemo            && swift test)   # 1010 tests / 299 suites  (baseline 1002)
+(cd Packages/MistKitConfiguration && swift test)   # 35 tests / 6 suites, 0 lint warnings
+(cd Examples/CelestraCloud       && swift test)   # 122 / 28  — untouched so far
+(cd Examples/BushelCloud         && swift test)   # 213 / 39  — untouched so far
+swift build && swift test                          # MistKit 631 — untouched
+(cd ~/Documents/Projects/ConfigKeyKit/wt-fix-bool-resolution && swift test)   # 63 tests
 ```
 
-**Merging** (per `.claude/agent-notes.md`): count commits first — 1 commit → `gh pr merge --rebase`; 2+ → `gh pr merge --squash`. This PR has 3, so **squash**. Never `--merge`.
+The handoff's old claim that Swift 6.4 needed a snapshot toolchain is **obsolete** — the
+system toolchain is 6.4 release and that snapshot is gone.
 
-### Subrepo pushes — yours to run
+SwiftLint parity for MistDemo was established by diffing against a `git archive HEAD`
+baseline with line numbers normalized: 2 pre-existing errors in files this work never
+touches, 2 warnings resolved. Never bare `git stash` in this repo
+(`feedback_never_git_stash_multiworktree`).
 
-Both examples are subrepos on branch `mistkit`:
+## Follow-up issues still worth filing
 
-| Subrepo | Remote |
-|---|---|
-| `Examples/CelestraCloud` | `git@github.com:brightdigit/CelestraCloud.git` |
-| `Examples/BushelCloud` | `git@github.com:brightdigit/BushelCloud.git` |
+1. ConfigKeyKit could reject or normalize underscored key bases at build time.
+2. Bushel `.env.example` documents a `CLOUDKIT_DATABASE` no Bushel code reads.
+3. `PrivateKeyMaterial` isn't `Equatable` in MistKit.
+4. Per-source key prefixing in ConfigKeyKit (env-only prefix), which MistDemo emulated
+   with `prefixKeys`.
+5. MistDemo's dead `MistDemoConstants.ConfigKeys.containerID = "container.id"` — resolved
+   by Part 0, but the *class* of drift (constants declared and then duplicated inline)
+   affected 10 constants.
 
-```bash
-git subrepo push Examples/CelestraCloud    # git-subrepo 0.4.9 is installed
-git subrepo push Examples/BushelCloud
-```
+## Memory written this session
 
-I left these to you deliberately — they publish to two external repos. Note the changes are **breaking** for both (`ValidatedCloudKitConfiguration.privateKey` is now `PrivateKeyMaterial`; `CloudKitAuthMethod` is gone), so downstream consumers of those repos need a heads-up.
-
----
-
-## PR 2 — extraction (not started)
-
-Stacked on PR 1's branch, so its diff shows only the extraction.
-
-### Blocked on you
-
-**Create the `brightdigit/MistKitConfiguration` GitHub repo.** It doesn't exist yet (verified). I won't create it unattended.
-
-### What ships in the package
-
-After PR 1 these are **byte-identical** across both examples (app name aside) — verified by diff:
-
-| File | Lines |
-|---|---|
-| `KeyIDValidator.swift` | 89 |
-| `PEMValidator.swift` | 99 |
-| `CredentialValidationError.swift` | 70 |
-| `ConfigReader+ConfigValueReading.swift` | 44 |
-
-Plus these, now sharing one shape but needing a parameter to absorb per-app differences:
-
-- `ConfigurationError` (58) — identical.
-- `ValidatedCloudKitConfiguration` (80) + `makeCloudKitService()` — identical shape.
-- `CloudKitConfiguration` (115) — needs the default container ID as a parameter.
-- `ConfigurationLoader` (120) — needs the `secretsSpecifier` list as a parameter (Bushel 4 entries, Celestra 2).
-- CloudKit `ConfigurationKeys` — needs `envPrefix` as a parameter (Bushel prefixes non-CloudKit keys with `BUSHEL`; Celestra prefixes nothing).
-
-### Stays in each app
-
-Root config structs (`CelestraConfiguration`, `BushelConfiguration`) and their differing validation layering; per-command configs; app-specific key groups (`VirtualBuddy`, `Fetch`, `Sync`, …); `BushelCloudKitService` and its protocol conformances; domain errors.
-
-### Package setup
-
-- **Platform floor:** `.macOS(.v15) .iOS(.v18) .tvOS(.v18) .watchOS(.v11) .visionOS(.v2)` — matches ConfigKeyKit exactly (forced by that dependency) and matches Bushel *and* MistDemo. Celestra's `.v26` consumes fine.
-- **Dependencies:** `MistKit`, `ConfigKeyKit` (`from: "1.0.0-beta.2"`), `swift-configuration` with trait `["CommandLineArguments"]`.
-- Add as `Packages/MistKitConfiguration/` via `git subrepo` (no `Packages/` dir exists yet; mirror the `.gitrepo` shape from `Examples/CelestraCloud/.gitrepo`).
-- Clean copy is fine — no subtree split or filter-repo (`feedback_skip_history_on_repo_extraction`).
-- `setup-mistkitconfiguration` composite action belongs **in the new repo**, not MistKit (`feedback_setup_action_lives_in_owned_repo`), referenced remotely like `brightdigit/MistKit/.github/actions/setup-mistkit@main`.
-- Follow ConfigKeyKit for CI workflow shape (`.claude/agent-notes.md`).
-
-### Known costs of the separate-repo choice
-
-- Both subrepos gain a **second** remote dependency line and a `MISTKITCONFIGURATION_BRANCH` pin alongside `MISTKIT_BRANCH` (3 call sites each in `BushelCloud.yml` / `CelestraCloud.yml`).
-- Bushel's `Package.swift:94-98` documents the MistKit `path: "../.."` line as a one-line overlay reapplied on branch recreation and never merged. It becomes a **two-line** overlay — update that comment.
-- The new repo must be **tagged** before either subrepo's `main` can pin a release; until then both consume it by branch pin.
-- `project_mistkit_branch_pin_resolves_tags`: `git ls-remote` matches tags too, so a tag value silently pins a release instead of the branch. The new action should pin by resolved revision, like `setup-mistkit` does.
-
-### Also in PR 2
-
-- Amend `Sources/MistKit/Documentation.docc/ConfiguringMistKit.md:3`, which currently states *"There is no single `MistKitConfiguration` type"* — still true of MistKit itself, but worth a pointer to the new package.
-- Close out #407: comment the verification table, retitle to reflect what was built, close.
-
----
-
-## Follow-up issues worth filing
-
-1. **Valueless CLI flags don't resolve** through `CommandLineArgumentsProvider` + ConfigKeyKit's bool path (details above). Affects both examples; pre-existing. Possibly a ConfigKeyKit fix: resolve booleans via `bool(forKey:)` rather than `string(forKey:)`.
-2. **ConfigKeyKit could reject or normalize underscored key bases** — a snake_case base silently yields an unusable CLI flag and breaks `secretsSpecifier` matching, with no build-time signal. Root cause of the Bushel bug.
-3. **Bushel `.env.example` documents `CLOUDKIT_DATABASE`** that no Bushel code reads.
-4. **`PrivateKeyMaterial` isn't `Equatable`** in MistKit — tests must assert via `.filePath` or a `case` pattern. Cheap to add if wanted.
-
-## Memory written
-
-- `.claude/memory/reference_configkey_cli_flag_dash_case.md` — the dash-case rule and why ENV hides the bug.
-- `.claude/memory/reference_configkeykit_configvaluereading.md` — ConfigKeyKit#1 shipped in-core; no `ConfigKeyKitConfiguration` package exists.
-- `.claude/memory/project_beta4_worktree_layout.md` — corrected; it recorded #407 as blocked on a now-resolved blocker.
-
-Full plan: `~/.claude/plans/verify-the-choices-in-rosy-bubble.md`
+- `project_path_package_identity_collision.md` — path identity vs `url:`; resolve succeeds, build fails.
+- `project_mistkitconfiguration_subrepo_overlay.md` — the never-merged Package.swift line.
