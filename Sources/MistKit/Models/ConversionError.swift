@@ -62,6 +62,8 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
   case zoneMissingID
   /// A zone response was missing its `zoneName`.
   case zoneMissingName
+  /// A zone response carried an unrecognized `zoneType` wire value.
+  case unrecognizedZoneType(String)
   /// A user response was missing its `userRecordName`.
   case userMissingRecordName
   /// A subscription response was missing its `subscriptionID`.
@@ -113,6 +115,8 @@ public enum ConversionError: LocalizedError, Sendable, Equatable {
       return "Zone entry missing zoneID"
     case .zoneMissingName:
       return "Zone entry missing zoneName"
+    case .unrecognizedZoneType(let wireValue):
+      return "Zone entry has unrecognized zoneType '\(wireValue)'"
     case .userMissingRecordName:
       return "UserResponse missing userRecordName"
     case .subscriptionMissingID:

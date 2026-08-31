@@ -1,14 +1,14 @@
 ---
 name: reference_cloudkit_zone_dictionary
-description: "CloudKit's Zone Dictionary has exactly three keys (zoneID, syncToken, atomic) — isEager and zone create options do not exist"
+description: "CloudKit Zone Dictionary keys — archived docs plus live-confirmed extensions (issue #444)"
 metadata:
   node_type: memory
   type: reference
 ---
 
-Verified against Apple's archived CloudKit Web Services Reference during issue #386 / PR #427.
+Verified against Apple's archived CloudKit Web Services Reference during issue #386 / PR #427, with live-response confirmation for additional keys in issue #444.
 
-**Zone Dictionary documents exactly three keys** ([Types.html](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/Types.html)):
+**Zone Dictionary — archived docs** ([Types.html](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/Types.html)):
 
 | Key | Apple's wording |
 |-----|-----------------|
@@ -16,7 +16,24 @@ Verified against Apple's archived CloudKit Web Services Reference during issue #
 | `syncToken` | "The current point in the zone's change history." |
 | `atomic` | "A Boolean value indicating whether this zone supports atomic operations." |
 
-All four zone endpoints (`zones/list`, `zones/lookup`, `zones/modify`, `zones/changes`) route their **success** payload through this dictionary, and their **failure** payload through the "Zone Fetch Error Dictionary" (`zoneID`, `reason`, `serverErrorCode`, `retryAfter`, `redirectURL`).
+**Live-confirmed additions (issue #444)** — present on change feeds (`zones/changes`, `changes/database`) but absent from the archived Zone Dictionary page:
+
+| Key | Location | Notes |
+|-----|----------|-------|
+| `deleted` | Zone object (not inside `zoneID`) | `true` = tombstone; sync clients must observe this |
+| `zoneType` | Inside `zoneID` | ``ZoneType`` — `DEFAULT_ZONE` or `REGULAR_CUSTOM_ZONE`; key optional |
+
+**Zone ID Dictionary** — wire key is `ownerRecordName`, **not** `ownerName`:
+
+| Key | Description |
+|-----|-------------|
+| `zoneName` | Required. Default `_defaultZone`. |
+| `ownerRecordName` | Zone owner's user record name (shared zones). |
+| `zoneType` | Optional. ``ZoneType`` (`DEFAULT_ZONE` / `REGULAR_CUSTOM_ZONE`); unrecognized values throw at conversion. |
+
+MistKit's domain `ZoneID` keeps the Swift property name `ownerName`; only the wire key is `ownerRecordName`.
+
+All four zone endpoints (`zones/list`, `zones/lookup`, `zones/modify`, `zones/changes`) route their **success** payload through the Zone dictionary, and their **failure** payload through the "Zone Fetch Error Dictionary" (`zoneID`, `reason`, `serverErrorCode`, `retryAfter`, `redirectURL`).
 
 **Things that do NOT exist — do not add them speculatively:**
 
@@ -24,9 +41,9 @@ All four zone endpoints (`zones/list`, `zones/lookup`, `zones/modify`, `zones/ch
 - **`atomic` on the `zones/modify` request** — the request body is `operations` only. `records/modify` *does* document `atomic`; the asymmetry is deliberate.
 - **Zone create options on `ZoneOperation`** — the operation's `zone` is documented as having "a single `zoneID` key".
 
-**Open discrepancies (unresolved, see issue #386 comment):**
+**Resolved discrepancies:**
 
-- `zones/changes` documents its token key as **`metaSyncToken`** in both request and response; MistKit sends/reads `syncToken`. Apple's page contradicts itself (the `moreComing` description refers back to "the included `syncToken` key"), so this needs a live-response check before changing.
-- `zones/changes` is documented as **deprecated** in favor of `changes/database`.
+- `zones/changes` token key is `metaSyncToken` on the wire (issue #430); Swift-facing names unchanged.
+- `ownerRecordName` is the wire key for the zone owner (issue #444); the mistaken `ownerName` key never decoded live responses.
 
-Note `ZoneID`'s owner key: Apple documents `ownerRecordName`, while MistKit's `ZoneID` domain type calls it `ownerName` and the wire schema uses `ownerName`. Related: [[reference_cloudkit_archived_endpoints]].
+Note `zones/changes` is documented as **deprecated** in favor of `changes/database`. Related: [[reference_cloudkit_archived_endpoints]].

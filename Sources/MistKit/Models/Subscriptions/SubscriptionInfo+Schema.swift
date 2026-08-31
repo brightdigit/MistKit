@@ -138,6 +138,6 @@ extension SubscriptionInfo {
     guard let zoneName = payload.zoneName else {
       try ConversionError.zoneMissingName.reportAndThrow()
     }
-    return .zone(ZoneID(zoneName: zoneName, ownerName: payload.ownerName))
+    return .zone(ZoneID(zoneName: zoneName, ownerName: payload.ownerRecordName))
   }
 }

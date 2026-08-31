@@ -115,7 +115,7 @@ extension ResponseConfig {
       [
         "zoneID": [
           "zoneName": "test-zone-\(index)",
-          "ownerName": "_defaultOwner",
+          "ownerRecordName": "_defaultOwner",
         ]
       ]
     }

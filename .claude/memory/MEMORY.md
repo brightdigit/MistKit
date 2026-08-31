@@ -12,7 +12,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 ## Index
 
 - [CloudKit archived endpoints not in local docs](reference_cloudkit_archived_endpoints.md) — Verify CloudKit endpoints (e.g. assets/rereference) against Apple's archived reference, not just .claude/docs/webservices.md
-- [CloudKit Zone Dictionary has exactly 3 keys](reference_cloudkit_zone_dictionary.md) — zoneID/syncToken/atomic only; isEager, modify-request `atomic`, and zone create options do NOT exist
+- [CloudKit Zone Dictionary has exactly 3 keys](reference_cloudkit_zone_dictionary.md) — archived docs: zoneID/syncToken/atomic; live change feeds also carry `deleted` + `zoneID.zoneType`; wire owner key is `ownerRecordName` (issue #444)
 - [wasm CI failure signatures](reference_wasm_ci_signatures.md) — Two distinct wasm failures: silent exit-1 (OOM on big test target) vs curl exit-7 (SDK download flake, just re-run)
 - [Swift Testing availability guard](feedback_swift_testing_availability.md) — Never annotate @Suite types with @available; use guard #available inside @Test functions instead
 - [GitHub Action pinning preference](feedback_action_pinning.md) — Use @v<major> for brightdigit-owned actions; pin third-party actions explicitly
