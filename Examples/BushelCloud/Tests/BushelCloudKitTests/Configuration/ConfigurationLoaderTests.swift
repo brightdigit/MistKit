@@ -194,7 +194,7 @@ internal struct ConfigurationLoaderTests {
     @Test("String value from CLI arguments")
     internal func testStringFromCLI() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
-        cliArgs: ["cloudkit.container_id=iCloud.com.test.App"],
+        cliArgs: ["cloudkit.container-id=iCloud.com.test.App"],
         env: [:]
       )
 
@@ -216,7 +216,7 @@ internal struct ConfigurationLoaderTests {
     @Test("CLI string overrides ENV string")
     internal func testStringCLIPrecedence() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
-        cliArgs: ["cloudkit.container_id=iCloud.com.cli.App"],
+        cliArgs: ["cloudkit.container-id=iCloud.com.cli.App"],
         env: ["CLOUDKIT_CONTAINER_ID": "iCloud.com.env.App"]
       )
 
@@ -243,7 +243,7 @@ internal struct ConfigurationLoaderTests {
     @Test("Valid integer from CLI")
     internal func testValidIntFromCLI() async throws {
       let loader = ConfigurationLoaderTests.createLoader(
-        cliArgs: ["sync.min_interval=3600"],
+        cliArgs: ["sync.min-interval=3600"],
         env: [:]
       )
 
@@ -556,7 +556,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [
           "export.output=/tmp/export.json",
           "export.pretty",
-          "export.signed_only",
+          "export.signed-only",
         ],
         env: [:]
       )
@@ -574,7 +574,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [
           "sync.verbose",
           "export.pretty",
-          "list.restore_images",
+          "list.restore-images",
         ],
         env: [:]
       )
@@ -596,8 +596,8 @@ internal struct ConfigurationLoaderTests {
       let loader = ConfigurationLoaderTests.createLoader(
         cliArgs: [
           "sync.verbose",
-          "sync.dry_run",
-          "sync.min_interval=3600",
+          "sync.dry-run",
+          "sync.min-interval=3600",
         ],
         env: [
           "BUSHEL_SYNC_NO_BETAS": "true",
@@ -642,42 +642,48 @@ internal struct ConfigurationLoaderTests {
 
   // MARK: - Test Utilities
 
-  /// Create a ConfigurationLoader with simulated CLI args and environment variables
+  /// Creates a loader backed by the same providers production uses, with
+  /// their inputs injected instead of read from the process.
+  ///
+  /// Using `CommandLineArgumentsProvider` and `EnvironmentVariablesProvider`
+  /// rather than `InMemoryProvider` keeps the double faithful on two behaviors
+  /// the tests depend on: the environment provider normalizes `-` and `.` to
+  /// `_` when encoding a key (so `CLOUDKIT_KEY-ID`, generated from the
+  /// dash-case base `cloudkit.key-id`, resolves from a `CLOUDKIT_KEY_ID`
+  /// variable), and both providers coerce their string-shaped input on demand
+  /// (so one variable answers `string`, `int` and `double` reads).
+  /// `InMemoryProvider` does neither — it matches keys literally and serves
+  /// only the stored case.
   ///
   /// - Parameters:
-  ///   - cliArgs: Simulated CLI arguments (format: "key=value" or "key" for flags)
-  ///   - env: Simulated environment variables
-  /// - Returns: ConfigurationLoader with controlled inputs
+  ///   - cliArgs: Simulated CLI arguments (format: "key=value", or "key" for flags).
+  ///   - env: Simulated environment variables.
+  /// - Returns: A loader reading from those inputs only.
   private static func createLoader(
     cliArgs: [String],
     env: [String: String]
   ) -> ConfigurationLoader {
-    // Parse CLI args: "key=value" or "key" for flags
-    var cliValues: [AbsoluteConfigKey: ConfigValue] = [:]
+    // Rebuild an argv from "key=value" / "key" (flag presence) entries.
+    //
+    // A bare `--flag` is spelled `--flag true` here. `CommandLineArgumentsProvider`
+    // reports a valueless flag through `bool(forKey:)` but not `string(forKey:)`,
+    // and ConfigKeyKit's boolean resolution detects flag presence via the string
+    // read — so a truly bare flag resolves to its default. That gap predates the
+    // `ConfigValueReading` migration (the hand-rolled `read(ConfigKey<Bool>)`
+    // these tests previously exercised used the same string-based check); it was
+    // masked because the former `InMemoryProvider` double stored flags as
+    // `.string("true")`. Passing the value explicitly keeps these tests on the
+    // path that works. See the follow-up issue on valueless-flag support.
+    var arguments: [String] = ["bushel-cloud"]
     for arg in cliArgs {
-      if arg.contains("=") {
-        let parts = arg.split(separator: "=", maxSplits: 1)
-        if parts.count == 2 {
-          let key = AbsoluteConfigKey(stringLiteral: String(parts[0]))
-          cliValues[key] = .init(.string(String(parts[1])), isSecret: false)
-        }
-      } else {
-        // Flag presence (boolean)
-        let key = AbsoluteConfigKey(stringLiteral: arg)
-        cliValues[key] = .init(.string("true"), isSecret: false)
-      }
-    }
-
-    // ENV vars as-is
-    var envValues: [AbsoluteConfigKey: ConfigValue] = [:]
-    for (key, value) in env {
-      let configKey = AbsoluteConfigKey(stringLiteral: key)
-      envValues[configKey] = .init(.string(value), isSecret: false)
+      let parts = arg.split(separator: "=", maxSplits: 1)
+      arguments.append("--" + parts[0].replacingOccurrences(of: ".", with: "-"))
+      arguments.append(parts.count == 2 ? String(parts[1]) : "true")
     }
 
     let providers: [any ConfigProvider] = [
-      InMemoryProvider(values: cliValues),  // Priority 1: CLI
-      InMemoryProvider(values: envValues),  // Priority 2: ENV
+      CommandLineArgumentsProvider(arguments: arguments),  // Priority 1: CLI
+      EnvironmentVariablesProvider(environmentVariables: env),  // Priority 2: ENV
     ]
 
     let configReader = ConfigReader(providers: providers)

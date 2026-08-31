@@ -37,23 +37,23 @@ internal enum ConfigurationKeys {
   /// CloudKit configuration keys
   ///
   /// Auto-generates environment variable names from the key path.
-  /// Example: "cloudkit.container_id" → ENV: CLOUDKIT_CONTAINER_ID
+  /// Example: "cloudkit.container-id" → ENV: CLOUDKIT_CONTAINER_ID
   internal enum CloudKit {
     internal static let containerID = ConfigKey<String>(
-      "cloudkit.container_id",
+      "cloudkit.container-id",
       default: "iCloud.com.brightdigit.Bushel"
     )
 
     internal static let keyID = OptionalConfigKey<String>(
-      "cloudkit.key_id"
+      "cloudkit.key-id"
     )
 
     internal static let privateKeyPath = OptionalConfigKey<String>(
-      "cloudkit.private_key_path"
+      "cloudkit.private-key-path"
     )
 
     internal static let privateKey = OptionalConfigKey<String>(
-      "cloudkit.private_key"
+      "cloudkit.private-key"
     )
 
     internal static let environment = OptionalConfigKey<String>(
@@ -68,7 +68,7 @@ internal enum ConfigurationKeys {
   /// Auto-generates ENV names (VIRTUALBUDDY_API_KEY).
   internal enum VirtualBuddy {
     internal static let apiKey = OptionalConfigKey<String>(
-      "virtualbuddy.api_key"
+      "virtualbuddy.api-key"
     )
   }
 
@@ -77,7 +77,7 @@ internal enum ConfigurationKeys {
   /// Fetch throttling configuration keys
   ///
   /// Uses `bushelPrefixed:` to add BUSHEL_ prefix to all environment variables.
-  /// Example: "fetch.interval_global" → ENV: BUSHEL_FETCH_INTERVAL_GLOBAL
+  /// Example: "fetch.interval-global" → ENV: BUSHEL_FETCH_INTERVAL_GLOBAL
   internal enum Fetch {
     /// Generate per-source interval key dynamically
     /// - Parameter source: Data source identifier (e.g., "appledb.dev")
@@ -96,20 +96,20 @@ internal enum ConfigurationKeys {
   ///
   /// Uses `bushelPrefixed:` for BUSHEL_SYNC_* environment variables.
   internal enum Sync {
-    internal static let dryRun = ConfigKey<Bool>(bushelPrefixed: "sync.dry_run")
+    internal static let dryRun = ConfigKey<Bool>(bushelPrefixed: "sync.dry-run")
     internal static let restoreImagesOnly = ConfigKey<Bool>(
-      bushelPrefixed: "sync.restore_images_only"
+      bushelPrefixed: "sync.restore-images-only"
     )
-    internal static let xcodeOnly = ConfigKey<Bool>(bushelPrefixed: "sync.xcode_only")
-    internal static let swiftOnly = ConfigKey<Bool>(bushelPrefixed: "sync.swift_only")
-    internal static let noBetas = ConfigKey<Bool>(bushelPrefixed: "sync.no_betas")
-    internal static let noAppleWiki = ConfigKey<Bool>(bushelPrefixed: "sync.no_apple_wiki")
+    internal static let xcodeOnly = ConfigKey<Bool>(bushelPrefixed: "sync.xcode-only")
+    internal static let swiftOnly = ConfigKey<Bool>(bushelPrefixed: "sync.swift-only")
+    internal static let noBetas = ConfigKey<Bool>(bushelPrefixed: "sync.no-betas")
+    internal static let noAppleWiki = ConfigKey<Bool>(bushelPrefixed: "sync.no-apple-wiki")
     internal static let verbose = ConfigKey<Bool>(bushelPrefixed: "sync.verbose")
     internal static let force = ConfigKey<Bool>(bushelPrefixed: "sync.force")
-    internal static let minInterval = OptionalConfigKey<Int>(bushelPrefixed: "sync.min_interval")
+    internal static let minInterval = OptionalConfigKey<Int>(bushelPrefixed: "sync.min-interval")
     internal static let source = OptionalConfigKey<String>(bushelPrefixed: "sync.source")
     internal static let jsonOutputFile = OptionalConfigKey<String>(
-      bushelPrefixed: "sync.json_output_file")
+      bushelPrefixed: "sync.json-output-file")
   }
 
   // MARK: - Export Command Configuration
@@ -120,8 +120,8 @@ internal enum ConfigurationKeys {
   internal enum Export {
     internal static let output = OptionalConfigKey<String>(bushelPrefixed: "export.output")
     internal static let pretty = ConfigKey<Bool>(bushelPrefixed: "export.pretty")
-    internal static let signedOnly = ConfigKey<Bool>(bushelPrefixed: "export.signed_only")
-    internal static let noBetas = ConfigKey<Bool>(bushelPrefixed: "export.no_betas")
+    internal static let signedOnly = ConfigKey<Bool>(bushelPrefixed: "export.signed-only")
+    internal static let noBetas = ConfigKey<Bool>(bushelPrefixed: "export.no-betas")
     internal static let verbose = ConfigKey<Bool>(bushelPrefixed: "export.verbose")
   }
 
@@ -131,7 +131,7 @@ internal enum ConfigurationKeys {
   ///
   /// Uses `bushelPrefixed:` for BUSHEL_STATUS_* environment variables.
   internal enum Status {
-    internal static let errorsOnly = ConfigKey<Bool>(bushelPrefixed: "status.errors_only")
+    internal static let errorsOnly = ConfigKey<Bool>(bushelPrefixed: "status.errors-only")
     internal static let detailed = ConfigKey<Bool>(bushelPrefixed: "status.detailed")
   }
 
@@ -141,9 +141,9 @@ internal enum ConfigurationKeys {
   ///
   /// Uses `bushelPrefixed:` for BUSHEL_LIST_* environment variables.
   internal enum List {
-    internal static let restoreImages = ConfigKey<Bool>(bushelPrefixed: "list.restore_images")
-    internal static let xcodeVersions = ConfigKey<Bool>(bushelPrefixed: "list.xcode_versions")
-    internal static let swiftVersions = ConfigKey<Bool>(bushelPrefixed: "list.swift_versions")
+    internal static let restoreImages = ConfigKey<Bool>(bushelPrefixed: "list.restore-images")
+    internal static let xcodeVersions = ConfigKey<Bool>(bushelPrefixed: "list.xcode-versions")
+    internal static let swiftVersions = ConfigKey<Bool>(bushelPrefixed: "list.swift-versions")
   }
 
   // MARK: - Clear Command Configuration
