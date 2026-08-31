@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:brightdigit/MistKitConfiguration.git
 	branch = initial-extraction
-	commit = 
+	commit = 0397cb6dd6ca433b30f2c206b810629ea7db840a
 	method = merge
 	cmdver = 0.4.9
