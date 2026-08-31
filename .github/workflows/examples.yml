@@ -48,3 +48,6 @@ jobs:
         uses: brightdigit/swift-build@v1
         with:
           working-directory: ${{ matrix.path }}
+          # MistKitConfiguration gitignores Package.resolved (standalone CI uses the
+          # same flag). Examples that commit a lockfile keep the default.
+          skip-package-resolved: ${{ matrix.example == 'MistKitConfiguration' }}
