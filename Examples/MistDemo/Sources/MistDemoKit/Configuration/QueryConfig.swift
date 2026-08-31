@@ -125,12 +125,8 @@ public struct QueryConfig: Sendable, ConfigurationParseable {
       offset: parsed.pagination.offset,
       fields: parsed.pagination.fields,
       continuationMarker: parsed.pagination.continuationMarker,
-      zoneWide: configReader.optionalBool(
-        forKey: MistDemoConstants.ConfigKeys.zoneWide
-      ),
-      numbersAsStrings: configReader.optionalBool(
-        forKey: MistDemoConstants.ConfigKeys.numbersAsStrings
-      ),
+      zoneWide: configReader.read(MistDemoKeys.Query.zoneWide),
+      numbersAsStrings: configReader.read(MistDemoKeys.Record.numbersAsStrings),
       output: parsed.pagination.output
     )
   }

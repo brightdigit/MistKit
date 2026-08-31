@@ -1,5 +1,5 @@
 //
-//  BrowserFlagResolver.swift
+//  ConfigReader+ConfigValueReading.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,27 +27,19 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+public import ConfigKeyKit
+public import Configuration
 
-/// Resolves the "should we open the browser on startup?" decision from
-/// the two mutually-exclusive CLI flags into a single boolean.
+/// Bridges swift-configuration's `ConfigReader` to ConfigKeyKit's
+/// ``ConfigValueReading``, which supplies the CLI → ENV → default resolution
+/// for every `ConfigKey` / `OptionalConfigKey` overload.
 ///
-/// - `--no-browser` sets `no.browser=true` → resolves to `false` (wins).
-/// - `--browser` sets `browser=true` → resolves to `true`.
-/// - Neither set → falls back to the per-command default.
-internal enum BrowserFlagResolver {
-  internal static func resolve(
-    configReader: MistDemoConfiguration,
-    default defaultValue: Bool
-  ) -> Bool {
-    let noBrowser = configReader.read(MistDemoKeys.Server.noBrowser)
-    if noBrowser {
-      return false
-    }
-    let browser = configReader.read(MistDemoKeys.Server.browser)
-    if browser {
-      return true
-    }
-    return defaultValue
+/// Before ConfigKeyKit 1.0.0-beta.2 each consumer hand-wrote those overloads;
+/// they now live on the protocol extension in ConfigKeyKit's dependency-free
+/// core, so this conformance is the only glue required.
+extension ConfigReader: @retroactive ConfigValueReading {
+  /// Wraps a resolved per-source key string in swift-configuration's own key type.
+  public func makeConfigKey(_ string: String) -> Configuration.ConfigKey {
+    .init(string)
   }
 }

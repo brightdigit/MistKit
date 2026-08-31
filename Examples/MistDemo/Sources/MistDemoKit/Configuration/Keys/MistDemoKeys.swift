@@ -1,5 +1,5 @@
 //
-//  BrowserFlagResolver.swift
+//  MistDemoKeys.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,27 +27,23 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import ConfigKeyKit
 
-/// Resolves the "should we open the browser on startup?" decision from
-/// the two mutually-exclusive CLI flags into a single boolean.
+/// Typed configuration keys for MistDemo.
 ///
-/// - `--no-browser` sets `no.browser=true` → resolves to `false` (wins).
-/// - `--browser` sets `browser=true` → resolves to `true`.
-/// - Neither set → falls back to the per-command default.
-internal enum BrowserFlagResolver {
-  internal static func resolve(
-    configReader: MistDemoConfiguration,
-    default defaultValue: Bool
-  ) -> Bool {
-    let noBrowser = configReader.read(MistDemoKeys.Server.noBrowser)
-    if noBrowser {
-      return false
-    }
-    let browser = configReader.read(MistDemoKeys.Server.browser)
-    if browser {
-      return true
-    }
-    return defaultValue
-  }
+/// Every key resolves to a command-line flag and an environment variable:
+///
+/// - **CloudKit credential keys** carry a `cloudkit.` base and therefore need no
+///   `envPrefix` — the base already yields `CLOUDKIT_*`. These five names are shared
+///   with `MistKitConfiguration`, BushelCloud and CelestraCloud.
+/// - **Every other key** keeps its historical base and passes ``envPrefix``, faithfully
+///   reproducing the blanket `prefixKeys(with: "cloudkit")` the provider stack used to
+///   apply to the whole key space. Bases stay unchanged so no flag or variable moves.
+///
+/// Bases must be **dash-case** within a component (`cloudkit.key-id`, never
+/// `cloudkit.key_id`): `CLIKeyEncoder` joins components verbatim, so an underscore
+/// survives into an unusable flag and silently defeats secret redaction.
+internal enum MistDemoKeys {
+  /// Environment-variable prefix applied to every non-CloudKit key.
+  internal static let envPrefix = "CLOUDKIT"
 }

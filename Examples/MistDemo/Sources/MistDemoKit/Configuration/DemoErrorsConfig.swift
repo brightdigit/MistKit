@@ -64,8 +64,7 @@ public struct DemoErrorsConfig: Sendable, ConfigurationParseable {
     }
 
     let scenarioString =
-      configuration.string(forKey: "scenario", default: "all")
-      ?? "all"
+      configuration.read(MistDemoKeys.Integration.scenario)
     guard let scenario = ErrorScenario(rawValue: scenarioString) else {
       throw DemoErrorsError.invalidScenario(scenarioString)
     }

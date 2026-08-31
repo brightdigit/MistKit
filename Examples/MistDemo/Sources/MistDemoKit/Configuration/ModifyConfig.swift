@@ -92,26 +92,14 @@ public struct ModifyConfig: Sendable, ConfigurationParseable {
       configReader
     )
 
-    let atomic = configReader.bool(
-      forKey: MistDemoConstants.ConfigKeys.atomic,
-      default: false
-    )
+    let atomic = configReader.read(MistDemoKeys.Record.atomic)
 
-    let zone = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.zone
-    )
-    let desiredKeys = configReader.commaSeparatedList(
-      forKey: MistDemoConstants.ConfigKeys.fields
-    )
-    let numbersAsStrings = configReader.optionalBool(
-      forKey: MistDemoConstants.ConfigKeys.numbersAsStrings
-    )
+    let zone = configReader.read(MistDemoKeys.Query.optionalZone)
+    let desiredKeys = configReader.commaSeparatedList(MistDemoKeys.Record.fields)
+    let numbersAsStrings = configReader.read(MistDemoKeys.Record.numbersAsStrings)
 
     let outputString =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat
-      ) ?? MistDemoConstants.Defaults.outputFormat
+      configReader.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(
@@ -146,9 +134,7 @@ public struct ModifyConfig: Sendable, ConfigurationParseable {
   private static func parseOperationsFromSources(
     _ configReader: MistDemoConfiguration
   ) throws -> [ModifyOperationInput] {
-    if let path = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.operationsFile
-    ) {
+    if let path = configReader.read(MistDemoKeys.Record.operationsFile) {
       do {
         let data = try Data(
           contentsOf: URL(fileURLWithPath: path)
@@ -164,10 +150,7 @@ public struct ModifyConfig: Sendable, ConfigurationParseable {
       }
     }
 
-    if configReader.bool(
-      forKey: MistDemoConstants.ConfigKeys.stdin,
-      default: false
-    ) {
+    if configReader.read(MistDemoKeys.Record.stdin) {
       let stdinData = FileHandle.standardInput.readDataToEndOfFile()
       guard !stdinData.isEmpty else {
         throw ModifyError.emptyStdin

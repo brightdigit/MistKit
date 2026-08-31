@@ -1,6 +1,6 @@
 //
 //  MistDemoConfig+Testing.swift
-//  MistDemoTests
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,6 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import ConfigKeyKit
 internal import Configuration
 internal import Foundation
 internal import MistKit
@@ -49,17 +50,13 @@ extension MistDemoConfig {
   /// `database` is left unset so it falls through to the production
   /// parser's default and cannot affect environment-test semantics.
   internal init(rawEnvironment: String) async throws {
-    func key(_ path: String) -> AbsoluteConfigKey {
-      AbsoluteConfigKey(path.split(separator: ".").map(String.init), context: [:])
-    }
-
-    let testProvider = InMemoryProvider(values: [
-      key("container.identifier"): .init(stringLiteral: "iCloud.com.test.App"),
-      key("api.token"): .init(stringLiteral: "test-api-token"),
-      key("environment"): .init(stringLiteral: rawEnvironment),
-    ])
-    let configuration = MistDemoConfiguration(testProvider: testProvider)
-    self = try await MistDemoConfig(configuration: configuration)
+    self = try await MistDemoConfig(
+      configuration: Self.makeConfiguration([
+        (MistDemoKeys.CloudKit.containerID, "iCloud.com.test.App"),
+        (MistDemoKeys.Auth.apiToken, "test-api-token"),
+        (MistDemoKeys.CloudKit.environment, rawEnvironment),
+      ])
+    )
   }
 
   /// Create a test configuration with custom values
@@ -82,43 +79,40 @@ extension MistDemoConfig {
     testServerToServer: Bool = false,
     badCredentials: Bool = false
   ) async throws {
-    let envString = environment == .production ? "production" : "development"
-
-    func key(_ path: String) -> AbsoluteConfigKey {
-      AbsoluteConfigKey(path.split(separator: ".").map(String.init), context: [:])
-    }
-
-    var values: [AbsoluteConfigKey: ConfigValue] = [
-      key("container.identifier"): .init(stringLiteral: containerIdentifier),
-      key("api.token"): .init(stringLiteral: apiToken),
-      key("environment"): .init(stringLiteral: envString),
-      key("database"): .init(stringLiteral: database.pathSegment),
-      key("host"): .init(stringLiteral: host),
-      key("port"): .init(integerLiteral: port),
-      key("auth.timeout"): .init(integerLiteral: Int(authTimeout)),
-      key("skip.auth"): .init(booleanLiteral: skipAuth),
-      key("test.all.auth"): .init(booleanLiteral: testAllAuth),
-      key("test.api.only"): .init(booleanLiteral: testApiOnly),
-      key("test.adaptive"): .init(booleanLiteral: testAdaptive),
-      key("test.server.to.server"): .init(booleanLiteral: testServerToServer),
-      key("bad.credentials"): .init(booleanLiteral: badCredentials),
+    var values: [(key: any ConfigurationKey, value: String)] = [
+      (MistDemoKeys.CloudKit.containerID, containerIdentifier),
+      (MistDemoKeys.Auth.apiToken, apiToken),
+      (
+        MistDemoKeys.CloudKit.environment,
+        environment == .production ? "production" : "development"
+      ),
+      (MistDemoKeys.Server.database, database.pathSegment),
+      (MistDemoKeys.Server.host, host),
+      (MistDemoKeys.Server.port, String(port)),
+      (MistDemoKeys.Server.authTimeout, String(Int(authTimeout))),
+      (MistDemoKeys.Auth.skipAuth, String(skipAuth)),
+      (MistDemoKeys.AuthModes.testAllAuth, String(testAllAuth)),
+      (MistDemoKeys.AuthModes.testAPIOnly, String(testApiOnly)),
+      (MistDemoKeys.AuthModes.testAdaptive, String(testAdaptive)),
+      (MistDemoKeys.AuthModes.testServerToServer, String(testServerToServer)),
+      (MistDemoKeys.Auth.badCredentials, String(badCredentials)),
     ]
 
-    if let webAuthToken {
-      values[key("web.auth.token")] = .init(stringLiteral: webAuthToken)
-    }
-    if let keyID {
-      values[key("key.id")] = .init(stringLiteral: keyID)
-    }
-    if let privateKey {
-      values[key("private.key")] = .init(stringLiteral: privateKey)
-    }
+    if let webAuthToken { values.append((MistDemoKeys.Auth.webAuthToken, webAuthToken)) }
+    if let keyID { values.append((MistDemoKeys.CloudKit.keyID, keyID)) }
+    if let privateKey { values.append((MistDemoKeys.CloudKit.privateKey, privateKey)) }
+    // Previously seeded `private.key.file`, a key production never read, so the
+    // `privateKeyFile:` argument silently did nothing.
     if let privateKeyFile {
-      values[key("private.key.file")] = .init(stringLiteral: privateKeyFile)
+      values.append((MistDemoKeys.CloudKit.privateKeyPath, privateKeyFile))
     }
 
-    let testProvider = InMemoryProvider(values: values)
-    let configuration = MistDemoConfiguration(testProvider: testProvider)
-    self = try await MistDemoConfig(configuration: configuration)
+    self = try await MistDemoConfig(configuration: Self.makeConfiguration(values))
+  }
+
+  private static func makeConfiguration(
+    _ values: [(key: any ConfigurationKey, value: String)]
+  ) -> MistDemoConfiguration {
+    MistDemoConfiguration.forTesting(values)
   }
 }

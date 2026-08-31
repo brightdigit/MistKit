@@ -87,7 +87,7 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
 
     // Parse command-specific options
     let apiToken =
-      configReader.string(forKey: "api.token", isSecret: true) ?? ""
+      configReader.read(MistDemoKeys.Auth.apiToken)
     guard !apiToken.isEmpty else {
       throw ConfigurationError.missingRequired(
         "api.token",
@@ -99,29 +99,24 @@ public struct AuthTokenConfig: Sendable, ConfigurationParseable {
     // Demo default — override via --container-identifier
     // or config key "container.identifier"
     let containerIdentifier =
-      configReader.string(
-        forKey: "container.identifier",
-        default: MistDemoConstants.Defaults.containerIdentifier
-      ) ?? MistDemoConstants.Defaults.containerIdentifier
+      configReader.read(MistDemoKeys.CloudKit.containerID)
 
     let envString =
-      configReader.string(forKey: "environment", default: "development")
-      ?? "development"
+      configReader.read(MistDemoKeys.CloudKit.environment)
     guard let environment = MistKit.Environment(caseInsensitive: envString) else {
       throw ConfigurationError.invalidEnvironment(envString)
     }
 
     let port =
-      configReader.int(forKey: "port", default: 8_080) ?? 8_080
+      configReader.read(MistDemoKeys.Server.port)
     let host =
-      configReader.string(forKey: "host", default: "127.0.0.1")
-      ?? "127.0.0.1"
+      configReader.read(MistDemoKeys.Server.host)
     let openBrowser = BrowserFlagResolver.resolve(
       configReader: configReader,
       default: true
     )
     let resetAuth =
-      configReader.bool(forKey: "reset.auth", default: false)
+      configReader.read(MistDemoKeys.Auth.resetAuth)
 
     self.init(
       apiToken: apiToken,

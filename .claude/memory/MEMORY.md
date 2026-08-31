@@ -43,3 +43,4 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — `examples.yml` must use a Swift container that can parse each example's Package.swift (6.4 nightly for Bushel/Celestra; 6.3 for MistDemo)
 - [ConfigKey bases must be dash-case](reference_configkey_cli_flag_dash_case.md) — snake_case silently breaks CLI flags and secret redaction; ENV works either way, so it hides the bug
 - [ConfigKeyKit ConfigValueReading](reference_configkeykit_configvaluereading.md) — ConfigKeyKit#1 shipped in-core in 1.0.0-beta.2; there is no ConfigKeyKitConfiguration package
+- [Path-package identity is the directory name](project_path_package_identity_collision.md) — a `path:` MistKit + a transitive `url:` MistKit = duplicate-target build failure; resolve still succeeds

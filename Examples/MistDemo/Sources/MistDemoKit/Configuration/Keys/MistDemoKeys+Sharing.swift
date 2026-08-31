@@ -1,5 +1,5 @@
 //
-//  BrowserFlagResolver.swift
+//  MistDemoKeys+Sharing.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,27 +27,24 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import ConfigKeyKit
 
-/// Resolves the "should we open the browser on startup?" decision from
-/// the two mutually-exclusive CLI flags into a single boolean.
-///
-/// - `--no-browser` sets `no.browser=true` → resolves to `false` (wins).
-/// - `--browser` sets `browser=true` → resolves to `true`.
-/// - Neither set → falls back to the per-command default.
-internal enum BrowserFlagResolver {
-  internal static func resolve(
-    configReader: MistDemoConfiguration,
-    default defaultValue: Bool
-  ) -> Bool {
-    let noBrowser = configReader.read(MistDemoKeys.Server.noBrowser)
-    if noBrowser {
-      return false
-    }
-    let browser = configReader.read(MistDemoKeys.Server.browser)
-    if browser {
-      return true
-    }
-    return defaultValue
+extension MistDemoKeys {
+  /// Share resolve/accept keys.
+  internal enum Sharing {
+    /// `--short-guid` / `CLOUDKIT_SHORT_GUID`, comma separated.
+    internal static let shortGUID = OptionalConfigKey<String>(
+      "short.guid", envPrefix: MistDemoKeys.envPrefix
+    )
+
+    /// `--share-url` / `CLOUDKIT_SHARE_URL`, comma separated.
+    internal static let shareURL = OptionalConfigKey<String>(
+      "share.url", envPrefix: MistDemoKeys.envPrefix
+    )
+
+    /// `--fetch-root-record` / `CLOUDKIT_FETCH_ROOT_RECORD`.
+    internal static let fetchRootRecord = OptionalConfigKey<Bool>(
+      "fetch.root.record", envPrefix: MistDemoKeys.envPrefix
+    )
   }
 }

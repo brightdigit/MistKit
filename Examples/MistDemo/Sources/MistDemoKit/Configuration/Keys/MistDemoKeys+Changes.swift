@@ -1,5 +1,5 @@
 //
-//  BrowserFlagResolver.swift
+//  MistDemoKeys+Changes.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,27 +27,24 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import ConfigKeyKit
 
-/// Resolves the "should we open the browser on startup?" decision from
-/// the two mutually-exclusive CLI flags into a single boolean.
-///
-/// - `--no-browser` sets `no.browser=true` → resolves to `false` (wins).
-/// - `--browser` sets `browser=true` → resolves to `true`.
-/// - Neither set → falls back to the per-command default.
-internal enum BrowserFlagResolver {
-  internal static func resolve(
-    configReader: MistDemoConfiguration,
-    default defaultValue: Bool
-  ) -> Bool {
-    let noBrowser = configReader.read(MistDemoKeys.Server.noBrowser)
-    if noBrowser {
-      return false
-    }
-    let browser = configReader.read(MistDemoKeys.Server.browser)
-    if browser {
-      return true
-    }
-    return defaultValue
+extension MistDemoKeys {
+  /// Change-tracking keys for the `fetch-*-changes` commands.
+  internal enum Changes {
+    /// `--sync-token` / `CLOUDKIT_SYNC_TOKEN`.
+    internal static let syncToken = OptionalConfigKey<String>(
+      "sync.token", envPrefix: MistDemoKeys.envPrefix
+    )
+
+    /// `--fetch-all` / `CLOUDKIT_FETCH_ALL`, auto-paginate.
+    internal static let fetchAll = ConfigKey<Bool>(
+      "fetch.all", envPrefix: MistDemoKeys.envPrefix, default: false
+    )
+
+    /// `--record-types` / `CLOUDKIT_RECORD_TYPES`, comma separated.
+    internal static let desiredRecordTypes = OptionalConfigKey<String>(
+      "record.types", envPrefix: MistDemoKeys.envPrefix
+    )
   }
 }

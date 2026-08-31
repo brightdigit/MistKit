@@ -67,10 +67,7 @@ public struct ListSubscriptionsConfig: Sendable, ConfigurationParseable {
     }
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: "table"
-      ) ?? "table"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .table
 
     self.init(base: baseConfig, output: output)

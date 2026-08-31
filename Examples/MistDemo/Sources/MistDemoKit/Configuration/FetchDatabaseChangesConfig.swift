@@ -77,13 +77,12 @@ public struct FetchDatabaseChangesConfig: Sendable, ConfigurationParseable {
       )
     }
 
-    let syncToken = configuration.string(forKey: "sync.token")
+    let syncToken = configuration.read(MistDemoKeys.Changes.syncToken)
     let fetchAll =
-      configuration.bool(forKey: "fetch.all", default: false)
-    let limit = configuration.int(forKey: "limit")
+      configuration.read(MistDemoKeys.Changes.fetchAll)
+    let limit = configuration.read(MistDemoKeys.Query.optionalLimit)
     let outputString =
-      configuration.string(forKey: "output.format", default: "table")
-      ?? "table"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .table
 
     self.init(

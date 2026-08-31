@@ -70,7 +70,7 @@ public struct LookupSubscriptionConfig: Sendable, ConfigurationParseable {
       )
     }
 
-    let idsString = configuration.string(forKey: "subscription-ids") ?? ""
+    let idsString = configuration.read(MistDemoKeys.Subscription.subscriptionIDs)
     let subscriptionIDs =
       idsString
       .split(separator: ",")
@@ -78,10 +78,7 @@ public struct LookupSubscriptionConfig: Sendable, ConfigurationParseable {
       .filter { !$0.isEmpty }
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: "json"
-      ) ?? "json"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(

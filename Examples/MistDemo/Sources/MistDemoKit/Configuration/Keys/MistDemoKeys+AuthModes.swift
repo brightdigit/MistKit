@@ -1,5 +1,5 @@
 //
-//  BrowserFlagResolver.swift
+//  MistDemoKeys+AuthModes.swift
 //  MistDemo
 //
 //  Created by Leo Dion.
@@ -27,27 +27,29 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import ConfigKeyKit
 
-/// Resolves the "should we open the browser on startup?" decision from
-/// the two mutually-exclusive CLI flags into a single boolean.
-///
-/// - `--no-browser` sets `no.browser=true` → resolves to `false` (wins).
-/// - `--browser` sets `browser=true` → resolves to `true`.
-/// - Neither set → falls back to the per-command default.
-internal enum BrowserFlagResolver {
-  internal static func resolve(
-    configReader: MistDemoConfiguration,
-    default defaultValue: Bool
-  ) -> Bool {
-    let noBrowser = configReader.read(MistDemoKeys.Server.noBrowser)
-    if noBrowser {
-      return false
-    }
-    let browser = configReader.read(MistDemoKeys.Server.browser)
-    if browser {
-      return true
-    }
-    return defaultValue
+extension MistDemoKeys {
+  /// Flags selecting which authentication modes the demo exercises.
+  internal enum AuthModes {
+    /// `--test-all-auth` / `CLOUDKIT_TEST_ALL_AUTH`.
+    internal static let testAllAuth = ConfigKey<Bool>(
+      "test.all.auth", envPrefix: MistDemoKeys.envPrefix, default: false
+    )
+
+    /// `--test-api-only` / `CLOUDKIT_TEST_API_ONLY`.
+    internal static let testAPIOnly = ConfigKey<Bool>(
+      "test.api.only", envPrefix: MistDemoKeys.envPrefix, default: false
+    )
+
+    /// `--test-adaptive` / `CLOUDKIT_TEST_ADAPTIVE`.
+    internal static let testAdaptive = ConfigKey<Bool>(
+      "test.adaptive", envPrefix: MistDemoKeys.envPrefix, default: false
+    )
+
+    /// `--test-server-to-server` / `CLOUDKIT_TEST_SERVER_TO_SERVER`.
+    internal static let testServerToServer = ConfigKey<Bool>(
+      "test.server.to.server", envPrefix: MistDemoKeys.envPrefix, default: false
+    )
   }
 }
