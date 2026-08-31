@@ -45,3 +45,4 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [ConfigKeyKit ConfigValueReading](reference_configkeykit_configvaluereading.md) — ConfigKeyKit#1 shipped in-core in 1.0.0-beta.2; there is no ConfigKeyKitConfiguration package
 - [Path-package identity is the directory name](project_path_package_identity_collision.md) — a `path:` MistKit + a transitive `url:` MistKit = duplicate-target build failure; resolve still succeeds
 - [MistKitConfiguration subrepo overlay](project_mistkitconfiguration_subrepo_overlay.md) — Package.swift differs by one line between monorepo and standalone; `git subrepo push` clobbers it
+- [Draft-gated CI needs ready_for_review](reference_draft_gated_ci_needs_ready_for_review.md) — an `if: draft == false` job stays `skipped` forever unless `types:` lists `ready_for_review`; re-running replays the stale payload
