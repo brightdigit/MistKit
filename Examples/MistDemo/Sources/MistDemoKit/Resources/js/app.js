@@ -42,6 +42,8 @@ const deleteBtn = document.getElementById('delete-btn');
 const refreshBtn = document.getElementById('refresh-btn');
 const recordTypeInput = document.getElementById('record-type');
 const queryLimitInput = document.getElementById('query-limit');
+const queryZoneInput = document.getElementById('query-zone');
+const queryZoneOwnerInput = document.getElementById('query-zone-owner');
 const rawResponseEl = document.getElementById('raw-response');
 const formImageGenerateBtn = document.getElementById('form-image-generate');
 const formImageClearBtn = document.getElementById('form-image-clear');
@@ -497,6 +499,10 @@ async function queryNotes() {
     if (queryInFlight) return;
     const recordType = recordTypeInput.value.trim();
     const limit = parseInt(queryLimitInput.value, 10);
+    const zoneName = queryZoneInput.value.trim() || undefined;
+    // The server rejects a zoneOwner without a zoneName, so drop a stray owner
+    // rather than sending a body that is guaranteed to 400.
+    const zoneOwner = zoneName ? (queryZoneOwnerInput.value.trim() || undefined) : undefined;
     queryInFlight = true;
     setQueryControlsDisabled(true);
     const dbLabel = currentDatabase === 'public' ? 'public' : 'private';
@@ -512,6 +518,8 @@ async function queryNotes() {
                 sortBy: currentSort
                     ? [{ field: currentSort.field, ascending: currentSort.ascending }]
                     : undefined,
+                zoneName,
+                zoneOwner,
             });
         } else {
             const query = { recordType };
@@ -520,6 +528,12 @@ async function queryNotes() {
                     fieldName: currentSort.field,
                     ascending: currentSort.ascending,
                 }];
+            }
+            // CloudKit JS names the owner `ownerRecordName` inside zoneID.
+            if (zoneName) {
+                query.zoneID = zoneOwner
+                    ? { zoneName, ownerRecordName: zoneOwner }
+                    : { zoneName };
             }
             payload = await ckJsDatabase().performQuery(query, {
                 resultsLimit: isFinite(limit) ? limit : undefined,
@@ -552,6 +566,7 @@ function setQueryControlsDisabled(disabled) {
         'refresh-btn', 'db-private', 'db-public',
         'mode-mistkit', 'mode-cloudkitjs',
         'save-btn', 'delete-btn',
+        'query-zone', 'query-zone-owner',
     ];
     for (const id of ids) {
         const el = document.getElementById(id);
