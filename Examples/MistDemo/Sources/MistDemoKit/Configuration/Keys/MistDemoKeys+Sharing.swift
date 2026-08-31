@@ -1,6 +1,6 @@
 //
-//  CloudKitAuthMethod.swift
-//  BushelCloud
+//  MistDemoKeys+Sharing.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,27 +27,24 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
+internal import ConfigKeyKit
 
-/// Authentication method for CloudKit Server-to-Server
-///
-/// Provides type-safe authentication credential handling with two patterns:
-/// - `.pemString`: For CI/CD environments (GitHub Actions secrets)
-/// - `.pemFile`: For local development (file on disk)
-public enum CloudKitAuthMethod: Sendable {
-  /// PEM content provided as string (CI/CD pattern)
-  ///
-  /// **Usage**: Pass PEM content from environment variables or secrets
-  /// ```swift
-  /// let method = .pemString(pemContentFromEnvironment)
-  /// ```
-  case pemString(String)
+extension MistDemoKeys {
+  /// Share resolve/accept keys.
+  internal enum Sharing {
+    /// `--short-guid` / `CLOUDKIT_SHORT_GUID`, comma separated.
+    internal static let shortGUID = OptionalConfigKey<String>(
+      "short.guid", envPrefix: MistDemoKeys.envPrefix
+    )
 
-  /// PEM content loaded from file path (local development pattern)
-  ///
-  /// **Usage**: Pass path to .pem file on disk
-  /// ```swift
-  /// let method = .pemFile(path: "~/.cloudkit/bushel-private-key.pem")
-  /// ```
-  case pemFile(path: String)
+    /// `--share-url` / `CLOUDKIT_SHARE_URL`, comma separated.
+    internal static let shareURL = OptionalConfigKey<String>(
+      "share.url", envPrefix: MistDemoKeys.envPrefix
+    )
+
+    /// `--fetch-root-record` / `CLOUDKIT_FETCH_ROOT_RECORD`.
+    internal static let fetchRootRecord = OptionalConfigKey<Bool>(
+      "fetch.root.record", envPrefix: MistDemoKeys.envPrefix
+    )
+  }
 }

@@ -1,5 +1,9 @@
 # MistDemo Overview
 
+> **Source of truth:** configuration keys now live as typed values in
+> `Examples/MistDemo/Sources/MistDemoKit/Configuration/Keys/` (`MistDemoKeys`).
+> The five CloudKit credential keys share their names with `MistKitConfiguration`,
+> BushelCloud and CelestraCloud; every other key carries `envPrefix: "CLOUDKIT"`.
 ## Architecture
 
 MistDemo is a CLI tool with a subcommand architecture where each CloudKit Web Services operation maps to a dedicated subcommand. The tool demonstrates MistKit's capabilities while providing a practical interface for CloudKit operations.
@@ -40,7 +44,7 @@ All subcommands accept these global options:
 
 | Option | Short | Environment Variable | Default | Description |
 |--------|-------|---------------------|---------|-------------|
-| `--environment` | `-e` | `CLOUDKIT_ENVIRONMENT` | `development` | CloudKit environment |
+| `--cloudkit-environment` | | `CLOUDKIT_ENVIRONMENT` | `development` | CloudKit environment |
 | `--database` | `-d` | `CLOUDKIT_DATABASE` | `public` | Database type |
 
 Valid values:
@@ -53,9 +57,9 @@ Valid values:
 
 | Option | Environment Variable | Description |
 |--------|---------------------|-------------|
-| `--key-id` | `CLOUDKIT_KEY_ID` | Server-to-server key ID (required for public database) |
-| `--private-key-file` | `CLOUDKIT_PRIVATE_KEY_PATH` | Path to ECDSA private key PEM file |
-| `--private-key` | `CLOUDKIT_PRIVATE_KEY` | ECDSA private key as inline string |
+| `--cloudkit-key-id` | `CLOUDKIT_KEY_ID` | Server-to-server key ID (required for public database) |
+| `--cloudkit-private-key-path` | `CLOUDKIT_PRIVATE_KEY_PATH` | Path to ECDSA private key PEM file |
+| `--cloudkit-private-key` | `CLOUDKIT_PRIVATE_KEY` | ECDSA private key as inline string |
 
 **Private/shared database** — web authentication:
 
@@ -113,7 +117,7 @@ For server-side applications using key-based authentication.
 
 ```bash
 mistdemo query \
-  --key-id YOUR_KEY_ID \
+  --cloudkit-key-id YOUR_KEY_ID \
   --private-key-file path/to/key.pem
 ```
 

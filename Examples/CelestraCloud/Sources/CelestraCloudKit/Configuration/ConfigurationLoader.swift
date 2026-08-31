@@ -30,7 +30,7 @@
 internal import ConfigKeyKit
 internal import Configuration
 internal import Foundation
-internal import MistKit
+internal import MistKitConfiguration
 
 /// Loads and merges configuration from multiple sources
 public actor ConfigurationLoader {
@@ -38,153 +38,37 @@ public actor ConfigurationLoader {
 
   /// Creates a new configuration loader with default providers.
   public init() {
-    var providers: [any ConfigProvider] = []
-
-    // Priority 1: Command-line arguments (highest)
-    providers.append(
-      CommandLineArgumentsProvider(
-        secretsSpecifier: .specific(
-          [
-            "--cloudkit-key-id",
-            "--cloudkit-private-key-path",
-          ]
-        )
-      )
+    self.configReader = ConfigurationSources.makeConfigReader(
+      secretCommandLineFlags: ConfigurationKeys.cloudKit.secretCommandLineFlags
     )
+  }
 
-    // Priority 2: Environment variables
-    providers.append(EnvironmentVariablesProvider())
-
-    self.configReader = ConfigReader(providers: providers)
+  /// Creates a loader over a pre-configured reader.
+  ///
+  /// Lets tests inject controlled configuration sources instead of mutating
+  /// process-global environment variables.
+  /// - Parameter configReader: Pre-configured reader to read from.
+  internal init(configReader: ConfigReader) {
+    self.configReader = configReader
   }
 
   /// Load complete configuration with all defaults applied
   public func loadConfiguration() async throws -> CelestraConfiguration {
-    // CloudKit configuration (automatic CLI → ENV → default fallback)
-    let cloudkit = CloudKitConfiguration(
-      containerID: read(ConfigurationKeys.CloudKit.containerID),
-      keyID: read(ConfigurationKeys.CloudKit.keyID),
-      privateKeyPath: read(ConfigurationKeys.CloudKit.privateKeyPath),
-      environment: parseEnvironment(read(ConfigurationKeys.CloudKit.environment))
-    )
+    let cloudkit = configReader.readCloudKitConfiguration(keys: ConfigurationKeys.cloudKit)
 
-    // Update command configuration
     let update = UpdateCommandConfiguration(
-      delay: read(ConfigurationKeys.Update.delay),
-      skipRobotsCheck: read(ConfigurationKeys.Update.skipRobotsCheck),
-      maxFailures: read(ConfigurationKeys.Update.maxFailures),
-      minPopularity: read(ConfigurationKeys.Update.minPopularity),
-      lastAttemptedBefore: read(ConfigurationKeys.Update.lastAttemptedBefore),
-      limit: read(ConfigurationKeys.Update.limit),
-      jsonOutputPath: read(ConfigurationKeys.Update.jsonOutputPath)
+      delay: configReader.read(ConfigurationKeys.Update.delay),
+      skipRobotsCheck: configReader.read(ConfigurationKeys.Update.skipRobotsCheck),
+      maxFailures: configReader.read(ConfigurationKeys.Update.maxFailures),
+      minPopularity: configReader.read(ConfigurationKeys.Update.minPopularity),
+      lastAttemptedBefore: configReader.read(ConfigurationKeys.Update.lastAttemptedBefore),
+      limit: configReader.read(ConfigurationKeys.Update.limit),
+      jsonOutputPath: configReader.read(ConfigurationKeys.Update.jsonOutputPath)
     )
 
     return CelestraConfiguration(
       cloudkit: cloudkit,
       update: update
     )
-  }
-
-  // MARK: - Per-key-string Primitives
-
-  private func readString(forKey key: String) -> String? {
-    configReader.string(forKey: ConfigKey(key))
-  }
-
-  private func readInt(forKey key: String) -> Int? {
-    configReader.int(forKey: ConfigKey(key))
-  }
-
-  private func readDate(forKey key: String) -> Date? {
-    // Swift Configuration automatically converts ISO8601 strings to Date
-    configReader.string(forKey: ConfigKey(key), as: Date.self)
-  }
-
-  private func parseEnvironment(_ value: String?) -> MistKit.Environment {
-    guard let value = value?.lowercased() else {
-      return .development
-    }
-    return value == "production" ? .production : .development
-  }
-
-  // MARK: - Generic ConfigKey Helpers (required default → non-optional)
-
-  /// Read a string value with automatic CLI → ENV → default fallback.
-  private func read(_ key: ConfigKeyKit.ConfigKey<String>) -> String {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let value = readString(forKey: keyString) {
-        return value
-      }
-    }
-    return key.defaultValue
-  }
-
-  /// Read a double value with automatic CLI → ENV → default fallback.
-  private func read(_ key: ConfigKeyKit.ConfigKey<Double>) -> Double {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let stringValue = readString(forKey: keyString), let value = Double(stringValue) {
-        return value
-      }
-    }
-    return key.defaultValue
-  }
-
-  /// Read a boolean value with CLI flag-presence and ENV string parsing.
-  ///
-  /// - CLI: flag presence indicates `true` (e.g. `--update-skip-robots-check`).
-  /// - ENV: accepts `true`/`1`/`yes` (case-insensitive); anything else is `false`.
-  /// - Otherwise: the key's default.
-  private func read(_ key: ConfigKeyKit.ConfigKey<Bool>) -> Bool {
-    if let cliKey = key.key(for: .commandLine),
-      configReader.string(forKey: ConfigKey(cliKey)) != nil
-    {
-      return true
-    }
-
-    if let envKey = key.key(for: .environment),
-      let envValue = configReader.string(forKey: ConfigKey(envKey))
-    {
-      let lowercased = envValue.lowercased().trimmingCharacters(in: .whitespaces)
-      return lowercased == "true" || lowercased == "1" || lowercased == "yes"
-    }
-
-    return key.defaultValue
-  }
-
-  // MARK: - Generic OptionalConfigKey Helpers (no default → optional)
-
-  /// Read a string value with automatic CLI → ENV fallback.
-  private func read(_ key: ConfigKeyKit.OptionalConfigKey<String>) -> String? {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let value = readString(forKey: keyString) {
-        return value
-      }
-    }
-    return nil
-  }
-
-  /// Read an integer value with automatic CLI → ENV fallback.
-  private func read(_ key: ConfigKeyKit.OptionalConfigKey<Int>) -> Int? {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let value = readInt(forKey: keyString) {
-        return value
-      }
-    }
-    return nil
-  }
-
-  /// Read a date value (ISO8601) with automatic CLI → ENV fallback.
-  private func read(_ key: ConfigKeyKit.OptionalConfigKey<Date>) -> Date? {
-    for source in ConfigKeySource.allCases {
-      guard let keyString = key.key(for: source) else { continue }
-      if let value = readDate(forKey: keyString) {
-        return value
-      }
-    }
-    return nil
   }
 }

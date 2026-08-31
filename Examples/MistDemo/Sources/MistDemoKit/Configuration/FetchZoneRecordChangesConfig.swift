@@ -91,25 +91,21 @@ public struct FetchZoneRecordChangesConfig: Sendable, ConfigurationParseable {
     }
 
     let zonesString =
-      configuration.string(forKey: "zone.names", default: "_defaultZone")
-      ?? "_defaultZone"
+      configuration.read(MistDemoKeys.Query.zoneNames)
     let zones = zonesString.split(separator: ",").map {
       $0.trimmingCharacters(in: .whitespaces)
     }
 
-    let syncToken = configuration.string(forKey: "sync.token")
+    let syncToken = configuration.read(MistDemoKeys.Changes.syncToken)
     let fetchAll =
-      configuration.bool(forKey: "fetch.all", default: false)
-    let limit = configuration.int(forKey: "limit")
-    let desiredKeys = configuration.commaSeparatedList(
-      forKey: MistDemoConstants.ConfigKeys.fields
-    )
+      configuration.read(MistDemoKeys.Changes.fetchAll)
+    let limit = configuration.read(MistDemoKeys.Query.optionalLimit)
+    let desiredKeys = configuration.commaSeparatedList(MistDemoKeys.Record.fields)
     let desiredRecordTypes = configuration.commaSeparatedList(
-      forKey: MistDemoConstants.ConfigKeys.desiredRecordTypes
+      MistDemoKeys.Changes.desiredRecordTypes
     )
     let outputString =
-      configuration.string(forKey: "output.format", default: "table")
-      ?? "table"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .table
 
     self.init(

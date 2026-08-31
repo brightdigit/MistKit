@@ -1,5 +1,5 @@
 {
-  "originHash" : "f27a89c0d96b0be480821ad8378b3900758538ddb1232c8dde2c0a272a5cfcee",
+  "originHash" : "87364e7b045e473ed8ad111d20d315a2cbd9c05d42a520e101eddd6505e58ff7",
   "pins" : [
     {
       "identity" : "celestrakit",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/brightdigit/ConfigKeyKit.git",
       "state" : {
-        "revision" : "6949abb4b7f3e50f7f81d668e6c11aa4721e97fd",
-        "version" : "1.0.0-beta.2"
+        "revision" : "3c8ae3825b4cdcbf60fb1adeaaaf324557e7fd41",
+        "version" : "1.0.0-beta.3"
       }
     },
     {

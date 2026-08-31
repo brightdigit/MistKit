@@ -88,35 +88,21 @@ public struct DeleteConfig: Sendable, ConfigurationParseable {
     }
 
     let zone =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.zone,
-        default: MistDemoConstants.Defaults.zone
-      ) ?? MistDemoConstants.Defaults.zone
+      configReader.read(MistDemoKeys.Query.zone)
     let recordType =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.recordType,
-        default: MistDemoConstants.Defaults.recordType
-      ) ?? MistDemoConstants.Defaults.recordType
+      configReader.read(MistDemoKeys.Record.recordType)
 
     guard
-      let recordName = configReader.string(forKey: MistDemoConstants.ConfigKeys.recordName)
+      let recordName = configReader.read(MistDemoKeys.Record.recordName)
     else {
       throw DeleteError.recordNameRequired
     }
 
-    let recordChangeTag = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.recordChangeTag
-    )
-    let force = configReader.bool(
-      forKey: MistDemoConstants.ConfigKeys.force,
-      default: false
-    )
+    let recordChangeTag = configReader.read(MistDemoKeys.Record.recordChangeTag)
+    let force = configReader.read(MistDemoKeys.Record.force)
 
     let outputString =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat
-      ) ?? MistDemoConstants.Defaults.outputFormat
+      configReader.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(

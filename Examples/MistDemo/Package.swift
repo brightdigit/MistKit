@@ -106,6 +106,9 @@ let package = Package(
   ],
   dependencies: [
     .package(name: "MistKit", path: "../.."),
+    // Monorepo dogfood overlay — publishable consumers use a tagged `from:` once
+    // MistKitConfiguration is released.
+    .package(path: "../../Packages/MistKitConfiguration"),
     .package(url: "https://github.com/brightdigit/ConfigKeyKit.git", from: "1.0.0-beta.2"),
     .package(
       url: "https://github.com/hummingbird-project/hummingbird.git",
@@ -136,6 +139,7 @@ let package = Package(
       dependencies: [
         .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
         .product(name: "MistKit", package: "MistKit"),
+        .product(name: "MistKitConfiguration", package: "MistKitConfiguration"),
         .product(
           name: "Hummingbird",
           package: "hummingbird",
@@ -176,6 +180,7 @@ let package = Package(
         "MistDemoKit",
         .product(name: "ConfigKeyKit", package: "ConfigKeyKit"),
         .product(name: "MistKit", package: "MistKit"),
+        .product(name: "MistKitConfiguration", package: "MistKitConfiguration"),
         .product(
           name: "Hummingbird",
           package: "hummingbird",

@@ -31,6 +31,7 @@ internal import CelestraCloudKit
 internal import CelestraKit
 internal import Foundation
 internal import MistKit
+internal import MistKitConfiguration
 
 internal enum UpdateCommand {
   internal static func run() async throws {
@@ -93,8 +94,8 @@ internal enum UpdateCommand {
   private static func createProcessor(
     config: CelestraConfiguration
   ) throws -> FeedUpdateProcessor {
-    let validatedCloudKit = try config.cloudkit.validated()
-    let service = try CelestraConfig.createCloudKitService(from: validatedCloudKit)
+    let validatedCloudKit = try config.cloudkit.validatedForCelestra()
+    let service = try validatedCloudKit.makeCloudKitService()
     let fetcher = RSSFetcherService(userAgent: .cloud(build: 1))
     let robotsService = RobotsTxtService(userAgent: .cloud(build: 1))
     let rateLimiter = RateLimiter(defaultDelay: config.update.delay)

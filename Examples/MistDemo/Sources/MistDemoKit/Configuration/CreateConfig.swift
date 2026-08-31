@@ -86,28 +86,17 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
 
     // Parse create-specific options
     let zone =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.zone,
-        default: MistDemoConstants.Defaults.zone
-      ) ?? MistDemoConstants.Defaults.zone
+      configReader.read(MistDemoKeys.Query.zone)
     let recordType =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.recordType,
-        default: MistDemoConstants.Defaults.recordType
-      ) ?? MistDemoConstants.Defaults.recordType
-    let recordName = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.recordName
-    )
+      configReader.read(MistDemoKeys.Record.recordType)
+    let recordName = configReader.read(MistDemoKeys.Record.recordName)
 
     // Parse fields from various sources
     let fields = try Self.parseFieldsFromSources(configReader)
 
     // Parse output format
     let outputString =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat
-      ) ?? MistDemoConstants.Defaults.outputFormat
+      configReader.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(
@@ -126,7 +115,7 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
     var fields: [Field] = []
 
     // 1. Parse inline field definitions
-    if let fieldString = configReader.string(forKey: "field") {
+    if let fieldString = configReader.read(MistDemoKeys.Record.field) {
       let fieldDefinitions = fieldString.split(separator: ",").map {
         String($0).trimmingCharacters(in: .whitespaces)
       }
@@ -135,18 +124,13 @@ public struct CreateConfig: Sendable, ConfigurationParseable {
     }
 
     // 2. Parse from JSON file
-    if let jsonFile = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.jsonFile
-    ) {
+    if let jsonFile = configReader.read(MistDemoKeys.Record.jsonFile) {
       let jsonFields = try parseFieldsFromJSONFile(jsonFile)
       fields.append(contentsOf: jsonFields)
     }
 
     // 3. Parse from stdin (check if data is available)
-    if configReader.bool(
-      forKey: MistDemoConstants.ConfigKeys.stdin,
-      default: false
-    ) {
+    if configReader.read(MistDemoKeys.Record.stdin) {
       let stdinFields = try parseFieldsFromStdin()
       fields.append(contentsOf: stdinFields)
     }

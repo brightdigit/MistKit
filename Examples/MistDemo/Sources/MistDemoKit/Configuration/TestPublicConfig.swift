@@ -88,15 +88,15 @@ public struct TestPublicConfig: Sendable, ConfigurationParseable {
     }
 
     let recordCount =
-      configuration.int(forKey: "record.count", default: 10) ?? 10
+      configuration.read(MistDemoKeys.Integration.recordCount)
     let assetSizeKB =
-      configuration.int(forKey: "asset.size", default: 100) ?? 100
+      configuration.read(MistDemoKeys.Integration.assetSize)
     let skipCleanup =
-      configuration.bool(forKey: "skip.cleanup", default: false)
+      configuration.read(MistDemoKeys.Integration.skipCleanup)
     let verbose =
-      configuration.bool(forKey: "verbose", default: false)
-    let lookupEmail = configuration.string(forKey: "lookup.email")
-    let shareShortGUID = configuration.string(forKey: "share.short.guid")
+      configuration.read(MistDemoKeys.Output.verbose)
+    let lookupEmail = configuration.read(MistDemoKeys.Integration.lookupEmail)
+    let shareShortGUID = configuration.read(MistDemoKeys.Integration.shareShortGUID)
 
     self.init(
       base: baseConfig,

@@ -1,6 +1,6 @@
 //
-//  ValidatedCloudKitConfiguration.swift
-//  CelestraCloud
+//  TestFixtures.swift
+//  MistKitConfiguration
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -28,37 +28,16 @@
 //
 
 internal import Foundation
-public import MistKit
 
-/// Validated CloudKit configuration with all required fields
-public struct ValidatedCloudKitConfiguration: Sendable {
-  /// CloudKit container identifier (validated non-empty)
-  public let containerID: String
+/// Shared credential fixtures.
+internal enum TestFixtures {
+  /// A syntactically valid 64-character hex key ID.
+  internal static let validKeyID = String(repeating: "a1b2c3d4", count: 8)
 
-  /// Server-to-Server authentication key ID (validated non-empty)
-  public let keyID: String
-
-  /// Absolute path to PEM-encoded private key file (validated non-empty)
-  public let privateKeyPath: String
-
-  /// CloudKit environment (development or production)
-  public let environment: MistKit.Environment
-
-  /// Initialize validated CloudKit configuration
-  /// - Parameters:
-  ///   - containerID: CloudKit container identifier
-  ///   - keyID: Server-to-Server authentication key ID
-  ///   - privateKeyPath: Absolute path to PEM-encoded private key file
-  ///   - environment: CloudKit environment
-  public init(
-    containerID: String,
-    keyID: String,
-    privateKeyPath: String,
-    environment: MistKit.Environment
-  ) {
-    self.containerID = containerID
-    self.keyID = keyID
-    self.privateKeyPath = privateKeyPath
-    self.environment = environment
-  }
+  /// A structurally valid PEM private key with base64-decodable content.
+  internal static let validPEM = """
+    -----BEGIN PRIVATE KEY-----
+    \(Data(repeating: 0x41, count: 48).base64EncodedString())
+    -----END PRIVATE KEY-----
+    """
 }

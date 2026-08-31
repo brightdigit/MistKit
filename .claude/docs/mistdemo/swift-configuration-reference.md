@@ -1,5 +1,9 @@
 # Swift Configuration Reference for MistDemo
 
+> **Source of truth:** configuration keys now live as typed values in
+> `Examples/MistDemo/Sources/MistDemoKit/Configuration/Keys/` (`MistDemoKeys`).
+> The five CloudKit credential keys share their names with `MistKitConfiguration`,
+> BushelCloud and CelestraCloud; every other key carries `envPrefix: "CLOUDKIT"`.
 ## Overview
 
 MistDemo uses [Swift Configuration](https://github.com/apple/swift-configuration) (v1.0.0+) for hierarchical configuration management. This replaced ArgumentParser during Phase 1 (issue #212) to provide a more flexible, cross-platform configuration system.
@@ -48,12 +52,12 @@ Swift Configuration uses different naming conventions for different sources:
 
 | Swift Key | CLI Flag | Environment Variable |
 |-----------|----------|---------------------|
-| `container.identifier` | `--container-identifier` | `CONTAINER_IDENTIFIER` |
-| `api.token` | `--api-token` | `API_TOKEN` |
-| `web.auth.token` | `--web-auth-token` | `WEB_AUTH_TOKEN` |
-| `environment` | `--environment` | `ENVIRONMENT` |
-| `database` | `--database` | `DATABASE` |
-| `output.format` | `--output-format` | `OUTPUT_FORMAT` |
+| `cloudkit.container-id` | `--cloudkit-container-id` | `CLOUDKIT_CONTAINER_ID` |
+| `api.token` | `--api-token` | `CLOUDKIT_API_TOKEN` |
+| `web.auth.token` | `--web-auth-token` | `CLOUDKIT_WEB_AUTH_TOKEN` |
+| `cloudkit.environment` | `--cloudkit-environment` | `CLOUDKIT_ENVIRONMENT` |
+| `database` | `--database` | `CLOUDKIT_DATABASE` |
+| `output.format` | `--output-format` | `CLOUDKIT_OUTPUT_FORMAT` |
 | `query.limit` | `--query-limit` | `QUERY_LIMIT` |
 | `query.zone` | `--query-zone` | `QUERY_ZONE` |
 
@@ -276,7 +280,7 @@ let package = Package(
 **Problem**: Configuration key returns `nil` even though it's set.
 
 **Solution**: Check key name transformation:
-- CLI: `--container-identifier` → Key: `"container.identifier"`
+- CLI: `--cloudkit-container-id` → Key: `"cloudkit.container-id"`
 - ENV: `CONTAINER_IDENTIFIER` → Key: `"container.identifier"`
 
 ### Environment Variable Not Working
@@ -312,10 +316,10 @@ export CONTAINER_IDENTIFIER="iCloud.com.example.App"
 **Solution**: Verify the exact flag format:
 ```bash
 # Wrong (uses =)
-mistdemo --container-identifier=iCloud.com.example.App
+mistdemo --cloudkit-container-id=iCloud.com.example.App
 
 # Correct (uses space)
-mistdemo --container-identifier iCloud.com.example.App
+mistdemo --cloudkit-container-id iCloud.com.example.App
 
 # Also correct (short form if defined)
 mistdemo -c iCloud.com.example.App

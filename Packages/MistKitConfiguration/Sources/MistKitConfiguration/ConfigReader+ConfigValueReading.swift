@@ -1,6 +1,6 @@
 //
-//  EnhancedConfigurationError.swift
-//  CelestraCloud
+//  ConfigReader+ConfigValueReading.swift
+//  MistKitConfiguration
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,32 +27,19 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+public import ConfigKeyKit
+public import Configuration
 
-/// Enhanced configuration error with detailed context
-public struct EnhancedConfigurationError: LocalizedError {
-  /// The error message describing what went wrong.
-  public let message: String
-
-  /// The configuration key that caused the error, if applicable.
-  public let key: String?
-
-  /// A localized description of the error.
-  public var errorDescription: String? {
-    var parts = [message]
-    if let key = key {
-      parts.append("(key: \(key))")
-    }
-    return parts.joined(separator: " ")
-  }
-
-  /// Creates a new enhanced configuration error.
-  ///
-  /// - Parameters:
-  ///   - message: The error message describing what went wrong.
-  ///   - key: The configuration key that caused the error, if applicable.
-  public init(_ message: String, key: String? = nil) {
-    self.message = message
-    self.key = key
+/// Bridges swift-configuration's `ConfigReader` to ConfigKeyKit's ``ConfigValueReading``,
+/// which supplies the CLI → ENV → default resolution for every `ConfigKey` /
+/// `OptionalConfigKey` overload.
+///
+/// Shipping the conformance here means consuming applications must **not** declare their
+/// own — two modules declaring the same retroactive conformance is a duplicate-conformance
+/// error.
+extension ConfigReader: @retroactive ConfigValueReading {
+  /// Wraps a resolved per-source key string in swift-configuration's own key type.
+  public func makeConfigKey(_ string: String) -> Configuration.ConfigKey {
+    .init(string)
   }
 }

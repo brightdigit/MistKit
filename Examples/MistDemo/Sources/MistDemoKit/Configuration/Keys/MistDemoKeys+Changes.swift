@@ -1,6 +1,6 @@
 //
-//  CelestraConfig.swift
-//  CelestraCloud
+//  MistDemoKeys+Changes.swift
+//  MistDemo
 //
 //  Created by Leo Dion.
 //  Copyright © 2026 BrightDigit.
@@ -27,31 +27,24 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-public import MistKit
+internal import ConfigKeyKit
 
-// MARK: - Shared Configuration
-
-/// Shared configuration helper for creating CloudKit service
-public enum CelestraConfig {
-  /// Create CloudKit service from validated configuration
-  public static func createCloudKitService(from config: ValidatedCloudKitConfiguration) throws
-    -> CloudKitService
-  {
-    // Read private key from file
-    let privateKeyPEM = try String(contentsOfFile: config.privateKeyPath, encoding: .utf8)
-
-    // Create token manager for server-to-server authentication
-    let tokenManager = try ServerToServerAuthManager(
-      keyID: config.keyID,
-      pemString: privateKeyPEM
+extension MistDemoKeys {
+  /// Change-tracking keys for the `fetch-*-changes` commands.
+  internal enum Changes {
+    /// `--sync-token` / `CLOUDKIT_SYNC_TOKEN`.
+    internal static let syncToken = OptionalConfigKey<String>(
+      "sync.token", envPrefix: MistDemoKeys.envPrefix
     )
 
-    // Create and return CloudKit service
-    return CloudKitService(
-      containerIdentifier: config.containerID,
-      tokenManager: tokenManager,
-      environment: config.environment
+    /// `--fetch-all` / `CLOUDKIT_FETCH_ALL`, auto-paginate.
+    internal static let fetchAll = ConfigKey<Bool>(
+      "fetch.all", envPrefix: MistDemoKeys.envPrefix, default: false
+    )
+
+    /// `--record-types` / `CLOUDKIT_RECORD_TYPES`, comma separated.
+    internal static let desiredRecordTypes = OptionalConfigKey<String>(
+      "record.types", envPrefix: MistDemoKeys.envPrefix
     )
   }
 }

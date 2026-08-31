@@ -42,9 +42,8 @@ swift run mistdemo test-public             # integration suite, public DB
 swift run mistdemo test-private            # integration suite, private DB
 ```
 
-Configuration comes from `MistDemoConfiguration` — flags,
-`CLOUDKIT_*` env vars, or `--config-file ~/.mistdemo/config.json` all
-work. `test-private` requires both a sharer and a sharee web-auth
+Configuration comes from `MistDemoConfiguration` — command-line flags or
+`CLOUDKIT_*` env vars. `test-private` requires both a sharer and a sharee web-auth
 token (`CLOUDKIT_WEB_AUTH_TOKEN` + `CLOUDKIT_SHAREE_WEB_AUTH_TOKEN`) and
 the sharee's iCloud email (`CLOUDKIT_SHAREE_EMAIL`); capture them with
 `mistdemo auth-tokens --sharee-email sharee@example.com`.
@@ -86,17 +85,17 @@ sharee credentials for `test-private`.
 | Flag | Default | Notes |
 |---|---|---|
 | `--api-token <token>` | (required) | Or set `CLOUDKIT_API_TOKEN` |
-| `--container-identifier <id>` | `iCloud.com.brightdigit.MistDemo` | Your CloudKit container |
-| `--environment <env>` | `development` | `development` or `production` |
+| `--cloudkit-container-id <id>` | `iCloud.com.brightdigit.MistDemo` | Your CloudKit container (`CLOUDKIT_CONTAINER_ID`) |
+| `--cloudkit-environment <env>` | `development` | `development` or `production` |
 | `--host <host>` | `127.0.0.1` | Bind address |
 | `--port <port>` | `8080` | Server port |
 | `--browser` | on for `auth-token` / `auth-tokens`, off for `web` | Open browser on startup |
 | `--no-browser` | — | Suppress the open (wins if both flags set) |
 
-Configuration is read via `MistDemoConfiguration`, so the same keys
-(`api.token`, `container.identifier`, `environment`, `port`, `host`,
-`browser`, `no.browser`) can be supplied through `--config-file ~/.mistdemo/config.json`
-or environment variables.
+Configuration is read via `MistDemoConfiguration` from typed `MistDemoKeys`, so the
+same keys (`api.token`, `cloudkit.container-id`, `cloudkit.environment`, `port`,
+`host`, `browser`, `no.browser`) can equally be supplied as environment variables
+(`CLOUDKIT_API_TOKEN`, `CLOUDKIT_CONTAINER_ID`, `CLOUDKIT_ENVIRONMENT`, …).
 
 ### What the server exposes
 
@@ -148,7 +147,7 @@ The web command's code lives under `Sources/MistDemoKit/`:
 ```
 Sources/MistDemoKit/
 ├── Commands/WebCommand.swift              # `mistdemo web` entry point
-├── Configuration/WebConfig.swift          # Flags / env / config-file binding
+├── Configuration/WebConfig.swift          # Flags / env binding
 ├── Resources/index.html                   # Served at GET /
 └── Server/
     ├── WebServer.swift                    # Hummingbird router + handlers
