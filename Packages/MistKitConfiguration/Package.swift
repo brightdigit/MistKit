@@ -37,10 +37,12 @@ let package = Package(
     // packages and fail with "multiple similar targets 'MistKit', 'MistKitOpenAPI'".
     // Every package inside this monorepo must therefore reach MistKit the same way.
     //
-    // This line is a monorepo-local overlay. The standalone repository carries the
-    // `url:` form instead — CI swaps it via
-    // `brightdigit/MistKit/.github/actions/setup-mistkit@main`, and it must be a
-    // tagged `url:` before any release is cut, or the tag is unusable downstream.
+    // ⚠️ This line is a monorepo-local overlay that must NEVER reach the standalone
+    // repository. `git subrepo push Packages/MistKitConfiguration` would carry it over
+    // and break `brightdigit/MistKitConfiguration`, whose own manifest deliberately
+    // carries `.package(url: …MistKit.git, from: "1.0.0-beta.4")` — the form that makes a
+    // tag of this package usable downstream. Re-apply the swap after every push, the same
+    // never-merged-overlay discipline `Examples/BushelCloud/Package.swift` documents.
     .package(name: "MistKit", path: "../.."),
     // Pinned to the fix for brightdigit/ConfigKeyKit#8: booleans resolved through
     // `string(forKey:)` could not see a valueless command-line flag, so `--flag` read as

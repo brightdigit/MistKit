@@ -40,7 +40,7 @@ Supporting pieces: `CloudKitConfigurationKeys` (a value type, not a `static` enu
 
 `Package.swift` in the **monorepo** uses `.package(name: "MistKit", path: "../..")`. This is not a preference: a `path:` package takes its identity from the directory name, so mixing it with a sibling that depends on MistKit by `url:` makes SwiftPM resolve two distinct packages and fail with *"multiple similar targets 'MistKit', 'MistKitOpenAPI'"*. Every package in that monorepo must reach MistKit the same way.
 
-The standalone repository carries the `url:` form instead. CI swaps it with `brightdigit/MistKit/.github/actions/setup-mistkit@main`, pinned by `MISTKIT_BRANCH`. **That value must be a branch name, not a tag** — `git ls-remote` matches tags too, and a tag would silently pin an old release. Before cutting a release, the dependency must be a tagged `url:`, or the tag is unusable downstream; `dependency-policy.yml` gates PRs to `main` on exactly that.
+The standalone repository carries the `url:` form instead — and **`git subrepo push` does not know that**. It would copy the `path:` line over and break the standalone repo, so the swap has to be re-applied after every push. That is the same never-merged-overlay discipline `Examples/BushelCloud/Package.swift` documents for its own MistKit line. CI swaps it with `brightdigit/MistKit/.github/actions/setup-mistkit@main`, pinned by `MISTKIT_BRANCH`. **That value must be a branch name, not a tag** — `git ls-remote` matches tags too, and a tag would silently pin an old release. Before cutting a release, the dependency must be a tagged `url:`, or the tag is unusable downstream; `dependency-policy.yml` gates PRs to `main` on exactly that.
 
 ## CI
 
