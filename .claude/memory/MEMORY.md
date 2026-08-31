@@ -46,4 +46,5 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [Path-package identity is the directory name](project_path_package_identity_collision.md) — a `path:` MistKit + a transitive `url:` MistKit = duplicate-target build failure; resolve still succeeds
 - [MistKitConfiguration subrepo overlay](project_mistkitconfiguration_subrepo_overlay.md) — Package.swift differs by one line between monorepo and standalone; `git subrepo push` clobbers it
 - [Dogfood pins are branch pins, not tags](project_dogfood_pins_are_branch_pins_not_tags.md) — tagging a monorepo package does NOT mean Examples switch to `from:`; they keep `path:` and CI pins both deps to branch HEADs
+- [MistKitConfiguration integration branch](project_mkc_integration_branch.md) — subrepo tracks `mistkit-beta.5` (pins unreleased MistKit); never merge it to `main` or tag from it
 - [Draft-gated CI needs ready_for_review](reference_draft_gated_ci_needs_ready_for_review.md) — an `if: draft == false` job stays `skipped` forever unless `types:` lists `ready_for_review`; re-running replays the stale payload

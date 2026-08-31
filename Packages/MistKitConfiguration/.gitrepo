@@ -5,7 +5,7 @@
 ;
 [subrepo]
 	remote = git@github.com:brightdigit/MistKitConfiguration.git
-	branch = initial-extraction
-	commit = 0397cb6dd6ca433b30f2c206b810629ea7db840a
+	branch = mistkit-beta.5
+	commit = a70afee6b05575a654e442216dad47dc5ea7a672
 	method = merge
 	cmdver = 0.4.9
