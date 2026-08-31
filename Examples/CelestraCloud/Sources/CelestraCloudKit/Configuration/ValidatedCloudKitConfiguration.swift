@@ -38,8 +38,8 @@ public struct ValidatedCloudKitConfiguration: Sendable {
   /// Server-to-Server authentication key ID (validated non-empty)
   public let keyID: String
 
-  /// Absolute path to PEM-encoded private key file (validated non-empty)
-  public let privateKeyPath: String
+  /// Resolved signing key, either inline PEM or a path to a `.pem` file.
+  public let privateKey: PrivateKeyMaterial
 
   /// CloudKit environment (development or production)
   public let environment: MistKit.Environment
@@ -48,17 +48,33 @@ public struct ValidatedCloudKitConfiguration: Sendable {
   /// - Parameters:
   ///   - containerID: CloudKit container identifier
   ///   - keyID: Server-to-Server authentication key ID
-  ///   - privateKeyPath: Absolute path to PEM-encoded private key file
+  ///   - privateKey: PEM signing key, inline or by path
   ///   - environment: CloudKit environment
   public init(
     containerID: String,
     keyID: String,
-    privateKeyPath: String,
+    privateKey: PrivateKeyMaterial,
     environment: MistKit.Environment
   ) {
     self.containerID = containerID
     self.keyID = keyID
-    self.privateKeyPath = privateKeyPath
+    self.privateKey = privateKey
     self.environment = environment
+  }
+}
+
+extension ValidatedCloudKitConfiguration {
+  /// Builds a `CloudKitService` signing with these server-to-server credentials.
+  ///
+  /// `PrivateKeyMaterial` defers reading a `.file(path:)` key until the
+  /// credentials are consumed, so this does no file IO.
+  public func makeCloudKitService() throws -> CloudKitService {
+    CloudKitService(
+      containerIdentifier: containerID,
+      credentials: try Credentials(
+        serverToServer: ServerToServerCredentials(keyID: keyID, privateKey: privateKey)
+      ),
+      environment: environment
+    )
   }
 }

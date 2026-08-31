@@ -51,7 +51,7 @@ internal enum ClearCommand {
     let loader = ConfigurationLoader()
     let config = try await loader.loadConfiguration()
     let validatedCloudKit = try config.cloudkit.validated()
-    let service = try CelestraConfig.createCloudKitService(from: validatedCloudKit)
+    let service = try validatedCloudKit.makeCloudKitService()
 
     // Delete articles first (to avoid orphans)
     print("📋 Deleting articles...")

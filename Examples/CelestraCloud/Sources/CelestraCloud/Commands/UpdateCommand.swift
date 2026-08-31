@@ -94,7 +94,7 @@ internal enum UpdateCommand {
     config: CelestraConfiguration
   ) throws -> FeedUpdateProcessor {
     let validatedCloudKit = try config.cloudkit.validated()
-    let service = try CelestraConfig.createCloudKitService(from: validatedCloudKit)
+    let service = try validatedCloudKit.makeCloudKitService()
     let fetcher = RSSFetcherService(userAgent: .cloud(build: 1))
     let robotsService = RobotsTxtService(userAgent: .cloud(build: 1))
     let rateLimiter = RateLimiter(defaultDelay: config.update.delay)

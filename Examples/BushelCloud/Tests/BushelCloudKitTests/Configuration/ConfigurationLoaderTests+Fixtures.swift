@@ -1,5 +1,5 @@
 //
-//  CloudKitAuthMethod.swift
+//  ConfigurationLoaderTests+Fixtures.swift
 //  BushelCloud
 //
 //  Created by Leo Dion.
@@ -25,29 +25,24 @@
 //  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 //  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //  OTHER DEALINGS IN THE SOFTWARE.
-//
 
-internal import Foundation
+@testable import BushelCloudKit
 
-/// Authentication method for CloudKit Server-to-Server
-///
-/// Provides type-safe authentication credential handling with two patterns:
-/// - `.pemString`: For CI/CD environments (GitHub Actions secrets)
-/// - `.pemFile`: For local development (file on disk)
-public enum CloudKitAuthMethod: Sendable {
-  /// PEM content provided as string (CI/CD pattern)
+extension ConfigurationLoaderTests {
+  /// A syntactically valid Server-to-Server key ID: exactly 64 hex characters.
   ///
-  /// **Usage**: Pass PEM content from environment variables or secrets
-  /// ```swift
-  /// let method = .pemString(pemContentFromEnvironment)
-  /// ```
-  case pemString(String)
+  /// ``KeyIDValidator`` checks shape, so fixtures must be well-formed even
+  /// though no CloudKit request is made.
+  internal static let validKeyID =
+    "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
 
-  /// PEM content loaded from file path (local development pattern)
+  /// A structurally valid PEM: correct header/footer and base64-decodable body.
   ///
-  /// **Usage**: Pass path to .pem file on disk
-  /// ```swift
-  /// let method = .pemFile(path: "~/.cloudkit/bushel-private-key.pem")
-  /// ```
-  case pemFile(path: String)
+  /// Not a usable key — ``PEMValidator`` checks structure, not cryptographic
+  /// content.
+  internal static let validPEM = """
+    -----BEGIN PRIVATE KEY-----
+    bm90IGEgcmVhbCBrZXksIGJ1dCB2YWxpZCBiYXNlNjQgc28gUEVNVmFsaWRhdG9yIGFjY2VwdHMgaXQ=
+    -----END PRIVATE KEY-----
+    """
 }

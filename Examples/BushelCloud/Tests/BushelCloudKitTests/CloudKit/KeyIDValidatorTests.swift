@@ -59,35 +59,35 @@ internal struct KeyIDValidatorTests {
 
   @Test("Empty string throws error")
   internal func testEmpty() {
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try KeyIDValidator.validate("")
     }
   }
 
   @Test("Whitespace-only string throws error")
   internal func testWhitespaceOnly() {
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try KeyIDValidator.validate("   \n  ")
     }
   }
 
   @Test("Surrounding whitespace on an otherwise-valid key throws error")
   internal func testSurroundingWhitespace() {
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try KeyIDValidator.validate(" \(Self.validLowercase)\n")
     }
   }
 
   @Test("Too-short key throws error")
   internal func testTooShort() {
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try KeyIDValidator.validate("0123456789abcdef")
     }
   }
 
   @Test("Too-long key throws error")
   internal func testTooLong() {
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try KeyIDValidator.validate(Self.validLowercase + "00")
     }
   }
@@ -98,10 +98,10 @@ internal struct KeyIDValidatorTests {
     let withLetter = "g123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
     let withDash = "-123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try KeyIDValidator.validate(withLetter)
     }
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try KeyIDValidator.validate(withDash)
     }
   }
@@ -111,7 +111,7 @@ internal struct KeyIDValidatorTests {
     do {
       try KeyIDValidator.validate("invalid")
       Issue.record("Should have thrown error")
-    } catch let error as BushelCloudKitError {
+    } catch let error as CredentialValidationError {
       let description = error.errorDescription ?? ""
       #expect(description.contains("Invalid CloudKit Server-to-Server Key ID"))
       #expect(error.recoverySuggestion != nil)

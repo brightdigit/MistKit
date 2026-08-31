@@ -53,7 +53,7 @@ internal struct PEMValidatorTests {
       -----END PRIVATE KEY-----
       """
 
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try PEMValidator.validate(invalidPEM)
     }
   }
@@ -65,7 +65,7 @@ internal struct PEMValidatorTests {
       MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg
       """
 
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try PEMValidator.validate(invalidPEM)
     }
   }
@@ -77,7 +77,7 @@ internal struct PEMValidatorTests {
       -----END PRIVATE KEY-----
       """
 
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try PEMValidator.validate(invalidPEM)
     }
   }
@@ -90,7 +90,7 @@ internal struct PEMValidatorTests {
       -----END PRIVATE KEY-----
       """
 
-    #expect(throws: BushelCloudKitError.self) {
+    #expect(throws: CredentialValidationError.self) {
       try PEMValidator.validate(invalidPEM)
     }
   }
@@ -102,7 +102,7 @@ internal struct PEMValidatorTests {
     do {
       try PEMValidator.validate(invalidPEM)
       Issue.record("Should have thrown error")
-    } catch let error as BushelCloudKitError {
+    } catch let error as CredentialValidationError {
       let description = error.errorDescription ?? ""
       #expect(description.contains("BEGIN PRIVATE KEY"))
       #expect(error.recoverySuggestion != nil)

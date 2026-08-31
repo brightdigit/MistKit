@@ -70,19 +70,11 @@ internal enum ExportCommand {
     // Enable verbose console output if requested
     ConsoleOutput.isVerbose = config.export?.verbose ?? false
 
-    // Determine authentication method
-    let authMethod: CloudKitAuthMethod
-    if let pemString = config.cloudKit.privateKey {
-      authMethod = .pemString(pemString)
-    } else {
-      authMethod = .pemFile(path: config.cloudKit.privateKeyPath)
-    }
-
     // Create sync engine
     let syncEngine = try SyncEngine(
       containerIdentifier: config.cloudKit.containerID,
       keyID: config.cloudKit.keyID,
-      authMethod: authMethod,
+      privateKey: config.cloudKit.privateKey,
       environment: config.cloudKit.environment
     )
 

@@ -45,6 +45,10 @@ internal enum ConfigurationKeys {
     )
     internal static let keyID = OptionalConfigKey<String>("cloudkit.key-id")
     internal static let privateKeyPath = OptionalConfigKey<String>("cloudkit.private-key-path")
+    internal static let privateKey = OptionalConfigKey<String>(
+      "cloudkit.private-key",
+      isSecret: true
+    )
     internal static let environment = OptionalConfigKey<String>("cloudkit.environment")
   }
 

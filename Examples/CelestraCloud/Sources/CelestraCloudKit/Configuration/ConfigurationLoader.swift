@@ -47,6 +47,7 @@ public actor ConfigurationLoader {
           [
             "--cloudkit-key-id",
             "--cloudkit-private-key-path",
+            "--cloudkit-private-key",
           ]
         )
       )
@@ -67,6 +68,26 @@ public actor ConfigurationLoader {
     self.configReader = configReader
   }
 
+  /// Parses a CloudKit environment string, defaulting to `.development` when absent.
+  ///
+  /// An unrecognized value throws rather than silently degrading — a typo'd
+  /// `CLOUDKIT_ENVIRONMENT` must not quietly run against the development
+  /// container.
+  private static func parseEnvironment(
+    _ value: String?
+  ) throws -> MistKit.Environment {
+    guard let value else {
+      return .development
+    }
+    guard let environment = MistKit.Environment(caseInsensitive: value) else {
+      throw ConfigurationError(
+        "Invalid CLOUDKIT_ENVIRONMENT: '\(value)'. Must be 'development' or 'production'",
+        key: "cloudkit.environment"
+      )
+    }
+    return environment
+  }
+
   /// Load complete configuration with all defaults applied
   public func loadConfiguration() async throws -> CelestraConfiguration {
     // CloudKit configuration (automatic CLI → ENV → default fallback)
@@ -74,6 +95,7 @@ public actor ConfigurationLoader {
       containerID: configReader.read(ConfigurationKeys.CloudKit.containerID),
       keyID: configReader.read(ConfigurationKeys.CloudKit.keyID),
       privateKeyPath: configReader.read(ConfigurationKeys.CloudKit.privateKeyPath),
+      privateKey: configReader.read(ConfigurationKeys.CloudKit.privateKey),
       environment: try Self.parseEnvironment(
         configReader.read(ConfigurationKeys.CloudKit.environment)
       )
@@ -94,25 +116,5 @@ public actor ConfigurationLoader {
       cloudkit: cloudkit,
       update: update
     )
-  }
-
-  /// Parses a CloudKit environment string, defaulting to `.development` when absent.
-  ///
-  /// An unrecognized value throws rather than silently degrading — a typo'd
-  /// `CLOUDKIT_ENVIRONMENT` must not quietly run against the development
-  /// container.
-  private static func parseEnvironment(
-    _ value: String?
-  ) throws -> MistKit.Environment {
-    guard let value else {
-      return .development
-    }
-    guard let environment = MistKit.Environment(caseInsensitive: value) else {
-      throw EnhancedConfigurationError(
-        "Invalid CLOUDKIT_ENVIRONMENT: '\(value)'. Must be 'development' or 'production'",
-        key: "cloudkit.environment"
-      )
-    }
-    return environment
   }
 }

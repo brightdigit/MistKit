@@ -343,7 +343,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
             // Missing CLOUDKIT_PRIVATE_KEY_PATH
         ]
       )
@@ -361,7 +361,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
         ]
       )
@@ -370,8 +370,8 @@ internal struct ConfigurationLoaderTests {
       let validated = try config.validated()
 
       #expect(validated.cloudKit.containerID == "iCloud.com.test.App")
-      #expect(validated.cloudKit.keyID == "test-key-id")
-      #expect(validated.cloudKit.privateKeyPath == "/path/to/key.pem")
+      #expect(validated.cloudKit.keyID == ConfigurationLoaderTests.validKeyID)
+      #expect(validated.cloudKit.privateKey.filePath == "/path/to/key.pem")
     }
 
     @Test("CloudKit privateKey from environment variable")
@@ -380,17 +380,20 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY":
-            "-----BEGIN PRIVATE KEY-----\nMIGH...\n-----END PRIVATE KEY-----",
+            ConfigurationLoaderTests.validPEM,
         ]
       )
 
       let config = try await loader.loadConfiguration()
       let validated = try config.validated()
 
-      #expect(validated.cloudKit.privateKey != nil)
-      #expect(validated.cloudKit.privateKey?.contains("BEGIN PRIVATE KEY") == true)
+      guard case .raw(let pem) = validated.cloudKit.privateKey else {
+        Issue.record("expected inline PEM material")
+        return
+      }
+      #expect(pem.contains("BEGIN PRIVATE KEY"))
     }
 
     @Test(
@@ -402,7 +405,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
           "CLOUDKIT_ENVIRONMENT": environment,
         ]
@@ -420,7 +423,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
           "CLOUDKIT_ENVIRONMENT": "staging",  // Invalid
         ]
@@ -439,7 +442,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
             // Missing both CLOUDKIT_PRIVATE_KEY and CLOUDKIT_PRIVATE_KEY_PATH
         ]
       )
@@ -457,9 +460,8 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
-          "CLOUDKIT_PRIVATE_KEY":
-            "-----BEGIN PRIVATE KEY-----\nfrom-env\n-----END PRIVATE KEY-----",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
+          "CLOUDKIT_PRIVATE_KEY": ConfigurationLoaderTests.validPEM,
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
         ]
       )
@@ -468,9 +470,8 @@ internal struct ConfigurationLoaderTests {
       let validated = try config.validated()
 
       // Both should be set in validated config
-      #expect(validated.cloudKit.privateKey != nil)
-      #expect(!validated.cloudKit.privateKeyPath.isEmpty)
-      // SyncEngine will prefer privateKey when initializing
+      // Inline PEM wins over a path when both are supplied.
+      #expect(validated.cloudKit.privateKey.filePath == nil)
     }
 
     @Test("Empty CLOUDKIT_PRIVATE_KEY is treated as absent")
@@ -479,7 +480,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY": "   ",  // Whitespace only
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
         ]
@@ -488,9 +489,8 @@ internal struct ConfigurationLoaderTests {
       let config = try await loader.loadConfiguration()
       let validated = try config.validated()
 
-      // Should use privateKeyPath since privateKey is effectively empty
-      #expect(validated.cloudKit.privateKey == nil)
-      #expect(!validated.cloudKit.privateKeyPath.isEmpty)
+      // Falls back to the path, since the inline key is effectively empty.
+      #expect(validated.cloudKit.privateKey.filePath?.isEmpty == false)
     }
 
     @Test("Environment parsing is case-insensitive")
@@ -499,7 +499,7 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY_PATH": "/path/to/key.pem",
           "CLOUDKIT_ENVIRONMENT": "Production",  // Mixed case
         ]
@@ -517,9 +517,9 @@ internal struct ConfigurationLoaderTests {
         cliArgs: [],
         env: [
           "CLOUDKIT_CONTAINER_ID": "iCloud.com.test.App",
-          "CLOUDKIT_KEY_ID": "test-key-id",
+          "CLOUDKIT_KEY_ID": ConfigurationLoaderTests.validKeyID,
           "CLOUDKIT_PRIVATE_KEY":
-            "-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----",
+            ConfigurationLoaderTests.validPEM,
           "CLOUDKIT_ENVIRONMENT": "production",
         ]
       )
@@ -528,8 +528,8 @@ internal struct ConfigurationLoaderTests {
       let validated = try config.validated()
 
       #expect(validated.cloudKit.containerID == "iCloud.com.test.App")
-      #expect(validated.cloudKit.keyID == "test-key-id")
-      #expect(validated.cloudKit.privateKey != nil)
+      #expect(validated.cloudKit.keyID == ConfigurationLoaderTests.validKeyID)
+      #expect(validated.cloudKit.privateKey.filePath == nil)
       #expect(validated.cloudKit.environment == .production)
     }
   }

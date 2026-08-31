@@ -141,35 +141,23 @@ public struct SyncEngine: Sendable {
   /// - Parameters:
   ///   - containerIdentifier: CloudKit container ID
   ///   - keyID: Server-to-Server Key ID
-  ///   - authMethod: Authentication method (`.pemString` or `.pemFile`)
+  ///   - privateKey: Signing key, inline PEM or a path to a `.pem` file
   ///   - environment: CloudKit environment (.development or .production, defaults to .development)
   ///   - configuration: Fetch configuration for data sources
   /// - Throws: Error if authentication credentials are invalid or missing
   public init(
     containerIdentifier: String,
     keyID: String,
-    authMethod: CloudKitAuthMethod,
+    privateKey: PrivateKeyMaterial,
     environment: Environment = .development,
     configuration: FetchConfiguration = FetchConfiguration.loadFromEnvironment()
   ) throws {
-    // Initialize CloudKit service based on auth method
-    let service: BushelCloudKitService
-    switch authMethod {
-    case .pemString(let pem):
-      service = try BushelCloudKitService(
-        containerIdentifier: containerIdentifier,
-        keyID: keyID,
-        pemString: pem,
-        environment: environment
-      )
-    case .pemFile(let path):
-      service = try BushelCloudKitService(
-        containerIdentifier: containerIdentifier,
-        keyID: keyID,
-        privateKeyPath: path,
-        environment: environment
-      )
-    }
+    let service = try BushelCloudKitService(
+      containerIdentifier: containerIdentifier,
+      keyID: keyID,
+      privateKey: privateKey,
+      environment: environment
+    )
 
     self.cloudKitService = service
     self.pipeline = DataSourcePipeline(

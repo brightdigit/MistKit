@@ -67,85 +67,39 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
   ///
   /// **MistKit Pattern**: Server-to-Server authentication requires:
   /// 1. Key ID from CloudKit Dashboard → API Access → Server-to-Server Keys
-  /// 2. Private key .pem file downloaded when creating the key
+  /// 2. A private key, either the downloaded `.pem` file or its contents
   /// 3. Container identifier (begins with "iCloud.")
   ///
-  /// - Parameters:
-  ///   - containerIdentifier: CloudKit container ID (e.g., "iCloud.com.company.App")
-  ///   - keyID: Server-to-Server Key ID from CloudKit Dashboard
-  ///   - privateKeyPath: Path to the private key .pem file
-  ///   - environment: CloudKit environment (.development or .production, defaults to .development)
-  /// - Throws: Error if the private key file cannot be read or is invalid
-  public init(
-    containerIdentifier: String,
-    keyID: String,
-    privateKeyPath: String,
-    environment: Environment = .development
-  ) throws {
-    // Validate Key ID format before any file IO
-    try KeyIDValidator.validate(keyID)
-
-    // Read PEM file from disk
-    guard FileManager.default.fileExists(atPath: privateKeyPath) else {
-      throw BushelCloudKitError.privateKeyFileNotFound(path: privateKeyPath)
-    }
-
-    let pemString: String
-    do {
-      pemString = try String(contentsOfFile: privateKeyPath, encoding: .utf8)
-    } catch {
-      throw BushelCloudKitError.privateKeyFileReadFailed(path: privateKeyPath, error: error)
-    }
-
-    // Validate PEM format before using it
-    try PEMValidator.validate(pemString)
-
-    // Create Server-to-Server authentication manager
-    let tokenManager = try ServerToServerAuthManager(
-      keyID: keyID,
-      pemString: pemString
-    )
-
-    self.service = CloudKitService(
-      containerIdentifier: containerIdentifier,
-      tokenManager: tokenManager,
-      environment: environment
-    )
-  }
-
-  /// Initialize CloudKit service with Server-to-Server authentication using PEM string
-  ///
-  /// **CI/CD Pattern**: This initializer accepts PEM content directly from environment variables,
-  /// eliminating the need for temporary file creation in GitHub Actions or other CI/CD environments.
+  /// `PrivateKeyMaterial` covers both the local-development case
+  /// (`.file(path:)`) and the CI case (`.raw`, from a secret), so no temporary
+  /// file is needed in GitHub Actions. MistKit defers reading a `.file(path:)`
+  /// key until the credentials are consumed, so this initializer does no file
+  /// IO and a missing file surfaces on first use.
   ///
   /// - Parameters:
   ///   - containerIdentifier: CloudKit container ID (e.g., "iCloud.com.company.App")
   ///   - keyID: Server-to-Server Key ID from CloudKit Dashboard
-  ///   - pemString: PEM file content as string (including headers/footers)
+  ///   - privateKey: Signing key, inline PEM or a path to a `.pem` file
   ///   - environment: CloudKit environment (.development or .production, defaults to .development)
-  /// - Throws: Error if PEM string is invalid or authentication fails
+  /// - Throws: ``CredentialValidationError`` if the key ID or inline PEM is malformed.
   public init(
     containerIdentifier: String,
     keyID: String,
-    pemString: String,
+    privateKey: PrivateKeyMaterial,
     environment: Environment = .development
   ) throws {
-    // Validate Key ID format before any cryptographic work
+    // Validate before MistKit sees them: these produce far better messages
+    // than a downstream signing failure.
     try KeyIDValidator.validate(keyID)
-
-    // Validate PEM format BEFORE passing to MistKit
-    // This provides better error messages than MistKit's internal validation
-    try PEMValidator.validate(pemString)
-
-    // Create Server-to-Server authentication manager directly from PEM string
-    let tokenManager = try ServerToServerAuthManager(
-      keyID: keyID,
-      pemString: pemString
-    )
+    if case .raw(let pem) = privateKey {
+      try PEMValidator.validate(pem)
+    }
 
     self.service = CloudKitService(
       containerIdentifier: containerIdentifier,
-      tokenManager: tokenManager,
+      credentials: try Credentials(
+        serverToServer: ServerToServerCredentials(keyID: keyID, privateKey: privateKey)
+      ),
       environment: environment
     )
   }

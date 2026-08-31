@@ -44,6 +44,9 @@ public struct CloudKitConfiguration: Sendable {
   /// Absolute path to PEM-encoded private key file
   public var privateKeyPath: String?
 
+  /// Inline PEM private key, for CI where writing a file is inconvenient
+  public var privateKey: String?
+
   /// CloudKit environment (development or production, default: development)
   public var environment: MistKit.Environment
 
@@ -52,43 +55,60 @@ public struct CloudKitConfiguration: Sendable {
   ///   - containerID: CloudKit container identifier
   ///   - keyID: Server-to-Server authentication key ID
   ///   - privateKeyPath: Absolute path to PEM-encoded private key file
+  ///   - privateKey: Inline PEM private key
   ///   - environment: CloudKit environment
   public init(
     containerID: String? = nil,
     keyID: String? = nil,
     privateKeyPath: String? = nil,
+    privateKey: String? = nil,
     environment: MistKit.Environment = .development
   ) {
     self.containerID = containerID
     self.keyID = keyID
     self.privateKeyPath = privateKeyPath
+    self.privateKey = privateKey
     self.environment = environment
   }
 
   /// Validate that all required fields are present
   public func validated() throws -> ValidatedCloudKitConfiguration {
     guard let containerID = containerID, !containerID.isEmpty else {
-      throw EnhancedConfigurationError(
+      throw ConfigurationError(
         "CloudKit container ID must be non-empty",
-        key: "cloudkit.container_id"
+        key: "cloudkit.container-id"
       )
     }
     guard let keyID = keyID, !keyID.isEmpty else {
-      throw EnhancedConfigurationError(
+      throw ConfigurationError(
         "CloudKit key ID must be non-empty",
-        key: "cloudkit.key_id"
+        key: "cloudkit.key-id"
       )
     }
-    guard let privateKeyPath = privateKeyPath, !privateKeyPath.isEmpty else {
-      throw EnhancedConfigurationError(
-        "CloudKit private key path must be non-empty",
-        key: "cloudkit.private_key_path"
+    try KeyIDValidator.validate(keyID)
+
+    // Exactly one credential method is required, not both.
+    let trimmedPrivateKey = privateKey?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    let trimmedPrivateKeyPath =
+      privateKeyPath?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+    let resolvedPrivateKey: PrivateKeyMaterial
+    if !trimmedPrivateKey.isEmpty {
+      try PEMValidator.validate(trimmedPrivateKey)
+      resolvedPrivateKey = .raw(trimmedPrivateKey)
+    } else if !trimmedPrivateKeyPath.isEmpty {
+      resolvedPrivateKey = .file(path: trimmedPrivateKeyPath)
+    } else {
+      throw ConfigurationError(
+        "Either CLOUDKIT_PRIVATE_KEY or CLOUDKIT_PRIVATE_KEY_PATH must be provided",
+        key: "cloudkit.private-key"
       )
     }
+
     return ValidatedCloudKitConfiguration(
       containerID: containerID,
       keyID: keyID,
-      privateKeyPath: privateKeyPath,
+      privateKey: resolvedPrivateKey,
       environment: environment
     )
   }

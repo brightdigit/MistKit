@@ -1,5 +1,5 @@
 //
-//  CelestraConfig.swift
+//  ConfigurationError.swift
 //  CelestraCloud
 //
 //  Created by Leo Dion.
@@ -27,31 +27,32 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-public import MistKit
+public import Foundation
 
-// MARK: - Shared Configuration
+/// A missing or malformed configuration value, naming the key at fault.
+public struct ConfigurationError: LocalizedError, Sendable {
+  /// The error message describing what went wrong.
+  public let message: String
 
-/// Shared configuration helper for creating CloudKit service
-public enum CelestraConfig {
-  /// Create CloudKit service from validated configuration
-  public static func createCloudKitService(from config: ValidatedCloudKitConfiguration) throws
-    -> CloudKitService
-  {
-    // Read private key from file
-    let privateKeyPEM = try String(contentsOfFile: config.privateKeyPath, encoding: .utf8)
+  /// The configuration key that caused the error, if applicable.
+  public let key: String?
 
-    // Create token manager for server-to-server authentication
-    let tokenManager = try ServerToServerAuthManager(
-      keyID: config.keyID,
-      pemString: privateKeyPEM
-    )
+  /// A localized description of the error.
+  public var errorDescription: String? {
+    var parts = [message]
+    if let key {
+      parts.append("(key: \(key))")
+    }
+    return parts.joined(separator: " ")
+  }
 
-    // Create and return CloudKit service
-    return CloudKitService(
-      containerIdentifier: config.containerID,
-      tokenManager: tokenManager,
-      environment: config.environment
-    )
+  /// Creates a new configuration error.
+  ///
+  /// - Parameters:
+  ///   - message: The error message describing what went wrong.
+  ///   - key: The configuration key that caused the error, if applicable.
+  public init(_ message: String, key: String? = nil) {
+    self.message = message
+    self.key = key
   }
 }

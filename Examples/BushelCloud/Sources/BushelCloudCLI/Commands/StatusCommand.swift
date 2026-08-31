@@ -40,22 +40,12 @@ internal enum StatusCommand {
     let config = try rawConfig.validated()
 
     // Create CloudKit service
-    let cloudKitService: BushelCloudKitService
-    if let pemString = config.cloudKit.privateKey {
-      cloudKitService = try BushelCloudKitService(
-        containerIdentifier: config.cloudKit.containerID,
-        keyID: config.cloudKit.keyID,
-        pemString: pemString,
-        environment: config.cloudKit.environment
-      )
-    } else {
-      cloudKitService = try BushelCloudKitService(
-        containerIdentifier: config.cloudKit.containerID,
-        keyID: config.cloudKit.keyID,
-        privateKeyPath: config.cloudKit.privateKeyPath,
-        environment: config.cloudKit.environment
-      )
-    }
+    let cloudKitService = try BushelCloudKitService(
+      containerIdentifier: config.cloudKit.containerID,
+      keyID: config.cloudKit.keyID,
+      privateKey: config.cloudKit.privateKey,
+      environment: config.cloudKit.environment
+    )
 
     // Load configuration to show intervals
     let configuration = config.fetch ?? FetchConfiguration.loadFromEnvironment()

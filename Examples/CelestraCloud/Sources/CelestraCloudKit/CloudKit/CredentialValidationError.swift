@@ -1,5 +1,5 @@
 //
-//  EnhancedConfigurationError.swift
+//  CredentialValidationError.swift
 //  CelestraCloud
 //
 //  Created by Leo Dion.
@@ -25,34 +25,46 @@
 //  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 //  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //  OTHER DEALINGS IN THE SOFTWARE.
-//
 
 public import Foundation
 
-/// Enhanced configuration error with detailed context
-public struct EnhancedConfigurationError: LocalizedError {
-  /// The error message describing what went wrong.
-  public let message: String
+/// A malformed CloudKit server-to-server credential, caught before it reaches
+/// MistKit.
+///
+/// Validating locally turns an opaque signing failure into a message naming the
+/// offending value and how to fix it.
+public enum CredentialValidationError: LocalizedError, Equatable {
+  /// PEM text that is not a well-formed private key.
+  case invalidPEMFormat(reason: String, suggestion: String)
+  /// A key ID that is not a 64-character hexadecimal string.
+  case invalidKeyID(reason: String, suggestion: String)
 
-  /// The configuration key that caused the error, if applicable.
-  public let key: String?
-
-  /// A localized description of the error.
   public var errorDescription: String? {
-    var parts = [message]
-    if let key = key {
-      parts.append("(key: \(key))")
+    switch self {
+    case .invalidPEMFormat(let reason, let suggestion):
+      return """
+        Invalid PEM format: \(reason)
+
+        Suggestion: \(suggestion)
+
+        Expected format:
+        -----BEGIN PRIVATE KEY-----
+        [base64 encoded key data]
+        -----END PRIVATE KEY-----
+        """
+    case .invalidKeyID(let reason, let suggestion):
+      return """
+        Invalid CloudKit Server-to-Server Key ID: \(reason)
+
+        Suggestion: \(suggestion)
+        """
     }
-    return parts.joined(separator: " ")
   }
 
-  /// Creates a new enhanced configuration error.
-  ///
-  /// - Parameters:
-  ///   - message: The error message describing what went wrong.
-  ///   - key: The configuration key that caused the error, if applicable.
-  public init(_ message: String, key: String? = nil) {
-    self.message = message
-    self.key = key
+  public var recoverySuggestion: String? {
+    switch self {
+    case .invalidPEMFormat(_, let suggestion), .invalidKeyID(_, let suggestion):
+      return suggestion
+    }
   }
 }

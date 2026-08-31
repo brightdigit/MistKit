@@ -28,16 +28,33 @@
 //
 
 public import BushelFoundation
-internal import Foundation
+public import Foundation
 internal import MistKit
 
 // MARK: - Configuration Error
 
-/// Errors that can occur during configuration validation
-public struct ConfigurationError: Error, Sendable {
+/// A missing or malformed configuration value, naming the key at fault.
+public struct ConfigurationError: LocalizedError, Sendable {
+  /// The error message describing what went wrong.
   public let message: String
+
+  /// The configuration key that caused the error, if applicable.
   public let key: String?
 
+  /// A localized description of the error.
+  public var errorDescription: String? {
+    var parts = [message]
+    if let key {
+      parts.append("(key: \(key))")
+    }
+    return parts.joined(separator: " ")
+  }
+
+  /// Creates a new configuration error.
+  ///
+  /// - Parameters:
+  ///   - message: The error message describing what went wrong.
+  ///   - key: The configuration key that caused the error, if applicable.
   public init(_ message: String, key: String? = nil) {
     self.message = message
     self.key = key

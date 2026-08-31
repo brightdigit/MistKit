@@ -66,7 +66,7 @@ internal enum AddFeedCommand {
     let loader = ConfigurationLoader()
     let config = try await loader.loadConfiguration()
     let validatedCloudKit = try config.cloudkit.validated()
-    let service = try CelestraConfig.createCloudKitService(from: validatedCloudKit)
+    let service = try validatedCloudKit.makeCloudKitService()
 
     // 4. Create Feed record with initial metadata
     let feed = Feed(
