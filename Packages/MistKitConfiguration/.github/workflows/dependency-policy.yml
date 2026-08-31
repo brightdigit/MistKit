@@ -1,8 +1,9 @@
 name: Dependency Policy
 
-# Gate for PRs targeting `main`: Package.swift may only use tagged (version)
-# dependencies. Branch, revision, or local-path dependencies are integration-only
-# and must be bumped to a released tag before merging into `main`.
+# Gate for PRs targeting `main` that are ready to merge: Package.swift may only use
+# tagged (version) dependencies. Branch, revision, or local-path dependencies are
+# integration-only and must be bumped to a released tag before leaving draft /
+# merging into `main`. Draft PRs skip this check so integration pins can stay green.
 
 on:
   pull_request:
@@ -16,6 +17,7 @@ concurrency:
 jobs:
   tagged-dependencies:
     name: Verify tagged dependencies
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     container: swiftlang/swift:nightly-6.4.x-noble
     steps:
