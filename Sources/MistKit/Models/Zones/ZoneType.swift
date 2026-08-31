@@ -46,7 +46,9 @@ extension ZoneType {
   /// `nil` stays `nil`. Any other unrecognized string throws
   /// ``ConversionError/unrecognizedZoneType(_:)``.
   internal static func fromWire(_ wire: String?) throws(ConversionError) -> ZoneType? {
-    guard let wire else { return nil }
+    guard let wire else {
+      return nil
+    }
     guard let value = ZoneType(rawValue: wire) else {
       throw ConversionError.unrecognizedZoneType(wire)
     }

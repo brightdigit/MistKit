@@ -79,6 +79,7 @@
             recordType: body.recordType,
             recordName: body.recordName,
             fields: body.fields,
+            zone: body.zone,
             database: body.database
           )
           return try WebJSON.encoder().encode(
@@ -107,6 +108,7 @@
             recordName: body.recordName,
             fields: body.fields,
             recordChangeTag: body.recordChangeTag,
+            zone: body.zone,
             database: body.database
           )
           return try WebJSON.encoder().encode(
@@ -134,6 +136,7 @@
             recordType: body.recordType,
             recordName: body.recordName,
             recordChangeTag: body.recordChangeTag,
+            zone: body.zone,
             database: body.database
           )
           return try WebJSON.encoder().encode(

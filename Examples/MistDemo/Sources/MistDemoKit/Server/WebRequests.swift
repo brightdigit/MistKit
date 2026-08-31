@@ -71,6 +71,12 @@ internal enum WebRequests {
     }
   }
 
+  /// Coding keys shared by request bodies that accept a flat zone selector.
+  internal enum ZoneCodingKeys: String, CodingKey {
+    case zoneName
+    case zoneOwner
+  }
+
   /// `POST /api/records/query`
   ///
   /// Wire format stays flat (`zoneName` / `zoneOwner` at the top level) so
@@ -103,22 +109,7 @@ internal enum WebRequests {
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
-      let zoneName = try container.decodeIfPresent(
-        String.self, forKey: .zoneName
-      )
-      let zoneOwner = try container.decodeIfPresent(
-        String.self, forKey: .zoneOwner
-      )
-      if zoneOwner != nil, zoneName == nil {
-        throw DecodingError.dataCorruptedError(
-          forKey: .zoneOwner,
-          in: container,
-          debugDescription: "zoneOwner requires zoneName"
-        )
-      }
-      self.zone = zoneName.map {
-        ZoneSelector(zoneName: $0, zoneOwner: zoneOwner)
-      }
+      self.zone = try WebRequests.decodeZoneSelector(from: container)
     }
   }
 
@@ -133,12 +124,16 @@ internal enum WebRequests {
       case recordName
       case fields
       case database
+      case zoneName
+      case zoneOwner
     }
 
     internal let recordType: String
     internal let recordName: String?
     internal let fields: [String: FieldValue]
     internal let database: MistKit.Database
+    /// `nil` = default zone; otherwise a custom or shared zone.
+    internal let zone: ZoneSelector?
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -152,6 +147,7 @@ internal enum WebRequests {
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
+      self.zone = try WebRequests.decodeZoneSelector(from: container)
     }
   }
 
@@ -167,6 +163,8 @@ internal enum WebRequests {
       case fields
       case recordChangeTag
       case database
+      case zoneName
+      case zoneOwner
     }
 
     internal let recordType: String
@@ -174,6 +172,8 @@ internal enum WebRequests {
     internal let fields: [String: FieldValue]
     internal let recordChangeTag: String?
     internal let database: MistKit.Database
+    /// `nil` = default zone; otherwise a custom or shared zone.
+    internal let zone: ZoneSelector?
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -188,6 +188,7 @@ internal enum WebRequests {
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
+      self.zone = try WebRequests.decodeZoneSelector(from: container)
     }
   }
 
@@ -202,12 +203,16 @@ internal enum WebRequests {
       case recordName
       case recordChangeTag
       case database
+      case zoneName
+      case zoneOwner
     }
 
     internal let recordType: String
     internal let recordName: String
     internal let recordChangeTag: String?
     internal let database: MistKit.Database
+    /// `nil` = default zone; otherwise a custom or shared zone.
+    internal let zone: ZoneSelector?
 
     internal init(from decoder: any Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -219,6 +224,7 @@ internal enum WebRequests {
       self.database = try WebRequests.decodeDatabase(
         from: container, forKey: .database
       )
+      self.zone = try WebRequests.decodeZoneSelector(from: container)
     }
   }
 
@@ -247,5 +253,33 @@ internal enum WebRequests {
       )
     }
     return database
+  }
+
+  /// Decode flat `zoneName` / `zoneOwner` into a ``ZoneSelector``.
+  /// Rejects owner-without-name so shared-zone wire mistakes surface as 400.
+  internal static func decodeZoneSelector<Key: CodingKey>(
+    from container: KeyedDecodingContainer<Key>
+  ) throws -> ZoneSelector? {
+    guard let zoneNameKey = Key(stringValue: ZoneCodingKeys.zoneName.rawValue),
+      let zoneOwnerKey = Key(stringValue: ZoneCodingKeys.zoneOwner.rawValue)
+    else {
+      return nil
+    }
+    let zoneName = try container.decodeIfPresent(
+      String.self, forKey: zoneNameKey
+    )
+    let zoneOwner = try container.decodeIfPresent(
+      String.self, forKey: zoneOwnerKey
+    )
+    if zoneOwner != nil, zoneName == nil {
+      throw DecodingError.dataCorruptedError(
+        forKey: zoneOwnerKey,
+        in: container,
+        debugDescription: "zoneOwner requires zoneName"
+      )
+    }
+    return zoneName.map {
+      ZoneSelector(zoneName: $0, zoneOwner: zoneOwner)
+    }
   }
 }
