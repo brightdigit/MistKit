@@ -42,7 +42,15 @@ let package = Package(
     // `brightdigit/MistKit/.github/actions/setup-mistkit@main`, and it must be a
     // tagged `url:` before any release is cut, or the tag is unusable downstream.
     .package(name: "MistKit", path: "../.."),
-    .package(url: "https://github.com/brightdigit/ConfigKeyKit.git", from: "1.0.0-beta.2"),
+    // Pinned to the fix for brightdigit/ConfigKeyKit#8: booleans resolved through
+    // `string(forKey:)` could not see a valueless command-line flag, so `--flag` read as
+    // its default and `--flag false` read as true, while an unrecognized environment
+    // value collapsed to false instead of being ignored. Move back to a version range
+    // once a release carrying that fix is tagged.
+    .package(
+      url: "https://github.com/brightdigit/ConfigKeyKit.git",
+      revision: "90110faa06f7666a0d58d224c92da976fff5d930"
+    ),
     .package(
       url: "https://github.com/apple/swift-configuration.git",
       from: "1.0.0",
