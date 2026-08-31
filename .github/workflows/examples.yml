@@ -2,7 +2,10 @@ name: Examples
 
 on:
   pull_request:
-    branches: [main]
+    # Match MistKit.yml full-matrix bases: main and semver release branches (e.g. v1.0.0-beta.5).
+    branches:
+      - main
+      - 'v*.*.*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
