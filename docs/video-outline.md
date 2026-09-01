@@ -63,7 +63,7 @@ If you want to you can actually grab the user's web token using the CKFetchWebAu
 
 > **[Beginner]** How does CloudKit Web Services differ from the CloudKit framework I’d use in an iOS app?
 
-CloudKit Web Services is more or less REST API while the CloudKit framework is a built-in.
+CloudKit Web Services is a REST API while the CloudKit framework is a built-in.
 
 ## Why Server Side Cloud
 
@@ -73,9 +73,23 @@ No it's only available on Apple devices.
 
 ### Private Database
 
-> **[Beginner]** What happens to a user’s private database data if they delete the app or their iCloud account?
+When I was writing Heartwitch, I wanted a user to have an easy way to login on the Apple Watch without having to type their username and password. Unfortunetly Sign in with Appple was not available and frankly I was intimidated by setting it up on the server. Why not use something already built in on the device with CloudKit.
+
+This was great however I had a separate login mechanism for the website. I needed a way to link someone's Apple Watch to that login. I ended up adding to the website the ability to login into CloudKit.
+
+1. Run Apple Watch app, adds Apple Watch record to CloudKit.
+2. Login into Website.
+3. Login into CloudKit from Website.
+4. Pulls Apple Watch from CloudKit and adds it to Postgres.
+5. User runs workout and passed Apple Watch id; Vapor knows how it is and heart rate shows up on web page.
+
+> **[Author]** What happens to a user’s private database data if they delete the app or their iCloud account?
 
 ### Public Database
+
+My app Bushel is a macOS virtual machine app for developers. Part of using bushel is being able to install any available macOS version. What I need is the ability to pull the list of restore images (installer images) and know what is available, what is signed, and what versions of Xcode and Swift are available.
+
+Bushel doesn't need a backend really but I need a place to store this information and easily and cheaply update it. This gave me the oppurtuniy to use a public database and able to update it easily in the cloud.
 
 ## Building MistKit
 
