@@ -162,4 +162,3 @@ extension Platform {
 }
 
 // swiftlint:enable explicit_acl explicit_top_level_acl
-
