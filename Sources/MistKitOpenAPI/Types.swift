@@ -37,7 +37,7 @@ public protocol APIProtocol: Sendable {
     /// Fetch Record Information
     ///
     /// Resolve one or more share short GUIDs into information about the shared
-    /// records they identify — the root record, the `cloudKit.share` record,
+    /// records they identify — the root record, the `cloudkit.share` record,
     /// the owner identity, and the caller's participation in each share.
     ///
     /// Routed against the public database with web-auth credentials
@@ -309,7 +309,7 @@ extension APIProtocol {
     /// Fetch Record Information
     ///
     /// Resolve one or more share short GUIDs into information about the shared
-    /// records they identify — the root record, the `cloudKit.share` record,
+    /// records they identify — the root record, the `cloudkit.share` record,
     /// the owner identity, and the caller's participation in each share.
     ///
     /// Routed against the public database with web-auth credentials
@@ -985,7 +985,7 @@ public enum Components {
             /// - Remark: Generated from `#/components/schemas/RecordRequest/forRecord`.
             public var forRecord: Components.Schemas.ShareTargetReference?
             /// The public read/write permissions to apply. Set when creating a
-            /// `cloudKit.share` record.
+            /// `cloudkit.share` record.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/RecordRequest/publicPermission`.
@@ -996,12 +996,12 @@ public enum Components {
                 case UNKNOWN = "UNKNOWN"
             }
             /// The public read/write permissions to apply. Set when creating a
-            /// `cloudKit.share` record.
+            /// `cloudkit.share` record.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/RecordRequest/publicPermission`.
             public var publicPermission: Components.Schemas.RecordRequest.publicPermissionPayload?
-            /// The participants to invite. Set when creating a `cloudKit.share`
+            /// The participants to invite. Set when creating a `cloudkit.share`
             /// record.
             ///
             ///
@@ -1017,7 +1017,7 @@ public enum Components {
             ///   - createShortGUID: Whether to create a short GUID so this record can be shared. The
             ///   - forRecord:
             ///   - publicPermission: The public read/write permissions to apply. Set when creating a
-            ///   - participants: The participants to invite. Set when creating a `cloudKit.share`
+            ///   - participants: The participants to invite. Set when creating a `cloudkit.share`
             public init(
                 recordName: Swift.String? = nil,
                 recordType: Swift.String? = nil,
@@ -1048,7 +1048,7 @@ public enum Components {
                 case participants
             }
         }
-        /// Identifies the record being shared when creating a `cloudKit.share`
+        /// Identifies the record being shared when creating a `cloudkit.share`
         /// record (the `forRecord` key).
         ///
         ///
@@ -1132,7 +1132,7 @@ public enum Components {
             /// - Remark: Generated from `#/components/schemas/RecordResponse/share`.
             public var share: Components.Schemas.ShareReference?
             /// The public read/write permissions of a shared record. Present on
-            /// `cloudKit.share` records.
+            /// `cloudkit.share` records.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/RecordResponse/publicPermission`.
@@ -1143,12 +1143,12 @@ public enum Components {
                 case UNKNOWN = "UNKNOWN"
             }
             /// The public read/write permissions of a shared record. Present on
-            /// `cloudKit.share` records.
+            /// `cloudkit.share` records.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/RecordResponse/publicPermission`.
             public var publicPermission: Components.Schemas.RecordResponse.publicPermissionPayload?
-            /// The participants in a shared record. Present on `cloudKit.share`
+            /// The participants in a shared record. Present on `cloudkit.share`
             /// records.
             ///
             ///
@@ -1171,7 +1171,7 @@ public enum Components {
             ///   - shortGUID: The short GUID of a shared record. Present only on records that
             ///   - share:
             ///   - publicPermission: The public read/write permissions of a shared record. Present on
-            ///   - participants: The participants in a shared record. Present on `cloudKit.share`
+            ///   - participants: The participants in a shared record. Present on `cloudkit.share`
             ///   - owner:
             ///   - currentUserParticipant:
             public init(
@@ -1219,7 +1219,11 @@ public enum Components {
                 case currentUserParticipant
             }
         }
-        /// A reference to the `cloudKit.share` record governing a shared record.
+        /// A reference to the `cloudkit.share` record governing a shared record.
+        /// Note the lowercase `k`: Apple's archived "Sharing Records" docs write
+        /// `cloudKit.share`, but the live `records/modify` API accepts and returns
+        /// only `cloudkit.share`. The camelCase spelling fails with
+        /// "Cannot share - no such record exists to share".
         ///
         ///
         /// - Remark: Generated from `#/components/schemas/ShareReference`.
@@ -5804,7 +5808,7 @@ public enum Operations {
     /// Fetch Record Information
     ///
     /// Resolve one or more share short GUIDs into information about the shared
-    /// records they identify — the root record, the `cloudKit.share` record,
+    /// records they identify — the root record, the `cloudkit.share` record,
     /// the owner identity, and the caller's participation in each share.
     ///
     /// Routed against the public database with web-auth credentials

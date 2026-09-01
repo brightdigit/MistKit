@@ -1013,7 +1013,7 @@ public struct Client: APIProtocol {
     /// Fetch Record Information
     ///
     /// Resolve one or more share short GUIDs into information about the shared
-    /// records they identify — the root record, the `cloudKit.share` record,
+    /// records they identify — the root record, the `cloudkit.share` record,
     /// the owner identity, and the caller's participation in each share.
     ///
     /// Routed against the public database with web-auth credentials
