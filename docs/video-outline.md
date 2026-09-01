@@ -181,25 +181,35 @@ Bushel doesn't need a backend really but I need a place to store this informatio
 
 > **[Beginner]** How do I stop users from writing to the public database?
 
-> **[Beginner]** How do I avoid creating duplicates every time the job runs?
-
-> **[Beginner]** Isn't 200 operations per request going to be a problem for a big catalog?
-
 ## Building MistKit
+
+In 2020 I began the journey of building MistKit for heartwitch specifically. There were a few issues:
+
+1. I had to hand write the client code for both URLSession and server-side AsyncHTTPClient (without async/await)
+2. I had to hand write each api call based on the apple documentation.
 
 ### OpenAPI Generator
 
 #### Introduce openapi.yaml
 
+openapi formerlly swagger is a standard for yaml-based spec for describing a REST API. It allows client-side developers to know the variety of calls and many languages have the ability to easily write client-side code for the various calls.
+Thankfully in 20**, the Swift OpenAPI Generator was released.
+
 > **[Beginner]** Why generate a client instead of just writing `URLSession` calls?
 
-> **[Beginner]** Isn't the generated code just as brittle as hand-written code?
+Because when you are running on a non-Apple device or doing server-side calls, it's best to use a client that's SwiftNIO based. SwiftNIO is a dedicated networking stack written by many folks at Apple specically for server-side development.
 
 ### Using AI to create an openapi.yaml
 
 > **[Beginner]** Can I trust an AI-generated spec?
 
+No that's why I insist on not only unit tests but integration tests via a web dashboard.
+
 > **[Beginner]** What did the AI get wrong?
+
+1. Authenitcation
+2. Field Types
+3. Bad Documentation
 
 ## Authentication
 
@@ -207,7 +217,13 @@ Bushel doesn't need a backend really but I need a place to store this informatio
 
 > **[Beginner]** What is middleware doing here, and why is auth a good fit for it?
 
+The Swift OpenAPI suite contains a middleware layer that allows the you to either make sure changes to the request before the server receives it or before the client sends it.
+
 > **[Beginner]** Can I plug in my own credential source — a secrets vault, or rotation?
+
+Yes there's a pluggable API you can implement. 
+
+> **[Author]** What is the protocol which the developer needs to implement?
 
 #### API Token
 
