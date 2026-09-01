@@ -77,7 +77,7 @@ extension ZoneMetadataTests {
       #expect(info.ownerRecordName == "_defaultOwner")
       #expect(info.syncToken == "AQAAAAAAAAAB")
       #expect(info.atomic == true)
-      #expect(info.deleted == false)
+      #expect(info.deleted == nil)
     }
 
     @Test(
@@ -105,8 +105,8 @@ extension ZoneMetadataTests {
       #expect(info.deleted == true)
     }
 
-    @Test("Absent deleted defaults to false rather than collapsing into nil")
-    internal func absentDeletedDefaultsFalse() throws {
+    @Test("Absent deleted stays nil rather than defaulting to false")
+    internal func absentDeletedStaysNil() throws {
       let zone = try Self.decodeZone(
         """
         {
@@ -117,7 +117,7 @@ extension ZoneMetadataTests {
 
       let info = try ZoneInfo(from: zone)
 
-      #expect(info.deleted == false)
+      #expect(info.deleted == nil)
     }
 
     @Test("DatabaseChangedZone tombstone surfaces deleted on ZoneInfo")
@@ -145,6 +145,12 @@ extension ZoneMetadataTests {
       #expect(zone.ownerRecordName == "_aca0fa3547ae9f9cd1f7e25fed948a20")
       #expect(zone.zoneType == .regularCustom)
       #expect(zone.deleted == true)
+    }
+
+    @Test("unrecognizedZoneType exposes a localized description")
+    internal func unrecognizedZoneTypeDescription() {
+      let error = ConversionError.unrecognizedZoneType("SHARED_ZONE")
+      #expect(error.errorDescription == "Zone entry has unrecognized zoneType 'SHARED_ZONE'")
     }
 
     @Test("Unrecognized zoneType throws ConversionError")
@@ -202,6 +208,7 @@ extension ZoneMetadataTests {
       // an explicit `false`.
       #expect(info.syncToken == nil)
       #expect(info.atomic == nil)
+      #expect(info.deleted == nil)
       #expect(info.zoneName == "Articles")
     }
   }

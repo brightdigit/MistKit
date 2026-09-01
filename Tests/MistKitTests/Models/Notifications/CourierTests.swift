@@ -74,5 +74,36 @@
       let notification = try #require(result)
       #expect(notification.reason == .recordCreated)
     }
+    @Test("notifications yields a decoded notification from the stream")
+    internal func notificationsYieldsDecodedNotification() async throws {
+      let url = try Self.courierURL()
+      let body = #"{"ck":{"qry":{"fo":1,"sid":"s","rid":"r"}}}"#
+      final class PollBox: @unchecked Sendable {
+        var count = 0
+      }
+      let polls = PollBox()
+      let transport: Courier.Transport = { _, _ in
+        polls.count += 1
+        if polls.count == 1 {
+          return (statusCode: 200, data: Data(body.utf8))
+        }
+        try await Task.sleep(for: .seconds(30))
+        return (statusCode: 200, data: Data())
+      }
+
+      let stream = Courier.notifications(courierURL: url, perPollTimeout: 1, transport: transport)
+      let task = Task<CourierNotification?, Error> {
+        for try await notification in stream {
+          return notification
+        }
+        return nil
+      }
+      defer { task.cancel() }
+
+      let notification = try await task.value
+      let decoded = try #require(notification)
+      #expect(decoded.reason == CourierNotification.Reason.recordCreated)
+      #expect(polls.count >= 1)
+    }
   }
 #endif

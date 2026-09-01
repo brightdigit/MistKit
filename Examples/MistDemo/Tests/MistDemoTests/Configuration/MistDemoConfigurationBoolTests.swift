@@ -30,7 +30,7 @@
 internal import ConfigKeyKit
 internal import MistKitConfiguration
 internal import Configuration
-import Testing
+internal import Testing
 
 @testable import MistDemoKit
 

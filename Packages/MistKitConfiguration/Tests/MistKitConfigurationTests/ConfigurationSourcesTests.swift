@@ -28,7 +28,7 @@
 //
 
 internal import Configuration
-import Testing
+internal import Testing
 
 @testable import MistKitConfiguration
 

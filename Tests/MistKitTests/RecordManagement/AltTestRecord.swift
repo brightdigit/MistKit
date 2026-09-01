@@ -1,5 +1,5 @@
 //
-//  ShareTargetReference.swift
+//  AltTestRecord.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,31 +27,30 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistKitOpenAPI
+internal import Foundation
 
-/// Identifies the root record being shared when creating a `cloudKit.share`
-/// record (CloudKit's `forRecord` key).
-public struct ShareTargetReference: Codable, Sendable, Equatable, Hashable {
-  /// The record name of the shared root record.
-  public let recordName: String
-  /// Optional change tag for optimistic concurrency when creating the share.
-  public let recordChangeTag: String?
+@testable import MistKit
 
-  /// Initialize a share target reference.
-  /// - Parameters:
-  ///   - recordName: The record name of the shared root record.
-  ///   - recordChangeTag: Optional change tag for the root record.
-  public init(recordName: String, recordChangeTag: String? = nil) {
-    self.recordName = recordName
-    self.recordChangeTag = recordChangeTag
+/// Second CloudKit record type for collection-operation tests.
+internal struct AltTestRecord: CloudKitRecord {
+  internal static var cloudKitRecordType: String { "AltTestRecord" }
+
+  internal var recordName: String
+  internal var title: String
+
+  internal static func from(recordInfo: RecordInfo) -> AltTestRecord? {
+    guard let title = recordInfo.fields["title"]?.stringValue else {
+      return nil
+    }
+    return AltTestRecord(recordName: recordInfo.recordName, title: title)
   }
-}
 
-extension Components.Schemas.ShareTargetReference {
-  internal init(from reference: ShareTargetReference) {
-    self.init(
-      recordName: reference.recordName,
-      recordChangeTag: reference.recordChangeTag
-    )
+  internal static func formatForDisplay(_ recordInfo: RecordInfo) -> String {
+    let title = recordInfo.fields["title"]?.stringValue ?? "Unknown"
+    return "  \(recordInfo.recordName): \(title)"
+  }
+
+  internal func toCloudKitFields() -> [String: FieldValue] {
+    ["title": .string(title)]
   }
 }

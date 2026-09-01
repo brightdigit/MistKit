@@ -1,5 +1,5 @@
 //
-//  ShareTargetReference.swift
+//  RecordTypeSetTests.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,31 +27,26 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistKitOpenAPI
+internal import Testing
 
-/// Identifies the root record being shared when creating a `cloudKit.share`
-/// record (CloudKit's `forRecord` key).
-public struct ShareTargetReference: Codable, Sendable, Equatable, Hashable {
-  /// The record name of the shared root record.
-  public let recordName: String
-  /// Optional change tag for optimistic concurrency when creating the share.
-  public let recordChangeTag: String?
+@testable import MistKit
 
-  /// Initialize a share target reference.
-  /// - Parameters:
-  ///   - recordName: The record name of the shared root record.
-  ///   - recordChangeTag: Optional change tag for the root record.
-  public init(recordName: String, recordChangeTag: String? = nil) {
-    self.recordName = recordName
-    self.recordChangeTag = recordChangeTag
-  }
-}
+@Suite("RecordTypeSet")
+internal struct RecordTypeSetTests {
+  @Test("forEach visits every record type in the pack")
+  internal func forEachVisitsAllTypes() async {
+    guard #available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *) else {
+      Issue.record("RecordTypeSet is not available on this operating system.")
+      return
+    }
 
-extension Components.Schemas.ShareTargetReference {
-  internal init(from reference: ShareTargetReference) {
-    self.init(
-      recordName: reference.recordName,
-      recordChangeTag: reference.recordChangeTag
-    )
+    let recordTypes = RecordTypeSet(TestRecord.self, AltTestRecord.self)
+    var visited: [String] = []
+
+    await recordTypes.forEach { recordType in
+      visited.append(recordType.cloudKitRecordType)
+    }
+
+    #expect(visited.sorted() == ["AltTestRecord", "TestRecord"])
   }
 }

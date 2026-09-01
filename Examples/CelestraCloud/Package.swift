@@ -94,7 +94,7 @@ let package = Package(
     // Monorepo dogfood overlay — publishable consumers use a tagged `from:` once
     // MistKitConfiguration is released. Same never-merged discipline as the MistKit line.
     .package(path: "../../Packages/MistKitConfiguration"),
-    .package(url: "https://github.com/brightdigit/ConfigKeyKit.git", from: "1.0.0-beta.2"),
+    .package(url: "https://github.com/brightdigit/ConfigKeyKit.git", from: "1.0.0-beta.3"),
     .package(url: "https://github.com/brightdigit/CelestraKit.git", from: "0.0.3"),
     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     .package(

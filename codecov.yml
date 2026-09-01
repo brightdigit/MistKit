@@ -9,3 +9,4 @@ ignore:
   - "Tests"
   - "Sources/MistKitOpenAPI"
   - "Examples"
+  - "Packages/MistKitConfiguration"
