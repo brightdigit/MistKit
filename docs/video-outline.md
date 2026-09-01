@@ -18,14 +18,12 @@ CloudKit is Apple's backend cloud database available to developers.
 
 ### Databases
 
-CloudKit supports 2 kinds of databases: a public and a private database. Private is exclusive to a single user while Public is shared over the entire system.
-A great example is what I'll doing with my RSS app. The public database will contain the RSS content shared amongst all users while the private database will contain a user's particular reading status and subscriptions.
+CloudKit supports 2 kinds of databases: a public and a private database. Private is exclusive to a single user but allows the ability to share records while Public is shared over the entire system. 
+A great example is what I'll doing with my RSS app. The public database will contain the RSS content shared amongst all users while the private database will contain a user's particular reading status and subscriptions. The only requirement is the user is signed in on their device to access either database.
 
-> **[Beginner]** Is there a third database — shared — and when would I use it vs public?
+Besides the databases, theres environments. Environments allow you to test and develop against a development or production environment safely as well as deployment content back and forth.
 
-> **[Beginner]** Do I need an iCloud-signed-in user on device to read the public database?
-
-> **[Beginner]** What’s the difference between development and production environments, and how do I promote a schema?
+### Records
 
 > **[Beginner]** What is a record type / zone / subscription in plain terms?
 
@@ -49,7 +47,7 @@ With the API Token, you can add a login to your web page and retrieve the users 
 >
 > **Answer:** Yes. API token + web auth token can target public, private, and shared. Private/shared require web auth; public can use web auth or server-to-server.
 
-> **[Beginner]** How long does a web auth token last, and how do I refresh it?
+> **[Author]** How long does a web auth token last, and how do I refresh it?
 
 ##### CKFetchWebAuthTokenOperation
 
@@ -57,7 +55,7 @@ If you want to you can actually grab the user's web token using the CKFetchWebAu
 
 #### Server to Server
 
-> **[Beginner]** Why would I use server-to-server instead of web auth for the public database?
+> **[Author]** Why would I use server-to-server instead of web auth for the public database?
 
 #### Compare Capabilities
 
@@ -65,9 +63,13 @@ If you want to you can actually grab the user's web token using the CKFetchWebAu
 
 > **[Beginner]** How does CloudKit Web Services differ from the CloudKit framework I’d use in an iOS app?
 
+CloudKit Web Services is more or less REST API while the CloudKit framework is a built-in.
+
 ## Why Server Side Cloud
 
 > **[Beginner]** Can Linux / a Vapor server use the CloudKit framework, or only Web Services (MistKit)?
+
+No it's only available on Apple devices.
 
 ### Private Database
 
