@@ -38,7 +38,11 @@ extension Components.Schemas.ListValuePayload {
   /// the build here instead of silently degrading. (It previously fell through to a
   /// `default: assertionFailure(...)` that returned an empty list — a debug-only trap that
   /// in release builds would have written `[]` in place of the value.)
-  internal init(from fieldValue: FieldValue) {
+  ///
+  /// The complexity is the nine-case dispatch itself and is irreducible without
+  /// reintroducing a catch-all, so it is suppressed below as in the sibling switches
+  /// (`Components.Schemas.FieldValueRequest`, `FilterBuilder`, `FieldValue.ResponseTypeTag`).
+  internal init(from fieldValue: FieldValue) {  // swiftlint:disable:this cyclomatic_complexity
     switch fieldValue {
     case .string(let value):
       self = .StringValue(value)
