@@ -1,0 +1,3 @@
+- [All code in Swift Packages](feedback_spm_architecture.md) — Xcode projects should only contain thin @main App entry point; all logic in SPM library targets
+- [CK*Operation continuation bridges must be nonisolated](feedback_ckoperation_continuation_isolation.md) — `@MainActor` + `withCheckedThrowingContinuation` around a CKDatabaseOperation trips `_dispatch_assert_queue_fail` on CloudKit's callback queue; mark the bridge `nonisolated`
+- [CloudKit subscription uniqueness is content-based, not ID-based](project_cloudkit_subscription_uniqueness.md) — same `(recordType, firesOn)` collides regardless of `subscriptionID`; same ID twice silently succeeds; `INTERNAL_ERROR`/"could not find subscription we just created"

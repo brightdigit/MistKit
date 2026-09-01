@@ -35,3 +35,4 @@ Standing always/never directives and corrections from the human. Agents must rea
 - NEVER use `Task.sleep(for:)` / `Duration` clocks in MistKitTests — package deployment target is iOS 14 (and peers); use `Task.sleep(nanoseconds:)` instead (CI iOS simulator build failed on CourierTests for this).
 - NEVER reintroduce `RetryPolicy` / client retry-with-jitter in MistKit — it was deliberately removed (#148 lineage); rate-limit honoring is fine, retries are not.
 - ALWAYS treat MistDemo (web UI + `test-public` / `test-private` integration phases) as the live-verification oracle for CloudKit wire behavior: endpoints and facts those flows exercise count as live-confirmed — do NOT re-flag them as unproven / needs-a-live-container.
+- Before writing any synthesis/analysis document, READ the existing reports in `.claude/memory/_raw/` first — they are the prior art and the new work must cross-reference (corroborate/sharpen/contradict) them rather than restate or duplicate them.
