@@ -52,14 +52,6 @@ internal actor MockCollectionRecordManagingService: RecordManaging, CloudKitReco
     lastExecutedOperations.append(contentsOf: operations)
   }
 
-  internal func reset() {
-    queryCallCount = 0
-    executeCallCount = 0
-    lastExecutedOperations = []
-    batchSizes = []
-    recordsByType = [:]
-  }
-
   internal func setRecords(_ records: [RecordInfo], forRecordType recordType: String) {
     recordsByType[recordType] = records
   }

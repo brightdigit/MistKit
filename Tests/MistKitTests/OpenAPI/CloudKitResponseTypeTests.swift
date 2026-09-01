@@ -64,78 +64,36 @@ internal struct CloudKitResponseTypeTests {
       Issue.record("expected non-nil CloudKitError for HTTP \(statusCode)")
       return
     }
-    if case .httpError(let code) = mapped {
-      #expect(code == statusCode)
-      return
-    }
-    if case .badRequest = mapped, statusCode == 400 { return }
-    if case .authenticationFailed = mapped, statusCode == 401 { return }
-    if case .accessDenied = mapped, statusCode == 403 { return }
-    if case .notFound = mapped, statusCode == 404 { return }
-    if case .conflict = mapped, statusCode == 409 { return }
-    if case .validatingReferenceError = mapped, statusCode == 412 { return }
-    if case .quotaExceeded = mapped, statusCode == 413 { return }
-    if case .authenticationRequired = mapped, statusCode == 421 { return }
-    if case .throttled = mapped, statusCode == 429 { return }
-    if case .internalServerError = mapped, statusCode == 500 { return }
-    if case .tryAgainLater = mapped, statusCode == 503 { return }
-    Issue.record("unexpected CloudKitError mapping for HTTP \(statusCode): \(String(describing: mapped))")
+    #expect(mapped.httpStatusCode == statusCode)
   }
 
   @Test("listZones maps documented HTTP failures")
   internal func listZonesMapsFailures() {
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.badRequest(Self.sampleFailure(code: .BAD_REQUEST)),
-      statusCode: 400
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.unauthorized(Self.sampleFailure(code: .AUTHENTICATION_FAILED)),
-      statusCode: 401
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.forbidden(Self.sampleFailure(code: .ACCESS_DENIED)),
-      statusCode: 403
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.notFound(Self.sampleFailure(code: .NOT_FOUND)),
-      statusCode: 404
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.conflict(Self.sampleFailure(code: .CONFLICT)),
-      statusCode: 409
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.preconditionFailed(
-        Self.sampleFailure(code: .VALIDATING_REFERENCE_ERROR)
+    let mappings: [(() -> Operations.listZones.Output, Int)] = [
+      ({ .badRequest(Self.sampleFailure(code: .BAD_REQUEST)) }, 400),
+      ({ .unauthorized(Self.sampleFailure(code: .AUTHENTICATION_FAILED)) }, 401),
+      ({ .forbidden(Self.sampleFailure(code: .ACCESS_DENIED)) }, 403),
+      ({ .notFound(Self.sampleFailure(code: .NOT_FOUND)) }, 404),
+      ({ .conflict(Self.sampleFailure(code: .CONFLICT)) }, 409),
+      (
+        {
+          .preconditionFailed(Self.sampleFailure(code: .VALIDATING_REFERENCE_ERROR))
+        }, 412
       ),
-      statusCode: 412
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.contentTooLarge(Self.sampleFailure(code: .QUOTA_EXCEEDED)),
-      statusCode: 413
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.misdirectedRequest(
-        Self.sampleFailure(code: .AUTHENTICATION_REQUIRED)
+      ({ .contentTooLarge(Self.sampleFailure(code: .QUOTA_EXCEEDED)) }, 413),
+      (
+        {
+          .misdirectedRequest(Self.sampleFailure(code: .AUTHENTICATION_REQUIRED))
+        }, 421
       ),
-      statusCode: 421
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.tooManyRequests(Self.sampleFailure(code: .THROTTLED)),
-      statusCode: 429
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.internalServerError(Self.sampleFailure(code: .INTERNAL_ERROR)),
-      statusCode: 500
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.serviceUnavailable(Self.sampleFailure(code: .TRY_AGAIN_LATER)),
-      statusCode: 503
-    )
-    Self.assertMapsToStatusCode(
-      Operations.listZones.Output.undocumented(statusCode: 418, Self.undocumentedPayload()),
-      statusCode: 418
-    )
+      ({ .tooManyRequests(Self.sampleFailure(code: .THROTTLED)) }, 429),
+      ({ .internalServerError(Self.sampleFailure(code: .INTERNAL_ERROR)) }, 500),
+      ({ .serviceUnavailable(Self.sampleFailure(code: .TRY_AGAIN_LATER)) }, 503),
+      ({ .undocumented(statusCode: 418, Self.undocumentedPayload()) }, 418),
+    ]
+    for (makeOutput, statusCode) in mappings {
+      Self.assertMapsToStatusCode(makeOutput(), statusCode: statusCode)
+    }
   }
 
   @Test("lookupZones maps documented HTTP failures")
@@ -195,7 +153,10 @@ internal struct CloudKitResponseTypeTests {
       statusCode: 429
     )
     Self.assertMapsToStatusCode(
-      Operations.fetchRecordChanges.Output.undocumented(statusCode: 418, Self.undocumentedPayload()),
+      Operations.fetchRecordChanges.Output.undocumented(
+        statusCode: 418,
+        Self.undocumentedPayload()
+      ),
       statusCode: 418
     )
   }

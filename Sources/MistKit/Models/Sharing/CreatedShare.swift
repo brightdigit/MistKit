@@ -35,11 +35,15 @@ public import Foundation
 /// and share-specific metadata. Share keys stay here (and on ``ShareInfo``)
 /// rather than on ``RecordInfo``, which models a plain record.
 public struct CreatedShare: Sendable {
-  // swift-format-ignore: NeverForceUnwrap
   /// Base URL for iCloud share invite links (`https://www.icloud.com/share`).
   ///
   /// Append a ``ShortGUID`` path component to build a full invite URL.
-  public static let shareURLBase = URL(string: "https://www.icloud.com/share")!
+  public static let shareURLBase: URL = {
+    guard let url = URL(string: "https://www.icloud.com/share") else {
+      preconditionFailure("invalid iCloud share URL base")
+    }
+    return url
+  }()
 
   /// The short GUID CloudKit assigned to the share (and shared root).
   public let shortGUID: ShortGUID

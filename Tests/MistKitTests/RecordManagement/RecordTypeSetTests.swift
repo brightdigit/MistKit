@@ -43,6 +43,7 @@ internal struct RecordTypeSetTests {
     let recordTypes = RecordTypeSet(TestRecord.self, AltTestRecord.self)
     var visited: [String] = []
 
+    // swift-format-ignore: ReplaceForEachWithForLoop
     await recordTypes.forEach { recordType in
       visited.append(recordType.cloudKitRecordType)
     }

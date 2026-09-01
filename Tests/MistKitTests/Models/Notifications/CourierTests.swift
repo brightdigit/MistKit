@@ -78,13 +78,17 @@
     internal func notificationsYieldsDecodedNotification() async throws {
       let url = try Self.courierURL()
       let body = #"{"ck":{"qry":{"fo":1,"sid":"s","rid":"r"}}}"#
-      final class PollBox: @unchecked Sendable {
-        var count = 0
+      actor PollCounter {
+        private(set) var count = 0
+        func increment() {
+          count += 1
+        }
       }
-      let polls = PollBox()
+      let polls = PollCounter()
       let transport: Courier.Transport = { _, _ in
-        polls.count += 1
-        if polls.count == 1 {
+        await polls.increment()
+        let pollCount = await polls.count
+        if pollCount == 1 {
           return (statusCode: 200, data: Data(body.utf8))
         }
         try await Task.sleep(for: .seconds(30))
@@ -103,7 +107,8 @@
       let notification = try await task.value
       let decoded = try #require(notification)
       #expect(decoded.reason == CourierNotification.Reason.recordCreated)
-      #expect(polls.count >= 1)
+      let finalCount = await polls.count
+      #expect(finalCount >= 1)
     }
   }
 #endif

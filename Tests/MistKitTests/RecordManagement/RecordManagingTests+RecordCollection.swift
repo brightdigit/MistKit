@@ -51,7 +51,7 @@ extension RecordManagingTests {
           isActive: true,
           score: nil,
           lastUpdated: nil
-        ),
+        )
       ]
       let altRecords = [
         AltTestRecord(recordName: "alt-1", title: "Alt One"),
