@@ -19,3 +19,7 @@ Standing always/never directives and corrections from the human. Agents must rea
 - Repo-wide CI version bumps (Xcode/simulator/toolchain) DO extend into the `Examples/` subrepos — update BushelCloud and CelestraCloud in the same pass rather than deferring them to their own repos.
 - Follow sibling brightdigit repos (e.g. ConfigKeyKit) for current CI workflow shape before inventing a new one.
 - Feature-branch PRs: NEVER merge-commit. ALWAYS rebase if the PR has exactly 1 commit (`gh pr merge --rebase`); ALWAYS squash if it has 2+ commits (`gh pr merge --squash`). Count commits before merging.
+- Release PRs (a `v*` release branch into `main`) are the one merge-commit case — the "never merge-commit" rule above covers FEATURE PRs only; still confirm the shape with the human before merging.
+- NEVER tag a release before its `ReleaseNotes.md` section exists in the tree being tagged — run `./Scripts/release.sh verify-tag <tag> --at HEAD` first (beta.3 and beta.4 both shipped tags with no notes).
+- Release notes are a FLAT bullet list — no `###` category subsections.
+- ALWAYS manage worktrees with `git trees` (`add`/`rm`/`list`/`clean`), never raw `git worktree`.
