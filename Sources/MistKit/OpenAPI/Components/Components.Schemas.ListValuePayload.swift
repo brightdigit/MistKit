@@ -32,46 +32,37 @@ internal import MistKitOpenAPI
 
 extension Components.Schemas.ListValuePayload {
   /// Initialize from MistKit FieldValue for list elements
+  ///
+  /// The `switch` is deliberately `default`-free: it is the single dispatch point from the
+  /// domain enum to a list element's wire representation, so a new `FieldValue` case breaks
+  /// the build here instead of silently degrading. (It previously fell through to a
+  /// `default: assertionFailure(...)` that returned an empty list — a debug-only trap that
+  /// in release builds would have written `[]` in place of the value.)
   internal init(from fieldValue: FieldValue) {
-    if let payload = Self.makeScalarPayload(from: fieldValue) {
-      self = payload
-    } else {
-      self = Self.makeComplexPayload(from: fieldValue)
-    }
-  }
-
-  private static func makeScalarPayload(from fieldValue: FieldValue) -> Self? {
-    if case .string(let value) = fieldValue {
-      return .StringValue(value)
-    }
-    if case .int64(let value) = fieldValue {
-      return .Int64Value(Int64(value))
-    }
-    if case .double(let value) = fieldValue {
-      return .DoubleValue(value)
-    }
-    if case .bytes(let value) = fieldValue {
-      return .BytesValue(value.base64EncodedString())
-    }
-    if case .date(let value) = fieldValue {
-      return .DateValue(value.timeIntervalSince1970 * 1_000)
-    }
-    return nil
-  }
-
-  private static func makeComplexPayload(from fieldValue: FieldValue) -> Self {
     switch fieldValue {
+    case .string(let value):
+      self = .StringValue(value)
+    case .int64(let value):
+      self = .Int64Value(Int64(value))
+    case .double(let value):
+      self = .DoubleValue(value)
+    case .bytes(let value):
+      self = .BytesValue(value.base64EncodedString())
+    case .date(let value):
+      // Round to whole milliseconds, same constraint as the scalar `.date` case in
+      // `Components.Schemas.FieldValueRequest`: CloudKit rejects a fractional TIMESTAMP
+      // with BAD_REQUEST "expected type TIMESTAMP", and Date carries sub-millisecond
+      // precision. List elements carry no `type` tag of their own, so the value's shape
+      // is all CloudKit has to go on.
+      self = .DateValue((value.timeIntervalSince1970 * 1_000).rounded())
     case .location(let location):
-      return .LocationValue(makeLocationValue(location))
+      self = .LocationValue(Self.makeLocationValue(location))
     case .reference(let reference):
-      return .ReferenceValue(makeReferenceValue(reference))
+      self = .ReferenceValue(Self.makeReferenceValue(reference))
     case .asset(let asset):
-      return .AssetValue(makeAssetValue(asset))
+      self = .AssetValue(Self.makeAssetValue(asset))
     case .list(let nestedList):
-      return .ListValue(nestedList.map { Self(from: $0) })
-    default:
-      assertionFailure("Unexpected FieldValue case in makeComplexPayload: \(fieldValue)")
-      return .ListValue([])
+      self = .ListValue(nestedList.map { Self(from: $0) })
     }
   }
 
@@ -86,7 +77,8 @@ extension Components.Schemas.ListValuePayload {
       altitude: location.altitude,
       speed: location.speed,
       course: location.course,
-      timestamp: location.timestamp.map { $0.timeIntervalSince1970 * 1_000 }
+      // Rounded for the same reason as the `.date` element above.
+      timestamp: location.timestamp.map { ($0.timeIntervalSince1970 * 1_000).rounded() }
     )
   }
 
