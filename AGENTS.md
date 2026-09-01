@@ -140,6 +140,8 @@ MistKit uses separate types for requests and responses at the OpenAPI schema lev
 
 Object/array-shaped values (`REFERENCE`, `ASSET`, `LOCATION`, `LIST`) and `STRING`/`INT64` are unambiguous and stay untagged. Tagging happens in the exhaustive `init(from:)` switch (`Components.Schemas.FieldValueRequest.swift`). `type` is *not* required globally because CloudKit documents it as optional.
 
+**Timestamps must be whole milliseconds.** CloudKit rejects a fractional `TIMESTAMP` (e.g. `1747999812347.89`) with `BAD_REQUEST "Invalid value, expected type TIMESTAMP"`, and Swift's `Date` carries sub-millisecond precision — so `.date` values are `.rounded()` on the way out, not just tagged. **The same constraint applies to `LocationValue.timestamp`** (`Components.Schemas.FieldValueRequest.swift:89`), which is a second, nested millisecond field with no `type` tag of its own to disambiguate it; that instance was found only via a live CelestraCloud integration failure (PR #377, commit `1eb639a`). Sub-millisecond precision is therefore destroyed on every write: a `Date` in is a different `Date` out.
+
 **Response type recovery (issue #375):** The generated `value` `oneOf` is *undiscriminated* — the decoder tries cases first-match-wins (`String → Int64 → Double → Bytes → Date`), so a whole-millisecond `TIMESTAMP` decodes as `Int64Value` and a base64 `BYTES` string decodes as `StringValue`. The response conversion therefore honors an explicit `type` *over* the decoded case (`makeTypedScalar` in `FieldValue+Components+Scalar.swift`). For the genuinely-ambiguous scalars whose correct interpretation differs from inference it produces the typed value directly: `TIMESTAMP`/`DOUBLE` from any numeric case, `BYTES` from any string case (decoded with `Data(base64Encoded:)`; malformed tagged base64 throws `ConversionError.typeValueMismatch` with the unwrapped string). `INT64`/`STRING` validate the category then defer to inference (which already yields them, and for `INT64` avoids truncating a fractional number). When `type` is absent it falls back to first-match-wins inference (`makeInferredScalar`), which is lossy for the ambiguous scalars (BYTES→`.string`, whole-number TIMESTAMP→`.int64`). Do **not** infer `.bytes` from untagged base64 — ordinary strings such as `"Chen"` decode as valid base64. Domain `.bytes` is `Data`; `bytesValue` re-encodes to base64 and `dataValue` matches `.bytes` only (no `.string` fallback). The generated `BytesValue` in `Sources/MistKitOpenAPI/` stays `String`.
 
 When a scalar `type` *contradicts* the value's category — a numeric type (`TIMESTAMP`/`DOUBLE`/`INT64`) over a non-number, or a string type (`STRING`/`BYTES`) over a non-string — the response is internally inconsistent and the conversion **throws** `ConversionError.typeValueMismatch` (via `requireNumeric`/`requireString`) rather than coercing to the value's shape. This matches the codebase's existing fail-loud `unmappableFieldValue` philosophy.
@@ -376,7 +378,7 @@ A `ClientTransport` extension could provide a generic upload method, but would n
 - `Sources/MistKit/Models/Queries/FilterBuilder/FilterBuilder+StringFilters.swift` — string-specific: `beginsWith`, `notBeginsWith`, `containsAllTokens`
 - `Sources/MistKit/Models/Queries/FilterBuilder/FilterBuilder+ListMemberFilters.swift` — list-specific: `listContains`, etc.
 
-**IN/NOT_IN serialization:** Uses `ListValuePayload` (`Components.Schemas.ListValuePayload`) to wrap array values. The fix in v1.0.0-alpha.5 ensures the correct `value` key structure is used when serializing list comparators.
+**IN/NOT_IN serialization:** Uses `ListValuePayload` (`Components.Schemas.ListValuePayload`) to wrap array values, and tags the list's element type explicitly via `cloudKitListType(for:)` (`.STRING_LIST`, `.INT64_LIST`, …). The v1.0.0-alpha.5 fix (issue #192 / PR #205) **added that `type` tag** — without it CloudKit cannot determine the element type and rejects every `.in()` query with `HTTP 400 BadRequestException: Unexpected input`, at any array size. `ListValuePayload` was already in use and was never the problem; the `value` key structure is unchanged. The element type is derived from the *first* element, so a heterogeneous list is tagged by element zero, and an empty list is sent untagged.
 
 ### CloudKit Web Services Integration
 - Base URL: `https://api.apple-cloudkit.com`
@@ -461,13 +463,24 @@ The `openapi.yaml` file serves as the source of truth for:
 - Authentication requirements
 - Error response formats
 
-Key endpoints documented in the OpenAPI spec:
-- Records: `/records/query`, `/records/modify`, `/records/lookup`, `/records/changes`
-- Zones: `/zones/list`, `/zones/lookup`, `/zones/modify`, `/zones/changes`
+Key endpoints documented in the OpenAPI spec. All are under
+`/database/{version}/{container}/{environment}/{database}/` **except the token endpoints** —
+see the `/device/` note below.
+- Records: `/records/query`, `/records/modify`, `/records/lookup`, `/records/changes`,
+  `/records/resolve`, `/records/accept`
+- Zones: `/zones/list`, `/zones/lookup`, `/zones/modify`, `/zones/changes` *(deprecated by
+  Apple in favor of `/changes/database`)*
+- Changes: `/changes/database`, `/changes/zone`
 - Subscriptions: `/subscriptions/list`, `/subscriptions/lookup`, `/subscriptions/modify`
-- Users: `/users/caller`, `/users/discover` (POST + GET), `/users/lookup/email`, `/users/lookup/id`
-- Assets: `/assets/upload`
-- Tokens: `/tokens/create`, `/tokens/register`
+- Users: `/users/caller`, `/users/discover` (POST; GET is `@available(*, unavailable)` — Apple
+  returns HTTP 500, see #28), `/users/lookup/email`, `/users/lookup/id`
+  *(`/users/lookup/contacts` and `/users/current` are deprecated and unwrapped)*
+- Assets: `/assets/upload`, `/assets/rereference`
+- Tokens: **`/device/{version}/{container}/{environment}/tokens/create`** and
+  `…/tokens/register` — container-scoped, with **no `{database}` segment**. Apple's archived
+  reference documents these under `/database/…`, but the live service routes only `OPTIONS`
+  there and returns `405 Method Not Allowed` on POST. The working path is the one CloudKit JS
+  uses (`setApiModuleName("device")`). See issue #382.
 
 ## Reference Documentation
 

@@ -62,13 +62,13 @@ public struct RecordOperation: Sendable {
   /// When `true`, ask CloudKit to mint a short GUID so this record can be
   /// shared. Echoed back on the response as `shortGUID`.
   public let createShortGUID: Bool?
-  /// When creating a `cloudKit.share` record, the root record being shared
+  /// When creating a `cloudkit.share` record, the root record being shared
   /// (`forRecord`).
   public let forRecord: ShareTargetReference?
-  /// When creating a `cloudKit.share` record, the public's read/write
+  /// When creating a `cloudkit.share` record, the public's read/write
   /// permissions on the shared record.
   public let publicPermission: SharePermission?
-  /// When creating a `cloudKit.share` record, the participants to invite.
+  /// When creating a `cloudkit.share` record, the participants to invite.
   public let participants: [ShareParticipant]?
 
   /// Initialize a record operation

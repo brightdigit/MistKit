@@ -29,7 +29,7 @@
 
 internal import MistKitOpenAPI
 
-/// Identifies the root record being shared when creating a `cloudKit.share`
+/// Identifies the root record being shared when creating a `cloudkit.share`
 /// record (CloudKit's `forRecord` key).
 public struct ShareTargetReference: Codable, Sendable, Equatable, Hashable {
   /// The record name of the shared root record.

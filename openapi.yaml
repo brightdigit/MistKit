@@ -239,7 +239,7 @@ paths:
       summary: Fetch Record Information
       description: |
         Resolve one or more share short GUIDs into information about the shared
-        records they identify — the root record, the `cloudKit.share` record,
+        records they identify — the root record, the `cloudkit.share` record,
         the owner identity, and the caller's participation in each share.
 
         Routed against the public database with web-auth credentials
@@ -858,9 +858,16 @@ paths:
       summary: Get the Caller (Current User)
       description: |
         Fetch the authenticated caller's user information. This replaces the deprecated
-        `users/current` endpoint. Requires public database with a web-auth token
-        (user-context auth); server-to-server credentials and the private database
-        will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
+        `users/current` endpoint. Requires a web-auth token (user-context auth);
+        server-to-server credentials are rejected. MistKit routes it against the
+        public database, which is the scope Apple documents.
+
+        Unverified: whether the `public` segment is strictly required here. The
+        sibling `users/discover` rejects private/shared with `BAD_REQUEST:
+        endpoint not applicable in the database type 'privatedb'`, but one recorded
+        observation had `users/caller` succeed on private + web-auth, while another
+        saw `421 AUTHENTICATION_REQUIRED` with a redirect URL against public. Needs
+        a live re-check before this description asserts either way.
       operationId: getCaller
       tags:
         - Users
@@ -1437,11 +1444,11 @@ components:
           enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
           description: |
             The public read/write permissions to apply. Set when creating a
-            `cloudKit.share` record.
+            `cloudkit.share` record.
         participants:
           type: array
           description: |
-            The participants to invite. Set when creating a `cloudKit.share`
+            The participants to invite. Set when creating a `cloudkit.share`
             record.
           items:
             $ref: '#/components/schemas/ShareParticipant'
@@ -1449,7 +1456,7 @@ components:
     ShareTargetReference:
       type: object
       description: |
-        Identifies the record being shared when creating a `cloudKit.share`
+        Identifies the record being shared when creating a `cloudkit.share`
         record (the `forRecord` key).
       properties:
         recordName:
@@ -1496,11 +1503,11 @@ components:
           enum: [NONE, READ_ONLY, READ_WRITE, UNKNOWN]
           description: |
             The public read/write permissions of a shared record. Present on
-            `cloudKit.share` records.
+            `cloudkit.share` records.
         participants:
           type: array
           description: |
-            The participants in a shared record. Present on `cloudKit.share`
+            The participants in a shared record. Present on `cloudkit.share`
             records.
           items:
             $ref: '#/components/schemas/ShareParticipant'
@@ -1512,7 +1519,11 @@ components:
     ShareReference:
       type: object
       description: |
-        A reference to the `cloudKit.share` record governing a shared record.
+        A reference to the `cloudkit.share` record governing a shared record.
+        Note the lowercase `k`: Apple's archived "Sharing Records" docs write
+        `cloudKit.share`, but the live `records/modify` API accepts and returns
+        only `cloudkit.share`. The camelCase spelling fails with
+        "Cannot share - no such record exists to share".
       properties:
         recordName:
           type: string

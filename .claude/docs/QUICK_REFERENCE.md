@@ -9,13 +9,12 @@ https://api.apple-cloudkit.com/database/{version}/{container}/{environment}/{dat
 
 ### Authentication
 
-**API Token (User-based)**
+**API Token / Web Auth (user-based)** — query parameters, **not** headers:
 ```
-Headers:
-  X-Apple-CloudKit-Request-KeyID: [api-token]
-  X-Apple-CloudKit-Request-ISO8601Date: [timestamp]
-  X-Apple-CloudKit-Request-SignatureV1: [signature]
+?ckAPIToken=[api-token]&ckWebAuthToken=[web-auth-token]
 ```
+`ckWebAuthToken` must be percent-encoded (`+`→`%2B`, `/`→`%2F`, `=`→`%3D`).
+Required for private/shared databases and for every `/users/*` route.
 
 **Server-to-Server Key**
 ```
@@ -36,7 +35,7 @@ Body: Included in signature
 | Record Changes | `/records/changes` | POST |
 | List Zones | `/zones/list` | POST |
 | Modify Zones | `/zones/modify` | POST |
-| Current User | `/users/current` | GET |
+| Current User | `/users/caller` | GET | *(`users/current` is deprecated)*
 | Upload Asset | `/assets/upload` | POST |
 
 ### Request Format (POST endpoints)

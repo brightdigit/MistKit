@@ -35,11 +35,28 @@ FieldValueRequest:
       oneOf: [StringValue, Int64Value, DoubleValue, BytesValue,
               DateValue, LocationValue, ReferenceValue, AssetValue, ListValue]
     type:
-      enum: [STRING_LIST, INT64_LIST, DOUBLE_LIST, ...]  # List element types only
+      enum: [STRING, INT64, DOUBLE, BYTES, TIMESTAMP, REFERENCE, ASSET, ASSETID,
+             LOCATION, STRING_LIST, INT64_LIST, ...]  # 17 values: scalars + 8 *_LIST
 ```
 
-- The `type` field is **optional** and only used for list-typed filter expressions (IN/NOT_IN).
-- For mutations, CloudKit **infers** the type from the value's JSON structure.
+- The `type` field is **optional** on the wire — but it is *not* optional in practice for
+  every value.
+- CloudKit infers the type from the value's JSON structure, and for three scalars that
+  inference is **wrong**, because their JSON form is indistinguishable from another type:
+
+  | Domain case | Wire form | Inferred as, if untagged |
+  |---|---|---|
+  | `.date` (`TIMESTAMP`) | millisecond number | `INT64` / `DOUBLE` |
+  | `.bytes` (`BYTES`) | base64 string | `STRING` |
+  | `.double` (`DOUBLE`) | whole-valued number | `INT64` |
+
+  These **must** carry an explicit `type` or CloudKit rejects the write with `BAD_REQUEST`
+  (issue #375). Object- and array-shaped values (`REFERENCE`, `ASSET`, `LOCATION`, `LIST`)
+  plus `STRING`/`INT64` are unambiguous and stay untagged.
+- `TIMESTAMP` values are additionally **rounded to whole milliseconds** — CloudKit rejects a
+  fractional timestamp with `BAD_REQUEST "expected type TIMESTAMP"`, and Swift's `Date` carries
+  sub-millisecond precision. The same applies to `LocationValue.timestamp`.
+- The granular `*_LIST` tags are used for IN/NOT_IN list filters.
 
 ### FieldValueResponse
 
@@ -53,16 +70,21 @@ FieldValueResponse:
       enum: [STRING, INT64, DOUBLE, TIMESTAMP, ASSETID, ...]  # All field types
 ```
 
-- The `type` field is **optional but present** — provides explicit type information.
+- The `type` field is **optional but usually present** — it is the only way to recover the
+  ambiguous scalars, since the `oneOf` is undiscriminated and decodes first-match-wins.
 - Critical for disambiguation: a `DoubleValue` with `type: TIMESTAMP` is a date, not a double.
+- Note the **list asymmetry**: the response enum carries a single `LIST`, not the request's
+  granular `*_LIST` family — so a list's element type is information you must *send* but can
+  never *read back*. Elements are re-inferred structurally, and `ListValuePayload` carries no
+  per-element tag at all.
 
 ### Why Two Types?
 
 | Concern | Request | Response |
 |---------|---------|----------|
-| Type field purpose | Specifies list element type for filters | Disambiguates value semantics |
-| Type field values | List types only (STRING_LIST, etc.) | All field types (STRING, TIMESTAMP, etc.) |
-| Required? | No — CloudKit infers from structure | No — but aids parsing |
+| Type field purpose | Disambiguates ambiguous scalars; element type for IN/NOT_IN filters | Disambiguates value semantics |
+| Type field values | 17 — all scalars/complex + 8 granular `*_LIST` | 10 — all scalars/complex + a single `LIST` |
+| Required? | Optional on the wire, but **mandatory** for `TIMESTAMP`/`BYTES`/`DOUBLE` | Optional — absent means lossy structural inference |
 
 Modeling this asymmetry at the schema level means the Swift compiler prevents accidentally using a response type where a request is expected.
 

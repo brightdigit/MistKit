@@ -1013,7 +1013,7 @@ public struct Client: APIProtocol {
     /// Fetch Record Information
     ///
     /// Resolve one or more share short GUIDs into information about the shared
-    /// records they identify — the root record, the `cloudKit.share` record,
+    /// records they identify — the root record, the `cloudkit.share` record,
     /// the owner identity, and the caller's participation in each share.
     ///
     /// Routed against the public database with web-auth credentials
@@ -3647,9 +3647,16 @@ public struct Client: APIProtocol {
     /// Get the Caller (Current User)
     ///
     /// Fetch the authenticated caller's user information. This replaces the deprecated
-    /// `users/current` endpoint. Requires public database with a web-auth token
-    /// (user-context auth); server-to-server credentials and the private database
-    /// will be rejected with `BAD_REQUEST: endpoint not applicable in the database type`.
+    /// `users/current` endpoint. Requires a web-auth token (user-context auth);
+    /// server-to-server credentials are rejected. MistKit routes it against the
+    /// public database, which is the scope Apple documents.
+    ///
+    /// Unverified: whether the `public` segment is strictly required here. The
+    /// sibling `users/discover` rejects private/shared with `BAD_REQUEST:
+    /// endpoint not applicable in the database type 'privatedb'`, but one recorded
+    /// observation had `users/caller` succeed on private + web-auth, while another
+    /// saw `421 AUTHENTICATION_REQUIRED` with a redirect URL against public. Needs
+    /// a live re-check before this description asserts either way.
     ///
     ///
     /// - Remark: HTTP `GET /database/{version}/{container}/{environment}/{database}/users/caller`.

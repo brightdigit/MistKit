@@ -324,7 +324,7 @@ Show the CloudKit Dashboard flow: container → Server-to-Server Keys → genera
 > *"Apple gives you a `.pem` file and a key ID. What they don't tell you is how to actually use these to sign requests."*
 
 **Step 2 — Request signing (2 min)**
-Walk through the MistKit signing code: load private key → create payload (date + body + path) → sign with ECDSA → attach headers (`X-Apple-CloudKit-Request-KeyID`, `X-Apple-CloudKit-Request-ISO8601Date`, `X-Apple-CloudKit-Request-SignedMessage`).
+Walk through the MistKit signing code: load private key → create payload (date + body + path) → sign with ECDSA → attach headers (`X-Apple-CloudKit-Request-KeyID`, `X-Apple-CloudKit-Request-ISO8601Date`, `X-Apple-CloudKit-Request-SignatureV1`).
 > *"This is the part where most developers give up. The signing format isn't documented clearly, and getting any part wrong gives you a generic 401."*
 
 **Step 3 — Environment switching (1 min)**

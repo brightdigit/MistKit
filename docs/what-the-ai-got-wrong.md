@@ -9,6 +9,12 @@ Companion to the published narrative in
 §Lessons Learned. That article was written from memory. This one is written from the transcripts,
 and in three places the transcripts sharpen or complicate it.
 
+Companion piece: [`what-cloudkit-got-wrong.md`](what-cloudkit-got-wrong.md) asks the orthogonal
+question — which parts of *CloudKit Web Services itself* were hard. The two barely overlap, for
+the same structural reason this document opens with: the CloudKit facts were discovered after the
+memory convention began, so they appear in `.claude/memory/` and `openapi.yaml` rather than in any
+PR or chat record.
+
 Raw per-slice evidence lives in [`.claude/memory/_raw/`](../.claude/memory/_raw/). Every claim here
 traces to a session id and timestamp or a PR/issue number. **Read the [Limitations](#limitations)
 section before quoting any number.**
