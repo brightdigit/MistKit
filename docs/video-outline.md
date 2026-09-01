@@ -20,6 +20,23 @@ CloudKit is Apple's backend cloud database available to developers.
 
 ## Some basics about CloudKit
 
+### Records
+
+> **[Beginner]** What is a record type / zone / subscription in plain terms?
+Record Field Types
+* String
+* Number
+* Data
+* Date
+* CLLocation
+* CKReference
+* CKAsset
+* List<>
+
+> **[Beginner]** Do I have to define the schema up front, or does it create fields as I go?
+
+Up-Front
+
 ### Databases
 
 CloudKit supports 2 kinds of databases: a public and a private database. Private is exclusive to a single user but allows the ability to share records while Public is shared over the entire system. 
@@ -32,16 +49,6 @@ Besides the databases, theres environments. Environments allow you to test and d
 > **[Beginner]** When does data move between development and production?
 
 > **[Beginner]** Is my container tied to one app, or can several apps share it?
-
-### Records
-
-> **[Beginner]** What is a record type / zone / subscription in plain terms?
-
-> **[Beginner]** How do I model a relationship without joins?
-
-> **[Beginner]** Where does the record name come from — does CloudKit assign it?
-
-> **[Beginner]** Do I have to define the schema up front, or does it create fields as I go?
 
 ### Authenticaion
 
