@@ -150,5 +150,38 @@ extension AuthenticationMiddlewareTests {
 
       #expect(await tokenManager.webAuthToken == nil)
     }
+
+    @Test("AdaptiveTokenManager ignores rotation from middleware before web auth upgrade")
+    internal func adaptiveTokenManagerIgnoresMiddlewareRotationWithoutWebAuth() async throws {
+      let tokenManager = AdaptiveTokenManager(apiToken: Self.validAPIToken)
+      let middleware = AuthenticationMiddleware(tokenManager: tokenManager)
+
+      _ = try await middleware.intercept(
+        Self.makeRequest(),
+        body: nil as HTTPBody?,
+        baseURL: CloudKitService.baseURL,
+        operationID: Self.testOperationID,
+        next: { _, _, _ in
+          (Self.responseWithRotatedToken(Self.rotatedWebAuthToken), nil)
+        }
+      )
+
+      #expect(await tokenManager.webAuthToken == nil)
+    }
+
+    @Test("AdaptiveTokenManager persists rotated token to storage")
+    internal func adaptiveTokenManagerPersistsRotatedTokenToStorage() async throws {
+      let storage = InMemoryTokenStorage()
+      let tokenManager = AdaptiveTokenManager(
+        apiToken: Self.validAPIToken,
+        storage: storage
+      )
+      try await tokenManager.upgradeToWebAuthentication(webAuthToken: Self.validWebAuthToken)
+      try await tokenManager.didReceiveRotatedWebAuthToken(Self.rotatedWebAuthToken)
+
+      let stored = try await storage.retrieve(identifier: Self.validAPIToken)
+      let web = try #require(stored as? WebAuthTokenAuthenticator)
+      #expect(web.webAuthToken == Self.rotatedWebAuthToken)
+    }
   }
 }
