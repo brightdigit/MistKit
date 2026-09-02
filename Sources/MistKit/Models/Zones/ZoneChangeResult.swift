@@ -48,7 +48,7 @@ extension OperationResult where Success == ZoneInfo, Target == ZoneTarget {
       self = .success(
         try ZoneInfo(
           fromZoneID: zone.zoneID,
-          deleted: zone.deleted ?? false
+          deleted: zone.deleted
         )
       )
     }

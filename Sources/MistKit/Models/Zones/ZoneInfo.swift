@@ -55,7 +55,11 @@ public struct ZoneInfo: Codable, Sendable {
   public let atomic: Bool?
   /// When `true`, this is a tombstone entry from a zone change feed —
   /// the zone was deleted and should be removed from local storage.
-  public let deleted: Bool
+  ///
+  /// `nil` when the server omits the key — deliberately *not* defaulted to
+  /// `false`, so list/lookup responses stay distinguishable from change-feed
+  /// tombstones.
+  public let deleted: Bool?
 
   /// Initialize zone information
   public init(
@@ -65,7 +69,7 @@ public struct ZoneInfo: Codable, Sendable {
     zoneType: ZoneType? = nil,
     syncToken: String? = nil,
     atomic: Bool? = nil,
-    deleted: Bool = false
+    deleted: Bool? = nil
   ) {
     self.zoneName = zoneName
     self.ownerRecordName = ownerRecordName
@@ -93,7 +97,7 @@ public struct ZoneInfo: Codable, Sendable {
     fromZoneID zoneID: Components.Schemas.ZoneID?,
     syncToken: String? = nil,
     atomic: Bool? = nil,
-    deleted: Bool = false
+    deleted: Bool? = nil
   ) throws(ConversionError) {
     guard let zoneID else {
       try ConversionError.zoneMissingID.reportAndThrow()
@@ -119,7 +123,7 @@ public struct ZoneInfo: Codable, Sendable {
       fromZoneID: zone.zoneID,
       syncToken: zone.syncToken,
       atomic: zone.atomic,
-      deleted: zone.deleted ?? false
+      deleted: zone.deleted
     )
   }
 }

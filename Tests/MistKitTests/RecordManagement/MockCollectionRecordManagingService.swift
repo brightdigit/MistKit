@@ -1,5 +1,5 @@
 //
-//  ShareTargetReference.swift
+//  MockCollectionRecordManagingService.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,31 +27,32 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import MistKitOpenAPI
+internal import Foundation
 
-/// Identifies the root record being shared when creating a `cloudKit.share`
-/// record (CloudKit's `forRecord` key).
-public struct ShareTargetReference: Codable, Sendable, Equatable, Hashable {
-  /// The record name of the shared root record.
-  public let recordName: String
-  /// Optional change tag for optimistic concurrency when creating the share.
-  public let recordChangeTag: String?
+@testable import MistKit
 
-  /// Initialize a share target reference.
-  /// - Parameters:
-  ///   - recordName: The record name of the shared root record.
-  ///   - recordChangeTag: Optional change tag for the root record.
-  public init(recordName: String, recordChangeTag: String? = nil) {
-    self.recordName = recordName
-    self.recordChangeTag = recordChangeTag
+@available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+internal actor MockCollectionRecordManagingService: RecordManaging, CloudKitRecordCollection {
+  internal static let recordTypes = RecordTypeSet(TestRecord.self, AltTestRecord.self)
+
+  internal var queryCallCount = 0
+  internal var executeCallCount = 0
+  internal var lastExecutedOperations: [RecordOperation] = []
+  internal var batchSizes: [Int] = []
+  internal var recordsByType: [String: [RecordInfo]] = [:]
+
+  internal func queryAllRecords(recordType: String) async throws -> [RecordInfo] {
+    queryCallCount += 1
+    return recordsByType[recordType] ?? []
   }
-}
 
-extension Components.Schemas.ShareTargetReference {
-  internal init(from reference: ShareTargetReference) {
-    self.init(
-      recordName: reference.recordName,
-      recordChangeTag: reference.recordChangeTag
-    )
+  internal func executeBatchOperations(_ operations: [RecordOperation]) async throws {
+    executeCallCount += 1
+    batchSizes.append(operations.count)
+    lastExecutedOperations.append(contentsOf: operations)
+  }
+
+  internal func setRecords(_ records: [RecordInfo], forRecordType recordType: String) {
+    recordsByType[recordType] = records
   }
 }

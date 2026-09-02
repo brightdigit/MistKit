@@ -96,7 +96,7 @@ internal struct ZonePayloadMetadataPhase: IntegrationPhase {
         zoneName: zoneName,
         context: context,
         description: "zone creation"
-      ) { !$0.deleted }
+      ) { $0.deleted != true }
       try Self.requireLiveZoneMetadata(createdChange, source: "fetchDatabaseChanges (create)")
 
       try await context.service.deleteZone(
@@ -112,9 +112,9 @@ internal struct ZonePayloadMetadataPhase: IntegrationPhase {
         zoneName: zoneName,
         context: context,
         description: "zone deletion tombstone"
-      ) { $0.deleted }
+      ) { $0.deleted == true }
 
-      guard deletedChange.deleted else {
+      guard deletedChange.deleted == true else {
         throw IntegrationTestError.verificationFailed(
           "fetchDatabaseChanges did not mark '\(zoneName)' deleted after deleteZone"
         )
@@ -156,7 +156,7 @@ internal struct ZonePayloadMetadataPhase: IntegrationPhase {
           + "(expected \(customZoneType.rawValue))"
       )
     }
-    guard !zone.deleted else {
+    guard zone.deleted != true else {
       throw IntegrationTestError.verificationFailed(
         "\(source) reported deleted=true for live zone '\(zone.zoneName)'"
       )

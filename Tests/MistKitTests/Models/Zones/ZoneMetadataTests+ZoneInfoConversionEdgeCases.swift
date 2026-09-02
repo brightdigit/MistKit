@@ -51,7 +51,7 @@ extension ZoneMetadataTests {
 
       let info = try ZoneInfo(from: zone)
 
-      #expect(try #require(info.atomic) == false)
+      #expect(info.atomic == false)
     }
 
     @Test("ZoneInfo still throws when the zone payload has no zoneName")
