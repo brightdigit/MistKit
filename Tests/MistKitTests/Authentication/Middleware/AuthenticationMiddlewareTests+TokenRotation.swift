@@ -73,10 +73,12 @@ extension AuthenticationMiddlewareTests {
       let mockManager = MockTokenManagerWithRotationFailure()
       let middleware = AuthenticationMiddleware(tokenManager: mockManager)
 
-      let (response, _) = try await RotatedWebAuthTokenFailureReporter.$assertionHandler.withValue(
+      // Return a single value from withValue (not a tuple) — TaskLocal + async
+      // + tuple return has tripped Swift 6.2's Windows frontend.
+      let status = try await RotatedWebAuthTokenFailureReporter.$assertionHandler.withValue(
         { _ in },
         operation: {
-          try await middleware.intercept(
+          let (response, _) = try await middleware.intercept(
             Self.makeRequest(),
             body: nil as HTTPBody?,
             baseURL: CloudKitService.baseURL,
@@ -85,10 +87,11 @@ extension AuthenticationMiddlewareTests {
               (Self.responseWithRotatedToken("short"), nil)
             }
           )
+          return response.status
         }
       )
 
-      #expect(response.status == .ok)
+      #expect(status == .ok)
     }
 
     @Test("WebAuthTokenManager adopts rotated token from middleware")
@@ -109,7 +112,7 @@ extension AuthenticationMiddlewareTests {
         }
       )
 
-      #expect(await tokenManager.webAuthToken == Self.rotatedWebAuthToken)
+      #expect(tokenManager.webAuthToken == Self.rotatedWebAuthToken)
       let authenticator = try await tokenManager.currentAuthenticator()
       let web = try #require(authenticator as? WebAuthTokenAuthenticator)
       #expect(web.webAuthToken == Self.rotatedWebAuthToken)

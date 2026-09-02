@@ -25,7 +25,7 @@ extension WebAuthTokenManagerTests {
 
       let startTime = Date()
 
-      // WASM cooperative executor traps under heavy actor churn; keep a smoke count.
+      // WASM cooperative executor traps under heavy async churn; keep a smoke count.
       let iterations = Platform.isWasm ? 5 : 1_000
 
       // Perform many operations

@@ -150,7 +150,7 @@ extension CloudKitServiceTests.FetchDatabaseChanges {
       do {
         _ = try entry.get()
         Issue.record("expected .zoneOperationFailed")
-      } catch let error as CloudKitError {
+      } catch let error {
         guard case .zoneOperationFailed(let failure) = error else {
           Issue.record("expected .zoneOperationFailed, got \(error)")
           return

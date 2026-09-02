@@ -52,7 +52,7 @@ extension CloudKitServiceTests.Upload {
           database: .public(.prefers(.serverToServer))
         )
         Issue.record("Expected authentication error")
-      } catch let error as CloudKitError {
+      } catch let error {
         if case .authenticationFailed(let reason) = error {
           #expect(error.httpStatusCode == 401, "Should return 401 Unauthorized")
           #expect(error.serverErrorCode == "AUTHENTICATION_FAILED")
@@ -82,7 +82,7 @@ extension CloudKitServiceTests.Upload {
           database: .public(.prefers(.serverToServer))
         )
         Issue.record("Expected bad request error")
-      } catch let error as CloudKitError {
+      } catch let error {
         if case .badRequest = error {
           // expected
         } else {

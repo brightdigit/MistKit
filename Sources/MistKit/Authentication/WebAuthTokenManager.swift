@@ -31,9 +31,22 @@ internal import Foundation
 
 /// Token manager for web authentication with API token + web auth token.
 /// Provides user-specific access to CloudKit Web Services.
-public actor WebAuthTokenManager: TokenManager {
+///
+/// Rotation mutates `webAuthToken` under an `NSLock`. Kept as a `Sendable`
+/// class (not an `actor`) because the actor form caused a silent Swift 6.2
+/// Windows abort while emitting `MistKitTests`.
+public final class WebAuthTokenManager: TokenManager, @unchecked Sendable {
   internal let apiToken: String
-  internal var webAuthToken: String
+
+  private let lock = NSLock()
+  private var _webAuthToken: String
+
+  /// The current web authentication token (may change after rotation).
+  internal var webAuthToken: String {
+    lock.lock()
+    defer { lock.unlock() }
+    return _webAuthToken
+  }
 
   // MARK: - TokenManager Protocol
 
@@ -53,7 +66,7 @@ public actor WebAuthTokenManager: TokenManager {
     webAuthToken: String
   ) {
     self.apiToken = apiToken
-    self.webAuthToken = webAuthToken
+    self._webAuthToken = webAuthToken
   }
 
   /// Validates the stored credentials for format and completeness.
@@ -70,6 +83,14 @@ public actor WebAuthTokenManager: TokenManager {
   /// Adopts a rotated web auth token from a CloudKit response header.
   public func didReceiveRotatedWebAuthToken(_ token: String) async throws(TokenManagerError) {
     _ = try WebAuthTokenAuthenticator(apiToken: apiToken, webAuthToken: token)
-    self.webAuthToken = token
+    // Locking must happen in a synchronous helper — `NSLock.lock` is
+    // unavailable from asynchronous contexts on newer SDKs.
+    replaceWebAuthToken(token)
+  }
+
+  private func replaceWebAuthToken(_ token: String) {
+    lock.lock()
+    _webAuthToken = token
+    lock.unlock()
   }
 }

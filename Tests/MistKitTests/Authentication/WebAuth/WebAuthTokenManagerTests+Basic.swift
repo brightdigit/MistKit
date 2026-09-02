@@ -22,26 +22,26 @@ extension WebAuthTokenManagerTests {
 
     /// Tests WebAuthTokenManager initialization with valid tokens
     @Test("WebAuthTokenManager initialization with valid tokens")
-    internal func initializationWithValidTokens() async {
+    internal func initializationWithValidTokens() {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
       )
 
-      #expect(await manager.apiToken == Self.validAPIToken)
-      #expect(await manager.webAuthToken == Self.validWebAuthToken)
+      #expect(manager.apiToken == Self.validAPIToken)
+      #expect(manager.webAuthToken == Self.validWebAuthToken)
     }
 
     /// Tests WebAuthTokenManager initialization with storage
     @Test("WebAuthTokenManager initialization with storage")
-    internal func initializationWithStorage() async {
+    internal func initializationWithStorage() {
       let manager = WebAuthTokenManager(
         apiToken: Self.validAPIToken,
         webAuthToken: Self.validWebAuthToken
       )
 
-      #expect(await manager.apiToken == Self.validAPIToken)
-      #expect(await manager.webAuthToken == Self.validWebAuthToken)
+      #expect(manager.apiToken == Self.validAPIToken)
+      #expect(manager.webAuthToken == Self.validWebAuthToken)
     }
 
     // MARK: - TokenManager Protocol Tests
