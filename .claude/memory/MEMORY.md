@@ -40,6 +40,6 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [Never git stash in this multi-worktree repo](feedback_never_git_stash_multiworktree.md) — The stash stack is shared across worktrees; a pop in one can bury a sibling branch's WIP. Commit instead.
 - [cloudkit.share wire casing](project_cloudkit_share_record_type_casing.md) — Live API wants `cloudkit.share` (lowercase k); archived docs' `cloudKit.share` yields "Cannot share - no such record exists to share"
 - [MISTKIT_BRANCH pin resolves tags too](project_mistkit_branch_pin_resolves_tags.md) — `git ls-remote` matches tags; a tag value silently pins the old release and greens example CI without testing the branch
-- [MistKit release process](project_release_process.md) — Branch `vX` vs tag `X`; pins invert at release; a tag must contain its own notes; notes are a flat bullet list
+- [MistKit release process](project_release_process.md) — Branch `vX` vs tag `X`; pins invert at release; retain release branches; notes are a flat bullet list for new entries
 - [Use git trees, not git worktree](feedback_use_git_trees_not_git_worktree.md) — Manage worktrees with `git trees add/rm/list/clean`; `add` pushes to origin unless `--no-push`
 - [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — `examples.yml` must use a Swift container that can parse each example's Package.swift (6.4 nightly for Bushel/Celestra; 6.3 for MistDemo)

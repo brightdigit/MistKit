@@ -34,3 +34,7 @@ confirmed with the human each time rather than assumed. See
 [[feedback_feature_pr_merge_squash_or_rebase]] and
 [[feedback_check_merge_strategy_before_release_deletions]] (the archive tag is
 load-bearing under squash).
+
+**Release branches are retained after publication.** Do not delete `v*` release
+branches or remove their worktrees; open the next beta from `main` with
+`git trees add vX.Y.Z main`.

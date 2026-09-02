@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 ## The naming rule
 
-```
+```text
 release branch  v1.0.0-beta.5   ← with v
 release tag      1.0.0-beta.5   ← without v
 ```
@@ -49,8 +49,8 @@ Run everything from the release branch's own worktree
 ```
 
 Checks branch shape, clean tree, tag availability, gating CI (`MistKit`,
-`MistDemo`, `Examples` — *not* `Claude Code Review`, which is advisory), pins,
-open milestone issues, then local `swift build`/`swift test`/`Scripts/lint.sh`.
+`MistDemo Integration`, `Examples` — *not* `Claude Code Review`, which is advisory),
+pins, open milestone issues, then local `swift build`/`swift test`/`Scripts/lint.sh`.
 Use `--skip-local` only when re-running after a green local pass.
 
 ### 2. Fix the pre-release pins
@@ -65,6 +65,8 @@ git subrepo push Examples/BushelCloud
 git subrepo push Examples/CelestraCloud
 git push
 ```
+
+When `Packages/MistKitConfiguration` lands (#407), add its subrepo push here too.
 
 Then confirm from a build log that `Setup MistKit` printed
 `Pinning MistKit to v1.0.0-beta.5 @ <sha>` with a sha matching the branch tip,
@@ -93,8 +95,9 @@ git commit -am "docs: 1.0.0-beta.5 release notes and roadmap" && git push
 
 ### 4. Archive before merging
 
-Load-bearing under squash: once the branch is deleted, squashed commits are
-unreachable. Do this even if you plan a merge commit.
+Load-bearing under squash: once squashed commits are no longer reachable from
+`main`, the archive tag is the only preservation mechanism. Do this even if you
+plan a merge commit.
 
 ```bash
 git tag "backup/v1.0.0-beta.5-pre-merge" v1.0.0-beta.5
@@ -115,8 +118,11 @@ archive tag from phase 4 the *only* preservation mechanism.
 
 ### 6. Tag — only after notes have landed
 
+Locate the existing `main` worktree (`git trees list`) — do not `git checkout main`
+from the release worktree. From that `main` worktree:
+
 ```bash
-git checkout main && git pull --ff-only
+git pull --ff-only
 ./Scripts/release.sh verify-tag 1.0.0-beta.5 --at HEAD   # must pass first
 git tag 1.0.0-beta.5          # lightweight, no -a, no v
 git push origin 1.0.0-beta.5
@@ -146,17 +152,20 @@ git subrepo push Examples/CelestraCloud
 git push
 ```
 
-### 9. Clean up and open the next release
+When `Packages/MistKitConfiguration` lands (#407), add its subrepo push here too.
+
+### 9. Open the next beta
+
+Keep the released `v1.0.0-beta.5` branch and its worktree — do not delete either.
+Create the next beta branch from `main`:
 
 ```bash
-git push origin --delete v1.0.0-beta.5   # archive tag from phase 4 preserves it
-git trees rm v1.0.0-beta.5 --apply
 git trees add v1.0.0-beta.6 main
 ```
 
 ## This runbook will not
 
 - Push the Example subrepos for you — it prints the `git subrepo push` commands.
-- Delete a release branch before its archive tag exists.
+- Delete a release branch after publication.
 - Tag before `check` / `verify-tag` passes.
 - Choose the merge shape without asking.

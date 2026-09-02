@@ -18,9 +18,11 @@ REPO_URL="https://github.com/${REPO}.git"
 # Claude Code Review is advisory and is routinely red, so an all-green rule
 # would make preflight unpassable and get bypassed. No env-var override —
 # a release gate is policy, not configuration.
-REQUIRED_WORKFLOWS=("MistKit" "MistDemo" "Examples")
+REQUIRED_WORKFLOWS=("MistKit" "MistDemo Integration" "Examples")
 
 # Example workflows carrying a MISTKIT_BRANCH pin. Both are git subrepos.
+# When Packages/MistKitConfiguration lands (#407), add its workflow here and
+# to the git subrepo push hints in cmd_pins.
 PIN_FILES=(
 	"Examples/BushelCloud/.github/workflows/BushelCloud.yml"
 	"Examples/CelestraCloud/.github/workflows/CelestraCloud.yml"
@@ -69,6 +71,21 @@ current_branch() {
 # Newest release already recorded in ReleaseNotes.md, e.g. 1.0.0-beta.4.
 previous_tag() {
 	sed -n 's/^## \(.*\)$/\1/p' ReleaseNotes.md | head -1
+}
+
+# The release immediately before $1 — skips $1 when notes-draft prepended it.
+prior_released_tag() {
+	local excluding="$1"
+	sed -n 's/^## \(.*\)$/\1/p' ReleaseNotes.md \
+		| awk -v skip="$excluding" '$0 != skip { print; exit }'
+}
+
+validate_release_tag() {
+	local tag="$1"
+	if [[ "$tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+\.[0-9]+)?$ ]]; then
+		return 0
+	fi
+	die "tag '$tag' does not match the release pattern (expected e.g. 1.0.0-beta.5)"
 }
 
 # Print the ReleaseNotes.md section for a tag (heading included).
@@ -364,7 +381,7 @@ cmd_check() {
 	local branch="${1:-$(current_branch)}"
 	local tag prev
 	tag=$(tag_for "$branch")
-	prev=$(previous_tag)
+	prev=$(prior_released_tag "$tag")
 
 	echo "🔍 Checking the prepared tree for $tag"
 	echo
@@ -422,10 +439,14 @@ cmd_check() {
 	snippet=$(grep -o 'from: "[^"]*"' README.md | head -1 | sed 's/from: "//;s/"//')
 	if [ -z "$snippet" ]; then
 		warn "no 'from:' snippet found in README.md"
-	elif [ "$snippet" = "$prev" ] || [ "$snippet" = "$tag" ]; then
-		pass "README 'from:' snippet is current ($snippet)"
+	elif [ -z "$prev" ]; then
+		fail "could not determine the prior release tag from ReleaseNotes.md"
+	elif [ "$snippet" = "$prev" ]; then
+		pass "README 'from:' snippet names the currently released tag ($snippet)"
+	elif [ "$snippet" = "$tag" ]; then
+		fail "README 'from:' snippet is '$snippet' but the tag does not exist yet; expected '$prev'"
 	else
-		fail "README 'from:' snippet is '$snippet'; expected '$prev' (the current release)"
+		fail "README 'from:' snippet is '$snippet'; expected '$prev' (the currently released tag)"
 	fi
 
 	check_pins --expect-branch "$branch"
@@ -437,6 +458,7 @@ cmd_publish() {
 	local tag="$1"
 	[ -n "$tag" ] || die "publish needs a tag"
 	[ "$tag" = "${tag#v}" ] || die "tags carry no 'v' prefix; use '${tag#v}'"
+	validate_release_tag "$tag"
 
 	local section
 	section=$(notes_section "$tag")
@@ -492,6 +514,12 @@ cmd_verify_tag() {
 		fail "tag '$tag' must not carry a 'v' prefix (branches do, tags do not)"
 	fi
 
+	if [[ "$tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+\.[0-9]+)?$ ]]; then
+		pass "tag '$tag' matches the release pattern"
+	else
+		fail "tag '$tag' does not match the release pattern (expected e.g. 1.0.0-beta.5)"
+	fi
+
 	git rev-parse -q --verify "$ref" >/dev/null 2>&1 || die "ref '$ref' not found"
 
 	local head_line
@@ -540,34 +568,54 @@ ROOT=$(repo_root) || die "not in a git worktree"
 cd "$ROOT" || die "could not cd to $ROOT"
 
 COMMAND="$1"
-shift 2>/dev/null
+shift 2>/dev/null || true
 
 ARGS=()
 AT_REF=""
-for arg in "$@"; do
-	case "$arg" in
-		--dry-run) DRY_RUN=true ;;
-		*)         ARGS+=("$arg") ;;
-	esac
-done
+SKIP_LOCAL=false
+STDOUT=false
 
-# --at <sha> for verify-tag
-for i in "${!ARGS[@]}"; do
-	if [ "${ARGS[$i]}" = "--at" ]; then
-		AT_REF="${ARGS[$((i + 1))]}"
-		unset 'ARGS[$i]' 'ARGS[$((i + 1))]'
-		ARGS=("${ARGS[@]}")
-		break
-	fi
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--dry-run) DRY_RUN=true ;;
+		--skip-local)
+			[ "$COMMAND" = preflight ] || die "--skip-local is only valid for preflight"
+			SKIP_LOCAL=true
+			;;
+		--stdout)
+			[ "$COMMAND" = notes-draft ] || die "--stdout is only valid for notes-draft"
+			STDOUT=true
+			;;
+		--at)
+			[ "$COMMAND" = verify-tag ] || die "--at is only valid for verify-tag"
+			shift
+			[ -n "${1:-}" ] || die "--at requires a ref"
+			AT_REF="$1"
+			;;
+		*) ARGS+=("$1") ;;
+	esac
+	shift
 done
 
 case "$COMMAND" in
-	preflight)   cmd_preflight "${ARGS[0]}" "${ARGS[1]}" ;;
-	notes-draft) cmd_notes_draft "${ARGS[0]}" "${ARGS[1]}" ;;
+	preflight)
+		if [ "$SKIP_LOCAL" = true ]; then
+			cmd_preflight "${ARGS[0]}" "--skip-local"
+		else
+			cmd_preflight "${ARGS[0]}"
+		fi
+		;;
+	notes-draft)
+		if [ "$STDOUT" = true ]; then
+			cmd_notes_draft "${ARGS[0]}" "--stdout"
+		else
+			cmd_notes_draft "${ARGS[0]}"
+		fi
+		;;
 	check)       cmd_check "${ARGS[0]}" ;;
 	pins)        cmd_pins "${ARGS[0]}" "${ARGS[1]}" ;;
 	publish)     cmd_publish "${ARGS[0]}" ;;
-	verify-tag)  cmd_verify_tag "${ARGS[0]}" "$AT_REF" ;;
+	verify-tag)  cmd_verify_tag "${ARGS[0]}" "${AT_REF:-${ARGS[0]}}" ;;
 	-h|--help|help|"") usage; exit 0 ;;
 	*)           usage; die "unknown command: $COMMAND" ;;
 esac

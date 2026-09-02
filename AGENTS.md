@@ -562,7 +562,7 @@ the common ones.
 
 **Naming — the one rule to internalize:**
 
-```
+```text
 release branch  v1.0.0-beta.5   ← with v
 release tag      1.0.0-beta.5   ← without v
 ```
@@ -572,7 +572,8 @@ Tags are lightweight and unprefixed; branches are prefixed. `setup-mistkit` reso
 pinning the wrong kind of ref succeeds silently and greens example CI without ever
 compiling the code under release. The requirement inverts at release time: before the
 merge the pin must be the **branch**, after publishing it must be the **tag**. Assert
-it with `./Scripts/release.sh pins --expect-branch|--expect-tag`.
+with `./Scripts/release.sh pins --expect-branch v1.0.0-beta.5` before the merge and
+`./Scripts/release.sh pins --expect-tag 1.0.0-beta.5` after publishing.
 
 **Three standing guardrails:**
 
@@ -580,10 +581,11 @@ it with `./Scripts/release.sh pins --expect-branch|--expect-tag`.
    pass before `git tag`. Both 1.0.0-beta.3 and 1.0.0-beta.4 were tagged with no
    `ReleaseNotes.md` section of their own; the `Release Check` workflow re-asserts this
    after any tag push.
-2. **Archive before deleting a release branch.** Under squash-merge the branch's commits
-   become unreachable — the archive tag is the only preservation mechanism.
-3. **Release notes are a flat bullet list.** No `###` category subsections; sections
-   from beta.1–beta.4 predate this and are left as they are.
+2. **Archive before merging under squash.** Under squash-merge, squashed commits can
+   become unreachable from `main` — the pre-merge archive tag is the preservation
+   mechanism. Release branches themselves are retained after publication.
+3. **Release notes are a flat bullet list for new entries.** No `###` category
+   subsections; sections from beta.1–beta.4 predate this and are left as they are.
 
 The release PR is the documented merge-commit case (feature PRs are always rebase or
 squash), but confirm the shape with the human before merging.

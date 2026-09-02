@@ -21,5 +21,6 @@ Standing always/never directives and corrections from the human. Agents must rea
 - Feature-branch PRs: NEVER merge-commit. ALWAYS rebase if the PR has exactly 1 commit (`gh pr merge --rebase`); ALWAYS squash if it has 2+ commits (`gh pr merge --squash`). Count commits before merging.
 - Release PRs (a `v*` release branch into `main`) are the one merge-commit case — the "never merge-commit" rule above covers FEATURE PRs only; still confirm the shape with the human before merging.
 - NEVER tag a release before its `ReleaseNotes.md` section exists in the tree being tagged — run `./Scripts/release.sh verify-tag <tag> --at HEAD` first (beta.3 and beta.4 both shipped tags with no notes).
-- Release notes are a FLAT bullet list — no `###` category subsections.
+- Release notes are a FLAT bullet list for **new** entries — do not add `###` category subsections; preserve the existing beta.1–beta.4 sections.
+- NEVER delete a released beta branch — after publication, create the next beta branch from `main` with `git trees add`.
 - ALWAYS manage worktrees with `git trees` (`add`/`rm`/`list`/`clean`), never raw `git worktree`.
