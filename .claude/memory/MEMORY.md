@@ -43,8 +43,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [MISTKIT_BRANCH pin resolves tags too](project_mistkit_branch_pin_resolves_tags.md) — `git ls-remote` matches tags; a tag value silently pins the old release and greens example CI without testing the branch
 - [MistKit release process](project_release_process.md) — Branch `vX` vs tag `X`; pins invert at release; retain release branches; notes are a flat bullet list for new entries
 - [Use git trees, not git worktree](feedback_use_git_trees_not_git_worktree.md) — Manage worktrees with `git trees add/rm/list/clean`; `add` pushes to origin unless `--no-push`
-- [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — `examples.yml` must use a Swift container that can parse each example's Package.swift (6.4 nightly for Bushel/Celestra; 6.3 for MistDemo)
-- [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — `examples.yml` / MistDemo.yml must use a Swift 6.4 toolchain wherever MistKitConfiguration is a dependency (6.4 nightly / Xcode 27)
+- [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — MistDemo/Bushel/Celestra/MKC are tools-version 6.4; examples.yml + MistDemo.yml use 6.4 nightly / Xcode 27
 - [ConfigKey bases must be dash-case](reference_configkey_cli_flag_dash_case.md) — snake_case silently breaks CLI flags and secret redaction; ENV works either way, so it hides the bug
 - [ConfigKeyKit ConfigValueReading](reference_configkeykit_configvaluereading.md) — ConfigKeyKit#1 shipped in-core in 1.0.0-beta.2; there is no ConfigKeyKitConfiguration package
 - [Path-package identity is the directory name](project_path_package_identity_collision.md) — a `path:` MistKit + a transitive `url:` MistKit = duplicate-target build failure; resolve still succeeds

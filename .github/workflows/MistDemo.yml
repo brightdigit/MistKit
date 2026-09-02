@@ -60,9 +60,9 @@ jobs:
       - id: matrix
         name: Build matrix values
         run: |
-          # MistDemo depends on MistKitConfiguration (swift-tools-version: 6.4).
+          # MistDemo declares swift-tools-version: 6.4 (MistKitConfiguration).
           # Swift 6.4 has no release toolchain yet, so only the nightly image can
-          # parse that dependency — no 6.2/6.3 lanes (same constraint as
+          # parse the manifest — no 6.2/6.3 lanes (same constraint as
           # Packages/MistKitConfiguration and examples.yml).
           SWIFT='[{"version":"6.4","image":"swiftlang/swift:nightly-6.4.x"}]'
           if [[ "${{ steps.check.outputs.full }}" == "true" ]]; then
@@ -144,15 +144,10 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [windows-2022, windows-2025]
-        # MistDemo's Package.swift declares swift-tools-version: 6.2,
-        # so Swift 6.1 is not supported.
-        # TODO: re-add swift-6.2-release once the swift-testing 6.2 +
-        # Windows parallel-runner crash is resolved (test process exits
-        # 1 with no diagnostic output after fanning out parallel tests;
-        # 6.3 is unaffected).
+        # Re-enable when a windows-*-release 6.4 toolchain exists.
         swift:
-          - version: swift-6.3-release
-            build: 6.3-RELEASE
+          - version: swift-6.4-release
+            build: 6.4-RELEASE
     steps:
       - uses: actions/checkout@v6
       - uses: brightdigit/swift-build@v1
@@ -181,11 +176,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # MistDemo's Package.swift declares swift-tools-version: 6.2,
-        # so Swift 6.1 is not supported.
+        # Re-enable when an Android Swift 6.4 SDK lane exists.
         swift:
-          - version: "6.2"
-          - version: "6.3"
+          - version: "6.4"
         android-api-level: [33, 34]
     steps:
       - uses: actions/checkout@v6
