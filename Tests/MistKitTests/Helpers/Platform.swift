@@ -24,8 +24,9 @@ internal enum Platform {
 
   /// True only on Windows × Swift 6.2, which silently aborts emitting
   /// MistKitTests past a tip-over size (no `error:` / stack dump).
-  /// Prefer compile-time `#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))`
-  /// for suites that must not join the emit; this flag is for gist-style traits.
+  /// Prefer compile-time body `#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))`
+  /// (with `Issue.record` in `#else`) so tip-over IR is omitted from emit; this
+  /// flag pairs with `.disabled(if:)` so Windows 6.2 does not fail at runtime.
   #if os(Windows) && compiler(>=6.2) && compiler(<6.3)
     internal static let isWindowsSwift62 = true
   #else

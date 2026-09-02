@@ -32,16 +32,15 @@ internal import Testing
 
 @testable import MistKit
 
-// Omitted on Windows × Swift 6.2: emit-module tip-over (see .claude/docs/research/windows-6.2-ci-failure-462.md).
-#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
-  extension CloudKitServiceTests.RecordWriteConvenience {
-    /// Pins zoneID forwarding on the single-record write conveniences (#454).
-    @Suite("Record Write Convenience ZoneID")
-    internal struct ZoneIDForwarding {
-      private typealias Helper = CloudKitServiceTests.Rereference
+extension CloudKitServiceTests.RecordWriteConvenience {
+  /// Pins zoneID forwarding on the single-record write conveniences (#454).
+  @Suite("Record Write Convenience ZoneID", .disabled(if: Platform.isWindowsSwift62))
+  internal struct ZoneIDForwarding {
+    private typealias Helper = CloudKitServiceTests.Rereference
 
-      @Test("createRecord forwards zoneID into the modifyRecords request body")
-      internal func createForwardsZoneID() async throws {
+    @Test("createRecord forwards zoneID into the modifyRecords request body")
+    internal func createForwardsZoneID() async throws {
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
         guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
           Issue.record("CloudKitService is not available on this operating system.")
           return
@@ -68,10 +67,14 @@ internal import Testing
         let zoneID = try #require(body["zoneID"] as? [String: Any])
         #expect(zoneID["zoneName"] as? String == "Articles")
         #expect(zoneID["ownerRecordName"] as? String == "_abc123")
-      }
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
+    }
 
-      @Test("updateRecord forwards zoneID into the modifyRecords request body")
-      internal func updateForwardsZoneID() async throws {
+    @Test("updateRecord forwards zoneID into the modifyRecords request body")
+    internal func updateForwardsZoneID() async throws {
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
         guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
           Issue.record("CloudKitService is not available on this operating system.")
           return
@@ -99,10 +102,14 @@ internal import Testing
         let zoneID = try #require(body["zoneID"] as? [String: Any])
         #expect(zoneID["zoneName"] as? String == "Articles")
         #expect(zoneID["ownerRecordName"] as? String == "_abc123")
-      }
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
+    }
 
-      @Test("deleteRecord forwards zoneID into the modifyRecords request body")
-      internal func deleteForwardsZoneID() async throws {
+    @Test("deleteRecord forwards zoneID into the modifyRecords request body")
+    internal func deleteForwardsZoneID() async throws {
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
         guard #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) else {
           Issue.record("CloudKitService is not available on this operating system.")
           return
@@ -129,8 +136,9 @@ internal import Testing
         let zoneID = try #require(body["zoneID"] as? [String: Any])
         #expect(zoneID["zoneName"] as? String == "Articles")
         #expect(zoneID["ownerRecordName"] as? String == "_abc123")
-      }
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
     }
   }
-
-#endif
+}

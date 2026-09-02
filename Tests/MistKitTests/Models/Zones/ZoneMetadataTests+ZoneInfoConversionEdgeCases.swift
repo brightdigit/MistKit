@@ -33,18 +33,17 @@ internal import Testing
 @testable import MistKit
 @testable import MistKitOpenAPI
 
-// Omitted on Windows × Swift 6.2: emit-module tip-over (see .claude/docs/research/windows-6.2-ci-failure-462.md).
-#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
-  extension ZoneMetadataTests {
-    /// Edge-case decoding for ``ZoneInfo`` conversion.
-    @Suite("ZoneInfo Conversion Edge Cases")
-    internal struct ZoneInfoConversionEdgeCases {
-      private static func decodeZone(_ json: String) throws -> Components.Schemas.Zone {
-        try JSONDecoder().decode(Components.Schemas.Zone.self, from: Data(json.utf8))
-      }
+extension ZoneMetadataTests {
+  /// Edge-case decoding for ``ZoneInfo`` conversion.
+  @Suite("ZoneInfo Conversion Edge Cases", .disabled(if: Platform.isWindowsSwift62))
+  internal struct ZoneInfoConversionEdgeCases {
+    private static func decodeZone(_ json: String) throws -> Components.Schemas.Zone {
+      try JSONDecoder().decode(Components.Schemas.Zone.self, from: Data(json.utf8))
+    }
 
-      @Test("atomic decodes false without collapsing into nil")
-      internal func atomicFalseIsPreserved() throws {
+    @Test("atomic decodes false without collapsing into nil")
+    internal func atomicFalseIsPreserved() throws {
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
         let zone = try Self.decodeZone(
           """
           { "zoneID": { "zoneName": "Articles" }, "atomic": false }
@@ -54,10 +53,14 @@ internal import Testing
         let info = try ZoneInfo(from: zone)
 
         #expect(info.atomic == false)
-      }
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
+    }
 
-      @Test("ZoneInfo still throws when the zone payload has no zoneName")
-      internal func missingZoneNameThrows() throws {
+    @Test("ZoneInfo still throws when the zone payload has no zoneName")
+    internal func missingZoneNameThrows() throws {
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
         let zone = try Self.decodeZone(
           """
           { "zoneID": { "ownerRecordName": "_defaultOwner" }, "atomic": true }
@@ -72,8 +75,9 @@ internal import Testing
             }
           }
         )
-      }
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
     }
   }
-
-#endif
+}

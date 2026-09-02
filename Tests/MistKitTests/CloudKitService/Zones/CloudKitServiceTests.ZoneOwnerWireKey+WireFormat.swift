@@ -32,46 +32,45 @@ internal import Testing
 
 @testable import MistKit
 
-// Omitted on Windows × Swift 6.2: emit-module tip-over (see .claude/docs/research/windows-6.2-ci-failure-462.md).
-#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
-  extension CloudKitServiceTests.ZoneOwnerWireKey {
-    /// Pins the on-the-wire owner key inside `zoneID` objects (issue #444).
-    ///
-    /// Apple's Zone ID Dictionary and live responses use `ownerRecordName`, not
-    /// the mistaken `ownerName` key MistKit previously emitted.
-    @Suite("ZoneID Wire Format")
-    internal struct WireFormat {
-      private static let database: Database = .private
+extension CloudKitServiceTests.ZoneOwnerWireKey {
+  /// Pins the on-the-wire owner key inside `zoneID` objects (issue #444).
+  ///
+  /// Apple's Zone ID Dictionary and live responses use `ownerRecordName`, not
+  /// the mistaken `ownerName` key MistKit previously emitted.
+  @Suite("ZoneID Wire Format", .disabled(if: Platform.isWindowsSwift62))
+  internal struct WireFormat {
+    private static let database: Database = .private
 
-      private static func makeService(
-        _ provider: ResponseProvider
-      ) throws -> CloudKitService {
-        try CloudKitService(
-          containerIdentifier: TestConstants.serviceContainerIdentifier,
-          credentials: Credentials(
-            apiAuth: APICredentials(
-              apiToken: TestConstants.apiToken,
-              webAuthToken: TestConstants.webAuthToken
-            )
-          ),
-          transport: MockTransport(responseProvider: provider)
-        )
-      }
+    private static func makeService(
+      _ provider: ResponseProvider
+    ) throws -> CloudKitService {
+      try CloudKitService(
+        containerIdentifier: TestConstants.serviceContainerIdentifier,
+        credentials: Credentials(
+          apiAuth: APICredentials(
+            apiToken: TestConstants.apiToken,
+            webAuthToken: TestConstants.webAuthToken
+          )
+        ),
+        transport: MockTransport(responseProvider: provider)
+      )
+    }
 
-      private static func sentBody(
-        for operationID: String,
-        from provider: ResponseProvider,
-        at index: Int = 0
-      ) async throws -> [String: Any] {
-        let bodies = await provider.bodies(for: operationID).compactMap { $0 }
-        let data = try #require(bodies.dropFirst(index).first)
-        return try #require(
-          try JSONSerialization.jsonObject(with: data) as? [String: Any]
-        )
-      }
+    private static func sentBody(
+      for operationID: String,
+      from provider: ResponseProvider,
+      at index: Int = 0
+    ) async throws -> [String: Any] {
+      let bodies = await provider.bodies(for: operationID).compactMap { $0 }
+      let data = try #require(bodies.dropFirst(index).first)
+      return try #require(
+        try JSONSerialization.jsonObject(with: data) as? [String: Any]
+      )
+    }
 
-      @Test("queryRecords() encodes ownerRecordName, never ownerName")
-      internal func queryEncodesOwnerRecordName() async throws {
+    @Test("queryRecords() encodes ownerRecordName, never ownerName")
+    internal func queryEncodesOwnerRecordName() async throws {
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
         guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
           Issue.record("CloudKitService is not available on this operating system.")
           return
@@ -89,10 +88,14 @@ internal import Testing
         let zoneID = try #require(body["zoneID"] as? [String: Any])
         #expect(zoneID["ownerRecordName"] as? String == "_owner-record-name")
         #expect(zoneID["ownerName"] == nil)
-      }
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
+    }
 
-      @Test("modifyZones() encodes ownerRecordName inside each operation's zoneID")
-      internal func modifyZonesEncodesOwnerRecordName() async throws {
+    @Test("modifyZones() encodes ownerRecordName inside each operation's zoneID")
+    internal func modifyZonesEncodesOwnerRecordName() async throws {
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
         guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
           Issue.record("CloudKitService is not available on this operating system.")
           return
@@ -112,8 +115,9 @@ internal import Testing
         let zoneID = try #require(zone["zoneID"] as? [String: Any])
         #expect(zoneID["ownerRecordName"] as? String == "other-user")
         #expect(zoneID["ownerName"] == nil)
-      }
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
     }
   }
-
-#endif
+}

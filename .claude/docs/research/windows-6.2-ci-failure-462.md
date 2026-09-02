@@ -22,20 +22,29 @@ Dies after compiling MistKitTests sources with exit 1, **no** `error:` / stack d
 
 ## Mitigation (current)
 
-Compile-time omit of tip-over suites on **Windows × Swift 6.2 only**:
+Keep `@Suite` / `@Test` / mocks always compiled. Omit only each tip-over **test body** on **Windows × Swift 6.2**, with `Issue.record` in the `#else` (Swift Testing `#if canImport(…)` style), plus `.disabled(if: Platform.isWindowsSwift62)` on the `@Suite` so CI does not fail if tests run:
 
 ```swift
-#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
-// suite
-#endif
+@Suite("…", .disabled(if: Platform.isWindowsSwift62))
+internal struct Example {
+  @Test("…")
+  internal func example() async throws {
+    #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
+      // real body
+    #else
+      Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+    #endif
+  }
+}
 ```
 
-plus `Platform.isWindowsSwift62` in `Tests/MistKitTests/Helpers/Platform.swift` (gist-style helper; traits alone cannot fix emit-module).
+`Platform.isWindowsSwift62` lives in `Tests/MistKitTests/Helpers/Platform.swift`. Traits alone cannot fix emit-module — the `#if` is load-bearing.
 
-Windows 6.1/6.3 and all non-Windows platforms still compile and run those suites.
+Windows 6.1/6.3 and all non-Windows platforms still compile and run the real bodies.
 
 ## Dead ends
 
 - Restoring `WebAuthTokenManager` as a locked class (vs actor) — red herring.
 - `Package.swift` `#if os(Windows)` `exclude:` — worked but was broader than needed (all Windows).
-- Swift Testing `.disabled(if:)` — execution-only; does not shrink emit-module.
+- Swift Testing `.disabled(if:)` alone — execution-only; does not shrink emit-module.
+- Wrapping whole `@Suite` / files in `#if` — works but coarser than body gates.

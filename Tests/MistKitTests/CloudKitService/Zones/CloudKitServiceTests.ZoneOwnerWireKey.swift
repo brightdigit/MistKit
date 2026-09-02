@@ -27,10 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// Omitted on Windows × Swift 6.2: emit-module tip-over (see .claude/docs/research/windows-6.2-ci-failure-462.md).
-#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
-  extension CloudKitServiceTests {
-    internal enum ZoneOwnerWireKey {}
-  }
-
-#endif
+extension CloudKitServiceTests {
+  internal enum ZoneOwnerWireKey {}
+}
