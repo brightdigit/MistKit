@@ -19,6 +19,11 @@ Standing always/never directives and corrections from the human. Agents must rea
 - Repo-wide CI version bumps (Xcode/simulator/toolchain) DO extend into the `Examples/` subrepos — update BushelCloud and CelestraCloud in the same pass rather than deferring them to their own repos.
 - Follow sibling brightdigit repos (e.g. ConfigKeyKit) for current CI workflow shape before inventing a new one.
 - Feature-branch PRs: NEVER merge-commit. ALWAYS rebase if the PR has exactly 1 commit (`gh pr merge --rebase`); ALWAYS squash if it has 2+ commits (`gh pr merge --squash`). Count commits before merging.
+- Release PRs (a `v*` release branch into `main`) are the one merge-commit case — the "never merge-commit" rule above covers FEATURE PRs only; still confirm the shape with the human before merging.
+- NEVER tag a release before its `ReleaseNotes.md` section exists in the tree being tagged — run `./Scripts/release.sh verify-tag <tag> --at HEAD` first (beta.3 and beta.4 both shipped tags with no notes).
+- Release notes are a FLAT bullet list for **new** entries — do not add `###` category subsections; preserve the existing beta.1–beta.4 sections.
+- NEVER delete a released beta branch — after publication, create the next beta branch from `main` with `git trees add`.
+- ALWAYS manage worktrees with `git trees` (`add`/`rm`/`list`/`clean`), never raw `git worktree`.
 - MistKitConfiguration#1 is merged and `1.0.0-beta.1` is tagged (ConfigKeyKit `1.0.0-beta.3`). The published `main` manifest must stay tag-only — `dependency-policy.yml` enforces this on non-draft PRs to `main`. Branch pins live on the `mistkit-beta.5` integration branch, which must NEVER be merged to `main` or tagged.
 - MistDemo's own `resolveBool` may now be replaced by ConfigKeyKit `read(_:)`: the boolean fix (ConfigKeyKit#8) shipped in `1.0.0-beta.3` (2026-08-31). Verify behaviour before swapping; this supersedes the earlier "keep resolveBool until tagged" directive.
 - `git subrepo push Packages/MistKitConfiguration` refuses ("new changes upstream") and would clobber the standalone `url:` MistKit line with the monorepo `path:` overlay; push subrepo-only changes by applying them to a clone of the standalone repo instead, then record the pushed SHA in `.gitrepo`'s `commit =`.
