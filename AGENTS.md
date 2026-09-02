@@ -554,6 +554,45 @@ The convention is not lint-enforced (SwiftLint has no rule for import visibility
 - type order is based on the default in swiftlint: https://realm.github.io/SwiftLint/type_contents_order.html
 - Anything inside [CONTENT] [/CONTENT] is written by me
 
+## Release Process
+
+Full runbook: `.claude/skills/release/SKILL.md` (invoke as `/release`). Mechanical
+checks live in `Scripts/release.sh`; `make release-preflight` / `release-check` wrap
+the common ones.
+
+**Naming — the one rule to internalize:**
+
+```text
+release branch  v1.0.0-beta.5   ← with v
+release tag      1.0.0-beta.5   ← without v
+```
+
+Tags are lightweight and unprefixed; branches are prefixed. `setup-mistkit` resolves
+`MISTKIT_BRANCH` via `git ls-remote`, which matches **tags as well as branches**, so
+pinning the wrong kind of ref succeeds silently and greens example CI without ever
+compiling the code under release. The requirement inverts at release time: before the
+merge the pin must be the **branch**, after publishing it must be the **tag**. Assert
+with `./Scripts/release.sh pins --expect-branch v1.0.0-beta.5` before the merge and
+`./Scripts/release.sh pins --expect-tag 1.0.0-beta.5` after publishing.
+
+**Three standing guardrails:**
+
+1. **Never tag without notes.** `./Scripts/release.sh verify-tag <tag> --at HEAD` must
+   pass before `git tag`. Both 1.0.0-beta.3 and 1.0.0-beta.4 were tagged with no
+   `ReleaseNotes.md` section of their own; the `Release Check` workflow re-asserts this
+   after any tag push.
+2. **Archive before merging under squash.** Under squash-merge, squashed commits can
+   become unreachable from `main` — the pre-merge archive tag is the preservation
+   mechanism. Release branches themselves are retained after publication.
+3. **Release notes are a flat bullet list for new entries.** No `###` category
+   subsections; sections from beta.1–beta.4 predate this and are left as they are.
+
+The release PR is the documented merge-commit case (feature PRs are always rebase or
+squash), but confirm the shape with the human before merging.
+
+Worktrees are managed with `git trees` (`add` / `rm` / `list` / `clean`), never raw
+`git worktree`.
+
 ## Memory & Corrections Convention
 
 Versioned, in-repo agent memory is the source of truth for how to work in this repo. Read both stores at the start of every session before doing work:
