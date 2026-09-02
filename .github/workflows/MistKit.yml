@@ -99,6 +99,7 @@ jobs:
         id: build
         with:
           type: ${{ matrix.type }}
+          build-only: ${{ startsWith(matrix.type, 'wasm') }}
           wasmtime-version: "40.0.2"
           wasm-swift-flags: >-
             -Xcc -D_WASI_EMULATED_SIGNAL

@@ -133,5 +133,22 @@ extension AuthenticationMiddlewareTests {
 
       #expect(await tokenManager.webAuthToken == Self.rotatedWebAuthToken)
     }
+
+    @Test("APITokenManager ignores rotated token via default implementation")
+    internal func apiTokenManagerIgnoresRotation() async throws {
+      let tokenManager = APITokenManager(apiToken: Self.validAPIToken)
+      try await tokenManager.didReceiveRotatedWebAuthToken(Self.rotatedWebAuthToken)
+
+      let authenticator = try await tokenManager.currentAuthenticator()
+      #expect(authenticator is APITokenAuthenticator)
+    }
+
+    @Test("AdaptiveTokenManager ignores rotation before web auth upgrade")
+    internal func adaptiveTokenManagerIgnoresRotationWithoutWebAuth() async throws {
+      let tokenManager = AdaptiveTokenManager(apiToken: Self.validAPIToken)
+      try await tokenManager.didReceiveRotatedWebAuthToken(Self.rotatedWebAuthToken)
+
+      #expect(await tokenManager.webAuthToken == nil)
+    }
   }
 }
