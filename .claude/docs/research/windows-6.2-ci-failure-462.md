@@ -1,41 +1,41 @@
 # Windows Swift 6.2 CI failure — `462-web-auth-token-rotation`
 
 **Date:** 2026-09-02  
-**Branch HEAD investigated:** `a6c5023` → fix attempts `a36fddd`, `4605cf7`  
 **Failing job:** `Build on Windows (windows-2022, swift-6.2-release, 6.2-RELEASE)`  
 **Primary log:** `/Users/leo/Downloads/windows-fialure.txt` (run `33640879394`)
 
 ## Verdict
 
-**Swift 6.2 Windows toolchain silently aborts while emitting `MistKitTests`.** Library targets succeed. Same commit is green on Windows 6.1 and 6.3. Tip-over is MistKitTests size/complexity on this branch relative to `main` (not a single construct). Closest match in-repo is the wasm “silent exit-1 / no diagnostic” signature, but here it is **toolchain-version-specific** and **reproducible**.
+**Swift 6.2 Windows toolchain silently aborts while emitting `MistKitTests`.** Library targets succeed. Same commit is green on Windows 6.1 and 6.3. Tip-over is MistKitTests size/complexity on this branch relative to `main`. Reproducible (not a flake). Closest match: wasm silent exit-1 signature, but toolchain-version-specific.
 
 ## Evidence
 
-### Same failure from first branch run
+| Run | SHA | Windows 6.2 |
+|-----|-----|-------------|
+| `33523875168` | `4ccaa624` | fail |
+| `33640879394` | `a6c50236` | fail |
+| rerun | `a6c50236` | fail (not flake) |
+| `33656677094` | `a36fddd` (actor→class) | fail — class workaround did **not** help |
+| `33657978639` | `4605cf7`/`77d707a` (Package.swift Windows exclude) | success |
 
-| Run | SHA | Windows 6.2 | Windows 6.1 / 6.3 |
-|-----|-----|-------------|-------------------|
-| `33523875168` | `4ccaa624` | fail (job `99909670558`) | success |
-| `33640879394` | `a6c50236` | fail (job `100285122571`) | success |
-| rerun of above | `a6c50236` | fail (job `100317077991`) | — |
-| `33656677094` | `a36fddd` (class workaround) | fail (job `100336869940`) | 6.1 success |
+Dies after compiling MistKitTests sources with exit 1, **no** `error:` / stack dump, and **no** `Emitting module MistKitTests`. On success paths, emit appears then wrap/link.
 
-Dies after `[1177/1186] Compiling MistKitTests TestConstants.swift` with `exit code 1` and **no** `error:` / stack dump / OOM text. No `Emitting module MistKitTests` line.
+## Mitigation (current)
 
-### Missing emit on 6.2 only
+Compile-time omit of tip-over suites on **Windows × Swift 6.2 only**:
 
-After `Wrapping AST for MistKit`, successful toolchains print emit then compile; 6.2 Windows has ~22s silence then Compiling with zero emit lines. On **main** Windows 6.2 (run `33399165875`), emit **does** appear and succeeds.
+```swift
+#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
+// suite
+#endif
+```
 
-## Fixes tried
+plus `Platform.isWindowsSwift62` in `Tests/MistKitTests/Helpers/Platform.swift` (gist-style helper; traits alone cannot fix emit-module).
 
-1. **`WebAuthTokenManager` actor → locked `Sendable` class** (`a36fddd`) — did **not** fix emit abort.
-2. **TaskLocal test restructure** + typed-throws `catch as` cleanup — log quieter; emit still aborts.
-3. **`Package.swift` `#if os(Windows)` exclude** of the seven `main...HEAD` added MistKitTests sources (`4605cf7`) — keeps Windows 6.2 in the matrix; coverage of those files remains on Ubuntu/macOS.
+Windows 6.1/6.3 and all non-Windows platforms still compile and run those suites.
 
-## Alternative (not applied)
+## Dead ends
 
-Drop `swift-6.2-release` from the Windows matrix. Cleaner canary removal, but loses the Windows×6.2 job entirely. Prefer the exclude list unless it becomes untenable.
-
-## Open questions
-
-- Whether excluding only the three rotation files (without zone/write additions) would be enough was not isolated.
+- Restoring `WebAuthTokenManager` as a locked class (vs actor) — red herring.
+- `Package.swift` `#if os(Windows)` `exclude:` — worked but was broader than needed (all Windows).
+- Swift Testing `.disabled(if:)` — execution-only; does not shrink emit-module.

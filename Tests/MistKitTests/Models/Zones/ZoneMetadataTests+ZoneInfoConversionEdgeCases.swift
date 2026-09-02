@@ -33,43 +33,47 @@ internal import Testing
 @testable import MistKit
 @testable import MistKitOpenAPI
 
-extension ZoneMetadataTests {
-  /// Edge-case decoding for ``ZoneInfo`` conversion.
-  @Suite("ZoneInfo Conversion Edge Cases")
-  internal struct ZoneInfoConversionEdgeCases {
-    private static func decodeZone(_ json: String) throws -> Components.Schemas.Zone {
-      try JSONDecoder().decode(Components.Schemas.Zone.self, from: Data(json.utf8))
-    }
+// Omitted on Windows × Swift 6.2: emit-module tip-over (see .claude/docs/research/windows-6.2-ci-failure-462.md).
+#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
+  extension ZoneMetadataTests {
+    /// Edge-case decoding for ``ZoneInfo`` conversion.
+    @Suite("ZoneInfo Conversion Edge Cases")
+    internal struct ZoneInfoConversionEdgeCases {
+      private static func decodeZone(_ json: String) throws -> Components.Schemas.Zone {
+        try JSONDecoder().decode(Components.Schemas.Zone.self, from: Data(json.utf8))
+      }
 
-    @Test("atomic decodes false without collapsing into nil")
-    internal func atomicFalseIsPreserved() throws {
-      let zone = try Self.decodeZone(
-        """
-        { "zoneID": { "zoneName": "Articles" }, "atomic": false }
-        """
-      )
+      @Test("atomic decodes false without collapsing into nil")
+      internal func atomicFalseIsPreserved() throws {
+        let zone = try Self.decodeZone(
+          """
+          { "zoneID": { "zoneName": "Articles" }, "atomic": false }
+          """
+        )
 
-      let info = try ZoneInfo(from: zone)
+        let info = try ZoneInfo(from: zone)
 
-      #expect(info.atomic == false)
-    }
+        #expect(info.atomic == false)
+      }
 
-    @Test("ZoneInfo still throws when the zone payload has no zoneName")
-    internal func missingZoneNameThrows() throws {
-      let zone = try Self.decodeZone(
-        """
-        { "zoneID": { "ownerRecordName": "_defaultOwner" }, "atomic": true }
-        """
-      )
+      @Test("ZoneInfo still throws when the zone payload has no zoneName")
+      internal func missingZoneNameThrows() throws {
+        let zone = try Self.decodeZone(
+          """
+          { "zoneID": { "ownerRecordName": "_defaultOwner" }, "atomic": true }
+          """
+        )
 
-      ConversionFailureReporter.$assertionHandler.withValue(
-        { _, _, _ in },
-        operation: {
-          #expect(throws: ConversionError.self) {
-            _ = try ZoneInfo(from: zone)
+        ConversionFailureReporter.$assertionHandler.withValue(
+          { _, _, _ in },
+          operation: {
+            #expect(throws: ConversionError.self) {
+              _ = try ZoneInfo(from: zone)
+            }
           }
-        }
-      )
+        )
+      }
     }
   }
-}
+
+#endif

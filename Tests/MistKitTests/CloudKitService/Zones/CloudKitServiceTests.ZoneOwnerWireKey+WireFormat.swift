@@ -32,84 +32,88 @@ internal import Testing
 
 @testable import MistKit
 
-extension CloudKitServiceTests.ZoneOwnerWireKey {
-  /// Pins the on-the-wire owner key inside `zoneID` objects (issue #444).
-  ///
-  /// Apple's Zone ID Dictionary and live responses use `ownerRecordName`, not
-  /// the mistaken `ownerName` key MistKit previously emitted.
-  @Suite("ZoneID Wire Format")
-  internal struct WireFormat {
-    private static let database: Database = .private
+// Omitted on Windows × Swift 6.2: emit-module tip-over (see .claude/docs/research/windows-6.2-ci-failure-462.md).
+#if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
+  extension CloudKitServiceTests.ZoneOwnerWireKey {
+    /// Pins the on-the-wire owner key inside `zoneID` objects (issue #444).
+    ///
+    /// Apple's Zone ID Dictionary and live responses use `ownerRecordName`, not
+    /// the mistaken `ownerName` key MistKit previously emitted.
+    @Suite("ZoneID Wire Format")
+    internal struct WireFormat {
+      private static let database: Database = .private
 
-    private static func makeService(
-      _ provider: ResponseProvider
-    ) throws -> CloudKitService {
-      try CloudKitService(
-        containerIdentifier: TestConstants.serviceContainerIdentifier,
-        credentials: Credentials(
-          apiAuth: APICredentials(
-            apiToken: TestConstants.apiToken,
-            webAuthToken: TestConstants.webAuthToken
-          )
-        ),
-        transport: MockTransport(responseProvider: provider)
-      )
-    }
-
-    private static func sentBody(
-      for operationID: String,
-      from provider: ResponseProvider,
-      at index: Int = 0
-    ) async throws -> [String: Any] {
-      let bodies = await provider.bodies(for: operationID).compactMap { $0 }
-      let data = try #require(bodies.dropFirst(index).first)
-      return try #require(
-        try JSONSerialization.jsonObject(with: data) as? [String: Any]
-      )
-    }
-
-    @Test("queryRecords() encodes ownerRecordName, never ownerName")
-    internal func queryEncodesOwnerRecordName() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
+      private static func makeService(
+        _ provider: ResponseProvider
+      ) throws -> CloudKitService {
+        try CloudKitService(
+          containerIdentifier: TestConstants.serviceContainerIdentifier,
+          credentials: Credentials(
+            apiAuth: APICredentials(
+              apiToken: TestConstants.apiToken,
+              webAuthToken: TestConstants.webAuthToken
+            )
+          ),
+          transport: MockTransport(responseProvider: provider)
+        )
       }
-      let provider = ResponseProvider.successfulQuery()
-      let service = try Self.makeService(provider)
 
-      _ = try await service.queryRecords(
-        MistKit.Query(recordType: "TestRecord"),
-        zoneID: ZoneID(zoneName: "SharedZone", ownerName: "_owner-record-name"),
-        database: Self.database
-      )
-
-      let body = try await Self.sentBody(for: "queryRecords", from: provider)
-      let zoneID = try #require(body["zoneID"] as? [String: Any])
-      #expect(zoneID["ownerRecordName"] as? String == "_owner-record-name")
-      #expect(zoneID["ownerName"] == nil)
-    }
-
-    @Test("modifyZones() encodes ownerRecordName inside each operation's zoneID")
-    internal func modifyZonesEncodesOwnerRecordName() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
+      private static func sentBody(
+        for operationID: String,
+        from provider: ResponseProvider,
+        at index: Int = 0
+      ) async throws -> [String: Any] {
+        let bodies = await provider.bodies(for: operationID).compactMap { $0 }
+        let data = try #require(bodies.dropFirst(index).first)
+        return try #require(
+          try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
       }
-      let provider = try ResponseProvider.successfulModifyZones(zoneCount: 1)
-      let service = try Self.makeService(provider)
 
-      _ = try await service.modifyZones(
-        [.create(ZoneID(zoneName: "Shared", ownerName: "other-user"))],
-        database: Self.database
-      )
+      @Test("queryRecords() encodes ownerRecordName, never ownerName")
+      internal func queryEncodesOwnerRecordName() async throws {
+        guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+          Issue.record("CloudKitService is not available on this operating system.")
+          return
+        }
+        let provider = ResponseProvider.successfulQuery()
+        let service = try Self.makeService(provider)
 
-      let body = try await Self.sentBody(for: "modifyZones", from: provider)
-      let operations = try #require(body["operations"] as? [[String: Any]])
-      let operation = try #require(operations.first)
-      let zone = try #require(operation["zone"] as? [String: Any])
-      let zoneID = try #require(zone["zoneID"] as? [String: Any])
-      #expect(zoneID["ownerRecordName"] as? String == "other-user")
-      #expect(zoneID["ownerName"] == nil)
+        _ = try await service.queryRecords(
+          MistKit.Query(recordType: "TestRecord"),
+          zoneID: ZoneID(zoneName: "SharedZone", ownerName: "_owner-record-name"),
+          database: Self.database
+        )
+
+        let body = try await Self.sentBody(for: "queryRecords", from: provider)
+        let zoneID = try #require(body["zoneID"] as? [String: Any])
+        #expect(zoneID["ownerRecordName"] as? String == "_owner-record-name")
+        #expect(zoneID["ownerName"] == nil)
+      }
+
+      @Test("modifyZones() encodes ownerRecordName inside each operation's zoneID")
+      internal func modifyZonesEncodesOwnerRecordName() async throws {
+        guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+          Issue.record("CloudKitService is not available on this operating system.")
+          return
+        }
+        let provider = try ResponseProvider.successfulModifyZones(zoneCount: 1)
+        let service = try Self.makeService(provider)
+
+        _ = try await service.modifyZones(
+          [.create(ZoneID(zoneName: "Shared", ownerName: "other-user"))],
+          database: Self.database
+        )
+
+        let body = try await Self.sentBody(for: "modifyZones", from: provider)
+        let operations = try #require(body["operations"] as? [[String: Any]])
+        let operation = try #require(operations.first)
+        let zone = try #require(operation["zone"] as? [String: Any])
+        let zoneID = try #require(zone["zoneID"] as? [String: Any])
+        #expect(zoneID["ownerRecordName"] as? String == "other-user")
+        #expect(zoneID["ownerName"] == nil)
+      }
     }
   }
-}
+
+#endif
