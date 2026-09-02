@@ -52,7 +52,7 @@ extension CloudKitServiceTests.DeleteZone {
       do {
         try await service.deleteZone(zoneName: "Missing", database: .private)
         Issue.record("expected .zoneOperationFailed")
-      } catch let error as CloudKitError {
+      } catch {
         guard case .zoneOperationFailed(let failure) = error else {
           Issue.record("expected .zoneOperationFailed, got \(error)")
           return

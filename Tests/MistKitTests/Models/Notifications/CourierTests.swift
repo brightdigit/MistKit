@@ -35,6 +35,36 @@
 
   @Suite("Courier")
   internal struct CourierTests {
+    private actor PollCounter {
+      private(set) var count = 0
+      func increment() -> Int {
+        count += 1
+        return count
+      }
+    }
+
+    private actor FirstNotificationGate {
+      private var notification: CourierNotification?
+      private var continuation: CheckedContinuation<Void, Never>?
+
+      func store(_ notification: CourierNotification) {
+        self.notification = notification
+        continuation?.resume()
+        continuation = nil
+      }
+
+      func waitForFirst() async {
+        if notification != nil {
+          return
+        }
+        await withCheckedContinuation { continuation = $0 }
+      }
+
+      func firstNotification() -> CourierNotification? {
+        notification
+      }
+    }
+
     private static func courierURL() throws -> URL {
       try #require(URL(string: "https://webcourier.icloud.com/poll"))
     }
@@ -74,17 +104,11 @@
       let notification = try #require(result)
       #expect(notification.reason == .recordCreated)
     }
+
     @Test("notifications yields a decoded notification from the stream")
     internal func notificationsYieldsDecodedNotification() async throws {
       let url = try Self.courierURL()
       let body = #"{"ck":{"qry":{"fo":1,"sid":"s","rid":"r"}}}"#
-      actor PollCounter {
-        private(set) var count = 0
-        func increment() -> Int {
-          count += 1
-          return count
-        }
-      }
       let polls = PollCounter()
       let transport: Courier.Transport = { _, _ in
         let pollCount = await polls.increment()
@@ -95,28 +119,6 @@
         // nanoseconds API: package deployment target is below iOS 16 / Duration clocks.
         try await Task.sleep(nanoseconds: 60_000_000_000)
         return (statusCode: 200, data: Data())
-      }
-
-      actor FirstNotificationGate {
-        private var notification: CourierNotification?
-        private var continuation: CheckedContinuation<Void, Never>?
-
-        func store(_ notification: CourierNotification) {
-          self.notification = notification
-          continuation?.resume()
-          continuation = nil
-        }
-
-        func waitForFirst() async {
-          if notification != nil {
-            return
-          }
-          await withCheckedContinuation { continuation = $0 }
-        }
-
-        func firstNotification() -> CourierNotification? {
-          notification
-        }
       }
 
       let stream = Courier.notifications(courierURL: url, perPollTimeout: 1, transport: transport)

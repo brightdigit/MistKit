@@ -35,7 +35,7 @@ internal import Testing
 
 extension ZoneMetadataTests {
   /// Edge-case decoding for ``ZoneInfo`` conversion.
-  @Suite("ZoneInfo Conversion Edge Cases")
+  @Suite("ZoneInfo Conversion Edge Cases", .disabled(if: Platform.isWindowsSwift62))
   internal struct ZoneInfoConversionEdgeCases {
     private static func decodeZone(_ json: String) throws -> Components.Schemas.Zone {
       try JSONDecoder().decode(Components.Schemas.Zone.self, from: Data(json.utf8))
@@ -43,33 +43,41 @@ extension ZoneMetadataTests {
 
     @Test("atomic decodes false without collapsing into nil")
     internal func atomicFalseIsPreserved() throws {
-      let zone = try Self.decodeZone(
-        """
-        { "zoneID": { "zoneName": "Articles" }, "atomic": false }
-        """
-      )
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
+        let zone = try Self.decodeZone(
+          """
+          { "zoneID": { "zoneName": "Articles" }, "atomic": false }
+          """
+        )
 
-      let info = try ZoneInfo(from: zone)
+        let info = try ZoneInfo(from: zone)
 
-      #expect(info.atomic == false)
+        #expect(info.atomic == false)
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
     }
 
     @Test("ZoneInfo still throws when the zone payload has no zoneName")
     internal func missingZoneNameThrows() throws {
-      let zone = try Self.decodeZone(
-        """
-        { "zoneID": { "ownerRecordName": "_defaultOwner" }, "atomic": true }
-        """
-      )
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
+        let zone = try Self.decodeZone(
+          """
+          { "zoneID": { "ownerRecordName": "_defaultOwner" }, "atomic": true }
+          """
+        )
 
-      ConversionFailureReporter.$assertionHandler.withValue(
-        { _, _, _ in },
-        operation: {
-          #expect(throws: ConversionError.self) {
-            _ = try ZoneInfo(from: zone)
+        ConversionFailureReporter.$assertionHandler.withValue(
+          { _, _, _ in },
+          operation: {
+            #expect(throws: ConversionError.self) {
+              _ = try ZoneInfo(from: zone)
+            }
           }
-        }
-      )
+        )
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
     }
   }
 }

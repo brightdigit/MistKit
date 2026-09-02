@@ -37,7 +37,7 @@ extension CloudKitServiceTests.ZoneOwnerWireKey {
   ///
   /// Apple's Zone ID Dictionary and live responses use `ownerRecordName`, not
   /// the mistaken `ownerName` key MistKit previously emitted.
-  @Suite("ZoneID Wire Format")
+  @Suite("ZoneID Wire Format", .disabled(if: Platform.isWindowsSwift62))
   internal struct WireFormat {
     private static let database: Database = .private
 
@@ -70,46 +70,54 @@ extension CloudKitServiceTests.ZoneOwnerWireKey {
 
     @Test("queryRecords() encodes ownerRecordName, never ownerName")
     internal func queryEncodesOwnerRecordName() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let provider = ResponseProvider.successfulQuery()
-      let service = try Self.makeService(provider)
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
+        guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+          Issue.record("CloudKitService is not available on this operating system.")
+          return
+        }
+        let provider = ResponseProvider.successfulQuery()
+        let service = try Self.makeService(provider)
 
-      _ = try await service.queryRecords(
-        MistKit.Query(recordType: "TestRecord"),
-        zoneID: ZoneID(zoneName: "SharedZone", ownerName: "_owner-record-name"),
-        database: Self.database
-      )
+        _ = try await service.queryRecords(
+          MistKit.Query(recordType: "TestRecord"),
+          zoneID: ZoneID(zoneName: "SharedZone", ownerName: "_owner-record-name"),
+          database: Self.database
+        )
 
-      let body = try await Self.sentBody(for: "queryRecords", from: provider)
-      let zoneID = try #require(body["zoneID"] as? [String: Any])
-      #expect(zoneID["ownerRecordName"] as? String == "_owner-record-name")
-      #expect(zoneID["ownerName"] == nil)
+        let body = try await Self.sentBody(for: "queryRecords", from: provider)
+        let zoneID = try #require(body["zoneID"] as? [String: Any])
+        #expect(zoneID["ownerRecordName"] as? String == "_owner-record-name")
+        #expect(zoneID["ownerName"] == nil)
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
     }
 
     @Test("modifyZones() encodes ownerRecordName inside each operation's zoneID")
     internal func modifyZonesEncodesOwnerRecordName() async throws {
-      guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
-        Issue.record("CloudKitService is not available on this operating system.")
-        return
-      }
-      let provider = try ResponseProvider.successfulModifyZones(zoneCount: 1)
-      let service = try Self.makeService(provider)
+      #if !(os(Windows) && compiler(>=6.2) && compiler(<6.3))
+        guard #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) else {
+          Issue.record("CloudKitService is not available on this operating system.")
+          return
+        }
+        let provider = try ResponseProvider.successfulModifyZones(zoneCount: 1)
+        let service = try Self.makeService(provider)
 
-      _ = try await service.modifyZones(
-        [.create(ZoneID(zoneName: "Shared", ownerName: "other-user"))],
-        database: Self.database
-      )
+        _ = try await service.modifyZones(
+          [.create(ZoneID(zoneName: "Shared", ownerName: "other-user"))],
+          database: Self.database
+        )
 
-      let body = try await Self.sentBody(for: "modifyZones", from: provider)
-      let operations = try #require(body["operations"] as? [[String: Any]])
-      let operation = try #require(operations.first)
-      let zone = try #require(operation["zone"] as? [String: Any])
-      let zoneID = try #require(zone["zoneID"] as? [String: Any])
-      #expect(zoneID["ownerRecordName"] as? String == "other-user")
-      #expect(zoneID["ownerName"] == nil)
+        let body = try await Self.sentBody(for: "modifyZones", from: provider)
+        let operations = try #require(body["operations"] as? [[String: Any]])
+        let operation = try #require(operations.first)
+        let zone = try #require(operation["zone"] as? [String: Any])
+        let zoneID = try #require(zone["zoneID"] as? [String: Any])
+        #expect(zoneID["ownerRecordName"] as? String == "other-user")
+        #expect(zoneID["ownerName"] == nil)
+      #else
+        Issue.record("Omitted on Windows × Swift 6.2 (MistKitTests emit tip-over).")
+      #endif
     }
   }
 }

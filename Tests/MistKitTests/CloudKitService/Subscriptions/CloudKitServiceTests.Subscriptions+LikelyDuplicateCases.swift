@@ -74,7 +74,7 @@ extension CloudKitServiceTests.Subscriptions {
           database: Self.database
         )
         Issue.record("expected createSubscription to throw")
-      } catch let error as CloudKitError {
+      } catch {
         guard case .subscriptionLikelyDuplicate(let failure) = error else {
           Issue.record("expected .subscriptionLikelyDuplicate, got \(error)")
           return

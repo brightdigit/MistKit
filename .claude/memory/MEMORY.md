@@ -14,6 +14,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [CloudKit archived endpoints not in local docs](reference_cloudkit_archived_endpoints.md) — Verify CloudKit endpoints (e.g. assets/rereference) against Apple's archived reference, not just .claude/docs/webservices.md
 - [CloudKit Zone Dictionary has exactly 3 keys](reference_cloudkit_zone_dictionary.md) — archived docs: zoneID/syncToken/atomic; live change feeds also carry `deleted` + `zoneID.zoneType`; wire owner key is `ownerRecordName` (issue #444)
 - [wasm CI failure signatures](reference_wasm_ci_signatures.md) — Two distinct wasm failures: silent exit-1 (OOM on big test target) vs curl exit-7 (SDK download flake, just re-run)
+- [Windows 6.2 MistKitTests emit abort](reference_windows_62_mistkittests_emit_abort.md) — Swift 6.2 Windows silent exit-1 while emitting MistKitTests; gate tip-over test bodies with `#if` + `Issue.record` (not actor revert)
 - [Swift Testing availability guard](feedback_swift_testing_availability.md) — Never annotate @Suite types with @available; use guard #available inside @Test functions instead
 - [GitHub Action pinning preference](feedback_action_pinning.md) — Use @v<major> for brightdigit-owned actions; pin third-party actions explicitly
 - [CI Swift matrix preferences](feedback_ci_swift_matrix.md) — Keep Swift 6.1 in full matrix; in-dev Swift branches (6.4 snapshots) ride in the build-ubuntu matrix via an `image` override (ConfigKeyKit pattern), never a separate job
@@ -42,8 +43,7 @@ Project-scoped agent memory for MistKit. This directory **replaces** any native 
 - [MISTKIT_BRANCH pin resolves tags too](project_mistkit_branch_pin_resolves_tags.md) — `git ls-remote` matches tags; a tag value silently pins the old release and greens example CI without testing the branch
 - [MistKit release process](project_release_process.md) — Branch `vX` vs tag `X`; pins invert at release; retain release branches; notes are a flat bullet list for new entries
 - [Use git trees, not git worktree](feedback_use_git_trees_not_git_worktree.md) — Manage worktrees with `git trees add/rm/list/clean`; `add` pushes to origin unless `--no-push`
-- [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — `examples.yml` must use a Swift container that can parse each example's Package.swift (6.4 nightly for Bushel/Celestra; 6.3 for MistDemo)
-- [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — `examples.yml` / MistDemo.yml must use a Swift 6.4 toolchain wherever MistKitConfiguration is a dependency (6.4 nightly / Xcode 27)
+- [Examples workflow tracks subrepo tools-version](feedback_examples_workflow_tracks_tools_version.md) — MistDemo/Bushel/Celestra/MKC are tools-version 6.4; examples.yml + MistDemo.yml use 6.4 nightly / Xcode 27
 - [ConfigKey bases must be dash-case](reference_configkey_cli_flag_dash_case.md) — snake_case silently breaks CLI flags and secret redaction; ENV works either way, so it hides the bug
 - [ConfigKeyKit ConfigValueReading](reference_configkeykit_configvaluereading.md) — ConfigKeyKit#1 shipped in-core in 1.0.0-beta.2; there is no ConfigKeyKitConfiguration package
 - [Path-package identity is the directory name](project_path_package_identity_collision.md) — a `path:` MistKit + a transitive `url:` MistKit = duplicate-target build failure; resolve still succeeds

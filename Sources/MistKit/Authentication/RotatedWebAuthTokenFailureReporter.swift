@@ -1,5 +1,5 @@
 //
-//  TokenManager.swift
+//  RotatedWebAuthTokenFailureReporter.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,27 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal import Foundation
-
-/// Protocol for managing authentication tokens and credentials for CloudKit Web Services.
-///
-/// A `TokenManager` is the lifecycle owner of credentials (loading, validating,
-/// rotating, persisting). It vends an `Authenticator` to whomever needs to apply
-/// those credentials to an outgoing request.
-public protocol TokenManager: Sendable {
-  /// Checks if credentials are currently available.
-  var hasCredentials: Bool { get async }
-
-  /// Validates the current authentication credentials.
-  /// - Returns: True if credentials are valid and usable.
-  /// - Throws: `TokenManagerError` if validation fails.
-  func validateCredentials() async throws(TokenManagerError) -> Bool
-
-  /// Returns the authenticator that should be used for the next request,
-  /// or `nil` if no credentials are available.
-  func currentAuthenticator() async throws(TokenManagerError) -> (any Authenticator)?
-
-  /// Adopts a rotated web auth token from the `X-Apple-CloudKit-Web-Auth-Token`
-  /// response header.
-  func didReceiveRotatedWebAuthToken(_ token: String) async throws(TokenManagerError)
+/// Trap hook when rotated web auth token adoption fails in middleware.
+internal enum RotatedWebAuthTokenFailureReporter {
+  @TaskLocal internal static var assertionHandler: @Sendable (String) -> Void = { message in
+    assertionFailure(message)
+  }
 }

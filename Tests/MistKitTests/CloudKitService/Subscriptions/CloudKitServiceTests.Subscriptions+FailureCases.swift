@@ -117,7 +117,7 @@ extension CloudKitServiceTests.Subscriptions {
           database: Self.database
         )
         Issue.record("expected createSubscription to throw")
-      } catch let error as CloudKitError {
+      } catch {
         guard case .subscriptionOperationFailed(let failure) = error else {
           Issue.record("expected .subscriptionOperationFailed, got \(error)")
           return
