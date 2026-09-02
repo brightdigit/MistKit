@@ -92,7 +92,8 @@
           return (statusCode: 200, data: Data(body.utf8))
         }
         // Would hang the test if Courier.notifications keeps polling after cancel.
-        try await Task.sleep(for: .seconds(60))
+        // nanoseconds API: package deployment target is below iOS 16 / Duration clocks.
+        try await Task.sleep(nanoseconds: 60_000_000_000)
         return (statusCode: 200, data: Data())
       }
 
@@ -138,7 +139,7 @@
       let decoded = try #require(await gate.firstNotification())
       #expect(decoded.reason == CourierNotification.Reason.recordCreated)
 
-      try await Task.sleep(for: .milliseconds(100))
+      try await Task.sleep(nanoseconds: 100_000_000)
       let finalCount = await polls.count
       #expect(finalCount <= 2)
     }
