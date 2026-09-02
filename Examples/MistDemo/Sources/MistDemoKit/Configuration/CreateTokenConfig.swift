@@ -81,17 +81,14 @@ public struct CreateTokenConfig: Sendable, ConfigurationParseable {
     }
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: "json"
-      ) ?? "json"
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(
       base: baseConfig,
-      apnsToken: configuration.string(forKey: "apns-token"),
-      apnsEnvironment: configuration.string(forKey: "apns-environment"),
-      clientId: configuration.string(forKey: "client-id"),
+      apnsToken: configuration.read(MistDemoKeys.Subscription.apnsToken),
+      apnsEnvironment: configuration.read(MistDemoKeys.Subscription.apnsEnvironment),
+      clientId: configuration.read(MistDemoKeys.Subscription.clientID),
       output: output
     )
   }

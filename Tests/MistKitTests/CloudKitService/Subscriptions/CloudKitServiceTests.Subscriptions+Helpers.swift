@@ -47,7 +47,7 @@ extension CloudKitServiceTests.Subscriptions {
         {
           "subscriptionID": "zone-sub",
           "subscriptionType": "zone",
-          "zoneID": { "zoneName": "Photos", "ownerName": "_defaultOwner" },
+          "zoneID": { "zoneName": "Photos", "ownerRecordName": "_defaultOwner" },
           "firesOn": ["create", "update", "delete"]
         }
       ]

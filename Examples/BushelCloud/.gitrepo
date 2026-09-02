@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:brightdigit/BushelCloud.git
 	branch = mistkit
-	commit = 72a1a6825d9188c4a9e062c33bf15ff369e07a8c
-	parent = 9c5b292931b81e61ca219ef4f04cbdd0afd35013
+	commit = cf22ab754e1294b2f4cb065c79008c29e000166d
+	parent = 690a370bb4489d3b8ca0f52b93b5b599a323a14b
 	method = merge
 	cmdver = 0.4.9

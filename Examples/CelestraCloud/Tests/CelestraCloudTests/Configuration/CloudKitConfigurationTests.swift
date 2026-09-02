@@ -29,26 +29,30 @@
 
 internal import Foundation
 internal import MistKit
+internal import MistKitConfiguration
 internal import Testing
 
 @testable import CelestraCloudKit
 
 @Suite("CloudKitConfiguration Tests")
 internal struct CloudKitConfigurationTests {
+  /// A syntactically valid Server-to-Server key ID: exactly 64 hex characters.
+  private static let validKeyID = "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
+
   @Test("Valid configuration with all fields")
   internal func testValidConfigurationWithAllFields() throws {
     let config = CloudKitConfiguration(
       containerID: "iCloud.com.example.Test",
-      keyID: "TEST_KEY_ID",
+      keyID: Self.validKeyID,
       privateKeyPath: "/path/to/key.pem",
-      environment: .production
+      environment: "production"
     )
 
-    let validated = try config.validated()
+    let validated = try config.validatedForCelestra()
 
     #expect(validated.containerID == "iCloud.com.example.Test")
-    #expect(validated.keyID == "TEST_KEY_ID")
-    #expect(validated.privateKeyPath == "/path/to/key.pem")
+    #expect(validated.keyID == Self.validKeyID)
+    #expect(validated.privateKey.filePath == "/path/to/key.pem")
     #expect(validated.environment == .production)
   }
 
@@ -56,11 +60,11 @@ internal struct CloudKitConfigurationTests {
   internal func testValidConfigurationWithDefaultEnvironment() throws {
     let config = CloudKitConfiguration(
       containerID: "iCloud.com.example.Test",
-      keyID: "TEST_KEY_ID",
+      keyID: Self.validKeyID,
       privateKeyPath: "/path/to/key.pem"
     )
 
-    let validated = try config.validated()
+    let validated = try config.validatedForCelestra()
 
     #expect(validated.environment == .development)
   }
@@ -69,12 +73,12 @@ internal struct CloudKitConfigurationTests {
   internal func testMissingContainerIDThrowsError() {
     let config = CloudKitConfiguration(
       containerID: nil,
-      keyID: "TEST_KEY_ID",
+      keyID: Self.validKeyID,
       privateKeyPath: "/path/to/key.pem"
     )
 
-    #expect(throws: EnhancedConfigurationError.self) {
-      try config.validated()
+    #expect(throws: ConfigurationError.self) {
+      try config.validatedForCelestra()
     }
   }
 
@@ -82,16 +86,16 @@ internal struct CloudKitConfigurationTests {
   internal func testEmptyContainerIDThrowsError() {
     let config = CloudKitConfiguration(
       containerID: "",
-      keyID: "TEST_KEY_ID",
+      keyID: Self.validKeyID,
       privateKeyPath: "/path/to/key.pem"
     )
 
     do {
-      _ = try config.validated()
+      _ = try config.validatedForCelestra()
       Issue.record("Expected error to be thrown for empty containerID")
-    } catch let error as EnhancedConfigurationError {
+    } catch let error as ConfigurationError {
       #expect(error.message == "CloudKit container ID must be non-empty")
-      #expect(error.key == "cloudkit.container_id")
+      #expect(error.key == "cloudkit.container-id")
     } catch {
       Issue.record("Unexpected error type: \(error)")
     }
@@ -105,8 +109,8 @@ internal struct CloudKitConfigurationTests {
       privateKeyPath: "/path/to/key.pem"
     )
 
-    #expect(throws: EnhancedConfigurationError.self) {
-      try config.validated()
+    #expect(throws: ConfigurationError.self) {
+      try config.validatedForCelestra()
     }
   }
 
@@ -119,11 +123,11 @@ internal struct CloudKitConfigurationTests {
     )
 
     do {
-      _ = try config.validated()
+      _ = try config.validatedForCelestra()
       Issue.record("Expected error to be thrown for empty keyID")
-    } catch let error as EnhancedConfigurationError {
+    } catch let error as ConfigurationError {
       #expect(error.message == "CloudKit key ID must be non-empty")
-      #expect(error.key == "cloudkit.key_id")
+      #expect(error.key == "cloudkit.key-id")
     } catch {
       Issue.record("Unexpected error type: \(error)")
     }
@@ -133,12 +137,12 @@ internal struct CloudKitConfigurationTests {
   internal func testMissingPrivateKeyPathThrowsError() {
     let config = CloudKitConfiguration(
       containerID: "iCloud.com.example.Test",
-      keyID: "TEST_KEY_ID",
+      keyID: Self.validKeyID,
       privateKeyPath: nil
     )
 
-    #expect(throws: EnhancedConfigurationError.self) {
-      try config.validated()
+    #expect(throws: ConfigurationError.self) {
+      try config.validatedForCelestra()
     }
   }
 
@@ -146,16 +150,18 @@ internal struct CloudKitConfigurationTests {
   internal func testEmptyPrivateKeyPathThrowsError() {
     let config = CloudKitConfiguration(
       containerID: "iCloud.com.example.Test",
-      keyID: "TEST_KEY_ID",
+      keyID: Self.validKeyID,
       privateKeyPath: ""
     )
 
     do {
-      _ = try config.validated()
+      _ = try config.validatedForCelestra()
       Issue.record("Expected error to be thrown for empty privateKeyPath")
-    } catch let error as EnhancedConfigurationError {
-      #expect(error.message == "CloudKit private key path must be non-empty")
-      #expect(error.key == "cloudkit.private_key_path")
+    } catch let error as ConfigurationError {
+      #expect(
+        error.message
+          == "Either CLOUDKIT_PRIVATE_KEY or CLOUDKIT_PRIVATE_KEY_PATH must be provided")
+      #expect(error.key == "cloudkit.private-key")
     } catch {
       Issue.record("Unexpected error type: \(error)")
     }
@@ -165,18 +171,18 @@ internal struct CloudKitConfigurationTests {
   internal func testEnvironmentSetToProduction() throws {
     let config = CloudKitConfiguration(
       containerID: "iCloud.com.example.Test",
-      keyID: "TEST_KEY_ID",
+      keyID: Self.validKeyID,
       privateKeyPath: "/path/to/key.pem",
-      environment: .production
+      environment: "production"
     )
 
-    let validated = try config.validated()
+    let validated = try config.validatedForCelestra()
 
     #expect(validated.environment == .production)
   }
 
   @Test("Default container ID constant")
   internal func testDefaultContainerIDConstant() {
-    #expect(CloudKitConfiguration.defaultContainerID == "iCloud.com.brightdigit.Celestra")
+    #expect(ConfigurationKeys.defaultContainerID == "iCloud.com.brightdigit.Celestra")
   }
 }

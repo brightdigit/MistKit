@@ -18,7 +18,7 @@ This document explains how to configure the scheduled CloudKit sync workflow.
 4. Click **+** to create a new key
 5. Download the `.pem` file immediately (you can only download it once)
 6. Save the file securely (e.g., `~/Downloads/AuthKey_XXXXXXXXXX.pem`)
-7. Note the **Key ID** (32-character hex string)
+7. Note the **Key ID** (64-character hex string)
 
 ### 2. Add GitHub Secrets
 
@@ -31,7 +31,7 @@ This document explains how to configure the scheduled CloudKit sync workflow.
 #### Add CLOUDKIT_KEY_ID
 
 - **Name:** `CLOUDKIT_KEY_ID`
-- **Value:** Your 32-character key ID from step 1.7
+- **Value:** Your 64-character key ID from step 1.7
 - Click **Add secret**
 
 #### Add CLOUDKIT_PRIVATE_KEY

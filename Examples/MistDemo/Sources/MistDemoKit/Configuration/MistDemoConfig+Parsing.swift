@@ -28,6 +28,7 @@
 //
 
 internal import MistKit
+internal import MistKitConfiguration
 
 extension MistDemoConfig {
   internal struct CoreConfig {
@@ -62,21 +63,14 @@ extension MistDemoConfig {
     _ config: MistDemoConfiguration
   ) throws -> CoreConfig {
     let containerIdentifier =
-      config.string(
-        forKey: "container.identifier",
-        default: MistDemoConstants.Defaults.containerIdentifier
-      ) ?? MistDemoConstants.Defaults.containerIdentifier
+      config.read(MistDemoKeys.cloudKit.containerID)
 
     let apiToken =
-      config.string(
-        forKey: "api.token",
-        default: "",
-        isSecret: true
-      ) ?? ""
+      config.read(MistDemoKeys.Auth.apiToken)
 
-    let defaultEnv = MistKit.Environment.development.rawValue
+    let defaultEnv = MistDemoConstants.Defaults.environment
     let envString =
-      config.string(forKey: "environment", default: defaultEnv) ?? defaultEnv
+      config.read(MistDemoKeys.cloudKit.environment) ?? defaultEnv
     guard let environment = MistKit.Environment(caseInsensitive: envString) else {
       throw ConfigurationError.invalidEnvironment(envString)
     }
@@ -92,18 +86,10 @@ extension MistDemoConfig {
     _ config: MistDemoConfiguration
   ) -> AuthConfig {
     AuthConfig(
-      webAuthToken: config.string(
-        forKey: "web.auth.token",
-        isSecret: true
-      ),
-      keyID: config.string(forKey: "key.id"),
-      privateKey: config.string(
-        forKey: "private.key",
-        isSecret: true
-      ),
-      privateKeyFile: config.string(
-        forKey: "private.key.path"
-      )
+      webAuthToken: config.read(MistDemoKeys.Auth.webAuthToken),
+      keyID: config.read(MistDemoKeys.cloudKit.keyID),
+      privateKey: config.read(MistDemoKeys.cloudKit.privateKey),
+      privateKeyFile: config.read(MistDemoKeys.cloudKit.privateKeyPath)
     )
   }
 
@@ -111,22 +97,13 @@ extension MistDemoConfig {
     _ config: MistDemoConfiguration
   ) -> ServerConfig {
     let host =
-      config.string(
-        forKey: "host",
-        default: "127.0.0.1"
-      ) ?? "127.0.0.1"
+      config.read(MistDemoKeys.Server.host)
 
     let port =
-      config.int(
-        forKey: "port",
-        default: 8_080
-      ) ?? 8_080
+      config.read(MistDemoKeys.Server.port)
 
     let authTimeout = Double(
-      config.int(
-        forKey: "auth.timeout",
-        default: 300
-      ) ?? 300
+      config.read(MistDemoKeys.Server.authTimeout)
     )
 
     return ServerConfig(
@@ -140,30 +117,12 @@ extension MistDemoConfig {
     _ config: MistDemoConfiguration
   ) -> FlagConfig {
     FlagConfig(
-      skipAuth: config.bool(
-        forKey: "skip.auth",
-        default: false
-      ),
-      testAllAuth: config.bool(
-        forKey: "test.all.auth",
-        default: false
-      ),
-      testApiOnly: config.bool(
-        forKey: "test.api.only",
-        default: false
-      ),
-      testAdaptive: config.bool(
-        forKey: "test.adaptive",
-        default: false
-      ),
-      testServerToServer: config.bool(
-        forKey: "test.server.to.server",
-        default: false
-      ),
-      badCredentials: config.bool(
-        forKey: "bad.credentials",
-        default: false
-      )
+      skipAuth: config.read(MistDemoKeys.Auth.skipAuth),
+      testAllAuth: config.read(MistDemoKeys.AuthModes.testAllAuth),
+      testApiOnly: config.read(MistDemoKeys.AuthModes.testAPIOnly),
+      testAdaptive: config.read(MistDemoKeys.AuthModes.testAdaptive),
+      testServerToServer: config.read(MistDemoKeys.AuthModes.testServerToServer),
+      badCredentials: config.read(MistDemoKeys.Auth.badCredentials)
     )
   }
 }

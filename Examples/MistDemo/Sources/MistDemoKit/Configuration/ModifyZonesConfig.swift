@@ -73,10 +73,7 @@ public struct ModifyZonesConfig: Sendable, ConfigurationParseable {
     let operations = try Self.parseOperationsFromSources(configuration)
 
     let outputString =
-      configuration.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat
-      ) ?? MistDemoConstants.Defaults.outputFormat
+      configuration.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     self.init(
@@ -108,9 +105,7 @@ public struct ModifyZonesConfig: Sendable, ConfigurationParseable {
   private static func parseOperationsFromSources(
     _ configReader: MistDemoConfiguration
   ) throws -> [ZoneOperationInput] {
-    if let path = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.operationsFile
-    ) {
+    if let path = configReader.read(MistDemoKeys.Record.operationsFile) {
       do {
         let data = try Data(contentsOf: URL(fileURLWithPath: path))
         return try parseOperations(from: data)
@@ -124,10 +119,7 @@ public struct ModifyZonesConfig: Sendable, ConfigurationParseable {
       }
     }
 
-    if configReader.bool(
-      forKey: MistDemoConstants.ConfigKeys.stdin,
-      default: false
-    ) {
+    if configReader.read(MistDemoKeys.Record.stdin) {
       let stdinData = FileHandle.standardInput.readDataToEndOfFile()
       guard !stdinData.isEmpty else {
         throw ModifyZonesError.emptyStdin

@@ -51,26 +51,14 @@ extension QueryConfig {
     _ configReader: MistDemoConfiguration
   ) throws -> ParsedOptions {
     let zone =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.zone,
-        default: MistDemoConstants.Defaults.zone
-      ) ?? MistDemoConstants.Defaults.zone
-    let zoneOwner = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.zoneOwner
-    )
+      configReader.read(MistDemoKeys.Query.zone)
+    let zoneOwner = configReader.read(MistDemoKeys.Query.zoneOwner)
     let recordType =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.recordType,
-        default: MistDemoConstants.Defaults.recordType
-      ) ?? MistDemoConstants.Defaults.recordType
+      configReader.read(MistDemoKeys.Record.recordType)
 
-    let filters = configReader.filterStrings(
-      forKey: MistDemoConstants.ConfigKeys.filter
-    )
+    let filters = configReader.filterStrings(MistDemoKeys.Query.filter)
 
-    let sortString = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.sort
-    )
+    let sortString = configReader.read(MistDemoKeys.Query.sort)
     let sort = try parseSortOption(sortString)
 
     let pagination = try parsePagination(configReader)
@@ -89,10 +77,7 @@ extension QueryConfig {
     _ configReader: MistDemoConfiguration
   ) throws -> ParsedPagination {
     let limit =
-      configReader.int(
-        forKey: MistDemoConstants.ConfigKeys.limit,
-        default: MistDemoConstants.Defaults.queryLimit
-      ) ?? MistDemoConstants.Defaults.queryLimit
+      configReader.read(MistDemoKeys.Query.limit)
     guard
       limit >= MistDemoConstants.Limits.minQueryLimit,
       limit <= MistDemoConstants.Limits.maxQueryLimit
@@ -101,24 +86,17 @@ extension QueryConfig {
     }
 
     let offset =
-      configReader.int(forKey: "offset", default: 0) ?? 0
+      configReader.read(MistDemoKeys.Query.offset)
 
-    let fieldsString = configReader.string(
-      forKey: MistDemoConstants.ConfigKeys.fields
-    )
+    let fieldsString = configReader.read(MistDemoKeys.Record.fields)
     let fields = fieldsString?.split(separator: ",").map {
       String($0).trimmingCharacters(in: .whitespaces)
     }
 
-    let continuationMarker = configReader.string(
-      forKey: "continuation.marker"
-    )
+    let continuationMarker = configReader.read(MistDemoKeys.Query.continuationMarker)
 
     let outputString =
-      configReader.string(
-        forKey: MistDemoConstants.ConfigKeys.outputFormat,
-        default: MistDemoConstants.Defaults.outputFormat
-      ) ?? MistDemoConstants.Defaults.outputFormat
+      configReader.read(MistDemoKeys.Output.format)
     let output = OutputFormat(rawValue: outputString) ?? .json
 
     return ParsedPagination(

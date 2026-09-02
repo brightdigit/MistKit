@@ -32,6 +32,7 @@ public import BushelLogging
 public import Foundation
 internal import Logging
 public import MistKit
+public import MistKitConfiguration
 
 #if canImport(FelinePineSwift)
   internal import FelinePineSwift
@@ -63,91 +64,15 @@ public struct BushelCloudKitService: Sendable, RecordManaging, CloudKitRecordCol
 
   // MARK: - Initialization
 
-  /// Initialize CloudKit service with Server-to-Server authentication
+  /// Initialize from already-validated CloudKit credentials.
   ///
-  /// **MistKit Pattern**: Server-to-Server authentication requires:
-  /// 1. Key ID from CloudKit Dashboard → API Access → Server-to-Server Keys
-  /// 2. Private key .pem file downloaded when creating the key
-  /// 3. Container identifier (begins with "iCloud.")
+  /// Validation (presence + key ID / PEM format) happens in
+  /// ``ValidatedCloudKitConfiguration``; this wrapper only builds the MistKit service.
   ///
-  /// - Parameters:
-  ///   - containerIdentifier: CloudKit container ID (e.g., "iCloud.com.company.App")
-  ///   - keyID: Server-to-Server Key ID from CloudKit Dashboard
-  ///   - privateKeyPath: Path to the private key .pem file
-  ///   - environment: CloudKit environment (.development or .production, defaults to .development)
-  /// - Throws: Error if the private key file cannot be read or is invalid
-  public init(
-    containerIdentifier: String,
-    keyID: String,
-    privateKeyPath: String,
-    environment: Environment = .development
-  ) throws {
-    // Validate Key ID format before any file IO
-    try KeyIDValidator.validate(keyID)
-
-    // Read PEM file from disk
-    guard FileManager.default.fileExists(atPath: privateKeyPath) else {
-      throw BushelCloudKitError.privateKeyFileNotFound(path: privateKeyPath)
-    }
-
-    let pemString: String
-    do {
-      pemString = try String(contentsOfFile: privateKeyPath, encoding: .utf8)
-    } catch {
-      throw BushelCloudKitError.privateKeyFileReadFailed(path: privateKeyPath, error: error)
-    }
-
-    // Validate PEM format before using it
-    try PEMValidator.validate(pemString)
-
-    // Create Server-to-Server authentication manager
-    let tokenManager = try ServerToServerAuthManager(
-      keyID: keyID,
-      pemString: pemString
-    )
-
-    self.service = CloudKitService(
-      containerIdentifier: containerIdentifier,
-      tokenManager: tokenManager,
-      environment: environment
-    )
-  }
-
-  /// Initialize CloudKit service with Server-to-Server authentication using PEM string
-  ///
-  /// **CI/CD Pattern**: This initializer accepts PEM content directly from environment variables,
-  /// eliminating the need for temporary file creation in GitHub Actions or other CI/CD environments.
-  ///
-  /// - Parameters:
-  ///   - containerIdentifier: CloudKit container ID (e.g., "iCloud.com.company.App")
-  ///   - keyID: Server-to-Server Key ID from CloudKit Dashboard
-  ///   - pemString: PEM file content as string (including headers/footers)
-  ///   - environment: CloudKit environment (.development or .production, defaults to .development)
-  /// - Throws: Error if PEM string is invalid or authentication fails
-  public init(
-    containerIdentifier: String,
-    keyID: String,
-    pemString: String,
-    environment: Environment = .development
-  ) throws {
-    // Validate Key ID format before any cryptographic work
-    try KeyIDValidator.validate(keyID)
-
-    // Validate PEM format BEFORE passing to MistKit
-    // This provides better error messages than MistKit's internal validation
-    try PEMValidator.validate(pemString)
-
-    // Create Server-to-Server authentication manager directly from PEM string
-    let tokenManager = try ServerToServerAuthManager(
-      keyID: keyID,
-      pemString: pemString
-    )
-
-    self.service = CloudKitService(
-      containerIdentifier: containerIdentifier,
-      tokenManager: tokenManager,
-      environment: environment
-    )
+  /// - Parameter cloudKit: Validated server-to-server credentials.
+  /// - Throws: `CredentialsValidationError` if MistKit rejects the credentials.
+  public init(_ cloudKit: ValidatedCloudKitConfiguration) throws {
+    self.service = try cloudKit.makeCloudKitService()
   }
 
   // MARK: - RecordManaging Protocol Requirements

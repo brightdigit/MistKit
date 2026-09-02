@@ -66,7 +66,7 @@ extension CloudKitServiceTests.FetchRecordZoneChanges {
       ]
     }
     return [
-      "zoneID": ["zoneName": zoneName, "ownerName": "_defaultOwner"],
+      "zoneID": ["zoneName": zoneName, "ownerRecordName": "_defaultOwner"],
       "records": records,
       "syncToken": syncToken,
       "moreComing": moreComing,
@@ -80,7 +80,7 @@ extension CloudKitServiceTests.FetchRecordZoneChanges {
     reason: String = "Zone does not exist"
   ) -> [String: Any] {
     [
-      "zoneID": ["zoneName": zoneName, "ownerName": "_defaultOwner"],
+      "zoneID": ["zoneName": zoneName, "ownerRecordName": "_defaultOwner"],
       "serverErrorCode": serverErrorCode,
       "reason": reason,
     ]

@@ -42,6 +42,8 @@ const deleteBtn = document.getElementById('delete-btn');
 const refreshBtn = document.getElementById('refresh-btn');
 const recordTypeInput = document.getElementById('record-type');
 const queryLimitInput = document.getElementById('query-limit');
+const queryZoneInput = document.getElementById('query-zone');
+const queryZoneOwnerInput = document.getElementById('query-zone-owner');
 const rawResponseEl = document.getElementById('raw-response');
 const formImageGenerateBtn = document.getElementById('form-image-generate');
 const formImageClearBtn = document.getElementById('form-image-clear');
@@ -493,10 +495,28 @@ function ckJsFields(fields) {
 
 // ---- Notes CRUD operations ----
 
+/** Selected toolbar zone for query and writes. Drops stray owner without name. */
+function selectedZone() {
+    const zoneName = queryZoneInput.value.trim() || undefined;
+    const zoneOwner = zoneName
+        ? (queryZoneOwnerInput.value.trim() || undefined)
+        : undefined;
+    return { zoneName, zoneOwner };
+}
+
+/** CloudKit JS per-record zoneID shape (unlike query's top-level zoneID). */
+function ckJsRecordZoneID(zoneName, zoneOwner) {
+    if (!zoneName) return undefined;
+    return zoneOwner
+        ? { zoneName, ownerRecordName: zoneOwner }
+        : { zoneName };
+}
+
 async function queryNotes() {
     if (queryInFlight) return;
     const recordType = recordTypeInput.value.trim();
     const limit = parseInt(queryLimitInput.value, 10);
+    const { zoneName, zoneOwner } = selectedZone();
     queryInFlight = true;
     setQueryControlsDisabled(true);
     const dbLabel = currentDatabase === 'public' ? 'public' : 'private';
@@ -512,6 +532,8 @@ async function queryNotes() {
                 sortBy: currentSort
                     ? [{ field: currentSort.field, ascending: currentSort.ascending }]
                     : undefined,
+                zoneName,
+                zoneOwner,
             });
         } else {
             const query = { recordType };
@@ -520,6 +542,10 @@ async function queryNotes() {
                     fieldName: currentSort.field,
                     ascending: currentSort.ascending,
                 }];
+            }
+            // CloudKit JS names the owner `ownerRecordName` inside zoneID.
+            if (zoneName) {
+                query.zoneID = ckJsRecordZoneID(zoneName, zoneOwner);
             }
             payload = await ckJsDatabase().performQuery(query, {
                 resultsLimit: isFinite(limit) ? limit : undefined,
@@ -552,6 +578,7 @@ function setQueryControlsDisabled(disabled) {
         'refresh-btn', 'db-private', 'db-public',
         'mode-mistkit', 'mode-cloudkitjs',
         'save-btn', 'delete-btn',
+        'query-zone', 'query-zone-owner',
     ];
     for (const id of ids) {
         const el = document.getElementById(id);
@@ -583,6 +610,7 @@ async function saveNote() {
         // /api/assets/upload, then create/update with the returned descriptor.
         // CloudKit JS handles upload inline through saveRecords by passing a
         // Blob in the field value.
+        const { zoneName, zoneOwner } = selectedZone();
         let uploadedRecordName = null;
         if (hasPendingImage && currentMode === 'mistkit') {
             setStatus(formStatusEl, 'Uploading image…', 'loading');
@@ -592,6 +620,8 @@ async function saveNote() {
                 recordName: isUpdate ? note.recordName : undefined,
                 database: currentDatabase,
                 data: pendingImage.base64,
+                zoneName,
+                zoneOwner,
             });
             uploadedRecordName = receipt.recordName;
             // FieldValue's Asset case decodes the bare Asset shape directly.
@@ -605,6 +635,8 @@ async function saveNote() {
                     recordName: note.recordName,
                     fields,
                     recordChangeTag: note.recordChangeTag,
+                    zoneName,
+                    zoneOwner,
                 });
             } else {
                 payload = await postJSON('/api/records/create', {
@@ -612,6 +644,8 @@ async function saveNote() {
                     database: currentDatabase,
                     recordName: uploadedRecordName || undefined,
                     fields,
+                    zoneName,
+                    zoneOwner,
                 });
             }
         } else {
@@ -626,6 +660,8 @@ async function saveNote() {
                 record.recordName = note.recordName;
                 record.recordChangeTag = note.recordChangeTag;
             }
+            const zoneID = ckJsRecordZoneID(zoneName, zoneOwner);
+            if (zoneID) record.zoneID = zoneID;
             payload = await ckJsDatabase().saveRecords([record]);
             if (payload && payload.hasErrors && payload.errors.length) {
                 throw new Error(payload.errors[0].reason || 'CloudKit JS save failed');
@@ -654,15 +690,21 @@ async function deleteNote(note, statusEl = tableStatusEl) {
     clearStatus(statusEl);
     try {
         let payload;
+        const { zoneName, zoneOwner } = selectedZone();
         if (currentMode === 'mistkit') {
             payload = await postJSON('/api/records/delete', {
                 recordType: note.recordType,
                 database: currentDatabase,
                 recordName: note.recordName,
                 recordChangeTag: note.recordChangeTag,
+                zoneName,
+                zoneOwner,
             });
         } else {
-            payload = await ckJsDatabase().deleteRecords([{ recordName: note.recordName }]);
+            const deleteSpec = { recordName: note.recordName };
+            const zoneID = ckJsRecordZoneID(zoneName, zoneOwner);
+            if (zoneID) deleteSpec.zoneID = zoneID;
+            payload = await ckJsDatabase().deleteRecords([deleteSpec]);
             if (payload && payload.hasErrors && payload.errors.length) {
                 throw new Error(payload.errors[0].reason || 'CloudKit JS delete failed');
             }
