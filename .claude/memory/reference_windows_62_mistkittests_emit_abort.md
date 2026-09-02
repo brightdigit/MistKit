@@ -1,6 +1,6 @@
 ---
 name: windows-6.2-mistkittests-emit-abort
-description: Swift 6.2 Windows silently aborts emitting MistKitTests (no error:); tip-over from WebAuthTokenManager-as-actor in #462
+description: Swift 6.2 Windows silently aborts emitting MistKitTests (no error:); tip-over is test-target size on this branch
 metadata:
   node_type: memory
   type: reference
